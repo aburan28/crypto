@@ -1,0 +1,70 @@
+{
+  "schema": "p256-complementary-quotient-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 302,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E(F_p)[n] --[pullback]--> J(H)(F_p)",
+    "H: v^2=u^6+a*u^2+b --[pi_1:(u^2,v)]--> icv1-fp256-t89188191154553853111372247798585809583-f188c491/E",
+    "H --[pi_2:(b/u^2,b*v/u^3)]--> E': V^2=U^3+a*U^2+b^2",
+    "E(F_p)[n] --[composed rational homomorphism]--> E'(F_p)[n]=0",
+    "cover sheet multiplicity --[pi_1 quotient]--> kernel directions (Round 300)"
+  ],
+  "obligations": [
+    {
+      "name": "explicit construction",
+      "status": "supported",
+      "evidence": "Both rational quotient maps and the complementary long Weierstrass model are explicit.",
+      "scope": "This split degree-two cover only."
+    },
+    {
+      "name": "map correctness",
+      "status": "supported",
+      "evidence": "994 complete toy primary/quartic replays and 64 deterministic P-256 replays passed.",
+      "scope": "Affine points; exceptional u=0 is counted separately."
+    },
+    {
+      "name": "subgroup preservation to primary quotient",
+      "status": "supported",
+      "evidence": "pi_1 is the registered H->E quotient map.",
+      "scope": "P-256 order-n factor."
+    },
+    {
+      "name": "order-n transport to complementary quotient",
+      "status": "refuted",
+      "evidence": "Two independent scalar algorithms give [n]R != O on E', and the Hasse interval contains no other positive multiple of n.",
+      "scope": "Rational E'(F_p) for this construction."
+    },
+    {
+      "name": "two independent collapsed rows",
+      "status": "refuted",
+      "evidence": "The complementary quotient has no rational order-n image; only the primary row survives.",
+      "scope": "This split cover event model."
+    },
+    {
+      "name": "inverse recovery and complete cost below rho",
+      "status": "unknown",
+      "evidence": "No promoted second row exists, so no end-to-end attack was implemented.",
+      "scope": "Future nonstandard covers remain open."
+    }
+  ],
+  "controls": [
+    "Complete toy enumeration covered 994 affine H points with 2 exceptional u=0 points.",
+    "P-256 accepted 64 deterministic points after scanning 142 u values; digest 9a20adaf3e12b5ea3b616e158f0202940f706d0b82c5abce15c9f127ce86849c.",
+    "Independent LSB/MSB scalar replays match: true.",
+    "Round 300 and Round 301 were imported only after exact byte-hash, curve, schema, and gate checks."
+  ],
+  "cost_accounting": [
+    "Measured: exact field-operation, exponentiation, inversion, group-addition/doubling, scan, replay, process, and artifact counts.",
+    "Exact structural result: E'(F_p) has no rational subgroup of P-256 order n under the certified Hasse-and-witness argument.",
+    "Unset: structured relation solver, relation yield, sparse linear algebra, inverse DLP recovery, and complete attack cost because the second-row gate failed."
+  ],
+  "exploration_boundary": "Exact for the explicit split quadratic cover H:v^2=u^6+a*u^2+b and its two elliptic quotients; not a search over all covers, Jacobians, or non-homomorphic relation mechanisms.",
+  "weakest_open_obligation": "Construct a different P-256-specific cover or non-homomorphic relation mechanism whose additional collapsed equation remains in the order-n quotient, then implement recovery and complete below-rho cost.",
+  "narrowest_supported_finding": "The complementary elliptic quotient of the registered split degree-two P-256 cover cannot supply a second rational order-n relation row; the 13.920747-times-rho boundary is unchanged for this construction.",
+  "semantic_evidence_sha256": "2dcf6c82aad7225c024d9fbac45fe2a0bb98d76761954a948749b913f6fa6aa8",
+  "assessment_json_bytes": 4163
+}

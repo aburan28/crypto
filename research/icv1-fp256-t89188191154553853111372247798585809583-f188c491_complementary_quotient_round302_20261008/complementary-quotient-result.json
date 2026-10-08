@@ -1,0 +1,265 @@
+{
+  "schema": "p256-complementary-quotient-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 302,
+  "execution_status": "complete",
+  "factor_base": "FB1hc72514a2a8d3",
+  "registered_s17_factor_base": "FB1h2f8621cda105",
+  "dependencies": [
+    {
+      "path": "docs/curves/registry.json",
+      "bytes": 197581,
+      "sha256": "b1b8439baf4d18307bbc81626f28fb840bd48ba69eda585fde4a9090fcc10fdf",
+      "schema": "ICV1 registry/v1"
+    },
+    {
+      "path": "docs/curves/covers.json",
+      "bytes": 137140,
+      "sha256": "39811d799f2b12982f2b9e4cd0a4408c21fb1b533f117181e98f4fe506afeef5",
+      "schema": "curve-covers/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_cover_fiber_round300_20261007/cover-fiber-result.json",
+      "bytes": 55005,
+      "sha256": "7d65f3e015c6d6c6d24b64ea2e59a6e9e8653c88a1900835838b1bc0a1ec36e5",
+      "schema": "p256-cover-fiber-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_algebraic_escapes_round301_20261007/algebraic-escape-result.json",
+      "bytes": 16618,
+      "sha256": "ae4b44315181c18a40a790ae1bc784ffdb05e3061d442b8f1be78a1f25dc20e9",
+      "schema": "p256-algebraic-escape-census/v1"
+    }
+  ],
+  "exact_maps": [
+    "pi_1(u,v)=(u^2,v) on E:y^2=x^3+a*x+b",
+    "pi_Q(u,v)=(u^2,u*v) on Q:Y^2=X^4+a*X^2+b*X",
+    "pi_2(u,v)=(b/u^2,b*v/u^3) on E':V^2=U^3+a*U^2+b^2"
+  ],
+  "complementary_curve": {
+    "model": "V^2=U^3+a*U^2+b^2; short x=U+a/3",
+    "p": "115792089210356248762697446949407573530086143415290314195533631308867097853951",
+    "a2": "115792089210356248762697446949407573530086143415290314195533631308867097853948",
+    "a4": "0",
+    "a6": "54302614891805799069845202603916957238709300290449041439536091560547796457699",
+    "short_a": "115792089210356248762697446949407573530086143415290314195533631308867097853948",
+    "short_b": "54302614891805799069845202603916957238709300290449041439536091560547796457697",
+    "nonsingular": true
+  },
+  "toy_control": {
+    "p": 1019,
+    "a": 2,
+    "b": 3,
+    "selection_rule": "first literal preregistered cell [(1019,2,3)]",
+    "nonsingular": true,
+    "elliptic_primary_order": 1032,
+    "elliptic_complementary_order": 984,
+    "affine_cover_points": 994,
+    "primary_map_replays": 994,
+    "quartic_map_replays": 994,
+    "complementary_map_replays": 992,
+    "complementary_exceptional_points": 2,
+    "replay_failures": 0,
+    "primary_fibres": {
+      "distinct_images": 498,
+      "minimum_affine_fibre": 1,
+      "maximum_affine_fibre": 2,
+      "histogram": {
+        "1": 2,
+        "2": 496
+      }
+    },
+    "complementary_fibres": {
+      "distinct_images": 496,
+      "minimum_affine_fibre": 2,
+      "maximum_affine_fibre": 2,
+      "histogram": {
+        "2": 496
+      }
+    },
+    "operations": {
+      "field_additions": 16100,
+      "field_subtractions": 0,
+      "field_multiplications": 21062,
+      "field_squarings": 15502,
+      "field_inversions": 1984,
+      "modular_exponentiations": 5536,
+      "modular_exponentiation_multiplications": 44288,
+      "modular_exponentiation_squarings": 51311,
+      "legendre_tests": 3055,
+      "square_root_exponentiations": 497,
+      "group_additions": 0,
+      "group_doublings": 0
+    }
+  },
+  "p256_map_control": {
+    "requested_points": 64,
+    "scanned_u_candidates": 142,
+    "accepted_cover_points": 64,
+    "primary_map_replays": 64,
+    "quartic_map_replays": 64,
+    "complementary_map_replays": 64,
+    "exceptional_points": 0,
+    "replay_failures": 0,
+    "sample_digest_encoding": "64 records * (u,v,pi1.x,pi1.y,Q.x,Q.y,pi2.U,pi2.V) * be32",
+    "sample_sha256": "9a20adaf3e12b5ea3b616e158f0202940f706d0b82c5abce15c9f127ce86849c",
+    "first_sample": {
+      "u": "3",
+      "v": "51526724754062166015584919426425978625125453926651511334537437022392830938472",
+      "primary_x": "9",
+      "primary_y": "51526724754062166015584919426425978625125453926651511334537437022392830938472",
+      "quartic_x": "9",
+      "quartic_y": "38788085051830249284057311329870362345290218364664219808078679758311394961465",
+      "complementary_u": "17427828103945376765780397414383871326577842714587115527818765291434062806138",
+      "complementary_v": "83547447725566963686546996770412820536730305882394561089317057891638514677360"
+    },
+    "last_sample": {
+      "u": "142",
+      "v": "37244460373210598204416451753507623842729857229385274041531967032942581186422",
+      "primary_x": "20164",
+      "primary_y": "37244460373210598204416451753507623842729857229385274041531967032942581186422",
+      "quartic_x": "20164",
+      "quartic_y": "78069358529873750705751036274741776813763272884644775098525909778827125044129",
+      "complementary_u": "19865398479584775670120005709570563584059565786277781716321447428768365946450",
+      "complementary_v": "96563140378296454381789812289900613319546917866131096006890725248749086552422"
+    },
+    "operations": {
+      "field_additions": 796,
+      "field_subtractions": 0,
+      "field_multiplications": 1116,
+      "field_squarings": 1052,
+      "field_inversions": 128,
+      "modular_exponentiations": 334,
+      "modular_exponentiation_multiplications": 36736,
+      "modular_exponentiation_squarings": 85234,
+      "legendre_tests": 142,
+      "square_root_exponentiations": 64,
+      "group_additions": 0,
+      "group_doublings": 0
+    }
+  },
+  "subgroup_certificate": {
+    "witness_selection": "first U>=0 with nonzero quadratic-residue RHS and canonical nonzero V",
+    "scanned_u_candidates": 1,
+    "witness": {
+      "infinity": false,
+      "x": "0",
+      "y": "41058363725152142129326129780047268409114441015993725554835256314039467401291"
+    },
+    "witness_on_curve": true,
+    "scalar": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "primary_n_times_witness": {
+      "infinity": false,
+      "x": "76074407470426473796363728253042208915998852166885294523260263405079725826771",
+      "y": "84895104842189184257970919770094616861457938270131543429056297146488700524075"
+    },
+    "replay_n_times_witness": {
+      "infinity": false,
+      "x": "76074407470426473796363728253042208915998852166885294523260263405079725826771",
+      "y": "84895104842189184257970919770094616861457938270131543429056297146488700524075"
+    },
+    "scalar_algorithms_match": true,
+    "n_times_witness_is_infinity": false,
+    "hasse_upper_bound_used": "115792089210356248762697446949407573530766708149132191122460380523730634276864",
+    "hasse_upper_bound_below_two_n": true,
+    "only_positive_multiple_of_n_in_hasse_interval_is_n": true,
+    "n_divides_complementary_group_order": false,
+    "rational_order_n_transport_exists": false,
+    "search_operations": {
+      "field_additions": 4,
+      "field_subtractions": 0,
+      "field_multiplications": 4,
+      "field_squarings": 5,
+      "field_inversions": 0,
+      "modular_exponentiations": 2,
+      "modular_exponentiation_multiplications": 162,
+      "modular_exponentiation_squarings": 509,
+      "legendre_tests": 1,
+      "square_root_exponentiations": 1,
+      "group_additions": 0,
+      "group_doublings": 0
+    },
+    "primary_scalar_operations": {
+      "field_additions": 514,
+      "field_subtractions": 2186,
+      "field_multiplications": 1870,
+      "field_squarings": 680,
+      "field_inversions": 422,
+      "modular_exponentiations": 422,
+      "modular_exponentiation_multiplications": 54016,
+      "modular_exponentiation_squarings": 108032,
+      "legendre_tests": 0,
+      "square_root_exponentiations": 0,
+      "group_additions": 166,
+      "group_doublings": 256
+    },
+    "replay_scalar_operations": {
+      "field_additions": 512,
+      "field_subtractions": 2182,
+      "field_multiplications": 1864,
+      "field_squarings": 678,
+      "field_inversions": 421,
+      "modular_exponentiations": 421,
+      "modular_exponentiation_multiplications": 53888,
+      "modular_exponentiation_squarings": 107776,
+      "legendre_tests": 0,
+      "square_root_exponentiations": 0,
+      "group_additions": 166,
+      "group_doublings": 255
+    }
+  },
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "independent_rows_per_cover_event": null,
+      "optimistic_ratio_to_rho": 1.0,
+      "complete_cost_measured": true,
+      "status": "reference"
+    },
+    {
+      "variant": "minimum-width independent-log FB1hc72514a2a8d3",
+      "independent_rows_per_cover_event": 1,
+      "optimistic_ratio_to_rho": 13.920747397073491,
+      "complete_cost_measured": false,
+      "status": "free-perfect-oracle lower boundary"
+    },
+    {
+      "variant": "split-cover complementary quotient over FB1hc72514a2a8d3",
+      "independent_rows_per_cover_event": 1,
+      "optimistic_ratio_to_rho": 13.920747397073491,
+      "complete_cost_measured": false,
+      "status": "complement has no rational order-n transport; no second row credit"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "independent_rows_per_cover_event": 1,
+      "optimistic_ratio_to_rho": 394.42528,
+      "complete_cost_measured": false,
+      "status": "unchanged free-perfect-oracle comparison"
+    }
+  ],
+  "distinct_p256_order_n_rows_per_cover_event": 1,
+  "structured_residual_degree_of_regularity": null,
+  "relations_reported_on_p256": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "exploration_boundary": "Exact for the registered split quadratic cover and its complementary elliptic quotient; not universal over covers or Jacobians.",
+  "transfer_assessment_semantic_sha256": "2dcf6c82aad7225c024d9fbac45fe2a0bb98d76761954a948749b913f6fa6aa8",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "zero_map_and_replay_failures": true,
+    "two_distinct_order_n_rows_per_cover_event": false,
+    "explicit_forward_inverse_kernel_and_recovery": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "complete_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "projected_storage_below_2_50": false,
+    "discarded_probabilistic_branches_counted_as_exhaustive": false,
+    "promoted": false
+  },
+  "classification": "split-cover/complementary-quotient/order-n-transport-refuted/parity-blocked",
+  "dominant_obstruction": "The explicit second elliptic quotient E' has no rational P-256 order-n subgroup: a deterministic E'(F_p) witness satisfies [n]R != O under two independent scalar replays, while the Hasse interval contains no positive multiple of n other than n. The cover therefore yields only the primary P-256 row, not two independent rows per event.",
+  "decision": "Reject a two-row speedup from the registered split degree-two cover. Keep general nonstandard covers and non-homomorphic mechanisms open. Do not attempt an unplanted full-depth relation because the second-row, degree, cost, and storage gates fail.",
+  "semantic_evidence_sha256": "674ee12ea9a4eb2c9d8afc2499b5797563565ed124b23688c8bf5ac92680239d",
+  "result_json_bytes": 11099
+}
