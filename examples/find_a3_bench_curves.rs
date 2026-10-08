@@ -93,9 +93,12 @@ fn find_curve(bits: u32, residue_mod_4: u64) -> Option<(u64, u64, u64, u64, u64,
                         % p as u128) as u64;
                     if let Some(y) = legendre_or_sqrt(rhs, p) {
                         // (x, y) is a generator: the group has prime order
-                        // and (x, y) is not the identity.
+                        // and (x, y) is not the identity.  Canonicalise to
+                        // the smaller root so the table matches
+                        // `find_a3_curve`'s convention.
+                        let y_canon = y.min(p - y);
                         let _ = count_points; // silence unused-in-some-cfg
-                        return Some((p, a, b, x, y, order));
+                        return Some((p, a, b, x, y_canon, order));
                     }
                 }
             }
@@ -114,6 +117,8 @@ fn main() {
         (20, 1, "cryptoproclass"),
         (24, 3, "p256class"),
         (24, 1, "cryptoproclass"),
+        (28, 3, "p256class"),
+        (28, 1, "cryptoproclass"),
     ] {
         match find_curve(bits, residue) {
             Some((p, a, b, gx, gy, order)) => {
