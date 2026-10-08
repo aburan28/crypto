@@ -53,3 +53,29 @@ jobs:
         run: podman build --build-arg WITH_RUST=0 -t localhost/isolab-base:latest -f isolab/isolab/images/base/Containerfile isolab/isolab/images/base
       - name: Smoke the image
         run: podman run --rm localhost/isolab-base:latest python -c "import numpy, scipy, sympy, gmpy2; print(numpy.__version__)"
+  image-sage:
+    # the upstream sagemath image is x86-64 only, which the hosted runner is
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolab-sage
+        run: podman build -t localhost/isolab-sage:latest -f isolab/isolab/images/sage/Containerfile isolab/isolab/images/sage
+      - name: Smoke the image as a job sees it (no capabilities, read-only root, no network)
+        run: |
+          podman run --rm --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp --network none \
+            localhost/isolab-sage:latest sage -c 'print(factor(2^64+1)); import pandas, gmpy2, numpy'
+  image-cuda:
+    # build only: hosted runners have no GPU, so this proves the recipe, not the CUDA runtime
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolab-cuda
+        run: podman build -t localhost/isolab-cuda:latest -f isolab/isolab/images/cuda/Containerfile isolab/isolab/images/cuda
+      - name: Smoke the toolchain
+        run: podman run --rm --network none localhost/isolab-cuda:latest sh -c 'nvcc --version && python3 -c "import numpy, scipy" && numactl --version'

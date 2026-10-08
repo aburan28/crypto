@@ -336,7 +336,8 @@ class PodmanBackend(Backend):
         return base
 
     def resolve_image(self, image: str, pull: str = "missing") -> dict[str, Any]:
-        fmt = "{{.Id}}|{{.Digest}}|{{json .RepoDigests}}"
+        # .Digest is podman's; docker's inspect has no such key and fails the whole template
+        fmt = "{{.Id}}||{{json .RepoDigests}}" if self.name == "docker" else "{{.Id}}|{{.Digest}}|{{json .RepoDigests}}"
         rc, text = self.run([*self._base(), "image", "inspect", "--format", fmt, image], 60)
         if rc != 0:
             if pull == "never":

@@ -189,6 +189,8 @@ def cmd_images(args) -> None:
         argv = [tool, "build", "-t", tag, "-f", str(d / "Containerfile")]
         for a in args.build_arg or []:
             argv += ["--build-arg", a]
+        if args.ca_bundle:
+            argv += ["--secret", f"id=ca,src={Path(args.ca_bundle).expanduser().resolve()}"]
         argv.append(str(d))
         print("+", " ".join(argv), file=sys.stderr)
         subprocess.run(argv, check=True)
@@ -399,6 +401,7 @@ def main(argv: list[str] | None = None) -> None:
     im.add_argument("names", nargs="*", help="base, sage, cuda")
     im.add_argument("--tool", choices=["podman", "docker"])
     im.add_argument("--build-arg", action="append")
+    im.add_argument("--ca-bundle", metavar="PEM", help="CA bundle for a TLS-intercepting proxy, given to the build as secret id=ca")
     im.set_defaults(fn=cmd_images)
 
     r = sub.add_parser("run", help="submit one command (the common case)")

@@ -186,7 +186,8 @@ to skip), hwloc and numactl. `isolab-sage` is the official `sagemath/sagemath`
 image with the same Python additions on top; that upstream image is published
 for x86-64 only, so it builds on an x86-64 worker and not on Arm. `isolab-cuda`
 is `nvidia/cuda` devel with Python and NumPy. Build them on a worker with
-`isolab images build base`; the worker lists what it has, with digests, and
+`isolab images build base` (behind a TLS-intercepting proxy, add
+`--ca-bundle PEM`; the Sage recipe hands it to `pip` as a build secret); the worker lists what it has, with digests, and
 every result pins the image digest it ran. A job may name any image the
 worker has; `placement.require_images` (default true) keeps a job off a
 worker that lacks it.
