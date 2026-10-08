@@ -101,6 +101,7 @@ pub struct Registration {
     pub immutable_files: Value,
     pub source_manifest_sha256: String,
     pub config_sha256: String,
+    pub host_context_sha256: String,
     pub worker_sha256: String,
     pub auditor_sha256: String,
     pub worker_build_identity: Value,
@@ -122,6 +123,7 @@ fn pins(record: &Registration) -> Result<(), String> {
             && [
                 &record.source_manifest_sha256,
                 &record.config_sha256,
+                &record.host_context_sha256,
                 &record.worker_sha256,
                 &record.auditor_sha256,
                 &prep.registration_sha256,
@@ -142,7 +144,10 @@ fn pins(record: &Registration) -> Result<(), String> {
         "target compiled source pin differs",
     )
 }
-pub fn check_capsule(capsule: &Path, expected: &str) -> Result<Registration, String> {
+/// Validate the sealed registration and its small sidecars as data. This is
+/// also used for portable build-custody replay, where the immutable tree is
+/// checked inside a bounded archive instead of extracted or executed.
+pub fn registration(capsule: &Path, expected: &str) -> Result<Registration, String> {
     native::require(
         journal::digest(expected),
         "external target registration seal required",
@@ -157,10 +162,16 @@ pub fn check_capsule(capsule: &Path, expected: &str) -> Result<Registration, Str
         "target registration differs from external seal",
     )?;
     native::require(
-        record.config_sha256 == sha256(&native::read(&capsule.join("config.json"), 65536)?),
+        record.config_sha256 == sha256(&native::read(&capsule.join("config.json"), 65536)?)
+            && record.host_context_sha256
+                == sha256(&native::read(&capsule.join("host-context.json"), 65536)?),
         "target configuration changed",
     )?;
     config(capsule)?;
+    Ok(record)
+}
+pub fn check_capsule(capsule: &Path, expected: &str) -> Result<Registration, String> {
+    let record = registration(capsule, expected)?;
     native::check_tree(&capsule.join("immutable"), &record.immutable_files)?;
     native::require(
         canonical_sha(&native::inventory(&capsule.join("immutable/source"))?)?

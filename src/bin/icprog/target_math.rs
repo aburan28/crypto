@@ -90,7 +90,7 @@ impl<'de> Deserialize<'de> for StrictJson {
         d.deserialize_any(V)
     }
 }
-fn parse(bytes: &[u8]) -> Result<Value, String> {
+pub(super) fn parse(bytes: &[u8]) -> Result<Value, String> {
     serde_json::from_slice::<StrictJson>(bytes)
         .map(|v| v.0)
         .map_err(|e| e.to_string())
@@ -563,7 +563,7 @@ fn record_inventory(root: &Path, cap: usize) -> Result<Value, String> {
 }
 
 /// Compare every original durable envelope with the mathematically audited report.
-fn verify_records(
+pub(super) fn verify_records(
     execution: &Path,
     cfg: &Config,
     producer: &Value,

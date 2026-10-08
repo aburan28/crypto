@@ -182,9 +182,21 @@ fn abrupt_record_helper() {
 fn watchdog_killed_writer_retains_start_and_original_drain_receipt() {
     let p = temp("watchdog");
     let own = std::env::current_exe().unwrap();
+    let meta = fs::symlink_metadata(&own).unwrap();
+    eprintln!(
+        "file-only watchdog helper metadata: bytes={} regular={} symlink={}",
+        meta.len(),
+        meta.is_file(),
+        meta.file_type().is_symlink()
+    );
     let args = vec![
         "--exact".into(),
-        "journal::tests::abrupt_record_helper".into(),
+        // The journal is also compiled below icprog::target_control. Test names
+        // omit the crate prefix, so retain the actual module path in both bins.
+        format!(
+            "{}::abrupt_record_helper",
+            module_path!().split_once("::").unwrap().1
+        ),
         "--nocapture".into(),
     ];
     let env = vec![(

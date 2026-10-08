@@ -26,6 +26,7 @@ fn record() -> Registration {
         immutable_files: json!({}),
         source_manifest_sha256: "2".repeat(64),
         config_sha256: "3".repeat(64),
+        host_context_sha256: "6".repeat(64),
         worker_sha256: "4".repeat(64),
         auditor_sha256: "5".repeat(64),
         worker_build_identity: json!({"schema_version":1,"source_manifest_sha256":"2".repeat(64),

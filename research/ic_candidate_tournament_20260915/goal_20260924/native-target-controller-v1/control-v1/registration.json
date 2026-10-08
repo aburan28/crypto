@@ -1,0 +1,44 @@
+{
+  "auditor_sha256": "16c63c9496607b8eea5818fa1cb5327b585c8954c27167a918146c24b3f03592",
+  "config_sha256": "48e671908392f36580aef3dfa9d3e96a981be68126230ca3b312a087dd3931e5",
+  "hardware": {
+    "architecture": "aarch64",
+    "os": "macos"
+  },
+  "host_context_sha256": "43a9e963730c1a9fc43a4f5f746ac77a7fba6b3b7fc364f6a3c17121b0b1ccc4",
+  "immutable_files": {
+    "bin/icprog": {
+      "bytes": 46,
+      "sha256": "16c63c9496607b8eea5818fa1cb5327b585c8954c27167a918146c24b3f03592"
+    },
+    "bin/prepared_target_worker": {
+      "bytes": 46,
+      "sha256": "16c63c9496607b8eea5818fa1cb5327b585c8954c27167a918146c24b3f03592"
+    }
+  },
+  "preparation": {
+    "auditor_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+    "capsule": "/synthetic-no-execution/preparation",
+    "execution": "/synthetic-no-execution/results",
+    "mathematics_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "producer_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "registration_sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+  },
+  "runtime_environment": {
+    "LC_ALL": "C",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "schema_version": 1,
+  "scope": "disclosed-n17-native-one-target-f5-v1",
+  "source_commit": "1111111111111111111111111111111111111111",
+  "source_manifest_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "validation_only": true,
+  "worker_build_identity": {
+    "build_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+    "schema_version": 1,
+    "source_manifest_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "target_arch": "aarch64",
+    "target_os": "macos"
+  },
+  "worker_sha256": "16c63c9496607b8eea5818fa1cb5327b585c8954c27167a918146c24b3f03592"
+}

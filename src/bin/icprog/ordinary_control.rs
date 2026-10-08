@@ -12,7 +12,7 @@ use serde_json::{json, Value};
 use std::{fs, path::Path, process::Command, time::Instant};
 const ASSETS: &str = "research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/native-inputs-macos-arm64";
 
-fn reject_ancestor_config(source: &Path) -> Result<(), String> {
+pub(super) fn reject_ancestor_config(source: &Path) -> Result<(), String> {
     for parent in source.ancestors().skip(1) {
         for name in [".cargo/config", ".cargo/config.toml"] {
             require(
@@ -23,13 +23,13 @@ fn reject_ancestor_config(source: &Path) -> Result<(), String> {
     }
     Ok(())
 }
-fn copy_file(root: &Path, source: &Path, name: &str) -> Result<(), String> {
+pub(super) fn copy_file(root: &Path, source: &Path, name: &str) -> Result<(), String> {
     let target = source.join(name);
     fs::create_dir_all(target.parent().ok_or("source file lacks parent")?)
         .map_err(|e| e.to_string())?;
     native::create(&target, &read(&root.join(name), 256 * 1024 * 1024)?)
 }
-fn executable_copy(from: &Path, to: &Path) -> Result<(), String> {
+pub(super) fn executable_copy(from: &Path, to: &Path) -> Result<(), String> {
     native::create(to, &read(from, 128 * 1024 * 1024)?)?;
     #[cfg(unix)]
     {
@@ -473,7 +473,7 @@ fn pid(receipt: &Value) -> Result<u32, String> {
         .map(|v| v as u32)
         .ok_or("invalid ordinary child PID".into())
 }
-fn verify_receipt(
+pub(super) fn verify_receipt(
     execution: &Path,
     stem: &Path,
     receipt: &Value,
@@ -921,7 +921,7 @@ fn verify_native_assets(root: &Path) -> Result<(), String> {
     result?;
     cleanup
 }
-fn verify_execution_inventory(execution: &Path, terminal: &Value) -> Result<(), String> {
+pub(super) fn verify_execution_inventory(execution: &Path, terminal: &Value) -> Result<(), String> {
     let mut files = native::inventory(execution)?;
     files
         .as_object_mut()

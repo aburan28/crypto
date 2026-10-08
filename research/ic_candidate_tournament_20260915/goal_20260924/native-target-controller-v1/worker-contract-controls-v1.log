@@ -1,0 +1,77 @@
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/ic-native-target-controller-20261004)
+    Finished `test` profile [unoptimized] target(s) in 3.44s
+     Running unittests src/bin/prepared_target_worker.rs (/Volumes/SSD990/llm/tmp/ic-native-preparation-build-cache-20261004/debug/deps/prepared_target_worker-c828abe59f749a96)
+
+running 23 tests
+test contract::tests::claim_rejects_validation_capsule_wrong_seal_and_wrong_execution ... ok
+test contract::tests::config_rejects_unbounded_and_known_scalar_fields ... ok
+test contract::tests::old_capsule_scope_and_mismatched_compiled_identity_are_rejected ... ok
+test contract::tests::preparation_receipt_pins_reject_missing_native_admission_and_changed_input ... ok
+test journal::tests::abrupt_record_helper ... ok
+test journal::tests::binding_and_record_limits_are_fail_closed ... ok
+test journal::tests::both_record_shapes_preserve_complete_prefix_with_no_runtime_admission ... ok
+test journal::tests::durable_start_survives_drop_as_unadmitted_pending_prefix ... ok
+test journal::tests::failed_write_poisoning_prevents_overwrite_and_resume ... ok
+test journal::tests::inspector_rejects_orphans_gaps_changed_links_and_wrong_seal ... ok
+test journal::tests::watchdog_killed_writer_retains_start_and_original_drain_receipt ... ok
+test journal::tests::wrong_target_coefficients_family_and_completion_are_rejected ... ok
+test native::tests::accepted_archive_custody_extracts_without_executing_binaries ... ok
+test native::tests::create_only_and_tree_mutation_controls ... ok
+test native::tests::helper_requires_consumed_execution_parent_and_query_cap ... ok
+test native::tests::nonreading_worker_cannot_block_registered_job_deadline ... ok
+test native::tests::registered_job_preserves_exact_input_and_environment ... ok
+test native::tests::retained_exports_have_exact_layout_and_hashes ... ok
+test native::tests::watchdog_preserves_exit_and_kills_a_timed_out_group ... ok
+test preparation::tests::durable_records_preserve_pending_prefix_and_reject_overwrites ... ok
+test preparation::tests::helper_requires_new_claim_parent_durable_start_and_exact_public_query ... ok
+test preparation::tests::native_roles_use_only_accepted_paths_and_frozen_single_thread_argv ... ok
+test preparation::tests::strict_configuration_and_compiled_identity_are_required ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.62s
+

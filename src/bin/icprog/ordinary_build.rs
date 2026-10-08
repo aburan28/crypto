@@ -52,8 +52,13 @@ fn validation(record: &capsule::Registration, hash: &str, expected: &str) -> Res
         "build custody requires the external validation-only seal",
     )
 }
-// Stream only registered regular files; no directories, links, metadata extensions or executables run.
-fn archive(root: &Path, out: &Path, files: &serde_json::Map<String, Value>) -> Result<(), String> {
+// Shared strict USTAR writer for ordinary and target build custody. It streams
+// only registered regular files and never extracts or executes archived data.
+pub(super) fn archive(
+    root: &Path,
+    out: &Path,
+    files: &serde_json::Map<String, Value>,
+) -> Result<(), String> {
     let file = fs::OpenOptions::new()
         .write(true)
         .create_new(true)
@@ -64,7 +69,7 @@ fn archive(root: &Path, out: &Path, files: &serde_json::Map<String, Value>) -> R
     for (index, (name, expected)) in files.iter().enumerate() {
         if index.is_multiple_of(512) {
             eprintln!(
-                "ordinary build custody: serializing member {index} of {}",
+                "native build custody: serializing member {index} of {}",
                 files.len()
             );
         }

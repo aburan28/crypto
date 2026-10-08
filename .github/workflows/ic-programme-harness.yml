@@ -44,6 +44,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-durable-target-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-worker-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-math-audit-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-controller-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -82,6 +83,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-durable-target-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-worker-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-math-audit-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-controller-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -121,6 +123,10 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    env:
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_INCREMENTAL: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -146,8 +152,10 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::boundary_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::external_sat::sat_boundary_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::recording_tests -- --test-threads=1
-          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_target_worker -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_target_worker -- --test-threads=1 --nocapture
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_math::tests -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_control -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_custody -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_control_archive -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
@@ -159,6 +167,10 @@ jobs:
             --publication research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/build-validation-v2 \
             --validation-registration-sha256 02e12b456947c8034f096b47c16dd7b73eb6c15cedb6c0b79164f887ec1406f3 \
             --out "$RUNNER_TEMP/native-ordinary-build-custody.json"
+          "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog target-control-replay-build \
+            --publication research/ic_candidate_tournament_20260915/goal_20260924/native-target-controller-v1/build-validation-v1 \
+            --validation-registration-sha256 571ec54d81e02ba68a6238236a51808631758a60f0dc997da684d398e6436662 \
+            --out "$RUNNER_TEMP/native-target-build-custody.json"
           target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-preparation-replay --out "$RUNNER_TEMP/native-f5-preparation-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-target-replay --out "$RUNNER_TEMP/native-f5-target-replay.json"
@@ -173,6 +185,7 @@ jobs:
           path: |
             ${{ runner.temp }}/native-sat-replay.json
             ${{ runner.temp }}/native-ordinary-build-custody.json
+            ${{ runner.temp }}/native-target-build-custody.json
             ${{ runner.temp }}/native-f5-preparation-replay.json
             ${{ runner.temp }}/native-f5-target-replay.json
             ${{ runner.temp }}/native-f5-build-validation-replay.json

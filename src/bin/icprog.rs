@@ -81,6 +81,12 @@ mod sat_source;
 mod stats;
 #[path = "icprog/suite.rs"]
 mod suite;
+#[path = "icprog/target_build.rs"]
+mod target_build;
+#[path = "icprog/target_control.rs"]
+mod target_control;
+#[path = "icprog/target_custody.rs"]
+mod target_custody;
 #[path = "icprog/target_math.rs"]
 mod target_math;
 
@@ -115,6 +121,76 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Freeze the complete native n17 target source/build; never runs a solve.
+    TargetControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        preparation_binding: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        validation_only: bool,
+    },
+    /// Publish full data custody of an unconsumed validation-only target build.
+    TargetControlPublishBuild {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Check archived target build bytes and receipts; never executes an archive.
+    TargetControlReplayBuild {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Consume one separately published target registration; no retry or resume.
+    TargetControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Inspect original interrupted target files; never admits runtime or starts a child.
+    TargetControlInspect {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Independently audit original target source/build, preparation/runtime, math and clocks.
+    TargetControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Independently replay bounded n17 target records and mathematics; no solver or runtime admission.
     TargetMathematicsAudit {
         #[arg(long)]
@@ -738,6 +814,58 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::TargetControlFreeze {
+            root,
+            out,
+            config,
+            preparation_binding,
+            cargo,
+            rustc,
+            host_context,
+            validation_only,
+        } => target_build::freeze(target_build::FreezeRequest {
+            root: &root,
+            out: &out,
+            config: &config,
+            preparation: &preparation_binding,
+            cargo: &cargo,
+            rustc: &rustc,
+            host: &host_context,
+            validation_only,
+        }),
+        Command::TargetControlPublishBuild {
+            capsule,
+            publication,
+            validation_registration_sha256,
+            out,
+        } => target_custody::publish(
+            &capsule,
+            &publication,
+            &validation_registration_sha256,
+            &out,
+        ),
+        Command::TargetControlReplayBuild {
+            publication,
+            validation_registration_sha256,
+            out,
+        } => target_custody::replay(&publication, &validation_registration_sha256, &out),
+        Command::TargetControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => target_control::execute(&capsule, &execution, &registration_sha256),
+        Command::TargetControlInspect {
+            capsule,
+            execution,
+            registration_sha256,
+            out,
+        } => target_control::inspect(&capsule, &execution, &registration_sha256, &out),
+        Command::TargetControlAudit {
+            capsule,
+            execution,
+            registration_sha256,
+            out,
+        } => target_control::audit(&capsule, &execution, &registration_sha256, &out),
         Command::OrdinaryControlPublishBuild {
             capsule,
             publication,
