@@ -1478,7 +1478,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         bit-identical trajectories, so the saving is a subtraction rather than an estimate &mdash;
         537 of 537 rows identical in every counter but the pool&rsquo;s, zero trajectories moved,
         zero rows whose saving differs from the offsets they stopped drawing.</p>
-      <p><strong>P-256 S17 boundary, repriced with variable columns.</strong> This route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm. Round 18 rejected fixed-atom enumeration at 2<sup>272.404</sup> field multiplications. Round 19 exactly constructs the global 8+9 frontier and lowers the optimistic 138,031-row projection by 107.248 bits to 2<sup>165.156</sup> P-256 field-multiplication equivalents, still 32.690 bits above the same-unit rho reference. The result remains a rejected stage projection and is retained below rather than inserted into this end-to-end table.</p>
+      <p><strong>P-256 S17 boundary, corrected for the finite representation domain.</strong> This route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm. Round 18 rejected fixed-atom enumeration at 2<sup>272.404</sup> field multiplications; Round 19&rsquo;s exact global 8+9 frontier lowered that to 2<sup>165.156</sup>. Round 20 initially reported 2<sup>144.625</sup>, but that symmetric projection demanded 2<sup>136.538</sup> distinct left images from a domain containing only 2<sup>128.734</sup> and is withdrawn. Materialising the complete finite left domain and charging streamed right images plus duplicate occupancy gives 2<sup>151.885</sup> P-256 field-multiplication equivalents, <strong>19.419 bits above rho</strong>. Even the corrected one-addition-per-image boundary is 16.203 bits above rho. This remains a rejected stage projection and is not inserted into the end-to-end table.</p>
     </div>
     <div class="table-scroll">
       <table>
@@ -1969,7 +1969,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           (the matched walk, &sect;18; 0.27&ndash;0.30 with the plain walk) and 0.25 on the Koblitz
           ladder is its unamortised setup.
           Anything to the right of one half loses as the group grows, whatever its constant.</p>
-        <p>The P-256 S17 diagnostics are intentionally not plotted on this group-order axis. Round 18 measures a fixed-atom depth-prefix slope; Round 19 measures local <code>B=17..20</code> list growth, with slopes 11.650 and 11.684 against <code>log B</code>, not a multi-size exponent in the subgroup order. Exact full-size combinatorics project the variable-column collector to 2<sup>165.156</sup> FME, 32.690 bits above the same-unit rho reference.</p>
+        <p>The P-256 S17 diagnostics are intentionally not plotted on this group-order axis. Round 18 measures a fixed-atom depth-prefix slope; Round 19 measures local <code>B=17..20</code> list growth, with slopes 11.650 and 11.684 against <code>log B</code>. Round 20 measures a projected-key birthday ladder whose counted-work slope is 0.499979 per key bit and whose logical-memory slope is 0.5; none is a multi-size exponent in subgroup order. Its initial symmetric 2<sup>144.625</sup> projection is withdrawn because it exceeds the signed-eight domain. Corrected finite-domain accounting projects the collector to 2<sup>151.885</sup> FME, 19.419 bits above rho, while its optimistic image floor remains 16.203 bits above rho.</p>
       </div>
       <div class="exp">
         <div class="erow"><div class="name">char2: Meet in the middle, m = 2, negation-folded table</div><div class="track"><i class="dot" style="left:82.8%" title="r^0.79 (R² 1.00, 5 sizes)"></i></div><div class="num">0.79</div></div>
@@ -12098,6 +12098,47 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-multilevel-selector-round19-20261005 -->
+<!-- BEGIN p256-s17-batch-collision-round20-20261005 -->
+<section class="panel" id="p256-s17-batch-collision-round20-20261005">
+  <div class="panel-head">
+    <h2>P-256 S17 batch collisions: finite-domain correction leaves the generic floor 16.2 bits above rho <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Five exact P-256 sampled-list cells have zero errors and birthday slope 0.499979. The original symmetric projection exceeded the finite signed-eight domain and is withdrawn; corrected direct batching remains 19.419 bits above rho and the optimistic image floor remains 16.203 bits above.</p>
+    <p>Round 20 samples signed eight-sums on the left and target-adjusted signed nine-sums on the right for 256 hash-selected unplanted targets. It sorts projected point keys only as a bounded census: every match is checked against the complete compressed P-256 key, every full-key hit is replayed from 17 fresh factor-base points, and an independent full-key reference covers every frozen sample list.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Measured actual-P-256 projected-image census. Each cell has one forced planted full-key match; random projected matches are screening candidates, never reported relations.</caption>
+    <thead><tr><th>Key bits</th><th>Images / side</th><th>Projected matches</th><th>Random / expected</th><th>Full-key hits</th><th>Unplanted relations</th><th>FME</th><th>Logical lists</th><th>FN / FP</th></tr></thead>
+    <tbody>
+      <tr><td class="n">20</td><td class="n">8,192</td><td class="n">72</td><td class="n">71 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">2,311,203</td><td class="n">1,310,720 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">22</td><td class="n">16,384</td><td class="n">65</td><td class="n">64 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">4,622,113</td><td class="n">2,621,440 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">24</td><td class="n">32,768</td><td class="n">57</td><td class="n">56 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">9,243,933</td><td class="n">5,242,880 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">26</td><td class="n">65,536</td><td class="n">57</td><td class="n">56 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">18,487,573</td><td class="n">10,485,760 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">28</td><td class="n">131,072</td><td class="n">58</td><td class="n">57 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">36,974,853</td><td class="n">20,971,520 B</td><td class="n">0 / 0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>138,031-row projection in one FME unit. The correction materialises all signed-eight images and streams signed-nine images with duplicate occupancy charged. The lower boundary assumes only one group addition per image; neither live row prices sorting or I/O.</caption>
+    <thead><tr><th>Variant</th><th>Image / addition boundary</th><th>Total log<sub>2</sub> FME</th><th>Per row</th><th>Ratio to rho</th><th>Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Round-19 exhaustive 8+9</td><td class="n">complete frontier per target</td><td class="n">165.156</td><td class="n">148.081</td><td class="n">+32.690 bits</td><td><span class="chip">superseded projection</span></td></tr>
+      <tr><td>Initial symmetric batching</td><td class="n">required left 2<sup>136.538</sup> &gt; domain 2<sup>128.734</sup></td><td class="n"><s>144.625</s></td><td class="n"><s>127.551</s></td><td class="n"><s>+12.159 bits</s></td><td><span class="chip">withdrawn</span></td></tr>
+      <tr><td>Direct finite-domain signed sums</td><td class="n">all left + 2<sup>144.581</sup> streamed right</td><td class="n"><strong>151.885</strong></td><td class="n">134.811</td><td class="n"><strong>+19.419 bits</strong></td><td><span class="chip">rejected</span></td></tr>
+      <tr><td>One-addition-per-image boundary</td><td class="n">2<sup>144.581</sup> total images</td><td class="n"><strong>148.668</strong></td><td class="n">131.594</td><td class="n"><strong>+16.203 bits</strong></td><td><span class="chip">generic floor</span></td></tr>
+      <tr><td>Complete left materialisation</td><td class="n">80-byte exact records</td><td class="n">135.056 bytes</td><td class="n">&mdash;</td><td class="n">+85.056 bits over gate</td><td><span class="chip">storage fails</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> five planted relations replay exactly; 304 random projected matches versus 320 expected all fail the full-key check; zero FN, FP or duplicates; the 20-bit cell additionally scans all 67,108,864 pairs</span>
+    <span><span class="chip">growth</span> counted FME slope 0.499979 and logical-memory slope 0.5 per projected key bit, matching the frozen birthday prediction</span>
+    <span><span class="chip">accounting correction</span> the old symmetric schedule repeated left representations; the corrected target allowance is 143,185.658, its expected relation population is 475,983.691, and 163,013.787 collision events are charged for 138,031 distinct rows</span>
+    <span><span class="chip">classification</span> batching is projected engineering against the generic image floor; replacing the unattainable symmetric projection is accounting, not an algorithmic gain</span>
+    <span><span class="chip">Dickson</span> all 131,458 leaves pass all 18 chain steps; survival remains 1.0 and supplies no cross-column pruning</span>
+    <span><span class="chip">degree</span> local join degree 2; frozen residual maxima 3 / 3 / 4; unsplit S17 regularity remains unknown</span>
+    <span><span class="chip">decision</span> exactness and degree pass; per-row, collection, storage and rho parity fail; no full-depth unplanted attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_batch_collision_round20_20261005/RESULT.md</code>; result SHA-256 <code>72f269c401d5192fda1e2a9f8c7e4b7bd537d92fe29a18b851882b610fa5c459</code></span>
+  </div>
+</section>
+<!-- END p256-s17-batch-collision-round20-20261005 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
