@@ -22,7 +22,9 @@
 > `2^151` on `C₄ = 1.2·10¹²` and `r∞ = 0.518`; `k = 4` Joux–Vitse, never.
 > Parity at a size that fits a machine therefore needs a route this harness
 > does not have: `k ≥ 5` with the torsion symmetries that halve the degree
-> of the symmetrised system, or a cover; §6 registers the first one.
+> of the symmetrised system, or a cover; §6 registers the first one.  **Update, 2026-10-03:** both were then built; §8 states
+> where the programme ended: on generic curves no route closes below `2^200`,
+> and the cover closes by a polynomial only on a weak class.
 
 ## 1. What parity means here, and why the question is about exponents
 
@@ -308,7 +310,16 @@ measured size are both outside this harness:
   measured as a wash (`2×` on the rate, `2.01×` on the test).
 - **A cover** (Joux–Vitse 2012, `E(F_{p⁶})` → genus-`3` hyperelliptic over
   `F_{p²}`; the GHS work elsewhere in this repository): changes the target,
-  not the constant, and belongs to a different ledger.
+  not the constant, and belongs to a different ledger.  **Outcome
+  (2026-10-03, `RESEARCH_COVER_DECOMPOSITION_LEDGER.md`):** registered, built
+  and measured.  One six-point test costs `5.2·10⁶` multiplications, and
+  `S / rho` falls as `p^{−1.92 ± 0.12}` (`n^{−0.32}`) to `8–10×` at `2^{58}`,
+  extrapolating to parity near `2^{67}` — on the weak class only, with the
+  isogeny walk unpriced; the one route here that closes by a polynomial and
+  crosses inside an extrapolation, and a reproduction of a published
+  algorithm, not an advance.  Stopping F4 at the Bézout staircase (that
+  note's §10, engineering) makes the test `3.2·10⁶` and `S / rho` `5–6×` at
+  `2^{58}`, the exponent unchanged and the extrapolated parity `2^{65}`.
 
 Either is a new harness, not a lever on this one.  What this note settles
 is that the levers on this one — the automorphism quotient, the canonical
@@ -322,7 +333,33 @@ that the only sub-parity asymptote measured (`r∞ = 0.52` at `k = 4`) is
 
 - The trace-driven (fixed-matrix) three-point test: an engineering lever
   worth `≈ 3–10×` on `C′`, which cannot move the constant below `10³×`.
-- `k = 5`: registered above, not built.
+- `k = 5`: registered in §6, built and measured afterwards (`RESEARCH_K5_TORSION_JOUX_VITSE.md`); §8 states where it ended.
 - Two seeds per size for the end-to-end run, `16` rho walks each; the rho
   reference is pooled over all `128` walks (`1.319 ± 0.065`), as
   §11.19 does, because one curve's `16` walks leave a `15 %` standard error.
+
+## 8. Where the programme stands (2026-10-04)
+
+Every row is a frozen measurement unless marked *extrapolated*; the tables are
+printed by `scripts/parity_ledger.py` (sections A to G).
+
+| route | measured `S / rho` at the top size | what moves it | parity at | class of the result |
+|:--|:--|:--|:--|:--|
+| `k = 3`, plain `⟨−1⟩` base | `691×` at `2^{33}` | exponents `0.34` (relations) and `0.66` (linear algebra) | never; minimum `≈ 177×` near `2^{52}` | measurement |
+| `k = 3`, `⟨ψ⟩` quotient (`j = 0`) | `224×` at `2^{33}` | linear algebra `10×` smaller | never; minimum `≈ 26×` near `2^{59}` | measurement |
+| `k = 3`, double large primes | `2,599×` at `2^{33}` | `n^{−1/18}` | `2^{237}` *extrapolated* | measurement |
+| `k = 4`, full four-point decompositions | relation phase `> 10^8×` at `2^{32}` | `C₄ = 1.2·10¹²`, `r∞ = 0.518` | `2^{151}` *extrapolated* | measurement |
+| `k = 4`, Joux–Vitse | `6,945×`, flat in `n` | `C′ = 1.6·10⁵` | never (needs `C′ < 21`) | measurement |
+| `k = 5`, plain symmetrisation | `C″ = 3.0·10¹⁰` per test | `n^{−1/10}` | `2^{302}` *extrapolated* | stage diagnostic |
+| `k = 5`, 2-torsion (Edwards `y`) | `C″ = 7.3·10⁷` per test | residual rate `1/(192p)`, counted exactly | `2^{233}` *extrapolated* | stage diagnostic |
+| `k = 5`, saturated by the rational 4-torsion point | `C″ = 1.46·10⁸` per test | `2×` on the rate, `2.01×` on the test | `2^{233}`: a wash | engineering; the registered `4–10×` lever retracted |
+| **cover and decomposition, weak class over `F_{p⁶}`**, Nagao relations | `2.98×` and `2.40×` at `2^{57.9}` with F4 stopped at the staircase and replaying a recorded trace (`8.1×` and `10.2×` as first built) | `S/rho ∝ p^{−1.96 ± 0.11}`, `C_cov = 1.6·10⁶` per test (`5.2·10⁶` as first built) | `2^{62}` *extrapolated* (`2^{67}` as first built) | reproduction of a published route; the stop and the trace are engineering |
+| **cover and decomposition, weak class over `F_{p⁶}`, sieved relations** (the route of Joux–Vitse §3.2) | **`0.0122×` and `0.0137×` at `2^{61.4}`** (`0.0075×` and `0.0086×` with the descent replaying the trace); `3.2×` and `8.5×` at `2^{45.8}` | `C_rel ≈ 3–6·10⁶` per relation at `m = 9`, the descent two Nagao tests | **measured at `p ≈ 430` (`ℓ ≈ 2^{50}`)**; `p ≈ 371` (`2^{49}`) with the traced descent and §14 | reproduction of a published route (cover note §11); the enumeration of §14 is engineering |
+
+**The boundary.**
+
+1. **On the generic curves of this harness, no measured route reaches parity at a size below `2^{150}`.**  The `k = 3` routes are bounded by exponents, `k = 4` Joux–Vitse by a constant (`6,945×`), and the two that close do so only past `2^{151}` (`k = 4` full) and `2^{233}` (`k = 5`, 2-torsion) on measured constants.  The `k = 5` route's one lever left (a trace-driven elimination, `3–10×`) cannot bring it below `2^{200}`; the `k = 5` torsion lever the programme registered (4-torsion) does not exist on a curve not defined over `F_p`, and the variant that does was a wash.
+2. **The one route that closes is the cover, and only on a weak class — and there the crossover is now measured, not extrapolated.**  On `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}` the route with Nagao relations falls as `n^{−0.33}` to `2.4–3.0×` at `ℓ = 2^{58}` (F4 stopped at the Bézout staircase and replaying a recorded trace, `3.2×` on the test together and nothing on the exponent; cover note §§10, 12); the route with the sieved relation phase of [JV12] §3.2 (cover note §11) **crosses rho at `p ≈ 430`, `ℓ ≈ 2^{50}`** as first measured, between `3.2–8.5×` at `p = 251` and `1.05×`/`0.11×` at `p = 503` (`p ≈ 371`, `ℓ ≈ 2^{49}`, with the traced descent and the lazy line enumeration of cover note §14), and reads `0.012–0.014×` at `ℓ = 2^{61.4}` (`0.0068–0.0077×` with both).  Every logarithm was recovered and checked, every relation verified in the Jacobian.  The published break of a 149-bit instance by the same method (Joux–Vitse 2012) is cited and not reproduced.  **Reaching the class is priced too** (cover note §13): a generic curve of order divisible by `4` reaches the weak class, which is `3/q` of the curves with full 2-torsion (measured), by a 2,3-isogeny walk of `≈ q/3` steps at `3–7·10⁵` multiplications a step, which costs more than rho itself below `p ≈ 8,000` — so at every size the harness reaches, walk plus attack is above rho, and the attack alone is below it only on a curve already in the class.  Outside the figures: the `p/2`-column linear algebra's memory, and the cited `≈ q` steps of the walk, which the toy walks could neither confirm nor refute (their 2,3-isogeny components were too small to sample a class).
+3. **What the harness did not do, so that nothing above is read as more:** run any size above `ℓ = 2^{61.4}`; reach a weak curve by a walk at a size where the attack beats rho; or touch prime-field curves, curves of prime order outside the weak form, or any deployed curve.
+
+**Class.**  Accounting, engineering and measurement throughout; the programme produced no new algorithm.  What it produced is the boundary above, in one unit (`F_p` multiplications over `√n` additions), with every constant and exponent behind it recorded, two registered predictions falsified in the open (the `k = 5` 2-torsion `C″` with its crossover, and the 4-torsion lever), one accounting error corrected (the Edwards residual rate, `1/(192p)` and not `1/(24p)`), four defects in the cover module and three in its trace replay found and kept as superseded or defective runs, and three engineering constants on the cover route measured after the fact (the F4 stop `1.6×`, the trace replay `2.0×`, the sieve's line enumeration, cover note §14).

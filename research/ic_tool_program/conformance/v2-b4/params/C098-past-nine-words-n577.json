@@ -1,0 +1,35 @@
+{
+ "schema_version": 2,
+ "name": "C098: the Koblitz curve with a = 0 at n = 577, past nine words' limit of 574",
+ "field": {
+  "kind": "binary",
+  "degree": 577,
+  "modulus": "0x200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010d"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "2347237",
+  "cofactor": "210741737177033707342294383583461908648450368753740538270368996477899100181644944392336220762899722546760266572126992042926013237452355711457186072092347977959410902572",
+  "generator": {
+   "x": "0x1411ad973d34b3d18594127c9be7e6aa61786a253cf041b7bf46c0182d0eb82fb5f9b91a2d4bd226dfdaf3a9847a60dc2da65586428da0f46c82149ded20d3bb1dd423ce496eab734",
+   "y": "0x38ba0c3d0926145a0355c17f0332c99e6578972fec9d2f4872e196cfad5ac2b857ce56a0c62040262c1977bbf4d890d7080e1eed8943be8363c1b8d261dbbb3ca67b4705d895de1"
+  }
+ },
+ "target": {
+  "known_log": "838926"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

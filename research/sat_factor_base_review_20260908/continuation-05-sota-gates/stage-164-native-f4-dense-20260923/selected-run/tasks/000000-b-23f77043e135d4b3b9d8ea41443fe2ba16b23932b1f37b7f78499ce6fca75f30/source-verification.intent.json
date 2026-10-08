@@ -1,0 +1,49 @@
+{
+  "close_fds": true,
+  "command": [
+    "/Volumes/SSD990/koblitz-native-f4-build14-9845f2df/bin/koblitz_pdp_backend",
+    "verify-source",
+    "/Volumes/SSD990/koblitz-native-f4-run12-9845f2df/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json"
+  ],
+  "cwd": "/Volumes/SSD990/koblitz-native-f4-run12-9845f2df/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "RAYON_NUM_THREADS": "1",
+    "TMPDIR": "/tmp",
+    "TZ": "UTC",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "executable_sha256": "32ac34e5675ee4f5ef46cfc89717cfe3587799984ceb8a15fbd000d52a105875",
+  "inputs": [
+    {
+      "bytes": 4343,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run12-9845f2df/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+      "sha256": "e0bb80d4068e2fb3b9665ca07d8c7973b8e68c4e50853a362c393196c6ba3367"
+    },
+    {
+      "bytes": 255940,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run12-9845f2df/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+      "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+    },
+    {
+      "bytes": 219207,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run12-9845f2df/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf",
+      "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+    },
+    {
+      "bytes": 404158,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run12-9845f2df/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.magma",
+      "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+    }
+  ],
+  "role": "source-verification",
+  "schema": "koblitz_pdp_phase_b_child_intent.v1",
+  "stdin": "devnull",
+  "watchdog_seconds": 120
+}

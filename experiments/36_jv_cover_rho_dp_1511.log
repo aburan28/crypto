@@ -1,0 +1,28 @@
+  [rho-dp p=1511 seed=1000] steps 2.013e8 (0.12 sqrt l) dps 2977 64 s
+  [rho-dp p=1511 seed=1000] steps 2.684e8 (0.16 sqrt l) dps 3975 85 s
+  [rho-dp p=1511 seed=1000] steps 7.382e8 (0.43 sqrt l) dps 11169 235 s
+  [rho-dp p=1511 seed=1000] steps 8.724e8 (0.51 sqrt l) dps 13213 277 s
+  [rho-dp p=1511 seed=1000] steps 1.074e9 (0.62 sqrt l) dps 16196 342 s
+  [rho-dp p=1511 seed=1000] steps 1.476e9 (0.86 sqrt l) dps 22434 472 s
+  [rho-dp p=1511 seed=1000] steps 1.544e9 (0.89 sqrt l) dps 23420 494 s
+  [rho-dp p=1511 seed=1000] steps 1.611e9 (0.93 sqrt l) dps 24456 516 s
+  [rho-dp p=1511 seed=1000] steps 1.678e9 (0.97 sqrt l) dps 25499 538 s
+  [rho-dp p=1511 seed=1000] steps 1.879e9 (1.09 sqrt l) dps 28602 604 s
+  [rho-dp p=1511 seed=1000] steps 1.946e9 (1.13 sqrt l) dps 29622 626 s
+  [rho-dp p=1511 seed=1000] steps 2.013e9 (1.17 sqrt l) dps 30582 647 s
+p= 1511 seed=1 run=0 l=2^61.4 c_add E 331 | rho-dp dp_bits 16 threads 4 steps 2.1989e9 (1.275 sqrt l) group ops 2.1989e9 S 1.2748 correct true | 707 s
+  [rho-dp p=1511 seed=1001] steps 6.711e7 (0.04 sqrt l) dps 1004 21 s
+  [rho-dp p=1511 seed=1001] steps 2.684e8 (0.16 sqrt l) dps 4075 87 s
+p= 1511 seed=1 run=1 l=2^61.4 c_add E 331 | rho-dp dp_bits 16 threads 4 steps 2.8257e8 (0.164 sqrt l) group ops 2.8259e8 S 0.1638 correct true | 92 s
+  [rho-dp p=1511 seed=1002] steps 2.684e8 (0.16 sqrt l) dps 4098 86 s
+  [rho-dp p=1511 seed=1002] steps 3.355e8 (0.19 sqrt l) dps 5089 108 s
+  [rho-dp p=1511 seed=1002] steps 4.027e8 (0.23 sqrt l) dps 6123 129 s
+  [rho-dp p=1511 seed=1002] steps 4.698e8 (0.27 sqrt l) dps 7156 150 s
+  [rho-dp p=1511 seed=1002] steps 5.369e8 (0.31 sqrt l) dps 8169 170 s
+  [rho-dp p=1511 seed=1002] steps 8.053e8 (0.47 sqrt l) dps 12220 255 s
+  [rho-dp p=1511 seed=1002] steps 8.724e8 (0.51 sqrt l) dps 13293 277 s
+  [rho-dp p=1511 seed=1002] steps 9.395e8 (0.54 sqrt l) dps 14330 298 s
+  [rho-dp p=1511 seed=1002] steps 1.007e9 (0.58 sqrt l) dps 15399 319 s
+  [rho-dp p=1511 seed=1002] steps 1.544e9 (0.89 sqrt l) dps 23752 487 s
+p= 1511 seed=1 run=2 l=2^61.4 c_add E 331 | rho-dp dp_bits 16 threads 4 steps 1.6452e9 (0.954 sqrt l) group ops 1.6452e9 S 0.9538 correct true | 518 s
+p= 1511 seed=1 run=3 l=2^61.4 c_add E 331 | rho-dp dp_bits 16 threads 4 steps 1.4732e9 (0.854 sqrt l) group ops 1.4732e9 S 0.8541 correct true | 466 s

@@ -65,7 +65,14 @@ def replay() -> dict:
         ["git", "ls-files", "research/notes/ecc2k130/**/*.points.jsonl"],
         cwd=ROOT, text=True).splitlines()
         if not path.startswith(str(HERE.relative_to(ROOT)) + "/")]
-    assert [item["path"] for item in canonical] == tracked
+    # The inventory was the complete tracked set when the freeze was taken
+    # (prepare.py refuses to run otherwise, and the sealed INPUT_RECEIPT.json
+    # was produced against it). Corpora frozen by later rounds, such as
+    # research/notes/ecc2k130/base_window_screen_20261001 (#1131), are not
+    # prior inputs of this round, so a replay requires every frozen prior file
+    # to still be tracked, with its hash checked below, and nothing more.
+    missing = sorted(set(item["path"] for item in canonical) - set(tracked))
+    assert not missing, f"frozen prior point files no longer tracked: {missing}"
 
     old = json.loads(OLD_INPUT_FREEZE.read_text())
     curves = {}

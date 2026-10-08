@@ -1,0 +1,31 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "yield sweep, Koblitz: every oracle and solver on the same subspace bases and targets",
+  "description": "PROTOCOL.md. Four Koblitz curves, four planted targets each. Two polynomial-basis subspace factor bases (dimension 6 and 8) under the subtract oracle, the unfolded meet-in-the-middle oracle, and the algebraic descent oracle (m = 2) solved by sat-cdcl, buchberger-f2, f4-f2 and crossbred-f2, so every arm decomposes the same targets over the same base and the record carries its solver block. The strong signed-Frobenius rho is the reference so S stays on the table; this session is a stage diagnostic of yield and solver cost, not a speed claim.",
+  "workloads": {
+    "curves": [
+      {"kind": "koblitz", "a": 0, "n": 13},
+      {"kind": "koblitz", "a": 1, "n": 17},
+      {"kind": "koblitz", "a": 0, "n": 19},
+      {"kind": "koblitz", "a": 0, "n": 23}
+    ],
+    "targets_per_curve": 4,
+    "target_seed": 20261004
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "sub6-subtract", "role": "baseline", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "subtract"}}},
+    {"name": "sub6-mitm", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "mitm:m=2"}}},
+    {"name": "sub6-da-sat", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "descent-algebraic:m=2", "solver": "sat-cdcl"}}},
+    {"name": "sub6-da-buch", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "descent-algebraic:m=2", "solver": "buchberger-f2"}}},
+    {"name": "sub6-da-f4", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "descent-algebraic:m=2", "solver": "f4-f2"}}},
+    {"name": "sub6-da-crossbred", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "descent-algebraic:m=2", "solver": "crossbred-f2"}}},
+    {"name": "sub8-subtract", "role": "baseline", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "subtract"}}},
+    {"name": "sub8-mitm", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "mitm:m=2"}}},
+    {"name": "sub8-da-sat", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "descent-algebraic:m=2", "solver": "sat-cdcl"}}},
+    {"name": "sub8-da-buch", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "descent-algebraic:m=2", "solver": "buchberger-f2"}}},
+    {"name": "sub8-da-f4", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "descent-algebraic:m=2", "solver": "f4-f2"}}},
+    {"name": "sub8-da-crossbred", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "descent-algebraic:m=2", "solver": "crossbred-f2"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 20261004, "isolation_required": "L1", "timeout_seconds": 240}
+}

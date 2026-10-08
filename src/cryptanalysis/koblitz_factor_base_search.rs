@@ -909,7 +909,7 @@ fn score_base(
 /// For an invariant subspace this is the divisibility test `(x+1) ∤ g`,
 /// but the base may be a union or a pruned set, so it is computed
 /// directly on the abscissae and holds for every family.
-fn subspace_is_trace_zero(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> bool {
+pub fn subspace_is_trace_zero(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> bool {
     fb.subspace.iter().all(|x| {
         let mut acc = x.clone();
         let mut cur = x.clone();

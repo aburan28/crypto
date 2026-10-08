@@ -1,0 +1,47 @@
+{
+  "metrics": {
+    "bytes": 752,
+    "path": "metrics.json",
+    "sha256": "3e9982d66c543e6d0a6cbd263bd7e65799695da8c6a1ba55da15fce85a545449"
+  },
+  "process": {
+    "command": [
+      "/usr/bin/env",
+      "RAYON_NUM_THREADS=1",
+      "VECLIB_MAXIMUM_THREADS=1",
+      "OPENBLAS_NUM_THREADS=1",
+      "OMP_NUM_THREADS=1",
+      "MKL_NUM_THREADS=1",
+      "BLIS_NUM_THREADS=1",
+      "NUMEXPR_NUM_THREADS=1",
+      "/usr/bin/make",
+      "-C",
+      "/Volumes/SSD990/wdsat-stage193-55d55b2/src",
+      "clean"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1785856,
+    "pid": 83455,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.005804,
+    "timed_out": false,
+    "total_core_seconds": 0.010204000000000001,
+    "user_seconds": 0.0044,
+    "wall_seconds": 0.020718875,
+    "watchdog_seconds": 60
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 17,
+    "path": "stdout.txt",
+    "sha256": "a3515c316ebd9e7c90a2a42b194022151e5a247df963425832fe5923d04eedbd"
+  }
+}

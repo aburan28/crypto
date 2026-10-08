@@ -1,0 +1,22 @@
+51ba7c3ecd5c9afae48668495e602b23e21add0d
+rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: aarch64-apple-darwin
+release: 1.93.1
+LLVM version: 21.1.8
+cargo 1.93.1 (Homebrew)
+ProductName:		macOS
+ProductVersion:		26.6
+BuildVersion:		25G70
+Darwin Adams-MacBook-Pro.local 25.6.0 Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041 arm64
+Apple M4 Pro
+14
+10
+4
+51539607552
+binary sha256: c562ee1e0533d4a2db306b50c1fd743460b65ae750e2135ba5f4cbf60e0abd38
+build: cargo build --release --bin ecbench with CARGO_TARGET_DIR=/Volumes/SSD990/crypto-worktrees/koblitz-factor-bases-novel-9ba1ad/target, binary copied into the worktree so the host capsule names this worktree's commit
+run flags: --cpus none --allow-busy --settle 0.25 --lock /tmp/crypto-bench-n41n53.lock (the default lock was held by another long-running experiment, pid 56276 ic-native; counts do not depend on it, wall is L0 exploratory)
+load at launch: 19:08  up 1 day, 23:18, 5 users, load averages: 51.94 57.12 62.21

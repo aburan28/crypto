@@ -1,0 +1,7 @@
+Command: /usr/bin/time -p target/release/examples/n37_native_m6_residual /private/tmp/n37-native-residual-b01-raw-20261002.json
+Source commit: 880c0eefe45a68b0dfd9ead8fb15930e484096ae
+Host: macOS 26.6 arm64; rustc 1.93.1 (01f6ddf75 2026-02-11)
+Producer stdout: rank=42/42 direct=939/1024 shifted=85 verified=1024 attempts=1115 max_attempts=3 output=/private/tmp/n37-native-residual-b01-raw-20261002.json bytes=1798008
+real 2.37
+user 1.71
+sys 0.01

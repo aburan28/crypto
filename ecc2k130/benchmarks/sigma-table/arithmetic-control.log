@@ -1,0 +1,21 @@
+src/testpackedcuda.cu(8): warning #177-D: variable "eccPacked131::SIGMA_SMEM_BYTES_TEST" was declared but never referenced
+  namespace eccPacked131 { static const size_t SIGMA_SMEM_BYTES_TEST = size_t(SIGMA_TABLE_BYTES) + 256; }
+                                               ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+packed arithmetic direct reduction: 1
+packed arithmetic sigma table: 0
+packed arithmetic generated product: 1
+packed arithmetic native carryless multiply: 1
+packed arithmetic top clmad: 0
+packed arithmetic native carryless square: 0
+packed arithmetic three-limb Karatsuba: 0
+packed arithmetic weighted prefix: 2
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+Frobenius table not compiled in; lookup checks skipped

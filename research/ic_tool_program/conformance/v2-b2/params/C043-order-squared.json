@@ -1,0 +1,31 @@
+{
+ "schema_version": 2,
+ "name": "C043: a prime curve whose subgroup order's square divides #E",
+ "field": {
+  "kind": "prime",
+  "p": "16777259"
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": "8493140",
+  "b": "16271299"
+ },
+ "subgroup": {
+  "order": "3",
+  "cofactor": "5592435",
+  "generator": {
+   "x": "9109526",
+   "y": "7688580"
+  }
+ },
+ "target": {
+  "known_log": "1"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

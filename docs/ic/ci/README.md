@@ -216,7 +216,7 @@ four-rung `n = 61` ladder archived below, not on the v5 aimed rungs:
 
 | rung | log₂ r | runs | rho/IC per run | 95 % CI | runtime claim |
 |:--|--:|--:|:--|:--|:--|
-| `k0n31` | 20.5 | 5 | 0.036, 0.036, 0.037, 0.037, 0.038 | [0.036, 0.037] | no (IC slower) |
+| `icv1-f2m31-tm90707-c95f16f5` | 20.5 | 5 | 0.036, 0.036, 0.037, 0.037, 0.038 | [0.036, 0.037] | no (IC slower) |
 | `k0n41-subgroup` | 39.0 | 5 | 2.228, 2.234, 2.256, 2.206, 2.251 | **[2.210, 2.260]** | faster than rho, end to end |
 | `k0n53-subgroup` | 44.3 | 5 | 1.996, 2.064, 2.034, 2.004, 1.957 | **[1.961, 2.062]** | faster than rho, end to end |
 | `k0n61-subgroup-wide` | 47.2 | 3 | 1.774, 1.696, 1.784 | **[1.632, 1.871]** | faster than rho, end to end |
@@ -250,7 +250,7 @@ Frozen: [`instructions/ladder-20260920-n31-41-53-61.json`](instructions/ladder-2
 
 | rung | log₂ r | `S`, index calculus | `S`, rho | rho / IC in Ir | rho / IC in wall (runner, 95 % CI) | IC Ir in the pair table / in the scan |
 |:--|--:|--:|--:|--:|:--|--:|
-| `k0n31` | 20.5 | 167,091 | 5,912 | 0.035 | [0.036, 0.037] | 38 % / 2 % |
+| `icv1-f2m31-tm90707-c95f16f5` | 20.5 | 167,091 | 5,912 | 0.035 | [0.036, 0.037] | 38 % / 2 % |
 | `k0n41-subgroup` | 39.0 | 1,155 | 1,542 | **1.335** | [2.210, 2.260] | 57 % / 41 % |
 | `k0n53-subgroup` | 44.3 | 2,292 | 2,761 | **1.204** | [1.961, 2.062] | 47 % / 52 % |
 | `k0n61-subgroup-wide` | 47.2 | 2,723 | 2,724 | **1.001** | [1.632, 1.871] | 86 % / 11 % |

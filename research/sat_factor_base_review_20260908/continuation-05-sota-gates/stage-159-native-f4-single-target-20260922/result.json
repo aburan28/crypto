@@ -1,0 +1,467 @@
+{
+  "attempt_history": {
+    "attempt_01": {
+      "backend_terminal_report": null,
+      "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "claim_boundary": "Charged class-blind single-target native-F4 attempt; watchdog timeout is censored, not UNSAT, and is not licensed Magma F4 or an end-to-end index-calculus result.",
+      "classification": "inconclusive",
+      "clean_build_resources": {
+        "aggregate_process_tree_peak_rss_bytes": null,
+        "largest_child_peak_rss_bytes": 1684684800,
+        "single_core_elapsed_seconds": null,
+        "summed_process_wall_seconds": 172.200837335,
+        "total_core_seconds": 167.481573
+      },
+      "conflicts": null,
+      "full_cost_gate_passed": false,
+      "internal_budget_seconds": 110,
+      "known_witnesses_present": false,
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_f4_complete": false,
+      "outer_driver_resource_note": "the runner failed after preserving child receipts, before it could write its outer resource summary",
+      "outer_driver_resources": null,
+      "outer_watchdog_seconds": 120,
+      "process_resources": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 5251366912,
+        "single_core_seconds": 119.855702,
+        "system_seconds": 0.9215089999999999,
+        "total_core_seconds": 119.855702,
+        "user_seconds": 118.934193,
+        "wall_seconds": 120.10503841599711
+      },
+      "schema": "koblitz_phase_b_native_f4_failed_attempt.v1",
+      "solver": "f4-f2",
+      "source_artifacts_unchanged": true,
+      "source_revision": {
+        "commit": "f438115ddf274f72bca345c02f7c5b006dd2d41a",
+        "dirty": false,
+        "porcelain": []
+      },
+      "source_system_id": "x-4b8824db5204cff67a887d4166992386cf86804e7547c89717f385097a92d886",
+      "status": "watchdog_timeout_inconclusive",
+      "target": {
+        "x": "342002423881678665",
+        "y": "482559600513111561"
+      },
+      "terminal": {
+        "returncode": -15,
+        "stderr_bytes": 0,
+        "stdout_bytes": 0,
+        "timed_out": true
+      },
+      "truth_labels_present": false
+    },
+    "attempt_02": {
+      "backend_terminal_report": null,
+      "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "claim_boundary": "Charged class-blind single-target native-F4 attempt after outer-timeout parsing fix; watchdog timeout is censored, not UNSAT, and is not licensed Magma F4 or an end-to-end index-calculus result.",
+      "classification": "inconclusive",
+      "clean_build_resources": {
+        "aggregate_process_tree_peak_rss_bytes": null,
+        "largest_child_peak_rss_bytes": 1685274624,
+        "single_core_elapsed_seconds": null,
+        "summed_process_wall_seconds": 161.865528501006,
+        "total_core_seconds": 157.76164
+      },
+      "conflicts": null,
+      "full_cost_gate_passed": false,
+      "internal_budget_seconds": 30,
+      "known_witnesses_present": false,
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_f4_complete": false,
+      "outer_driver_resource_note": "the runner crashed during aggregation before writing its outer resource summary",
+      "outer_driver_resources": null,
+      "outer_watchdog_seconds": 120,
+      "process_resources": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 6310576128,
+        "single_core_seconds": 119.79722699999999,
+        "system_seconds": 0.869046,
+        "total_core_seconds": 119.79722699999999,
+        "user_seconds": 118.928181,
+        "wall_seconds": 120.08162662500035
+      },
+      "runner_terminal": "post-timeout aggregation bug: None backend report was dereferenced after the valid timeout classification",
+      "schema": "koblitz_phase_b_native_f4_failed_attempt.v1",
+      "solver": "f4-f2",
+      "source_artifacts_unchanged": true,
+      "source_revision": {
+        "commit": "a0f6152c179d061e781f22232c06bf4055eb1f01",
+        "dirty": false,
+        "porcelain": []
+      },
+      "source_system_id": "x-4b8824db5204cff67a887d4166992386cf86804e7547c89717f385097a92d886",
+      "status": "watchdog_timeout_inconclusive",
+      "target": {
+        "x": "342002423881678665",
+        "y": "482559600513111561"
+      },
+      "terminal": {
+        "returncode": -15,
+        "stderr_bytes": 0,
+        "stdout_bytes": 0,
+        "timed_out": true
+      },
+      "truth_labels_present": false
+    },
+    "attempt_03_run_inventory_sha256": "836fb6a5f4f318f5b8f464fe61a7a396367049b38fcc2fb742f22855a4cae7b9",
+    "attempt_04_run_inventory_sha256": "9decb8774ee096723d50c401d5820d5ce2af1db341ff0231249f6b1f1b96f2da",
+    "attempt_05_run_inventory_sha256": "6fffd8c2499572ce138fb31895fa76714e128deec6e2c91cefdd8b19862e81f4",
+    "attempt_06_run_inventory_sha256": "e8e192c60f653da3acaa5a2e0aa9a7034362e84ac915c1632f1f4618bd64e91b"
+  },
+  "campaign_accounting": {
+    "complete_campaign_cost": null,
+    "distinct_successful_clean_builds": 5,
+    "failed_build_and_dependency_fetch_records": 15,
+    "measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 31,
+      "summed_wall_seconds": 1596.064122959007,
+      "total_core_seconds": 1565.839519
+    },
+    "outer_driver_missing_for_attempts": [
+      1,
+      2
+    ],
+    "reason_complete_is_null": "some development commands predated an outer meter; measured totals are a lower bound",
+    "unmetered_development_commands_present": true,
+    "unmetered_scope": [
+      "incremental cargo check and focused cargo tests",
+      "Python unit tests and evidence composition",
+      "GitHub artifact downloads and local file copies"
+    ]
+  },
+  "claim_boundary": "Strong internal engineering and one finite public toy-PDP native-F4 result. It is not licensed Magma F4, a full 160-input native-F4 panel, an end-to-end index-calculus speedup, or a Koblitz index-calculus SOTA.",
+  "comparisons": {
+    "rejected_trace_over_selected": {
+      "core_ratio": 1.1805435393181962,
+      "rss_ratio": 0.691422984623589,
+      "wall_ratio": 1.1815676850720878,
+      "word_xor_ratio": 1.5878897206030642
+    },
+    "selected_cold_build_plus_run": {
+      "peak_rss_bytes": 1684865024,
+      "total_core_seconds": 263.868835,
+      "wall_seconds": 268.5893069569934
+    },
+    "selected_over_full_fixed_x1": {
+      "core_ratio": 0.48745869830223443,
+      "rss_ratio": 0.9692954494546583,
+      "same_verified_witness_x": true,
+      "wall_ratio": 0.48700991229079776,
+      "word_xor_ratio": 0.4789140048196694
+    },
+    "selected_over_same_host_direct_mitm": {
+      "core_ratio": 33.39868605111732,
+      "rss_ratio": 20.105432451751252,
+      "wall_ratio": 33.39690331348631
+    }
+  },
+  "control_provenance": {
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "schema": "koblitz_stage159_same_target_control_provenance.v1",
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "stage26": {
+      "artifact": {
+        "digest": "sha256:0b7e8840b4da0e574032580e9ad47cafebb8b1a7dab2fef5184c1abbd652ed19",
+        "expires_at": "2026-12-10T18:12:57Z",
+        "id": 10282543184,
+        "name": "koblitz-stage26-n59-l9-m3-standard-a1-f0-34632018379",
+        "size_in_bytes": 6788558
+      },
+      "artifact_inventory_sha256": "120d0b75815320b5c1f0da3c07fe84a824b452ddea7a1c8be46d92ef1552cbeb",
+      "task_sha256": "0ffcbbab71447644bd6cae8ba3513926b5badbebb43155b52841b83f3d6f5fb8",
+      "verification": {
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "inventory_sha256": "a39e487df01326ccbfe485a5b9f1f9d4827952e77ccf4f9ddc453e60268f02b3",
+        "schema": "koblitz_stage26_affinity_cell_verification.v1",
+        "status": "verified"
+      }
+    },
+    "stage27": {
+      "artifact": {
+        "digest": "sha256:1ba9dc9c741ae1731471ed37dd072808786ed6e81e91bde7287de71722f36aa1",
+        "expires_at": "2026-12-10T18:33:21Z",
+        "id": 10277178866,
+        "name": "koblitz-stage27-n59-l9-m3-standard-a1-f0-34633920325",
+        "size_in_bytes": 6003458
+      },
+      "artifact_inventory_sha256": "56a21b9fc4a6442affbada01ab054c8989e1e5036db810b39a9dde909edc478e",
+      "task_sha256": "26457d2e31139b35d14d0b70986793f5c6c7804386e1690ba547dae43e0ec91a",
+      "verification": {
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "inventory_sha256": "d5ec240475d23e68bbd7d8994a202e5a347a8b1f03cb7fc26284446d387e2d83",
+        "schema": "koblitz_stage27_direct_mitm_verification.v1",
+        "status": "verified"
+      }
+    }
+  },
+  "date": "2026-09-22",
+  "factor_base": {
+    "definition": "span(1,z,...,z^8), with exact rational-lift membership checks",
+    "discrete_log_labels_used": false,
+    "factor_base_logs_known_by_construction": false,
+    "target_subgroup_enumerated": false
+  },
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_native_f4_one_n59_target_added_licensed_magma_and_full_native_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "instance": {
+    "basis": "standard polynomial subspace",
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "curve": "K_1 over GF(2^59)",
+    "ell": 9,
+    "m": 3,
+    "n": 59,
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "target": {
+      "x": "342002423881678665",
+      "y": "482559600513111561"
+    },
+    "target_class_opened_after_run_seal": "decomposable"
+  },
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "same_target_table": [
+    {
+      "backend": "native-f4-selected",
+      "classification": "true_positive",
+      "conflicts": null,
+      "formulation": "fixed-X1 direct S4; non-rational X1 masks skipped",
+      "host": "local arm64",
+      "operations": {
+        "f4_calls": 65,
+        "word_xors_elimination_only": 87513949370
+      },
+      "peak_rss_bytes": 921681920,
+      "status": "sat",
+      "total_core_seconds": 99.920352,
+      "wall_seconds": 100.17938004100142
+    },
+    {
+      "backend": "native-xor",
+      "classification": "inconclusive",
+      "conflicts": 100000,
+      "formulation": "frozen S4 correspondence system",
+      "host": "local arm64",
+      "operations": null,
+      "peak_rss_bytes": 168361984,
+      "status": "unknown_inconclusive",
+      "total_core_seconds": 8.890455,
+      "wall_seconds": 8.906471791000513
+    },
+    {
+      "backend": "direct-mitm",
+      "classification": "true_positive",
+      "conflicts": null,
+      "formulation": "exact factor-point pair table",
+      "host": "local arm64",
+      "operations": {
+        "group_additions": 117015,
+        "pair_entries": 116635
+      },
+      "peak_rss_bytes": 45842432,
+      "status": "sat",
+      "total_core_seconds": 2.991745,
+      "wall_seconds": 2.999660749999748
+    },
+    {
+      "backend": "wdsat",
+      "classification": "inconclusive",
+      "conflicts": null,
+      "formulation": "frozen S4 ANF",
+      "host": "GitHub Linux x86_64",
+      "operations": null,
+      "peak_rss_bytes": 19632128,
+      "status": "timeout_inconclusive",
+      "total_core_seconds": 88.060134,
+      "wall_seconds": 120.00305557999997
+    },
+    {
+      "backend": "cryptominisat",
+      "classification": "inconclusive",
+      "conflicts": null,
+      "formulation": "frozen S4 CNF plus XOR",
+      "host": "GitHub Linux x86_64",
+      "operations": null,
+      "peak_rss_bytes": 69353472,
+      "status": "timeout_inconclusive",
+      "total_core_seconds": 87.983526,
+      "wall_seconds": 120.005938571
+    },
+    {
+      "backend": "magma-f4",
+      "classification": "not_run",
+      "conflicts": null,
+      "formulation": "frozen direct Boolean F4 source",
+      "host": null,
+      "operations": null,
+      "peak_rss_bytes": null,
+      "status": "not_run_licensed_tool_missing",
+      "total_core_seconds": null,
+      "wall_seconds": null
+    },
+    {
+      "backend": "ggmp",
+      "classification": "not_applicable",
+      "conflicts": null,
+      "formulation": "GGMP invariant-kernel base exists only in the frozen n31 cell",
+      "host": null,
+      "operations": null,
+      "peak_rss_bytes": null,
+      "status": "not_same_instance",
+      "total_core_seconds": null,
+      "wall_seconds": null
+    }
+  ],
+  "schema": "koblitz_stage159_native_f4_single_target.v1",
+  "selected_native_f4": {
+    "classification": "true_positive",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 921681920,
+      "single_core_seconds": 99.920352,
+      "system_seconds": 0.34712299999999996,
+      "total_core_seconds": 99.920352,
+      "user_seconds": 99.573229,
+      "wall_seconds": 100.17938004100142
+    },
+    "report": {
+      "algebraic_roots": 2,
+      "backend": "native-f4",
+      "budget_seconds": 300,
+      "conflicts": null,
+      "cost": {
+        "degree_reached": 6,
+        "extra": {
+          "basis_len": 17,
+          "build_ns": 31204715165,
+          "divisor_tests": 1151227822,
+          "eliminate_ns": 26399355875,
+          "extraction_tests": 119560,
+          "f4_calls": 65,
+          "field_pairs_reduced": 186661,
+          "matrix_cols_max": 29308,
+          "matrix_rows_max": 39756,
+          "matrix_rows_sum": 1330928,
+          "new_elements": 265523,
+          "oversize": 0,
+          "pairs_chain_skipped": 229620889,
+          "pairs_left": 0,
+          "pairs_product_skipped": 70978814,
+          "pairs_reduced": 412194,
+          "reducer_rows": 501782,
+          "steps": 325,
+          "symbolic_bytes_estimate_max": 495286352,
+          "symbolic_cap_hit": 0
+        },
+        "op_unit": "word XORs (elimination only)",
+        "ops": 87513949370,
+        "peak_bytes": 145665984,
+        "solving_degree": 5,
+        "timed_out": false,
+        "wall_ns": 73711779630
+      },
+      "exhaustive": true,
+      "factor_base_contract": {
+        "discrete_log_labels_used": false,
+        "target_subgroup_enumerated": false
+      },
+      "fixed_x1_nonrational_skipped": 73,
+      "fixed_x1_systems_completed": 65,
+      "fixed_x1_systems_constructed": 65,
+      "fixed_x1_values": 512,
+      "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+      "regenerated_source_exact": true,
+      "same_instance_fields": [
+        "n",
+        "ell",
+        "m",
+        "curve",
+        "algebraic_factor_base",
+        "affine_target"
+      ],
+      "schema": "koblitz_pdp_isolated_backend.v1",
+      "single_thread_requested": true,
+      "solver": "f4-f2",
+      "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bit-packed elimination, reduced basis",
+      "solver_equations_blake3": "d6969c5f89b5be6a7eacbdac45799fc734a273c9034949a482723b4422504ae7",
+      "solver_equations_total": 3835,
+      "solver_max_degree": 4,
+      "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+      "solver_schedule": "enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
+      "solver_terms_max_per_system": 61922,
+      "solver_terms_total": 3864601,
+      "solver_variables": 18,
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_model_valid": true,
+      "source_representation": "symmetrised_s4",
+      "source_variables": 78,
+      "source_witness_valid": true,
+      "status": "sat",
+      "timing_ns": {
+        "factor_base_x1_membership": 8845208,
+        "fixed_x1_s4_construction": 26323585414,
+        "native_f4_whole": 100122533958,
+        "source_verification": 39671959
+      },
+      "witness_points": [
+        {
+          "x": "137",
+          "y": "164288105115948905"
+        },
+        {
+          "x": "286",
+          "y": "349643848945327627"
+        },
+        {
+          "x": "159",
+          "y": "15349584312879311"
+        }
+      ]
+    },
+    "run_inventory_sha256": "6fffd8c2499572ce138fb31895fa76714e128deec6e2c91cefdd8b19862e81f4",
+    "source_model_valid": true,
+    "source_revision": {
+      "commit": "60d453ba32b7204c23a486d3babd8c06681363ce",
+      "dirty": false,
+      "porcelain": []
+    },
+    "source_witness_valid": true,
+    "status": "sat"
+  },
+  "status": "complete_single_target_native_f4_true_positive"
+}

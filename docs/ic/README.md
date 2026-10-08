@@ -7,6 +7,8 @@ accepts explicit K_0 curve parameters and points through degree 131, with durabl
 pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
 The older inspection command uses imported points for mathematical validation.
 
+**Technique inventory:** [ECDLP_RESEARCH_TECHNIQUES.md](ECDLP_RESEARCH_TECHNIQUES.md) maps factor-base, relation, filtering, sparse-linear-algebra, and individual-logarithm research techniques to their native modules and labels each as integrated, experimental, component, or backlog.
+
 **Agent scoreboard:** per-stage records and next targets to beat live in
 [`BOUNDARY_TARGETS.md`](BOUNDARY_TARGETS.md) and
 [`boundary_targets.json`](boundary_targets.json) (binary, Koblitz, prime;
@@ -201,7 +203,7 @@ Expected trials is half the collection cost. A trial is paid whether or not
 it succeeds, so collection spends `trials × (cost per trial)`, and the
 second factor is the one that varies: coverage saturates at 100% as the
 subspace grows while the Weil-restricted summation system keeps `m·ℓ`
-Boolean unknowns. At `K_1/2^15` the two orders disagree by `22.41×` over
+Boolean unknowns. At `icv1-f2m15-t275-b7f03703` the two orders disagree by `22.41×` over
 twelve verified logarithms — see
 [`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).
 
@@ -292,16 +294,17 @@ default): its columns are canonical cofactor projections `R_o ∈ ⟨G⟩`, so
 each column logarithm is a genuine, self-certifying discrete log.
 
 The precomputation reaches whatever the factor base and summand count
-support. On `K_0/2^31` over a search-selected dimension-11 base
+support. On `icv1-f2m31-tm90707-c95f16f5` over a search-selected dimension-11 base
 (`--summands 3`, 35 columns) it completes in about 15 s; each subsequent
 target then needs one or two relations. The `logs` trial budget
 (`--max-trials`, default 200000) bounds the search for a full-rank
 relation set; a base whose coverage cannot determine every column
 reports `incomplete` rather than emitting an unverified database.
 
-### Linear algebra: relation filtering and block Wiedemann
+### Linear algebra: filtering, block Wiedemann, and block Lanczos
 
     ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra sparse --block-size 4
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31-lanczos.json --linear-algebra sparse --sparse-solver block-lanczos --block-size 4 --spmv sharded --spmv-shards 8
     ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra dense
 
 Each relation has at most `m` nonzero entries, so the relation matrix is
@@ -317,12 +320,20 @@ sparse in exactly the way a number-field-sieve matrix is. By default
    recorded, so the eliminated logarithms are reconstructed exactly from
    the core solution (back-substitution, then propagation through the
    original rows, then a small dense residual if anything is left).
-2. **Block Wiedemann** — the reduced core is made square by folding its
+2. **Black-box core solve** — block Wiedemann (the default) makes the
+   reduced core square by folding its
    excess rows into random earlier rows, homogenised to `M (x, 1)ᵀ = 0`,
    and a kernel vector is read off the Krylov sequence `X Mⁱ Y` of
    `block_size × block_size` blocks through a matrix Berlekamp–Massey
    step (a shifted minimal approximant basis). Only sparse
-   matrix-times-block products touch the matrix, in parallel over rows.
+   matrix-times-block products touch the matrix. `--sparse-solver
+   block-lanczos` instead runs finite-field block Lanczos on the symmetric
+   congruence `A^T D A`; it retries on breakdown and still verifies `A x = b`.
+   Products select `auto`, `serial`, `rayon`, deterministic `sharded`, or
+   `worker` execution with `--spmv`. A worker speaks the CPU-verified `SPMV1`
+   contract in `gpu/spmv`; set `IC_SPMV_WORKER` to the host, CUDA, or cluster
+   launcher executable. Worker failure emits a warning and falls back to the
+   serial CPU product.
 
 The sparse path never attempts a solve before every column occurs in
 some row, and the solution is checked against every relation before
@@ -331,7 +342,8 @@ keeps the reference behaviour: full big-integer elimination after every
 new relation. Both paths certify the same database (the `ic` tests
 compare them); the report's `linear_algebra` object records the mode,
 the attempts, the time, and for the sparse path the filtering counts
-and the Wiedemann run (`core_dimension`, `sequence_length`, products).
+and the configured solver/SpMV backend plus the selected Wiedemann or Lanczos
+run (`core_dimension`, iterations or sequence length, and products).
 
 ## Running the pipeline as a resumable workflow
 
@@ -427,10 +439,13 @@ relations loaded, rejected and deduplicated and which units were used.
 
 A parameter file (schema_version 1):
 
-    {"schema_version":1,"name":"k0n31","curve":{"degree":31,"curve_a":0},
+    {"schema_version":1,"name":"icv1-f2m31-tm90707-c95f16f5","curve":{"degree":31,"curve_a":0},
      "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
      "linear_algebra":{"mode":"sparse",
-                       "sparse":{"wiedemann":{"block_m":4,"block_n":4},
+                       "sparse":{"solver":"block-wiedemann",
+                                 "spmv":{"backend":"auto","shards":0},
+                                 "wiedemann":{"block_m":4,"block_n":4},
+                                 "lanczos":{"block_size":4,"margin":8},
                                  "filter":{"target_excess":32,"merge_max_weight":8}}},
      "collection":{"unit_trials":4096,"units":4,"max_units":64},
      "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
@@ -450,8 +465,8 @@ without child validation). Each target is a synthetic known-answer
 instance: `known_log` names the scalar, `random_seed` draws one
 reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
 or `sat`. `linear_algebra` is optional: `mode` is `sparse` (default;
-filtering + block Wiedemann, with every knob of the sparse solver under
-`sparse`) or `dense`. `collection` sizes the work units (above). The
+filtering plus block Wiedemann or block Lanczos, with every solver and SpMV
+knob under `sparse`) or `dense`. `collection` sizes the work units (above). The
 report lists every stage with whether it ran or was reused — the collect
 stage with its units, the logs stage with its verification counts and
 linear-algebra statistics — and every solution with its expected and
@@ -610,7 +625,7 @@ fitted entirely inside DRAM, and the law's whole purpose is to push the
 table out of it.
 
 `docs/ic/params/k0n61-subgroup-wide.json` is the largest rung this family
-offers: `K_0/F_{2^61}`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
+offers: `icv1-f2m61-t158598901-ab42b6c5`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
 a 36112-point compact base. It solves 32 of 32 with a 53.1 ms descent
 against ρ's 3.248 s — charged 61.2, amortised 1.29, and all three
 verdicts true at 32 targets.
@@ -960,6 +975,12 @@ configurations from a JSON file and prints one table.
         --factor-base binary-subspace:dimension=6 \
         --oracle descent-algebraic:m=2 --solver buchberger-f2
     ./target/release/ic bench --sweep docs/ic/sweeps/solver-engines.json
+
+A plug-in is written `name:key=value,key=value`. The `,` ends a
+parameter, so a parameter that takes several values separates them with
+`;`: `--factor-base 'koblitz-orbit:divisor=1;2'` selects factors 1 and 2
+(quote it, since a bare `;` ends a shell command). `divisor=1,2` is
+refused with an error that names the `;`.
 
 [`FRAMEWORK.md`](FRAMEWORK.md) is the manual: the unit, the report
 columns, the stage contracts, a worked example of adding a solver (the

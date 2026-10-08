@@ -11,7 +11,7 @@
 Declared 2026-09-30, before anything below ran. The only computations
 made first are `predict.py`, which carries §20's frozen model to the six
 sizes below (`prediction.json`), and a pin check. The pin check ran the
-round's binary on §20's `K_0/GF(2^41)` `M1` file, and its counts and
+round's binary on §20's `icv1-f2m41-tm2308219-7f48b14a` `M1` file, and its counts and
 recovered logarithms equal §22's.
 
 ## Question
@@ -44,12 +44,12 @@ Every Koblitz curve with `n ≤ 63` and `r ≥ 2^36`:
 
 | curve | `log₂ r` | `r` | in §20 | proper intermediate subfields over `GF(2)` |
 |:--|--:|--:|:--|:--|
-| `K_1/GF(2^47)` | 36.6 | 106,781,081,677 | yes | none |
-| `K_0/GF(2^57)` | 38.0 | 275,295,876,199 | **new** | `GF(2^3)`, `GF(2^19)` |
-| `K_0/GF(2^41)` | 39.0 | 549,756,390,943 | yes | none |
-| `K_0/GF(2^53)` | 44.3 | 21,044,858,204,113 | yes | none |
-| `K_1/GF(2^59)` | 44.5 | 25,179,555,920,633 | **new** | none |
-| `K_0/GF(2^61)` | 47.2 | 162,888,033,982,417 | yes | none |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 106,781,081,677 | yes | none |
+| `icv1-f2m57-tm747311035-c1f545af` | 38.0 | 275,295,876,199 | **new** | `GF(2^3)`, `GF(2^19)` |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 549,756,390,943 | yes | none |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 21,044,858,204,113 | yes | none |
+| `icv1-f2m59-tm943548413-98844ecc` | 44.5 | 25,179,555,920,633 | **new** | none |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 162,888,033,982,417 | yes | none |
 
 - **Where `r` comes from.** It is the subgroup order that
   `KoblitzCurve::new(a, n)` builds, read by
@@ -137,12 +137,12 @@ comes from the eight per-set ratios (`t`, 7 degrees of freedom).
 
 | curve | `log₂ r` | model ratio | law ratio | model's `(c, m)` |
 |:--|--:|--:|--:|:--|
-| `K_1/GF(2^47)` | 36.6 | 3.56 | 4.53 | 55, 2 |
-| `K_0/GF(2^57)` | 38.0 | 3.70 | 4.82 | 61, 2 |
-| `K_0/GF(2^41)` | 39.0 | 4.51 | 6.38 | 104, 2 |
-| `K_0/GF(2^53)` | 44.3 | 6.76 | 10.3 | 263, 2 |
-| `K_1/GF(2^59)` | 44.5 | 6.61 | 10.1 | 251, 2 |
-| `K_0/GF(2^61)` | 47.2 | 8.68 | 13.5 | 448, 2 |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 3.56 | 4.53 | 55, 2 |
+| `icv1-f2m57-tm747311035-c1f545af` | 38.0 | 3.70 | 4.82 | 61, 2 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 4.51 | 6.38 | 104, 2 |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 6.76 | 10.3 | 263, 2 |
+| `icv1-f2m59-tm943548413-98844ecc` | 44.5 | 6.61 | 10.1 | 251, 2 |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 8.68 | 13.5 | 448, 2 |
 
 - **The model's local exponent** (`ratio·√n` on `r`) is 0.139 over the
   six sizes, and 0.149 over the four largest.

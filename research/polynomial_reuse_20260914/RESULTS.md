@@ -139,7 +139,7 @@ The **parameterized** route measures 22.6× and 776× at n = 3 and 5 with ell = 
 ### Diagnostic at n = 13, outside the frozen contract
 
 The counters above say what could change the verdict: more lookups per process. n = 13 is the one larger degree the frozen invocation reaches:
-- n = 11 stops with "K_0 / GF(2^11) has no usable prime-order subgroup in the existing constructor";
+- n = 11 stops with "icv1-f2m11-tm67-f393fc83 has no usable prime-order subgroup in the existing constructor";
 - n = 15 uses all 500 trials without a relation.
 
 [`diagnostic_n13.py`](diagnostic_n13.py) follows `run.py`'s conventions: `IC_*` stripped, `RAYON_NUM_THREADS=1`, 30 s and 2 GiB, raw output kept. It compares only `off` and `preprocess-local`, over 4 seeds × 2 solvers × **5 repetitions**, alternating the mode order between repetitions. The load average was 0.05 at the start and 0.20 at the end. Every one of the 80 processes completed and verified, and `preprocess-local` is identical to `off` in 40 of 40 pairs.

@@ -29,12 +29,12 @@ the same process):
 
 | `M1` | trials | descent | walk start | of which 63 additions | relation assembly | recovery check |
 |:--|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 8.2 | 1,481 | 635 | 549 | 391 | 118 |
-| `K_1/GF(2^23)` | 105.5 | 1,984 | 752 | 658 | 429 | 146 |
-| `K_1/GF(2^45)` | 160.8 | 2,449 | 1,162 | 1,045 | 345 | 155 |
-| `K_0/GF(2^37)` | 1,619 | 4,408 | 1,060 | 918 | 387 | 177 |
-| `K_1/GF(2^43)` | 5,115 | 9,530 | 1,120 | 970 | 371 | 190 |
-| `K_0/GF(2^41)` | 24,134 | 38,789 | 1,156 | 986 | 488 | 210 |
+| `icv1-f2m19-tm797-9c54981b` | 8.2 | 1,481 | 635 | 549 | 391 | 118 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 105.5 | 1,984 | 752 | 658 | 429 | 146 |
+| `icv1-f2m45-tm6236725-40939294` | 160.8 | 2,449 | 1,162 | 1,045 | 345 | 155 |
+| `icv1-f2m37-tm534059-32aad96b` | 1,619 | 4,408 | 1,060 | 918 | 387 | 177 |
+| `icv1-f2m43-tm998717-e2e742b0` | 5,115 | 9,530 | 1,120 | 970 | 371 | 190 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 24,134 | 38,789 | 1,156 | 986 | 488 | 210 |
 
 - **The walk start** is three scalar multiplications (21–29 units each)
   and 63 additions made one at a time, each paying its own inversion. The
@@ -153,8 +153,8 @@ converts both arms at one unit.
 4. **A whole-pipeline speedup (primary) whose 95% interval excludes 1**
    at the four sizes where the probe put the fixed part at 25% or more of
    the descent. The fixed part is the walk start, the relation assembly
-   and the recovery check. The four sizes are `K_1/GF(2^19)`,
-   `K_1/GF(2^23)`, `K_1/GF(2^45)` and `K_0/GF(2^37)`.
+   and the recovery check. The four sizes are `icv1-f2m19-tm797-9c54981b`,
+   `icv1-f2m23-tm5197-1f85e9e1`, `icv1-f2m45-tm6236725-40939294` and `icv1-f2m37-tm534059-32aad96b`.
 5. **No regression.** No size's primary interval lies wholly below 1, at
    one thread or at four.
 

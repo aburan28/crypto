@@ -1505,7 +1505,7 @@ impl<'a, G: CountedGroup> EndomorphismClasses<'a, G> {
     }
 
     /// Every `(Q, μ)` with `Q = [μ]P` in the orbit of `P`.
-    fn orbit(&self, g: &G, p: G::Elt) -> Result<Vec<(G::Elt, u64)>, String> {
+    pub fn orbit(&self, g: &G, p: G::Elt) -> Result<Vec<(G::Elt, u64)>, String> {
         let mut out: Vec<(G::Elt, u64)> = vec![(p, 1)];
         let mut i = 0usize;
         while i < out.len() {

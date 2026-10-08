@@ -50,12 +50,12 @@ The pin reproduced §22's counts.
 
 | curve | log₂ r | online speedup [95%] | canonical step | cold ratio | S, set-up | break-even | over BL model |
 |:--|--:|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^47)` | 36.6 | 9.77× [7.83, 12.5] | 4.34× | 4.95× | 4.20 | 7 | 2.4× |
-| `K_0/GF(2^57)` | 38.0 | 13.5× [10.7, 17.3] | 5.97× | 1.98× | 8.08 | 15 | 3.3× |
-| `K_0/GF(2^41)` | 39.0 | 9.38× [7.43, 12.1] | 4.57× | 8.04× | 5.51 | 10 | 2.5× |
-| `K_0/GF(2^53)` | 44.3 | 17.5× [13.6, 22.6] | 9.37× | 14.7× | 7.37 | 16 | 2.0× |
-| `K_1/GF(2^59)` | 44.5 | 16.9× [13.0, 22.1] | 8.90× | 15.7× | 9.00 | 18 | 2.8× |
-| `K_0/GF(2^61)` | 47.2 | 8.84× [6.76, 11.9] | 4.68× | 31.6× | 15.10 | 37 | 8.0× |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 9.77× [7.83, 12.5] | 4.34× | 4.95× | 4.20 | 7 | 2.4× |
+| `icv1-f2m57-tm747311035-c1f545af` | 38.0 | 13.5× [10.7, 17.3] | 5.97× | 1.98× | 8.08 | 15 | 3.3× |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 9.38× [7.43, 12.1] | 4.57× | 8.04× | 5.51 | 10 | 2.5× |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 17.5× [13.6, 22.6] | 9.37× | 14.7× | 7.37 | 16 | 2.0× |
+| `icv1-f2m59-tm943548413-98844ecc` | 44.5 | 16.9× [13.0, 22.1] | 8.90× | 15.7× | 9.00 | 18 | 2.8× |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 8.84× [6.76, 11.9] | 4.68× | 31.6× | 15.10 | 37 | 8.0× |
 
 Online, the index calculus is faster than rho on the same point at all six
 sizes. Cold, with its reusable set-up, rho is faster at all six, so by
@@ -67,6 +67,13 @@ it the six sizes read 6.3–32.5×. The ledger §23 has the readings, the
 graded targets and the class (accounting: no algorithm changed).
 
 ## Reproducing
+
+The Python scripts here are the record of what ran. Since N3
+(`research/ic_tool_program/README.md`) the native `icprog rule` replaces
+them: `icprog rule claims` and `icprog rule analyse` reproduce this
+directory's `claims/`, `manifests/` and `analysis.json` from `runs/`, byte
+for byte, apart from each replay's checker name (`tests/icprog.rs`). The
+commands below are those that ran.
 
     cargo build --release --bin ic      # at the declaration commit; kept outside the tree
     cd research/ic_single_target_20260930

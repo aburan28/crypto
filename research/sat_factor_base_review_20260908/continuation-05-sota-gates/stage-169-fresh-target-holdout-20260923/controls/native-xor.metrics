@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "-i",
+    "LANG=C",
+    "LC_ALL=C",
+    "MKL_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "RAYON_NUM_THREADS=1",
+    "TMPDIR=/tmp",
+    "TZ=UTC",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "/Volumes/SSD990/koblitz-native-f4-build18-509e43c7/bin/koblitz_pdp_backend",
+    "native-sat",
+    "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance/manifest.json",
+    "100000"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 8.986402957991231,
+    "user_seconds": 8.928584,
+    "system_seconds": 0.035019,
+    "total_core_seconds": 8.963603,
+    "single_core_seconds": 8.963603,
+    "peak_rss_bytes": 167575552,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

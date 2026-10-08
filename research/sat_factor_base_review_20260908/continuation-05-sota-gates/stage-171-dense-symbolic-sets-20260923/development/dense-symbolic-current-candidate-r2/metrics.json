@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+    "native-f4",
+    "manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 14.141400415988755,
+    "user_seconds": 147.559744,
+    "system_seconds": 1.646139,
+    "total_core_seconds": 149.205883,
+    "single_core_seconds": 149.205883,
+    "peak_rss_bytes": 2915139584,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

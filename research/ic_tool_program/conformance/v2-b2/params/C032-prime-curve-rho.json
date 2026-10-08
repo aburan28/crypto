@@ -1,0 +1,31 @@
+{
+ "schema_version": 2,
+ "name": "C032: a prime curve near 2^24, rho alone",
+ "field": {
+  "kind": "prime",
+  "p": "16777259"
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": "16768242",
+  "b": "4351576"
+ },
+ "subgroup": {
+  "order": "5591479",
+  "cofactor": "3",
+  "generator": {
+   "x": "349833",
+   "y": "8265726"
+  }
+ },
+ "target": {
+  "known_log": "5275835"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

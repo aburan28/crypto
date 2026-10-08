@@ -1,0 +1,81 @@
+name: n37 four-policy support replay
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/n37-four-policy-support.yml'
+      - 'examples/n37_four_policy_support.rs'
+      - 'examples/n37_four_policy_support_replay.rs'
+      - 'examples/support/n37_policy_common.rs'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/**'
+      - 'research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json'
+      - 'research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz'
+      - 'src/cryptanalysis/binary_field_basis.rs'
+      - 'src/cryptanalysis/binary_velu.rs'
+      - 'src/cryptanalysis/koblitz_fast.rs'
+      - 'src/cryptanalysis/koblitz_index_calculus.rs'
+      - 'docs/index-calculus-scoreboard.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            src
+            examples/n37_four_policy_support.rs
+            examples/n37_four_policy_support_replay.rs
+            examples/support/n37_policy_common.rs
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock
+            research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json
+            research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz
+            research/notes/ecc2k130/n37_four_policy_support_20261003
+      - name: Use frozen native lockfile
+        run: cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
+      - name: Check the changed Rust files
+        run: rustfmt --edition 2021 --check examples/n37_four_policy_support.rs examples/n37_four_policy_support_replay.rs examples/support/n37_policy_common.rs
+      - name: Build native producer and independent replay
+        run: cargo build --release --locked --example n37_four_policy_support --example n37_four_policy_support_replay
+      - name: Inflate and verify the committed manifest
+        run: |
+          printf '%s  %s\n' \
+            '8eac2ae4b8d8f0fc452b7cd7c8edbd3183558e55454abbd67349665bd64610d5' \
+            research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz | sha256sum --check
+          gzip -cd research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz \
+            > "$RUNNER_TEMP/n37-four-policy-result.json"
+          printf '%s  %s\n' \
+            '05664103a6dab090a8b4298f34c0964e6f253f625cd73d661562d85a2fce87af' \
+            "$RUNNER_TEMP/n37-four-policy-result.json" | sha256sum --check
+      - name: Recompute every point, label, action and exceptional control
+        run: |
+          target/release/examples/n37_four_policy_support_replay \
+            "$RUNNER_TEMP/n37-four-policy-result.json" \
+            "$RUNNER_TEMP/n37-four-policy-replay.json"
+          cmp "$RUNNER_TEMP/n37-four-policy-replay.json" \
+            research/notes/ecc2k130/n37_four_policy_support_20261003/REPLAY.json
+      - name: Retain independent replay receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n37-four-policy-support-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n37-four-policy-replay.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Volumes/SSD990/kic-f4-stage171-dev/clean-build-6de26d8c.sh"
+  ],
+  "returncode": 101,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.16604804100643378,
+    "user_seconds": 0.048105999999999996,
+    "system_seconds": 0.10424299999999999,
+    "total_core_seconds": 0.15234899999999998,
+    "single_core_seconds": 0.15234899999999998,
+    "peak_rss_bytes": 23724032,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

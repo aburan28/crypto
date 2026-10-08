@@ -1,0 +1,1346 @@
+{
+  "binary_sha256": {
+    "five": "b156f3320564c1e9fed2b168aba7a0b4f3c875d677c1a9354751bba527ee5bd6",
+    "six": "6e634aeff568c824c1f58c27c9deeb1b677a716990a4a0ed7d858182fec2bc5a"
+  },
+  "builds": {
+    "five": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 614,
+          "path": "development/build-five/metrics.json",
+          "sha256": "ff46d1bc2ac403185a06621786edd8a39d0fd44c6a7390614b80226b87d957a9"
+        },
+        "stderr": {
+          "bytes": 3518,
+          "path": "development/build-five/stderr.txt",
+          "sha256": "cebf7f57d897487e2c0e70b64082012bf701995bb9a52f38fca6e1dca4464763"
+        },
+        "stdout": {
+          "bytes": 0,
+          "path": "development/build-five/stdout.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage179-five-target-12da6fe14",
+          "cargo",
+          "build",
+          "--release",
+          "--locked",
+          "--example",
+          "koblitz_pdp_backend"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3425828864,
+          "single_core_seconds": 336.228429,
+          "system_seconds": 13.994638,
+          "total_core_seconds": 336.228429,
+          "user_seconds": 322.233791,
+          "wall_seconds": 128.887393084
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    },
+    "six": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 658,
+          "path": "development/build-six/metrics.json",
+          "sha256": "450f1c863c33675013acc826e02354ec8b0a5e3c8d73778821446cbf36491b92"
+        },
+        "stderr": {
+          "bytes": 3518,
+          "path": "development/build-six/stderr.txt",
+          "sha256": "b71adf530759c41970ae5431b0467526c656b5ee7f70c65a6cf5c7543d12a074"
+        },
+        "stdout": {
+          "bytes": 0,
+          "path": "development/build-six/stdout.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage179-six-target-12da6fe14",
+          "cargo",
+          "build",
+          "--release",
+          "--locked",
+          "--features",
+          "f4-wide-tables",
+          "--example",
+          "koblitz_pdp_backend"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3323133952,
+          "single_core_seconds": 318.864172,
+          "system_seconds": 13.897749,
+          "total_core_seconds": 318.864172,
+          "user_seconds": 304.966423,
+          "wall_seconds": 128.71594420899964
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    }
+  },
+  "campaign_charge": {
+    "components": 10,
+    "peak_rss_bytes_max": 4237049856,
+    "total_core_seconds_sum": 3234.101524,
+    "wall_seconds_sum": 2023.5037671669998
+  },
+  "claim_boundary": "One opened n=59 decomposition target and an existing solver-feature comparison only; not a full index-calculus run or SOTA.",
+  "conflicts": null,
+  "decision": {
+    "pass": false,
+    "reason": "Six columns increased deterministic performed XORs and table memory and failed the paired timing gate.",
+    "selected_table_columns": 5,
+    "status": "REJECTED_WIDER_TABLE_REGRESSION"
+  },
+  "mechanism": {
+    "performed_xor_ratio_six_over_five": 1.1062911394310182,
+    "row_equivalent_xors_identical": true,
+    "structural_f4_counts_identical": true,
+    "table_memory_ratio_six_over_five": 1.3964839416128814
+  },
+  "median_paired_ratios": {
+    "core": 1.0320980813616216,
+    "rss": 0.9405481096219244,
+    "wall": 1.108172775573731
+  },
+  "pair_ratios": [
+    {
+      "core": 1.0320980813616216,
+      "pair": 1,
+      "rss": 0.8626923270265149,
+      "wall": 1.5071279023164372
+    },
+    {
+      "core": 1.049224540744709,
+      "pair": 2,
+      "rss": 1.0198434665982565,
+      "wall": 0.7975197230097044
+    },
+    {
+      "core": 0.976286101252658,
+      "pair": 3,
+      "rss": 0.9405481096219244,
+      "wall": 1.108172775573731
+    }
+  ],
+  "runner_commit": "87c2b4170",
+  "runs": [
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 968,
+          "path": "development/paired/01-five-r1/metrics.json",
+          "sha256": "d6a06b75ebd45b926bc019cc5877b917eeba88a0d9c0683d70d2fc520b3a90ca"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/paired/01-five-r1/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 5587,
+          "path": "development/paired/01-five-r1/stdout.json",
+          "sha256": "20453a2992e83295d6e423440e76618e931848a0a23e5c9b192497eee01b37d0"
+        }
+      },
+      "correct": true,
+      "order": 1,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=12",
+          "PQ_F4_X1_BATCH=512",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage179-five-target-12da6fe14/release/examples/koblitz_pdp_backend",
+          "native-f4",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+          "300"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 4237049856,
+          "single_core_seconds": 283.618167,
+          "system_seconds": 9.111176,
+          "total_core_seconds": 283.618167,
+          "user_seconds": 274.506991,
+          "wall_seconds": 81.77215562499987
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 360.0
+      },
+      "repeat": 1,
+      "report": {
+        "algebraic_roots": 0,
+        "backend": "native-f4",
+        "budget_seconds": 300,
+        "conflicts": null,
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "basis_len": 1,
+            "build_ns": 442755555651,
+            "divisor_tests": 4190633182,
+            "eliminate_ns": 443879135092,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "f4_wall_ns": 1145182077258,
+            "field_pairs_reduced": 633185,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764760,
+            "max_poly_degree": 5,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "peak_matrix_bytes": 18528000,
+            "peak_table_bytes": 53070336,
+            "reducer_rows": 1732933,
+            "steps": 1204,
+            "word_xors_performed": 147794583858
+          },
+          "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+          "ops": 319313687585,
+          "peak_bytes": 71598336,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 1146651234243
+        },
+        "exhaustive": true,
+        "factor_base_contract": {
+          "discrete_log_labels_used": false,
+          "target_subgroup_enumerated": false
+        },
+        "fixed_x1_masks_visited": 512,
+        "fixed_x1_nonrational_skipped": 270,
+        "fixed_x1_systems_completed": 242,
+        "fixed_x1_systems_constructed": 242,
+        "fixed_x1_values": 512,
+        "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        "regenerated_source_exact": true,
+        "same_instance_fields": [
+          "n",
+          "ell",
+          "m",
+          "curve",
+          "algebraic_factor_base",
+          "affine_target"
+        ],
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "single_thread_requested": false,
+        "solver": "f4-f2",
+        "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+        "solver_block_table_columns": 5,
+        "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+        "solver_constructor": "fixed_x1_constant_linear_specialisation",
+        "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+        "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+        "solver_engine": "repository_current_block_tables_f4",
+        "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "solver_equations_total": 14278,
+        "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+        "solver_max_degree": 4,
+        "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+        "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+        "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+        "solver_parallel_construction": true,
+        "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+        "solver_rayon_threads_requested": 12,
+        "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+        "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+        "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+        "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+        "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+        "solver_terms_max_per_system": 62087,
+        "solver_terms_total": 14515915,
+        "solver_variables": 18,
+        "solver_x1_batch_cap": 512,
+        "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+        "solver_x1_batch_size": 512,
+        "solver_x1_batches_completed": 1,
+        "solver_x1_order": "hamming_weight_then_mask",
+        "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+        "solver_x1_order_target_independent": true,
+        "solver_x1_speculative_systems_completed": 0,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_representation": "symmetrised_s4",
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_x1_membership": 4629694,
+          "fixed_x1_s4_construction": 1682263917,
+          "native_f4_whole": 81149743750,
+          "source_verification": 63182708
+        },
+        "witness_points": null
+      },
+      "variant": "five"
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 967,
+          "path": "development/paired/02-six-r1/metrics.json",
+          "sha256": "94579d9597e6a600d36dc82330fe9f2bd9979f10e8631e28b14b181d873d5934"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/paired/02-six-r1/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 5588,
+          "path": "development/paired/02-six-r1/stdout.json",
+          "sha256": "90955a04ba4e0d499f1c753c461d063256931e1f126094ec3fd5f9a0b7f4faca"
+        }
+      },
+      "correct": true,
+      "order": 2,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=12",
+          "PQ_F4_X1_BATCH=512",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage179-six-target-12da6fe14/release/examples/koblitz_pdp_backend",
+          "native-f4",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+          "300"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3655270400,
+          "single_core_seconds": 292.721766,
+          "system_seconds": 8.074494,
+          "total_core_seconds": 292.721766,
+          "user_seconds": 284.647272,
+          "wall_seconds": 123.2410973749993
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 360.0
+      },
+      "repeat": 1,
+      "report": {
+        "algebraic_roots": 0,
+        "backend": "native-f4",
+        "budget_seconds": 300,
+        "conflicts": null,
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "basis_len": 1,
+            "build_ns": 519066775872,
+            "divisor_tests": 4190633182,
+            "eliminate_ns": 703180046613,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "f4_wall_ns": 1571801451006,
+            "field_pairs_reduced": 633185,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764760,
+            "max_poly_degree": 5,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "peak_matrix_bytes": 18528000,
+            "peak_table_bytes": 74111872,
+            "reducer_rows": 1732933,
+            "steps": 1204,
+            "word_xors_performed": 163503838578
+          },
+          "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+          "ops": 319313687585,
+          "peak_bytes": 92639872,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 1573503888792
+        },
+        "exhaustive": true,
+        "factor_base_contract": {
+          "discrete_log_labels_used": false,
+          "target_subgroup_enumerated": false
+        },
+        "fixed_x1_masks_visited": 512,
+        "fixed_x1_nonrational_skipped": 270,
+        "fixed_x1_systems_completed": 242,
+        "fixed_x1_systems_constructed": 242,
+        "fixed_x1_values": 512,
+        "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        "regenerated_source_exact": true,
+        "same_instance_fields": [
+          "n",
+          "ell",
+          "m",
+          "curve",
+          "algebraic_factor_base",
+          "affine_target"
+        ],
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "single_thread_requested": false,
+        "solver": "f4-f2",
+        "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+        "solver_block_table_columns": 6,
+        "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+        "solver_constructor": "fixed_x1_constant_linear_specialisation",
+        "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+        "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+        "solver_engine": "repository_current_block_tables_f4",
+        "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "solver_equations_total": 14278,
+        "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+        "solver_max_degree": 4,
+        "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+        "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+        "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+        "solver_parallel_construction": true,
+        "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+        "solver_rayon_threads_requested": 12,
+        "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+        "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+        "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+        "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+        "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+        "solver_terms_max_per_system": 62087,
+        "solver_terms_total": 14515915,
+        "solver_variables": 18,
+        "solver_x1_batch_cap": 512,
+        "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+        "solver_x1_batch_size": 512,
+        "solver_x1_batches_completed": 1,
+        "solver_x1_order": "hamming_weight_then_mask",
+        "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+        "solver_x1_order_target_independent": true,
+        "solver_x1_speculative_systems_completed": 0,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_representation": "symmetrised_s4",
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_x1_membership": 7860326,
+          "fixed_x1_s4_construction": 1404212166,
+          "native_f4_whole": 122665172459,
+          "source_verification": 49699208
+        },
+        "witness_points": null
+      },
+      "variant": "six"
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 968,
+          "path": "development/paired/03-six-r2/metrics.json",
+          "sha256": "d372581351387b4cf6bd2f600dbc6566992aec7dd0ba964a6d8ec8f4e5c187ce"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/paired/03-six-r2/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 5590,
+          "path": "development/paired/03-six-r2/stdout.json",
+          "sha256": "37e7515f8a2d0d8f8a0c03dd0c6cacd74bfba37fa230e0411a3e7c70531d1c7a"
+        }
+      },
+      "correct": true,
+      "order": 3,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=12",
+          "PQ_F4_X1_BATCH=512",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage179-six-target-12da6fe14/release/examples/koblitz_pdp_backend",
+          "native-f4",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+          "300"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3712581632,
+          "single_core_seconds": 295.135581,
+          "system_seconds": 12.58053,
+          "total_core_seconds": 295.135581,
+          "user_seconds": 282.555051,
+          "wall_seconds": 221.94718970800022
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 360.0
+      },
+      "repeat": 2,
+      "report": {
+        "algebraic_roots": 0,
+        "backend": "native-f4",
+        "budget_seconds": 300,
+        "conflicts": null,
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "basis_len": 1,
+            "build_ns": 739607120011,
+            "divisor_tests": 4190633182,
+            "eliminate_ns": 1589770705470,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "f4_wall_ns": 2996005534033,
+            "field_pairs_reduced": 633185,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764760,
+            "max_poly_degree": 5,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "peak_matrix_bytes": 18528000,
+            "peak_table_bytes": 74111872,
+            "reducer_rows": 1732933,
+            "steps": 1204,
+            "word_xors_performed": 163503838578
+          },
+          "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+          "ops": 319313687585,
+          "peak_bytes": 92639872,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 2999326700336
+        },
+        "exhaustive": true,
+        "factor_base_contract": {
+          "discrete_log_labels_used": false,
+          "target_subgroup_enumerated": false
+        },
+        "fixed_x1_masks_visited": 512,
+        "fixed_x1_nonrational_skipped": 270,
+        "fixed_x1_systems_completed": 242,
+        "fixed_x1_systems_constructed": 242,
+        "fixed_x1_values": 512,
+        "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        "regenerated_source_exact": true,
+        "same_instance_fields": [
+          "n",
+          "ell",
+          "m",
+          "curve",
+          "algebraic_factor_base",
+          "affine_target"
+        ],
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "single_thread_requested": false,
+        "solver": "f4-f2",
+        "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+        "solver_block_table_columns": 6,
+        "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+        "solver_constructor": "fixed_x1_constant_linear_specialisation",
+        "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+        "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+        "solver_engine": "repository_current_block_tables_f4",
+        "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "solver_equations_total": 14278,
+        "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+        "solver_max_degree": 4,
+        "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+        "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+        "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+        "solver_parallel_construction": true,
+        "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+        "solver_rayon_threads_requested": 12,
+        "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+        "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+        "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+        "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+        "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+        "solver_terms_max_per_system": 62087,
+        "solver_terms_total": 14515915,
+        "solver_variables": 18,
+        "solver_x1_batch_cap": 512,
+        "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+        "solver_x1_batch_size": 512,
+        "solver_x1_batches_completed": 1,
+        "solver_x1_order": "hamming_weight_then_mask",
+        "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+        "solver_x1_order_target_independent": true,
+        "solver_x1_speculative_systems_completed": 0,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_representation": "symmetrised_s4",
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_x1_membership": 7024880,
+          "fixed_x1_s4_construction": 7990184209,
+          "native_f4_whole": 221632936291,
+          "source_verification": 120506417
+        },
+        "witness_points": null
+      },
+      "variant": "six"
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 968,
+          "path": "development/paired/04-five-r2/metrics.json",
+          "sha256": "2abd816191a2182d53cfa2a9f995b4388124d389b8650eb548de6efbfaa0fcb0"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/paired/04-five-r2/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 5591,
+          "path": "development/paired/04-five-r2/stdout.json",
+          "sha256": "9e7f35dcd222aa1ff09029ffc1a9a3d11c2cad4b600bc15525ef40b07d5f7122"
+        }
+      },
+      "correct": true,
+      "order": 4,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=12",
+          "PQ_F4_X1_BATCH=512",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage179-five-target-12da6fe14/release/examples/koblitz_pdp_backend",
+          "native-f4",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+          "300"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3640344576,
+          "single_core_seconds": 281.289247,
+          "system_seconds": 12.324727,
+          "total_core_seconds": 281.289247,
+          "user_seconds": 268.96452,
+          "wall_seconds": 278.2968035829999
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 360.0
+      },
+      "repeat": 2,
+      "report": {
+        "algebraic_roots": 0,
+        "backend": "native-f4",
+        "budget_seconds": 300,
+        "conflicts": null,
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "basis_len": 1,
+            "build_ns": 1025883951854,
+            "divisor_tests": 4190633182,
+            "eliminate_ns": 1568722472784,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "f4_wall_ns": 3471696670666,
+            "field_pairs_reduced": 633185,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764760,
+            "max_poly_degree": 5,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "peak_matrix_bytes": 18528000,
+            "peak_table_bytes": 53070336,
+            "reducer_rows": 1732933,
+            "steps": 1204,
+            "word_xors_performed": 147794583858
+          },
+          "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+          "ops": 319313687585,
+          "peak_bytes": 71598336,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 3475239015031
+        },
+        "exhaustive": true,
+        "factor_base_contract": {
+          "discrete_log_labels_used": false,
+          "target_subgroup_enumerated": false
+        },
+        "fixed_x1_masks_visited": 512,
+        "fixed_x1_nonrational_skipped": 270,
+        "fixed_x1_systems_completed": 242,
+        "fixed_x1_systems_constructed": 242,
+        "fixed_x1_values": 512,
+        "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        "regenerated_source_exact": true,
+        "same_instance_fields": [
+          "n",
+          "ell",
+          "m",
+          "curve",
+          "algebraic_factor_base",
+          "affine_target"
+        ],
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "single_thread_requested": false,
+        "solver": "f4-f2",
+        "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+        "solver_block_table_columns": 5,
+        "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+        "solver_constructor": "fixed_x1_constant_linear_specialisation",
+        "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+        "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+        "solver_engine": "repository_current_block_tables_f4",
+        "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "solver_equations_total": 14278,
+        "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+        "solver_max_degree": 4,
+        "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+        "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+        "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+        "solver_parallel_construction": true,
+        "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+        "solver_rayon_threads_requested": 12,
+        "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+        "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+        "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+        "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+        "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+        "solver_terms_max_per_system": 62087,
+        "solver_terms_total": 14515915,
+        "solver_variables": 18,
+        "solver_x1_batch_cap": 512,
+        "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+        "solver_x1_batch_size": 512,
+        "solver_x1_batches_completed": 1,
+        "solver_x1_order": "hamming_weight_then_mask",
+        "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+        "solver_x1_order_target_independent": true,
+        "solver_x1_speculative_systems_completed": 0,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_representation": "symmetrised_s4",
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_x1_membership": 5035167,
+          "fixed_x1_s4_construction": 5395338250,
+          "native_f4_whole": 277968238667,
+          "source_verification": 159229708
+        },
+        "witness_points": null
+      },
+      "variant": "five"
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 970,
+          "path": "development/paired/05-five-r3/metrics.json",
+          "sha256": "4dbee0f8dfd285c1444108425933e4325b8d9812613825b065bdc16bca9f50ba"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/paired/05-five-r3/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 5590,
+          "path": "development/paired/05-five-r3/stdout.json",
+          "sha256": "b527e5a164940709cf4d05b432940fe6eb02c29d0b0e3841c2635f4a38e58672"
+        }
+      },
+      "correct": true,
+      "order": 5,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=12",
+          "PQ_F4_X1_BATCH=512",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage179-five-target-12da6fe14/release/examples/koblitz_pdp_backend",
+          "native-f4",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+          "300"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 4095180800,
+          "single_core_seconds": 287.716713,
+          "system_seconds": 13.733285,
+          "total_core_seconds": 287.716713,
+          "user_seconds": 273.983428,
+          "wall_seconds": 232.21064858300088
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 360.0
+      },
+      "repeat": 3,
+      "report": {
+        "algebraic_roots": 0,
+        "backend": "native-f4",
+        "budget_seconds": 300,
+        "conflicts": null,
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "basis_len": 1,
+            "build_ns": 1295240030023,
+            "divisor_tests": 4190633182,
+            "eliminate_ns": 1331231170430,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "f4_wall_ns": 3373506843335,
+            "field_pairs_reduced": 633185,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764760,
+            "max_poly_degree": 5,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "peak_matrix_bytes": 18528000,
+            "peak_table_bytes": 53070336,
+            "reducer_rows": 1732933,
+            "steps": 1204,
+            "word_xors_performed": 147794583858
+          },
+          "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+          "ops": 319313687585,
+          "peak_bytes": 71598336,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 3377249845623
+        },
+        "exhaustive": true,
+        "factor_base_contract": {
+          "discrete_log_labels_used": false,
+          "target_subgroup_enumerated": false
+        },
+        "fixed_x1_masks_visited": 512,
+        "fixed_x1_nonrational_skipped": 270,
+        "fixed_x1_systems_completed": 242,
+        "fixed_x1_systems_constructed": 242,
+        "fixed_x1_values": 512,
+        "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        "regenerated_source_exact": true,
+        "same_instance_fields": [
+          "n",
+          "ell",
+          "m",
+          "curve",
+          "algebraic_factor_base",
+          "affine_target"
+        ],
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "single_thread_requested": false,
+        "solver": "f4-f2",
+        "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+        "solver_block_table_columns": 5,
+        "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+        "solver_constructor": "fixed_x1_constant_linear_specialisation",
+        "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+        "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+        "solver_engine": "repository_current_block_tables_f4",
+        "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "solver_equations_total": 14278,
+        "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+        "solver_max_degree": 4,
+        "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+        "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+        "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+        "solver_parallel_construction": true,
+        "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+        "solver_rayon_threads_requested": 12,
+        "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+        "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+        "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+        "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+        "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+        "solver_terms_max_per_system": 62087,
+        "solver_terms_total": 14515915,
+        "solver_variables": 18,
+        "solver_x1_batch_cap": 512,
+        "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+        "solver_x1_batch_size": 512,
+        "solver_x1_batches_completed": 1,
+        "solver_x1_order": "hamming_weight_then_mask",
+        "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+        "solver_x1_order_target_independent": true,
+        "solver_x1_speculative_systems_completed": 0,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_representation": "symmetrised_s4",
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_x1_membership": 6431175,
+          "fixed_x1_s4_construction": 3786735541,
+          "native_f4_whole": 232064097583,
+          "source_verification": 57752583
+        },
+        "witness_points": null
+      },
+      "variant": "five"
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 968,
+          "path": "development/paired/06-six-r3/metrics.json",
+          "sha256": "83ad8750e12c3dd549b83c4bb802fee5b30924f963bed42e8510d0eb4ed63680"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/paired/06-six-r3/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 5590,
+          "path": "development/paired/06-six-r3/stdout.json",
+          "sha256": "d3be2720bc8587cf1bd61ee0551d64490e2e6f68082f5328a5202e7ad8b425ad"
+        }
+      },
+      "correct": true,
+      "order": 6,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=12",
+          "PQ_F4_X1_BATCH=512",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage179-six-target-12da6fe14/release/examples/koblitz_pdp_backend",
+          "native-f4",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+          "300"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3851714560,
+          "single_core_seconds": 280.893828,
+          "system_seconds": 9.133693,
+          "total_core_seconds": 280.893828,
+          "user_seconds": 271.760135,
+          "wall_seconds": 257.32951895800034
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 360.0
+      },
+      "repeat": 3,
+      "report": {
+        "algebraic_roots": 0,
+        "backend": "native-f4",
+        "budget_seconds": 300,
+        "conflicts": null,
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "basis_len": 1,
+            "build_ns": 712284954684,
+            "divisor_tests": 4190633182,
+            "eliminate_ns": 1576229849733,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "f4_wall_ns": 3062457546961,
+            "field_pairs_reduced": 633185,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764760,
+            "max_poly_degree": 5,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "peak_matrix_bytes": 18528000,
+            "peak_table_bytes": 74111872,
+            "reducer_rows": 1732933,
+            "steps": 1204,
+            "word_xors_performed": 163503838578
+          },
+          "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+          "ops": 319313687585,
+          "peak_bytes": 92639872,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 3065341024496
+        },
+        "exhaustive": true,
+        "factor_base_contract": {
+          "discrete_log_labels_used": false,
+          "target_subgroup_enumerated": false
+        },
+        "fixed_x1_masks_visited": 512,
+        "fixed_x1_nonrational_skipped": 270,
+        "fixed_x1_systems_completed": 242,
+        "fixed_x1_systems_constructed": 242,
+        "fixed_x1_values": 512,
+        "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        "regenerated_source_exact": true,
+        "same_instance_fields": [
+          "n",
+          "ell",
+          "m",
+          "curve",
+          "algebraic_factor_base",
+          "affine_target"
+        ],
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "single_thread_requested": false,
+        "solver": "f4-f2",
+        "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+        "solver_block_table_columns": 6,
+        "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+        "solver_constructor": "fixed_x1_constant_linear_specialisation",
+        "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+        "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+        "solver_engine": "repository_current_block_tables_f4",
+        "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "solver_equations_total": 14278,
+        "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+        "solver_max_degree": 4,
+        "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+        "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+        "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+        "solver_parallel_construction": true,
+        "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+        "solver_rayon_threads_requested": 12,
+        "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+        "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+        "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+        "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+        "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+        "solver_terms_max_per_system": 62087,
+        "solver_terms_total": 14515915,
+        "solver_variables": 18,
+        "solver_x1_batch_cap": 512,
+        "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+        "solver_x1_batch_size": 512,
+        "solver_x1_batches_completed": 1,
+        "solver_x1_order": "hamming_weight_then_mask",
+        "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+        "solver_x1_order_target_independent": true,
+        "solver_x1_speculative_systems_completed": 0,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_representation": "symmetrised_s4",
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_x1_membership": 6483592,
+          "fixed_x1_s4_construction": 5686200583,
+          "native_f4_whole": 257076783708,
+          "source_verification": 116982167
+        },
+        "witness_points": null
+      },
+      "variant": "six"
+    }
+  ],
+  "schema": "koblitz_stage179_current_f4_wide_tables_single_target.v1",
+  "single_core_seconds": null,
+  "source_commit": "12da6fe144788ecf8e9f2bf72a7a3274ed3582b9",
+  "tests": {
+    "five": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 658,
+          "path": "development/test-five/metrics.json",
+          "sha256": "b5d748462e305cc78c87a2260c9c3fff9c0b3b554ff50e9347cca1463744ab11"
+        },
+        "stderr": {
+          "bytes": 2126,
+          "path": "development/test-five/stderr.txt",
+          "sha256": "44503408a0ec0dfb39889f55f494a7d1b236de89f46c4abd1dfa21a5a24dd4be"
+        },
+        "stdout": {
+          "bytes": 808,
+          "path": "development/test-five/stdout.txt",
+          "sha256": "19b86a711924730045dd81cbc360cbb7e743e1e5c4ba56c1da375eca3a496edf"
+        }
+      },
+      "passed": true,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage179-five-target-12da6fe14",
+          "cargo",
+          "test",
+          "--release",
+          "--locked",
+          "--lib",
+          "cryptanalysis::pq_f4_f2::tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3999498240,
+          "single_core_seconds": 427.770782,
+          "system_seconds": 16.302931,
+          "total_core_seconds": 427.770782,
+          "user_seconds": 411.467851,
+          "wall_seconds": 294.4797507500007
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    },
+    "six": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 713,
+          "path": "development/test-six/metrics.json",
+          "sha256": "c488d2f2fca79237060c169d29fd572e0da90dd51b7916a25f08417355c21b85"
+        },
+        "stderr": {
+          "bytes": 2125,
+          "path": "development/test-six/stderr.txt",
+          "sha256": "e2934a0fdd66511549eb2554009c0af6bb416ebbffe76edcf1d600957780a83c"
+        },
+        "stdout": {
+          "bytes": 808,
+          "path": "development/test-six/stdout.txt",
+          "sha256": "f155874a413942d8d83eb2eab144276d4446ac01c14a893d9eb4f3a767ad312f"
+        }
+      },
+      "passed": true,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage179-six-target-12da6fe14",
+          "cargo",
+          "test",
+          "--release",
+          "--locked",
+          "--features",
+          "f4-wide-tables",
+          "--lib",
+          "cryptanalysis::pq_f4_f2::tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3803168768,
+          "single_core_seconds": 429.86283899999995,
+          "system_seconds": 19.151711,
+          "total_core_seconds": 429.86283899999995,
+          "user_seconds": 410.711128,
+          "wall_seconds": 276.6232652919989
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    }
+  },
+  "wall_interpretation": "The host was severely descheduled during the paired panel; paired wall is retained as observed, while core-seconds and deterministic operation counts anchor the rejection."
+}

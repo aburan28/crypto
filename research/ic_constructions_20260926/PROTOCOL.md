@@ -123,7 +123,7 @@ diagnostic.
 2. **The constructions group falls at least 3×** at every size.
 3. **A whole-pipeline speedup** whose 95% interval excludes 1, at every
    size where §20 measured the constructions at 15% or more of `S`. That
-   is seven sizes: all but `K_0/GF(2^53)` and `K_0/GF(2^61)`.
+   is seven sizes: all but `icv1-f2m53-tm56619371-dac20a85` and `icv1-f2m61-t158598901-ab42b6c5`.
 4. **No regression.** No size's speedup interval lies wholly below 1, at
    one thread or at four.
 

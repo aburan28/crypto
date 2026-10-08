@@ -198,12 +198,15 @@ fn run(job: &Job) -> Result<Value, String> {
             || !job.exclusive_phases
             || job.degree != 17
             || job.curve_a != 1
-            || !matches!(job.config.solver.as_str(), "f4" | "f5")
+            || !matches!(
+                job.config.solver.as_str(),
+                "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair"
+            )
             || job.config.summands != 3
             || job.config.groebner_degree != 3
             || job.config.linear_algebra != "dense")
     {
-        return Err("prepared mode is limited to exclusive n17a1 F4/F5 IC".into());
+        return Err("prepared mode is limited to exclusive n17a1 F4/F5/F6-IC".into());
     }
     if !job.exclusive_phases {
         return run_inner(job);
@@ -391,7 +394,7 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     let strategy = match cfg.solver.as_str() {
         "pair_table" => DecompositionStrategy::PairTable,
         "enumerate" => DecompositionStrategy::Enumerate,
-        "f4" | "f5" | "inherited_f4" => DecompositionStrategy::Groebner,
+        "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair" => DecompositionStrategy::Groebner,
         "sat_xor" | "sat_cnf" => DecompositionStrategy::Sat,
         _ => return Err("unsupported decomposition backend".into()),
     };
@@ -409,13 +412,15 @@ fn run_inner(job: &Job) -> Result<Value, String> {
         node_budget: cfg.node_budget,
         collection_window: cfg.collection_window,
         allow_direct_relation: false,
+        f6_ic: matches!(cfg.solver.as_str(), "f6_ic" | "f6_ic_pair"),
+        f6_pair_index: cfg.solver == "f6_ic_pair",
         ..KoblitzIcOptions::default()
     };
     opts.engine = match cfg.solver.as_str() {
         "f5" => SolverEngine::MatrixF5 {
             max_degree: cfg.groebner_degree,
         },
-        "inherited_f4" => SolverEngine::InheritedF4 {
+        "inherited_f4" | "f6_ic" | "f6_ic_pair" => SolverEngine::InheritedF4 {
             max_degree: cfg.groebner_degree,
         },
         _ => SolverEngine::MatrixF4 {
@@ -680,7 +685,8 @@ fn run_prepared_target(
     let online_ns = online_start.elapsed().as_nanos();
     measurement::end_online();
     let verified = replay == Some(true);
-    Ok(json!({"schema_version":1,"mode":"ic",
+    Ok(
+        json!({"schema_version":1,"query_schema_version":1,"mode":"ic",
         "status":if verified {"complete"} else {"incomplete"},
         "preparation_mode":"imported-certified-log-table-v1",
         "reusable_symbolic_template_prepared":true,
@@ -695,7 +701,8 @@ fn run_prepared_target(
         "online_timing_schema":1,"online_wall_ns":online_ns,
         "target_input":"supplied_public_point","reusable_setup_excluded":true,
         "scalar_replay_included":replay.is_some(),"scalar_verified":verified,
-        "elapsed_seconds":start.elapsed().as_secs_f64()}))
+        "elapsed_seconds":start.elapsed().as_secs_f64()}),
+    )
 }
 
 fn main() {
@@ -761,6 +768,7 @@ mod prepared_target_tests {
     #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
     fn prepared_f5_recovers_disclosed_target_without_ordinary_collection() {
         let report = run(&prepared_job(8)).unwrap();
+        assert_eq!(report["query_schema_version"], 1);
         assert_eq!(report["status"], "complete");
         assert_eq!(report["solutions"][0]["recovered"], "24886");
         assert_eq!(report["solutions"][0]["trials"], 3);
@@ -785,8 +793,37 @@ mod prepared_target_tests {
 
     #[test]
     #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn prepared_f6_ic_recovers_disclosed_target_with_geometric_closure() {
+        let mut job = prepared_job(8);
+        job.config.solver = "f6_ic".into();
+        let report = run(&job).unwrap();
+        assert_eq!(report["status"], "complete");
+        assert_eq!(report["solutions"][0]["recovered"], "24886");
+        assert_eq!(report["scalar_verified"], true);
+        assert_eq!(report["trials"], 0);
+        let attempts = report["solutions"][0]["attempts"].as_array().unwrap();
+        assert!(attempts.iter().any(|attempt| {
+            let stats = &attempt["pdp"]["stats"];
+            stats["stats"]["geometric_witnesses"].as_u64().unwrap_or(0)
+                + stats["stats"]["geometric_refutations"]
+                    .as_u64()
+                    .unwrap_or(0)
+                > 0
+        }));
+        let phases = report["generic_phase_timing"]["online_phases_ns"]
+            .as_object()
+            .unwrap();
+        assert_eq!(
+            report["online_wall_ns"].as_u64(),
+            Some(phases.values().filter_map(Value::as_u64).sum())
+        );
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
     fn prepared_failed_attempt_is_retained_without_a_scalar() {
         let report = run(&prepared_job(1)).unwrap();
+        assert_eq!(report["query_schema_version"], 1);
         assert_eq!(report["status"], "incomplete");
         assert!(report["solutions"][0]["recovered"].is_null());
         assert_eq!(report["solutions"][0]["trials"], 1);

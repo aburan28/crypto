@@ -6,11 +6,11 @@ Declared 2026-09-30, before any run below. What ran first:
   - the one-lane rho reproduces batch rho at `k = 1`;
   - the online phases sum exactly to their interval;
   - one claim, assembled from a report, passed the checker.
-- Smoke runs went to scratch space: `K_1/GF(2^47)` targets `T01`–`T02`
-  through the harness, and `K_0/GF(2^41)` target `T01` through the
+- Smoke runs went to scratch space: `icv1-f2m47-t22705043-f4e44623` targets `T01`–`T02`
+  through the harness, and `icv1-f2m41-tm2308219-7f48b14a` target `T01` through the
   pricer. Their numbers are not quoted and do not enter the record. The
   round runs those targets again like every other.
-- A pin: the batch pricer at `K_0/GF(2^41)` `M1` gave §22's counts and
+- A pin: the batch pricer at `icv1-f2m41-tm2308219-7f48b14a` `M1` gave §22's counts and
   logarithms.
 
 ## Why §23 is declared again
@@ -124,12 +124,12 @@ declaration.
 
 | curve | `log₂ r` | `r` | model | proper intermediate subfields over `GF(2)` | `ord_n(2)` |
 |:--|--:|--:|:--|:--|--:|
-| `K_1/GF(2^47)` | 36.6 | 106,781,081,677 | `E_1` | none | 23 |
-| `K_0/GF(2^57)` | 38.0 | 275,295,876,199 | `E_0` | `GF(2^3)`, `GF(2^19)` | — |
-| `K_0/GF(2^41)` | 39.0 | 549,756,390,943 | `E_0` | none | 20 |
-| `K_0/GF(2^53)` | 44.3 | 21,044,858,204,113 | `E_0` | none | 52 |
-| `K_1/GF(2^59)` | 44.5 | 25,179,555,920,633 | `E_1` | none | 58 |
-| `K_0/GF(2^61)` | 47.2 | 162,888,033,982,417 | `E_0` | none | 60 |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 106,781,081,677 | `E_1` | none | 23 |
+| `icv1-f2m57-tm747311035-c1f545af` | 38.0 | 275,295,876,199 | `E_0` | `GF(2^3)`, `GF(2^19)` | — |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 549,756,390,943 | `E_0` | none | 20 |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 21,044,858,204,113 | `E_0` | none | 52 |
+| `icv1-f2m59-tm943548413-98844ecc` | 44.5 | 25,179,555,920,633 | `E_1` | none | 58 |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 162,888,033,982,417 | `E_0` | none | 60 |
 
 - `E_0` is the ECC2K-130 family; `E_1` is a different Koblitz model
   (AGENTS.md §8b).
@@ -144,12 +144,12 @@ recipe seed 201. No recipe is chosen or changed on a measurement:
 
 | curve | columns | descent summands | source |
 |:--|--:|--:|:--|
-| `K_1/GF(2^47)` | 56 | 3 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
-| `K_0/GF(2^57)` | 64 | 2 | §20's model optimum, 61 columns, read as `8⌈c/8⌉` |
-| `K_0/GF(2^41)` | 80 | 2 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
-| `K_0/GF(2^53)` | 264 | 2 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
-| `K_1/GF(2^59)` | 256 | 2 | §20's model optimum, 251 columns, read as `8⌈c/8⌉` |
-| `K_0/GF(2^61)` | 320 | 2 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
+| `icv1-f2m47-t22705043-f4e44623` | 56 | 3 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
+| `icv1-f2m57-tm747311035-c1f545af` | 64 | 2 | §20's model optimum, 61 columns, read as `8⌈c/8⌉` |
+| `icv1-f2m41-tm2308219-7f48b14a` | 80 | 2 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
+| `icv1-f2m53-tm56619371-dac20a85` | 264 | 2 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
+| `icv1-f2m59-tm943548413-98844ecc` | 256 | 2 | §20's model optimum, 251 columns, read as `8⌈c/8⌉` |
+| `icv1-f2m61-t158598901-ab42b6c5` | 320 | 2 | §20's sweep; the frozen `M1` recipe, rebuilt exactly |
 
 The two new sizes were never swept. Their recipes follow §20's model
 rather than §20's measurement, and they are labelled so wherever they
@@ -241,12 +241,12 @@ not, the pricer is not the one §22 measured, and nothing runs.
 
 | curve | IC online | setup | rho online, probe step | speedup, probe / canonical step | cold ratio | break-even | IC online over the BL model |
 |:--|--:|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^47)` | 22,834 | 1.51 M | 181,640 | 8.0× / 4.3× | 8.4 | 9.5 | 2.5 |
-| `K_0/GF(2^57)` | 29,524 | 2.82 M | 264,835 | 9.0× / 4.8× | 10.8 | 12.0 | 2.8 |
-| `K_0/GF(2^41)` | 35,619 | 4.45 M | 441,272 | 12.4× / 6.6× | 10.2 | 11.0 | 1.9 |
-| `K_0/GF(2^53)` | 87,576 | 33.7 M | 2,401,311 | 27.4× / 14.7× | 14.1 | 14.6 | 1.2 |
-| `K_1/GF(2^59)` | 102,079 | 39.0 M | 2,489,496 | 24.4× / 13.0× | 15.7 | 16.3 | 1.5 |
-| `K_0/GF(2^61)` | 503,099 | 175 M | 6,227,204 | 12.4× / 6.6× | 28.2 | 30.6 | 5.3 |
+| `icv1-f2m47-t22705043-f4e44623` | 22,834 | 1.51 M | 181,640 | 8.0× / 4.3× | 8.4 | 9.5 | 2.5 |
+| `icv1-f2m57-tm747311035-c1f545af` | 29,524 | 2.82 M | 264,835 | 9.0× / 4.8× | 10.8 | 12.0 | 2.8 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 35,619 | 4.45 M | 441,272 | 12.4× / 6.6× | 10.2 | 11.0 | 1.9 |
+| `icv1-f2m53-tm56619371-dac20a85` | 87,576 | 33.7 M | 2,401,311 | 27.4× / 14.7× | 14.1 | 14.6 | 1.2 |
+| `icv1-f2m59-tm943548413-98844ecc` | 102,079 | 39.0 M | 2,489,496 | 24.4× / 13.0× | 15.7 | 16.3 | 1.5 |
+| `icv1-f2m61-t158598901-ab42b6c5` | 503,099 | 175 M | 6,227,204 | 12.4× / 6.6× | 28.2 | 30.6 | 5.3 |
 
 **Expected:**
 - the index calculus faster online at every size, by either rho price;

@@ -1,0 +1,25 @@
+start KS=/Volumes/SSD990/ic-n61/target/release/examples/koblitz_rho_batch_ks_v2_n61 IC=/Volumes/SSD990/ic-n61/target/release/examples/koblitz_orbit_dlp_fast L=65536 N=61 BLOCKS=3 2026-10-01T02:46:05Z
+corpus n61-ks-growing-tune-65536-v1 ready 2026-10-01T02:46:10Z
+corpus n61-ks-growing-65536-v1 ready 2026-10-01T02:46:19Z
+tune K=1400 start load=37.68 47.75 38.13 2026-10-01T02:46:19Z
+start KS=/Volumes/SSD990/ic-n61/target/release/examples/koblitz_rho_batch_ks_v2_n61 IC=/Volumes/SSD990/ic-n61/target/release/examples/koblitz_orbit_dlp_fast L=65536 N=61 BLOCKS=3 2026-10-01T02:47:27Z
+tune K=1400 start load=49.63 48.13 38.93 2026-10-01T02:47:27Z
+tune n=61 K=1400 rc=0 wall=2478.43 load=34.97 26.55 23.55 2026-10-01T03:28:46Z
+tune K=1800 start load=34.97 26.55 23.55 2026-10-01T03:28:46Z
+tune n=61 K=1800 censored: killed at 4908 s elapsed (> 2 x K=1400 wall 2478.43 s; swap full, RSS 2.5 GB resident of ~18.6 GB est); wall >= 4908 s so K=1400 is lowest-wall regardless 2026-10-01T04:50:51Z
+tune n=61 K=2200 skipped: estimated RSS 27752560000 exceeds available 23706550272 2026-10-01T04:50:51Z
+chosen n=61 K=1400 2026-10-01T04:50:51Z
+start KS=/Volumes/SSD990/ic-n61/target/release/examples/koblitz_rho_batch_ks_v2_n61 IC=/Volumes/SSD990/ic-n61/target/release/examples/koblitz_orbit_dlp_fast L=65536 N=61 BLOCKS=3 2026-10-01T04:50:57Z
+ic b=0 K=1400 start load=34.96 41.30 35.03 2026-10-01T04:50:57Z
+ic n=61 K=1400 b=0 rc=0 wall=1798.20 2026-10-01T05:20:55Z
+ks b=0 start load=20.27 21.67 26.84 2026-10-01T05:20:55Z
+ks n=61 b=0 rc=0 wall=913.68 2026-10-01T05:36:09Z
+ks b=1 start load=10.34 13.06 18.46 2026-10-01T05:36:09Z
+ks n=61 b=1 rc=0 wall=859.83 2026-10-01T05:50:29Z
+ic b=1 K=1400 start load=9.14 10.57 13.69 2026-10-01T05:50:29Z
+ic n=61 K=1400 b=1 rc=0 wall=295.26 2026-10-01T05:55:24Z
+ic b=2 K=1400 start load=9.24 10.04 12.56 2026-10-01T05:55:24Z
+ic n=61 K=1400 b=2 rc=0 wall=294.97 2026-10-01T06:00:19Z
+ks b=2 start load=10.82 11.21 12.45 2026-10-01T06:00:19Z
+ks n=61 b=2 rc=0 wall=839.10 2026-10-01T06:14:18Z
+BLOCKS_DONE 2026-10-01T06:14:18Z

@@ -1,0 +1,35 @@
+{
+ "schema_version": 2,
+ "name": "C033: the same prime curve, paired",
+ "field": {
+  "kind": "prime",
+  "p": "16777259"
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": "16768242",
+  "b": "4351576"
+ },
+ "subgroup": {
+  "order": "5591479",
+  "cofactor": "3",
+  "generator": {
+   "x": "349833",
+   "y": "8265726"
+  }
+ },
+ "target": {
+  "known_log": "5275835"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

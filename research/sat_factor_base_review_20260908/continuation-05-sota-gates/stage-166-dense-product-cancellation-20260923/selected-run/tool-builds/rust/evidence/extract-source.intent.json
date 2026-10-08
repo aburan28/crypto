@@ -1,0 +1,34 @@
+{
+  "close_fds": true,
+  "command": [
+    "/usr/bin/tar",
+    "-xf",
+    "/Volumes/SSD990/koblitz-native-f4-build17-ac3e385c/source.tar",
+    "-C",
+    "/Volumes/SSD990/koblitz-native-f4-build17-ac3e385c/source"
+  ],
+  "cwd": "/Volumes/SSD990/koblitz-native-f4-build17-ac3e385c",
+  "environment": {
+    "CARGO_HOME": "/Volumes/SSD990/koblitz-native-f4-cargo-fetch-9845f2df",
+    "CARGO_INCREMENTAL": "0",
+    "HOME": "/Users/adamburan",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+    "RAYON_NUM_THREADS": "1",
+    "RUSTC": "/opt/homebrew/bin/rustc",
+    "TMPDIR": "/tmp",
+    "TZ": "UTC",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "executable_sha256": null,
+  "inputs": [],
+  "role": "extract-source",
+  "schema": "koblitz_pdp_phase_b_child_intent.v1",
+  "stdin": "devnull",
+  "watchdog_seconds": 1800
+}
