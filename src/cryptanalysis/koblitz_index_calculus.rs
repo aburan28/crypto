@@ -10888,6 +10888,7 @@ impl<'a> FactorBaseLogSolver<'a> {
                 self.report.duplicate_relations += 1;
                 continue;
             }
+            let _build = measurement::scope(Phase::MatrixBuild);
             self.system.push(rel);
         }
         self.report.collection_seconds += begin.elapsed().as_secs_f64();

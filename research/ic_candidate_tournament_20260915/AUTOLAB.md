@@ -42,6 +42,12 @@ base, every witness/negative/failure, projected duplicates, rank and logs.
 `icprog ordinary-preparation-audit` is data replay only: native production,
 source-model custody, per-attempt costs and fresh qualification remain pending.
 It does not reopen consumed controls or establish a new relation-yield result.
+The [target-free native preparation API](goal_20260924/native-target-free-preparation-v1/PROTOCOL.md)
+builds fresh geometry and reusable state, retains every fixed-panel outcome
+and exclusive phase cost, and solves the final matrix once. Its MatrixF5 and
+external source/model CMS paths still need the separately frozen one-use
+executor and runtime audit; the retained correctness controls are not a new
+ordinary panel or fresh qualification.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,

@@ -416,6 +416,62 @@ pub fn run(input: &Path, out: &Path) -> Result<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn target_free_producer_transcript_passes_independent_mathematical_gate() {
+        use crypto_lib::cryptanalysis::{
+            prepared_ordinary as producer, prepared_sat_control as sat,
+        };
+        struct TimeoutBackend;
+        impl producer::SatBackend for TimeoutBackend {
+            fn query(&mut self, _: usize, p: [u64; 2]) -> Result<sat::QueryOutput, String> {
+                Ok(sat::QueryOutput {
+                    native: sat::NativeOutput {
+                        exit_code: None,
+                        timed_out: true,
+                        stdout: String::new(),
+                        receipt: json!({"mock_timeout_control":true}),
+                    },
+                    manifest: json!({"n":17,"curve_a":1,"ell":6,"m":3,"source_variables":51,"source_equations":50,
+                        "representation":"symmetrised_s4","factor_base_basis_bitmasks":["1","2","4","8","16","32"],
+                        "target":{"x":p[0],"y":p[1]}}),
+                    anf: String::new(),
+                    cnf: String::new(),
+                    source_receipt: json!({"mock_timeout_control":true}),
+                })
+            }
+        }
+        struct Observed;
+        impl producer::Observer for Observed {
+            fn started(&mut self, _: usize, _: u64) -> Result<(), String> {
+                Ok(())
+            }
+            fn completed(&mut self, _: &Value) -> Result<(), String> {
+                Ok(())
+            }
+        }
+        let plan = producer::Plan {
+            schema_version: 1,
+            question: "native-target-free-preparation-n17-v1".into(),
+            family: producer::Family::Cryptominisat,
+            algorithm_seed: 2026100311,
+            planned_queries: 2,
+        };
+        // Only mock failures. No F5/CMS search, source custody or yield claim.
+        let report = producer::prepare_sat(&plan, &mut TimeoutBackend, &mut Observed).unwrap();
+        let checked = audit(&report["mathematical_input"]).unwrap();
+        assert_eq!(checked["audited_queries"], 2);
+        assert_eq!(checked["ordinary_outcome_mix"]["timeout"], 2);
+        assert_eq!(checked["geometric_points"], 63);
+        assert_eq!(checked["usable_points"], 62);
+        assert_eq!(checked["folded_columns"], 29);
+        assert_eq!(checked["rank"], 0);
+        assert_eq!(checked["mathematical_preparation_complete"], false);
+        assert_eq!(checked["source_bound_execution_admitted"], false);
+        assert!(report["phase_windows"][0]["clock"]["phases_ns"]["matrix_build"].is_u64());
+        let mut changed = report["mathematical_input"].clone();
+        changed["attempts"][0]["scalar"] = json!(1);
+        assert!(audit(&changed).is_err());
+    }
     fn retained() -> Value {
         let old: Value = serde_json::from_str(include_str!("../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/f5-preparation.json")).unwrap();
         let input = &old["certificate"]["inputs"];

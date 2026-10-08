@@ -105,6 +105,13 @@ admits neither source-bound production nor new natural yield or performance.
 Native target-free F5 and external CryptoMiniSat producers, their own one-use
 registrations and per-attempt costs remain pending. Never use the worker's Rust
 CDCL engine as evidence for the accepted external CryptoMiniSat pipeline.
+The [native target-free preparation API](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-target-free-preparation-v1/PROTOCOL.md)
+now constructs fresh n17 geometry and the matrix without Q or imported logs,
+retains the fixed panel and exclusive attempt costs, and runs one final LA
+solve. Its F5 entry uses the real cached MatrixF5 collector; its external CMS
+entry checks original source/models and full-point lifting. Retained controls
+are not new yield or native custody. The source-frozen one-use executor and
+independent runtime audit are still required before a scientific dispatch.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
