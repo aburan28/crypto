@@ -2392,9 +2392,71 @@ pub(crate) fn build_inherited_macaulay_support_local(
     if rows_monos.is_empty() {
         return Some((Vec::new(), Vec::new()));
     }
-    let columns = macaulay_columns(&rows_monos)?;
+    let columns = if F4_SUPPORT_LOCAL_BITMAP_COLUMNS.load(std::sync::atomic::Ordering::Relaxed) {
+        support_local_bitmap_columns(&rows_monos, n_vars, degree)
+            .or_else(|| macaulay_columns(&rows_monos))?
+    } else {
+        macaulay_columns(&rows_monos)?
+    };
     let matrix = pack_rows(&rows_monos, &columns);
     Some((columns, matrix))
+}
+
+/// Collect exact observed columns using the colex rank of each square-free
+/// monomial within its degree. Only the unique masks need the final order
+/// sort; the bitmap does not admit a monomial cancelled out of a row.
+fn support_local_bitmap_columns(rows: &[Vec<u64>], n_vars: usize, degree: u32) -> Option<Vec<u64>> {
+    const MAX_DEGREE: usize = 4;
+    let degree = degree as usize;
+    if n_vars > 64 || degree > MAX_DEGREE {
+        return None;
+    }
+    let mut choose = [[0usize; MAX_DEGREE + 1]; 65];
+    for n in 0..=n_vars {
+        choose[n][0] = 1;
+        for k in 1..=MAX_DEGREE.min(n) {
+            choose[n][k] = choose[n - 1][k - 1] + choose[n - 1][k];
+        }
+    }
+    let mut offsets = [0usize; MAX_DEGREE + 1];
+    let mut total = 0usize;
+    for d in (0..=degree).rev() {
+        offsets[d] = total;
+        total += choose[n_vars][d];
+    }
+    let mut seen = vec![0u64; total.div_ceil(64)];
+    let mut columns = Vec::new();
+    let column_cap = max_f4_cols();
+    let variable_mask = all_variable_mask(n_vars);
+    for row in rows {
+        for &mask in row {
+            let d = mask.count_ones() as usize;
+            if d > degree || mask & !variable_mask != 0 {
+                return None;
+            }
+            let mut rank = 0usize;
+            let mut bits = mask;
+            let mut j = 1;
+            while bits != 0 {
+                let bit = bits.trailing_zeros() as usize;
+                rank += choose[bit][j];
+                bits &= bits - 1;
+                j += 1;
+            }
+            let index = offsets[d] + rank;
+            let word = &mut seen[index / 64];
+            let bit = 1u64 << (index % 64);
+            if *word & bit == 0 {
+                *word |= bit;
+                columns.push(mask);
+                if columns.len() > column_cap {
+                    return None;
+                }
+            }
+        }
+    }
+    columns.sort_unstable_by_key(|&mask| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(mask))));
+    Some(columns)
 }
 
 /// The support-local row order and odd-multiplicity cancellation of the
@@ -2997,6 +3059,8 @@ static F4_DIRECT_FUSED_PACK: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 static F4_SUPPORT_LOCAL_STREAM: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
+static F4_SUPPORT_LOCAL_BITMAP_COLUMNS: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 static F4_BUILD_ROWS_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_BUILD_PACK_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 struct F4ColumnLayout {
@@ -3092,6 +3156,11 @@ pub fn set_f4_direct_fused_pack(enabled: bool) {
 /// Set before a single-threaded diagnostic solve; the default is historical.
 pub fn set_f4_support_local_stream(enabled: bool) {
     F4_SUPPORT_LOCAL_STREAM.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Opt-in exact bitmap column collection for support-local Macaulay rows.
+pub fn set_f4_support_local_bitmap_columns(enabled: bool) {
+    F4_SUPPORT_LOCAL_BITMAP_COLUMNS.store(enabled, std::sync::atomic::Ordering::Relaxed);
 }
 
 pub fn f4_build_subprofile() -> (u64, u64) {
@@ -5558,6 +5627,54 @@ mod tests {
         let new = build_inherited_macaulay_support_local(&polys, n_vars, degree, mask, false);
         assert_eq!(old, new);
         set_f4_support_local_stream(false);
+    }
+
+    #[test]
+    fn support_local_bitmap_columns_match_exact_sorted_columns() {
+        for n_vars in 0..=7 {
+            for degree in 0..=4 {
+                let mut rows = vec![Vec::new(), Vec::new(), Vec::new()];
+                for mask in 0..(1u64 << n_vars) {
+                    if mask.count_ones() <= degree {
+                        rows[(mask as usize) % 3].push(mask);
+                    }
+                }
+                rows[0].push(0); // duplicate observation, same exact column set
+                assert_eq!(
+                    support_local_bitmap_columns(&rows, n_vars, degree).unwrap(),
+                    macaulay_columns(&rows).unwrap()
+                );
+            }
+        }
+        assert!(support_local_bitmap_columns(&[vec![0]], 5, 5).is_none());
+
+        let n_vars = 5;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00001),
+                    F2BoolMono::from_mask(0b00011),
+                    F2BoolMono::from_mask(0b01000),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00010),
+                    F2BoolMono::from_mask(0b00110),
+                    F2BoolMono::from_mask(0b10000),
+                ],
+                n_vars,
+            ),
+        ];
+        let mask = all_variable_mask(n_vars);
+        set_f4_support_local_stream(false);
+        set_f4_support_local_bitmap_columns(false);
+        let original = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        set_f4_support_local_bitmap_columns(true);
+        let bitmap = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        assert_eq!(original, bitmap);
+        set_f4_support_local_bitmap_columns(false);
     }
 
     #[test]
