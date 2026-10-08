@@ -169,3 +169,18 @@ and E4.
 reports each hypothesis as **held**, **falsified**, or **not testable**,
 quoting the cell that decides it. Results go in `RESULTS.md`. This file
 is not edited after commit except by dated amendments.
+
+## Amendment 1 (2026-10-08, after E1 output was read)
+
+**What went wrong.** The as-run `exp.sage trace` built the predicted
+relation with constant `Tr(x_3)`, the pre-fit guess. The registered
+hypothesis H1 uses `Tr(b/x_3²)`, the constant found by `fit.sage`. The
+syzygy mode (E1b) used the registered constant. So E1 as run tested the
+wrong statement, and its H1 and C2 verdicts score that wrong statement.
+
+**What changes.** `rescore_e1.sage` recomputes the registered constant
+from each record's stored `x_3` and `b`. It keeps the stored linear part,
+`predicted_L` minus its constant, and re-tests membership against the
+stored echelon basis of `span(F) ∩ R_{≤1}`, `deg_le1`. No draw was rerun
+and no seed changed. `score.py` reports both the as-run verdicts and the
+Amendment 1 verdicts, and `RESULTS.md` quotes both.
