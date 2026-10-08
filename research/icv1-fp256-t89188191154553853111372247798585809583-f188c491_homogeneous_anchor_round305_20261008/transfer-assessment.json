@@ -1,0 +1,70 @@
+{
+  "schema": "p256-homogeneous-anchor-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 305,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/factor-base points --[static homogeneous identities]--> ell^perp",
+    "rank-K-1 static kernel --[quotient]--> one projective log scale",
+    "fixed target Q --[unanchored decompositions]--> (ell,d)^perp / one global scale",
+    "one generator-anchored row --[known a,b]--> one residual unknown",
+    "second independent anchored row --[known a,b]--> full scalar-labelled control",
+    "fixed-target coupling plus one independent generator anchor --> full scalar-labelled control"
+  ],
+  "obligations": [
+    {
+      "name": "homogeneous static rank bound",
+      "status": "supported",
+      "evidence": "Every replayable static row annihilates the nonzero factor-base log vector, so rank is at most K-1.",
+      "scope": "Any order-n factor base in the cyclic P-256 subgroup."
+    },
+    {
+      "name": "fixed-target projective bound",
+      "status": "supported",
+      "evidence": "Every augmented fixed-target row annihilates (ell,d), so rank is at most K and one global scale remains.",
+      "scope": "Unanchored decompositions of one P-256 target."
+    },
+    {
+      "name": "complete finite control",
+      "status": "supported",
+      "evidence": "All 400 projective Z/7Z log profiles and all 960400 coefficient vectors were checked with zero discrepancies.",
+      "scope": "Cyclic order-seven group with four base logs and one target log."
+    },
+    {
+      "name": "P-256 algebra replay",
+      "status": "supported as scalar-labelled control",
+      "evidence": "984 materialized P-256 equations replayed exactly; dual-modulus ranks reach 163, 164, and 165 at the registered stages.",
+      "scope": "Synthetic deterministic log-labelled points, not the geometry-defined factor base."
+    },
+    {
+      "name": "two-equation P-256 event",
+      "status": "unknown",
+      "evidence": "No non-scalar-labelled event supplying both target coupling and an independent generator scale anchor is constructed.",
+      "scope": "Future non-homomorphic relation mechanisms."
+    },
+    {
+      "name": "complete below-rho recovery",
+      "status": "unknown",
+      "evidence": "The free one-anchor boundary is above rho and no new relation/decomposition/recovery pipeline exists.",
+      "scope": "End-to-end P-256 attack."
+    }
+  ],
+  "controls": [
+    "The toy census replayed 412400 cyclic-group equations with zero false positives, false negatives, or rank discrepancies.",
+    "Six P-256 stages were ranked over two fields in both row orders; 984 group equations replayed with zero failures.",
+    "Round 295, 298, 299, and 304 inputs were imported only after exact byte-hash, schema, curve, factor-base, width, and conclusion checks."
+  ],
+  "cost_accounting": [
+    "Measured: complete toy coefficient enumeration, retained rows, rank operations, P-256 scalar multiplications, group additions, equation replays, process telemetry, and artifact sizes.",
+    "Imported without extrapolation: Round-304 unquotiented, unknown-anchor, and known-anchor oracle/direct ratios.",
+    "Unset: discovery of static identities on FB1hc72514a2a8d3, a target-coupling-plus-scale-anchor event, relation yield, structured solver, sparse linear algebra, target recovery, and complete attack cost."
+  ],
+  "exploration_boundary": "Exact for static homogeneous group identities and unanchored fixed-target decompositions in a prime-order cyclic subgroup; not a lower bound on a mechanism that supplies target coupling and an independent generator scale anchor in one event.",
+  "weakest_open_obligation": "Construct and replay one P-256 event that supplies both target coupling and an independent known generator right-hand side without secret scalar labels, then price its complete recovery pipeline below rho.",
+  "narrowest_supported_finding": "Any free homogeneous structure on a 164-column P-256 factor base leaves at least one global log scale, and unanchored fixed-target decompositions remain projective. Full rank needs two post-static equations: target coupling plus one independent generator anchor, or two independent generator-anchored target rows.",
+  "semantic_evidence_sha256": "69bd838358bd2a5751de2b5fac6c56a7fa6969136448600b6b09cf1588bdf7db",
+  "assessment_json_bytes": 4790
+}

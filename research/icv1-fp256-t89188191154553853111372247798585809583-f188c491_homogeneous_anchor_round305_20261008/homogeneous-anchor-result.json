@@ -1,0 +1,383 @@
+{
+  "schema": "p256-homogeneous-anchor-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 305,
+  "execution_status": "complete",
+  "factor_base": "FB1hc72514a2a8d3",
+  "registered_s17_factor_base": "FB1h2f8621cda105",
+  "columns": 164,
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_union_round295_20261007/dickson-union-result.json",
+      "bytes": 431043,
+      "sha256": "9550f2bbaceb9e297fb35c12e79480581ca80bd58b03a8493e86ea7c1eda91a5",
+      "schema": "p256-dickson-union-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_union_round295_20261007/selected-factor-base.json",
+      "bytes": 83981,
+      "sha256": "d27516ca40a612ecf3ebabfa8ae04776084c7948110e20f221da438e1e64d8f8",
+      "schema": "ecbench.factor_base_dump/v1-wide"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_parity_escapes_round298_20261007/parity-escape-result.json",
+      "bytes": 50776,
+      "sha256": "8718bbe26751ff0191164b0665618226a97556c64c6e2feeef72468a38206965",
+      "schema": "p256-parity-escape-screen/v2"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_transfer_anchor_round299_20261007/transfer-anchor-result.json",
+      "bytes": 39954,
+      "sha256": "e6b78d729e785b1831a061cd39e6e57f10c46da8b8e98418321dc72f56752f35",
+      "schema": "p256-transfer-anchor-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_algebraic_quotient_rigidity_round304_20261008/algebraic-quotient-rigidity-result.json",
+      "bytes": 12449,
+      "sha256": "c94e339eca07b96ea0ef890592fb13b80815f0baf52af0e6bd57de17dd46ac9c",
+      "schema": "p256-algebraic-quotient-rigidity-screen/v1"
+    }
+  ],
+  "theorem": "For P_i=[ell_i]G with nonzero ell, every replayable homogeneous factor-base row h satisfies h dot ell=0; therefore static rank is at most K-1 and one log scale remains.",
+  "target_extension": "For Q=[d]G, every unanchored decomposition row (c,-1) annihilates (ell,d), so augmented rank is at most K. Starting from static rank K-1, full rank needs two post-static equations: a target coupling plus one independent generator anchor, or two independent generator-anchored target rows.",
+  "exhaustive_toy_census": {
+    "modulus": 7,
+    "base_columns": 4,
+    "raw_nonzero_log_vectors": 2400,
+    "projective_profiles": 400,
+    "coefficient_vectors_tested": 960400,
+    "static_rows_retained": 137200,
+    "fixed_target_rows_retained": 137200,
+    "fixed_target_difference_rows": 136800,
+    "anchored_rows_replayed": 1200,
+    "cyclic_group_equations_replayed": 412400,
+    "replay_failures": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "rank_discrepancies": 0,
+    "minimum_static_rank": 3,
+    "maximum_static_rank": 3,
+    "minimum_fixed_target_augmented_rank": 4,
+    "maximum_fixed_target_augmented_rank": 4,
+    "minimum_one_anchored_rank": 4,
+    "maximum_one_anchored_rank": 4,
+    "minimum_two_anchored_rank": 5,
+    "maximum_two_anchored_rank": 5,
+    "minimum_fixed_target_plus_one_generator_anchor_rank": 5,
+    "maximum_fixed_target_plus_one_generator_anchor_rank": 5,
+    "rank_operations": {
+      "matrices": 4800,
+      "rows_materialized": 1648800,
+      "entries_materialized": 7696000,
+      "pivot_row_scans": 1827867,
+      "pivot_swaps": 12057,
+      "modular_inversions": 19200,
+      "modular_multiplications": 16953420,
+      "modular_subtractions": 16893016
+    },
+    "first_profile": {
+      "logs": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "target_log": 3,
+      "static_rows": 343,
+      "fixed_target_rows": 343,
+      "static_rank": 3,
+      "fixed_target_augmented_rank": 4,
+      "static_plus_one_anchored_rank": 4,
+      "static_plus_two_anchored_rank": 5,
+      "fixed_target_plus_one_generator_anchor_rank": 5,
+      "anchored_right_hand_sides": [
+        3,
+        4
+      ]
+    },
+    "last_profile": {
+      "logs": [
+        1,
+        6,
+        6,
+        6
+      ],
+      "target_log": 6,
+      "static_rows": 343,
+      "fixed_target_rows": 343,
+      "static_rank": 3,
+      "fixed_target_augmented_rank": 4,
+      "static_plus_one_anchored_rank": 4,
+      "static_plus_two_anchored_rank": 5,
+      "fixed_target_plus_one_generator_anchor_rank": 5,
+      "anchored_right_hand_sides": [
+        0,
+        1
+      ]
+    }
+  },
+  "p256_control": {
+    "scalar_labelled_control": true,
+    "base_columns": 164,
+    "augmented_columns": 165,
+    "witness_log_vector_sha256": "54d9a22822efee6f91f917140741a7e158ae6d733bc53fec1ddc59f7195dbda9",
+    "witness_point_vector_sha256": "849bcbffd8fd77da848590222a02bb937ccba8ecf0e6041fbc1fc6f68b119dad",
+    "target_log_sha256": "ebe5e29ca48d43d5f7b7814d0e2c1251312a3c8170a30cdd06a35a7a83848e35",
+    "target_point": {
+      "infinity": false,
+      "x": "51997179315284847964913870430280356079252804666889782519036411407629470731626",
+      "y": "72103359241922306582119243026922764784382447749649837768442056828882935864668"
+    },
+    "stage_profiles": [
+      {
+        "variant": "static-homogeneous",
+        "rows": 163,
+        "columns": 164,
+        "expected_rank": 163,
+        "rank_mod_2_61_minus_1": 163,
+        "reversed_rank_mod_2_61_minus_1": 163,
+        "rank_mod_p256_n": 163,
+        "reversed_rank_mod_p256_n": 163,
+        "declared_nullity": 1,
+        "scalar_equation_replays": 326,
+        "p256_group_equation_replays": 163,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 855424,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 652,
+          "entries_materialized": 106928,
+          "pivot_row_scans": 13774,
+          "pivot_swaps": 162,
+          "modular_inversions": 652,
+          "modular_multiplications": 3020714,
+          "modular_subtractions": 2966598
+        }
+      },
+      {
+        "variant": "fixed-target-augmented",
+        "rows": 164,
+        "columns": 165,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "declared_nullity": 1,
+        "scalar_equation_replays": 328,
+        "p256_group_equation_replays": 164,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 865920,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 656,
+          "entries_materialized": 108240,
+          "pivot_row_scans": 13778,
+          "pivot_swaps": 162,
+          "modular_inversions": 656,
+          "modular_multiplications": 162356,
+          "modular_subtractions": 107580
+        }
+      },
+      {
+        "variant": "fixed-target-differences",
+        "rows": 163,
+        "columns": 164,
+        "expected_rank": 163,
+        "rank_mod_2_61_minus_1": 163,
+        "reversed_rank_mod_2_61_minus_1": 163,
+        "rank_mod_p256_n": 163,
+        "reversed_rank_mod_p256_n": 163,
+        "declared_nullity": 1,
+        "scalar_equation_replays": 326,
+        "p256_group_equation_replays": 163,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 855424,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 652,
+          "entries_materialized": 106928,
+          "pivot_row_scans": 13774,
+          "pivot_swaps": 162,
+          "modular_inversions": 652,
+          "modular_multiplications": 3020714,
+          "modular_subtractions": 2966598
+        }
+      },
+      {
+        "variant": "static-plus-one-anchored",
+        "rows": 164,
+        "columns": 165,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "declared_nullity": 1,
+        "scalar_equation_replays": 328,
+        "p256_group_equation_replays": 164,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 865920,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 656,
+          "entries_materialized": 108240,
+          "pivot_row_scans": 13940,
+          "pivot_swaps": 162,
+          "modular_inversions": 656,
+          "modular_multiplications": 3075818,
+          "modular_subtractions": 3021042
+        }
+      },
+      {
+        "variant": "static-plus-two-anchored",
+        "rows": 165,
+        "columns": 165,
+        "expected_rank": 165,
+        "rank_mod_2_61_minus_1": 165,
+        "reversed_rank_mod_2_61_minus_1": 165,
+        "rank_mod_p256_n": 165,
+        "reversed_rank_mod_p256_n": 165,
+        "declared_nullity": 0,
+        "scalar_equation_replays": 330,
+        "p256_group_equation_replays": 165,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 871200,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 660,
+          "entries_materialized": 108900,
+          "pivot_row_scans": 14108,
+          "pivot_swaps": 164,
+          "modular_inversions": 660,
+          "modular_multiplications": 3103540,
+          "modular_subtractions": 3048760
+        }
+      },
+      {
+        "variant": "fixed-target-plus-one-generator-anchor",
+        "rows": 165,
+        "columns": 165,
+        "expected_rank": 165,
+        "rank_mod_2_61_minus_1": 165,
+        "reversed_rank_mod_2_61_minus_1": 165,
+        "rank_mod_p256_n": 165,
+        "reversed_rank_mod_p256_n": 165,
+        "declared_nullity": 0,
+        "scalar_equation_replays": 330,
+        "p256_group_equation_replays": 165,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 871200,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 660,
+          "entries_materialized": 108900,
+          "pivot_row_scans": 13944,
+          "pivot_swaps": 162,
+          "modular_inversions": 660,
+          "modular_multiplications": 163020,
+          "modular_subtractions": 108240
+        }
+      }
+    ],
+    "aggregate_rank_operations": {
+      "matrices": 24,
+      "rows_materialized": 3936,
+      "entries_materialized": 648136,
+      "pivot_row_scans": 83318,
+      "pivot_swaps": 974,
+      "modular_inversions": 3936,
+      "modular_multiplications": 12546162,
+      "modular_subtractions": 12218818
+    },
+    "group_operations": {
+      "points_constructed": 165,
+      "equations_replayed": 984,
+      "scalar_multiplications": 2462,
+      "scalar_bits_processed": 626549,
+      "scalar_one_bits": 318166,
+      "point_additions": 2293
+    },
+    "group_replay_failures": 0,
+    "all_points_on_curve": true
+  },
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "free_oracle_ratio_to_rho": 1.0,
+      "direct_measured_ratio_to_rho": 1.0,
+      "complete_attack_measured": true,
+      "status": "complete reference"
+    },
+    {
+      "variant": "unquotiented geometry-defined FB1hc72514a2a8d3",
+      "free_oracle_ratio_to_rho": 13.920747397073491,
+      "direct_measured_ratio_to_rho": null,
+      "complete_attack_measured": false,
+      "status": "164 independent log classes"
+    },
+    {
+      "variant": "free maximal homogeneous kernel; one scale remains",
+      "free_oracle_ratio_to_rho": 1.4465047156952717,
+      "direct_measured_ratio_to_rho": null,
+      "complete_attack_measured": false,
+      "status": "target coupling plus an independent generator anchor still required; construction omitted"
+    },
+    {
+      "variant": "Round-25 unknown-anchor scalar-labelled control",
+      "free_oracle_ratio_to_rho": 1.4465047156952717,
+      "direct_measured_ratio_to_rho": 11.572037725562172,
+      "complete_attack_measured": false,
+      "status": "registered direct control remains above rho"
+    },
+    {
+      "variant": "known-anchor scalar-labelled control",
+      "free_oracle_ratio_to_rho": 0.964336477130181,
+      "direct_measured_ratio_to_rho": 7.714691817041447,
+      "complete_attack_measured": false,
+      "status": "ideal oracle below rho; direct construction above rho"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "free_oracle_ratio_to_rho": 394.42528,
+      "direct_measured_ratio_to_rho": null,
+      "complete_attack_measured": false,
+      "status": "unchanged free-perfect-oracle comparison"
+    }
+  ],
+  "structured_residual_degree_of_regularity": null,
+  "relations_reported_on_actual_factor_base": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "exploration_boundary": "Exact for homogeneous static identities and unanchored fixed-target decompositions; not universal over an event carrying both target coupling and an independent known generator coefficient.",
+  "transfer_assessment_semantic_sha256": "69bd838358bd2a5751de2b5fac6c56a7fa6969136448600b6b09cf1588bdf7db",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "complete_projective_toy_census": true,
+    "zero_false_positives_and_false_negatives": true,
+    "static_rank_at_most_k_minus_1": true,
+    "fixed_target_retains_global_scale": true,
+    "two_post_static_equations_necessary_and_sufficient_in_controls": true,
+    "fixed_target_plus_one_generator_anchor_reaches_full_rank": true,
+    "dual_modulus_p256_ranks_and_group_replays_passed": true,
+    "non_scalar_labelled_two_row_p256_event": false,
+    "complete_relation_decomposition_and_recovery": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "complete_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "projected_storage_below_2_50": false,
+    "discarded_probabilistic_branches_counted_as_exhaustive": false,
+    "promoted": false
+  },
+  "classification": "homogeneous-factor-base-relations/projective-scale-conservation/target-plus-anchor-required/parity-blocked",
+  "dominant_obstruction": "Every homogeneous static relation lies in the orthogonal complement of the nonzero factor-base log vector, so even a free maximal kernel has rank only 163 and leaves one scale. Unanchored decompositions of a fixed target likewise determine only the projective class of (ell,d). Full rank after the static quotient needs two post-static equations: one target coupling plus one independent known generator anchor, or two independent generator-anchored target rows. The registered free one-anchor boundary is already 1.446505 times rho, and no non-scalar-labelled event supplying the required pair is constructed.",
+  "decision": "Reject static homogeneous factor-base structure as a complete logarithm quotient. Credit at most rank K-1, require both target coupling and an independent generator scale anchor after that quotient, and charge their discovery and full recovery pipeline. Keep a structured two-equation event open; do not attempt an unplanted full-depth relation.",
+  "semantic_evidence_sha256": "2dc50589d8ccf8dd09de36a3187f04babbac6eb4dce252e890014ffe577f1628",
+  "result_json_bytes": 15262
+}
