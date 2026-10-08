@@ -106,6 +106,7 @@ struct ToyProfileExample {
     fixed_target_augmented_rank: usize,
     static_plus_one_anchored_rank: usize,
     static_plus_two_anchored_rank: usize,
+    fixed_target_plus_one_generator_anchor_rank: usize,
     anchored_right_hand_sides: Vec<u8>,
 }
 
@@ -133,6 +134,8 @@ struct ToyCensus {
     maximum_one_anchored_rank: usize,
     minimum_two_anchored_rank: usize,
     maximum_two_anchored_rank: usize,
+    minimum_fixed_target_plus_one_generator_anchor_rank: usize,
+    maximum_fixed_target_plus_one_generator_anchor_rank: usize,
     rank_operations: RankOperations,
     first_profile: ToyProfileExample,
     last_profile: ToyProfileExample,
@@ -209,7 +212,8 @@ struct Gates {
     zero_false_positives_and_false_negatives: bool,
     static_rank_at_most_k_minus_1: bool,
     fixed_target_retains_global_scale: bool,
-    two_anchored_rows_necessary_and_sufficient_in_controls: bool,
+    two_post_static_equations_necessary_and_sufficient_in_controls: bool,
+    fixed_target_plus_one_generator_anchor_reaches_full_rank: bool,
     dual_modulus_p256_ranks_and_group_replays_passed: bool,
     non_scalar_labelled_two_row_p256_event: bool,
     complete_relation_decomposition_and_recovery: bool,
@@ -557,6 +561,7 @@ fn toy_census() -> Result<ToyCensus, String> {
     let mut fixed_ranks = Vec::new();
     let mut one_ranks = Vec::new();
     let mut two_ranks = Vec::new();
+    let mut target_plus_anchor_ranks = Vec::new();
     let mut examples = Vec::new();
 
     for logs in &profiles {
@@ -660,12 +665,41 @@ fn toy_census() -> Result<ToyCensus, String> {
         static_plus_one.push(anchors[0].0.clone());
         let mut static_plus_two = static_plus_one.clone();
         static_plus_two.push(anchors[1].0.clone());
+        let mut scale_anchor = None;
+        'scale_anchor: for b in 0..TOY_MODULUS {
+            for code in 1..u64::from(TOY_MODULUS).pow(TOY_WIDTH as u32) {
+                let coefficients = decode_base7(code, TOY_WIDTH);
+                let rhs = (u16::from(mod7_dot(&coefficients, logs))
+                    + u16::from(b) * u16::from(target))
+                    % 7;
+                if rhs == 0 {
+                    continue;
+                }
+                let mut augmented = coefficients;
+                augmented.push(b);
+                scale_anchor = Some((augmented, rhs as u8));
+                break 'scale_anchor;
+            }
+        }
+        let scale_anchor = scale_anchor.ok_or("no toy scale anchor")?;
+        replays += 1;
+        anchored_rows_total += 1;
+        let scale_anchor_left = (u16::from(mod7_dot(&scale_anchor.0[..TOY_WIDTH], logs))
+            + u16::from(scale_anchor.0[TOY_WIDTH]) * u16::from(target))
+            % 7;
+        if scale_anchor_left as u8 != scale_anchor.1 {
+            replay_failures += 1;
+            false_positives += 1;
+        }
+        let mut fixed_target_plus_anchor = fixed_augmented_rows.clone();
+        fixed_target_plus_anchor.push(scale_anchor.0);
         let systems = [
             (&static_rows, TOY_WIDTH, 3usize),
             (&fixed_augmented_rows, TOY_WIDTH + 1, 4),
             (&differences, TOY_WIDTH, 3),
             (&static_plus_one, TOY_WIDTH + 1, 4),
             (&static_plus_two, TOY_WIDTH + 1, 5),
+            (&fixed_target_plus_anchor, TOY_WIDTH + 1, 5),
         ];
         let mut ranks = Vec::new();
         for (rows, width, expected) in systems {
@@ -682,6 +716,7 @@ fn toy_census() -> Result<ToyCensus, String> {
         fixed_ranks.push(ranks[1]);
         one_ranks.push(ranks[3]);
         two_ranks.push(ranks[4]);
+        target_plus_anchor_ranks.push(ranks[5]);
         examples.push(ToyProfileExample {
             logs: logs.clone(),
             target_log: target,
@@ -691,6 +726,7 @@ fn toy_census() -> Result<ToyCensus, String> {
             fixed_target_augmented_rank: ranks[1],
             static_plus_one_anchored_rank: ranks[3],
             static_plus_two_anchored_rank: ranks[4],
+            fixed_target_plus_one_generator_anchor_rank: ranks[5],
             anchored_right_hand_sides: anchors.iter().map(|entry| entry.1).collect(),
         });
     }
@@ -725,6 +761,14 @@ fn toy_census() -> Result<ToyCensus, String> {
         maximum_one_anchored_rank: *one_ranks.iter().max().ok_or("no one-anchor ranks")?,
         minimum_two_anchored_rank: *two_ranks.iter().min().ok_or("no two-anchor ranks")?,
         maximum_two_anchored_rank: *two_ranks.iter().max().ok_or("no two-anchor ranks")?,
+        minimum_fixed_target_plus_one_generator_anchor_rank: *target_plus_anchor_ranks
+            .iter()
+            .min()
+            .ok_or("no target-plus-anchor ranks")?,
+        maximum_fixed_target_plus_one_generator_anchor_rank: *target_plus_anchor_ranks
+            .iter()
+            .max()
+            .ok_or("no target-plus-anchor ranks")?,
         rank_operations: aggregate_ops,
         first_profile: examples.first().ok_or("no first toy profile")?.clone(),
         last_profile: examples.last().ok_or("no last toy profile")?.clone(),
@@ -826,6 +870,14 @@ fn control_systems(modulus: &BigUint) -> Result<ControlSystems, String> {
     static_plus_one.push(anchor_one.clone());
     let mut static_plus_two = static_plus_one.clone();
     static_plus_two.push(anchor_two);
+    let mut base_scale_anchor_coefficients = vec![BigUint::zero(); COLUMNS + 1];
+    base_scale_anchor_coefficients[0] = BigUint::one();
+    let base_scale_anchor = Equation {
+        coefficients: base_scale_anchor_coefficients,
+        rhs: pivot,
+    };
+    let mut fixed_target_plus_anchor = fixed_rows.clone();
+    fixed_target_plus_anchor.push(base_scale_anchor);
 
     Ok(ControlSystems {
         logs,
@@ -858,6 +910,12 @@ fn control_systems(modulus: &BigUint) -> Result<ControlSystems, String> {
             (
                 "static-plus-two-anchored".into(),
                 static_plus_two,
+                COLUMNS + 1,
+                COLUMNS + 1,
+            ),
+            (
+                "fixed-target-plus-one-generator-anchor".into(),
+                fixed_target_plus_anchor,
                 COLUMNS + 1,
                 COLUMNS + 1,
             ),
@@ -1142,7 +1200,7 @@ fn boundary_table() -> Vec<BoundaryRow> {
             free_oracle_ratio_to_rho: UNKNOWN_ANCHOR_ORACLE_RATIO,
             direct_measured_ratio_to_rho: None,
             complete_attack_measured: false,
-            status: "two independent anchored rows still required; construction omitted".into(),
+            status: "target coupling plus an independent generator anchor still required; construction omitted".into(),
         },
         BoundaryRow {
             variant: "Round-25 unknown-anchor scalar-labelled control".into(),
@@ -1192,28 +1250,29 @@ fn build_assessment(toy: &ToyCensus, p256: &P256Control) -> TransferAssessment {
             "fixed target Q --[unanchored decompositions]--> (ell,d)^perp / one global scale".into(),
             "one generator-anchored row --[known a,b]--> one residual unknown".into(),
             "second independent anchored row --[known a,b]--> full scalar-labelled control".into(),
+            "fixed-target coupling plus one independent generator anchor --> full scalar-labelled control".into(),
         ],
         obligations: vec![
             obligation("homogeneous static rank bound", "supported", "Every replayable static row annihilates the nonzero factor-base log vector, so rank is at most K-1.", "Any order-n factor base in the cyclic P-256 subgroup."),
             obligation("fixed-target projective bound", "supported", "Every augmented fixed-target row annihilates (ell,d), so rank is at most K and one global scale remains.", "Unanchored decompositions of one P-256 target."),
             obligation("complete finite control", "supported", &format!("All {} projective Z/7Z log profiles and all {} coefficient vectors were checked with zero discrepancies.", toy.projective_profiles, toy.coefficient_vectors_tested), "Cyclic order-seven group with four base logs and one target log."),
             obligation("P-256 algebra replay", "supported as scalar-labelled control", &format!("{} materialized P-256 equations replayed exactly; dual-modulus ranks reach 163, 164, and 165 at the registered stages.", p256.group_operations.equations_replayed), "Synthetic deterministic log-labelled points, not the geometry-defined factor base."),
-            obligation("two-row anchored P-256 event", "unknown", "No non-scalar-labelled event emitting two independent generator-anchored rows is constructed.", "Future non-homomorphic relation mechanisms."),
+            obligation("two-equation P-256 event", "unknown", "No non-scalar-labelled event supplying both target coupling and an independent generator scale anchor is constructed.", "Future non-homomorphic relation mechanisms."),
             obligation("complete below-rho recovery", "unknown", "The free one-anchor boundary is above rho and no new relation/decomposition/recovery pipeline exists.", "End-to-end P-256 attack."),
         ],
         controls: vec![
             format!("The toy census replayed {} cyclic-group equations with zero false positives, false negatives, or rank discrepancies.", toy.cyclic_group_equations_replayed),
-            format!("Five P-256 stages were ranked over two fields in both row orders; {} group equations replayed with zero failures.", p256.group_operations.equations_replayed),
+            format!("Six P-256 stages were ranked over two fields in both row orders; {} group equations replayed with zero failures.", p256.group_operations.equations_replayed),
             "Round 295, 298, 299, and 304 inputs were imported only after exact byte-hash, schema, curve, factor-base, width, and conclusion checks.".into(),
         ],
         cost_accounting: vec![
             "Measured: complete toy coefficient enumeration, retained rows, rank operations, P-256 scalar multiplications, group additions, equation replays, process telemetry, and artifact sizes.".into(),
             "Imported without extrapolation: Round-304 unquotiented, unknown-anchor, and known-anchor oracle/direct ratios.".into(),
-            "Unset: discovery of static identities on FB1hc72514a2a8d3, a two-row anchored event, relation yield, structured solver, sparse linear algebra, target recovery, and complete attack cost.".into(),
+            "Unset: discovery of static identities on FB1hc72514a2a8d3, a target-coupling-plus-scale-anchor event, relation yield, structured solver, sparse linear algebra, target recovery, and complete attack cost.".into(),
         ],
-        exploration_boundary: "Exact for static homogeneous group identities and unanchored fixed-target decompositions in a prime-order cyclic subgroup; not a lower bound on a mechanism that emits multiple generator-anchored rows.".into(),
-        weakest_open_obligation: "Construct and replay one P-256 event that emits at least two independent generator-anchored rows without secret scalar labels, then price its complete recovery pipeline below rho.".into(),
-        narrowest_supported_finding: "Any free homogeneous structure on a 164-column P-256 factor base leaves at least one global log scale; even all decompositions of one unanchored target remain projective. Two independent generator-anchored rows are still necessary after a maximal static quotient.".into(),
+        exploration_boundary: "Exact for static homogeneous group identities and unanchored fixed-target decompositions in a prime-order cyclic subgroup; not a lower bound on a mechanism that supplies target coupling and an independent generator scale anchor in one event.".into(),
+        weakest_open_obligation: "Construct and replay one P-256 event that supplies both target coupling and an independent known generator right-hand side without secret scalar labels, then price its complete recovery pipeline below rho.".into(),
+        narrowest_supported_finding: "Any free homogeneous structure on a 164-column P-256 factor base leaves at least one global log scale, and unanchored fixed-target decompositions remain projective. Full rank needs two post-static equations: target coupling plus one independent generator anchor, or two independent generator-anchored target rows.".into(),
         semantic_evidence_sha256: String::new(),
         assessment_json_bytes: 0,
     };
@@ -1247,7 +1306,8 @@ fn build_result(cli: &Cli) -> Result<(ResultReceipt, TransferAssessment), String
         zero_false_positives_and_false_negatives: true,
         static_rank_at_most_k_minus_1: true,
         fixed_target_retains_global_scale: true,
-        two_anchored_rows_necessary_and_sufficient_in_controls: true,
+        two_post_static_equations_necessary_and_sufficient_in_controls: true,
+        fixed_target_plus_one_generator_anchor_reaches_full_rank: true,
         dual_modulus_p256_ranks_and_group_replays_passed: true,
         non_scalar_labelled_two_row_p256_event: false,
         complete_relation_decomposition_and_recovery: false,
@@ -1261,9 +1321,9 @@ fn build_result(cli: &Cli) -> Result<(ResultReceipt, TransferAssessment), String
     };
     let assessment = build_assessment(&toy, &p256);
     let classification =
-        "homogeneous-factor-base-relations/projective-scale-conservation/two-anchored-rows-required/parity-blocked";
-    let obstruction = "Every homogeneous static relation lies in the orthogonal complement of the nonzero factor-base log vector, so even a free maximal kernel has rank only 163 and leaves one scale. Unanchored decompositions of a fixed target likewise determine only the projective class of (ell,d). Starting from maximal static rank, one generator-anchored row still leaves one unknown and two independent anchored rows are necessary. The registered free one-anchor boundary is already 1.446505 times rho, and no non-scalar-labelled two-row event is constructed.";
-    let decision = "Reject static homogeneous factor-base structure as a complete logarithm quotient. Credit at most rank K-1, require two independently replayable generator-anchored rows after that quotient, and charge their discovery and full recovery pipeline. Keep a structured two-row anchored event open; do not attempt an unplanted full-depth relation.";
+        "homogeneous-factor-base-relations/projective-scale-conservation/target-plus-anchor-required/parity-blocked";
+    let obstruction = "Every homogeneous static relation lies in the orthogonal complement of the nonzero factor-base log vector, so even a free maximal kernel has rank only 163 and leaves one scale. Unanchored decompositions of a fixed target likewise determine only the projective class of (ell,d). Full rank after the static quotient needs two post-static equations: one target coupling plus one independent known generator anchor, or two independent generator-anchored target rows. The registered free one-anchor boundary is already 1.446505 times rho, and no non-scalar-labelled event supplying the required pair is constructed.";
+    let decision = "Reject static homogeneous factor-base structure as a complete logarithm quotient. Credit at most rank K-1, require both target coupling and an independent generator scale anchor after that quotient, and charge their discovery and full recovery pipeline. Keep a structured two-equation event open; do not attempt an unplanted full-depth relation.";
     let semantic = json!({
         "curve": CURVE_SLUG,
         "dependencies": &dependencies,
@@ -1290,14 +1350,14 @@ fn build_result(cli: &Cli) -> Result<(ResultReceipt, TransferAssessment), String
             columns: COLUMNS,
             dependencies,
             theorem: "For P_i=[ell_i]G with nonzero ell, every replayable homogeneous factor-base row h satisfies h dot ell=0; therefore static rank is at most K-1 and one log scale remains.".into(),
-            target_extension: "For Q=[d]G, every unanchored decomposition row (c,-1) annihilates (ell,d), so augmented rank is at most K. Starting from static rank K-1, two independent generator-anchored rows are necessary to determine both the residual base scale and d.".into(),
+            target_extension: "For Q=[d]G, every unanchored decomposition row (c,-1) annihilates (ell,d), so augmented rank is at most K. Starting from static rank K-1, full rank needs two post-static equations: a target coupling plus one independent generator anchor, or two independent generator-anchored target rows.".into(),
             exhaustive_toy_census: toy,
             p256_control: p256,
             boundary_table: boundaries,
             structured_residual_degree_of_regularity: None,
             relations_reported_on_actual_factor_base: 0,
             full_depth_unplanted_p256_relation_attempted: false,
-            exploration_boundary: "Exact for homogeneous static identities and unanchored fixed-target decompositions; not universal over events carrying two or more independent known generator coefficients.".into(),
+            exploration_boundary: "Exact for homogeneous static identities and unanchored fixed-target decompositions; not universal over an event carrying both target coupling and an independent known generator coefficient.".into(),
             transfer_assessment_semantic_sha256: assessment.semantic_evidence_sha256.clone(),
             gates,
             classification: classification.into(),
@@ -1370,6 +1430,10 @@ mod tests {
         assert_eq!(census.maximum_static_rank, 3);
         assert_eq!(census.minimum_fixed_target_augmented_rank, 4);
         assert_eq!(census.maximum_two_anchored_rank, 5);
+        assert_eq!(
+            census.minimum_fixed_target_plus_one_generator_anchor_rank,
+            5
+        );
         assert_eq!(census.replay_failures, 0);
     }
 

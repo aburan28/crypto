@@ -2,6 +2,38 @@
 
 Date preregistered: 2026-10-08
 
+## Amendment after the canonical-v2 audit
+
+The first successful implementation run exposed a missing combined control
+before publication.  The preregistered statement that two
+generator-anchored rows are always necessary after a maximal static kernel is
+too strong: one unanchored fixed-target row first couples `d` to the residual
+base scale, after which one independent generator-anchored row fixes that
+scale.  Two generator-anchored rows are necessary only when no target-coupling
+row is already present.
+
+The original protocol remains below for provenance.  The final run adds a
+sixth exact system:
+
+```text
+complete fixed-target augmented space + one independent generator anchor
+```
+
+with expected rank five in the toy control and 165 in the P-256 control.  The
+correct surviving requirement is therefore **two independent post-static
+equations in total**, comprising either:
+
+1. one target-coupling row and one generator anchor; or
+2. two independent generator-anchored target rows.
+
+At least one row must carry a known nonzero generator right-hand side to break
+the global scale.  Promotion gate 2 is amended accordingly: require a
+non-scalar-labelled P-256 event or complete pipeline that supplies both the
+target coupling and the independent scale anchor.  The withdrawn v2 result
+and assessment are retained verbatim, and the failed float-comparison receipt
+plus successful v2 receipt remain in `isolation.jsonl`.  No v2 result is used
+for the final claim.
+
 ## Objective and fixed boundary
 
 Rounds 303 and 304 close, respectively, low-dimensional homomorphic cover
