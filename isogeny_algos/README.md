@@ -26,7 +26,7 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `gf3n.rs` GF(3ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 95 tests, all pass)
+## Correctness checks (`cargo test --release`: 98 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -61,7 +61,11 @@ Added in V3:
   embedding of a 3ᵇ-isogeny (auxiliary degree 2ⁿ − 3ᵇ as four squares) splits for the true kernel and
   not for a twisted one;
 * isogeny cycles: t mod 3⁴, 5³, 7², 11² equal the BSGS trace; Montgomery 4-isogeny chain = 2-isogeny
-  chain = Weierstrass Vélu chain; generic F_{p²} = the u64 F_{p²}.
+  chain = Weierstrass Vélu chain; generic F_{p²} = the u64 F_{p²};
+* GF(3ⁿ): bitsliced multiplication and Itoh–Tsujii inversion = digit-by-digit schoolbook arithmetic
+  (n = 2..40); the polynomial-time modulus search returns the same reduction polynomials as the
+  earlier exhaustive scan (n ≤ 17, where that scan finished); Sutherland Φ_ℓ mod p from ℓ + 1 curves
+  found by the ψ_ℓ test and the volcano walk is still exactly the Hecke Φ_ℓ (ℓ = 3, 5, 7).
 
 The benchmark re-verifies each result before timing and stores `verified` in every record.
 

@@ -2316,6 +2316,10 @@ fn main() {
             "theta" => bench_theta(&mut o),
             "twopow" => bench_twopow(&mut o),
             "theta4" => bench_theta4(&mut o),
+            "newcomp" => bench_newcomp(&mut o),
+            "nc_fields" => bench_nc_fields(&mut o),
+            "nc_atkin" => bench_nc_atkin(&mut o),
+            "nc_suth" => bench_nc_suth(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
@@ -2543,5 +2547,171 @@ fn bench_theta4(o: &mut Out) {
         let tm = time_it(budget, 500, || chain_g(&f, &inst.curves, &inst.k, n, &[], iota));
         let pb = 64 - p.leading_zeros();
         o.rec("theta4", "theta_dim4_kani_chain", &[("n", n.to_string()), ("b", b.to_string()), ("p_bits", pb.to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("ns_per_step", tm.0 / n as f64), ("gluing_steps", gl as f64)], ok, "E0^2 x E^2, alpha in M2(Z[i]) of degree 2^n - 3^b (four squares); splits, twisted kernel does not");
+    }
+}
+
+/// The V3-late components: F_{p^r} tower arithmetic, GF(3^n) arithmetic, Atkin primes over
+/// F_{p^d} towers (and SEA with them), Sutherland's isogeny-graph Phi_l.
+fn bench_newcomp(o: &mut Out) {
+    bench_nc_fields(o);
+    bench_nc_atkin(o);
+    bench_nc_suth(o);
+}
+
+/// F_{p^r} and GF(3^n) field operations.
+#[allow(unused_imports)]
+fn bench_nc_fields(o: &mut Out) {
+    use isogeny_algos::find::sea::{atkin_eigenvalue_tower, atkin_candidates_tower, sea, sea_atkin_tower};
+    use isogeny_algos::find::sutherland::{phi_crt, phi_mod_p};
+    use isogeny_algos::fpr::FpR;
+    use isogeny_algos::gf3n::GF3n;
+    let budget = if o.quick { 100 } else { 400 };
+    let p40 = next_prime((1u64 << 39) + 4242);
+    // --- F_{p^r}: mul, inv ---
+    for &r in &[2usize, 3, 6] {
+        let f = FpR::new(p40, r);
+        let mut rng = Rng::new(31_000 + r as u64);
+        let xs: Vec<_> = (0..256).map(|_| f.random(&mut rng)).collect();
+        let (m, _, _) = time_it(budget, 1000, || {
+            let mut a = xs[0];
+            for x in &xs {
+                a = f.mul(a, *x);
+            }
+            a
+        });
+        let (mi, _, _) = time_it(budget, 1000, || {
+            let mut a = f.zero();
+            for x in xs.iter().take(64) {
+                a = f.add(a, f.inv(*x));
+            }
+            a
+        });
+        let ok = xs.iter().all(|x| f.is_zero(*x) || f.mul(*x, f.inv(*x)) == f.one());
+        o.rec("newcomp", "fpr_ops", &[("p_bits", "40".into()), ("r", r.to_string())], &[("mul_ns", m / 256.0), ("inv_ns", mi / 64.0)], ok, "x * x^-1 = 1 for all samples");
+    }
+    // --- GF(3^n): mul, inv ---
+    for &n in &[5u32, 20, 40] {
+        let f = GF3n::new(n);
+        let mut rng = Rng::new(32_000 + n as u64);
+        let xs: Vec<u64> = (0..256).map(|_| f.random(&mut rng)).collect();
+        let (m, _, _) = time_it(budget, 1000, || {
+            let mut a = xs[0];
+            for x in &xs {
+                a = f.mul(a, *x);
+            }
+            a
+        });
+        let (mi, _, _) = time_it(budget, 1000, || {
+            let mut a = f.zero();
+            for x in xs.iter().take(16) {
+                if *x != 0 {
+                    a = f.add(a, f.inv(*x));
+                }
+            }
+            a
+        });
+        let ok = xs.iter().all(|&x| x == 0 || f.mul(x, f.inv(x)) == f.one());
+        o.rec("newcomp", "gf3n_ops", &[("n", n.to_string())], &[("mul_ns", m / 256.0), ("inv_ns", mi / 16.0)], ok, "x * x^-1 = 1 for all samples");
+    }
+}
+
+/// Atkin primes over F_{p^d} towers; SEA with and without the tower resolver.
+#[allow(unused_imports)]
+fn bench_nc_atkin(o: &mut Out) {
+    use isogeny_algos::find::sea::{atkin_eigenvalue_tower, atkin_candidates_tower, sea, sea_atkin_tower};
+    use isogeny_algos::find::sutherland::{phi_crt, phi_mod_p};
+    use isogeny_algos::fpr::FpR;
+    use isogeny_algos::gf3n::GF3n;
+    let p40 = next_prime((1u64 << 39) + 4242);
+    // --- Atkin primes over F_{p^d} towers ---
+    let fp = Zp::new(p40);
+    let mut rng = Rng::new(1300);
+    let mut phis: std::collections::HashMap<usize, Phi<Zp>> = std::collections::HashMap::new();
+    let mut cases = 0;
+    let want = if o.quick { 2 } else { 4 };
+    'curves: for _ in 0..600 {
+        let e = Curve::new(fp.random(&mut rng), fp.random(&mut rng));
+        let j = jinv(&fp, &e);
+        if !is_smooth(&fp, &e) || j == 0 || j == 1728 {
+            continue;
+        }
+        for &ell in &[5u64, 7, 11, 13] {
+            let phi = phis.entry(ell as usize).or_insert_with(|| Phi::compute(&fp, ell as usize));
+            if !phi.neighbors(&fp, j, &mut rng).is_empty() {
+                continue;
+            }
+            let mut r2 = Rng::new(7);
+            let t0 = Instant::now();
+            let res = atkin_eigenvalue_tower(&fp, &e, ell, &mut r2);
+            let ns = t0.elapsed().as_nanos() as f64;
+            let Some((nu, d)) = res else { continue };
+            let t = (fp.p as i128 + 1 - order(&fp, &e, &mut rng) as i128).rem_euclid(ell as i128) as u64;
+            let cands = atkin_candidates_tower(ell, fp.p % ell, d, nu);
+            o.rec(
+                "newcomp",
+                "atkin_eigenvalue_tower",
+                &[("p_bits", "40".into()), ("ell", ell.to_string()), ("d", d.to_string()), ("case", cases.to_string())],
+                &[("ns", ns), ("candidates", cands.len() as f64)],
+                cands.contains(&t),
+                "refined set contains the BSGS t mod l",
+            );
+            cases += 1;
+            if cases >= want {
+                break 'curves;
+            }
+        }
+    }
+    let fs = Zp::new(next_prime((1u64 << 37) + 99));
+    let mut rng = Rng::new(1400);
+    let mut phis: std::collections::HashMap<usize, Phi<Zp>> = std::collections::HashMap::new();
+    for inst in 0..(if o.quick { 1 } else { 3 }) {
+        let e = loop {
+            let e = Curve::new(fs.random(&mut rng), fs.random(&mut rng));
+            let j = jinv(&fs, &e);
+            if is_smooth(&fs, &e) && j != 0 && j != 1728 {
+                break e;
+            }
+        };
+        let reference = isogeny_algos::bigint::Big::from_u64(order(&fs, &e, &mut rng));
+        let _ = sea(&fs, &e, 31, &mut phis, &mut rng); // warm the Phi cache
+        let t0 = Instant::now();
+        let a = sea(&fs, &e, 31, &mut phis, &mut rng);
+        let ns_plain = t0.elapsed().as_nanos() as f64;
+        let t0 = Instant::now();
+        let b = sea_atkin_tower(&fs, &e, 31, &mut phis, &mut rng);
+        let ns_tower = t0.elapsed().as_nanos() as f64;
+        let ok = a.as_ref().map_or(false, |x| x.0 == reference) && b.as_ref().map_or(false, |x| x.0 == reference);
+        o.rec("newcomp", "sea_vs_sea_atkin_tower", &[("p_bits", "38".into()), ("instance", inst.to_string())], &[("sea_ns", ns_plain), ("sea_atkin_tower_ns", ns_tower)], ok, "both equal the BSGS order");
+    }
+}
+
+/// Sutherland isogeny-graph Phi_l vs the q-expansion Phi_l.
+#[allow(unused_imports)]
+fn bench_nc_suth(o: &mut Out) {
+    use isogeny_algos::find::sea::{atkin_eigenvalue_tower, atkin_candidates_tower, sea, sea_atkin_tower};
+    use isogeny_algos::find::sutherland::{phi_crt, phi_mod_p};
+    use isogeny_algos::fpr::FpR;
+    use isogeny_algos::gf3n::GF3n;
+    // --- Sutherland Phi_l mod p vs Hecke ---
+    for &ell in &[3usize, 5, 7] {
+        let mut p = (1u64 << 16) + 1;
+        while !(is_prime(p) && p % ell as u64 == 1) {
+            p += 1;
+        }
+        let f = Zp::new(p);
+        let t0 = Instant::now();
+        let s = phi_mod_p(p, ell, &mut Rng::new(0x5107 ^ p));
+        let ns_s = t0.elapsed().as_nanos() as f64;
+        let t0 = Instant::now();
+        let h = Phi::compute(&f, ell);
+        let ns_h = t0.elapsed().as_nanos() as f64;
+        o.rec("newcomp", "sutherland_phi_mod_p", &[("p_bits", "17".into()), ("ell", ell.to_string())], &[("ns", ns_s), ("hecke_ns", ns_h)], s.map_or(false, |c| c == h.c), "equals the Hecke Phi_l mod p");
+    }
+    for &ell in &[3usize, 5] {
+        let t0 = Instant::now();
+        let c = phi_crt(ell);
+        let ns = t0.elapsed().as_nanos() as f64;
+        let ok = c.map_or(false, |c| c == isogeny_algos::find::modpoly::integer_coeffs(ell));
+        o.rec("newcomp", "sutherland_phi_crt", &[("ell", ell.to_string())], &[("ns", ns)], ok, "equals the integer Phi_l");
     }
 }

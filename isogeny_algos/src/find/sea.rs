@@ -285,12 +285,41 @@ pub fn atkin_candidates(ell: u64, q_mod_l: u64, r: usize) -> Vec<u64> {
 /// genuinely acts as [nu] on the kernel, that nu is a true eigenvalue of pi^d, i.e. nu = lambda^d
 /// or mu^d mod l. Returns None if no degree <= RMAX works. Curve over the prime field F_p.
 pub fn atkin_eigenvalue_tower(zp: &crate::field::Zp, e: &Curve<u64>, ell: u64, rng: &mut Rng) -> Option<(u64, usize)> {
+    let phi0 = Phi::compute(zp, ell as usize);
+    atkin_eigenvalue_tower_with(zp, &phi0, e, ell, rng)
+}
+
+/// `atkin_eigenvalue_tower` with the base-field Phi_l supplied (as cached by SEA). Phi_l has
+/// integer coefficients, so over F_{p^d} it is the F_p polynomial with its coefficients embedded:
+/// no modular-polynomial computation happens in the extension. Degrees d over which Phi_l(j, Y)
+/// has no root (gcd(Y^(p^d) - Y, Phi_l(j, Y)) = 1 over F_p) are skipped without building F_{p^d}.
+pub fn atkin_eigenvalue_tower_with(
+    zp: &crate::field::Zp,
+    phi0: &Phi<crate::field::Zp>,
+    e: &Curve<u64>,
+    ell: u64,
+    rng: &mut Rng,
+) -> Option<(u64, usize)> {
     use crate::fpr::{FpR, RMAX};
-    for d in 2..=ATKIN_TOWER_MAX_DEGREE.min(RMAX) {
+    let dmax = ATKIN_TOWER_MAX_DEGREE.min(RMAX);
+    // which extension degrees carry a root of Phi_l(j, Y): those divisible by some factor degree
+    let g = poly::monic(zp, &phi0.y_poly(zp, jinv(zp, e)));
+    let y = poly::x_poly(zp);
+    let mut yk = y.clone();
+    let mut has_root = vec![false; dmax + 1];
+    for slot in has_root.iter_mut().skip(1) {
+        yk = poly::powmod_big(zp, &yk, &zp.q(), &g); // Y^(p^d) mod g, d = 1, 2, ...
+        let gg = poly::gcd(zp, &g, &poly::sub(zp, &yk, &y));
+        *slot = poly::deg(zp, &gg) > 0;
+    }
+    for d in 2..=dmax {
+        if !has_root[d] {
+            continue;
+        }
         let fr = FpR::new(zp.p, d);
         let e_ext = Curve::new(fr.embed(e.a), fr.embed(e.b));
         let j_ext = jinv(&fr, &e_ext);
-        let phi = Phi::compute(&fr, ell as usize);
+        let phi = Phi { ell: phi0.ell, c: phi0.c.iter().map(|row| row.iter().map(|&x| fr.embed(x)).collect()).collect() };
         let roots = phi.neighbors(&fr, j_ext, rng);
         for &jt in roots.iter().take(5) {
             let Some(et) = crate::find::elkies::elkies_codomain(&fr, &phi, &e_ext, jt) else { continue };
@@ -377,7 +406,19 @@ pub fn sea_atkin_tower(
     let ee = *e;
     let fpc = fp.clone();
     let mut rng2 = Rng::new(0xA7C0 ^ fp.p);
-    let mut resolver = move |l: u64| atkin_trace_tower(&fpc, &ee, l, &mut rng2);
+    // the resolver cannot borrow `phis` (sea_resolved holds it), so it keeps its own base-field
+    // Phi_l cache; each is computed once per prime and only embedded into the towers
+    let mut cache: HashMap<u64, Phi<crate::field::Zp>> = HashMap::new();
+    let mut resolver = move |l: u64| {
+        let phi0 = cache.entry(l).or_insert_with(|| Phi::compute(&fpc, l as usize));
+        let (nu, d) = atkin_eigenvalue_tower_with(&fpc, phi0, &ee, l, &mut rng2)?;
+        let cands = atkin_candidates_tower(l, fpc.p % l, d, nu);
+        if cands.len() == 1 {
+            Some(cands[0])
+        } else {
+            None
+        }
+    };
     sea_resolved(fp, e, max_ell, phis, rng, CYCLE_DEGREE, Some(&mut resolver))
 }
 

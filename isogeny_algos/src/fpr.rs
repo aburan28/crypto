@@ -17,8 +17,13 @@ pub type ER = [u64; RMAX];
 pub struct FpR {
     pub p: u64,
     pub r: usize,
-    /// z^r = sum_i red[i] z^i (i < r).
-    red: ER,
+    /// the nonzero entries (k, red[k]) of the reduction tail, where z^r = sum_k red[k] z^k
+    /// (low weight: 1-3 terms usually)
+    nz: Vec<(usize, u64)>,
+    /// true when sums of the products formed in one `mul` fit in u128 without reduction
+    lazy: bool,
+    /// Frobenius matrix: frob[i] = (z^p)^i, so (sum a_i z^i)^p = sum a_i frob[i]
+    frob: Vec<ER>,
 }
 
 impl FpR {
@@ -27,17 +32,16 @@ impl FpR {
         assert!(is_prime(p), "FpR: p must be prime");
         assert!((1..=RMAX).contains(&r), "FpR: 1 <= r <= {RMAX}");
         if r == 1 {
-            return FpR { p, r, red: [0; RMAX] };
+            return Self::build(p, r, [0; RMAX]);
         }
         let zp = Zp::new(p);
         // search tails of increasing weight: z^r = c0 + c1 z + ... (few nonzero terms, small coeffs)
         for weight in 1..=3usize {
             if let Some(red) = search_tail(&zp, r, weight) {
-                return FpR { p, r, red };
+                return Self::build(p, r, red);
             }
         }
         // dense fallback (rare): brute small coefficients
-        let zp = Zp::new(p);
         let mut rng = Rng::new(0x1F9C ^ p ^ r as u64);
         for _ in 0..100_000 {
             let mut red = [0u64; RMAX];
@@ -45,32 +49,81 @@ impl FpR {
                 *ri = rng.below(p);
             }
             if is_irreducible(&zp, r, &red) {
-                return FpR { p, r, red };
+                return Self::build(p, r, red);
             }
         }
         panic!("FpR: no irreducible of degree {r} found for p={p}");
     }
 
-    fn reduce_vec(&self, mut c: Vec<u64>) -> ER {
-        let p = self.p;
+    fn build(p: u64, r: usize, red: ER) -> FpR {
+        let nz: Vec<(usize, u64)> = (0..r).filter(|&k| red[k] % p != 0).map(|k| (k, red[k] % p)).collect();
+        // worst case per accumulator entry: r products (2x for squaring) plus (r-1)*|nz| folds,
+        // each < p^2; lazy accumulation is safe when that bound stays below 2^127
+        let bits = 64 - p.leading_zeros();
+        let terms = (2 * r + r.saturating_sub(1) * nz.len()).max(1) as u32;
+        let lazy = 2 * bits + (32 - terms.leading_zeros()) <= 127;
+        let mut f = FpR { p, r, nz, lazy, frob: vec![] };
+        if r > 1 {
+            let mut z = [0u64; RMAX];
+            z[1] = 1;
+            let zp = f.pow_big(z, &Big::from_u64(p)); // z^p
+            let mut fr = vec![f.one()];
+            for i in 1..r {
+                let next = f.mul(fr[i - 1], zp);
+                fr.push(next);
+            }
+            f.frob = fr;
+        }
+        f
+    }
+
+    /// Fold the coefficients of degree >= r with z^r = red and reduce mod p.
+    #[inline]
+    fn fold(&self, acc: &mut [u128; 2 * RMAX]) -> ER {
         let r = self.r;
-        // c has degree up to 2r-2; fold top coefficients with z^r = red
-        for i in (r..c.len()).rev() {
-            let ci = c[i] % p;
+        let pp = self.p as u128;
+        for i in (r..2 * r - 1).rev() {
+            let ci = acc[i] % pp;
             if ci == 0 {
                 continue;
             }
-            c[i] = 0;
-            for k in 0..r {
-                if self.red[k] != 0 {
-                    let idx = i - r + k;
-                    c[idx] = (c[idx] + (ci as u128 * self.red[k] as u128 % p as u128) as u64) % p;
+            for &(k, rk) in &self.nz {
+                let idx = i - r + k;
+                if self.lazy {
+                    acc[idx] += ci * rk as u128;
+                } else {
+                    acc[idx] = (acc[idx] % pp + ci * rk as u128 % pp) % pp;
                 }
             }
         }
         let mut out = [0u64; RMAX];
-        for (i, slot) in out.iter_mut().take(r).enumerate() {
-            *slot = c.get(i).copied().unwrap_or(0) % p;
+        for i in 0..r {
+            out[i] = (acc[i] % pp) as u64;
+        }
+        out
+    }
+
+    /// Frobenius a -> a^p (F_p-linear: a matrix-vector product).
+    pub fn frobenius(&self, a: ER) -> ER {
+        let r = self.r;
+        let pp = self.p as u128;
+        let mut acc = [0u128; RMAX];
+        for i in 0..r {
+            if a[i] == 0 {
+                continue;
+            }
+            let ai = a[i] as u128;
+            for k in 0..r {
+                if self.lazy {
+                    acc[k] += ai * self.frob[i][k] as u128;
+                } else {
+                    acc[k] = (acc[k] + ai * self.frob[i][k] as u128 % pp) % pp;
+                }
+            }
+        }
+        let mut out = [0u64; RMAX];
+        for k in 0..r {
+            out[k] = (acc[k] % pp) as u64;
         }
         out
     }
@@ -175,59 +228,99 @@ impl Field for FpR {
         e[0] = 1 % self.p;
         e
     }
+    // Elements are kept reduced (every coefficient < p), so add/sub need one conditional
+    // correction instead of a division.
     fn add(&self, a: ER, b: ER) -> ER {
+        let p = self.p as u128;
         let mut c = [0u64; RMAX];
         for i in 0..self.r {
-            c[i] = (a[i] + b[i]) % self.p;
+            let s = a[i] as u128 + b[i] as u128;
+            c[i] = if s >= p { (s - p) as u64 } else { s as u64 };
         }
         c
     }
     fn sub(&self, a: ER, b: ER) -> ER {
         let mut c = [0u64; RMAX];
         for i in 0..self.r {
-            c[i] = (a[i] + self.p - b[i] % self.p) % self.p;
+            c[i] = if a[i] >= b[i] { a[i] - b[i] } else { a[i] + (self.p - b[i]) };
         }
         c
     }
     fn neg(&self, a: ER) -> ER {
         let mut c = [0u64; RMAX];
         for i in 0..self.r {
-            c[i] = (self.p - a[i] % self.p) % self.p;
+            c[i] = if a[i] == 0 { 0 } else { self.p - a[i] };
         }
         c
     }
     fn mul(&self, a: ER, b: ER) -> ER {
         let r = self.r;
-        let p = self.p as u128;
-        let mut prod = vec![0u64; 2 * r];
+        if r == 1 {
+            let mut c = [0u64; RMAX];
+            c[0] = (a[0] as u128 * b[0] as u128 % self.p as u128) as u64;
+            return c;
+        }
+        let pp = self.p as u128;
+        let mut acc = [0u128; 2 * RMAX];
         for i in 0..r {
             if a[i] == 0 {
                 continue;
             }
             let ai = a[i] as u128;
             for j in 0..r {
-                if b[j] != 0 {
-                    prod[i + j] = ((prod[i + j] as u128 + ai * b[j] as u128) % p) as u64;
+                if self.lazy {
+                    acc[i + j] += ai * b[j] as u128;
+                } else {
+                    acc[i + j] = (acc[i + j] + ai * b[j] as u128 % pp) % pp;
                 }
             }
         }
-        self.reduce_vec(prod)
+        self.fold(&mut acc)
     }
+    fn sq(&self, a: ER) -> ER {
+        let r = self.r;
+        if r == 1 || !self.lazy {
+            return self.mul(a, a);
+        }
+        // a_i a_j for i < j once, doubled; squares on the diagonal
+        let mut acc = [0u128; 2 * RMAX];
+        for i in 0..r {
+            if a[i] == 0 {
+                continue;
+            }
+            let ai = a[i] as u128;
+            acc[2 * i] += ai * ai;
+            let ai2 = 2 * ai;
+            for j in (i + 1)..r {
+                acc[i + j] += ai2 * a[j] as u128;
+            }
+        }
+        self.fold(&mut acc)
+    }
+    /// Inverse through the norm: with b = a^p a^(p^2) ... a^(p^(r-1)) (Frobenius powers, each a
+    /// matrix-vector product), N(a) = a b lies in F_p, and a^-1 = b N(a)^-1.
     fn inv(&self, a: ER) -> ER {
         assert!(!self.is_zero(a), "FpR: inverse of zero");
-        // extended Euclid in F_p[z] between m and a
-        let zp = Zp::new(self.p);
-        let m = modulus_poly(&zp, self.r, &self.red);
-        let mut av: Vec<u64> = a[..self.r].iter().map(|&c| c % self.p).collect();
-        while av.len() > 1 && *av.last().unwrap() == 0 {
-            av.pop();
+        let p = self.p;
+        if self.r == 1 {
+            let mut c = [0u64; RMAX];
+            c[0] = crate::fpm::inv_u64(a[0], p);
+            return c;
         }
-        let inv = poly::invmod(&zp, &av, &m).expect("FpR inverse exists for nonzero element");
-        let mut out = [0u64; RMAX];
-        for (i, slot) in out.iter_mut().take(self.r).enumerate() {
-            *slot = inv.get(i).copied().unwrap_or(0) % self.p;
+        let mut f = self.frobenius(a);
+        let mut b = f;
+        for _ in 2..self.r {
+            f = self.frobenius(f);
+            b = self.mul(b, f);
         }
-        out
+        let n = self.mul(a, b);
+        debug_assert!(n[1..self.r].iter().all(|&c| c == 0), "norm must lie in F_p");
+        let ninv = crate::fpm::inv_u64(n[0], p) as u128;
+        let mut c = [0u64; RMAX];
+        for i in 0..self.r {
+            c[i] = (b[i] as u128 * ninv % p as u128) as u64;
+        }
+        c
     }
     fn from_u64(&self, n: u64) -> ER {
         let mut e = [0; RMAX];

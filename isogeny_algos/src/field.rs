@@ -353,17 +353,51 @@ impl Field for Zp {
     }
 }
 
-/// sum a[i] b[len-1-i] mod p with lazy u128 accumulation (p < 2^62).
+/// Bit length of the largest residue p - 1 (p >= 2).
+#[inline]
+fn residue_bits(p: u64) -> u32 {
+    64 - (p - 1).leading_zeros()
+}
+
+/// Products (each < 2^(2b), b = residue_bits(p)) that a u128 accumulator already holding a value
+/// < p can absorb before it must be reduced: 15 for p < 2^62 as before, 2^(127 - 2b) (at most
+/// 2^30) when that is larger. Bit lengths only: this runs once per dot product.
+#[inline]
+fn lazy_cap(p: u64) -> usize {
+    let b = 2 * residue_bits(p);
+    if b >= 123 {
+        15
+    } else {
+        1usize << (127 - b).min(30)
+    }
+}
+
+/// Whether a sum of `terms` products of residues mod p fits in a u64.
+#[inline]
+fn fits_u64(p: u64, terms: usize) -> bool {
+    2 * residue_bits(p) + (usize::BITS - terms.leading_zeros()) <= 64
+}
+
+/// sum a[i] b[len-1-i] mod p with lazy accumulation (p < 2^62): in a u64 when the whole sum
+/// fits, otherwise in a u128 reduced every `lazy_cap(p)` products.
 pub fn lazy_dot_rev(a: &[u64], b: &[u64], p: u64) -> u128 {
     let n = a.len().min(b.len());
+    let bl = b.len();
+    if fits_u64(p, n) {
+        let mut acc = 0u64;
+        for i in 0..n {
+            acc += a[i] * b[bl - 1 - i];
+        }
+        return (acc % p) as u128;
+    }
     let pp = p as u128;
+    let cap = lazy_cap(p);
     let mut acc: u128 = 0;
     let mut cnt = 0;
-    let bl = b.len();
     for i in 0..n {
         acc += a[i] as u128 * b[bl - 1 - i] as u128;
         cnt += 1;
-        if cnt == 15 {
+        if cnt == cap {
             acc %= pp;
             cnt = 1;
         }
@@ -371,8 +405,9 @@ pub fn lazy_dot_rev(a: &[u64], b: &[u64], p: u64) -> u128 {
     acc % pp
 }
 
-/// Convolution with u128 accumulation: products are < p^2 < 2^124 for p < 2^62, so 15 of them can be
-/// summed before reducing; `fin` maps the reduced accumulator (< p) to the output representation.
+/// Convolution with lazy accumulation (p < 2^62): each output coefficient is summed in a u64
+/// when that cannot overflow, otherwise in a u128 reduced every `lazy_cap(p)` products; `fin`
+/// maps the reduced accumulator (< p) to the output representation.
 pub fn lazy_conv(a: &[u64], b: &[u64], p: u64, nout: usize, fin: impl Fn(u128) -> u64) -> Vec<u64> {
     let (n, m) = (a.len(), b.len());
     let mut r = Vec::with_capacity(nout);
@@ -380,6 +415,8 @@ pub fn lazy_conv(a: &[u64], b: &[u64], p: u64, nout: usize, fin: impl Fn(u128) -
     if n == 0 || m == 0 {
         return vec![fin(0); nout];
     }
+    let small = fits_u64(p, n.min(m));
+    let cap = lazy_cap(p);
     for k in 0..nout {
         if k > n + m - 2 {
             r.push(fin(0));
@@ -387,12 +424,20 @@ pub fn lazy_conv(a: &[u64], b: &[u64], p: u64, nout: usize, fin: impl Fn(u128) -
         }
         let lo = k.saturating_sub(m - 1);
         let hi = k.min(n - 1);
+        if small {
+            let mut acc = 0u64;
+            for i in lo..=hi {
+                acc += a[i] * b[k - i];
+            }
+            r.push(fin((acc % p) as u128));
+            continue;
+        }
         let mut acc: u128 = 0;
         let mut cnt = 0;
         for i in lo..=hi {
             acc += a[i] as u128 * b[k - i] as u128;
             cnt += 1;
-            if cnt == 15 {
+            if cnt == cap {
                 acc %= pp;
                 cnt = 1;
             }

@@ -277,10 +277,14 @@ pub fn gcd<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
 pub fn mulmod<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>, m: &Poly<F>) -> Poly<F> {
     rem(f, &mul(f, a, b), m)
 }
-pub fn powmod<F: Field>(f: &F, a: &Poly<F>, mut e: u128, m: &Poly<F>) -> Poly<F> {
+pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
     if m.len() > 64 {
         return PolyModulus::new(f, m).powmod_big(f, a, &Big::from_u128(e));
     }
+    if m.len() >= 3 {
+        return TableModulus::new(f, m).powmod(f, a, 128 - e.leading_zeros() as usize, |i| e >> i & 1 == 1);
+    }
+    let mut e = e;
     let mut r = constant(f, f.one());
     let mut b = rem(f, a, m);
     while e > 0 {
@@ -298,6 +302,9 @@ pub fn powmod_big<F: Field>(f: &F, a: &Poly<F>, e: &Big, m: &Poly<F>) -> Poly<F>
     if m.len() > 64 {
         return PolyModulus::new(f, m).powmod_big(f, a, e);
     }
+    if m.len() >= 3 {
+        return TableModulus::new(f, m).powmod(f, a, e.bits(), |i| e.bit(i));
+    }
     let mut r = constant(f, f.one());
     let b = rem(f, a, m);
     for i in (0..e.bits()).rev() {
@@ -307,6 +314,89 @@ pub fn powmod_big<F: Field>(f: &F, a: &Poly<F>, e: &Big, m: &Poly<F>) -> Poly<F>
         }
     }
     r
+}
+
+/// Reducer for a fixed modulus of small degree n >= 2: the table of x^k mod m for k = n..2n-2,
+/// stored by output coefficient, so each coefficient of a reduced product is one lazily
+/// accumulated dot product (`Field::dot_rev`) rather than n separate modular multiply-subtracts
+/// of long division. Elements are kept as fixed length-n coefficient vectors.
+struct TableModulus<F: Field> {
+    n: usize,
+    /// x^n mod m (multiplication by x is a shift plus this row times the overflow)
+    xn: Vec<F::E>,
+    /// cols[i][n-2-j] = coefficient i of x^(n+j) mod m (reversed for `dot_rev`)
+    cols: Vec<Vec<F::E>>,
+}
+
+impl<F: Field> TableModulus<F> {
+    fn new(f: &F, m: &Poly<F>) -> Self {
+        // remainders modulo m and modulo monic(m) agree
+        let m = monic(f, m);
+        let n = m.len() - 1;
+        let xn: Vec<F::E> = m[..n].iter().map(|&c| f.neg(c)).collect();
+        let mut rows = vec![xn.clone()];
+        for _ in n + 1..=2 * n - 2 {
+            let t = Self::times_x(f, &xn, rows.last().unwrap());
+            rows.push(t);
+        }
+        let cols = (0..n).map(|i| (0..n - 1).map(|j| rows[n - 2 - j][i]).collect()).collect();
+        TableModulus { n, xn, cols }
+    }
+    /// x t mod m for t of length n
+    fn times_x(f: &F, xn: &[F::E], t: &[F::E]) -> Vec<F::E> {
+        let n = t.len();
+        let lead = t[n - 1];
+        (0..n)
+            .map(|i| {
+                let low = if i == 0 { f.zero() } else { t[i - 1] };
+                f.add(low, f.mul(lead, xn[i]))
+            })
+            .collect()
+    }
+    /// a mod m for a.len() <= 2n - 1, as a length-n vector
+    fn reduce(&self, f: &F, a: &[F::E]) -> Vec<F::E> {
+        let n = self.n;
+        if a.len() <= n {
+            let mut r = a.to_vec();
+            r.resize(n, f.zero());
+            return r;
+        }
+        let hi = &a[n..];
+        let h = hi.len();
+        (0..n).map(|i| f.add(a[i], f.dot_rev(hi, &self.cols[i][n - 1 - h..]))).collect()
+    }
+    /// a^e mod m, the bits of e given by `bit(i)` for i < nbits, left to right. A base of
+    /// degree <= 1 (x, x + c, ...) multiplies in by a shift instead of a full product.
+    fn powmod(&self, f: &F, a: &Poly<F>, nbits: usize, bit: impl Fn(usize) -> bool) -> Poly<F> {
+        let n = self.n;
+        let b = {
+            let mut b = rem(f, a, &self.monic_m(f));
+            b.resize(n, f.zero());
+            b
+        };
+        let linear = b[2..].iter().all(|&c| f.is_zero(c));
+        let mut r = vec![f.zero(); n];
+        r[0] = f.one();
+        for i in (0..nbits).rev() {
+            r = self.reduce(f, &mul_raw(f, &r, &r));
+            if bit(i) {
+                r = if linear {
+                    // r (b0 + b1 x) = b0 r + b1 (x r)
+                    let xr = Self::times_x(f, &self.xn, &r);
+                    (0..n).map(|k| f.add(f.mul(b[0], r[k]), f.mul(b[1], xr[k]))).collect()
+                } else {
+                    self.reduce(f, &mul_raw(f, &r, &b))
+                };
+            }
+        }
+        trim(f, &mut r);
+        r
+    }
+    fn monic_m(&self, f: &F) -> Poly<F> {
+        let mut m: Poly<F> = self.xn.iter().map(|&c| f.neg(c)).collect();
+        m.push(f.one());
+        m
+    }
 }
 
 /// Subproduct tree of the linear factors (x - r_i): level 0 = leaves, last level = product.
@@ -373,7 +463,9 @@ pub fn from_roots<F: Field>(f: &F, roots: &[F::E]) -> Poly<F> {
     p
 }
 
-fn split_roots<F: Field>(f: &F, g: &Poly<F>, rng: &mut Rng, out: &mut Vec<F::E>) {
+/// The roots of `g`, assumed monic and a product of distinct linear factors (Cantor-Zassenhaus
+/// splitting), appended to `out`.
+pub fn split_roots<F: Field>(f: &F, g: &Poly<F>, rng: &mut Rng, out: &mut Vec<F::E>) {
     let d = deg(f, g);
     if d <= 0 {
         return;

@@ -2,17 +2,18 @@
 //! Chinese remainder theorem"): compute Phi_l mod p from the l-isogeny graph, then CRT to the
 //! integer polynomial. The mod-p step is independent of the q-expansion methods in `modpoly.rs`
 //! (Hecke/Newton, linear algebra): for a curve E/F_p (p = 1 mod l) whose l+1 l-isogenies are all
-//! rational, every subgroup's codomain j-invariant is computed by Velu/Kohel, so
+//! rational, every subgroup's codomain j-invariant is computed by Velu, so
 //!     Phi_l(X, j(E)) = prod_{C} (X - j(E/C))
-//! is read off directly; interpolating over l+2 such curves recovers the bivariate Phi_l(X, Y)
-//! mod p. The result is checked (in tests) for exact equality against the q-expansion Phi_l.
+//! is read off directly; interpolating over l+1 such curves (Phi_l is monic of degree l+1 in Y)
+//! recovers the bivariate Phi_l(X, Y) mod p. The result is checked (in tests) for exact equality
+//! against the q-expansion Phi_l.
 use crate::curve::{is_smooth, jinv, Curve};
 use crate::field::{is_prime, Field, Rng, Zp};
-use crate::find::divpoly::kernel_polys;
+use crate::find::divpoly::division_poly;
 use crate::int::Int;
-use crate::kernel::kohel::kohel;
+use crate::kernel::xonly::velu_xonly_fast;
 use crate::poly;
-use std::collections::HashSet;
+use std::collections::{HashSet, VecDeque};
 
 /// Lagrange interpolation over F_p: the unique polynomial (coeffs low->high) of degree < xs.len()
 /// through (xs[k], ys[k]). xs must be distinct.
@@ -39,58 +40,101 @@ fn lagrange(fp: &Zp, xs: &[u64], ys: &[u64]) -> Vec<u64> {
     acc
 }
 
+/// The l+1 codomains of the l-isogenies of E, when all of them are rational; None otherwise.
+/// With p = 1 mod l, all l+1 are rational iff Frobenius is +-1 on E[l] (its determinant is
+/// p = 1), iff every root of psi_l lies in F_p, iff x^p = x mod psi_l: one modular power decides,
+/// for any curve. The (l^2-1)/2 roots then split into the l+1 cyclic subgroups, each read off by
+/// x-only Velu from one of its x-coordinates (x-only, so the twist case needs no square root).
+fn full_codomains(fp: &Zp, e: &Curve<u64>, ell: usize, rng: &mut Rng) -> Option<Vec<Curve<u64>>> {
+    let psi = poly::monic(fp, &division_poly(fp, e, ell));
+    let x = poly::x_poly(fp);
+    if poly::deg(fp, &poly::sub(fp, &poly::powmod(fp, &x, fp.p as u128, &psi), &x)) >= 0 {
+        return None;
+    }
+    let mut xs = vec![];
+    poly::split_roots(fp, &psi, rng, &mut xs);
+    let roots: HashSet<u64> = xs.iter().copied().collect();
+    let mut taken = HashSet::new();
+    let mut cods = vec![];
+    for &x0 in &xs {
+        if taken.contains(&x0) {
+            continue;
+        }
+        let iso = velu_xonly_fast(fp, e, x0, ell as u64)?;
+        for r in &iso.reps {
+            // x(kP) is a root of psi_l not yet in any subgroup (the subgroups partition the roots)
+            if !roots.contains(&r.0) || !taken.insert(r.0) {
+                return None;
+            }
+        }
+        cods.push(iso.cod);
+    }
+    (cods.len() == ell + 1).then_some(cods)
+}
+
 /// Phi_l mod p by the isogeny-graph method. Returns the (l+2) x (l+2) coefficient matrix c[i][j]
-/// (coefficient of X^i Y^j) mod p, or None if fewer than l+2 curves with all l+1 l-isogenies
+/// (coefficient of X^i Y^j) mod p, or None if fewer than l+1 curves with all l+1 l-isogenies
 /// rational were found within the search budget. Requires p prime and p = 1 mod l.
+///
+/// Such curves cluster: they are the vertices of the l-isogeny volcano above its floor, so the
+/// codomains of each one found are tried next (a walk through the volcano), and random curves
+/// are drawn only when that runs dry. The interpolation is unique, so the order in which the
+/// l+1 curves turn up does not change the result.
 pub fn phi_mod_p(p: u64, ell: usize, rng: &mut Rng) -> Option<Vec<Vec<u64>>> {
     assert!(is_prime(p), "p must be prime");
     assert!(p % ell as u64 == 1, "need p = 1 mod l so the full l-torsion can be rational");
     let fp = Zp::new(p);
     let l1 = ell + 1;
-    let need = l1 + 1; // l + 2 distinct j0 for a degree <= l+1 interpolation in Y
+    // Phi_l is monic of degree l+1 in Y (c[i][l+1] = [i = 0]), so each X^i coefficient minus
+    // its known Y^(l+1) term has degree <= l in Y: l + 1 distinct j0 determine it
+    let need = l1;
     let mut j0s: Vec<u64> = vec![];
     let mut cols: Vec<Vec<u64>> = vec![]; // per curve: coeffs of Phi(X, j0) in X, length l+2
-    let mut seen = HashSet::new();
+    // j-invariants already tested (the property depends only on j: twists flip the sign of
+    // Frobenius, and j != 0, 1728 has no other twists)
+    let mut tested = HashSet::new();
+    let mut walk: VecDeque<Curve<u64>> = VecDeque::new();
     let mut tries = 0u64;
     while j0s.len() < need && tries < 400_000 {
-        tries += 1;
-        let e = Curve::new(fp.random(rng), fp.random(rng));
+        let e = match walk.pop_front() {
+            Some(e) => e,
+            None => {
+                tries += 1;
+                Curve::new(fp.random(rng), fp.random(rng))
+            }
+        };
         if !is_smooth(&fp, &e) {
             continue;
         }
         let j0 = jinv(&fp, &e);
-        if j0 == 0 || j0 == 1728 || seen.contains(&j0) {
+        if j0 == 0 || j0 == 1728 || !tested.insert(j0) {
             continue;
         }
-        let kps = kernel_polys(&fp, &e, ell as u64, rng);
-        if kps.len() != l1 {
-            continue; // need every l+1 l-isogeny rational (pi scalar on E[l])
-        }
+        let Some(cods) = full_codomains(&fp, &e, ell, rng) else { continue };
         // Phi(X, j0) = prod over the l+1 subgroups of (X - j(E/C))
         let mut px = vec![fp.one()];
-        for h in &kps {
-            let iso = kohel(&fp, &e, h, ell as u64);
-            let jc = jinv(&fp, &iso.cod);
-            px = poly::mul(&fp, &px, &vec![fp.neg(jc), fp.one()]);
+        for cod in &cods {
+            px = poly::mul(&fp, &px, &vec![fp.neg(jinv(&fp, cod)), fp.one()]);
         }
         px.resize(l1 + 1, 0); // monic degree l+1: coeffs c0..c_{l+1}
-        seen.insert(j0);
         j0s.push(j0);
         cols.push(px);
+        walk.extend(cods);
     }
     if j0s.len() < need {
         return None;
     }
     // interpolate each X-power's coefficient as a polynomial in Y
     let mut c = vec![vec![0u64; l1 + 1]; l1 + 1];
+    c[0][l1] = 1;
     for i in 0..=l1 {
-        let ys: Vec<u64> = cols.iter().map(|col| col[i]).collect();
+        let ys: Vec<u64> = cols
+            .iter()
+            .zip(&j0s)
+            .map(|(col, &j0)| if i == 0 { fp.sub(col[0], fp.pow(j0, l1 as u128)) } else { col[i] })
+            .collect();
         let py = lagrange(&fp, &j0s, &ys);
-        for (j, &v) in py.iter().enumerate() {
-            if j <= l1 {
-                c[i][j] = v;
-            }
-        }
+        c[i][..l1].copy_from_slice(&py);
     }
     Some(c)
 }
