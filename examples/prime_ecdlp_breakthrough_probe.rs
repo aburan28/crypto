@@ -23,7 +23,7 @@
 //! roots and measures the empirical success threshold.
 //!
 //! ```bash
-//! cargo run --release --example prime_ecdlp_breakthrough_probe -- [--probe a|b|ab]
+//! cargo run --release --example prime_ecdlp_breakthrough_probe -- [--probe a|b|c|abc]
 //!     [--rho-bits 32,36,40,44] [--lattice-bits 40,56] [--targets 16] [--json out.json]
 //! ```
 //!
@@ -605,6 +605,204 @@ fn probe_b(bits_list: &[u32], out: &mut Vec<serde_json::Value>) {
     println!();
 }
 
+
+/// Which lattice to build for the `S₃` small-root problem.
+#[derive(Clone, Copy, Debug)]
+enum LatticeKind {
+    /// Jochemsz–May basic/extended: monomials `u^α v^β`, `α ≤ 2m + t`, `β ≤ 2m`,
+    /// row `u^{α−2k} v^{β−2k} f^k p^{m−k}` with `k = min(⌊α/2⌋, ⌊β/2⌋, m)`.
+    Rect { m: usize, t: usize },
+    /// Symmetric rewriting in `(e₁, e₂) = (x₁+x₂, x₁x₂)`, bounds `(2B, B²)`,
+    /// triangle `α + β ≤ 2m`, row `e₁^α e₂^{β−2k} f^k p^{m−k}`, `k = min(⌊β/2⌋, m)`.
+    Sym { m: usize },
+}
+
+/// One generalised lattice trial; returns (vanishing rows, HG-on-first-two, dim).
+fn lattice_trial_kind(curve: &FastCurve, kind: LatticeKind, bound: u64, rng: &mut StdRng) -> Option<(usize, bool, usize)> {
+    let p = BigInt::from(curve.f.p);
+    let pick = |rng: &mut StdRng| -> Option<Pt> {
+        for _ in 0..10_000 {
+            let x = rng.gen_range(1..=bound);
+            if let Some(pt) = curve.lift_x(x) {
+                return Some(pt);
+            }
+        }
+        None
+    };
+    let fi = pick(rng)?;
+    let fj = pick(rng)?;
+    let fj_signed = if rng.gen_bool(0.5) { fj } else { curve.neg(fj) };
+    let r = curve.add(Some(fi), Some(fj_signed))?;
+    let (xi, _) = curve.canonical(fi);
+    let (xj, _) = curve.canonical(fj);
+    let c = s3_coeffs(curve, r.x);
+    let big = |v: u64| BigInt::from(v);
+    // polynomial, bounds and monomial set per kind
+    let (f, bounds, monos, m): (BiPoly, (BigInt, BigInt), Vec<(usize, usize)>, usize) = match kind {
+        LatticeKind::Rect { m, t } => {
+            let mut f: BiPoly = HashMap::new();
+            for a in 0..3 {
+                for b in 0..3 {
+                    if c[a][b] != 0 {
+                        f.insert((a, b), big(c[a][b]));
+                    }
+                }
+            }
+            let mut monos = Vec::new();
+            for alpha in 0..=(2 * m + t) {
+                for beta in 0..=(2 * m) {
+                    monos.push((alpha, beta));
+                }
+            }
+            (f, (big(bound), big(bound)), monos, m)
+        }
+        LatticeKind::Sym { m } => {
+            // f(u,v) = Σ c_ab u^a v^b, symmetric: rewrite in e1 = u+v, e2 = uv.
+            // S3 = (e1² − 4e2) z² − 2[e1(e2 + A) + 2B] z + (e2 − A)² − 4B e1.
+            // Read the needed scalars back from the (u,v) coefficients:
+            //   z² = c[2][0], −2z = c[2][1], −2z² − 2A = c[1][1], lin = c[1][0], const = c[0][0].
+            let pm = &p;
+            let md = |x: BigInt| ((x % pm) + pm) % pm;
+            let z2 = big(c[2][0]);
+            let m2z = big(c[2][1]); // −2z
+            let c11 = big(c[1][1]); // −2z² − 2A
+            let lin = big(c[1][0]); // −2Az − 4B
+            let c00 = big(c[0][0]); // −4Bz + A²
+            // e1²: z²; e2: −4z² + (coefficient of uv from (uv−A)² and −2(u+v)(uv)z ... ) — derive directly:
+            // (e1² − 4e2) z²  → e1²·z², e2·(−4z²)
+            // −2[e1 e2 + A e1 + 2B] z → e1e2·(−2z), e1·(−2Az), const·(−4Bz)
+            // (e2 − A)² → e2²·1, e2·(−2A), const·A²
+            // −4B e1 → e1·(−4B)
+            // In terms of available scalars: e1 e2 coefficient = −2z = m2z; e1 coefficient = lin;
+            // const = c00; e2 coefficient = −4z² − 2A = c11 − 2z² ; e2² = 1; e1² = z2.
+            let mut f: BiPoly = HashMap::new();
+            f.insert((2, 0), md(z2.clone()));
+            f.insert((0, 2), BigInt::one());
+            f.insert((1, 1), md(m2z));
+            f.insert((1, 0), md(lin));
+            f.insert((0, 1), md(c11 - BigInt::from(2u8) * &z2));
+            f.insert((0, 0), md(c00));
+            let mut monos = Vec::new();
+            for alpha in 0..=(2 * m) {
+                for beta in 0..=(2 * m) {
+                    if alpha + beta <= 2 * m {
+                        monos.push((alpha, beta));
+                    }
+                }
+            }
+            (f, (big(2 * bound), big(bound) * big(bound)), monos, m)
+        }
+    };
+    // roots in the chosen variables
+    let (ru, rv) = match kind {
+        LatticeKind::Rect { .. } => (big(xi), big(xj)),
+        LatticeKind::Sym { .. } => (big(xi) + big(xj), big(xi) * big(xj)),
+    };
+    debug_assert!((poly_eval(&f, &ru, &rv) % &p).is_zero());
+    let mut fpow: Vec<BiPoly> = vec![HashMap::from([((0usize, 0usize), BigInt::one())])];
+    for k in 1..=m {
+        let next = poly_mul(&fpow[k - 1], &f);
+        fpow.push(next);
+    }
+    let dim = monos.len();
+    let index: HashMap<(usize, usize), usize> = monos.iter().enumerate().map(|(i, &mn)| (mn, i)).collect();
+    let (xb, yb) = bounds;
+    let mut basis: Vec<Vec<BigInt>> = Vec::with_capacity(dim);
+    for &(alpha, beta) in &monos {
+        let k = match kind {
+            LatticeKind::Rect { m, .. } => (alpha / 2).min(beta / 2).min(m),
+            LatticeKind::Sym { m } => (beta / 2).min(m),
+        };
+        let (a, b) = match kind {
+            LatticeKind::Rect { .. } => (alpha - 2 * k, beta - 2 * k),
+            LatticeKind::Sym { .. } => (alpha, beta - 2 * k),
+        };
+        let pk = p.pow((m - k) as u32);
+        let mut row = vec![BigInt::zero(); dim];
+        for ((pa, pb), cf) in &fpow[k] {
+            let mono = (pa + a, pb + b);
+            let Some(&col) = index.get(&mono) else { return None }; // shape mismatch guard
+            row[col] += cf * &pk * xb.pow(mono.0 as u32) * yb.pow(mono.1 as u32);
+        }
+        basis.push(row);
+    }
+    if lll_reduce(&mut basis, 0.99).is_err() {
+        return None;
+    }
+    let mut vanishing = 0usize;
+    let mut hg = true;
+    let pm = p.pow(m as u32);
+    let dimf = (dim as f64).sqrt();
+    for (ri, row) in basis.iter().enumerate() {
+        let mut poly: BiPoly = HashMap::new();
+        let mut norm2 = BigInt::zero();
+        for (col, &(alpha, beta)) in monos.iter().enumerate() {
+            let cf = &row[col];
+            if cf.is_zero() {
+                continue;
+            }
+            norm2 += cf * cf;
+            poly.insert((alpha, beta), cf / (xb.pow(alpha as u32) * yb.pow(beta as u32)));
+        }
+        if poly.is_empty() {
+            continue;
+        }
+        if poly_eval(&poly, &ru, &rv).is_zero() {
+            vanishing += 1;
+        }
+        if ri < 2 {
+            let norm = norm2.to_f64().unwrap_or(f64::INFINITY).sqrt();
+            hg &= norm * dimf < pm.to_f64().unwrap_or(f64::INFINITY);
+        }
+    }
+    Some((vanishing, hg, dim))
+}
+
+fn probe_c(bits: u32, out: &mut Vec<serde_json::Value>) {
+    println!("## C. Best lattice reach for S₃: extended Jochemsz–May shifts and the symmetric (e₁, e₂) lattice\n");
+    println!("Same planted instances and success criteria as probe B. `Rect{{m,t}}` = basic lattice at level m with t extra u-shifts; `Sym{{m}}` = symmetric formulation (bounds 2B, B²). 8 trials per cell on the {bits}-bit curve.\n");
+    println!("| lattice | dim | δ | B | ≥2 vanishing / trials | HG first two | mean vanishing | ms per LLL |");
+    println!("|---|---:|---:|---:|---:|---:|---:|---:|");
+    let Some((curve, _g)) = find_a3_curve(bits, 3) else { return };
+    let kinds = [
+        LatticeKind::Rect { m: 2, t: 1 },
+        LatticeKind::Rect { m: 2, t: 2 },
+        LatticeKind::Rect { m: 3, t: 1 },
+        LatticeKind::Sym { m: 1 },
+        LatticeKind::Sym { m: 2 },
+        LatticeKind::Sym { m: 3 },
+    ];
+    let deltas = [0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20];
+    for kind in kinds {
+        for &delta in &deltas {
+            let bound = ((curve.f.p as f64).powf(delta)).floor().max(2.0) as u64;
+            let mut rng = StdRng::seed_from_u64(0xC0DE + bits as u64 * 100 + (delta * 100.0) as u64);
+            let (mut succ, mut hgc, mut vsum, mut done, mut dim) = (0usize, 0usize, 0usize, 0usize, 0usize);
+            let t0 = Instant::now();
+            for _ in 0..8 {
+                if let Some((v, h, d)) = lattice_trial_kind(&curve, kind, bound, &mut rng) {
+                    done += 1;
+                    vsum += v;
+                    dim = d;
+                    if v >= 2 {
+                        succ += 1;
+                    }
+                    if h {
+                        hgc += 1;
+                    }
+                }
+            }
+            let ms = t0.elapsed().as_secs_f64() * 1e3 / done.max(1) as f64;
+            println!("| {kind:?} | {dim} | {delta:.2} | {bound} | {succ}/{done} | {hgc}/{done} | {:.1} | {ms:.0} |", vsum as f64 / done.max(1) as f64);
+            out.push(json!({"probe":"C","bits":bits,"lattice":format!("{kind:?}"),"dim":dim,"delta":delta,"bound":bound,"trials":done,"successes":succ,"hg_first_two":hgc,"mean_vanishing":vsum as f64/done.max(1) as f64,"ms_per_lll":ms}));
+            if succ == 0 && delta >= 0.14 {
+                break;
+            }
+        }
+    }
+    println!();
+}
+
 fn main() {
     let argv: Vec<String> = std::env::args().collect();
     let mut probe = "ab".to_string();
@@ -647,6 +845,9 @@ fn main() {
     }
     if probe.contains('b') {
         probe_b(&lattice_bits, &mut out);
+    }
+    if probe.contains('c') {
+        probe_c(lattice_bits[0], &mut out);
     }
     if let Some(path) = json_path {
         std::fs::write(&path, serde_json::to_string_pretty(&json!({"results": out})).unwrap()).unwrap();

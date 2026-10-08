@@ -6,10 +6,12 @@ breakthrough for ECDLP over prime fields" into (i) a quantitative map of what
 is *provably or heuristically closed*, (ii) the exact condition any new
 method must satisfy, and (iii) the cheapest falsifiers, two of which were run
 today with the native engine from `RESEARCH_PRIME_FAST_ECDLP.md`.
+**Landing.** PR #1560 (merged into `cursor/ic-boundary-experiments-d111`)
+carries §0–§4.5 and Probes A–B; the follow-up PR carries §3.3, §4.6 and Probe C.
 **Code.** `examples/prime_ecdlp_breakthrough_probe.rs`; raw output in
 `research/prime_fast_bench_20261008/probeA.md|json` (preprocessing rho,
 corrected online walker) and `probe.md|json` (lattice probe; its probe-A
-section is the pre-fix run).
+section is the pre-fix run), `probeC.md|json` (extended and symmetric lattices).
 
 ---
 
@@ -93,10 +95,11 @@ requires `p^{Σ(ℓ−k)}·X^{mΣα} < p^{dim·ℓ}`.) Numerically:
 | 4 | `S₅`, degree 8 | 1/80 | 1/6 | 13× |
 | 5 | `S₆`, degree 16 | 1/240 | 1/8 | 30× |
 
-Extended Jochemsz–May strategies move these by tens of percent, not by
-factors of 3–30, and the symmetrised (elementary-symmetric) rewriting of
-`S_{m+1}` lowers the monomial count, not the degree reach. **Probe B** (§3.2)
-measures the `m = 2` row empirically so the derivation is not taken on faith.
+Extended Jochemsz–May strategies and the symmetrised (elementary-symmetric)
+rewriting of `S_{m+1}` do not move the reach at all in practice — **Probe C**
+(§3.3) measures both at `m = 2` and finds the same threshold as the basic
+lattice; the symmetric form only lowers the cost per reduction. **Probe B**
+(§3.2) measures the basic `m = 2` row so the derivation is not taken on faith.
 
 ### 2.3 Why algebraic factor bases do not rescue it
 
@@ -110,6 +113,39 @@ has `≈ (2B)^m/m!·…` solutions over the algebraic closure, so any solver
 that enumerates solutions costs ≥ `B^{m−1}`, which is enumeration again.
 Multiplicative-subgroup bases (`x^B = 1`) make `L` sparse but not
 lower-degree; `j = 0` orbits divide `B` by 3; neither changes the exponent.
+
+### 2.4 Including the linear algebra: which arities could work at all
+
+§2.1 asked only that the relation phase beat `√p`. Index calculus also
+needs `B` relations and a sparse solve costing `Θ(m·B²)` (Wiedemann on
+weight-`m` rows; nothing sub-quadratic is known for these random-sparse
+systems). Write the total as
+
+    cost(B) ≈ (m!/2^m) · p · T_dec / B^{m−1}  +  m · B²
+
+with `T_dec` the cost of one decomposition attempt. Minimising over `B`:
+
+| m | optimum `B` | total | beats `√p`? |
+|---|---|---|---|
+| 2 | `(p·T_dec)^{1/3}` | `≈ 3 (p·T_dec)^{2/3}` | **never**, even with `T_dec = 1` |
+| 3 | `(p·T_dec)^{1/4}` | `≈ 3.5 (p·T_dec)^{1/2}` | **never beats**; ties only if `T_dec = O(1)` |
+| 4 | `(p·T_dec)^{1/5}` | `≈ 4 (p·T_dec)^{2/5}` | yes iff `T_dec ≪ p^{1/4}` |
+| 5 | `(p·T_dec)^{1/6}` | `≈ 5 (p·T_dec)^{1/3}` | yes iff `T_dec ≪ p^{1/2}` |
+
+So a free `S₃` oracle would not help, a free `S₄` oracle would only tie rho,
+and the **first arity that could beat rho is `m = 4`**, which needs an `S₅`
+decomposition oracle (four unknowns, degree 8 in each) that is cheap at
+`B ≈ p^{1/5}`, i.e. `δ ≈ 1/5`. The lattice reach there is `1/80` (§2.2):
+a 16× shortfall in the exponent at the first arity where success is even
+arithmetically possible. The §4.1 target is therefore sharper than
+"δ ≥ 1/2 for `S₃`": it is **a small-root method for `S₅` at δ ≈ 1/5**, with
+`δ ≥ 1/4 for S₄` the intermediate milestone that would still only tie.
+
+**Lattice-assisted meet-in-the-middle does not escape this.** With the
+measured reach the lattice can decide "`z ∈ {x(F_i + F_j)}`" in polynomial
+time only for `B ≤ p^{1/6}`; enumerating the other `m − 2` summands then
+costs `B^{m−2}` per trial against `p/B^m` trials, i.e. `p/B² = p^{2/3}` per
+relation for every `m` — the reach cap on `B` makes the arity irrelevant.
 
 ## 3. Probes run on 2026-10-08
 
@@ -208,15 +244,81 @@ gap is 3–5×, not a constant, exactly as §2.2 predicts; higher `m` makes it
 worse. Both the theory and this measurement say: **no breakthrough via
 Coppersmith on the summation polynomials, at any size.**
 
+### 3.3 Probe C — the best lattice reach: extended shifts and the symmetric lattice
+
+Same planted instances and criteria as Probe B, on the 40-bit curve.
+`Rect{m,t}` is the Jochemsz–May lattice at level `m` with `t` extra `u`-shifts
+(the "extended strategy"); `Sym{m}` is the symmetric rewriting in
+`(e₁, e₂) = (x₁+x₂, x₁x₂)` with bounds `(2B, B²)`.
+
+| lattice | dim | δ | B | ≥2 vanishing / trials | Howgrave-Graham (first two) | mean vanishing rows | ms per LLL |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Rect { m: 2, t: 1 } | 30 | 0.06 | 5 | 8/8 | 8/8 | 28.2 | 36 |
+| Rect { m: 2, t: 1 } | 30 | 0.08 | 9 | 7/7 | 7/7 | 25.4 | 43 |
+| Rect { m: 2, t: 1 } | 30 | 0.10 | 15 | 8/8 | 8/8 | 27.5 | 50 |
+| Rect { m: 2, t: 1 } | 30 | 0.12 | 27 | 8/8 | 0/8 | 13.9 | 46 |
+| Rect { m: 2, t: 1 } | 30 | 0.14 | 48 | 6/8 | 0/8 | 2.8 | 32 |
+| Rect { m: 2, t: 1 } | 30 | 0.16 | 84 | 3/8 | 0/8 | 1.4 | 24 |
+| Rect { m: 2, t: 1 } | 30 | 0.18 | 147 | 0/8 | 0/8 | 0.0 | 19 |
+| Rect { m: 2, t: 2 } | 35 | 0.06 | 5 | 8/8 | 8/8 | 33.2 | 69 |
+| Rect { m: 2, t: 2 } | 35 | 0.08 | 9 | 7/7 | 7/7 | 29.6 | 80 |
+| Rect { m: 2, t: 2 } | 35 | 0.10 | 15 | 8/8 | 8/8 | 32.5 | 85 |
+| Rect { m: 2, t: 2 } | 35 | 0.12 | 27 | 8/8 | 0/8 | 15.1 | 76 |
+| Rect { m: 2, t: 2 } | 35 | 0.14 | 48 | 6/8 | 0/8 | 2.8 | 54 |
+| Rect { m: 2, t: 2 } | 35 | 0.16 | 84 | 3/8 | 0/8 | 1.4 | 43 |
+| Rect { m: 2, t: 2 } | 35 | 0.18 | 147 | 0/8 | 0/8 | 0.0 | 36 |
+| Rect { m: 3, t: 1 } | 56 | 0.06 | 5 | 8/8 | 8/8 | 54.5 | 1373 |
+| Rect { m: 3, t: 1 } | 56 | 0.08 | 9 | 7/7 | 7/7 | 48.1 | 1768 |
+| Rect { m: 3, t: 1 } | 56 | 0.10 | 15 | 8/8 | 8/8 | 54.1 | 2073 |
+| Rect { m: 3, t: 1 } | 56 | 0.12 | 27 | 8/8 | 2/8 | 53.8 | 2113 |
+| Rect { m: 3, t: 1 } | 56 | 0.14 | 48 | 8/8 | 0/8 | 10.4 | 1336 |
+| Rect { m: 3, t: 1 } | 56 | 0.16 | 84 | 2/8 | 0/8 | 1.1 | 567 |
+| Rect { m: 3, t: 1 } | 56 | 0.18 | 147 | 0/8 | 0/8 | 0.0 | 454 |
+| Sym { m: 1 } | 6 | 0.06 | 5 | 8/8 | 6/8 | 2.6 | 0 |
+| Sym { m: 1 } | 6 | 0.08 | 9 | 7/7 | 6/7 | 2.0 | 0 |
+| Sym { m: 1 } | 6 | 0.10 | 15 | 8/8 | 3/8 | 2.0 | 0 |
+| Sym { m: 1 } | 6 | 0.12 | 27 | 6/8 | 0/8 | 1.8 | 0 |
+| Sym { m: 1 } | 6 | 0.14 | 48 | 6/8 | 0/8 | 1.6 | 0 |
+| Sym { m: 1 } | 6 | 0.16 | 84 | 2/8 | 0/8 | 0.6 | 0 |
+| Sym { m: 1 } | 6 | 0.18 | 147 | 0/8 | 0/8 | 0.0 | 0 |
+| Sym { m: 2 } | 15 | 0.06 | 5 | 8/8 | 8/8 | 13.8 | 3 |
+| Sym { m: 2 } | 15 | 0.08 | 9 | 7/7 | 7/7 | 12.6 | 4 |
+| Sym { m: 2 } | 15 | 0.10 | 15 | 8/8 | 8/8 | 13.9 | 4 |
+| Sym { m: 2 } | 15 | 0.12 | 27 | 7/8 | 1/8 | 6.1 | 4 |
+| Sym { m: 2 } | 15 | 0.14 | 48 | 7/8 | 0/8 | 2.2 | 4 |
+| Sym { m: 2 } | 15 | 0.16 | 84 | 2/8 | 0/8 | 1.1 | 3 |
+| Sym { m: 2 } | 15 | 0.18 | 147 | 0/8 | 0/8 | 0.0 | 4 |
+| Sym { m: 3 } | 28 | 0.06 | 5 | 8/8 | 8/8 | 27.0 | 143 |
+| Sym { m: 3 } | 28 | 0.08 | 9 | 7/7 | 7/7 | 25.3 | 165 |
+| Sym { m: 3 } | 28 | 0.10 | 15 | 8/8 | 8/8 | 27.0 | 185 |
+| Sym { m: 3 } | 28 | 0.12 | 27 | 8/8 | 2/8 | 27.0 | 133 |
+| Sym { m: 3 } | 28 | 0.14 | 48 | 7/8 | 0/8 | 5.6 | 81 |
+| Sym { m: 3 } | 28 | 0.16 | 84 | 2/8 | 0/8 | 1.2 | 53 |
+| Sym { m: 3 } | 28 | 0.18 | 147 | 0/8 | 0/8 | 0.0 | 44 |
+
+Reading: **every variant has the same threshold** — the rigorous
+Howgrave-Graham condition never survives past δ = 0.10, the heuristic
+criterion fades at 0.14–0.16 and is zero at 0.18. The extended shifts change
+nothing but the dimension; the symmetric lattice reaches the same δ at 6/15/28
+dimensions instead of 9/25/49, i.e. 3–10× cheaper per reduction, which is a
+constant-factor improvement to a route that is three exponents short. The
+empirical ceiling for the `S₃` small-root problem is therefore
+`δ ≈ 1/6` with everything known, exactly the §2.2 prediction. The open lever
+(§4.1) must reach δ ≥ 1/2 here, or δ ≥ 1/4 for `S₄`, and this table is the
+baseline it is measured against.
+
 ## 4. Candidate levers, each with a falsifier
 
 1. **Small roots beyond Coppersmith for the Semaev shape.** The `S_{m+1}`
    polynomials are not generic: they are symmetric, of a fixed resultant
    form, and their small-root instances come with the *curve structure*
-   (the roots are x-coordinates of points whose sum is fixed). A method that
-   reaches `δ ≥ 1/(2(m−1))` for them would be a breakthrough.
-   *Falsifier:* Probe B's framework with any proposed lattice/embedding; the
-   target row is `δ ≥ 1/4` at `m = 3` on a 40-bit curve. Nothing in the
+   (the roots are x-coordinates of points whose sum is fixed). With the
+   linear algebra included (§2.4) the breakthrough target is an `S₅` oracle
+   at `δ ≈ 1/5`; an `S₄` oracle at `δ ≥ 1/4` would tie rho and is the
+   intermediate milestone; nothing at `S₃` can help.
+   *Falsifier:* Probe B/C's framework with any proposed lattice/embedding;
+   the milestone row is `δ ≥ 1/4` at `m = 3` on a 40-bit curve, the target
+   row `δ ≈ 1/5` at `m = 4`. Nothing in the
    literature (Coppersmith 1996, Jochemsz–May 2006, Petit–Kosters–Messeng
    2016) reaches it.
 2. **A factor base with sub-`B`-degree membership.** Needs a subset of
@@ -237,9 +339,46 @@ Coppersmith on the summation polynomials, at any size.**
    only place sub-`√n` per target is real: preprocessing rho (Probe A),
    Kuhn–Struik multi-target rho. *Use:* make the regime-C ledger charge
    precomputation explicitly and record `S·T²` per row.
-5. **Quantum.** Shor's algorithm is the actual breakthrough for every
+5. **Binary-field counterpart, for calibration.** On `main`,
+   `research/linearization_reach_20260930/README.md` does the same exercise
+   for ECC2K-130: it states in bits how far the one algebraic lever there
+   (linearization of the bilinear `S₃` core) falls short of rho — a
+   `70.19 − b_max`-bit gap, the "product-law floor". Over `F_{2^n}` the
+   lever at least exists because the subfield makes `S₃` bilinear; over
+   `F_p` the corresponding lever is the lattice one measured here, and the
+   gap is a factor in the exponent rather than a fixed number of bits.
+6. **Quantum.** Shor's algorithm is the actual breakthrough for every
    group; this repository's `quantum_estimator` already prices it. Not a
    classical lever.
+
+### 4.6 Also examined on 2026-10-08 and closed on paper
+
+- **Symmetric rewriting of `S₃` in `(e₁, e₂) = (x₁+x₂, x₁x₂)`.** Six
+  monomials instead of nine, bounds `(2B, B²)`. Level-1 reach improves from
+  `1/18` to `1/12`, but the asymptotic reach for the total-degree-2 triangle
+  with these bounds is `1/9 < 1/6`: the smaller monomial set is outweighed
+  by the `B²` bound on `e₂`. Not worth a run.
+- **Multiplicative-subgroup factor bases** (`x^B = 1`, `B | p−1`). The
+  membership polynomial becomes sparse, and `Π_{h∈H} S₃(h, X, z)` can be
+  built by cyclic-norm folding in `O(log B)` polynomial products — but the
+  output has degree `2B`, so every route (fold modulo `X^B − 1`, gcd, batched
+  evaluation of `Ψ(Z) = Π S₃(x_i, x_j, Z)` over many targets) costs `Õ(B)`
+  per target or returns to the `B²`-advice generic trade-off. No exponent
+  change; it needs `p − 1` to have a divisor near `p^{1/3}`, which the
+  deployed primes do not offer anyway.
+- **Global lifting (xedni-style).** Take `E/Q` with small coefficients, use
+  reductions of small-height rational points as the factor base so that
+  relations in `E(Q)` reduce to free relations mod `p`. All those logs are
+  spanned by `rank(E(Q))` unknowns, and the target still has to be written
+  as a bounded combination of the generators — an `r`-dimensional
+  bounded-coefficient DLP that is generic again. This is Silverman's xedni
+  calculus; Jacobson–Koblitz–Silverman–Stein–Teske (2000) showed it does not
+  beat rho.
+- **Embedding into an extension to buy a subfield.** `E(F_p) ⊂ E(F_{p^n})`
+  makes the subfield factor base `x ∈ F_p` algebraic, but Gaudry's cost
+  there is `Õ(p^{2−2/n})` against the original `√p`: `p` for `n = 2`,
+  `p^{4/3}` for `n = 3`. The embedding enlarges the problem faster than the
+  structure helps.
 
 ## 5. Decision
 
