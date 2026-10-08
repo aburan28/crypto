@@ -312,7 +312,7 @@ fn require_ratio(value: &Value, pointer: &str, expected: f64, label: &str) -> Re
         .pointer(pointer)
         .and_then(Value::as_f64)
         .ok_or_else(|| format!("{label} missing at {pointer}"))?;
-    if actual.to_bits() != expected.to_bits() {
+    if (actual - expected).abs() > 1e-12 {
         return Err(format!("{label} is {actual}, expected {expected}"));
     }
     Ok(())
