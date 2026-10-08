@@ -1224,11 +1224,14 @@ mod simd512 {
             qx.resize(padded, 0);
             qy.resize(padded, 0);
             dens.resize(padded, 1);
-            acc.clear();
-            acc.resize(padded, 0);
+            // Grown, never zeroed: the kernel stores every prefix before it
+            // reads one back.
+            if acc.len() < padded {
+                acc.resize(padded, 0);
+            }
             // SAFETY: a `Simd512` is only built after detecting avx512f
             // and vpclmulqdq; every slice holds `padded` words.
-            unsafe { self.kernel(curve, p, dens, acc, qx, qy) };
+            unsafe { self.kernel(curve, p, dens, &mut acc[..padded], qx, qy) };
             // `acc` now holds the abscissae and `dens` the slopes.
             out.reserve(qs.len());
             lambdas.reserve(qs.len());
