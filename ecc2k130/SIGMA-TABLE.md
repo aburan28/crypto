@@ -13,8 +13,9 @@ different coordinates. `make gpu-rtx-pro6000-sigma-table` builds it.
 The headline below compares the table at 512 x 1 against the preset at
 256 x 2 with four waves of workers; the population sweep further down
 attributes +3.6% of that to the one-block geometry and +1.8% to the table,
-and finds another +5.9% in the L2 persisting window at one wave, for
-**16.88 B/s** in the recommended configuration.
+and finds another +5.9% in the L2 persisting window at one wave; the
+headline protocol on that recommended configuration gives **16.86 B/s**,
+paired median **1.102** against the preset at its own best population.
 
 Under the fused headline protocol on one RTX PRO 6000 (five A/A pairs, five
 alternating A/B pairs, 64 launches per sample, replay and sorted-corpus gates),
@@ -150,6 +151,19 @@ IDENTICAL. Receipts under
 [samples.tsv](benchmarks/sigma-table/headline/samples.tsv), the per-run logs,
 build, arithmetic, integration, replay and corpus outputs, binary and source
 hashes.
+
+### Headline protocol, recommended configuration
+
+The same job with `HEADLINE_PERSIST=1` (`make bench-rtx-pro6000-sigma-table`
+style, candidate `PACKED_L2_PERSIST=1` at its one-wave population of 96,256
+workers against the preset at its four-wave 385,024), one RTX PRO 6000
+(driver 580.95.05): A/A maximum drift 0.053%, A/B paired ratios 1.102281,
+1.102789, 1.101823, 1.103130 and 1.100996, **median 1.102281**, session
+medians **16.864369** against 15.299614 B complete scalar updates/s, verdict
+`PROMOTE_ENGINEERING`, identical 1,709,477-record corpora. Receipts under
+[headline-persist/](benchmarks/sigma-table/headline-persist/). This is the
+number of record for the table: **16.86 B/s, +10.2%** over the confirmed
+fused preset measured in the same session.
 
 ### Screen
 

@@ -32,10 +32,13 @@ verdict promote as compatible engineering
 [benchmarks/sigma-table/headline](benchmarks/sigma-table/headline/)). A
 population sweep attributes +3.6% of that to the 512 x 1 geometry and +1.8%
 to the table, and adds +5.9% from the L2 persisting window at one wave of
-workers: **16.88 B/s** for the table with `PACKED_L2_PERSIST=1` at the
-automatic 96,256 workers. `roofline.py` puts that build at 87% of the
-carry-less unit (38.1 `CLMAD`s per update, floor 19.3 B/s). The 26 B/s goal
-remains unmet.
+workers: under the headline protocol the table with `PACKED_L2_PERSIST=1` at
+the automatic 96,256 workers measures **16.864369 B/s** against the preset's
+15.299614 at its own best population, paired median **1.102** over five
+pairs with A/A drift 0.05%, verdict promote as compatible engineering
+([headline-persist](benchmarks/sigma-table/headline-persist/)).
+`roofline.py` puts that build at 87% of the carry-less unit (38.1 `CLMAD`s
+per update, floor 19.3 B/s). The 26 B/s goal remains unmet.
 
 The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
 on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle
