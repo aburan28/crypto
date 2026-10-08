@@ -1,0 +1,254 @@
+{
+  "schema": "p256-product-lift-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 308,
+  "execution_status": "complete",
+  "factor_base": "FB1h2f8621cda105",
+  "factor_base_columns": 131458,
+  "required_useful_rows": 138031,
+  "optimistic_lower_bound_factor_base": "FB1hc72514a2a8d3",
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_affine_log_orbit_round39_20261006/affine-log-orbit-result.json",
+      "bytes": 9211,
+      "sha256": "189e48a45ab2919dd3e279bf058940230c4a0461c745fba42dffb26f785ba079",
+      "schema": "p256.affine_log_orbit_screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_complementary_quotient_round302_20261008/complementary-quotient-result.json",
+      "bytes": 11099,
+      "sha256": "a9a12d823cbca6df965d28f8372217b08e65c04326e13e408bba9dac9f1819c1",
+      "schema": "p256-complementary-quotient-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_jacobian_row_capacity_round303_20261008/jacobian-row-capacity-result.json",
+      "bytes": 18217,
+      "sha256": "6b023f47fbb2c57eb79f870f1c25be48e0b4230d974c3823caf76784a095caa0",
+      "schema": "p256-jacobian-row-capacity-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_event_provenance_round307_20261008/event-provenance-result.json",
+      "bytes": 12817,
+      "sha256": "3751468a6708d1851598e366bfb99d0795d2da251377a3a1bbf7918cbb36034d",
+      "schema": "p256-event-provenance-screen/v1"
+    }
+  ],
+  "typed_product_map": "Phi(c)=(sum_i c_i P_i,sum_i c_i R_i) in GxG; a collision yields delta=c-c' with both coordinate sums equal to O",
+  "trilemma": [
+    "linked/homomorphic auxiliary coordinates replay a scalar multiple of the primary equality and add useful rank one",
+    "independent unknown auxiliary coordinates give block rank two but add a new log block and project to useful original rank one",
+    "known auxiliary labels are coefficient-computable selectors, not new unknown-log equations, and a generic exhaustive full collision costs order n"
+  ],
+  "exhaustive_toy_census": {
+    "modulus": 5,
+    "width": 3,
+    "normalized_projective_profiles": 31,
+    "ordered_profile_pairs": 961,
+    "proportional_profile_pairs": 31,
+    "independent_profile_pairs": 930,
+    "coefficient_states": 120125,
+    "unordered_coefficient_pair_tests": 7447750,
+    "first_coordinate_collisions": 1441500,
+    "full_product_collisions": 279000,
+    "full_proportional_collisions": 46500,
+    "full_independent_collisions": 232500,
+    "independent_first_only_collisions": 1162500,
+    "coordinate_replay_discrepancies": 0,
+    "bucket_histogram_discrepancies": 0,
+    "collision_replay_failures": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "rank_control": {
+      "linked_event_rank": 1,
+      "linked_event_reversed_rank": 1,
+      "independent_expanded_block_rank": 2,
+      "independent_expanded_block_reversed_rank": 2,
+      "independent_original_projection_rank": 1,
+      "independent_original_projection_reversed_rank": 1
+    },
+    "operations": {
+      "coefficient_state_evaluations": 120125,
+      "dot_product_terms": 720750,
+      "cyclic_group_additions": 1441500,
+      "unordered_pair_tests": 7447750,
+      "collision_equations_replayed": 558000,
+      "logical_peak_materialized_bytes": 625
+    }
+  },
+  "p256_control": {
+    "scalar_labelled_control": true,
+    "columns_materialized": 17,
+    "primary_log_vector_sha256": "5042f4b4851c6cc3cfc135e0110afd02e7e6eba65825c3832f81f71f9c95e04c",
+    "independent_auxiliary_log_vector_sha256": "046c27ee28afe8e33061bb2dd8f4056eccd947bfedf9369dae68abf4856e7a18",
+    "primary_point_vector_sha256": "23b1514736c4bf46958c9d33cb139c8eb5acad01ed8a72fe95c70ecccc7bd0d0",
+    "independent_auxiliary_point_vector_sha256": "0ca5d4f1a8a4405a4e80c13279bb5b374948b0781424c8e41a4644ded4e35a47",
+    "linked_multiplier": "84153965304490356668020329225807144132670526493586976920684676335721416539915",
+    "linked_delta_sha256": "bcad16a6b952587efbde7bf889fa8563673c58064d03eaee2c18f5d8ff6790d9",
+    "independent_delta_sha256": "26df90e57ddfcfdc2b7b4192ea582d8918f028e704a292fcf8b65c28fd293bb9",
+    "all_points_on_curve": true,
+    "scalar_replay_failures": 0,
+    "group_replay_failures": 0,
+    "group_operations": {
+      "points_constructed": 51,
+      "equations_replayed": 4,
+      "scalar_multiplications": 61,
+      "scalar_bits_processed": 15552,
+      "scalar_one_bits": 7890,
+      "point_additions": 10
+    },
+    "rank_operations": {
+      "matrices": 12,
+      "rows_materialized": 24,
+      "entries_materialized": 544,
+      "pivot_row_scans": 212,
+      "pivot_swaps": 4,
+      "modular_inversions": 16,
+      "modular_multiplications": 408,
+      "modular_subtractions": 68
+    },
+    "rank_receipts": [
+      {
+        "variant": "linked homomorphic coordinate",
+        "rows": 2,
+        "columns": 17,
+        "expected_rank": 1,
+        "rank_mod_2_61_minus_1": 1,
+        "reversed_rank_mod_2_61_minus_1": 1,
+        "rank_mod_p256_n": 1,
+        "reversed_rank_mod_p256_n": 1,
+        "useful_original_system_rank": 1,
+        "introduced_auxiliary_log_vector": false,
+        "status": "second equality is a known scalar multiple"
+      },
+      {
+        "variant": "independent coordinate, expanded block system",
+        "rows": 2,
+        "columns": 34,
+        "expected_rank": 2,
+        "rank_mod_2_61_minus_1": 2,
+        "reversed_rank_mod_2_61_minus_1": 2,
+        "rank_mod_p256_n": 2,
+        "reversed_rank_mod_p256_n": 2,
+        "useful_original_system_rank": 1,
+        "introduced_auxiliary_log_vector": true,
+        "status": "rank two only after adding an independent unknown log block"
+      },
+      {
+        "variant": "independent coordinate projected to original unknowns",
+        "rows": 2,
+        "columns": 17,
+        "expected_rank": 1,
+        "rank_mod_2_61_minus_1": 1,
+        "reversed_rank_mod_2_61_minus_1": 1,
+        "rank_mod_p256_n": 1,
+        "reversed_rank_mod_p256_n": 1,
+        "useful_original_system_rank": 1,
+        "introduced_auxiliary_log_vector": true,
+        "status": "auxiliary row projects to zero on the original recovery variables"
+      }
+    ],
+    "linked_first_primary_point": {
+      "infinity": false,
+      "x": "39729038167554728584461704483384803368462975982343095044681984640911028964908",
+      "y": "9180524649538285967043446656637241461096073820215343357134850362701729751488"
+    },
+    "independent_first_auxiliary_point": {
+      "infinity": false,
+      "x": "19031531960923538810278155175405397069389056747388335833963263430300864223698",
+      "y": "101150048551322745936531769788325248463246481279672978494494896470867362608840"
+    },
+    "known_label_selector_new_original_log_rows": 0
+  },
+  "generic_product_collision_projection": {
+    "subgroup_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "original_canonical_states": "57896044605178124381348723474703786764998477612067880171211129530534256022185",
+    "product_canonical_states": "6703903961849550000561278353995505841769572391168607857098878760322432797127854223500633464330763947064984370529374005771557885306222791227620809912304081",
+    "asymptotic_expected_product_collision_samples_formula": "sqrt(pi)/2*n under simultaneous global-negation quotient",
+    "expected_product_collision_samples_log2": 255.82574806440024,
+    "ratio_to_original_rho": 3.2806207776272584e+38,
+    "ratio_to_original_rho_log2": 127.94723644131447,
+    "optimistic_useful_original_rows_per_product_event": 1,
+    "optimistic_cost_per_useful_original_row_log2": 255.82574806440024,
+    "registered_useful_rows_with_five_percent_rank_allowance": 138031,
+    "optimistic_registered_collection_lower_bound_log2_operations": 272.90038085311386,
+    "materialized_record_bytes": 82,
+    "materialized_list_bytes_log2": 262.18330006901834,
+    "materialized_disk_write_plus_read_bytes_log2": 263.18330006901834,
+    "memoryless_walk_state_bytes": 512,
+    "memoryless_storage_below_2_50": true,
+    "materialized_list_storage_below_2_50": false,
+    "operation_cost_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "projection_is_measurement": false
+  },
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "ratio_to_rho": 1.0,
+      "ratio_to_rho_log2": 0.0,
+      "useful_original_rows_per_event": null,
+      "complete_attack_measured": true,
+      "status": "complete reference"
+    },
+    {
+      "variant": "unquotiented geometry-defined FB1hc72514a2a8d3",
+      "ratio_to_rho": 13.920747397073491,
+      "ratio_to_rho_log2": 3.7991647656361613,
+      "useful_original_rows_per_event": 1,
+      "complete_attack_measured": false,
+      "status": "executable free-oracle boundary unchanged"
+    },
+    {
+      "variant": "free two-primitive oracle",
+      "ratio_to_rho": 1.4465047156952717,
+      "ratio_to_rho_log2": 0.5325710265506741,
+      "useful_original_rows_per_event": 2,
+      "complete_attack_measured": false,
+      "status": "already above rho; no construction"
+    },
+    {
+      "variant": "generic balanced product lift",
+      "ratio_to_rho": 3.2806207776272584e+38,
+      "ratio_to_rho_log2": 127.94723644131447,
+      "useful_original_rows_per_event": 1,
+      "complete_attack_measured": false,
+      "status": "order-n projection; independent second coordinate adds no original-system row"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "ratio_to_rho": 394.42528,
+      "ratio_to_rho_log2": 8.623608211474894,
+      "useful_original_rows_per_event": 1,
+      "complete_attack_measured": false,
+      "status": "unchanged free-perfect-oracle comparison"
+    }
+  ],
+  "structured_residual_degree_of_regularity": null,
+  "relations_reported_on_actual_factor_base": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "exploration_boundary": "Exact for direct product lifts with linked scalar, independent unknown, or known-label auxiliary coordinates; non-homomorphic couplings remain outside the result.",
+  "transfer_assessment_semantic_sha256": "09b396da4801ef808aad3837b0f024e2a3ad52eae8f484f13a64a25789370686",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "complete_toy_product_census": true,
+    "zero_false_positives_and_false_negatives": true,
+    "p256_exact_group_replays_passed": true,
+    "linked_lift_useful_rank_is_one": true,
+    "independent_lift_block_rank_is_two": true,
+    "independent_lift_original_projection_rank_is_one": true,
+    "nonhomomorphic_two_row_original_system_coupling": false,
+    "complete_relation_decomposition_and_recovery": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "complete_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "complete_attack_peak_storage_below_2_50": false,
+    "discarded_probabilistic_branches_counted_as_exhaustive": false,
+    "promoted": false
+  },
+  "classification": "product-lift/useful-rank-one-or-new-unknown-block/order-n-collision/parity-blocked",
+  "dominant_obstruction": "A direct product coordinate cannot simultaneously remain coupled to the original recovery variables and independent of the primary equation. Linked prime-order-group transports are scalar and rank one. Independent coordinates have block rank two only by introducing a new log vector; their second row projects to zero on the original unknowns. Treating known labels as a selector requires a generic full product collision at about 2^255.825 samples, roughly 2^127.947 times original rho.",
+  "decision": "Reject direct GxG product lifting as the two-primitive parity escape. Preserve a non-homomorphic coupling as the open target, but require two rows on the original recovery system, no new unresolved logs, exact replay, and a complete below-rho cost before promotion. Do not attempt an unplanted full-depth relation.",
+  "semantic_evidence_sha256": "6320f53c8719793b983cfc21f0e123e7c100f14ff43a2711f3f32edbef4417cd",
+  "result_json_bytes": 12245
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "p256-product-lift-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 308,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "coefficient vector c --[primary sum]--> sum c_i P_i in G",
+    "coefficient vector c --[auxiliary sum]--> sum c_i R_i in G",
+    "product collision in GxG --[difference]--> two coordinate equalities",
+    "linked R_i=[a]P_i --[known scalar]--> one useful original-system row",
+    "independent R_i --[expanded unknown block]--> block rank two, original projection rank one",
+    "known auxiliary labels --[precomputable filter]--> zero new original-log rows"
+  ],
+  "obligations": [
+    {
+      "name": "typed product replay",
+      "status": "supported",
+      "evidence": "279000 toy product collisions and 4 P-256 coordinate equations replay with zero failures.",
+      "scope": "Complete order-five control and deterministic scalar-labelled P-256 witnesses."
+    },
+    {
+      "name": "linked-coordinate independence",
+      "status": "refuted",
+      "evidence": "The linked pair has rank one over both fields and both row orders.",
+      "scope": "Prime-order-group homomorphic scalar transports."
+    },
+    {
+      "name": "independent-coordinate net information",
+      "status": "refuted for direct block lift",
+      "evidence": "The expanded rows have rank two, but projection to the original unknown block has rank one and the auxiliary log vector is new.",
+      "scope": "Direct product of two independent cyclic-group coordinates."
+    },
+    {
+      "name": "known-label selector cost",
+      "status": "fails promotion",
+      "evidence": "The optimistic generic product collision costs 2^255.825748 samples per useful original row and is 2^127.947236 times original rho.",
+      "scope": "Uniform balanced generic product collision; projection, not a measured attack."
+    },
+    {
+      "name": "non-homomorphic coupling",
+      "status": "open",
+      "evidence": "No map supplies two independent rows on the original recovery variables without adding unknowns or a product-size collision space.",
+      "scope": "Mechanisms outside homomorphic, independent-block, and known-label cases."
+    }
+  ],
+  "controls": [
+    "Complete toy census: 961 profile pairs, 7447750 pair tests, 1441500 first-coordinate collisions, and 279000 full product collisions.",
+    "P-256 controls materialize 17 primary and two sets of auxiliary points, replay four equations, and rank all systems over two fields in both row orders.",
+    "Rounds 39, 302, 303, and 307 are imported only after exact byte-hash, schema, curve, factor-base, conclusion, and boundary checks."
+  ],
+  "cost_accounting": [
+    "Measured: complete toy state and pair enumeration, collision/replay counts, P-256 scalar multiplications, group additions, dual-field rank operations, process telemetry, and artifact sizes.",
+    "Modeled lower bound: uniform simultaneous-negation product birthday collision at 2^255.825748 samples; this is explicitly not measurement.",
+    "Storage alternatives are separated: an 82-byte materialized record list fails the storage gate, while a constant-memory walk can pass storage but retains the order-n operation exponent.",
+    "Unset: a non-homomorphic coupling, actual relation yield, product-system degree, decomposition, sparse linear algebra, target recovery, and complete attack cost."
+  ],
+  "exploration_boundary": "Exact for direct linked, independent-block, and known-label product lifts in prime-order cyclic groups; not a universal theorem about non-homomorphic encodings or higher algebraic correspondences.",
+  "weakest_open_obligation": "Construct a typed non-homomorphic event whose two replayed equations both survive projection to the original P-256 recovery variables, add no unresolved log block, and cost no more than original-group rho.",
+  "narrowest_supported_finding": "A direct two-coordinate product lift does not yield two useful original-system rows: linked coordinates collapse to rank one, while independent coordinates add an unknown block and a generic full collision costs order n rather than order sqrt(n).",
+  "semantic_evidence_sha256": "09b396da4801ef808aad3837b0f024e2a3ad52eae8f484f13a64a25789370686",
+  "assessment_json_bytes": 4620
+}
