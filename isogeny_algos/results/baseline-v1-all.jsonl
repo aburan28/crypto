@@ -1,0 +1,360 @@
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"3","task":"codomain_from_point","median_ns":340,"min_ns":327,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"3","task":"codomain_from_point(poly+formulas)","median_ns":814,"min_ns":798,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"3","task":"codomain_given_h","median_ns":491,"min_ns":472,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"3","task":"codomain_from_point","median_ns":441,"min_ns":432,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"3","task":"eval_point","median_ns":251,"min_ns":246,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"3","task":"eval_point","median_ns":589,"min_ns":576,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"3","task":"eval_point","median_ns":455,"min_ns":445,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"5","task":"codomain_from_point","median_ns":430,"min_ns":417,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"5","task":"codomain_from_point(poly+formulas)","median_ns":1098,"min_ns":1048,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"5","task":"codomain_given_h","median_ns":658,"min_ns":622,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"5","task":"codomain_from_point","median_ns":580,"min_ns":564,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"5","task":"eval_point","median_ns":593,"min_ns":583,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"5","task":"eval_point","median_ns":604,"min_ns":591,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"5","task":"eval_point","median_ns":538,"min_ns":525,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"7","task":"codomain_from_point","median_ns":785,"min_ns":771,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"7","task":"codomain_from_point(poly+formulas)","median_ns":2136,"min_ns":1564,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"7","task":"codomain_given_h","median_ns":799,"min_ns":769,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"7","task":"codomain_from_point","median_ns":1815,"min_ns":1751,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"7","task":"eval_point","median_ns":718,"min_ns":710,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"7","task":"eval_point","median_ns":605,"min_ns":593,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"7","task":"eval_point","median_ns":1469,"min_ns":1416,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"11","task":"codomain_from_point","median_ns":1451,"min_ns":1432,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"11","task":"codomain_from_point(poly+formulas)","median_ns":2693,"min_ns":2653,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"11","task":"codomain_given_h","median_ns":1198,"min_ns":1176,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"11","task":"codomain_from_point","median_ns":2738,"min_ns":2674,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"11","task":"eval_point","median_ns":1407,"min_ns":1391,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"11","task":"eval_point","median_ns":908,"min_ns":895,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"11","task":"eval_point","median_ns":1657,"min_ns":1612,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"13","task":"codomain_from_point","median_ns":1611,"min_ns":1590,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"13","task":"codomain_from_point(poly+formulas)","median_ns":4027,"min_ns":3082,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"13","task":"codomain_given_h","median_ns":2174,"min_ns":1897,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"13","task":"codomain_from_point","median_ns":3354,"min_ns":3002,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"13","task":"eval_point","median_ns":1707,"min_ns":1605,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"13","task":"eval_point","median_ns":1033,"min_ns":984,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"13","task":"eval_point","median_ns":2712,"min_ns":2322,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"31","task":"codomain_from_point","median_ns":4403,"min_ns":4256,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"31","task":"codomain_from_point(poly+formulas)","median_ns":12268,"min_ns":11169,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"31","task":"codomain_given_h","median_ns":7064,"min_ns":5020,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"31","task":"codomain_from_point","median_ns":4061,"min_ns":3969,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"31","task":"eval_point","median_ns":3645,"min_ns":3593,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"31","task":"eval_point","median_ns":1687,"min_ns":1672,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"31","task":"eval_point","median_ns":2604,"min_ns":2519,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"61","task":"codomain_from_point","median_ns":8159,"min_ns":8103,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"61","task":"codomain_from_point(poly+formulas)","median_ns":26279,"min_ns":26036,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"61","task":"codomain_given_h","median_ns":16301,"min_ns":16137,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"61","task":"codomain_from_point","median_ns":6849,"min_ns":6652,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"61","task":"eval_point","median_ns":7246,"min_ns":7212,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"61","task":"eval_point","median_ns":3217,"min_ns":3193,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"61","task":"eval_point","median_ns":4623,"min_ns":4446,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"101","task":"codomain_from_point","median_ns":13990,"min_ns":13919,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"101","task":"codomain_from_point(poly+formulas)","median_ns":60935,"min_ns":60136,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"101","task":"codomain_given_h","median_ns":41592,"min_ns":41051,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"101","task":"codomain_from_point","median_ns":10748,"min_ns":10498,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"101","task":"eval_point","median_ns":11778,"min_ns":11734,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"101","task":"eval_point","median_ns":5047,"min_ns":5028,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"101","task":"eval_point","median_ns":7143,"min_ns":6909,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"211","task":"codomain_from_point","median_ns":29587,"min_ns":29413,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"211","task":"codomain_from_point(poly+formulas)","median_ns":226773,"min_ns":220118,"reps":1646,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"211","task":"codomain_given_h","median_ns":172620,"min_ns":168582,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"211","task":"codomain_from_point","median_ns":20748,"min_ns":20281,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"211","task":"eval_point","median_ns":25011,"min_ns":24945,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"211","task":"eval_point","median_ns":10238,"min_ns":10215,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"211","task":"eval_point","median_ns":14630,"min_ns":14180,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"401","task":"codomain_from_point","median_ns":56330,"min_ns":55960,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"401","task":"codomain_from_point(poly+formulas)","median_ns":776762,"min_ns":728165,"reps":474,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"401","task":"codomain_given_h","median_ns":644680,"min_ns":594360,"reps":531,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"401","task":"codomain_from_point","median_ns":34610,"min_ns":33613,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"401","task":"eval_point","median_ns":48596,"min_ns":48510,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"401","task":"eval_point","median_ns":19223,"min_ns":19177,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"401","task":"eval_point","median_ns":26094,"min_ns":25047,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"1009","task":"codomain_from_point","median_ns":142565,"min_ns":140765,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"1009","task":"codomain_from_point(poly+formulas)","median_ns":4512263,"min_ns":4396180,"reps":88,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"1009","task":"codomain_given_h","median_ns":3871516,"min_ns":3772456,"reps":101,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"1009","task":"codomain_from_point","median_ns":80281,"min_ns":77744,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"32","ell":"1009","task":"eval_point","median_ns":123734,"min_ns":123166,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"32","ell":"1009","task":"eval_point","median_ns":47666,"min_ns":47603,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"32","ell":"1009","task":"eval_point","median_ns":60342,"min_ns":57801,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"3","task":"codomain_from_point","median_ns":417,"min_ns":405,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"3","task":"codomain_from_point(poly+formulas)","median_ns":900,"min_ns":878,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"3","task":"codomain_given_h","median_ns":487,"min_ns":475,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"3","task":"codomain_from_point","median_ns":522,"min_ns":512,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"3","task":"eval_point","median_ns":527,"min_ns":521,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"3","task":"eval_point","median_ns":867,"min_ns":855,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"3","task":"eval_point","median_ns":746,"min_ns":732,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"5","task":"codomain_from_point","median_ns":1049,"min_ns":1038,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"5","task":"codomain_from_point(poly+formulas)","median_ns":1704,"min_ns":1672,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"5","task":"codomain_given_h","median_ns":646,"min_ns":627,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"5","task":"codomain_from_point","median_ns":1193,"min_ns":1180,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"5","task":"eval_point","median_ns":953,"min_ns":939,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"5","task":"eval_point","median_ns":1137,"min_ns":1126,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"5","task":"eval_point","median_ns":814,"min_ns":796,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"7","task":"codomain_from_point","median_ns":1555,"min_ns":1536,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"7","task":"codomain_from_point(poly+formulas)","median_ns":2377,"min_ns":2336,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"7","task":"codomain_given_h","median_ns":813,"min_ns":783,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"7","task":"codomain_from_point","median_ns":2862,"min_ns":2803,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"7","task":"eval_point","median_ns":1341,"min_ns":1329,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"7","task":"eval_point","median_ns":1247,"min_ns":1235,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"7","task":"eval_point","median_ns":1950,"min_ns":1896,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"11","task":"codomain_from_point","median_ns":2207,"min_ns":2188,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"11","task":"codomain_from_point(poly+formulas)","median_ns":3483,"min_ns":3426,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"11","task":"codomain_given_h","median_ns":1482,"min_ns":1166,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"11","task":"codomain_from_point","median_ns":3879,"min_ns":3752,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"11","task":"eval_point","median_ns":2208,"min_ns":2171,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"11","task":"eval_point","median_ns":1403,"min_ns":1275,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"11","task":"eval_point","median_ns":2046,"min_ns":1962,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"13","task":"codomain_from_point","median_ns":2733,"min_ns":2708,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"13","task":"codomain_from_point(poly+formulas)","median_ns":4257,"min_ns":4189,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"13","task":"codomain_given_h","median_ns":1464,"min_ns":1438,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"13","task":"codomain_from_point","median_ns":3616,"min_ns":3531,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"13","task":"eval_point","median_ns":2938,"min_ns":2905,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"13","task":"eval_point","median_ns":1421,"min_ns":1407,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"13","task":"eval_point","median_ns":2203,"min_ns":2144,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"31","task":"codomain_from_point","median_ns":6951,"min_ns":6920,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"31","task":"codomain_from_point(poly+formulas)","median_ns":12457,"min_ns":12354,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"31","task":"codomain_given_h","median_ns":5106,"min_ns":5036,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"31","task":"codomain_from_point","median_ns":5925,"min_ns":5846,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"31","task":"eval_point","median_ns":6341,"min_ns":6305,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"31","task":"eval_point","median_ns":2252,"min_ns":2238,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"31","task":"eval_point","median_ns":3124,"min_ns":3051,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"61","task":"codomain_from_point","median_ns":14060,"min_ns":14006,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"61","task":"codomain_from_point(poly+formulas)","median_ns":32040,"min_ns":31868,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"61","task":"codomain_given_h","median_ns":16410,"min_ns":16267,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"61","task":"codomain_from_point","median_ns":9153,"min_ns":8969,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"61","task":"eval_point","median_ns":13025,"min_ns":12925,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"61","task":"eval_point","median_ns":3676,"min_ns":3657,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"61","task":"eval_point","median_ns":5088,"min_ns":4942,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"101","task":"codomain_from_point","median_ns":23006,"min_ns":22921,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"101","task":"codomain_from_point(poly+formulas)","median_ns":70540,"min_ns":69091,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"101","task":"codomain_given_h","median_ns":41441,"min_ns":41104,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"101","task":"codomain_from_point","median_ns":13279,"min_ns":13045,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"101","task":"eval_point","median_ns":21712,"min_ns":21636,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"101","task":"eval_point","median_ns":5798,"min_ns":5778,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"101","task":"eval_point","median_ns":7774,"min_ns":7540,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"211","task":"codomain_from_point","median_ns":49286,"min_ns":48748,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"211","task":"codomain_from_point(poly+formulas)","median_ns":255672,"min_ns":239812,"reps":1456,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"211","task":"codomain_given_h","median_ns":178218,"min_ns":168956,"reps":1931,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"211","task":"codomain_from_point","median_ns":26157,"min_ns":25526,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"211","task":"eval_point","median_ns":45630,"min_ns":45136,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"211","task":"eval_point","median_ns":11572,"min_ns":11338,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"211","task":"eval_point","median_ns":15050,"min_ns":14491,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"401","task":"codomain_from_point","median_ns":93128,"min_ns":92725,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"401","task":"codomain_from_point(poly+formulas)","median_ns":800985,"min_ns":767438,"reps":491,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"401","task":"codomain_given_h","median_ns":623484,"min_ns":595277,"reps":622,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"401","task":"codomain_from_point","median_ns":42771,"min_ns":39819,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"velu","p_bits":"61","ell":"401","task":"eval_point","median_ns":90374,"min_ns":87333,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"kohel","p_bits":"61","ell":"401","task":"eval_point","median_ns":20537,"min_ns":20502,"reps":2000,"verified":true,"note":""}
+{"group":"kernel","algo":"sqrt_velu","p_bits":"61","ell":"401","task":"eval_point","median_ns":26435,"min_ns":25318,"reps":2000,"verified":true,"note":""}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"3","median_ns":34827,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"3","kernels_found":"1","median_ns":11230,"min_ns":11047,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"3","kernels_found":"1","median_ns":26339,"min_ns":25961,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"3","kernels_found":"1","median_ns":7943,"min_ns":7802,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"5","median_ns":138892,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"5","kernels_found":"2","median_ns":223263,"min_ns":210045,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"5","kernels_found":"2","median_ns":163314,"min_ns":152602,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"5","kernels_found":"2","median_ns":31497,"min_ns":29387,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"7","median_ns":347797,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"7","kernels_found":"1","median_ns":2620529,"min_ns":2493411,"reps":168,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"7","kernels_found":"1","median_ns":211905,"min_ns":193448,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"7","kernels_found":"1","median_ns":20591,"min_ns":20070,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"11","median_ns":2426439,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"11","kernels_found":"2","median_ns":18506206,"min_ns":18334148,"reps":27,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"11","kernels_found":"2","median_ns":1628934,"min_ns":1577441,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"11","kernels_found":"2","median_ns":52257,"min_ns":50974,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"13","median_ns":5008657,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"13","kernels_found":"2","median_ns":27161180,"min_ns":26841659,"reps":19,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"13","kernels_found":"2","median_ns":2841932,"min_ns":2772558,"reps":170,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"13","kernels_found":"2","median_ns":53149,"min_ns":52652,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"17","median_ns":19503805,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"17","kernels_found":"2","median_ns":113242198,"min_ns":107388396,"reps":5,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"17","kernels_found":"2","median_ns":7577857,"min_ns":7323924,"reps":66,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"17","kernels_found":"2","median_ns":121002,"min_ns":81845,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"19","median_ns":44619754,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"19","kernels_found":"2","median_ns":825477615,"min_ns":818690994,"reps":3,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"19","kernels_found":"2","median_ns":11345901,"min_ns":11003181,"reps":43,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"19","kernels_found":"2","median_ns":96071,"min_ns":94051,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"30","ell":"23","median_ns":95241512,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"30","ell":"23","kernels_found":"1","median_ns":1233184959,"min_ns":1132278975,"reps":2,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"30","ell":"23","kernels_found":"1","median_ns":11920312,"min_ns":11174709,"reps":41,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"30","ell":"23","kernels_found":"1","median_ns":136217,"min_ns":124937,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"3","median_ns":43193,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"3","kernels_found":"1","median_ns":20457,"min_ns":20121,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"3","kernels_found":"1","median_ns":36027,"min_ns":35715,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"3","kernels_found":"1","median_ns":15395,"min_ns":15121,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"5","median_ns":114846,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"5","kernels_found":"2","median_ns":457204,"min_ns":427931,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"5","kernels_found":"2","median_ns":177541,"min_ns":173334,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"5","kernels_found":"2","median_ns":45924,"min_ns":45291,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"7","median_ns":328020,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"7","kernels_found":"2","median_ns":2202473,"min_ns":2127207,"reps":200,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"7","kernels_found":"2","median_ns":427426,"min_ns":407615,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"7","kernels_found":"2","median_ns":55251,"min_ns":54157,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"11","median_ns":2272248,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"11","kernels_found":"1","median_ns":49226610,"min_ns":47811331,"reps":10,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"11","kernels_found":"1","median_ns":873921,"min_ns":836944,"reps":200,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"11","kernels_found":"1","median_ns":81563,"min_ns":80138,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"13","median_ns":5005413,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"13","kernels_found":"2","median_ns":38178720,"min_ns":35951566,"reps":13,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"13","kernels_found":"2","median_ns":2992810,"min_ns":2871603,"reps":165,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"13","kernels_found":"2","median_ns":120351,"min_ns":117931,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"17","median_ns":19667849,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"17","kernels_found":"2","median_ns":234846871,"min_ns":230501898,"reps":3,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"17","kernels_found":"2","median_ns":7986442,"min_ns":7476689,"reps":59,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"17","kernels_found":"2","median_ns":182582,"min_ns":169351,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"19","median_ns":34201998,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"19","kernels_found":"2","median_ns":815623245,"min_ns":812945452,"reps":3,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"19","kernels_found":"2","median_ns":11747847,"min_ns":11191876,"reps":39,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"19","kernels_found":"2","median_ns":370297,"min_ns":221985,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"find","algo":"phi_setup","p_bits":"61","ell":"23","median_ns":150491542,"reps":1,"verified":true,"note":"one-off per (p,l)"}
+{"group":"find","algo":"divpoly_factor","p_bits":"61","ell":"23","kernels_found":"2","median_ns":2097442539,"min_ns":2097442539,"reps":1,"verified":true,"note":"psi_l DDF/EDF + subset search"}
+{"group":"find","algo":"elkies_phi_bmss","p_bits":"61","ell":"23","kernels_found":"2","median_ns":23012204,"min_ns":22463609,"reps":22,"verified":true,"note":"Phi roots + Elkies codomain + BMSS Pade (Phi given)"}
+{"group":"find","algo":"phi_roots_only","p_bits":"61","ell":"23","kernels_found":"2","median_ns":333994,"min_ns":313755,"reps":200,"verified":true,"note":"j-invariants of neighbours only, no isogeny"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"20","instance":"0","trace":"-474","ns":282053,"path_len":4,"nodes_expanded":7,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"20","instance":"0","trace":"-474","ns":78777,"steps":4,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"20","instance":"0","trace":"-474","ns":206758,"path_len":6,"steps":6,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"20","instance":"0","trace":"-474","ns":206073,"path_len":6,"steps":6,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"20","instance":"1","trace":"395","ns":1332804,"path_len":6,"nodes_expanded":19,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"20","instance":"1","trace":"395","ns":542600,"steps":6,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"20","instance":"1","trace":"395","ns":1398619,"path_len":25,"steps":25,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"20","instance":"1","trace":"395","ns":1078753,"path_len":25,"steps":25,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"20","instance":"2","trace":"845","ns":353427,"path_len":6,"nodes_expanded":10,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"20","instance":"2","trace":"845","ns":556365,"steps":6,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"20","instance":"2","trace":"845","ns":426435,"path_len":6,"steps":12,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"20","instance":"2","trace":"845","ns":416604,"path_len":6,"steps":12,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"20","instance":"3","trace":"-984","ns":162953,"path_len":3,"nodes_expanded":4,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"20","instance":"3","trace":"-984","ns":222696,"steps":3,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"20","instance":"3","trace":"-984","ns":2660364,"path_len":35,"steps":63,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"20","instance":"3","trace":"-984","ns":2629161,"path_len":35,"steps":63,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"20","instance":"4","trace":"-1","ns":233,"path_len":0,"nodes_expanded":0,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"20","instance":"4","trace":"-1","ns":505,"steps":0,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"20","instance":"4","trace":"-1","ns":1271,"path_len":0,"steps":0,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"20","instance":"4","trace":"-1","ns":1635,"path_len":0,"steps":0,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"24","instance":"0","trace":"-1335","ns":5425262,"path_len":12,"nodes_expanded":105,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"24","instance":"0","trace":"-1335","ns":1493471,"steps":12,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"24","instance":"0","trace":"-1335","ns":4841465,"path_len":96,"steps":102,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"24","instance":"0","trace":"-1335","ns":4855815,"path_len":96,"steps":102,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"24","instance":"1","trace":"2010","ns":7895794,"path_len":96,"nodes_expanded":190,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"24","instance":"1","trace":"2010","ns":1768578,"steps":96,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"24","instance":"1","trace":"2010","ns":7869404,"path_len":96,"steps":191,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"24","instance":"1","trace":"2010","ns":8072494,"path_len":96,"steps":191,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"24","instance":"2","trace":"1356","ns":39761979,"path_len":30,"nodes_expanded":814,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"24","instance":"2","trace":"1356","ns":893133,"steps":30,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"24","instance":"2","trace":"1356","ns":49850301,"path_len":996,"steps":1048,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"24","instance":"2","trace":"1356","ns":51215422,"path_len":996,"steps":1048,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"24","instance":"3","trace":"-4240","ns":8639540,"path_len":96,"nodes_expanded":189,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"24","instance":"3","trace":"-4240","ns":17326433,"steps":96,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"24","instance":"3","trace":"-4240","ns":4352775,"path_len":104,"steps":104,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"24","instance":"3","trace":"-4240","ns":4265609,"path_len":104,"steps":104,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"24","instance":"4","trace":"-3882","ns":2380895,"path_len":8,"nodes_expanded":48,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"24","instance":"4","trace":"-3882","ns":462906,"steps":8,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"24","instance":"4","trace":"-3882","ns":3362304,"path_len":44,"steps":69,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"24","instance":"4","trace":"-3882","ns":3338473,"path_len":44,"steps":69,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"28","instance":"0","trace":"-972","ns":4571876,"path_len":26,"nodes_expanded":93,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"28","instance":"0","trace":"-972","ns":1800777,"steps":26,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"28","instance":"0","trace":"-972","ns":9791896,"path_len":164,"steps":199,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"28","instance":"0","trace":"-972","ns":10721974,"path_len":164,"steps":199,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"28","instance":"1","trace":"-17882","ns":12351827,"path_len":14,"nodes_expanded":208,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"28","instance":"1","trace":"-17882","ns":2216501,"steps":14,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"28","instance":"1","trace":"-17882","ns":10730555,"path_len":112,"steps":184,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"28","instance":"1","trace":"-17882","ns":10670649,"path_len":112,"steps":184,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"28","instance":"2","trace":"14962","ns":3253274,"path_len":7,"nodes_expanded":56,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"28","instance":"2","trace":"14962","ns":1242436,"steps":7,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"28","instance":"2","trace":"14962","ns":7094891,"path_len":67,"steps":125,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"28","instance":"2","trace":"14962","ns":7653145,"path_len":67,"steps":125,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"28","instance":"3","trace":"-18423","ns":1195287,"path_len":8,"nodes_expanded":23,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"28","instance":"3","trace":"-18423","ns":509172,"steps":8,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"28","instance":"3","trace":"-18423","ns":2357884,"path_len":30,"steps":44,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"28","instance":"3","trace":"-18423","ns":2258449,"path_len":30,"steps":44,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"28","instance":"4","trace":"-19452","ns":3768207,"path_len":18,"nodes_expanded":61,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"28","instance":"4","trace":"-19452","ns":1172454,"steps":18,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"28","instance":"4","trace":"-19452","ns":41172396,"path_len":406,"steps":807,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"28","instance":"4","trace":"-19452","ns":41485326,"path_len":406,"steps":807,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"32","instance":"0","trace":"5624","ns":574,"path_len":0,"nodes_expanded":0,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"32","instance":"0","trace":"5624","ns":615,"steps":0,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"32","instance":"0","trace":"5624","ns":1328,"path_len":0,"steps":0,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"32","instance":"0","trace":"5624","ns":1266,"path_len":0,"steps":0,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"32","instance":"1","trace":"-45720","ns":13503266,"path_len":121,"nodes_expanded":239,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"32","instance":"1","trace":"-45720","ns":7856006,"steps":121,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"32","instance":"1","trace":"-45720","ns":13920358,"path_len":121,"steps":241,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"32","instance":"1","trace":"-45720","ns":14065304,"path_len":121,"steps":241,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"32","instance":"2","trace":"-45159","ns":2581563,"path_len":14,"nodes_expanded":47,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"32","instance":"2","trace":"-45159","ns":2524005,"steps":14,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"32","instance":"2","trace":"-45159","ns":145541618,"path_len":1270,"steps":2538,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"32","instance":"2","trace":"-45159","ns":146823925,"path_len":1270,"steps":2538,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"32","instance":"3","trace":"-87292","ns":899636,"path_len":6,"nodes_expanded":14,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"32","instance":"3","trace":"-87292","ns":1058915,"steps":6,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"32","instance":"3","trace":"-87292","ns":28046598,"path_len":238,"steps":475,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"32","instance":"3","trace":"-87292","ns":28607786,"path_len":238,"steps":475,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"galbraith_bidirectional_bfs","p_bits":"32","instance":"4","trace":"85940","ns":124567,"path_len":2,"nodes_expanded":2,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"explicit_chain_from_path","p_bits":"32","instance":"4","trace":"85940","ns":103799,"steps":2,"verified":true,"note":"Elkies+BMSS per step"}
+{"group":"path","algo":"ghs_random_walk_collision","p_bits":"32","instance":"4","trace":"85940","ns":412156,"path_len":4,"steps":5,"verified":true,"note":"primes 3,5,7"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"32","instance":"4","trace":"85940","ns":343636,"path_len":4,"steps":5,"verified":true,"note":"all heights 0 here, so same walk plus height checks"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"17","instance":"0","height":"2","ns":379056,"path_len":4,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"17","instance":"0","height":"2","ns":414303,"path_len":4,"steps":0,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"17","instance":"1","height":"1","ns":219885,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"17","instance":"1","height":"1","ns":37067000,"path_len":-1,"steps":494,"verified":false,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"17","instance":"2","height":"1","ns":87483,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"17","instance":"2","height":"1","ns":86541,"path_len":2,"steps":0,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"17","instance":"3","height":"1","ns":409452,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"17","instance":"3","height":"1","ns":4202495,"path_len":53,"steps":55,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"17","instance":"4","height":"2","ns":7472563,"path_len":15,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"17","instance":"4","height":"2","ns":2381271,"path_len":17,"steps":23,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"19","instance":"0","height":"1","ns":2464165,"path_len":10,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"19","instance":"0","height":"1","ns":141427592,"path_len":-1,"steps":1628,"verified":false,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"19","instance":"1","height":"1","ns":116851,"path_len":0,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"19","instance":"1","height":"1","ns":116409,"path_len":0,"steps":0,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"19","instance":"2","height":"1","ns":81197,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"19","instance":"2","height":"1","ns":82880,"path_len":2,"steps":0,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"19","instance":"3","height":"1","ns":227309,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"19","instance":"3","height":"1","ns":948993,"path_len":6,"steps":6,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"19","instance":"4","height":"1","ns":4028981,"path_len":18,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"19","instance":"4","height":"1","ns":5228505,"path_len":55,"steps":57,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"21","instance":"0","height":"2","ns":527035,"path_len":4,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"21","instance":"0","height":"2","ns":575944,"path_len":4,"steps":0,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"21","instance":"1","height":"1","ns":447760,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"21","instance":"1","height":"1","ns":52414669,"path_len":422,"steps":507,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"21","instance":"2","height":"1","ns":147524,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"21","instance":"2","height":"1","ns":1699316,"path_len":4,"steps":0,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"21","instance":"3","height":"1","ns":2395921,"path_len":10,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"21","instance":"3","height":"1","ns":128928324,"path_len":-1,"steps":1290,"verified":false,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"kohel_volcano_crater_walk","p_bits":"21","instance":"4","height":"1","ns":595353,"path_len":2,"verified":true,"note":"l=3 volcano; same-volcano targets only"}
+{"group":"path","algo":"ghs_with_kohel_volcano","p_bits":"21","instance":"4","height":"1","ns":3950360,"path_len":32,"steps":40,"verified":true,"note":"ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"20","instance":"0","primes":"[11, 19]","box_m":"4","ns":202521734,"nodes":44,"path_len":5,"prime_select_ns":13704994,"phi_setup_ns":154123008,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"20","instance":"1","primes":"[11, 17, 19]","box_m":"4","ns":414515449,"nodes":124,"path_len":4,"prime_select_ns":24343151,"phi_setup_ns":154123008,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"20","instance":"2","primes":"[13, 17]","box_m":"4","ns":119493887,"nodes":26,"path_len":4,"prime_select_ns":10742762,"phi_setup_ns":154123008,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"20","instance":"3","primes":"[13, 17]","box_m":"4","ns":97996478,"nodes":25,"path_len":1,"prime_select_ns":11629512,"phi_setup_ns":154123008,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"20","instance":"4","primes":"[13, 17]","box_m":"4","ns":144156521,"nodes":28,"path_len":8,"prime_select_ns":11270859,"phi_setup_ns":154123008,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"24","instance":"0","primes":"[13, 17, 19]","box_m":"4","ns":736376816,"nodes":143,"path_len":11,"prime_select_ns":24258175,"phi_setup_ns":150861056,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"24","instance":"1","primes":"[5, 7, 13, 19]","box_m":"4","ns":310667938,"nodes":645,"path_len":12,"prime_select_ns":38660918,"phi_setup_ns":150861056,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"24","instance":"2","primes":"[13, 17, 19]","box_m":"4","ns":544236127,"nodes":124,"path_len":6,"prime_select_ns":45226330,"phi_setup_ns":150861056,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"24","instance":"3","primes":"[7, 13]","box_m":"4","ns":20684571,"nodes":24,"path_len":2,"prime_select_ns":3608557,"phi_setup_ns":150861056,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"24","instance":"4","primes":"[13, 17, 19, 23]","box_m":"4","ns":2688087301,"nodes":624,"path_len":5,"prime_select_ns":45716131,"phi_setup_ns":150861056,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"28","instance":"0","primes":"[5, 11, 13]","box_m":"4","ns":107915413,"nodes":200,"path_len":4,"prime_select_ns":5237159,"phi_setup_ns":146155634,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"28","instance":"1","primes":"[13, 19, 23]","box_m":"4","ns":741827605,"nodes":139,"path_len":7,"prime_select_ns":36368202,"phi_setup_ns":146155634,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"28","instance":"2","primes":"[7, 11, 19, 23]","box_m":"4","ns":841665005,"nodes":628,"path_len":13,"prime_select_ns":37071593,"phi_setup_ns":146155634,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"couveignes_hhs_mitm","p_bits":"28","instance":"4","primes":"[5, 13, 17]","box_m":"4","ns":212536428,"nodes":210,"path_len":6,"prime_select_ns":11278364,"phi_setup_ns":146155634,"verified":true,"note":"planted exponents in [-m,m]^k; different problem from generic path finding"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"22","instance":"0","ns":128234768,"path_len":1560,"walk_steps":1539,"bfs_nodes":68,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"22","instance":"1","ns":92862702,"path_len":1231,"walk_steps":1075,"bfs_nodes":417,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"22","instance":"2","ns":94851651,"path_len":992,"walk_steps":761,"bfs_nodes":643,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"22","instance":"3","ns":192350418,"path_len":2331,"walk_steps":2241,"bfs_nodes":181,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"22","instance":"4","ns":82608304,"path_len":1032,"walk_steps":982,"bfs_nodes":182,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"26","instance":"0","ns":373972143,"path_len":3964,"walk_steps":3723,"bfs_nodes":947,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"26","instance":"1","ns":216611750,"path_len":2222,"walk_steps":2105,"bfs_nodes":449,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"26","instance":"2","ns":829944004,"path_len":8447,"walk_steps":8292,"bfs_nodes":603,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"26","instance":"3","ns":421631542,"path_len":4174,"walk_steps":3767,"bfs_nodes":1609,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"26","instance":"4","ns":819660935,"path_len":8391,"walk_steps":7903,"bfs_nodes":1596,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"30","instance":"0","ns":1965789369,"path_len":13680,"walk_steps":13531,"bfs_nodes":14412,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"30","instance":"1","ns":2750556543,"path_len":23503,"walk_steps":23470,"bfs_nodes":1646,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"30","instance":"2","ns":2634648102,"path_len":22774,"walk_steps":22740,"bfs_nodes":1660,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"30","instance":"3","ns":3474578838,"path_len":29758,"walk_steps":29694,"bfs_nodes":7012,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"30","instance":"4","ns":5350279995,"path_len":48680,"walk_steps":48618,"bfs_nodes":5829,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"34","instance":"0","ns":7614130169,"path_len":46150,"walk_steps":45982,"bfs_nodes":53227,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"34","instance":"1","ns":7320034617,"path_len":28772,"walk_steps":28545,"bfs_nodes":98692,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"34","instance":"2","ns":8336826942,"path_len":54666,"walk_steps":54508,"bfs_nodes":46938,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"34","instance":"3","ns":3881893049,"path_len":14601,"walk_steps":14408,"bfs_nodes":61128,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"34","instance":"4","ns":4124396352,"path_len":30950,"walk_steps":30870,"bfs_nodes":11451,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"38","instance":"0","ns":120568157155,"path_len":902002,"walk_steps":875223,"bfs_nodes":107099,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"38","instance":"1","ns":11841151127,"path_len":99121,"walk_steps":72263,"bfs_nodes":59487,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"38","instance":"2","ns":37470123329,"path_len":282752,"walk_steps":253781,"bfs_nodes":115867,"verified":true,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"38","instance":"3","ns":45683610960,"path_len":-1,"walk_steps":311406,"bfs_nodes":119786,"verified":false,"note":"j-path only; Fp2 arithmetic"}
+{"group":"path","algo":"delfs_galbraith_supersingular","p_bits":"38","instance":"4","ns":93216337797,"path_len":-1,"walk_steps":672816,"bfs_nodes":119786,"verified":false,"note":"j-path only; Fp2 arithmetic"}

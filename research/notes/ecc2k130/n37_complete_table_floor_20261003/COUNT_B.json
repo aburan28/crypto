@@ -1,0 +1,106 @@
+{
+  "cold_setup_gae_floor_each": 4831386,
+  "cold_setup_s_floor_each": 318.1552563860221,
+  "columns_each": 42,
+  "curve_slug": "icv1-f2m37-tm534059-32aad96b",
+  "generic_rho_s_floor": 0.14569480906717377,
+  "pairs_each": 4831386,
+  "physical_points_each": 3108,
+  "policies": [
+    {
+      "curve": "source",
+      "ordered_pair_sums_sha256": "3e29ecc542cb7a11c215c7e8bd432072a4d648a1d8a289b05924ce1dbdc1d298",
+      "pair_additions": 4831386,
+      "pair_doublings": 0,
+      "pair_gae": 4831386.0,
+      "pair_scalar_mults": 0,
+      "physical_points": 3108,
+      "policy": "original",
+      "unpriced": [
+        "point parsing",
+        "curve and uniqueness checks",
+        "table sorting",
+        "table memory",
+        "field arithmetic",
+        "factor-base and isogeny setup",
+        "relations",
+        "linear algebra",
+        "descent",
+        "recovery"
+      ]
+    },
+    {
+      "curve": "leaf",
+      "ordered_pair_sums_sha256": "64445a63352ca7a6af80fc86f70a6db5c4c919e3015add98897d5c180b4bcef4",
+      "pair_additions": 4831386,
+      "pair_doublings": 0,
+      "pair_gae": 4831386.0,
+      "pair_scalar_mults": 0,
+      "physical_points": 3108,
+      "policy": "transported",
+      "unpriced": [
+        "point parsing",
+        "curve and uniqueness checks",
+        "table sorting",
+        "table memory",
+        "field arithmetic",
+        "factor-base and isogeny setup",
+        "relations",
+        "linear algebra",
+        "descent",
+        "recovery"
+      ]
+    },
+    {
+      "curve": "leaf",
+      "ordered_pair_sums_sha256": "7ccf8fbba58b32d6174479e0bad9a37114eeac0890bbf900bec06d9e0944dc91",
+      "pair_additions": 4831386,
+      "pair_doublings": 0,
+      "pair_gae": 4831386.0,
+      "pair_scalar_mults": 0,
+      "physical_points": 3108,
+      "policy": "descendant_native",
+      "unpriced": [
+        "point parsing",
+        "curve and uniqueness checks",
+        "table sorting",
+        "table memory",
+        "field arithmetic",
+        "factor-base and isogeny setup",
+        "relations",
+        "linear algebra",
+        "descent",
+        "recovery"
+      ]
+    },
+    {
+      "curve": "source",
+      "ordered_pair_sums_sha256": "c5aa34f02ed3422e5fc60da2c7849ac46d9c2877b9b08fef045848c45bea3643",
+      "pair_additions": 4831386,
+      "pair_doublings": 0,
+      "pair_gae": 4831386.0,
+      "pair_scalar_mults": 0,
+      "physical_points": 3108,
+      "policy": "pullback",
+      "unpriced": [
+        "point parsing",
+        "curve and uniqueness checks",
+        "table sorting",
+        "table memory",
+        "field arithmetic",
+        "factor-base and isogeny setup",
+        "relations",
+        "linear algebra",
+        "descent",
+        "recovery"
+      ]
+    }
+  ],
+  "r": 230603167,
+  "schema": "n37-complete-table-floor/v1",
+  "scope": "mandatory table-construction group operations for the frozen complete at-most-three-summand oracle; no complete IC cost or speedup",
+  "signed_automorphism_order": 74,
+  "signed_classes_each": 1554,
+  "status": "PASS",
+  "support_gzip_sha256": "8eac2ae4b8d8f0fc452b7cd7c8edbd3183558e55454abbd67349665bd64610d5"
+}

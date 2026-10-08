@@ -1,0 +1,165 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1h16421b98082b",
+  "a": {
+    "session_id": "ECBS1h9a1d373bbe54",
+    "arm": "rho-strong",
+    "method_id": "ECM1h1d9961ee4601",
+    "method": "rho.signed_frobenius_strong",
+    "measured": 40,
+    "verified": 40,
+    "statuses": {
+      "verified": 40
+    },
+    "mean_s": 0.41936663748443725,
+    "mean_ratio_to_floor": 2.8783910708245273,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1h9a1d373bbe54",
+    "arm": "ic-k8",
+    "method_id": "ECM1h90d7515e0e7a",
+    "method": "ic.shared_rank",
+    "measured": 40,
+    "verified": 40,
+    "statuses": {
+      "verified": 40
+    },
+    "mean_s": 2.1332953658332876,
+    "mean_ratio_to_floor": 14.642219441392138,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "W01f731b735b5",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.36009676368212884,
+      "b_mean_s": 2.223991467427839,
+      "ratio_b_over_a": 6.1760940161934945
+    },
+    {
+      "workload_id": "W3770919a06f0",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.4017809258029679,
+      "b_mean_s": 1.8575975216390923,
+      "ratio_b_over_a": 4.623408933429688
+    },
+    {
+      "workload_id": "W4857dc5fcae1",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.5211438203688965,
+      "b_mean_s": 2.3462330532664204,
+      "ratio_b_over_a": 4.502083612169895
+    },
+    {
+      "workload_id": "W4ee69fadc6f1",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.47778702362267156,
+      "b_mean_s": 2.0114840738523263,
+      "ratio_b_over_a": 4.210001474298891
+    },
+    {
+      "workload_id": "W54ab9060182b",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.4228798287153167,
+      "b_mean_s": 2.201968450690333,
+      "ratio_b_over_a": 5.207078468083426
+    },
+    {
+      "workload_id": "W935dacbd4a6d",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.512253833186727,
+      "b_mean_s": 2.025064548710968,
+      "ratio_b_over_a": 3.953244304904578
+    },
+    {
+      "workload_id": "Wd37d16c23159",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.3313853976715667,
+      "b_mean_s": 2.294637474148493,
+      "ratio_b_over_a": 6.924377145980007
+    },
+    {
+      "workload_id": "Wdb4602a43312",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 0.3276055068252221,
+      "b_mean_s": 2.1053863369308266,
+      "ratio_b_over_a": 6.426590191763939
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "log2_r": 27.78083708554834,
+      "workloads": 8,
+      "pairs": 40,
+      "ratio_b_over_a": 5.086945825327973,
+      "ci95": [
+        4.32664475438343,
+        6.050201006948361
+      ],
+      "ci_method": "cluster"
+    }
+  ],
+  "ops": {
+    "status": "ok",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": 5.086945825327973,
+    "ci95": [
+      4.32664475438343,
+      6.050201006948361
+    ],
+    "ci_method": "cluster",
+    "pairs": 40,
+    "unpaired_runs": 0,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 1,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "40 of 40 pairs did not reach L2",
+      "0 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L2",
+    "pairs": 40,
+    "pairs_below_level": 40,
+    "median_ratio": 15.949410836535161,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "verdict": "ops (ok): ic-k8 / rho-strong = 5.0869 [4.327, 6.050] (cluster) over 40 pairs on 8 workloads, 1 curve(s), bounded (unpriced work); wall: descriptive (median 15.9494, not a result: 40 of 40 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)"
+}

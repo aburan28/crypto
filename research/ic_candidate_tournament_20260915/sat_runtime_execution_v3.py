@@ -32,6 +32,8 @@ from sat_runtime_bundle import (  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 SOURCE_SUFFIXES = {'.py', '.pyc', '.so', '.dylib', '.pyd', '.zip'}
+EXECUTION_POLICY = dict(schema_version=1, mode='one-use-registration',
+                        claim_file='execution-claim.json', claim_operation='exclusive-create')
 
 
 def digest(path):
@@ -112,6 +114,45 @@ def validate_spec(spec):
             'SAT runtime execution binding changed')
     require(('asset_manifest' in spec) == ('asset_seal' in spec),
             'SAT asset manifest and seal must be registered together')
+    if 'execution_policy' in spec:
+        require(spec['execution_policy'] == EXECUTION_POLICY,
+                'SAT execution policy differs from the one-use contract')
+
+
+def validate_claim(claim, spec):
+    """Validate portable retained metadata, without reopening the registration."""
+    require(type(claim) is dict and set(claim) == {
+                'schema_version', 'execution_sha256', 'binding', 'output_directory',
+                'registration_directory', 'status'},
+            'SAT execution claim fields changed')
+    require(claim['schema_version'] == 1 and claim['execution_sha256'] == sha256(spec)
+            and claim['binding'] == spec['binding']
+            and claim['status'] == 'CONSUMED_BEFORE_LAUNCH'
+            and all(type(claim[key]) is str and Path(claim[key]).is_absolute()
+                    for key in ('registration_directory', 'output_directory')),
+            'SAT execution claim differs from sealed registration')
+
+
+def claim_execution(registration, output, spec):
+    """Consume this retained registration even if setup or launch later fails.
+
+    Exclusive creation arbitrates concurrent launches into different outputs.
+    A crash during writing leaves a consumed claim; never repair it to retry.
+    This is a local scheduling guard, not attestation against copied or edited
+    registrations. The external registration ledger remains authoritative.
+    """
+    claim = dict(schema_version=1, execution_sha256=sha256(spec), binding=spec['binding'],
+                 registration_directory=str(registration), output_directory=str(output),
+                 status='CONSUMED_BEFORE_LAUNCH')
+    try:
+        with (registration/EXECUTION_POLICY['claim_file']).open('x') as handle:
+            json.dump(claim, handle, sort_keys=True, separators=(',', ':'))
+            handle.write('\n')
+            handle.flush()
+            os.fsync(handle.fileno())
+    except FileExistsError:
+        require(False, 'SAT registration consumed; no retries into another output')
+    return claim
 
 
 def register(repository, output, *, module, action, arguments, timeout_seconds,
@@ -134,6 +175,7 @@ def register(repository, output, *, module, action, arguments, timeout_seconds,
     manifest, seal = freeze(repository, output/'runtime')
     spec = dict(schema_version=3, runtime_manifest=manifest, runtime_seal=seal,
                 interpreter=interpreter_record(),
+                execution_policy=dict(EXECUTION_POLICY),
                 entrypoint=dict(module=module, callable=action),
                 arguments=arguments, runtime_watchdog_seconds=timeout_seconds,
                 claim_scope='Python execution binding only')
@@ -186,6 +228,8 @@ def execute(registration, output, *, expected_spec, timeout_seconds):
     require(timeout_seconds == spec['runtime_watchdog_seconds'],
             'SAT runtime watchdog differs from sealed registration')
     validate_spec(spec)
+    require(spec.get('execution_policy') == EXECUTION_POLICY,
+            'SAT legacy registration is audit-only; freeze a new one-use registration')
     registration_seal = read(registration/'registration-seal.json')
     require(registration_seal == dict(schema_version=3, execution_sha256=sha256(spec),
                 binding=spec['binding'], registration_stage='before-execution'),
@@ -196,7 +240,11 @@ def execute(registration, output, *, expected_spec, timeout_seconds):
         verified_assets(registration/'assets', spec['asset_manifest'], spec['asset_seal'])
     require(interpreter_record() == spec['interpreter'],
             'SAT registered interpreter changed before execution')
+    require(not output.is_relative_to(registration) and not registration.is_relative_to(output),
+            'SAT registration and execution output must be separate trees')
+    claim = claim_execution(registration, output, spec)
     output.mkdir(parents=True)
+    write_immutable(output/EXECUTION_POLICY['claim_file'], claim)
     write_immutable(output/'execution.json', spec)
     write_immutable(output/'registration-seal.json', registration_seal)
     shutil.copytree(registration/'runtime', output/'runtime')
@@ -215,6 +263,7 @@ def execute(registration, output, *, expected_spec, timeout_seconds):
                '--worker', str(output)]
     started = time.monotonic_ns()
     timed_out = False
+    owned_group_killed = False
     with (output/'stdout.txt').open('x') as stdout, (output/'stderr.txt').open('x') as stderr:
         process = subprocess.Popen(command, cwd=root, env=frozen_environment(),
                                    stdout=stdout, stderr=stderr, start_new_session=True)
@@ -226,17 +275,23 @@ def execute(registration, output, *, expected_spec, timeout_seconds):
             # group, wait for the leader, and retain the incomplete source gate.
             try:
                 os.killpg(process.pid, signal.SIGKILL)
+                owned_group_killed = True
             except ProcessLookupError:
-                pass  # The whole process group exited at the watchdog boundary.
+                owned_group_killed = True  # The entire owned group already exited.
             returncode = process.wait()
         finally:
             # A failed controller can leave an inherited-group meter alive.
             # Reap the entire owned group on every terminal path, including
             # normal leader exit. Native v3 tools never start another group.
-            try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
+            # Once the watchdog killed the group, do not signal it again after
+            # reaping the leader. macOS can return EPERM for a group containing
+            # only orphaned zombies; the first group kill already covered every
+            # inherited child. First-kill permission errors still propagate.
+            if not owned_group_killed:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
     wall = time.monotonic_ns()-started
     receipt = dict(schema_version=3, execution_sha256=sha256(spec),
                    binding=spec['binding'], exit_code=returncode, timed_out=timed_out,
@@ -247,6 +302,7 @@ def execute(registration, output, *, expected_spec, timeout_seconds):
                    status='EXECUTED_SOURCE_CONTROL',
                    scope='whole runtime process; outside single-target online interval',
                    promotion_eligible=False, online_speedup=None)
+    receipt['execution_claim_sha256'] = sha256(claim)
     write_immutable(output/'process.json', receipt)
     return receipt
 
@@ -272,6 +328,10 @@ def worker(output):
                binding=spec['binding'], loaded_modules=before,
                interpreter_sha256=sha256(spec['interpreter']),
                flags=dict(isolated=True, no_site=True, bytecode_writes=False))
+    if 'execution_policy' in spec:
+        claim = read(output/EXECUTION_POLICY['claim_file'])
+        validate_claim(claim, spec)
+        pre['execution_claim_sha256'] = sha256(claim)
     write_immutable(output/'before.json', pre)
     succeeded, error = False, None
     result = None
@@ -314,6 +374,12 @@ def audit_execution(output, expected_spec):
         check_extracted_assets(output/'asset-files', expected_spec['asset_manifest'])
     process, before, after = map(read, (output/'process.json',
                                       output/'before.json', output/'after.json'))
+    if 'execution_policy' in expected_spec:
+        claim = read(output/EXECUTION_POLICY['claim_file'])
+        validate_claim(claim, expected_spec)
+        require(all(item.get('execution_claim_sha256') == sha256(claim)
+                    for item in (process, before, after)),
+                'SAT retained execution claim differs from process/source gates')
     require(process['execution_sha256'] == sha256(expected_spec)
             and process['binding'] == expected_spec['binding']
             and process['timed_out'] is False

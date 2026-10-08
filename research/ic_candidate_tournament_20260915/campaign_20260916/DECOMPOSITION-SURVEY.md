@@ -7,6 +7,10 @@ promoted, no tracked file was changed.** The new files are this note and three s
 model scripts, each with its output next to it (§8 lists exactly what ran).
 Classification: **scoping / stage diagnostic**. It computes no `S` and no new rho ratio.
 
+> **Addendum 2 (2026-10-02), appended at the end of this file:** §3.2's symmetric-group
+> and Frobenius items and §3.3's three algebraic forms are now measured or closed by
+> structure; pointers only.
+>
 > **Erratum 1 (2026-09-30), appended at the end of this file.** §0 item 2, §2 and §3.3
 > say `m = 3` cannot beat rho even with a free oracle. That holds for the no-large-prime
 > model only. With two large primes, the free-oracle exponent at `m = 3` is `4/9`. No
@@ -221,7 +225,7 @@ repository's notes and not re-read here.
   with `E(0, 3) = 1/2`.
 
 **Cheapest pre-compute falsification (proof search map).**
-- **Baseline reproduction.** Re-run two frozen cells (`K_0/2^9` m=4 and `K_1/2^15` m=4)
+- **Baseline reproduction.** Re-run two frozen cells (`icv1-f2m9-t5-81e744be` m=4 and `icv1-f2m15-t275-b7f03703` m=4)
   through `groebner_stage_bench` and match `tables.md`'s word-operation totals exactly.
   The counts are deterministic.
 - **Observation collision.** The observable is the per-target refutation cost. If random
@@ -602,3 +606,44 @@ exponent is `2(m−1)/m²`. With per-attempt oracle cost `2^{cn}`, not re-optimi
 - **Memory.** The graph holds `Θ(N^{2/9})` large-prime vertices. It is not charged here,
   and neither is it in §2.
 
+## Addendum 2 (2026-10-02): §3.2 and §3.3 measured
+
+Pointers to records written after this survey; the sections above are unchanged.
+
+- **§3.2, symmetric-group action:** measured by the `m = 3` Riemann–Roch norm-form ladder,
+  which is fully symmetric in the summands:
+  [ic_rr_norm_ladder_20260930](../../ic_rr_norm_ladder_20260930/RESULTS.md), `s̄ = 1.167`,
+  constant lever.
+- **§3.2, Frobenius-orbit coordinates:** closed by structure,
+  [NOTE-20260930-frobenius-orbit-coordinates.md](NOTE-20260930-frobenius-orbit-coordinates.md);
+  the orbit-union reading is the coset-typed base of `H-SEMBIN-c59e50`.
+- **§3.3, extended to `m ≥ 4`:** the search form's ceiling is §3.5's; the support form's
+  system degree rises 2 per unit `ℓ`
+  ([support-degree.txt](../../ic_rr_norm_ladder_20260930/support-degree.txt)); the norm form
+  with `V`-typed roots is a constant lever (above). The `m = 4` norm form (`4ℓ + n + 1`
+  unknowns, cubic) is an engineering arm for §5's audit, not an exponent candidate. The
+  first-fall-degree claim stays with the SEMBIN lane, as this section already says.
+
+
+## Addendum 3 (2026-10-04): the `m = 3` ladder on an external engine
+
+Pointer only; the sections above are unchanged.
+[ic_gb_ladder_20261003](../../ic_gb_ladder_20261003/RESULTS.md) re-read the `m = 3`
+ladder with Singular's degree-truncated `slimgb` and extended it one rung: the direct `S₄`
+descent (§3.1's object at `m = 3`) refutes at 5, 8, 9, 10 for `ℓ = 2…5` on `K₁/2¹⁷`, three
+above the sharp first-fall bound at `ℓ = 5` and rising one per rung; `ℓ = 6` is out of
+memory at 12 GB on both `n = 19` curves. §3.1's "every measurement on record points
+against `c` being that small" now rests on an independently confirmed ladder one rung
+longer. The `m = 3` `x4` readings quoted in §0 item 3 and §2 from the in-tree scan carry
+that scan's floor (6 at `ℓ = 2` is 5).
+
+## Addendum 4 (2026-10-05): the `m = 3` ladder at `ℓ = 6`
+
+Pointer only; the sections above are unchanged.
+[ic_dense_ladder_20261004](../../ic_dense_ladder_20261004/RESULTS.md) resolved the rung the
+external engine could not, with a dense in-tree elimination that agrees with it on all 32
+calibration draws. On `K₀/2¹⁹` and `K₁/2¹⁹` at `ℓ = 6`, the direct `S₄` descent refutes at 11
+on all eight draws, four above the sharp first-fall bound. The symmetric norm form refutes
+at 8. The direct descent's excess now reads −2, 1, 2, 3, 4 over `ℓ = 2…6`. §3.1's statement
+that every measurement points against `c` being small now rests on a ladder one rung longer
+again.

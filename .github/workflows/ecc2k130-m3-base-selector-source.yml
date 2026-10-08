@@ -1,0 +1,47 @@
+name: ECC2K-130 m3 base-selector source lock
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ecc2k130-m3-base-selector-source.yml
+      - research/notes/ecc2k130/m3_base_selector_20260930/**
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ecc2k130-m3-base-selector-source.yml
+      - research/notes/ecc2k130/m3_base_selector_20260930/**
+
+permissions:
+  contents: read
+
+jobs:
+  source-lock:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            .github/workflows/ecc2k130-m3-four-policy.yml
+            .github/workflows/ecc2k130-m3-base-selector-source.yml
+            research/notes/ecc2k130/m3_base_selector_20260930
+            research/notes/ecc2k130/m3_four_policy_20260930
+            research/ecc2k130_factor_base_pilot_20260924
+            research/ecc2k130_factor_base_replication_20260925
+            research/ecc2k130_dual_transport_20260925
+            research/ecc2k130_relations
+            research/ecc2k130_oriented_transport_20260924
+          sparse-checkout-cone-mode: false
+      - name: Audit exact source and dependency bytes
+        run: |
+          python3 research/notes/ecc2k130/m3_base_selector_20260930/check_source_lock.py
+          python3 -m py_compile \
+            research/notes/ecc2k130/m3_base_selector_20260930/score.py \
+            research/notes/ecc2k130/m3_base_selector_20260930/produce.py \
+            research/notes/ecc2k130/m3_base_selector_20260930/verify.py
+      - name: Regress score on archived independent bases only
+        run: |
+          python3 -m unittest discover \
+            research/notes/ecc2k130/m3_base_selector_20260930 \
+            -p 'test_score.py' -v

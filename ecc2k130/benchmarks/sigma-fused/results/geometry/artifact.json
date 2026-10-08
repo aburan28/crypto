@@ -1,0 +1,34 @@
+{
+  "decision": "RETAIN_B16_T256",
+  "archiveBytes": 33523091,
+  "archiveSha256": "785fa37ac4ba2df15f0d36dbd6638ab6712bd5b09d7813c6c126d5c50b21f60b",
+  "resultSha256": "3e3f85a6cfcac8814b71ae99e9494c7251ba91a81a389e96a8a083145d57e8c1",
+  "launchSha256": "4c194c75c1e2b282713e83b4ffd2e7092e7638edefdf6f9305832d509e8cc2c9",
+  "sourceCommit": "18585910d4aa9ae2753f2c49a08a1072b4d7b8bc",
+  "provider": "modal",
+  "volume": "ecc2k130-jobs",
+  "token": "396402ccf7a34d52852ae88fba9ac6ce",
+  "functionCallId": "fc-01M3X7HFERSTG12A1WZF26P1QP",
+  "retrievalCommand": "modal run modal_job.py --fetch-token 396402ccf7a34d52852ae88fba9ac6ce --out /tmp/ecc2k-fused-geometry-retrieved",
+  "exitCode": 0,
+  "validation": {
+    "nativeSummaryByteIdentical": true,
+    "timingLogHashesMatched": 20,
+    "measuredSourceHashesMatched": 8,
+    "verificationArms": 5,
+    "replaysPerArm": 300,
+    "droppedPerArm": 0,
+    "sortedCorpusRecords": 1710327,
+    "sortedCorpusSha256": "d93e276e7f92e6114a00df9e250f8bc299a47768eda4c34c50148a24aec60a85",
+    "sortedCorpusRunId": 31,
+    "warmupRowsExcluded": 5,
+    "screenRows": 15,
+    "screenUpdatesPerRow": 201863462912
+  },
+  "limits": [
+    "Bounded geometry screen; no five-pair confirmation or A/A panel for these geometry arms.",
+    "Raw corpus identity is reported by the measured native comparator; one sorted corpus is retained and independently scanned for framing, namespace, canonical bits and sort order.",
+    "Executable hashes are recorded but executable bytes are absent from the archive.",
+    "The in-job manifest races wrapper population of job.log; raw-files.sha256 binds the final extracted files."
+  ]
+}

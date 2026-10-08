@@ -497,6 +497,34 @@ What was run, in the order each became worth running:
 What has *not* been run: `make gpu`. There is no CUDA toolchain here, so the
 packed edits are uncompiled — see the status table at the top.
 
+## 7.5 Being seen while the search runs
+
+A claim shows the network what was done an epoch after the fact. cairn's
+reader now has a per-task dashboard (`/ui/task?id=…`, PR
+[`aburan28/cairn#208`](https://github.com/aburan28/cairn/pull/208)) that
+puts two things side by side and labels them: what the log has **paid** each
+worker, recomputed from settlements and the witness counters they carry, and
+what each worker **reports** it is doing now over `POST /progress`. Nothing
+reported is verified or paid; it is how an operator sees the fleet is alive,
+on which slots, at what rate.
+
+Two clients in this repository post that heartbeat:
+
+- `crypto cryptanalysis rho-collab work --cairn URL --objective ID` (the
+  prime-field transport, `src/cryptanalysis/pollard_collab/cairn.rs`) posts
+  one every 30 s from its lanes' own counters, beside the commit/reveal
+  claims it already sends.
+- `ecc2k130/aws/worker.py`, the campaign supervisor, posts one on its 60 s
+  slot tick when `ECC_CAIRN_NODE` and `ECC_CAIRN_OBJECTIVE` are set (or
+  `campaign.json` names them). `ECC_CAIRN_WORKER` should be the pseudonym the
+  orbits are submitted under, so the dashboard's settled and reported halves
+  land on one row.
+
+Both leave out what they cannot know rather than guessing, and both treat a
+node that is down or that predates the route as a log line, never as a reason
+to stop walking. The body is the one `examples/certicom-ecdlp/tools/orbit_worker.py`
+in cairn posts, which is the reference for any other client.
+
 ## 8. What would make this not worth doing
 
 State it before measuring, per `AGENTS.md` §4. Abandon Route B, and fall back

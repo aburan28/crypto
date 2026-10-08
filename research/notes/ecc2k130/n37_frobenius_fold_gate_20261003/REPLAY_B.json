@@ -1,0 +1,30 @@
+{
+  "arms": [
+    {
+      "decisions_checked": 4096,
+      "m2_hits": 43,
+      "m2_query_adds": 43,
+      "m3_hits": 2048,
+      "m3_query_adds": 99917,
+      "name": "original",
+      "table_additions": 66822,
+      "table_entries": 64467
+    },
+    {
+      "decisions_checked": 4096,
+      "m2_hits": 51,
+      "m2_query_adds": 51,
+      "m3_hits": 2048,
+      "m3_query_adds": 102767,
+      "name": "pullback",
+      "table_additions": 66822,
+      "table_entries": 64530
+    }
+  ],
+  "complete_reference_gzip_sha256": "c84066a521137cfa61a2f490ed18a3a957b79da6e27f587ad1579b350cb9764a",
+  "decisions_checked": 8192,
+  "result_sha256": "251aee18844a30765f02049c87c858bfd0549fb28941ee12ac04e3814040e83e",
+  "schema": "n37-frobenius-fold-replay/v1",
+  "status": "PASS",
+  "support_gzip_sha256": "8eac2ae4b8d8f0fc452b7cd7c8edbd3183558e55454abbd67349665bd64610d5"
+}

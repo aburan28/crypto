@@ -20,7 +20,7 @@ The historical motivation is legitimate but not evidence of a new attack: extens
 | P1 | Frobenius-aware F4/F5/SAT order | Groebner/SAT backends | identical ideal/CNF, orbit block orders, peak degree/Macaulay/conflicts |
 | P1 | orbit-aware factor-base search | `koblitz_factor_base_search` | optimize verified independent relations/sec at matched effective columns |
 | P1 | hybrid SAT -> Groebner | solver pipeline | SAT orbit/Boolean choices then algebraic residual vs pure controls |
-| P1 | trace-zero intersection bases | factor-base candidates | trace-zero x Frobenius-stable bases vs matched random/orbit controls |
+| P1 | trace-zero intersection bases | factor-base candidates | trace-zero x Frobenius-stable bases vs matched random/orbit controls. **`D*` side settled 2026-10-01 (EXP-H):** trace-zero buys a free degree-2 refutation of the wrong-coset half of targets and nothing on the other half; the fold side is unchanged. `RESEARCH_FACTOR_BASE_SHAPE_SEARCH.md` |
 | P1 | partial/large-orbit relations | relation collector | one/two-large-orbit graph, recombination, memory and full collection cost |
 | P2 | tau-adic candidate generation | Koblitz scalar/candidate generator | uniform vs matched-weight vs sparse tau-NAF relation targets |
 | P2 | generic endomorphism group interface | orbit abstraction | Frobenius plus GLV/GLS-compatible fixture under same verifier |

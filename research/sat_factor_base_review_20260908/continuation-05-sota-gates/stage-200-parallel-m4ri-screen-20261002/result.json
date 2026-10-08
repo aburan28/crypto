@@ -1,0 +1,82 @@
+{
+  "schema": "koblitz_stage200_final.v1",
+  "initial_candidate_commit": "8fe333238",
+  "corrected_candidate_commit": "c2397b083aa303a32e32bd2c6c5bdceb3071f9aa",
+  "revert_commit": "2690e4d02d344091d9f70509437844868191417e",
+  "finalizer_commit": "5beacd5ee1537958ca05a4c30b1ca364c6f869a1",
+  "decision_status": "REJECTED_SCREEN",
+  "candidate_selected": false,
+  "runtime_default": "Stage 199 selected hybrid: full-matrix block-8 M4RI on eligible matrices from 4096 rows with serial target-row clearing; five-column BlockTables elsewhere",
+  "claim_boundary": "One opened n=59 F4 row-scheduling screen. Direct MITM and full automorphism-aware rho remain unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "single_core_seconds": null,
+  "screen": {
+    "all_correct": true,
+    "candidate_over_control": {
+      "wall": 1.058804132868452,
+      "total_core": 0.963228607767762,
+      "peak_rss": 1.0080399129454742
+    },
+    "threshold": 0.98,
+    "passed_performance_gate": false,
+    "status": "REJECTED_SCREEN"
+  },
+  "failed_candidate_preserved_and_charged": true,
+  "measured_stage_charge": {
+    "components": 26,
+    "wall_seconds_sum": 1088.3709191639998,
+    "total_core_seconds_sum": 4553.408345,
+    "peak_rss_bytes_max": 5592170496,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 722,
+    "wall_seconds_sum": 26616.264677911004,
+    "total_core_seconds_sum": 73077.015408,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "final result write and final verification after the charged composition control"
+  ],
+  "artifacts": {
+    "candidate_failure": {
+      "path": "CANDIDATE_FAILURE.md",
+      "bytes": 1758,
+      "sha256": "f4dd1d8d761217c6f6981563fc9d3726e425627c0dcade931eda0b63043d2aec"
+    },
+    "candidate_patch": {
+      "path": "candidate-parallel-m4ri.patch",
+      "bytes": 33135,
+      "sha256": "bf4269950abd6c5b2da741e0394739d8b68bde2ff32edcda7bce0f1e9d871a79"
+    },
+    "failed_candidate_receipt": {
+      "path": "development/screen/parallel-candidate/receipt.json",
+      "bytes": 1694,
+      "sha256": "07008acdb51da41ca573131d6f0c1e6fec799d94bce7f3157b26879c2a1810a1"
+    },
+    "failed_candidate_stderr": {
+      "path": "development/screen/parallel-candidate/stderr.txt",
+      "bytes": 498,
+      "sha256": "0f89bce0835d1973439a3538170f03e42c79164773afe909c5f951e95bc1430f"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 6065,
+      "sha256": "8a6f9fec091eab78b85ec1c48943dbe189d624704a3e804445c29b608370f0c4"
+    },
+    "screen_result": {
+      "path": "development/corrected-screen/result.json",
+      "bytes": 26974,
+      "sha256": "6d63b031aaab1d2dcdc16b766409caeb1c65dd4a3f45bd2322c56c0648821952"
+    },
+    "screen_verification": {
+      "path": "development/corrected-screen/verification.json",
+      "bytes": 191,
+      "sha256": "ee81ef5f36784731646013aacf228cd1ecaf8c9d1abe229306abca739622930d"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

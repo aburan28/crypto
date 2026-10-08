@@ -1,0 +1,81 @@
+name: isolab
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'isolab/**'
+      - '.github/workflows/isolab.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'isolab/**'
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: |
+          pip install -e './isolab[mcp,test]'
+          sudo apt-get update -q && sudo apt-get install -y -q numactl >/dev/null
+      - name: nats-server
+        run: |
+          mkdir -p "$HOME/nats" && cd "$HOME/nats"
+          curl -fsSL -o ns.tgz https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz
+          tar xzf ns.tgz && echo "ISOLAB_TEST_NATS_SERVER=$HOME/nats/nats-server-v2.15.0-linux-amd64/nats-server" >> "$GITHUB_ENV"
+      - name: Unit and integration tests (unprivileged, direct backend)
+        working-directory: isolab
+        run: python -m pytest -q tests
+      - name: Privileged end-to-end (root worker, cgroup partition, eviction, IRQ moves)
+        working-directory: isolab
+        run: |
+          sudo -E env "PATH=$PATH" ISOLAB_TEST_NATS_SERVER="$ISOLAB_TEST_NATS_SERVER" ISOLAB_TEST_PRIVILEGED=1 \
+            python -m pytest -q tests/test_e2e.py tests/test_slots.py -k privileged
+      - name: Rootless podman end-to-end
+        working-directory: isolab
+        run: |
+          podman --version
+          python -m pytest -q tests/test_e2e.py -k podman
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolab-base (without Rust, to fit the runner)
+        run: podman build --build-arg WITH_RUST=0 -t localhost/isolab-base:latest -f isolab/isolab/images/base/Containerfile isolab/isolab/images/base
+      - name: Smoke the image
+        run: podman run --rm localhost/isolab-base:latest python -c "import numpy, scipy, sympy, gmpy2; print(numpy.__version__)"
+  image-sage:
+    # the upstream sagemath image is x86-64 only, which the hosted runner is
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolab-sage
+        run: podman build -t localhost/isolab-sage:latest -f isolab/isolab/images/sage/Containerfile isolab/isolab/images/sage
+      - name: Smoke the image as a job sees it (no capabilities, read-only root, no network)
+        run: |
+          podman run --rm --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp --network none \
+            localhost/isolab-sage:latest sage -c 'print(factor(2^64+1)); import pandas, gmpy2, numpy'
+  image-cuda:
+    # build only: hosted runners have no GPU, so this proves the recipe, not the CUDA runtime
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolab-cuda
+        run: podman build -t localhost/isolab-cuda:latest -f isolab/isolab/images/cuda/Containerfile isolab/isolab/images/cuda
+      - name: Smoke the toolchain
+        run: podman run --rm --network none localhost/isolab-cuda:latest sh -c 'nvcc --version && python3 -c "import numpy, scipy" && numactl --version'

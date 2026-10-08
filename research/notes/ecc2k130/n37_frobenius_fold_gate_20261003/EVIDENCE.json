@@ -1,0 +1,36 @@
+{
+  "schema": "n37-frobenius-fold-evidence/v1",
+  "protocol_commit": "1354075ad247e4652ef7c16b08cd10c58bad2819",
+  "pr": "https://github.com/aburan28/crypto/pull/1281",
+  "curve_slug": "icv1-f2m37-tm534059-32aad96b",
+  "input_sha256": {
+    "support_gzip": "8eac2ae4b8d8f0fc452b7cd7c8edbd3183558e55454abbd67349665bd64610d5",
+    "support_expanded": "05664103a6dab090a8b4298f34c0964e6f253f625cd73d661562d85a2fce87af",
+    "complete_reference_gzip": "c84066a521137cfa61a2f490ed18a3a957b79da6e27f587ad1579b350cb9764a",
+    "b03_points": "84400a2914f06e4a001d0f113f0195952f692634d4ff8285e23ade2599e2bde2",
+    "b04_points": "72c5b5361a0b846c9626269ce3928820cb7d420aae479d31dc26f5cbf7e78aa6",
+    "frozen_cargo_lock": "b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365"
+  },
+  "source_sha256": {
+    "producer": "ed66c80bc96eb576e006fb220eb914b4aae73e56348fb9c13b2df2a8005bffd2",
+    "independent_replay": "792a118ae3fb5a86ea6c1657c50f59013679307bf65f96c75b72f0b24f3eec93"
+  },
+  "raw_outputs": {
+    "run_a_gzip_sha256": "b1ba2093452ae74effd152ad6f15af2ce3957828820213918b7c896c42175c5c",
+    "run_a_expanded_sha256": "f1bcf4fcea33a90b6b2d9d3becf2eab96c16484a9114a06d03137c7f5ba50d75",
+    "run_b_gzip_sha256": "7ff327b23e4d84c703e10386049047a84f6856b04c74e656b0f19e1a73d19b50",
+    "run_b_expanded_sha256": "251aee18844a30765f02049c87c858bfd0549fb28941ee12ac04e3814040e83e",
+    "canonical_non_timing_sha256": "3cfb28e21dfcb32a252b32bb96619a4e72bb0a5997a4128e019fc0afde494e6b",
+    "replay_a_sha256": "6f801aece08ab7c62d5d64883f3f84f4d7700929ece97c06cacc9a87aff900e6",
+    "replay_b_sha256": "40b9f85f537ae9c16bc355a561cf3961a8b0a68fc4259a4ad3d3627736aca837"
+  },
+  "command_sequence": [
+    "cargo build --release --locked --example n37_frobenius_fold_gate --example n37_frobenius_fold_replay",
+    "target/release/examples/n37_frobenius_fold_gate /private/tmp/n37-fold-A-20261003.json",
+    "target/release/examples/n37_frobenius_fold_replay /private/tmp/n37-fold-A-20261003.json /private/tmp/n37-fold-replay-A-20261003.json",
+    "target/release/examples/n37_frobenius_fold_gate /private/tmp/n37-fold-B-20261003.json",
+    "target/release/examples/n37_frobenius_fold_replay /private/tmp/n37-fold-B-20261003.json /private/tmp/n37-fold-replay-B-20261003.json"
+  ],
+  "linux_replay": "pending GitHub Actions on PR #1281",
+  "cost_claim": "stage only; S, IC/rho ratio and end-to-end speedup null"
+}

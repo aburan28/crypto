@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/wdsat_solver",
+    "-i",
+    "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+    "-g",
+    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
+  ],
+  "returncode": 1,
+  "watchdog_seconds": 120.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.014530334010487422,
+    "user_seconds": 0.000793,
+    "system_seconds": 0.001745,
+    "total_core_seconds": 0.002538,
+    "single_core_seconds": 0.002538,
+    "peak_rss_bytes": 1425408,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

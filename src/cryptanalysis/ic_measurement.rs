@@ -410,6 +410,13 @@ fn dump(label: &'static [u8]) {
     let _ = label;
 }
 
+/// Dump and reset Callgrind's current interval at an external measurement
+/// boundary. Labels must be static, NUL-terminated ASCII. The client request
+/// is inert when the process is not running under Valgrind.
+pub(crate) fn callgrind_dump(label: &'static [u8]) {
+    dump(label);
+}
+
 #[cfg(test)]
 thread_local! { static DUMPS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
 

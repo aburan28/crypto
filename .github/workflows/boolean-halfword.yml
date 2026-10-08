@@ -1,0 +1,77 @@
+name: Standalone Boolean half-word study
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'research/boolean_halfword_20260923/**'
+      - '.github/workflows/boolean-halfword.yml'
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Qualified comparison phase
+        required: true
+        default: discovery
+        type: choice
+        options: [discovery, full]
+permissions:
+  contents: read
+concurrency:
+  group: halfword-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Runtime fallback and mathematical correctness
+        run: |
+          python3 tools/isolated_bench.py busy -- rustc --edition 2021 -O --test research/boolean_halfword_20260923/measure.rs -o /tmp/halfword-tests
+          python3 tools/isolated_bench.py busy -- /tmp/halfword-tests --test-threads=1
+      - name: Immutable evidence and resource admission checks
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 tools/isolated_bench.py busy -- python3 -m unittest discover -s research/boolean_halfword_20260923 -p 'test_*.py' -v
+  qualified-discovery:
+    if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'halfword-discovery') || (github.event_name == 'workflow_dispatch' && inputs.phase == 'discovery')
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    env:
+      RAYON_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Freeze and execute isolated A/A then A/B
+        run: python3 research/boolean_halfword_20260923/isolated_run.py --phase discovery --out research/boolean_halfword_20260923/ci_discovery_${{ github.run_id }}_${{ github.run_attempt }}
+      - name: Preserve successful or failed execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: halfword-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research/boolean_halfword_20260923/ci_discovery_${{ github.run_id }}_${{ github.run_attempt }}/
+          if-no-files-found: error
+  qualified-full:
+    if: (github.event.action == 'labeled' && github.event.label.name == 'halfword-full') || (github.event_name == 'workflow_dispatch' && inputs.phase == 'full')
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 180
+    env:
+      RAYON_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Require the selected qualified discovery binding
+        run: test -f research/boolean_halfword_20260923/qualified_probe_02/manifest.json
+      - name: Frozen corpus and unused holdouts
+        run: python3 research/boolean_halfword_20260923/isolated_run.py --phase full --discovery research/boolean_halfword_20260923/qualified_probe_02 --out research/boolean_halfword_20260923/ci_full_${{ github.run_id }}_${{ github.run_attempt }}
+      - name: Preserve successful or failed execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: halfword-full-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research/boolean_halfword_20260923/ci_full_${{ github.run_id }}_${{ github.run_attempt }}/
+          if-no-files-found: error

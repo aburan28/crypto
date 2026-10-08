@@ -4,10 +4,28 @@
 //! This executable is deliberately limited to the exact toy rungs.  Every
 //! discrete logarithm is a published synthetic fixture used to validate the
 //! walk.  It never accepts an external point or a secret scalar.
+//!
+//! Backends (argument 5):
+//!
+//! * `strong` — the reference to measure index calculus against: the library
+//!   [`crypto_lib::cryptanalysis::koblitz_strong_rho`] walk (distinguished
+//!   points, normal-basis signed-Frobenius canonical form, library `Gf2`
+//!   arithmetic, `KIC_RHO_LANES` lockstep walks with batched inversion,
+//!   default 32; `KIC_RHO_DP_BITS`, default 4). `signed_frobenius` only.
+//! * `reference`, `packed` — kept unchanged so archived stage runs reproduce.
+//!   **Neither is a valid `vs_rho` reference**: both store every step in a
+//!   table (no distinguished points) and canonicalize by an O(n)
+//!   polynomial-basis scan; at n = 53 `packed` costs about 43× the
+//!   instructions and 60× the wall time of `strong` on the same target
+//!   (`docs/ic/BOUNDARY_TARGETS.md`, 2026-09-30 erratum). They print a note to
+//!   stderr saying so.
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{points_with_x, KoblitzCurve};
+use crypto_lib::cryptanalysis::koblitz_strong_rho::{
+    RawPoint as StrongPoint, StrongRho, StrongRhoCharges, StrongRhoParams,
+};
 use num_bigint::BigUint;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -16,10 +34,38 @@ use std::collections::{BTreeSet, HashMap};
 use std::time::Instant;
 
 const TASK_ID: &str = "TASK-KIC-SAT-RHO-CROSSOVER-20260909";
+/// The exact toy rungs.  47, 57 and 61 are ledger §23's sizes the others miss,
+/// so that the rule's comparison can check its rho against the strong walk at
+/// every size it runs (`docs/ic/BOUNDARY_TARGETS.md`, 2026-10-01).
+const RUNGS: [u32; 13] = [7, 11, 13, 17, 19, 23, 37, 41, 47, 53, 57, 59, 61];
 const JUMPS: usize = 32;
 const MAX_RESTARTS: u64 = 128;
 /// Fruitless-collision restart budget for larger fields (n≥41).
 const MAX_RESTARTS_LARGE: u64 = 100_000;
+
+fn peak_rss_bytes() -> Option<u64> {
+    #[cfg(unix)]
+    {
+        let mut usage = std::mem::MaybeUninit::<libc::rusage>::uninit();
+        // SAFETY: getrusage initializes the complete value on success.
+        if unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) } != 0 {
+            return None;
+        }
+        // SAFETY: getrusage succeeded above.
+        let rss = unsafe { usage.assume_init() }.ru_maxrss;
+        if rss < 0 {
+            return None;
+        }
+        #[cfg(target_os = "macos")]
+        return Some(rss as u64);
+        #[cfg(not(target_os = "macos"))]
+        return (rss as u64).checked_mul(1024);
+    }
+    #[cfg(not(unix))]
+    {
+        None
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Quotient {
@@ -952,6 +998,172 @@ fn solve_fixture_packed(
     })
 }
 
+/// `KIC_RHO_LANES` / `KIC_RHO_DP_BITS` overrides of the strong defaults.
+fn strong_params() -> StrongRhoParams {
+    let mut params = StrongRhoParams::default();
+    if let Ok(value) = std::env::var("KIC_RHO_LANES") {
+        params.lanes = value.parse().expect("KIC_RHO_LANES must be an integer");
+        assert!(params.lanes >= 1, "KIC_RHO_LANES must be at least 1");
+    }
+    if let Ok(value) = std::env::var("KIC_RHO_DP_BITS") {
+        params.dp_bits = value.parse().expect("KIC_RHO_DP_BITS must be an integer");
+        assert!(params.dp_bits < 32, "KIC_RHO_DP_BITS must be below 32");
+    }
+    params
+}
+
+/// The `strong` backend: one target, same target derivation and JSON schema as
+/// `solve_fixture_packed`. The jump table is drawn from
+/// `blake3("KIC-KS-BATCH-JUMPS-v1|n|a|batch_seed")` and the walk starts from the
+/// fixture RNG after the fixture scalar, exactly as
+/// `examples/koblitz_rho_batch_ks_strong.rs` does at rung 3 with one fixture, so
+/// the two walk the same trajectory for the same seeds.
+fn solve_fixture_strong(
+    curve: &KoblitzCurve,
+    mode: Quotient,
+    fixture_index: u64,
+    fixture_seed: u64,
+    fixture_target: FixtureTarget,
+    batch_seed: Option<u64>,
+) -> serde_json::Value {
+    assert!(
+        mode == Quotient::SignedFrobenius,
+        "the strong backend implements signed_frobenius only"
+    );
+    let params = strong_params();
+    let setup_started = Instant::now();
+    let rho = StrongRho::new(curve);
+    let modulus = rho.modulus();
+    let lambda = rho.lambda();
+    let precompute_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+    let mut rng = StdRng::seed_from_u64(fixture_seed);
+    let generated_scalar = rng.gen_range(1..modulus);
+    let target_generation_started = Instant::now();
+    let (known_scalar, reference_q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+        match fixture_target {
+            FixtureTarget::SeededScalar => (
+                Some(generated_scalar),
+                curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
+                "seeded_fixture_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::ExplicitScalar(scalar) => (
+                Some(scalar),
+                curve.mul(curve.generator(), &BigUint::from(scalar)),
+                "explicit_public_validation_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::PublicHash(seed) => {
+                let (target, counter) = public_hash_target(curve, seed);
+                (
+                    None,
+                    target,
+                    "public_hash_unknown_scalar",
+                    Some(seed),
+                    Some(counter),
+                )
+            }
+        };
+    let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
+    let started = Instant::now();
+    let q = StrongPoint::from_binary(&reference_q);
+    let mut charges = StrongRhoCharges {
+        scalar_multiplications: 1,
+        ..StrongRhoCharges::default()
+    };
+    let jump_material = match batch_seed {
+        Some(seed) => format!("KIC-KS-BATCH-JUMPS-v1|{}|{}|{seed}", curve.n, curve.a),
+        None => format!("KIC-KS-BATCH-JUMPS-v1|{}|{}|{TASK_ID}", curve.n, curve.a),
+    };
+    let digest = blake3::hash(jump_material.as_bytes());
+    let jump_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
+    let jumps = rho.jumps(jump_seed, &mut charges);
+    let setup_ms = precompute_ms + started.elapsed().as_secs_f64() * 1000.0;
+    let walk_started = Instant::now();
+    let outcome = rho
+        .solve(q, &jumps, &mut rng, &params, charges)
+        .expect("strong public rho fixture exceeded its step cap");
+    let walk_ms = walk_started.elapsed().as_secs_f64() * 1000.0;
+    let recovered = outcome.scalar;
+    let validation_started = Instant::now();
+    if let Some(expected) = known_scalar {
+        assert_eq!(recovered, expected);
+    }
+    assert_eq!(
+        curve.mul(curve.generator(), &BigUint::from(recovered)),
+        reference_q
+    );
+    let validation_ms = validation_started.elapsed().as_secs_f64() * 1000.0;
+    let generator_point_key = raw_key(raw_point(curve.generator()));
+    let q_point_key = raw_key(raw_point(&reference_q));
+    let c = outcome.charges;
+
+    json!({
+        "schema_version":"1.0",
+        "task_id":TASK_ID,
+        "kind":"rho_public_fixture",
+        "evidence_class":"measured_rho_observation",
+        "reference_grade":"strong",
+        "n":curve.n,
+        "a":curve.a,
+        "subgroup_order":modulus,
+        "lambda":lambda,
+        "quotient_mode":mode.name(),
+        "arithmetic_backend":"gf2_normal_basis_lockstep_lanes",
+        "automorphism_size":outcome.automorphisms,
+        "fixture_index":fixture_index,
+        "fixture_seed":fixture_seed,
+        "batch_seed":batch_seed,
+        "published_fixture_scalar":known_scalar,
+        "fixture_scalar_source":fixture_scalar_source,
+        "target_scalar_constructed":known_scalar.is_some(),
+        "target_kind":if known_scalar.is_some() {"known_scalar_multiple"} else {"public_hash_to_curve_cofactor"},
+        "public_hash_seed":public_hash_seed,
+        "public_hash_counter":public_hash_counter,
+        "recovered_fixture_scalar":recovered,
+        "generator":[generator_point_key.1,generator_point_key.2],
+        "published_q":[q_point_key.1,q_point_key.2],
+        "generator_point_key":[generator_point_key.1,generator_point_key.2],
+        "published_q_point_key":[q_point_key.1,q_point_key.2],
+        "field_modulus_low_terms":curve.curve.irreducible.low_terms,
+        "verified":true,
+        "reference_group_validation":true,
+        "ideal_steps":outcome.ideal_steps,
+        "walk_steps":outcome.walk_steps,
+        "walks":outcome.walks,
+        "restarts":outcome.fruitless + outcome.capped,
+        "fruitless_cycles":outcome.fruitless,
+        "capped_walks":outcome.capped,
+        "wasted_merges":outcome.wasted_merges,
+        "lanes":params.lanes,
+        "jump_count":JUMPS,
+        "distinguished_bits":params.dp_bits,
+        "table_entries":outcome.table_entries,
+        "table_payload_lower_bound_bytes":outcome.table_entries * (1 + 4 * std::mem::size_of::<u64>()),
+        "peak_rss_bytes":peak_rss_bytes(),
+        "setup_ms":setup_ms,
+        "target_generation_ms":target_generation_ms,
+        "walk_ms":walk_ms,
+        "validation_ms":validation_ms,
+        "total_ms":target_generation_ms + setup_ms + walk_ms + validation_ms,
+        "charges":{
+            "group_additions":c.group_additions,
+            "scalar_multiplications":c.scalar_multiplications,
+            "canonicalizations":c.canonicalizations,
+            "frobenius_maps":0,
+            "negations_examined":0,
+            "partition_hashes":c.partition_hashes,
+            "table_queries":c.table_queries,
+            "table_inserts":c.table_inserts,
+            "failed_collisions":c.failed_collisions,
+            "fruitless_cycle_restarts":outcome.fruitless
+        },
+        "scope":if known_scalar.is_some() {"published synthetic toy fixture; no external point or production key"} else {"public_hash_unknown_scalar"}
+    })
+}
+
 fn raw_make_jump_ref(jumps: &[RawJump], index: usize) -> &RawJump {
     &jumps[index]
 }
@@ -960,7 +1172,7 @@ fn main() {
     let args: Vec<_> = std::env::args().collect();
     assert!(
         (5..=8).contains(&args.len()),
-        "usage: <n> <a> <mode> <fixtures> [reference|packed] [batch_seed] [explicit_fixture_scalar|hash:public_seed]"
+        "usage: <n> <a> <mode> <fixtures> [reference|packed|strong] [batch_seed] [explicit_fixture_scalar|hash:public_seed]"
     );
     let n: u32 = args[1].parse().unwrap();
     let a: u8 = args[2].parse().unwrap();
@@ -969,8 +1181,18 @@ fn main() {
     let backend = args.get(5).map(String::as_str).unwrap_or("reference");
     let batch_seed = args.get(6).map(|value| value.parse::<u64>().unwrap());
     let fixture_target = FixtureTarget::parse(args.get(7).map(String::as_str));
-    assert!(matches!(backend, "reference" | "packed"));
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53 | 59));
+    assert!(matches!(backend, "reference" | "packed" | "strong"));
+    if backend != "strong" {
+        eprintln!(
+            "note: backend `{backend}` stores every step and canonicalizes by an O(n) scan; \
+             it is not a valid vs_rho reference (docs/ic/BOUNDARY_TARGETS.md, 2026-09-30 \
+             erratum). Use `strong`."
+        );
+    }
+    assert!(
+        RUNGS.contains(&n),
+        "n = {n} is not one of the exact rungs {RUNGS:?}"
+    );
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
     let modulus = curve.subgroup_order.to_u64_digits()[0];
@@ -995,7 +1217,16 @@ fn main() {
         };
         let digest = blake3::hash(material.as_bytes());
         let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
-        let result = if backend == "packed" {
+        let result = if backend == "strong" {
+            solve_fixture_strong(
+                &curve,
+                mode,
+                fixture_index,
+                seed,
+                fixture_target,
+                batch_seed,
+            )
+        } else if backend == "packed" {
             solve_fixture_packed(&curve, mode, fixture_index, seed, fixture_target)
         } else {
             solve_fixture(&curve, mode, fixture_index, seed, fixture_target)
@@ -1007,6 +1238,69 @@ fn main() {
 #[cfg(test)]
 mod packed_tests {
     use super::*;
+
+    /// The strong backend recovers seeded and explicit scalars and reports the
+    /// same JSON fields the stage verifiers read.
+    #[test]
+    fn strong_backend_recovers_fixture_scalars() {
+        let mut ran = 0;
+        for (n, a) in [(13, 0), (17, 1), (19, 1), (23, 1), (37, 0), (41, 0)] {
+            let Some(curve) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            ran += 1;
+            let modulus = curve.subgroup_order.to_u64_digits()[0];
+            for (index, target) in [
+                FixtureTarget::SeededScalar,
+                FixtureTarget::ExplicitScalar(modulus / 5 + 3),
+            ]
+            .into_iter()
+            .enumerate()
+            {
+                let row = solve_fixture_strong(
+                    &curve,
+                    Quotient::SignedFrobenius,
+                    index as u64,
+                    1_000 + n as u64,
+                    target,
+                    Some(531_310),
+                );
+                assert_eq!(row["verified"], true);
+                assert_eq!(row["reference_grade"], "strong");
+                assert_eq!(
+                    row["recovered_fixture_scalar"], row["published_fixture_scalar"],
+                    "n={n} a={a}"
+                );
+                for key in [
+                    "published_q",
+                    "walk_steps",
+                    "restarts",
+                    "setup_ms",
+                    "table_entries",
+                ] {
+                    assert!(!row[key].is_null(), "missing {key}");
+                }
+            }
+        }
+        assert!(ran >= 4, "strong backend exercised only {ran} rungs");
+    }
+
+    /// Ledger §23's sizes are rungs, and a public target at one the earlier
+    /// rungs missed is the point `ic workflow` hashed from the same seed:
+    /// §23's `T01` at `icv1-f2m47-t22705043-f4e44623`.
+    #[test]
+    fn the_rule_comparisons_sizes_are_rungs_with_its_targets() {
+        for n in [41, 47, 53, 57, 59, 61] {
+            assert!(RUNGS.contains(&n), "n = {n}");
+        }
+        let curve = KoblitzCurve::new(1, 47).expect("§23's curve at n = 47 constructs");
+        let (target, counter) = public_hash_target(&curve, 23_001);
+        assert_eq!(
+            point_key(&target),
+            (1, 59_876_159_786_985, 136_992_923_299_992)
+        );
+        assert_eq!(counter, 0);
+    }
 
     #[test]
     fn packed_rho_arithmetic_matches_reference() {

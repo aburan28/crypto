@@ -21,7 +21,7 @@ and before any run of the supplementary holdout it registers.  Results are
 appended below §5 and do not edit it; corrections to §0–§4 are struck in place
 and point to §5.
 
-*Re-priced in instructions on 2026-09-25 ([`RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md`](RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md) §5): the stage gains hold (`5.23×` on T1′, `6.24×` on the holdout), but the whole `K_0/2^13` logarithm moves `1.01×`.*
+*Re-priced in instructions on 2026-09-25 ([`RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md`](RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md) §5): the stage gains hold (`5.23×` on T1′, `6.24×` on the holdout), but the whole `icv1-f2m13-t181-515ee569` logarithm moves `1.01×`.*
 
 ## The question
 
@@ -96,7 +96,7 @@ word operations, specialisation operations, reductions, propagations, splits,
 refutations, F4 calls, oversize and verdict digest on all six rungs.
 
 On this host the frozen ladder's reference total is ~~`16,734,846`~~
-**`16,696,846`** word operations (`K_1/2^23`: `7,982,169`, `4,876` reductions;
+**`16,696,846`** word operations (`icv1-f2m23-tm5197-1f85e9e1`: `7,982,169`, `4,876` reductions;
 *arithmetic correction, §5: the six rungs sum to the second figure*).
 [`RESEARCH_INHERITED_F4.md`](RESEARCH_INHERITED_F4.md) records `37,302,399` for the
 same configuration on the same tree (`4,876` reductions); ~~the rounds merged since
@@ -133,8 +133,8 @@ tuning set:
 
 - A probe of the tails the inherited engine reads.  On the frozen ladder, a
   non-unit linear row with no unit row appears on `115/550` reads at
-  `K_0/2^9, m = 2`, and on `0.2–5.5%` of reads at `n ≥ 13`; on
-  `K_1/2^17, m = 3` (4 targets) on `212` of `66,371`.  Using *tail* rows was
+  `icv1-f2m9-t5-81e744be, m = 2`, and on `0.2–5.5%` of reads at `n ≥ 13`; on
+  `icv1-f2m17-tm101-00378d4e, m = 3` (4 targets) on `212` of `66,371`.  Using *tail* rows was
   therefore not pursued; this round uses linear *generators*.
 - `koblitz_decompose_bench` (the stage bench's target scalars, node budget
   `20,000`) on `(a, n, targets, m)` = `(1, 17, 4, 3)`, `(0, 15, 8, 3)`,
@@ -144,10 +144,10 @@ tuning set:
 
   | cell | default | linear elimination | + interleaved order | reductions default → both |
   |:--|--:|--:|--:|:--|
-  | `K_1/2^17`, m=3, 4 targets | 202,667,232 | 204,871,791 | 35,239,803 | 66,371 → 2,324 |
-  | `K_0/2^15`, m=3, 8 | 4,342,676 | 4,049,014 | 1,439,390 | 3,672 → 136 |
-  | `K_0/2^13`, m=3, 8 | 9,743,787 | 8,408,962 | 6,009,659 | 200 → 200 |
-  | `K_0/2^9`, m=4, 8 | 2,868,312 | 1,473,191 | 909,554 | 758 → 156 |
+  | `icv1-f2m17-tm101-00378d4e`, m=3, 4 targets | 202,667,232 | 204,871,791 | 35,239,803 | 66,371 → 2,324 |
+  | `icv1-f2m15-tm275-2d22ff5d`, m=3, 8 | 4,342,676 | 4,049,014 | 1,439,390 | 3,672 → 136 |
+  | `icv1-f2m13-t181-515ee569`, m=3, 8 | 9,743,787 | 8,408,962 | 6,009,659 | 200 → 200 |
+  | `icv1-f2m9-t5-81e744be`, m=4, 8 | 2,868,312 | 1,473,191 | 909,554 | 758 → 156 |
 
   with the same number of targets decomposed in every column (0, 0, 8 and 7).
   Other orders on `(1, 17, 4, 3)`: splitting the summands `x₁` first or the
@@ -157,7 +157,7 @@ tuning set:
   order *with* children completed rather than rebuilt cost `1.19 × 10⁹` on the
   same `2,324`-node tree: that is what item 2 of the question removes.
 - The frozen ladder with linear elimination (scratch): identical verdict digests
-  on every rung, `K_0/2^9, m = 3` `1,142,867 → 888,008` (`→ 611,213` with the
+  on every rung, `icv1-f2m9-t5-81e744be, m = 3` `1,142,867 → 888,008` (`→ 611,213` with the
   order, digest changed, the same 15 of 16 decomposed), the quadratic rungs
   `1.00–1.08×`.
 - On the registered code, before registration: the reference selection
@@ -182,14 +182,14 @@ records them in its `stage.json` (`policy`).
 repetitions exist to show it and to take a wall median):
 
 1. **Frozen ladder** (`groebner_stage_bench`, unchanged): five quadratic rungs
-   and `K_0/2^9, m = 3`.  `O` is the identity on the quadratic rungs.
-2. **Chain ladder** (`--ladder chain`, new): `K_0/2^9 m=3` (16 targets),
-   `K_0/2^13 m=3` (8), `K_0/2^15 m=3` (8), `K_1/2^17 m=3` (4), `K_0/2^9 m=4` (8)
+   and `icv1-f2m9-t5-81e744be, m = 3`.  `O` is the identity on the quadratic rungs.
+2. **Chain ladder** (`--ladder chain`, new): `icv1-f2m9-t5-81e744be m=3` (16 targets),
+   `icv1-f2m13-t181-515ee569 m=3` (8), `icv1-f2m15-tm275-2d22ff5d m=3` (8), `icv1-f2m17-tm101-00378d4e m=3` (4), `icv1-f2m9-t5-81e744be m=4` (8)
    — the cells of §1, targets `0…`.  The tuning set.
-3. **Chain holdout** (`--ladder chain-holdout`, new): `K_1/2^9 m=3` (16),
-   `K_0/2^11 m=3` (8), `K_1/2^11 m=3` (8), `K_1/2^13 m=3` (8), `K_1/2^15 m=3` (8),
-   `K_0/2^17 m=3` (4), `K_1/2^9 m=4` (8), `K_0/2^15 m=4` (8), `K_1/2^15 m=4` (8),
-   and fresh targets `1000…` on `K_0/2^13 m=3` (8) and `K_1/2^17 m=3` (4).  No arm
+3. **Chain holdout** (`--ladder chain-holdout`, new): `icv1-f2m9-tm5-4a3ea183 m=3` (16),
+   `icv1-f2m11-tm67-f393fc83 m=3` (8), `icv1-f2m11-t67-05f5aa36 m=3` (8), `icv1-f2m13-tm181-25e736d2 m=3` (8), `icv1-f2m15-t275-b7f03703 m=3` (8),
+   `icv1-f2m17-t101-e6c4b64d m=3` (4), `icv1-f2m9-tm5-4a3ea183 m=4` (8), `icv1-f2m15-tm275-2d22ff5d m=4` (8), `icv1-f2m15-t275-b7f03703 m=4` (8),
+   and fresh targets `1000…` on `icv1-f2m13-t181-515ee569 m=3` (8) and `icv1-f2m17-tm101-00378d4e m=3` (4).  No arm
    of this change has run on any of them.  A cell the harness skips (no curve,
    no factor base, `m` inadmissible for the cofactor, or too many unknowns for a
    64-bit monomial) is listed as skipped, not dropped.
@@ -258,14 +258,14 @@ the planted `k`.  Both arms run on the same binary with the same `--degree`,
 `--curve-a`, `--seed` and factor base, so they draw the same trial points; only
 the oracle's tree differs.  The cells were sized by a reference-only
 feasibility run (seed 1, factor index 0), before registration: of the Koblitz
-curves `K_a/F_{2^n}`, `n ∈ {9, 11, 13, 15, 17}`, only `K_0/2^9` (3 columns,
-4 trials, `0.01 s`) and `K_0/2^13` (77 columns, 14 trials, `1.6 × 10⁷` word
-operations, `0.27 s`) run a logarithm with `m = 3` at all.  At `K_1/2^9`,
-`K_1/2^11`, `K_0/2^15`, `K_1/2^15` and `K_1/2^17` the pipeline draws no trial
-(the base admits no `m = 3` relation), and `K_0/2^11`, `K_1/2^13` and
-`K_0/2^17` have no usable prime-order subgroup in the constructor.  The
-registered cells are therefore `K_0/2^13`, seeds `1…10` with holdout seeds
-`101…105`, and `K_0/2^9`, seeds `1…5`, as a small-instance control.  Reported per
+curves `K_a/F_{2^n}`, `n ∈ {9, 11, 13, 15, 17}`, only `icv1-f2m9-t5-81e744be` (3 columns,
+4 trials, `0.01 s`) and `icv1-f2m13-t181-515ee569` (77 columns, 14 trials, `1.6 × 10⁷` word
+operations, `0.27 s`) run a logarithm with `m = 3` at all.  At `icv1-f2m9-tm5-4a3ea183`,
+`icv1-f2m11-t67-05f5aa36`, `icv1-f2m15-tm275-2d22ff5d`, `icv1-f2m15-t275-b7f03703` and `icv1-f2m17-tm101-00378d4e` the pipeline draws no trial
+(the base admits no `m = 3` relation), and `icv1-f2m11-tm67-f393fc83`, `icv1-f2m13-tm181-25e736d2` and
+`icv1-f2m17-t101-e6c4b64d` have no usable prime-order subgroup in the constructor.  The
+registered cells are therefore `icv1-f2m13-t181-515ee569`, seeds `1…10` with holdout seeds
+`101…105`, and `icv1-f2m9-t5-81e744be`, seeds `1…5`, as a small-instance control.  Reported per
 run: status, recovered and planted `k`, trials, relations, oracle reductions and
 word operations, and each phase's wall time.
 
@@ -287,19 +287,19 @@ projection as an extrapolation.
 any run of the supplementary holdout below.*
 
 **What happened.**  Seven of the eleven holdout cells of §2 were skipped by the
-harness.  `K_0/2^11`, `K_1/2^13` and `K_0/2^17` have no curve in the
-constructor (no usable prime-order subgroup).  At `K_1/2^9`, `K_1/2^11` and
-`K_1/2^15` with `m = 3`, and at `K_1/2^17` with fresh targets, the factor base
+harness.  `icv1-f2m11-tm67-f393fc83`, `icv1-f2m13-tm181-25e736d2` and `icv1-f2m17-t101-e6c4b64d` have no curve in the
+constructor (no usable prime-order subgroup).  At `icv1-f2m9-tm5-4a3ea183`, `icv1-f2m11-t67-05f5aa36` and
+`icv1-f2m15-t275-b7f03703` with `m = 3`, and at `icv1-f2m17-tm101-00378d4e` with fresh targets, the factor base
 admits no `m = 3` relation for its cofactor
 (`FrobeniusFactorBase::m_can_decompose`), so the decomposition oracle never
 enters the Gröbner stage there.  The list was written without either check.  Four
-holdout rungs ran — `K_1/2^9 m=4`, `K_0/2^15 m=4`, `K_1/2^15 m=4` and fresh
-targets on `K_0/2^13 m=3` — and T1 needs six.  **T1 is not met as registered**,
+holdout rungs ran — `icv1-f2m9-tm5-4a3ea183 m=4`, `icv1-f2m15-tm275-2d22ff5d m=4`, `icv1-f2m15-t275-b7f03703 m=4` and fresh
+targets on `icv1-f2m13-t181-515ee569 m=3` — and T1 needs six.  **T1 is not met as registered**,
 on its count clause alone; it is recorded that way and not re-read.
 
-The same check removes two cells from the chain (tuning) ladder: `K_0/2^15`
-and `K_1/2^17` with `m = 3` are inadmissible.  Two of §1's exploratory rows —
-including its largest ratio, `5.75×` on `K_1/2^17, m = 3` — therefore describe
+The same check removes two cells from the chain (tuning) ladder: `icv1-f2m15-tm275-2d22ff5d`
+and `icv1-f2m17-tm101-00378d4e` with `m = 3` are inadmissible.  Two of §1's exploratory rows —
+including its largest ratio, `5.75×` on `icv1-f2m17-tm101-00378d4e, m = 3` — therefore describe
 refutations the pipeline never asks for.  They stay in §1 as what was run; they
 are not evidence for this change.
 
@@ -313,15 +313,15 @@ no other selection:
 
 | cell | factor index | `ℓ` | base points | unknowns | targets |
 |:--|--:|--:|--:|--:|--:|
-| `K_1/2^11`, m=4 | 0 | 10 | 991 | 62 | 4 |
-| `K_0/2^15`, m=3 | 1 | 4 | 31 | 27 | 8 |
-| `K_0/2^15`, m=4 | 1 | 4 | 31 | 46 | 8 |
-| `K_0/2^15`, m=3 | 2 | 4 | 21 | 27 | 8 |
-| `K_0/2^15`, m=4 | 2 | 4 | 21 | 46 | 8 |
-| `K_1/2^15`, m=4 | 1 | 4 | 1 | 46 | 8 |
-| `K_1/2^15`, m=4 | 2 | 4 | 11 | 46 | 8 |
-| `K_0/2^23`, m=3 | 0 | 11 | 2,025 | 56 | 4 |
-| `K_0/2^23`, m=3 | 1 | 11 | 2,071 | 56 | 4 |
+| `icv1-f2m11-t67-05f5aa36`, m=4 | 0 | 10 | 991 | 62 | 4 |
+| `icv1-f2m15-tm275-2d22ff5d`, m=3 | 1 | 4 | 31 | 27 | 8 |
+| `icv1-f2m15-tm275-2d22ff5d`, m=4 | 1 | 4 | 31 | 46 | 8 |
+| `icv1-f2m15-tm275-2d22ff5d`, m=3 | 2 | 4 | 21 | 27 | 8 |
+| `icv1-f2m15-tm275-2d22ff5d`, m=4 | 2 | 4 | 21 | 46 | 8 |
+| `icv1-f2m15-t275-b7f03703`, m=4 | 1 | 4 | 1 | 46 | 8 |
+| `icv1-f2m15-t275-b7f03703`, m=4 | 2 | 4 | 11 | 46 | 8 |
+| `icv1-f2m23-t5197-69e76b73`, m=3 | 0 | 11 | 2,025 | 56 | 4 |
+| `icv1-f2m23-t5197-69e76b73`, m=3 | 1 | 11 | 2,071 | 56 | 4 |
 
 (`groebner_stage_bench --ladder chain-holdout-2`, targets `0…`, node budget
 `20,000`, four targets where a cell has 56 or more unknowns.)  Arms: the
@@ -364,30 +364,30 @@ are the reductions each tree took.
 
 | suite | rung | targets | decomposed | nodes ref → cand | reference | `L` alone | `O` alone | **candidate `O+L`** | `D` (same tree as ref) | class |
 |:--|:--|--:|--:|:--|--:|--:|--:|--:|--:|:--|
-| frozen | `K_0/2^9` m=2 | 40 | 39 | 338 → 289 | 219,979 | 1.08× | 1.00× | **1.08×** | 1.05× | engineering |
-| frozen | `K_0/2^9` m=3 | 16 | 15 | 382 → 215 | 1,142,867 | 1.29× | 0.66× | **1.84×** | 1.08× | engineering |
-| frozen | `K_0/2^13` m=2 | 40 | 40 | 520 → 520 | 5,295,231 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
-| frozen | `K_1/2^15` m=2 | 32 | 0 | 32 → 32 | 70,779 | 1.00× | 1.00× | **1.00×** | 1.00× | flat (no tree) |
-| frozen | `K_1/2^17` m=2 | 32 | 7 | 1,769 → 1,769 | 1,985,821 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
-| frozen | `K_1/2^23` m=2 | 16 | 9 | 4,876 → 4,876 | 7,982,169 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
+| frozen | `icv1-f2m9-t5-81e744be` m=2 | 40 | 39 | 338 → 289 | 219,979 | 1.08× | 1.00× | **1.08×** | 1.05× | engineering |
+| frozen | `icv1-f2m9-t5-81e744be` m=3 | 16 | 15 | 382 → 215 | 1,142,867 | 1.29× | 0.66× | **1.84×** | 1.08× | engineering |
+| frozen | `icv1-f2m13-t181-515ee569` m=2 | 40 | 40 | 520 → 520 | 5,295,231 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
+| frozen | `icv1-f2m15-t275-b7f03703` m=2 | 32 | 0 | 32 → 32 | 70,779 | 1.00× | 1.00× | **1.00×** | 1.00× | flat (no tree) |
+| frozen | `icv1-f2m17-tm101-00378d4e` m=2 | 32 | 7 | 1,769 → 1,769 | 1,985,821 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
+| frozen | `icv1-f2m23-tm5197-1f85e9e1` m=2 | 16 | 9 | 4,876 → 4,876 | 7,982,169 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
 | frozen | **total** | 176 | 110 | | **16,696,846** | 1.02× | 0.97× | **1.04×** | 1.01× | engineering |
-| chain (tuning) | `K_0/2^13` m=3 | 8 | 8 | 200 → 200 | 9,743,787 | 1.16× | 1.19× | **1.62×** | 1.16× | engineering |
-| chain (tuning) | `K_0/2^9` m=4 | 8 | 7 | 758 → 156 | 2,868,312 | 1.95× | 0.45× | **3.13×** | 1.12× | engineering |
-| chain (tuning) | **total** (with `K_0/2^9` m=3) | | | | **13,754,966** | 1.28× | 0.85× | **1.82×** | 1.14× | engineering |
-| holdout | `K_1/2^9` m=4 | 8 | 8 | 257 → 174 | 3,199,188 | 2.18× | 1.32× | **2.74×** | **0.88×** | engineering |
-| holdout | `K_0/2^15` m=4 (refutation only; base of 1 point) | 8 | 0 | 7,203 → 264 | 21,561,148 | 1.68× | 2.82× | **3.82×** | 1.64× | engineering |
-| holdout | `K_1/2^15` m=4 | 8 | 5 | 58,955 → 7,858 | 345,384,853 | 2.58× | **0.19×** | **8.74×** | 2.19× | engineering |
-| holdout | `K_0/2^13` m=3, targets 1000… | 8 | 8 | 200 → 200 | 9,121,538 | 1.09× | 1.26× | **1.53×** | 1.09× | engineering |
+| chain (tuning) | `icv1-f2m13-t181-515ee569` m=3 | 8 | 8 | 200 → 200 | 9,743,787 | 1.16× | 1.19× | **1.62×** | 1.16× | engineering |
+| chain (tuning) | `icv1-f2m9-t5-81e744be` m=4 | 8 | 7 | 758 → 156 | 2,868,312 | 1.95× | 0.45× | **3.13×** | 1.12× | engineering |
+| chain (tuning) | **total** (with `icv1-f2m9-t5-81e744be` m=3) | | | | **13,754,966** | 1.28× | 0.85× | **1.82×** | 1.14× | engineering |
+| holdout | `icv1-f2m9-tm5-4a3ea183` m=4 | 8 | 8 | 257 → 174 | 3,199,188 | 2.18× | 1.32× | **2.74×** | **0.88×** | engineering |
+| holdout | `icv1-f2m15-tm275-2d22ff5d` m=4 (refutation only; base of 1 point) | 8 | 0 | 7,203 → 264 | 21,561,148 | 1.68× | 2.82× | **3.82×** | 1.64× | engineering |
+| holdout | `icv1-f2m15-t275-b7f03703` m=4 | 8 | 5 | 58,955 → 7,858 | 345,384,853 | 2.58× | **0.19×** | **8.74×** | 2.19× | engineering |
+| holdout | `icv1-f2m13-t181-515ee569` m=3, targets 1000… | 8 | 8 | 200 → 200 | 9,121,538 | 1.09× | 1.26× | **1.53×** | 1.09× | engineering |
 | holdout | **total** (4 of 11 cells comparable) | | | | **379,266,727** | 2.42× | 0.21× | **7.25×** | 2.07× | engineering |
-| T1′ | `K_1/2^11` m=4 | 4 | 4 | 48,328 → 124 | 99,422,940 | | | **33.32×** | | engineering |
-| T1′ | `K_0/2^15` m=3, divisor 1 | 8 | 6 | 1,557 → 258 | 6,960,048 | | | **3.58×** | | engineering |
-| T1′ | `K_0/2^15` m=4, divisor 1 | 8 | 7 | 21,535 → 4,771 | 149,499,912 | | | **5.05×** | | engineering |
-| T1′ | `K_0/2^15` m=3, divisor 2 (refutation only) | 8 | 0 | 4,281 → 387 | 9,137,800 | | | **3.31×** | | engineering |
-| T1′ | `K_0/2^15` m=4, divisor 2 (refutation only) | 8 | 0 | 94,018 → 8,369 | 436,103,847 | | | **6.73×** | | engineering |
-| T1′ | `K_1/2^15` m=4, divisor 1 (refutation only; base of 1 point) | 8 | 0 | 8,229 → 264 | 28,328,427 | | | **4.82×** | | engineering |
-| T1′ | `K_1/2^15` m=4, divisor 2 (refutation only) | 8 | 0 | 50,138 → 2,870 | 205,293,663 | | | **6.07×** | | engineering |
-| T1′ | `K_0/2^23` m=3 | 4 | 4 | 9,279 → 2,380 | 65,321,230 | | | **1.68×** | | engineering |
-| T1′ | `K_0/2^23` m=3, divisor 1 | 4 | 4 | 19,166 → 4,758 | 104,466,517 | | | **2.36×** | | engineering |
+| T1′ | `icv1-f2m11-t67-05f5aa36` m=4 | 4 | 4 | 48,328 → 124 | 99,422,940 | | | **33.32×** | | engineering |
+| T1′ | `icv1-f2m15-tm275-2d22ff5d` m=3, divisor 1 | 8 | 6 | 1,557 → 258 | 6,960,048 | | | **3.58×** | | engineering |
+| T1′ | `icv1-f2m15-tm275-2d22ff5d` m=4, divisor 1 | 8 | 7 | 21,535 → 4,771 | 149,499,912 | | | **5.05×** | | engineering |
+| T1′ | `icv1-f2m15-tm275-2d22ff5d` m=3, divisor 2 (refutation only) | 8 | 0 | 4,281 → 387 | 9,137,800 | | | **3.31×** | | engineering |
+| T1′ | `icv1-f2m15-tm275-2d22ff5d` m=4, divisor 2 (refutation only) | 8 | 0 | 94,018 → 8,369 | 436,103,847 | | | **6.73×** | | engineering |
+| T1′ | `icv1-f2m15-t275-b7f03703` m=4, divisor 1 (refutation only; base of 1 point) | 8 | 0 | 8,229 → 264 | 28,328,427 | | | **4.82×** | | engineering |
+| T1′ | `icv1-f2m15-t275-b7f03703` m=4, divisor 2 (refutation only) | 8 | 0 | 50,138 → 2,870 | 205,293,663 | | | **6.07×** | | engineering |
+| T1′ | `icv1-f2m23-t5197-69e76b73` m=3 | 4 | 4 | 9,279 → 2,380 | 65,321,230 | | | **1.68×** | | engineering |
+| T1′ | `icv1-f2m23-t5197-69e76b73` m=3, divisor 1 | 4 | 4 | 19,166 → 4,758 | 104,466,517 | | | **2.36×** | | engineering |
 | T1′ | **total** (9 of 9 comparable) | 60 | 25 | | **1,104,534,384** | | | **4.91×** | | engineering |
 
 Ratio to the floor: flat on every row, by construction (§0).  Correctness:
@@ -406,7 +406,7 @@ note: the holdout `8.48 → 1.29 s`, T1′ `24.8 → 4.4 s`, the frozen ladder
   that ran, every other clause of T1 holds (`7.25×`, every rung above `1`).
 - **T1′: met.**  Nine comparable rungs of nine, total `4.91×` (threshold
   `2.0×`), every rung with a reference tree above `1.0` (the least,
-  `K_0/2^23 m=3`, `1.68×`), none exhausted on either side.
+  `icv1-f2m23-t5197-69e76b73 m=3`, `1.68×`), none exhausted on either side.
 - **T2: met.**  No frozen rung rises; four are flat, two fall (`1.08×`,
   `1.84×`).
 - **T3: met.**  The pinned same-tree tests, `linear_elimination_keeps_every_root`
@@ -415,9 +415,9 @@ note: the holdout `8.48 → 1.29 s`, T1′ `24.8 → 4.4 s`, the frozen ladder
   refuted / inconclusive counts for matrix-F4 on every cell and zero
   disagreements between any two oracles on any target (§6.4).
 - **The degree-drop rule: fails its gate.**  Same-tree against its `complete`
-  twin it is `0.88×` on the holdout's `K_1/2^9 m=4` with `L = 0`, and under
+  twin it is `0.88×` on the holdout's `icv1-f2m9-tm5-4a3ea183 m=4` with `L = 0`, and under
   `L = 1` it costs `47,868,319` against the candidate's `39,537,587` on
-  `K_1/2^15 m=4` (`0.83×`).  It stays a control, off by default — a clean
+  `icv1-f2m15-t275-b7f03703 m=4` (`0.83×`).  It stays a control, off by default — a clean
   negative: rebuilding a basis from scratch on every drop is dearer than
   completing it wherever the dropped generators are few, and the drops that
   mattered (to degree one) are exactly the ones linear elimination removes.
@@ -425,14 +425,14 @@ note: the holdout `8.48 → 1.29 s`, T1′ `24.8 → 4.4 s`, the frozen ladder
 ### 6.3 Why the two changes only work together
 
 The order alone is a loss wherever the chain is long enough to matter —
-`0.19×` on `K_1/2^15 m=4`, `0.21×` over the holdout — and linear elimination
+`0.19×` on `icv1-f2m15-t275-b7f03703 m=4`, `0.21×` over the holdout — and linear elimination
 alone is a modest gain (`2.42×` there); together they are `7.25×`.  That is the
 mechanism of the question, measured: fixing `x_m` first leaves the last link's
 `n` generators at degree one, and without elimination the inherited engine
 multiplies every one of them by every monomial of degree `≤ 2` over the
 occurring variables and inserts the products against the parent's basis
 (completion rows).  The tree shrinks — `58,955 → 7,858` reductions on
-`K_1/2^15 m=4`, `48,328 → 124` on `K_1/2^11 m=4` — but under the order alone
+`icv1-f2m15-t275-b7f03703 m=4`, `48,328 → 124` on `icv1-f2m11-t67-05f5aa36 m=4` — but under the order alone
 each of its nodes pays for that completion.  Elimination removes the
 intermediate point's variables instead, the node rebuilds a small basis over
 what is left, and the hybrid *guess a summand, eliminate the intermediate
@@ -481,19 +481,19 @@ one binary, the same seeds (`e2e/`).  All 40 runs **complete, with the planted
 
 | cell | runs | trials ref / cand | relations ref / cand | oracle word ops ref → cand | ratio (per run) | whole-process wall ref → cand | wall ratio, geometric mean [95% paired bootstrap] |
 |:--|--:|:--|:--|:--|:--|:--|:--|
-| `K_0/2^13`, seeds 1–10, holdout 101–105 | 15 + 15 | 207 / 207 (every seed equal) | 206 / 206 | 234,370,439 → 151,807,846 | **1.54×** (1.50–1.57) | 3.40 → 3.23 s | 1.062× [1.025, 1.097] |
-| `K_0/2^9`, seeds 1–5 | 5 + 5 | 20 / 19 (seed 2: 4 → 3) | 20 / 19 | 1,501,482 → 803,023 | **1.87×** (1.60–2.19) | 0.068 → 0.052 s | 1.32× [1.14, 1.49] |
+| `icv1-f2m13-t181-515ee569`, seeds 1–10, holdout 101–105 | 15 + 15 | 207 / 207 (every seed equal) | 206 / 206 | 234,370,439 → 151,807,846 | **1.54×** (1.50–1.57) | 3.40 → 3.23 s | 1.062× [1.025, 1.097] |
+| `icv1-f2m9-t5-81e744be`, seeds 1–5 | 5 + 5 | 20 / 19 (seed 2: 4 → 3) | 20 / 19 | 1,501,482 → 803,023 | **1.87×** (1.60–2.19) | 0.068 → 0.052 s | 1.32× [1.14, 1.49] |
 
 What this shows, and all it shows: on every run the candidate does the same
 work as the reference in every counted phase but the oracle — same trials,
-same relations, same matrix — except `K_0/2^9` seed 2, where a different first
+same relations, same matrix — except `icv1-f2m9-t5-81e744be` seed 2, where a different first
 decomposition closed the matrix one trial earlier, so it did *less* work in
 every phase.  So `baseline_total / candidate_total > 1` on every run.  Its size
 cannot be stated in one unit: `ic run` counts the oracle in word operations and
 the rest in wall time only, with no measured conversion (§4), so the method's
 `S` is **null** and the only whole-pipeline number is the wall ratio, a
 practicality note — and a weak one here: the arms ran back to back rather than
-interleaved on a shared host, so host drift is not excluded, and on `K_0/2^13`
+interleaved on a shared host, so host drift is not excluded, and on `icv1-f2m13-t181-515ee569`
 the relation collection is `95%` of the wall and the Gröbner stage only part
 of that.  No end-to-end speedup is claimed beyond the sign.
 
@@ -505,9 +505,9 @@ of that.  No end-to-end speedup is claimed beyond the sign.
 - **Anything about `m = 2`.**  The order is the identity there, and linear
   generators appear only when a whole summand is fixed, which the degree-3
   algebra rarely lets the tree reach: four of the five quadratic rungs are
-  flat, and `K_0/2^9, m = 2` moves `1.08×` on a different tree because linear
+  flat, and `icv1-f2m9-t5-81e744be, m = 2` moves `1.08×` on a different tree because linear
   generators do appear there.
-- **The two largest exploratory ratios.**  `K_1/2^17` and `K_0/2^15` at
+- **The two largest exploratory ratios.**  `icv1-f2m17-tm101-00378d4e` and `icv1-f2m15-tm275-2d22ff5d` at
   `m = 3` are inadmissible (§5); the production oracle never runs them.
 - **A crossing.**  The Gröbner oracle is still the most expensive route that
   finishes a decomposition on the oracle ladder; the page's verdict is

@@ -1,0 +1,42 @@
+{
+  "close_fds": true,
+  "command": [
+    "/Volumes/SSD990/koblitz-native-f4-build20-080d3c2b/bin/koblitz_pdp_export",
+    "59",
+    "9",
+    "standard",
+    "14452092187369076770",
+    "100000",
+    "/Volumes/SSD990/koblitz-native-f4-run20-080d3c2b-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance",
+    "1",
+    "0",
+    "--target-x",
+    "521573165675060038",
+    "--target-y",
+    "564432667292276508",
+    "--blind-instance-id",
+    "b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4",
+    "--export-only"
+  ],
+  "cwd": "/Volumes/SSD990/crypto-phase-b-native-f4-20260922",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "PQ_F4_X1_BATCH": "39",
+    "RAYON_NUM_THREADS": "12",
+    "TMPDIR": "/tmp",
+    "TZ": "UTC",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "executable_sha256": "1eeaa6b75c29faffae85533c93a70e6cc0705092b5b45e09ae174dabea9af1c1",
+  "inputs": [],
+  "role": "export",
+  "schema": "koblitz_pdp_phase_b_child_intent.v1",
+  "stdin": "devnull",
+  "watchdog_seconds": 120
+}

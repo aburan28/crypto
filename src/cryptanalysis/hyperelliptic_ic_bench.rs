@@ -604,6 +604,14 @@ pub struct HeadToHeadRow {
     pub ic_oracle_group_equiv_charged: f64,
     /// The same, converted to group-operation equivalents.
     pub ic_la_group_equiv: f64,
+    /// Large-prime bookkeeping (storing and combining partials), from
+    /// its measured wall time converted in situ.  Zero without large
+    /// primes.
+    pub ic_partial_group_equiv: f64,
+    /// Means per run: partials kept, and full relations combined from
+    /// them.
+    pub ic_partial_relations: f64,
+    pub ic_combined_relations: f64,
     pub ic_total_group_ops: f64,
     pub ic_s: f64,
     pub ic_wall_ms: f64,
@@ -716,6 +724,9 @@ pub fn head_to_head(
     let mut ic_oracle_ns = 0f64;
     let mut ic_walk_ns = 0f64;
     let mut ic_solve_ns = 0f64;
+    let mut ic_partial_ns = 0f64;
+    let mut ic_partials = 0f64;
+    let mut ic_combined = 0f64;
     let mut ic_precompute_ops = 0f64;
     let mut ic_ops_per_trial = 0f64;
     let mut ic_wall_ms = 0f64;
@@ -734,6 +745,9 @@ pub fn head_to_head(
         ic_oracle_ns += rep.smoothness_wall_ns as f64;
         ic_walk_ns += rep.walk_wall_ns as f64;
         ic_solve_ns += rep.solve_wall_ns as f64;
+        ic_partial_ns += rep.partial_wall_ns as f64;
+        ic_partials += rep.partial_relations as f64;
+        ic_combined += rep.combined_relations as f64;
         ic_precompute_ops += rep.precompute_ops as f64;
         ic_ops_per_trial += rep.ops_per_trial();
         ic_smooth += rep.smoothness_rate();
@@ -744,6 +758,8 @@ pub fn head_to_head(
     let (ic_precompute_ops, ic_ops_per_trial) = (ic_precompute_ops / f, ic_ops_per_trial / f);
     let (ic_oracle_ns, ic_walk_ns, ic_solve_ns) =
         (ic_oracle_ns / f, ic_walk_ns / f, ic_solve_ns / f);
+    let (ic_partial_ns, ic_partials, ic_combined) =
+        (ic_partial_ns / f, ic_partials / f, ic_combined / f);
     let (ic_relation_ops, ic_la_modmuls, ic_oracle_modmuls, ic_wall_ms, ic_smooth) = (
         ic_relation_ops / f,
         ic_la_modmuls / f,
@@ -794,7 +810,8 @@ pub fn head_to_head(
     let solve_group_equiv = ic_solve_ns / 1e9 / in_situ_per_op.max(f64::MIN_POSITIVE);
     let oracle_group_equiv_charged = ic_oracle_modmuls / conv.max(f64::MIN_POSITIVE);
     let la_group_equiv = solve_group_equiv;
-    let ic_total = ic_relation_ops + la_group_equiv + oracle_group_equiv;
+    let partial_group_equiv = ic_partial_ns / 1e9 / in_situ_per_op.max(f64::MIN_POSITIVE);
+    let ic_total = ic_relation_ops + la_group_equiv + oracle_group_equiv + partial_group_equiv;
 
     let m = ic_fb as f64;
     // Both terms in group-operation equivalents: the solve's `m²`
@@ -837,6 +854,9 @@ pub fn head_to_head(
         ic_ops_per_trial,
         ic_la_modmuls,
         ic_la_group_equiv: la_group_equiv,
+        ic_partial_group_equiv: partial_group_equiv,
+        ic_partial_relations: ic_partials,
+        ic_combined_relations: ic_combined,
         ic_oracle_modmuls,
         ic_oracle_group_equiv: oracle_group_equiv,
         ic_oracle_group_equiv_charged: oracle_group_equiv_charged,
@@ -1020,6 +1040,7 @@ mod tests {
             search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         };
         let row = head_to_head(
             &curve,
@@ -1055,6 +1076,7 @@ mod tests {
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let row = head_to_head(
             &curve,

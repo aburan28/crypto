@@ -1,0 +1,43 @@
+name: ECC2K-130 m3 probe-order bound replay
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ecc2k130-m3-probe-order-bound.yml
+      - research/notes/ecc2k130/m3_probe_order_bound_20260930/**
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ecc2k130-m3-probe-order-bound.yml
+      - research/notes/ecc2k130/m3_probe_order_bound_20260930/**
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            research/notes/ecc2k130/m3_probe_order_bound_20260930
+            research/notes/ecc2k130/m3_four_policy_20260930
+            research/ecc2k130_factor_base_pilot_20260924
+            research/ecc2k130_factor_base_replication_20260925
+            research/ecc2k130_dual_transport_20260925
+            research/ecc2k130_relations
+            research/ecc2k130_oriented_transport_20260924
+            .github/workflows/ecc2k130-m3-four-policy.yml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recompute exact bound and compare receipt
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/m3_probe_order_bound_20260930/derive.py
+          python3 research/notes/ecc2k130/m3_probe_order_bound_20260930/derive.py \
+            --out "$RUNNER_TEMP/m3-probe-order-bound.json"
+          cmp "$RUNNER_TEMP/m3-probe-order-bound.json" \
+            research/notes/ecc2k130/m3_probe_order_bound_20260930/BOUND.json

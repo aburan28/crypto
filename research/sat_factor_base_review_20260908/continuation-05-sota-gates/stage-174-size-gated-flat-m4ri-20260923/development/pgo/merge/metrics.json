@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/opt/homebrew/opt/llvm/bin/llvm-profdata",
+    "merge",
+    "-o",
+    "/Volumes/SSD990/kic-stage174-f4-pgo-dev/merged.profdata",
+    "/Volumes/SSD990/kic-stage174-f4-pgo-dev/training-profiles/training-84500-16713436162408484227_0.profraw"
+  ],
+  "returncode": 1,
+  "watchdog_seconds": 120.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.15801662499143276,
+    "user_seconds": 0.005621,
+    "system_seconds": 0.024215,
+    "total_core_seconds": 0.029836,
+    "single_core_seconds": 0.029836,
+    "peak_rss_bytes": 20905984,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

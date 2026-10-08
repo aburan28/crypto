@@ -14,7 +14,7 @@ where `ℓ = dim V`, so the base is not only what the relations are written in, 
 is what the solver has to solve.  Does the base the repository selects minimise
 what the solver then does?
 
-**Bottom line.  No — at `K_1/2^15` the selection objective ranks the candidate
+**Bottom line.  No — at `icv1-f2m15-t275-b7f03703` the selection objective ranks the candidate
 bases almost exactly backwards.**  `koblitz_factor_base_search` minimises
 expected *trials*; over five admissible invariant subspaces of that curve the
 Spearman correlation between that ranking and measured F4 word-XOR count is
@@ -112,7 +112,7 @@ That criterion is an algebraic fact, not a fit, and direct trace computation on
 every candidate at `n = 9, 15, 17, 23, 31` agrees with it row for row.
 
 The sweep shows the factor of two paying: adding the factor `(x+1)` to a divisor
-doubles the subspace and takes it out of `ker Tr`, and at `K_1/2^15` the three
+doubles the subspace and takes it out of `ker Tr`, and at `icv1-f2m15-t275-b7f03703` the three
 such pairs go `67 → 133` points for `36% → 48%` coverage, `77 → 123` for
 `44% → 46%`, and `97 → 163` for `12% → 12%`.  Twice the base for nothing, half
 of it, and nothing again — the trace-zero base is buying back most of what a
@@ -127,7 +127,7 @@ is the same with the middle factor set to `1`.  Coverage is pooled over two
 independent target samples (seeds 1 and 2) into one binomial with a Wilson 95%
 interval; `C`'s band is `C` evaluated at the ends of it.
 
-**`K_1/2^15`, `m = 2`, 128 targets per base** (the six cheapest of sixteen):
+**`icv1-f2m15-t275-b7f03703`, `m = 2`, 128 targets per base** (the six cheapest of sixteen):
 
 | divisor | `ℓ` | `\|F\|` | `U` | `Tr=0` | coverage (95% CI) | ops/target | `T` | `C` | `C`/best | ratio to floor |
 |:--|--:|--:|--:|:-:|--:|--:|--:|--:|--:|:--|
@@ -153,12 +153,12 @@ The other rungs, for completeness:
 
 | curve | trials pick | cost pick | penalty | at the worst end of both CIs | verdict |
 |:--|:--|:--|--:|--:|:--|
-| `K_0/2^9`, `m = 2` | `2` | `2` | 1.00× | — | agree |
-| `K_0/2^9`, `m = 3` | `2` | `2` | 1.00× | — | agree |
-| `K_1/2^15`, `m = 2` | `2·3` | `1·4` | **10.35×** | **7.99×** | **disagree** |
-| `K_1/2^17`, `m = 2` | `2` | `2` | 1.00× | — | agree |
-| `K_1/2^23`, `m = 2` | `1` | `1` | 1.00× | — | agree |
-| `K_0/2^31`, `m = 2` | `1·3·5` | `1·2·3` | 1.19× | 0.56× | **not established** |
+| `icv1-f2m9-t5-81e744be`, `m = 2` | `2` | `2` | 1.00× | — | agree |
+| `icv1-f2m9-t5-81e744be`, `m = 3` | `2` | `2` | 1.00× | — | agree |
+| `icv1-f2m15-t275-b7f03703`, `m = 2` | `2·3` | `1·4` | **10.35×** | **7.99×** | **disagree** |
+| `icv1-f2m17-tm101-00378d4e`, `m = 2` | `2` | `2` | 1.00× | — | agree |
+| `icv1-f2m23-tm5197-1f85e9e1`, `m = 2` | `1` | `1` | 1.00× | — | agree |
+| `icv1-f2m31-tm90707-c95f16f5`, `m = 2` | `1·3·5` | `1·2·3` | 1.19× | 0.56× | **not established** |
 
 At `n = 31` the six `ℓ = 15` subspaces differ by up to `1.8×` in `C`, but 24
 targets per base put every coverage inside everyone else's interval, so **no
@@ -169,7 +169,7 @@ them by `7.99×`.
 ## 3. F4 counters collected during complete verified runs
 
 Stage cost is a model.  The five admissible bases were therefore run end to end:
-`ic run` at `K_1/2^15`, twelve random known-answer targets each (seeds 11…133),
+`ic run` at `icv1-f2m15-t275-b7f03703`, twelve random known-answer targets each (seeds 11…133),
 identical curve, subgroup and solver, every logarithm recovered and verified.
 
 | divisor | verified | `\|F\|` | columns | trials | F4 reductions | **word XORs** | ratio | wall |
@@ -199,7 +199,7 @@ noise, so "the cheapest base" is that pair, not either one.
 - **Selection should score `C`, not `T`.**  The instrument exists now
   (`groebner_base_sweep` reuses the stage profiler), it costs one sweep per
   curve, and where it disagrees with `T` it disagrees by an order of magnitude.
-  The default base is worse still: at `K_1/2^15` it is the `ℓ = 4` divisor,
+  The default base is worse still: at `icv1-f2m15-t275-b7f03703` it is the `ℓ = 4` divisor,
   which decomposes **nothing** at `m = 2` (`0/32` in
   `research/notes/ecc2k130/RESEARCH_GROEBNER_STAGE.md`'s ladder), which is what the yield search was
   built to fix — this note is about the choice it makes *among* usable bases.

@@ -1,0 +1,89 @@
+{
+  "inventory": [
+    {
+      "bytes": 19,
+      "path": ".gitignore",
+      "sha256": "862263fa1f46c20f0d1e4dac5ffcc75abd55c08211b2c3864c5f8764b9d87793"
+    },
+    {
+      "bytes": 1687,
+      "path": "RESULTS.md",
+      "sha256": "9d48e7384702105b3d10719ebd8a93fa0a5684234b41e1465121a75cee67a4c1"
+    },
+    {
+      "bytes": 12168,
+      "path": "compose_stage172.py",
+      "sha256": "94de34ed7ff1ce89a0852905476a05e28564f24c1b320f0d1610bf875d4baca3"
+    },
+    {
+      "bytes": 25451,
+      "path": "result.json",
+      "sha256": "9bd040e1e9ec3dca070f1fe3f0120c9fc539d3fef7323b9aa95dad5684f05524"
+    },
+    {
+      "bytes": 548,
+      "path": "runs/candidate/metrics.json",
+      "sha256": "bd89cb45621e89358b939e947360af74537c069ce0e877ee0a986b00f2c27405"
+    },
+    {
+      "bytes": 0,
+      "path": "runs/candidate/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6562,
+      "path": "runs/candidate/stdout.json",
+      "sha256": "2f8c76d04a430a96e938ce1972a1c19027787702ad7050a0b5405b23567ebcd4"
+    },
+    {
+      "bytes": 549,
+      "path": "runs/control/metrics.json",
+      "sha256": "269cc5d977292c555e2a182327fa1efae4a8a53088806242be7dcfb98680a688"
+    },
+    {
+      "bytes": 0,
+      "path": "runs/control/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6465,
+      "path": "runs/control/stdout.json",
+      "sha256": "4abe1db0aa357904b1f9d119d061732959fce3f41f56d7eac4d32ff4300300d6"
+    },
+    {
+      "bytes": 530,
+      "path": "runs/direct-mitm/metrics.json",
+      "sha256": "b28fecf9b08f70bfa488b38241188c699755054b7d86714022e1a9da6720ad18"
+    },
+    {
+      "bytes": 0,
+      "path": "runs/direct-mitm/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1261,
+      "path": "runs/direct-mitm/stdout.json",
+      "sha256": "521f7b622ce3bfe975225f280f9bcc754dbd35b14357030fe82a90e530a45ef8"
+    },
+    {
+      "bytes": 1490,
+      "path": "seal_stage172.py",
+      "sha256": "2bd19941f2be3ee4603ab12f509b1135f4019f2dd2fa7e286aeae5c9dbbbeef7"
+    },
+    {
+      "bytes": 650,
+      "path": "verification.json",
+      "sha256": "14aa0fb6973cc13cbd21dfa07cdc79a5dd81874546001ce072721f0e763a6456"
+    },
+    {
+      "bytes": 5517,
+      "path": "verify_stage172.py",
+      "sha256": "22d7d8d0e3dfedb42b6beae89c2ead128c754ff1ff792589781b4fd6c419b71a"
+    }
+  ],
+  "inventory_sha256": "6613247c89c7fb8e288eff84c8b6ea47bb82802cfd3160aef36d3f74aaeaa826",
+  "result_sha256": "9bd040e1e9ec3dca070f1fe3f0120c9fc539d3fef7323b9aa95dad5684f05524",
+  "schema": "koblitz_stage172_native_f4_single_core_seal.v1",
+  "seal_payload_sha256": "e41271a3f1c6df14148593a7a2d31a3ed75d86e315d790892a6e5301bf1fd8c5",
+  "status": "stage172_native_f4_single_core_result_frozen"
+}

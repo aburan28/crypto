@@ -13,6 +13,12 @@ on:
     paths:
       - '.github/workflows/release.yml'
       - 'Cargo.toml'
+      - 'Cargo.lock'
+      # `cargo build --bins` consumes the library and every binary target.
+      # Exercise the cross-platform packaging path whenever any Rust source
+      # changes, including the cover/Jacobian command-line tools.
+      - 'src/**'
+      - 'tests/fixtures/ecbench_manifest_small.json'
       - 'ecc2k130/Makefile'
   workflow_dispatch:
 
@@ -66,6 +72,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
+      - name: Enable long Git paths on Windows
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.90.0
         with:
@@ -73,9 +82,11 @@ jobs:
       - name: Install the musl linker
         if: matrix.target == 'x86_64-unknown-linux-musl'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
-      # No --locked: Cargo.lock is gitignored in this repo, so a fresh
-      # checkout has none and --locked would refuse to build.
-      - run: cargo build --release --bins --target ${{ matrix.target }}
+      - name: Build release binaries with source provenance
+        env:
+          CRYPTO_BUILD_GIT_COMMIT: ${{ github.sha }}
+          CRYPTO_BUILD_GIT_DIRTY: "false"
+        run: cargo build --locked --release --bins --target ${{ matrix.target }}
       - name: Smoke-test the binaries
         # Every target in the matrix is native to its runner, so the
         # binaries must start here.
@@ -83,8 +94,24 @@ jobs:
         run: |
           ext=""
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
-          "./target/${{ matrix.target }}/release/crypto$ext" --help > /dev/null
+          for bin in crypto curve_cover_check hyperelliptic-cover; do
+            "./target/${{ matrix.target }}/release/$bin$ext" --help > /dev/null
+          done
           "./target/${{ matrix.target }}/release/ic$ext" --help > /dev/null
+          "./target/${{ matrix.target }}/release/ic$ext" --version > /dev/null
+          "./target/${{ matrix.target }}/release/ic$ext" --json > ic-smoke.json
+          grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' ic-smoke.json
+          "./target/${{ matrix.target }}/release/ic$ext" --json large-prime \
+            --manifest tests/fixtures/ecbench_manifest_small.json --validate-only \
+            > ic-large-prime-smoke.json
+          grep -Fq '"status": "checks_passed"' ic-large-prime-smoke.json
+          "./target/${{ matrix.target }}/release/ecbench$ext" --version > /dev/null
+          "./target/${{ matrix.target }}/release/ecbench$ext" methods --json \
+            > ecbench-methods-smoke.json
+          grep -Fq 'ic.large_prime' ecbench-methods-smoke.json
+          "./target/${{ matrix.target }}/release/ecbench$ext" host --json \
+            > ecbench-host-smoke.json
+          grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' ecbench-host-smoke.json
       - name: Stage the archive
         shell: bash
         run: |
@@ -92,8 +119,9 @@ jobs:
           mkdir -p "dist/$name"
           ext=""
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
-          cp "target/${{ matrix.target }}/release/crypto$ext" "dist/$name/"
-          cp "target/${{ matrix.target }}/release/ic$ext" "dist/$name/"
+          for bin in crypto ic ecbench curve_cover_check hyperelliptic-cover; do
+            cp "target/${{ matrix.target }}/release/$bin$ext" "dist/$name/"
+          done
           # `[ -f ] && cp` leaves the loop's exit status at 1 when the last
           # candidate is absent, which trips the step's `bash -e`.
           for extra in README.md LICENSE LICENSE.md; do
@@ -229,10 +257,10 @@ jobs:
 
           | Artifact | Contents |
           | --- | --- |
-          | `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic` — glibc |
-          | `crypto-*-x86_64-unknown-linux-musl.tar.gz` | `crypto`, `ic` — static |
-          | `crypto-*-aarch64-apple-darwin.tar.gz` | `crypto`, `ic` — Apple silicon |
-          | `crypto-*-x86_64-pc-windows-msvc.zip` | `crypto.exe`, `ic.exe` |
+          | `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic`, `ecbench`, `curve_cover_check`, `hyperelliptic-cover` — glibc |
+          | `crypto-*-x86_64-unknown-linux-musl.tar.gz` | same five executables — static |
+          | `crypto-*-aarch64-apple-darwin.tar.gz` | same five executables — Apple silicon |
+          | `crypto-*-x86_64-pc-windows-msvc.zip` | same five executables (`.exe`) |
           | `ecc2k130-cpu-*.tar.gz` | ECC2K-130 client, CPU (`-march=x86-64-v3`) |
           | `ecc2k130-cuda-*.tar.gz` | ECC2K-130 client, CUDA fatbinary (sm_80–sm_120) |
 

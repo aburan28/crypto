@@ -1,0 +1,18 @@
+{
+  "classification": "POSTRUN_AUDIT_PRODUCER_FAILURE",
+  "scientificDisposition": "All correctness gates and all 24 timing rows completed, and result.json was written. The job exited before its final artifact manifest because the native audit checker failed to compile.",
+  "cause": "GCC -Wdangling-reference rejected a conditional reference whose helper returned one of two static Arm records; after simplifying that expression, both GCC and Clang then identified the now-unused helper under -Werror.",
+  "repair": "Index the two static Arm records directly and remove the unused helper. The corrected native checker compiles with both GCC and Clang and validates the immutable raw artifact. No measured source, binary, sample, protocol, or decision input changes.",
+  "measuredSourceCommit": "7abbae77afabd910e558ceeec813dbde8c409b24",
+  "modal": {
+    "appId": "ap-JA7KLGdxCrZ7yJOaUYwb4g",
+    "functionCallId": "fc-01M3YJ2XY4JRQ05HV4MMWBCV0A",
+    "volumeToken": "09896a8aa82944f6b37136b298332766",
+    "exitCode": 1
+  },
+  "archiveSha256": "0bc85581ac549932472d584d218f8900e3a50acdf0eda5001f47ecd3037d9487",
+  "archiveBytes": 35306167,
+  "launchReceiptSha256": "fc7b7a65069423c9925c81b7150c49fb03486e23654c97977a7f6139da9d24b8",
+  "resultSha256": "785af54f06be2453566fb41c576a86ee11f5b32681055f08cb9adb82058829c6",
+  "samplesSha256": "f8c913ee6b96e7dab6fc1e1827cdf4b9a7621f0a144aad868ded0ac28be7d2d6"
+}

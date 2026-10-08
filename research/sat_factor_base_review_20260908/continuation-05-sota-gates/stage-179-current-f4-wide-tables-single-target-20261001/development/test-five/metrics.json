@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage179-five-target-12da6fe14",
+    "cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--lib",
+    "cryptanalysis::pq_f4_f2::tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 294.4797507500007,
+    "user_seconds": 411.467851,
+    "system_seconds": 16.302931,
+    "total_core_seconds": 427.770782,
+    "single_core_seconds": 427.770782,
+    "peak_rss_bytes": 3999498240,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -1,0 +1,35 @@
+{
+ "schema_version": 2,
+ "name": "C099: sect163k1 (SEC 2), paired at F0",
+ "field": {
+  "kind": "binary",
+  "degree": 163,
+  "modulus": "0x800000000000000000000000000000000000000c9"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 1
+ },
+ "subgroup": {
+  "order": "5846006549323611672814741753598448348329118574063",
+  "cofactor": "2",
+  "generator": {
+   "x": "0x2fe13c0537bbc11acaa07d793de4e6d5e5c94eee8",
+   "y": "0x289070fb05d38ff58321f2e800536d538ccdaa3d9"
+  }
+ },
+ "target": {
+  "known_log": "1"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "schema_version": 2,
+ "name": "C034: a Montgomery curve near 2^24, rho alone",
+ "field": {
+  "kind": "prime",
+  "p": "16777259"
+ },
+ "curve": {
+  "form": "montgomery",
+  "A": "862194",
+  "B": "1450001"
+ },
+ "subgroup": {
+  "order": "4195921",
+  "cofactor": "4",
+  "generator": {
+   "x": "15401649",
+   "y": "4581378"
+  }
+ },
+ "target": {
+  "known_log": "1264369"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

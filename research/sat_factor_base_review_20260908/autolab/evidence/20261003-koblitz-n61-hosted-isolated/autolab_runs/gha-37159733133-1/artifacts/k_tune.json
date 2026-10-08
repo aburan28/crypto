@@ -1,0 +1,18 @@
+{
+  "chosen_K": 700,
+  "k_source": "fixed",
+  "rows": [
+    {
+      "K": 700,
+      "available_memory_bytes": 15729528832,
+      "estimated_ic_rss_bytes": 2931952512,
+      "state": "fixed"
+    }
+  ],
+  "selection": "lowest wall_s",
+  "tune_corpus": {
+    "name": "n61-ks-growing-tune-16384-v1",
+    "scalars_sha256": "8ad8c3749678c672b596c9c1b03091285f10e6c9383ce26a8d99b8a5237a2102",
+    "targets": 16384
+  }
+}

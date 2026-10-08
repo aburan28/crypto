@@ -529,6 +529,10 @@ struct TableWalk {
             *out = R::addPt(p, q);
             return !out->inf;
         }
+        bool oppositeCloses(const Point &start, const Point &after, unsigned t) const {
+            Point closed;
+            return next(after, t, &closed) && equal(closed, start);
+        }
         bool equal(const Point &a, const Point &b) const { return R::eq(a, b); }
         bool less(const Point &a, const Point &b) const {
             const int wa = R::weight(a.x), wb = R::weight(b.x);

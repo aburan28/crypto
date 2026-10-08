@@ -1,0 +1,24 @@
+{
+  "artifact_receipts_verified": 83,
+  "checks": {
+    "all_clean_terminals": true,
+    "artifact_receipts": true,
+    "campaign_accounting": true,
+    "claim_boundary": true,
+    "development_accounting": true,
+    "external_clean_artifacts_if_present": true,
+    "measured_improvement": true,
+    "paired_medians": true,
+    "same_binary_control": true,
+    "same_scientific_report": true,
+    "schema": true,
+    "selected_schedule": true,
+    "source_commit_and_tree": true,
+    "status": true,
+    "tests": true
+  },
+  "external_clean_artifacts_present": true,
+  "result_sha256": "e3a24ca36961044de09696523c0a8efcae95ba49511e330332ac16b8c49fb7c7",
+  "schema": "koblitz_stage171_dense_symbolic_sets_verification.v1",
+  "status": "pass"
+}

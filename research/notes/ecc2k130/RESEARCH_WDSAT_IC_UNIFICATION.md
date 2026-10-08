@@ -53,7 +53,7 @@ encoding and is not relabelled here.
 
 ## Measured agreement (engineering)
 
-Planted two-summand decomposition on `K_1 / F_2^7` (prime degree),
+Planted two-summand decomposition on `icv1-f2m7-tm13-ac10a42c` (prime degree),
 identical subspace factor base, independent group lift:
 
 | variant | class | planted lift | agrees with native SAT |

@@ -16,8 +16,7 @@ import run
 HERE = Path(__file__).resolve().parent
 WORKFLOW = "ecc2k130-m10-capacity-once.yml"
 LABEL = "run-ecc2k130-m10-capacity-once"
-PR_NUMBER = 935
-BRANCH = "codex/n131-m10-capacity-release-20260929"
+BRANCH = "codex/n131-m10-capacity-attempt-20260929"
 REVIEWER_ASSOCIATIONS = {"OWNER", "MEMBER", "COLLABORATOR"}
 
 
@@ -81,16 +80,18 @@ def admit(out: Path) -> dict:
         event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text())
         assert event["action"] == "labeled" and event["label"]["name"] == LABEL
         pr = event["pull_request"]
-        assert pr["number"] == PR_NUMBER
+        pr_number = int(pr["number"])
+        assert pr_number == int(event["number"])
         assert pr["head"]["ref"] == BRANCH
         assert pr["head"]["repo"]["full_name"] == repo
         head = pr["head"]["sha"]
         assert head == subprocess.check_output(["git", "rev-parse", "HEAD"],
                                                cwd=run.ROOT, text=True).strip()
-        live = api(f"/repos/{repo}/pulls/{PR_NUMBER}", token)
+        live = api(f"/repos/{repo}/pulls/{pr_number}", token)
         assert live["state"] == "open" and not live["draft"]
+        assert live["number"] == pr_number
         assert live["head"]["sha"] == head and live["head"]["ref"] == BRANCH
-        reviews = api(f"/repos/{repo}/pulls/{PR_NUMBER}/reviews?per_page=100", token)
+        reviews = api(f"/repos/{repo}/pulls/{pr_number}/reviews?per_page=100", token)
         assert len(reviews) < 100, "review list needs pagination"
         latest = latest_reviews(reviews)
         assert not any(row["state"] == "CHANGES_REQUESTED" for row in latest.values())
@@ -104,7 +105,7 @@ def admit(out: Path) -> dict:
         release = run.release_gate(frozen)
         assert release["checkout_head"] == head
         receipt.update({"decision": "ADMITTED", "repo": repo,
-                        "pr_number": PR_NUMBER, "reviewed_head": head,
+                        "pr_number": pr_number, "reviewed_head": head,
                         "reviewer_logins": sorted(row["user"]["login"] for row in approved),
                         "prior_capacity_jobs": 0,
                         "workflow_runs_scanned": observed,

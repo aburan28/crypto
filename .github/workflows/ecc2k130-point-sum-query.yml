@@ -1,0 +1,44 @@
+name: ECC2K-130 compact point-sum query
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-point-sum-query.yml'
+      - 'examples/koblitz_orbit_dlp_s3_batch.rs'
+      - 'research/notes/ecc2k130/point_sum_query_20260930/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ecc2k130-point-sum-query.yml'
+      - 'examples/koblitz_orbit_dlp_s3_batch.rs'
+      - 'research/notes/ecc2k130/point_sum_query_20260930/**'
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Cargo.toml
+            /src/*
+            /examples/koblitz_orbit_dlp_s3_batch.rs
+            /docs/ic/calibration.json
+            /research/notes/ecc2k130/point_sum_query_20260930/*
+            /research/notes/ecc2k130/compact_orbit_point_panel_20260929/FROZEN.json
+            /research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+            /research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/*
+            /research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            /research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check source formatting
+        run: rustfmt --check --edition 2021 examples/koblitz_orbit_dlp_s3_batch.rs
+      - name: Test point-root algebra and query behavior
+        run: cargo test --example koblitz_orbit_dlp_s3_batch --no-default-features
+      - name: Independently replay retained development evidence
+        run: python3 research/notes/ecc2k130/point_sum_query_20260930/check_development.py

@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/tmp/crypto-pr.xIRzjS/target/release/isogeny_walk",
+    "traits",
+    "--curve",
+    "p256",
+    "--dir",
+    "/tmp/p256-isogeny-multigraph-64k-20261006/walk",
+    "--shard",
+    "0",
+    "--of",
+    "1",
+    "--class-audit-sample",
+    "8",
+    "--out",
+    "/tmp/p256-isogeny-multigraph-64k-20261006/traits"
+  ],
+  "exit_status": 0,
+  "max_rss_kib": 4223568,
+  "schema": "isogeny-resource-accounting/v1",
+  "system_seconds": 1.672754,
+  "timed_out": false,
+  "user_seconds": 79.678414,
+  "wall_seconds": 25.659262
+}
