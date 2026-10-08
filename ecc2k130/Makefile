@@ -365,6 +365,13 @@ test-status:
 	cargo test --release --quiet --manifest-path ../Cargo.toml --lib -- \
 	    ecc2k130_status ecc2k130_pyjson
 
+# Offline half of aws/dp_ingest.py (Phase A). Own workspace under
+# ecc2k130/dp-ingest/ so the IC autolab frozen root Cargo.lock stays untouched.
+# Live daemon remains aws/dp_ingest.py until Phase B/C.
+test-dp-ingest:
+	cargo +1.98 test --quiet --manifest-path dp-ingest/Cargo.toml
+	cargo +1.98 clippy --quiet --manifest-path dp-ingest/Cargo.toml --all-targets -- -D warnings
+
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
 #   pip install python-sat pycryptosat
