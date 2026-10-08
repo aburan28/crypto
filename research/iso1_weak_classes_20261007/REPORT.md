@@ -38,6 +38,11 @@ count and the twist trace identity are algebraic.
 One positive p = 11 witness at provisional trace 38 had
 [exact square-table trace 38](p11_trace38_audit.txt); its fresh
 twist-derived run agreed with the full run on all weak versus zero labels.
+An independent [PARI/GP `ellcard` control](gp_p37_validation_receipt.txt)
+generated 100 distinct traces from norm-one Legendre parameters at p = 37;
+all 100 lie in the Rust census's positive weak-trace set. This tests
+positive labels through a different point counter and field model, while
+leaving zero labels dependent on the exhaustive Rust enumeration.
 
 The pre-existing census used `w` from F_p as its supposed nonsquare in
 F_(p²).  Every nonzero F_p element is a square in F_(p²), so that run
