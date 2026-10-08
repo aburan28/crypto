@@ -152,7 +152,9 @@ division polynomials, not from (E, Ẽ).
 | sqrt by one exponentiation when q ≡ 3 mod 4; sliding-window exponentiation | `field.rs` | 512-bit sqrt 370 → 57 µs |
 | Karatsuba (threshold measured per field), lazy wide reduction for convolutions, monic division without inversion | `poly.rs`, `fpm.rs` | 256-term poly product over F_{P-256}: 1.05 ms (threshold 4) vs 0.79 ms (16) vs 1.91 ms (schoolbook) |
 | GF(2ⁿ), n ≤ 63, PCLMULQDQ | `gf2n.rs` | mul 4.9–5.8 ns; sqrt as a linear map 6.2–8.4 ns; z² + z = c 1.7–5.3 ns (n = 23, 41, 61) |
-| GF(3ⁿ), n ≤ 40, packed base-3 digits, low-weight irreducible (Rabin) | `gf3n.rs` | field axioms, Fermat, sqrt checked n ≤ 12 |
+| GF(3ⁿ), n ≤ 40: packed base-3 digits outside, bitsliced inside (digit 1 / digit 2 bit masks, table conversion 8 digits at a time); shift-and-add multiplication, Frobenius cubing, Itoh–Tsujii inversion; low-weight irreducible (Rabin), searched by exact-weight tails | `gf3n.rs` | mul 98 / 435 → 18 / 42 ns, inv 1.36 / 24.1 → 0.10 / 0.62 µs (n = 5 / 20); n = 40 mul 100 ns, inv 2.2 µs (did not construct before); `results/p10-speed.jsonl` |
+| F_{pʳ}, runtime r ≤ 16: stack accumulators with lazy u128 reduction, sparse reduction tail, Frobenius matrix, norm-based inversion | `fpr.rs` | 40-bit p, r = 2 / 3 / 6: mul 54 / 77 / 185 → 37 / 39 / 72 ns, inv 677 / 936 / 1834 → 204 / 250 / 794 ns |
+| Powering modulo a polynomial of degree 2..64: table of xᵏ mod m, each reduced coefficient one lazily accumulated dot product, a degree-≤ 1 base multiplied in by a shift; lazy reduction interval sized to p (u64 accumulation when the sum fits) | `poly.rs::TableModulus`, `field.rs::lazy_conv` | x^p mod a degree-24 polynomial (one run, same session): 42 → 23 µs (18-bit p), 333 → 107 µs (61-bit p); in context: division-polynomial factoring median 1.33×, SEA median 1.13–1.39× |
 | Signed big integers, Miller–Rabin in Montgomery form, Pollard–Brent | `int.rs`, `bigint.rs`, `field.rs` | — |
 | F_{p²} = F_p[i]/(i² + 1) over any prime field (p ≡ 3 mod 4), Karatsuba | `fp2.rs` | 434-bit multiplication 259 ns |
 

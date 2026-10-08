@@ -77,6 +77,7 @@ cargo run --release --bin bench -- --out results/run.jsonl                 # V1 
 cargo run --release --bin bench -- v2 --out results/run-v2.jsonl           # V2 groups: kernel2 chain bmss csidh v2path
 cargo run --release --bin bench -- --out results/run-v3.jsonl p1kernel big char2 quat genus2 phi radical relation models
 cargo run --release --bin bench -- --out results/run-v3b.jsonl theta twopow sea                # sea = SEA part of phi
+cargo run --release --bin bench -- --out results/run-p10.jsonl nc_fields nc_atkin nc_suth find sea
 cargo run --release --bin bench -- --quick kernel2                         # smoke test of one group
 cargo run --release --bin micro -- --out results/micro.jsonl               # field / polynomial / GF(2^n) micro benchmarks
 python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
@@ -100,8 +101,27 @@ python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
 | `results/p8-theta.jsonl`, `p8-models.jsonl` | theta (2,2)-isogenies, Kani chains, Richelot on the same field; `models` with Hessian |
 | `results/p8-sea.jsonl`, `p8-sea-walk.jsonl` | SEA with cycle bounds 0/20/40/80, BSGS recombination; the earlier run with the linear walk |
 | `results/p8-twopow.jsonl` | 2^216-isogeny chains over the SIKEp434 F_{p²} |
+| `results/p10-speed.jsonl` | speed pass: groups `nc_fields nc_atkin nc_suth find sea`, three alternating runs each of the build before it (`"build": "before"`, commit `5208c95a`) and after (`"after"`), tagged with `run` |
 
 Selected V3 measurements (medians unless stated; all records `verified: true`):
+
+* **Speed pass** (`p10-speed.jsonl`, median of three alternating before/after runs):
+  Sutherland Φ_ℓ mod p (17-bit p) ℓ = 3 / 5 / 7: 1.07 ms / 53 ms / 1.86 s → 0.15 / 2.2 / 17.4 ms (one test
+  x^p ≡ x mod ψ_ℓ per curve, a walk through the volcano, ℓ + 1 curves); still 5–270× slower than the
+  q-expansion Φ_ℓ at these ℓ (65 µs at ℓ = 7). CRT integer Φ₅ 1.40 s → 29 ms. Atkin eigenvalue over
+  F_{p^d} (40 bits): ℓ = 11, d = 4 55 → 9.9 ms; ℓ = 5, d = 6 17.6–20.6 → 5.1 ms; ℓ = 5, d = 2 1.9 → 1.0 ms.
+  F_{pʳ} (40-bit p, r = 2 / 3 / 6): mul 54 / 77 / 185 → 37 / 39 / 72 ns, inv 677 / 936 / 1834 → 204 / 250 / 794 ns.
+  GF(3ⁿ) n = 5 / 20: mul 98 / 435 → 18 / 42 ns, inv 1.36 / 24.1 → 0.10 / 0.62 µs; n = 40 (mul 100 ns,
+  inv 2.2 µs) did not construct before (the modulus search scanned all 3ⁿ tails). Polynomial powering
+  modulo degree 2..64 with a table of xᵏ mod m and lazily accumulated dot products, plus lazy reduction
+  sized to p, shared by everything: division-polynomial factoring 1.03–1.76× (median 1.33), Φ_ℓ root
+  finding 0.80–1.83× (median 1.48; 61-bit ℓ = 13 was slower, 71 → 89 µs), SEA point counting median
+  1.16× at 40 bits, 1.13× at 61 bits (single cases 0.70–1.57×) and 1.39× at 127 bits (1.15–1.58×);
+  Elkies + BMSS and the Φ_ℓ precomputation unchanged (0.92–1.16×). Not kept: Barrett reduction for the
+  u64 field measured slower than the 128-bit `%` on this CPU (9.4 vs 8 ns per dependent product), and the
+  Newton reducer below degree 64 gained less than the table. A first version of the lazy-reduction change
+  computed its bound with a 128-bit division per dot product and made root finding at 40 bits 30–50 %
+  slower for degree 6–18; replaced by bit lengths before these runs.
 
 * **CSIDH-512, exponents in [−5, 5]⁷⁴**: 81 ms (CLMPR batched, before the field work; commit message) →
   49.3 ms (CLMPR) → 34.2 ms (projective tree strategy, `p1-csidh.jsonl`) → 32.2 ms (tree strategy with the
@@ -171,7 +191,9 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
   (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5, 7 (N = 13 needs the genus-2 X₁(13)); Jacobi-quartic models;
   Enge's quasi-linear Φ_ℓ evaluation. Atkin-prime isogeny cycles over F_{pʳ} towers (t mod ℓ,
   verified against BSGS, tower degree ≤ 6) and Sutherland's volcano/CRT Φ_ℓ (verified equal to the
-  q-expansion Φ_ℓ) are now implemented. Not implementable here (resource limit): quantum algorithms.
+  q-expansion Φ_ℓ) are now implemented; the latter finds its curves by random search plus a volcano
+  walk rather than from CM orders with a known volcano, and stays slower than the q-expansion Φ_ℓ
+  for the ℓ measured. Not implementable here (resource limit): quantum algorithms.
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
 * KLPT is for left O₀-ideals with ℓ = 2 and p ≡ 3 mod 4; e/log₂p ≈ 3.8 at 128 bits, above the ≈ 3.5 heuristic.
