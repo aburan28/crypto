@@ -1,0 +1,33 @@
+{
+ "what_this_is": "The constants B5a's F2 estimates read for extension fields (design/extension-fields.md §2.6). Each names its source. They are models' inputs, not measurements of any run; B5a's measurement 6 replaces the provisional ones.",
+ "rho-negation": {
+  "extension": {
+   "status": "provisional: the one-word prime field's step cost (../B2-fields-forms-estimates/estimates.json, rho-negation.prime), until measurement 6",
+   "ns_per_step": 968.1968815288025
+  }
+ },
+ "rho-bignum": {
+  "extension": {
+   "status": "provisional: the prime field's step cost at width 127 (../B2-fields-forms-estimates/estimates.json, rho-bignum.prime), until measurement 6",
+   "points": [
+    {
+     "width": 127,
+     "ns_per_step": 24795
+    }
+   ]
+  }
+ },
+ "ic-gaudry-cubic": {
+  "source": "research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md §11.2: the meet-in-the-middle rows, total operations proportional to n^0.69 over p = 271 to 2083, at the largest rung",
+  "status": "provisional: the note's own host and wall time, until measurement 6 re-anchors it on the reference host and refits the exponent over G1-G3",
+  "variant": "the module's GaudryOptions::default(): the meet-in-the-middle oracle, dense elimination, no large primes",
+  "alpha": 0.69,
+  "anchor": {
+   "p": 2083,
+   "log2_r": 33.1,
+   "total_ops": 361700000.0,
+   "wall_s": 361,
+   "ns_per_op": 998.064694498203
+  }
+ }
+}

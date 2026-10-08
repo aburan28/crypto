@@ -285,7 +285,8 @@ enum FrontierCmd {
     Build {
         #[arg(long, num_args = 1..)]
         bounds: Vec<PathBuf>,
-        /// Dominance axes, comma-separated: ops, memory, uncharged.
+        /// Dominance axes, comma-separated: ops, memory, uncharged,
+        /// field_muls, field_sqrs, field_invs.
         #[arg(long, default_value = "ops,memory")]
         axes: String,
         #[arg(long)]

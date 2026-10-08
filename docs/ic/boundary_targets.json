@@ -1,6 +1,10 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
+  "updated": "2026-10-05",
+  "updated": "2026-10-07",
+  "claim_hygiene": "Public synthetic / known-answer fixtures only. Primary vs_rho claims use exactly one unseen target paired on the identical public point and resource envelope. Headline time is verified online wall after reusable IC preparation; exclude process launch, input loading, target generation, and target-independent setup. Multi-target averages, batch throughput, and shared-table amortization are secondary only and require a separate declared question after the primary one-target result. Never combine best component costs from different runs into a synthetic win.",
+  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "updated": "2026-09-22",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gr\u00f6bner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
@@ -122,9 +126,28 @@
         "rho_policy",
         "verdict",
         "claim_boundary",
-        "independent_replay_pointer"
+        "independent_replay_pointer",
+        "target_count",
+        "paired_target",
+        "ic_verified",
+        "rho_verified",
+        "ic_online_ms",
+        "rho_online_ms",
+        "online_speedup",
+        "ic_online_phase_ms",
+        "rho_online_phase_ms",
+        "ic_online_interval",
+        "rho_online_interval",
+        "operation_accounting"
       ],
       "timing_class_enum": [
+        "algorithmic_charged",
+        "projection_matched",
+        "whole_process_wall",
+        "single_target_online"
+      ],
+      "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control",
+      "operation_accounting_contract": "operation_accounting records both arms' online operation counts next to the wall ratio: ic_online_operations, rho_online_operations, operation_units, unit_assumption, and ops_speedup_online = rho_online_operations / ic_online_operations (claim-check verifies the ratio). A wall ratio alone mixes the algorithmic comparison with each arm's implementation speed. Koblitz single-target rungs also record the rank-stage mean probes (mean-target estimate), target_luck_factor, the total-work ratio with rank precompute charged, and host-contention flags; see research/sat_factor_base_review_20260908/autolab/op_accounting.py and docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md."
         "single_target_online_wall"
       ],
       "ic_online_phase_fields": [
@@ -176,49 +199,65 @@
     }
   },
   "how_to_beat": [
+    "Primary vs_rho workloads contain exactly one unseen target; IC and rho must solve the same frozen public point under the same resource envelope.",
+    "Start each online clock at the first target-dependent computation after reusable IC preparation; exclude process launch, input loading, target fixture generation, and target-independent setup. Independently verify the recovered scalar.",
     "Freeze public fixture (curve, seeds, base hash, resource caps).",
     "Launch via research/sat_factor_base_review_20260908/autolab/boundary_autolab.py (plan/preflight/launch/claim-check).",
     "Emit hashed JSON evidence under research/ or docs/ic/runs/ with every required measurement_schema field for the claimed stage.",
     "Pass the row acceptance_gates.",
     "PR updates current, appends history, sets next_target, links evidence.",
     "vs_rho and end_to_end_dlp past prior size require independent recomputation.",
-    "Incomplete measurement_schema fields fail closed \u2014 no row promotion."
+    "Incomplete measurement_schema fields fail closed — no row promotion."
   ],
   "agent_priorities": [
     {
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
+      "beat": "n=83 a=1 landed 2026-10-06 (median 8.2x online, three paired runs, Python replay PASS, first a=1 rung, first parallel-rank rung). Next: a rho-projection-class rung at n=97 a=0 (r ~ 2^95, cofactor 4) or the u128-ceiling a=1 rungs (n=107/109/113/127); ECC2K-130 itself (n=131 a=0) needs u256 words + implicit S3 index + 130-bit sparse LA, and 4-sum total-work parity with rho is not reachable — the 5-sum relation shape is the top unexplored lever (RESEARCH_ECC2K130_IC_FEASIBILITY.md)."
       "beat": "Compact-orbit W64 n41/n53 L=1024 blocked-root-prefilter repeat passed full-rank and independent replay, A/A and isolation gates. Same-K complete CPU filter/off ratios 0.8528/0.8924 are engineering gains, but filter/rho remains 1.3282/1.4727; common S, n83/n131 transfer and selected-panel or native-PDP promotion are unset. Next high-arity gate: independently reviewed, label-gated m10 capacity PR #937; if it passes, freeze natural-target solver/yield and equal-useful-size original/native/transported/pullback PDP with rank and full cost, retaining matched automorphism-aware rho."
     },
     {
       "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
       "rank": 2,
       "regime": "koblitz",
+      "stage": "factor_base",
+      "beat": "Advance the representative-plus-Frobenius factor-base construction under its memory gate; report setup separately from one-target online cost."
       "stage": "factor_base"
     },
     {
       "beat": "Reduce the selected n=53 median direct/rho core ratio from 2.2616 to <=1 and the 17.6367x fresh-build ratio while preserving the 0.8392 wall median and scalar-blind completion",
       "rank": 3,
       "regime": "koblitz",
+      "stage": "decomposition",
+      "beat": "Measure the selected n=31 dim-16 m=2 decomposition policy on a frozen single target first; multi-target distribution work is secondary and cannot stand in for one-target online cost."
       "stage": "vs_rho",
       "note": "Constraint withdrawn by the 2026-09-30 erratum: the 0.8392 wall median is against a rho 44-60x slower than a strong single-target rho; the operative reference is the strong rho (see strong_rho_single_target_n53)."
     },
     {
       "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged",
       "rank": 4,
+      "regime": "binary",
+      "stage": "decomposition",
+      "beat": "sub-2^(2l) oracle at l=8 with FFD logged on a single frozen target."
       "regime": "koblitz",
       "stage": "decomposition"
     },
     {
       "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve, FFD logged",
       "rank": 5,
+      "regime": "prime",
+      "stage": "end_to_end_dlp",
+      "beat": "Extend the j=0 known-answer IC ladder to >=20 bits with split stage timers; pair each one-target result on the identical public point with rho."
       "regime": "binary",
       "stage": "decomposition"
     },
     {
       "beat": "j=0 known-answer IC at 16 bits agreeing with rho",
       "rank": 6,
+      "regime": "binary_and_prime",
+      "stage": "relation_yield",
+      "beat": "Publish single-target query yield and rank distributions first; label any multi-target summaries as secondary."
       "regime": "prime",
       "stage": "end_to_end_dlp"
     },
@@ -243,7 +282,7 @@
   ],
   "regimes": {
     "binary": {
-      "label": "Binary fields (Weil\u2013Semaev / non-Koblitz)",
+      "label": "Binary fields (Weil–Semaev / non-Koblitz)",
       "best_stack": [
         "semaev_decomp",
         "semaev_sat",
@@ -945,6 +984,397 @@
               "collector policy hash frozen"
             ]
           },
+          "evidence": [],
+          "history": []
+        },
+        "rank": {
+          "status": "open",
+          "current": {
+            "summary": "Toy matrices only",
+            "metrics": {
+              "matrix_dims": null,
+              "sparse_or_dense": null,
+              "la_cost_ms": null
+            }
+          },
+          "next_target": {
+            "summary": "Full orbit-reduced rank at n=21 with surplus <= 2K+64; publish dims and LA cost",
+            "acceptance_gates": [
+              "rank recomputed after every relation",
+              "terminal rank equals required",
+              "matrix_dims and sparse_or_dense logged"
+            ]
+          },
+          "evidence": [],
+          "history": []
+        },
+        "end_to_end_dlp": {
+          "status": "record",
+          "current": {
+            "summary": "Toy known-answer / ic framework small degrees",
+            "metrics": {
+              "framework_degree_max_documented": 23,
+              "claim_boundary": "synthetic_known_answer"
+            }
+          },
+          "next_target": {
+            "summary": "Known-answer DLP at n=19 with stage timers",
+            "acceptance_gates": [
+              "[d]G = Q",
+              "incomplete stages fail closed",
+              "stage_timers present"
+            ]
+          },
+          "evidence": [
+            "docs/ic/README.md"
+          ],
+          "history": []
+        },
+        "vs_rho": {
+          "status": "not_achieved",
+          "current": {
+            "summary": "No charged binary crossover on record",
+            "metrics": {
+              "timing_class": null,
+              "automorphism_discount": null
+            },
+            "verdict": null
+          },
+          "next_target": {
+            "summary": "Charged single-instance cost < automorphism-aware rho at any eligible n>=15",
+            "acceptance_gates": [
+              "all stages charged in one process series",
+              "independent replay",
+              "timing_class and automorphism_discount explicit"
+            ]
+          },
+          "evidence": [],
+          "history": []
+        }
+      }
+    },
+    "koblitz": {
+      "label": "Koblitz K_a / F_2^n",
+      "best_stack": [
+        "koblitz_index_calculus",
+        "koblitz_groebner",
+        "semaev_sat",
+        "koblitz_rank_fixture"
+      ],
+      "implementation_caps": {
+        "MAX_N": 63
+      },
+      "unknowns_formula": "m*l + (m-2)*n",
+      "automorphism_discount_default": "sqrt(2n) with A=2*n",
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "n=53 explicit rank-guided base wins finite batches; its exact 220-orbit SAT domain reduces the complete implicit S5 formula to 22,887 clauses",
+            "metrics": {
+              "exact_n": 53,
+              "construction_n_max": 53,
+              "construction_method": "point_defined_signed_frobenius_eta_1_10_signed_expanded_pair_support_plus_balanced_rank_guided_slot_index",
+              "materialized": true,
+              "construction_wall_ms": 23670.267792000002,
+              "retained_bytes": 9739346224,
+              "factor_base_points": 23320,
+              "frobenius_closed": true,
+              "guided_slot_index_allocated_bytes": 612540720,
+              "independent_replay_discrepancies": 0,
+              "negation_closed": true,
+              "orbit_columns": 220,
+              "peak_rss_bytes": 10638950400,
+              "support_index_entries": 135919826,
+              "support_table_allocated_bytes": 9126805504,
+              "witness_bytes": 24,
+              "implicit_formula": {
+                "base_ingestion_ms": 309.154459,
+                "formula_encoding_ms": 408.919917,
+                "formula_peak_rss_bytes": 438190080,
+                "variables": 14622,
+                "ordinary_clauses": 1815492,
+                "native_xor_rows": 9619,
+                "pair_table_entries": 0,
+                "pair_selector_variables": 0
+              },
+              "frobenius_orbit_formula": {
+                "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+                "orbit_union_exact": true,
+                "orbit_representatives": 220,
+                "frobenius_shifts_per_orbit": 53,
+                "factor_base_x_coordinates": 11660,
+                "formula_encoding_ms": 24.343,
+                "variables": 19473,
+                "ordinary_clauses": 22887,
+                "native_xor_rows": 11474,
+                "coordinate_rom_clause_reduction": 79.32415781884913,
+                "pair_table_entries": 0,
+                "pair_selector_variables": 0,
+                "solver_verdict": "UNKNOWN"
+              }
+            },
+            "verdict": "N53_RANK_GUIDED_FACTOR_BASE_RETAINED_EXACT_REPLAY_UNDER_16GIB"
+          },
+          "next_target": {
+            "summary": "Independently replay the 12 SAT-confirmed compact-orbit n=53 relations on base d859319015ea405f, then cut per-relation extraction (median 625 ms) toward the explicit table's 7.49 ms without reintroducing a pair table",
+            "acceptance_gates": [
+              "same independently replayed base hash",
+              "no pair or edge selector enumeration",
+              "group-validated extracted relations",
+              "formula, solver, memory, and UNKNOWN accounting retained"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/batch1024_comparison.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/independent_validation.json",
+            "research/sat_factor_base_review_20260908/autolab_implicit_s5_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/results.json"
+          ],
+          "history": [
+            {
+              "summary": "Curve and generator construction verified at n=53 past prior MAX_N=41",
+              "verdict": "N53_CURVE_CONSTRUCTION_OK"
+            },
+            {
+              "metrics": {
+                "construction_method": "point_defined_signed_frobenius_eta_1_10_signed_expanded_pair_support",
+                "construction_n_max": 53,
+                "construction_wall_ms": 28551.732250023633,
+                "exact_n": 19,
+                "factor_base_points": 23320,
+                "feasible_n": 41,
+                "frobenius_closed": true,
+                "independent_replay_discrepancies": 0,
+                "materialized": true,
+                "negation_closed": true,
+                "orbit_columns": 220,
+                "peak_rss_bytes": 10101391360,
+                "retained_bytes": 9126805504,
+                "support_index_entries": 135919826,
+                "witness_bytes": 24
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "n=53 eta=1/10 signed-expanded base materialized under cap with packed witnesses and exact relation replay",
+              "verdict": "N53_FACTOR_BASE_MATERIALIZED_EXACT_REPLAY_UNDER_16GIB"
+            }
+          ]
+        },
+        "decomposition": {
+          "status": "record",
+          "current": {
+            "summary": "n=31 m=2 F4 cell completes with exact block-6 M4RI acceleration; n=53 exact Frobenius-orbit S5 compression removes the coordinate ROM, but every unrestricted solver arm remains UNKNOWN",
+            "metrics": {
+              "n": 31,
+              "dim": 16,
+              "m": 2,
+              "unknowns": 32,
+              "equations": 31,
+              "system_degree": "quadratic",
+              "x_chained": {
+                "verdict": "found",
+                "wall_ms": 63246,
+                "ffd": 3,
+                "f4_splits": 7056
+              },
+              "symmetrised": {
+                "verdict": "refuted",
+                "wall_ms": 36228,
+                "ffd": 4,
+                "f4_splits": 4095
+              },
+              "m4ri_hyperopt": {
+                "classification": "N31_BOOLEAN_F4_M4RI_SPEEDUP_PAIRED_PASS",
+                "selected_block_width": 6,
+                "x_kernel_median_ms_control": 11.864125,
+                "x_kernel_median_ms_selected": 7.355458,
+                "x_kernel_speedup": 1.6129689001011223,
+                "sym_kernel_median_ms_control": 9.800667,
+                "sym_kernel_median_ms_selected": 6.225708,
+                "sym_kernel_speedup": 1.5742252929305391,
+                "selected_targets": 2,
+                "selected_x_found": 2,
+                "selected_x_median_ms": 637,
+                "selected_sym_refuted": 2,
+                "selected_sym_median_ms": 30012,
+                "selected_inconclusive": 0,
+                "selected_gate_failures": 0,
+                "ffd_x": 3,
+                "ffd_sym": 4
+              },
+              "complete_process_wall_ms": 127919.902542,
+              "targets": 1,
+              "gate_failures": 0,
+              "oracle_classes": [
+                "groebner_f4",
+                "symmetrised_groebner_f4"
+              ],
+              "implicit_n53": {
+                "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+                "base_ingestion_ms": 309.154459,
+                "encoding_ms": 408.919917,
+                "variables": 14622,
+                "ordinary_clauses": 1815492,
+                "native_xor_rows": 9619,
+                "pair_table_entries": 0,
+                "pair_selector_variables": 0,
+                "best_external_n41_100k_seconds": 4.4,
+                "best_external_n41_1m_seconds": 31.07,
+                "n53_100k_seconds": 31.72,
+                "solver_verdict": "UNKNOWN",
+                "root_fixed_circuit_validation": "one valid n=53 group lift; zero invalid lifts"
+              },
+              "frobenius_orbit_n53": {
+                "orbit_union_exact": true,
+                "variables": 19473,
+                "ordinary_clauses": 22887,
+                "native_xor_rows": 11474,
+                "encoding_ms": 24.343,
+                "best_external_100k_seconds": 0.82,
+                "best_external_1m_seconds": 8.96,
+                "solver_verdict": "UNKNOWN"
+              },
+              "lazy_index_n41": {
+                "variables": 117,
+                "ordinary_clauses": 155,
+                "native_xor_rows": 36,
+                "conflicts": 10000,
+                "infeasible_quadruples": 20430,
+                "solver_verdict": "UNKNOWN"
+              }
+            },
+            "verdict": "N31_BOOLEAN_F4_M4RI_SPEEDUP_PAIRED_PASS__N53_FROBENIUS_ORBIT_FORMULA_COMPACT_EXTRACTION_UNKNOWN"
+          },
+          "next_target": {
+            "summary": "Repeat the selected block-6 M4RI policy over the retained 8-target n=31 distribution; separately expose reusable endpoint-pair support in the n=53 orbit formula",
+            "acceptance_gates": [
+              "exhaustive small-field equivalence on the declared regular/exceptional partition",
+              "n=53 extracted witness group-validates",
+              "UNKNOWN remains censored",
+              "no enumerated pair-edge domain",
+              "n=31 verdict mix, FFD 3/4, and zero-gate-failure status remain stable"
+            ]
+          },
+          "evidence": [
+            "RESEARCH_KOBLITZ_SCALING_TARGET.md",
+            "RESEARCH_KOBLITZ_INDEX_CALCULUS.md",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/n31_pmull_square_decomposition/receipt.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/independent_validation.json",
+            "research/sat_factor_base_review_20260908/autolab_groebner_hyperopt_20260921/results.json",
+            "research/sat_factor_base_review_20260908/autolab_implicit_s5_20260912/results.json"
+          ],
+          "history": [
+            {
+              "summary": "F4 refutation frontier past 46 unknowns; SAT ~27 unknowns; classical demos n<=13; FFD ladder measured",
+              "metrics": {
+                "f4_unknowns": 46,
+                "f4_example": "n=31 m=3 ~145s",
+                "sat_comfortable_unknowns": 27,
+                "classical_demo_n_max": 13,
+                "unknowns_formula": "m*l + (m-2)*n",
+                "ffd": {
+                  "ladder_source": "RESEARCH_KOBLITZ_SCALING_TARGET.md",
+                  "draws_per_row": 16,
+                  "headline": "No measured system falls later than D=3; chained m>=3 falls at FFD=3; m=2 often FFD 2-3 and overdetermined",
+                  "examples": [
+                    {
+                      "n": 31,
+                      "l": 5,
+                      "m": 3,
+                      "vars": 46,
+                      "eqs": 62,
+                      "deg": 3,
+                      "ffd_min": 3,
+                      "ffd_max": 3
+                    },
+                    {
+                      "n": 31,
+                      "l": 5,
+                      "m": 2,
+                      "vars": 10,
+                      "eqs": 31,
+                      "deg": 2,
+                      "ffd_min": 2,
+                      "ffd_max": 2
+                    },
+                    {
+                      "n": 21,
+                      "l": 6,
+                      "m": 3,
+                      "vars": 39,
+                      "eqs": 42,
+                      "deg": 3,
+                      "ffd_min": 3,
+                      "ffd_max": 3
+                    }
+                  ]
+                },
+                "f4_splits": "flat across 39→46 unknowns (scaling note)",
+                "oracle_classes": [
+                  "enumerate",
+                  "groebner",
+                  "sat"
+                ]
+              },
+              "recorded": "2026-09-12-pre-current-record"
+            }
+          ]
+        },
+        "relation_yield": {
+          "status": "record",
+          "current": {
+            "summary": "n=53 rank-guided eta=1/10 yields one exact four-sum relation per requested public target; 1,244/1,244 in the 1,024-target batch",
+            "metrics": {
+              "n": 53,
+              "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+              "eta": "1/10",
+              "target_mix": {
+                "natural_public_synthetic": 1024,
+                "planted_sat": 0,
+                "proven_unsat": 0
+              },
+              "target_trials": 1244,
+              "relations": 1244,
+              "trials_per_relation": 1.0,
+              "post_precomputation_target_ms": {
+                "median": 7.493417,
+                "p95": 27.384583399999997,
+                "p99": 47.49335051999998,
+                "max": 90.416166
+              },
+              "all_group_verified": true
+            },
+            "verdict": "N53_GUIDED_EXACT_RELATION_PER_TARGET_DISTRIBUTION"
+          },
+          "next_target": {
+            "summary": "Measure the same rank-guided policy at growing n with target/probe tails and support density",
+            "acceptance_gates": [
+              "public-natural fixture domain",
+              "exact group checks",
+              "trials, probes, timing distribution, and policy hash retained"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/TASK-KIC-SAT-RHO-CROSSOVER-20260909.md",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json"
+          ],
+          "history": [
+            {
+              "summary": "Exact coverage/yield controls at n=19; collectors at n=37 fixtures",
+              "metrics": {
+                "control_n": 19,
+                "fixture_collector_n": 37,
+                "trials_per_relation": null,
+                "target_mix_published": false
+              },
+              "recorded": "2026-09-12-pre-current-record"
           "evidence": [
             "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
             "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
@@ -2245,11 +2675,177 @@
               },
               "superseded_on": "2026-09-21"
             }
+          ],
+          "timing_audit": {
+            "status": "LEGACY_N41_N53_ONLINE_INTERVAL_OVERLAP",
+            "affected_verdicts": [
+              "N41_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+              "N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+            ],
+            "finding": "The legacy rank fixture collection_ms timer spans final solve and solution validation; old online totals re-add both. Recompute exact numbers from raw receipts before citing them.",
+            "fixed_producer_fields": [
+              "target_online_phase_ms",
+              "target_online_wall_ms",
+              "charged_total_ms",
+              "online_charged_ms"
+            ],
+            "unaffected_scope": "This finding does not assess the separate compact-orbit n61/n71 producer.",
+            "evidence": "https://github.com/aburan28/cryptanalysis/pull/353",
+            "claim_limit": "Historical numeric ratios are exploratory and not exact exclusive-phase results; no new controlled speedup is promoted."
+          }
+        }
+      }
+    },
+    "prime": {
+      "label": "Prime fields",
+      "best_stack": [
+        "ec_index_calculus_j0",
+        "ec_index_calculus"
+      ],
+      "implementation_caps": {
+        "generic_ic_bench_bits": 12,
+        "j0_ic_bench_bits": 14,
+        "module_doc_sub_bits": 40,
+        "dense_3sum_nonscaling_wall_bits": 80
+      },
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "Small-x and zeta-orbit bases on toy primes; Eisenstein-smooth FB implemented",
+            "metrics": {
+              "construction_methods": [
+                "small_x",
+                "zeta_orbit",
+                "eisenstein_smooth"
+              ],
+              "materialized": true,
+              "construction_wall_ms": null,
+              "retained_bytes": null
+            }
+          },
+          "next_target": {
+            "summary": "Orbit-reduced base on a 16-bit j=0 prime-order curve",
+            "acceptance_gates": [
+              "no duplicate orbits",
+              "size vs theory within 5%",
+              "construction_wall_ms and retained_bytes logged"
+            ]
+          },
+          "evidence": [
+            "docs/RESEARCH_BENCH_LOG.md",
+            "src/cryptanalysis/ec_index_calculus_j0.rs"
+          ],
+          "history": []
           ]
         },
         "rank": {
           "status": "record",
           "current": {
+            "summary": "n=53 rank-guided collector reaches the theoretical minimum rank on every measured fixture and reuses one factor-log table across 1,024 targets",
+            "metrics": {
+              "full_rank_n": 53,
+              "amortized_targets": 1024,
+              "sparse_or_dense": "sparse_rows_independent_modular_replay",
+              "note": "Relation-matrix LA over subgroup order; not Semaev FFD",
+              "first_matrix_dims": {
+                "cols": 221,
+                "rows": 221
+              },
+              "first_relations_to_rank": 221,
+              "first_surplus_relations": 0,
+              "independent_replay_discrepancies": 0,
+              "orbit_columns": 220,
+              "rank_accumulation": "forward incremental echelon with exact minimum rank; independent full-transcript replay",
+              "rank_and_linear_solve_charged_ms": 11.159244,
+              "subsequent_matrix_dims": {
+                "cols": 221,
+                "rows": 1
+              },
+              "subsequent_relations_per_target": 1,
+              "total_relations": 1244
+            },
+            "verdict": "N53_SHARED_FACTOR_LOG_RANK_221_PLUS_1023_ONE_RELATION_TARGETS"
+          },
+          "next_target": {
+            "summary": "Run a fixed-protocol growing-n rank/yield panel for shared factor logs and preserve minimum-rank accumulation",
+            "acceptance_gates": [
+              "independent matrix replay or preserved row transcript",
+              "matrix dimensions and LA cost logged",
+              "same rank-guided policy frozen before holdout"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/",
+            "research/sat_factor_base_review_20260908/autolab_n41_feasibility/",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/packed_eta_1_10_surplus0_full/independent_replay.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/batch1024_comparison.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json"
+          ],
+          "history": [
+            {
+              "metrics": {
+                "amortized_targets": 1024,
+                "fixture_rank_n": 41,
+                "full_rank_n": 53,
+                "la_charged_ms": 382.182,
+                "n53_matrix_columns": 221,
+                "n53_relations_to_rank": 439,
+                "n53_surplus_relations": 0,
+                "note": "Do not report this stage as FFD",
+                "sparse_or_dense": "sparse_rows_independent_modular_replay"
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "Exact relation-matrix rank replay through n=53; n=37 amortized fixtures and n=53 rank-221 full-evidence fixture"
+            }
+          ]
+        },
+        "end_to_end_dlp": {
+          "status": "record",
+          "current": {
+            "summary": "1,024 public-synthetic known-answer n=53 targets recovered and checked with one retained factor-log table",
+            "metrics": {
+              "claim_boundary": "public_synthetic_known_answer_multi_target",
+              "all_group_verified": true,
+              "all_recovered": true,
+              "factor_log_precomputation_fixtures": 1,
+              "independent_replay_discrepancies": 0,
+              "n": 53,
+              "one_relation_targets": 1023,
+              "stage_ms": {
+                "complete_online": 12980.085308999991,
+                "fully_charged": 36935.784684,
+                "support_setup": 23670.267792000002
+              },
+              "targets": 1024
+            },
+            "verdict": "N53_PUBLIC_SYNTHETIC_1024_TARGET_SHARED_LOG_RECOVERY_VERIFIED"
+          },
+          "next_target": {
+            "summary": "Repeat the shared-log known-answer workflow at a second n>=53 rung or on a second independent host",
+            "acceptance_gates": [
+              "all targets are public synthetic",
+              "[d]G = Q for every target",
+              "full stage timers and independent replay"
+            ]
+          },
+          "evidence": [
+            "docs/ic/README.md",
+            "tests/ic_progress.rs",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/batch1024_comparison.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json"
+          ],
+          "history": [
+            {
+              "metrics": {
+                "claim_boundary": "synthetic_known_answer",
+                "demo_n_max": 13,
+                "ic_degree_doc_max": 23
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "Known-answer recovery on toys n≈7–13; ic runner degrees <=23 with caps"
             "summary": "Relation-matrix LA priced per instance on the char2 ladder (Round 5): dense incremental Gauss-Jordan over Z/rZ, rank recomputed after every row, stop when the target column is pinned; multiply-subtracts counted and converted",
             "date": "2026-09-22",
             "metrics": {
@@ -3959,6 +4555,1179 @@
           ]
         },
         "vs_rho": {
+          "status": "record",
+          "current": {
+            "summary": "Sixth primary single-target online rung and the first on the a=1 arm: n=83 a=1 compact-orbit IC on u128 words (600 signed-Frobenius orbit columns, 99,600 base points, zero pair-table entries) beats automorphism-discounted rho on the identical frozen public point; three paired observations on one frozen target, median 8.2x online (IC 5.6-7.9 s vs rho 43-71 s, range 5.5x-12.7x); deterministic 8,845,441-probe relation on all runs; both arms verified every run; standalone Python GF(2^83) replay PASS on all three. First ledger rung using the parallel guided rank (KIC_RANK_THREADS=12, logs identical to the sequential path): precompute 4.8 min wall vs the 5.1 h sequential n=73 rank. Margin smaller than n=73 because this rung's subgroup (2^52.9) is smaller than n=73's (2^56.3): rho is easier here; online walls also ran conservative under unrelated host load.",
+            "metrics": {
+              "n": 83,
+              "a": 1,
+              "target_count": 1,
+              "timing_class": "single_target_online",
+              "subgroup_order": 8569786107849059,
+              "subgroup_log2_order": 52.9,
+              "curve": {
+                "a": 1,
+                "b": 1,
+                "cofactor": 1128547018,
+                "field_modulus": "x^83 + x^7 + x^4 + x^2 + 1",
+                "weierstrass_model": "y^2 + x*y = x^3 + x^2 + 1"
+              },
+              "paired_same_public_point": true,
+              "public_generator": [
+                "6614244651398184860292015",
+                "8868260410029249391539529"
+              ],
+              "public_target_q": [
+                "2655898345537166180532960",
+                "3881526307991673265292615"
+              ],
+              "fixture_scalar": 3141592653589793,
+              "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input",
+              "base_point_set_digest": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+              "factor_base_points": 99600,
+              "orbit_columns": 600,
+              "matrix_columns": 600,
+              "domain": {
+                "kind": "compact_orbit_u128",
+                "pair_table_entries": 0,
+                "edge_selectors": 0,
+                "root_table_entries": 29878182,
+                "regular_states": 29880000,
+                "rank": 600,
+                "rank_attempts": 600,
+                "rank_failures": 0,
+                "rank_policy": "guided parallel (KIC_RANK_THREADS=12): per-column scheduling-independent scalars; logs identical to the sequential path"
+              },
+              "automorphism_discount": "sqrt(2n) with A=2*n=166; rho producer uses signed_frobenius quotient",
+              "paired_runs": [
+                {
+                  "ic_online_ms": 7939.137707999999,
+                  "ic_rank_seed": 21,
+                  "online_speedup": 8.181301978998246,
+                  "rho_online_ms": 64952.48304199999,
+                  "rho_walk_seed": 202610061,
+                  "rho_walk_steps": 6608900,
+                  "run": "R1"
+                },
+                {
+                  "ic_online_ms": 7746.01425,
+                  "ic_rank_seed": 22,
+                  "online_speedup": 5.549638582319933,
+                  "rho_online_ms": 42987.579541,
+                  "rho_walk_seed": 202610062,
+                  "rho_walk_steps": 5958775,
+                  "run": "R2"
+                },
+                {
+                  "ic_online_ms": 5623.275125,
+                  "ic_rank_seed": 23,
+                  "online_speedup": 12.671208207334514,
+                  "rho_online_ms": 71253.68991600002,
+                  "rho_walk_seed": 202610063,
+                  "rho_walk_steps": 12179440,
+                  "run": "R3"
+                }
+              ],
+              "median_online_speedup": 8.181301978998246,
+              "online_speedup_range_all_runs": [
+                5.549638582319933,
+                12.671208207334514
+              ],
+              "ic_online_interval": "after reusable target-independent base/index/log preparation (base load, S3 root index build, guided rank-600 log table) through target relation extraction, group-lift check, log recovery, and [d]G=Q check; one public Q supplied as solver input",
+              "rho_online_interval": "after Q construction: per-target jump setup, walk, and in-process verification",
+              "ic_precomputation_ms_excluded_from_online": 305045.90508299996,
+              "ic_verified_all_runs": true,
+              "rho_verified_all_runs": true,
+              "ic_and_rho_scalar_identical": true,
+              "deterministic_ic_relation": {
+                "probes": 8845441,
+                "same_all_runs": true
+              },
+              "independent_scalar_replay": {
+                "method": "standalone Python GF(2^83) polynomial/affine-curve arithmetic independent of the Rust producers",
+                "validated_runs": [
+                  "R1",
+                  "R2",
+                  "R3"
+                ],
+                "status": "PASS"
+              },
+              "reproducibility": {
+                "note": "rho walk seeds 202610061/062/063, ic rank seeds 21/22/23, KIC_RANK_THREADS=12; binaries pinned by sha256 in run.json"
+              },
+              "resource_caps": {
+                "common_cap_bytes": null,
+                "ic_peak_rss_bytes_max": 5771837440,
+                "note": "no finite kernel cap declared; per-process peak RSS recorded with wait4(2)",
+                "rho_peak_rss_bytes_max": 2188230656
+              },
+              "asymptotic_sub_rho": false,
+              "single_target_crossover": true,
+              "operation_accounting": {
+                "source": "experiments/koblitz-single-target-n83-20261006/claim_report_vs_rho.json#operation_accounting",
+                "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                "ic_online_operations_frozen_target": 8845441,
+                "ic_rank_probes_mean_pooled": 2448320.0,
+                "rho_expected_steps": 9005150.0,
+                "ops_speedup_online_frozen_target": 1.018,
+                "ops_speedup_online_mean_target": 3.678,
+                "ops_speedup_total_mean_target_rank_precompute_charged": 0.00612,
+                "target_luck_factor": 0.2768,
+                "wall_speedup_median_all_runs": 8.181,
+                "wall_speedup_median_uncontended_runs": null,
+                "ic_to_rho_rate_ratio_median": 9.2,
+                "host_contended_runs": [
+                  "R1",
+                  "R2",
+                  "R3"
+                ]
+              }
+            },
+            "verdict": "N83_A1_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+            "claim_boundary": "Public synthetic Koblitz n=83 (a=1, b=1 over GF(2^83), 52.9-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point (sequential single-process arms, same host); constant-factor win only. The online walls are conservative: unrelated verification processes shared the host during the runs. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, no deployed-curve impact.",
+            "primary_single_target_status": "achieved_n41_n53_n61_n71_n73_n83a1_20261006"
+          },
+          "next_target": {
+            "summary": "Extend the a=1 arm past n=83: n=97 a=0 (r ~ 2^95, cofactor 4) needs a rho projection-class rung (online rho ~ 2^44 steps is not wall-runnable); n=107/109/113 a=1 (r ~ 2^107-2^112, cofactor 2) and n=127 a=1 (r ~ 2^115, cofactor 7114) are the u128-ceiling rungs, also projection-class. ECC2K-130 itself (n=131 a=0, r ~ 2^129.6) additionally needs u256 field words, an implicit S3 index, and 130-bit sparse LA; 4-sum total-work parity with rho is not reachable there (see RESEARCH_ECC2K130_IC_FEASIBILITY.md) — the 5-sum relation shape is the top unexplored lever.",
+            "acceptance_gates": [
+              "exactly one previously unseen online target",
+              "IC and rho use identical frozen public point and matching resource envelope",
+              "IC online clock starts after factor base, support index, and reusable logs are ready",
+              "rho online clock starts at first target-dependent walk computation",
+              "exclude process launch, input loading, and target fixture generation from both online intervals",
+              "compact-orbit u128 domain: no explicit pair table",
+              "guided rank accumulation (sequential or verified-parallel) establishes the reusable factor-log table",
+              "record exclusive online phases, memory peak, and independent scalar replay for both arms",
+              "report rho_online_ms / IC_online_ms; a win requires at least 1.20 and a verified answer",
+              "multi-target or amortized rows remain secondary"
+            ],
+            "historical_secondary_note": "The parallel guided rank is a precompute-path change only; its solved logs and the published target row are identical to the sequential path (verified byte-identical at n=71 and n=73, 2026-10-05). The n=83 rung's online walls are conservative: unrelated verification processes shared the host during the runs."
+          },
+          "evidence": [
+            "experiments/koblitz-single-target-n83-20261006/claim_report_vs_rho.json",
+            "experiments/koblitz-single-target-n83-20261006/frozen/fixture.json",
+            "experiments/koblitz-single-target-n73-20261003/claim_report_vs_rho.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/koblitz_parallel_rank_n73_20261005/"
+          ],
+          "history": [
+            {
+              "summary": "Fifth primary single-target online rung: n=73 compact-orbit IC on u128 words (600 signed-Frobenius orbit columns, 87,600 base points, zero pair-table entries) beats automorphism-discounted rho on the identical frozen public point; three paired observations on one frozen target, median 1189.7x online (IC 249-544 ms vs rho 46-683 s); all arms verified every run; standalone Python GF(2^73) replay PASS on all three; precompute (guided rank, mean 57-70M probes/relation, 5.1 h sequential) excluded from the online clock and fully logged",
+              "claim_boundary": "Public synthetic Koblitz n=73 (a=0, b=1 over GF(2^73), 56.3-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point (sequential single-process arms, same host, no finite cap; peak RSS recorded per process); constant-factor win only. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, not deployed-curve security impact. Multi-target amortized results remain secondary.",
+              "metrics": {
+                "n": 73,
+                "target_count": 1,
+                "timing_class": "single_target_online",
+                "subgroup_order": 86020738150056119,
+                "subgroup_log2_order": 56.3,
+                "curve": {
+                  "a": 0,
+                  "b": 1,
+                  "cofactor": 109796,
+                  "field_modulus": "x^73 + x^4 + x^3 + x^2 + 1",
+                  "weierstrass_model": "y^2 + x*y = x^3 + 1"
+                },
+                "paired_same_public_point": true,
+                "public_generator": [
+                  "4735344536444938487862",
+                  "4753051995279452466153"
+                ],
+                "public_target_q": [
+                  "1852858978593996699777",
+                  "7821257062942871962177"
+                ],
+                "fixture_scalar": 12345678901234567,
+                "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input",
+                "base_point_set_digest": "a65776025e4b9ebc4a1e074f9304d834ac12cd533afc7d89a1d3ee72a2a766cc",
+                "factor_base_points": 87600,
+                "orbit_columns": 600,
+                "matrix_columns": 600,
+                "domain": {
+                  "kind": "compact_orbit_u128",
+                  "pair_table_entries": 0,
+                  "edge_selectors": 0,
+                  "root_table_entries": 26278197,
+                  "regular_states": 26280000,
+                  "rank": 600,
+                  "rank_attempts": 600,
+                  "rank_failures": 0,
+                  "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j (sequential frozen arms)"
+                },
+                "automorphism_discount": "sqrt(2n) with A=2*n=146; rho producer uses signed_frobenius quotient",
+                "paired_runs": [
+                  {
+                    "ic_online_ms": 249.023875,
+                    "ic_rank_seed": 7,
+                    "online_speedup": 184.8588383342762,
+                    "rho_online_ms": 46034.26425,
+                    "rho_walk_seed": 202610041,
+                    "run": "R1"
+                  },
+                  {
+                    "ic_online_ms": 326.15937499999995,
+                    "ic_rank_seed": 8,
+                    "online_speedup": 2094.667646891953,
+                    "rho_online_ms": 683195.490543,
+                    "rho_walk_seed": 202610042,
+                    "run": "R2"
+                  },
+                  {
+                    "ic_online_ms": 543.8117500000001,
+                    "ic_rank_seed": 9,
+                    "online_speedup": 1189.7419463922945,
+                    "rho_online_ms": 646995.649916,
+                    "rho_walk_seed": 202610043,
+                    "run": "R3"
+                  }
+                ],
+                "median_online_speedup": 1189.7419463922945,
+                "online_speedup_range_all_runs": [
+                  184.8588383342762,
+                  2094.667646891953
+                ],
+                "ic_online_interval": "after reusable target-independent base/index/log preparation (base load, S3 root index build, guided rank-600 log table) through target relation extraction, group-lift check, log recovery, and [d]G=Q check; one public Q supplied as solver input",
+                "rho_online_interval": "after Q construction: per-target jump setup, walk, and in-process verification",
+                "ic_precomputation_ms_excluded_from_online": 48797543.425375,
+                "ic_verified_all_runs": true,
+                "rho_verified_all_runs": true,
+                "ic_and_rho_scalar_identical": true,
+                "independent_scalar_replay": {
+                  "method": "standalone Python GF(2^73) polynomial/affine-curve arithmetic independent of the Rust producers",
+                  "validated_runs": [
+                    "R1",
+                    "R2",
+                    "R3"
+                  ],
+                  "status": "PASS"
+                },
+                "reproducibility": {
+                  "note": "rho walk seeds 202610041/042/043, ic rank seeds 7/8/9; frozen binaries pinned by sha256 in run.json"
+                },
+                "resource_caps": {
+                  "common_cap_bytes": null,
+                  "ic_peak_rss_bytes_max": 5630296064,
+                  "note": "no finite kernel cap declared; per-process peak RSS recorded with wait4(2)",
+                  "rho_peak_rss_bytes_max": 5199986688
+                },
+                "asymptotic_sub_rho": false,
+                "single_target_crossover": true,
+                "operation_accounting": {
+                  "source": "experiments/koblitz-single-target-n73-20261003/claim_report_vs_rho.json#operation_accounting",
+                  "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                  "ic_online_operations_frozen_target": 457561,
+                  "ic_rank_probes_mean_pooled": 61301000.0,
+                  "rho_expected_steps": 30421800.0,
+                  "ops_speedup_online_frozen_target": 66.49,
+                  "ops_speedup_online_mean_target": 0.4963,
+                  "ops_speedup_total_mean_target_rank_precompute_charged": 0.0008257,
+                  "target_luck_factor": 134.0,
+                  "wall_speedup_median_all_runs": 1190.0,
+                  "wall_speedup_median_uncontended_runs": 184.9,
+                  "ic_to_rho_rate_ratio_median": 13.09,
+                  "host_contended_runs": [
+                    "R2",
+                    "R3"
+                  ]
+                }
+              },
+              "verdict": "N73_U128_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+              "recorded": "2026-10-05-pre-n83-rung"
+            },
+            {
+              "summary": "Fourth primary single-target online rung: n=71 compact-orbit IC on u128 words (600 signed-Frobenius orbit columns, 85,200 base points, zero pair-table entries, ~5.6 GB peak RSS) beats automorphism-discounted rho on the identical frozen public point; three paired observations on one frozen target, median 2864.1x online (IC 10.2-14.5 ms vs rho 18.2-70.7 s, range 1532.8x-4893.5x); deterministic 14,554-probe relation on all runs; both arms verified every run; standalone Python GF(2^71) replay PASS 15/15 on all three; first rung past the old u64 packing ceiling, enabled by the u128 field extension",
+              "claim_boundary": "Public synthetic Koblitz n=71 (a=0, b=1 over GF(2^71), 52-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point under the same 16 GiB cap (sequential single-process runs); constant-factor win only. Total operation-count boundary not comparable, S unknown. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target amortized results remain secondary.",
+              "metrics": {
+                "n": 71,
+                "target_count": 1,
+                "timing_class": "single_target_online",
+                "subgroup_order": 5513228015079457,
+                "subgroup_log2_order": 52.3,
+                "curve": {
+                  "a": 0,
+                  "b": 1,
+                  "field_modulus": "x^71 + x^5 + x^3 + x + 1",
+                  "cofactor": 428276,
+                  "weierstrass_model": "y^2 + x*y = x^3 + 1"
+                },
+                "paired_same_public_point": true,
+                "public_generator": [
+                  "461735816632835152742",
+                  "441632902040031190095"
+                ],
+                "public_target_q": [
+                  "1871938466584478812274",
+                  "411988277714743466179"
+                ],
+                "fixture_scalar": 2718281828459045,
+                "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input; frozen by standalone Python scalar multiplication",
+                "base_point_set_digest": "f3acde0cfc22ef8abc4a5214842ab32ecd1da82ca3e7a7c4e6da4d0e8a51514f",
+                "factor_base_points": 85200,
+                "orbit_columns": 600,
+                "matrix_columns": 600,
+                "domain": {
+                  "kind": "compact_orbit_u128",
+                  "pair_table_entries": 0,
+                  "edge_selectors": 0,
+                  "root_table_entries": 25558188,
+                  "regular_states": 25560000,
+                  "rank": 600,
+                  "rank_attempts": 600,
+                  "rank_failures": 0,
+                  "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+                  "field_word": "u128",
+                  "field_modulus": "x^71 + x^5 + x^3 + x + 1"
+                },
+                "automorphism_discount": "sqrt(2n) with A=2*n=142; rho producer uses signed_frobenius quotient",
+                "paired_runs": [
+                  {
+                    "run": "ledger-R1",
+                    "ic_online_ms": 14.457,
+                    "rho_online_ms": 70747.3,
+                    "online_speedup": 4893.5
+                  },
+                  {
+                    "run": "ledger-R2 (median, primary claim)",
+                    "ic_online_ms": 10.208,
+                    "rho_online_ms": 29237.4,
+                    "online_speedup": 2864.1
+                  },
+                  {
+                    "run": "ledger-R3",
+                    "ic_online_ms": 11.874,
+                    "rho_online_ms": 18200.9,
+                    "online_speedup": 1532.8
+                  }
+                ],
+                "median_online_speedup": 2864.1,
+                "online_speedup_range_all_runs": [
+                  1532.8,
+                  4893.5
+                ],
+                "ic_online_phase_ms": {
+                  "target_descent": 0.011,
+                  "target_pdp_and_relation_check": 10.051,
+                  "target_query": 0.0,
+                  "target_recovery_check": 0.147
+                },
+                "rho_online_phase_ms": {
+                  "target_specific_jump_setup": 9.316,
+                  "walk": 29216.614,
+                  "verification": 11.465
+                },
+                "ic_online_interval": "after reusable target-independent base/index/log preparation (base load, S3 root index build, guided rank-600 log table) through target relation extraction, group-lift check, log recovery, and [d]G=Q check; one public Q supplied as solver input",
+                "rho_online_interval": "after Q construction: per-target jump setup, walk, and in-process verification through the verified returned scalar",
+                "ic_precomputation_ms_excluded_from_online": 39112.7,
+                "ic_verified_all_runs": true,
+                "rho_verified_all_runs": true,
+                "ic_and_rho_scalar_identical": true,
+                "deterministic_ic_relation": {
+                  "probes": 14554,
+                  "same_all_runs": true
+                },
+                "independent_scalar_replay": {
+                  "method": "standalone Python GF(2^71) polynomial/affine-curve arithmetic independent of the Rust producers",
+                  "validated_runs": [
+                    "ledger-R1",
+                    "ledger-R2",
+                    "ledger-R3"
+                  ],
+                  "checks_per_run": 15,
+                  "checks_all_true": true,
+                  "status": "PASS"
+                },
+                "reproducibility": {
+                  "ic_source_sha256": "192cc051adb1e0b88cf7df4db152b4a567c797b99a998f6bda10167ff30525dd",
+                  "rho_source_sha256": "3906673dd74af6d6f499c9f4aee23304749f6bfa0eb6260089233af40960fc36"
+                },
+                "resource_caps": {
+                  "common_cap_bytes": 17179869184,
+                  "ic_peak_rss_bytes_max": 5615861760,
+                  "rho_peak_rss_bytes_max": 2098429952
+                },
+                "operation_count_boundary": "total operation-count comparison absent; S unknown (rho full charge accounting retained in the run rows)",
+                "asymptotic_sub_rho": false,
+                "single_target_crossover": true,
+                "operation_accounting": {
+                  "source": "experiments/koblitz-single-target-n71-20261002/claim_report_vs_rho.json#operation_accounting",
+                  "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                  "ic_online_operations_frozen_target": 14554,
+                  "ic_rank_probes_mean_pooled": 2244770.0,
+                  "rho_expected_steps": 7809420.0,
+                  "ops_speedup_online_frozen_target": 536.6,
+                  "ops_speedup_online_mean_target": 3.479,
+                  "ops_speedup_total_mean_target_rank_precompute_charged": 0.005789,
+                  "target_luck_factor": 154.2,
+                  "wall_speedup_median_all_runs": 2864.0,
+                  "wall_speedup_median_uncontended_runs": 2864.0,
+                  "ic_to_rho_rate_ratio_median": 7.395,
+                  "host_contended_runs": []
+                }
+              },
+              "verdict": "N71_U128_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+              "recorded": "2026-10-02-pre-n73-rung"
+            },
+            {
+              "summary": "Third primary single-target online rung at n=61 on the compact-orbit domain (600 orbit columns, 73,200 points, zero pair-table entries, 2.73 GB peak RSS; fresh reproduction 124.85x, frozen median 53.13x)",
+              "claim_boundary": "Public synthetic Koblitz n=61 (a=0, b=1 over GF(2^61), 48-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point under the same 16 GiB cap; constant-factor win only. Total operation-count boundary not comparable, S unknown. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target amortized results remain secondary.",
+              "metrics": {
+                "n": 61,
+                "target_count": 1,
+                "timing_class": "single_target_online",
+                "subgroup_order": 162888033982417,
+                "subgroup_log2_order": 47.5407,
+                "curve": {
+                  "a": 0,
+                  "b": 1,
+                  "field_modulus": "x^61 + x^5 + x^2 + x + 1",
+                  "cofactor": 14156,
+                  "weierstrass_model": "y^2 + x*y = x^3 + 1"
+                },
+                "paired_same_public_point": true,
+                "public_generator": [
+                  417741213578625342,
+                  1665657146971463353
+                ],
+                "public_target_q": [
+                  1191898001997870864,
+                  2105024931777585135
+                ],
+                "fixture_scalar": 77777777777777,
+                "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input",
+                "base_point_set_digest": "e94f7ffb099d82c8bb6e3c6e2f9857950c55b1ff238e3d6107fdd1f184b3b1e7",
+                "factor_base_points": 73200,
+                "orbit_columns": 600,
+                "matrix_columns": 600,
+                "domain": {
+                  "kind": "compact_orbit",
+                  "pair_table_entries": 0,
+                  "edge_selectors": 0,
+                  "root_table_entries": 21958053,
+                  "regular_states": 21960000,
+                  "rank": 600,
+                  "rank_attempts": 600,
+                  "rank_failures": 0,
+                  "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j"
+                },
+                "automorphism_discount": "sqrt(2n) with A=2*n=122; rho producer uses signed_frobenius quotient",
+                "paired_runs": [
+                  {
+                    "run": "R1 (frozen 2026-09-25)",
+                    "ic_online_ms": 75.088833,
+                    "rho_online_ms": 3989.175416,
+                    "online_speedup": 53.13
+                  },
+                  {
+                    "run": "R2 (frozen 2026-09-25)",
+                    "ic_online_ms": 99.561,
+                    "rho_online_ms": 2750.126167,
+                    "online_speedup": 27.62
+                  },
+                  {
+                    "run": "R3 (frozen 2026-09-25)",
+                    "ic_online_ms": 89.650083,
+                    "rho_online_ms": 8832.519541,
+                    "online_speedup": 98.52
+                  },
+                  {
+                    "run": "R4 (fresh 2026-10-02, committed source)",
+                    "ic_online_ms": 58.994333,
+                    "rho_online_ms": 7365.181667,
+                    "online_speedup": 124.85
+                  }
+                ],
+                "fresh_reproduction_online_speedup": 124.85,
+                "frozen_median_online_speedup": 53.13,
+                "online_speedup_range_all_runs": [
+                  27.62,
+                  124.85
+                ],
+                "ic_online_phase_ms": {
+                  "target_descent": 0.000875,
+                  "target_pdp_and_relation_check": 58.948292,
+                  "target_query": 0.0,
+                  "target_recovery_check": 0.044875
+                },
+                "rho_online_phase_ms": {
+                  "target_specific_jump_setup": 5.624917,
+                  "walk": 7351.676959,
+                  "verification": 7.879791
+                },
+                "ic_online_interval": "after reusable target-independent base/index/log preparation (base load, S3 root index build, guided rank-600 log table) through target relation extraction, group-lift check, log recovery, and [d]G=Q check; one public Q supplied as solver input",
+                "rho_online_interval": "after Q construction: per-target jump setup, walk, and in-process verification through the verified returned scalar",
+                "ic_precomputation_ms_excluded_from_online": 13097.772625,
+                "ic_verified_all_runs": true,
+                "rho_verified_all_runs": true,
+                "ic_and_rho_scalar_identical": true,
+                "independent_scalar_replay": {
+                  "method": "standalone Python GF(2^61) polynomial/affine-curve arithmetic independent of the Rust producers",
+                  "validated_runs": [
+                    "R1",
+                    "R2",
+                    "R3",
+                    "R4"
+                  ],
+                  "checks_all_true": [
+                    "generator_on_curve",
+                    "target_on_curve",
+                    "target_is_scalar_times_g",
+                    "target_matches_published_q",
+                    "generator_has_order_r",
+                    "all_x_codes_in_base",
+                    "x_codes_have_base_points",
+                    "group_relation_sums_to_target",
+                    "pinned_intermediates_match",
+                    "base_points_have_order_r",
+                    "recovered_log_times_g_is_target",
+                    "recovered_log_matches_published",
+                    "rho_same_public_point",
+                    "rho_scalar_matches_sidecar",
+                    "rho_verified"
+                  ],
+                  "status": "PASS"
+                },
+                "reproducibility": {
+                  "ic_source_sha256": "bb69bd4409fcb5898558533393dce02200e14571ded033b966cf2dcd9b3e9687",
+                  "ic_binary_sha256": "edf9ed313009a56e5d00acabefe92add93272761bbb8e264c9cc20dcc6fc243e",
+                  "byte_identical_to_frozen_protocol": true,
+                  "deterministic_relation": {
+                    "probes": 227437,
+                    "point_indices": [
+                      21852,
+                      25480,
+                      26108,
+                      45574
+                    ]
+                  }
+                },
+                "resource_caps": {
+                  "common_cap_bytes": 17179869184,
+                  "ic_peak_rss_bytes": 2730524672,
+                  "rho_peak_rss_bytes": 350502912
+                },
+                "operation_count_boundary": "total operation-count comparison absent; S unknown (rho full charge accounting retained in runs/R4/rho.jsonl)",
+                "asymptotic_sub_rho": false,
+                "single_target_crossover": true,
+                "operation_accounting": {
+                  "source": "experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json#operation_accounting",
+                  "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                  "ic_online_operations_frozen_target": 227437,
+                  "ic_rank_probes_mean_pooled": 63992.7,
+                  "rho_expected_steps": 1448190.0,
+                  "ops_speedup_online_frozen_target": 6.367,
+                  "ops_speedup_online_mean_target": 22.63,
+                  "ops_speedup_total_mean_target_rank_precompute_charged": 0.03765,
+                  "target_luck_factor": 0.2814,
+                  "wall_speedup_median_all_runs": 75.83,
+                  "wall_speedup_median_uncontended_runs": 75.83,
+                  "ic_to_rho_rate_ratio_median": 8.887,
+                  "host_contended_runs": []
+                }
+              },
+              "recorded": "2026-10-02-third-single-target-rung",
+              "verdict": "N61_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+            },
+            {
+              "summary": "Second primary single-target online rung at n=53 (guided shared-log precompute with the explicit pair table, 9.34 GB peak RSS under the cap, excluded setup)",
+              "claim_boundary": "Public synthetic Koblitz, exactly one previously unseen target solved online by IC and rho on the identical frozen public point under the same 16 GiB resource cap. Online clocks start after reusable guided shared-log IC preparation (factor base, support index, logs; 61.8 s and the explicit pair table's 9.34 GB peak are excluded setup, logged) and at rho's first target-dependent walk step. Constant-factor win only: not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target, batch throughput, and amortized-table results remain secondary.",
+              "metrics": {
+                "n": 53,
+                "target_count": 1,
+                "timing_class": "single_target_online",
+                "subgroup_order": 21044858204113,
+                "subgroup_log2_order": 44.258533022667656,
+                "paired_same_public_point": true,
+                "public_generator": [
+                  198217578752339,
+                  7929897206038174
+                ],
+                "public_target_q": [
+                  4910906853150104,
+                  968484661590993
+                ],
+                "fixture_scalar": 4572131355890,
+                "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+                "factor_base_points": 23320,
+                "matrix_columns": 221,
+                "automorphism_discount": "sqrt(2n) with A=2*n=106; rho producer uses signed_frobenius quotient",
+                "paired_runs": [
+                  {
+                    "run_id": "20261002T214339Z-56e7fbb9d7",
+                    "ic_online_ms": 18.006,
+                    "rho_online_ms": 918.836,
+                    "online_speedup": 51.03
+                  },
+                  {
+                    "run_id": "20261002T214636Z-0fbed42339",
+                    "ic_online_ms": 15.531,
+                    "rho_online_ms": 865.179,
+                    "online_speedup": 55.71
+                  }
+                ],
+                "ic_online_ms_median": 16.768,
+                "rho_online_ms_median": 892.008,
+                "online_speedup_median": 53.37,
+                "online_speedup_min": 51.03,
+                "online_speedup_max": 55.71,
+                "ic_online_phase_ms": {
+                  "target_pdp": 12.599,
+                  "target_query": 0.0,
+                  "target_recovery_check": 1.756,
+                  "target_relation_check": 3.651,
+                  "target_descent": 0.0
+                },
+                "rho_online_phase_ms": {
+                  "target_walk": 915.195,
+                  "scalar_recovery_check": 3.641
+                },
+                "ic_online_interval": "single target relation search after reusable factor-base/index/log preparation through exact relation and scalar replay; fixture point generation excluded",
+                "rho_online_interval": "first target-dependent walk step through recovered scalar and verification; excludes launch, walk setup, and fixture point generation",
+                "ic_precomputation_ms_excluded_from_online": 61839.6,
+                "ic_precomputation_note": "guided eta 1/10 signed_expanded pair_pair_guided_256; explicit pair table this rung, peak child RSS 9.34 GB under the 16 GiB common cap, logged; compact-orbit replacement without the pair table is the follow-up factor_base rung",
+                "online_target_admitted_relations": 1,
+                "uses_retained_factor_logs": true,
+                "ic_verified_all_runs": true,
+                "rho_verified_all_runs": true,
+                "ic_and_rho_scalar_identical": true,
+                "independent_scalar_replay": {
+                  "method": "standalone Python polynomial-basis GF(2^53) arithmetic and binary Weierstrass group law; separate from Rust producers",
+                  "validated_runs": [
+                    "20261002T214339Z-56e7fbb9d7",
+                    "20261002T214636Z-0fbed42339"
+                  ],
+                  "field_modulus": "x^53 + x^6 + x^2 + x + 1",
+                  "checks_all_true": [
+                    "field_irreducible",
+                    "generator_on_curve",
+                    "target_on_curve",
+                    "subgroup_order_annihilates_generator",
+                    "ic_scalar_replays_target",
+                    "rho_scalar_replays_target",
+                    "ic_and_rho_target_identical",
+                    "ic_and_rho_scalar_identical"
+                  ],
+                  "status": "PASS"
+                },
+                "resource_caps": {
+                  "common_cap_bytes": 17179869184
+                },
+                "asymptotic_sub_rho": false,
+                "single_target_crossover": true
+              },
+              "recorded": "2026-10-02-second-single-target-rung",
+              "verdict": "N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+            },
+            {
+              "summary": "Historical secondary (multi-target only): n=53 shared-log 1,024-target process-wall crossover plus fixed-32 growing-n panel; compact-orbit shared-log DLP (koblitz_orbit_dlp_fast, 0 pair edges) beat frozen Kuhn-Struik batched rho at n=53 in all 15 paired blocks (L=32..16,384, wall 0.24-0.74) and at n=41 L=1,024 (0.34), 86,112/86,112 independently replayed; no single-target crossover at that time",
+              "claim_boundary": "Public synthetic Koblitz, exactly one previously unseen target solved online by IC and rho on the identical frozen public point under the same 16 GiB resource cap. Online clocks start after reusable IC preparation (factor base, support index, logs) and exclude process launch, input loading, and fixture generation. Constant-factor win only: not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target, batch throughput, and amortized-table results remain secondary.",
+              "metrics": {
+                "n": 41,
+                "target_count": 1,
+                "timing_class": "single_target_online",
+                "subgroup_order": 549756390943,
+                "subgroup_log2_order": 39.0000015,
+                "paired_same_public_point": true,
+                "public_generator": [
+                  2056947637384,
+                  1635505394702
+                ],
+                "public_target_q": [
+                  32261361846,
+                  1686243023477
+                ],
+                "fixture_scalar": 122329249266,
+                "automorphism_discount": "sqrt(2n) with A=2*n=82; rho producer uses signed_frobenius quotient",
+                "paired_runs": [
+                  {
+                    "run_id": "20261001T055853Z-c145142251",
+                    "ic_online_ms": 8.996749,
+                    "rho_online_ms": 159.107083,
+                    "online_speedup": 17.684953
+                  },
+                  {
+                    "run_id": "20261001T151557Z-d271c124eb",
+                    "ic_online_ms": 8.718959,
+                    "rho_online_ms": 156.326292,
+                    "online_speedup": 17.929467
+                  },
+                  {
+                    "run_id": "20261002T213001Z-3e68b28a95",
+                    "ic_online_ms": 8.428959,
+                    "rho_online_ms": 158.750042,
+                    "online_speedup": 18.829467
+                  }
+                ],
+                "ic_online_ms_median": 8.718959,
+                "rho_online_ms_median": 158.750042,
+                "online_speedup_median": 17.929467,
+                "online_speedup_min": 17.684953,
+                "online_speedup_max": 18.829467,
+                "ic_online_phase_ms": {
+                  "target_pdp": 5.704625,
+                  "target_query": 0.000167,
+                  "target_recovery_check": 1.013459,
+                  "target_relation_check": 2.000708,
+                  "target_descent": 0.0
+                },
+                "rho_online_phase_ms": {
+                  "target_walk": 156.762,
+                  "scalar_recovery_check": 1.988
+                },
+                "ic_online_interval": "single target relation search after reusable factor-base/index/log preparation through exact relation and scalar replay; fixture point generation excluded",
+                "rho_online_interval": "first target-dependent walk step through recovered scalar and verification; excludes launch, walk setup, and fixture point generation",
+                "ic_precomputation_ms_excluded_from_online": 6222.105374,
+                "ic_verified_all_runs": true,
+                "rho_verified_all_runs": true,
+                "ic_and_rho_scalar_identical": true,
+                "independent_scalar_replay": {
+                  "method": "standalone Python polynomial-basis GF(2^41) arithmetic and binary Weierstrass group law; separate from Rust producers",
+                  "validated_runs": [
+                    "20261001T151557Z-d271c124eb",
+                    "20261002T213001Z-3e68b28a95"
+                  ],
+                  "python_builds": [
+                    "3.13.1",
+                    "3.9.10"
+                  ],
+                  "checks_all_true": [
+                    "field_irreducible",
+                    "generator_on_curve",
+                    "target_on_curve",
+                    "subgroup_order_annihilates_generator",
+                    "ic_scalar_replays_target",
+                    "rho_scalar_replays_target",
+                    "ic_and_rho_target_identical",
+                    "ic_and_rho_scalar_identical"
+                  ],
+                  "status": "PASS"
+                },
+                "resource_caps": {
+                  "common_cap_bytes": 17179869184
+                },
+                "asymptotic_sub_rho": false,
+                "single_target_crossover": true
+              },
+              "recorded": "2026-10-02-first-single-target-rung",
+              "verdict": "N41_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+            },
+            {
+              "summary": "Historical secondary (multi-target only): n=53 shared-log 1,024-target process-wall crossover plus fixed-32 growing-n panel; no single-target crossover at that time",
+              "claim_boundary": "Finite public-synthetic multi-target n=53 wall crossover remains valid. The growing-n security-axis panel orders direct growth above rho and does not support an asymptotic sub-rho claim. No single-target crossover, external/private targets, production key recovery, or deployed-curve security claim.",
+              "metrics": {
+                "n": 53,
+                "timing_class": "whole_process_wall_and_fully_charged_algorithm_same_public_corpus",
+                "whole_process_wall_crossover": true,
+                "amortized_targets": 1024,
+                "automorphism_discount": "sqrt(2n) with A=2*n=106; rho producer uses signed_frobenius quotient",
+                "asymptotic_sub_rho": false,
+                "batch1024": {
+                  "all_1024_verified": true,
+                  "direct_fully_charged_ms": 36935.784684,
+                  "direct_peak_rss_bytes": 10638950400,
+                  "direct_process_wall_ms": 43450.638084,
+                  "fully_charged_ratio": 0.0336568761192516,
+                  "fully_charged_speedup": 29.711610681182737,
+                  "process_wall_ratio": 0.0395810437414916,
+                  "process_wall_speedup": 25.264619258934058,
+                  "rho_algorithm_ms": 1097421.654735,
+                  "rho_peak_rss_bytes": 254033920,
+                  "rho_process_wall_ms": 1097763.82775,
+                  "same_public_scalars_and_points": true
+                },
+                "batch32": {
+                  "direct_fully_charged_ms": 28168.014705,
+                  "direct_process_wall_ms": 29659.520792,
+                  "fully_charged_ratio": 0.813555302743974,
+                  "process_wall_ratio": 0.8489032375634704,
+                  "rho_algorithm_ms": 34623.355794,
+                  "rho_process_wall_ms": 34938.6355
+                },
+                "independent_replay_discrepancies": 0,
+                "single_target_crossover": false,
+                "growing_n_panel": {
+                  "field_degrees": [
+                    37,
+                    41,
+                    53
+                  ],
+                  "subgroup_log2_orders": [
+                    27.78083708554834,
+                    39.00000151433405,
+                    44.258533022667656
+                  ],
+                  "wall_ratio_medians": [
+                    0.6540065199754175,
+                    0.47597992348637974,
+                    0.8152901634560032
+                  ],
+                  "direct_process_wall_slope": {
+                    "estimate": 0.4647299369192933,
+                    "lower_95": 0.4626693358523599,
+                    "upper_95": 0.470599964879437
+                  },
+                  "rho_process_wall_slope": {
+                    "estimate": 0.456253049834696,
+                    "lower_95": 0.43498287560184223,
+                    "upper_95": 0.4601498322443186
+                  },
+                  "direct_fully_charged_slope": {
+                    "estimate": 0.5704549445682197,
+                    "lower_95": 0.5665929396736489,
+                    "upper_95": 0.5785027151791216
+                  },
+                  "rho_algorithm_slope": {
+                    "estimate": 0.45866265955669466,
+                    "lower_95": 0.4398021195579382,
+                    "upper_95": 0.4626555117993512
+                  },
+                  "finite_ordering": "DIRECT_GROWS_FASTER",
+                  "independent_replay_discrepancies": 0
+                }
+              },
+              "recorded": "2026-10-01-pre-single-target-record",
+              "verdict": "N53_PUBLIC_SYNTHETIC_SHARED_LOG_1024_PROCESS_WALL_CROSSOVER"
+            },
+            {
+              "summary": "n=37 charged-time crossover; whole-process wall crossover false",
+              "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER"
+            },
+            {
+              "claim_boundary": "n=37 is a finite public-synthetic 1,024-target process-wall result. n=53 is a non-paired boundary diagnostic. Neither is Semaev-SAT, single-instance asymptotic sub-rho, an external/private target result, or key recovery.",
+              "metrics": {
+                "amortized_targets": 1024,
+                "automorphism_discount": "sqrt(2n) / A=2*n family",
+                "n": 37,
+                "n37_process_wall_ratio_median": 0.5236039893067193,
+                "n37_process_wall_ratio_upper_95": 0.530870619095724,
+                "n41_status": "materialized_but_not_crossover",
+                "n53_comparison_same_fixture_domain": true,
+                "n53_current_single_fixture_process_wall_ms": 39394.637749996036,
+                "n53_factor_base_points": 23320,
+                "n53_matched_batch4_ic_online_ms": 24575.849833,
+                "n53_matched_batch4_ic_process_wall_ms": 57840.82216699608,
+                "n53_matched_batch4_process_wall_ratio": 3.8621911783612606,
+                "n53_matched_batch4_rho_algorithm_ms": 14681.78858,
+                "n53_matched_batch4_rho_process_wall_ms": 14976.16754216142,
+                "n53_online_ratio_to_matched_rho": 1.6739002676062238,
+                "n53_orbit_columns": 220,
+                "n53_status": "N53_DIRECT_STACK_IMPROVED_OVER_30X_BUT_REMAINS_ABOVE_RHO",
+                "n53_support_entries": 135919826,
+                "timing_class": "direct_child_process_wall_with_full_evidence_shadows",
+                "whole_process_wall_crossover": true
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "n=37 process-wall crossover at 1,024 targets; n=53 direct stack improved over 30x but remains above fresh rho",
+              "verdict": "N37_DIRECT_1024_PROCESS_WALL_IC_OVER_RHO_WIN__N53_NO_CROSSOVER"
+            }
+          ]
+        }
+      }
+    },
+    "prime": {
+      "label": "Prime fields",
+      "best_stack": [
+        "ec_index_calculus_j0",
+        "ec_index_calculus"
+      ],
+      "implementation_caps": {
+        "generic_ic_bench_bits": 12,
+        "j0_ic_bench_bits": 14,
+        "module_doc_sub_bits": 40,
+        "dense_3sum_nonscaling_wall_bits": 80
+      },
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "Small-x and zeta-orbit bases on toy primes; Eisenstein-smooth FB implemented",
+            "metrics": {
+              "construction_methods": [
+                "small_x",
+                "zeta_orbit",
+                "eisenstein_smooth"
+              ],
+              "materialized": true,
+              "construction_wall_ms": null,
+              "retained_bytes": null
+            }
+          },
+          "next_target": {
+            "summary": "Orbit-reduced base on a 16-bit j=0 prime-order curve",
+            "acceptance_gates": [
+              "no duplicate orbits",
+              "size vs theory within 5%",
+              "construction_wall_ms and retained_bytes logged"
+            ]
+          },
+          "evidence": [
+            "docs/RESEARCH_BENCH_LOG.md",
+            "src/cryptanalysis/ec_index_calculus_j0.rs"
+          ],
+          "history": []
+        },
+        "decomposition": {
+          "status": "record",
+          "current": {
+            "summary": "First Semaev-S4 3-decomposition relation family past toy sizes on the deployed a=-3 curve shape (P-256 class, 16-bit prime p=65519): relations decompose R = aG + bQ into three factor-base points via the S4 quartic + Cantor-Zassenhaus root finding (find_roots_fp_fast); measured trials/relation = 1.0 (every trial yields a relation; ~13 expected hits/trial at fb=120), 128 relations, staged timers, known-answer verified and rho-agreeing. Per-relation wall 3.3 s is dominated by the B^2/2 quartic sweep at fixed B=120, so 2-decomposition remains faster per relation at these sizes; the confirmed p/B^3 3-decomposition density is the input for the larger-B design where 3-decomposition is the asymptotic lever.",
+            "metrics": {
+              "n_or_bits": 16,
+              "m_summands": 3,
+              "system_degree": 4,
+              "unknowns": 120,
+              "eq_var_ratio": "not applicable: direct univariate root finding per (x_i, x_j) pair",
+              "ffd": {
+                "status": "inapplicable",
+                "reason": "direct univariate quartic root finding (Cantor-Zassenhaus); no Boolean/Gröbner system solved"
+              },
+              "oracle_class": "quartic_root_find_cantor_zassenhaus",
+              "median_ms_per_target": 3320.0,
+              "median_ms_per_target_note": "relations stage wall / relations collected at fb=120, 16 bits",
+              "largest_solvable": "16-bit a=-3 (P-256 shape) known-answer DLP via S4 3-decomposition",
+              "trials_per_relation": {
+                "median": 1.0,
+                "max": 1,
+                "min": 1
+              },
+              "relations_collected": 128,
+              "all_group_verified": true,
+              "rho_agreement_control": true
+            },
+            "verdict": "A3_S4_3DECOMP_FAMILY_16BIT_QUARTIC_CZ_ORACLE"
+          },
+          "next_target": {
+            "summary": "Cut the S4 per-relation cost at fixed yield (the B^2/2 quartic sweep dominates: batch the pair sweep, share X^p mod f across quartics per trial, or vectorize the CZ root finding) and extend the family to >=20 bits; alternatively pair the 3-decomposition density with a larger factor base where the p/B^3 trials-per-relation scaling beats 2-decomposition total cost.",
+            "acceptance_gates": [
+              "relations group-verified and rho agreement control on the identical public point",
+              "trials-per-relation and per-relation wall recorded per bitlength",
+              "ffd status explicit (inapplicable + reason for direct root finding)",
+              "no claim that 3-decomposition beats 2-decomposition at the measured sizes unless the wall shows it"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_s4_ladder_20261006/claim_draft_a3_s4_ladder.json",
+            "examples/a3_s4_ladder.rs"
+          ],
+          "history": [
+            {
+              "summary": "S3 2-decomp through bench sizes; S4/Gröbner not a scaling win; FFD not published on 2-decomp frontier",
+              "metrics": {
+                "summation": "S3",
+                "summands": 2,
+                "system_degree": "quadratic_typical",
+                "ffd": {
+                  "status": "unmeasured",
+                  "reason": "Current bench frontier records wall scaling / alpha fits, not FFD/DoR"
+                },
+                "oracle_classes": [
+                  "semaev_s3_2decomp"
+                ]
+              },
+              "recorded": "2026-10-05-pre-s4-family"
+            }
+          ]
+        },
+        "relation_yield": {
+          "status": "record",
+          "current": {
+            "summary": "First prime-regime trials-per-relation yield curves: j=0 staged ladder at 16/20 bits (median 14 -> 171.5 trials/relation) and generic a=-3 (P-256/CryptoPro-B shape) ladder at 16/20/24 bits with fixed fb=120 x-coordinates (median 2 -> 28 -> 379/506 trials/relation, ~x16 per +4 bits); all runs known-answer verified with rho agreement",
+            "metrics": {
+              "j0_median_trials_per_relation": {
+                "16bit": 14.0,
+                "20bit": 171.5
+              },
+              "a3_median_trials_per_relation": {
+                "16bit_p256class": 2.0,
+                "20bit_p256class": [
+                  28.0,
+                  23.5
+                ],
+                "20bit_cryptoproclass": 20.0,
+                "24bit_p256class": 379.0,
+                "24bit_cryptoproclass": 505.5
+              },
+              "a3_policy": {
+                "fb_size": 120,
+                "extra_relations": 8,
+                "max_trials": 1000000,
+                "max_relation_attempts": 64
+              },
+              "target_mix": {
+                "natural_public_synthetic": 8,
+                "planted_sat": 0,
+                "proven_unsat": 0
+              }
+            }
+          },
+          "next_target": {
+            "summary": "Extend both yield curves to 24-32 bits with fixed policy; publish per-size CI on trials-per-relation",
+            "acceptance_gates": [
+              ">=3 seeds per size with median and max reported",
+              "fixed fb policy frozen before the run",
+              "target mix labelled"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/claim_draft_20bit.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/claim_draft_a3_ladder.json"
+          ],
+          "history": []
+        },
+        "rank": {
+          "status": "open",
+          "current": {
+            "summary": "Dense GE mod n on toy matrices",
+            "metrics": {
+              "sparse_or_dense": "dense",
+              "matrix_dims": null,
+              "la_cost_ms": null
+            }
+          },
+          "next_target": {
+            "summary": "Sparse LA for >=256 FB columns on a 16-bit instance; publish dims and LA cost",
+            "acceptance_gates": [
+              "correct vs dense GE on a subsample",
+              "matrix_dims and la cost logged"
+            ]
+          },
+          "evidence": [],
+          "history": []
+        },
+        "end_to_end_dlp": {
+          "status": "record",
+          "current": {
+            "summary": "j=0 known-answer IC at 20 bits (j0-bench-20bit, p=1048609, n=1047379) recovers d with [d]G=Q, matches the validation-only sidecar, and agrees with rho on the identical public point; split stage timers (factor_base -> relations -> LA -> verify) via the new staged driver; 3 deterministic seeds (20261005/06/07) all recover and agree, replay receipt PASS; IC wall 56.8-64.9 s vs rho 150-153 ms (no vs_rho crossover, gap widens with size); median trials/relation 171.5 at seed 20261005. Same session: first generic a=-3 (P-256/CryptoPro-B shape, prime order, a=p-3, no CM/automorphisms) IC ladder at 16/20/24 bits in both p mod 4 classes, all verified and rho-agreeing (16-bit IC 0.4 s median 2 trials/rel; 20-bit 18.7-37.2 s median 20-28; 24-bit 272-513 s median 379-506; IC/rho gap 19x -> 403x over 16 -> 24 bits)",
+            "metrics": {
+              "n_or_bits": 20,
+              "recovered_d_verified": true,
+              "stage_timers_ms_seed20261005": {
+                "factor_base": 5.6,
+                "relations": 64858.4,
+                "linear_algebra": 0.24,
+                "verify": 0.07
+              },
+              "ic_wall_ms_range": [
+                18691.7,
+                64870.5
+              ],
+              "rho_wall_ms_range": [
+                150.3,
+                152.9
+              ],
+              "trials_per_relation_median": 171.5,
+              "relations_collected": 48,
+              "orbit_count": 40,
+              "a3_ladder": {
+                "bits": [
+                  16,
+                  20,
+                  24
+                ],
+                "classes": [
+                  "p256_shape_p_eq_3_mod_4",
+                  "cryptopro_b_shape_p_eq_1_mod_4"
+                ],
+                "ic_wall_ms": [
+                  403.6,
+                  512978.5
+                ],
+                "rho_wall_ms": [
+                  21.1,
+                  1273.8
+                ],
+                "trials_per_relation_median_range": [
+                  2.0,
+                  505.5
+                ],
+                "all_verified_and_agree_rho": true
+              }
+            },
+            "verdict": "PRIME_J0_20BIT_STAGED_KNOWN_ANSWER_PLUS_FIRST_A3_LADDER"
+          },
+          "next_target": {
+            "summary": "Extend the j=0 staged ladder to >=24 bits and the a=-3 ladder to 28-32 bits with the same split timers and rho agreement control; measure where 2-decomposition relation yield (trials/relation ~ x16 per +4 bits) forces 3-decomposition (S4) relation search",
+            "acceptance_gates": [
+              "[d]G = Q verified in-process and by sidecar",
+              "split stage timers present (factor_base -> relations -> LA -> verify)",
+              "rho agreement control on the identical public point",
+              "independent replay on a second host or >=3 seeds for any size past 20 bits"
+            ]
+          },
+          "evidence": [
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/claim_draft_20bit.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/replay_receipt_20bit.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/ka_20bit_seed20261005.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/claim_draft_a3_ladder.json",
+            "examples/j0_stage_ladder.rs",
+            "examples/a3_stage_ladder.rs",
+            "examples/find_a3_bench_curves.rs"
+          ],
+          "history": [
+            {
+              "metrics": {
+                "generic_bits": 12,
+                "j0_bits": 14,
+                "best_variant": "j0_zeta_orbit",
+                "claim_boundary": "synthetic_known_answer"
+              },
+              "recorded": "2026-09-21-pre-16bit-promotion",
+              "summary": "Generic IC 12-bit; j=0 orbit IC 14-bit bench success"
+            },
+            {
+              "summary": "j=0 known-answer IC at 16 bits recovers d with [d]G=Q and agrees with rho on the same instance; three independent replay receipts (2026-09-11 both-runs, 2026-09-15 3-seed, 2026-09-15 3-shot redraw) with zero discrepancies; IC wall ~1.5-2.1 s >> rho ms, so no vs_rho crossover",
+              "metrics": {
+                "n_or_bits": 16,
+                "curve": "j0-bench-16bit",
+                "recovered_d_verified": true,
+                "ic_agrees_rho": true,
+                "ic_matches_truth": true,
+                "target_orbits": 40,
+                "claim_boundary": "public_synthetic_known_answer",
+                "stage_timers": {
+                  "ic_ms": 2088.1385,
+                  "rho_ms": 6.7435,
+                  "note": "producer does not yet split FB/relations/LA; wall is full j0_index_calculus_dlp vs pollard_rho (runs_manual/prime_j0_e2e_16bit_20260915/result.json)"
+                },
+                "control_14bit": {
+                  "ic_agrees_rho": true,
+                  "ic_ms": 362.508,
+                  "rho_ms": 5.067042
+                },
+                "independent_replay_discrepancies": 0,
+                "independent_replay_receipts": [
+                  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/replay_receipt_16bit.json",
+                  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915/replay_receipt.json",
+                  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915_redraw/replay_receipt.json"
+                ],
+                "fixture_hash": "3f5c48fa550223b6a1fc5eb74c6b002170a1ec15bf50f665827a53ab07457333",
+                "executable_or_source_hash": {
+                  "executable": "a33f7266e2ddb2b1b991bc03971359c685eede203f07d7d32f59b1db74a5843a",
+                  "source": "3f5c48fa550223b6a1fc5eb74c6b002170a1ec15bf50f665827a53ab07457333"
+                },
+                "host_id": {
+                  "node": "Adams-MacBook-Pro.local",
+                  "platform": "macOS-26.6-arm64-arm-64bit"
+                },
+                "resource_caps": {},
+                "seeds": {
+                  "random_scalar": "runtime"
+                },
+                "claim_boundary_non_claims": [
+                  "not key recovery on deployed curves",
+                  "not asymptotic sub-rho",
+                  "not a vs_rho crossover (IC wall >> rho on every measured instance)",
+                  "not imported/external points"
+                ]
+              },
+              "recorded": "2026-09-15-pre-20bit-rung"
+            }
+          ]
+        },
+        "vs_rho": {
+          "status": "not_achieved",
+          "current": {
+            "summary": "IC slower than rho at all measured sizes; dense 3-sum wall ~80 bits",
+            "metrics": {
+              "dense_3sum_wall_bits": 80,
+              "timing_class": null,
+              "automorphism_discount": "n/a_prime_generic_unless_stated"
           "status": "not_achieved",
           "current": {
             "summary": "Whole-process operation-counted cost against a counted Pollard rho on the same instance (Round 5): best variant mitm_m2_negfold_walk_balanced at 2.82x rho (n=18); at the largest instance (n=27) mitm_m2_negfold_walk_balanced at 15.96x rho; no variant below rho at r >= 2^20",

@@ -1,0 +1,27 @@
+{
+  "method": "Python GF(2^n) and affine-curve replay independent of the Rust producer",
+  "runs": [
+    {
+      "run_id": "R4",
+      "checks": {
+        "generator_on_curve": true,
+        "target_on_curve": true,
+        "target_is_scalar_times_g": true,
+        "target_matches_published_q": true,
+        "generator_has_order_r": true,
+        "all_x_codes_in_base": true,
+        "x_codes_have_base_points": true,
+        "group_relation_sums_to_target": true,
+        "pinned_intermediates_match": true,
+        "base_points_have_order_r": true,
+        "recovered_log_times_g_is_target": true,
+        "recovered_log_matches_published": true,
+        "rho_same_public_point": true,
+        "rho_scalar_matches_sidecar": true,
+        "rho_verified": true
+      },
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

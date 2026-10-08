@@ -1,0 +1,141 @@
+{
+ "C1": {
+  "rows": [
+   {
+    "n": 7,
+    "points": 116,
+    "I1_total": 114,
+    "I1_ok": 114,
+    "I2_total": 114,
+    "I2_ok": 114,
+    "I3_total": 456,
+    "I3_ok": 456,
+    "I4_total": 114,
+    "I4_ok": 114
+   },
+   {
+    "n": 11,
+    "points": 2116,
+    "I1_total": 2114,
+    "I1_ok": 2114,
+    "I2_total": 2114,
+    "I2_ok": 2114,
+    "I3_total": 8456,
+    "I3_ok": 8456,
+    "I4_total": 2114,
+    "I4_ok": 2114
+   },
+   {
+    "n": 13,
+    "points": 8012,
+    "I1_total": 8010,
+    "I1_ok": 8010,
+    "I2_total": 8010,
+    "I2_ok": 8010,
+    "I3_total": 32040,
+    "I3_ok": 32040,
+    "I4_total": 8010,
+    "I4_ok": 8010
+   }
+  ],
+  "pass_": true
+ },
+ "C2": {
+  "cells": [
+   {
+    "n": 13,
+    "l": 6,
+    "seeds": [
+     3,
+     3,
+     3
+    ],
+    "R": 0.9357,
+    "R_randomV": 1.9838,
+    "geo_vs_expect": 0.8856,
+    "randomset_vs_expect": 0.9465
+   },
+   {
+    "n": 17,
+    "l": 7,
+    "seeds": [
+     3,
+     3,
+     3
+    ],
+    "R": 0.9444,
+    "R_randomV": 1.1206,
+    "geo_vs_expect": 1.0034,
+    "randomset_vs_expect": 1.0624
+   },
+   {
+    "n": 17,
+    "l": 8,
+    "seeds": [
+     3,
+     3,
+     3
+    ],
+    "R": 1.0108,
+    "R_randomV": 1.0057,
+    "geo_vs_expect": 0.9968,
+    "randomset_vs_expect": 0.9861
+   },
+   {
+    "n": 19,
+    "l": 8,
+    "seeds": [
+     3,
+     3,
+     3
+    ],
+    "R": 0.9832,
+    "R_randomV": 1.1566,
+    "geo_vs_expect": 0.9647,
+    "randomset_vs_expect": 0.9812
+   },
+   {
+    "n": 19,
+    "l": 9,
+    "seeds": [
+     3,
+     3,
+     3
+    ],
+    "R": 1.3386,
+    "R_randomV": 1.7889,
+    "geo_vs_expect": 1.3285,
+    "randomset_vs_expect": 0.9925
+   },
+   {
+    "n": 23,
+    "l": 10,
+    "seeds": [
+     3,
+     3,
+     3
+    ],
+    "R": 1.0013,
+    "R_randomV": 1.0595,
+    "geo_vs_expect": 0.9904,
+    "randomset_vs_expect": 0.9892
+   },
+   {
+    "n": 23,
+    "l": 11,
+    "seeds": [
+     3,
+     3,
+     3
+    ],
+    "R": 0.9986,
+    "R_randomV": 1.0574,
+    "geo_vs_expect": 0.9976,
+    "randomset_vs_expect": 0.999
+   }
+  ],
+  "complete": true,
+  "pass_": true
+ },
+ "decisive_idea_survives": false
+}
