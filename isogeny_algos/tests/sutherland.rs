@@ -4,10 +4,11 @@ use isogeny_algos::find::sutherland::{phi_crt, phi_mod_p};
 
 /// Sutherland's isogeny-graph Phi_l mod p equals the q-expansion (Hecke) Phi_l mod p exactly.
 /// The two methods share nothing: one walks the l-isogeny graph (Velu codomains), the other
-/// solves q-series relations.
+/// solves q-series relations. l = 3, 5, 7 start from X_1(l) samples, l = 11 from uniformly
+/// random curves behind the l^2 filter; all use the prime-to-l walk with transported torsion.
 #[test]
 fn sutherland_phi_mod_p_matches_qexpansion() {
-    for &ell in &[3usize, 5, 7] {
+    for &ell in &[3usize, 5, 7, 11] {
         let mut found = 0;
         let mut cand = (1u64 << 16) + 1;
         while found < 2 {

@@ -2692,20 +2692,35 @@ fn bench_nc_suth(o: &mut Out) {
     use isogeny_algos::find::sutherland::{phi_crt, phi_mod_p};
     use isogeny_algos::fpr::FpR;
     use isogeny_algos::gf3n::GF3n;
-    // --- Sutherland Phi_l mod p vs Hecke ---
+    // --- Sutherland Phi_l mod p vs Hecke: the method is randomised (curve search), so one call
+    // times one random path; take 16 primes p = 1 mod l above 2^16, one seed each ---
     for &ell in &[3usize, 5, 7] {
+        let mut primes = vec![];
         let mut p = (1u64 << 16) + 1;
-        while !(is_prime(p) && p % ell as u64 == 1) {
+        while primes.len() < 16 {
+            if is_prime(p) && p % ell as u64 == 1 {
+                primes.push(p);
+            }
             p += 1;
         }
-        let f = Zp::new(p);
-        let t0 = Instant::now();
-        let s = phi_mod_p(p, ell, &mut Rng::new(0x5107 ^ p));
-        let ns_s = t0.elapsed().as_nanos() as f64;
-        let t0 = Instant::now();
-        let h = Phi::compute(&f, ell);
-        let ns_h = t0.elapsed().as_nanos() as f64;
-        o.rec("newcomp", "sutherland_phi_mod_p", &[("p_bits", "17".into()), ("ell", ell.to_string())], &[("ns", ns_s), ("hecke_ns", ns_h)], s.map_or(false, |c| c == h.c), "equals the Hecke Phi_l mod p");
+        let (mut ts, mut hs, mut ok) = (vec![], vec![], true);
+        for &p in &primes {
+            let f = Zp::new(p);
+            let t0 = Instant::now();
+            let s = phi_mod_p(p, ell, &mut Rng::new(0x5107 ^ p));
+            ts.push(t0.elapsed().as_nanos() as f64);
+            let t0 = Instant::now();
+            let h = Phi::compute(&f, ell);
+            hs.push(t0.elapsed().as_nanos() as f64);
+            ok &= s.map_or(false, |c| c == h.c);
+        }
+        let med = |v: &mut Vec<f64>| {
+            v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            v[v.len() / 2]
+        };
+        let mean = ts.iter().sum::<f64>() / ts.len() as f64;
+        let max = ts.iter().cloned().fold(0.0, f64::max);
+        o.rec("newcomp", "sutherland_phi_mod_p_16primes", &[("p_bits", "17".into()), ("ell", ell.to_string())], &[("ns", med(&mut ts)), ("mean_ns", mean), ("max_ns", max), ("hecke_ns", med(&mut hs))], ok, "median over 16 primes p = 1 mod l above 2^16 (one seed each); equals the Hecke Phi_l mod p for every prime");
     }
     for &ell in &[3usize, 5] {
         let t0 = Instant::now();
