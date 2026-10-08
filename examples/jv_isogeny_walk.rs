@@ -36,6 +36,7 @@ fn main() {
     let mut exact = false;
     let mut uniform = 0u64;
     let mut from_weak_class = false;
+    let mut refuse_depth1 = false;
     let mut moves = 8usize;
     let mut cap_mult = 3u64;
     let mut jumps: Vec<u64> = vec![3, 5, 7];
@@ -72,6 +73,7 @@ fn main() {
             "--exact-census" => exact = true,
             "--uniform" => uniform = next(&mut i).parse().expect("--uniform"),
             "--from-weak-class" => from_weak_class = true,
+            "--refuse-depth1" => refuse_depth1 = true,
             "--moves" => moves = next(&mut i).parse().expect("--moves"),
             "--e2e" => e2e = true,
             "--e2e-moves" => {
@@ -270,7 +272,14 @@ fn main() {
                 closure,
                 from_weak_class,
                 moves,
+                refuse_depth1,
             );
+            if refuse_depth1 {
+                eprintln!(
+                    "p={:>5} refuse-depth1: refused {} of {} | success on admitted {:.2} | muls/walk admitted {:.3e} refused {:.3e}",
+                    r.p, r.refused, r.trials, r.success_fraction_admitted, r.mean_muls_admitted, r.mean_muls_refused
+                );
+            }
             eprintln!(
                 "p={:>5} q={:>8} | weak×q {:.2} ({}) | found {} capped {} exhausted {} start-weak {} of {} | success {:.2} | curves median {:.0} mean {:.0} (q/3 {:.0}) | first comp {:.1} weak {:.2} | comps {:.1} | jumps {:?} wasted {} | c_curve {:.0} c_jump {:.3e} | muls/found walk {:.3e} all {:.3e} | walk/rho {:.4} all {:.4} | {:.0} s",
                 r.p, r.q, r.weak_fraction_times_q, r.sampled, r.found, r.capped, r.exhausted, r.start_weak, r.trials, r.success_fraction, r.median_curves, r.mean_curves, r.q_over_3,
