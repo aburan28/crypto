@@ -45,6 +45,8 @@ struct Args {
     timeout: Duration,
     max_models: usize,
     macaulay_degree: Option<u32>,
+    /// Conflict budget for the native arm (`u64::MAX` = unlimited).
+    native_conflict_budget: u64,
     out: Option<String>,
 }
 
@@ -62,6 +64,7 @@ fn parse_args() -> Args {
         timeout: Duration::from_secs(120),
         max_models: 64,
         macaulay_degree: Some(2),
+        native_conflict_budget: u64::MAX,
         out: None,
     };
     let argv: Vec<String> = std::env::args().skip(1).collect();
@@ -76,8 +79,13 @@ fn parse_args() -> Args {
             "--ell" => args.ell = Some(value.parse().expect("--ell")),
             "--targets" => args.targets = value.parse().expect("--targets"),
             "--seed" => args.seed = value.parse().expect("--seed"),
-            "--timeout-s" => args.timeout = Duration::from_secs(value.parse().expect("--timeout-s")),
+            "--timeout-s" => {
+                args.timeout = Duration::from_secs(value.parse().expect("--timeout-s"))
+            }
             "--max-models" => args.max_models = value.parse().expect("--max-models"),
+            "--native-conflict-budget" => {
+                args.native_conflict_budget = value.parse().expect("--native-conflict-budget")
+            }
             "--macaulay" => {
                 args.macaulay_degree = match value.as_str() {
                     "none" | "0" => None,
@@ -137,7 +145,12 @@ impl ArmTotals {
     }
 }
 
-fn verify_sum(kc: &KoblitzCurve, fb: &FrobeniusFactorBase, ids: &[usize], target: &BinaryPoint) -> bool {
+fn verify_sum(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    ids: &[usize],
+    target: &BinaryPoint,
+) -> bool {
     let sum = ids
         .iter()
         .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
@@ -149,7 +162,9 @@ fn main() {
     let kc = KoblitzCurve::new(args.a, args.n).expect("usable curve");
     let fb = match args.fb.as_str() {
         "standard" => {
-            let ell = args.ell.unwrap_or((args.n as usize).div_ceil(args.m) as u32);
+            let ell = args
+                .ell
+                .unwrap_or((args.n as usize).div_ceil(args.m) as u32);
             build_standard_subspace_factor_base(&kc, ell).expect("standard-subspace factor base")
         }
         "frobenius" => build_frobenius_factor_base(&kc, 0).expect("frobenius factor base"),
@@ -168,11 +183,17 @@ fn main() {
         })
         .collect();
 
-    let mut arms: Vec<(String, Option<(SmtSolverKind, SmtEncoding, std::path::PathBuf)>)> =
-        vec![("native-cdcl-xor".to_string(), None)];
+    let mut arms: Vec<(
+        String,
+        Option<(SmtSolverKind, SmtEncoding, std::path::PathBuf)>,
+    )> = vec![("native-cdcl-xor".to_string(), None)];
     for &kind in &args.solvers {
         let Some(binary) = find_solver(kind) else {
-            eprintln!("{} not found (PATH or SMT_{}_BIN); arm skipped", kind.name(), kind.name().to_ascii_uppercase());
+            eprintln!(
+                "{} not found (PATH or SMT_{}_BIN); arm skipped",
+                kind.name(),
+                kind.name().to_ascii_uppercase()
+            );
             continue;
         };
         for &encoding in &args.encodings {
@@ -204,6 +225,7 @@ fn main() {
         "subgroup_order": r,
         "targets": args.targets, "seed": args.seed,
         "max_models": args.max_models, "macaulay_degree": args.macaulay_degree,
+        "native_conflict_budget": args.native_conflict_budget,
         "trace_constraint": true,
         "timeout_s": args.timeout.as_secs(),
         "arms": arms.iter().map(|(name, _)| name.clone()).collect::<Vec<_>>(),
@@ -227,7 +249,10 @@ fn main() {
                         args.m,
                         args.max_models,
                         args.macaulay_degree,
-                        SatDecompositionOptions::default(),
+                        SatDecompositionOptions {
+                            conflict_budget: args.native_conflict_budget,
+                            ..Default::default()
+                        },
                     );
                     let (calls, conflicts) = (stats.solver_calls, stats.conflicts);
                     (out, stats, calls, Some(conflicts), None, None, None)

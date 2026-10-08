@@ -118,6 +118,22 @@ Verdicts and counts are the evidence; wall time is a practicality note.
 - P2 fails while P3 and P4 pass: the parity explanation is wrong but the
   verdict stands; record the counts and leave the mechanism open.
 
+## Amendment 1 (2026-10-08, after the `n = 13` run, before `n = 19` and `n = 23`)
+
+The native arm ran with its default unlimited conflict budget while every
+SMT call was capped at 120 s.  At `n = 19` the first refuting cell held
+the native arm for over 1,000 s, so the asymmetry would have let the
+native arm decide cells no SMT arm could within budget and would have put
+`n = 23` out of reach.  The native arm is now capped at
+`conflict_budget = 4,000,000`, the 120 s equivalent at the rate measured
+at `n = 13` (1,151,371 conflicts over 39.1 s on the seven refuting
+cells, about 29,000 per second).  A cell that exhausts it is `exhausted`,
+never a refutation, so the cap can only lower the native arm's decided
+count and make P3 harder to pass, not easier.  The `n = 13` run is kept:
+its largest native cell used 183,749 conflicts, under the cap.  The
+unbudgeted `n = 19` and `n = 23` runs were stopped before any cell was
+written and are not cited.  Predictions P1–P4 are unchanged.
+
 ## Stop condition and inadmissible moves
 
 Bounded: three `n`, 40 cells, five arms, one run.  It stops when P1–P4

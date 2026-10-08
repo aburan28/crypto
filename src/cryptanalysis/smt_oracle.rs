@@ -38,8 +38,7 @@
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 use crate::cryptanalysis::koblitz_groebner::{matrix_f4_f2, DecompositionSystem, FieldStructure};
 use crate::cryptanalysis::koblitz_index_calculus::{
-    absolute_trace_bit, lift_candidate, FrobeniusFactorBase, KoblitzCurve,
-    SatDecompositionStats,
+    absolute_trace_bit, lift_candidate, FrobeniusFactorBase, KoblitzCurve, SatDecompositionStats,
 };
 use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use crate::cryptanalysis::wdsat_oracle::AnfRow;
@@ -322,7 +321,10 @@ pub fn parse_smt_model(stdout: &str, n_vars: usize) -> Option<Vec<bool>> {
     let mut model = vec![None; n_vars];
     let mut i = 0;
     while i + 1 < tokens.len() {
-        if let Some(idx) = tokens[i].strip_prefix('x').and_then(|t| t.parse::<usize>().ok()) {
+        if let Some(idx) = tokens[i]
+            .strip_prefix('x')
+            .and_then(|t| t.parse::<usize>().ok())
+        {
             let value = match tokens[i + 1] {
                 "true" | "#b1" => Some(true),
                 "false" | "#b0" => Some(false),
@@ -424,9 +426,13 @@ pub fn run_smt(script: &str, round: usize, options: &SmtSolveOptions) -> Result<
     if let Some(dir) = &options.work_dir {
         command.current_dir(dir);
     }
-    let mut child = command
-        .spawn()
-        .map_err(|e| format!("spawn {} {}: {e}", options.kind.name(), options.binary.display()))?;
+    let mut child = command.spawn().map_err(|e| {
+        format!(
+            "spawn {} {}: {e}",
+            options.kind.name(),
+            options.binary.display()
+        )
+    })?;
     let deadline = started + options.timeout;
     let timed_out = loop {
         match child.try_wait() {
@@ -581,7 +587,11 @@ pub fn smt_decompose_detailed(
     target: &BinaryPoint,
     m: usize,
     options: &SmtSolveOptions,
-) -> (Option<Vec<usize>>, SatDecompositionStats, SmtDecompositionReport) {
+) -> (
+    Option<Vec<usize>>,
+    SatDecompositionStats,
+    SmtDecompositionReport,
+) {
     let mut stats = SatDecompositionStats::default();
     let mut report = SmtDecompositionReport::default();
     let x_r = match target {
@@ -717,7 +727,10 @@ pub fn rows_satisfied(rows: &[AnfRow], model: &[bool]) -> bool {
     rows.iter().all(|row| {
         let mut acc = row.constant;
         for mono in &row.monomials {
-            if mono.iter().all(|&v| model.get(v as usize).copied().unwrap_or(false)) {
+            if mono
+                .iter()
+                .all(|&v| model.get(v as usize).copied().unwrap_or(false))
+            {
                 acc = !acc;
             }
         }
@@ -739,7 +752,11 @@ mod tests {
     /// Every variable assignment of a small system, for brute-force checks.
     fn brute_force(rows: &[AnfRow], n_vars: usize) -> Vec<Vec<bool>> {
         (0u64..(1 << n_vars))
-            .map(|code| (0..n_vars).map(|i| (code >> i) & 1 == 1).collect::<Vec<bool>>())
+            .map(|code| {
+                (0..n_vars)
+                    .map(|i| (code >> i) & 1 == 1)
+                    .collect::<Vec<bool>>()
+            })
             .filter(|m| rows_satisfied(rows, m))
             .collect()
     }
@@ -855,7 +872,10 @@ mod tests {
                     assert!(rows_satisfied(&rows, &model), "solver model violates rows");
                     assert!(!blocked.contains(&model), "blocked model returned again");
                     blocked.push(model);
-                    assert!(blocked.len() <= expected.len(), "more models than solutions");
+                    assert!(
+                        blocked.len() <= expected.len(),
+                        "more models than solutions"
+                    );
                 }
                 SmtVerdict::Unsat => break,
                 SmtVerdict::Unknown => panic!("solver answered unknown: {}", run.stderr),
