@@ -48,6 +48,11 @@ and exclusive phase cost, and solves the final matrix once. Its MatrixF5 and
 external source/model CMS paths still need the separately frozen one-use
 executor and runtime audit; the retained correctness controls are not a new
 ordinary panel or fresh qualification.
+The [ordinary-query native worker contract](goal_20260924/native-ordinary-executor-v1/PROTOCOL.md)
+binds a new capsule scope, compiled source/build identity, one-use claim,
+single-thread environment, chronological durable records and accepted external
+native roles. Its source controls execute no panel; the frozen controller,
+registration/publication and independent runtime audit remain pending.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,

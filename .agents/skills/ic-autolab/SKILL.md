@@ -112,6 +112,12 @@ solve. Its F5 entry uses the real cached MatrixF5 collector; its external CMS
 entry checks original source/models and full-point lifting. Retained controls
 are not new yield or native custody. The source-frozen one-use executor and
 independent runtime audit are still required before a scientific dispatch.
+The [new ordinary-worker source contract](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-executor-v1/PROTOCOL.md)
+requires a separate target-free capsule/claim, compiled source/build pins,
+durable starts/completions and the accepted native CMS roles. It cannot run an
+ordinary development build and does not make its own execution scientifically
+admissible. The new frozen controller and independent runtime audit still need
+integration; do not loosen an old target-control registration to use this worker.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
