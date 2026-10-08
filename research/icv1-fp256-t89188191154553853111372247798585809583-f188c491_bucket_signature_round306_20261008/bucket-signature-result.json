@@ -1,0 +1,305 @@
+{
+  "schema": "p256-bucket-signature-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 306,
+  "execution_status": "complete",
+  "factor_base": "FB1hc72514a2a8d3",
+  "registered_s17_factor_base": "FB1h2f8621cda105",
+  "columns": 164,
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_parity_escapes_round298_20261007/parity-escape-result.json",
+      "bytes": 50776,
+      "sha256": "8718bbe26751ff0191164b0665618226a97556c64c6e2feeef72468a38206965",
+      "schema": "p256-parity-escape-screen/v2"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_algebraic_quotient_rigidity_round304_20261008/algebraic-quotient-rigidity-result.json",
+      "bytes": 12449,
+      "sha256": "c94e339eca07b96ea0ef890592fb13b80815f0baf52af0e6bd57de17dd46ac9c",
+      "schema": "p256-algebraic-quotient-rigidity-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_homogeneous_anchor_round305_20261008/homogeneous-anchor-result.json",
+      "bytes": 15262,
+      "sha256": "ecc749ad8edf3e90981f9fb816382d4f4a0913539e9a05e454b6ef8d0a6f4cd7",
+      "schema": "p256-homogeneous-anchor-screen/v1"
+    }
+  ],
+  "signature_definition": "For sum c_i P_i-[b]Q=[a]G, quotienting a maximal static kernel leaves sigma(c,b)=(c dot ell,-b) on variables (lambda,d).",
+  "same_bucket_bound": "Every decomposition in one fixed (a,b) bucket has sigma=(a+b*d,-b), so arbitrary bucket occupancy adds at most one post-static dimension.",
+  "exhaustive_toy_census": {
+    "modulus": 7,
+    "base_columns": 4,
+    "projective_profiles": 400,
+    "nonzero_signatures_per_profile": 48,
+    "full_buckets_checked": 19200,
+    "coefficient_vectors_tested": 46099200,
+    "retained_bucket_rows": 6585600,
+    "bucket_equation_replays": 6585600,
+    "signature_pairs_checked": 451200,
+    "pair_representative_replays": 902400,
+    "dependent_signature_pairs": 48000,
+    "independent_signature_pairs": 403200,
+    "bucket_rank_discrepancies": 0,
+    "determinant_rank_discrepancies": 0,
+    "replay_failures": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "minimum_bucket_rank": 4,
+    "maximum_bucket_rank": 4,
+    "minimum_dependent_pair_rank": 4,
+    "maximum_dependent_pair_rank": 4,
+    "minimum_independent_pair_rank": 5,
+    "maximum_independent_pair_rank": 5,
+    "rank_operations": {
+      "matrices": 940800,
+      "rows_materialized": 17798400,
+      "entries_materialized": 88992000,
+      "pivot_row_scans": 21012099,
+      "pivot_swaps": 1241541,
+      "modular_inversions": 4569600,
+      "modular_multiplications": 192443868,
+      "modular_subtractions": 178485840
+    },
+    "first_signature": {
+      "a": 0,
+      "b": 1,
+      "quotient_first": 3,
+      "quotient_second": 6,
+      "bucket_rows": 343,
+      "combined_rank": 4
+    },
+    "last_signature": {
+      "a": 6,
+      "b": 6,
+      "quotient_first": 0,
+      "quotient_second": 1,
+      "bucket_rows": 343,
+      "combined_rank": 4
+    }
+  },
+  "p256_control": {
+    "scalar_labelled_control": true,
+    "base_columns": 164,
+    "augmented_columns": 165,
+    "witness_log_vector_sha256": "54d9a22822efee6f91f917140741a7e158ae6d733bc53fec1ddc59f7195dbda9",
+    "witness_point_vector_sha256": "849bcbffd8fd77da848590222a02bb937ccba8ecf0e6041fbc1fc6f68b119dad",
+    "target_log_sha256": "ebe5e29ca48d43d5f7b7814d0e2c1251312a3c8170a30cdd06a35a7a83848e35",
+    "target_point": {
+      "infinity": false,
+      "x": "51997179315284847964913870430280356079252804666889782519036411407629470731626",
+      "y": "72103359241922306582119243026922764784382447749649837768442056828882935864668"
+    },
+    "stage_profiles": [
+      {
+        "variant": "static-homogeneous",
+        "rows": 163,
+        "columns": 164,
+        "expected_rank": 163,
+        "rank_mod_2_61_minus_1": 163,
+        "reversed_rank_mod_2_61_minus_1": 163,
+        "rank_mod_p256_n": 163,
+        "reversed_rank_mod_p256_n": 163,
+        "declared_nullity": 1,
+        "signature_status": "maximal static rank; one base scale remains",
+        "scalar_equation_replays": 326,
+        "p256_group_equation_replays": 163,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 855424,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 652,
+          "entries_materialized": 106928,
+          "pivot_row_scans": 13774,
+          "pivot_swaps": 162,
+          "modular_inversions": 652,
+          "modular_multiplications": 3020714,
+          "modular_subtractions": 2966598
+        }
+      },
+      {
+        "variant": "fixed-target-bucket",
+        "rows": 164,
+        "columns": 165,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "declared_nullity": 1,
+        "signature_status": "one signature (d,-1); one global scale remains",
+        "scalar_equation_replays": 328,
+        "p256_group_equation_replays": 164,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 865920,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 656,
+          "entries_materialized": 108240,
+          "pivot_row_scans": 13778,
+          "pivot_swaps": 162,
+          "modular_inversions": 656,
+          "modular_multiplications": 162356,
+          "modular_subtractions": 107580
+        }
+      },
+      {
+        "variant": "enlarged-fixed-target-bucket",
+        "rows": 327,
+        "columns": 165,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "declared_nullity": 1,
+        "signature_status": "327 rows with the same signature; rank unchanged",
+        "scalar_equation_replays": 654,
+        "p256_group_equation_replays": 327,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 1726560,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 1308,
+          "entries_materialized": 215820,
+          "pivot_row_scans": 14430,
+          "pivot_swaps": 162,
+          "modular_inversions": 656,
+          "modular_multiplications": 324700,
+          "modular_subtractions": 269924
+        }
+      },
+      {
+        "variant": "target-plus-proportional-signature",
+        "rows": 165,
+        "columns": 165,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "declared_nullity": 1,
+        "signature_status": "second signature (2d,-2) is proportional; rank unchanged",
+        "scalar_equation_replays": 330,
+        "p256_group_equation_replays": 165,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 871200,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 660,
+          "entries_materialized": 108900,
+          "pivot_row_scans": 13944,
+          "pivot_swaps": 162,
+          "modular_inversions": 656,
+          "modular_multiplications": 163016,
+          "modular_subtractions": 108240
+        }
+      },
+      {
+        "variant": "target-plus-generator-signature",
+        "rows": 165,
+        "columns": 165,
+        "expected_rank": 165,
+        "rank_mod_2_61_minus_1": 165,
+        "reversed_rank_mod_2_61_minus_1": 165,
+        "rank_mod_p256_n": 165,
+        "reversed_rank_mod_p256_n": 165,
+        "declared_nullity": 0,
+        "signature_status": "signatures (d,-1) and (1,0) are independent; full rank",
+        "scalar_equation_replays": 330,
+        "p256_group_equation_replays": 165,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 871200,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 660,
+          "entries_materialized": 108900,
+          "pivot_row_scans": 13944,
+          "pivot_swaps": 162,
+          "modular_inversions": 660,
+          "modular_multiplications": 163020,
+          "modular_subtractions": 108240
+        }
+      }
+    ],
+    "aggregate_rank_operations": {
+      "matrices": 20,
+      "rows_materialized": 3936,
+      "entries_materialized": 648788,
+      "pivot_row_scans": 69870,
+      "pivot_swaps": 810,
+      "modular_inversions": 3280,
+      "modular_multiplications": 3833806,
+      "modular_subtractions": 3560582
+    },
+    "group_operations": {
+      "points_constructed": 165,
+      "equations_replayed": 984,
+      "scalar_multiplications": 2948,
+      "scalar_bits_processed": 752444,
+      "scalar_one_bits": 399536,
+      "point_additions": 2782
+    },
+    "group_replay_failures": 0,
+    "all_points_on_curve": true
+  },
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "ratio_to_rho": 1.0,
+      "complete_attack_measured": true,
+      "status": "complete reference"
+    },
+    {
+      "variant": "unquotiented geometry-defined FB1hc72514a2a8d3",
+      "ratio_to_rho": 13.920747397073491,
+      "complete_attack_measured": false,
+      "status": "executable free-oracle boundary unchanged"
+    },
+    {
+      "variant": "free maximal static kernel plus two independent signature events",
+      "ratio_to_rho": 1.4465047156952717,
+      "complete_attack_measured": false,
+      "status": "optimistic oracle; construction and recovery omitted"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "ratio_to_rho": 394.42528,
+      "complete_attack_measured": false,
+      "status": "unchanged free-perfect-oracle comparison"
+    }
+  ],
+  "structured_residual_degree_of_regularity": null,
+  "relations_reported_on_actual_factor_base": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "exploration_boundary": "Exact for fixed-signature relation buckets after a maximal static quotient; not universal over events emitting multiple nonproportional signatures.",
+  "transfer_assessment_semantic_sha256": "1c02cadfc0040e2699e95a1c4a900460ac1cb77cd15056d46b5e1eb8e228b17f",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "complete_projective_signature_census": true,
+    "every_fixed_signature_bucket_adds_at_most_one_dimension": true,
+    "signature_determinant_matches_matrix_rank": true,
+    "zero_false_positives_and_false_negatives": true,
+    "dual_modulus_p256_ranks_and_group_replays_passed": true,
+    "non_scalar_labelled_two_signature_p256_event": false,
+    "complete_relation_decomposition_and_recovery": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "complete_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "projected_storage_below_2_50": false,
+    "discarded_probabilistic_branches_counted_as_exhaustive": false,
+    "promoted": false
+  },
+  "classification": "many-rows-per-event/fixed-bucket-signature-rank-one/two-signatures-required/parity-blocked",
+  "dominant_obstruction": "After a maximal static quotient, every decomposition in one fixed walk bucket (a,b) has the same two-variable signature (a+b*d,-b); all row differences are static. Therefore any occupancy in that bucket contributes at most one post-static dimension. P-256 controls retain rank 164 with 327 same-signature rows and with a proportional second signature, reaching rank 165 only with an independent generator signature. The two-signature free oracle is already 1.446505 times rho, and no non-labelled event emitting the required pair is constructed.",
+  "decision": "Reject same-bucket multiplicity as a two-row parity escape. Count quotient signature rank, not raw decompositions, and require two nonproportional signatures carrying target coupling and a generator anchor. Keep a structured two-signature event open; do not attempt an unplanted full-depth relation.",
+  "semantic_evidence_sha256": "74ba0bc692c471dda28ae8a3c81409011aa5dffbe303423bfe57964f9783ccfd",
+  "result_json_bytes": 12292
+}
