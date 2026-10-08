@@ -1318,3 +1318,53 @@ is evaluated as the rows land; `p = 31` read `0.609` and `p = 37` reads `0.605`,
 sizes costs hours each (`p = 31` took `3,258` s), and `p = 41, 43` run under
 the §18.2 twelve-hour stop; their rows and §18.3's characterization are the
 remaining pending items of this thread.
+
+### 18.6 A candidate rule for the weak classes, registered before its held-out test (2026-10-08)
+
+§18.3's exploration (`--characterize experiments/42_jv_cover_reach_all_curves_small.json`,
+sizes `p = 7, 11, 13, 17, 23`, post hoc) found one feature that nearly separates
+the weak classes among full-2-torsion classes, and none other does (`t mod 3`,
+`t mod 8`, `v₃(D)` and the class-size proxy are flat):
+
+| p | weak share of sampled classes with `v₂(D) = 5` | with `v₂(D) ≥ 6` |
+|--:|--:|--:|
+| 7 | 0.02 (147) | 0.68–1.00 |
+| 11 | 0.00 (511) | 0.67–1.00 |
+| 13 | 0.00 (728) | 0.67–1.00 |
+| 17 | 0.00 (1,025) | 0.93–1.00 |
+| 23 | 0.00 (1,305) | 0.97–1.00 |
+
+with `D = t² − 4q³` the Frobenius discriminant.  The weak set is closed under
+`t ↦ −t` up to the randomized group order's sub-1 % error (`5,568/5,594` at
+`p = 23`), as a rule in `t²` must be.
+
+**Rule R-v2 (candidate).**  A full-2-torsion isogeny class over `F_{q³}`
+holds a weak curve **iff `v₂(t² − 4q³) ≥ 6`**.
+
+*Why it might hold (heuristic, not a proof).*  The norm-one subgroup of
+`F_{q³}^×` has odd order `q² + q + 1`, so a weak curve's Legendre parameter
+`λ`, for the ordering with `N(λ) = 1`, lies in the odd part of `F_{q³}^×`
+and is a `2^k`-th power for every `k`.  Halving the 2-torsion point `(0, 0)`
+of `y² = x(x − 1)(x − λ)` needs `−1` and `−λ` to be squares, and `−1` is a
+square because `q³ ≡ 1 (mod 4)`; so a weak curve carries extra rational
+2-power torsion, which shows in the 2-adic valuation of its Frobenius
+discriminant.
+
+**Held-out test, registered now.**  `p = 19`, never examined by any analysis
+in §§17–18, exact census with `4,000` random full-2-torsion curves.
+
+- **V1 (necessity).**  Every exact weak trace has `v₂(D) ≥ 6`, except at most
+  `1 %` attributable to the randomized group order.  *Falsified if* more
+  than `1 %` of the weak traces have `v₂(D) = 5`.
+- **V2 (sufficiency).**  Among the sampled full-2-torsion classes with
+  `v₂(D) ≥ 7`, at least `95 %` are weak; with `v₂(D) = 6`, at least `85 %`.
+  *Falsified if* below either.
+- **V3 (the reach follows).**  The share of sampled full-2-torsion curves
+  with `v₂(D) ≥ 6` matches the census's reach fraction within `0.03`.
+
+If R-v2 survives, the reach at any `p` is the 2-adic density of
+`v₂(t² − 4q³) ≥ 6` among full-2-torsion curves.  It can then be measured
+from a trace sample alone, without the `2q² + 2q` enumeration, and §18.2's
+`p = 43` hold-out becomes a cheap second test.  If it fails, the
+characterization stays open.  **Class: exploratory → candidate**; nothing
+here is a claim until V1–V3 are read.
