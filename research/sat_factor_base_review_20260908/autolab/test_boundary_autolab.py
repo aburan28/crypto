@@ -11,6 +11,17 @@ from pathlib import Path
 from unittest import mock
 
 import boundary_autolab as lab
+import op_accounting
+
+
+def valid_operation_accounting(ic_ops: float = 100.0, rho_ops: float = 400.0) -> dict:
+    return {
+        "unit_assumption": "one probe and one rho step each count as one operation",
+        "operation_units": {"ic": "target probes", "rho": "walk steps"},
+        "ic_online_operations": ic_ops,
+        "rho_online_operations": rho_ops,
+        "ops_speedup_online": rho_ops / ic_ops,
+    }
 
 
 class LedgerContractTests(unittest.TestCase):
@@ -113,9 +124,34 @@ class MeasurementSchemaTests(unittest.TestCase):
             "resource_caps": {"common_cap_bytes": 1},
             "seeds": {"direct": 1},
             "claim_boundary_non_claims": ["not key recovery"],
+            "operation_accounting": valid_operation_accounting(),
         }
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "PASS", result)
+
+        del report["operation_accounting"]
+        result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(result["status"], "FAIL")
+        self.assertIn("operation_accounting", result["missing_stage_fields"])
+
+        report["operation_accounting"] = valid_operation_accounting()
+        report["operation_accounting"]["ops_speedup_online"] = 40.0
+        result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(result["status"], "FAIL")
+        self.assertIn(
+            "operation_accounting.ops_speedup_online does not equal "
+            "rho_online_operations / ic_online_operations",
+            result["pairing_errors"],
+        )
+
+        report["operation_accounting"] = valid_operation_accounting()
+        del report["operation_accounting"]["operation_units"]
+        result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(result["status"], "FAIL")
+        self.assertIn(
+            "operation_accounting.operation_units must name the ic and rho units",
+            result["pairing_errors"],
+        )
 
     def test_vs_rho_different_public_points_fail(self) -> None:
         report = {
@@ -149,6 +185,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "resource_caps": {"common_cap_bytes": 1},
             "seeds": {"direct": 1, "rho": 2},
             "claim_boundary_non_claims": ["not key recovery"],
+            "operation_accounting": valid_operation_accounting(),
         }
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "FAIL", result)
@@ -231,6 +268,7 @@ class HelperTests(unittest.TestCase):
                 "verified": True,
                 "walk_ms": 2.0,
                 "validation_ms": 0.1,
+                "walk_steps": 12,
             }
         ]
         with tempfile.TemporaryDirectory() as tmp:
@@ -257,6 +295,11 @@ class HelperTests(unittest.TestCase):
                 binaries={"direct": str(direct_bin), "rho": str(rho_bin)},
             )
             self.assertEqual(claim["target_count"], 1)
+            accounting = claim["operation_accounting"]
+            self.assertEqual(accounting["ic_online_operations"], 1)
+            self.assertEqual(accounting["rho_online_operations"], 12)
+            self.assertEqual(accounting["ops_speedup_online"], 12.0)
+            self.assertEqual(lab.operation_accounting_errors(accounting), [])
             self.assertEqual(
                 claim["independent_replay_pointer"],
                 str(run / "validation/independent_replay.json"),
@@ -383,6 +426,43 @@ class HelperTests(unittest.TestCase):
             result = lab.claim_check(args)
             self.assertEqual(result["status"], "FAIL")
             self.assertEqual(json.loads(out.read_text())["status"], "FAIL")
+
+
+
+class OperationAccountingTests(unittest.TestCase):
+    def test_every_rung_accounts_and_matches_the_committed_block(self) -> None:
+        for name, cfg in op_accounting.RUNGS.items():
+            block = op_accounting.account_rung(name)
+            self.assertEqual(lab.operation_accounting_errors(block), [], name)
+            claim = json.loads((lab.REPO / cfg["dir"] / "claim_report_vs_rho.json").read_text())
+            self.assertEqual(claim.get("operation_accounting"), block, f"{name}: rerun op_accounting.py --write")
+            self.assertFalse(
+                any("S unknown" in item for item in claim["claim_boundary_non_claims"]), name
+            )
+
+    def test_n73_separates_contended_runs_and_lucky_target(self) -> None:
+        block = op_accounting.account_rung("n73")
+        self.assertEqual(block["ic_online_operations"], 457561)
+        self.assertEqual(block["host_contention"]["contended_runs"], ["R2", "R3"])
+        self.assertAlmostEqual(block["wall_speedup_median_uncontended_runs"], 184.8588, places=3)
+        self.assertGreater(block["target_luck_factor"], 100)
+        self.assertLess(block["ops_speedup_online_mean_target"], 1)
+        expected = op_accounting.expected_rho_steps(86020738150056119, 73)
+        self.assertAlmostEqual(block["ops_speedup_online"], expected / 457561)
+
+    def test_strip_s_unknown_keeps_the_rest_of_the_non_claim(self) -> None:
+        strip = op_accounting.strip_s_unknown
+        self.assertIsNone(strip("total operation-count comparison absent; S unknown"))
+        self.assertEqual(
+            strip("not an asymptotic sub-rho claim (both arms remain sqrt-class; "
+                  "total operation-count boundary not comparable, S unknown)"),
+            "not an asymptotic sub-rho claim (both arms remain sqrt-class)",
+        )
+        self.assertEqual(
+            strip("not an asymptotic sub-rho claim (total operation-count boundary not comparable, S unknown)"),
+            "not an asymptotic sub-rho claim",
+        )
+        self.assertEqual(strip("not key recovery"), "not key recovery")
 
 
 if __name__ == "__main__":

@@ -78,9 +78,12 @@
   "claim_boundary": "Public synthetic Koblitz n=61 (a=0, b=1 over GF(2^61), modulus x^61+x^5+x^2+x+1), 48-bit subgroup; exactly one previously unseen public target point; compact-orbit IC arm (koblitz_orbit_dlp_fast, 600 signed-Frobenius orbit columns, 73,200 base points, zero pair-table entries, zero edge selectors) vs automorphism-discounted rho arm (koblitz_rho_fixture signed_frobenius packed) on the identical frozen public point under one process per arm on the same host. Constant-factor win only.",
   "claim_boundary_non_claims": [
     "not ECC2K-130 evidence (n=131 is a different curve and field degree)",
-    "not an asymptotic sub-rho claim (both arms remain sqrt-class; total operation-count boundary not comparable, S unknown)",
+    "not an asymptotic sub-rho claim (both arms remain sqrt-class)",
     "not key recovery, not external/private targets, not deployed-curve security impact",
-    "not a multi-target or amortized claim; batch throughput stays secondary"
+    "not a multi-target or amortized claim; batch throughput stays secondary",
+    "not compared against Pollard rho with precomputation (Bernstein-Lange distinguished-point tables) at equal precompute and memory",
+    "single frozen target: IC online probes are deterministic per target, so repeated paired runs sample timing noise, not the target distribution",
+    "wall-clock speedup includes implementation speed; operation counts are in operation_accounting"
   ],
   "independent_replay_pointer": "experiments/koblitz-single-target-n61-20260925/independent-replay-r4.json",
   "frozen_prior_observations": {
@@ -157,5 +160,134 @@
     "walk_steps": 2259575,
     "ideal_steps": 1448186.8976906298,
     "full_charge_row": "runs/R4/rho.jsonl"
+  },
+  "operation_accounting": {
+    "schema_version": "1.0",
+    "generated_by": "research/sat_factor_base_review_20260908/autolab/op_accounting.py",
+    "unit_assumption": "one IC probe (S3 quadratic solve plus root-table lookup) and one rho walk step (one group addition plus class canonicalisation) are each counted as one operation; not yet calibrated on a common backend (plan step 1.2)",
+    "operation_units": {
+      "ic": "target probes",
+      "rho": "walk steps"
+    },
+    "ic_online_operations": 227437,
+    "ic_online_operations_basis": "deterministic probes to the first relation for the frozen target (identical on every run)",
+    "rho_online_operations": 1448186.8976906298,
+    "rho_online_operations_basis": "expected walk sqrt(pi*r/(4n)) on signed-Frobenius classes; measured walks are under runs",
+    "ops_speedup_online": 6.367419978678183,
+    "ic_rank_probes_mean_per_relation": [
+      63992.71333333333,
+      63992.71333333333,
+      63992.71333333333
+    ],
+    "ic_rank_probes_mean_pooled": 63992.71333333334,
+    "ic_rank_probes_source": [
+      "runs/R1/ic-summary.json",
+      "runs/R2/ic-summary.json",
+      "runs/R3/ic-summary.json"
+    ],
+    "ic_rank_probes_note": "each rank relation runs the same extraction on a random subgroup point, so the rank mean estimates the online probes of a random target; per-relation counts are not retained, so no confidence interval is available",
+    "ops_speedup_online_mean_target": 22.630496852776513,
+    "target_luck_factor": 0.2813645683566585,
+    "precompute_rank_probes": 38395628.00000001,
+    "precompute_rank_probes_note": "rank_probes_mean x rank_attempts; the S3 root-index build is not counted in probes",
+    "ops_speedup_total_mean_target": 0.037654736859861086,
+    "wall_speedup_median_all_runs": 75.82500404660772,
+    "wall_speedup_median_uncontended_runs": 75.82500404660772,
+    "ops_speedup_measured_walk_median": 7.739666369148379,
+    "ic_to_rho_rate_ratio_median": 8.88728731531834,
+    "ic_rank_threads": [
+      1
+    ],
+    "thread_note": "ic_target_threads and rho_threads were not recorded by these run drivers (null)",
+    "host_contention": {
+      "contended_runs": [],
+      "source": null
+    },
+    "runs": [
+      {
+        "run": "R1",
+        "host_contended": false,
+        "exploratory": false,
+        "ic_probes": 227437,
+        "ic_online_ms": 75.088833,
+        "rho_walk_steps": 1260998,
+        "rho_ideal_steps_recorded": 1448186.8976906298,
+        "rho_walk_ms": 3967.02225,
+        "rho_online_ms": 3989.247833,
+        "wall_speedup": 53.12704530912073,
+        "ops_speedup_measured_walk": 5.544383719447583,
+        "ic_probes_per_s": 3028905.7761758,
+        "rho_steps_per_s": 317870.1606727817,
+        "ic_to_rho_rate_ratio": 9.52875151843454,
+        "ic_rank_threads": null,
+        "ic_target_threads": null,
+        "rho_threads": null,
+        "ic_peak_rss_bytes": null,
+        "rho_peak_rss_bytes": null
+      },
+      {
+        "run": "R2",
+        "host_contended": false,
+        "exploratory": false,
+        "ic_probes": 227437,
+        "ic_online_ms": 99.56099999999999,
+        "rho_walk_steps": 784028,
+        "rho_ideal_steps_recorded": 1448186.8976906298,
+        "rho_walk_ms": 2725.996542,
+        "rho_online_ms": 2750.197709,
+        "wall_speedup": 27.623243127328976,
+        "ops_speedup_measured_walk": 3.4472315410421346,
+        "ic_probes_per_s": 2284398.5094565144,
+        "rho_steps_per_s": 287611.516713362,
+        "ic_to_rho_rate_ratio": 7.942653116123929,
+        "ic_rank_threads": null,
+        "ic_target_threads": null,
+        "rho_threads": null,
+        "ic_peak_rss_bytes": null,
+        "rho_peak_rss_bytes": null
+      },
+      {
+        "run": "R3",
+        "host_contended": false,
+        "exploratory": false,
+        "ic_probes": 227437,
+        "ic_online_ms": 89.65008300000001,
+        "rho_walk_steps": 2712883,
+        "rho_ideal_steps_recorded": 1448186.8976906298,
+        "rho_walk_ms": 8817.686541000001,
+        "rho_online_ms": 8832.591791,
+        "wall_speedup": 98.52296278409469,
+        "ops_speedup_measured_walk": 11.928063595633077,
+        "ic_probes_per_s": 2536941.3210693845,
+        "rho_steps_per_s": 307663.8058504103,
+        "ic_to_rho_rate_ratio": 8.245823112202137,
+        "ic_rank_threads": null,
+        "ic_target_threads": null,
+        "rho_threads": null,
+        "ic_peak_rss_bytes": null,
+        "rho_peak_rss_bytes": null
+      },
+      {
+        "run": "R4",
+        "host_contended": false,
+        "exploratory": false,
+        "ic_probes": 227437,
+        "ic_online_ms": 58.994333000000005,
+        "rho_walk_steps": 2259575,
+        "rho_ideal_steps_recorded": 1448186.8976906298,
+        "rho_walk_ms": 7351.676958999999,
+        "rho_online_ms": 7365.356374999999,
+        "wall_speedup": 124.84854053693596,
+        "ops_speedup_measured_walk": 9.934949018849176,
+        "ic_probes_per_s": 3855234.705340257,
+        "rho_steps_per_s": 307355.04465192865,
+        "ic_to_rho_rate_ratio": 12.543261522537255,
+        "ic_rank_threads": null,
+        "ic_target_threads": null,
+        "rho_threads": null,
+        "ic_peak_rss_bytes": null,
+        "rho_peak_rss_bytes": null
+      }
+    ]
   }
 }

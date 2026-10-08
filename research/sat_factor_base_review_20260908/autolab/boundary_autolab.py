@@ -104,6 +104,7 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
         "non_claims",
         "claim_boundary",
     ),
+    "operation_accounting": ("operation_accounting",),
 }
 
 
@@ -192,6 +193,42 @@ def missing_fields(report: dict[str, Any], keys: list[str]) -> list[str]:
     return [key for key in keys if not field_present(report, key)]
 
 
+def operation_accounting_errors(accounting: Any) -> list[str]:
+    """Check the operation-count block that sits next to the wall ratio.
+
+    A wall ratio mixes the algorithmic comparison with the speed of each
+    arm's implementation, so a vs_rho claim must also state both arms'
+    online operation counts, their units, and their ratio.
+    """
+    if not isinstance(accounting, dict):
+        return ["operation_accounting must be an object"]
+    errors = []
+    ic_ops = accounting.get("ic_online_operations")
+    rho_ops = accounting.get("rho_online_operations")
+    for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
+            errors.append(f"operation_accounting.{name} must be positive")
+    units = accounting.get("operation_units")
+    if not isinstance(units, dict) or not all(
+        isinstance(units.get(arm), str) and units[arm].strip() for arm in ("ic", "rho")
+    ):
+        errors.append("operation_accounting.operation_units must name the ic and rho units")
+    assumption = accounting.get("unit_assumption")
+    if not isinstance(assumption, str) or not assumption.strip():
+        errors.append("operation_accounting.unit_assumption must state how the units compare")
+    ratio = accounting.get("ops_speedup_online")
+    if not isinstance(ratio, (int, float)) or isinstance(ratio, bool):
+        errors.append("operation_accounting.ops_speedup_online is required")
+    elif not errors:
+        expected = float(rho_ops) / float(ic_ops)
+        if abs(float(ratio) - expected) > max(1e-12, expected * 1e-8):
+            errors.append(
+                "operation_accounting.ops_speedup_online does not equal "
+                "rho_online_operations / ic_online_operations"
+            )
+    return errors
+
+
 def validate_claim(
     report: dict[str, Any],
     *,
@@ -248,6 +285,8 @@ def validate_claim(
                 pairing_errors.append(f"{arm}_online_ms is missing")
         if report.get("all_stages_charged_same_series") is not True:
             pairing_errors.append("same-target charged intervals are not confirmed")
+        if field_present(report, "operation_accounting"):
+            pairing_errors.extend(operation_accounting_errors(report["operation_accounting"]))
     ok = not missing_stage and not missing_global and not pairing_errors
     return {
         "schema_version": ledger.get("schema_version"),
@@ -694,6 +733,27 @@ def draft_vs_rho_claim(
             if timing_class == "whole_process_wall"
             else extract_rho_cost(rho_rows)
         )
+    ic_operations = online_row.get("target_trials") if online_row else None
+    rho_operations = rho_row.get("walk_steps") if rho_row else None
+    operation_accounting = None
+    if all(
+        isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+        for value in (ic_operations, rho_operations)
+    ):
+        operation_accounting = {
+            "schema_version": "1.0",
+            "unit_assumption": (
+                "one IC target relation trial and one rho walk step are each counted "
+                "as one operation; uncalibrated, so compare the ratio only together "
+                "with a measured per-operation cost"
+            ),
+            "operation_units": {"ic": "target relation trials", "rho": "walk steps"},
+            "ic_online_operations": ic_operations,
+            "ic_online_operations_basis": "target_trials of the one online target",
+            "rho_online_operations": rho_operations,
+            "rho_online_operations_basis": "measured walk steps of this run",
+            "ops_speedup_online": float(rho_operations) / float(ic_operations),
+        }
     claim = {
         "schema_version": 2,
         "task_id": TASK_ID,
@@ -725,6 +785,8 @@ def draft_vs_rho_claim(
             "not imported/external points",
             "not a multi-target batch",
             "not ledger promotion until independent validation",
+            "not compared against Pollard rho with precomputation at equal "
+            "precompute and memory",
         ],
         "target_count": target_count,
         "paired_target": {
@@ -745,6 +807,7 @@ def draft_vs_rho_claim(
         "ic_online_ms": float(ic_online) if isinstance(ic_online, (int, float)) else None,
         "rho_online_ms": float(rho_online) if isinstance(rho_online, (int, float)) else None,
         "online_speedup": online_speedup,
+        "operation_accounting": operation_accounting,
         "ic_online_phase_ms": ic_phases,
         "rho_online_phase_ms": rho_phases,
         "ic_online_interval": online_row.get("target_online_interval") if online_row else None,
