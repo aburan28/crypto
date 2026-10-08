@@ -132,6 +132,23 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 | 19 | `icv1-f2m19-t797-b6cf2467` | 8 | 3.134 | 1.582 | 2090.849 | 0.433 |
 | 23 | `icv1-f2m23-t5197-69e76b73` | 8 | 1.046 | 2.091 | 2.721 | 0.000 |
 
+## n41/n53 shared-rank counted panel, outside tables A–C
+
+The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 control, method parameters unchanged) ran on 16 new public one-target workloads on each of the next two registered sizes, five paired rounds each, on macOS at L0. Counted cold IC/rho is a quotient of two lower bounds (native work unpriced); a cell whose arm never verifies under the frozen parameters is unknown, not a cost. 206 of 640 measured runs verified; decision `frozen_parameters_do_not_transfer`; the L2 host run is pending. Read the [frozen decision](../../research/ecbench_n41_n53_shared_rank_20261005/DECISION.json).
+
+| curve | log2 r | arm | verified / measured | usable points | columns | mean cold S (lower bound) | counted IC/rho [95%] |
+|:--|--:|:--|--:|--:|--:|--:|:--|
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | rho-strong | 80/80 | — | — | 0.157 | reference |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | ic-k8 | 0/80 | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | ic-k16 | 23/80 | 1312 | 16 | 42.569 | 256.236 [202.459, 332.752] |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | ic-k16-control | 23/80 | 1312 | 16 | 42.569 | A/A control |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | K16 / K8 | — | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | rho-strong | 80/80 | — | — | 0.141 | reference |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k8 | 0/80 | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k16 | 0/80 | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k16-control | 0/80 | — | — | — | A/A control |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | K16 / K8 | — | — | — | — | unknown (0 verified pairs) |
+
 
 ## Sources
 
@@ -153,4 +170,5 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 - `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
 - `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
+- `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
 - `docs/curves/registry.json` — sha256 `2342a3d22dd3a947…`
