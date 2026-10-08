@@ -86,7 +86,7 @@ fn general_velu_cyclic_order_4_and_6() {
                 continue;
             }
             let ord = order(&fp, &c, &mut rng);
-            if ord % n != 0 {
+            if !ord.is_multiple_of(n) {
                 continue;
             }
             let r = c.random_point(&fp, &mut rng);

@@ -41,11 +41,24 @@ pub fn prime(p: &Int, a: &Int, b: &Int, order: &Int) -> Option<CurveId> {
         return None;
     }
     let field = format!("fp-{p}");
-    let model_json = format!(r#"{{"a":"{a}","b":"{b}","field":"{field}","form":"y^2=x^3+a*x+b","p":"{p}","v":"1"}}"#);
+    let model_json = format!(
+        r#"{{"a":"{a}","b":"{b}","field":"{field}","form":"y^2=x^3+a*x+b","p":"{p}","v":"1"}}"#
+    );
     let j = (&(&Int::from(1728i64 * 4) * &a3) * &disc.inv_mod(p)?).modulo(p);
     let model = crate::sha256::sha256_hex(model_json.as_bytes());
-    let icv1 = format!("ICV1:{field}:{trace}:{order}:{j}:unk:unk:r:{}", &model[..12]);
-    let t = if trace.is_neg() { format!("tm{}", trace.abs()) } else { format!("t{trace}") };
+    let icv1 = format!(
+        "ICV1:{field}:{trace}:{order}:{j}:unk:unk:r:{}",
+        &model[..12]
+    );
+    let t = if trace.is_neg() {
+        format!("tm{}", trace.abs())
+    } else {
+        format!("t{trace}")
+    };
     let slug = format!("icv1-fp{}-{t}-{}", p.bits(), &model[..8]);
-    Some(CurveId { icv1, slug, model_json })
+    Some(CurveId {
+        icv1,
+        slug,
+        model_json,
+    })
 }

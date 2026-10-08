@@ -1,7 +1,9 @@
 use isogeny_algos::curve::*;
 use isogeny_algos::field::*;
 use isogeny_algos::find::bmss;
-use isogeny_algos::kernel::{kohel::kohel, sqrt_velu::sqrt_velu_fast, velu::velu_cyclic, xonly::velu_xonly_fast};
+use isogeny_algos::kernel::{
+    kohel::kohel, sqrt_velu::sqrt_velu_fast, velu::velu_cyclic, xonly::velu_xonly_fast,
+};
 use isogeny_algos::testdata::supersingular_workload;
 
 fn kernel_algorithms_agree<const N: usize>(bits: usize, ells: &[u64], seed: u64) {
@@ -14,7 +16,11 @@ fn kernel_algorithms_agree<const N: usize>(bits: usize, ells: &[u64], seed: u64)
         let r = velu_xonly_fast(f, &w.e, x0, ell).unwrap();
         // the codomain is supersingular too: a random point times p+1 is the identity
         let q = random_point_f(f, &r.cod, &mut rng);
-        assert_eq!(pmul_big(f, &r.cod, &q, &f.modulus().add_small(1)), Pt::Inf, "l = {ell}");
+        assert_eq!(
+            pmul_big(f, &r.cod, &q, &f.modulus().add_small(1)),
+            Pt::Inf,
+            "l = {ell}"
+        );
         let sv = sqrt_velu_fast(f, &w.e, x0, ell).unwrap();
         assert_eq!(sv.cod, r.cod, "sqrt-Velu, l = {ell}");
         let t = random_point_f(f, &w.e, &mut rng);
@@ -24,8 +30,15 @@ fn kernel_algorithms_agree<const N: usize>(bits: usize, ells: &[u64], seed: u64)
             let (g, _) = kernel_poly_from_point_f(f, &w.e, &p, ell);
             let kh = kohel(f, &w.e, &g, ell);
             assert_eq!(kh.cod, r.cod, "Kohel, l = {ell}");
-            let iso = bmss::isogeny(f, bmss::Method::FastElkiesPrime, &w.e, &kh.cod, ell as usize, None)
-                .expect("BMSS");
+            let iso = bmss::isogeny(
+                f,
+                bmss::Method::FastElkiesPrime,
+                &w.e,
+                &kh.cod,
+                ell as usize,
+                None,
+            )
+            .expect("BMSS");
             assert_eq!(iso.ker, g, "fastElkies', l = {ell}");
         }
     }

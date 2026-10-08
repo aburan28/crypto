@@ -7,7 +7,7 @@ use isogeny_algos::path::csidh::Csidh;
 /// A point of exact order l (l | n = #E), robust to a non-cyclic l-part.
 fn point_of_order(fq: &Zp, ew: &Curve<u64>, n: u64, ell: u64, rng: &mut Rng) -> Pt<u64> {
     let mut lv = 1u64;
-    while n % (lv * ell) == 0 {
+    while n.is_multiple_of(lv * ell) {
         lv *= ell;
     }
     loop {
@@ -56,17 +56,35 @@ fn edwards_isogenies() {
         // codomain j vs Montgomery Velu
         let Pt::Aff(xk, _) = k else { unreachable!() };
         let xm = fp.sub(xk, third);
-        let ms = montgomery::multiples(&fp, montgomery::a24(&fp, a), (xm, 1), ((ell - 1) / 2) as usize);
+        let ms = montgomery::multiples(
+            &fp,
+            montgomery::a24(&fp, a),
+            (xm, 1),
+            ((ell - 1) / 2) as usize,
+        );
         let a2 = montgomery::velu_codomain(&fp, a, &ms, ell);
-        assert_eq!(iso.cod.j(&fp), montgomery::j_invariant(&fp, a2), "l = {ell}");
+        assert_eq!(
+            iso.cod.j(&fp),
+            montgomery::j_invariant(&fp, a2),
+            "l = {ell}"
+        );
         // points
         for _ in 0..5 {
-            let (q1, q2) = (random_point_f(&fp, &ew, &mut rng), random_point_f(&fp, &ew, &mut rng));
-            let (Some(e1), Some(e2)) = (to_ed(&q1), to_ed(&q2)) else { continue };
+            let (q1, q2) = (
+                random_point_f(&fp, &ew, &mut rng),
+                random_point_f(&fp, &ew, &mut rng),
+            );
+            let (Some(e1), Some(e2)) = (to_ed(&q1), to_ed(&q2)) else {
+                continue;
+            };
             let i1 = iso.eval_def(&fp, e1);
             let i2 = iso.eval_def(&fp, e2);
             assert!(iso.cod.on_curve(&fp, i1), "image on codomain");
-            assert_eq!(iso.eval_def(&fp, ed.add(&fp, e1, e2)), iso.cod.add(&fp, i1, i2), "homomorphism");
+            assert_eq!(
+                iso.eval_def(&fp, ed.add(&fp, e1, e2)),
+                iso.cod.add(&fp, i1, i2),
+                "homomorphism"
+            );
         }
         assert_eq!(iso.eval_def(&fp, ke), (0, 1), "kernel -> identity");
         let _ = idx;
@@ -87,10 +105,15 @@ fn edwards_isogenies() {
             continue;
         }
         let n = order(&fq, &ew, &mut rng);
-        let Some(&ell) = [3u64, 5, 7, 11, 13].iter().find(|&&l| n % l == 0) else { continue };
+        let Some(&ell) = [3u64, 5, 7, 11, 13].iter().find(|&&l| n.is_multiple_of(l)) else {
+            continue;
+        };
         let third = fq.div(a, 3);
         let k = point_of_order(&fq, &ew, n, ell, &mut rng);
-        let e1 = Edwards { a: 1u64, d: fq.div(ed.d, ed.a) };
+        let e1 = Edwards {
+            a: 1u64,
+            d: fq.div(ed.d, ed.a),
+        };
         let Pt::Aff(xw, yw) = k else { unreachable!() };
         let (x0, y0) = mont_to_edwards_point(&fq, fq.sub(xw, third), yw);
         let k1 = (fq.mul(x0, sa), y0);
@@ -107,7 +130,11 @@ fn edwards_isogenies() {
             let pt = (fq.mul(x, sa), y);
             let d = iso.eval_def(&fq, pt);
             assert!(iso.cod.on_curve(&fq, d));
-            assert_eq!(iso.eval_explicit(&fq, pt), d, "Theorem 2 = definition, l = {ell}");
+            assert_eq!(
+                iso.eval_explicit(&fq, pt),
+                d,
+                "Theorem 2 = definition, l = {ell}"
+            );
             assert_eq!(iso.eval_x_only(&fq, pt.0), d.0, "one-variable X, l = {ell}");
             checked += 1;
         }
@@ -123,7 +150,10 @@ fn huff_isogenies() {
     let fp = Zp::new(next_prime(1u64 << 30));
     let mut done = 0;
     while done < 4 {
-        let h = Huff { a: fp.random(&mut rng), b: fp.random(&mut rng) };
+        let h = Huff {
+            a: fp.random(&mut rng),
+            b: fp.random(&mut rng),
+        };
         if h.a == h.b || h.a == 0 || h.b == 0 {
             continue;
         }
@@ -132,19 +162,32 @@ fn huff_isogenies() {
             continue;
         }
         let n = order(&fp, &ew, &mut rng);
-        let Some(&ell) = [3u64, 5, 7, 11].iter().find(|&&l| n % l == 0) else { continue };
+        let Some(&ell) = [3u64, 5, 7, 11].iter().find(|&&l| n.is_multiple_of(l)) else {
+            continue;
+        };
         // a point of order l on y^2 = x^3 + (a+b) x^2 + ab x (shift between models: x_s = x + (a+b)/3)
         let shift = fp.div(fp.add(h.a, h.b), 3);
         let k = point_of_order(&fp, &ew, n, ell, &mut rng);
         let Pt::Aff(xs, ys) = k else { unreachable!() };
         let kh = h.from_weierstrass_point(&fp, (fp.sub(xs, shift), ys));
         assert!(h.on_curve(&fp, kh));
-        let Some(iso) = huff_isogeny(&fp, &h, kh, ell) else { continue };
+        let Some(iso) = huff_isogeny(&fp, &h, kh, ell) else {
+            continue;
+        };
         let reference = isogeny_algos::kernel::velu::velu_cyclic(&fp, &ew, &k, ell);
-        assert_eq!(jinv(&fp, &iso.cod.short_weierstrass(&fp)), jinv(&fp, &reference.cod), "l = {ell}");
+        assert_eq!(
+            jinv(&fp, &iso.cod.short_weierstrass(&fp)),
+            jinv(&fp, &reference.cod),
+            "l = {ell}"
+        );
         for _ in 0..5 {
-            let (q1, q2) = (ew.random_point(&fp, &mut rng), ew.random_point(&fp, &mut rng));
-            let (Pt::Aff(x1, y1), Pt::Aff(x2, y2)) = (q1, q2) else { continue };
+            let (q1, q2) = (
+                ew.random_point(&fp, &mut rng),
+                ew.random_point(&fp, &mut rng),
+            );
+            let (Pt::Aff(x1, y1), Pt::Aff(x2, y2)) = (q1, q2) else {
+                continue;
+            };
             let p1 = h.from_weierstrass_point(&fp, (fp.sub(x1, shift), y1));
             let p2 = h.from_weierstrass_point(&fp, (fp.sub(x2, shift), y2));
             let (i1, i2) = (iso.eval(&fp, p1), iso.eval(&fp, p2));

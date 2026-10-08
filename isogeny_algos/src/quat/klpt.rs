@@ -8,6 +8,7 @@
 //!  4. Strong approximation: mu = lambda mu0 + N mu1 of norm l^{e1}: lambda from a square root mod
 //!     N, (c, d) from a linear condition mod N, then a close vector in a 2-dimensional lattice so
 //!     that (l^{e1} - p(x^2 + y^2))/N^2 is a prime = 1 mod 4, split by Cornacchia.
+//!
 //!  J = L betabar / N with beta = gamma mu (norm N l^{e0+e1}).
 use super::*;
 use crate::field::Rng;
@@ -71,7 +72,9 @@ fn nullspace_mod(mat: &[[Int; 4]], n: &Int) -> Vec<[Int; 4]> {
     let mut pivcols = vec![];
     let mut row = 0;
     for col in 0..4 {
-        let Some(pr) = (row..a.len()).find(|&r| !a[r][col].is_zero()) else { continue };
+        let Some(pr) = (row..a.len()).find(|&r| !a[r][col].is_zero()) else {
+            continue;
+        };
         a.swap(row, pr);
         let inv = a[row][col].inv_mod(n).unwrap();
         a[row] = a[row].clone().map(|x| (&x * &inv).modulo(n));
@@ -158,7 +161,8 @@ pub fn klpt(alg: &Alg, i: &Lattice, ell: u64, rng: &mut Rng) -> Option<Klpt> {
     let mut bnd = 1u64;
     while cands.len() < 8 && bnd <= 64 {
         for _ in 0..500 {
-            let c: [Int; 4] = std::array::from_fn(|_| Int::from(rng.below(2 * bnd + 1) as i64 - bnd as i64));
+            let c: [Int; 4] =
+                std::array::from_fn(|_| Int::from(rng.below(2 * bnd + 1) as i64 - bnd as i64));
             let v: [Int; 4] = std::array::from_fn(|t| {
                 let mut s = Int::zero();
                 for r in 0..4 {
@@ -196,7 +200,14 @@ pub fn klpt(alg: &Alg, i: &Lattice, ell: u64, rng: &mut Rng) -> Option<Klpt> {
 }
 
 /// Steps 2-4 for an ideal L of prime norm n.
-fn klpt_prime(alg: &Alg, o0: &Lattice, lid: &Lattice, n: &Int, ell: u64, rng: &mut Rng) -> Option<Klpt> {
+fn klpt_prime(
+    alg: &Alg,
+    o0: &Lattice,
+    lid: &Lattice,
+    n: &Int,
+    ell: u64,
+    rng: &mut Rng,
+) -> Option<Klpt> {
     let p = alg.p.clone();
     let l = Int::from(ell);
     let one = Int::one();
@@ -216,7 +227,7 @@ fn klpt_prime(alg: &Alg, o0: &Lattice, lid: &Lattice, n: &Int, ell: u64, rng: &m
     };
     // 2. gamma of norm n l^{e0}
     let mut e0 = 0u32;
-    while &(n * &l.pow(e0)) < &(&p * &Int::from(1i64 << 12)) {
+    while (n * &l.pow(e0)) < (&p * &Int::from(1i64 << 12)) {
         e0 += 1;
     }
     for _try in 0..200 {
@@ -246,11 +257,17 @@ fn klpt_prime(alg: &Alg, o0: &Lattice, lid: &Lattice, n: &Int, ell: u64, rng: &m
         let (u1, v1) = (eval_f(&funcs[0], &gj), eval_f(&funcs[0], &gk));
         let (u2, v2) = (eval_f(&funcs[1], &gj), eval_f(&funcs[1], &gk));
         // C u + D v = 0 for both functionals
-        let (cc, dd) = if !u1.is_zero() || !v1.is_zero() { (v1.clone(), (-&u1).modulo(n)) } else { (v2.clone(), (-&u2).modulo(n)) };
+        let (cc, dd) = if !u1.is_zero() || !v1.is_zero() {
+            (v1.clone(), (-&u1).modulo(n))
+        } else {
+            (v2.clone(), (-&u2).modulo(n))
+        };
         if cc.is_zero() && dd.is_zero() {
             continue;
         }
-        if !(&(&cc * &u2) + &(&dd * &v2)).modulo(n).is_zero() || !(&(&cc * &u1) + &(&dd * &v1)).modulo(n).is_zero() {
+        if !(&(&cc * &u2) + &(&dd * &v2)).modulo(n).is_zero()
+            || !(&(&cc * &u1) + &(&dd * &v1)).modulo(n).is_zero()
+        {
             continue; // gamma in L or degenerate
         }
         // 4. strong approximation
@@ -290,7 +307,15 @@ fn klpt_prime(alg: &Alg, o0: &Lattice, lid: &Lattice, n: &Int, ell: u64, rng: &m
                     xi = xi.scale(&one, &l);
                     e -= 2;
                 }
-                return Some(Klpt { j: jid, e, xi, n_prime: n.clone(), e0, e1, attempts: 0 });
+                return Some(Klpt {
+                    j: jid,
+                    e,
+                    xi,
+                    n_prime: n.clone(),
+                    e0,
+                    e1,
+                    attempts: 0,
+                });
             }
             e1 += 1;
         }
@@ -300,7 +325,15 @@ fn klpt_prime(alg: &Alg, o0: &Lattice, lid: &Lattice, n: &Int, ell: u64, rng: &m
 
 /// mu = N a + N b i + x j + y k with x = lambda C + N c, y = lambda D + N d and
 /// Nrd(mu) = target (target = l^{e1}).
-fn strong_approx(alg: &Alg, n: &Int, lambda: &Int, cc: &Int, dd: &Int, target: &Int, rng: &mut Rng) -> Option<Quat> {
+fn strong_approx(
+    alg: &Alg,
+    n: &Int,
+    lambda: &Int,
+    cc: &Int,
+    dd: &Int,
+    target: &Int,
+    rng: &mut Rng,
+) -> Option<Quat> {
     let p = &alg.p;
     let one = Int::one();
     let two = Int::from(2i64);
@@ -316,10 +349,20 @@ fn strong_approx(alg: &Alg, n: &Int, lambda: &Int, cc: &Int, dd: &Int, target: &
     // particular (c0, d0) and the lattice {(c, d): cC + dD = 0 mod n}
     let (c0, d0, b1, b2) = if !cc.modulo(n).is_zero() {
         let ci = cc.inv_mod(n).unwrap();
-        ((&t * &ci).modulo(n), Int::zero(), [n.clone(), Int::zero()], [(-&(dd * &ci)).modulo(n), one.clone()])
+        (
+            (&t * &ci).modulo(n),
+            Int::zero(),
+            [n.clone(), Int::zero()],
+            [(-&(dd * &ci)).modulo(n), one.clone()],
+        )
     } else {
         let di = dd.inv_mod(n).unwrap();
-        (Int::zero(), (&t * &di).modulo(n), [Int::zero(), n.clone()], [one.clone(), (-&(cc * &di)).modulo(n)])
+        (
+            Int::zero(),
+            (&t * &di).modulo(n),
+            [Int::zero(), n.clone()],
+            [one.clone(), (-&(cc * &di)).modulo(n)],
+        )
     };
     // (x, y) = (lambda C + n c0, lambda D + n d0) + n (s b1 + u b2); lattice basis scaled by n
     let x0 = [&(lambda * cc) + &(n * &c0), &(lambda * dd) + &(n * &d0)];

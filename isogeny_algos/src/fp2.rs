@@ -66,7 +66,8 @@ impl<F: Field> Field for Fp2<F> {
     }
     fn size(&self) -> u128 {
         let p = self.base.size();
-        p.checked_mul(p).expect("Fp2::size: p^2 exceeds 128 bits; use q()")
+        p.checked_mul(p)
+            .expect("Fp2::size: p^2 exceeds 128 bits; use q()")
     }
     fn q(&self) -> Big {
         let p = self.base.q();

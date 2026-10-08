@@ -74,9 +74,7 @@ impl Method {
 fn c_coeffs<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
     let u = u_series(f, e, n + 1);
     let mut c = vec![f.zero(); n + 1];
-    for k in 1..=n {
-        c[k] = u[k + 1];
-    }
+    c[1..=n].copy_from_slice(&u[2..=n + 1]);
     c
 }
 
@@ -106,7 +104,7 @@ fn poly_from_power_sums<F: Field>(f: &F, q: &[F::E], d: usize) -> Poly<F> {
 
 /// g with g^2 = D (D monic of even degree 2d); None if D is not a square.
 fn sqrt_monic<F: Field>(f: &F, dd: &Poly<F>) -> Option<Poly<F>> {
-    if dd.len() % 2 == 0 {
+    if dd.len().is_multiple_of(2) {
         return None;
     }
     let d = (dd.len() - 1) / 2;
@@ -387,7 +385,7 @@ fn s_ode<F: Field>(f: &F, e: &Curve<F::E>, et: &Curve<F::E>, n: usize) -> Vec<F:
         } else {
             f.mul(f.sub(rk, f.dot_rev(&t[1..k], &t[1..k])), inv2)
         };
-        if k + 1 <= n {
+        if k < n {
             s[k + 1] = f.mul(t[k], invs[k]);
         }
     }
@@ -473,9 +471,8 @@ fn fast_elkies<F: Field>(
     let d = (ell - 1) / 2;
     let u = u_from_ode(f, e, et, d + 3);
     let mut h = vec![f.zero(); d.max(2) + 1];
-    for i in 1..h.len() {
-        h[i] = u[i + 1];
-    }
+    let hl = h.len();
+    h[1..].copy_from_slice(&u[2..hl + 1]);
     let q = q_from_h(f, e, d, sigma, &h);
     Some(poly_from_power_sums(f, &q, d))
 }
@@ -554,9 +551,7 @@ fn linear_algebra<F: Field>(
     let sol = solve_linear(f, mat, rhs)?;
     let mut dd = vec![f.zero(); ell];
     dd[ell - 1] = f.one();
-    for i in 0..ell - 1 {
-        dd[i] = sol[ell + i];
-    }
+    dd[..ell - 1].copy_from_slice(&sol[ell..2 * ell - 1]);
     sqrt_monic(f, &dd)
 }
 
@@ -648,7 +643,7 @@ pub fn isogeny<F: Field>(
     ell: usize,
     sigma: Option<F::E>,
 ) -> Option<RatIsogeny<F>> {
-    if ell < 3 || ell % 2 == 0 {
+    if ell < 3 || ell.is_multiple_of(2) {
         return None;
     }
     let g = match m {

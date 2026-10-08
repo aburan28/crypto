@@ -45,7 +45,11 @@ fn clmul_soft(a: u64, b: u64) -> u128 {
 #[target_feature(enable = "pclmulqdq")]
 unsafe fn clmul_hw(a: u64, b: u64) -> u128 {
     use std::arch::x86_64::*;
-    let r = _mm_clmulepi64_si128(_mm_set_epi64x(0, a as i64), _mm_set_epi64x(0, b as i64), 0x00);
+    let r = _mm_clmulepi64_si128(
+        _mm_set_epi64x(0, a as i64),
+        _mm_set_epi64x(0, b as i64),
+        0x00,
+    );
     std::mem::transmute::<__m128i, u128>(r)
 }
 
@@ -68,7 +72,16 @@ unsafe fn mul_hw(a: u64, b: u64, n: u32, mask: u64, red: u64) -> u64 {
 }
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "pclmulqdq")]
-unsafe fn dot_hw(a: &[u64], b: &[u64], lo: usize, hi: usize, k: usize, n: u32, mask: u64, red: u64) -> u64 {
+unsafe fn dot_hw(
+    a: &[u64],
+    b: &[u64],
+    lo: usize,
+    hi: usize,
+    k: usize,
+    n: u32,
+    mask: u64,
+    red: u64,
+) -> u64 {
     let mut acc = 0u128;
     for i in lo..=hi {
         acc ^= clmul_hw(a[i], b[k - i]);
@@ -81,18 +94,72 @@ unsafe fn dot_hw(a: &[u64], b: &[u64], lo: usize, hi: usize, k: usize, n: u32, m
 pub fn default_tail(n: u32) -> Option<u64> {
     // (n, [k]) for x^n + x^k + 1 or (n, [k1, k2, k3]) for x^n + x^k1 + x^k2 + x^k3 + 1
     let t: &[(u32, &[u32])] = &[
-        (2, &[1]), (3, &[1]), (4, &[1]), (5, &[2]), (6, &[1]), (7, &[1]), (8, &[4, 3, 1]),
-        (9, &[1]), (10, &[3]), (11, &[2]), (12, &[3]), (13, &[4, 3, 1]), (14, &[5]), (15, &[1]),
-        (16, &[5, 3, 1]), (17, &[3]), (18, &[3]), (19, &[5, 2, 1]), (20, &[3]), (21, &[2]),
-        (22, &[1]), (23, &[5]), (24, &[4, 3, 1]), (25, &[3]), (26, &[4, 3, 1]), (27, &[5, 2, 1]),
-        (28, &[1]), (29, &[2]), (30, &[1]), (31, &[3]), (32, &[7, 3, 2]), (33, &[10]),
-        (34, &[7]), (35, &[2]), (36, &[9]), (37, &[6, 4, 1]), (38, &[6, 5, 1]), (39, &[4]),
-        (40, &[5, 4, 3]), (41, &[3]), (42, &[7]), (43, &[6, 4, 3]), (44, &[5]), (45, &[4, 3, 1]),
-        (46, &[1]), (47, &[5]), (48, &[5, 3, 2]), (49, &[9]), (50, &[4, 3, 2]), (51, &[6, 3, 1]),
-        (52, &[3]), (53, &[6, 2, 1]), (54, &[9]), (55, &[7]), (56, &[7, 4, 2]), (57, &[4]),
-        (58, &[19]), (59, &[7, 4, 2]), (60, &[1]), (61, &[5, 2, 1]), (62, &[29]), (63, &[1]),
+        (2, &[1]),
+        (3, &[1]),
+        (4, &[1]),
+        (5, &[2]),
+        (6, &[1]),
+        (7, &[1]),
+        (8, &[4, 3, 1]),
+        (9, &[1]),
+        (10, &[3]),
+        (11, &[2]),
+        (12, &[3]),
+        (13, &[4, 3, 1]),
+        (14, &[5]),
+        (15, &[1]),
+        (16, &[5, 3, 1]),
+        (17, &[3]),
+        (18, &[3]),
+        (19, &[5, 2, 1]),
+        (20, &[3]),
+        (21, &[2]),
+        (22, &[1]),
+        (23, &[5]),
+        (24, &[4, 3, 1]),
+        (25, &[3]),
+        (26, &[4, 3, 1]),
+        (27, &[5, 2, 1]),
+        (28, &[1]),
+        (29, &[2]),
+        (30, &[1]),
+        (31, &[3]),
+        (32, &[7, 3, 2]),
+        (33, &[10]),
+        (34, &[7]),
+        (35, &[2]),
+        (36, &[9]),
+        (37, &[6, 4, 1]),
+        (38, &[6, 5, 1]),
+        (39, &[4]),
+        (40, &[5, 4, 3]),
+        (41, &[3]),
+        (42, &[7]),
+        (43, &[6, 4, 3]),
+        (44, &[5]),
+        (45, &[4, 3, 1]),
+        (46, &[1]),
+        (47, &[5]),
+        (48, &[5, 3, 2]),
+        (49, &[9]),
+        (50, &[4, 3, 2]),
+        (51, &[6, 3, 1]),
+        (52, &[3]),
+        (53, &[6, 2, 1]),
+        (54, &[9]),
+        (55, &[7]),
+        (56, &[7, 4, 2]),
+        (57, &[4]),
+        (58, &[19]),
+        (59, &[7, 4, 2]),
+        (60, &[1]),
+        (61, &[5, 2, 1]),
+        (62, &[29]),
+        (63, &[1]),
     ];
-    t.iter().find(|e| e.0 == n).map(|e| e.1.iter().fold(1u64, |acc, &k| acc | (1u64 << k)))
+    t.iter()
+        .find(|e| e.0 == n)
+        .map(|e| e.1.iter().fold(1u64, |acc, &k| acc | (1u64 << k)))
 }
 
 fn deg(a: u64) -> i32 {
@@ -101,7 +168,10 @@ fn deg(a: u64) -> i32 {
 
 impl GF2n {
     pub fn new(n: u32) -> Self {
-        GF2n::with_tail(n, default_tail(n).expect("no tabulated irreducible for this n"))
+        GF2n::with_tail(
+            n,
+            default_tail(n).expect("no tabulated irreducible for this n"),
+        )
     }
 
     /// GF(2)[x]/(x^n + tail); panics if the polynomial is reducible.
@@ -134,7 +204,9 @@ impl GF2n {
             f.tmask |= s << i;
         }
         // echelon form of L(z) = z^2 + z over the basis x^i
-        let mut rows: Vec<(u64, u64)> = (0..n).map(|i| (f.sq(1u64 << i) ^ (1u64 << i), 1u64 << i)).collect();
+        let mut rows: Vec<(u64, u64)> = (0..n)
+            .map(|i| (f.sq(1u64 << i) ^ (1u64 << i), 1u64 << i))
+            .collect();
         let mut piv = vec![];
         for bit in (0..n).rev() {
             if let Some(k) = rows.iter().position(|r| (r.0 >> bit) & 1 == 1) {
@@ -244,11 +316,11 @@ impl GF2n {
         let mut m = n;
         let mut r = 2;
         while m > 1 {
-            if m % r == 0 {
+            if m.is_multiple_of(r) {
                 if gcd(full, pow2k(n / r) ^ 2) != 1 {
                     return false;
                 }
-                while m % r == 0 {
+                while m.is_multiple_of(r) {
                     m /= r;
                 }
             }

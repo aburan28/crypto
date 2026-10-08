@@ -1,7 +1,7 @@
+use isogeny_algos::curve::Isogeny;
 use isogeny_algos::curve::{jinv, Curve, Pt};
 use isogeny_algos::field::{factor_u64, Field, Rng, Zp};
 use isogeny_algos::gf3n::GF3n;
-use isogeny_algos::curve::Isogeny;
 use isogeny_algos::weier::*;
 
 /// General Weierstrass Vélu agrees with the short-form Vélu in large characteristic.
@@ -20,12 +20,12 @@ fn gw_velu_matches_short_form_large_char() {
         let n = isogeny_algos::curve::order(&fp, &sc, &mut rng);
         let gw = GWCurve::new([0, 0, 0, a, b]);
         for ell in [3u64, 5, 7] {
-            if n % ell != 0 {
+            if !n.is_multiple_of(ell) {
                 continue;
             }
             // point of order ell
             let mut lv = 1;
-            while n % (lv * ell) == 0 {
+            while n.is_multiple_of(lv * ell) {
                 lv *= ell;
             }
             let k = loop {
@@ -100,7 +100,7 @@ fn gw_velu_characteristic_three() {
             let pts = points(&e);
             let order = pts.len() as u64;
             for ell in [5u64, 7, 11, 13] {
-                if order % ell != 0 || done >= 3 {
+                if !order.is_multiple_of(ell) || done >= 3 {
                     continue;
                 }
                 let k = loop {

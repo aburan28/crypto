@@ -31,7 +31,10 @@ pub fn equivalent(alg: &Alg, o: &Lattice, i: &Lattice, j: &Lattice) -> Option<Qu
 /// Number of units of the order up to sign (|O^x| / 2): elements of reduced norm 1.
 pub fn units_mod_sign(alg: &Alg, o: &Lattice) -> usize {
     let d2 = &o.den * &o.den;
-    o.short_vectors(alg, &d2, 64).iter().filter(|(_, n)| *n == d2).count()
+    o.short_vectors(alg, &d2, 64)
+        .iter()
+        .filter(|(_, n)| *n == d2)
+        .count()
 }
 
 /// A reduced representative of the class of I: J = I deltabar / N(I) for a shortest delta in I.
@@ -128,7 +131,10 @@ pub fn class_set(alg: &Alg, ell: u64, rng: &mut Rng) -> ClassSet {
             let jr = reduce_ideal(alg, &o0, &j);
             let key = theta_key(alg, &jr.right_order(alg, &o0));
             let bucket = buckets.entry(key).or_default();
-            let idx = bucket.iter().copied().find(|&t| equivalent(alg, &o0, &reps[t], &jr).is_some());
+            let idx = bucket
+                .iter()
+                .copied()
+                .find(|&t| equivalent(alg, &o0, &reps[t], &jr).is_some());
             let idx = match idx {
                 Some(t) => t,
                 None => {
@@ -163,7 +169,11 @@ pub fn class_set(alg: &Alg, ell: u64, rng: &mut Rng) -> ClassSet {
     let lhs: usize = units.iter().map(|&u| 12 * (w / u)).sum();
     let p = alg.p.to_i128().expect("p fits i128") as usize;
     assert_eq!(lhs, (p - 1) * w, "Eichler mass formula");
-    ClassSet { reps, units, brandt }
+    ClassSet {
+        reps,
+        units,
+        brandt,
+    }
 }
 
 /// Supersingular j-invariants over F_{p^2} and the Phi_l root-multiplicity matrix, by BFS from
@@ -195,8 +205,8 @@ pub fn supersingular_graph(p: u64, ell: usize, rng: &mut Rng) -> (Vec<(u64, u64)
                 m += 1;
             }
             out.push((r, m));
-            if !idx.contains_key(&r) {
-                idx.insert(r, js.len());
+            if let std::collections::hash_map::Entry::Vacant(e) = idx.entry(r) {
+                e.insert(js.len());
                 js.push(r);
             }
         }
@@ -222,7 +232,10 @@ pub fn supersingular_graph(p: u64, ell: usize, rng: &mut Rng) -> (Vec<(u64, u64)
 pub fn power_traces(m: &[Vec<u32>], kmax: usize) -> Vec<u64> {
     const P: u128 = (1u128 << 61) - 1;
     let h = m.len();
-    let mut cur: Vec<Vec<u128>> = m.iter().map(|r| r.iter().map(|&x| x as u128).collect()).collect();
+    let mut cur: Vec<Vec<u128>> = m
+        .iter()
+        .map(|r| r.iter().map(|&x| x as u128).collect())
+        .collect();
     let mut out = vec![];
     for _ in 0..kmax {
         out.push(((0..h).map(|i| cur[i][i]).sum::<u128>() % P) as u64);

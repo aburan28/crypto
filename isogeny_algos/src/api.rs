@@ -18,7 +18,9 @@
 //! Fields are chosen by the size of p: u64 arithmetic below 2^62, Montgomery with 2, 4 or 8
 //! limbs up to 128, 256 or 512 bits.
 use crate::bigint::Big;
-use crate::curve::{jinv, on_curve, padd, pmul_big, random_point_f, Curve, Isogeny, Pt, RatIsogeny};
+use crate::curve::{
+    jinv, on_curve, padd, pmul_big, random_point_f, Curve, Isogeny, Pt, RatIsogeny,
+};
 use crate::field::{Field, Rng, Zp};
 use crate::find::divpoly::kernel_polys;
 use crate::find::modpoly::{integer_coeffs, Phi};
@@ -70,7 +72,11 @@ impl PrimeCurve {
                 "115792089210356248762697446949407573530086143415290314195533631308867097853948",
                 "41058363725152142129326129780047268409114441015993725554835256314039467401291",
             ),
-            "secp256k1" => ("115792089237316195423570985008687907853269984665640564039457584007908834671663", "0", "7"),
+            "secp256k1" => (
+                "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+                "0",
+                "7",
+            ),
             _ => return None,
         };
         let d = |s: &str| Int::from_big(&Big::from_dec(s));
@@ -98,7 +104,11 @@ impl PrimeCurve {
         }
         let d2 = (&d * &d).modulo(p);
         let d3 = (&d2 * &d).modulo(p);
-        PrimeCurve { p: p.clone(), a: (&self.a * &d2).modulo(p), b: (&self.b * &d3).modulo(p) }
+        PrimeCurve {
+            p: p.clone(),
+            a: (&self.a * &d2).modulo(p),
+            b: (&self.b * &d3).modulo(p),
+        }
     }
 }
 
@@ -185,7 +195,11 @@ pub struct Check {
 }
 impl Check {
     fn new(name: &str, status: Status, detail: String) -> Check {
-        Check { name: name.into(), status, detail }
+        Check {
+            name: name.into(),
+            status,
+            detail,
+        }
     }
 }
 
@@ -298,7 +312,11 @@ pub enum CountMethod {
     /// complex multiplication, j = 0 or 1728 (Cornacchia, trace chosen by points)
     Cm,
     /// Schoof–Elkies–Atkin; the primes used and their congruences
-    Sea { elkies: Vec<(u64, u64)>, atkin: Vec<(u64, usize, usize)>, candidates: u128 },
+    Sea {
+        elkies: Vec<(u64, u64)>,
+        atkin: Vec<(u64, usize, usize)>,
+        candidates: u128,
+    },
     /// supplied by the caller (only checked)
     Given,
 }
@@ -307,8 +325,11 @@ pub enum CountMethod {
 #[derive(Clone, Debug)]
 pub struct OrderCertificate {
     pub order: Int,
-    /// the order is the only multiple of `divisor` in the Hasse interval
+    /// the order is the only multiple of `divisor` in the Hasse interval, or (`via_twist`) the
+    /// twist's order is certified and #E + #E^t = 2p + 2 fixes this one
     pub certified: bool,
+    /// certified through the twist rather than by this curve's own point orders
+    pub via_twist: bool,
     /// lcm of divisors of point orders established by the sampled points
     pub divisor: Int,
     /// prime factorisation of the claimed order found (probable primes), and its unfactored part
@@ -341,7 +362,10 @@ fn certify_in<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, order: &Int, seed: u64) -
     checks.push(Check::new(
         "hasse_interval",
         if hasse { Status::Pass } else { Status::Fail },
-        format!("|p + 1 - N| = |{t}| {} 2 sqrt(p)", if hasse { "<=" } else { ">" }),
+        format!(
+            "|p + 1 - N| = |{t}| {} 2 sqrt(p)",
+            if hasse { "<=" } else { ">" }
+        ),
     ));
     let (factors, unfactored) = factor_partial(order, 1 << 18, &mut rng);
     let mut divisor = Int::one();
@@ -377,7 +401,11 @@ fn certify_in<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, order: &Int, seed: u64) -
     }
     checks.push(Check::new(
         "points_annihilated",
-        if annihilated { Status::Pass } else { Status::Fail },
+        if annihilated {
+            Status::Pass
+        } else {
+            Status::Fail
+        },
         format!("[N]P = O for {} random points", points.len()),
     ));
     let certified = annihilated && &divisor * &divisor > bound_sq;
@@ -396,7 +424,16 @@ fn certify_in<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, order: &Int, seed: u64) -
             format!("divisor of the point orders established: {divisor}; unfactored part of N: {unfactored}")
         },
     ));
-    OrderCertificate { order: order.clone(), certified, divisor, factors, unfactored, points, checks }
+    OrderCertificate {
+        order: order.clone(),
+        certified,
+        via_twist: false,
+        divisor,
+        factors,
+        unfactored,
+        points,
+        checks,
+    }
 }
 
 fn lcm(a: &Int, b: &Int) -> Int {
@@ -441,35 +478,65 @@ fn finish_count(curve: &PrimeCurve, order: Int, method: CountMethod, seed: u64) 
     // #E + #E^t = 2p + 2: a certificate for either order fixes the other
     let (ce, ct) = (certificate.certified, twist_certificate.certified);
     let points_ok = |c: &OrderCertificate| c.checks.iter().all(|k| k.status != Status::Fail);
-    for (cert, other_certified, other) in [(&mut certificate, ct, "twist's"), (&mut twist_certificate, ce, "curve's")] {
+    for (cert, other_certified, other) in [
+        (&mut certificate, ct, "twist's"),
+        (&mut twist_certificate, ce, "curve's"),
+    ] {
         if !cert.certified && other_certified && points_ok(cert) {
             cert.certified = true;
-            for k in cert.checks.iter_mut().filter(|k| k.name == "order_unique_in_hasse_interval") {
+            cert.via_twist = true;
+            for k in cert
+                .checks
+                .iter_mut()
+                .filter(|k| k.name == "order_unique_in_hasse_interval")
+            {
                 k.status = Status::Pass;
-                k.detail = format!("follows from the certified {other} order: #E + #E^t = 2p + 2 ({})", k.detail);
+                k.detail = format!(
+                    "follows from the certified {other} order: #E + #E^t = 2p + 2 ({})",
+                    k.detail
+                );
             }
         }
     }
-    PointCount { order, trace, twist_order, method, certificate, twist_certificate }
+    PointCount {
+        order,
+        trace,
+        twist_order,
+        method,
+        certificate,
+        twist_certificate,
+    }
 }
 
-fn count_in<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, seed: u64) -> Result<(Int, CountMethod), String> {
+fn count_in<F: PrimeFieldInt>(
+    f: &F,
+    c: &PrimeCurve,
+    seed: u64,
+) -> Result<(Int, CountMethod), String> {
     let mut rng = Rng::new(seed);
     let p = &c.p;
     if p.bits() <= 40 {
         let fp = Zp::new(p.to_i128().unwrap() as u64);
         let e = Curve::new(fp.elem(&c.a), fp.elem(&c.b));
-        return Ok((Int::from(crate::curve::order(&fp, &e, &mut rng)), CountMethod::Bsgs));
+        return Ok((
+            Int::from(crate::curve::order(&fp, &e, &mut rng)),
+            CountMethod::Bsgs,
+        ));
     }
     if c.a.is_zero() || c.b.is_zero() {
         return cm_count(f, c, &mut rng).map(|n| (n, CountMethod::Cm));
     }
     let e = curve_in(f, c);
     let mut phis: HashMap<usize, Phi<F>> = HashMap::new();
-    let (n, st) = crate::find::sea::sea(f, &e, 1000, &mut phis, &mut rng).ok_or("SEA found no order")?;
+    let (n, st) =
+        crate::find::sea::sea(f, &e, 1000, &mut phis, &mut rng).ok_or("SEA found no order")?;
     Ok((
         Int::from_big(&n),
-        CountMethod::Sea { elkies: st.elkies, atkin: st.atkin, candidates: st.candidates },
+        CountMethod::Sea {
+            elkies: st.elkies,
+            atkin: st.atkin,
+            candidates: st.candidates,
+        },
     ))
 }
 
@@ -498,7 +565,11 @@ fn cm_count<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, rng: &mut Rng) -> Result<In
     let p = &c.p;
     let p1 = p + &Int::one();
     let j0 = c.a.is_zero();
-    let (supersingular, d) = if j0 { (p.mod_u64(3) == 2, 3) } else { (p.mod_u64(4) == 3, 1) };
+    let (supersingular, d) = if j0 {
+        (p.mod_u64(3) == 2, 3)
+    } else {
+        (p.mod_u64(4) == 3, 1)
+    };
     if supersingular {
         return Ok(p1);
     }
@@ -551,7 +622,13 @@ impl IsogenyRecord {
     }
 }
 
-fn record_from<F: PrimeFieldInt>(f: &F, e: &Curve<F::E>, iso: &RatIsogeny<F>, phi: Option<&Phi<F>>, rng: &mut Rng) -> IsogenyRecord {
+fn record_from<F: PrimeFieldInt>(
+    f: &F,
+    e: &Curve<F::E>,
+    iso: &RatIsogeny<F>,
+    phi: Option<&Phi<F>>,
+    rng: &mut Rng,
+) -> IsogenyRecord {
     let cod = iso.cod;
     let mut checks = vec![];
     let mut on = 0;
@@ -569,20 +646,35 @@ fn record_from<F: PrimeFieldInt>(f: &F, e: &Curve<F::E>, iso: &RatIsogeny<F>, ph
     }
     checks.push(Check::new(
         "image_on_codomain",
-        if on == trials { Status::Pass } else { Status::Fail },
+        if on == trials {
+            Status::Pass
+        } else {
+            Status::Fail
+        },
         format!("{on}/{trials} pairs of random points map onto E'"),
     ));
     checks.push(Check::new(
         "homomorphism",
-        if hom == trials { Status::Pass } else { Status::Fail },
+        if hom == trials {
+            Status::Pass
+        } else {
+            Status::Fail
+        },
         format!("phi(P + Q) = phi(P) + phi(Q) for {hom}/{trials} random pairs"),
     ));
     let kdeg = iso.ker.len().saturating_sub(1) as u64;
     let want = if iso.deg == 2 { 1 } else { (iso.deg - 1) / 2 };
     checks.push(Check::new(
         "kernel_degree",
-        if kdeg == want { Status::Pass } else { Status::Fail },
-        format!("kernel polynomial of degree {kdeg} for an isogeny of degree {}", iso.deg),
+        if kdeg == want {
+            Status::Pass
+        } else {
+            Status::Fail
+        },
+        format!(
+            "kernel polynomial of degree {kdeg} for an isogeny of degree {}",
+            iso.deg
+        ),
     ));
     let jt = jinv(f, &cod);
     if let Some(phi) = phi {
@@ -622,7 +714,12 @@ pub fn isogenies(curve: &PrimeCurve, ell: u64, seed: u64) -> Result<Vec<IsogenyR
     with_field(&curve.p, T(curve, ell, seed))
 }
 
-fn isogenies_in<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, ell: u64, seed: u64) -> Result<Vec<IsogenyRecord>, String> {
+fn isogenies_in<F: PrimeFieldInt>(
+    f: &F,
+    c: &PrimeCurve,
+    ell: u64,
+    seed: u64,
+) -> Result<Vec<IsogenyRecord>, String> {
     let mut rng = Rng::new(seed);
     let e = curve_in(f, c);
     if ell == 2 {
@@ -645,7 +742,14 @@ fn isogenies_in<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, ell: u64, seed: u64) ->
         let mut failed = false;
         for jt in phi.neighbors(f, j, &mut rng) {
             let iso = crate::find::elkies::elkies_codomain(f, &phi, &e, jt).and_then(|et| {
-                crate::find::bmss::isogeny(f, crate::find::bmss::Method::FastElkiesPrime, &e, &et, ell as usize, None)
+                crate::find::bmss::isogeny(
+                    f,
+                    crate::find::bmss::Method::FastElkiesPrime,
+                    &e,
+                    &et,
+                    ell as usize,
+                    None,
+                )
             });
             match iso {
                 Some(iso) => out.push(record_from(f, &e, &iso, Some(&phi), &mut rng)),
@@ -672,7 +776,12 @@ fn isogenies_in<F: PrimeFieldInt>(f: &F, c: &PrimeCurve, ell: u64, seed: u64) ->
 
 /// The isogeny with the given monic kernel polynomial (coefficients low to high; degree
 /// (l-1)/2 for odd l, 1 for l = 2), by Kohel's formulas.
-pub fn isogeny_from_kernel(curve: &PrimeCurve, kernel: &[Int], ell: u64, seed: u64) -> Result<IsogenyRecord, String> {
+pub fn isogeny_from_kernel(
+    curve: &PrimeCurve,
+    kernel: &[Int],
+    ell: u64,
+    seed: u64,
+) -> Result<IsogenyRecord, String> {
     struct T<'a>(&'a PrimeCurve, &'a [Int], u64, u64);
     impl FieldTask for T<'_> {
         type Out = Result<IsogenyRecord, String>;
@@ -709,7 +818,7 @@ pub fn kernel_from_x(curve: &PrimeCurve, x0: &Int, ell: u64) -> Option<Vec<Int>>
             Some(h.iter().map(|&c| f.int(c)).collect())
         }
     }
-    if ell < 3 || ell % 2 == 0 {
+    if ell < 3 || ell.is_multiple_of(2) {
         return None;
     }
     with_field(&curve.p, T(curve, x0, ell))
@@ -726,7 +835,11 @@ pub fn modular_polynomial(p: &Int, ell: usize) -> Result<Vec<Vec<Int>>, String> 
     impl FieldTask for T {
         type Out = Vec<Vec<Int>>;
         fn run<F: PrimeFieldInt>(self, f: &F) -> Self::Out {
-            Phi::compute(f, self.0).c.iter().map(|row| row.iter().map(|&x| f.int(x)).collect()).collect()
+            Phi::compute(f, self.0)
+                .c
+                .iter()
+                .map(|row| row.iter().map(|&x| f.int(x)).collect())
+                .collect()
         }
     }
     Ok(with_field(p, T(ell)))
@@ -740,18 +853,29 @@ pub fn modular_polynomial_integer(ell: usize) -> (Vec<Vec<Int>>, Check) {
     let fq = Zp::new(q);
     let direct = Phi::compute(&fq, ell).c;
     let qi = Int::from(q);
-    let same = c.iter().zip(&direct).all(|(r, d)| r.iter().zip(d).all(|(x, &y)| x.modulo(&qi) == Int::from(y)));
+    let same = c
+        .iter()
+        .zip(&direct)
+        .all(|(r, d)| r.iter().zip(d).all(|(x, &y)| x.modulo(&qi) == Int::from(y)));
     let check = Check::new(
         "reduction_mod_independent_prime",
         if same { Status::Pass } else { Status::Fail },
-        format!("Phi_l over Z reduced mod 2^61 - 1 equals Phi_l computed mod 2^61 - 1 ({})", if same { "equal" } else { "differs" }),
+        format!(
+            "Phi_l over Z reduced mod 2^61 - 1 equals Phi_l computed mod 2^61 - 1 ({})",
+            if same { "equal" } else { "differs" }
+        ),
     );
     (c, check)
 }
 
 /// Coefficients of Phi_l(X, j) mod p (low to high) and its roots in F_p (the j-invariants of the
 /// F_p-rational l-isogenous curves).
-pub fn modular_polynomial_at(p: &Int, ell: usize, j: &Int, seed: u64) -> Result<(Vec<Int>, Vec<Int>), String> {
+pub fn modular_polynomial_at(
+    p: &Int,
+    ell: usize,
+    j: &Int,
+    seed: u64,
+) -> Result<(Vec<Int>, Vec<Int>), String> {
     if *p <= Int::from(ell as i64 + 1) {
         return Err("Phi_l mod p by q-expansions needs p > l + 1".into());
     }
@@ -762,7 +886,10 @@ pub fn modular_polynomial_at(p: &Int, ell: usize, j: &Int, seed: u64) -> Result<
             let phi = Phi::compute(f, self.0);
             let g = phi.y_poly(f, f.elem(self.1));
             let mut rng = Rng::new(self.2);
-            let mut roots: Vec<Int> = poly::roots(f, &g, &mut rng).into_iter().map(|r| f.int(r)).collect();
+            let mut roots: Vec<Int> = poly::roots(f, &g, &mut rng)
+                .into_iter()
+                .map(|r| f.int(r))
+                .collect();
             roots.sort();
             (g.iter().map(|&x| f.int(x)).collect(), roots)
         }

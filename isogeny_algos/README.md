@@ -9,6 +9,19 @@ algorithm families. Nothing here is constant-time or intended for production.
 **What is covered, what is not, and why: [`docs/SURVEY.md`](docs/SURVEY.md)** (status of every
 algorithm in the literature I could identify, with the module and the test that checks it).
 
+## Using it
+
+For other tools in this repository: the `isogeny-algos` command line prints one JSON object per
+run (certified point counts with ICV1 identities, rational ℓ-isogenies with kernels and maps,
+Φ_ℓ mod p or over ℤ), every result with its checks and a `PASS` / `FAIL` / `INDETERMINATE` status
+and a matching exit code. Rust callers use the `api` module. **Guide: [`docs/USAGE.md`](docs/USAGE.md).**
+
+```
+cargo build --locked --release
+target/release/isogeny-algos count --curve secp256k1
+target/release/isogeny-algos isogenies --p 2305843009213693951 --a 3 --b 1234567 --ell 7
+```
+
 ## Implemented
 
 V1 = first delivery, V2 = kernel-only/BMSS extension, V3 = speed and coverage round. Different
@@ -26,7 +39,7 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `gf3n.rs` GF(3ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 101 tests, all pass)
+## Correctness checks (`cargo test --release`: 109 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -72,6 +85,15 @@ Added in V3:
   the exponentiation version; the SEA Atkin degree (equality at the divisors of ℓ + 1) = the gcd
   definition on 60 Atkin cases.
 
+The command line and `api` (`tests/api.rs`, `tests/icv1.rs`): SHA-256 against the FIPS 180-4
+vectors; ICV1 strings and slugs equal the crypto crate's `curve_id::prime` vectors and the P-256 and
+secp256k1 entries of `docs/curves/registry.json`; SEA and CM counts = BSGS at 48 bits and
+#E + #Eᵗ = 2p + 2; a wrong order fails; `isogenies` = the roots of Φ_ℓ(j, Y) in F_p (ℓ = 3..13, all
+checks pass; ℓ = 2 from the rational 2-torsion), and Vélu from each kernel polynomial gives the same
+codomain; exit codes 0 / 1 / 2 on a passing, failing and malformed run. `report` reproduces the
+committed `results/baseline*.md` byte for byte (`tests/report.rs`), and the embedded assembly is the
+output of its generator (`tests/adx_gen.rs`).
+
 The benchmark re-verifies each result before timing and stores `verified` in every record.
 
 ## Run
@@ -85,7 +107,7 @@ cargo run --release --bin bench -- --out results/run-v3b.jsonl theta twopow sea 
 cargo run --release --bin bench -- --out results/run-p10.jsonl nc_fields nc_atkin nc_suth find sea   # p10 / p11 groups
 cargo run --release --bin bench -- --quick kernel2                         # smoke test of one group
 cargo run --release --bin micro -- --out results/micro.jsonl               # field / polynomial / GF(2^n) micro benchmarks
-python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
+cargo run --release --bin report -- results/run-v2.jsonl > results/run-v2.md
 ```
 
 `ISOGENY_NO_ADX=1` disables the assembly multiplier; `ISOGENY_ADX4=1` enables it for 256-bit fields.

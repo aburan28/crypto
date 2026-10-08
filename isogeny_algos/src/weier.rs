@@ -16,14 +16,29 @@ pub struct GWCurve<E> {
 
 impl<E: Copy + PartialEq> GWCurve<E> {
     pub fn new(a: [E; 5]) -> Self {
-        GWCurve { a1: a[0], a2: a[1], a3: a[2], a4: a[3], a6: a[4] }
+        GWCurve {
+            a1: a[0],
+            a2: a[1],
+            a3: a[2],
+            a4: a[3],
+            a6: a[4],
+        }
     }
     pub fn on_curve<F: Field<E = E>>(&self, f: &F, p: &Pt<E>) -> bool {
         match *p {
             Pt::Inf => true,
             Pt::Aff(x, y) => {
-                let l = f.add(f.add(f.sq(y), f.mul(self.a1, f.mul(x, y))), f.mul(self.a3, y));
-                let r = f.add(f.add(f.add(f.mul(f.sq(x), x), f.mul(self.a2, f.sq(x))), f.mul(self.a4, x)), self.a6);
+                let l = f.add(
+                    f.add(f.sq(y), f.mul(self.a1, f.mul(x, y))),
+                    f.mul(self.a3, y),
+                );
+                let r = f.add(
+                    f.add(
+                        f.add(f.mul(f.sq(x), x), f.mul(self.a2, f.sq(x))),
+                        f.mul(self.a4, x),
+                    ),
+                    self.a6,
+                );
                 l == r
             }
         }
@@ -48,15 +63,33 @@ impl<E: Copy + PartialEq> GWCurve<E> {
         }
         let lam = if x1 == x2 {
             // doubling: (3x^2 + 2 a2 x + a4 - a1 y) / (2y + a1 x + a3)
-            let num = f.sub(f.add(f.add(f.mul(f.from_u64(3), f.sq(x1)), f.mul(f.mul(f.from_u64(2), self.a2), x1)), self.a4), f.mul(self.a1, y1));
+            let num = f.sub(
+                f.add(
+                    f.add(
+                        f.mul(f.from_u64(3), f.sq(x1)),
+                        f.mul(f.mul(f.from_u64(2), self.a2), x1),
+                    ),
+                    self.a4,
+                ),
+                f.mul(self.a1, y1),
+            );
             let den = f.add(f.add(f.mul(f.from_u64(2), y1), f.mul(self.a1, x1)), self.a3);
             f.div(num, den)
         } else {
             f.div(f.sub(y2, y1), f.sub(x2, x1))
         };
         // x3 = lam^2 + a1 lam - a2 - x1 - x2;  y3 = -(lam (x3 - x1) + y1) - a1 x3 - a3
-        let x3 = f.sub(f.sub(f.sub(f.add(f.sq(lam), f.mul(self.a1, lam)), self.a2), x1), x2);
-        let y3 = f.sub(f.sub(f.neg(f.add(f.mul(lam, f.sub(x3, x1)), y1)), f.mul(self.a1, x3)), self.a3);
+        let x3 = f.sub(
+            f.sub(f.sub(f.add(f.sq(lam), f.mul(self.a1, lam)), self.a2), x1),
+            x2,
+        );
+        let y3 = f.sub(
+            f.sub(
+                f.neg(f.add(f.mul(lam, f.sub(x3, x1)), y1)),
+                f.mul(self.a1, x3),
+            ),
+            self.a3,
+        );
         Pt::Aff(x3, y3)
     }
     fn neg_y<F: Field<E = E>>(&self, f: &F, x: E, y: E) -> E {
@@ -91,7 +124,13 @@ impl<E: Copy + PartialEq> GWCurve<E> {
         let b4 = f.add(f.mul(c(2), self.a4), f.mul(self.a1, self.a3));
         let b6 = f.add(f.sq(self.a3), f.mul(c(4), self.a6));
         let b8 = f.add(
-            f.sub(f.add(f.mul(f.sq(self.a1), self.a6), f.mul(c(4), f.mul(self.a2, self.a6))), f.mul(self.a1, f.mul(self.a3, self.a4))),
+            f.sub(
+                f.add(
+                    f.mul(f.sq(self.a1), self.a6),
+                    f.mul(c(4), f.mul(self.a2, self.a6)),
+                ),
+                f.mul(self.a1, f.mul(self.a3, self.a4)),
+            ),
             f.sub(f.mul(self.a2, f.sq(self.a3)), f.sq(self.a4)),
         );
         (b2, b4, b6, b8)
@@ -127,8 +166,20 @@ pub fn gw_velu_cyclic<F: Field>(f: &F, e: &GWCurve<F::E>, p: &Pt<F::E>, ell: u64
             Pt::Inf => panic!("kernel generator order mismatch"),
         };
         // gxQ = 3 xQ^2 + 2 a2 xQ + a4 - a1 yQ;  gyQ = -2 yQ - a1 xQ - a3
-        let gx = f.sub(f.add(f.add(f.mul(f.from_u64(3), f.sq(xq)), f.mul(f.mul(f.from_u64(2), e.a2), xq)), e.a4), f.mul(e.a1, yq));
-        let gy = f.sub(f.sub(f.neg(f.mul(f.from_u64(2), yq)), f.mul(e.a1, xq)), e.a3);
+        let gx = f.sub(
+            f.add(
+                f.add(
+                    f.mul(f.from_u64(3), f.sq(xq)),
+                    f.mul(f.mul(f.from_u64(2), e.a2), xq),
+                ),
+                e.a4,
+            ),
+            f.mul(e.a1, yq),
+        );
+        let gy = f.sub(
+            f.sub(f.neg(f.mul(f.from_u64(2), yq)), f.mul(e.a1, xq)),
+            e.a3,
+        );
         // Q not 2-torsion: tQ = 2 gxQ - a1 gyQ, uQ = gyQ^2
         let tq = f.sub(f.mul(f.from_u64(2), gx), f.mul(e.a1, gy));
         let uq = f.sq(gy);
@@ -146,7 +197,12 @@ pub fn gw_velu_cyclic<F: Field>(f: &F, e: &GWCurve<F::E>, p: &Pt<F::E>, ell: u64
         a4: f.sub(e.a4, f.mul(c(5), t)),
         a6: f.sub(f.sub(e.a6, f.mul(b2, t)), f.mul(c(7), w)),
     };
-    GWVelu { dom: *e, cod, deg: ell, data }
+    GWVelu {
+        dom: *e,
+        cod,
+        deg: ell,
+        data,
+    }
 }
 
 impl<E: Copy + PartialEq> GWVelu<E> {
@@ -167,13 +223,22 @@ impl<E: Copy + PartialEq> GWVelu<E> {
             let di2 = f.sq(di);
             let di3 = f.mul(di2, di);
             xx = f.add(xx, f.add(f.mul(tq, di), f.mul(uq, di2)));
-            dxdx = f.sub(dxdx, f.add(f.mul(tq, di2), f.mul(f.mul(f.from_u64(2), uq), di3)));
+            dxdx = f.sub(
+                dxdx,
+                f.add(f.mul(tq, di2), f.mul(f.mul(f.from_u64(2), uq), di3)),
+            );
         }
         // the Vélu isogeny is normalised: dX/(2Y + A1 X + A3) = dx/(2y + a1 x + a3), so
         // 2Y + A1 X + A3 = (2y + a1 x + a3) X'(x), hence Y = ((2y+a1x+a3) X'(x) - A1 X - A3)/2
-        let two_y = f.add(f.add(f.mul(f.from_u64(2), y), f.mul(self.dom.a1, x)), self.dom.a3);
+        let two_y = f.add(
+            f.add(f.mul(f.from_u64(2), y), f.mul(self.dom.a1, x)),
+            self.dom.a3,
+        );
         let yy = f.div(
-            f.sub(f.sub(f.mul(two_y, dxdx), f.mul(self.cod.a1, xx)), self.cod.a3),
+            f.sub(
+                f.sub(f.mul(two_y, dxdx), f.mul(self.cod.a1, xx)),
+                self.cod.a3,
+            ),
             f.from_u64(2),
         );
         Pt::Aff(xx, yy)

@@ -39,10 +39,16 @@ fn maximal_order_and_ideals() {
         assert!(o0.contains(&Quat::one()));
         // reduced norm is multiplicative and integral on O_0
         for _ in 0..20 {
-            let (x, y) = (rand_o0_elt(&alg, &o0, &mut rng, 50), rand_o0_elt(&alg, &o0, &mut rng, 50));
+            let (x, y) = (
+                rand_o0_elt(&alg, &o0, &mut rng, 50),
+                rand_o0_elt(&alg, &o0, &mut rng, 50),
+            );
             let (nx, dx) = alg.nrd(&x);
             let (ny, dy) = alg.nrd(&y);
-            assert!(dx == Int::one() && dy == Int::one(), "integral norms on O_0");
+            assert!(
+                dx == Int::one() && dy == Int::one(),
+                "integral norms on O_0"
+            );
             assert_eq!(alg.nrd(&alg.mul(&x, &y)), (&nx * &ny, Int::one()));
         }
         // ideals of prime norm
@@ -54,7 +60,10 @@ fn maximal_order_and_ideals() {
             let a = loop {
                 let a = rand_o0_elt(&alg, &o0, &mut rng, 20);
                 let (na, _) = alg.nrd(&a);
-                if !a.is_zero() && na.modulo(&ni).is_zero() && !(o0.scale(&ni, &Int::one())).contains(&a) {
+                if !a.is_zero()
+                    && na.modulo(&ni).is_zero()
+                    && !(o0.scale(&ni, &Int::one())).contains(&a)
+                {
                     break a;
                 }
             };
@@ -72,7 +81,11 @@ fn maximal_order_and_ideals() {
             assert_eq!(i.mul(&alg, &i.conj()), o0.scale(&ni, &Int::one()));
             // LLL keeps the lattice
             let rb = i.reduced_basis(&alg);
-            let l2 = Lattice::from_gens(&rb.iter().map(|r| Quat::new(r.clone(), i.den.clone())).collect::<Vec<_>>());
+            let l2 = Lattice::from_gens(
+                &rb.iter()
+                    .map(|r| Quat::new(r.clone(), i.den.clone()))
+                    .collect::<Vec<_>>(),
+            );
             assert_eq!(l2, i);
         }
         // units of O_0: norm-1 elements (scaled bound: den^2 * 1)
@@ -93,14 +106,22 @@ fn brandt_matrix_spectrum_matches_supersingular_graph() {
             let cs = class_set(&alg, ell, &mut rng);
             let (js, a) = supersingular_graph(p as u64, ell as usize, &mut rng);
             let h = cs.reps.len();
-            assert_eq!(h, js.len(), "class number = number of supersingular j, p = {p}");
+            assert_eq!(
+                h,
+                js.len(),
+                "class number = number of supersingular j, p = {p}"
+            );
             // expected class number: floor(p/12) + {0,1,1,2} for p = 1,5,7,11 mod 12
             let extra = [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 2][(p % 12) as usize];
             assert_eq!(h as i64, p / 12 + extra);
             for row in &cs.brandt {
                 assert_eq!(row.iter().sum::<u32>(), ell as u32 + 1);
             }
-            assert_eq!(power_traces(&cs.brandt, h), power_traces(&a, h), "spectra, p = {p}, l = {ell}");
+            assert_eq!(
+                power_traces(&cs.brandt, h),
+                power_traces(&a, h),
+                "spectra, p = {p}, l = {ell}"
+            );
         }
     }
 }
@@ -111,9 +132,15 @@ fn random_ideal(alg: &Alg, o0: &Lattice, n: &Int, rng: &mut Rng) -> Lattice {
     use isogeny_algos::quat::klpt::ideal_from;
     loop {
         let x = if n.is_probable_prime() {
-            let (b, c, d) = (Int::from(rng.next() >> 2), Int::from(rng.next() >> 2), Int::from(rng.next() >> 2));
+            let (b, c, d) = (
+                Int::from(rng.next() >> 2),
+                Int::from(rng.next() >> 2),
+                Int::from(rng.next() >> 2),
+            );
             let t = -&(&(&b * &b) + &(&alg.p * &(&(&c * &c) + &(&d * &d))));
-            let Some(a) = Int::sqrt_mod_prime(&t, n) else { continue };
+            let Some(a) = Int::sqrt_mod_prime(&t, n) else {
+                continue;
+            };
             Quat::new([a, b, c, d], Int::one())
         } else {
             let x = rand_o0_elt(alg, o0, rng, 1000);
@@ -134,7 +161,11 @@ fn klpt_outputs_equivalent_two_power_norm_ideals() {
     use isogeny_algos::bigint::Big;
     use isogeny_algos::quat::klpt::*;
     let mut rng = Rng::new(902);
-    for ps in ["2147483647", "1152921504606847067", "1267650600228229401496703205707"] {
+    for ps in [
+        "2147483647",
+        "1152921504606847067",
+        "1267650600228229401496703205707",
+    ] {
         let p = Int::from_big(&Big::from_dec(ps));
         let alg = Alg::new(&p);
         let o0 = alg.o0();
@@ -145,13 +176,25 @@ fn klpt_outputs_equivalent_two_power_norm_ideals() {
         for n in [Int::from(3i64.pow(5) * 5), big_n] {
             let i = random_ideal(&alg, &o0, &n, &mut rng);
             let res = klpt(&alg, &i, 2, &mut rng).expect("KLPT");
-            assert_eq!(res.j.norm(&o0), (Int::from(2i64).pow(res.e), Int::one()), "p = {p}");
+            assert_eq!(
+                res.j.norm(&o0),
+                (Int::from(2i64).pow(res.e), Int::one()),
+                "p = {p}"
+            );
             assert!(o0.contains_lattice(&res.j), "J in O_0");
             assert_eq!(res.j.left_order(&alg, &o0), o0, "left O_0-ideal");
             assert_eq!(i.rmul(&alg, &res.xi), res.j, "J = I xi");
-            assert!(!o0.scale(&Int::from(2i64), &Int::one()).contains_lattice(&res.j), "primitive");
+            assert!(
+                !o0.scale(&Int::from(2i64), &Int::one())
+                    .contains_lattice(&res.j),
+                "primitive"
+            );
             let logp = p.to_f64().log2();
-            eprintln!("p ~ 2^{logp:.0}, N(I) = {n}: e = {} ({:.2} log2 p)", res.e, res.e as f64 / logp);
+            eprintln!(
+                "p ~ 2^{logp:.0}, N(I) = {n}: e = {} ({:.2} log2 p)",
+                res.e,
+                res.e as f64 / logp
+            );
         }
     }
 }
@@ -176,11 +219,16 @@ fn deuring_classes_to_supersingular_curves() {
     // Deuring map on class representatives: a bijection onto the supersingular j-invariants
     let mut map = vec![];
     for (t, i) in cs.reps.iter().enumerate() {
-        let j = d.ideal_to_j(i, &mut rng).unwrap_or_else(|| panic!("class {t}: no smooth equivalent"));
+        let j = d
+            .ideal_to_j(i, &mut rng)
+            .unwrap_or_else(|| panic!("class {t}: no smooth equivalent"));
         map.push(j);
     }
     let jidx: HashMap<(u64, u64), usize> = js.iter().enumerate().map(|(k, &j)| (j, k)).collect();
-    let perm: Vec<usize> = map.iter().map(|j| *jidx.get(j).expect("Deuring image is supersingular")).collect();
+    let perm: Vec<usize> = map
+        .iter()
+        .map(|j| *jidx.get(j).expect("Deuring image is supersingular"))
+        .collect();
     let mut sorted = perm.clone();
     sorted.sort();
     sorted.dedup();
@@ -200,7 +248,9 @@ fn deuring_classes_to_supersingular_curves() {
             let k = loop {
                 let r = isogeny_algos::curve::random_point_f(&f2, &d.e0, &mut rng);
                 let k = pmul(&f2, &d.e0, &r, (p as u128 * p as u128 - 1) / n as u128);
-                let ok = isogeny_algos::field::factor_u64(n).iter().all(|&(l, _)| pmul(&f2, &d.e0, &k, (n / l) as u128) != Pt::Inf);
+                let ok = isogeny_algos::field::factor_u64(n)
+                    .iter()
+                    .all(|&(l, _)| pmul(&f2, &d.e0, &k, (n / l) as u128) != Pt::Inf);
                 if ok {
                     break k;
                 }

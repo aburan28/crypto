@@ -23,7 +23,10 @@ pub fn weierstrass_j<F: Field>(f: &F, a: [F::E; 5]) -> F::E {
     let b4 = f.add(f.mul(c(2), a4), f.mul(a1, a3));
     let b6 = f.add(f.mul(a3, a3), f.mul(c(4), a6));
     let c4 = f.sub(f.mul(b2, b2), f.mul(c(24), b4));
-    let c6 = f.add(f.sub(f.mul(c(36), f.mul(b2, b4)), f.mul(b2, f.mul(b2, b2))), f.neg(f.mul(c(216), b6)));
+    let c6 = f.add(
+        f.sub(f.mul(c(36), f.mul(b2, b4)), f.mul(b2, f.mul(b2, b2))),
+        f.neg(f.mul(c(216), b6)),
+    );
     let c43 = f.mul(c4, f.mul(c4, c4));
     let disc1728 = f.sub(c43, f.mul(c6, c6)); // 1728 Delta
     f.div(f.mul(c(1728), c43), disc1728)
@@ -37,7 +40,10 @@ pub fn to_short<F: Field>(f: &F, a: [F::E; 5]) -> Curve<F::E> {
     let b4 = f.add(f.mul(c(2), a4), f.mul(a1, a3));
     let b6 = f.add(f.mul(a3, a3), f.mul(c(4), a6));
     let c4 = f.sub(f.mul(b2, b2), f.mul(c(24), b4));
-    let c6 = f.add(f.sub(f.mul(c(36), f.mul(b2, b4)), f.mul(b2, f.mul(b2, b2))), f.neg(f.mul(c(216), b6)));
+    let c6 = f.add(
+        f.sub(f.mul(c(36), f.mul(b2, b4)), f.mul(b2, f.mul(b2, b2))),
+        f.neg(f.mul(c(216), b6)),
+    );
     Curve::new(f.neg(f.mul(c(27), c4)), f.neg(f.mul(c(54), c6)))
 }
 
@@ -77,7 +83,10 @@ pub fn step3<F: Field>(f: &F, a1: F::E, a3: F::E, e3: &Big) -> (F::E, F::E) {
     let c = |v: u64| f.from_u64(v);
     let a1n = f.sub(a1, f.mul(c(6), alpha));
     let al2 = f.mul(alpha, alpha);
-    let a3n = f.add(f.sub(f.mul(c(3), f.mul(a1, al2)), f.mul(f.mul(a1, a1), alpha)), f.mul(c(9), a3));
+    let a3n = f.add(
+        f.sub(f.mul(c(3), f.mul(a1, al2)), f.mul(f.mul(a1, a1), alpha)),
+        f.mul(c(9), a3),
+    );
     (a1n, a3n)
 }
 
@@ -88,8 +97,20 @@ pub fn step5<F: Field>(f: &F, b: F::E, e5: &Big) -> F::E {
     let a2 = f.mul(a, a);
     let a3 = f.mul(a2, a);
     let a4 = f.mul(a3, a);
-    let num = f.add(f.add(f.add(f.add(a4, f.mul(c(3), a3)), f.mul(c(4), a2)), f.mul(c(2), a)), f.one());
-    let den = f.add(f.sub(f.add(f.sub(a4, f.mul(c(2), a3)), f.mul(c(4), a2)), f.mul(c(3), a)), f.one());
+    let num = f.add(
+        f.add(
+            f.add(f.add(a4, f.mul(c(3), a3)), f.mul(c(4), a2)),
+            f.mul(c(2), a),
+        ),
+        f.one(),
+    );
+    let den = f.add(
+        f.sub(
+            f.add(f.sub(a4, f.mul(c(2), a3)), f.mul(c(4), a2)),
+            f.mul(c(3), a),
+        ),
+        f.one(),
+    );
     f.div(f.mul(a, num), den)
 }
 
@@ -97,7 +118,11 @@ pub fn step5<F: Field>(f: &F, b: F::E, e5: &Big) -> F::E {
 fn ipoly<F: Field>(f: &F, coeffs: &[i64], t: F::E) -> F::E {
     let mut acc = f.zero();
     for &c in coeffs.iter().rev() {
-        let cc = if c >= 0 { f.from_u64(c as u64) } else { f.neg(f.from_u64((-c) as u64)) };
+        let cc = if c >= 0 {
+            f.from_u64(c as u64)
+        } else {
+            f.neg(f.from_u64((-c) as u64))
+        };
         acc = f.add(f.mul(acc, t), cc);
     }
     acc
@@ -123,7 +148,7 @@ pub fn step7<F: Field>(f: &F, t: F::E, e7: &Big) -> F::E {
     let tm1 = f.sub(t, f.one());
     let rho = f.mul(t, f.mul(tm1, tm1));
     let a = f.pow_big(rho, e7); // alpha
-    // numerator coefficients P_k(t) (cleared by *7); denominator D(t) likewise.
+                                // numerator coefficients P_k(t) (cleared by *7); denominator D(t) likewise.
     const D: [i64; 5] = [1, 4, -13, 9, -1];
     const P: [&[i64]; 7] = [
         &[0, 12, -28, 19, -3],

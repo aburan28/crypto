@@ -29,10 +29,18 @@ fn points(f: &Zp, e: &Hessian<u64>) -> Vec<HPt<u64>> {
 
 fn weierstrass_count(f: &Zp, c: &Curve<u64>) -> u64 {
     let p = f.p;
-    1 + (0..p).map(|x| {
-        let r = isogeny_algos::curve::rhs(f, c, x);
-        if r == 0 { 1 } else if f.legendre(r) == 1 { 2 } else { 0 }
-    }).sum::<u64>()
+    1 + (0..p)
+        .map(|x| {
+            let r = isogeny_algos::curve::rhs(f, c, x);
+            if r == 0 {
+                1
+            } else if f.legendre(r) == 1 {
+                2
+            } else {
+                0
+            }
+        })
+        .sum::<u64>()
 }
 
 #[test]
@@ -42,9 +50,19 @@ fn hessian_group_law_isogenies_and_codomain() {
     let mut rng = Rng::new(5);
     let mut tested = std::collections::HashSet::new();
     let mut attempts = 0;
-    while tested.iter().map(|t: &(u64, u64)| t.0).collect::<std::collections::HashSet<_>>().len() < 5 && attempts < 1000 {
+    while tested
+        .iter()
+        .map(|t: &(u64, u64)| t.0)
+        .collect::<std::collections::HashSet<_>>()
+        .len()
+        < 5
+        && attempts < 1000
+    {
         attempts += 1;
-        let e = Hessian { a: f.random(&mut rng), d: f.random(&mut rng) };
+        let e = Hessian {
+            a: f.random(&mut rng),
+            d: f.random(&mut rng),
+        };
         // non-singular: a (d^3 - 27 a) != 0
         if e.a == 0 || f.sub(f.mul(e.d, f.sq(e.d)), f.mul(27, e.a)) == 0 || e.d == 0 {
             continue;
@@ -60,7 +78,11 @@ fn hessian_group_law_isogenies_and_codomain() {
         // group law: identity, inverse, associativity
         let o = e.identity(&f);
         for _ in 0..20 {
-            let (a, b, c) = (pts[rng.below(n) as usize], pts[rng.below(n) as usize], pts[rng.below(n) as usize]);
+            let (a, b, c) = (
+                pts[rng.below(n) as usize],
+                pts[rng.below(n) as usize],
+                pts[rng.below(n) as usize],
+            );
             assert!(e.eq(&f, &e.add(&f, &a, &o), &a));
             assert!(e.eq(&f, &e.add(&f, &a, &e.neg(&a)), &o));
             let l = e.add(&f, &e.add(&f, &a, &b), &c);
@@ -69,7 +91,7 @@ fn hessian_group_law_isogenies_and_codomain() {
             assert!(e.eq(&f, &e.mul(&f, &a, n), &o));
         }
         for ell in [5u64, 7, 11, 13, 17] {
-            if n % ell != 0 || tested.iter().any(|t| t.0 == ell) {
+            if !n.is_multiple_of(ell) || tested.iter().any(|t| t.0 == ell) {
                 continue;
             }
             // a point of order ell
@@ -82,7 +104,10 @@ fn hessian_group_law_isogenies_and_codomain() {
             let iso = hessian_isogeny(&f, &e, &k, ell).unwrap();
             let cod = iso.cod;
             let mut checked = 0;
-            assert!(e.eq(&f, &iso.eval(&f, &k), &cod.identity(&f)), "kernel -> identity");
+            assert!(
+                e.eq(&f, &iso.eval(&f, &k), &cod.identity(&f)),
+                "kernel -> identity"
+            );
             for _ in 0..20 {
                 let (a, b) = (pts[rng.below(n) as usize], pts[rng.below(n) as usize]);
                 let (ia, ib) = (iso.eval(&f, &a), iso.eval(&f, &b));

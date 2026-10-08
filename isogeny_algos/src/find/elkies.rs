@@ -130,9 +130,7 @@ pub fn bmss_isogeny<F: Field>(
     for _ in 0..n {
         let uv = ser_compose(f, &u, &v, n);
         let mut nv = vec![f.zero(); n];
-        for i in 0..n - 1 {
-            nv[i + 1] = uv[i];
-        }
+        nv[1..n].copy_from_slice(&uv[..n - 1]);
         v = nv;
     }
     // sigma(w) = U(v(w)) / U'(v(w))

@@ -16,7 +16,11 @@ fn sutherland_phi_mod_p_matches_qexpansion() {
                 let fp = Zp::new(cand);
                 let mut rng = Rng::new(0x5107 ^ cand);
                 let c = phi_mod_p(cand, ell, &mut rng).expect("enough full-structure curves");
-                assert_eq!(c, Phi::compute(&fp, ell).c, "l={ell} p={cand}: Sutherland != Hecke mod p");
+                assert_eq!(
+                    c,
+                    Phi::compute(&fp, ell).c,
+                    "l={ell} p={cand}: Sutherland != Hecke mod p"
+                );
                 found += 1;
             }
             cand += 2;
@@ -30,6 +34,10 @@ fn sutherland_phi_mod_p_matches_qexpansion() {
 fn sutherland_phi_crt_matches_integer_phi() {
     for &ell in &[3usize, 5] {
         let c = phi_crt(ell).expect("phi_crt");
-        assert_eq!(c, integer_coeffs(ell), "l={ell}: Sutherland CRT != integer Phi_l");
+        assert_eq!(
+            c,
+            integer_coeffs(ell),
+            "l={ell}: Sutherland CRT != integer Phi_l"
+        );
     }
 }

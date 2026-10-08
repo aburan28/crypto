@@ -10,7 +10,7 @@ pub fn curve_with_point(fp: &Zp, ell: u64, rng: &mut Rng) -> (Curve<u64>, Pt<u64
             continue;
         }
         let n = order(fp, &c, rng);
-        if n % ell != 0 {
+        if !n.is_multiple_of(ell) {
             continue;
         }
         let r = c.random_point(fp, rng);
@@ -102,7 +102,7 @@ pub fn supersingular_workload<const N: usize>(
     }
     let cbits = bits - prod.bits();
     let p = loop {
-        let mut limbs: Vec<u64> = (0..(cbits + 63) / 64).map(|_| rng.next()).collect();
+        let mut limbs: Vec<u64> = (0..cbits.div_ceil(64)).map(|_| rng.next()).collect();
         let top = (cbits - 1) % 64;
         let last = limbs.len() - 1;
         limbs[last] &= (1u64 << top << 1).wrapping_sub(1);
@@ -126,11 +126,16 @@ pub fn supersingular_workload<const N: usize>(
     for _ in 0..6 {
         let k = point_of_order(&e, 3, rng);
         let Pt::Aff(x0, _) = k else { unreachable!() };
-        e = crate::kernel::xonly::velu_xonly_fast(&f, &e, x0, 3).unwrap().cod;
+        e = crate::kernel::xonly::velu_xonly_fast(&f, &e, x0, 3)
+            .unwrap()
+            .cod;
     }
     let j = jinv(&f, &e);
     assert!(j != f.zero() && j != f.from_u64(1728));
-    let pts = ells.iter().map(|&l| (l, point_of_order(&e, l, rng))).collect();
+    let pts = ells
+        .iter()
+        .map(|&l| (l, point_of_order(&e, l, rng)))
+        .collect();
     SsWorkload { f, e, pts }
 }
 
@@ -138,19 +143,34 @@ pub fn supersingular_workload<const N: usize>(
 
 /// A point of exact order m (m | p + 1) on a supersingular curve over F_{p^2} whose group is
 /// (Z/(p+1))^2.
-pub fn ss_point_of_order(f: &Zp2, e: &Curve<(u64, u64)>, p: u64, m: u64, rng: &mut Rng) -> Pt<(u64, u64)> {
+pub fn ss_point_of_order(
+    f: &Zp2,
+    e: &Curve<(u64, u64)>,
+    p: u64,
+    m: u64,
+    rng: &mut Rng,
+) -> Pt<(u64, u64)> {
     let fac = factor_u64(m);
     loop {
         let r = random_point_f(f, e, rng);
         let q = pmul(f, e, &r, ((p + 1) / m) as u128);
-        if fac.iter().all(|&(l, _)| pmul(f, e, &q, (m / l) as u128) != Pt::Inf) {
+        if fac
+            .iter()
+            .all(|&(l, _)| pmul(f, e, &q, (m / l) as u128) != Pt::Inf)
+        {
             return q;
         }
     }
 }
 
 /// Basis of E[2^m] on such a curve.
-pub fn ss_basis2(f: &Zp2, e: &Curve<(u64, u64)>, p: u64, m: u32, rng: &mut Rng) -> (Pt<(u64, u64)>, Pt<(u64, u64)>) {
+pub fn ss_basis2(
+    f: &Zp2,
+    e: &Curve<(u64, u64)>,
+    p: u64,
+    m: u32,
+    rng: &mut Rng,
+) -> (Pt<(u64, u64)>, Pt<(u64, u64)>) {
     let n = 1u64 << m;
     let a = ss_point_of_order(f, e, p, n, rng);
     let a2 = pmul(f, e, &a, (n / 2) as u128);
@@ -163,7 +183,13 @@ pub fn ss_basis2(f: &Zp2, e: &Curve<(u64, u64)>, p: u64, m: u32, rng: &mut Rng) 
 }
 
 /// Cyclic isogeny with kernel <r> of order m as prime-degree Velu steps: codomain and images.
-pub fn cyclic_isogeny_chain<F: Field>(f: &F, e: &Curve<F::E>, r: &Pt<F::E>, m: u64, pts: &[Pt<F::E>]) -> (Curve<F::E>, Vec<Pt<F::E>>) {
+pub fn cyclic_isogeny_chain<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    r: &Pt<F::E>,
+    m: u64,
+    pts: &[Pt<F::E>],
+) -> (Curve<F::E>, Vec<Pt<F::E>>) {
     use crate::kernel::velu::velu_cyclic;
     let mut cur = *e;
     let mut ker = *r;
@@ -281,16 +307,30 @@ pub fn kani_endomorphism_instance<F: Field>(
             break q;
         }
     };
-    let (ch, pushed, _) = ell_power_isogeny(f, &e0, &k3, 3, b as usize, &[pp, qq], Strategy::Balanced);
+    let (ch, pushed, _) =
+        ell_power_isogeny(f, &e0, &k3, 3, b as usize, &[pp, qq], Strategy::Balanced);
     let e = ch.cod;
     let iota_map = |p: &Pt<F::E>| match *p {
         Pt::Inf => Pt::Inf,
         Pt::Aff(x, y) => Pt::Aff(f.neg(x), f.mul(iota, y)),
     };
-    let gamma = |p: &Pt<F::E>| padd(f, &e0, &pmul_big(f, &e0, p, u), &pmul_big(f, &e0, &iota_map(p), v));
+    let gamma = |p: &Pt<F::E>| {
+        padd(
+            f,
+            &e0,
+            &pmul_big(f, &e0, p, u),
+            &pmul_big(f, &e0, &iota_map(p), v),
+        )
+    };
     let (gp, gq) = (gamma(&pp), gamma(&qq));
     let q2 = padd(f, &e, &pushed[1], &pmul(f, &e, &pushed[0], 2));
-    KaniEndoInstance { e0, e, a, k: [(gp, pushed[0]), (gq, pushed[1])], k_twisted: [(gp, pushed[0]), (gq, q2)] }
+    KaniEndoInstance {
+        e0,
+        e,
+        a,
+        k: [(gp, pushed[0]), (gq, pushed[1])],
+        k_twisted: [(gp, pushed[0]), (gq, q2)],
+    }
 }
 
 /// c = a1^2 + a2^2 + a3^2 + a4^2 (randomised: the remainder after two random squares is split by
@@ -303,7 +343,7 @@ pub fn four_squares(c: &crate::int::Int, rng: &mut Rng) -> [crate::int::Int; 4] 
     loop {
         let rand_below = |rng: &mut Rng| {
             let mut v = Int::zero();
-            for _ in 0..(bits + 63) / 64 {
+            for _ in 0..bits.div_ceil(64) {
                 v = &(&v * &Int::from(1i64 << 32)) * &Int::from(1i64 << 32);
                 v = &v + &Int::from((rng.next() >> 1) as i64);
             }
@@ -315,7 +355,11 @@ pub fn four_squares(c: &crate::int::Int, rng: &mut Rng) -> [crate::int::Int; 4] 
             continue;
         }
         let r1s = r1.isqrt();
-        let a2 = if r1s.is_zero() { Int::zero() } else { rand_below(rng).modulo(&(&r1s + &Int::one())) };
+        let a2 = if r1s.is_zero() {
+            Int::zero()
+        } else {
+            rand_below(rng).modulo(&(&r1s + &Int::one()))
+        };
         let r = &r1 - &(&a2 * &a2);
         if r.is_neg() {
             continue;
@@ -330,7 +374,14 @@ pub fn four_squares(c: &crate::int::Int, rng: &mut Rng) -> [crate::int::Int; 4] 
 }
 
 /// [a] P + [b] i(P) on y^2 = x^3 + x (i: (x, y) -> (-x, iota y)), a, b signed.
-pub fn gaussian_action<F: Field>(f: &F, e0: &Curve<F::E>, a: &crate::int::Int, b: &crate::int::Int, iota: F::E, p: &Pt<F::E>) -> Pt<F::E> {
+pub fn gaussian_action<F: Field>(
+    f: &F,
+    e0: &Curve<F::E>,
+    a: &crate::int::Int,
+    b: &crate::int::Int,
+    iota: F::E,
+    p: &Pt<F::E>,
+) -> Pt<F::E> {
     let smul = |k: &crate::int::Int, q: &Pt<F::E>| {
         let r = pmul_big(f, e0, q, k.mag());
         if k.is_neg() {
@@ -385,7 +436,14 @@ pub fn kani4_kernel<F: Field>(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn kani4_instance<F: Field>(f: &F, p1: &crate::bigint::Big, n: u32, b: u32, iota: F::E, rng: &mut Rng) -> Kani4Instance<F> {
+pub fn kani4_instance<F: Field>(
+    f: &F,
+    p1: &crate::bigint::Big,
+    n: u32,
+    b: u32,
+    iota: F::E,
+    rng: &mut Rng,
+) -> Kani4Instance<F> {
     use crate::bigint::Big;
     use crate::int::Int;
     use crate::kernel::chain::{ell_power_isogeny, Strategy};
@@ -395,7 +453,8 @@ pub fn kani4_instance<F: Field>(f: &F, p1: &crate::bigint::Big, n: u32, b: u32, 
     let (cof2, _) = p1.divrem(&two_e);
     let (cof3, _) = p1.divrem(&three_b);
     let half = Big::from_u64(1).shl((n + 1) as usize);
-    let third = (0..b.saturating_sub(1)).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
+    let third =
+        (0..b.saturating_sub(1)).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
     let point2 = |rng: &mut Rng| loop {
         let q = pmul_big(f, &e0, &random_point_f(f, &e0, rng), &cof2);
         if pmul_big(f, &e0, &q, &half) != Pt::Inf {
@@ -416,12 +475,17 @@ pub fn kani4_instance<F: Field>(f: &F, p1: &crate::bigint::Big, n: u32, b: u32, 
             break q;
         }
     };
-    let (ch, pushed, _) = ell_power_isogeny(f, &e0, &k3, 3, b as usize, &[b1, b2], Strategy::Balanced);
+    let (ch, pushed, _) =
+        ell_power_isogeny(f, &e0, &k3, 3, b as usize, &[b1, b2], Strategy::Balanced);
     let e = ch.cod;
     let c = &Int::from_big(&Big::from_u64(1).shl(n as usize)) - &Int::from_big(&three_b);
     let sq = four_squares(&c, rng);
     let k = kani4_kernel(f, &e0, &b1, &b2, &pushed[0], &pushed[1], &sq, iota);
     let tw = padd(f, &e, &pushed[1], &pmul(f, &e, &pushed[0], 2));
     let k_twisted = kani4_kernel(f, &e0, &b1, &b2, &pushed[0], &tw, &sq, iota);
-    Kani4Instance { curves: vec![e0, e0, e, e], k, k_twisted }
+    Kani4Instance {
+        curves: vec![e0, e0, e, e],
+        k,
+        k_twisted,
+    }
 }

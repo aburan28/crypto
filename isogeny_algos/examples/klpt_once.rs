@@ -7,7 +7,9 @@ use std::time::Instant;
 
 fn main() {
     let mut rng = Rng::new(902);
-    let p = Int::from_big(&isogeny_algos::bigint::Big::from_dec(&std::env::args().nth(1).unwrap_or("1000003".into())));
+    let p = Int::from_big(&isogeny_algos::bigint::Big::from_dec(
+        &std::env::args().nth(1).unwrap_or("1000003".into()),
+    ));
     // ideal norm: argument 2 ("small" = 3^5 * 5, else a prime near p)
     let generic = std::env::args().nth(2).as_deref() == Some("generic");
     eprintln!("p = {p}");
@@ -29,7 +31,11 @@ fn main() {
     let a = if generic {
         // alpha = a + b i + c j + d k with n | Nrd(alpha): a = sqrt(-(b^2 + p(c^2 + d^2))) mod n
         loop {
-            let (bb, cc, dd) = (Int::from(rng.next() >> 1), Int::from(rng.next() >> 1), Int::from(rng.next() >> 1));
+            let (bb, cc, dd) = (
+                Int::from(rng.next() >> 1),
+                Int::from(rng.next() >> 1),
+                Int::from(rng.next() >> 1),
+            );
             let t = -&(&(&bb * &bb) + &(&p * &(&(&cc * &cc) + &(&dd * &dd))));
             if let Some(aa) = Int::sqrt_mod_prime(&t, &n) {
                 let x = Quat::new([aa, bb, cc, dd], Int::one());
@@ -59,11 +65,19 @@ fn main() {
     let i = ideal_from(&alg, &o0, &n, &a);
     let t0 = Instant::now();
     let rb = i.reduced_basis(&alg);
-    eprintln!("LLL {:?}: {:?}", t0.elapsed(), rb.iter().map(|v| alg.qf(v)).collect::<Vec<_>>());
+    eprintln!(
+        "LLL {:?}: {:?}",
+        t0.elapsed(),
+        rb.iter().map(|v| alg.qf(v)).collect::<Vec<_>>()
+    );
     let t0 = Instant::now();
     let sv = i.short_vectors(&alg, &(&alg.qf(&rb[0]) * &Int::from(16i64)), 2000);
     eprintln!("short vectors {:?}: {}", t0.elapsed(), sv.len());
     let t0 = Instant::now();
     let res = klpt(&alg, &i, 2, &mut rng);
-    eprintln!("klpt {:?}: {:?}", t0.elapsed(), res.map(|r| (r.e, r.e0, r.e1, r.n_prime)));
+    eprintln!(
+        "klpt {:?}: {:?}",
+        t0.elapsed(),
+        res.map(|r| (r.e, r.e0, r.e1, r.n_prime))
+    );
 }

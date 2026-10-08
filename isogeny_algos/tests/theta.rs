@@ -14,7 +14,10 @@ fn point_of_order(f: &Zp2, e: &Curve<E2>, p: u64, m: u64, rng: &mut Rng) -> Pt<E
     loop {
         let r = random_point_f(f, e, rng);
         let q = pmul(f, e, &r, ((p + 1) / m) as u128);
-        if fac.iter().all(|&(l, _)| pmul(f, e, &q, (m / l) as u128) != Pt::Inf) {
+        if fac
+            .iter()
+            .all(|&(l, _)| pmul(f, e, &q, (m / l) as u128) != Pt::Inf)
+        {
             return q;
         }
     }
@@ -35,7 +38,13 @@ fn basis2(f: &Zp2, e: &Curve<E2>, p: u64, m: u32, rng: &mut Rng) -> (Pt<E2>, Pt<
 
 /// Isogeny with cyclic kernel <r> (order m) as a chain of prime-degree Velu steps; returns the
 /// codomain and the images of `pts`.
-fn chain_iso(f: &Zp2, e: &Curve<E2>, r: &Pt<E2>, m: u64, pts: &[Pt<E2>]) -> (Curve<E2>, Vec<Pt<E2>>) {
+fn chain_iso(
+    f: &Zp2,
+    e: &Curve<E2>,
+    r: &Pt<E2>,
+    m: u64,
+    pts: &[Pt<E2>],
+) -> (Curve<E2>, Vec<Pt<E2>>) {
     let mut cur = *e;
     let mut ker = *r;
     let mut left = m;
@@ -112,17 +121,36 @@ fn theta_split_detection_and_gluing_vs_hlp() {
             Pt::Aff(x, _) => x,
             Pt::Inf => panic!(),
         };
-        let (a4, b4, c4, d4) = (pmul(&f, &e1, &a, 4), pmul(&f, &e1, &b, 4), pmul(&f, &e2, &c, 4), pmul(&f, &e2, &d, 4));
+        let (a4, b4, c4, d4) = (
+            pmul(&f, &e1, &a, 4),
+            pmul(&f, &e1, &b, 4),
+            pmul(&f, &e2, &c, 4),
+            pmul(&f, &e2, &d, 4),
+        );
         let ra = [x(a4), x(b4), x(padd(&f, &e1, &a4, &b4))];
         let rb = [x(c4), x(d4), x(padd(&f, &e2, &c4, &d4))];
         let sext = glue(&f, ra, rb).unwrap();
         let roots = poly::roots(&f, &sext, &mut rng);
         assert_eq!(roots.len(), 6);
-        let key_hlp = ic_key(&f, &igusa_clebsch(&f, sext[6], &[roots[0], roots[1], roots[2], roots[3], roots[4], roots[5]]));
+        let key_hlp = ic_key(
+            &f,
+            &igusa_clebsch(
+                &f,
+                sext[6],
+                &[roots[0], roots[1], roots[2], roots[3], roots[4], roots[5]],
+            ),
+        );
         // Rosenhain model, moved to six finite roots by x -> 1/(x - t)
         let t = f.from_u64(12345);
         let fin = [f.zero(), f.one(), rh[0], rh[1], rh[2]].map(|r| f.inv(f.sub(r, t)));
-        let key_th = ic_key(&f, &igusa_clebsch(&f, f.one(), &[fin[0], fin[1], fin[2], fin[3], fin[4], f.zero()]));
+        let key_th = ic_key(
+            &f,
+            &igusa_clebsch(
+                &f,
+                f.one(),
+                &[fin[0], fin[1], fin[2], fin[3], fin[4], f.zero()],
+            ),
+        );
         assert_eq!(key_th, key_hlp);
     }
 }
@@ -146,25 +174,53 @@ fn theta_kani_chain_splits_at_e0_times_x() {
         let (e, im_phi) = chain_iso(&f, &e0, &kphi, d1, &[pp, qq, kgam]);
         let (c, im_gam) = chain_iso(&f, &e0, &kgam, d2, &[pp, qq]);
         let (x, _) = chain_iso(&f, &e, &im_phi[2], d2, &[]);
-        let res = chain(&f, &c, &e, [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])], a, &[]).expect("chain");
+        let res = chain(
+            &f,
+            &c,
+            &e,
+            [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])],
+            a,
+            &[],
+        )
+        .expect("chain");
         assert_eq!(res.nulls.len(), a as usize);
         // intermediate codomains are Jacobians
         for nl in &res.nulls[..res.nulls.len() - 1] {
             assert!(split_j(&f, nl).is_none());
         }
         // the strategy (theta doublings) and pushing every multiple give the same codomains
-        let naive = chain_opts(&f, &c, &e, [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])], a, &[], false).expect("chain");
+        let naive = chain_opts(
+            &f,
+            &c,
+            &e,
+            [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])],
+            a,
+            &[],
+            false,
+        )
+        .expect("chain");
         assert_eq!(naive.nulls.len(), res.nulls.len());
         for (x, y) in naive.nulls.iter().zip(res.nulls.iter()) {
             assert!(proj_eq(&f, x, y));
         }
         let (j1, j2) = res.split.expect("Kani chain splits");
         let (ja, jb) = (jinv(&f, &e0), jinv(&f, &x));
-        assert!((j1, j2) == (ja, jb) || (j1, j2) == (jb, ja), "a = {a}, b = {b}");
+        assert!(
+            (j1, j2) == (ja, jb) || (j1, j2) == (jb, ja),
+            "a = {a}, b = {b}"
+        );
         // a kernel of the same shape but twisted by M = [[1, 2], [0, 1]] (det 1, so still
         // isotropic, and the same gluing step) does not come from a diamond: no split
         let q2 = padd(&f, &e, &im_phi[1], &pmul(&f, &e, &im_phi[0], 2));
-        let res2 = chain(&f, &c, &e, [(im_gam[0], im_phi[0]), (im_gam[1], q2)], a, &[]).expect("chain");
+        let res2 = chain(
+            &f,
+            &c,
+            &e,
+            [(im_gam[0], im_phi[0]), (im_gam[1], q2)],
+            a,
+            &[],
+        )
+        .expect("chain");
         assert!(res2.split.is_none(), "a = {a}, b = {b}");
     }
 }
@@ -196,7 +252,15 @@ fn theta_step_is_a_richelot_neighbour() {
         let kgam = point_of_order(&f, &e0, p, d2, &mut rng);
         let (e, im_phi) = chain_iso(&f, &e0, &kphi, d1, &[pp, qq]);
         let (c, im_gam) = chain_iso(&f, &e0, &kgam, d2, &[pp, qq]);
-        let res = chain(&f, &c, &e, [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])], a, &[]).unwrap();
+        let res = chain(
+            &f,
+            &c,
+            &e,
+            [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])],
+            a,
+            &[],
+        )
+        .unwrap();
         for s in 0..4 {
             let (_, roots) = key_of_null(&f, &res.nulls[s]);
             let (want, _) = key_of_null(&f, &res.nulls[s + 1]);
@@ -213,7 +277,10 @@ fn theta_step_is_a_richelot_neighbour() {
                 if cr.len() != 6 {
                     continue;
                 }
-                let key = ic_key(&f, &igusa_clebsch(&f, cod[6], &[cr[0], cr[1], cr[2], cr[3], cr[4], cr[5]]));
+                let key = ic_key(
+                    &f,
+                    &igusa_clebsch(&f, cod[6], &[cr[0], cr[1], cr[2], cr[3], cr[4], cr[5]]),
+                );
                 found |= key == want;
             }
             assert!(found, "step {s}");
@@ -232,7 +299,10 @@ fn theta_kani_endomorphism_126_bit() {
     use isogeny_algos::testdata::kani_endomorphism_instance;
     let (a, b, c) = (64u32, 35u32, 15u64);
     let three_b = (0..b).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
-    let p1 = Big::from_u64(1).shl((a + 2) as usize).mul(&three_b).mul(&Big::from_u64(c));
+    let p1 = Big::from_u64(1)
+        .shl((a + 2) as usize)
+        .mul(&three_b)
+        .mul(&Big::from_u64(c));
     let p = p1.sub_small(1);
     let f = Fp2::new(FpM::<2>::new(&p));
     let iota = (f.base.zero(), f.base.one());

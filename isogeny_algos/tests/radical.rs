@@ -80,7 +80,11 @@ fn radical_chains_match_csidh_action_on_csidh512() {
             let mut e = ex.clone();
             e[idx] = dir * s as i32;
             let a = cs.action_fast(f.zero(), &e, &mut rng);
-            assert_eq!(js[s], montgomery::j_invariant(f, a), "l = {ell}, step {s}, dir {dir}");
+            assert_eq!(
+                js[s],
+                montgomery::j_invariant(f, a),
+                "l = {ell}, step {s}, dir {dir}"
+            );
         }
     }
 }
@@ -172,7 +176,11 @@ fn radical7_steps_are_isogenies() {
             js.push(jinv_tate7(&fp, cur));
         }
         for i in 0..js.len() - 1 {
-            assert_eq!(phi.eval(&fp, js[i], js[i + 1]), 0, "p={p} step {i}: not 7-isogenous");
+            assert_eq!(
+                phi.eval(&fp, js[i], js[i + 1]),
+                0,
+                "p={p} step {i}: not 7-isogenous"
+            );
             if i + 2 < js.len() {
                 assert_ne!(js[i], js[i + 2], "p={p} step {i}: backtracking");
             }

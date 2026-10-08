@@ -3,7 +3,9 @@ use isogeny_algos::field::Rng;
 use isogeny_algos::int::Int;
 
 fn rand_big(rng: &mut Rng, limbs: usize) -> Big {
-    let v: Vec<u64> = (0..limbs).map(|_| rng.next() >> (rng.next() % 64)).collect();
+    let v: Vec<u64> = (0..limbs)
+        .map(|_| rng.next() >> (rng.next() % 64))
+        .collect();
     Big::from_limbs(&v)
 }
 
@@ -46,8 +48,10 @@ fn knuth_division() {
 fn signed_arithmetic() {
     let mut rng = Rng::new(801);
     for _ in 0..3000 {
-        let a = (rng.next() as i64 >> rng.below(63)) as i128 * if rng.next() & 1 == 1 { -1 } else { 1 };
-        let b = (rng.next() as i64 >> rng.below(63)) as i128 * if rng.next() & 1 == 1 { -1 } else { 1 };
+        let a =
+            (rng.next() as i64 >> rng.below(63)) as i128 * if rng.next() & 1 == 1 { -1 } else { 1 };
+        let b =
+            (rng.next() as i64 >> rng.below(63)) as i128 * if rng.next() & 1 == 1 { -1 } else { 1 };
         let (x, y) = (Int::from(a), Int::from(b));
         assert_eq!((&x + &y).to_i128(), Some(a + b));
         assert_eq!((&x - &y).to_i128(), Some(a - b));
@@ -55,7 +59,11 @@ fn signed_arithmetic() {
         assert_eq!(x.cmp(&y), a.cmp(&b));
         if b != 0 {
             let q = a / b;
-            let floor = if a % b != 0 && ((a < 0) != (b < 0)) { q - 1 } else { q };
+            let floor = if a % b != 0 && ((a < 0) != (b < 0)) {
+                q - 1
+            } else {
+                q
+            };
             assert_eq!(x.div_floor(&y).to_i128(), Some(floor));
             assert_eq!(x.modulo(&y).to_i128(), Some(a.rem_euclid(b)));
         }
@@ -98,18 +106,38 @@ fn miller_rabin_matches_u128_reference() {
         r
     }
     fn mr(n: u128) -> bool {
-        if n < 2 { return false; }
+        if n < 2 {
+            return false;
+        }
         for p in [2u128, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-            if n % p == 0 { return n == p; }
+            if n.is_multiple_of(p) {
+                return n == p;
+            }
         }
         let (mut d, mut s) = (n - 1, 0);
-        while d % 2 == 0 { d /= 2; s += 1; }
+        while d % 2 == 0 {
+            d /= 2;
+            s += 1;
+        }
         'o: for a in [2u128, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
             let mut x = 1u128;
             let (mut b, mut e) = (a, d);
-            while e > 0 { if e & 1 == 1 { x = mulmod(x, b, n); } b = mulmod(b, b, n); e >>= 1; }
-            if x == 1 || x == n - 1 { continue; }
-            for _ in 1..s { x = mulmod(x, x, n); if x == n - 1 { continue 'o; } }
+            while e > 0 {
+                if e & 1 == 1 {
+                    x = mulmod(x, b, n);
+                }
+                b = mulmod(b, b, n);
+                e >>= 1;
+            }
+            if x == 1 || x == n - 1 {
+                continue;
+            }
+            for _ in 1..s {
+                x = mulmod(x, x, n);
+                if x == n - 1 {
+                    continue 'o;
+                }
+            }
             return false;
         }
         true

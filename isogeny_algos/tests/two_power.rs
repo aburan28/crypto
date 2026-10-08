@@ -36,7 +36,10 @@ fn kernel_point<F: Field>(f: &F, e: usize, cof: &Big, rng: &mut Rng) -> (F::E, F
 fn four_and_two_chains_agree_with_weierstrass_velu() {
     let (e, b) = (20usize, 6u32);
     let base = (1u64 << e) * 3u64.pow(b);
-    let p = (1..).map(|c| base * c - 1).find(|&p| is_prime(p) && p % 4 == 3).unwrap();
+    let p = (1..)
+        .map(|c| base * c - 1)
+        .find(|&p| is_prime(p) && p % 4 == 3)
+        .unwrap();
     let cof = Big::from_u64((p + 1) >> e);
     let f = Zp2::new(p);
     let mut rng = Rng::new(31);
@@ -47,10 +50,17 @@ fn four_and_two_chains_agree_with_weierstrass_velu() {
         let extra = (f.random(&mut rng), f.one());
         let n4 = e / 2;
         let mut j_ref = None;
-        for (name, splits) in [("optimal", optimal_splits(n4, 1.0, 1.0)), ("naive", (0..=n4).map(|m| m.saturating_sub(1)).collect::<Vec<_>>())] {
+        for (name, splits) in [
+            ("optimal", optimal_splits(n4, 1.0, 1.0)),
+            (
+                "naive",
+                (0..=n4).map(|m| m.saturating_sub(1)).collect::<Vec<_>>(),
+            ),
+        ] {
             let mut st = TwoPowerStats::default();
             let mut pts = vec![extra];
-            let cod = four_chain(&f, proj24(&f, a0), r, e, &mut pts, &splits, &mut st).expect("4-chain");
+            let cod =
+                four_chain(&f, proj24(&f, a0), r, e, &mut pts, &splits, &mut st).expect("4-chain");
             let j = montgomery::j_invariant(&f, affine_a(&f, cod));
             assert_eq!(st.isogenies, n4, "{name}");
             if let Some(jr) = j_ref {
@@ -61,8 +71,21 @@ fn four_and_two_chains_agree_with_weierstrass_velu() {
         let j4 = j_ref.unwrap();
         // the same kernel as e two-isogenies
         let mut st = TwoPowerStats::default();
-        let cod2 = two_chain(&f, proj24(&f, a0), r, e, &mut vec![], &optimal_splits(e, 1.0, 1.0), &mut st).expect("2-chain");
-        assert_eq!(montgomery::j_invariant(&f, affine_a(&f, cod2)), j4, "2-chain");
+        let cod2 = two_chain(
+            &f,
+            proj24(&f, a0),
+            r,
+            e,
+            &mut vec![],
+            &optimal_splits(e, 1.0, 1.0),
+            &mut st,
+        )
+        .expect("2-chain");
+        assert_eq!(
+            montgomery::j_invariant(&f, affine_a(&f, cod2)),
+            j4,
+            "2-chain"
+        );
         // Weierstrass Velu chain (y from the curve equation)
         let w = montgomery::to_weierstrass(&f, a0);
         let xw = f.add(rx, f.div(a0, f.from_u64(3)));

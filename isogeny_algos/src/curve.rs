@@ -61,16 +61,15 @@ pub fn padd<F: Field>(f: &F, c: &Curve<F::E>, p: &Pt<F::E>, q: &Pt<F::E>) -> Pt<
     match (*p, *q) {
         (Pt::Inf, r) | (r, Pt::Inf) => r,
         (Pt::Aff(x1, y1), Pt::Aff(x2, y2)) => {
-            let lam;
-            if x1 == x2 {
+            let lam = if x1 == x2 {
                 if f.is_zero(f.add(y1, y2)) {
                     return Pt::Inf;
                 }
                 let num = f.add(f.mul(f.from_u64(3), f.mul(x1, x1)), c.a);
-                lam = f.div(num, f.add(y1, y1));
+                f.div(num, f.add(y1, y1))
             } else {
-                lam = f.div(f.sub(y2, y1), f.sub(x2, x1));
-            }
+                f.div(f.sub(y2, y1), f.sub(x2, x1))
+            };
             let x3 = f.sub(f.sub(f.mul(lam, lam), x1), x2);
             let y3 = f.sub(f.mul(lam, f.sub(x1, x3)), y1);
             Pt::Aff(x3, y3)
@@ -91,7 +90,12 @@ pub fn pmul<F: Field>(f: &F, c: &Curve<F::E>, p: &Pt<F::E>, mut k: u128) -> Pt<F
 }
 
 /// [k]P for a big scalar.
-pub fn pmul_big<F: Field>(f: &F, c: &Curve<F::E>, p: &Pt<F::E>, k: &crate::bigint::Big) -> Pt<F::E> {
+pub fn pmul_big<F: Field>(
+    f: &F,
+    c: &Curve<F::E>,
+    p: &Pt<F::E>,
+    k: &crate::bigint::Big,
+) -> Pt<F::E> {
     let mut r = Pt::Inf;
     for i in (0..k.bits()).rev() {
         r = padd(f, c, &r, &r);

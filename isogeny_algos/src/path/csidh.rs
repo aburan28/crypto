@@ -31,7 +31,11 @@ impl Csidh<Zp> {
         if p >= (1u128 << 62) || !is_prime(p as u64) {
             return None;
         }
-        Some(Csidh { fp: Zp::new(p as u64), primes: primes.to_vec(), p1: Big::from_u128(p + 1) })
+        Some(Csidh {
+            fp: Zp::new(p as u64),
+            primes: primes.to_vec(),
+            p1: Big::from_u128(p + 1),
+        })
     }
 
     /// n primes: the first n-1 odd primes plus the smallest further odd prime making p prime.
@@ -65,7 +69,11 @@ impl<const N: usize> Csidh<FpM<N>> {
         if f.pow_big(a, &p.sub_small(1)) != f.one() {
             return None;
         }
-        Some(Csidh { fp: f, primes: primes.to_vec(), p1: prod })
+        Some(Csidh {
+            fp: f,
+            primes: primes.to_vec(),
+            p1: prod,
+        })
     }
 
     /// CSIDH-512: primes 3, 5, ..., 373 (the first 73 odd primes) and 587.
@@ -143,7 +151,9 @@ impl<F: Field> Csidh<F> {
                 continue;
             }
             let positive = is_square(r);
-            let set: Vec<usize> = (0..e.len()).filter(|&i| e[i] != 0 && (e[i] > 0) == positive).collect();
+            let set: Vec<usize> = (0..e.len())
+                .filter(|&i| e[i] != 0 && (e[i] > 0) == positive)
+                .collect();
             if set.is_empty() {
                 continue;
             }
@@ -198,7 +208,9 @@ impl<F: Field> Csidh<F> {
                 continue;
             }
             let positive = f.pow_big(r, &half) == f.one();
-            let set: Vec<usize> = (0..e.len()).filter(|&i| e[i] != 0 && (e[i] > 0) == positive).collect();
+            let set: Vec<usize> = (0..e.len())
+                .filter(|&i| e[i] != 0 && (e[i] > 0) == positive)
+                .collect();
             if set.is_empty() {
                 continue;
             }
@@ -206,7 +218,17 @@ impl<F: Field> Csidh<F> {
             let q = ladder_p(f, k, (x, f.one()), &self.cofactor(&set_primes));
             let sign = if positive { 1 } else { -1 };
             let split = self.plan(&set);
-            self.tree(&mut k, q, &set, 0, set.len() - 1, &split, &mut e, sign, &mut stack);
+            self.tree(
+                &mut k,
+                q,
+                &set,
+                0,
+                set.len() - 1,
+                &split,
+                &mut e,
+                sign,
+                &mut stack,
+            );
         }
         affine_a(f, k)
     }
@@ -219,8 +241,14 @@ impl<F: Field> Csidh<F> {
     /// isogeny = 8d + 3 log l + 10 for l = 2d + 1).
     fn plan(&self, set: &[usize]) -> Vec<Vec<usize>> {
         let n = set.len();
-        let lg: Vec<f64> = set.iter().map(|&i| (self.primes[i] as f64).log2()).collect();
-        let d: Vec<f64> = set.iter().map(|&i| ((self.primes[i] - 1) / 2) as f64).collect();
+        let lg: Vec<f64> = set
+            .iter()
+            .map(|&i| (self.primes[i] as f64).log2())
+            .collect();
+        let d: Vec<f64> = set
+            .iter()
+            .map(|&i| ((self.primes[i] - 1) / 2) as f64)
+            .collect();
         let mut pre_lg = vec![0.0; n + 1];
         let mut pre_push = vec![0.0; n + 1];
         for t in 0..n {
@@ -309,7 +337,13 @@ impl<F: Field> Csidh<F> {
 
     /// Meet-in-the-middle for E_target = [e] E_start with e in [-m, m]^n: boxes [0,m]^n from both
     /// ends, collision [a]E_start = [b]E_target gives e = a - b. Returns (e, nodes visited).
-    pub fn mitm(&self, start: F::E, target: F::E, m: usize, rng: &mut Rng) -> Option<(Vec<i32>, usize)> {
+    pub fn mitm(
+        &self,
+        start: F::E,
+        target: F::E,
+        m: usize,
+        rng: &mut Rng,
+    ) -> Option<(Vec<i32>, usize)> {
         let n = self.primes.len();
         let base = m + 1;
         let total = base.pow(n as u32);

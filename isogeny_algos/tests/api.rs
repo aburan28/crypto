@@ -15,23 +15,37 @@ fn dec(s: &str) -> Int {
 #[test]
 fn standard_curves_certified_and_named_as_in_the_registry() {
     let p256 = PrimeCurve::preset("p256").unwrap();
-    let n256 = dec("115792089210356248762697446949407573529996955224135760342422259061068512044369");
+    let n256 =
+        dec("115792089210356248762697446949407573529996955224135760342422259061068512044369");
     let pc = api::check_order(&p256, &n256, 1);
     assert!(pc.certificate.certified && pc.twist_certificate.certified);
     let id = icv1::prime(&p256.p, &p256.a, &p256.b, &pc.order).unwrap();
-    assert_eq!(id.slug, "icv1-fp256-t89188191154553853111372247798585809583-f188c491");
+    assert_eq!(
+        id.slug,
+        "icv1-fp256-t89188191154553853111372247798585809583-f188c491"
+    );
     // secp256k1 has j = 0: counted by complex multiplication
     let k1 = PrimeCurve::preset("secp256k1").unwrap();
     let pc = api::count_points(&k1, 1).unwrap();
     assert_eq!(pc.method, CountMethod::Cm);
-    assert_eq!(pc.order, dec("115792089237316195423570985008687907852837564279074904382605163141518161494337"));
+    assert_eq!(
+        pc.order,
+        dec("115792089237316195423570985008687907852837564279074904382605163141518161494337")
+    );
     assert!(pc.certificate.certified);
     let id = icv1::prime(&k1.p, &k1.a, &k1.b, &pc.order).unwrap();
-    assert_eq!(id.slug, "icv1-fp256-t432420386565659656852420866390673177327-76dadd18");
+    assert_eq!(
+        id.slug,
+        "icv1-fp256-t432420386565659656852420866390673177327-76dadd18"
+    );
     // a wrong claimed order is rejected (here: off by one)
     let bad = api::check_order(&p256, &(&n256 + &Int::one()), 1);
     assert!(!bad.certificate.certified);
-    assert!(bad.certificate.checks.iter().any(|c| c.status == Status::Fail));
+    assert!(bad
+        .certificate
+        .checks
+        .iter()
+        .any(|c| c.status == Status::Fail));
 }
 
 /// SEA (48-bit p), CM (j = 0 and 1728) and BSGS give the order the crate's exact BSGS gives.
@@ -46,11 +60,26 @@ fn counts_match_bsgs() {
     for (a, b) in [(3i64, 1234567i64), (-3, 98765), (0, 5), (7, 0)] {
         let c = PrimeCurve::new(Int::from(p), Int::from(a), Int::from(b)).unwrap();
         let pc = api::count_points(&c, 3).unwrap();
-        let e = Curve::new(Int::from(a).modulo(&Int::from(p)).to_i128().unwrap() as u64, Int::from(b).modulo(&Int::from(p)).to_i128().unwrap() as u64);
+        let e = Curve::new(
+            Int::from(a).modulo(&Int::from(p)).to_i128().unwrap() as u64,
+            Int::from(b).modulo(&Int::from(p)).to_i128().unwrap() as u64,
+        );
         let n = isogeny_algos::curve::order(&fp, &e, &mut rng);
         assert_eq!(pc.order, Int::from(n), "a = {a}, b = {b}");
-        assert_eq!(&pc.order + &pc.twist_order, &Int::from(2 * p) + &Int::from(2i64));
+        assert_eq!(
+            &pc.order + &pc.twist_order,
+            &Int::from(2 * p) + &Int::from(2i64)
+        );
         assert!(pc.certificate.certified || pc.twist_certificate.certified);
+        // a transferred certificate rests on the other one's own point orders
+        for (c, other) in [
+            (&pc.certificate, &pc.twist_certificate),
+            (&pc.twist_certificate, &pc.certificate),
+        ] {
+            if c.via_twist {
+                assert!(c.certified && other.certified && !other.via_twist);
+            }
+        }
     }
 }
 
@@ -89,12 +118,19 @@ fn cli_records_and_exit_codes() {
     let bin = env!("CARGO_BIN_EXE_isogeny-algos");
     let run = |args: &[&str]| {
         let out = Command::new(bin).args(args).output().unwrap();
-        (out.status.code().unwrap(), String::from_utf8(out.stdout).unwrap())
+        (
+            out.status.code().unwrap(),
+            String::from_utf8(out.stdout).unwrap(),
+        )
     };
-    let (code, out) = run(&["count", "--p", "10935329", "--a", "5320418", "--b", "8535318"]);
+    let (code, out) = run(&[
+        "count", "--p", "10935329", "--a", "5320418", "--b", "8535318",
+    ]);
     assert_eq!(code, 0, "{out}");
     assert!(out.starts_with("{\"schema\":\"isogeny-algos/v1\""));
-    assert!(out.contains("\"icv1\":\"ICV1:fp-10935329:1577:10933753:2786525:unk:unk:r:773361558ca8\""));
+    assert!(
+        out.contains("\"icv1\":\"ICV1:fp-10935329:1577:10933753:2786525:unk:unk:r:773361558ca8\"")
+    );
     assert!(out.contains("\"status\":\"PASS\""));
     assert_eq!(out.trim().lines().count(), 1);
     let (code, out) = run(&["count", "--curve", "p256", "--order", "1"]);
@@ -105,4 +141,13 @@ fn cli_records_and_exit_codes() {
     let (code, out) = run(&["modpoly", "--ell", "3", "--integer"]);
     assert_eq!(code, 0);
     assert!(out.contains("\"1855425871872000000000\""));
+    let (code, out) = run(&["--version"]);
+    assert_eq!(code, 0);
+    assert_eq!(
+        out.trim(),
+        format!(
+            "{{\"schema\":\"isogeny-algos/v1\",\"tool\":{{\"name\":\"isogeny-algos\",\"version\":\"{}\"}}}}",
+            env!("CARGO_PKG_VERSION")
+        )
+    );
 }

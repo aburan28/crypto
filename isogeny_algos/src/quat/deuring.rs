@@ -103,9 +103,22 @@ impl Deuring {
                     break q;
                 }
             };
-            tors.push(TorsionBasis { ell, e, p: bp, q: bq });
+            tors.push(TorsionBasis {
+                ell,
+                e,
+                p: bp,
+                q: bq,
+            });
         }
-        Deuring { p, f2, alg, o0, e0, tors, t_odd }
+        Deuring {
+            p,
+            f2,
+            alg,
+            o0,
+            e0,
+            tors,
+            t_odd,
+        }
     }
 
     fn i_map(&self, p: &Pt<E2>) -> Pt<E2> {
@@ -133,7 +146,10 @@ impl Deuring {
             s = padd(f, e, &s, &smul(f, e, &imgs[t], c, n));
         }
         if alpha.d != Int::one() {
-            let dinv = alpha.d.inv_mod(&Int::from(n)).expect("denominator invertible mod n");
+            let dinv = alpha
+                .d
+                .inv_mod(&Int::from(n))
+                .expect("denominator invertible mod n");
             s = smul(f, e, &s, dinv.mod_u64(n) as i128, n);
         }
         s
@@ -141,7 +157,14 @@ impl Deuring {
 
     /// (a, b) mod l^k with R = a P + b Q, for a basis (P, Q) of E[l^k] (Pohlig–Hellman, digit by
     /// digit, l^2 table lookups per digit).
-    pub fn dlog2(&self, ell: u64, k: u32, p: &Pt<E2>, q: &Pt<E2>, r: &Pt<E2>) -> Option<(u64, u64)> {
+    pub fn dlog2(
+        &self,
+        ell: u64,
+        k: u32,
+        p: &Pt<E2>,
+        q: &Pt<E2>,
+        r: &Pt<E2>,
+    ) -> Option<(u64, u64)> {
         let f = &self.f2;
         let e = &self.e0;
         let lk = ell.pow(k);
@@ -150,7 +173,12 @@ impl Deuring {
         let mut table: HashMap<Pt<E2>, (u64, u64)> = HashMap::new();
         for s in 0..ell {
             for t in 0..ell {
-                let v = padd(f, e, &pmul(f, e, &p1, s as u128), &pmul(f, e, &q1, t as u128));
+                let v = padd(
+                    f,
+                    e,
+                    &pmul(f, e, &p1, s as u128),
+                    &pmul(f, e, &q1, t as u128),
+                );
                 table.insert(v, (s, t));
             }
         }
@@ -158,7 +186,15 @@ impl Deuring {
         let mut lpow = 1u64;
         for d in 0..k {
             // T = [l^{k-1-d}] (R - a P - b Q)
-            let rem = padd(f, e, r, &neg_pt(f, &padd(f, e, &pmul(f, e, p, a as u128), &pmul(f, e, q, b as u128))));
+            let rem = padd(
+                f,
+                e,
+                r,
+                &neg_pt(
+                    f,
+                    &padd(f, e, &pmul(f, e, p, a as u128), &pmul(f, e, q, b as u128)),
+                ),
+            );
             let t = pmul(f, e, &rem, ell.pow(k - 1 - d) as u128);
             let (s, u) = *table.get(&t)?;
             a += s * lpow;
@@ -200,7 +236,8 @@ impl Deuring {
                             let v = c + d * m;
                             let ok = rows.iter().all(|&(r0, r1)| {
                                 let (x, y) = if swap { (v, 1) } else { (1, v) };
-                                ((r0 as u128 * x as u128 + r1 as u128 * y as u128) % m2 as u128) == 0
+                                (r0 as u128 * x as u128 + r1 as u128 * y as u128)
+                                    .is_multiple_of(m2 as u128)
                             });
                             if ok {
                                 next.push(v);
@@ -217,7 +254,12 @@ impl Deuring {
                 Some(if swap { (v, 1) } else { (1, v) })
             };
             let (x, y) = solve(false).or_else(|| solve(true))?;
-            let k = padd(&self.f2, &self.e0, &pmul(&self.f2, &self.e0, &pa, x as u128), &pmul(&self.f2, &self.e0, &qa, y as u128));
+            let k = padd(
+                &self.f2,
+                &self.e0,
+                &pmul(&self.f2, &self.e0, &pa, x as u128),
+                &pmul(&self.f2, &self.e0, &qa, y as u128),
+            );
             out.push((ell, a, k));
         }
         Some(out)
@@ -263,7 +305,11 @@ impl Deuring {
         let mut bound = &minn * &Int::from(4i64);
         let mut cands: Vec<([Int; 4], Int)> = vec![];
         loop {
-            let b = if bound < exact { bound.clone() } else { exact.clone() };
+            let b = if bound < exact {
+                bound.clone()
+            } else {
+                exact.clone()
+            };
             let sv = i.short_vectors(alg, &b, 200_000);
             cands = sv.into_iter().filter(|(_, nv)| ok_norm(nv)).collect();
             if !cands.is_empty() || b == exact {
@@ -310,7 +356,11 @@ impl Deuring {
             }
             images.push((la, v));
         }
-        let inv_mod = |x: i128, m: u64| Int::from(x.rem_euclid(m as i128) as i64).inv_mod(&Int::from(m)).map(|v| v.mod_u64(m) as i128);
+        let inv_mod = |x: i128, m: u64| {
+            Int::from(x.rem_euclid(m as i128) as i64)
+                .inv_mod(&Int::from(m))
+                .map(|v| v.mod_u64(m) as i128)
+        };
         for _ in 0..200 {
             let mut coords = [0u128; 4];
             let mut modulus = 1u128;
@@ -321,7 +371,8 @@ impl Deuring {
                 let mut pair = None;
                 for r in 0..4 {
                     for s2 in r + 1..4 {
-                        let det = v[r].0 as i128 * v[s2].1 as i128 - v[s2].0 as i128 * v[r].1 as i128;
+                        let det =
+                            v[r].0 as i128 * v[s2].1 as i128 - v[s2].0 as i128 * v[r].1 as i128;
                         if let Some(di) = inv_mod(det, *la) {
                             pair = Some((r, s2, di));
                             break;
@@ -346,13 +397,19 @@ impl Deuring {
                 }
                 let (rhs0, rhs1) = (rhs0.rem_euclid(m), rhs1.rem_euclid(m));
                 // [[v_r.0, v_s.0], [v_r.1, v_s.1]] (c_r, c_s) = (rhs0, rhs1)
-                let (a11, a12, a21, a22) = (v[r].0 as i128, v[s2].0 as i128, v[r].1 as i128, v[s2].1 as i128);
+                let (a11, a12, a21, a22) = (
+                    v[r].0 as i128,
+                    v[s2].0 as i128,
+                    v[r].1 as i128,
+                    v[s2].1 as i128,
+                );
                 c[r] = ((a22 * rhs0 - a12 * rhs1).rem_euclid(m) * di).rem_euclid(m);
                 c[s2] = ((a11 * rhs1 - a21 * rhs0).rem_euclid(m) * di).rem_euclid(m);
                 // CRT coordinate-wise
                 let minv = inv_mod(modulus as i128, *la).unwrap();
                 for t in 0..4 {
-                    let tt = ((c[t] - coords[t] as i128).rem_euclid(m) * minv).rem_euclid(m) as u128;
+                    let tt =
+                        ((c[t] - coords[t] as i128).rem_euclid(m) * minv).rem_euclid(m) as u128;
                     coords[t] += modulus * tt;
                 }
                 modulus *= *la as u128;

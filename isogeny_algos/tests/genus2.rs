@@ -51,11 +51,23 @@ fn degenerate_richelot_splits() {
         for _ in 0..4 {
             // F(z) = c prod (z^2 - rho_i^2): the matching {rho_i, -rho_i} has Delta = 0
             let rho = distinct(&fp, 3, &mut rng);
-            if rho.iter().any(|&x| x == 0) || rho.iter().enumerate().any(|(i, &x)| rho.iter().skip(i + 1).any(|&y| y == fp.neg(x))) {
+            if rho.contains(&0)
+                || rho
+                    .iter()
+                    .enumerate()
+                    .any(|(i, &x)| rho.iter().skip(i + 1).any(|&y| y == fp.neg(x)))
+            {
                 continue;
             }
             let c = fp.random(&mut rng) | 1;
-            let roots = [rho[0], fp.neg(rho[0]), rho[1], fp.neg(rho[1]), rho[2], fp.neg(rho[2])];
+            let roots = [
+                rho[0],
+                fp.neg(rho[0]),
+                rho[1],
+                fp.neg(rho[1]),
+                rho[2],
+                fp.neg(rho[2]),
+            ];
             let f = poly::scale(&fp, &poly::from_roots(&fp, &roots), c);
             // then move it by a Moebius transformation x -> (2x + 3)/(x + 5) to hide the symmetry
             let (ma, mb, mc, md) = (2u64, 3u64, 1u64, 5u64);
@@ -85,10 +97,19 @@ fn degenerate_richelot_splits() {
                 poly::from_roots(&fp, &[nr[2], nr[3]]),
                 poly::from_roots(&fp, &[nr[4], nr[5]]),
             ];
-            assert_eq!(poly::scale(&fp, &poly::mul(&fp, &poly::mul(&fp, &gs[0], &gs[1]), &gs[2]), 1), g);
+            assert_eq!(
+                poly::scale(
+                    &fp,
+                    &poly::mul(&fp, &poly::mul(&fp, &gs[0], &gs[1]), &gs[2]),
+                    1
+                ),
+                g
+            );
             let rl = richelot(&fp, &gs);
             assert_eq!(rl.delta, 0, "symmetric matching is degenerate");
-            let Some((e1, e2)) = split(&fp, &g, &gs) else { continue };
+            let Some((e1, e2)) = split(&fp, &g, &gs) else {
+                continue;
+            };
             let (a1, a2) = (elliptic_trace(&fp, &e1), elliptic_trace(&fp, &e2));
             assert_eq!(lpoly(&fp, &g), LPoly::product(a1, a2, p as i64), "p = {p}");
         }
@@ -104,14 +125,20 @@ fn gluing_matches_product_l_polynomial() {
         for _ in 0..20 {
             let a = distinct(&fp, 3, &mut rng);
             let b = distinct(&fp, 3, &mut rng);
-            let Some(c) = glue(&fp, [a[0], a[1], a[2]], [b[0], b[1], b[2]]) else { continue };
+            let Some(c) = glue(&fp, [a[0], a[1], a[2]], [b[0], b[1], b[2]]) else {
+                continue;
+            };
             if c.len() != 7 {
                 continue;
             }
             let ta = elliptic_trace(&fp, &poly::from_roots(&fp, &a));
             let tb = elliptic_trace(&fp, &poly::from_roots(&fp, &b));
             let l = lpoly(&fp, &c);
-            assert_eq!(l, LPoly::product(ta, tb, p as i64), "p = {p}: glued Jacobian ~ E1 x E2");
+            assert_eq!(
+                l,
+                LPoly::product(ta, tb, p as i64),
+                "p = {p}: glued Jacobian ~ E1 x E2"
+            );
             done += 1;
         }
         assert!(done >= 5);
@@ -124,7 +151,9 @@ fn iko_count(p: i64) -> i64 {
     let m1 = if p % 4 == 1 { 1 } else { -1 };
     let m2 = if p % 8 == 1 || p % 8 == 3 { 1 } else { -1 };
     let m3 = if p % 3 == 1 { 1 } else { -1 };
-    let t = (p - 1) * (p * p + 25 * p + 166) - 90 * (1 - m1) + 360 * (1 - m2) + 160 * (1 - m3)
+    let t = (p - 1) * (p * p + 25 * p + 166) - 90 * (1 - m1)
+        + 360 * (1 - m2)
+        + 160 * (1 - m3)
         + if p % 5 == 4 { 2304 } else { 0 };
     assert_eq!(t % 2880, 0);
     t / 2880
@@ -138,8 +167,15 @@ fn superspecial_richelot_graph() {
         // supersingular j over F_{p^2}: h = floor(p/12) + {0,1,1,2}
         let h = (p / 12 + [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 2][(p % 12) as usize]) as usize;
         assert_eq!(g.products, h * (h + 1) / 2, "p = {p}: products E1 x E2");
-        assert_eq!(g.jacobians as i64, iko_count(p as i64), "p = {p}: superspecial Jacobians (Ibukiyama-Katsura-Oort)");
-        eprintln!("p = {p}: {} Jacobians, {} products, {} edges found", g.jacobians, g.products, g.edges);
+        assert_eq!(
+            g.jacobians as i64,
+            iko_count(p as i64),
+            "p = {p}: superspecial Jacobians (Ibukiyama-Katsura-Oort)"
+        );
+        eprintln!(
+            "p = {p}: {} Jacobians, {} products, {} edges found",
+            g.jacobians, g.products, g.edges
+        );
     }
 }
 
@@ -166,14 +202,20 @@ fn richelot_correspondence_maps_points_to_codomain() {
             let cod: Vec<(u64, u64)> = rl.codomain(&fp).iter().map(|&c| (c, 0)).collect();
             for _ in 0..20 {
                 let x = fp.random(&mut rng);
-                let Some(y) = fp.sqrt(poly::eval(&fp, &f, x)) else { continue };
+                let Some(y) = fp.sqrt(poly::eval(&fp, &f, x)) else {
+                    continue;
+                };
                 if y == 0 {
                     continue;
                 }
                 let img = rl.image_point(&fp, &g, &f2, |c| (c, 0), x, y, &mut rng);
                 assert!(img.len() <= 2);
                 for (xp, yp) in img {
-                    assert_eq!(f2.mul(yp, yp), poly::eval(&f2, &cod, xp), "image on the codomain, p = {p}");
+                    assert_eq!(
+                        f2.mul(yp, yp),
+                        poly::eval(&f2, &cod, xp),
+                        "image on the codomain, p = {p}"
+                    );
                     images += 1;
                 }
             }

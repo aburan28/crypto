@@ -40,10 +40,19 @@ impl Form {
     pub fn identity(d: i128) -> Form {
         // (1, b, c) with b = d mod 2
         let b = d.rem_euclid(2);
-        Form { a: 1, b, c: (b * b - d) / 4 }
+        Form {
+            a: 1,
+            b,
+            c: (b * b - d) / 4,
+        }
     }
     pub fn inverse(&self) -> Form {
-        Form { a: self.a, b: -self.b, c: self.c }.reduce()
+        Form {
+            a: self.a,
+            b: -self.b,
+            c: self.c,
+        }
+        .reduce()
     }
     /// Reduced representative: |b| <= a <= c, b >= 0 if |b| = a or a = c (Cohen 5.4.2).
     pub fn reduce(&self) -> Form {
@@ -93,7 +102,12 @@ impl Form {
         let b3 = b2 + 2 * v2 * r;
         let a3 = v1 * v2;
         let c3 = (b3 * b3 - d) / (4 * a3);
-        Form { a: a3, b: b3, c: c3 }.reduce()
+        Form {
+            a: a3,
+            b: b3,
+            c: c3,
+        }
+        .reduce()
     }
     pub fn pow(&self, mut e: i128) -> Form {
         let d = self.disc();
@@ -115,7 +129,12 @@ impl Form {
 
 /// The form of the CSIDH ideal (l, pi - 1) for p = -1 mod l, D = -4p.
 pub fn prime_form(p: i128, ell: i128) -> Form {
-    Form { a: ell, b: 2, c: (p + 1) / ell }.reduce()
+    Form {
+        a: ell,
+        b: 2,
+        c: (p + 1) / ell,
+    }
+    .reduce()
 }
 
 /// Analytic estimate sqrt(|D|) L(1, chi_D) / pi with the Euler product over odd primes < bound
@@ -139,7 +158,11 @@ pub fn class_number_estimate(d: i128, bound: u64) -> f64 {
                     b = b * b % q as u128;
                     e >>= 1;
                 }
-                if r == 1 { 1.0 } else { -1.0 }
+                if r == 1 {
+                    1.0
+                } else {
+                    -1.0
+                }
             };
             l /= 1.0 - chi / q as f64;
         }
@@ -231,7 +254,9 @@ pub fn relation_lattice(p: i128, primes: &[u64]) -> Option<RelationLattice> {
     let mut h = None;
     let mut seed = 0x5eedu64;
     let mut next = || {
-        seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        seed = seed
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         seed >> 33
     };
     let mut cands: Vec<Form> = forms.clone();
@@ -244,7 +269,9 @@ pub fn relation_lattice(p: i128, primes: &[u64]) -> Option<RelationLattice> {
     }
     let mut gen = None;
     for g in &cands {
-        let Some(m) = bsgs_exponent(g, lo, hi) else { continue };
+        let Some(m) = bsgs_exponent(g, lo, hi) else {
+            continue;
+        };
         let ord = order_from_multiple(g, m);
         let gcd = |mut a: i128, mut b: i128| {
             while b != 0 {
@@ -271,7 +298,9 @@ pub fn relation_lattice(p: i128, primes: &[u64]) -> Option<RelationLattice> {
         logs.push(dlog(&g, f, h)?);
     }
     // kernel of e -> sum e_i x_i mod h
-    let mut rows: Vec<Vec<i64>> = (0..n).map(|i| (0..n).map(|j| (i == j) as i64).collect()).collect();
+    let mut rows: Vec<Vec<i64>> = (0..n)
+        .map(|i| (0..n).map(|j| (i == j) as i64).collect())
+        .collect();
     let mut vals: Vec<i128> = logs.iter().map(|x| x.rem_euclid(h)).collect();
     loop {
         let nz: Vec<usize> = (0..n).filter(|&i| vals[i] != 0).collect();
@@ -309,7 +338,11 @@ pub fn relation_lattice(p: i128, primes: &[u64]) -> Option<RelationLattice> {
 /// smallest m_k with [l_k]^{m_k} in the previous subgroup gives the relation m_k e_k - v. The n
 /// relations are a triangular basis of L (determinant prod m_k = #<[l_i]>), then LLL. Memory and
 /// time are linear in the group order: for h up to a few million.
-pub fn relation_lattice_explicit(p: i128, primes: &[u64], max_order: usize) -> Option<RelationLattice> {
+pub fn relation_lattice_explicit(
+    p: i128,
+    primes: &[u64],
+    max_order: usize,
+) -> Option<RelationLattice> {
     let d = -4 * p;
     let n = primes.len();
     let forms: Vec<Form> = primes.iter().map(|&l| prime_form(p, l as i128)).collect();
@@ -357,7 +390,11 @@ pub fn relation_lattice_explicit(p: i128, primes: &[u64], max_order: usize) -> O
         }
     }
     let h = elems.len() as i128;
-    Some(RelationLattice { h, logs: vec![], basis: lll(rels) })
+    Some(RelationLattice {
+        h,
+        logs: vec![],
+        basis: lll(rels),
+    })
 }
 
 fn gcd_i(mut a: i128, mut b: i128) -> i128 {
@@ -373,7 +410,10 @@ pub fn lll(mut b: Vec<Vec<i64>>) -> Vec<Vec<i64>> {
     let n = b.len();
     let dot = |x: &[f64], y: &[f64]| x.iter().zip(y).map(|(a, c)| a * c).sum::<f64>();
     let gs = |b: &Vec<Vec<i64>>| -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
-        let bf: Vec<Vec<f64>> = b.iter().map(|r| r.iter().map(|&x| x as f64).collect()).collect();
+        let bf: Vec<Vec<f64>> = b
+            .iter()
+            .map(|r| r.iter().map(|&x| x as f64).collect())
+            .collect();
         let mut bs: Vec<Vec<f64>> = vec![];
         let mut mu = vec![vec![0f64; n]; n];
         for i in 0..n {
@@ -404,7 +444,8 @@ pub fn lll(mut b: Vec<Vec<i64>>) -> Vec<Vec<i64>> {
                 mu = nmu;
             }
         }
-        if dot(&bs[k], &bs[k]) >= (0.99 - mu[k][k - 1] * mu[k][k - 1]) * dot(&bs[k - 1], &bs[k - 1]) {
+        if dot(&bs[k], &bs[k]) >= (0.99 - mu[k][k - 1] * mu[k][k - 1]) * dot(&bs[k - 1], &bs[k - 1])
+        {
             k += 1;
         } else {
             b.swap(k, k - 1);
@@ -422,7 +463,10 @@ impl RelationLattice {
     pub fn reduce(&self, e: &[i64]) -> Vec<i64> {
         let n = e.len();
         let b = &self.basis;
-        let bf: Vec<Vec<f64>> = b.iter().map(|r| r.iter().map(|&x| x as f64).collect()).collect();
+        let bf: Vec<Vec<f64>> = b
+            .iter()
+            .map(|r| r.iter().map(|&x| x as f64).collect())
+            .collect();
         let dot = |x: &[f64], y: &[f64]| x.iter().zip(y).map(|(a, c)| a * c).sum::<f64>();
         let mut bs: Vec<Vec<f64>> = vec![];
         for i in 0..n {
