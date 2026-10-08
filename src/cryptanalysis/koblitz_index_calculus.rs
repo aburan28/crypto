@@ -156,7 +156,7 @@ use crate::cryptanalysis::koblitz_groebner::{
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
-    self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    self, SparseCoreSolver, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use crate::cryptanalysis::sat::SolveResult;
@@ -10819,9 +10819,9 @@ impl<'a> LogSystem<'a> {
     }
 
     /// Whether an attempt is due: enough rows, and enough new ones since
-    /// the last attempt (a failed block Wiedemann run costs a whole Krylov
-    /// sequence, so the sparse path waits for a batch of new rows; the
-    /// dense path attempts after every batch).
+    /// the last attempt (a failed sparse run costs a whole Krylov sequence,
+    /// so that path waits for a batch of new rows; the dense path attempts
+    /// after every batch).
     fn attempt_interval(&self) -> usize {
         if self.sparse_opts.is_some() {
             (self.n_cols / 32).max(1)
@@ -11070,10 +11070,10 @@ impl<'a> FactorBaseLogSolver<'a> {
             modulus: self.kc.subgroup_order.to_string(),
             column_points,
             rows,
-            solver: if system.sparse_opts.is_some() {
-                "sparse-filter-block-wiedemann"
-            } else {
-                "dense-gauss"
+            solver: match system.sparse_opts.map(|options| options.solver) {
+                Some(SparseCoreSolver::BlockWiedemann) => "sparse-filter-block-wiedemann",
+                Some(SparseCoreSolver::BlockLanczos) => "sparse-filter-block-lanczos",
+                None => "dense-gauss",
             },
             sparse_options: system.sparse_opts,
         }
