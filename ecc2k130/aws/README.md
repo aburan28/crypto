@@ -795,14 +795,16 @@ one.
 any of the above.** Since 19:02Z on 2026-09-18 it is the truth: spot reclaimed
 every worker, and `RunInstances` is refused account-wide — `Blocked … not
 recognized as a valid account`, an account-verification hold that no IAM
-permission overrides — so nothing can replace them. The document says which
-kind of stop it is without needing this paragraph: `walking_slots: 0`,
-`workers: 0`, `iterations_per_second: 0.0` and `outstanding_objects: 0` beside
-an 11-hour `lag_seconds` is a fleet that stopped with an ingest that is caught
-up, where a stopped ingest shows a rising `outstanding_objects` and a fresh
-`newest_object_at`. Both ASGs still hold their launch template and an available
-AMI, and they track `$Latest`, so recovery once the hold clears is capacity
-only:
+permission overrides — so nothing can replace them. Status, Support reply
+draft, and the owner unblock checklist live in
+[`ACCOUNT-HOLD.md`](ACCOUNT-HOLD.md) (still blocked as of 2026-10-05). The
+document says which kind of stop it is without needing this paragraph:
+`walking_slots: 0`, `workers: 0`, `iterations_per_second: 0.0` and
+`outstanding_objects: 0` beside an 11-hour `lag_seconds` is a fleet that
+stopped with an ingest that is caught up, where a stopped ingest shows a
+rising `outstanding_objects` and a fresh `newest_object_at`. Both ASGs still
+hold their launch template and an available AMI, and they track `$Latest`, so
+recovery once the hold clears is capacity only:
 
 ```
 aws autoscaling update-auto-scaling-group --region us-west-2 \

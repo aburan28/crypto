@@ -694,7 +694,11 @@ impl Gf2 {
         let down = _mm_cvtsi32_si128(s as i32);
         let plain = |v: __m128i| _mm_cvtsi128_si64(_mm_srl_epi64(v, down)) as u64;
         let shifted = |v: u64| _mm_cvtsi64_si128((v << s) as i64);
-        scratch.clear();
+        // Sized, not refilled: the forward pass writes every prefix before
+        // the backward pass reads it, so clearing and zero-filling the
+        // buffer was a memset of the whole batch on every call.  Only a
+        // longer batch than the last zero-fills, and only its new tail.
+        scratch.truncate(xs.len());
         scratch.resize(xs.len(), 0);
         let mut acc = [shifted(1); LANES];
         for (xc, pc) in xs.chunks(LANES).zip(scratch.chunks_mut(LANES)) {
@@ -731,7 +735,11 @@ impl Gf2 {
     #[inline(always)]
     fn batch_inv_inline(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
         const LANES: usize = 4;
-        scratch.clear();
+        // Sized, not refilled: the forward pass writes every prefix before
+        // the backward pass reads it, so clearing and zero-filling the
+        // buffer was a memset of the whole batch on every call.  Only a
+        // longer batch than the last zero-fills, and only its new tail.
+        scratch.truncate(xs.len());
         scratch.resize(xs.len(), 0);
         let mut acc = [1u64; LANES];
         for (xc, pc) in xs.chunks(LANES).zip(scratch.chunks_mut(LANES)) {
