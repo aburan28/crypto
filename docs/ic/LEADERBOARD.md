@@ -160,7 +160,7 @@ The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 con
 - `research/ic_descent_20260930/analysis-isolated.json` — sha256 `060359c266e779db…`
 - `research/ic_single_target_20260930/analysis.json` — sha256 `109326d7c2882b71…`
 - `docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json` — sha256 `2271c4aa5236e2bd…`
-- `research/ecbench_n37_rank_columns_20261004/RESULT.json` — sha256 `9d3ba4708f70e279…`
+- `research/ecbench_n37_rank_columns_20261004/RESULT.json` — sha256 `f7b950edc74978cb…`
 - `research/ecbench_n37_k8_k16_20261004/DECISION.json` — sha256 `c4a33ffd9045a479…`
 - `research/ecbench_n37_online_ir_20261004/DECISION.json` — sha256 `e711979f64d08ea3…`
 - `research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json` — sha256 `369e99e76d8ba12a…`
