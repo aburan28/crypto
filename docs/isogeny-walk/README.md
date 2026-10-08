@@ -217,6 +217,44 @@ distinct full-width j-invariants. The
 [result report](../../research/p256_j_windows_20261007/RESULTS.md) preserves
 the receipts, transfer boundary, visuals and the still-unset ECDLP speedup.
 
+### Structural trait census over certified grids
+
+Use `trait-census` only after each source certificate has passed its matching
+independent replay. The command re-audits source hashes, record chains, exact j
+uniqueness, and frozen P-256 headers, then emits one compact trait record per
+curve. `verify-trait-census` reopens those same sources, reconstructs the
+entire uncompressed artifact, and byte-compares it with the recorded census.
+
+```bash
+$M trait-census \
+  --source runs/p256-grid-1m.jsonl.gz \
+  --source runs/p256-strip-y1000-h64.jsonl.gz \
+  --source-commit "$C" \
+  --output runs/p256-traits-1064k.jsonl.gz \
+  > runs/TRAIT_GENERATE.json
+
+$M verify-trait-census \
+  --input runs/p256-traits-1064k.jsonl.gz \
+  --source runs/p256-grid-1m.jsonl.gz \
+  --source runs/p256-strip-y1000-h64.jsonl.gz \
+  > runs/TRAIT_VERIFY.json
+```
+
+Both receipts include SHA-256 digests and byte counts for the stored gzip and
+its decompressed content. The census stores class-wide arithmetic once and
+curve-varying model, identity, detector, path, and incoming-edge traits once
+per curve. An exact path degree is represented losslessly as
+`11^x * 13^y`, together with its bit length and decimal-digit count.
+
+The degree-11 **row** and degree-13 **spine** labels describe construction
+axes. They are not isogeny-volcano directions. The separate
+`volcano_direction` field is populated only from the Frobenius-discriminant,
+endomorphism-conductor, and splitting proof; otherwise it remains typed as
+unknown with a reason. A structural census does not measure discrete-log cost,
+so its `ecdlp_speedup` remains null until a separate preregistered end-to-end
+solver experiment supplies that evidence. The frozen census protocol is
+[`research/p256_isogeny_traits_20261008/PROTOCOL.md`](../../research/p256_isogeny_traits_20261008/PROTOCOL.md).
+
 ## Sizing
 
 Measured on a 14-core Apple M4 Pro, unisolated.  Treat these as estimates

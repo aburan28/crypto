@@ -6,8 +6,13 @@
 //! smaller object needed for a large enumeration: one kernel-certified parent
 //! edge per new canonical curve in a fixed two-generator product grid.
 
+mod census;
 mod window;
 
+pub use census::{
+    generate_trait_census_jsonl, verify_trait_census_paths, TraitCensusReceipt, TraitCensusSummary,
+    TRAIT_CENSUS_RECEIPT_SCHEMA, TRAIT_CENSUS_SCHEMA, TRAIT_CENSUS_SUMMARY_SCHEMA,
+};
 pub use window::{
     audit_j_union_paths, generate_strip_jsonl, verify_strip_jsonl, JUnionReceipt, StripConfig,
     StripHeaderRecord, UnionInputReceipt, J_UNION_SCHEMA, STRIP_RECEIPT_SCHEMA, STRIP_SCHEMA,
