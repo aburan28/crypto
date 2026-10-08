@@ -1,0 +1,63 @@
+{
+  "schema": "p256-bucket-signature-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 306,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "maximal static kernel --[quotient]--> variables (lambda,d)",
+    "fixed walk bucket (a,b) --[all decompositions]--> one signature (a+b*d,-b)",
+    "same-bucket row differences --[subtraction]--> static homogeneous kernel",
+    "two proportional signatures --> quotient rank one",
+    "two nonproportional signatures --> quotient rank two / scalar-labelled full-rank control"
+  ],
+  "obligations": [
+    {
+      "name": "same-bucket quotient dimension",
+      "status": "supported",
+      "evidence": "Every row in a fixed (a,b) bucket has the same quotient signature; all differences are static.",
+      "scope": "Prime-order cyclic subgroup after a maximal homogeneous quotient."
+    },
+    {
+      "name": "complete signature-pair control",
+      "status": "supported",
+      "evidence": "19200 complete buckets and 451200 signature pairs were checked; determinant and matrix rank always agree.",
+      "scope": "All projective four-log profiles over Z/7Z."
+    },
+    {
+      "name": "P-256 same-signature replay",
+      "status": "supported as scalar-labelled control",
+      "evidence": "The 327-row enlarged target bucket and proportional-signature stage retain rank 164; the independent generator signature reaches rank 165 across 984 group replays.",
+      "scope": "Synthetic deterministic labels, not a relation construction on FB1hc72514a2a8d3."
+    },
+    {
+      "name": "two-signature P-256 event",
+      "status": "unknown",
+      "evidence": "No non-scalar-labelled event emits both target coupling and an independent generator signature.",
+      "scope": "Future non-homomorphic relation mechanisms."
+    },
+    {
+      "name": "complete below-rho recovery",
+      "status": "unknown",
+      "evidence": "The two-signature free oracle is above rho and no complete relation/decomposition/recovery pipeline exists.",
+      "scope": "End-to-end P-256 attack."
+    }
+  ],
+  "controls": [
+    "The toy census retained and replayed 6585600 bucket rows and 902400 pair representatives with zero discrepancies.",
+    "Five P-256 stages were ranked over two fields in both row orders and replayed through 984 exact group equations.",
+    "Rounds 298, 304, and corrected 305 were imported only after exact byte-hash, schema, curve, factor-base, width, boundary, and gate checks."
+  ],
+  "cost_accounting": [
+    "Measured: toy coefficient tests, retained bucket rows, pair determinants, rank operations, P-256 scalar multiplications, group additions, equation replays, process telemetry, and artifact sizes.",
+    "Imported without extrapolation: Round-304 unquotiented and one-anchor oracle boundaries.",
+    "Unset: a non-labelled two-signature event, relation yield, structured solver, sparse linear algebra, target recovery, and complete attack cost."
+  ],
+  "exploration_boundary": "Exact for rows sharing a fixed generator/target walk signature after a maximal static quotient; not a bound on an event that emits multiple nonproportional signatures.",
+  "weakest_open_obligation": "Construct and replay one P-256 event that emits two nonproportional signatures, including target coupling and a generator anchor, then price complete recovery below rho.",
+  "narrowest_supported_finding": "Any number of decompositions in one fixed P-256 target/walk bucket contributes at most one post-static dimension. Full rank requires two nonproportional bucket signatures; no qualifying event is constructed.",
+  "semantic_evidence_sha256": "1c02cadfc0040e2699e95a1c4a900460ac1cb77cd15056d46b5e1eb8e228b17f",
+  "assessment_json_bytes": 4077
+}
