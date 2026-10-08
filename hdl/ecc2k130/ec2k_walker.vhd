@@ -18,6 +18,11 @@
 -- accepted only on clocks when no step completes, so the FIFO has one
 -- write port.
 --
+-- The FIFO is block RAM (304 x NWALK), read synchronously two clocks ahead
+-- into a four-entry register buffer whose head is what the step unit and
+-- the report register see; reads are issued while buffer plus reads in
+-- flight are under four, so the head is always the oldest entry and the
+-- buffer never overflows.  Distributed RAM would put the write pointer on
 -- The FIFO is block RAM (285 x NWALK), written through a register and read
 -- synchronously two clocks ahead into a four-entry buffer, whose oldest
 -- entry moves into a head register as that empties; the head register is
@@ -28,6 +33,8 @@
 --
 -- The step count travels with the walk, through the step unit's tag and
 -- back into the FIFO plus one, rather than in a per-walk counter memory:
+-- there is then no read-modify-write of a RAM on the retire path, and no
+-- state indexed by walk id at all.
 -- there is then no read-modify-write of a RAM on the retire path.  Only
 -- its low CNT_LO_W bits travel, though: the FIFO word and the step unit's
 -- leaf word are each 512 deep, and four RAMB36 hold 288 bits at that
@@ -100,6 +107,8 @@ architecture rtl of ec2k_walker is
   subtype id_t  is unsigned(ID_W - 1 downto 0);
   subtype cnt_t is unsigned(CNT_W - 1 downto 0);
 
+  -- FIFO word: x, y, id, steps, dp
+  constant FW : natural := 2 * M + ID_W + CNT_W + 1;
   -- the step count: LO_W bits travel with the walk, HI_W sit in the table
   constant LO_W : natural := CNT_LO_W;
   constant HI_W : natural := CNT_W - LO_W;
@@ -119,6 +128,12 @@ architecture rtl of ec2k_walker is
   attribute ram_style : string;
   attribute ram_style of f_mem : signal is "block";
 
+  signal f_wr, f_rd : unsigned(ID_W downto 0) := (others => '0');
+  signal f_empty, f_full : boolean;
+  signal rd_w, rr_w : fword_t;                -- read latch, output register
+  signal rv         : std_logic_vector(0 to 1) := (others => '0');  -- reads in flight
+
+  -- output buffer: the FIFO's head lives here
   -- The write goes through a register of its own (enable, address, word)
   -- so the block RAM's port pins are driven from flip-flops the placer
   -- can put beside it: in the routed 128-engine image at 375 MHz the
@@ -170,6 +185,18 @@ architecture rtl of ec2k_walker is
   signal ob : ob_mem_t := (others => (others => '0'));
   signal ob_wr, ob_rd : unsigned(OB_LOG downto 0) := (others => '0');
   signal ob_empty : boolean;
+  signal head_w   : fword_t;
+  signal head_dp  : std_logic;
+  -- the buffer is distributed RAM (176 LUTRAM; as registers with one-hot
+  -- write enables it was 1 200 flip-flops and 500 more LUTs for the read
+  -- mux).  Its read pointer selects a 304-bit mux and the report
+  -- register's load is 304 more: each such net from one driver is a long
+  -- route in a full device, so those drivers are replicated
+  attribute MAX_FANOUT : string;
+  attribute MAX_FANOUT of ob_rd : signal is "100";
+
+  -- step unit; the tag is (id, steps so far)
+  constant TAG_W : natural := ID_W + CNT_W;
   signal head_w   : fword_t := (others => '0');
   signal head_v   : std_logic := '0';
   signal head_dp  : std_logic;
@@ -206,6 +233,7 @@ begin
     generic map (TAG_W => TAG_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
                  FLUSH_CLK => FLUSH_CLK, DP_WEIGHT => DP_WEIGHT)
     port map (
+      clk => clk, rst => rst,
       clk => clk, rst => rst_q,
       in_valid => s_in_valid, in_ready => s_in_ready,
       in_x => head_w(FW - 1 downto X_LO), in_y => head_w(X_LO - 1 downto Y_LO),
@@ -213,12 +241,33 @@ begin
       out_valid => s_out_valid, out_x => s_out_x, out_y => s_out_y,
       out_hw => s_out_hw, out_dp => s_out_dp, out_tag => s_out_tag);
 
+  f_empty  <= f_wr = f_rd;
+  f_full   <= f_wr(ID_W) /= f_rd(ID_W) and f_wr(ID_W - 1 downto 0) = f_rd(ID_W - 1 downto 0);
+  ob_empty <= ob_wr = ob_rd;
+  head_w   <= ob(to_integer(ob_rd(OB_LOG - 1 downto 0)));
   f_empty  <= f_wrc = f_rd;
   ob_empty <= ob_wr = ob_rd;
   head_dp  <= head_w(0);
 
   -- every completed step takes the FIFO's write port, so a load is
   -- accepted only on clocks with no retirement
+  ld_rdy   <= '1' when rst = '0' and s_out_valid = '0' and not f_full else '0';
+  ld_ready <= ld_rdy;
+
+  -- head of the FIFO: a walk is offered to the step unit, a distinguished
+  -- point to the report register once that is free (or being freed)
+  s_in_valid <= '0' when ob_empty or rst = '1' or head_dp = '1' else '1';
+  s_in_tag   <= head_w(Y_LO - 1 downto ID_LO) & head_w(ID_LO - 1 downto CNT_LO);
+  take_dp    <= not ob_empty and rst = '0' and head_dp = '1' and (dpv = '0' or dp_ack = '1');
+
+  dp_valid <= dpv;
+
+  -- the FIFO memory's read port and output register
+  mem_rd : process (clk)
+  begin
+    if rising_edge(clk) then
+      rd_w <= f_mem(to_integer(f_rd(ID_W - 1 downto 0)));
+      rr_w <= rd_w;
   ld_rdy   <= '1' when rst_q = '0' and s_out_valid = '0' and f_full = '0' else '0';
   ld_ready <= ld_rdy;
 
@@ -262,6 +311,9 @@ begin
   end process;
 
   main : process (clk)
+    variable wr    : natural range 0 to NWALK - 1;
+    variable issue : boolean;
+    variable held  : natural range 0 to OB_N + 2;
     variable issue : boolean;
     variable held  : natural range 0 to OB_N + 2;
     variable lo1   : unsigned(LO_W downto 0);   -- low count plus one, with its carry
@@ -286,6 +338,21 @@ begin
         ob_wr <= ob_wr + 1;
       end if;
 
+      -- pop: the step unit took the head, or the head is a report (the
+      -- two exclude each other: a report is never offered to the step
+      -- unit)
+      if (s_in_valid = '1' and s_in_ready = '1') or take_dp then
+        ob_rd <= ob_rd + 1;
+      end if;
+      if take_dp then
+        dpv      <= '1';
+        dp_id    <= unsigned(head_w(Y_LO - 1 downto ID_LO));
+        dp_x     <= head_w(FW - 1 downto X_LO);
+        dp_y     <= head_w(X_LO - 1 downto Y_LO);
+        dp_steps <= unsigned(head_w(ID_LO - 1 downto CNT_LO));
+      end if;
+      if dp_ack = '1' and not take_dp then
+        dpv <= '0';
       -- head: the step unit took it, or it is a report and the report
       -- register takes it (the two exclude each other: a report is never
       -- offered to the step unit); either way, or when the head is empty,
@@ -339,6 +406,26 @@ begin
 
       -- a completed step: re-queue it with its count plus one, flagged
       -- if distinguished; else a host load, which starts at zero.  One
+      -- if/elsif chain so the memory has exactly one write port.
+      wr := to_integer(f_wr(ID_W - 1 downto 0));
+      if s_out_valid = '1' then
+        step_pulse <= '1';
+        f_mem(wr) <= s_out_x & s_out_y & s_out_tag(TAG_W - 1 downto CNT_W)
+                     & std_logic_vector(unsigned(s_out_tag(CNT_W - 1 downto 0)) + 1)
+                     & s_out_dp;
+        f_wr <= f_wr + 1;
+      elsif ld_valid = '1' and ld_rdy = '1' then
+        f_mem(wr) <= ld_x & ld_y & std_logic_vector(ld_id)
+                     & std_logic_vector(to_unsigned(0, CNT_W)) & '0';
+        f_wr <= f_wr + 1;
+      end if;
+
+      if rst = '1' then
+        f_wr  <= (others => '0');
+        f_rd  <= (others => '0');
+        ob_wr <= (others => '0');
+        ob_rd <= (others => '0');
+        rv    <= (others => '0');
       -- if/elsif chain so the memory has exactly one write port; the
       -- write itself is the write register's, next clock.
       fw_addr <= f_wr(ID_W - 1 downto 0);

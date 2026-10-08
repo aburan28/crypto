@@ -1,0 +1,12 @@
+# R06's exploration benches, outside the repository's crate: the key
+# kernels (src/bin/kbench.rs) and the invariant-hash collision simulation
+# (src/main.rs).  Its own workspace, so nothing at the root picks it up.
+[package]
+name = "invsim"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[profile.release]
+opt-level = 3

@@ -3,7 +3,7 @@
  "generated_by": "scripts/build_lab_browser.py",
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
-  "curves": 121,
+  "curves": 130,
   "methods": 49,
   "factor_bases": 30,
   "candidates": 258,
@@ -12,9 +12,15 @@
   "yields": 2436
  },
  "sources": {
+  "docs/curves/registry.json": "d11d19fcb65175b8a8ad363b2c15ea87ccc733331d5c20b36cb0954901108c92",
+  "docs/curves/covers.json": "e4d59ab26061ea2ab02a1f6e5f33c6cb02a4ae10277754a874cf1a4514887b79",
+  "docs/ic/leaderboard.json": "ab9832187616a80953aca50a4c2c7cc40e92543d7513061a70655036cad46eef",
+  "docs/curves/registry.json": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3",
+  "docs/curves/covers.json": "5f90fe0c1dfaa5cd2bd187a87dfd5ee5985c4d0171ea93e7874f9246527aaf9b",
+  "docs/ic/leaderboard.json": "bf8e682b1fd3fdeb9a11f9644ccc315cf8d9731ddfac5d4f1f2979716cd34b36",
   "docs/curves/registry.json": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
   "docs/curves/covers.json": "b1634d75fff27add2e27adf996ba820a8852ea72468088d9eb3c88bb69759a39",
-  "docs/ic/leaderboard.json": "6605578b89e8828cb8503b8fc327fca54a1c8a919b74a262cfe77c177e8695f7",
+  "docs/ic/leaderboard.json": "3fc2c323691ef75c2941f2fbda02d73fa8cfc38517b6f4f60f69bfa3848e872b",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -6988,11 +6994,11 @@
     {
      "regime": "koblitz",
      "log2_r": 39.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 5.580644298617035,
-     "ratio_rho": 8.044290213253069,
-     "ratio_floor": 40.3210032810846,
+     "best_s": 11.16913986167439,
+     "ratio_rho": 7.657141173367715,
+     "ratio_floor": 80.69873314109438,
      "verified": true
     },
     {
@@ -7657,11 +7663,11 @@
     {
      "regime": "koblitz",
      "log2_r": 36.64,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 4.267748993706104,
-     "ratio_rho": 4.946769165949517,
-     "ratio_floor": 33.01435804053309,
+     "best_s": 9.506805780776906,
+     "ratio_rho": 5.2259258441371435,
+     "ratio_floor": 73.54253737303847,
      "verified": true
     },
     {
@@ -7833,11 +7839,11 @@
     {
      "regime": "koblitz",
      "log2_r": 44.26,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 7.398810637067995,
-     "ratio_rho": 14.703867319407847,
-     "ratio_floor": 60.779189777284564,
+     "best_s": 16.97618299454087,
+     "ratio_rho": 13.24099753697916,
+     "ratio_floor": 139.45466353062287,
      "verified": true
     },
     {
@@ -8086,11 +8092,11 @@
     {
      "regime": "koblitz",
      "log2_r": 38.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 8.12117350520502,
-     "ratio_rho": 1.9845626541276857,
-     "ratio_floor": 69.18489342115318,
+     "best_s": 11.014581514064941,
+     "ratio_rho": 6.121194064269396,
+     "ratio_floor": 93.8340558345144,
      "verified": true
     }
    ],
@@ -8199,11 +8205,11 @@
     {
      "regime": "koblitz",
      "log2_r": 44.52,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 9.032810277716749,
-     "ratio_rho": 15.668163853624774,
-     "ratio_floor": 78.2895782821557,
+     "best_s": 16.25703234767737,
+     "ratio_rho": 12.030889434458363,
+     "ratio_floor": 140.90367975056634,
      "verified": true
     }
    ],
@@ -8405,11 +8411,11 @@
     {
      "regime": "koblitz",
      "log2_r": 47.21,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 15.14900664715143,
-     "ratio_rho": 31.599405794913018,
-     "ratio_floor": 133.50702947303913,
+     "best_s": 24.931644865085715,
+     "ratio_rho": 20.970861959576446,
+     "ratio_floor": 219.72066706038663,
      "verified": true
     },
     {
@@ -18156,6 +18162,903 @@
     "model_sha256": "76dadd18862f89d1d83448f01f54a24b4b543230f2c38acceb813523c2a6d196",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
     "slug": "icv1-fp256-t432420386565659656852420866390673177327-76dadd18",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp6k11-tm527622722-07ccd925",
+   "icv1": "ICV1:fpk-37-11-02fde89a:-527622722:177917622307083136:16,4,11,23,19,29,29,1,8,23,29:unk:unk:r:07ccd925d696",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "37",
+    "bits": 58,
+    "degree": 11,
+    "modulus": [
+     "26",
+     "21",
+     "7",
+     "6",
+     "4",
+     "31",
+     "21",
+     "29",
+     "14",
+     "16",
+     "7"
+    ]
+   },
+   "a": "[18, 2, 14, 25, 8, 30, 31, 18, 12, 21, 25]",
+   "b": "[27, 36, 7, 5, 6, 18, 26, 26, 16, 14, 34]",
+   "construction": null,
+   "trace": "-527622722",
+   "order": "177917622307083136",
+   "order_bits": 57.235,
+   "r": "49850497589",
+   "r_bits": 35.451,
+   "cofactor": 3569024,
+   "generator": [
+    [
+     27,
+     35,
+     36,
+     18,
+     20,
+     16,
+     8,
+     16,
+     8,
+     6,
+     30
+    ],
+    [
+     12,
+     5,
+     11,
+     10,
+     33,
+     24,
+     26,
+     24,
+     28,
+     19,
+     32
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "16,4,11,23,19,29,29,1,8,23,29",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"18\",\"2\",\"14\",\"25\",\"8\",\"30\",\"31\",\"18\",\"12\",\"21\",\"25\"],\"b\":[\"27\",\"36\",\"7\",\"5\",\"6\",\"18\",\"26\",\"26\",\"16\",\"14\",\"34\"],\"field\":\"fpk-37-11-02fde89a\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"11\",\"modulus\":[\"26\",\"21\",\"7\",\"6\",\"4\",\"31\",\"21\",\"29\",\"14\",\"16\",\"7\"],\"p\":\"37\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q37D11Cfpkh06d0f78d2fde"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:06d0f78d2fdea20265e940969142fcd4daed58279fc2121acc85eb91fff9fce2"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E11-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x24b8333948cfb53",
+      "0x0",
+      "0x1b4f0b41080af94",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "07ccd925d6963c07565faa474724c6692baa6ba370bd1422473913550817de92",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp6k11-tm527622722-07ccd925",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp9k3-t1227-55c8d640",
+   "icv1": "ICV1:fpk-271-3-725abf60:1227:19901285:202,155,118:unk:unk:r:55c8d6404e98",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "271",
+    "bits": 25,
+    "degree": 3,
+    "modulus": [
+     "269",
+     "0",
+     "0"
+    ]
+   },
+   "a": "[88, 60, 158]",
+   "b": "[233, 70, 211]",
+   "construction": null,
+   "trace": "1227",
+   "order": "19901285",
+   "order_bits": 24.186,
+   "r": "50383",
+   "r_bits": 15.538,
+   "cofactor": 395,
+   "generator": [
+    [
+     88,
+     252,
+     245
+    ],
+    [
+     255,
+     69,
+     184
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "202,155,118",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"88\",\"60\",\"158\"],\"b\":[\"233\",\"70\",\"211\"],\"field\":\"fpk-271-3-725abf60\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"269\",\"0\",\"0\"],\"p\":\"271\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q271D3Cfpkhd6a8a65a8a4c"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:d6a8a65a8a4cdc11ee858a30bea829d77dd41024b02530bc0c7c7a8b234885e6"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/H1-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0xecbe76",
+      "0x0",
+      "0xb14eba",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "55c8d6404e985edbb2f10643c26badc5ea0d66bd7f83f6d05fea3609dce007b0",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp9k3-t1227-55c8d640",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp9k3-tm4575-aba104ba",
+   "icv1": "ICV1:fpk-271-3-725abf60:-4575:19907087:109,150,85:unk:unk:r:aba104bae738",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "271",
+    "bits": 25,
+    "degree": 3,
+    "modulus": [
+     "269",
+     "0",
+     "0"
+    ]
+   },
+   "a": "[168, 59, 35]",
+   "b": "[212, 72, 29]",
+   "construction": null,
+   "trace": "-4575",
+   "order": "19907087",
+   "order_bits": 24.187,
+   "r": "19907087",
+   "r_bits": 24.187,
+   "cofactor": 1,
+   "generator": [
+    [
+     14,
+     102,
+     40
+    ],
+    [
+     152,
+     203,
+     44
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "109,150,85",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"168\",\"59\",\"35\"],\"b\":[\"212\",\"72\",\"29\"],\"field\":\"fpk-271-3-725abf60\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"269\",\"0\",\"0\"],\"p\":\"271\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q271D3Cfpkh800837f403ee"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:800837f403eeba121cd787ec4015aed256fb2046a64e10eca701ac56f11b9b37"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G1-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x20cc89",
+      "0x0",
+      "0x2777e0",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "aba104bae738a15bd4d4a4f518066a02076592f50c110e89208aca316fb128cb",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp9k3-tm4575-aba104ba",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp10k3-t3589-bbd5cc8b",
+   "icv1": "ICV1:fpk-523-3-c6b97896:3589:143052079:432,170,295:unk:unk:r:bbd5cc8b7e15",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "523",
+    "bits": 28,
+    "degree": 3,
+    "modulus": [
+     "521",
+     "0",
+     "0"
+    ]
+   },
+   "a": "[345, 215, 106]",
+   "b": "[424, 373, 36]",
+   "construction": null,
+   "trace": "3589",
+   "order": "143052079",
+   "order_bits": 27.066,
+   "r": "143052079",
+   "r_bits": 27.066,
+   "cofactor": 1,
+   "generator": [
+    [
+     249,
+     32,
+     448
+    ],
+    [
+     386,
+     88,
+     501
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "432,170,295",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"345\",\"215\",\"106\"],\"b\":[\"424\",\"373\",\"36\"],\"field\":\"fpk-523-3-c6b97896\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"521\",\"0\",\"0\"],\"p\":\"523\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q523D3Cfpkhfb90ff16ed62"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:fb90ff16ed6280a00b19e7f65249080e8fff2a71a2878977102278d641bd7977"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G2-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x993cb3",
+      "0x0",
+      "0x1bc22b0",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "bbd5cc8b7e15ea9d7397e6af76fcddbdc797008865bfa6ebbdb0778990ae5e9d",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp10k3-t3589-bbd5cc8b",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp10k3-t41822-dfa3991d",
+   "icv1": "ICV1:fpk-1009-3-e3fbfd05:41822:1027201908:974,955,327:unk:unk:r:dfa3991d2668",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "1009",
+    "bits": 30,
+    "degree": 3,
+    "modulus": [
+     "776",
+     "595",
+     "960"
+    ]
+   },
+   "a": "[670, 300, 374]",
+   "b": "[47, 257, 560]",
+   "construction": null,
+   "trace": "41822",
+   "order": "1027201908",
+   "order_bits": 29.913,
+   "r": "674017",
+   "r_bits": 19.286,
+   "cofactor": 1524,
+   "generator": [
+    [
+     179,
+     892,
+     250
+    ],
+    [
+     146,
+     197,
+     22
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "974,955,327",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"670\",\"300\",\"374\"],\"b\":[\"47\",\"257\",\"560\"],\"field\":\"fpk-1009-3-e3fbfd05\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"776\",\"595\",\"960\"],\"p\":\"1009\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q1009D3Cfpkh957c64a1ac0d"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:957c64a1ac0d70205d16d43a313f3c7c6dc5336178982bd04b3cecbba057594b"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b2/params/C050-cubic-extension.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x21ff6150",
+      "0x0",
+      "0x16b699c0",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "dfa3991d266837a4dc8596fba86cd943b6d48d34b6bff53b88911e723767c2d3",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp10k3-t41822-dfa3991d",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp11k3-tm30789-3c2726bc",
+   "icv1": "ICV1:fpk-1039-3-c47db6db:-30789:1121653109:752,81,656:unk:unk:r:3c2726bc5e60",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "1039",
+    "bits": 31,
+    "degree": 3,
+    "modulus": [
+     "1037",
+     "0",
+     "0"
+    ]
+   },
+   "a": "[335, 1030, 289]",
+   "b": "[701, 99, 145]",
+   "construction": null,
+   "trace": "-30789",
+   "order": "1121653109",
+   "order_bits": 30.045,
+   "r": "1121653109",
+   "r_bits": 30.045,
+   "cofactor": 1,
+   "generator": [
+    [
+     792,
+     757,
+     118
+    ],
+    [
+     754,
+     980,
+     697
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "752,81,656",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"335\",\"1030\",\"289\"],\"b\":[\"701\",\"99\",\"145\"],\"field\":\"fpk-1039-3-c47db6db\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"1037\",\"0\",\"0\"],\"p\":\"1039\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q1039D3Cfpkh1d1f8afd3a95"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:1d1f8afd3a95b5b8d341e196ec918b9984e52584f2987f908879c7285cb92f19"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G3-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x9560bfb",
+      "0x0",
+      "0x12a8cbaa",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "3c2726bc5e60a09198b9ea992eea3485b29e7a5276395ec082b141b9b549bbff",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp11k3-tm30789-3c2726bc",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp12k5-tm296780010-475f4271",
+   "icv1": "ICV1:fpk-2053-5-b778c5c5:-296780010:36470754699785504:584,1698,1294,850,1945:unk:unk:r:475f42718ca5",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "2053",
+    "bits": 56,
+    "degree": 5,
+    "modulus": [
+     "1536",
+     "882",
+     "535",
+     "1934",
+     "211"
+    ]
+   },
+   "a": "[420, 738, 2017, 1352, 1667]",
+   "b": "[1807, 597, 1599, 912, 658]",
+   "construction": null,
+   "trace": "-296780010",
+   "order": "36470754699785504",
+   "order_bits": 55.012,
+   "r": "698780554487",
+   "r_bits": 39.271,
+   "cofactor": 52192,
+   "generator": [
+    [
+     78,
+     1089,
+     61,
+     911,
+     482
+    ],
+    [
+     126,
+     911,
+     496,
+     1983,
+     1270
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "584,1698,1294,850,1945",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"420\",\"738\",\"2017\",\"1352\",\"1667\"],\"b\":[\"1807\",\"597\",\"1599\",\"912\",\"658\"],\"field\":\"fpk-2053-5-b778c5c5\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"5\",\"modulus\":[\"1536\",\"882\",\"535\",\"1934\",\"211\"],\"p\":\"2053\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q2053D5Cfpkhe85f97f97912"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:e85f97f97912f08c6a5fd63b4cede93430651f82d1b5e687a7e9daa4b7456462"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E5-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x298e5f8151caa1",
+      "0x0",
+      "0x6940126b804f02",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "475f42718ca5e405f4b5f21d1d76f0bac064dffffb73debe8e0fc64e119048ea",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp12k5-tm296780010-475f4271",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp31k2-t1044939202-6687f4aa",
+   "icv1": "ICV1:fpk-2147483647-2-2dd74626:1044939202:4611686013087481408:1684628177,1856063102:unk:unk:r:6687f4aa0d02",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "2147483647",
+    "bits": 62,
+    "degree": 2,
+    "modulus": [
+     "996971330",
+     "270963791"
+    ]
+   },
+   "a": "[459164876, 1077033002]",
+   "b": "[87384810, 1624838696]",
+   "construction": null,
+   "trace": "1044939202",
+   "order": "4611686013087481408",
+   "order_bits": 62.0,
+   "r": "50612514727",
+   "r_bits": 35.473,
+   "cofactor": 91117504,
+   "generator": [
+    [
+     605757450,
+     1161662889
+    ],
+    [
+     1780798159,
+     718871902
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "1684628177,1856063102",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"459164876\",\"1077033002\"],\"b\":[\"87384810\",\"1624838696\"],\"field\":\"fpk-2147483647-2-2dd74626\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"996971330\",\"270963791\"],\"p\":\"2147483647\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q2147483647D2Cfpkhf7a0a063fa34"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:f7a0a063fa34935ec81cc9a9904e5926efbea39d8e1e0a2c45e0dfa2c43460be"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E2-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x306c8913a45c50c2",
+      "0x0",
+      "0x20191c14db2c14a2",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "6687f4aa0d02c9f820c0a0ba89f02602f68abfa33f7af8b1a158dafb116c7a50",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp31k2-t1044939202-6687f4aa",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-fp36k2-tm52676205250-0d78f787",
+   "icv1": "ICV1:fpk-34359738421-2-8286ea01:-52676205250:1180591624412219778492:34103994903,19452403749:unk:unk:r:0d78f7872138",
+   "family": "extension",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "34359738421",
+    "bits": 71,
+    "degree": 2,
+    "modulus": [
+     "26331252790",
+     "2511667419"
+    ]
+   },
+   "a": "[14233520128, 7914896054]",
+   "b": "[26838110637, 17581638592]",
+   "construction": null,
+   "trace": "-52676205250",
+   "order": "1180591624412219778492",
+   "order_bits": 70.0,
+   "r": "5986912233091",
+   "r_bits": 42.361,
+   "cofactor": 197195412,
+   "generator": [
+    [
+     15167988613,
+     19608674438
+    ],
+    [
+     28472194760,
+     22214387862
+    ]
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "34103994903,19452403749",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":[\"14233520128\",\"7914896054\"],\"b\":[\"26838110637\",\"17581638592\"],\"field\":\"fpk-34359738421-2-8286ea01\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"26331252790\",\"2511667419\"],\"p\":\"34359738421\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1Q34359738421D2Cfpkh988322aa091b"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:988322aa091b3f9eb837e9ae88e8a4fbfe8f9ae554a856d6d59da7792508ddf2"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/B2-known.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "prime_quadratic_pullback_v1",
+     "degree": 2,
+     "f": [
+      "0x20bf941edf34e2586d",
+      "0x0",
+      "0xebe1dd614fbe7efae",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 2,
+     "h": [],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [],
+     "y_v": [
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "0d78f78721389c50087d71b00dc51977589a9cfac38e0c2c5b429cfb70f74fe6",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-fp36k2-tm52676205250-0d78f787",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"

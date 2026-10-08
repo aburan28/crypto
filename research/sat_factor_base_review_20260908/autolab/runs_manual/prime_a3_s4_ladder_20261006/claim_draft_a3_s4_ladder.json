@@ -1,0 +1,69 @@
+{
+ "all_runs_verified_and_agree_rho": true,
+ "beat_id": "prime.decomposition.s4_3decomp_ladder",
+ "claim_boundary": "synthetic_known_answer_s4_3decomp_a_minus_3_ladder",
+ "claim_boundary_non_claims": [
+  "not P-256 or CryptoPro-B themselves (synthetic small-field members of the a=-3 family)",
+  "not a scaling win over 2-decomposition at these sizes (per-relation cost is dominated by the B^2/2 quartic sweep)",
+  "not a vs_rho claim",
+  "not ledger promotion until independent validation"
+ ],
+ "created_at": "2026-10-07T06:42:42.072073+00:00",
+ "evidence_paths": [
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_s4_ladder_20261006/a3s4_16bit_p256class_seed20261006.json"
+ ],
+ "executable_or_source_hash": {
+  "example": "5bb18410db85d5bd0090dcb5bf40cab4947f33aac6d00214013391d49aa5e6cd",
+  "source": "d44588f85e015e012d4fdc7bc0bc4d95d482885cdbc3c55c6e7a3b612724501d"
+ },
+ "family": "y^2 = x^3 - 3x + b, prime order, h=1, a=p-3 (P-256 and CryptoPro-B shapes)",
+ "fixture_hash": "918ed5f1a27d1f3fef2e956aef3c0a69cfab0320360fd38e97c742cc7d8f4230",
+ "host_id": {
+  "node": "Adams-MacBook-Pro.local",
+  "platform": "macOS-26.6-arm64-arm-64bit"
+ },
+ "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_s4_ladder_20261006/claim_draft_a3_s4_ladder.json",
+ "ladder": [
+  {
+   "bits": 16,
+   "curve": "a3-bench-16bit-p256class",
+   "curve_class": "p256_shape",
+   "ffd": {
+    "reason": "direct univariate quartic root finding; no Boolean/Gr\u00f6bner system solved",
+    "status": "inapplicable"
+   },
+   "file": "a3s4_16bit_p256class_seed20261006.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 499394.797792,
+   "ic_ok": true,
+   "m_summands": 3,
+   "oracle_class": "quartic_root_find_cantor_zassenhaus",
+   "per_relation_ms": 3901.466135085938,
+   "relations_collected": 128,
+   "rho_ms": 4.251416,
+   "rho_ok": true,
+   "seed": 20261006,
+   "stage_timers": {
+    "factor_base_ms": 1.581333,
+    "linear_algebra_ms": 5.268916,
+    "relations_ms": 499387.66529100004,
+    "verify_ms": 0.067833
+   },
+   "system_degree": 4,
+   "trials_per_relation_max": 1,
+   "trials_per_relation_median": 1.0
+  }
+ ],
+ "n_or_bits": 16,
+ "readout": "First Semaev-S4 3-decomposition relation family past toy sizes on the deployed a=-3 curve shape: relations decompose R = aG + bQ into three factor-base points via the S4 quartic and Cantor-Zassenhaus root finding. Yield: trials/relation = 1.0 at 16 bits (every trial yields a relation; ~13 expected hits per trial at B=120), confirming the p/B^3 3-decomposition density. Cost: the B^2/2 quartic sweep dominates per-trial cost (~3.3 s at B=120, 16-20 bits), so 2-decomposition remains faster per relation at these sizes; the measured yield curve is the input for the larger-B design where 3-decomposition is the asymptotic lever.",
+ "regime": "prime",
+ "resource_caps": {},
+ "schema_version": 2,
+ "seeds": [
+  20261006
+ ],
+ "stage": "decomposition",
+ "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+ "unknowns_formula_when_applicable": "not applicable: direct univariate root finding, one unknown x_k per (x_i, x_j) pair"
+}

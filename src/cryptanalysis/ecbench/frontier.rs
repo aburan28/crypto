@@ -20,13 +20,32 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::cryptanalysis::ecbench::bounds::{seal_document, Bound, Domain};
+use crate::cryptanalysis::ecbench::bounds::{seal_document, Bound, Domain, FIELD_AXES};
 
 pub const FRONTIER_SCHEMA: &str = "ecbench.frontier/v1";
 pub const FRONTIER_PREFIX: &str = "ECFR1h";
 /// The axes dominance reads by default.  `uncharged` is reported on every
 /// entry and used as an axis only when asked.
 pub const DEFAULT_AXES: &[&str] = &["ops", "memory"];
+/// The axes every entry reports whether or not they decide.
+const REPORTED_AXES: &[&str] = &["ops", "memory", "uncharged"];
+
+/// Every axis name a frontier or a challenge may read: the three every
+/// bound carries and the three field-operation axes a bound carries when
+/// its runs counted them.
+pub fn is_axis(name: &str) -> bool {
+    REPORTED_AXES.contains(&name) || FIELD_AXES.contains(&name)
+}
+
+/// The axis vocabulary, for error messages.
+pub fn axis_names() -> String {
+    REPORTED_AXES
+        .iter()
+        .chain(FIELD_AXES.iter())
+        .copied()
+        .collect::<Vec<_>>()
+        .join(", ")
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Axis {
@@ -149,11 +168,21 @@ fn axis_of(b: &Bound, name: &str) -> Axis {
 
 fn entry_of(b: &Bound, axes: &[String]) -> Entry {
     let mut ax = BTreeMap::new();
+    // A field-operation axis rides on an entry only when its bound
+    // carries the dimension — the bound's runs counted it — whether or
+    // not dominance was asked to read it; an entry without the key says
+    // nothing, and `dominates` leaves the axis out as unknown.  Bounds
+    // fitted before the axes existed therefore give the entries, and the
+    // page, they always gave.
     for name in axes
         .iter()
         .map(String::as_str)
-        .chain(["ops", "memory", "uncharged"])
+        .chain(REPORTED_AXES.iter().copied())
+        .chain(FIELD_AXES.iter().copied())
     {
+        if FIELD_AXES.contains(&name) && !b.dimensions.contains_key(name) {
+            continue;
+        }
         ax.entry(name.to_string())
             .or_insert_with(|| axis_of(b, name));
     }
@@ -255,10 +284,8 @@ pub fn dominates(a: &Entry, b: &Entry, axes: &[String]) -> (bool, Vec<String>, V
 /// Build the frontier of every domain in `bounds`.
 pub fn build(bounds: &[Bound], axes: &[String]) -> Result<Frontier, String> {
     for a in axes {
-        if !["ops", "memory", "uncharged"].contains(&a.as_str()) {
-            return Err(format!(
-                "unknown axis `{a}`; axes are ops, memory, uncharged"
-            ));
+        if !is_axis(a) {
+            return Err(format!("unknown axis `{a}`; axes are {}", axis_names()));
         }
     }
     let mut by_domain: BTreeMap<String, (Domain, Vec<&Bound>)> = BTreeMap::new();
@@ -393,6 +420,19 @@ pub fn render_markdown(f: &Frontier, records_dir: &str) -> String {
         f.axes.join("`, `")
     ));
     out.push_str("A row is **on the frontier** when no other admissible bound of its domain is at least as good on every axis both report and clearly better (disjoint 95 % intervals) on one. Ties stand. `ops` is the mean ratio of `S = gae / √r` to the generic floor `√(π / 2A)`; `memory` is table entries per `√r`; `uncharged` is counted-but-unpriced work per `√r`. `α` is the fitted exponent of `gae = C · r^α` over the sizes listed, a scaling claim only with four or more sizes. Toy stays toy: nothing here speaks about cryptographic sizes.\n\n");
+    // The field-operation columns appear in a domain only when some entry
+    // there carries the axis, so a page built from bounds that predate
+    // them is the page it was.
+    let field_cols = |d: &DomainFrontier| -> Vec<&'static str> {
+        FIELD_AXES
+            .iter()
+            .copied()
+            .filter(|a| d.entries.iter().any(|e| e.axes.contains_key(*a)))
+            .collect()
+    };
+    if f.domains.iter().any(|d| !field_cols(d).is_empty()) {
+        out.push_str("`field muls`, `field sqrs` and `field invs` are the modular multiplications, squarings and inversions behind the group operations, per `√r`: the primitive level, counted today for the prime-field group law the generic walks and tables run on. A row showing `unknown` there did not count them; unknown is not zero.\n\n");
+    }
     for d in &f.domains {
         out.push_str(&format!(
             "## {} · {} · {} targets · {} · tier {}\n\n",
@@ -405,8 +445,20 @@ pub fn render_markdown(f: &Frontier, records_dir: &str) -> String {
             d.ops_leader.as_deref().unwrap_or("–"),
             d.memory_leader.as_deref().unwrap_or("–")
         ));
-        out.push_str("| frontier | method | params | ops (× floor) | 95 % | memory (/√r) | uncharged (/√r) | α | 95 % | declared α | sizes (log₂ r) | runs | bounded | bound | dominated by |\n");
-        out.push_str("|:--|:--|:--|--:|:--|--:|--:|--:|:--|--:|:--|--:|:--|:--|:--|\n");
+        let cols = field_cols(d);
+        let col_title = |a: &str| format!(" {} (/√r) |", a.replace('_', " "));
+        out.push_str("| frontier | method | params | ops (× floor) | 95 % | memory (/√r) | uncharged (/√r) |");
+        for a in &cols {
+            out.push_str(&col_title(a));
+        }
+        out.push_str(
+            " α | 95 % | declared α | sizes (log₂ r) | runs | bounded | bound | dominated by |\n",
+        );
+        out.push_str("|:--|:--|:--|--:|:--|--:|--:|");
+        for _ in &cols {
+            out.push_str("--:|");
+        }
+        out.push_str("--:|:--|--:|:--|--:|:--|:--|:--|\n");
         for e in &d.entries {
             let ax = |n: &str| e.axes.get(n);
             let params = if e.params.is_empty() {
@@ -418,8 +470,20 @@ pub fn render_markdown(f: &Frontier, records_dir: &str) -> String {
                     .collect::<Vec<_>>()
                     .join(", ")
             };
+            let field_cells: String = cols
+                .iter()
+                .map(|a| {
+                    format!(
+                        " {} |",
+                        ax(a)
+                            .filter(|x| x.known)
+                            .map(|x| fmt(x.value))
+                            .unwrap_or_else(|| "unknown".into())
+                    )
+                })
+                .collect();
             out.push_str(&format!(
-                "| {} | `{}` | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | `{}` | {} |\n",
+                "| {} | `{}` | {} | {} | {} | {} | {} |{} {} | {} | {} | {} | {} | {} | `{}` | {} |\n",
                 if e.is_frontier { "**yes**" } else { "no" },
                 e.method,
                 params,
@@ -430,6 +494,7 @@ pub fn render_markdown(f: &Frontier, records_dir: &str) -> String {
                     .map(|a| fmt(a.value))
                     .unwrap_or_else(|| "unknown".into()),
                 fmt(ax("uncharged").and_then(|a| a.value)),
+                field_cells,
                 fmt(e.alpha),
                 fmt_ci(e.alpha_ci95),
                 fmt(e.declared_alpha),

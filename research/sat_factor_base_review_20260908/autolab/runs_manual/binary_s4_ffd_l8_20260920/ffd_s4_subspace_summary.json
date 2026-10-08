@@ -1,0 +1,2062 @@
+{
+  "config": {
+    "curve": "Koblitz b=1 (y^2+xy = x^3+x^2+1)",
+    "d_min": 4,
+    "dmax_fix": 7,
+    "dmax_full": 8,
+    "draws": 16,
+    "extra_witness_seed": "0xA5A55A5AF15A8F42",
+    "factor_base": "V = <1,z,...,z^(l-1)>, same as pairs-and-solve baseline",
+    "irr": {
+      "degree": 24,
+      "low_terms": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "source": "recorded baseline arm decomp_bench_to_l8.stdout.txt"
+    },
+    "l": 8,
+    "mem_cap_gb": 2.0,
+    "n": 24,
+    "seed": "0x54FFD518"
+  },
+  "correspondence_probe": {
+    "build_ms_each": 13.6455,
+    "e_vars": 45,
+    "x_r_independence_checked": true
+  },
+  "created_at": "2026-09-21T04:39:12Z",
+  "draws": [
+    {
+      "build_ms": 25.133499999999998,
+      "decomposable": false,
+      "decompose_ms": 23.35475,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 0,
+      "elim_ms": 334.88183300000003,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 33830.929541000005,
+      "meas_full_ms": 143609.761917,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 10.803458000000001,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x17",
+      "xr": "0x945BE7",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 10.024583,
+      "decomposable": false,
+      "decompose_ms": 16.292708,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 1,
+      "elim_ms": 131.763416,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 36626.281583,
+      "meas_full_ms": 136765.878834,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 4.570625,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0xFB",
+      "xr": "0xD53C44",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 12.148875,
+      "decomposable": false,
+      "decompose_ms": 16.393,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 2,
+      "elim_ms": 131.239875,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 35790.707375,
+      "meas_full_ms": 141528.55941699998,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 4.961458,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0xCD",
+      "xr": "0xB938D9",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 12.760916,
+      "decomposable": false,
+      "decompose_ms": 17.027082999999998,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 3,
+      "elim_ms": 136.7445,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 36805.115874999996,
+      "meas_full_ms": 133445.18175,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.63125,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x7F",
+      "xr": "0x6D824B",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 12.175625,
+      "decomposable": false,
+      "decompose_ms": 16.234790999999998,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 4,
+      "elim_ms": 133.751584,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 36773.58975,
+      "meas_full_ms": 138398.92645899998,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.356,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x57",
+      "xr": "0x0EF9FE",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 14.401458,
+      "decomposable": false,
+      "decompose_ms": 16.618750000000002,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 5,
+      "elim_ms": 143.399542,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 34665.040041,
+      "meas_full_ms": 138746.313625,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.3920840000000005,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x6B",
+      "xr": "0xDDDF82",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 14.336791999999999,
+      "decomposable": false,
+      "decompose_ms": 16.482709000000003,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 6,
+      "elim_ms": 135.906958,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 34234.729792000006,
+      "meas_full_ms": 133990.659458,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.212042,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x2C",
+      "xr": "0x5DCE22",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 13.470416,
+      "decomposable": false,
+      "decompose_ms": 16.797,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 7,
+      "elim_ms": 128.002125,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 33094.445208000005,
+      "meas_full_ms": 135581.16804100003,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.0271669999999995,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0xAA",
+      "xr": "0x9EB152",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 11.433583,
+      "decomposable": true,
+      "decompose_ms": 5.129957999999999,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 8,
+      "elim_ms": 130.254167,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 35399.967667,
+      "meas_full_ms": 134893.13749999998,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 4.874459,
+        "witness_checked": true
+      },
+      "witness": [
+        "0x2C",
+        "0xC8",
+        "0xD3"
+      ],
+      "x1_fix": "0xF1",
+      "xr": "0x04CA3A",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 13.064833,
+      "decomposable": false,
+      "decompose_ms": 16.227334,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 9,
+      "elim_ms": 136.083833,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 35398.858417,
+      "meas_full_ms": 132054.1935,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.306583,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0xF0",
+      "xr": "0x3DC2BC",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 13.380667,
+      "decomposable": false,
+      "decompose_ms": 23.525834,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 10,
+      "elim_ms": 140.303542,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 34170.147084,
+      "meas_full_ms": 141487.377625,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 4.830666,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x92",
+      "xr": "0xF640DB",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 10.576916,
+      "decomposable": false,
+      "decompose_ms": 16.599791999999997,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 11,
+      "elim_ms": 132.514208,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 33937.080500000004,
+      "meas_full_ms": 139576.897125,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.911166,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0xD7",
+      "xr": "0x39D2C8",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 8.868166,
+      "decomposable": false,
+      "decompose_ms": 16.424792,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 12,
+      "elim_ms": 124.854417,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 35350.900625,
+      "meas_full_ms": 135594.38154200002,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 4.642334,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x22",
+      "xr": "0x180674",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 11.816540999999999,
+      "decomposable": true,
+      "decompose_ms": 9.181125,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 13,
+      "elim_ms": 129.674667,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 35015.828417000004,
+      "meas_full_ms": 134127.919834,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.101375,
+        "witness_checked": true
+      },
+      "witness": [
+        "0x59",
+        "0x64",
+        "0x7E"
+      ],
+      "x1_fix": "0xB1",
+      "xr": "0x56B611",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 10.081667000000001,
+      "decomposable": false,
+      "decompose_ms": 16.087583,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 14,
+      "elim_ms": 132.124625,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 35822.480917,
+      "meas_full_ms": 131534.211041,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.331375,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0xA7",
+      "xr": "0x350224",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    },
+    {
+      "build_ms": 12.264333,
+      "decomposable": false,
+      "decompose_ms": 16.45125,
+      "deg_hist_fix": {
+        "4": 24
+      },
+      "deg_hist_full": {
+        "6": 24
+      },
+      "draw": 15,
+      "elim_ms": 137.17499999999998,
+      "fix": {
+        "deg_min": 4,
+        "fall_degree": 7,
+        "fall_structural": 7,
+        "measured": [
+          {
+            "cols": 2517,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 6885,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 408,
+            "rank_generic": 408,
+            "rows": 408
+          },
+          {
+            "cols": 14893,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 3288,
+            "rank_generic": 3288,
+            "rows": 3288
+          },
+          {
+            "cols": 26333,
+            "degree": 7,
+            "fall_signal": -788,
+            "rank": 15940,
+            "rank_generic": 16728,
+            "rows": 16728
+          }
+        ],
+        "skipped_memory": []
+      },
+      "full": {
+        "deg_min": 6,
+        "fall_degree": null,
+        "fall_structural": null,
+        "measured": [
+          {
+            "cols": 12951,
+            "degree": 4,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 55455,
+            "degree": 5,
+            "fall_signal": 0,
+            "rank": 0,
+            "rank_generic": 0,
+            "rows": 0
+          },
+          {
+            "cols": 190051,
+            "degree": 6,
+            "fall_signal": 0,
+            "rank": 24,
+            "rank_generic": 24,
+            "rows": 24
+          },
+          {
+            "cols": 536155,
+            "degree": 7,
+            "fall_signal": 0,
+            "rank": 600,
+            "rank_generic": 600,
+            "rows": 600
+          },
+          {
+            "cols": 1271626,
+            "degree": 8,
+            "fall_signal": 0,
+            "rank": 7224,
+            "rank_generic": 7224,
+            "rows": 7224
+          }
+        ],
+        "skipped_memory": []
+      },
+      "meas_fix_ms": 35060.0885,
+      "meas_full_ms": 132153.25050000002,
+      "unsat_cert_eqs_fix": 0,
+      "unsat_cert_eqs_full": 0,
+      "verify": {
+        "mismatches": 0,
+        "points": 64,
+        "verify_ms": 5.010833,
+        "witness_checked": false
+      },
+      "witness": null,
+      "x1_fix": "0x95",
+      "xr": "0xFBFBC1",
+      "zero_eqs_fix": 0,
+      "zero_eqs_full": 0
+    }
+  ],
+  "extra_witness_draws": [],
+  "honesty": {
+    "koszul_note": "falls at D >= 2*deg_min may be Koszul syzygies; fall_structural requires D < 2*deg_min",
+    "no_oracle_claim": true,
+    "scope": "l=8 (n=24) only; says nothing about asymptotics",
+    "truncation_note": "Macaulay truncation at D and multipliers <= D-deg per equation, identical convention to the quadratic harness (sanity gate)"
+  },
+  "purpose": "FFD min/max/mean over >=16 draws on the subspace-restricted Weil-descended S4 system at l=8 — the 'FFD required' gate of the binary decomposition beat (docs/ic/boundary_targets.json). Measurement only: no oracle, no speedup claim.",
+  "sanity_s3": {
+    "ffd_all": 3,
+    "match_reference": true,
+    "n_checked": [
+      5,
+      6,
+      7
+    ],
+    "seed": "0xFFDDEAD"
+  },
+  "schema": "ffd_s4_subspace_v1",
+  "summary": {
+    "decomposable_draws": 2,
+    "draws_total": 16,
+    "ffd_fix": {
+      "draws_censored": 0,
+      "draws_with_fall": 16,
+      "max": 7,
+      "mean": 7.0,
+      "min": 7
+    },
+    "ffd_full": {
+      "draws_censored": 16,
+      "draws_with_fall": 0,
+      "max": null,
+      "mean": null,
+      "min": null
+    },
+    "median_decompose_ms_pairs_baseline_recheck": 16.45125,
+    "pair_cache_size": 737,
+    "per_degree_fix": [
+      {
+        "cols": 2517,
+        "degree": 4,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 24,
+        "rank_mean": 24.0,
+        "rank_min": 24,
+        "rows_max": 24,
+        "rows_min": 24
+      },
+      {
+        "cols": 6885,
+        "degree": 5,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 408,
+        "rank_mean": 408.0,
+        "rank_min": 408,
+        "rows_max": 408,
+        "rows_min": 408
+      },
+      {
+        "cols": 14893,
+        "degree": 6,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 3288,
+        "rank_mean": 3288.0,
+        "rank_min": 3288,
+        "rows_max": 3288,
+        "rows_min": 3288
+      },
+      {
+        "cols": 26333,
+        "degree": 7,
+        "draws": 16,
+        "mean_deficit_vs_rows": 788.0,
+        "rank_max": 15940,
+        "rank_mean": 15940.0,
+        "rank_min": 15940,
+        "rows_max": 16728,
+        "rows_min": 16728
+      }
+    ],
+    "per_degree_full": [
+      {
+        "cols": 12951,
+        "degree": 4,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 0,
+        "rank_mean": 0.0,
+        "rank_min": 0,
+        "rows_max": 0,
+        "rows_min": 0
+      },
+      {
+        "cols": 55455,
+        "degree": 5,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 0,
+        "rank_mean": 0.0,
+        "rank_min": 0,
+        "rows_max": 0,
+        "rows_min": 0
+      },
+      {
+        "cols": 190051,
+        "degree": 6,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 24,
+        "rank_mean": 24.0,
+        "rank_min": 24,
+        "rows_max": 24,
+        "rows_min": 24
+      },
+      {
+        "cols": 536155,
+        "degree": 7,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 600,
+        "rank_mean": 600.0,
+        "rank_min": 600,
+        "rows_max": 600,
+        "rows_min": 600
+      },
+      {
+        "cols": 1271626,
+        "degree": 8,
+        "draws": 16,
+        "mean_deficit_vs_rows": 0.0,
+        "rank_max": 7224,
+        "rank_mean": 7224.0,
+        "rank_min": 7224,
+        "rows_max": 7224,
+        "rows_min": 7224
+      }
+    ],
+    "structural_falls_fix": [
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "structural_falls_full": [],
+    "verdict": "L8_S4_SUBSPACE_X1FIXED_STRUCTURAL_FALL_D7"
+  },
+  "timing_s": {
+    "total": 2748.830484625
+  }
+}

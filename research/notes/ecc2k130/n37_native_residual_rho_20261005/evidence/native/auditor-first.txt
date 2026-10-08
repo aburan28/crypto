@@ -1,0 +1,298 @@
+//! Independent native audit of every same-Q n37 IC/rho batch arm and its replay.
+
+use crypto_lib::hash::sha256;
+use serde_json::{json, Value};
+use std::fs;
+use std::path::{Path, PathBuf};
+
+const NOTE: &str = "research/notes/ecc2k130/n37_native_residual_rho_20261005";
+const POINTS: &str = "research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b01.points.jsonl";
+const FIXTURE: &str = "research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b01.fixture.jsonl";
+const CORPUS: &str = "compact-disjoint-cold-v2-n37-L1024-b01-20261001";
+const FIXTURE_SHA: &str = "3453995c0423e4911ad4a6afa7cfe50ec1d6b0e6c67a771bda590f1d6ed680df";
+const SOURCES: &[(&str, &str)] = &[
+    ("examples/n37_native_m6_residual.rs", "086a6fbdd12e2b104ec18f809d4048453d747ad76c5a74f695befd08d4efffa8"),
+    ("examples/n37_native_m6_residual_replay.rs", "68a4ce03029b82821fdabb9854a14559dde243bd5ac0f409de884df032f7394a"),
+    ("examples/koblitz_rho_batch_ks_v3.rs", "98b6e8a27d821ebfc7ae716410184dffe89aadf27dfe36bcac8ce834c39cf04c"),
+    ("Cargo.toml", "f88ac8c9527bc2403cc550b8b00aaa778630911a4c9d1de47f67dbbff055d6a2"),
+    ("Cargo.lock", "b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365"),
+    (POINTS, "78553fdff5ae66521d3a1052978962258e78d48c92285df6e1df962034b43717"),
+];
+
+fn digest(path: &Path) -> String {
+    hex::encode(sha256(&fs::read(path).unwrap()))
+}
+
+fn value(path: &Path) -> Value {
+    serde_json::from_slice(&fs::read(path).unwrap()).unwrap()
+}
+
+fn lines(path: &Path) -> Vec<Value> {
+    fs::read_to_string(path).unwrap().lines().filter(|line| !line.is_empty())
+        .map(|line| serde_json::from_str(line).unwrap()).collect()
+}
+
+fn integer(value: &Value) -> u64 { value.as_u64().expect("expected unsigned integer") }
+fn real(value: &Value) -> f64 { value.as_f64().expect("expected number") }
+fn geomean(left: f64, right: f64) -> f64 { (left * right).sqrt() }
+
+fn median(mut values: Vec<f64>) -> f64 {
+    values.sort_by(|a, b| a.total_cmp(b));
+    (values[(values.len() - 1) / 2] + values[values.len() / 2]) / 2.0
+}
+
+fn log_t_interval(values: &[f64]) -> [f64; 2] {
+    assert_eq!(values.len(), 5);
+    let logs: Vec<f64> = values.iter().map(|value| value.ln()).collect();
+    let center = logs.iter().sum::<f64>() / 5.0;
+    let variance = logs.iter().map(|value| (value - center).powi(2)).sum::<f64>() / 4.0;
+    let margin = 2.776_445_105_197_798_7 * (variance / 5.0).sqrt();
+    [(center - margin).exp(), (center + margin).exp()]
+}
+
+fn verify_ic(raw: &Path, row: &Value, points: &[Value], fixture: &[Value]) -> (Vec<u64>, Value, Value) {
+    let result_path = raw.join(row["result"].as_str().unwrap());
+    let replay_path = raw.join(row["result"].as_str().unwrap().replace(".result.json", ".replay.json"));
+    let result = value(&result_path);
+    let replay = value(&replay_path);
+    assert_eq!(replay["schema"], "n37-native-m6-residual-source-replay-v1");
+    assert_eq!(replay["raw_result_sha256"], digest(&result_path));
+    assert_eq!(integer(&replay["independent_rank"]), 42);
+    assert_eq!(integer(&result["rank"]), 42);
+    assert_eq!(integer(&replay["verified_target_logs"]), 1024);
+    assert_eq!(integer(&result["verified_target_logs"]), 1024);
+    assert_eq!(integer(&replay["unresolved_targets"]), 0);
+    assert_eq!(integer(&result["unresolved_targets"]), 0);
+    assert_eq!(replay["complete_batch"], true);
+    assert_eq!(result["complete_batch"], true);
+    for (name, expected) in [("direct_hits", 939), ("shifted_hits", 85),
+                             ("total_target_attempts", 1115)] {
+        assert_eq!(integer(&replay[name]), expected);
+        assert_eq!(integer(&result[name]), expected);
+    }
+    assert_eq!(replay["input_sha256"]["points"], digest(&Path::new(env!("CARGO_MANIFEST_DIR")).join(POINTS)));
+    assert_eq!(replay["input_sha256"]["fixture"], FIXTURE_SHA);
+    assert_eq!(integer(&result["target_count"]), 1024);
+    let targets = result["targets"].as_array().unwrap();
+    assert_eq!(targets.len(), 1024);
+    let mut recovered = Vec::with_capacity(1024);
+    for (index, ((target, point), truth)) in targets.iter().zip(points).zip(fixture).enumerate() {
+        assert_eq!(integer(&target["index"]), index as u64);
+        assert_eq!(target["source"], *point);
+        assert_eq!(target["source"], truth["published_q"]);
+        let scalar = integer(&target["recovered_log"]);
+        assert_eq!(scalar, integer(&truth["published_fixture_scalar"]));
+        recovered.push(scalar);
+    }
+    let phases = &result["phase_wall_ms"];
+    let charged: f64 = ["setup_transport", "half_table", "relations", "solve_verify_base",
+        "shift_precomputation", "target_queries_verify"].iter().map(|name| real(&phases[name])).sum();
+    let discrepancy = real(&phases["internal_excluding_output"]) - charged;
+    assert!((0.0..5.0).contains(&discrepancy));
+    assert!(real(&phases["target_queries"]) + real(&phases["target_log_verification"])
+            <= real(&phases["target_queries_verify"]) + 1e-6);
+    let mut additions = integer(&result["build_counts"]["build_adds"])
+        + integer(&result["residual_shift_adds"])
+        + integer(&result["external_witness_replay_adds"]);
+    for name in ["relation_oracle_counts", "direct_oracle_counts", "residual_oracle_counts"] {
+        additions += integer(&result[name]["query_adds"]) + integer(&result[name]["witness_adds"]);
+    }
+    assert_eq!(additions, 33_647_429);
+    assert_eq!(integer(&result["scalar_multiplications"]["total"]), 4289);
+    (recovered, phases.clone(), json!({"logical_addition_requests": additions,
+        "explicit_scalar_multiplications": 4289, "replay_sha256": digest(&replay_path)}))
+}
+
+fn verify_rho(raw: &Path, row: &Value, points: &[Value], fixture: &[Value]) -> (Vec<u64>, Value) {
+    let records = lines(&raw.join(row["result"].as_str().unwrap()));
+    assert_eq!(records.len(), 1025);
+    let summary = records.last().unwrap();
+    assert_eq!(summary["kind"], "rho_ks_batch_summary");
+    assert_eq!(integer(&summary["n"]), 37);
+    assert_eq!(integer(&summary["a"]), 0);
+    assert_eq!(summary["quotient_mode"], "signed_frobenius");
+    assert_eq!(integer(&summary["automorphism_size"]), 74);
+    assert_eq!(integer(&summary["fixtures"]), 1024);
+    assert_eq!(summary["all_verified"], true);
+    assert_eq!(integer(&summary["batch_seed"]), 2026100110101);
+    assert_eq!(summary["corpus"], CORPUS);
+    assert_eq!(integer(&summary["dp_bits"]), 8);
+    assert_eq!(integer(&summary["parallel_walks"]), 32);
+    assert_eq!(summary["canonicalization_backend"], "normal_basis");
+    assert_eq!(summary["target_source"], "public_point_jsonl");
+    let mut recovered = Vec::with_capacity(1024);
+    let mut steps = 0;
+    for (index, ((record, point), truth)) in records[..1024].iter().zip(points).zip(fixture).enumerate() {
+        assert_eq!(record["kind"], "rho_ks_batch_fixture");
+        assert_eq!(integer(&record["fixture_index"]), index as u64);
+        assert_eq!(integer(&record["n"]), 37);
+        assert_eq!(integer(&record["a"]), 0);
+        assert_eq!(record["published_q"], *point);
+        assert_eq!(record["published_q"], truth["published_q"]);
+        assert!(record["published_fixture_scalar"].is_null());
+        assert_eq!(record["target_source"], "public_point_jsonl");
+        assert_eq!(record["verified"], true);
+        let scalar = integer(&record["recovered_fixture_scalar"]);
+        assert_eq!(scalar, integer(&truth["published_fixture_scalar"]));
+        recovered.push(scalar);
+        steps += integer(&record["walk_steps"]);
+    }
+    assert_eq!(steps, integer(&summary["total_walk_steps"]));
+    assert_eq!(steps, 596_818);
+    assert_eq!(integer(&summary["charges"]["group_additions"]), 632_240);
+    assert_eq!(integer(&summary["charges"]["scalar_multiplications"]), 3104);
+    (recovered, json!({"walk_steps": steps, "charges": summary["charges"],
+        "cross_target_solves": summary["cross_target_solves"],
+        "table_entries": summary["table_entries"]}))
+}
+
+fn run() -> Result<(), Box<dyn std::error::Error>> {
+    let mut args = std::env::args_os();
+    let _program = args.next();
+    let raw = PathBuf::from(args.next().ok_or("usage: n37_native_batch_rho_audit RAW_DIR OUT_JSON")?);
+    let out = PathBuf::from(args.next().ok_or("usage: n37_native_batch_rho_audit RAW_DIR OUT_JSON")?);
+    if args.next().is_some() || out.exists() { return Err("expected raw directory and new receipt path".into()); }
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let note = root.join(NOTE);
+    assert_eq!(digest(&root.join(FIXTURE)), FIXTURE_SHA);
+    let manifest = value(&raw.join("manifest.json"));
+    assert_eq!(manifest["schema"], "n37-native-batch-rho-panel-v2");
+    assert_eq!(manifest["status"], "completed_schedule");
+    assert_eq!(integer(&manifest["wall_cap_seconds"]), 180);
+    assert_eq!(integer(&manifest["rss_cap_bytes"]), 4 * 1024 * 1024 * 1024);
+    assert_eq!(manifest["host"]["isolation"], "unverified_unisolated_local_host");
+    assert_eq!(manifest["fixture_read_by_producers"], false);
+    assert_eq!(manifest["protocol_sha256"], digest(&note.join("PROTOCOL.md")));
+    assert_eq!(manifest["runner_sha256"], digest(&root.join("examples/n37_native_batch_rho_panel.rs")));
+    for (relative, expected) in SOURCES {
+        assert_eq!(digest(&root.join(relative)), *expected);
+        assert_eq!(manifest["source_sha256"][relative], *expected);
+    }
+    assert_eq!(manifest["point_file_sha256"], digest(&root.join(POINTS)));
+    for (key, filename) in [("ic", "n37_native_m6_residual"),
+                            ("ic_replay", "n37_native_m6_residual_replay"),
+                            ("rho", "koblitz_rho_batch_ks_v3")] {
+        assert_eq!(manifest["binary_sha256"][key], digest(&root.join("target/release/examples").join(filename)));
+    }
+    let points = lines(&root.join(POINTS));
+    let fixture = lines(&root.join(FIXTURE));
+    assert_eq!(points.len(), 1024);
+    assert_eq!(fixture.len(), 1024);
+    let arms = lines(&raw.join("arms.jsonl"));
+    assert_eq!(arms.len(), 20);
+    let mut blocks = Vec::new();
+    let mut ic_cpu_all = Vec::new();
+    let mut rho_cpu_all = Vec::new();
+    let mut ic_wall_all = Vec::new();
+    let mut rho_wall_all = Vec::new();
+    let mut ic_phases = Vec::new();
+    let mut ic_ops = Vec::new();
+    let mut rho_ops = Vec::new();
+    let mut ratios = Vec::new();
+    for block in 0..5 {
+        let order = if block % 2 == 0 { ["ic", "rho", "rho", "ic"] }
+                    else { ["rho", "ic", "ic", "rho"] };
+        assert_eq!(manifest["schedule"][block], json!(order));
+        let mut ic_cpu = Vec::new();
+        let mut rho_cpu = Vec::new();
+        for (position, method) in order.iter().enumerate() {
+            let row = &arms[block * 4 + position];
+            assert_eq!(row["schema"], "n37-native-batch-rho-arm-v2");
+            assert_eq!(integer(&row["block"]), block as u64);
+            assert_eq!(integer(&row["position"]), position as u64);
+            assert_eq!(row["method"], *method);
+            assert_eq!(row["exit_code"], 0);
+            assert_eq!(row["timed_out"], false);
+            assert_eq!(row["resource_accepted"], true);
+            let wall = integer(&row["wall_ns"]);
+            let cpu = integer(&row["user_ns"]) + integer(&row["system_ns"]);
+            assert!(wall > 0 && wall <= 180_000_000_000);
+            assert!(cpu > 0 && cpu <= 2 * wall);
+            assert!(integer(&row["peak_rss_bytes"]) > 0 && integer(&row["peak_rss_bytes"]) <= 4 * 1024 * 1024 * 1024);
+            for name in ["stdout", "stderr", "result"] {
+                assert_eq!(row[format!("{name}_sha256")], digest(&raw.join(row[name].as_str().unwrap())));
+            }
+            let recovered = if *method == "ic" {
+                assert!(row["command"][0].as_str().unwrap().ends_with("/n37_native_m6_residual"));
+                assert_eq!(row["environment"], json!({}));
+                let (scalars, phases, ops) = verify_ic(&raw, row, &points, &fixture);
+                ic_phases.push(phases);
+                ic_ops.push(ops);
+                ic_cpu.push(cpu as f64);
+                ic_cpu_all.push(cpu as f64);
+                ic_wall_all.push(wall as f64);
+                scalars
+            } else {
+                assert!(row["command"][0].as_str().unwrap().ends_with("/koblitz_rho_batch_ks_v3"));
+                assert_eq!(&row["command"].as_array().unwrap()[1..],
+                    json!(["37", "0", "signed_frobenius", "1024", "2026100110101"])
+                        .as_array().unwrap());
+                assert_eq!(row["environment"]["KIC_RHO_POINT_INPUT"], root.join(POINTS).display().to_string());
+                assert_eq!(row["environment"]["KIC_RHO_BATCH_CORPUS"], CORPUS);
+                assert_eq!(row["environment"]["KIC_RHO_CANON_BACKEND"], "normal_basis");
+                assert_eq!(row["environment"]["KIC_RHO_DP_BITS"], "8");
+                let (scalars, ops) = verify_rho(&raw, row, &points, &fixture);
+                rho_ops.push(ops);
+                rho_cpu.push(cpu as f64);
+                rho_cpu_all.push(cpu as f64);
+                rho_wall_all.push(wall as f64);
+                scalars
+            };
+            assert!(recovered.iter().zip(&fixture).all(|(actual, truth)| *actual == integer(&truth["published_fixture_scalar"])));
+        }
+        assert_eq!(ic_cpu.len(), 2);
+        assert_eq!(rho_cpu.len(), 2);
+        let ic_cost = geomean(ic_cpu[0], ic_cpu[1]);
+        let rho_cost = geomean(rho_cpu[0], rho_cpu[1]);
+        let ic_drift = ic_cpu[0].max(ic_cpu[1]) / ic_cpu[0].min(ic_cpu[1]);
+        let rho_drift = rho_cpu[0].max(rho_cpu[1]) / rho_cpu[0].min(rho_cpu[1]);
+        let ratio = ic_cost / rho_cost;
+        ratios.push(ratio);
+        blocks.push(json!({"block": block, "ic_cpu_ns": ic_cpu, "rho_cpu_ns": rho_cpu,
+            "ic_geomean_cpu_ns": ic_cost, "rho_geomean_cpu_ns": rho_cost,
+            "ic_over_rho_cpu": ratio, "ic_duplicate_drift": ic_drift,
+            "rho_duplicate_drift": rho_drift,
+            "drift_gate_pass": ic_drift <= 1.1 && rho_drift <= 1.1}));
+    }
+    assert_eq!(ic_ops.len(), 10);
+    assert_eq!(rho_ops.len(), 10);
+    assert!(ic_ops.iter().all(|ops| ops["logical_addition_requests"] == 33_647_429));
+    assert!(rho_ops.iter().all(|ops| ops["walk_steps"] == 596_818));
+    let phase_names = ["setup_transport", "half_table", "relations", "solve_verify_base",
+        "shift_precomputation", "target_queries_verify", "internal_excluding_output"];
+    let mut phase_medians = serde_json::Map::new();
+    for name in phase_names {
+        phase_medians.insert(name.into(), json!(median(ic_phases.iter().map(|phases| real(&phases[name])).collect())));
+    }
+    let receipt = json!({
+        "schema": "n37-native-batch-rho-native-audit-v1",
+        "status": "PASS_20_NATIVE_ARMS_20480_POINT_SOLVES",
+        "input_point_count": 1024, "ic_arms_replayed": 10, "rho_arms_replayed": 10,
+        "verified_scalar_outputs": 20480, "all_resources_accepted": true,
+        "all_duplicate_drift_pass": blocks.iter().all(|row| row["drift_gate_pass"] == true),
+        "host_isolation_verified": false, "timing_eligible_for_speed_claim": false,
+        "blocks": blocks,
+        "descriptive_ic_over_rho_median": median(ratios.clone()),
+        "descriptive_ic_over_rho_geomean": (ratios.iter().map(|r| r.ln()).sum::<f64>() / 5.0).exp(),
+        "descriptive_ic_over_rho_log_t_95": log_t_interval(&ratios),
+        "median_cpu_ms": {"ic": median(ic_cpu_all) / 1e6, "rho": median(rho_cpu_all) / 1e6},
+        "median_wall_ms": {"ic": median(ic_wall_all) / 1e6, "rho": median(rho_wall_all) / 1e6},
+        "ic_phase_median_ms": phase_medians,
+        "ic_operation_counts": ic_ops, "rho_operation_counts": rho_ops,
+        "common_operation_unit_S": null, "primary_one_target_online_speedup": null,
+        "input_sha256": {"points": digest(&root.join(POINTS)), "fixture": digest(&root.join(FIXTURE))},
+        "raw_manifest_sha256": digest(&raw.join("manifest.json")),
+        "raw_arms_sha256": digest(&raw.join("arms.jsonl")),
+        "auditor_sha256": digest(&root.join("examples/n37_native_batch_rho_audit.rs")),
+    });
+    fs::write(&out, format!("{}\n", serde_json::to_string_pretty(&receipt)?))?;
+    println!("{}", json!({"status": receipt["status"],
+        "all_duplicate_drift_pass": receipt["all_duplicate_drift_pass"],
+        "descriptive_ic_over_rho_median": receipt["descriptive_ic_over_rho_median"],
+        "descriptive_ic_over_rho_log_t_95": receipt["descriptive_ic_over_rho_log_t_95"]}));
+    Ok(())
+}
+
+fn main() {
+    if let Err(error) = run() { eprintln!("audit failed: {error}"); std::process::exit(1); }
+}

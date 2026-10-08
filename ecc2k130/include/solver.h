@@ -122,7 +122,31 @@ struct Solver {
 #if ECC_WALK_TABLE
             p = walk.step(p, hw, &hist, &out.a, &out.b, ell, spow);
 #else
+#if ECC_PACKED_XONLY_23
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY
+            out.counts[0]++;
+#elif ECC_PACKED_XONLY_BRIDGE3
+            if (
+#if ECC_PACKED_XONLY_POLY_SELECT
+                R::polySelectBridge3(p.x)
+#else
+                ECC_PACKED_XONLY_IS_BRIDGE3(hw)
+#endif
+            ) out.counts[2]++;
+            else
+#if ECC_PACKED_XONLY_DOUBLE_ONLY
+            out.counts[0]++;
+#else
+            out.counts[(hw >> 1) & 1]++;
+#endif
+#elif ECC_PACKED_XONLY_DOUBLE_ONLY
+            out.counts[0]++;
+#else
+            out.counts[(hw >> 1) & 1]++;
+#endif
+#else
             out.counts[R::jOf(hw) - 3]++;
+#endif
             p = R::step(p, hw);
 #endif
         }
@@ -169,6 +193,31 @@ struct Solver {
     // mu = prod_j (1 + s^j)^{n_j}
     U192 multiplier(const unsigned long long *counts) const {
         U192 mu = u192_from(1);
+#if ECC_PACKED_XONLY_23
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON
+        if (counts[0]) {
+            U192 e = u192_zero();
+            e.v[0] = counts[0];
+            const U192 bridge1 = mod_add(u192_from(1), spow[1], ell);
+            mu = mod_mul(mu, mod_pow(bridge1, e, ell), ell);
+        }
+#else
+        for (int j = 0; j < 2; ++j) {
+            if (!counts[j]) continue;
+            U192 e = u192_zero();
+            e.v[0] = counts[j];
+            mu = mod_mul(mu, mod_pow(u192_from(j + 2), e, ell), ell);
+        }
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3
+        if (counts[2]) {
+            U192 e = u192_zero();
+            e.v[0] = counts[2];
+            const U192 bridge = mod_add(u192_from(1), spow[3], ell);
+            mu = mod_mul(mu, mod_pow(bridge, e, ell), ell);
+        }
+#endif
+#else
         for (int j = 0; j < 8; ++j) {
             if (!counts[j]) continue;
             const U192 f = mod_add(u192_from(1), spow[j + 3], ell);
@@ -176,6 +225,7 @@ struct Solver {
             e.v[0] = counts[j];
             mu = mod_mul(mu, mod_pow(f, e, ell), ell);
         }
+#endif
         return mu;
     }
 
