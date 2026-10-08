@@ -916,6 +916,147 @@ mod wide {
         z ^ (z >> 31)
     }
 
+    /// Order-preserving parallel target extraction: workers scan disjoint
+    /// blocks of the same rotated state order the sequential scan uses, each
+    /// stopping at its block's first hit; the merge picks the smallest
+    /// global position.  The published relation (point indices, x-codes,
+    /// intermediates) is therefore identical to the sequential first hit —
+    /// only the wall time and the per-block probe diagnostic differ.
+    /// Returns the relation and the summed relation-check nanoseconds.
+    fn extract128_parallel(
+        gf: &Gf2_128,
+        fast: &FastBinaryCurve128,
+        basis: &NormalBasis128,
+        solver: &S3Solver128,
+        index: &Index128,
+        base: &Base128,
+        target: FastPoint128,
+        start: usize,
+        threads: usize,
+    ) -> (Option<Relation128>, u128) {
+        let n_states = index.states.len();
+        if threads <= 1 || n_states == 0 {
+            let mut relation_check_ns = 0u128;
+            let relation = extract128(
+                gf,
+                fast,
+                basis,
+                solver,
+                index,
+                base,
+                target,
+                start,
+                &mut relation_check_ns,
+            );
+            return (relation, relation_check_ns);
+        }
+        let (target_x, _) = match target {
+            Some((x, _)) => (x, ()),
+            None => return (None, 0),
+        };
+        let n_u32 = gf.n;
+        let n = n_u32 as usize;
+        let chunk = (n_states + threads - 1) / threads;
+        let (sender, receiver) = std::sync::mpsc::channel::<(usize, Relation128, u128)>();
+        std::thread::scope(|scope| {
+            let mut handles = Vec::with_capacity(threads);
+            for thread in 0..threads {
+                let sender = sender.clone();
+                let gf = gf;
+                let fast = fast;
+                let basis = basis;
+                let solver = solver;
+                let index = index;
+                let base = base;
+                handles.push(scope.spawn(move || {
+                    let pos_lo = thread * chunk;
+                    let pos_hi = ((thread + 1) * chunk).min(n_states);
+                    if pos_lo >= pos_hi {
+                        return;
+                    }
+                    // Rotated position p maps to absolute state
+                    // (start + p) mod n_states; scan in order.
+                    let state_lo = (start + pos_lo) % n_states;
+                    let length = pos_hi - pos_lo;
+                    let mut relation_check_ns = 0u128;
+                    let mut probes = 0u64;
+                    let mut offset = 0usize;
+                    'scan: while offset < length {
+                        let state = &index.states[(state_lo + offset) % n_states];
+                        for shift in 0..n_u32 {
+                            let left_x = index.shifted[state.left as usize][shift as usize];
+                            let right_x = index.shifted[state.right as usize]
+                                [(shift as usize + state.relative as usize) % n];
+                            for &normal_root in &state.normal_roots {
+                                let absolute =
+                                    basis.to_poly.apply(basis.rotate(normal_root, shift));
+                                let Some(partners) =
+                                    solver.roots(gf, basis, absolute, target_x)
+                                else {
+                                    continue;
+                                };
+                                for partner in partners {
+                                    probes += 1;
+                                    let (canonical, partner_shift) =
+                                        basis.canonical(basis.to_normal.apply(partner));
+                                    let Some(value) = index.table.get(canonical) else {
+                                        continue;
+                                    };
+                                    let (left2, right2, relative2, stored_shift) = unpack(value);
+                                    let left_shift2 =
+                                        ((stored_shift + n_u32 - partner_shift) % n_u32) as usize;
+                                    let right_shift2 = (left_shift2 + relative2 as usize) % n;
+                                    let codes = [
+                                        left_x,
+                                        right_x,
+                                        index.shifted[left2][left_shift2],
+                                        index.shifted[right2][right_shift2],
+                                    ];
+                                    if let Some(point_indices) = lift128(
+                                        fast,
+                                        base,
+                                        &codes,
+                                        target,
+                                        &mut relation_check_ns,
+                                    ) {
+                                        let position = pos_lo + offset;
+                                        sender
+                                            .send((
+                                                position,
+                                                Relation128 {
+                                                    point_indices,
+                                                    x_codes: codes,
+                                                    intermediates: [absolute, partner],
+                                                    probes,
+                                                },
+                                                relation_check_ns,
+                                            ))
+                                            .expect("target receiver is alive");
+                                        break 'scan;
+                                    }
+                                }
+                            }
+                        }
+                        offset += 1;
+                    }
+                }));
+            }
+            drop(sender);
+            let mut best: Option<(usize, Relation128, u128)> = None;
+            let mut check_ns_total = 0u128;
+            for (position, relation, check_ns) in receiver {
+                check_ns_total += check_ns;
+                if best.as_ref().map_or(true, |(pos, _, _)| position < *pos) {
+                    best = Some((position, relation, check_ns));
+                }
+            }
+            for handle in handles {
+                handle.join().expect("target worker thread");
+            }
+            (best.map(|(_, relation, _)| relation), check_ns_total)
+        })
+    }
+
     // serde_json's default Number representation cannot emit arbitrary
     // u128 field elements.  Keep the wide-only wire format lossless by
     // encoding every field coordinate as a decimal string; the legacy
@@ -1427,6 +1568,11 @@ mod wide {
         let la_ms = la_started.elapsed().as_secs_f64() * 1000.0;
 
         let targets_started = Instant::now();
+        let target_threads: usize = std::env::var("KIC_TARGET_THREADS")
+            .ok()
+            .and_then(|value| value.trim().parse::<usize>().ok())
+            .filter(|&threads| threads > 0)
+            .unwrap_or(1);
         let mut solved = 0usize;
         let mut failed = 0usize;
         let mut target_query_ms = Vec::with_capacity(target_inputs.len());
@@ -1450,8 +1596,7 @@ mod wide {
             let start = query_hash as usize;
             let target_query_stage_ms = query_hash_started.elapsed().as_secs_f64() * 1000.0;
             let target_pdp_started = Instant::now();
-            let mut target_relation_check_ns = 0u128;
-            let relation = extract128(
+            let (relation, target_relation_check_ns) = extract128_parallel(
                 &gf,
                 &fast,
                 &basis,
@@ -1460,7 +1605,7 @@ mod wide {
                 &base,
                 target,
                 start,
-                &mut target_relation_check_ns,
+                target_threads,
             );
             let target_decomposition_total_ms = target_pdp_started.elapsed().as_secs_f64() * 1000.0;
             let target_relation_check_ms = target_relation_check_ns as f64 / 1_000_000.0;
@@ -1555,6 +1700,7 @@ mod wide {
             "targets_failed":failed,
             "peak_rss_bytes":super::peak_rss_bytes(),
             "threads":rank_threads,
+            "target_threads":target_threads,
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
         println!("{summary}");

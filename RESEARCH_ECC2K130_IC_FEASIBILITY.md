@@ -111,19 +111,53 @@ once.  Beating rho on total work requires a relation-shape change
 3. **u256 field words + 130-bit LA.**  Mechanical but enabling: wide
    paths past n=127 and modular echelon/Lanczos over r ≥ 2¹²⁸
    (relation rows sparse, 5 nnz/row, so sparse methods dominate).
-4. **a=1 rungs.**  The family admits rho-feasible a=1 rungs at n=73
-   (r ≈ 2⁶²·⁰, cofactor 1754) and n=79 (r ≈ 2⁶⁹·¹, cofactor 634), and
-   u128-ceiling rungs at n=97 a=0 (r ≈ 2⁹⁵, cofactor 4), n=107/109/113
-   a=1 (r ≈ 2¹⁰⁷⁻¹¹², cofactor 2), n=127 a=1 (r ≈ 2¹¹⁵, cofactor 7114).
-   These measure the yield cliff at larger n with paired rho still
-   runnable in minutes-to-hours (n=83 a=1: r ≈ 2⁵²·⁷, rho ≈ 44 s).
-5. **Parallel guided rank (landed 2026-10-05, this session).**  The rank
-   stage parallelizes with per-column deterministic scalars; the solved
-   logs are unchanged (unique full-rank solution), the wall divides by
-   the thread count.  Verification at n=73 in
+4. **a=1 rungs and the sweet-spot scan (2026-10-06).**  The family
+   admits rho-feasible a=1 rungs at n=73 (r ≈ 2⁶²·⁰, cofactor 1754) and
+   n=79 (r ≈ 2⁶⁹·¹, cofactor 634), and u128-ceiling rungs at n=97 a=0
+   (r ≈ 2⁹⁵, cofactor 4), n=107/109/113 a=1 (r ≈ 2¹⁰⁷⁻¹¹², cofactor 2),
+   n=127 a=1 (r ≈ 2¹¹⁵, cofactor 7114).  **n=83 a=1 landed 2026-10-06**
+   (r ≈ 2⁵²·⁹, median 8.2× online, three paired runs, replay PASS).
+   A full n=59..131 scan of both arms (trace recurrence + factored
+   orders) shows the remaining rho-runnable IC-feasible rungs are:
+   **n=85 a=0** (r ≈ 2⁵³·ˣ, cofactor 2,695,534,732; probes/relation ≈
+   7.2·10⁶ at K=600 — a normal K=600 rung) and **n=89 a=0** (r ≈ 2⁵⁸·ˣ,
+   cofactor 1,405,114,916; probes/relation ≈ 2·10⁸ at K=600, so it needs
+   K≈850 with 6.4·10⁷ states ≈ 2.2× the n=83 table).  Every wider rung
+   has r/(n²K²) beyond the materialized-table regime.
+5. **Parallel guided rank (landed 2026-10-05).**  The rank stage
+   parallelizes with per-column deterministic scalars; the solved logs
+   are unchanged (unique full-rank solution), the wall divides by the
+   thread count.  Verification at n=73 in
    `research/sat_factor_base_review_20260908/autolab/runs_manual/`
    (see §6).  It moves the precompute wall at n=73 from 5.1 h to ~25 min
    on 14 cores but does not change the total-work story.
+6. **Parallel *target* extraction (landed 2026-10-06) — an honest
+   negative.**  `KIC_TARGET_THREADS` parallelizes the online extraction
+   order-preservingly (workers scan disjoint blocks of the same rotated
+   state order; the merge takes the smallest global position, so the
+   published relation is *identical* to the sequential first hit —
+   verified byte-identical at n=83, probe count included).  Measured at
+   n=83: **no wall-time speedup** — the first hit sits at ~0.1% of the
+   scan space (8.8·10⁶ of ~10¹⁰ probes), inside the first worker's
+   block, so the wall equals the sequential wall.  The online stage is
+   **probe-rate bound** (~1.1 M probes/s single-core, dominated by the
+   S₃ quadratic solve per probe), not scan-length bound.  The parallel
+   extraction still bounds the unlucky-tail wall (deep first hits); the
+   real online lever is raising the per-probe rate or reducing probes
+   per relation (higher-arity relations again).
+7. **The 6-sum yield model (design note).**  If a 6-sum extraction
+   (three indexed pairs joined by an S4-tree) kept the per-state probe
+   count within a small factor of the 4-sum's, the yield model becomes
+   `probes/relation ≈ 45·r/(n⁴K⁴)` — at n=83, K=600 that is ~5·10⁷×
+   cheaper than the 4-sum's `r/(n²K²)`.  At n=97 a=1 (r ≈ 2⁸⁸) K=1000
+   would give ~1.6·10⁸ probes/relation with only 9.4·10⁶ states; at
+   n=131 (ECC2K-130) K≈2000 gives ~6·10⁷ with 5.2·10⁸ states
+   (memory-bound, ~20× the n=73 table).  The structural obstacle: a
+   2k-point relation among k indexed pairs needs `S_{k+1}` solved in
+   k−1 unknowns; the direct quadratic chain (solve for the single
+   unknown partner, then table-lookup) closes only at k=2.  k=3
+   (6 points) requires either iterating one table (states×table — dead)
+   or a real S4 solve per probe.  That is the concrete open design.
 
 ## 5. P-256 and GOST CryptoPro-B: where prime-field IC stands
 
