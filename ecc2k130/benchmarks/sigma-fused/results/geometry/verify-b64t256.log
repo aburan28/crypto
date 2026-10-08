@@ -1,0 +1,51 @@
+packed kernel: 126 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed launch bounds: 256 threads, 2 min blocks
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 0
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed witness: 0
+packed L2 persist: 0
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed square table: 0
+packed polynomial inversion: 0
+packed profile ranges: 0
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 24064 threads x 64 slots x 1 lanes = 1540096 walks, dp weight 48, 95 steps per launch
+WARNING: --verify 300 replays reports on the CPU; campaign collection uses --verify 0 so a cutoff-32 trail cannot stall the GPU
+      36.5 s       4.003 M it/s   146309120 iterations    244395 dp    244395 stored         0 dropped
+      65.2 s       4.487 M it/s   292618240 iterations    488514 dp    488514 stored         0 dropped
+      93.9 s       4.673 M it/s   438927360 iterations    733205 dp    733205 stored         0 dropped
+     122.2 s       4.791 M it/s   585236480 iterations    976599 dp    976599 stored         0 dropped
+     150.6 s       4.857 M it/s   731545600 iterations   1220600 dp   1220600 stored         0 dropped
+     179.4 s       4.893 M it/s   877854720 iterations   1465388 dp   1465388 stored         0 dropped
+     208.0 s       4.925 M it/s  1024163840 iterations   1710327 dp   1710327 stored         0 dropped
+  finished: 4.925 M it/s, 1710327 distinguished points (300 verified against the reference, 0 dropped)

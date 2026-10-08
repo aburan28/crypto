@@ -1,0 +1,4 @@
+packed kernel: 126 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed GPU-wide resolver geometry: 188 blocks, 512 threads/block, 16 warps/block, 1 active block(s)/SM, 57052 dynamic shared bytes, launch bounds 512 x 1
+packed hint select kernel: 56 registers/thread, 0 local bytes/thread, 0 static shared bytes
+packed hint resolve kernel: 123 registers/thread, 400 local bytes/thread, 0 static shared bytes

@@ -6793,7 +6793,7 @@ the algebra was the real limit.
   `median_refuted_ms` alongside the overall median; `median()` returns
   `NaN` rather than `0.0` for an empty class (zero milliseconds is a
   measurement claim, absence is not); `SystemProfile::eq_var_ratio()`.
-- Added `K_1/F_2^15` at `m = 3` to the standard sweep so the baseline
+- Added `icv1-f2m15-t275-b7f03703` at `m = 3` to the standard sweep so the baseline
   covers the refuting regime, not only the finding one.
 
 ### Findings
@@ -7060,7 +7060,7 @@ At n=131 and 163 there are two cosets and the only dimensions are
 **A constraint I did not expect: the cofactor class.**  x=0 lies in every
 invariant subspace, so the 2-torsion point is always in F, and the base
 can sit entirely off <G>.  A target in <G> needs its summands' h-torsion
-classes to cancel, so on K_1/F_2^7 (cofactor 2, no factor-base point in
+classes to cancel, so on icv1-f2m7-tm13-ac10a42c (cofactor 2, no factor-base point in
 <G>) odd m decomposes *nothing* at any |F|: m=2 gives 11/11, m=3 gives
 0/11, m=4 gives 11/11.  `admissible_summand_counts` computes this from
 one scalar multiplication per point.
@@ -7967,14 +7967,14 @@ at m=2, the first n the single-factor construction cannot serve.
 
 - Checked what actually blocked it.  MAX_N was already 63 (raised by
   another thread), so nothing needed lifting.
-- Built divisor bases on K_0/F_2^31 at dims 10, 11, 15, 16 and ran the
+- Built divisor bases on icv1-f2m31-tm90707-c95f16f5 at dims 10, 11, 15, 16 and ran the
   DLP through `koblitz_index_calculus_dlp_with_factor_base`.
 - Added `FrobeniusFactorBase::n_vars_for_summands`, the milestone test,
   and an n=31 section to the factor-base survey example.
 
 ### Findings
 
-**Solved.**  K_0/F_2^31, r = 1 439 393, recovered log 123456 in 3.5 s
+**Solved.**  icv1-f2m31-tm90707-c95f16f5, r = 1 439 393, recovered log 123456 in 3.5 s
 with the dim-10 divisor base at m=2 -- 20 unknowns, quadratic, no
 chaining.  Three further targets (7, 999983, 424242) also recovered.
 

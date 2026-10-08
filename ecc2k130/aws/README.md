@@ -330,7 +330,8 @@ TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 #    us-west-1 is g4dn-only; needs the fat 75+89+120 client (CLMAD=1)
 #    cheapest SKU and research-credit route: RESEARCH-CREDITS.md
 #    (GCP L4 spot is cheaper than Modal; leftover AWS g6 is cheaper than both)
-ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
+cargo build --release --bin ecc2k-status   # once
+ECC_BUCKET=ecc2k130-<account> ../../target/release/ecc2k-status --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
 #    masks) and checks that they report the preset's arithmetic before any
@@ -349,6 +350,10 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GP
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campaign campaign.json --client ../ecc2k130-cpu
 #    prints collisions and, if one solves, writes solution.json locally and to the bucket
+#    The Rust port takes the same arguments and writes the same bytes; CI's
+#    merge-parity job holds the two together until merge.py is retired:
+cargo build --release --bin ecc2k-merge    # from the repository root
+../../target/release/ecc2k-merge --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campaign campaign.json --client ../ecc2k130-cpu
 
 # 6. done
 ./fleet.sh down                  # workers checkpoint on the way out
@@ -492,9 +497,30 @@ every boot after it.
   republishes the ingest host's `status.json` from the status bucket
   instead of leaving Pages on the last successful hop. It does not open
   RDS to the internet.
-* `status.py` sums live workers' rates, each slot's checkpointed iterations ×
+* **A cairn node's dashboard.** With `ECC_CAIRN_NODE` and
+  `ECC_CAIRN_OBJECTIVE` set (or `cairnNode` / `cairnObjective` in
+  `campaign.json`), each supervisor also posts a heartbeat to that node's
+  `POST /progress` on its 60 s tick -- iterations and rate from the client's
+  progress line, points found, uploaded and spooled, the GPU's name and walk
+  count -- and the node's reader shows the fleet at `/ui/task?id=<objective>`
+  beside what its log has actually paid each worker (`docs/serving.md` in
+  cairn). `ECC_CAIRN_WORKER` is the name on that page: set it to the
+  pseudonym the orbits are submitted under so the settled and reported halves
+  share a row (default `slot-NNNNN`). A heartbeat is not a record and pays
+  nothing; a node that is down or refuses costs one bounded request a minute
+  and a log line, never the lease (`test_worker_cairn.py`).
+* `ecc2k-status` (the Rust port of `status.py`, `cargo build --release --bin
+  ecc2k-status`) sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
-  fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
+  fraction of 2^60.9. It also prints each slot's **steps per walk**, its
+  iterations over its points: every point ends a walk, so this is the mean walk
+  length, 2^28.41 at the campaign's weight 32. A slot with 50,000 points that
+  is more than 2× from that is flagged off weight (`!` in the column), the rule
+  the ingest host applies; `?` marks a slot whose walks are assumed. The
+  pooled figure covers the slots that report their walks, and with off-weight
+  slots present a second figure leaves them out. The JSON carries the same as
+  `stepsPerWalk*` and `offWeightSlots`.
+  The walk count is not a campaign constant: a checkpoint
   holds the per-walk iteration base, and Ada slots omit `--threads` so the
   client sizes the grid (`usesCampaignWorkers`), which makes their base climb
   by the ratio of the two grids — about 26× on an L4-sized grid — for the same
@@ -540,7 +566,11 @@ every boot after it.
 
 The public dashboard reads Postgres (`rho-dp`), not S3, so something has to
 copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does that work; how it is
-deployed is a separate question.
+deployed is a separate question. A Phase A Rust port of the offline half
+(decode, keys, envelope, coverage, weight-32 cutoff) lives in
+[`../dp-ingest/`](../dp-ingest/); `make -C ecc2k130 test-dp-ingest` holds it.
+The live daemon stays Python until Postgres/S3 parity lands — see
+[`research/ecc2k130_dp_ingest_rust_20261007/PROTOCOL.md`](../../research/ecc2k130_dp_ingest_rust_20261007/PROTOCOL.md).
 
 **General path (any host).** From a machine with AWS credentials and a route
 to Postgres, run:
@@ -765,14 +795,16 @@ one.
 any of the above.** Since 19:02Z on 2026-09-18 it is the truth: spot reclaimed
 every worker, and `RunInstances` is refused account-wide — `Blocked … not
 recognized as a valid account`, an account-verification hold that no IAM
-permission overrides — so nothing can replace them. The document says which
-kind of stop it is without needing this paragraph: `walking_slots: 0`,
-`workers: 0`, `iterations_per_second: 0.0` and `outstanding_objects: 0` beside
-an 11-hour `lag_seconds` is a fleet that stopped with an ingest that is caught
-up, where a stopped ingest shows a rising `outstanding_objects` and a fresh
-`newest_object_at`. Both ASGs still hold their launch template and an available
-AMI, and they track `$Latest`, so recovery once the hold clears is capacity
-only:
+permission overrides — so nothing can replace them. Status, Support reply
+draft, and the owner unblock checklist live in
+[`ACCOUNT-HOLD.md`](ACCOUNT-HOLD.md) (still blocked as of 2026-10-05). The
+document says which kind of stop it is without needing this paragraph:
+`walking_slots: 0`, `workers: 0`, `iterations_per_second: 0.0` and
+`outstanding_objects: 0` beside an 11-hour `lag_seconds` is a fleet that
+stopped with an ingest that is caught up, where a stopped ingest shows a
+rising `outstanding_objects` and a fresh `newest_object_at`. Both ASGs still
+hold their launch template and an available AMI, and they track `$Latest`, so
+recovery once the hold clears is capacity only:
 
 ```
 aws autoscaling update-auto-scaling-group --region us-west-2 \

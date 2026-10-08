@@ -5,6 +5,7 @@
 #include "../include/packed131.h"
 
 using eccPacked131::P131;
+namespace eccPacked131 { static const size_t SIGMA_SMEM_BYTES_TEST = size_t(SIGMA_TABLE_BYTES) + 256; }
 static void checked(cudaError_t status) {
     if (status != cudaSuccess) {
         fprintf(stderr, "CUDA arithmetic test: %s\n", cudaGetErrorString(status));
@@ -81,6 +82,16 @@ void pairedProbe(const P131 *a,const P131 *b,const P131 *c,P131 *first,P131 *sec
         first[i]=pair.first;second[i]=pair.second;
     }
 }
+
+#if ECC_PACKED_SIGMA_TABLE
+extern __shared__ __align__(256) uint32_t eccSigmaSmem[];
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void sigmaTableProbe(const uint32_t *__restrict__ table, const P131 *input, const int *maps, P131 *output, int n) {
+    const uint32_t base = eccPacked131::stageSigmaTable(table, eccSigmaSmem);
+    const int i = blockIdx.x*blockDim.x+threadIdx.x;
+    if (i < n) output[i] = eccPacked131::sigmaPlusTable131(input[i], maps[i], base);
+}
+#endif
 
 static bool same(P131 a, P131 b) {
     // Compare all five words so noncanonical output bits cannot be hidden by
@@ -288,8 +299,54 @@ static bool polynomialChecks() {
     return true;
 }
 
+static bool sigmaTableChecks() {
+#if ECC_PACKED_SIGMA_TABLE
+    // Device lookups through shared memory against the host table and the
+    // normal-basis path, for every map, basis vector, edge and random input.
+    std::vector<uint32_t> table(eccPacked131::SIGMA_TABLE_WORDS);
+    eccPacked131::buildSigmaTable(table.data());
+    std::vector<P131> input; std::vector<int> maps;
+    uint32_t state=0x7131263u;
+    for (int q=0;q<8;q++) {
+        for (int bit=0;bit<131;bit++) { P131 a{}; a.v[bit/32]=1u<<(bit%32); input.push_back(a); maps.push_back(q); }
+        input.push_back(P131{}); maps.push_back(q);
+        input.push_back(P131{{~0u,~0u,~0u,~0u,7u}}); maps.push_back(q);
+        for (int i=0;i<256;i++) {
+            P131 a; for (int w=0;w<5;w++) { state^=state<<13;state^=state>>17;state^=state<<5; a.v[w]=state; }
+            a.v[4]&=7u; input.push_back(a); maps.push_back(q);
+        }
+    }
+    const int n=int(input.size()); std::vector<P131> output(n);
+    uint32_t *deviceTable; P131 *deviceInput,*deviceOutput; int *deviceMaps;
+    checked(cudaMalloc(&deviceTable,table.size()*sizeof(uint32_t)));
+    checked(cudaMalloc(&deviceInput,n*sizeof(P131))); checked(cudaMalloc(&deviceOutput,n*sizeof(P131)));
+    checked(cudaMalloc(&deviceMaps,n*sizeof(int)));
+    checked(cudaMemcpy(deviceTable,table.data(),table.size()*sizeof(uint32_t),cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(deviceInput,input.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(deviceMaps,maps.data(),n*sizeof(int),cudaMemcpyHostToDevice));
+    checked(cudaFuncSetAttribute(sigmaTableProbe,cudaFuncAttributeMaxDynamicSharedMemorySize,int(eccPacked131::SIGMA_SMEM_BYTES_TEST)));
+    sigmaTableProbe<<<(n+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS,eccPacked131::SIGMA_SMEM_BYTES_TEST>>>(deviceTable,deviceInput,deviceMaps,deviceOutput,n);
+    checked(cudaGetLastError()); checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(output.data(),deviceOutput,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    checked(cudaFree(deviceTable)); checked(cudaFree(deviceInput)); checked(cudaFree(deviceOutput)); checked(cudaFree(deviceMaps));
+    for (int i=0;i<n;i++) {
+        const P131 a=eccPacked131::fromPolynomial131(input[i]);
+        const P131 want=eccPacked131::toPolynomial131(eccPacked131::add131(a,eccPacked131::sigma131(a,maps[i]+3)));
+        const P131 host=eccPacked131::sigmaPlusTable131(table.data(),input[i],maps[i]);
+        if (!same(output[i],want) || !same(host,want)) {
+            fprintf(stderr,"GPU Frobenius table mismatch at %d (map %d)\n",i,maps[i]); return false;
+        }
+    }
+    printf("PASS: %d GPU Frobenius table lookups through shared memory against the network path\n",n);
+#else
+    printf("Frobenius table not compiled in; lookup checks skipped\n");
+#endif
+    return true;
+}
+
 int main() {
     printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
+    printf("packed arithmetic sigma table: %d\n",ECC_PACKED_SIGMA_TABLE);
     printf("packed arithmetic generated product: %d\n",ECC_PACKED_GENERATED_PRODUCT);
     printf("packed arithmetic native carryless multiply: %d\n",ECC_PACKED_CLMAD);
     printf("packed arithmetic top clmad: %d\n",ECC_PACKED_TOP_CLMAD);
@@ -333,6 +390,6 @@ int main() {
         }
     }
     printf("PASS: %d GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases\n",n);
-    return polynomialChecks() && squareChecks() && pairedFrobeniusChecks()?0:1;
+    return polynomialChecks() && squareChecks() && pairedFrobeniusChecks() && sigmaTableChecks()?0:1;
 }
 

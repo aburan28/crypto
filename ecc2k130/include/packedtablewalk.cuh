@@ -373,6 +373,16 @@ struct TwCycleOps {
         out->y = add131(add131(mul131(lambda, add131(p.x, out->x)), out->x), p.y);
         return true;
     }
+    TW_METHOD bool oppositeCloses(const TwCyclePoint &, const TwCyclePoint &after,
+                                  unsigned t) const {
+        P131 zero = {{0,0,0,0,0}}, tx, ty;
+        twAddend(t, zero, zero, tab, &tx, &ty);
+        tx = fromPolynomial131(tx);
+        // The caller proved t is the inverse of the first addend. By group
+        // associativity the result is the start whenever next() is defined;
+        // next() is defined exactly when this denominator is nonzero.
+        return !twFieldEqual(after.x, tx);
+    }
     TW_METHOD bool equal(const TwCyclePoint &a, const TwCyclePoint &b) const {
         return twFieldEqual(a.x,b.x) && twFieldEqual(a.y,b.y);
     }
@@ -382,6 +392,37 @@ struct TwCycleOps {
         return twFieldLess(twCanonical(a.x), twCanonical(b.x));
     }
 };
+
+#if ECC_CYCLE_PROFILE && defined(__CUDACC__)
+// The cold path is divergent by construction. Aggregate one hint count per
+// active warp, one count per distinct terminal outcome/next-call value, and
+// one ballot for exits. This bounds global atomics by the diagnostic event
+// diversity rather than issuing several atomics per hinted lane.
+__device__ __forceinline__ void twCycleProfileAccumulateDevice(
+        EccCycleProfile *totals, const EccCycleProbeProfile &probe) {
+    const unsigned active = __activemask();
+    const int lane = int(threadIdx.x & 31);
+    const int activeLeader = __ffs(int(active)) - 1;
+    if (lane == activeLeader)
+        atomicAdd(&totals->hints, (unsigned long long)__popc(active));
+
+    const unsigned outcomeGroup = __match_any_sync(active, probe.outcome);
+    if (lane == __ffs(int(outcomeGroup)) - 1) {
+        unsigned long long *counter = eccCycleOutcomeCounter(totals, probe.outcome);
+        if (counter) atomicAdd(counter, (unsigned long long)__popc(outcomeGroup));
+    }
+
+    const unsigned nextGroup = __match_any_sync(active, probe.nextCalls);
+    if (lane == __ffs(int(nextGroup)) - 1 && probe.nextCalls)
+        atomicAdd(&totals->affineNextCalls,
+                  (unsigned long long)probe.nextCalls * __popc(nextGroup));
+
+    const unsigned exits = __ballot_sync(active, probe.anchorExit != 0);
+    if (exits && lane == __ffs(int(exits)) - 1)
+        atomicAdd(&totals->anchorExits, (unsigned long long)__popc(exits));
+}
+#endif
+
 TW_COLD unsigned twCycleTag(const P131 &x, const P131 &yp, unsigned raw,
                             const uint32_t *sel, const uint32_t *tab, int dpWeight) {
 #ifdef __CUDACC__
@@ -391,18 +432,56 @@ TW_COLD unsigned twCycleTag(const P131 &x, const P131 &yp, unsigned raw,
 #endif
                              TwCycleOps{sel,tab,dpWeight}, 131, TW_H);
 }
+#if ECC_CYCLE_PROFILE
+TW_COLD unsigned twCycleTagProfile(const P131 &x, const P131 &yp, unsigned raw,
+                                   const uint32_t *sel, const uint32_t *tab,
+                                   int dpWeight, EccCycleProfile *totals) {
+    EccCycleProbeProfile probe;
+#ifdef __CUDACC__
+    const unsigned tag = eccCycleAnchorTagDeviceProfile(
+        TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+        TwCycleOps{sel,tab,dpWeight}, 131, TW_H, &probe);
+    twCycleProfileAccumulateDevice(totals, probe);
+#else
+    const unsigned tag = eccCycleAnchorTagProfile(
+        TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+        TwCycleOps{sel,tab,dpWeight}, 131, TW_H, &probe);
+    eccCycleProfileAccumulate(totals, probe);
+#endif
+    return tag;
+}
+#endif
 TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
                             unsigned long long *hist, const uint32_t *sel,
-                            const uint32_t *tab, int dpWeight) {
+                            const uint32_t *tab, int dpWeight
+#if ECC_CYCLE_PROFILE
+                            , EccCycleProfile *profile = nullptr
+#endif
+                            ) {
     unsigned tag = twRawTag(x,yp,hw,sel);
-    if (eccTagFruitless(tag,*hist,131)) tag = twCycleTag(x,yp,tag,sel,tab,dpWeight);
+    if (eccTagFruitless(tag,*hist,131)) {
+#if ECC_CYCLE_PROFILE
+        tag = profile ? twCycleTagProfile(x,yp,tag,sel,tab,dpWeight,profile)
+                      : twCycleTag(x,yp,tag,sel,tab,dpWeight);
+#else
+        tag = twCycleTag(x,yp,tag,sel,tab,dpWeight);
+#endif
+    }
     *hist = eccHistPush(*hist,tag);
     return tag;
 }
 TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
                         unsigned long long *hist, const uint32_t *sel,
-                        const uint32_t *tab, int dpWeight) {
-    return twSelectHist(x,yp,hw,hist,sel,tab,dpWeight);
+                        const uint32_t *tab, int dpWeight
+#if ECC_CYCLE_PROFILE
+                        , EccCycleProfile *profile = nullptr
+#endif
+                        ) {
+    return twSelectHist(x,yp,hw,hist,sel,tab,dpWeight
+#if ECC_CYCLE_PROFILE
+                        , profile
+#endif
+                        );
 }
 #undef TW_METHOD
 #undef TW_COLD

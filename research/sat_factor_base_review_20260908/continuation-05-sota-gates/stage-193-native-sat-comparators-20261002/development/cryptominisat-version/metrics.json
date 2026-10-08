@@ -1,0 +1,27 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/usr/bin/env",
+    "RAYON_NUM_THREADS=1",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "/opt/homebrew/bin/cryptominisat5",
+    "--version"
+  ],
+  "environment": {},
+  "pid": 83599,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 30,
+  "wall_seconds": 0.027214958,
+  "user_seconds": 0.002026,
+  "system_seconds": 0.003244,
+  "total_core_seconds": 0.00527,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 2162688
+}

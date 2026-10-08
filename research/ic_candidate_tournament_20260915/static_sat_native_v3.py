@@ -1,10 +1,12 @@
-"""Fresh, isolated meters for the two admitted non-forking SAT native tools.
+"""Fresh, isolated meters for admitted non-forking SAT and IC native tools.
 
 Native tools inherit the enclosing controller process group. This is not a
 general supervisor for arbitrary plugins that fork or create their own groups.
 All wrapper/source checks are charged to the caller's PDP interval.
 """
 import argparse
+import contextlib
+import hashlib
 import json
 import math
 import os
@@ -38,7 +40,29 @@ def context(execution):
     return execution, spec
 
 
-def meter(execution, asset_role, arguments, directory, name, seconds):
+def registered_stdin(spec, key):
+    """Serialize only an explicitly registered JSON argument, never live input.
+
+    Keep targets and seeds in the invocation rather than reusable native assets,
+    so their bytes do not silently alter the candidate implementation identity.
+    """
+    require(type(key) is str and key.isidentifier() and not key.startswith('_')
+            and type(spec['arguments']) is dict and key in spec['arguments']
+            and type(spec['arguments'][key]) is dict,
+            'native stdin is not a registered JSON job')
+    data = json.dumps(spec['arguments'][key], sort_keys=True, separators=(',', ':'),
+                      ensure_ascii=False, allow_nan=False).encode('utf-8')
+    require(len(data) <= 1_048_576, 'native registered stdin exceeds job limit')
+    return data
+
+
+def stdin_binding(spec, key):
+    data = registered_stdin(spec, key)
+    return dict(stdin_argument=key, stdin_sha256=hashlib.sha256(data).hexdigest(),
+                stdin_bytes=len(data))
+
+
+def meter(execution, asset_role, arguments, directory, name, seconds, *, stdin_argument=None):
     """Run once. A wrapper failure remains evidence and fails the controller."""
     execution, spec = context(execution)
     directory = Path(directory).resolve()
@@ -50,6 +74,8 @@ def meter(execution, asset_role, arguments, directory, name, seconds):
                 asset_role=asset_role, arguments=[str(x) for x in arguments],
                 watchdog_seconds=seconds, name=name,
                 directory=directory.relative_to(execution).as_posix())
+    if stdin_argument is not None:
+        call.update(stdin_binding(spec, stdin_argument))
     intent = directory/(name+'.intent.json')
     require(not intent.exists(), 'native SAT invocation already exists; no retries')
     write_immutable(intent, call)
@@ -88,6 +114,15 @@ def worker(execution, intent, expected_sha256):
             and interpreter_record() == spec['interpreter'],
             'native SAT meter source or interpreter changed')
     assets = check_extracted_assets(execution/'asset-files', spec['asset_manifest'])
+    stdin_data = None
+    if 'stdin_argument' in call:
+        require({key: call.get(key) for key in ('stdin_argument', 'stdin_sha256', 'stdin_bytes')}
+                == stdin_binding(spec, call['stdin_argument']),
+                'native stdin differs from registered job')
+        stdin_data = registered_stdin(spec, call['stdin_argument'])
+    else:
+        require('stdin_sha256' not in call and 'stdin_bytes' not in call,
+                'native stdin has no registered argument')
     roles = {item['role'] for item in spec['asset_manifest']['components']
              if item['executable']}
     require(call['asset_role'] in roles, 'native SAT tool is not an executable asset')
@@ -102,16 +137,24 @@ def worker(execution, intent, expected_sha256):
                 process_group=os.getpgrp(), wrapper_pid=os.getpid(),
                 flags=dict(isolated=True, no_site=True, bytecode_writes=False))
     gate['execution_directory'] = str(execution)
+    if stdin_data is not None:
+        gate.update(stdin_binding(spec, call['stdin_argument']))
+        stdin_path = directory/(name+'.stdin.json')
+        with stdin_path.open('xb') as stream:
+            stream.write(stdin_data)
+        stdin_path.chmod(0o444)
     write_immutable(directory/(name+'.before.json'), gate)
     environment = dict(os.environ, **THREAD_ENVIRONMENT)
     timed_out = False
     process = None
     start = time.monotonic_ns()
     with (directory/(name+'.stdout')).open('xb') as stdout, (
-            directory/(name+'.stderr')).open('xb') as stderr:
+            directory/(name+'.stderr')).open('xb') as stderr, (
+            stdin_path.open('rb') if stdin_data is not None
+            else contextlib.nullcontext(None)) as stdin:
         try:
             process = subprocess.Popen(command, cwd=directory, env=environment,
-                                       stdout=stdout, stderr=stderr,
+                                       stdout=stdout, stderr=stderr, stdin=stdin,
                                        start_new_session=False)
             native_pid = process.pid
             try:
@@ -136,6 +179,9 @@ def worker(execution, intent, expected_sha256):
                 process.kill()
                 process.wait()
     stop = time.monotonic_ns()
+    if stdin_data is not None:
+        require(not stdin_path.is_symlink() and stdin_path.read_bytes() == stdin_data,
+                'native stdin changed during execution')
     usage = resource.getrusage(resource.RUSAGE_CHILDREN)
     require(digest(executable) == gate['executable_sha256']
             and check_extracted_assets(execution/'asset-files', spec['asset_manifest']) == assets
@@ -163,10 +209,12 @@ def worker(execution, intent, expected_sha256):
                    stderr_sha256=digest(directory/(name+'.stderr')),
                    before_sha256=digest(directory/(name+'.before.json')),
                    after_sha256=digest(directory/(name+'.after.json')))
+    if stdin_data is not None:
+        receipt.update(stdin_binding(spec, call['stdin_argument']))
     write(directory/(name+'.metrics.json'), receipt, exclusive=True)
 
 
-def audit_meter(execution, directory, name, *, asset_role, arguments, seconds):
+def audit_meter(execution, directory, name, *, asset_role, arguments, seconds, stdin_argument=None):
     """Check exact argv, native bytes, isolated child gates and output receipts."""
     execution, spec = context(execution)
     directory = Path(directory).resolve()
@@ -175,8 +223,16 @@ def audit_meter(execution, directory, name, *, asset_role, arguments, seconds):
                     asset_role=asset_role, arguments=[str(x) for x in arguments],
                     watchdog_seconds=seconds, name=name,
                     directory=directory.relative_to(execution).as_posix())
+    if stdin_argument is not None:
+        expected.update(stdin_binding(spec, stdin_argument))
     require(call == expected, 'native SAT command or watchdog differs from registration')
     receipt = read(directory/(name+'.metrics.json'))
+    if stdin_argument is not None:
+        fields = stdin_binding(spec, stdin_argument)
+        require({key: receipt.get(key) for key in fields} == fields
+                and not (directory/(name+'.stdin.json')).is_symlink()
+                and (directory/(name+'.stdin.json')).read_bytes() == registered_stdin(spec, stdin_argument),
+                'retained native stdin differs from registered job')
     spawned = read(directory/(name+'.spawned.json'))
     require(spawned == dict(native_pid=receipt['native_pid'],
                             native_group_observed=receipt['native_group_observed'],
@@ -215,6 +271,9 @@ def audit_meter(execution, directory, name, *, asset_role, arguments, seconds):
                 and set(gate['loaded_modules'].values()) <= files,
                 'native SAT child source gate missing or changed')
         gates.append(gate)
+        if stdin_argument is not None:
+            require({key: gate.get(key) for key in fields} == fields,
+                    'native stdin source gate differs')
     require(gates[0]['loaded_modules'].items() <= gates[1]['loaded_modules'].items(),
             'native SAT terminal gate drops imports')
     for stream in ('stdout', 'stderr'):
@@ -232,7 +291,8 @@ def audit_meter(execution, directory, name, *, asset_role, arguments, seconds):
 def process_control(arguments, output):
     """Non-SAT process-group control for the bounded supervisor tests only."""
     receipt = meter(Path(output).parent, arguments['role'], arguments['argv'],
-                    output, 'control', arguments['seconds'])
+                    output, 'control', arguments['seconds'],
+                    stdin_argument=arguments.get('stdin_argument'))
     return dict(native_returncode=receipt['returncode'], timed_out=receipt['timed_out'],
                 scope='process supervisor control; no IC or SAT admission')
 

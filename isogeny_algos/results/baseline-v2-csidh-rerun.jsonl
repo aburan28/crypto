@@ -1,0 +1,10 @@
+{"group":"csidh","algo":"class_group_action","p_bits":"20","n_primes":"6","exp_bound":"3","isogeny_steps":"14","median_ns":28102,"min_ns":27740,"reps":200,"ns_per_step":2007.2857142857142,"verified":true,"note":"one fresh random point per isogeny, no batching"}
+{"group":"csidh","algo":"mitm_group_action_inversion","p_bits":"20","n_primes":"6","box_m":"2","ns":3294758,"nodes":1458,"verified":true,"note":"boxes [0,m]^n from both ends"}
+{"group":"csidh","algo":"class_group_action","p_bits":"30","n_primes":"8","exp_bound":"3","isogeny_steps":"6","median_ns":17839,"min_ns":17713,"reps":200,"ns_per_step":2973.1666666666665,"verified":true,"note":"one fresh random point per isogeny, no batching"}
+{"group":"csidh","algo":"mitm_group_action_inversion","p_bits":"30","n_primes":"8","box_m":"2","ns":44173903,"nodes":13122,"verified":true,"note":"boxes [0,m]^n from both ends"}
+{"group":"csidh","algo":"class_group_action","p_bits":"40","n_primes":"10","exp_bound":"3","isogeny_steps":"13","median_ns":52491,"min_ns":48792,"reps":200,"ns_per_step":4037.769230769231,"verified":true,"note":"one fresh random point per isogeny, no batching"}
+{"group":"csidh","algo":"mitm_group_action_inversion","p_bits":"40","n_primes":"10","box_m":"1","ns":8897349,"nodes":2048,"verified":true,"note":"boxes [0,m]^n from both ends"}
+{"group":"csidh","algo":"class_group_action","p_bits":"50","n_primes":"12","exp_bound":"3","isogeny_steps":"17","median_ns":85305,"min_ns":78299,"reps":200,"ns_per_step":5017.941176470588,"verified":true,"note":"one fresh random point per isogeny, no batching"}
+{"group":"csidh","algo":"ideal_order_by_cycle","p_bits":"20","ell":"3","class_number":"1905","ns":5431041,"order":1905,"verified":true,"note":"order divides h(-4p) (independent form count)"}
+{"group":"csidh","algo":"ideal_order_by_cycle","p_bits":"20","ell":"5","class_number":"1905","ns":3761358,"order":1905,"verified":true,"note":"order divides h(-4p) (independent form count)"}
+{"group":"csidh","algo":"ideal_order_by_cycle","p_bits":"20","ell":"7","class_number":"1905","ns":3675585,"order":1905,"verified":true,"note":"order divides h(-4p) (independent form count)"}

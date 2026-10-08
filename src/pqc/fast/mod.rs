@@ -15,5 +15,6 @@
 
 pub mod isogeny;
 pub mod keccak;
+pub mod keccak4;
 pub mod ml_dsa;
 pub mod ml_kem;

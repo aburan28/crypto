@@ -1,0 +1,49 @@
+{
+  "metrics": {
+    "bytes": 785,
+    "path": "metrics.json",
+    "sha256": "64e4d0d040477a427f732a084049adc316c9992e1fdfcf434907ff60e615cfe2"
+  },
+  "process": {
+    "command": [
+      "/usr/bin/env",
+      "RAYON_NUM_THREADS=1",
+      "VECLIB_MAXIMUM_THREADS=1",
+      "OPENBLAS_NUM_THREADS=1",
+      "OMP_NUM_THREADS=1",
+      "MKL_NUM_THREADS=1",
+      "BLIS_NUM_THREADS=1",
+      "NUMEXPR_NUM_THREADS=1",
+      "/opt/homebrew/bin/cargo",
+      "build",
+      "--release",
+      "--locked",
+      "--example",
+      "koblitz_stage193_sat_comparators"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 267894784,
+    "pid": 89270,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.157081,
+    "timed_out": false,
+    "total_core_seconds": 3.390179,
+    "user_seconds": 3.233098,
+    "wall_seconds": 1.653189458,
+    "watchdog_seconds": 300
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 1734,
+    "path": "stderr.txt",
+    "sha256": "74084576d748aeb2f39981cf75be53ed2197fe82d3e2ff3bc61c6093d9adf0cb"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,68 @@
+name: curve-traits
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/curve_traits/**'
+      - 'src/bin/curve_traits.rs'
+      - 'src/cryptanalysis/isogeny_class_search.rs'
+      - 'src/cryptanalysis/semaev_decomp.rs'
+      - 'src/cryptanalysis/curve_id.rs'
+      - 'src/cryptanalysis/curve_aliases.json'
+      - 'src/binary_ecc/**'
+      - 'src/isogeny/class_group.rs'
+      - 'src/ecc/field.rs'
+      - 'src/ecc/point.rs'
+      - 'docs/curves/registry.json'
+      - 'docs/curves/traits.json'
+      - 'docs/curves/TRAITS.md'
+      - '.github/workflows/curve-traits.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/cryptanalysis/curve_traits/**'
+      - 'src/bin/curve_traits.rs'
+      - 'src/cryptanalysis/isogeny_class_search.rs'
+      - 'src/cryptanalysis/semaev_decomp.rs'
+      - 'src/cryptanalysis/curve_id.rs'
+      - 'src/cryptanalysis/curve_aliases.json'
+      - 'src/binary_ecc/**'
+      - 'src/isogeny/class_group.rs'
+      - 'src/ecc/field.rs'
+      - 'src/ecc/point.rs'
+      - 'docs/curves/registry.json'
+      - 'docs/curves/traits.json'
+      - 'docs/curves/TRAITS.md'
+      - '.github/workflows/curve-traits.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  traits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Module tests
+        run: cargo test --release --lib curve_traits
+      - run: cargo build --release --bin curve_traits
+      - name: traits.json is current with registry.json
+        run: ./target/release/curve_traits check
+      - name: Queries run on the committed file
+        run: |
+          ./target/release/curve_traits show ECC2K-130
+          ./target/release/curve_traits group --by cm,descent --min-sizes 2
+          ./target/release/curve_traits similar ECC2K-130 --other-sizes --top 5
+      - name: Reject an altered file
+        run: |
+          cp docs/curves/traits.json /tmp/altered.json
+          sed -i '0,/"conductor": "7"/s//"conductor": "11"/' /tmp/altered.json
+          if cmp -s docs/curves/traits.json /tmp/altered.json; then
+            echo 'the edit did not apply'; exit 1
+          fi
+          if ./target/release/curve_traits check --traits /tmp/altered.json; then
+            exit 1
+          fi

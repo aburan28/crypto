@@ -400,17 +400,17 @@ static int differences(const Stored &s, const FoldVectors &v, bool report) {
 }
 
 /* The bucket width against the CPU's over a grid, through
- * `folded_byte_size = 4 pairs + 4 buckets + pairs / 2`: the one table
- * below agrees at one point, and at that point the estimate's `+ |F|`
- * term happens not to move the width, so on its own it would pass a
- * port that dropped the term. */
+ * `folded_byte_size = 4 pairs + 4 buckets + pairs` (the filter's eight
+ * bits a pair): the one table below agrees at one point, and at that
+ * point the estimate's `+ |F|` term happens not to move the width, so on
+ * its own it would pass a port that dropped the term. */
 static void test_fold_geometry() {
     int bad = 0;
     for (int i = 0; i < fold_geometry_vectors_count; i++) {
         const FoldGeometryVector &g = fold_geometry_vectors[i];
         const uint64_t pairs = pt_folded_pair_count(g.orbits, g.points);
         const uint64_t buckets = 1ull << pt_folded_bucket_bits(pairs, (int)g.degree);
-        const uint64_t bytes = pairs * 4 + buckets * 4 + pairs / 2;
+        const uint64_t bytes = pairs * 4 + buckets * 4 + pairs;
         if (bytes != g.bytes) {
             if (bad++ < 4) {
                 printf("  orbits %u, points %u, degree %u: %llu bytes, the CPU says %llu\n",

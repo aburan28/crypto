@@ -1,0 +1,59 @@
+{
+  "backend": {
+    "bytes": 1751024,
+    "path": "/Volumes/SSD990/kic-stage188-native-target-a52376ba6/release/examples/koblitz_pdp_backend",
+    "sha256": "f04a0b7dbefc4689a4eaa58dc8af60b9b45293b5f667afc450a01f89d9d38d9e"
+  },
+  "external_thread_caps": 1,
+  "host": {
+    "arch": "aarch64",
+    "family": "unix",
+    "os": "macos"
+  },
+  "lock": {
+    "bytes": 29115,
+    "path": "/Volumes/SSD990/crypto-kic-pr660-main-20261001/Cargo.lock",
+    "sha256": "4f17b356fa7bac392b6d801d1c74fb9e36b6517f9465c8ebc19bb9a2792a84c5"
+  },
+  "manifest": {
+    "bytes": 4348,
+    "path": "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+    "sha256": "188dfdcb7e9398b0ab03193265f7b3035776d4a8a52de7dd4a51475dfc1a572c"
+  },
+  "protocol": {
+    "bytes": 6760,
+    "path": "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-188-dense-reducer-stacked-native-20261002/PROTOCOL.md",
+    "sha256": "41166fe6ba3cbd76a2430a53ad5d93a2ffeb5f93108c26eaf4d69687c41da3f1"
+  },
+  "rayon_threads": 12,
+  "runner": {
+    "bytes": 907120,
+    "path": "/Volumes/SSD990/kic-stage188-native-target-a52376ba6/release/examples/koblitz_f4_stage188",
+    "sha256": "ec0d99df062a711ae0b66139d770245cbaecf2b0a8b47018fee9675d34f526c8"
+  },
+  "schema": "koblitz_stage188_native_provenance.v1",
+  "source_artifacts": {
+    "examples/koblitz_f4_stage188.rs": {
+      "bytes": 38220,
+      "path": "examples/koblitz_f4_stage188.rs",
+      "sha256": "77b206b8ef9c1a67b433cdec606add02652b4eec86d878e5ea426fed9cd77261"
+    },
+    "examples/koblitz_pdp_backend.rs": {
+      "bytes": 64498,
+      "path": "examples/koblitz_pdp_backend.rs",
+      "sha256": "c255b68235cf3279479da39fd8a5141dbd2a0ff57533f13dafc5c881ac6b65c5"
+    },
+    "src/cryptanalysis/ic_framework/solvers.rs": {
+      "bytes": 56541,
+      "path": "src/cryptanalysis/ic_framework/solvers.rs",
+      "sha256": "9653f735c13a8790f82eb1ec1825b3b9b9f5e8d404e36df21f9cd5d053782b93"
+    },
+    "src/cryptanalysis/pq_f4_f2.rs": {
+      "bytes": 105045,
+      "path": "src/cryptanalysis/pq_f4_f2.rs",
+      "sha256": "acaf715317c52a20b6cfc6fe49db39f611c97c36baae5b3dd9d6cb929a9ad0bc"
+    }
+  },
+  "source_commit": "a52376ba628944c1feba19b2ac2b4d20e3d1149d",
+  "watchdog_seconds": 360
+}

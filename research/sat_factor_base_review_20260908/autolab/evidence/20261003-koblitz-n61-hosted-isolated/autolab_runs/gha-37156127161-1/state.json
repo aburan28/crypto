@@ -1,0 +1,48 @@
+{
+  "beat_id": "koblitz.compact_orbit.n61_panel",
+  "blocks": 5,
+  "chosen_K": 700,
+  "claim_check": "PASS",
+  "claim_check_vs_rho": "FAIL",
+  "created_at": "2026-10-03T21:50:19.615818+00:00",
+  "git_head": "b5077d433cb2d14c7447b42479b50bddab8ba930",
+  "k_candidates": [
+    700
+  ],
+  "launch_mode": "batch_panel",
+  "phase": "done",
+  "pinned_cpu": 3,
+  "producer_exit_codes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "run_id": "gha-37156127161-1",
+  "schema_version": "1.0",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "targets": 4096,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "tune_targets": 4096,
+  "updated_at": "2026-10-03T22:45:45.819595+00:00",
+  "wall_ratio": {
+    "median": 0.21309433108200956,
+    "range": [
+      0.2124597139494548,
+      0.21319976186431458
+    ],
+    "values": [
+      0.21316864790554485,
+      0.21319976186431458,
+      0.21290444650474766,
+      0.21309433108200956,
+      0.2124597139494548
+    ]
+  }
+}

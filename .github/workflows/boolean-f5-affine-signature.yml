@@ -1,0 +1,32 @@
+name: Boolean F5 affine signature
+
+on:
+  push:
+    paths:
+      - 'research/boolean_f5_affine_signature_20261002/**'
+      - '.github/workflows/boolean-f5-affine-signature.yml'
+  pull_request:
+    paths:
+      - 'research/boolean_f5_affine_signature_20261002/**'
+      - '.github/workflows/boolean-f5-affine-signature.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native algebra and verifier tests
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml -- --test-threads=1
+      - name: Rust formatting
+        run: cargo fmt --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml --check
+      - name: Replay retained discovery when present
+        run: |
+          if test -f research/boolean_f5_affine_signature_20261002/qualified_discovery_01/manifest.json; then
+            python3 tools/isolated_bench.py busy -- cargo build --locked --release --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml
+            research/boolean_f5_affine_signature_20261002/target/release/boolean-f5-affine-signature --verify-bundle research/boolean_f5_affine_signature_20261002/qualified_discovery_01
+          fi

@@ -1,0 +1,80 @@
+{
+  "candidate": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 829,
+        "path": "grouped-pairs-provisional.metrics",
+        "sha256": "ed9d6d32035f7f0d8e393874a54c3c06ca71863964a99512c54fd96559ce7abc"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "grouped-pairs-provisional.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 3674,
+        "path": "grouped-pairs-provisional.stdout",
+        "sha256": "0cb4f6a40dc79c667fb730ef5e8a0cbf7f2340aeded48c9ed3d0b93543bc648e"
+      }
+    },
+    "decision": "promoted_after_clean_rebuild",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 962412544,
+      "single_core_seconds": 57.996966,
+      "system_seconds": 0.26464499999999996,
+      "total_core_seconds": 57.996966,
+      "user_seconds": 57.732321,
+      "wall_seconds": 58.53263641599915
+    },
+    "word_xors": 87513949370
+  },
+  "complete_development_cost": null,
+  "profile": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 798,
+        "path": "profile-fast-hash.metrics",
+        "sha256": "05d2918081325cbc2ff3400427dc5faee0ea62299d634fdf2c50384517dca993"
+      },
+      "sample.txt": {
+        "bytes": 110483,
+        "path": "profile-fast-hash.sample.txt",
+        "sha256": "590cd31317b6021dac7f5ac2294058ad057a9dbfb373470fb3e648d6f19cc4c3"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "profile-fast-hash.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 3674,
+        "path": "profile-fast-hash.stdout",
+        "sha256": "f6e52c12dee5a696bd0aa4132ee0992e4427f6bf56fe7cdcd0e35e86dcc6c77e"
+      }
+    },
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 965132288,
+      "single_core_seconds": 60.475817,
+      "system_seconds": 0.286061,
+      "total_core_seconds": 60.475817,
+      "user_seconds": 60.189756,
+      "wall_seconds": 60.92774083399854
+    },
+    "sample_duration_seconds": 20,
+    "sample_interval_ms": 5,
+    "samples": 3327,
+    "top_of_stack": {
+      "columns_pack": 153,
+      "echelon": 1366,
+      "hashmap_insert": 121,
+      "stable_quicksort": 251,
+      "state_insert": 695,
+      "vec_retain": 109
+    }
+  },
+  "reason_complete_is_null": "incremental compile and focused tests lack outer receipts",
+  "schema": "koblitz_stage162_development.v1",
+  "status": "post_hash_profile_and_candidate_retained"
+}

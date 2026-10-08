@@ -1,0 +1,14 @@
+{
+ "baseline": "v2",
+ "previous": "v1",
+ "round": "R05",
+ "class": "engineering",
+ "commit": "edcb0bec",
+ "built_from": "edcb0bec948ffab566a3c8998dc3c92d52375da2",
+ "base": "v1 30f6c153",
+ "src_tree": "4e9e664dbaee308725e5e19043045c37f874a77e",
+ "binary_sha256": "76a2a2fd05acd47d6dc9a0851a013d8056cc9d7d9b7a34320d1d92089a794597",
+ "source": "research/ic_tool_program/rounds/R05-presence-filter/analysis.json",
+ "what_changed": "the collection scan's presence filter: three bits a key in one 64-bit word, at eight to sixteen bits a stored pair, in every builder, the probe and the GPU fold kernel; every pinned output is v0's",
+ "measured": "R05's comparison: M1's two rows at the eight smaller sizes and all eight at the three target sizes, five rounds each and ten at the two sizes the half-width rule extended, paired with v1 in the same runs; s_cold is the candidate's median in v0's unit"
+}

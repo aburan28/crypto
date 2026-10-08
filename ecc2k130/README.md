@@ -13,31 +13,62 @@ including a browser copy of the toy:
 
 # ECC2K-130 and ECC2K-95
 
-**20.078 B complete scalar walk iterations/s median on one RTX PRO 6000
-Blackwell** with `make gpu-rtx-pro6000-20b`
-([ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md)): the table walk in one
-512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt from
-the step tag instead of stored, products inlined and the forward pass
-software-pipelined. 300/300 device reports re-walked, the same distinguished
-points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
-the tree's previous best configuration rebuilt in the same session on the same
-card, 17.41 B/s: +15.3%. [ROOFLINE.md](ROOFLINE.md) prices it per pipe from
-dynamic SASS counts: the ALU pipe is 91% busy (1,320 logic lane-instructions
-per update at 64 per SM-clock), the carry-less unit 73%, and the speed of
-light for its 33.1 CLMADs per update is 27.4 B/s. The same note corrects the
-22.3 B/s "carry-less ceiling" quoted here before: it assumed 1.62 CLMADs per
-SM-clock, and a measured sweep build ran the unit at least 1.654 (accounting;
-no rate changes). The campaign default below is unchanged.  The table walk's
-first cycle rule let fruitless cycles through (four steps that sum to `O`
-through Frobenius's own `σ² + σ + 2 = 0`, and six-step pairwise ones), which
-at the campaign's distinguished-point weight trapped about half its walks.
-The rule now refuses them, and the table walk is projected at 0.81–0.86× the
-σ walk's cost per solve on these rates; the new kernel's own paired rate is
-the measurement the switch waits on ([WALK-CONSTANT.md](WALK-CONSTANT.md)
-§11).
-[CHEAPER-SELECTION.md](CHEAPER-SELECTION.md) prices the remaining forward-pass
-lever (phase via popc planes, `TABLE_PHASE_POPC`) against the earlier 0.90
-floor of that 22.3 B/s ceiling.
+The current confirmed sigma path reaches **15.436677 B complete scalar
+updates/s** on one RTX PRO 6000: the fused reverse/next-prefix schedule improves
+its same-allocation control by 2.826% across five alternating pairs. The
+arithmetic, walk and odd-launch replay gates pass with identical complete
+corpora. Use `make gpu-rtx-pro6000-sigma-fused` for the native build and see
+[the result and receipts](benchmarks/sigma-fused/RESULTS.md). A matched B32/B64
+screen retains B16/T256/min2. The goal of 26 B/s remains unmet.
+
+On that fused schedule, reading the walk's Frobenius steps from
+[shared-memory nibble tables](SIGMA-TABLE.md) in polynomial coordinates
+(`PACKED_SIGMA_TABLE=1`, `make gpu-rtx-pro6000-sigma-table`, one 512-thread
+block per SM) measures **15.884369 B/s** under the fused headline protocol
+against a 15.513653 B/s same-session control: A/B paired median ratio
+1.023930 over five pairs, A/A drift 0.099%, identical sorted corpora,
+verdict promote as compatible engineering
+([SIGMA-TABLE.md](SIGMA-TABLE.md), receipts in
+[benchmarks/sigma-table/headline](benchmarks/sigma-table/headline/)). The
+26 B/s goal remains unmet.
+
+The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
+on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle
+hints across the batch first raised the path to 2.449169 B/s. Proving raw
+two-cycles after their first affine step then measured 3.592601–3.593206 B/s
+against 2.449482–2.450247 B/s, with a median paired ratio of 1.466604. Finally,
+compacting hinted owners across each block measured 5.015825–5.019737 B/s
+against 3.558739–3.563098 B/s, a median paired ratio of 1.408969. Every arm
+replayed 300/300 reports with zero drops and produced the same sorted
+multiset of 1,480,278 `ECC2KDT3` records. The selected B16/T512 geometry beat
+B32 in every long confirmation and B64 in the screen. See the frozen
+[reconvergence result](benchmarks/batch-hints/result.json), its
+[independent audit](benchmarks/batch-hints/independent-audit.json), the
+[geometry follow-up](benchmarks/hint-geometry/result.json), and the
+[two-cycle result](benchmarks/batch-hints-fast2/result.json). The selected
+block queue is recorded in [its result](benchmarks/block-hints/result.json)
+and [independent audit](benchmarks/block-hints/independent-audit.json).
+On that selected block-v3 schedule, the shared polynomial-square table and
+out-of-line polynomial inversion measured **5.095344–5.107611 B/s**, including
+**5.097573** and **5.100950 B/s**, against 5.064024–5.069412 B/s controls.
+All five paired ratios cleared 1.005, with median **1.006625**, while a matched
+control/control panel had median 1.000047 and stayed within the frozen noise
+bounds. The table preset now selects `PACKED_SQUARE_TABLE=1` and
+`PACKED_INV_POLY=2`. This is a bounded 0.66% same-walk engineering gain; it
+remains `Partial` against the older 1.040 roofline threshold and is not a
+full-solve improvement. See the [five-pair result](benchmarks/block-both2-confirm5/result.json),
+[artifact manifest](benchmarks/block-both2-confirm5/artifact-manifest.json) and
+[independent audit](benchmarks/block-both2-confirm5/independent-audit.json).
+
+The earlier **20.078 B/s** table result in
+[ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) used the superseded v2 cycle
+rule and does not transfer to v3. A fresh seven-arm v3 run put its reference at
+1.040338 B/s and its best arithmetic arm at 1.050842 B/s. Its retained static
+roofline model is also stale on the new cold call: the CLMAD self-check fails,
+although the direct hardware probe remains usable. The default sigma walk is
+still faster. The 26 B/s one-GPU objective remains unachieved. Older table-walk
+optimization notes below retain the revision and rule under which they were
+measured.
 [TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× the 22.3
 ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
 SM-clocks 30 B/s allows; at the unit's 2.0 they fill 15.0, so the verdict

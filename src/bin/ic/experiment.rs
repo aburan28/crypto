@@ -2,17 +2,21 @@
 use super::params::{self, Field, Fixture, Parameters};
 use clap::{Args, ValueEnum};
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+use crypto_lib::cryptanalysis::curve_id;
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions, SearchReport,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    build_subgroup_orbit_factor_base_with_cost, factor_x_n_minus_1, individual_log,
-    koblitz_index_calculus_dlp_with_factor_base_and_progress, order_of_2_mod_n,
-    solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable, FactorBaseSelectionCost,
-    FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, LinearAlgebra,
-    LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
+    build_subgroup_orbit_factor_base_with_cost, factor_x_n_minus_1, find_irreducible_sparse,
+    individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
+    FactorBaseSelectionCost, FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    LinearAlgebra, LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
 };
-use crypto_lib::cryptanalysis::koblitz_sparse_la::{BlockWiedemannOptions, SparseSolveOptions};
+use crypto_lib::cryptanalysis::koblitz_sparse_la::{
+    BlockLanczosOptions, BlockWiedemannOptions, SparseCoreSolver, SparseSolveOptions, SpmvBackend,
+    SpmvOptions,
+};
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
@@ -81,13 +85,28 @@ pub fn field_degree(value: &str) -> Result<u32, String> {
     }
     Ok(n)
 }
-/// Label of a synthetic curve from its parameters, before it is built.
+/// Name of a synthetic curve from its parameters: its ICV1 slug
+/// (`docs/curves/ICV1.md`).  A Koblitz curve (`k = 1`) is named from the
+/// field's modulus and the trace recurrence without being built; a
+/// subfield curve is built to be named, and one the constructor refuses
+/// has no identity, so it is described by its parameters instead.
 pub(crate) fn curve_label(n: u32, a: u8, k: u32, b: u64) -> String {
     if k == 1 {
-        format!("K_{a} / GF(2^{n})")
-    } else {
-        format!("E_{{{a},{b}}}/GF(2^{k}) over GF(2^{n})")
+        let id = find_irreducible_sparse(n).and_then(|f| {
+            curve_id::koblitz(
+                a,
+                n,
+                &curve_id::modulus_integer(&f),
+                &koblitz_point_count(a, n),
+            )
+        });
+        if let Some(id) = id {
+            return id.slug;
+        }
+    } else if let Some(c) = KoblitzCurve::subfield(k, n, u64::from(a), b) {
+        return c.label();
     }
+    format!("the curve with k = {k}, n = {n}, a-index {a}, b-index {b}")
 }
 fn one_u32() -> u32 {
     1
@@ -143,10 +162,46 @@ impl Solver {
 pub enum LinearAlgebraMode {
     /// Dense big-integer Gaussian elimination after every new relation.
     Dense,
-    /// Relation filtering (duplicates, singletons, excess, merge), then
-    /// block Wiedemann on the reduced core.
+    /// Relation filtering (duplicates, singletons, excess, merge), then the
+    /// selected sparse Krylov solver on the reduced core.
     #[default]
     Sparse,
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum SparseSolverMode {
+    BlockWiedemann,
+    BlockLanczos,
+}
+
+impl From<SparseSolverMode> for SparseCoreSolver {
+    fn from(value: SparseSolverMode) -> Self {
+        match value {
+            SparseSolverMode::BlockWiedemann => SparseCoreSolver::BlockWiedemann,
+            SparseSolverMode::BlockLanczos => SparseCoreSolver::BlockLanczos,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum SpmvMode {
+    Auto,
+    Serial,
+    Rayon,
+    Sharded,
+    Worker,
+}
+
+impl From<SpmvMode> for SpmvBackend {
+    fn from(value: SpmvMode) -> Self {
+        match value {
+            SpmvMode::Auto => SpmvBackend::Auto,
+            SpmvMode::Serial => SpmvBackend::Serial,
+            SpmvMode::Rayon => SpmvBackend::Rayon,
+            SpmvMode::Sharded => SpmvBackend::Sharded,
+            SpmvMode::Worker => SpmvBackend::Worker,
+        }
+    }
 }
 impl LinearAlgebraMode {
     pub fn name(self) -> &'static str {
@@ -168,14 +223,31 @@ pub(crate) fn with_linear_algebra(
     };
     opts
 }
-/// Sparse-solve options with one block size for both sides of the
-/// Krylov sequence; everything else at its default.
-pub(crate) fn sparse_options(block_size: usize) -> SparseSolveOptions {
+/// Sparse-solve options with one block size for the selected Krylov solver;
+/// everything else stays at its default.
+pub(crate) fn sparse_options(
+    block_size: usize,
+    solver: SparseSolverMode,
+    spmv: SpmvMode,
+    shards: usize,
+) -> SparseSolveOptions {
     SparseSolveOptions {
+        solver: solver.into(),
+        spmv: SpmvOptions {
+            backend: spmv.into(),
+            shards,
+        },
         wiedemann: BlockWiedemannOptions {
             block_m: block_size,
             block_n: block_size,
             ..BlockWiedemannOptions::default()
+        },
+        lanczos: match solver {
+            SparseSolverMode::BlockLanczos => BlockLanczosOptions {
+                block_size,
+                ..BlockLanczosOptions::default()
+            },
+            SparseSolverMode::BlockWiedemann => BlockLanczosOptions::default(),
         },
         ..SparseSolveOptions::default()
     }
@@ -455,11 +527,22 @@ pub struct LogsArgs {
     pub solver: Solver,
     #[arg(long, default_value_t = 0x4b_6f_62_6c_69_74_7a_00u64)]
     pub seed: u64,
-    /// How the relation matrix is solved: filtering + block Wiedemann
-    /// (sparse) or dense big-integer elimination.
+    /// How the relation matrix is solved: sparse filtering plus the selected
+    /// black-box solver, or dense big-integer elimination.
     #[arg(long, value_enum, default_value_t = LinearAlgebraMode::Sparse)]
     pub linear_algebra: LinearAlgebraMode,
-    /// Block size (both sides) of the block Wiedemann Krylov sequence.
+    /// Sparse Krylov solver used after filtering.
+    #[arg(long, value_enum, default_value_t = SparseSolverMode::BlockWiedemann)]
+    pub sparse_solver: SparseSolverMode,
+    /// Sparse matrix-times-block backend. `worker` uses `IC_SPMV_WORKER`
+    /// and verifies every accelerator result against the CPU implementation.
+    #[arg(long, value_enum, default_value_t = SpmvMode::Auto)]
+    pub spmv: SpmvMode,
+    /// Deterministic row shards for `--spmv sharded`; zero uses the Rayon
+    /// thread count.
+    #[arg(long, default_value_t = 0)]
+    pub spmv_shards: usize,
+    /// Block size of the Wiedemann or Lanczos Krylov sequence.
     #[arg(long,default_value_t=4,value_parser=clap::value_parser!(u8).range(1..=64))]
     pub block_size: u8,
     /// Write the logarithm database here; an existing path is never overwritten.
@@ -680,7 +763,12 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let opts = with_linear_algebra(
         ic_options(args.solver, args.summands, args.max_trials, args.seed),
         args.linear_algebra,
-        sparse_options(usize::from(args.block_size)),
+        sparse_options(
+            usize::from(args.block_size),
+            args.sparse_solver,
+            args.spmv,
+            args.spmv_shards,
+        ),
     );
     let (table, report) = solve_factor_base_logs(&c, &fb, &opts)
         .ok_or("factor base has no usable projected columns for this summand count")?;

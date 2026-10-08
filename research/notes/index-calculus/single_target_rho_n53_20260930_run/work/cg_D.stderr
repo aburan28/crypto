@@ -1,0 +1,11 @@
+==2795== Callgrind, a call-graph generating cache profiler
+==2795== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==2795== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==2795== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rank_fixture 53 0 1 128 18118074343025384088 signed_expanded independent pair_pair_parallel_4096 1 476811900269
+==2795== 
+==2795== For interactive control, run 'callgrind_control -h'.
+==2795== 
+==2795== Events    : Ir
+==2795== Collected : 27067359137
+==2795== 
+==2795== I   refs:      27,067,359,137

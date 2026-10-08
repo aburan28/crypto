@@ -1,0 +1,14 @@
+{
+  "schema": "ecc2k130_global_hints_producer_failure.v1",
+  "sourceCommit": "b069cb0325bbc11f926d33334e75f9cabb610c15",
+  "phase": "local Modal entrypoint before function spawn",
+  "command": "modal run --detach modal_job.py --job benchmarks/global-hints/gpujob.sh --out /private/tmp/ecc2k-global-hints-gpu-r1-20261002 --gpu 'RTX PRO 6000'",
+  "app": "ap-GlflA0YT385LwvXF7CClbi",
+  "error": "AttributeError: 'Function' object has no attribute 'with_options'",
+  "cause": "GPU display name differs from launcher's canonical default ID RTX-PRO-6000, selecting obsolete override method",
+  "functionSpawned": false,
+  "gpuKernelRuns": 0,
+  "launchReceiptCreated": false,
+  "decision": "no measurement; retain failure and use canonical default GPU ID on next dispatch",
+  "nextSourceCorrection": "pin GLOBAL_CG=0 before first device experiment"
+}

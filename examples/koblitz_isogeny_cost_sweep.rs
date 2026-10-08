@@ -116,7 +116,10 @@ fn main() {
             println!("\n   n={n}: no sparse irreducible available; skipped.");
             continue;
         };
-        let l = subspace_dimension(n);
+        let l = std::env::var("KOBLITZ_SWEEP_L")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or_else(|| subspace_dimension(n));
         let Some((a2, r, h)) = preferred_family(n) else {
             println!("\n   n={n}: neither family has a usable prime subgroup; skipped.");
             continue;
@@ -129,7 +132,13 @@ fn main() {
             64 - r.leading_zeros()
         );
         let t0 = Instant::now();
-        let census = enumerate_class_exact(n, &irr, a2);
+        let census = match class_from_walk(n, a2) {
+            Some(c) => {
+                println!("   members read from the explicit-isogeny walk (the 4^n scan is past budget here)");
+                c
+            }
+            None => enumerate_class_exact(n, &irr, a2),
+        };
         let scan_s = t0.elapsed().as_secs_f64();
         println!(
             "   scanned {} curves in {scan_s:.1}s: {} in the class, {} on the twist",
@@ -160,26 +169,100 @@ fn main() {
         );
 
         println!("\n── Part 3: index calculus on every member (ℓ = {l}, m = 2, a₂ = {a2}) ──");
+        // Budget overrides for classes past the scan budget, where a full
+        // yield phase on every member is days: `KOBLITZ_SWEEP_YIELD_PROBES`,
+        // `KOBLITZ_SWEEP_MAX_TRIALS`.  Defaults reproduce the committed runs.
+        let env_usize = |k: &str, d: usize| -> usize {
+            std::env::var(k)
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(d)
+        };
+        let defaults = IcCostOptions::default();
         let opts = IcCostOptions {
             l,
             m: 2,
             ffd_targets: 12,
             ffd_d_max: 6,
-            max_trials: 60_000,
-            ..Default::default()
+            max_trials: env_usize("KOBLITZ_SWEEP_MAX_TRIALS", 60_000),
+            yield_probes: env_usize("KOBLITZ_SWEEP_YIELD_PROBES", defaults.yield_probes),
+            // A class named by the walk has `#E` certified on every edge.
+            known_order: (census.scanned == 0).then_some(census.target_order as u64),
+            cofactor_tolerant: std::env::var("KOBLITZ_SWEEP_COFACTOR_TOLERANT")
+                .is_ok_and(|v| v == "1"),
+            ..defaults
         };
         let t1 = Instant::now();
-        let (rows, summary) = sweep_class(n, &irr, a2, &census.members, &opts);
+        // `KOBLITZ_SWEEP_SAMPLE=k` measures a fixed sample of k members —
+        // the Koblitz curve plus k−1 others ranked by a seeded hash of a₆ —
+        // for budgets where every member is out of reach.  The sample is a
+        // function of the seed alone, so it is the same on every rerun.
+        let sample: Option<usize> = std::env::var("KOBLITZ_SWEEP_SAMPLE")
+            .ok()
+            .and_then(|v| v.parse().ok());
+        let measured_members: Vec<u64> = match sample {
+            Some(k) if k < census.members.len() => {
+                let mix = |a: u64| {
+                    let mut h = a ^ DEFAULT_SEED;
+                    h ^= h >> 33;
+                    h = h.wrapping_mul(0xFF51_AFD7_ED55_8CCD);
+                    h ^ (h >> 33)
+                };
+                let mut rest: Vec<u64> =
+                    census.members.iter().copied().filter(|&a| a != 1).collect();
+                rest.sort_by_key(|&a| mix(a));
+                // `KOBLITZ_SWEEP_SAMPLE_OFFSET=o` takes ranks o..o+k of the
+                // same ranking instead, without forcing the Koblitz curve in:
+                // a hold-out sample disjoint from the offset-0 one.
+                let offset: usize = std::env::var("KOBLITZ_SWEEP_SAMPLE_OFFSET")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0);
+                let mut pick: Vec<u64> = if offset == 0 {
+                    std::iter::once(1)
+                        .filter(|_| census.members.contains(&1))
+                        .chain(rest)
+                        .take(k)
+                        .collect()
+                } else {
+                    rest.into_iter().skip(offset).take(k).collect()
+                };
+                pick.sort_unstable();
+                println!(
+                    "   sampled {} of {} members (KOBLITZ_SWEEP_SAMPLE)",
+                    pick.len(),
+                    census.members.len()
+                );
+                pick
+            }
+            _ => census.members.clone(),
+        };
+        let (rows, summary) = match std::env::var_os("KOBLITZ_SWEEP_CHECKPOINT") {
+            Some(dir) => {
+                let off = std::env::var("KOBLITZ_SWEEP_SAMPLE_OFFSET").unwrap_or_default();
+                let ct = if opts.cofactor_tolerant { "_ct" } else { "" };
+                let tag = match sample {
+                    Some(k) => format!(
+                        "sweep_{n}_{a2}_l{l}_s{k}{}{off}{ct}.jsonl",
+                        if off.is_empty() { "" } else { "_o" }
+                    ),
+                    None => format!("sweep_{n}_{a2}{ct}.jsonl"),
+                };
+                let path = std::path::PathBuf::from(dir).join(tag);
+                sweep_with_checkpoint(n, &irr, a2, &measured_members, &opts, &path)
+            }
+            None => sweep_class(n, &irr, a2, &measured_members, &opts),
+        };
         let sweep_s = t1.elapsed().as_secs_f64();
         println!(
             "   measured {} of {} members in {sweep_s:.1}s ({} skipped)",
             summary.measured,
-            census.members.len(),
+            measured_members.len(),
             summary.skipped
         );
         if summary.skipped > 0 {
             let mut why: BTreeMap<String, usize> = BTreeMap::new();
-            for a6 in &census.members {
+            for a6 in &measured_members {
                 if let Err(reason) = diagnose_member(n, &irr, a2, *a6, opts.seed) {
                     *why.entry(format!("{reason:?}")).or_insert(0) += 1;
                 }
@@ -314,6 +397,104 @@ fn main() {
     }
 
     write_json(&reach_rows, &sweeps);
+}
+
+/// `sweep_class` in batches, appending every measured row (and every
+/// member attempted) to a JSON-lines file, so a restarted sweep measures
+/// only what is left.  Each member's measurement is deterministic in its
+/// seed, so a resumed sweep is the sweep it would have been.
+fn sweep_with_checkpoint(
+    n: u32,
+    irr: &crypto_lib::binary_ecc::IrreduciblePoly,
+    a2: u8,
+    members: &[u64],
+    opts: &IcCostOptions,
+    path: &std::path::Path,
+) -> (Vec<IcCostRow>, ClassCostSummary) {
+    use std::io::Write;
+    let mut rows: BTreeMap<u64, IcCostRow> = BTreeMap::new();
+    let mut attempted: std::collections::BTreeSet<u64> = Default::default();
+    if let Ok(text) = std::fs::read_to_string(path) {
+        for line in text.lines() {
+            let Ok(v) = serde_json::from_str::<serde_json::Value>(line) else {
+                continue;
+            };
+            if let Some(a6) = v["attempted"].as_u64() {
+                attempted.insert(a6);
+            } else if let Ok(r) = serde_json::from_value::<IcCostRow>(v) {
+                rows.insert(r.a6, r);
+            }
+        }
+    }
+    let mut file = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .expect("checkpoint file");
+    let todo: Vec<u64> = members
+        .iter()
+        .copied()
+        .filter(|a| !attempted.contains(a))
+        .collect();
+    let t0 = Instant::now();
+    for (i, chunk) in todo.chunks(64).enumerate() {
+        let (got, _) = sweep_class(n, irr, a2, chunk, opts);
+        for r in got {
+            let _ = writeln!(file, "{}", serde_json::to_string(&r).unwrap());
+            rows.insert(r.a6, r);
+        }
+        for a in chunk {
+            let _ = writeln!(file, "{{\"attempted\": {a}}}");
+        }
+        eprintln!(
+            "     … sweep n={n}: {} of {} members attempted, {:.0}s",
+            members.len() - todo.len() + (i * 64 + chunk.len()),
+            members.len(),
+            t0.elapsed().as_secs_f64()
+        );
+    }
+    let rows: Vec<IcCostRow> = members.iter().filter_map(|a| rows.remove(a)).collect();
+    let summary = summarise(n, members.len(), &rows, opts);
+    (rows, summary)
+}
+
+/// Past the scan budget the class is named by the explicit-isogeny walk
+/// (`koblitz_isogeny_class_walk`), whose snapshot lists every edge it
+/// computed.  Its vertex set is used only when the walk reached exactly the
+/// CM class size; `scanned = 0` records that no scan was run.
+fn class_from_walk(n: u32, a2: u8) -> Option<ClassCensus> {
+    if 2 * n <= 40 {
+        return None;
+    }
+    let text = std::fs::read_to_string("experiments/koblitz_isogeny_class_walk.json").ok()?;
+    let v: serde_json::Value = serde_json::from_str(&text).ok()?;
+    let case = v["cases"]
+        .as_array()?
+        .iter()
+        .find(|c| c["n"].as_u64() == Some(n as u64) && c["a2"].as_u64() == Some(a2 as u64))?;
+    if case["reached_equals_census"].as_bool() != Some(true) {
+        return None;
+    }
+    let mut members: Vec<u64> = vec![1];
+    for e in case["edge_list"].as_array()? {
+        members.push(e["from"].as_u64()?);
+        members.push(e["to"].as_u64()?);
+    }
+    members.sort_unstable();
+    members.dedup();
+    let target_order = koblitz_family_order(n, a2);
+    let predicted: num_bigint::BigInt = case["class_size_cm"].as_str()?.parse().ok()?;
+    Some(ClassCensus {
+        n,
+        a2,
+        target_order,
+        twist_order: (1i128 << (n + 1)) + 2 - target_order,
+        agrees_with_cm: predicted == num_bigint::BigInt::from(members.len()),
+        members,
+        twist_members: 0,
+        scanned: 0,
+        predicted_class_size: predicted,
+    })
 }
 
 fn print_row(r: &IcCostRow) {

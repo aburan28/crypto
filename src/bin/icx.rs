@@ -22,6 +22,9 @@ use std::process::ExitCode;
 use clap::{Args, Parser, Subcommand};
 use serde_json::{json, Value};
 
+#[path = "icx/parameters.rs"]
+mod parameters;
+
 use crypto_lib::cryptanalysis::curve_catalog::{self, CatalogCurve, Family};
 use crypto_lib::cryptanalysis::ic_engine;
 
@@ -53,6 +56,8 @@ enum Action {
     List(ListArgs),
     /// Verify a curve's parameters (generator on curve, [n]G = O, Hasse).
     Inspect(CurveArg),
+    /// Check public point sums and S3 on the named curve's exact parameters.
+    Validate(CurveArg),
     /// Report the generic-attack cost and the IC picture for this curve.
     Estimate(EstimateArgs),
     /// Run the index-calculus pipeline on the curve (or a same-family analogue).
@@ -85,6 +90,9 @@ struct FesArgs {
 struct RunArgs {
     /// Curve name or alias.
     curve: String,
+    /// Require the actual named curve; fail if only an analogue is available.
+    #[arg(long)]
+    require_named_curve: bool,
     /// Factor base plugin: `name` or `name:k=v,...` (default per family).
     #[arg(long)]
     factor_base: Option<String>,
@@ -206,6 +214,7 @@ fn list(args: &ListArgs) -> Result<Value, String> {
             "field_bits": field.bits,
             "order_bits": c.order_bits(),
             "rho_security_bits": round1(c.rho_security_bits()),
+            "exact_parameters": parameters::exact_parameters(&c),
             "ic_relevant": est.ic_relevant,
             "regime": est.regime.tag(),
         }));
@@ -244,6 +253,7 @@ fn inspect(name: &str) -> Result<Value, String> {
             "cofactor": c.cofactor().to_string(),
             "group_order": c.group_order().to_string(),
             "rho_security_bits": round1(c.rho_security_bits()),
+            "exact_parameters": parameters::exact_parameters(&c),
         },
         "checks": checks_json,
         "verified": all_passed,
@@ -272,8 +282,44 @@ fn estimate(args: &EstimateArgs) -> Result<Value, String> {
             "relevant": est.ic_relevant,
             "regime": est.regime.tag(),
         },
+        "heuristic_index_calculus": est.heuristic.as_ref().map(|h| heuristic_json(h, est.rho_log2_ops)),
         "notes": est.notes,
     }))
+}
+
+/// The per-`ω` heuristic table: a model on the first-fall-degree
+/// assumption, never a measurement.
+fn heuristic_json(h: &ic_engine::HeuristicIc, rho_log2_ops: f64) -> Value {
+    let n = h.field_degree as f64;
+    let rows: Vec<Value> = h
+        .rows
+        .iter()
+        .map(|r| {
+            json!({
+                "omega_bound": r.bound.id,
+                "omega": r.bound.value,
+                "relation": r.bound.relation(),
+                "construction": r.bound.construction.tag(),
+                "proof": r.bound.proof.tag(),
+                "characteristic_2": r.applicability.tag(),
+                "log2_cost": round2(r.log2_cost),
+                "below_generic": r.log2_cost < n / 2.0,
+                "log2_cost_minus_rho": round2(r.log2_cost - rho_log2_ops),
+                "turning_point_n": r.turning_point,
+                "exponent_ratio_to_best_established": (r.exponent_ratio_to_best_established * 1e4).round() / 1e4,
+                "source": r.bound.source,
+            })
+        })
+        .collect();
+    json!({
+        "kind": "model",
+        "heuristic": h.heuristic.id(),
+        "formula": h.heuristic.formula(),
+        "assumption": "first-fall-degree assumption (D_reg ~ D_ff), contested by Kosters-Yeo 2015 and Huang-Kosters-Yeo 2015",
+        "field_degree": h.field_degree,
+        "generic_log2": n / 2.0,
+        "rows": rows,
+    })
 }
 
 fn round1(x: f64) -> f64 {
@@ -360,6 +406,31 @@ fn display(report: &Value) {
                 report["index_calculus"]["relevant"],
                 report["index_calculus"]["regime"].as_str().unwrap_or("?"),
             );
+            let h = &report["heuristic_index_calculus"];
+            if !h.is_null() {
+                println!(
+                    "Heuristic IC ({}, a model, not a measurement): {}",
+                    h["heuristic"].as_str().unwrap_or("?"),
+                    h["formula"].as_str().unwrap_or("?"),
+                );
+                println!(
+                    "  {:<24} {:>10} {:>15} {:>13} {:>9} {:>8}",
+                    "omega bound", "omega", "construction", "char 2", "log2 T", "turn n"
+                );
+                for r in h["rows"].as_array().into_iter().flatten() {
+                    println!(
+                        "  {:<24} {:>2}{:>8.4} {:>15} {:>13} {:>9.2} {:>8}",
+                        r["omega_bound"].as_str().unwrap_or("?"),
+                        r["relation"].as_str().unwrap_or("?"),
+                        r["omega"].as_f64().unwrap_or(f64::NAN),
+                        r["construction"].as_str().unwrap_or("?"),
+                        r["characteristic_2"].as_str().unwrap_or("?"),
+                        r["log2_cost"].as_f64().unwrap_or(f64::NAN),
+                        r["turning_point_n"].as_u64().unwrap_or(0),
+                    );
+                }
+                println!("  generic 2^(n/2) = 2^{}", h["generic_log2"]);
+            }
             for n in report["notes"].as_array().into_iter().flatten() {
                 println!("  - {}", n.as_str().unwrap_or(""));
             }
@@ -444,6 +515,13 @@ fn run_cmd(args: &RunArgs, json: bool) -> Result<Value, String> {
 
     let curve = curve_catalog::by_name(&args.curve)
         .ok_or_else(|| format!("unknown curve '{}'; try `icx list`", args.curve))?;
+    if args.require_named_curve {
+        return Err(format!(
+            "full-parameter IC solving is unavailable for {}; the current run path uses \
+             an analogue. Use `icx validate {}` for bounded checks on the actual parameters",
+            curve.name, curve.name
+        ));
+    }
     let cfg = RunConfig {
         factor_base: args.factor_base.clone(),
         oracle: args.oracle.clone(),
@@ -520,6 +598,11 @@ fn execute(cli: &Cli) -> Result<Value, String> {
     match &cli.command {
         Some(Action::List(a)) => list(a),
         Some(Action::Inspect(a)) => inspect(&a.curve),
+        Some(Action::Validate(a)) => {
+            let curve = curve_catalog::by_name(&a.curve)
+                .ok_or_else(|| format!("unknown curve '{}'; try `icx list`", a.curve))?;
+            parameters::validate(&curve)
+        }
         Some(Action::Estimate(a)) => estimate(a),
         Some(Action::Run(a)) => run_cmd(a, cli.json),
         Some(Action::Fes(a)) => fes_cmd(a),

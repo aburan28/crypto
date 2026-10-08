@@ -27,8 +27,8 @@ use crypto_lib::cryptanalysis::ic_boundary::{
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, GlvOrbitBase,
-    KoblitzOrbitBase, KoblitzSymmetrisedBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
-    SymmetrisedOracle,
+    KoblitzOrbitBase, KoblitzSymmetrisedBase, KoblitzTraceZeroBase, MitmOracle, PrimeAbscissaBase,
+    SubtractOracle, SymmetrisedOracle,
 };
 use crypto_lib::cryptanalysis::ic_framework::solvers::{
     solver_by_name, solver_registry, validate_solver_params,
@@ -179,20 +179,9 @@ fn frozen_factor_base<'c>(
     }))
 }
 
-/// `name:k=v,k=v` → `(name, params)`.
+/// `name:k=v,k=v` → `(name, params)`; list values use `;`.
 fn parse_plugin(spec: &str) -> Result<(String, Params), String> {
-    let (name, rest) = match spec.split_once(':') {
-        None => (spec, ""),
-        Some((n, r)) => (n, r),
-    };
-    let mut params = Params::default();
-    for kv in rest.split(',').filter(|s| !s.is_empty()) {
-        let (k, v) = kv
-            .split_once('=')
-            .ok_or_else(|| format!("parameter `{kv}` is not key=value"))?;
-        params.set(k.trim(), v.trim());
-    }
-    Ok((name.to_string(), params))
+    Params::parse_spec(spec)
 }
 
 fn listing() -> Value {
@@ -229,11 +218,14 @@ fn listing() -> Value {
                      "parameters": [{"name": "dimension", "means": "F_2-dimension of the abscissa subspace"}]},
                     {"name": "koblitz-orbit", "regimes": ["koblitz"],
                      "parameters": [
-                        {"name": "divisor", "means": "comma-separated factor indices selecting the Frobenius-invariant subspace"},
+                        {"name": "divisor", "means": "`;`-separated factor indices selecting the Frobenius-invariant subspace, e.g. divisor=1;2 (a `,` would end the parameter)"},
                         {"name": "no_fold", "means": "1 for one column per abscissa: the control that shows what the fold buys"}]},
+                    {"name": "koblitz-trace-zero", "regimes": ["koblitz"],
+                     "parameters": [
+                        {"name": "divisor", "means": "`;`-separated factor indices; the selected invariant abscissa subspace must lie entirely in the absolute-trace kernel"}]},
                     {"name": "koblitz-symmetrised", "regimes": ["koblitz"],
                      "parameters": [
-                        {"name": "divisor", "means": "`;`-separated factor indices; must include 0 (x + 1) so that 1 ∈ V; the base is F_u = {P : 1/(x+1) ∈ V}, T = (0,1) included"},
+                        {"name": "divisor", "means": "`;`-separated factor indices, e.g. divisor=0;1; must include 0 (x + 1) so that 1 ∈ V; the base is F_u = {P : 1/(x+1) ∈ V}, T = (0,1) included"},
                         {"name": "no_fold", "means": "1 for one column per abscissa"}]},
                 ],
             },
@@ -569,14 +561,16 @@ fn run_binary(
     let g = BinaryGroup(&inst.fast);
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
+    let trace_zero = KoblitzTraceZeroBase { instance: inst };
     let symmetrised_base = KoblitzSymmetrisedBase { instance: inst };
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
+        "koblitz-trace-zero" => &trace_zero,
         "koblitz-symmetrised" => &symmetrised_base,
         other => {
             return Err(format!(
-                "factor base `{other}` is not available on a binary curve; try binary-subspace, koblitz-orbit or koblitz-symmetrised"
+                "factor base `{other}` is not available on a binary curve; try binary-subspace, koblitz-orbit, koblitz-trace-zero or koblitz-symmetrised"
             ))
         }
     };

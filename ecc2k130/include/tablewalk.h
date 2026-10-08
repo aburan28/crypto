@@ -38,6 +38,18 @@
 #if ECC_TABLE_BRANCHES != 8 && ECC_TABLE_BRANCHES != 16
 #error "ECC_TABLE_BRANCHES must be 8 or 16"
 #endif
+#ifndef ECC_CYCLE_FAST2
+#define ECC_CYCLE_FAST2 0
+#endif
+#if ECC_CYCLE_FAST2 != 0 && ECC_CYCLE_FAST2 != 1
+#error "ECC_CYCLE_FAST2 must be 0 or 1"
+#endif
+#ifndef ECC_CYCLE_PROFILE
+#define ECC_CYCLE_PROFILE 0
+#endif
+#if ECC_CYCLE_PROFILE != 0 && ECC_CYCLE_PROFILE != 1
+#error "ECC_CYCLE_PROFILE must be 0 or 1"
+#endif
 #include "bitslice.h"
 
 // Step tag: h in bits 0-3, k in bits 4-11, eps in bit 12.  A lane that has not
@@ -104,10 +116,80 @@ ECC_HD unsigned long long eccHistPush(unsigned long long hist, unsigned t) {
     return (hist << 16) | (unsigned long long)(t & 0xFFFFu);
 }
 
+// Diagnostic-only accounting for the exact v3 cold probe.  Every probe has
+// one terminal outcome.  Anchor exits are a subset of the two exact-cycle
+// outcomes, and nextCalls counts only Ops::next invocations (the fast2
+// denominator check is deliberately not an affine next call).
+enum EccCycleProbeOutcome {
+    ECC_CYCLE_OUTCOME_NONE = 0,
+    ECC_CYCLE_OUTCOME_FAST2,
+    ECC_CYCLE_OUTCOME_GENERAL_1,
+    ECC_CYCLE_OUTCOME_GENERAL_2,
+    ECC_CYCLE_OUTCOME_GENERAL_3,
+    ECC_CYCLE_OUTCOME_GENERAL_4,
+    ECC_CYCLE_OUTCOME_GENERAL_5,
+    ECC_CYCLE_OUTCOME_GENERAL_6,
+    ECC_CYCLE_OUTCOME_GENERAL_7,
+    ECC_CYCLE_OUTCOME_GENERAL_8,
+    ECC_CYCLE_OUTCOME_OPEN_8,
+    ECC_CYCLE_OUTCOME_DP_ABORT,
+    ECC_CYCLE_OUTCOME_EXCEPTIONAL_ABORT,
+};
+
+struct EccCycleProbeProfile {
+    unsigned nextCalls;
+    unsigned outcome;
+    unsigned anchorExit;
+};
+
+struct EccCycleProfile {
+    unsigned long long hints;
+    unsigned long long fast2Hits;
+    unsigned long long generalCycles[8];
+    unsigned long long openEightStepProbes;
+    unsigned long long dpAborts;
+    unsigned long long exceptionalDenominatorAborts;
+    unsigned long long affineNextCalls;
+    unsigned long long anchorExits;
+};
+
+ECC_HD unsigned long long *eccCycleOutcomeCounter(EccCycleProfile *totals,
+                                                   unsigned outcome) {
+    if (outcome == ECC_CYCLE_OUTCOME_FAST2) return &totals->fast2Hits;
+    if (outcome >= ECC_CYCLE_OUTCOME_GENERAL_1 &&
+        outcome <= ECC_CYCLE_OUTCOME_GENERAL_8)
+        return &totals->generalCycles[outcome - ECC_CYCLE_OUTCOME_GENERAL_1];
+    if (outcome == ECC_CYCLE_OUTCOME_OPEN_8) return &totals->openEightStepProbes;
+    if (outcome == ECC_CYCLE_OUTCOME_DP_ABORT) return &totals->dpAborts;
+    if (outcome == ECC_CYCLE_OUTCOME_EXCEPTIONAL_ABORT)
+        return &totals->exceptionalDenominatorAborts;
+    return nullptr;
+}
+
+ECC_HD void eccCycleProfileAccumulate(EccCycleProfile *totals,
+                                       const EccCycleProbeProfile &probe) {
+    ++totals->hints;
+    unsigned long long *outcome = eccCycleOutcomeCounter(totals, probe.outcome);
+    if (outcome) ++*outcome;
+    totals->affineNextCalls += probe.nextCalls;
+    totals->anchorExits += probe.anchorExit;
+}
+
+ECC_HD unsigned long long eccCycleProfileTerminalTotal(const EccCycleProfile &totals) {
+    unsigned long long result = totals.fast2Hits + totals.openEightStepProbes +
+                                totals.dpAborts + totals.exceptionalDenominatorAborts;
+    for (int i = 0; i < 8; ++i) result += totals.generalCycles[i];
+    return result;
+}
+
 // Shared host/device cold-path control flow. Ops supplies a complete raw
 // addition, exact point equality, and an orbit-invariant strict ordering.
 // A table may contain exceptional points; next() then returns false and this
 // bounded probe declines to infer a cycle. It does not invent a point.
+#define ECC_CYCLE_PROFILE_BEGIN() ((void)0)
+#define ECC_CYCLE_PROFILE_NEXT() ((void)0)
+#define ECC_CYCLE_PROFILE_OUTCOME(value) ((void)0)
+#define ECC_CYCLE_PROFILE_EXIT() ((void)0)
 template <class Point, class Ops>
 inline unsigned eccCycleAnchorTag(const Point &start, unsigned raw, const Ops &ops,
                                   int m, int branches) {
@@ -119,6 +201,37 @@ __device__ __forceinline__ unsigned eccCycleAnchorTagDevice(const Point &start, 
                                   int m, int branches) {
 #include "cycleanchor_body.h"
 }
+#endif
+#undef ECC_CYCLE_PROFILE_BEGIN
+#undef ECC_CYCLE_PROFILE_NEXT
+#undef ECC_CYCLE_PROFILE_OUTCOME
+#undef ECC_CYCLE_PROFILE_EXIT
+
+#if ECC_CYCLE_PROFILE
+#define ECC_CYCLE_PROFILE_BEGIN() do { profile->nextCalls = 0; \
+                                       profile->outcome = ECC_CYCLE_OUTCOME_NONE; \
+                                       profile->anchorExit = 0; } while (0)
+#define ECC_CYCLE_PROFILE_NEXT() (++profile->nextCalls)
+#define ECC_CYCLE_PROFILE_OUTCOME(value) (profile->outcome = (value))
+#define ECC_CYCLE_PROFILE_EXIT() (profile->anchorExit = 1)
+template <class Point, class Ops>
+inline unsigned eccCycleAnchorTagProfile(const Point &start, unsigned raw,
+                                         const Ops &ops, int m, int branches,
+                                         EccCycleProbeProfile *profile) {
+#include "cycleanchor_body.h"
+}
+#ifdef __CUDACC__
+template <class Point, class Ops>
+__device__ __forceinline__ unsigned eccCycleAnchorTagDeviceProfile(
+        const Point &start, unsigned raw, const Ops &ops, int m, int branches,
+        EccCycleProbeProfile *profile) {
+#include "cycleanchor_body.h"
+}
+#endif
+#undef ECC_CYCLE_PROFILE_BEGIN
+#undef ECC_CYCLE_PROFILE_NEXT
+#undef ECC_CYCLE_PROFILE_OUTCOME
+#undef ECC_CYCLE_PROFILE_EXIT
 #endif
 
 // Coordinate tables for GF(2^M) in the permuted type-II ONB, coordinate i in

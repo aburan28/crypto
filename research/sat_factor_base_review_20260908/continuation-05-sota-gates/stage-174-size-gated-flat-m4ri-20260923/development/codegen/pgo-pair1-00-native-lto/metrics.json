@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "RAYON_NUM_THREADS=12",
+    "PQ_F4_X1_BATCH=512",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "/Volumes/SSD990/kic-stage174-f4-native-target/release/examples/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/crypto-kic-stage174-native-f4/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-20260923/selected-run/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance/manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 18.1075067089987,
+    "user_seconds": 149.051462,
+    "system_seconds": 1.991002,
+    "total_core_seconds": 151.042464,
+    "single_core_seconds": 151.042464,
+    "peak_rss_bytes": 2918498304,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

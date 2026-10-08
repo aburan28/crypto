@@ -53,6 +53,13 @@ ic descent --cells 17:9:2 --targets 8 --repeats 3 \
     --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
     --solver crossbred-f2 --solver fes-f2
 
+# A Koblitz factor base chosen by divisor: the indices are separated by
+# `;` (quoted, for the shell), because `,` separates the plug-in's
+# parameters (`divisor=1,2` is refused, not read as `divisor=1`).
+ic bench --koblitz-degree 17 \
+    --factor-base 'koblitz-orbit:divisor=0;1' \
+    --oracle mitm-frobenius:m=2
+
 # The relation matrix is a stage too.
 ic bench --bits 20 \
     --factor-base prime-abscissa:size=256 \
@@ -618,7 +625,11 @@ configurations or a **matrix** whose product is taken.
   curve whose cofactor is allowed to be large can hand back a tiny
   subgroup, and `S = ops / √r` over a tiny `r` means nothing against
   rho.
-- A plug-in is `name` or `name:key=value,key=value`.
+- A plug-in is `name` or `name:key=value,key=value`. A `,` ends a
+  parameter, so a value that is a list takes `;` between its items:
+  `koblitz-orbit:divisor=1;2`, never `divisor=1,2` (quote the argument
+  in a shell, where a bare `;` ends the command). The comma form is
+  refused with an error that names the `;`, not read as `divisor=1`.
 - The keys are the stages: `factor_base`, `oracle`, `targets`,
   `solver` (for `descent-algebraic`) and `linalg`. A key left out takes
   the command line's value.
@@ -737,6 +748,14 @@ worse than none:
   step's elimination once the residue echelon is full, is round 6 (§15):
   every output unchanged, 39% fewer multiply-adds at `m = 4`, `N = 12` and
   25% at `N = 16`, all in the refutation step.
+
+  Round 7 (§16) finishes `m = 3` at `N = 18`, where round 2 had only
+  `D ≥ 7`: `D = 7` on both targets. The `m = 3` line reads 6, 6, 7, 7
+  over `N = 9`–18, which A1 calls inconclusive, like `m = 4`'s 7, 7. Its
+  address space peaked at 96% of the 14 GB that machine allows, so
+  `m = 3` at `N = 21` is beyond it too. The round's checks run on a native
+  checker (`examples/pkm_tower_check.rs`) that reproduces the retired
+  Python scripts line for line.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
@@ -750,13 +769,16 @@ worse than none:
 
 | stage | trait | plug-ins |
 |:--|:--|:--|
-| factor base | `FactorBaseBuilder` | `prime-abscissa`, `glv-orbit`, `binary-subspace`, `koblitz-orbit`, `koblitz-symmetrised`, `gls-line` |
+| factor base | `FactorBaseBuilder` | `prime-abscissa`, `glv-orbit`, `binary-subspace`, `koblitz-orbit`, `koblitz-trace-zero`, `koblitz-symmetrised`, `gls-line` |
 | targets | `Targets` | `random`, `walk` |
 | point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic`, `symmetrised`; `line-resultant` (library and `examples/glv_invariant_experiments.rs`: the `O(log p)` Weil-descent oracle for a line base over `F_{p^k}`, `line_oracle.rs`) |
 | polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `fes-f2-wide`, `exhaustive` |
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
+A parameter that takes several values (`divisor` on `koblitz-orbit`,
+`koblitz-trace-zero`, and `koblitz-symmetrised`) takes them separated by `;`,
+quoted in a shell.
 
 ### Source map
 

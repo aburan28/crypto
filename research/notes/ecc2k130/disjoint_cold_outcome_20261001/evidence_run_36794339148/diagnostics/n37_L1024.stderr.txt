@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/llm/tmp/ecc2k130-leaf-m10-column-bound-20260930/research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py", line 277, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/SSD990/llm/tmp/ecc2k130-leaf-m10-column-bound-20260930/research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py", line 265, in main
+    receipt = verify(args.cell, args.run_dir.resolve(), args.relocated)
+  File "/Volumes/SSD990/llm/tmp/ecc2k130-leaf-m10-column-bound-20260930/research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py", line 188, in verify
+    check_target(record, label, base, logs, curve, generator, checked_labels)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/llm/tmp/ecc2k130-leaf-m10-column-bound-20260930/research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py", line 100, in check_target
+    assert set(record["pinned_intermediates"]) == {left[0], right[0]}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -1,0 +1,22 @@
+{
+  "schema": "koblitz_stage179_pair_provenance.v1",
+  "source_commit": "12da6fe144788ecf8e9f2bf72a7a3274ed3582b9",
+  "runner_commit": "87c2b4170c95daa0a5c8e9b778c75fb2108a0297",
+  "binaries": {
+    "five": "/Volumes/SSD990/kic-stage179-five-target-12da6fe14/release/examples/koblitz_pdp_backend",
+    "six": "/Volumes/SSD990/kic-stage179-six-target-12da6fe14/release/examples/koblitz_pdp_backend"
+  },
+  "binary_sha256": {
+    "five": "b156f3320564c1e9fed2b168aba7a0b4f3c875d677c1a9354751bba527ee5bd6",
+    "six": "6e634aeff568c824c1f58c27c9deeb1b677a716990a4a0ed7d858182fec2bc5a"
+  },
+  "sequence": [
+    "five",
+    "six",
+    "six",
+    "five",
+    "five",
+    "six"
+  ],
+  "manifest": "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json"
+}

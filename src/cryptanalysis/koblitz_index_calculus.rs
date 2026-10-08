@@ -142,6 +142,7 @@ use crate::cryptanalysis::crossbred::{
     extract_crossbred, solve_crossbred, CrossbredParams, SearchOptions as CrossbredSearchOptions,
     SearchStats as CrossbredSearchStats,
 };
+use crate::cryptanalysis::curve_id;
 use crate::cryptanalysis::ec_index_calculus::{
     gaussian_eliminate_mod_n, gaussian_eliminate_mod_n_particular, sqrt_mod_p,
 };
@@ -150,12 +151,12 @@ use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
-    solve_boolean_system_filtered, split_rule_default, FieldStructure, SolveOptions, SolveStats,
-    SolverEngine,
+    solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
+    FieldStructure, NodeOracleDecision, SolveOptions, SolveStats, SolverEngine,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
-    self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    self, SparseCoreSolver, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use crate::cryptanalysis::sat::SolveResult;
@@ -539,8 +540,14 @@ fn factorise(v: BigUint) -> Vec<(BigUint, u32)> {
 
 fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut out = Vec::new();
+    // Whether what is left is prime changes only when a division changes
+    // it, so the test runs then and not at every trial divisor: a
+    // Miller–Rabin test per divisor was most of building a curve whose
+    // order has a composite cofactor (`n = 57`).  Even divisors past 2
+    // are skipped, since the 2s are gone by then.
+    let mut prime = is_prime_u64(v);
     let mut d = 2u64;
-    while v > 1 && !is_prime_u64(v) && d.saturating_mul(d) <= v {
+    while v > 1 && !prime && d.saturating_mul(d) <= v {
         let mut e = 0;
         while v.is_multiple_of(d) {
             v /= d;
@@ -548,8 +555,9 @@ fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
         }
         if e > 0 {
             out.push((d, e));
+            prime = is_prime_u64(v);
         }
-        d += 1;
+        d += if d == 2 { 1 } else { 2 };
     }
     if v > 1 {
         out.push((v, 1));
@@ -633,6 +641,95 @@ impl KoblitzCurve {
             return None;
         }
         Self::subfield(1, n, u64::from(a), 1)
+    }
+
+    /// The pinned K_1 model over GF(2^83) used by the two-word IC stage
+    /// gate. Its parameters are the C082 public fixture.
+    pub fn known_n83_k1() -> Option<Self> {
+        Self::known_n83_from_fixture(
+            1,
+            "8569786107849059",
+            "1128547018",
+            "68a212cfe19a809fe0598",
+            "244a245ea0b17d8cc8297",
+        )
+    }
+
+    /// The pinned K_0 n=83 confidence-gate model and public subgroup
+    /// generator from `gate-m83-T001.json`. Its 81-bit subgroup order was
+    /// independently proved prime with the checked Sage launcher; the
+    /// certificate is in `research/f6_wide_n83_20261004/prime-check.txt`.
+    /// The generic constructor remains capped at [`MAX_N`] because its
+    /// factorisation and normal-basis helpers use single-word polynomials.
+    pub fn known_n83_k0() -> Option<Self> {
+        Self::known_n83_from_fixture(
+            0,
+            "2417851639230796216685689",
+            "4",
+            "477f77103dfad59850800",
+            "2fa5e737d542c4e4fd5c3",
+        )
+    }
+
+    fn known_n83_from_fixture(
+        a: u8,
+        order: &str,
+        cofactor: &str,
+        gx: &str,
+        gy: &str,
+    ) -> Option<Self> {
+        let n = 83;
+        let r = BigUint::parse_bytes(order.as_bytes(), 10)?;
+        let cofactor = BigUint::parse_bytes(cofactor.as_bytes(), 10)?;
+        let group_order = koblitz_point_count(a, n);
+        if group_order != &r * &cofactor
+            || r <= cofactor
+            || r.to_u64().is_some_and(|small| !is_prime_u64(small))
+        {
+            return None;
+        }
+        let generator = BinaryPoint::Affine {
+            x: F2mElement::from_hex(gx, n),
+            y: F2mElement::from_hex(gy, n),
+        };
+        let curve = BinaryCurve {
+            m: n,
+            irreducible: IrreduciblePoly {
+                degree: n,
+                low_terms: vec![0, 1, 2, 45],
+            },
+            a: if a == 0 {
+                F2mElement::zero(n)
+            } else {
+                F2mElement::one(n)
+            },
+            b: F2mElement::one(n),
+            generator: generator.clone(),
+            order: r.clone(),
+            cofactor: cofactor.clone(),
+        };
+        if !curve.is_on_curve(&generator)
+            || scalar_mul(&curve, &generator, &r) != BinaryPoint::Infinity
+        {
+            return None;
+        }
+        let trace = if a == 0 { -1 } else { 1 };
+        let lambda = frobenius_eigenvalue(&curve, trace, &r)?;
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda,
+            k: 1,
+            q: 2,
+            a_index: u64::from(a),
+            b_index: 1,
+            subfield_basis: vec![F2mElement::one(n)],
+        })
     }
 
     /// **A curve defined over `F_q`, `q = 2^k`, taken over `F_{2^n}`**
@@ -811,17 +908,23 @@ impl KoblitzCurve {
         acc
     }
 
-    /// Short label: `K_a / GF(2^n)`, or the subfield form
-    /// `E_{a,b}/GF(2^k) over GF(2^n)`.
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`), in the
+    /// polynomial basis this curve's field is built on.  A Koblitz curve
+    /// (`k = 1`) certifies `End(E) = Z[τ]`, discriminant `−7`; a subfield
+    /// curve leaves the endomorphism ring unknown.
+    pub fn curve_id(&self) -> curve_id::CurveId {
+        let modulus = curve_id::modulus_integer(&self.curve.irreducible);
+        let (a, b) = (self.curve.a.to_biguint(), self.curve.b.to_biguint());
+        let end = (self.k == 1).then_some(-7);
+        curve_id::binary(self.n, &modulus, &a, &b, &self.group_order, end)
+            .expect("a constructed curve is non-singular and inside the Hasse interval")
+    }
+
+    /// The curve's name: its ICV1 slug.  Reports written before ICV1
+    /// named it `K_a / GF(2^n)` or `E_{a,b}/GF(2^k) over GF(2^n)`; the
+    /// registry resolves those to this slug ([`curve_id::same_curve`]).
     pub fn label(&self) -> String {
-        if self.k == 1 {
-            format!("K_{} / GF(2^{})", self.a, self.n)
-        } else {
-            format!(
-                "E_{{{},{}}}/GF(2^{}) over GF(2^{})",
-                self.a_index, self.b_index, self.k, self.n
-            )
-        }
+        self.curve_id().slug
     }
 
     /// `[k]·P` on this curve.
@@ -2937,6 +3040,52 @@ fn pair_filter_hash(key: u64) -> u64 {
     h.wrapping_mul(0xc4ce_b9fe_1a85_ec53)
 }
 
+/// Bits a key sets in its presence-filter word, in this module's builds
+/// and `gpu/ecc2k/pairtable.cuh`'s: three, all in the one word its hash
+/// names, so a probe still reads one word.  A table built elsewhere says
+/// how many its builder set ([`FoldedParts::filter_probes`]).
+pub const FILTER_PROBES: u8 = 3;
+
+/// Filter bits per stored key, before the filter is rounded up to a power
+/// of two.
+const FILTER_BITS_PER_KEY: usize = 8;
+
+/// The filter's width in bits, as a power of two: `FILTER_BITS_PER_KEY` a
+/// stored key, rounded up, within `2^6..=2^32`.
+pub(crate) fn filter_bits_for(keys: usize) -> u32 {
+    (usize::BITS
+        - keys
+            .max(1)
+            .saturating_mul(FILTER_BITS_PER_KEY)
+            .leading_zeros())
+    .clamp(6, 32)
+}
+
+/// `extra` for [`filter_slot`]: every bit for three probes, none for one.
+pub(crate) const fn filter_extra(probes: u8) -> u64 {
+    if probes >= 3 {
+        u64::MAX
+    } else {
+        0
+    }
+}
+
+/// A key's filter word and the bits it sets there, from its hash `h`.  The
+/// word is `(h & mask) / 64` and the first bit `h`'s low six bits, as with
+/// one probe; with three (`extra` all ones) the other two come from `h`'s
+/// top twelve bits, which the word index (at most 32 bits) never reaches.
+#[inline(always)]
+pub(crate) fn filter_slot(h: u64, mask: u64, extra: u64) -> (usize, u64) {
+    let more = (1u64 << ((h >> 52) & 63)) | (1u64 << (h >> 58));
+    (
+        ((h & mask) >> 6) as usize,
+        (1u64 << (h & 63)) | (more & extra),
+    )
+}
+
+/// [`filter_extra`] for this module's own builds.
+const FILTER_EXTRA: u64 = filter_extra(FILTER_PROBES);
+
 /// **Every pair sum of a factor base**, `P_i + P_j` for `i ≤ j`, sorted
 /// by packed point identity so a sum can be looked up by binary search.
 ///
@@ -3035,6 +3184,8 @@ pub struct FoldedStorage<'a> {
     pub words: &'a [u32],
     pub present: &'a [u64],
     pub present_mask: u64,
+    /// Bits each key set in its filter word: 1 or [`FILTER_PROBES`].
+    pub filter_probes: u8,
     pub tagged: bool,
     /// The normal basis the keys were named in; empty if the build fell
     /// back to the squaring chain.
@@ -3051,6 +3202,7 @@ impl FoldedStorage<'_> {
             words: self.words.to_vec(),
             present: self.present.to_vec(),
             present_mask: self.present_mask,
+            filter_probes: self.filter_probes,
             canon_tables: self.canon_tables.to_vec(),
         }
     }
@@ -3069,9 +3221,15 @@ pub struct FoldedParts {
     /// `(orbit << 16) | hash16` on a tagged table, the hash's low word
     /// otherwise.
     pub words: Vec<u32>,
-    /// One bit per `pair_filter_hash(key) & present_mask`.
+    /// The presence filter: each key sets `filter_probes` bits of word
+    /// `(pair_filter_hash(key) & present_mask) / 64` ([`filter_slot`]).
     pub present: Vec<u64>,
     pub present_mask: u64,
+    /// Bits each key set in its filter word: [`FILTER_PROBES`] for this
+    /// module's builds and `gpu/ecc2k/pairtable.cuh`'s, 1 for a table
+    /// built with one bit a key, as both built them before (a `PTFOLD1`
+    /// file).  The probe reads as many as were set.
+    pub filter_probes: u8,
     /// The normal basis the keys were named in, as
     /// [`FrobeniusCanon::tables`] gives it.
     pub canon_tables: Vec<[u64; 256]>,
@@ -3126,14 +3284,17 @@ pub struct PairSumTable {
     /// walking a binary search across the whole table.
     bucket_start: Vec<u32>,
     bucket_shift: u32,
-    /// One bit per hashed key, about four per stored sum: a lookup that
-    /// finds its bit clear is certainly absent and never touches the
-    /// entries.  Most lookups of a decomposition search miss, and the
+    /// [`FILTER_PROBES`] bits per hashed key, all in one word, in a filter
+    /// of eight to sixteen bits per stored sum: a lookup that finds any of
+    /// its bits clear is certainly absent and never touches the entries.
+    /// Most lookups of a decomposition search miss, and the
     /// entries are far too large to cache, so this turns the hot path
     /// from a miss in a table of hundreds of megabytes into one in a
     /// few.  No false negatives, so the answer is unchanged.
     present: Vec<u64>,
     present_mask: u64,
+    /// [`filter_extra`] of the probes the filter was built with.
+    filter_extra: u64,
     /// Whether the stored keys are folded by the signed Frobenius group
     /// `G = ⟨π, −1⟩`.
     ///
@@ -3501,7 +3662,7 @@ impl PairSumTable {
     pub fn compact_byte_size(points: usize, degree: u32) -> u128 {
         let pairs = Self::pair_count(points);
         let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
-        pairs * 4 + buckets * 4 + pairs / 2
+        pairs * 4 + buckets * 4 + pairs * FILTER_BITS_PER_KEY as u128 / 8
     }
 
     /// [`Self::compact_byte_size`] plus one packed pair witness per
@@ -3545,7 +3706,7 @@ impl PairSumTable {
     pub fn folded_byte_size(orbits: usize, points: usize, degree: u32) -> u128 {
         let pairs = Self::folded_pair_count(orbits, points);
         let buckets = 1u128 << Self::folded_bucket_bits(pairs, degree);
-        pairs * 4 + buckets * 4 + pairs / 2
+        pairs * 4 + buckets * 4 + pairs * FILTER_BITS_PER_KEY as u128 / 8
     }
 
     /// Bucket bits for the compact table: about one bucket per sixteen
@@ -3751,13 +3912,13 @@ impl PairSumTable {
         for b in 0..buckets {
             bucket_start[b + 1] += bucket_start[b];
         }
-        // Four bits per entry, rounded up to a power of two.
-        let filter_bits = (usize::BITS - (entries.len().max(1) * 4).leading_zeros()).clamp(6, 32);
+        // Eight bits per entry, rounded up to a power of two.
+        let filter_bits = filter_bits_for(entries.len());
         let present_mask = (1u64 << filter_bits) - 1;
         let mut present = vec![0u64; (1usize << filter_bits) / 64];
         for &(key, _, _) in &entries {
-            let h = (pair_filter_hash(key) & present_mask) as usize;
-            present[h >> 6] |= 1u64 << (h & 63);
+            let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+            present[word] |= bits;
         }
         Some(Self {
             entries,
@@ -3771,6 +3932,7 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            filter_extra: FILTER_EXTRA,
             fold: false,
             canon: None,
             orbit_start: Vec::new(),
@@ -3847,7 +4009,7 @@ impl PairSumTable {
         let total = bucket_start[buckets] as usize;
         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
         let mut rests = vec![0u32; total];
-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let filter_bits = filter_bits_for(total);
         let present_mask = (1u64 << filter_bits) - 1;
         let words = (1usize << filter_bits) / 64;
         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
@@ -3866,8 +4028,8 @@ impl PairSumTable {
                 unsafe {
                     *(slots as *mut u32).add(slot) = Self::compact_rest(key);
                 }
-                let h = (pair_filter_hash(key) & present_mask) as usize;
-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+                let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+                present_atomic[word].fetch_or(bits, Ordering::Relaxed);
             });
         });
         let present: Vec<u64> = present_atomic
@@ -3887,6 +4049,7 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            filter_extra: FILTER_EXTRA,
             fold: false,
             canon: None,
             orbit_start: Vec::new(),
@@ -3965,7 +4128,7 @@ impl PairSumTable {
         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
         let mut rests = vec![0u32; total];
         let mut compact_witnesses = vec![0u32; total];
-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let filter_bits = filter_bits_for(total);
         let present_mask = (1u64 << filter_bits) - 1;
         let words = (1usize << filter_bits) / 64;
         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
@@ -3985,8 +4148,8 @@ impl PairSumTable {
                     *(rest_slots as *mut u32).add(slot) = Self::compact_rest(key);
                     *(witness_slots as *mut u32).add(slot) = ((i as u32) << 16) | j;
                 }
-                let h = (pair_filter_hash(key) & present_mask) as usize;
-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+                let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+                present_atomic[word].fetch_or(bits, Ordering::Relaxed);
             }
         });
         drop(cached_keys);
@@ -4006,6 +4169,7 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            filter_extra: FILTER_EXTRA,
             fold: false,
             canon: None,
             orbit_start: Vec::new(),
@@ -4117,7 +4281,7 @@ impl PairSumTable {
             });
         drop(keyed);
         // 4. Each partition counting-sorted into its own bucket range.
-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let filter_bits = filter_bits_for(total);
         let present_mask = (1u64 << filter_bits) - 1;
         let present_atomic: Vec<AtomicU64> = (0..(1usize << filter_bits) / 64)
             .map(|_| AtomicU64::new(0))
@@ -4149,8 +4313,8 @@ impl PairSumTable {
                     // bucket cursors stay inside it.
                     unsafe { *(rp as *mut u32).add(at[b]) = w };
                     at[b] += 1;
-                    let f = (h & present_mask) as usize;
-                    present_atomic[f >> 6].fetch_or(1u64 << (f & 63), Ordering::Relaxed);
+                    let (word, bits) = filter_slot(h, present_mask, FILTER_EXTRA);
+                    present_atomic[word].fetch_or(bits, Ordering::Relaxed);
                 }
             });
         bucket_start[buckets] = total as u32;
@@ -4296,7 +4460,7 @@ impl PairSumTable {
             let total = bucket_start[buckets] as usize;
             let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
             let mut rests = vec![0u32; total];
-            let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+            let filter_bits = filter_bits_for(total);
             let present_mask = (1u64 << filter_bits) - 1;
             let words = (1usize << filter_bits) / 64;
             let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
@@ -4315,8 +4479,9 @@ impl PairSumTable {
                             Self::compact_rest(key)
                         };
                     }
-                    let h = (pair_filter_hash(key) & present_mask) as usize;
-                    present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+                    let (word, bits) =
+                        filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+                    present_atomic[word].fetch_or(bits, Ordering::Relaxed);
                 });
             });
             let present: Vec<u64> = present_atomic
@@ -4336,6 +4501,7 @@ impl PairSumTable {
                 words: rests,
                 present,
                 present_mask,
+                filter_probes: FILTER_PROBES,
                 canon_tables: Vec::new(),
             },
             tagged,
@@ -4377,6 +4543,7 @@ impl PairSumTable {
             bucket_shift: parts.bucket_shift,
             present: parts.present,
             present_mask: parts.present_mask,
+            filter_extra: filter_extra(parts.filter_probes),
             fold: true,
             canon,
             orbit_start,
@@ -4458,6 +4625,12 @@ impl PairSumTable {
                 parts.present_mask
             ));
         }
+        if parts.filter_probes != 1 && parts.filter_probes != FILTER_PROBES {
+            return Err(format!(
+                "a presence filter of {} probes a key, not 1 or {FILTER_PROBES}",
+                parts.filter_probes
+            ));
+        }
         let tagged = fb.signed_orbits.len() <= Self::MAX_TAGGED_ORBITS;
         if tagged {
             let orbits = fb.signed_orbits.len() as u32;
@@ -4536,6 +4709,11 @@ impl PairSumTable {
             words: &self.rests,
             present: &self.present,
             present_mask: self.present_mask,
+            filter_probes: if self.filter_extra != 0 {
+                FILTER_PROBES
+            } else {
+                1
+            },
             tagged: self.tagged,
             canon_tables: self.canon.as_ref().map_or(&[], |c| c.tables()),
         })
@@ -4768,18 +4946,19 @@ impl PairSumTable {
         }
     }
 
-    /// Index of the filter word holding this key's bit.
+    /// Index of the filter word holding this key's bits.
     #[inline]
     fn filter_word(&self, key: u64) -> usize {
         ((pair_filter_hash(key) & self.present_mask) as usize) >> 6
     }
 
-    /// Whether the filter admits this key.  A `false` is certain; a
-    /// `true` still has to be checked against the entries.
+    /// Whether the filter admits this key: every bit it would have set is
+    /// set.  A `false` is certain; a `true` still has to be checked
+    /// against the entries.
     #[inline]
     fn admitted(&self, key: u64) -> bool {
-        let h = (pair_filter_hash(key) & self.present_mask) as usize;
-        self.present[h >> 6] >> (h & 63) & 1 == 1
+        let (word, bits) = filter_slot(pair_filter_hash(key), self.present_mask, self.filter_extra);
+        self.present[word] & bits == bits
     }
 
     /// All `(i, j)` with `P_i + P_j` equal to the packed point.
@@ -5571,6 +5750,609 @@ pub(crate) fn lift_candidate(
     }
 }
 
+/// Exact coordinates of an x-value in the factor-base's binary basis. A
+/// pivot row retains its expression in the original basis so a residual
+/// point can be checked against a partially assigned summand code.
+struct F6CoordinateEncoder {
+    rows: Vec<(u32, u128, u64)>,
+}
+
+struct F6FastGeometry {
+    curve: FastCurve,
+    points: Vec<FastPoint>,
+    target: FastPoint,
+    index_of: HashMap<FastPoint, usize>,
+    codes: Vec<u64>,
+}
+
+impl F6CoordinateEncoder {
+    fn field_word(element: &F2mElement) -> Option<u128> {
+        let bits = element.raw_bits();
+        if bits.is_empty() || bits.len() > 2 {
+            return None;
+        }
+        Some(u128::from(bits[0]) | (u128::from(*bits.get(1).unwrap_or(&0)) << 64))
+    }
+
+    fn new(basis: &[F2mElement]) -> Option<Self> {
+        if basis.len() >= 64 {
+            return None;
+        }
+        let mut rows: Vec<(u32, u128, u64)> = Vec::with_capacity(basis.len());
+        for (j, element) in basis.iter().enumerate() {
+            let mut value = Self::field_word(element)?;
+            let mut code = 1u64 << j;
+            for &(pivot, row, row_code) in &rows {
+                if value & (1u128 << pivot) != 0 {
+                    value ^= row;
+                    code ^= row_code;
+                }
+            }
+            if value == 0 {
+                return None;
+            }
+            rows.push((127 - value.leading_zeros(), value, code));
+            rows.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
+        }
+        Some(Self { rows })
+    }
+
+    fn encode(&self, element: &F2mElement) -> Option<u64> {
+        let mut value = Self::field_word(element)?;
+        let mut code = 0u64;
+        for &(pivot, row, row_code) in &self.rows {
+            if value & (1u128 << pivot) != 0 {
+                value ^= row;
+                code ^= row_code;
+            }
+        }
+        (value == 0).then_some(code)
+    }
+}
+
+/// F6-IC's target-specific geometric branch oracle. It may close a branch
+/// only against the exact enumerated base, or return a group-verified
+/// relation; it never treats an x-only Semaev root as a relation.
+struct F6GeometricGate<'a> {
+    kc: &'a KoblitzCurve,
+    fb: &'a FrobeniusFactorBase,
+    index_of: &'a HashMap<(BigUint, BigUint), usize>,
+    target: &'a BinaryPoint,
+    vars: Vec<Vec<usize>>,
+    encoder: F6CoordinateEncoder,
+    by_x: HashMap<BigUint, Vec<usize>>,
+    fast: Option<F6FastGeometry>,
+    batch_fast: bool,
+    pair_index_enabled: bool,
+    pair_index: Option<HashMap<FastPoint, Vec<(usize, usize)>>>,
+    pair_index_builds: u64,
+    pair_index_lookups: u64,
+    one_fixed_additions: u64,
+    witness: Option<Vec<usize>>,
+    support_checks: u64,
+    residual_lookups: u64,
+    fast_residual_lookups: u64,
+    batch_groups: u64,
+    group_additions: u64,
+}
+
+impl<'a> F6GeometricGate<'a> {
+    fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        index_of: &'a HashMap<(BigUint, BigUint), usize>,
+        target: &'a BinaryPoint,
+        m: usize,
+        perm: Option<&[u32]>,
+    ) -> Option<Self> {
+        let ell = fb.subspace_basis.len();
+        if m < 2 || m.checked_mul(ell)? > 64 {
+            return None;
+        }
+        if index_of.len() != fb.points.len() {
+            return None;
+        }
+        let encoder = F6CoordinateEncoder::new(&fb.subspace_basis)?;
+        let mut by_x: HashMap<BigUint, Vec<usize>> = HashMap::new();
+        for (index, point) in fb.points.iter().enumerate() {
+            if index_of.get(&point_key(point)) != Some(&index) {
+                return None;
+            }
+            let BinaryPoint::Affine { x, .. } = point else {
+                continue;
+            };
+            encoder.encode(x)?;
+            by_x.entry(x.to_biguint()).or_default().push(index);
+        }
+        let fast = FastCurve::new(&kc.curve).and_then(|curve| {
+            let points: Vec<_> = fb.points.iter().map(|p| curve.lift(p)).collect();
+            let target_fast = curve.lift(target);
+            if points
+                .iter()
+                .zip(&fb.points)
+                .any(|(&packed, general)| curve.lower(packed) != *general)
+                || curve.lower(target_fast) != *target
+            {
+                return None;
+            }
+            let codes: Vec<_> = fb
+                .points
+                .iter()
+                .map(|point| match point {
+                    BinaryPoint::Affine { x, .. } => encoder.encode(x),
+                    BinaryPoint::Infinity => None,
+                })
+                .collect::<Option<_>>()?;
+            let index_of: HashMap<_, _> = points.iter().enumerate().map(|(i, &p)| (p, i)).collect();
+            (index_of.len() == points.len()).then_some(F6FastGeometry {
+                curve,
+                points,
+                target: target_fast,
+                index_of,
+                codes,
+            })
+        });
+        let vars = (0..m)
+            .map(|i| {
+                (0..ell)
+                    .map(|j| {
+                        let old = i * ell + j;
+                        perm.map_or(old, |p| p[old] as usize)
+                    })
+                    .collect()
+            })
+            .collect();
+        Some(Self {
+            kc,
+            fb,
+            index_of,
+            target,
+            vars,
+            encoder,
+            by_x,
+            fast,
+            batch_fast: true,
+            pair_index_enabled: false,
+            pair_index: None,
+            pair_index_builds: 0,
+            pair_index_lookups: 0,
+            one_fixed_additions: 0,
+            witness: None,
+            support_checks: 0,
+            residual_lookups: 0,
+            fast_residual_lookups: 0,
+            batch_groups: 0,
+            group_additions: 0,
+        })
+    }
+
+    fn code_matches(
+        vars: &[usize],
+        code: u64,
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        vars.iter().enumerate().all(|(j, &var)| {
+            defined_mask & (1u64 << var) != 0
+                || assignment[var].is_none_or(|value| value == ((code >> j) & 1 != 0))
+        })
+    }
+
+    fn partial_residual_matches(
+        &self,
+        remaining: usize,
+        residual: &BinaryPoint,
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        let BinaryPoint::Affine { x, .. } = residual else {
+            return false;
+        };
+        self.encoder.encode(x).is_some_and(|code| {
+            Self::code_matches(&self.vars[remaining], code, assignment, defined_mask)
+        })
+    }
+
+    fn verify_witness(&mut self, chosen: &[usize]) -> bool {
+        let _check = measurement::relation_check_scope();
+        let mut sum = BinaryPoint::Infinity;
+        for &index in chosen {
+            self.group_additions += 1;
+            sum = self.kc.add(&sum, &self.fb.points[index]);
+        }
+        if sum != *self.target {
+            return false;
+        }
+        let mut indices = chosen.to_vec();
+        indices.sort_unstable();
+        self.witness = Some(indices);
+        true
+    }
+
+    /// For three summands, one fixed x-coordinate is already enough for an
+    /// exact branch decision: try its usable point lifts against every
+    /// second base point, then look up the uniquely determined third point.
+    fn close_one_fixed(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        if self.pair_index_enabled && self.fast.is_some() {
+            let size = self.fb.points.len() as u64;
+            if self.pair_index.is_none()
+                && self.one_fixed_additions >= size.saturating_mul(size + 1)
+                && self.by_x.contains_key(&fixed.1)
+            {
+                self.build_pair_index();
+            }
+            if self.pair_index.is_some() {
+                return match self.close_one_fixed_fast_pair(fixed, assignment, defined_mask) {
+                    Some(chosen) if self.verify_witness(&chosen) => true,
+                    Some(_) => self.close_one_fixed_legacy(fixed, assignment, defined_mask),
+                    None => false,
+                };
+            }
+        }
+        let before = self.group_additions;
+        let found = self.close_one_fixed_legacy(fixed, assignment, defined_mask);
+        self.one_fixed_additions += self.group_additions - before;
+        found
+    }
+
+    fn build_pair_index(&mut self) {
+        let Some(fast) = self.fast.as_ref() else {
+            return;
+        };
+        let mut index: HashMap<FastPoint, Vec<(usize, usize)>> = HashMap::new();
+        let mut scratch = BatchScratch::default();
+        let mut sums = Vec::new();
+        for first in 0..fast.points.len() {
+            sums.clear();
+            fast.curve.add_many(
+                fast.points[first],
+                &fast.points[first..],
+                &mut sums,
+                &mut scratch,
+            );
+            assert_eq!(sums.len(), fast.points.len() - first);
+            self.group_additions += sums.len() as u64;
+            self.batch_groups += 1;
+            for (offset, &sum) in sums.iter().enumerate() {
+                index.entry(sum).or_default().push((first, first + offset));
+            }
+        }
+        self.pair_index = Some(index);
+        self.pair_index_builds += 1;
+    }
+
+    fn close_one_fixed_fast_pair(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> Option<[usize; 3]> {
+        let fast = self.fast.as_ref()?;
+        let index = self.pair_index.as_ref()?;
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1)?;
+        for &first in choices {
+            self.group_additions += 1;
+            let residual = fast
+                .curve
+                .add(fast.target, fast.curve.neg(fast.points[first]));
+            self.pair_index_lookups += 1;
+            let Some(pairs) = index.get(&residual) else {
+                continue;
+            };
+            for &(left, right) in pairs {
+                for &(second_index, third_index) in &[(left, right), (right, left)] {
+                    if Self::code_matches(
+                        &self.vars[second],
+                        fast.codes[second_index],
+                        assignment,
+                        defined_mask,
+                    ) && Self::code_matches(
+                        &self.vars[third],
+                        fast.codes[third_index],
+                        assignment,
+                        defined_mask,
+                    ) {
+                        let mut chosen = [usize::MAX; 3];
+                        chosen[fixed.0] = first;
+                        chosen[second] = second_index;
+                        chosen[third] = third_index;
+                        return Some(chosen);
+                    }
+                    if left == right {
+                        break;
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn close_one_fixed_legacy(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        if self.fast.is_some() {
+            let packed = if self.batch_fast {
+                self.close_one_fixed_fast_batched(fixed, assignment, defined_mask)
+            } else {
+                self.close_one_fixed_fast_scalar(fixed, assignment, defined_mask)
+            };
+            match packed {
+                Some(chosen) if self.verify_witness(&chosen) => return true,
+                Some(_) => {} // A mismatched packed witness gets a general replay/search.
+                None => return false,
+            }
+        }
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1).cloned().unwrap_or_default();
+        let mut chosen = [usize::MAX; 3];
+        for first_index in choices {
+            chosen[fixed.0] = first_index;
+            for second_index in 0..self.fb.points.len() {
+                let second_point = &self.fb.points[second_index];
+                if !self.partial_residual_matches(second, second_point, assignment, defined_mask) {
+                    continue;
+                }
+                chosen[second] = second_index;
+                self.group_additions += 1;
+                let sum = self.kc.add(&self.fb.points[first_index], second_point);
+                self.group_additions += 1;
+                let residual = self.kc.add(self.target, &point_neg(&sum));
+                self.residual_lookups += 1;
+                let Some(&third_index) = self.index_of.get(&point_key(&residual)) else {
+                    continue;
+                };
+                if !self.partial_residual_matches(third, &residual, assignment, defined_mask) {
+                    continue;
+                }
+                chosen[third] = third_index;
+                if self.verify_witness(&chosen) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// The exact single-word representation uses the same point choices as
+    /// the general path. Conversion and the packed map are rebuilt inside
+    /// each target PDP attempt and are therefore charged online.
+    fn close_one_fixed_fast_scalar(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> Option<[usize; 3]> {
+        let fast = self.fast.as_ref()?;
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1).cloned().unwrap_or_default();
+        let mut chosen = [usize::MAX; 3];
+        for first_index in choices {
+            chosen[fixed.0] = first_index;
+            for second_index in 0..fast.points.len() {
+                if !Self::code_matches(
+                    &self.vars[second],
+                    fast.codes[second_index],
+                    assignment,
+                    defined_mask,
+                ) {
+                    continue;
+                }
+                chosen[second] = second_index;
+                self.group_additions += 1;
+                let sum = fast
+                    .curve
+                    .add(fast.points[first_index], fast.points[second_index]);
+                self.group_additions += 1;
+                let residual = fast.curve.add(fast.target, fast.curve.neg(sum));
+                self.residual_lookups += 1;
+                self.fast_residual_lookups += 1;
+                let Some(&third_index) = fast.index_of.get(&residual) else {
+                    continue;
+                };
+                if !Self::code_matches(
+                    &self.vars[third],
+                    fast.codes[third_index],
+                    assignment,
+                    defined_mask,
+                ) {
+                    continue;
+                }
+                chosen[third] = third_index;
+                return Some(chosen);
+            }
+        }
+        None
+    }
+
+    /// Two inversion batches per fixed point: all first-plus-second sums,
+    /// then all target-minus-sum residuals. The logical point-addition and
+    /// lookup counters remain identical to the scalar packed loop.
+    fn close_one_fixed_fast_batched(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> Option<[usize; 3]> {
+        let fast = self.fast.as_ref()?;
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1).cloned().unwrap_or_default();
+        let mut eligible_indices = Vec::with_capacity(fast.points.len());
+        let mut eligible_points = Vec::with_capacity(fast.points.len());
+        for (index, &point) in fast.points.iter().enumerate() {
+            if Self::code_matches(
+                &self.vars[second],
+                fast.codes[index],
+                assignment,
+                defined_mask,
+            ) {
+                eligible_indices.push(index);
+                eligible_points.push(point);
+            }
+        }
+        if eligible_points.is_empty() {
+            return None;
+        }
+        let mut scratch = BatchScratch::default();
+        let mut sums = Vec::with_capacity(eligible_points.len());
+        let mut neg_sums = Vec::with_capacity(eligible_points.len());
+        let mut residuals = Vec::with_capacity(eligible_points.len());
+        let mut chosen = [usize::MAX; 3];
+        for first_index in choices {
+            chosen[fixed.0] = first_index;
+            sums.clear();
+            fast.curve.add_many(
+                fast.points[first_index],
+                &eligible_points,
+                &mut sums,
+                &mut scratch,
+            );
+            self.group_additions += eligible_points.len() as u64;
+            self.batch_groups += 1;
+            neg_sums.clear();
+            neg_sums.extend(sums.iter().map(|&p| fast.curve.neg(p)));
+            residuals.clear();
+            fast.curve
+                .add_many(fast.target, &neg_sums, &mut residuals, &mut scratch);
+            self.group_additions += eligible_points.len() as u64;
+            self.batch_groups += 1;
+            for (j, &residual) in residuals.iter().enumerate() {
+                self.residual_lookups += 1;
+                self.fast_residual_lookups += 1;
+                let Some(&third_index) = fast.index_of.get(&residual) else {
+                    continue;
+                };
+                if !Self::code_matches(
+                    &self.vars[third],
+                    fast.codes[third_index],
+                    assignment,
+                    defined_mask,
+                ) {
+                    continue;
+                }
+                chosen[second] = eligible_indices[j];
+                chosen[third] = third_index;
+                return Some(chosen);
+            }
+        }
+        None
+    }
+
+    fn close_residual(
+        &mut self,
+        positions: &[(usize, BigUint)],
+        remaining: usize,
+        depth: usize,
+        sum: &BinaryPoint,
+        chosen: &mut [usize],
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        if depth == positions.len() {
+            self.group_additions += 1;
+            let residual = self.kc.add(self.target, &point_neg(sum));
+            self.residual_lookups += 1;
+            let Some(&last) = self.index_of.get(&point_key(&residual)) else {
+                return false;
+            };
+            if !self.partial_residual_matches(remaining, &residual, assignment, defined_mask) {
+                return false;
+            }
+            chosen[remaining] = last;
+            return self.verify_witness(chosen);
+        }
+        let (summand, x) = &positions[depth];
+        let choices = self.by_x.get(x).cloned().unwrap_or_default();
+        for index in choices {
+            chosen[*summand] = index;
+            self.group_additions += 1;
+            let next = self.kc.add(sum, &self.fb.points[index]);
+            if self.close_residual(
+                positions,
+                remaining,
+                depth + 1,
+                &next,
+                chosen,
+                assignment,
+                defined_mask,
+            ) {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn decide(&mut self, assignment: &[Option<bool>], defined_mask: u64) -> NodeOracleDecision {
+        let mut fixed = Vec::with_capacity(self.vars.len());
+        for (i, vars) in self.vars.iter().enumerate() {
+            let mut x = F2mElement::zero(self.kc.n);
+            let mut complete = true;
+            for (j, &var) in vars.iter().enumerate() {
+                if defined_mask & (1u64 << var) != 0 {
+                    complete = false;
+                    break;
+                }
+                match assignment[var] {
+                    Some(true) => x.add_assign(&self.fb.subspace_basis[j]),
+                    Some(false) => {}
+                    None => {
+                        complete = false;
+                        break;
+                    }
+                }
+            }
+            if complete {
+                self.support_checks += 1;
+                let key = x.to_biguint();
+                if !self.by_x.contains_key(&key) {
+                    return NodeOracleDecision::Refute;
+                }
+                fixed.push((i, key));
+            }
+        }
+        if self.vars.len() == 3 && fixed.len() == 1 && self.fb.points.len() <= 256 {
+            return if self.close_one_fixed(&fixed[0], assignment, defined_mask) {
+                NodeOracleDecision::Witness
+            } else {
+                NodeOracleDecision::Refute
+            };
+        }
+        if fixed.len() < self.vars.len() - 1 {
+            return NodeOracleDecision::Continue;
+        }
+        let remaining = (0..self.vars.len())
+            .find(|i| fixed.iter().all(|(j, _)| i != j))
+            .unwrap_or(self.vars.len() - 1);
+        let positions: Vec<_> = fixed.into_iter().filter(|(i, _)| *i != remaining).collect();
+        let mut chosen = vec![usize::MAX; self.vars.len()];
+        if self.close_residual(
+            &positions,
+            remaining,
+            0,
+            &BinaryPoint::Infinity,
+            &mut chosen,
+            assignment,
+            defined_mask,
+        ) {
+            NodeOracleDecision::Witness
+        } else {
+            NodeOracleDecision::Refute
+        }
+    }
+}
+
 /// **Algebraic decomposition**: solve the Semaev system for
 /// `R = P_1 + … + P_m` over the factor base.
 ///
@@ -5590,6 +6372,9 @@ pub fn groebner_decompose(
     engine: SolverEngine,
     node_budget: usize,
 ) -> (Option<Vec<usize>>, SolveStats) {
+    // Keep the generic frontend's unsupported-input contract explicit: the
+    // archived admission replay checks this entry point. Pass the built
+    // system onward so the F4 path does not build it twice.
     let unsupported = || SolveStats {
         exhausted: true,
         unsupported: true,
@@ -5608,6 +6393,135 @@ pub fn groebner_decompose(
     ) {
         Some(sys) => sys,
         None => return (None, unsupported()),
+    };
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        false,
+        false,
+        Some(sys),
+    )
+}
+
+/// F6-IC: inherited F4 with exact factor-base support pruning and residual
+/// group closure inside the Boolean splitting tree. A completed no-relation
+/// result is about usable factor-base decompositions, not all x-only roots.
+#[allow(clippy::too_many_arguments)]
+pub fn groebner_decompose_f6_ic(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    if !matches!(engine.effective(), SolverEngine::InheritedF4 { .. }) {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                unsupported: true,
+                ..Default::default()
+            },
+        );
+    }
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        true,
+        false,
+        None,
+    )
+}
+
+/// Opt-in F6-IC geometric closure with an adaptively built exact pair-sum
+/// index. The original F6-IC path remains the reference.
+#[allow(clippy::too_many_arguments)]
+pub fn groebner_decompose_f6_ic_pair_index(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    if !matches!(engine.effective(), SolverEngine::InheritedF4 { .. }) {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                unsupported: true,
+                ..Default::default()
+            },
+        );
+    }
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        true,
+        true,
+        None,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn groebner_decompose_with_geometry(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+    f6_ic: bool,
+    pair_index_enabled: bool,
+    prebuilt: Option<crate::cryptanalysis::koblitz_groebner::DecompositionSystem>,
+) -> (Option<Vec<usize>>, SolveStats) {
+    let unsupported = || SolveStats {
+        exhausted: true,
+        unsupported: true,
+        ..Default::default()
+    };
+    let sys = if let Some(sys) = prebuilt {
+        sys
+    } else {
+        let x_r = match target {
+            BinaryPoint::Affine { x, .. } => x.clone(),
+            BinaryPoint::Infinity => return (None, unsupported()),
+        };
+        match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+            &fb.subspace_basis,
+            &x_r,
+            &kc.curve.b,
+            m,
+            st,
+        ) {
+            Some(sys) => sys,
+            None => return (None, unsupported()),
+        }
     };
     // A root of S₃ fixes the summands only up to sign, so some roots do
     // not lift.  Lift each as it is found and stop at the first that
@@ -5638,7 +6552,7 @@ pub fn groebner_decompose(
         None => &sys.equations,
     };
     let back = order.as_deref().map(invert_permutation);
-    let (_, stats) = solve_boolean_system_filtered(equations, sys.n_vars, &opts, |root| {
+    let mut accept_root = |root| {
         let root = back
             .as_deref()
             .map_or(root, |inverse| permute_mask(root, inverse));
@@ -5652,7 +6566,32 @@ pub fn groebner_decompose(
             }
             None => false,
         }
-    });
+    };
+    if f6_ic {
+        if let Some(mut gate) = F6GeometricGate::new(kc, fb, index_of, target, m, order.as_deref())
+        {
+            gate.pair_index_enabled = pair_index_enabled;
+            let (_, mut stats) = solve_boolean_system_with_node_oracle(
+                equations,
+                sys.n_vars,
+                &opts,
+                &mut accept_root,
+                |assignment, defined_mask| gate.decide(assignment, defined_mask),
+            );
+            stats.geometric_support_checks = gate.support_checks;
+            stats.geometric_residual_lookups = gate.residual_lookups;
+            stats.geometric_fast_residual_lookups = gate.fast_residual_lookups;
+            stats.geometric_batch_groups = gate.batch_groups;
+            stats.geometric_group_additions = gate.group_additions;
+            stats.geometric_pair_index_builds = gate.pair_index_builds;
+            stats.geometric_pair_index_lookups = gate.pair_index_lookups;
+            return (gate.witness.or(found), stats);
+        }
+    }
+    let (_, mut stats) = solve_boolean_system_filtered(equations, sys.n_vars, &opts, accept_root);
+    if f6_ic {
+        stats.geometric_fallbacks = 1;
+    }
     (found, stats)
 }
 
@@ -5776,17 +6715,24 @@ pub struct SatDecompositionStats {
 /// Encode a finite set of coordinates without enumerating its complement.
 /// Missing branches of the binary trie become forbidden-prefix clauses.
 /// No auxiliary variables are needed; at most O(ell * |codes|) clauses.
+fn packed_coordinate_u128(x: &F2mElement) -> u128 {
+    let words = x.raw_bits();
+    assert!(words.len() <= 2, "coordinate exceeds u128 width");
+    u128::from(*words.first().unwrap_or(&0)) | (u128::from(*words.get(1).unwrap_or(&0)) << 64)
+}
+
 fn add_coordinate_domain(
     solver: &mut crate::cryptanalysis::sat::Solver,
     offset: usize,
     ell: usize,
-    codes: &[u64],
+    codes: &[u128],
 ) {
+    assert!(ell <= 128, "coordinate domain exceeds u128 width");
     fn visit(
         solver: &mut crate::cryptanalysis::sat::Solver,
         offset: usize,
         bit: usize,
-        codes: &[u64],
+        codes: &[u128],
         prefix: &mut Vec<i32>,
     ) {
         if codes.is_empty() {
@@ -6060,11 +7006,15 @@ pub fn sat_decompose_with(
                 BinaryPoint::Infinity => None,
             })
             .collect();
-        let mut codes: Vec<u64> = if fb.uses_ambient_basis() {
+        let mut codes: Vec<u128> = if fb.uses_ambient_basis() {
             // Union construction uses the full polynomial field basis.
             legal_x
                 .iter()
-                .map(|x| x.to_u64_digits().first().copied().unwrap_or(0))
+                .map(|x| {
+                    let words = x.to_u64_digits();
+                    u128::from(*words.first().unwrap_or(&0))
+                        | (u128::from(*words.get(1).unwrap_or(&0)) << 64)
+                })
                 .collect()
         } else {
             (0..(1u64 << ell))
@@ -6074,6 +7024,7 @@ pub fn sat_decompose_with(
                             .to_biguint(),
                     )
                 })
+                .map(u128::from)
                 .collect()
         };
         codes.sort_unstable();
@@ -6153,6 +7104,11 @@ fn sat_decompose_union_s4(
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
     use crate::cryptanalysis::semaev_sat::encode_semaev_s4;
     let mut stats = SatDecompositionStats::default();
+    if kc.n > 128 {
+        stats.exhausted = true;
+        stats.unsupported = true;
+        return (None, stats);
+    }
     let BinaryPoint::Affine { x: x_r, .. } = target else {
         stats.exhausted = true;
         stats.unsupported = true;
@@ -6167,11 +7123,11 @@ fn sat_decompose_union_s4(
         options.encoding,
     );
     enc.solver.conflict_budget = options.conflict_budget;
-    let mut codes: Vec<_> = fb
+    let mut codes: Vec<u128> = fb
         .points
         .iter()
         .filter_map(|p| match p {
-            BinaryPoint::Affine { x, .. } => Some(x.raw_bits().first().copied().unwrap_or(0)),
+            BinaryPoint::Affine { x, .. } => Some(packed_coordinate_u128(x)),
             BinaryPoint::Infinity => None,
         })
         .collect();
@@ -6735,6 +7691,13 @@ pub struct KoblitzIcOptions {
     /// Which algebraic engine reduces the Semaev system.  Ignored by
     /// [`DecompositionStrategy::Enumerate`].
     pub engine: SolverEngine,
+    /// F6-IC exact geometric support pruning and residual closure around
+    /// inherited F4. Only the ordinary Gröbner decomposition path supports
+    /// it; chart plans retain their separate, explicit implementation.
+    pub f6_ic: bool,
+    /// Opt-in adaptive exact pair-sum closure for the three-summand F6-IC
+    /// node oracle. Its index build is charged inside each PDP attempt.
+    pub f6_pair_index: bool,
     /// Experimental exact S3 decomposition on a validated Frobenius chart
     /// cover. Applies only to two-summand Groebner collection/descent. Plan
     /// construction is caller-owned precomputation and must be charged.
@@ -6812,6 +7775,8 @@ impl Default for KoblitzIcOptions {
             seed: 0x4b_6f_62_6c_69_74_7a_00, // "Koblitz\0"
             strategy: DecompositionStrategy::Groebner,
             engine: SolverEngine::default(),
+            f6_ic: false,
+            f6_pair_index: false,
             weil_charts: None,
             node_budget: 4096,
             max_models: 64,
@@ -7358,6 +8323,16 @@ fn koblitz_index_calculus_dlp_observed(
                         .and_then(|table| table.decompose(kc, fb, target, opts.m)),
                 ),
                 DecompositionStrategy::Groebner => {
+                    if opts.f6_ic && opts.weil_charts.is_some() {
+                        return RelationAttemptOutcome::Groebner(
+                            None,
+                            SolveStats {
+                                exhausted: true,
+                                unsupported: true,
+                                ..Default::default()
+                            },
+                        );
+                    }
                     if let Some(plan) = &opts.weil_charts {
                         let options = SolveOptions {
                             engine: opts.engine,
@@ -7370,7 +8345,16 @@ fn koblitz_index_calculus_dlp_observed(
                             .expect("chart cover validated at pipeline entry");
                         return RelationAttemptOutcome::Groebner(idxs, stats.solver);
                     }
-                    let (idxs, stats) = groebner_decompose(
+                    let decompose = if opts.f6_ic {
+                        if opts.f6_pair_index {
+                            groebner_decompose_f6_ic_pair_index
+                        } else {
+                            groebner_decompose_f6_ic
+                        }
+                    } else {
+                        groebner_decompose
+                    };
+                    let (idxs, stats) = decompose(
                         kc,
                         fb,
                         &index_of,
@@ -9065,6 +10049,9 @@ fn decompose_once(
             attempt
         }
         DecompositionStrategy::Groebner => {
+            if opts.f6_ic && opts.weil_charts.is_some() {
+                return PdpAttempt::bare(None, PdpOutcome::Unsupported);
+            }
             if let Some(plan) = &opts.weil_charts {
                 let options = SolveOptions {
                     engine: opts.engine,
@@ -9084,7 +10071,16 @@ fn decompose_once(
                 };
                 return attempt;
             }
-            let (points, stats) = groebner_decompose(
+            let decompose = if opts.f6_ic {
+                if opts.f6_pair_index {
+                    groebner_decompose_f6_ic_pair_index
+                } else {
+                    groebner_decompose_f6_ic
+                }
+            } else {
+                groebner_decompose
+            };
+            let (points, stats) = decompose(
                 kc,
                 fb,
                 index_of,
@@ -9991,9 +10987,9 @@ impl<'a> LogSystem<'a> {
     }
 
     /// Whether an attempt is due: enough rows, and enough new ones since
-    /// the last attempt (a failed block Wiedemann run costs a whole Krylov
-    /// sequence, so the sparse path waits for a batch of new rows; the
-    /// dense path attempts after every batch).
+    /// the last attempt (a failed sparse run costs a whole Krylov sequence,
+    /// so that path waits for a batch of new rows; the dense path attempts
+    /// after every batch).
     fn attempt_interval(&self) -> usize {
         if self.sparse_opts.is_some() {
             (self.n_cols / 32).max(1)
@@ -10242,10 +11238,10 @@ impl<'a> FactorBaseLogSolver<'a> {
             modulus: self.kc.subgroup_order.to_string(),
             column_points,
             rows,
-            solver: if system.sparse_opts.is_some() {
-                "sparse-filter-block-wiedemann"
-            } else {
-                "dense-gauss"
+            solver: match system.sparse_opts.map(|options| options.solver) {
+                Some(SparseCoreSolver::BlockWiedemann) => "sparse-filter-block-wiedemann",
+                Some(SparseCoreSolver::BlockLanczos) => "sparse-filter-block-lanczos",
+                None => "dense-gauss",
             },
             sparse_options: system.sparse_opts,
         }
@@ -11974,6 +12970,26 @@ mod tests {
     }
 
     #[test]
+    fn the_filter_sets_its_probes_in_one_word_and_one_probe_is_the_old_bit() {
+        let mask = (1u64 << 20) - 1;
+        for key in [0u64, 1, 0xdead_beef, u64::MAX, 0x1234_5678_9abc_def0] {
+            let h = pair_filter_hash(key);
+            let (w1, b1) = filter_slot(h, mask, filter_extra(1));
+            let (w3, b3) = filter_slot(h, mask, filter_extra(FILTER_PROBES));
+            // One probe is the filter as it was: bit `h & mask` of the array.
+            let old = (h & mask) as usize;
+            assert_eq!((w1, b1), (old >> 6, 1u64 << (old & 63)));
+            // Three probes stay in that word and include its bit.
+            assert_eq!(w3, w1);
+            assert_eq!(b3 & b1, b1);
+            assert!((1..=3).contains(&b3.count_ones()));
+        }
+        assert_eq!(filter_bits_for(0), 6);
+        assert_eq!(filter_bits_for(1000), 13);
+        assert_eq!(filter_bits_for(usize::MAX >> 8), 32);
+    }
+
+    #[test]
     fn find_irreducible_returns_degree_n_irreducible() {
         for n in 3..=16u32 {
             let irr = find_irreducible(n).expect("degree-n irreducible exists");
@@ -12598,7 +13614,7 @@ mod tests {
         use crate::cryptanalysis::sat::{SolveResult, Solver};
         for ell in 1..=5usize {
             for mode in 0..4 {
-                let codes: Vec<_> = (0..(1u64 << ell))
+                let codes: Vec<_> = (0..(1u128 << ell))
                     .filter(|x| match mode {
                         0 => false,
                         1 => true,
@@ -12606,7 +13622,7 @@ mod tests {
                         _ => x & 1 == 1,
                     })
                     .collect();
-                for x in 0..(1u64 << ell) {
+                for x in 0..(1u128 << ell) {
                     let mut solver = Solver::new(ell as u32 + 2);
                     add_coordinate_domain(&mut solver, 2, ell, &codes);
                     for j in 0..ell {
@@ -12617,6 +13633,33 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn domain_trie_distinguishes_n83_high_bits() {
+        use crate::cryptanalysis::sat::{SolveResult, Solver};
+        let low = 0x1a5u128;
+        let high = low | (1u128 << 82);
+        let codes = [low, high];
+        for (value, accepted) in [
+            (low, true),
+            (high, true),
+            (low | (1u128 << 64), false),
+            (high | (1u128 << 70), false),
+        ] {
+            let mut solver = Solver::new(85);
+            add_coordinate_domain(&mut solver, 2, 83, &codes);
+            for bit in 0..83 {
+                let lit = bit + 3;
+                solver.add_clause(vec![if (value >> bit) & 1 == 1 { lit } else { -lit }]);
+            }
+            assert_eq!(solver.solve() == SolveResult::Sat, accepted, "{value:#x}");
+        }
+        let x = F2mElement::from_bit_positions(&[0, 64, 82], 83);
+        assert_eq!(
+            packed_coordinate_u128(&x),
+            1 | (1u128 << 64) | (1u128 << 82)
+        );
     }
 
     /// The single-word enumeration returns exactly the generic search's
@@ -13620,7 +14663,29 @@ mod tests {
                 values.push(koblitz_point_count(a, n).to_u64().unwrap());
             }
         }
+        // The version before the primality test moved out of the loop,
+        // kept verbatim: the change must not alter a single factor.
+        fn factorise_u64_per_divisor(mut v: u64) -> Vec<(u64, u32)> {
+            let mut out = Vec::new();
+            let mut d = 2u64;
+            while v > 1 && !is_prime_u64(v) && d.saturating_mul(d) <= v {
+                let mut e = 0;
+                while v.is_multiple_of(d) {
+                    v /= d;
+                    e += 1;
+                }
+                if e > 0 {
+                    out.push((d, e));
+                }
+                d += 1;
+            }
+            if v > 1 {
+                out.push((v, 1));
+            }
+            out
+        }
         for v in values {
+            assert_eq!(factorise_u64(v), factorise_u64_per_divisor(v), "{v}");
             let fast: Vec<(BigUint, u32)> = factorise_u64(v)
                 .into_iter()
                 .map(|(p, e)| (BigUint::from(p), e))
@@ -13694,6 +14759,23 @@ mod tests {
     }
 
     #[test]
+    fn a_folded_table_read_as_one_bit_a_key_gives_the_same_answers() {
+        // A `PTFOLD1` table set one bit a key: bit `h & 63` of the word
+        // `filter_slot` names.  A three-bit filter sets that bit too, so
+        // its words read as one bit a key are such a filter, and a table
+        // loaded that way must miss nothing.
+        let kc = KoblitzCurve::new(0, 31).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        let built = PairSumTable::build_folded_within(&kc, &fb, u128::MAX).unwrap();
+        let mut parts = built.folded_storage().unwrap().to_parts();
+        assert_eq!(parts.filter_probes, FILTER_PROBES);
+        parts.filter_probes = 1;
+        let loaded = PairSumTable::from_folded_parts(&kc, &fb, parts).unwrap();
+        assert_eq!(loaded.folded_storage().unwrap().filter_probes, 1);
+        assert_same_answers(&kc, &fb, &built, &loaded);
+    }
+
+    #[test]
     fn a_folded_table_is_refused_when_a_lookup_could_not_trust_it() {
         let kc = KoblitzCurve::new(0, 23).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 300).unwrap();
@@ -13732,6 +14814,10 @@ mod tests {
                 Box::new(|p| {
                     p.present.pop();
                 }),
+            ),
+            (
+                "a filter of two probes a key",
+                Box::new(|p| p.filter_probes = 2),
             ),
             (
                 "a tag naming no orbit",
@@ -15595,6 +16681,350 @@ mod tests {
     }
 
     #[test]
+    fn f6_ic_geometric_closure_matches_exact_small_base() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let engine = SolverEngine::InheritedF4 { max_degree: 3 };
+        let mut refutations = 0usize;
+        let mut witnesses = 0usize;
+        let mut eliminated = 0usize;
+        for m in [2, 3] {
+            for scalar in 1..=24u32 {
+                let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+                let expected = enumerate_decompose(&kc, &fb, &index_of, &target, m);
+                let (baseline, base_stats) =
+                    groebner_decompose(&kc, &fb, &index_of, &st, &target, m, engine, 20_000);
+                let (f6, stats) =
+                    groebner_decompose_f6_ic(&kc, &fb, &index_of, &st, &target, m, engine, 20_000);
+                assert!(
+                    !base_stats.exhausted && !stats.exhausted,
+                    "m={m}, target={scalar}"
+                );
+                assert_eq!(baseline.is_some(), expected.is_some());
+                assert_eq!(f6.is_some(), expected.is_some(), "m={m}, target={scalar}");
+                assert_eq!(stats.geometric_fallbacks, 0);
+                refutations += stats.geometric_refutations;
+                witnesses += stats.geometric_witnesses;
+                eliminated += stats.eliminated;
+                if let Some(indices) = f6 {
+                    let sum = indices
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                    assert_eq!(sum, target);
+                }
+            }
+        }
+        assert!(
+            refutations > 0 && witnesses > 0,
+            "refutations={refutations}, witnesses={witnesses}, eliminated={eliminated}"
+        );
+        assert!(
+            eliminated > 0,
+            "chain control did not exercise affine definitions"
+        );
+    }
+
+    #[test]
+    fn f6_ic_proves_exact_small_base_misses() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 2).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let engine = SolverEngine::InheritedF4 { max_degree: 3 };
+        let mut missed = 0;
+        for scalar in 1..=32u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            let expected = enumerate_decompose(&kc, &fb, &index_of, &target, 2);
+            let (f6, stats) =
+                groebner_decompose_f6_ic(&kc, &fb, &index_of, &st, &target, 2, engine, 20_000);
+            assert!(!stats.exhausted && !stats.unsupported, "target={scalar}");
+            assert_eq!(f6.is_some(), expected.is_some(), "target={scalar}");
+            missed += usize::from(expected.is_none());
+        }
+        assert!(missed > 0);
+    }
+
+    #[test]
+    fn f6_ic_refutes_x_only_roots_without_a_usable_point_lift() {
+        use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let index_of = fb.index_map();
+        let xs: Vec<_> = (0..16u64)
+            .map(|code| {
+                let mut x = F2mElement::zero(kc.n);
+                for (j, basis) in fb.subspace_basis.iter().enumerate() {
+                    if code & (1 << j) != 0 {
+                        x.add_assign(basis);
+                    }
+                }
+                x
+            })
+            .collect();
+        let perm = [3u32, 2, 1, 0, 7, 6, 5, 4];
+        let mut checked_nonlift = false;
+        let mut checked_missing_support = false;
+        let mut s3_roots = 0usize;
+        for scalar in 1..=100u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            let BinaryPoint::Affine { x: target_x, .. } = &target else {
+                continue;
+            };
+            for (a, x1) in xs.iter().enumerate() {
+                for (b, x2) in xs.iter().enumerate() {
+                    let codes = [a as u64, b as u64];
+                    let mut assignment = vec![None; 8];
+                    for summand in 0..2 {
+                        for bit in 0..4 {
+                            assignment[perm[4 * summand + bit] as usize] =
+                                Some(codes[summand] & (1 << bit) != 0);
+                        }
+                    }
+                    let mut gate =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 2, Some(&perm)).unwrap();
+                    let missing_support = !gate.by_x.contains_key(&x1.to_biguint())
+                        || !gate.by_x.contains_key(&x2.to_biguint());
+                    if missing_support {
+                        assert_eq!(gate.decide(&assignment, 0), NodeOracleDecision::Refute);
+                        checked_missing_support = true;
+                    }
+                    if binary_semaev_s3(
+                        x1,
+                        x2,
+                        target_x,
+                        &F2mElement::one(kc.n),
+                        &kc.curve.irreducible,
+                    )
+                    .is_zero()
+                    {
+                        s3_roots += 1;
+                        // Usable-point filtering can exclude an x-only root
+                        // while leaving its Semaev equation unchanged.
+                        let mut restricted = fb.clone();
+                        restricted.points.retain(
+                            |point| !matches!(point, BinaryPoint::Affine { x, .. } if x == x1),
+                        );
+                        let restricted_index = restricted.index_map();
+                        assert!(lift_candidate(
+                            &kc,
+                            &restricted,
+                            &restricted_index,
+                            &[x1.clone(), x2.clone()],
+                            &target,
+                        )
+                        .is_none());
+                        let mut restricted_gate = F6GeometricGate::new(
+                            &kc,
+                            &restricted,
+                            &restricted_index,
+                            &target,
+                            2,
+                            Some(&perm),
+                        )
+                        .unwrap();
+                        assert_eq!(
+                            restricted_gate.decide(&assignment, 0),
+                            NodeOracleDecision::Refute
+                        );
+                        checked_nonlift = true;
+                    }
+                }
+            }
+        }
+        assert!(checked_missing_support);
+        assert!(
+            checked_nonlift,
+            "no filtered nonlifting S3 root was exercised (s3_roots={s3_roots})"
+        );
+    }
+
+    #[test]
+    fn f6_ic_one_fixed_coordinate_closure_matches_exact_enumeration() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let index_of = fb.index_map();
+        let encoder = F6CoordinateEncoder::new(&fb.subspace_basis).unwrap();
+        let ell = fb.subspace_basis.len();
+        let mut witnessed = 0;
+        let mut refuted = 0;
+        let mut packed_lookups = 0;
+        let mut batch_groups = 0;
+        for scalar in 1..=32u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            for code in 0..(1u64 << ell) {
+                let mut fixed_x = F2mElement::zero(kc.n);
+                for (j, basis) in fb.subspace_basis.iter().enumerate() {
+                    if code & (1 << j) != 0 {
+                        fixed_x.add_assign(basis);
+                    }
+                }
+                for second_bit in [false, true] {
+                    let mut assignment = vec![None; 3 * ell];
+                    for j in 0..ell {
+                        assignment[j] = Some(code & (1 << j) != 0);
+                    }
+                    assignment[ell] = Some(second_bit);
+                    let expected = fb.points.iter().any(|first| {
+                        matches!(first, BinaryPoint::Affine { x, .. } if x == &fixed_x)
+                            && fb.points.iter().any(|second| {
+                                let BinaryPoint::Affine { x, .. } = second else {
+                                    return false;
+                                };
+                                encoder
+                                    .encode(x)
+                                    .is_some_and(|c| ((c & 1) != 0) == second_bit)
+                                    && {
+                                        let sum = kc.add(first, second);
+                                        let third = kc.add(&target, &point_neg(&sum));
+                                        index_of.contains_key(&point_key(&third))
+                                    }
+                            })
+                    });
+                    let mut gate =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                    assert!(gate.fast.is_some());
+                    let decision = gate.decide(&assignment, 0);
+                    packed_lookups += gate.fast_residual_lookups;
+                    batch_groups += gate.batch_groups;
+                    let mut scalar =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                    scalar.batch_fast = false;
+                    assert_eq!(decision, scalar.decide(&assignment, 0));
+                    let mut general =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                    general.fast = None;
+                    assert_eq!(decision, general.decide(&assignment, 0));
+                    assert_eq!(decision == NodeOracleDecision::Witness, expected);
+                    if expected {
+                        witnessed += 1;
+                        let sum = gate
+                            .witness
+                            .unwrap()
+                            .iter()
+                            .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                        assert_eq!(sum, target);
+                    } else {
+                        assert_eq!(decision, NodeOracleDecision::Refute);
+                        refuted += 1;
+                    }
+                }
+            }
+        }
+        assert!(
+            witnessed > 0 && refuted > 0,
+            "witnessed={witnessed}, refuted={refuted}"
+        );
+        assert!(packed_lookups > 0);
+        assert!(batch_groups > 0);
+    }
+
+    #[test]
+    fn f6_ic_pair_index_matches_legacy_closure_with_partial_codes() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let index_of = fb.index_map();
+        let ell = fb.subspace_basis.len();
+        let mut witnessed = 0;
+        let mut refuted = 0;
+        let mut duplicate_sums = false;
+        for scalar in 1..=12u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            for code in 0..(1u64 << ell) {
+                for second_bit in [false, true] {
+                    for third_bit in [None, Some(false), Some(true)] {
+                        let mut assignment = vec![None; 3 * ell];
+                        for j in 0..ell {
+                            assignment[j] = Some(code & (1 << j) != 0);
+                        }
+                        assignment[ell] = Some(second_bit);
+                        assignment[2 * ell] = third_bit;
+                        let mut legacy =
+                            F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                        let expected = legacy.decide(&assignment, 0);
+                        let mut indexed =
+                            F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                        indexed.pair_index_enabled = true;
+                        indexed.one_fixed_additions =
+                            (fb.points.len() * (fb.points.len() + 1)) as u64;
+                        let actual = indexed.decide(&assignment, 0);
+                        assert_eq!(actual, expected, "scalar={scalar}, code={code}");
+                        if indexed.pair_index_builds != 0 {
+                            let table = indexed.pair_index.as_ref().unwrap();
+                            assert_eq!(
+                                table.values().map(Vec::len).sum::<usize>(),
+                                fb.points.len() * (fb.points.len() + 1) / 2
+                            );
+                            duplicate_sums |= table.values().any(|bucket| bucket.len() > 1);
+                        }
+                        if actual == NodeOracleDecision::Witness {
+                            witnessed += 1;
+                            let sum = indexed
+                                .witness
+                                .as_ref()
+                                .unwrap()
+                                .iter()
+                                .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                            assert_eq!(sum, target);
+                        } else {
+                            refuted += 1;
+                        }
+                    }
+                }
+            }
+        }
+        assert!(witnessed > 0 && refuted > 0 && duplicate_sums);
+    }
+
+    #[test]
+    fn f6_coordinate_encoder_reconstructs_nonstandard_basis_codes() {
+        let basis = [
+            F2mElement::from_bit_positions(&[0, 3], 9),
+            F2mElement::from_bit_positions(&[1, 3], 9),
+            F2mElement::from_bit_positions(&[2, 5], 9),
+        ];
+        let encoder = F6CoordinateEncoder::new(&basis).unwrap();
+        for code in 0..8u64 {
+            let mut x = F2mElement::zero(9);
+            for (j, item) in basis.iter().enumerate() {
+                if code & (1u64 << j) != 0 {
+                    x.add_assign(item);
+                }
+            }
+            assert_eq!(encoder.encode(&x), Some(code));
+        }
+        assert_eq!(
+            encoder.encode(&F2mElement::from_bit_positions(&[8], 9)),
+            None
+        );
+    }
+
+    #[test]
+    fn f6_coordinate_encoder_keeps_n83_high_words() {
+        let basis = [
+            F2mElement::from_bit_positions(&[70], 83),
+            F2mElement::from_bit_positions(&[5, 70], 83),
+            F2mElement::from_bit_positions(&[82, 2], 83),
+        ];
+        let encoder = F6CoordinateEncoder::new(&basis).unwrap();
+        for code in 0..8u64 {
+            let mut x = F2mElement::zero(83);
+            for (j, item) in basis.iter().enumerate() {
+                if code & (1u64 << j) != 0 {
+                    x.add_assign(item);
+                }
+            }
+            assert_eq!(encoder.encode(&x), Some(code));
+        }
+        assert_eq!(
+            encoder.encode(&F2mElement::from_bit_positions(&[71], 83)),
+            None
+        );
+    }
+
+    #[test]
     fn pdp_admission_attempt_ledger_retains_unsupported() {
         let kc = KoblitzCurve::new(1, 9).unwrap();
         let target = kc.mul(kc.generator(), &BigUint::from(5u32));
@@ -16312,7 +17742,11 @@ mod subfield_tests {
                 (1, 2, u64::from(a), 1)
             );
             assert_eq!(koblitz.subfield_basis, vec![F2mElement::one(n)]);
-            assert_eq!(koblitz.label(), format!("K_{a} / GF(2^{n})"));
+            assert!(koblitz.label().starts_with(&format!("icv1-f2m{n}-")));
+            assert!(curve_id::same_curve(
+                &koblitz.label(),
+                &format!("K_{a} / GF(2^{n})")
+            ));
             // The factor list and the legacy family are the F_2 ones.
             let masks: Vec<u64> = invariant_factors(&koblitz)
                 .iter()

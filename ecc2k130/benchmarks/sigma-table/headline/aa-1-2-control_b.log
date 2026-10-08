@@ -1,0 +1,60 @@
+packed kernel: 126 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed launch bounds: 256 threads, 2 min blocks
+packed sigma table: 0 (0 dynamic shared bytes)
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 0
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed inline polynomial: 3
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed witness: 0
+packed L2 persist: 0
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed square table: 0
+packed polynomial inversion: 0
+packed profile ranges: 0
+packed table GPU-wide hints: 0
+packed hint scheduling: table fused 0, pipe select 0, chain first 0, inline polynomial 3, phase profile 0, cycle profile 0
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 385024 threads x 16 slots x 1 lanes = 6160384 walks, dp weight 0, 1024 steps per launch
+       2.0 s   15568.239 M it/s  31541166080 iterations         0 dp         0 stored         0 dropped
+       4.1 s   15542.237 M it/s  63082332160 iterations         0 dp         0 stored         0 dropped
+       6.1 s   15535.097 M it/s  94623498240 iterations         0 dp         0 stored         0 dropped
+       8.1 s   15523.700 M it/s  126164664320 iterations         0 dp         0 stored         0 dropped
+      10.2 s   15520.387 M it/s  157705830400 iterations         0 dp         0 stored         0 dropped
+      12.2 s   15520.197 M it/s  189246996480 iterations         0 dp         0 stored         0 dropped
+      14.2 s   15507.231 M it/s  220788162560 iterations         0 dp         0 stored         0 dropped
+      16.3 s   15507.875 M it/s  252329328640 iterations         0 dp         0 stored         0 dropped
+      18.3 s   15508.562 M it/s  283870494720 iterations         0 dp         0 stored         0 dropped
+      20.3 s   15509.532 M it/s  315411660800 iterations         0 dp         0 stored         0 dropped
+      22.4 s   15509.330 M it/s  346952826880 iterations         0 dp         0 stored         0 dropped
+      24.4 s   15509.346 M it/s  378493992960 iterations         0 dp         0 stored         0 dropped
+      26.0 s   15509.419 M it/s  403726925824 iterations         0 dp         0 stored         0 dropped
+  finished: 15509.355 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

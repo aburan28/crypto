@@ -36,6 +36,8 @@ def compact_identity(subdir: Path) -> tuple:
 
 
 def verify(cell_id: str, run_dir: Path, mode: str, relocated: bool = False) -> dict:
+def verify(cell_id: str, run_dir: Path, mode: str,
+           relocated: bool = False) -> dict:
     config, cell = load_cell(cell_id)
     report = json.loads((run_dir / "cold_run.json").read_text())
     assert report["schema"] == "ecc2k130-compact-ir-cold-gap-run-v1"
@@ -147,6 +149,12 @@ def main() -> None:
     assert not args.out.exists(), "never overwrite a cold replay receipt"
     try:
         receipt = verify(args.cell, args.run_dir.resolve(), args.mode, args.relocated)
+                        help="replay an archived run extracted outside its original runner path")
+    args = parser.parse_args()
+    assert not args.out.exists(), "never overwrite a cold replay receipt"
+    try:
+        receipt = verify(args.cell, args.run_dir.resolve(), args.mode,
+                         relocated=args.relocated)
     except BaseException as error:
         receipt = {"status": "FAIL", "error_type": type(error).__name__,
                    "error": str(error), "traceback": traceback.format_exc()}

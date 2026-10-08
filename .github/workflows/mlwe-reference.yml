@@ -1,0 +1,25 @@
+name: MLWE CUDA reference
+on:
+  pull_request:
+    paths:
+      - 'gpu/mlwe/**'
+      - '.github/workflows/mlwe-reference.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cpu-reference:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and check CPU reference
+        run: |
+          g++ -O2 -std=c++17 -Wall -Wextra -pedantic gpu/mlwe/cpu_check.cpp -o /tmp/mlwe_cpu_check
+          /tmp/mlwe_cpu_check
+  cuda-compile:
+    runs-on: ubuntu-24.04
+    container: nvidia/cuda:12.6.3-devel-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile CUDA reference (GPU execution remains pending)
+        run: nvcc -O2 -std=c++17 -arch=sm_80 gpu/mlwe/mlwe_cuda.cu -o /tmp/mlwe_cuda_check

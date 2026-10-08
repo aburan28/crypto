@@ -79,12 +79,151 @@ fn estimate_labels_koblitz_as_ic_relevant() {
     assert_eq!(v["family"], "koblitz");
 }
 
+/// Every binary-field estimate carries the per-`ω` heuristic table with each
+/// bound's characteristic-2 standing; no other field does.
+#[test]
+fn estimate_prices_the_binary_heuristic_at_every_omega_bound() {
+    assert!(run_json(&["estimate", "p256"])["heuristic_index_calculus"].is_null());
+    let list = run_json(&["list"]);
+    let binary: Vec<String> = list["curves"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["field"].as_str().is_some_and(|f| f.starts_with("F_2^")))
+        .map(|c| c["name"].as_str().unwrap().to_string())
+        .collect();
+    assert!(!binary.is_empty());
+    for name in &binary {
+        let h = &run_json(&["estimate", name])["heuristic_index_calculus"];
+        assert_eq!(h["kind"], "model", "{name}");
+        let rows = h["rows"].as_array().unwrap();
+        let standing: Vec<&str> = rows
+            .iter()
+            .map(|r| r["characteristic_2"].as_str().unwrap())
+            .collect();
+        assert_eq!(
+            standing,
+            [
+                "established",
+                "established",
+                "established",
+                "undetermined",
+                "conditional"
+            ],
+            "{name}"
+        );
+        let nine_fourths = &rows[4];
+        assert_eq!(nine_fourths["omega"], 2.25);
+        assert_eq!(nine_fourths["construction"], "existence-only");
+        assert_eq!(nine_fourths["turning_point_n"], 227);
+    }
+}
+
 #[test]
 fn aliases_resolve() {
     // NIST/SEC aliases must map to the canonical curve.
     for (alias, canonical) in [("nistp256", "p256"), ("k-163", "sect163k1")] {
         let v = run_json(&["inspect", alias]);
         assert_eq!(v["curve"]["name"], canonical, "alias {alias}");
+    }
+}
+
+#[test]
+fn validate_actual_nist_parameters_against_independent_sage_reference() {
+    let reference: serde_json::Value =
+        serde_json::from_str(include_str!("../docs/ic/nist-parameter-reference.json")).unwrap();
+    let rows = reference["curves"].as_array().unwrap();
+    assert_eq!(rows.len(), 11, "the frozen NIST coverage panel changed");
+    for row in rows {
+        let name = row["curve"].as_str().unwrap();
+        assert_eq!(row["verified"], true, "Sage reference failed for {name}");
+        let actual = run_json(&["validate", name]);
+        assert_eq!(
+            actual["verified"], true,
+            "parameter validation failed for {name}"
+        );
+        assert_eq!(actual["is_named_curve"], true);
+        assert_eq!(actual["diagnostic_only"], true);
+        assert_eq!(actual["full_parameter_pipeline_available"], false);
+        let inspected = run_json(&["inspect", name]);
+        assert_eq!(
+            inspected["curve"]["exact_parameters"],
+            row["exact_parameters"]
+        );
+        assert_eq!(
+            actual["exact_parameters"], row["exact_parameters"],
+            "parameters {name}"
+        );
+        assert_eq!(
+            actual["fixtures"], row["fixtures"],
+            "point/S3 fixtures {name}"
+        );
+        assert_eq!(
+            actual["binary_diagnostics"], row["binary_diagnostics"],
+            "point lifting and group-law checks {name}"
+        );
+        if name != "p256" {
+            let checks = actual["binary_diagnostics"]["checks"].as_object().unwrap();
+            assert_eq!(checks.len(), 15, "binary coverage changed for {name}");
+            assert!(
+                checks.values().all(|v| v == true),
+                "binary check failed for {name}"
+            );
+        }
+        assert!(
+            actual["fixtures"][1]["u"].as_str().unwrap().len() > 16,
+            "wide public scalar was narrowed for {name}"
+        );
+    }
+}
+
+#[test]
+fn exact_parameter_solve_requests_never_substitute_an_analogue() {
+    for name in [
+        "P-256", "K-163", "K-233", "K-283", "K-409", "K-571", "B-163", "B-233", "B-283", "B-409",
+        "B-571",
+    ] {
+        let out = icx()
+            .args([
+                "run",
+                name,
+                "--require-named-curve",
+                "--envelope",
+                "1024",
+                "--json",
+            ])
+            .output()
+            .expect("run icx");
+        assert!(
+            !out.status.success(),
+            "{name} must not report a full-size solve"
+        );
+        let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(report["status"], "error");
+        assert!(report["message"]
+            .as_str()
+            .unwrap()
+            .contains("full-parameter IC solving is unavailable"));
+        assert!(
+            report.get("result").is_none(),
+            "analogue result leaked for {name}"
+        );
+    }
+}
+
+#[test]
+fn incompatible_or_unrepresentable_analogue_parameters_are_rejected() {
+    for args in [
+        vec!["run", "p256", "--degree", "13"],
+        vec!["run", "k-163", "--bits", "16"],
+        vec!["run", "b-571", "--degree", "571"],
+        vec!["run", "k-163", "--repeats", "0"],
+        vec!["run", "k-163", "--degree", "13"],
+    ] {
+        let out = icx().args(&args).arg("--json").output().unwrap();
+        assert!(!out.status.success(), "ignored invalid arguments: {args:?}");
+        let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(report["status"], "error");
     }
 }
 
@@ -160,7 +299,7 @@ fn fes_worker_path_when_available() {
 fn run_koblitz_analogue_recovers_a_logarithm() {
     // `icx run` on a Koblitz curve executes a small same-family analogue and
     // must recover a verified logarithm, labelled as scaled.
-    let v = run_json(&["run", "sect163k1", "--degree", "13", "--rho-runs", "0"]);
+    let v = run_json(&["run", "sect163k1", "--degree", "11", "--rho-runs", "0"]);
     assert_eq!(v["operation"], "run");
     assert_eq!(v["verified"], true, "koblitz analogue did not verify");
     assert_eq!(v["result"]["analogue"]["family"], "koblitz");
