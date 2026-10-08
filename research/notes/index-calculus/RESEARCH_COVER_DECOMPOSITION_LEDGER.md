@@ -1304,17 +1304,17 @@ pricing; the algorithm is [JV12]'s and §§11–17's).
 
 §18.2's exact census (every weak curve's trace among `2q² + 2q`
 representatives, against `4,000` random full-2-torsion curves) extends
-§17.5.3's `p ≤ 31`.  **In progress.**
+§17.5.3's `p ≤ 31`.  **`p = 37` measured; `p = 41, 43` running.**
 
 | p | q | weak representatives | weak classes | random curves in a weak class | status |
 |--:|--:|--:|--:|--:|:--|
 | 7–31 | | | | 0.528–0.609 | §17.5.3 |
-| 37 | 1,369 | | | | running |
-| 41 | 1,681 | | | | pending |
-| 43 | 1,849 | | | | pending |
+| 37 | 1,369 | 3,751,060 | 24,074 | **0.605** | measured (3,223 s on 12 threads) |
+| 41 | 1,681 | | | | running |
+| 43 | 1,849 | | | | running |
 
 **R1** (the weak-class fraction stays in `[0.50, 0.68]` at `p = 37, 41, 43`)
-is evaluated as the rows land; `p = 31` read `0.609`.  The census at these
+is evaluated as the rows land; `p = 31` read `0.609` and `p = 37` reads `0.605`, inside the band: the series `0.528, 0.592, 0.570, 0.608, 0.618, 0.609, 0.605` at `p = 7 … 37` is flat at `≈ 0.6` from `p = 17` on.  The census is now parallel over representatives (each task its own field context); it reproduces the representative counts exactly, and the class count to within the randomized BSGS group order's sub-1 % error (`122` against `121` weak classes at `p = 7`).  The census at these
 sizes costs hours each (`p = 31` took `3,258` s), and `p = 41, 43` run under
 the §18.2 twelve-hour stop; their rows and §18.3's characterization are the
 remaining pending items of this thread.
