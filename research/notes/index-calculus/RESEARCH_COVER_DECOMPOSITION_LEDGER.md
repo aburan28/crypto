@@ -1095,7 +1095,7 @@ The attack's own question is the second factor: given a curve whose class holds 
 
 `walk / rho ∝ p^{−1.48}` over `p ≥ 53`; `c_jump ∝ p^{0.32}`, `c_curve ∝ p^{0.07}`.
 
-Every walk finds a weak curve, after a median of `3`–`16` distinct curves at every size — not `q/3`, and not growing with `p`.  Inside a weak class the weak curves are not a `3/q` sprinkling: the start's own 2-component holds one `47`–`80 %` of the time.  The whole walk, point count included, costs `1.7×` rho at `p = 7` and falls through parity at `p ≈ 11` to `0.0002×` at `p = 1009`, where the point count (`3·10⁷`) is more than half of it.  Set beside the sieved route of §§14–16 (`0.021×` rho at `p = 1009` on the measured reference; `0.0068`–`0.012×` at `1511`): **for a curve in a weak class, the walk adds about one per cent to the route's cost at `p = 1009`, and the route with the walk inside it still crosses rho near `p ≈ 333`–`371`** (the walk is `0.0038×` at `251` and `0.0027×` at `503`, against the route's `≈ 3×` and `≈ 0.4×` there: the crossover moves by less than the spread between instances in §16).
+Every walk finds a weak curve, after a median of `3`–`16` distinct curves at every size — not `q/3`, and not growing with `p`.  Inside a weak class the weak curves are not a `3/q` sprinkling: the start's own 2-component holds one `47`–`80 %` of the time.  The whole walk, point count included, costs `1.7×` rho at `p = 7` and falls through parity at `p ≈ 11` to `0.0002×` at `p = 1009`, where the point count (`3·10⁷`) is more than half of it.  Set beside the separately measured sieved route of §§14–16 (`0.021×` rho at `p = 1009` on its reference; `0.0068`–`0.012×` at `1511`), the walk stage is about one per cent of that route reference at `p = 1009`.  This is a comparison of separately measured costs on different instances.  Point transport and a complete DLP run from a non-weak curve remain unmeasured in this round, so neither their end-to-end `S` nor their crossover with rho is established.  The walk alone is `0.0038×` rho at `251` and `0.0027×` at `503`, while the earlier route measured `≈ 3×` and `≈ 0.4×` on its own instances.
 
 #### 17.5.5 How far from a weak curve the start is (post hoc; `39_jv_isogeny_walk_v2_weakclass_m64.*`)
 
@@ -1310,7 +1310,7 @@ pricing; the algorithm is [JV12]'s and §§11–17's).
 
 §18.2's exact census (every weak curve's trace among `2q² + 2q`
 representatives, against `4,000` random full-2-torsion curves) extends
-§17.5.3's `p ≤ 31`.  **In progress.**
+§17.5.3's `p ≤ 31`.  **`p = 37` measured; `p = 41, 43` running.**
 
 | p | q | weak representatives | weak classes | random curves in a weak class | status |
 |--:|--:|--:|--:|--:|:--|
@@ -1336,3 +1336,63 @@ the representative bug; corrected p = 23 and 31 reruns are also pending.
 | **37** | **1,369** | **49,284** | **24,352** | **0 / 24,642** | **290 / 24,642** | **0.60825 [0.59303, 0.62327]** |
 
 For `D=t²−4p⁶=f_π²D_K` with `D_K` fundamental, the observed necessary condition for a weak trace is `v₂(f_π)≥2`, equivalently `(t/2)²≡p⁶ (mod 16)` or `t/2≡±p³ (mod 8)`. The equivalence between arithmetic tests is exact; universal necessity of the weak-curve implication is not proved. On held-out p = 37 traces this classifier has TP 24,352, FP 290, FN 0, TN 24,642 (99.41 % accuracy). It is **not sufficient**, so it cannot replace the reach census or seed sieve. Splitting of 2 and maximal-order class-number parity fit worse. A concrete counterexample is p = 37, `t=-92218` (zero weak representatives) versus `t=38854` (24): same Frobenius conductor depth 3, ramified 2, even class-number parity, and identical trace mod `2^17`. The 290 high-depth zero rows concentrate near the Hasse edge (234/290 in its outer fifth), though central zero rows also occur. The requested every-trace p = 41–about 200 census and exact criterion remain open.
+| 7–31 | | | | 0.528–0.609 | §17.5.3 |
+| 37 | 1,369 | 3,751,060 | 24,074 | **0.605** | measured (3,223 s on 12 threads) |
+| 41 | 1,681 | | | | running |
+| 43 | 1,849 | | | | running |
+
+**R1** (the weak-class fraction stays in `[0.50, 0.68]` at `p = 37, 41, 43`)
+is evaluated as the rows land; `p = 31` read `0.609` and `p = 37` reads `0.605`, inside the band: the series `0.528, 0.592, 0.570, 0.608, 0.618, 0.609, 0.605` at `p = 7 … 37` is flat at `≈ 0.6` from `p = 17` on.  The census is now parallel over representatives (each task its own field context); it reproduces the representative counts exactly, and the class count to within the randomized BSGS group order's sub-1 % error (`122` against `121` weak classes at `p = 7`).  The census at these
+sizes costs hours each (`p = 31` took `3,258` s), and `p = 41, 43` run under
+the §18.2 twelve-hour stop; their rows and §18.3's characterization are the
+remaining pending items of this thread.
+
+### 18.6 A candidate rule for the weak classes, registered before its held-out test (2026-10-08)
+
+§18.3's exploration (`--characterize experiments/42_jv_cover_reach_all_curves_small.json`,
+sizes `p = 7, 11, 13, 17, 23`, post hoc) found one feature that nearly separates
+the weak classes among full-2-torsion classes, and none other does (`t mod 3`,
+`t mod 8`, `v₃(D)` and the class-size proxy are flat):
+
+| p | weak share of sampled classes with `v₂(D) = 5` | with `v₂(D) ≥ 6` |
+|--:|--:|--:|
+| 7 | 0.02 (147) | 0.68–1.00 |
+| 11 | 0.00 (511) | 0.67–1.00 |
+| 13 | 0.00 (728) | 0.67–1.00 |
+| 17 | 0.00 (1,025) | 0.93–1.00 |
+| 23 | 0.00 (1,305) | 0.97–1.00 |
+
+with `D = t² − 4q³` the Frobenius discriminant.  The weak set is closed under
+`t ↦ −t` up to the randomized group order's sub-1 % error (`5,568/5,594` at
+`p = 23`), as a rule in `t²` must be.
+
+**Rule R-v2 (candidate).**  A full-2-torsion isogeny class over `F_{q³}`
+holds a weak curve **iff `v₂(t² − 4q³) ≥ 6`**.
+
+*Why it might hold (heuristic, not a proof).*  The norm-one subgroup of
+`F_{q³}^×` has odd order `q² + q + 1`, so a weak curve's Legendre parameter
+`λ`, for the ordering with `N(λ) = 1`, lies in the odd part of `F_{q³}^×`
+and is a `2^k`-th power for every `k`.  Halving the 2-torsion point `(0, 0)`
+of `y² = x(x − 1)(x − λ)` needs `−1` and `−λ` to be squares, and `−1` is a
+square because `q³ ≡ 1 (mod 4)`; so a weak curve carries extra rational
+2-power torsion, which shows in the 2-adic valuation of its Frobenius
+discriminant.
+
+**Held-out test, registered now.**  `p = 19`, never examined by any analysis
+in §§17–18, exact census with `4,000` random full-2-torsion curves.
+
+- **V1 (necessity).**  Every exact weak trace has `v₂(D) ≥ 6`, except at most
+  `1 %` attributable to the randomized group order.  *Falsified if* more
+  than `1 %` of the weak traces have `v₂(D) = 5`.
+- **V2 (sufficiency).**  Among the sampled full-2-torsion classes with
+  `v₂(D) ≥ 7`, at least `95 %` are weak; with `v₂(D) = 6`, at least `85 %`.
+  *Falsified if* below either.
+- **V3 (the reach follows).**  The share of sampled full-2-torsion curves
+  with `v₂(D) ≥ 6` matches the census's reach fraction within `0.03`.
+
+If R-v2 survives, the reach at any `p` is the 2-adic density of
+`v₂(t² − 4q³) ≥ 6` among full-2-torsion curves.  It can then be measured
+from a trace sample alone, without the `2q² + 2q` enumeration, and §18.2's
+`p = 43` hold-out becomes a cheap second test.  If it fails, the
+characterization stays open.  **Class: exploratory → candidate**; nothing
+here is a claim until V1–V3 are read.

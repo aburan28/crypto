@@ -92,6 +92,11 @@ committed source lock. `SOURCE_Cargo.toml` preserves the exact manifest from
 source commit `7039ab0b2940ac55809da62c91361b8082625716`, SHA-256
 `f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721`.
 The current root manifest gained later bins, so using it directly fails the
+historical source lock. Restoring the measured manifest and lockfile before
+the check leaves the old evidence and result unchanged.
+
+```sh
+cp research/notes/ecc2k130/n37_four_policy_sparse16_20261004/SOURCE_Cargo.toml Cargo.toml
 historical source lock. Later commits also changed locked sources (for
 example `src/hash/sha256.rs`) and files the library compiles in
 (`docs/curves/registry.json`, `docs/ecbench/schema.sql`), so the replay

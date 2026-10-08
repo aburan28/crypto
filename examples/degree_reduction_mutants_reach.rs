@@ -144,7 +144,7 @@ fn main() {
                     r.aug_eqs_mean.round() as u32,
                     OMEGA,
                 );
-                let total = (r.log2_extraction_cost.exp2() + solve.exp2()).log2();
+                let total = (r.extraction.log2_mean_cost(OMEGA).exp2() + solve.exp2()).log2();
                 let saving = base - total;
                 let enum_cost = log2_enumeration_cost(r.full_vars, r.n);
                 let margin = enum_cost - total;

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wider implications of the lopsided refutation: audit report (2026-10-06)</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; max-width: 900px; margin: 2em auto; color: #111; line-height: 1.5; }
+h1 { font-size: 1.6em; } h2 { font-size: 1.25em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #f0f0f0; }
+code { font-size: 0.92em; }
+figure { margin: 1.5em 0; } figcaption { font-size: 0.9em; color: #333; margin-top: 0.5em; }
+@media print { body { margin: 1cm; } figure svg { max-height: 200mm; } }
+</style>
+</head>
+<body>
+<h1>Wider implications of the lopsided refutation: audit report (2026-10-06)</h1>
+<p>Questions and method in the <b>protocol</b> (<code>README.md</code>). Rounds 1-2: thin-product interface
+(merged PR #1485) and twelve-target survey (open PR #1493). Status labels: <b>[proposed]</b> /
+<b>[derived]</b> / <b>[verified]</b> / <b>[measured]</b> (none in this round).</p>
+
+<h2>Headline</h2>
+<p><b>Our hardness foundations do not move.</b> The repository's floor is the unconditional generic-group
+bound (Shoup 1997) and its reference is measured rho -- neither cites the refuted hypotheses. The audit finds
+zero load-bearing dependencies on 3SUM/APSP/Exact Triangle hardness, one research-note sentence naming the
+conjecture (repaired in this PR), and a trail of false positives.</p>
+
+<h2>Dependency graph</h2>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" font-family="sans-serif">
+<title>Dependency graph: what the refutation touches and what it cannot reach</title>
+<rect x="0" y="0" width="1200" height="600" fill="#ffffff"/>
+<text x="20" y="28" font-size="17" font-weight="bold">What the refutation touches -- and what it cannot reach</text>
+<text x="20" y="48" font-size="12" fill="#444">Red: refuted hypotheses and downstream external claims. Green: intact ground, including our entire foundation. Grey: false positives.</text>
+
+<rect x="20" y="70" width="540" height="110" rx="8" fill="#ffebee" stroke="#c62828"/>
+<text x="30" y="92" font-size="13" font-weight="bold">REFUTED by arXiv:2610.06783v1</text>
+<text x="30" y="110" font-size="11">integer + real 3SUM, APSP / (min,+) product, Exact Triangle,</text>
+<text x="30" y="126" font-size="11">zero-weight k-Clique, thin-hint Online Matrix-Vector</text>
+<text x="30" y="142" font-size="11">conjectures (Thms 2, 4; Secs. 3-5)</text>
+<text x="30" y="160" font-size="11">downstream: 3SUM/APSP-hardness verdicts, sparse-triangle</text>
+<text x="30" y="176" font-size="11">and dynamic-problem lower bounds built on them</text>
+
+<rect x="640" y="70" width="540" height="110" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="650" y="92" font-size="13" font-weight="bold">INTACT</text>
+<text x="650" y="110" font-size="11">SETH, Orthogonal Vectors, k-SUM/XOR for k at least 4,</text>
+<text x="650" y="126" font-size="11">unhinted OMv, 3SUM-indexing (paper Sec. 1.2, Fig. 1)</text>
+<text x="650" y="142" font-size="11">generic-group / Shoup lower bounds (unconditional) --</text>
+<text x="650" y="160" font-size="11">our floor S = sqrt(pi/2A) + measured rho live here</text>
+
+<rect x="20" y="210" width="360" height="150" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="30" y="232" font-size="12" font-weight="bold">Our core: UNAFFECTED</text>
+<text x="30" y="250" font-size="11">Scoreboard verdict, ledger floors,</text>
+<text x="30" y="266" font-size="11">FRAMEWORK.md, residual-walks note:</text>
+<text x="30" y="282" font-size="11">all rest on the generic floor +</text>
+<text x="30" y="298" font-size="11">measured rho. Zero load-bearing</text>
+<text x="30" y="314" font-size="11">citations of refuted hypotheses</text>
+<text x="30" y="330" font-size="11">(audit receipts in REPORT).</text>
+<text x="30" y="348" font-size="11">No floor, reference, or verdict moves.</text>
+
+<rect x="420" y="210" width="360" height="150" rx="8" fill="#fff8e1" stroke="#f9a825"/>
+<text x="430" y="232" font-size="12" font-weight="bold">Genuine touchpoints (3)</text>
+<text x="430" y="250" font-size="11">1. RR panel sentence naming the</text>
+<text x="430" y="266" font-size="11">conjecture: 1 precision fix (this PR).</text>
+<text x="430" y="282" font-size="11">Conclusion unchanged; refutation</text>
+<text x="430" y="298" font-size="11">added as sharpening.</text>
+<text x="430" y="314" font-size="11">2. Nagao contract: already correct.</text>
+<text x="430" y="330" font-size="11">3. dense_3sum metric: historical</text>
+<text x="430" y="348" font-size="11">measurement, stands as data.</text>
+
+<rect x="820" y="210" width="360" height="150" rx="8" fill="#f5f5f5" stroke="#757575"/>
+<text x="830" y="232" font-size="12" font-weight="bold">False positives (no action)</text>
+<text x="830" y="250" font-size="11">b3sum (BLAKE3 tooling), getRandomValues,</text>
+<text x="830" y="266" font-size="11">Sethi-Ullman scheduling, token/timing</text>
+<text x="830" y="282" font-size="11">scopes, matvec substrings, relation-</text>
+<text x="830" y="298" font-size="11">weight "zero-weight", "conditional"</text>
+<text x="830" y="314" font-size="11">as premise-relative accounting.</text>
+
+<rect x="20" y="390" width="1160" height="190" rx="8" fill="#e3f2fd" stroke="#1565c0"/>
+<text x="30" y="412" font-size="13" font-weight="bold">Method implications [proposed, not imposed]</text>
+<text x="30" y="434" font-size="11">1. Machine-found identities need machine-checkable certificates: the paper was discovered by Claude and verified in Lean 4/Mathlib.</text>
+<text x="30" y="450" font-size="11">We already do this for runs (replay receipts, sealed records); the gap is algebraic-identity claims. Proposal: identity claims ship a checker-replayable</text>
+<text x="30" y="466" font-size="11">certificate (Lean proof, or seeded independent re-evaluation) beside the claim. Next action: a follow-up PR writes the format into the study template.</text>
+<text x="30" y="488" font-size="11">2. Reductions are algorithms -- screen transfers on arrival via screen_workload (round 2), cited in future protocols, not this report.</text>
+<text x="30" y="504" font-size="11">3. Tiny-exponent polynomial gains do not move our verdicts by design: end-to-end S vs rho is exactly the filter such results must pass. Confirmatory, no change.</text>
+<text x="30" y="520" font-size="11">4. Watch the general regime (eps below 0.1204, paper Sec. 4), not just the concrete 1/18 line in the gate. Kept open from round 2.</text>
+<text x="30" y="552" font-size="11">Audit headline: no floor, reference, or verdict depends on a refuted hypothesis. A tree-wide hit showing otherwise would overturn this; the receipts above are the search that found none.</text>
+</svg>
+<figcaption>Figure 1 -- what the refutation touches and what it cannot reach. Green: intact. Red: refuted
+plus the one sentence repaired. Grey: false positives. Editable source: <code>figure.mmd</code>.</figcaption>
+</figure>
+
+<h2>Audit table</h2>
+<table>
+<tr><th>Hit</th><th>Context (quoted)</th><th>Classification [derived]</th></tr>
+<tr><td>RR solver panel, Secs. 8-9</td><td>"Finding P1+P2+P3 = R ... is 3SUM over a group ... 3SUM hardness is a conjecture about <i>generic</i> sets"</td><td><b>Repaired (this PR)</b>: integer 3SUM now refuted, but no transfer to curve-point decomposition exists; curve-point analogue stays conjectural; conclusion unchanged</td></tr>
+<tr><td>Nagao solver_15 contract</td><td>"...an oracle that exploits the algebraic structure of F rather than re-indexing a generic 3SUM search over it"</td><td><b>Already correct</b>: demands structure over generic search; refutation does not weaken it</td></tr>
+<tr><td><code>dense_3sum_wall_bits: 80</code>, boundary_targets.json</td><td>Historical wall clock of our own dense 3-sum enumeration (superseded rows)</td><td><b>Historical measurement, unaffected</b>: data, not assumption</td></tr>
+<tr><td><code>matrix-vector</code> (ic_boundary, stages, pq_wiedemann, FRAMEWORK)</td><td>Wiedemann/matvec operation counts</td><td><b>False positive</b>: sparse matvecs, not the OMv conjecture</td></tr>
+<tr><td><code>b3sum</code>, <code>getRandomValues</code>, Sethi-Ullman, token/timing scopes</td><td>Build manifests, web API, scheduling, API scopes, side channels</td><td><b>False positives</b>: unrelated word senses</td></tr>
+<tr><td>"conditional ... bound" on the scoreboard</td><td>Premise-relative component/counting bounds</td><td><b>Already correct</b>: not fine-grained-conditional hardness</td></tr>
+<tr><td>Scoreboard verdict, FRAMEWORK, ledger floors</td><td>"generic-group floor and matched rho reference"; S = sqrt(pi/2A); Shoup 1997</td><td><b>Unaffected (unconditional)</b>: no floor, reference, or verdict moves</td></tr>
+</table>
+
+<h2>Method implications [proposed]</h2>
+<ol>
+<li><b>Machine-found identities need machine-checkable certificates.</b> Paper discovered by Claude, verified in
+Lean 4/Mathlib. We do this for runs (replay receipts); the gap is algebraic-identity claims. Proposal: identity
+claims ship a checker-replayable certificate beside the claim. Next action: follow-up PR writes the format into
+the study template.</li>
+<li><b>Screen transfers on arrival</b> via <code>screen_workload</code> (round 2) in future protocols.</li>
+<li><b>Tiny-exponent gains do not move our verdicts by design</b> -- end-to-end S vs rho is the filter. Confirmatory.</li>
+<li><b>Watch the general regime</b> (eps below 0.1204, paper Sec. 4). Kept open from round 2.</li>
+</ol>
+
+<h2>Boundary, table, ratio</h2>
+<ul>
+<li>Boundaries unchanged and unchangeable by the refutation (unconditional vs conditional).</li>
+<li>No table row produced: audit classifications are not DLP answers.</li>
+<li>Falsification target: a tree-wide hit showing dependence on a refuted hypothesis. The receipts are the search that found none.</li>
+<li>All phases unpriced (<code>null</code>); wall time appears nowhere.</li>
+</ul>
+
+<h2>Graphs checked -- no change [verified by inspection]</h2>
+<ul>
+<li>Scoreboard + progress-timeline: verdict rests on the generic floor.</li>
+<li>Leaderboard files, browser data, curve registry: nothing landed.</li>
+<li>Only non-study changes: the one-sentence RR-panel repair and the round-1 figure.svg encoding repair, both disclosed.</li>
+</ul>
+
+<h2>Sources</h2>
+<ul>
+<li>Paper: <a href="https://arxiv.org/pdf/2610.06783">https://arxiv.org/pdf/2610.06783</a> (v1).</li>
+<li>Rounds 1-2: <code>research/lopsided_thin_product_20261006/</code>, <code>research/lopsided_other_speedups_20261006/</code>.</li>
+</ul>
+</body>
+</html>

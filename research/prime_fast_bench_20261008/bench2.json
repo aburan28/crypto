@@ -1,0 +1,200 @@
+{
+  "host": {
+    "arch": "aarch64",
+    "os": "macos",
+    "threads": 14
+  },
+  "results": [
+    {
+      "biguint_ns": 133.67499999999998,
+      "bits": 28,
+      "fast_ns": 10.226875,
+      "op": "mul",
+      "section": "micro"
+    },
+    {
+      "biguint_ns": 19612.5625,
+      "bits": 28,
+      "fast_ns": 1921.7666499999998,
+      "op": "inv",
+      "section": "micro"
+    },
+    {
+      "bits": 28,
+      "fast_ns": 223.962197265625,
+      "op": "inv_batched_1024",
+      "section": "micro"
+    },
+    {
+      "biguint_ns": 568.1175,
+      "bits": 61,
+      "fast_ns": 9.957919999999998,
+      "op": "mul",
+      "section": "micro"
+    },
+    {
+      "biguint_ns": 177097.8333,
+      "bits": 61,
+      "fast_ns": 626.8707999999999,
+      "op": "inv",
+      "section": "micro"
+    },
+    {
+      "bits": 61,
+      "fast_ns": 16.875815429687503,
+      "op": "inv_batched_1024",
+      "section": "micro"
+    },
+    {
+      "biguint_ns": 25923.0333,
+      "curve": "28-bit ladder",
+      "fast_batched_ns": 132.726845703125,
+      "fast_ns": 464.3625,
+      "op": "affine_add",
+      "section": "micro"
+    },
+    {
+      "biguint_ns": 99862.6917,
+      "curve": "56-bit generated",
+      "fast_batched_ns": 64.1153955078125,
+      "fast_ns": 1003.56045,
+      "op": "affine_add",
+      "section": "micro"
+    },
+    {
+      "baseline_wall_s": 0.073020083,
+      "bits": 16,
+      "curve": "a3-bench-16bit-p256class",
+      "dp_bits": 0,
+      "fast_steps_median": 192.0,
+      "fast_steps_per_s": 6656.302249372539,
+      "fast_wall_s": 0.0289355,
+      "n": 65447,
+      "p": 65519,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 1,
+      "walkers": 32
+    },
+    {
+      "baseline_wall_s": 0.36900275,
+      "bits": 20,
+      "curve": "a3-bench-20bit-p256class",
+      "dp_bits": 1,
+      "fast_steps_median": 864.0,
+      "fast_steps_per_s": 26298.602227287152,
+      "fast_wall_s": 0.034064375,
+      "n": 1048189,
+      "p": 1048571,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 1,
+      "walkers": 32
+    },
+    {
+      "baseline_wall_s": 6.045263458,
+      "bits": 24,
+      "curve": "a3-bench-24bit-p256class",
+      "dp_bits": 3,
+      "fast_steps_median": 5096.0,
+      "fast_steps_per_s": 48889.17669801388,
+      "fast_wall_s": 0.100653625,
+      "n": 16782299,
+      "p": 16777199,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 1,
+      "walkers": 56
+    },
+    {
+      "baseline_wall_s": 22.6589575,
+      "bits": 28,
+      "curve": "a3-bench-28bit-p256class",
+      "dp_bits": 3,
+      "fast_steps_median": 23175.0,
+      "fast_steps_per_s": 159926.22031774776,
+      "fast_wall_s": 0.048614625,
+      "n": 268407199,
+      "p": 268435399,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 3,
+      "walkers": 75
+    },
+    {
+      "baseline_wall_s": null,
+      "bits": 32,
+      "curve": "a3-fast-32bit-p256class",
+      "dp_bits": 3,
+      "fast_steps_median": 50048.0,
+      "fast_steps_per_s": 406816.30935753183,
+      "fast_wall_s": 0.096772875,
+      "n": 4294959973,
+      "p": 4294967291,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 14,
+      "walkers": 64
+    },
+    {
+      "baseline_wall_s": null,
+      "bits": 36,
+      "curve": "a3-fast-36bit-p256class",
+      "dp_bits": 3,
+      "fast_steps_median": 355348.0,
+      "fast_steps_per_s": 1962208.7998936432,
+      "fast_wall_s": 0.139959917,
+      "n": 68719022539,
+      "p": 68719476731,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 14,
+      "walkers": 259
+    },
+    {
+      "baseline_wall_s": null,
+      "bits": 40,
+      "curve": "a3-fast-40bit-p256class",
+      "dp_bits": 3,
+      "fast_steps_median": 332800.0,
+      "fast_steps_per_s": 1362023.267556436,
+      "fast_wall_s": 0.244342375,
+      "n": 1099512551701,
+      "p": 1099511627563,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 14,
+      "walkers": 1024
+    },
+    {
+      "baseline_wall_s": null,
+      "bits": 44,
+      "curve": "a3-fast-44bit-p256class",
+      "dp_bits": 5,
+      "fast_steps_median": 4243456.0,
+      "fast_steps_per_s": 3155316.752554211,
+      "fast_wall_s": 1.344858958,
+      "n": 17592192476281,
+      "p": 17592186044399,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 14,
+      "walkers": 1024
+    },
+    {
+      "baseline_wall_s": null,
+      "bits": 48,
+      "curve": "a3-fast-48bit-p256class",
+      "dp_bits": 7,
+      "fast_steps_median": 20463616.0,
+      "fast_steps_per_s": 11610928.517877266,
+      "fast_wall_s": 1.723829375,
+      "n": 281474991897067,
+      "p": 281474976710591,
+      "section": "rho",
+      "seeds": 3,
+      "threads": 14,
+      "walkers": 1024
+    }
+  ]
+}

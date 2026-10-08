@@ -1,0 +1,198 @@
+digraph sect113r1_weak_curve_audit {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.30",
+    nodesep="0.46",
+    ranksep="0.60",
+    splines=polyline,
+    fontname="DejaVu Sans",
+    fontsize=14,
+    labelloc="t",
+    label="sect113r1 weak-curve audit — exact pre-admission diagnostic outcome\nNOT AN ADMITTED SCIENTIFIC RUN · semantic certificate SHA-256 1cf4a3733e98c6acdc2219c24f29c15771fc67578bdb33dd426ab643e12572d8"
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#f8fafc",
+    color="#475569",
+    fontname="DejaVu Sans",
+    fontsize=10,
+    margin="0.13,0.09"
+  ];
+  edge [fontname="DejaVu Sans", fontsize=8, color="#475569", arrowsize=0.7];
+
+  source [
+    shape=box3d,
+    fillcolor="#dbeafe",
+    color="#1d4ed8",
+    label="[EXACT · PRE-ADMISSION DIAGNOSTIC] VALID SOURCE\nsect113r1 over GF(2^113)\nN=10384593717069655379671765157661406=2n\nn=5192296858534827689835882578830703 prime\ntrace=-122610772499221213\nICV1 (join wrapped lines without spaces):\nICV1:f2m-113-99967757:\n-122610772499221213:\n10384593717069655379671765157661406:\n0x6942e38fc45c62366c09aa8204cd:\nunk:unk:r:97df4ac684cb\nUID suffix 9fd94d97"
+  ];
+
+  subgraph cluster_class {
+    label="Class-wide analytic lane";
+    color="#60a5fa";
+    penwidth=1.4;
+    style="rounded";
+
+    certs [
+      fillcolor="#eff6ff",
+      color="#2563eb",
+      label="[EXACT · DIAGNOSTIC] Arithmetic certificates PASS\nz^113+z^9+1 irreducible\nG exact order n; n prime; Hasse-unique N\nexact trace and fundamental D_pi\nembedding degree=(n-1)/2; no F2 representative\nord_113(2)=28; GHS magic/type/genus uncomputed"
+    ];
+    generic [
+      fillcolor="#fef3c7",
+      color="#b45309",
+      label="[MODELED] Generic collision work\nexpected rho log2=56.325748\n95% birthday quantile log2=57.291454\nnegation-optimized rho log2=55.825379\nfrozen classical policy threshold=80 bits"
+    ];
+    prior_art [
+      fillcolor="#fff7ed",
+      color="#c2410c",
+      label="[EXTERNAL] Wenger–Wolfger\nePrint 2015/143 reports full sect113r1 DLP\nabout 2.5 months on ten Kintex-7 FPGAs\nnot measured here"
+    ];
+    class_result [
+      fillcolor="#fee2e2",
+      color="#b91c1c",
+      penwidth=1.7,
+      label="DIAGNOSTIC CLASSIFICATION: CLASS_WEAK\nlegacy subgroup size / generic attack\nclass-wide baseline; NOT a new algebraic or isogeny break"
+    ];
+
+    certs -> generic [color="#2563eb", penwidth=1.4, label="certified n"];
+    generic -> class_result [
+      constraint=false,
+      color="#b91c1c",
+      penwidth=1.5,
+      label="below frozen threshold"
+    ];
+    generic -> prior_art [style=invis, weight=80];
+    prior_art -> class_result [color="#c2410c", style=dashed, label="external corroboration"];
+  }
+
+  subgraph cluster_valid {
+    label="Valid degree-5 isogeny lane — two exact transports, no representative speedup";
+    color="#22c55e";
+    penwidth=1.4;
+    style="rounded";
+
+    frob5 [
+      fillcolor="#ecfdf5",
+      color="#15803d",
+      label="[EXACT · DIAGNOSTIC] psi_5 / Frobenius certification\ngcd degrees over q,q^2,q^4 = 2,4,12\nexactly two rational degree-5 kernel lines"
+    ];
+
+    endpoint_a [
+      fillcolor="#ecfdf5",
+      color="#15803d",
+      label="[EXACT · DIAGNOSTIC] DEGREE-5 MAP A\nVALID ENDPOINT A\nICV1 (join wrapped lines without spaces):\nICV1:f2m-113-99967757:\n-122610772499221213:\n10384593717069655379671765157661406:\n0xb1df3d9c423aa919217735a6d6ba:\nunk:unk:r:fd54d0ebcd45\nUID suffix b97616c6\nb=0x0109267245489e254e8f14002629a1\nkernel SHA-256 14f04e52…637a43a5\ndual SHA-256 b3ea0c7e…f3b64d28\nforward target homomorphism; dual ∘ map=[5]\non G and target; exact target pullback\nTRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+    ];
+
+    endpoint_b [
+      fillcolor="#ecfdf5",
+      color="#15803d",
+      label="[EXACT · DIAGNOSTIC] DEGREE-5 MAP B\nVALID ENDPOINT B\nICV1 (join wrapped lines without spaces):\nICV1:f2m-113-99967757:\n-122610772499221213:\n10384593717069655379671765157661406:\n0x17ef6a3b098891f6b4c529b62f0dd:\nunk:unk:r:5de3030fefcc\nUID suffix 19f19386\nb=0x0162b1a595685a1387c82647bf44cf\nkernel SHA-256 75c8d794…b0d0ccb2\ndual SHA-256 335fc848…fecd47bf\nforward target homomorphism; dual ∘ map=[5]\non G and target; exact target pullback\nTRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+    ];
+
+    transfer_only [
+      fillcolor="#dcfce7",
+      color="#15803d",
+      penwidth=1.7,
+      label="VALID ISOGENY RESULT\ntwo certified degree-5 routes preserve the prime-order subgroup\nTRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED on both endpoints\nno codomain DLP solve or representative-specific weakness"
+    ];
+
+    frob5 -> endpoint_a [color="#15803d", penwidth=1.5, label="kernel A"];
+    frob5 -> endpoint_b [
+      constraint=false,
+      color="#15803d",
+      penwidth=1.5,
+      label="kernel B"
+    ];
+    endpoint_a -> endpoint_b [style=invis, weight=90];
+    endpoint_a -> transfer_only [
+      constraint=false,
+      color="#15803d",
+      penwidth=1.5,
+      label="exact map + dual replay"
+    ];
+    endpoint_b -> transfer_only [color="#15803d", penwidth=1.5, label="exact map + dual replay"];
+  }
+
+  subgraph cluster_invalid {
+    label="Implementation-input lane — singular and wrong-subgroup objects are not valid isogenous representatives";
+    color="#c084fc";
+    penwidth=1.4;
+    style="rounded";
+
+    singular [
+      fillcolor="#f3e8ff",
+      color="#7e22ce",
+      label="[EXACT · DIAGNOSTIC]\nSINGULAR SAME-a COMPANION\ny^2+xy=x^3+a x^2; b=0; discriminant=0\nR=(a,0) off sect113r1; exact order q+1\nq+1=3·227·48817·636190001\n·491003369344660409\nindependent torus law agrees\nexhaustive GF(2^8) control passes\nNO ICV1 / EC1 / curve UID\nnot an elliptic curve"
+    ];
+    demo [
+      fillcolor="#f3e8ff",
+      color="#7e22ce",
+      label="[EXACT · DIAGNOSTIC]\nONE-CALL PLANTED DEMO RECOVERY\nd_demo=6599291615786184\nBSGS on 3, 227, 48817, 636190001 + CRT\nrecovered d_demo exactly\nfinal nominal public-key replay PASS"
+    ];
+    full_width [
+      fillcolor="#fef3c7",
+      color="#b45309",
+      label="FULL-WIDTH CONTROL — PARTIAL ONLY\n[EXACT · DIAGNOSTIC] one call; frozen vector PASS\nresidue 13735027495063591\nmodulo 21149740236874377\n[EXACT STATUS] remaining 59-bit prime\n491003369344660409 NOT EXECUTED\n[MODELED] remaining rho log2=29.710003"
+    ];
+    impl [
+      fillcolor="#fee2e2",
+      color="#b91c1c",
+      penwidth=1.7,
+      label="DIAGNOSTIC CLASSIFICATION\nCONDITIONAL_IMPLEMENTATION_WEAK\nconditional on attacker-selected BinaryPoint\nreaching unchecked scalar_mul with\ndistinguishable full-point output\nno production exposure asserted"
+    ];
+    controls [
+      fillcolor="#dcfce7",
+      color="#15803d",
+      label="[EXACT · DIAGNOSTIC]\nVALIDATION-PREDICATE CONTROLS\npredicate rejects singular R\npredicate rejects exact order-2 T=(0,sqrt(b))\nunchecked T makes scalar parity observable\n(no checked multiplier integration asserted)"
+    ];
+
+    singular -> demo [color="#7e22ce", penwidth=1.5, label="one actual unchecked multiplier call"];
+    singular -> controls [color="#b45309", penwidth=1.3, label="input-validation tests"];
+    demo -> full_width [color="#7e22ce", penwidth=1.4, label="separate full-width fixture"];
+    demo -> impl [color="#b91c1c", penwidth=1.5, label="exact recovery + replay"];
+    controls -> impl [color="#15803d", style=dashed, label="scope boundary"];
+  }
+
+  twist [
+    fillcolor="#fff7ed",
+    color="#c2410c",
+    label="QUADRATIC-TWIST CONTROL — OFF CLASS\n[EXACT · DIAGNOSTIC]\norder=10384593717069655134450220159218980\nexact factorization; largest prime\n4690844705882931102817 certified prime\n[MODELED] generic rho log2=36.320917\nOFF_CLASS_CONTROL\nNOT_AN_ISOGENOUS_REPRESENTATIVE"
+  ];
+
+  source -> certs [color="#2563eb", penwidth=1.7, label="exact source arithmetic"];
+  source -> frob5 [color="#15803d", penwidth=1.7, label="valid 5-isogeny extraction"];
+
+  // Layout-only constraints keep the report rendering readable: class and
+  // valid-isogeny evidence share the first row; invalid-input and twist
+  // controls follow beneath them.
+  class_result -> singular [style=invis, weight=80, minlen=2];
+  transfer_only -> singular [
+    style=dashed,
+    color="#dc2626",
+    fontcolor="#b91c1c",
+    penwidth=2,
+    weight=100,
+    minlen=2,
+    label="singular formula control\nNOT an isogeny"
+  ];
+  transfer_only -> twist [
+    style=dashed,
+    color="#c2410c",
+    penwidth=1.6,
+    weight=70,
+    minlen=2,
+    label="different trace and order\nNOT the source isogeny class"
+  ];
+  impl -> legend [style=invis, weight=80, minlen=1];
+  twist -> legend [style=invis, weight=60, minlen=1];
+
+  legend [
+    shape=note,
+    fillcolor="#ffffff",
+    color="#94a3b8",
+    label="EVIDENCE LEGEND\n[EXACT · DIAGNOSTIC] deterministic native\narithmetic or replay in the pre-admission certificate\n[EXACT STATUS] recorded execution/non-execution fact\n[MODELED] analytic work factor; not observed runtime\nor a recovered component\n[EXTERNAL] cited publication; not measured here\nblue=source/class arithmetic\ngreen=valid isogeny transfer\npurple=singular algebra\norange=off-class/control or modeled estimate\nred dashed=forbidden equivalence inference\nPRE-ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES\nno admitted run or independent verdict"
+  ];
+}

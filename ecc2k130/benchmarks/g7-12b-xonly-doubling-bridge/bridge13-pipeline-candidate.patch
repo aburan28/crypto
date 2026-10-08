@@ -1,0 +1,95 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/packedxonly23.cuh	2026-09-17 22:44:44.372088551 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh	2026-09-17 22:51:27.267085804 +0000
+@@ -56,9 +56,9 @@
+     }
+ #endif
+     P131 prod, inv;
+-#pragma unroll 1
+-    for (int step = 0; step < p.steps; ++step) {
+-        const unsigned long long now = p.iterBase + step;
++    // Prime the classification pipeline with the launch's initial state.
++    if (p.steps > 0) {
++        const unsigned long long now = p.iterBase;
+         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+ 
+         // Classify first so warp 0 can materialize only rare rational data
+@@ -115,6 +115,10 @@
+         bridgeMasks131[threadIdx.x] =
+             static_cast<unsigned char>(localBridgeMask);
+         __syncthreads();
++    }
++#pragma unroll 1
++    for (int step = 0; step < p.steps; ++step) {
++        const unsigned long long now = p.iterBase + step;
+ 
+         // Rare arithmetic has a separate lifetime and is executed by one warp.
+         if (threadIdx.x < 32) {
+@@ -147,6 +151,10 @@
+             }
+         }
+         __syncthreads();
++        if (step + 1 < p.steps) {
++            if (threadIdx.x == 0) bridgeCount131 = 0;
++            __syncthreads();
++        }
+ #if ECC_PACKED_LAST_SLOT_CACHE
+         P131 lastDenominator{};
+ #if ECC_PACKED_LAST_SLOT_CACHE == 2
+@@ -231,6 +239,7 @@
+ 
+         // Inactive threads still enter the block-wide inverse collectives.
+         inv = blockInverse131<(ECC_PACKED_BATCH_SPLIT == 2)>(prod, inverseTree);
++        unsigned nextBridgeMask = 0;
+         if (active) {
+ #pragma unroll 1
+             for (int localSlot = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1;
+@@ -299,8 +308,48 @@
+ #else
+                 store(p.x, slot, tid, p.threads, nx);
+ #endif
++                if (step + 1 < p.steps) {
++                    const P131 normalX = fromPolynomial131(nx);
++                    const int hw = weight(normalX);
++                    const unsigned long long nextNow = now + 1;
++                    const bool nextGuard = p.maxIters &&
++                        nextNow % ECC_GUARD_PERIOD == 0;
++                    const size_t id = size_t(slot) * p.threads + tid;
++                    if (!p.dead[id]) {
++                        if (hw <= p.dpWeight) {
++                            if ((p.seed[id] & 0xffffull) == 0xffffull)
++                                atomicAdd(p.dpCount + 2, 1u);
++                            const unsigned dest = atomicAdd(p.dpCount, 1u);
++                            if (dest < p.dpCap) {
++                                DpRecord rec{};
++                                rec.seed = p.seed[id];
++                                rec.iters = nextNow - p.startIter[id];
++                                toLimbs(normalX, rec.x);
++                                p.dp[dest] = rec;
++                            }
++                            p.dead[id] = 1;
++                        } else if (nextGuard &&
++                                   nextNow - p.startIter[id] >= p.maxIters) {
++                            if ((p.seed[id] & 0xffffull) == 0xffffull)
++                                atomicAdd(p.dpCount + 2, 1u);
++                            p.dead[id] = 1;
++                            atomicAdd(p.dpCount + 1, 1u);
++                        }
++                    }
++                    if (ECC_PACKED_XONLY_BRIDGE3 && (hw & 31) == 14) {
++                        nextBridgeMask |= 1u << localSlot;
++                        const unsigned event = atomicAdd(&bridgeCount131, 1u);
++                        bridgeQueue131[event] = static_cast<unsigned short>(
++                            localSlot * ECC_THREADS + threadIdx.x);
++                    }
++                }
+             }
+         }
++        if (step + 1 < p.steps) {
++            bridgeMasks131[threadIdx.x] =
++                static_cast<unsigned char>(nextBridgeMask);
++            __syncthreads();
++        }
+     }
+ #if ECC_PACKED_SHARED_X_SLOTS
+     if (active && p.steps > 0) {

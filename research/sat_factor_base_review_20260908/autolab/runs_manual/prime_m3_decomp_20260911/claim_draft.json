@@ -1,0 +1,108 @@
+{
+  "beat_id": "prime.decomposition.m3_gbrl_probe",
+  "claim_boundary": "Public synthetic Semaev m=3 Buchberger probe in gbrl only.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not 14-bit curve-order claim",
+    "not FFD/DoR measurement",
+    "not ledger promotion"
+  ],
+  "created_at": "2026-09-11T07:15:24.293841+00:00",
+  "dimension_l_or_dim": 6,
+  "eq_var_ratio": 1.3333333333333333,
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_m3_decomp_20260911/m3_decomp_bench.jsonl"
+  ],
+  "executable_or_source_hash": {
+    "source": "e4a5a8320ff713bfdb4af602c2b3d52e6915cd7c2b6b6c41718361d6ed6bd032"
+  },
+  "ffd_or_degree_of_regularity": {
+    "reason": "gbrl F4/Macaulay FFD path unimplemented; Buchberger cost only",
+    "status": "unmeasured"
+  },
+  "fixture_hash": "e4a5a8320ff713bfdb4af602c2b3d52e6915cd7c2b6b6c41718361d6ed6bd032",
+  "host_id": {
+    "node": "Adams-MacBook-Pro.local"
+  },
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_m3_decomp_20260911/claim_draft.json",
+  "ladder": [
+    {
+      "arith_ops": 2242,
+      "basis_len": 22,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 45,
+      "done": true,
+      "eqs": 4,
+      "fb_size": 3,
+      "ffd_reason": "gbrl F4/Macaulay FFD path unimplemented; Buchberger cost only",
+      "ffd_status": "unmeasured",
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 9.940875
+    },
+    {
+      "arith_ops": 4060,
+      "basis_len": 52,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 116,
+      "done": true,
+      "eqs": 4,
+      "fb_size": 4,
+      "ffd_reason": "gbrl F4/Macaulay FFD path unimplemented; Buchberger cost only",
+      "ffd_status": "unmeasured",
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 14.737791
+    },
+    {
+      "arith_ops": 9726,
+      "basis_len": 104,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 250,
+      "done": true,
+      "eqs": 4,
+      "fb_size": 5,
+      "ffd_reason": "gbrl F4/Macaulay FFD path unimplemented; Buchberger cost only",
+      "ffd_status": "unmeasured",
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 38.620333
+    },
+    {
+      "arith_ops": 24251,
+      "basis_len": 184,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 459,
+      "done": true,
+      "eqs": 4,
+      "fb_size": 6,
+      "ffd_reason": "gbrl F4/Macaulay FFD path unimplemented; Buchberger cost only",
+      "ffd_status": "unmeasured",
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 150.83525
+    }
+  ],
+  "largest_solvable": {
+    "buchberger_steps": 459,
+    "fb_size": 6,
+    "field": "F_1000003",
+    "note": "toy fixed prime field; not 14-bit j=0 curve order",
+    "wall_ms": 150.83525
+  },
+  "m_summands": 3,
+  "median_ms_per_target": 150.83525,
+  "n_or_bits": 20,
+  "oracle_class": "groebner",
+  "regime": "prime",
+  "resource_caps": {},
+  "schema_version": 2,
+  "seeds": {
+    "gbrl_semaev3": "fixed_x_r_24990"
+  },
+  "stage": "decomposition",
+  "system_degree": "20",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "unknowns": 3,
+  "verdict": "M3_BUCHBERGER_LADDER_PASS_FFD_UNMEASURED_NOT_14BIT_CURVE"
+}

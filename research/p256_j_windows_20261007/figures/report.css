@@ -1,0 +1,90 @@
+@page {
+  size: Letter;
+  margin: 0.65in 0.62in 0.7in;
+}
+
+html {
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  color: #202b38;
+  font-size: 10.2pt;
+  line-height: 1.38;
+}
+
+body {
+  max-width: none;
+  margin: 0;
+}
+
+h1 {
+  color: #17324d;
+  font-size: 22pt;
+  line-height: 1.15;
+  margin: 0 0 0.24in;
+}
+
+h2 {
+  break-after: avoid;
+  color: #234f73;
+  font-size: 15pt;
+  margin-top: 0.28in;
+  border-bottom: 1px solid #d7e0e8;
+  padding-bottom: 0.04in;
+}
+
+p, li {
+  orphans: 3;
+  widows: 3;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 8.3pt;
+  margin: 0.12in 0 0.18in;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tr {
+  break-inside: avoid;
+}
+
+th, td {
+  border: 1px solid #cbd6df;
+  padding: 0.055in;
+  vertical-align: top;
+}
+
+th {
+  background: #edf3f7;
+  color: #17324d;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  max-height: 8.2in;
+  margin: 0.12in auto 0.2in;
+  break-inside: avoid;
+}
+
+code {
+  overflow-wrap: anywhere;
+  font-size: 0.91em;
+}
+
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f5f7f9;
+  border: 1px solid #dce3e8;
+  padding: 0.1in;
+  font-size: 7.8pt;
+}
+
+a {
+  color: #1d6596;
+  text-decoration: none;
+}

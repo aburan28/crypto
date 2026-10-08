@@ -1,0 +1,136 @@
+{
+  "count": 12,
+  "field_degree": 53,
+  "fixtures": [
+    {
+      "fixture_scalar": "14670575928188",
+      "label": "T001",
+      "public_point": [
+        3599239148257784,
+        7952440697411652
+      ],
+      "scalar_derivation_sha256": "f048c76dd88ee4a198636af226ab5851f54c24aa0bdc55ce3e388368f4343bbb",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "2870639215557",
+      "label": "T002",
+      "public_point": [
+        7394500218286569,
+        2407903721675014
+      ],
+      "scalar_derivation_sha256": "0953f48b55f293aa62eeb9ba2168398926896482e0c3209fc7c92fd490d51d84",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "428069317639",
+      "label": "T003",
+      "public_point": [
+        8918160076460922,
+        2470284238605596
+      ],
+      "scalar_derivation_sha256": "3c5e653c01cfd4987d52febc87807d8cf81c1bf61647c08943a75c0402dfb4d6",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "20760262443929",
+      "label": "T004",
+      "public_point": [
+        1870613915139741,
+        4583812629714122
+      ],
+      "scalar_derivation_sha256": "393dac2011ed6976808d57879faff0a13c5d4a8e91a0220e8eef2983086d92c8",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "20601613183419",
+      "label": "T005",
+      "public_point": [
+        1462974038848602,
+        5044255934035768
+      ],
+      "scalar_derivation_sha256": "0a7379e1d937cac119c2bba8f876dcb7ff1f0535282937318b4563e5816ed31a",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "17973556866106",
+      "label": "T006",
+      "public_point": [
+        7498510525337322,
+        2540560398420993
+      ],
+      "scalar_derivation_sha256": "6f5c4934e1811d174ddfe5cbc4039d18192abce502e5ec7f961ca7eb7dea0d39",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "20092716364253",
+      "label": "T007",
+      "public_point": [
+        7850983682800,
+        108444110426326
+      ],
+      "scalar_derivation_sha256": "8b01f6d3ff898da10f807a6c2b45bd6f79f1da1c0c82bd6bb0c0b3ecb487a2bc",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "20060692586424",
+      "label": "T008",
+      "public_point": [
+        8452447422856495,
+        3508036654039426
+      ],
+      "scalar_derivation_sha256": "45710da64a4add793700d823b2789702f19b620ac5f8983ca7d941b3a169ff17",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "8852546444268",
+      "label": "T009",
+      "public_point": [
+        4619048998800972,
+        6409188452935251
+      ],
+      "scalar_derivation_sha256": "6d5353f6687ec049881e174d5533368ab7c4b951c6bd5e84439e3bbfa462688b",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "1747174738776",
+      "label": "T010",
+      "public_point": [
+        3909447802276182,
+        7653300126016405
+      ],
+      "scalar_derivation_sha256": "7618fe86b2340ee21c11d565501e2c2f8390931fb8013c7a17e89539b6f730d7",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "2808751536225",
+      "label": "T011",
+      "public_point": [
+        7066264337141373,
+        8625892060299046
+      ],
+      "scalar_derivation_sha256": "d1932858e156273a663ae9b57e286eae254575f27dfe41321740f104d9ab1ff0",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "3209507283552",
+      "label": "T012",
+      "public_point": [
+        6077733206257605,
+        5596906335903606
+      ],
+      "scalar_derivation_sha256": "89874e45949bfbf884e294ffbc813e906e69a15349040e5b6450db7cff01becf",
+      "workload_id": null
+    }
+  ],
+  "generator": [
+    198217578752339,
+    7929897206038174
+  ],
+  "kind": "s3_pair_public_target_fixtures_v1",
+  "koblitz_a": 0,
+  "scalar_law": "1 + int_be(SHA256('s3-pair-target-v1:' || seed_label || ':' || u32be(n) || u32be(index))) mod (r-1)",
+  "seed_label": "s3-pair-pilot-20261007-v1",
+  "solver_input_policy": "only each public_target.json point is passed to the solver; fixture_scalar is for independent checking after measurement",
+  "subgroup_order": "21044858204113"
+}

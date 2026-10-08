@@ -999,6 +999,13 @@ pub fn curve_order(f: &Fq3, c: &Curve2, rng: &mut StdRng) -> u128 {
     let u = f.sub(&c.e[1], &c.e[0]);
     let v = f.sub(&c.e[2], &c.e[0]);
     let ec = EllE::from_a2_a4(f, f.neg(&f.add(&u, &v)), f.mul(&u, &v));
+    ell_order(f, &ec, rng)
+}
+
+/// `#E(F_{q³})` of `y² = x³ + a₂x² + a₄x` by baby-step giant-step on two
+/// random points (the first's order located in the Hasse interval, confirmed
+/// on the second).
+pub fn ell_order(f: &Fq3, ec: &EllE, rng: &mut StdRng) -> u128 {
     let p = f.f.p as u128;
     let q3 = p.pow(6);
     let two_sqrt = 2 * isqrt_u128(q3) + 2;
@@ -1950,11 +1957,66 @@ pub struct ExactCensus {
     /// The weak classes by the number of representatives in them, top 12:
     /// `(t, representatives)`.
     pub top_weak: Vec<(i128, u64)>,
+    /// §18.2: every weak trace with its representative count, sorted by `t`,
+    /// and the traces of the `n` random full-2-torsion curves, kept for
+    /// §18.3's characterization.
+    #[serde(default)]
+    pub weak_traces: Vec<(i128, u64)>,
+    #[serde(default)]
+    pub random_traces: Vec<i128>,
+    /// §18.5: `n_uniform` uniformly random curves `y² = x³ + ax + b` over
+    /// `F_{q³}` (all curves, not only full 2-torsion).  A curve with no
+    /// rational 2-torsion point has odd order and so no weak curve in its
+    /// class; the others are counted by `ell_order`.  `uniform_in_weak_classes`
+    /// is the fraction of **all** sampled curves whose trace is a weak class.
+    #[serde(default)]
+    pub n_uniform: u64,
+    #[serde(default)]
+    pub uniform_odd_order: u64,
+    #[serde(default)]
+    pub uniform_four_divides: u64,
+    #[serde(default)]
+    pub uniform_in_weak_classes: f64,
+    #[serde(default)]
+    pub uniform_traces: Vec<i128>,
     pub muls: u64,
     pub wall_ms: f64,
 }
 
+/// One uniformly random curve `y² = x³ + ax + b` over `F_{q³}` (non-singular):
+/// its order through a rational 2-torsion point moved to `0`, or `None` if
+/// the cubic has no root in `F_{q³}` (odd order).
+fn uniform_curve_order(f: &Fq3, rng: &mut StdRng) -> Option<u128> {
+    let c = |k: u64| f.from_fq(E2([k % f.f.p, 0]));
+    loop {
+        let a = f.random(rng);
+        let b = f.random(rng);
+        // 4a³ + 27b² ≠ 0
+        let disc = f.add(
+            &f.mul(&c(4), &f.mul(&a, &f.sq(&a))),
+            &f.mul(&c(27), &f.sq(&b)),
+        );
+        if disc == E6::ZERO {
+            continue;
+        }
+        let cubic: P6 = vec![b, a, E6::ZERO, E6::ONE];
+        let roots = roots_q3(f, &cubic, rng);
+        let Some(r) = roots.first().copied() else {
+            return None;
+        };
+        // x = X + r:  y² = X³ + 3r X² + (3r² + a) X
+        let a2 = f.mul(&c(3), &r);
+        let a4 = f.add(&f.mul(&c(3), &f.sq(&r)), &a);
+        let ec = EllE::from_a2_a4(f, a2, a4);
+        return Some(ell_order(f, &ec, rng));
+    }
+}
+
 pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
+    exact_census_full(p, seed, n, 0)
+}
+
+pub fn exact_census_full(p: u64, seed: u64, n: u64, n_uniform: u64) -> ExactCensus {
     use rayon::prelude::*;
     let start = Instant::now();
     let f = Fq3::new(p);
@@ -2018,17 +2080,40 @@ pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
     let f = Fq3::new(p);
     let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7);
     let mut rand_t: HashMap<i128, u64> = HashMap::new();
+    let mut random_traces: Vec<i128> = Vec::with_capacity(n as usize);
     let mut in_weak = 0u64;
     for _ in 0..n {
         let r = random_curve(&f, &mut rng);
         let t = q3 + 1 - curve_order(&f, &r, &mut rng) as i128;
         *rand_t.entry(t).or_insert(0) += 1;
+        random_traces.push(t);
         if weak_t.contains_key(&t) {
             in_weak += 1;
         }
     }
+    // uniformly random curves over F_{q³}: the reach over all curves
+    let mut urng = StdRng::seed_from_u64(seed ^ 0x0A11_C0E5);
+    let mut uniform_traces: Vec<i128> = Vec::new();
+    let (mut u_odd, mut u_four, mut u_weak) = (0u64, 0u64, 0u64);
+    for _ in 0..n_uniform {
+        match uniform_curve_order(&f, &mut urng) {
+            None => u_odd += 1,
+            Some(ord) => {
+                if ord % 4 == 0 {
+                    u_four += 1;
+                }
+                let t = q3 + 1 - ord as i128;
+                uniform_traces.push(t);
+                if weak_t.contains_key(&t) {
+                    u_weak += 1;
+                }
+            }
+        }
+    }
     let mut top: Vec<(i128, u64)> = weak_t.iter().map(|(t, c)| (*t, *c)).collect();
     top.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    let mut weak_traces = top.clone();
+    weak_traces.sort_by_key(|&(t, _)| t);
     top.truncate(12);
     ExactCensus {
         p,
@@ -2039,9 +2124,103 @@ pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
         random_distinct: rand_t.len() as u64,
         random_in_weak_classes: in_weak as f64 / n.max(1) as f64,
         top_weak: top,
+        weak_traces,
+        random_traces,
+        n_uniform,
+        uniform_odd_order: u_odd,
+        uniform_four_divides: u_four,
+        uniform_in_weak_classes: u_weak as f64 / n_uniform.max(1) as f64,
+        uniform_traces,
         muls: census_muls + f.muls(),
         wall_ms: start.elapsed().as_secs_f64() * 1e3,
     }
+}
+
+/// §18.3 (exploratory, post hoc): what distinguishes the weak classes.
+/// Weak membership depends only on the trace `t`, because the Weil
+/// restriction's characteristic polynomial over `F_q` is `T⁶ − tT³ + q³`.
+/// From frozen `ExactCensus` files: for the full-2-torsion classes the
+/// random sample met, the weak fraction by `v₂(D)`, `v₃(D)`, `t mod 3`,
+/// `t mod 8` and a class-size proxy (the class's multiplicity among the
+/// uniform all-curve sample), with `D = t² − 4q³`; plus twist symmetry
+/// (`t` weak ⟹ `−t` weak).  A feature that separates shows fractions of
+/// only 0 and 1.  Labelled exploratory; a rule found here is a candidate,
+/// to be registered and tested on a size it was not fitted on.
+pub fn characterize_weak(reports: &[ExactCensus]) -> String {
+    use std::collections::{BTreeMap, HashSet as HSet};
+    use std::fmt::Write;
+    fn val(mut n: i128, p: i128) -> u32 {
+        n = n.abs();
+        if n == 0 {
+            return 99;
+        }
+        let mut k = 0;
+        while n % p == 0 {
+            n /= p;
+            k += 1;
+        }
+        k
+    }
+    let mut out = String::new();
+    for r in reports {
+        let q3 = (r.p as i128).pow(6);
+        let weak: HSet<i128> = r.weak_traces.iter().map(|&(t, _)| t).collect();
+        let classes: HSet<i128> = r.random_traces.iter().copied().collect();
+        let mut umult: HashMap<i128, u64> = HashMap::new();
+        for &t in &r.uniform_traces {
+            *umult.entry(t).or_insert(0) += 1;
+        }
+        let twist_ok = weak.iter().filter(|t| weak.contains(&-**t)).count();
+        let _ = writeln!(
+            out,
+            "\n### p = {}: {} weak classes (exact), {} full-2-torsion classes sampled, {:.1} % of them weak; weak set closed under t ↦ −t: {}/{}",
+            r.p,
+            weak.len(),
+            classes.len(),
+            100.0 * classes.iter().filter(|t| weak.contains(t)).count() as f64
+                / classes.len().max(1) as f64,
+            twist_ok,
+            weak.len()
+        );
+        let mut feats: Vec<(&str, BTreeMap<String, (u64, u64)>)> = vec![
+            ("v2(D)", BTreeMap::new()),
+            ("v3(D)", BTreeMap::new()),
+            ("t mod 3", BTreeMap::new()),
+            ("t mod 8", BTreeMap::new()),
+            ("class size proxy (uniform hits)", BTreeMap::new()),
+        ];
+        for &t in &classes {
+            let d = t * t - 4 * q3;
+            let w = weak.contains(&t) as u64;
+            let um = *umult.get(&t).unwrap_or(&0);
+            let vals = [
+                format!("{}", val(d, 2)),
+                format!("{}", val(d, 3)),
+                format!("{}", t.rem_euclid(3)),
+                format!("{}", t.rem_euclid(8)),
+                format!("{}", um.min(4)),
+            ];
+            for (i, v) in vals.into_iter().enumerate() {
+                let e = feats[i].1.entry(v).or_insert((0, 0));
+                e.0 += w;
+                e.1 += 1;
+            }
+        }
+        for (name, m) in &feats {
+            let cells: Vec<String> = m
+                .iter()
+                .map(|(v, (w, n))| format!("{v}: {:.2} ({n})", *w as f64 / *n as f64))
+                .collect();
+            let separates = m.values().all(|(w, n)| *w == 0 || *w == *n);
+            let _ = writeln!(
+                out,
+                "- {name}{}: {}",
+                if separates { " — SEPARATES" } else { "" },
+                cells.join(" · ")
+            );
+        }
+    }
+    out
 }
 
 /// The derived tables of ledger §17.5, printed from frozen `Walk2Report`s

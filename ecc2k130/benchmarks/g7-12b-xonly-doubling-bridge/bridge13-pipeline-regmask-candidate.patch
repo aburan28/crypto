@@ -1,0 +1,74 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-regmask-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh	2026-09-17 22:51:27.267085804 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-regmask-src/include/packedxonly23.cuh	2026-09-17 23:01:48.896122866 +0000
+@@ -42,7 +42,6 @@
+     __shared__ unsigned bridgeCount131;
+     __shared__ unsigned short bridgeQueue131[ECC_THREADS *
+         (ECC_BATCH / ECC_PACKED_BATCH_SPLIT)];
+-    __shared__ unsigned char bridgeMasks131[ECC_THREADS];
+ #if ECC_PACKED_SHARED_X_SLOTS
+     __shared__ uint4 sharedXLow[ECC_PACKED_SHARED_X_SLOTS * ECC_THREADS];
+     __shared__ unsigned char sharedXTail[ECC_PACKED_SHARED_X_SLOTS * ECC_THREADS];
+@@ -56,6 +55,7 @@
+     }
+ #endif
+     P131 prod, inv;
++    unsigned currentBridgeMask = 0;
+     // Prime the classification pipeline with the launch's initial state.
+     if (p.steps > 0) {
+         const unsigned long long now = p.iterBase;
+@@ -65,7 +65,7 @@
+         // before the common denominator tree begins.
+         if (threadIdx.x == 0) bridgeCount131 = 0;
+         __syncthreads();
+-        unsigned localBridgeMask = 0;
++        currentBridgeMask = 0;
+         if (active) {
+ #pragma unroll 1
+             for (int localSlot = 0;
+@@ -104,7 +104,7 @@
+                     }
+                 }
+                 if (ECC_PACKED_XONLY_BRIDGE3 && (hw & 31) == 14) {
+-                    localBridgeMask |= 1u << localSlot;
++                    currentBridgeMask |= 1u << localSlot;
+                     const unsigned event = atomicAdd(&bridgeCount131, 1u);
+                     bridgeQueue131[event] =
+                         static_cast<unsigned short>(localSlot * ECC_THREADS +
+@@ -112,8 +112,6 @@
+                 }
+             }
+         }
+-        bridgeMasks131[threadIdx.x] =
+-            static_cast<unsigned char>(localBridgeMask);
+         __syncthreads();
+     }
+ #pragma unroll 1
+@@ -179,7 +177,7 @@
+                 const int hw = weight(normalX);
+ #endif
+                 const bool sparseBridge =
+-                    (bridgeMasks131[threadIdx.x] >> localSlot) & 1u;
++                    (currentBridgeMask >> localSlot) & 1u;
+ #if ECC_PACKED_XONLY_DOUBLE_ONLY
+                 // Ordinary states use x; warp 0 precomputed rare
+                 // bridge denominators into the existing scratch field.
+@@ -253,7 +251,7 @@
+ #endif
+ #if ECC_PACKED_XONLY_DOUBLE_ONLY
+                 const bool sparseBridge =
+-                    (bridgeMasks131[threadIdx.x] >> localSlot) & 1u;
++                    (currentBridgeMask >> localSlot) & 1u;
+ #if ECC_PACKED_SHARED_X_SLOTS
+                 const P131 x = localSlot >= firstSharedXLocalSlot131
+                     ? loadSharedX131(sharedXLow, sharedXTail,
+@@ -346,8 +344,7 @@
+             }
+         }
+         if (step + 1 < p.steps) {
+-            bridgeMasks131[threadIdx.x] =
+-                static_cast<unsigned char>(nextBridgeMask);
++            currentBridgeMask = nextBridgeMask;
+             __syncthreads();
+         }
+     }
