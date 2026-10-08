@@ -244,7 +244,11 @@ pub fn divrem<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> (Poly<F>, Poly<F>) {
     let mut r = a.clone();
     let mut q = vec![f.zero(); a.len() - b.len() + 1];
     for i in (0..q.len()).rev() {
-        let c = if monic { r[i + b.len() - 1] } else { f.mul(r[i + b.len() - 1], li) };
+        let c = if monic {
+            r[i + b.len() - 1]
+        } else {
+            f.mul(r[i + b.len() - 1], li)
+        };
         q[i] = c;
         if !f.is_zero(c) {
             for j in 0..b.len() {
@@ -282,7 +286,8 @@ pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
         return PolyModulus::new(f, m).powmod_big(f, a, &Big::from_u128(e));
     }
     if m.len() >= 3 {
-        return TableModulus::new(f, m).powmod(f, a, 128 - e.leading_zeros() as usize, |i| e >> i & 1 == 1);
+        return TableModulus::new(f, m)
+            .powmod(f, a, 128 - e.leading_zeros() as usize, |i| e >> i & 1 == 1);
     }
     let mut e = e;
     let mut r = constant(f, f.one());
@@ -339,7 +344,9 @@ impl<F: Field> TableModulus<F> {
             let t = Self::times_x(f, &xn, rows.last().unwrap());
             rows.push(t);
         }
-        let cols = (0..n).map(|i| (0..n - 1).map(|j| rows[n - 2 - j][i]).collect()).collect();
+        let cols = (0..n)
+            .map(|i| (0..n - 1).map(|j| rows[n - 2 - j][i]).collect())
+            .collect();
         TableModulus { n, xn, cols }
     }
     /// x t mod m for t of length n
@@ -363,7 +370,9 @@ impl<F: Field> TableModulus<F> {
         }
         let hi = &a[n..];
         let h = hi.len();
-        (0..n).map(|i| f.add(a[i], f.dot_rev(hi, &self.cols[i][n - 1 - h..]))).collect()
+        (0..n)
+            .map(|i| f.add(a[i], f.dot_rev(hi, &self.cols[i][n - 1 - h..])))
+            .collect()
     }
     /// a^e mod m, the bits of e given by `bit(i)` for i < nbits, left to right. A base of
     /// degree <= 1 (x, x + c, ...) multiplies in by a shift instead of a full product.
@@ -383,7 +392,9 @@ impl<F: Field> TableModulus<F> {
                 r = if linear {
                     // r (b0 + b1 x) = b0 r + b1 (x r)
                     let xr = Self::times_x(f, &self.xn, &r);
-                    (0..n).map(|k| f.add(f.mul(b[0], r[k]), f.mul(b[1], xr[k]))).collect()
+                    (0..n)
+                        .map(|k| f.add(f.mul(b[0], r[k]), f.mul(b[1], xr[k])))
+                        .collect()
                 } else {
                     self.reduce(f, &mul_raw(f, &r, &b))
                 };
@@ -433,8 +444,16 @@ impl<F: Field> Composer<F> {
         }
         let giant = pows.pop().unwrap();
         let at = |p: &Poly<F>, t: usize| if t < p.len() { p[t] } else { f.zero() };
-        let cols = (0..n).map(|t| (0..s).map(|i| at(&pows[s - 1 - i], t)).collect()).collect();
-        Composer { m, n, s, cols, giant }
+        let cols = (0..n)
+            .map(|t| (0..s).map(|i| at(&pows[s - 1 - i], t)).collect())
+            .collect();
+        Composer {
+            m,
+            n,
+            s,
+            cols,
+            giant,
+        }
     }
     pub fn baby_steps(&self) -> usize {
         self.s
@@ -448,9 +467,15 @@ impl<F: Field> Composer<F> {
         for j in (0..blocks).rev() {
             let hb = &h[j * s..((j + 1) * s).min(h.len())];
             let k = hb.len();
-            let mut block: Poly<F> = (0..n).map(|t| f.dot_rev(hb, &self.cols[t][s - k..])).collect();
+            let mut block: Poly<F> = (0..n)
+                .map(|t| f.dot_rev(hb, &self.cols[t][s - k..]))
+                .collect();
             trim(f, &mut block);
-            acc = if acc.is_empty() { block } else { add(f, &self.m.mulmod(f, &acc, &self.giant), &block) };
+            acc = if acc.is_empty() {
+                block
+            } else {
+                add(f, &self.m.mulmod(f, &acc, &self.giant), &block)
+            };
         }
         acc
     }
@@ -602,7 +627,8 @@ pub fn ddf<F: Field>(f: &F, p: &Poly<F>) -> Vec<(usize, Poly<F>)> {
             if qm.as_ref().is_some_and(|c| c.baby_steps() != s) {
                 qm = None;
             }
-            qm.get_or_insert_with(|| Composer::with_baby_steps(f, &xi, &fp, s)).compose(f, &h)
+            qm.get_or_insert_with(|| Composer::with_baby_steps(f, &xi, &fp, s))
+                .compose(f, &h)
         };
         if k == 1 {
             xi = h.clone();
@@ -636,7 +662,14 @@ pub fn edf<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<
     edf_with(f, g, k, rng, out, xi)
 }
 
-fn edf_with<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<Poly<F>>, xi: Option<Poly<F>>) {
+fn edf_with<F: Field>(
+    f: &F,
+    g: &Poly<F>,
+    k: usize,
+    rng: &mut Rng,
+    out: &mut Vec<Poly<F>>,
+    xi: Option<Poly<F>>,
+) {
     let d = deg(f, g);
     if d as usize == k {
         out.push(monic(f, g));
@@ -645,7 +678,9 @@ fn edf_with<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec
     let half = f.q().sub_small(1).shr(1);
     // k - 1 compositions per attempt: s = sqrt(k n) baby steps balances building against using
     let s_bk = (((k * d as usize) as f64).sqrt().ceil() as usize).min(512);
-    let qm = xi.as_ref().map(|xi| Composer::with_baby_steps(f, xi, g, s_bk));
+    let qm = xi
+        .as_ref()
+        .map(|xi| Composer::with_baby_steps(f, xi, g, s_bk));
     loop {
         let a: Poly<F> = {
             let mut a: Poly<F> = (0..d as usize).map(|_| f.random(rng)).collect();

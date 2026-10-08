@@ -85,7 +85,15 @@ static JOIN: [u16; 256] = join_table();
 static SPREAD3: [u32; 256] = spread3_table();
 
 /// A word holding a bitsliced digit vector (u64 when the product fits, else u128).
-trait Lane: Copy + Eq + BitOr<Output = Self> + BitXor<Output = Self> + BitAnd<Output = Self> + Shl<u32, Output = Self> + Shr<u32, Output = Self> {
+trait Lane:
+    Copy
+    + Eq
+    + BitOr<Output = Self>
+    + BitXor<Output = Self>
+    + BitAnd<Output = Self>
+    + Shl<u32, Output = Self>
+    + Shr<u32, Output = Self>
+{
     const ZERO: Self;
     fn from64(x: u64) -> Self;
     fn low64(self) -> u64;
@@ -192,8 +200,20 @@ impl GF3n {
     }
 
     fn with_red(n: u32, red: Vec<u8>, pow3n: u64) -> Self {
-        let terms = red.iter().enumerate().filter(|(_, &r)| r != 0).map(|(k, &r)| (k as u32, r)).collect();
-        GF3n { n, red, terms, pow3n, mask: (1u64 << n) - 1, chunks: n.div_ceil(8) }
+        let terms = red
+            .iter()
+            .enumerate()
+            .filter(|(_, &r)| r != 0)
+            .map(|(k, &r)| (k as u32, r))
+            .collect();
+        GF3n {
+            n,
+            red,
+            terms,
+            pow3n,
+            mask: (1u64 << n) - 1,
+            chunks: n.div_ceil(8),
+        }
     }
 
     /// packed base-3 -> bitsliced (lo, hi)
@@ -215,7 +235,9 @@ impl GF3n {
         let mut v = 0u64;
         for c in (0..self.chunks).rev() {
             let s = 8 * c;
-            v = v * CHUNK + JOIN[(a.0 >> s & 0xff) as usize] as u64 + 2 * JOIN[(a.1 >> s & 0xff) as usize] as u64;
+            v = v * CHUNK
+                + JOIN[(a.0 >> s & 0xff) as usize] as u64
+                + 2 * JOIN[(a.1 >> s & 0xff) as usize] as u64;
         }
         v
     }
@@ -233,7 +255,11 @@ impl GF3n {
             c = (c.0 & mask, c.1 & mask);
             for &(k, r) in &self.terms {
                 // h t^n = h red: add r h t^k (r = 2 swaps the masks)
-                let s = if r == 1 { (h.0 << k, h.1 << k) } else { (h.1 << k, h.0 << k) };
+                let s = if r == 1 {
+                    (h.0 << k, h.1 << k)
+                } else {
+                    (h.1 << k, h.0 << k)
+                };
                 c = tadd(c, s);
             }
         }
@@ -429,9 +455,9 @@ fn distinct_primes(mut n: u32) -> Vec<u32> {
     let mut ps = vec![];
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             ps.push(d);
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 n /= d;
             }
         }
@@ -505,7 +531,7 @@ impl Field for GF3n {
         let qm1 = self.pow3n - 1;
         let mut s = 0u32;
         let mut m = qm1;
-        while m % 2 == 0 {
+        while m.is_multiple_of(2) {
             m /= 2;
             s += 1;
         }
@@ -519,7 +545,7 @@ impl Field for GF3n {
         let sq = |x: (u64, u64)| self.mul_bits(x, x);
         let mut c = self.unpack(self.pow(z, m));
         let mut t = self.unpack(self.pow(a, m));
-        let mut r = self.unpack(self.pow(a, (m + 1) / 2));
+        let mut r = self.unpack(self.pow(a, m.div_ceil(2)));
         let one = (1u64, 0u64);
         let mut mm = s;
         while t != one {
@@ -562,7 +588,10 @@ mod tests {
             let (lo, hi) = f.unpack(v);
             let d = to_digits(v, 40);
             for (i, &di) in d.iter().enumerate() {
-                assert_eq!((lo >> i & 1, hi >> i & 1), ((di == 1) as u64, (di == 2) as u64));
+                assert_eq!(
+                    (lo >> i & 1, hi >> i & 1),
+                    ((di == 1) as u64, (di == 2) as u64)
+                );
             }
             assert_eq!(f.pack((lo, hi)), v);
         }

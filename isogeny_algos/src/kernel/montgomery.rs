@@ -22,7 +22,10 @@ pub fn to_weierstrass<F: Field>(f: &F, a: F::E) -> Curve<F::E> {
 pub fn j_invariant<F: Field>(f: &F, a: F::E) -> F::E {
     let a2 = f.mul(a, a);
     let n = f.sub(a2, f.from_u64(3));
-    f.div(f.mul(f.from_u64(256), f.mul(n, f.mul(n, n))), f.sub(a2, f.from_u64(4)))
+    f.div(
+        f.mul(f.from_u64(256), f.mul(n, f.mul(n, n))),
+        f.sub(a2, f.from_u64(4)),
+    )
 }
 
 /// Constant (A+2)/4 used by the doubling formula.

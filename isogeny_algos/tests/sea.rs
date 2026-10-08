@@ -58,7 +58,10 @@ fn sea_at_128_bits() {
         let p = random_point_f(&f, &e, &mut rng);
         assert_eq!(pmul_big(&f, &e, &p, &n), Pt::Inf, "stats {st:?}");
     }
-    eprintln!("128-bit SEA: elkies {:?}, atkin {:?}, candidates {}", st.elkies, st.atkin, st.candidates);
+    eprintln!(
+        "128-bit SEA: elkies {:?}, atkin {:?}, candidates {}",
+        st.elkies, st.atkin, st.candidates
+    );
 }
 
 /// (lambda, mu, ord(lambda/mu)) in F_{l^2} from the true trace, for the independent check.
@@ -67,7 +70,12 @@ fn eig_mod_l(ell: u64, p: u64, t: u64) -> ((u64, u64), (u64, u64), u64) {
     let md = |a: u64| a % l;
     let sqrt_l = |a: u64| (0..l).find(|&x| x * x % l == md(a));
     let nr = (2..l).find(|&a| sqrt_l(a).is_none()).unwrap_or(2);
-    let mul = |x: (u64, u64), y: (u64, u64)| (md(x.0 * y.0 + nr * md(x.1 * y.1)), md(x.0 * y.1 + x.1 * y.0));
+    let mul = |x: (u64, u64), y: (u64, u64)| {
+        (
+            md(x.0 * y.0 + nr * md(x.1 * y.1)),
+            md(x.0 * y.1 + x.1 * y.0),
+        )
+    };
     let pow = |mut x: (u64, u64), mut e: u64| {
         let mut rr = (1u64, 0u64);
         while e > 0 {
@@ -79,7 +87,7 @@ fn eig_mod_l(ell: u64, p: u64, t: u64) -> ((u64, u64), (u64, u64), u64) {
         }
         rr
     };
-    let inv2 = (l + 1) / 2;
+    let inv2 = l.div_ceil(2);
     let ql = md(p);
     let disc = md(t * t + l * l * 4 - 4 * ql);
     let s = match sqrt_l(disc) {
@@ -104,7 +112,12 @@ fn pow_fl2(ell: u64, x: (u64, u64), e: u64) -> (u64, u64) {
     let md = |a: u64| a % l;
     let sqrt_l = |a: u64| (0..l).find(|&y| y * y % l == md(a));
     let nr = (2..l).find(|&a| sqrt_l(a).is_none()).unwrap_or(2);
-    let mul = |x: (u64, u64), y: (u64, u64)| (md(x.0 * y.0 + nr * md(x.1 * y.1)), md(x.0 * y.1 + x.1 * y.0));
+    let mul = |x: (u64, u64), y: (u64, u64)| {
+        (
+            md(x.0 * y.0 + nr * md(x.1 * y.1)),
+            md(x.0 * y.1 + x.1 * y.0),
+        )
+    };
     let mut r = (1u64, 0u64);
     let mut b = x;
     let mut e = e;
@@ -139,7 +152,8 @@ fn atkin_tower_eigenvalue_matches_true_trace() {
         if !is_smooth(&fp, &e) || j == 0 || j == 1728 {
             continue;
         }
-        let t_true = (p as i128 + 1 - order(&fp, &e, &mut rng) as i128).rem_euclid(p as i128) as u64;
+        let t_true =
+            (p as i128 + 1 - order(&fp, &e, &mut rng) as i128).rem_euclid(p as i128) as u64;
         for &ell in &[5u64, 7, 11, 13] {
             // genuine Atkin prime: discriminant t^2 - 4p a non-residue mod l (lambda, mu not in F_l)
             let (lam, _mu, ord) = eig_mod_l(ell, p, t_true % ell);
@@ -150,12 +164,16 @@ fn atkin_tower_eigenvalue_matches_true_trace() {
             if !(2..=4).contains(&ord) {
                 continue; // keep the tower degree small/fast for the test
             }
-            let phi = phis.entry(ell as usize).or_insert_with(|| Phi::compute(&fp, ell as usize));
+            let phi = phis
+                .entry(ell as usize)
+                .or_insert_with(|| Phi::compute(&fp, ell as usize));
             if !phi.neighbors(&fp, j, &mut rng).is_empty() {
                 continue; // classified Elkies by the modular polynomial
             }
             let _ = ord;
-            let Some((nu, d)) = atkin_eigenvalue_tower(&fp, &e, ell, &mut rng) else { continue };
+            let Some((nu, d)) = atkin_eigenvalue_tower(&fp, &e, ell, &mut rng) else {
+                continue;
+            };
             // independent check: nu is a true eigenvalue of pi^d, i.e. nu == lambda^d or mu^d mod l
             let ld = pow_fl2(ell, lam, d as u64);
             let (_lam2, mu, _o) = eig_mod_l(ell, p, t_true % ell);
@@ -166,7 +184,10 @@ fn atkin_tower_eigenvalue_matches_true_trace() {
             );
             // refined candidate set must contain the true t mod l
             let cands = atkin_candidates_tower(ell, p % ell, d, nu);
-            assert!(cands.contains(&(t_true % ell)), "l={ell} d={d}: true t mod l not in {cands:?}");
+            assert!(
+                cands.contains(&(t_true % ell)),
+                "l={ell} d={d}: true t mod l not in {cands:?}"
+            );
             if cands.len() == 1 {
                 singletons += 1;
             }
@@ -177,8 +198,14 @@ fn atkin_tower_eigenvalue_matches_true_trace() {
         }
     }
     eprintln!("atkin tower: {recovered} recoveries, {singletons} singletons");
-    assert!(recovered >= 4, "expected >= 4 Atkin tower recoveries, got {recovered}");
-    assert!(singletons >= 1, "expected at least one Atkin prime resolved to a unique t mod l");
+    assert!(
+        recovered >= 4,
+        "expected >= 4 Atkin tower recoveries, got {recovered}"
+    );
+    assert!(
+        singletons >= 1,
+        "expected at least one Atkin prime resolved to a unique t mod l"
+    );
 }
 
 /// SEA that resolves Atkin primes to congruences via F_{p^d} towers gives the correct #E and
@@ -203,11 +230,15 @@ fn sea_with_atkin_towers_matches_bsgs() {
         };
         let reference = order(&fp, &e, &mut rng);
         let (n_plain, st_plain) = sea(&fp, &e, max_ell, &mut phis, &mut rng).expect("plain SEA");
-        let (n_tower, st_tower) = sea_atkin_tower(&fp, &e, max_ell, &mut phis, &mut rng).expect("tower SEA");
+        let (n_tower, st_tower) =
+            sea_atkin_tower(&fp, &e, max_ell, &mut phis, &mut rng).expect("tower SEA");
         assert_eq!(n_plain, Big::from_u64(reference), "plain SEA wrong");
         assert_eq!(n_tower, Big::from_u64(reference), "tower SEA wrong");
         // the Atkin resolver only adds congruences, so it never leaves more candidates
-        assert!(st_tower.candidates <= st_plain.candidates, "tower must not add candidates");
+        assert!(
+            st_tower.candidates <= st_plain.candidates,
+            "tower must not add candidates"
+        );
         if st_tower.candidates < st_plain.candidates {
             improved += 1;
         }
@@ -248,9 +279,22 @@ fn isogeny_cycles_give_t_mod_l_power() {
             if roots.len() != 2 {
                 continue; // Elkies prime with two rational l-isogenies (distinct eigenvalues)
             }
-            let Some(et) = elkies_codomain(&fp, &phi, &e, roots[0]) else { continue };
-            let Some(iso) = bmss::isogeny(&fp, bmss::Method::FastElkiesPrime, &e, &et, ell as usize, None) else { continue };
-            let Some(lam1) = elkies_eigenvalue(&fp, &e, &iso.ker, ell) else { continue };
+            let Some(et) = elkies_codomain(&fp, &phi, &e, roots[0]) else {
+                continue;
+            };
+            let Some(iso) = bmss::isogeny(
+                &fp,
+                bmss::Method::FastElkiesPrime,
+                &e,
+                &et,
+                ell as usize,
+                None,
+            ) else {
+                continue;
+            };
+            let Some(lam1) = elkies_eigenvalue(&fp, &e, &iso.ker, ell) else {
+                continue;
+            };
             let (lam, k) = eigenvalue_cycle(&fp, &phi, &e, &iso, ell, lam1, kmax, &mut rng);
             let m = (ell as i128).pow(k);
             let t = q + 1 - order(&fp, &e, &mut rng) as i128;
@@ -280,7 +324,10 @@ fn atkin_degree_matches_gcd_definition() {
     }
     let fp = Zp::new(p);
     let mut rng = Rng::new(4100);
-    let phis: Vec<(usize, Phi<Zp>)> = [3usize, 5, 7, 11, 13, 17, 19, 23, 29, 31].iter().map(|&l| (l, Phi::compute(&fp, l))).collect();
+    let phis: Vec<(usize, Phi<Zp>)> = [3usize, 5, 7, 11, 13, 17, 19, 23, 29, 31]
+        .iter()
+        .map(|&l| (l, Phi::compute(&fp, l)))
+        .collect();
     let mut checked = 0;
     while checked < 60 {
         let e = Curve::new(fp.random(&mut rng), fp.random(&mut rng));
@@ -303,7 +350,12 @@ fn atkin_degree_matches_gcd_definition() {
             if naive == Some(1) {
                 continue; // Elkies prime (or l = j-special): not an Atkin degree
             }
-            assert_eq!(atkin_degree(&fp, &g), naive, "p = {p}, j = {j}, l = {}", phi.ell);
+            assert_eq!(
+                atkin_degree(&fp, &g),
+                naive,
+                "p = {p}, j = {j}, l = {}",
+                phi.ell
+            );
             checked += 1;
         }
     }

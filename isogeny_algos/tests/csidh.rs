@@ -137,7 +137,11 @@ fn csidh512_action_commutes() {
     let ba = cs.action_batched(cs.action_batched(f.zero(), &e2, &mut rng), &e1, &mut rng);
     assert_eq!(ab, ba);
     let sum: Vec<i32> = e1.iter().zip(&e2).map(|(x, y)| x + y).collect();
-    assert_eq!(cs.action(f.zero(), &sum, &mut rng), ab, "batched vs stepwise at 512 bits");
+    assert_eq!(
+        cs.action(f.zero(), &sum, &mut rng),
+        ab,
+        "batched vs stepwise at 512 bits"
+    );
     let neg: Vec<i32> = sum.iter().map(|x| -x).collect();
     assert!(f.is_zero(cs.action_batched(ab, &neg, &mut rng)));
 }

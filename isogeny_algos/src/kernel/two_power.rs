@@ -27,7 +27,10 @@ pub fn four_isogeny<F: Field>(f: &F, p4: XZ<F::E>) -> Option<Four<F::E>> {
     let mut a24 = f.sq(x);
     a24 = f.add(a24, a24);
     a24 = f.sq(a24);
-    Some(Four { cod: (a24, c24), k: [k1, k2, k3] })
+    Some(Four {
+        cod: (a24, c24),
+        k: [k1, k2, k3],
+    })
 }
 
 impl<E: Copy> Four<E> {
@@ -59,7 +62,10 @@ pub fn two_isogeny<F: Field>(f: &F, p2: XZ<F::E>) -> Option<Two<F::E>> {
     }
     let a24 = f.sq(p2.0);
     let c24 = f.sq(p2.1);
-    Some(Two { cod: (f.sub(c24, a24), c24), k: p2 })
+    Some(Two {
+        cod: (f.sub(c24, a24), c24),
+        k: p2,
+    })
 }
 
 impl<E: Copy> Two<E> {
@@ -117,7 +123,7 @@ pub fn four_chain<F: Field>(
     splits: &[usize],
     st: &mut TwoPowerStats,
 ) -> Option<Proj24<F::E>> {
-    assert!(e % 2 == 0);
+    assert!(e.is_multiple_of(2));
     fn rec<F: Field>(
         f: &F,
         curve: &mut Proj24<F::E>,

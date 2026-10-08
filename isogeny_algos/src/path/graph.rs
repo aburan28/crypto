@@ -39,6 +39,9 @@ impl<E: Copy> Path<E> {
     pub fn len(&self) -> usize {
         self.ells.len()
     }
+    pub fn is_empty(&self) -> bool {
+        self.ells.is_empty()
+    }
     pub fn reversed(&self) -> Path<E> {
         Path {
             js: self.js.iter().rev().copied().collect(),

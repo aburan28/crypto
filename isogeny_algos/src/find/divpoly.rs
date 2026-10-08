@@ -51,28 +51,27 @@ pub fn division_poly<F: Field>(f: &F, e: &Curve<F::E>, ell: usize) -> Poly<F> {
         n: usize,
         memo: &mut HashMap<usize, Poly<F>>,
         f16: &Poly<F>,
-        fx: &Poly<F>,
     ) -> Poly<F> {
         if let Some(v) = memo.get(&n) {
             return v.clone();
         }
         let r = if n % 2 == 1 {
             let m = (n - 1) / 2;
-            let (a, b) = (get(f, m + 2, memo, f16, fx), get(f, m, memo, f16, fx));
-            let (c1, d1) = (get(f, m - 1, memo, f16, fx), get(f, m + 1, memo, f16, fx));
+            let (a, b) = (get(f, m + 2, memo, f16), get(f, m, memo, f16));
+            let (c1, d1) = (get(f, m - 1, memo, f16), get(f, m + 1, memo, f16));
             let cube = |p: &Poly<F>| poly::mul(f, p, &poly::mul(f, p, p));
             let t1 = poly::mul(f, &a, &cube(&b));
             let t2 = poly::mul(f, &c1, &cube(&d1));
-            if m % 2 == 0 {
+            if m.is_multiple_of(2) {
                 poly::sub(f, &poly::mul(f, f16, &t1), &t2)
             } else {
                 poly::sub(f, &t1, &poly::mul(f, f16, &t2))
             }
         } else {
             let m = n / 2;
-            let gm = get(f, m, memo, f16, fx);
-            let (gp2, gm1) = (get(f, m + 2, memo, f16, fx), get(f, m - 1, memo, f16, fx));
-            let (gm2, gp1) = (get(f, m - 2, memo, f16, fx), get(f, m + 1, memo, f16, fx));
+            let gm = get(f, m, memo, f16);
+            let (gp2, gm1) = (get(f, m + 2, memo, f16), get(f, m - 1, memo, f16));
+            let (gm2, gp1) = (get(f, m - 2, memo, f16), get(f, m + 1, memo, f16));
             let l = poly::mul(f, &gp2, &poly::mul(f, &gm1, &gm1));
             let r = poly::mul(f, &gm2, &poly::mul(f, &gp1, &gp1));
             poly::mul(f, &gm, &poly::sub(f, &l, &r))
@@ -80,7 +79,7 @@ pub fn division_poly<F: Field>(f: &F, e: &Curve<F::E>, ell: usize) -> Poly<F> {
         memo.insert(n, r.clone());
         r
     }
-    get(f, ell, &mut memo, &f16, &fx)
+    get(f, ell, &mut memo, &f16)
 }
 
 /// All F-rational kernel polynomials of degree-l isogenies (l odd prime).

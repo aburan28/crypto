@@ -21,9 +21,9 @@ fn factor_small(mut n: u128) -> (Vec<(u64, u32)>, u128) {
     let mut out = vec![];
     let mut q = 2u64;
     while (q as u128) * (q as u128) <= n && q < 2_000_000 {
-        if n % q as u128 == 0 {
+        if n.is_multiple_of(q as u128) {
             let mut v = 0;
-            while n % q as u128 == 0 {
+            while n.is_multiple_of(q as u128) {
                 n /= q as u128;
                 v += 1;
             }
@@ -68,7 +68,7 @@ pub fn endomorphism_ring<F: Field>(
     for &(q, _) in &fac {
         // height of the l-volcano = v_l(f_pi)
         let h_actual = (0..)
-            .take_while(|k| fpi % (q as u128).pow(k + 1) == 0)
+            .take_while(|k| fpi.is_multiple_of((q as u128).pow(k + 1)))
             .count() as u32;
         if h_actual == 0 {
             continue;

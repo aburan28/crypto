@@ -15,7 +15,7 @@
 //! "1 - a x" products use the reversed polynomial of E_J at the same points.
 //! Points are affine after one batch inversion; the generic polynomial arithmetic (Karatsuba
 //! products, Newton remainders) does the rest. Cross-checked against x-only Vélu.
-use super::montgomery::{a24, xadd, xdbl, ladder_xz, XZ};
+use super::montgomery::{a24, ladder_xz, xadd, xdbl, XZ};
 use crate::bigint::Big;
 use crate::field::Field;
 use crate::poly::{self, Poly};
@@ -77,7 +77,11 @@ impl<F: Field> SqrtVeluMont<F> {
         }
         // K: odd k in [4 b b' + 1, l - 2]
         let k0 = (4 * b * bp + 1) as u64;
-        let nk = if k0 + 1 <= ell - 1 { ((ell - 2 - k0) / 2 + 1) as usize } else { 0 };
+        let nk = if k0 < ell - 1 {
+            ((ell - 2 - k0) / 2 + 1) as usize
+        } else {
+            0
+        };
         if nk > 0 {
             pts.push(ladder_xz(f, k24, kp, &Big::from_u64(k0)));
             if nk > 1 {
@@ -98,8 +102,21 @@ impl<F: Field> SqrtVeluMont<F> {
         let xs_j = xs[..b].to_vec();
         let xs_i = xs[b..b + bp].to_vec();
         let xs_k = xs[b + bp..].to_vec();
-        let tree_i = if bp > 0 { poly::subproduct_tree(f, &xs_i) } else { vec![] };
-        Some(SqrtVeluMont { a, ell, b, bp, xs_j, xs_i, xs_k, tree_i })
+        let tree_i = if bp > 0 {
+            poly::subproduct_tree(f, &xs_i)
+        } else {
+            vec![]
+        };
+        Some(SqrtVeluMont {
+            a,
+            ell,
+            b,
+            bp,
+            xs_j,
+            xs_i,
+            xs_k,
+            tree_i,
+        })
     }
 
     /// E_J(Z) for the evaluation point alpha (degree 2b).
@@ -122,7 +139,13 @@ impl<F: Field> SqrtVeluMont<F> {
         while layer.len() > 1 {
             layer = layer
                 .chunks(2)
-                .map(|c| if c.len() == 2 { poly::mul(f, &c[0], &c[1]) } else { c[0].clone() })
+                .map(|c| {
+                    if c.len() == 2 {
+                        poly::mul(f, &c[0], &c[1])
+                    } else {
+                        c[0].clone()
+                    }
+                })
                 .collect();
         }
         layer.pop().unwrap_or_else(|| vec![f.one()])
@@ -140,7 +163,11 @@ impl<F: Field> SqrtVeluMont<F> {
 
     /// h_S(alpha) * Δ (Δ = prod F0(x_i, x_j), common to every call).
     fn h_scaled(&self, f: &F, alpha: F::E) -> F::E {
-        let mut r = if self.bp > 0 { self.prod_at_i(f, &self.e_j(f, alpha)) } else { f.one() };
+        let mut r = if self.bp > 0 {
+            self.prod_at_i(f, &self.e_j(f, alpha))
+        } else {
+            f.one()
+        };
         for &x in &self.xs_k {
             r = f.mul(r, f.sub(alpha, x));
         }
@@ -154,8 +181,14 @@ impl<F: Field> SqrtVeluMont<F> {
         let h1 = self.h_scaled(f, one);
         let hm1 = self.h_scaled(f, f.neg(one));
         let two = f.from_u64(2);
-        let d_new = f.mul(f.pow(f.sub(self.a, two), self.ell as u128), f.sq(f.sq(f.sq(h1))));
-        let a_new = f.mul(f.pow(f.add(self.a, two), self.ell as u128), f.sq(f.sq(f.sq(hm1))));
+        let d_new = f.mul(
+            f.pow(f.sub(self.a, two), self.ell as u128),
+            f.sq(f.sq(f.sq(h1))),
+        );
+        let a_new = f.mul(
+            f.pow(f.add(self.a, two), self.ell as u128),
+            f.sq(f.sq(f.sq(hm1))),
+        );
         (a_new, f.sub(a_new, d_new))
     }
 

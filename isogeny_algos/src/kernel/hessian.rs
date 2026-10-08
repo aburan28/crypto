@@ -29,8 +29,12 @@ impl<E: Copy + PartialEq> Hessian<E> {
     }
     pub fn on_curve<F: Field<E = E>>(&self, f: &F, p: &HPt<E>) -> bool {
         let [x, y, z] = *p;
-        let lhs = f.add(f.add(f.mul(self.a, f.mul(x, f.sq(x))), f.mul(y, f.sq(y))), f.mul(z, f.sq(z)));
-        lhs == f.mul(self.d, f.mul(x, f.mul(y, z))) && !(f.is_zero(x) && f.is_zero(y) && f.is_zero(z))
+        let lhs = f.add(
+            f.add(f.mul(self.a, f.mul(x, f.sq(x))), f.mul(y, f.sq(y))),
+            f.mul(z, f.sq(z)),
+        );
+        lhs == f.mul(self.d, f.mul(x, f.mul(y, z)))
+            && !(f.is_zero(x) && f.is_zero(y) && f.is_zero(z))
     }
     pub fn neg(&self, p: &HPt<E>) -> HPt<E> {
         [p[0], p[2], p[1]]
@@ -40,17 +44,35 @@ impl<E: Copy + PartialEq> Hessian<E> {
         let [x1, y1, z1] = *p;
         let [x2, y2, z2] = *q;
         let r = [
-            f.sub(f.mul(f.sq(x1), f.mul(y2, z2)), f.mul(f.mul(y1, z1), f.sq(x2))),
-            f.sub(f.mul(f.sq(z1), f.mul(x2, y2)), f.mul(f.mul(x1, y1), f.sq(z2))),
-            f.sub(f.mul(f.sq(y1), f.mul(x2, z2)), f.mul(f.mul(x1, z1), f.sq(y2))),
+            f.sub(
+                f.mul(f.sq(x1), f.mul(y2, z2)),
+                f.mul(f.mul(y1, z1), f.sq(x2)),
+            ),
+            f.sub(
+                f.mul(f.sq(z1), f.mul(x2, y2)),
+                f.mul(f.mul(x1, y1), f.sq(z2)),
+            ),
+            f.sub(
+                f.mul(f.sq(y1), f.mul(x2, z2)),
+                f.mul(f.mul(x1, z1), f.sq(y2)),
+            ),
         ];
         if !r.iter().all(|&v| f.is_zero(v)) {
             return r;
         }
         [
-            f.sub(f.mul(f.sq(z2), f.mul(x1, z1)), f.mul(f.sq(y1), f.mul(x2, y2))),
-            f.sub(f.mul(f.sq(y2), f.mul(y1, z1)), f.mul(self.a, f.mul(f.sq(x1), f.mul(x2, z2)))),
-            f.sub(f.mul(self.a, f.mul(f.sq(x2), f.mul(x1, y1))), f.mul(f.sq(z1), f.mul(y2, z2))),
+            f.sub(
+                f.mul(f.sq(z2), f.mul(x1, z1)),
+                f.mul(f.sq(y1), f.mul(x2, y2)),
+            ),
+            f.sub(
+                f.mul(f.sq(y2), f.mul(y1, z1)),
+                f.mul(self.a, f.mul(f.sq(x1), f.mul(x2, z2))),
+            ),
+            f.sub(
+                f.mul(self.a, f.mul(f.sq(x2), f.mul(x1, y1))),
+                f.mul(f.sq(z1), f.mul(y2, z2)),
+            ),
         ]
     }
     pub fn mul<F: Field<E = E>>(&self, f: &F, p: &HPt<E>, mut k: u64) -> HPt<E> {
@@ -73,7 +95,10 @@ impl<E: Copy + PartialEq> Hessian<E> {
         let d3 = f.mul(self.d, f.sq(self.d));
         let n = f.add(d3, f.mul(f.from_u64(216), self.a));
         let m = f.sub(d3, f.mul(f.from_u64(27), self.a));
-        f.div(f.mul(d3, f.mul(n, f.sq(n))), f.mul(self.a, f.mul(m, f.sq(m))))
+        f.div(
+            f.mul(d3, f.mul(n, f.sq(n))),
+            f.mul(self.a, f.mul(m, f.sq(m))),
+        )
     }
 }
 
@@ -86,8 +111,13 @@ pub struct HessianIso<E> {
     pub consts: Vec<[E; 6]>,
 }
 
-pub fn hessian_isogeny<F: Field>(f: &F, e: &Hessian<F::E>, k: &HPt<F::E>, ell: u64) -> Option<HessianIso<F::E>> {
-    if ell % 2 == 0 || ell % 3 == 0 {
+pub fn hessian_isogeny<F: Field>(
+    f: &F,
+    e: &Hessian<F::E>,
+    k: &HPt<F::E>,
+    ell: u64,
+) -> Option<HessianIso<F::E>> {
+    if ell.is_multiple_of(2) || ell.is_multiple_of(3) {
         return None;
     }
     let mut consts = Vec::with_capacity((ell / 2) as usize);
@@ -108,13 +138,23 @@ pub fn hessian_isogeny<F: Field>(f: &F, e: &Hessian<F::E>, k: &HPt<F::E>, ell: u
         den_prod = f.mul(den_prod, x2);
     }
     // d' = (l d - 6 a sum s) / prod s = (l d yz_prod - 6 a sum_num) / den_prod
-    let num_sum = f.sub(f.mul(f.mul(f.from_u64(ell), e.d), yz_prod), f.mul(f.mul(f.from_u64(6), e.a), sum_num));
+    let num_sum = f.sub(
+        f.mul(f.mul(f.from_u64(ell), e.d), yz_prod),
+        f.mul(f.mul(f.from_u64(6), e.a), sum_num),
+    );
     if f.is_zero(den_prod) {
         return None;
     }
     let d2 = f.div(num_sum, den_prod);
-    let cod = Hessian { a: f.pow(e.a, ell as u128), d: d2 };
-    Some(HessianIso { dom: *e, cod, consts })
+    let cod = Hessian {
+        a: f.pow(e.a, ell as u128),
+        d: d2,
+    };
+    Some(HessianIso {
+        dom: *e,
+        cod,
+        consts,
+    })
 }
 
 impl<E: Copy + PartialEq> HessianIso<E> {

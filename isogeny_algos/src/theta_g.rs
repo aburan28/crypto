@@ -44,7 +44,9 @@ pub fn sq_all<F: Field>(f: &F, x: &[F::E]) -> Vec<F::E> {
 }
 
 pub fn proj_eq_v<F: Field>(f: &F, x: &[F::E], y: &[F::E]) -> bool {
-    let Some(k) = (0..x.len()).find(|&i| !f.is_zero(x[i])) else { return y.iter().all(|&v| f.is_zero(v)) };
+    let Some(k) = (0..x.len()).find(|&i| !f.is_zero(x[i])) else {
+        return y.iter().all(|&v| f.is_zero(v));
+    };
     if f.is_zero(y[k]) {
         return false;
     }
@@ -54,7 +56,10 @@ pub fn proj_eq_v<F: Field>(f: &F, x: &[F::E], y: &[F::E]) -> bool {
 /// Projective inverse skipping zero coordinates (whose entry stays zero).
 fn proj_inv_skip<F: Field>(f: &F, v: &[F::E]) -> Vec<F::E> {
     let n = v.len();
-    let w: Vec<F::E> = v.iter().map(|&c| if f.is_zero(c) { f.one() } else { c }).collect();
+    let w: Vec<F::E> = v
+        .iter()
+        .map(|&c| if f.is_zero(c) { f.one() } else { c })
+        .collect();
     let mut pre = vec![f.one(); n + 1];
     for i in 0..n {
         pre[i + 1] = f.mul(pre[i], w[i]);
@@ -63,7 +68,15 @@ fn proj_inv_skip<F: Field>(f: &F, v: &[F::E]) -> Vec<F::E> {
     for i in (0..n).rev() {
         suf[i] = f.mul(suf[i + 1], w[i]);
     }
-    (0..n).map(|i| if f.is_zero(v[i]) { f.zero() } else { f.mul(pre[i], suf[i + 1]) }).collect()
+    (0..n)
+        .map(|i| {
+            if f.is_zero(v[i]) {
+                f.zero()
+            } else {
+                f.mul(pre[i], suf[i + 1])
+            }
+        })
+        .collect()
 }
 
 /// A (2,...,2)-isogeny with kernel K2 of the domain structure.
@@ -78,20 +91,39 @@ pub struct IsoG<E> {
 /// None if inconsistent (two paths of the hypercube give different D beyond a sign, or D^2 is
 /// not proportional to H(S(null))).
 pub fn isogeny_g<F: Field>(f: &F, null: &[F::E], t8: &[Vec<F::E>]) -> Option<IsoG<F::E>> {
-    let masked: Vec<(usize, Vec<F::E>)> = t8.iter().enumerate().map(|(j, t)| (1usize << j, t.clone())).collect();
+    let masked: Vec<(usize, Vec<F::E>)> = t8
+        .iter()
+        .enumerate()
+        .map(|(j, t)| (1usize << j, t.clone()))
+        .collect();
     isogeny_g_masks(f, null, &masked)
 }
 
 /// As `isogeny_g` with points T''_m = sum_{j in m} T''_j for arbitrary masks m (each gives
 /// D_{chi ^ m} / D_chi = x_m[chi ^ m] / x_m[chi]); on products the single-bit relations can
 /// leave coordinates of D unreachable.
-pub fn isogeny_g_masks<F: Field>(f: &F, null: &[F::E], t8: &[(usize, Vec<F::E>)]) -> Option<IsoG<F::E>> {
+pub fn isogeny_g_masks<F: Field>(
+    f: &F,
+    null: &[F::E],
+    t8: &[(usize, Vec<F::E>)],
+) -> Option<IsoG<F::E>> {
     let n = null.len();
-    let xs: Vec<(usize, Vec<F::E>)> = t8.iter().map(|(m, t)| (*m, wht(f, &sq_all(f, t)))).collect();
+    let xs: Vec<(usize, Vec<F::E>)> = t8
+        .iter()
+        .map(|(m, t)| (*m, wht(f, &sq_all(f, t))))
+        .collect();
     let x0 = wht(f, &sq_all(f, null));
     // D_chi = 0 exactly where H(S(null)) vanishes
     let b = (0..n).find(|&c| !f.is_zero(x0[c]) && xs.iter().any(|(_, x)| !f.is_zero(x[c])))?;
-    let mut d: Vec<Option<F::E>> = (0..n).map(|c| if f.is_zero(x0[c]) { Some(f.zero()) } else { None }).collect();
+    let mut d: Vec<Option<F::E>> = (0..n)
+        .map(|c| {
+            if f.is_zero(x0[c]) {
+                Some(f.zero())
+            } else {
+                None
+            }
+        })
+        .collect();
     d[b] = Some(f.one());
     let mut queue = vec![b];
     while let Some(c) = queue.pop() {
@@ -128,25 +160,38 @@ pub fn isogeny_g_masks<F: Field>(f: &F, null: &[F::E], t8: &[(usize, Vec<F::E>)]
     if zeros.len() == n {
         return None;
     }
-    Some(IsoG { dinv: proj_inv_skip(f, &d), zeros, codomain: wht(f, &d) })
+    Some(IsoG {
+        dinv: proj_inv_skip(f, &d),
+        zeros,
+        codomain: wht(f, &d),
+    })
 }
 
 impl<E: Copy> IsoG<E> {
     fn dual<F: Field<E = E>>(&self, f: &F, x: &[E]) -> Vec<E> {
         let y = wht(f, &sq_all(f, x));
-        y.iter().zip(self.dinv.iter()).map(|(&a, &b)| f.mul(a, b)).collect()
+        y.iter()
+            .zip(self.dinv.iter())
+            .map(|(&a, &b)| f.mul(a, b))
+            .collect()
     }
     pub fn eval<F: Field<E = E>>(&self, f: &F, x: &[E]) -> Vec<E> {
         wht(f, &self.dual(f, x))
     }
     /// Image of x given images-to-be of x + T'_m for the masks m in `trans` (needed when some
     /// dual coordinates vanish).
-    pub fn eval_translates<F: Field<E = E>>(&self, f: &F, x: &[E], trans: &[(usize, Vec<E>)]) -> Option<Vec<E>> {
+    pub fn eval_translates<F: Field<E = E>>(
+        &self,
+        f: &F,
+        x: &[E],
+        trans: &[(usize, Vec<E>)],
+    ) -> Option<Vec<E>> {
         let mut y = self.dual(f, x);
         if self.zeros.is_empty() {
             return Some(wht(f, &y));
         }
-        let duals: Vec<(usize, Vec<E>)> = trans.iter().map(|(m, xt)| (*m, self.dual(f, xt))).collect();
+        let duals: Vec<(usize, Vec<E>)> =
+            trans.iter().map(|(m, xt)| (*m, self.dual(f, xt))).collect();
         let y0 = y.clone();
         for &z in &self.zeros {
             let mut done = false;
@@ -156,7 +201,10 @@ impl<E: Copy> IsoG<E> {
                 }
                 // normalisation coordinate c: Y(f(x+T'_m))_{c^m} = lambda Y(f x)_c
                 let Some(c) = (0..y0.len()).find(|&c| {
-                    !self.zeros.contains(&c) && !self.zeros.contains(&(c ^ m)) && !f.is_zero(y0[c]) && !f.is_zero(yt[c ^ m])
+                    !self.zeros.contains(&c)
+                        && !self.zeros.contains(&(c ^ m))
+                        && !f.is_zero(y0[c])
+                        && !f.is_zero(yt[c ^ m])
                 }) else {
                     continue;
                 };
@@ -185,13 +233,23 @@ impl<E: Copy> DoublerG<E> {
         if x0.iter().chain(null.iter()).any(|&v| f.is_zero(v)) {
             return None;
         }
-        Some(DoublerG { inv_x0: proj_inv_skip(f, &x0), inv_null: proj_inv_skip(f, null) })
+        Some(DoublerG {
+            inv_x0: proj_inv_skip(f, &x0),
+            inv_null: proj_inv_skip(f, null),
+        })
     }
     pub fn double<F: Field<E = E>>(&self, f: &F, x: &[E]) -> Vec<E> {
         let xx = sq_all(f, &wht(f, &sq_all(f, x)));
-        let y: Vec<E> = xx.iter().zip(self.inv_x0.iter()).map(|(&a, &b)| f.mul(a, b)).collect();
+        let y: Vec<E> = xx
+            .iter()
+            .zip(self.inv_x0.iter())
+            .map(|(&a, &b)| f.mul(a, b))
+            .collect();
         let z = wht(f, &y);
-        z.iter().zip(self.inv_null.iter()).map(|(&a, &b)| f.mul(a, b)).collect()
+        z.iter()
+            .zip(self.inv_null.iter())
+            .map(|(&a, &b)| f.mul(a, b))
+            .collect()
     }
 }
 
@@ -204,7 +262,11 @@ pub fn fundamental_squares_g<F: Field>(f: &F, n: &[F::E]) -> Vec<F::E> {
             let mut s = f.zero();
             for c in 0..m {
                 let t = f.mul(n[c], n[c ^ a]);
-                s = if (b & c).count_ones() % 2 == 1 { f.sub(s, t) } else { f.add(s, t) };
+                s = if (b & c).count_ones() % 2 == 1 {
+                    f.sub(s, t)
+                } else {
+                    f.add(s, t)
+                };
             }
             out[a * m + b] = s;
         }
@@ -218,7 +280,11 @@ pub fn fundamental_squares_g<F: Field>(f: &F, n: &[F::E]) -> Vec<F::E> {
 /// vanishing even constants of the computed final null.
 pub fn split_score<F: Field>(f: &F, res: &ChainResultG<F::E>, first_null: &[F::E]) -> usize {
     let k = res.nulls.len();
-    let dom = if k >= 2 { &res.nulls[k - 2] } else { first_null };
+    let dom = if k >= 2 {
+        &res.nulls[k - 2]
+    } else {
+        first_null
+    };
     dom.iter().filter(|&&v| f.is_zero(v)).count() + even_zero_count(f, &res.nulls[k - 1])
 }
 
@@ -226,7 +292,9 @@ pub fn split_score<F: Field>(f: &F, res: &ChainResultG<F::E>, first_null: &[F::E
 pub fn even_zero_count<F: Field>(f: &F, n: &[F::E]) -> usize {
     let m = n.len();
     let t = fundamental_squares_g(f, n);
-    (0..m * m).filter(|&i| (i / m & i % m).count_ones() % 2 == 0 && f.is_zero(t[i])).count()
+    (0..m * m)
+        .filter(|&i| ((i / m) & (i % m)).count_ones() % 2 == 0 && f.is_zero(t[i]))
+        .count()
 }
 
 // ------------------------------------------------------------------ the starting structure
@@ -236,7 +304,9 @@ pub fn even_zero_count<F: Field>(f: &F, n: &[F::E]) -> usize {
 type Tor2 = Vec<(bool, bool)>;
 
 fn symp(a: &Tor2, b: &Tor2) -> bool {
-    a.iter().zip(b.iter()).fold(false, |acc, (u, v)| acc ^ (u.0 & v.1) ^ (u.1 & v.0))
+    a.iter()
+        .zip(b.iter())
+        .fold(false, |acc, (u, v)| acc ^ (u.0 & v.1) ^ (u.1 & v.0))
 }
 
 /// Apply the operator of a 2-torsion point to a coordinate vector: per factor, Z then X.
@@ -264,8 +334,14 @@ fn apply_op<F: Field>(f: &F, v: &Tor2, scal: F::E, u: &[F::E]) -> Vec<F::E> {
 /// Gaussian elimination inverse of a square matrix (rows).
 fn mat_inv<F: Field>(f: &F, m: &[Vec<F::E>]) -> Option<Vec<Vec<F::E>>> {
     let n = m.len();
-    let mut a: Vec<Vec<F::E>> = m.iter().map(|r| r.clone()).collect();
-    let mut inv: Vec<Vec<F::E>> = (0..n).map(|i| (0..n).map(|j| if i == j { f.one() } else { f.zero() }).collect()).collect();
+    let mut a: Vec<Vec<F::E>> = m.to_vec();
+    let mut inv: Vec<Vec<F::E>> = (0..n)
+        .map(|i| {
+            (0..n)
+                .map(|j| if i == j { f.one() } else { f.zero() })
+                .collect()
+        })
+        .collect();
     for col in 0..n {
         let piv = (col..n).find(|&r| !f.is_zero(a[r][col]))?;
         a.swap(col, piv);
@@ -306,7 +382,14 @@ impl<E: Copy> ProductStructure<E> {
     }
     pub fn point<F: Field<E = E>>(&self, f: &F, pts: &[Pt<E>]) -> Vec<E> {
         let p = self.product_coords(f, pts);
-        self.m.iter().map(|row| row.iter().zip(p.iter()).fold(f.zero(), |acc, (&a, &b)| f.add(acc, f.mul(a, b)))).collect()
+        self.m
+            .iter()
+            .map(|row| {
+                row.iter()
+                    .zip(p.iter())
+                    .fold(f.zero(), |acc, (&a, &b)| f.add(acc, f.mul(a, b)))
+            })
+            .collect()
     }
     pub fn null<F: Field<E = E>>(&self, f: &F, g: usize) -> Vec<E> {
         self.point(f, &vec![Pt::Inf; g])
@@ -315,14 +398,23 @@ impl<E: Copy> ProductStructure<E> {
 
 /// Candidate structures (one per sign choice) for which the kernel generated by 2 T'_j is K2 and
 /// T'_j has the zero pattern of e_j / 4. `iota` is a square root of -1.
-pub fn product_structures<F: Field>(f: &F, curves: &[Curve<F::E>], t4: &[Vec<Pt<F::E>>], iota: F::E) -> Vec<ProductStructure<F::E>> {
+pub fn product_structures<F: Field>(
+    f: &F,
+    curves: &[Curve<F::E>],
+    t4: &[Vec<Pt<F::E>>],
+    iota: F::E,
+) -> Vec<ProductStructure<F::E>> {
     let g = curves.len();
     let n = 1usize << g;
     let dbl = |k: usize, p: &Pt<F::E>| padd(f, &curves[k], p, p);
     // per-factor 4-torsion basis taken from the components of the T'_j
     let mut t1s = Vec::with_capacity(g);
     for k in 0..g {
-        let comps: Vec<Pt<F::E>> = t4.iter().map(|t| t[k]).filter(|p| *p != Pt::Inf && dbl(k, p) != Pt::Inf).collect();
+        let comps: Vec<Pt<F::E>> = t4
+            .iter()
+            .map(|t| t[k])
+            .filter(|p| *p != Pt::Inf && dbl(k, p) != Pt::Inf)
+            .collect();
         let mut found = None;
         'outer: for a in 0..comps.len() {
             for b in 0..comps.len() {
@@ -355,7 +447,10 @@ pub fn product_structures<F: Field>(f: &F, curves: &[Curve<F::E>], t4: &[Vec<Pt<
             (true, true)
         }
     };
-    let s: Vec<Tor2> = t4.iter().map(|t| (0..g).map(|k| classify(k, &dbl(k, &t[k]))).collect()).collect();
+    let s: Vec<Tor2> = t4
+        .iter()
+        .map(|t| (0..g).map(|k| classify(k, &dbl(k, &t[k]))).collect())
+        .collect();
     // isotropy and independence
     for i in 0..g {
         for j in 0..g {
@@ -365,15 +460,27 @@ pub fn product_structures<F: Field>(f: &F, curves: &[Curve<F::E>], t4: &[Vec<Pt<
         }
     }
     // symplectic complement: R_j with <S_i, R_j> = delta_ij, <R_i, R_j> = 0
-    let all: Vec<Tor2> = (0..1usize << (2 * g)).map(|bits| (0..g).map(|k| ((bits >> (2 * k)) & 1 == 1, (bits >> (2 * k + 1)) & 1 == 1)).collect()).collect();
+    let all: Vec<Tor2> = (0..1usize << (2 * g))
+        .map(|bits| {
+            (0..g)
+                .map(|k| ((bits >> (2 * k)) & 1 == 1, (bits >> (2 * k + 1)) & 1 == 1))
+                .collect()
+        })
+        .collect();
     let mut r: Vec<Tor2> = Vec::with_capacity(g);
     for j in 0..g {
-        let cand = all.iter().find(|v| (0..g).all(|i| symp(&s[i], v) == (i == j)));
+        let cand = all
+            .iter()
+            .find(|v| (0..g).all(|i| symp(&s[i], v) == (i == j)));
         let Some(c) = cand else { return vec![] };
         let mut v = c.clone();
         for k in 0..j {
             if symp(&v, &r[k]) {
-                v = v.iter().zip(s[k].iter()).map(|(a, b)| (a.0 ^ b.0, a.1 ^ b.1)).collect();
+                v = v
+                    .iter()
+                    .zip(s[k].iter())
+                    .map(|(a, b)| (a.0 ^ b.0, a.1 ^ b.1))
+                    .collect();
             }
         }
         r.push(v);
@@ -386,16 +493,38 @@ pub fn product_structures<F: Field>(f: &F, curves: &[Curve<F::E>], t4: &[Vec<Pt<
     for eps in 0..1usize << g {
         for bsg in 0..1usize << g {
             let a_ops: Vec<(Tor2, F::E)> = (0..g)
-                .map(|j| (s[j].clone(), if (eps >> j) & 1 == 1 { f.neg(scal(&s[j])) } else { scal(&s[j]) }))
+                .map(|j| {
+                    (
+                        s[j].clone(),
+                        if (eps >> j) & 1 == 1 {
+                            f.neg(scal(&s[j]))
+                        } else {
+                            scal(&s[j])
+                        },
+                    )
+                })
                 .collect();
             let b_ops: Vec<(Tor2, F::E)> = (0..g)
-                .map(|j| (r[j].clone(), if (bsg >> j) & 1 == 1 { f.neg(scal(&r[j])) } else { scal(&r[j]) }))
+                .map(|j| {
+                    (
+                        r[j].clone(),
+                        if (bsg >> j) & 1 == 1 {
+                            f.neg(scal(&r[j]))
+                        } else {
+                            scal(&r[j])
+                        },
+                    )
+                })
                 .collect();
             // common +1 eigenvector
             let mut w0: Vec<F::E> = (0..n).map(|_| f.random(&mut rng)).collect();
             for (v, sc) in &a_ops {
                 let aw = apply_op(f, v, *sc, &w0);
-                w0 = w0.iter().zip(aw.iter()).map(|(&x, &y)| f.add(x, y)).collect();
+                w0 = w0
+                    .iter()
+                    .zip(aw.iter())
+                    .map(|(&x, &y)| f.add(x, y))
+                    .collect();
             }
             if w0.iter().all(|&c| f.is_zero(c)) {
                 continue;
@@ -412,13 +541,20 @@ pub fn product_structures<F: Field>(f: &F, curves: &[Curve<F::E>], t4: &[Vec<Pt<
                 })
                 .collect();
             // W has columns w_chi; new coordinates = W^-1 * product coordinates
-            let wmat: Vec<Vec<F::E>> = (0..n).map(|i| (0..n).map(|chi| cols[chi][i]).collect()).collect();
+            let wmat: Vec<Vec<F::E>> = (0..n)
+                .map(|i| (0..n).map(|chi| cols[chi][i]).collect())
+                .collect();
             let Some(m) = mat_inv(f, &wmat) else { continue };
-            let st = ProductStructure { t: t1s.iter().map(|x| x.0).collect(), m };
+            let st = ProductStructure {
+                t: t1s.iter().map(|x| x.0).collect(),
+                m,
+            };
             // zero pattern of T'_j
             let ok = (0..g).all(|j| {
                 let c = st.point(f, &t4[j]);
-                (0..n).filter(|chi| (chi >> j) & 1 == 1).all(|chi| f.is_zero(c[chi]))
+                (0..n)
+                    .filter(|chi| (chi >> j) & 1 == 1)
+                    .all(|chi| f.is_zero(c[chi]))
             });
             if ok {
                 out.push(st);
@@ -489,7 +625,9 @@ pub fn chain_g_with<F: Field>(
     let g = curves.len();
     let n = n as usize;
     assert!(n >= 1 && k.len() == g);
-    let addp = |p: &[Pt<F::E>], q: &[Pt<F::E>]| -> Vec<Pt<F::E>> { (0..g).map(|i| padd(f, &curves[i], &p[i], &q[i])).collect() };
+    let addp = |p: &[Pt<F::E>], q: &[Pt<F::E>]| -> Vec<Pt<F::E>> {
+        (0..g).map(|i| padd(f, &curves[i], &p[i], &q[i])).collect()
+    };
     let mults: Vec<Vec<Vec<Pt<F::E>>>> = k
         .iter()
         .map(|kj| {
@@ -579,7 +717,11 @@ fn chain_with_structure<F: Field>(
             }
             t8.push((m, push(f, st, &steps, s - 1, &acc, offset, addp)?));
         }
-        let dom = if s == 1 { null.clone() } else { steps[s - 2].iso.codomain.clone() };
+        let dom = if s == 1 {
+            null.clone()
+        } else {
+            steps[s - 2].iso.codomain.clone()
+        };
         let iso = isogeny_g_masks(f, &dom, &t8)?;
         let masks = choose_masks(&iso.zeros, g);
         let zero = !iso.zeros.is_empty();
@@ -597,15 +739,25 @@ fn chain_with_structure<F: Field>(
         images.push(push(f, st, &steps, done, x, offset, addp)?);
     }
     if done == n {
-        return Some(ChainResultG { nulls, images, gluing_steps: gl });
+        return Some(ChainResultG {
+            nulls,
+            images,
+            gluing_steps: gl,
+        });
     }
     // generic phase: generators of order 2^(n + 2 - done), m = n - done steps
-    let gens: Vec<Vec<F::E>> = (0..g).map(|j| push(f, st, &steps, done, &mults[j][0], offset, addp)).collect::<Option<_>>()?;
+    let gens: Vec<Vec<F::E>> = (0..g)
+        .map(|j| push(f, st, &steps, done, &mults[j][0], offset, addp))
+        .collect::<Option<_>>()?;
     let m = n - done;
     let splits = crate::kernel::two_power::optimal_splits(m, 1.0, 0.6);
     let mut cur = steps.last().unwrap().iso.codomain.clone();
     rec_strategy(f, &mut cur, gens, m, &mut images, &splits, &mut nulls)?;
-    Some(ChainResultG { nulls, images, gluing_steps: gl })
+    Some(ChainResultG {
+        nulls,
+        images,
+        gluing_steps: gl,
+    })
 }
 
 fn rec_strategy<F: Field>(

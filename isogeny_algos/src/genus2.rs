@@ -30,7 +30,10 @@ impl LPoly {
     }
     /// L of E1 x E2 from the traces a1, a2: (1 - a1 T + p T^2)(1 - a2 T + p T^2).
     pub fn product(a1: i64, a2: i64, p: i64) -> LPoly {
-        LPoly { c1: -(a1 + a2), c2: 2 * p + a1 * a2 }
+        LPoly {
+            c1: -(a1 + a2),
+            c2: 2 * p + a1 * a2,
+        }
     }
 }
 
@@ -50,7 +53,11 @@ pub fn point_counts(fp: &Zp, f: &Poly<Zp>) -> (i64, i64) {
     let leg = legendre_table(p);
     let d = f.len() - 1;
     let lc = f[d];
-    let inf1 = if d == 5 { 1 } else { 1 + leg[lc as usize] as i64 };
+    let inf1 = if d == 5 {
+        1
+    } else {
+        1 + leg[lc as usize] as i64
+    };
     let mut n1 = inf1;
     for x in 0..p {
         n1 += 1 + leg[poly::eval(fp, f, x) as usize] as i64;
@@ -108,14 +115,22 @@ fn det3<F: Field>(f: &F, m: &[[F::E; 3]; 3]) -> F::E {
 }
 
 fn bracket<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
-    poly::sub(f, &poly::mul(f, &poly::derivative(f, a), b), &poly::mul(f, a, &poly::derivative(f, b)))
+    poly::sub(
+        f,
+        &poly::mul(f, &poly::derivative(f, a), b),
+        &poly::mul(f, a, &poly::derivative(f, b)),
+    )
 }
 
 /// Richelot data for the (2,2)-subgroup given by the quadratic splitting f = G1 G2 G3.
 pub fn richelot<F: Field>(f: &F, g: &[Poly<F>; 3]) -> Richelot<F> {
     let m = [coeffs(f, &g[0]), coeffs(f, &g[1]), coeffs(f, &g[2])];
     let delta = det3(f, &m);
-    let h = [bracket(f, &g[1], &g[2]), bracket(f, &g[2], &g[0]), bracket(f, &g[0], &g[1])];
+    let h = [
+        bracket(f, &g[1], &g[2]),
+        bracket(f, &g[2], &g[0]),
+        bracket(f, &g[0], &g[1]),
+    ];
     Richelot { delta, h }
 }
 
@@ -146,7 +161,11 @@ impl<F: Field> Richelot<F> {
     ) -> Vec<(G::E, G::E)> {
         let g1x = poly::eval(f, &g[0], x);
         let g2x = poly::eval(f, &g[1], x);
-        let q = poly::add(f, &poly::scale(f, &self.h[0], g1x), &poly::scale(f, &self.h[1], g2x));
+        let q = poly::add(
+            f,
+            &poly::scale(f, &self.h[0], g1x),
+            &poly::scale(f, &self.h[1], g2x),
+        );
         let qe: Vec<G::E> = q.iter().map(|&c| emb(c)).collect();
         let h1e: Vec<G::E> = self.h[0].iter().map(|&c| emb(c)).collect();
         // the x' are the roots of a quadratic: closed form (one square root), not Cantor-Zassenhaus
@@ -161,7 +180,11 @@ impl<F: Field> Richelot<F> {
                         let i2a = ext.inv(ext.add(a, a));
                         let r1 = ext.mul(ext.sub(s, b), i2a);
                         let r2 = ext.mul(ext.sub(ext.neg(s), b), i2a);
-                        if r1 == r2 { vec![r1] } else { vec![r1, r2] }
+                        if r1 == r2 {
+                            vec![r1]
+                        } else {
+                            vec![r1, r2]
+                        }
                     }
                     None => vec![],
                 }
@@ -173,7 +196,10 @@ impl<F: Field> Richelot<F> {
         roots
             .into_iter()
             .map(|xp| {
-                let yp = ext.div(ext.mul(ext.mul(g1e, poly::eval(ext, &h1e, xp)), ext.sub(xe, xp)), ye);
+                let yp = ext.div(
+                    ext.mul(ext.mul(g1e, poly::eval(ext, &h1e, xp)), ext.sub(xe, xp)),
+                    ye,
+                );
                 (xp, ext.mul(de, yp))
             })
             .collect()
@@ -196,7 +222,9 @@ pub fn split<F: Field>(f: &F, fsex: &Poly<F>, g: &[Poly<F>; 3]) -> Option<(Poly<
     // coordinate z with sigma: z -> -z, x = (r - s z)/(1 - z) (s = infinity: x = r + z)
     let six = 6usize;
     let mut fz: Poly<F> = vec![f.zero(); 7];
-    let fc: Vec<F::E> = (0..=six).map(|k| if k < fsex.len() { fsex[k] } else { f.zero() }).collect();
+    let fc: Vec<F::E> = (0..=six)
+        .map(|k| if k < fsex.len() { fsex[k] } else { f.zero() })
+        .collect();
     if f.is_zero(gamma) {
         // fixed points: r = beta/(2 alpha) and infinity; z = x - r... sigma(x) = -x - beta/alpha
         let r = f.neg(f.div(beta, f.add(alpha, alpha)));
@@ -264,7 +292,10 @@ pub fn cubic_to_short<F: Field>(f: &F, cub: &Poly<F>) -> Curve<F::E> {
     let s = f.div(b2, three);
     // t^3 + (c2 - b2^2/3) t + (2 b2^3/27 - b2 c2/3 + d2)
     let aa = f.sub(c2, f.mul(b2, s));
-    let bb = f.add(f.sub(f.mul(f.from_u64(2), f.mul(s, f.mul(s, s))), f.mul(s, c2)), d2);
+    let bb = f.add(
+        f.sub(f.mul(f.from_u64(2), f.mul(s, f.mul(s, s))), f.mul(s, c2)),
+        d2,
+    );
     Curve::new(aa, bb)
 }
 
@@ -278,15 +309,27 @@ pub fn glue<F: Field>(f: &F, a: [F::E; 3], b: [F::E; 3]) -> Option<Poly<F>> {
     let sq = |x: F::E| f.mul(x, x);
     let inv_or = |x: F::E| if f.is_zero(x) { None } else { Some(f.inv(x)) };
     let aa1 = f.add(
-        f.add(f.mul(sq(d(a1, a2)), inv_or(d(b1, b2))?), f.mul(sq(d(a2, a3)), inv_or(d(b2, b3))?)),
+        f.add(
+            f.mul(sq(d(a1, a2)), inv_or(d(b1, b2))?),
+            f.mul(sq(d(a2, a3)), inv_or(d(b2, b3))?),
+        ),
         f.mul(sq(d(a3, a1)), inv_or(d(b3, b1))?),
     );
     let bb1 = f.add(
-        f.add(f.mul(sq(d(b1, b2)), inv_or(d(a1, a2))?), f.mul(sq(d(b2, b3)), inv_or(d(a2, a3))?)),
+        f.add(
+            f.mul(sq(d(b1, b2)), inv_or(d(a1, a2))?),
+            f.mul(sq(d(b2, b3)), inv_or(d(a2, a3))?),
+        ),
         f.mul(sq(d(b3, b1)), inv_or(d(a3, a1))?),
     );
-    let aa2 = f.add(f.add(f.mul(a1, d(b3, b2)), f.mul(a2, d(b1, b3))), f.mul(a3, d(b2, b1)));
-    let bb2 = f.add(f.add(f.mul(b1, d(a3, a2)), f.mul(b2, d(a1, a3))), f.mul(b3, d(a2, a1)));
+    let aa2 = f.add(
+        f.add(f.mul(a1, d(b3, b2)), f.mul(a2, d(b1, b3))),
+        f.mul(a3, d(b2, b1)),
+    );
+    let bb2 = f.add(
+        f.add(f.mul(b1, d(a3, a2)), f.mul(b2, d(a1, a3))),
+        f.mul(b3, d(a2, a1)),
+    );
     if f.is_zero(aa1) || f.is_zero(bb1) || f.is_zero(aa2) || f.is_zero(bb2) {
         return None;
     }
@@ -296,7 +339,11 @@ pub fn glue<F: Field>(f: &F, a: [F::E; 3], b: [F::E; 3]) -> Option<Poly<F>> {
     let big_b = f.mul(da, f.div(bb1, bb2));
     let quad = |x1: F::E, x2: F::E, x3: F::E, y1: F::E, y2: F::E, y3: F::E| -> Poly<F> {
         // A (x2 - x1)(x1 - x3) x^2 + B (y2 - y1)(y1 - y3)
-        vec![f.mul(big_b, f.mul(d(y2, y1), d(y1, y3))), f.zero(), f.mul(big_a, f.mul(d(x2, x1), d(x1, x3)))]
+        vec![
+            f.mul(big_b, f.mul(d(y2, y1), d(y1, y3))),
+            f.zero(),
+            f.mul(big_a, f.mul(d(x2, x1), d(x1, x3))),
+        ]
     };
     let q1 = quad(a1, a2, a3, b1, b2, b3);
     let q2 = quad(a2, a3, a1, b2, b3, b1);
@@ -341,8 +388,18 @@ pub fn igusa_clebsch<F: Field>(f: &F, lc: F::E, r: &[F::E; 6]) -> [F::E; 4] {
             let base = f.mul(tri(s1), tri(s2));
             i4 = f.add(i4, base);
             // the six bijections s1 -> s2
-            for perm in [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]] {
-                let m = f.mul(f.mul(d(s1[0], s2[perm[0]]), d(s1[1], s2[perm[1]])), d(s1[2], s2[perm[2]]));
+            for perm in [
+                [0, 1, 2],
+                [0, 2, 1],
+                [1, 0, 2],
+                [1, 2, 0],
+                [2, 0, 1],
+                [2, 1, 0],
+            ] {
+                let m = f.mul(
+                    f.mul(d(s1[0], s2[perm[0]]), d(s1[1], s2[perm[1]])),
+                    d(s1[2], s2[perm[2]]),
+                );
                 i6 = f.add(i6, f.mul(base, m));
             }
         }
@@ -419,34 +476,46 @@ pub fn neighbours(f: &Zp2, v: &Vertex<(u64, u64)>, rng: &mut Rng) -> Vec<Vertex<
                     if let Some((e1, e2)) = split(f, &fsex, &g) {
                         let (ra, rb) = (poly::roots(f, &e1, rng), poly::roots(f, &e2, rng));
                         if ra.len() == 3 && rb.len() == 3 {
-                            out.push(Vertex::Prod { a: [ra[0], ra[1], ra[2]], b: [rb[0], rb[1], rb[2]] });
+                            out.push(Vertex::Prod {
+                                a: [ra[0], ra[1], ra[2]],
+                                b: [rb[0], rb[1], rb[2]],
+                            });
                         }
                     }
                 } else {
                     let c = rl.codomain(f);
                     let rs = poly::roots(f, &c, rng);
                     if rs.len() == 6 {
-                        out.push(Vertex::Jac { lc: *c.last().unwrap(), roots: [rs[0], rs[1], rs[2], rs[3], rs[4], rs[5]] });
+                        out.push(Vertex::Jac {
+                            lc: *c.last().unwrap(),
+                            roots: [rs[0], rs[1], rs[2], rs[3], rs[4], rs[5]],
+                        });
                     }
                 }
             }
         }
         Vertex::Prod { a, b } => {
             // 9 products of 2-isogenies (kernel (a_i, 0) on E1, (b_j, 0) on E2)
-            let two_iso = |r: &[(u64, u64); 3], k: usize, rng: &mut Rng| -> Option<[(u64, u64); 3]> {
-                let c = poly::from_roots(f, r);
-                let e = cubic_to_short(f, &c);
-                // short model shifts x by -b/3: the kernel abscissa is r_k + (sum r)/3
-                let shift = f.div(f.add(f.add(r[0], r[1]), r[2]), f.from_u64(3));
-                let x0 = f.sub(r[k], shift);
-                let iso = crate::kernel::velu::velu_cyclic(f, &e, &crate::curve::Pt::Aff(x0, f.zero()), 2);
-                let rr = poly::roots(f, &vec![iso.cod.b, iso.cod.a, f.zero(), f.one()], rng);
-                if rr.len() == 3 {
-                    Some([rr[0], rr[1], rr[2]])
-                } else {
-                    None
-                }
-            };
+            let two_iso =
+                |r: &[(u64, u64); 3], k: usize, rng: &mut Rng| -> Option<[(u64, u64); 3]> {
+                    let c = poly::from_roots(f, r);
+                    let e = cubic_to_short(f, &c);
+                    // short model shifts x by -b/3: the kernel abscissa is r_k + (sum r)/3
+                    let shift = f.div(f.add(f.add(r[0], r[1]), r[2]), f.from_u64(3));
+                    let x0 = f.sub(r[k], shift);
+                    let iso = crate::kernel::velu::velu_cyclic(
+                        f,
+                        &e,
+                        &crate::curve::Pt::Aff(x0, f.zero()),
+                        2,
+                    );
+                    let rr = poly::roots(f, &vec![iso.cod.b, iso.cod.a, f.zero(), f.one()], rng);
+                    if rr.len() == 3 {
+                        Some([rr[0], rr[1], rr[2]])
+                    } else {
+                        None
+                    }
+                };
             for i in 0..3 {
                 for j in 0..3 {
                     if let (Some(na), Some(nb)) = (two_iso(a, i, rng), two_iso(b, j, rng)) {
@@ -455,13 +524,23 @@ pub fn neighbours(f: &Zp2, v: &Vertex<(u64, u64)>, rng: &mut Rng) -> Vec<Vertex<
                 }
             }
             // 6 gluings
-            for perm in [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]] {
+            for perm in [
+                [0, 1, 2],
+                [0, 2, 1],
+                [1, 0, 2],
+                [1, 2, 0],
+                [2, 0, 1],
+                [2, 1, 0],
+            ] {
                 let bp = [b[perm[0]], b[perm[1]], b[perm[2]]];
                 match glue(f, *a, bp) {
                     Some(c) => {
                         let rs = poly::roots(f, &c, rng);
                         if rs.len() == 6 {
-                            out.push(Vertex::Jac { lc: *c.last().unwrap(), roots: [rs[0], rs[1], rs[2], rs[3], rs[4], rs[5]] });
+                            out.push(Vertex::Jac {
+                                lc: *c.last().unwrap(),
+                                roots: [rs[0], rs[1], rs[2], rs[3], rs[4], rs[5]],
+                            });
                         }
                     }
                     None => {
@@ -527,5 +606,9 @@ pub fn superspecial_graph(p: u64, max_vertices: usize, rng: &mut Rng) -> SsGraph
             }
         }
     }
-    SsGraph { jacobians: jac, products: prod, edges }
+    SsGraph {
+        jacobians: jac,
+        products: prod,
+        edges,
+    }
 }

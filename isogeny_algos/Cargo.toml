@@ -7,6 +7,13 @@ description = "Baseline implementations of isogeny-computation algorithms (Velu,
 # Standalone crate: keep it out of any parent workspace.
 [workspace]
 
+[lints.clippy]
+# Index-heavy polynomial and matrix code reads more directly with explicit indices, and the
+# isogeny formulas take many curve parameters; the repository's other crates allow the same.
+needless_range_loop = "allow"
+too_many_arguments = "allow"
+type_complexity = "allow"
+
 [profile.release]
 opt-level = 3
 debug = false

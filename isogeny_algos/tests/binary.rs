@@ -57,7 +57,11 @@ fn group_law_and_point_counting() {
     for n in [11u32, 13, 15] {
         let f = GF2n::new(n);
         for _ in 0..3 {
-            let e = BinCurve::new(f.random(&mut rng), f.random(&mut rng), f.random(&mut rng) | 1);
+            let e = BinCurve::new(
+                f.random(&mut rng),
+                f.random(&mut rng),
+                f.random(&mut rng) | 1,
+            );
             if e.disc(&f) == 0 {
                 continue;
             }
@@ -65,10 +69,17 @@ fn group_law_and_point_counting() {
             // BSGS path (forced) agrees
             assert_eq!(order_bsgs_forced(&f, &e, &mut rng), ord);
             for _ in 0..5 {
-                let (p, q, r) = (e.random_point(&f, &mut rng), e.random_point(&f, &mut rng), e.random_point(&f, &mut rng));
+                let (p, q, r) = (
+                    e.random_point(&f, &mut rng),
+                    e.random_point(&f, &mut rng),
+                    e.random_point(&f, &mut rng),
+                );
                 assert!(e.on_curve(&f, &p));
                 assert!(e.on_curve(&f, &e.add(&f, &p, &q)));
-                assert_eq!(e.add(&f, &e.add(&f, &p, &q), &r), e.add(&f, &p, &e.add(&f, &q, &r)));
+                assert_eq!(
+                    e.add(&f, &e.add(&f, &p, &q), &r),
+                    e.add(&f, &p, &e.add(&f, &q, &r))
+                );
                 assert_eq!(e.add(&f, &p, &e.neg(&p)), Pt::Inf);
                 assert_eq!(e.mul(&f, &p, ord), Pt::Inf);
             }
@@ -102,11 +113,25 @@ fn order_bsgs_forced(f: &GF2n, e: &BinCurve, rng: &mut Rng) -> u128 {
             o += 1;
         }
         assert_eq!(n % o, 0);
-        let g = { let (mut a, mut b) = (l, o); while b != 0 { let t = a % b; a = b; b = t; } a };
+        let g = {
+            let (mut a, mut b) = (l, o);
+            while b != 0 {
+                let t = a % b;
+                a = b;
+                b = t;
+            }
+            a
+        };
         l = l / g * o;
     }
-    let c: Vec<u128> = ((q + 1 - w)..=(q + 1 + w)).filter(|k| k % l == 0 && k % 2 == 0).collect();
-    if c.len() == 1 { c[0] } else { n }
+    let c: Vec<u128> = ((q + 1 - w)..=(q + 1 + w))
+        .filter(|k| k % l == 0 && k % 2 == 0)
+        .collect();
+    if c.len() == 1 {
+        c[0]
+    } else {
+        n
+    }
 }
 
 /// A curve over GF(2^n) with a rational point of order ell.
@@ -114,7 +139,7 @@ fn curve_with_ell(f: &GF2n, ell: u64, rng: &mut Rng) -> (BinCurve, BPt, u128) {
     loop {
         let e = BinCurve::new(f.random(rng) & 1, 0, f.random(rng) | 1);
         let n = e.order(f, rng);
-        if n % ell as u128 != 0 {
+        if !n.is_multiple_of(ell as u128) {
             continue;
         }
         let p = e.mul(f, &e.random_point(f, rng), n / ell as u128);
@@ -132,12 +157,20 @@ fn velu_kohel_and_division_polynomials() {
         let (e, p, n) = curve_with_ell(&f, ell, &mut rng);
         let iso = velu(&f, &e, &p, ell);
         // codomain has the same number of points, images lie on it, homomorphism
-        assert_eq!(iso.cod.order(&f, &mut rng), n, "isogenous curves have equal order");
+        assert_eq!(
+            iso.cod.order(&f, &mut rng),
+            n,
+            "isogenous curves have equal order"
+        );
         for _ in 0..5 {
             let (a, b) = (e.random_point(&f, &mut rng), e.random_point(&f, &mut rng));
             let (ia, ib) = (iso.eval(&f, &a), iso.eval(&f, &b));
             assert!(iso.cod.on_curve(&f, &ia), "l = {ell}");
-            assert_eq!(iso.eval(&f, &e.add(&f, &a, &b)), iso.cod.add(&f, &ia, &ib), "l = {ell}");
+            assert_eq!(
+                iso.eval(&f, &e.add(&f, &a, &b)),
+                iso.cod.add(&f, &ia, &ib),
+                "l = {ell}"
+            );
         }
         assert_eq!(iso.eval(&f, &p), Pt::Inf);
         // Kohel from the kernel polynomial: same codomain and x-map
@@ -169,7 +202,10 @@ fn velu_kohel_and_division_polynomials() {
 fn phi_mod2_matches_kernel_oracle() {
     let mut rng = Rng::new(703);
     let f = GF2n::new(19);
-    let ko = BinKernelOracle { f: &f, ells: vec![3, 5, 7] };
+    let ko = BinKernelOracle {
+        f: &f,
+        ells: vec![3, 5, 7],
+    };
     let phis: Vec<_> = [3usize, 5, 7].iter().map(|&l| phi_mod2(&f, l)).collect();
     let mut edges = 0;
     for _ in 0..6 {
@@ -191,7 +227,11 @@ fn phi_mod2_matches_kernel_oracle() {
     assert!(edges >= 6, "only {edges} edges: comparison too weak");
 }
 
-fn verify_path(f: &GF2n, phis: &[isogeny_algos::find::modpoly::Phi<GF2n>], path: &Path<u64>) -> bool {
+fn verify_path(
+    f: &GF2n,
+    phis: &[isogeny_algos::find::modpoly::Phi<GF2n>],
+    path: &Path<u64>,
+) -> bool {
     path.ells.iter().enumerate().all(|(i, &l)| {
         let p = phis.iter().find(|p| p.ell == l).unwrap();
         p.eval(f, path.js[i], path.js[i + 1]) == 0
@@ -203,14 +243,20 @@ fn path_finding_on_binary_curves() {
     let mut rng = Rng::new(704);
     let f = GF2n::new(17);
     let ells = vec![3u64, 5, 7];
-    let ko = BinKernelOracle { f: &f, ells: ells.clone() };
+    let ko = BinKernelOracle {
+        f: &f,
+        ells: ells.clone(),
+    };
     let phis: Vec<_> = ells.iter().map(|&l| phi_mod2(&f, l as usize)).collect();
     let mut total_len = 0;
     for trial in 0..4 {
         // start curve and a random walk to the target
         let j1 = f.random(&mut rng) | 4;
         let mut j2 = j1;
-        let mut walked = Path { js: vec![j1], ells: vec![] };
+        let mut walked = Path {
+            js: vec![j1],
+            ells: vec![],
+        };
         for _ in 0..6 {
             let ns = ko.neighbors(j2, &mut rng);
             if ns.is_empty() {
@@ -224,7 +270,10 @@ fn path_finding_on_binary_curves() {
         assert!(verify_path(&f, &phis, &walked));
         total_len += walked.len();
         // same number of points (twist-insensitive: compare the pair of orders)
-        let (o1, o2) = (BinCurve::from_j(&f, j1).order(&f, &mut rng), BinCurve::from_j(&f, j2).order(&f, &mut rng));
+        let (o1, o2) = (
+            BinCurve::from_j(&f, j1).order(&f, &mut rng),
+            BinCurve::from_j(&f, j2).order(&f, &mut rng),
+        );
         let q = f.size();
         assert!(o1 == o2 || o1 + o2 == 2 * q + 2, "trial {trial}");
         let (p, _) = galbraith_with(&ko, j1, j2, 200_000, &mut rng);

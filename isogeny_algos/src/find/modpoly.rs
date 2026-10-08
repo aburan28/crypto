@@ -23,7 +23,7 @@ impl<F: Field> Clone for Phi<F> {
 fn sigma3(n: usize) -> u64 {
     let mut s = 0u64;
     for d in 1..=n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             s += (d as u64).pow(3);
         }
     }
@@ -57,7 +57,11 @@ fn s_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
             if g2 <= n {
                 t = f.add(t, part[n - g2]);
             }
-            acc = if k % 2 == 1 { f.add(acc, t) } else { f.sub(acc, t) };
+            acc = if k % 2 == 1 {
+                f.add(acc, t)
+            } else {
+                f.sub(acc, t)
+            };
             k += 1;
         }
         part[n] = acc;
@@ -86,7 +90,10 @@ pub fn integer_coeffs(ell: usize) -> Vec<Vec<crate::int::Int>> {
         }
         p -= 2;
     }
-    let phis: Vec<Phi<Zp>> = primes.iter().map(|&p| Phi::compute(&Zp::new(p), ell)).collect();
+    let phis: Vec<Phi<Zp>> = primes
+        .iter()
+        .map(|&p| Phi::compute(&Zp::new(p), ell))
+        .collect();
     let (rows, cols) = (phis[0].c.len(), phis[0].c[0].len());
     let mut m = Big::from_u64(1);
     for &p in &primes {
@@ -144,7 +151,10 @@ impl<F: Field> Phi<F> {
     /// powers of S) and l^2 dot products for the coefficients actually read, plus O(l^2) short
     /// products, against the O(l^6) dense solve of `compute_linear_algebra`.
     pub fn compute_hecke(f: &F, ell: usize) -> Phi<F> {
-        assert!(f.char() > ell as u64 + 1 || f.char() == 0, "characteristic must exceed l + 1");
+        assert!(
+            f.char() > ell as u64 + 1 || f.char() == 0,
+            "characteristic must exceed l + 1"
+        );
         let l = ell;
         let l1 = l + 1;
         let prec = l + 1; // non-negative powers q^0 .. q^l of the e_k(j_r)
@@ -205,7 +215,8 @@ impl<F: Field> Phi<F> {
         }
         // offset-1 Laurent product truncated to q^{prec-1}: (q^{i-1})(q^{k-1}) = q^{i+k-2}, i.e.
         // coefficients 1..=w of the plain product (lazily accumulated)
-        let lmul = |a: &[F::E], b: &[F::E]| -> Vec<F::E> { f.conv_trunc(a, b, w + 1)[1..].to_vec() };
+        let lmul =
+            |a: &[F::E], b: &[F::E]| -> Vec<F::E> { f.conv_trunc(a, b, w + 1)[1..].to_vec() };
         // Newton: k e_k = sum_{i=1}^k (-1)^{i-1} e_{k-i} s_i
         let mut e: Vec<Vec<F::E>> = vec![{
             let mut one = vec![f.zero(); w];
@@ -217,15 +228,19 @@ impl<F: Field> Phi<F> {
             for i in 1..=k {
                 let t = lmul(&e[k - i], &pw[i]);
                 for (a, b) in acc.iter_mut().zip(t) {
-                    *a = if i % 2 == 1 { f.add(*a, b) } else { f.sub(*a, b) };
+                    *a = if i % 2 == 1 {
+                        f.add(*a, b)
+                    } else {
+                        f.sub(*a, b)
+                    };
                 }
             }
             let ki = f.inv(f.from_u64(k as u64));
             e.push(acc.into_iter().map(|x| f.mul(x, ki)).collect());
         }
         e.push(vec![f.zero(); w]); // e_{l+1} of l conjugates = 0
-        // j(q^l) = sum_n [j]_n q^{l n}, n >= -1
-        // E_k = e_k + j(q^l) e_{k-1}: polar order <= l + 1; represent with offset l+1, up to q^0
+                                   // j(q^l) = sum_n [j]_n q^{l n}, n >= -1
+                                   // E_k = e_k + j(q^l) e_{k-1}: polar order <= l + 1; represent with offset l+1, up to q^0
         let wo = l1 + 1;
         let jpow = |d: usize, ex: i64| -> F::E {
             // coefficient of q^ex in j^d

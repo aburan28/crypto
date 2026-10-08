@@ -285,7 +285,10 @@ impl MontRt {
         for _ in 0..6 {
             inv = inv.wrapping_mul(2u64.wrapping_sub(n.0[0].wrapping_mul(inv)));
         }
-        MontRt { n: n.0.clone(), ninv: inv.wrapping_neg() }
+        MontRt {
+            n: n.0.clone(),
+            ninv: inv.wrapping_neg(),
+        }
     }
     fn geq(a: &[u64], b: &[u64]) -> bool {
         for i in (0..b.len()).rev() {
@@ -353,7 +356,12 @@ impl MontRt {
 fn small_odd_primes() -> &'static [u64] {
     use std::sync::OnceLock;
     static P: OnceLock<Vec<u64>> = OnceLock::new();
-    P.get_or_init(|| (3u64..2000).step_by(2).filter(|&q| crate::field::is_prime(q)).collect())
+    P.get_or_init(|| {
+        (3u64..2000)
+            .step_by(2)
+            .filter(|&q| crate::field::is_prime(q))
+            .collect()
+    })
 }
 
 /// Miller-Rabin for big integers (bases 2..=37) after trial division by the primes below 2000;

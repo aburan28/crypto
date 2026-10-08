@@ -28,7 +28,10 @@ impl fmt::Display for Int {
 
 impl Int {
     pub fn zero() -> Int {
-        Int { neg: false, mag: Big::zero() }
+        Int {
+            neg: false,
+            mag: Big::zero(),
+        }
     }
     pub fn one() -> Int {
         Int::from(1i64)

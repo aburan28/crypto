@@ -24,17 +24,13 @@ pub fn eigen_class(fp: &Zp, e: &Curve<u64>, h: &Poly<Zp>, ell: u64) -> Option<u6
     let g = |n: usize| poly::rem(fp, &division_poly(fp, e, n), h);
     for lam in 2..=((ell - 1) / 2) as usize {
         let (gl, gm, gp) = (g(lam), g(lam - 1), g(lam + 1));
-        let Some(inv) = poly::invmod(fp, &poly::mulmod(fp, &gl, &gl, h), h) else {
-            return None;
-        };
+        let inv = poly::invmod(fp, &poly::mulmod(fp, &gl, &gl, h), h)?;
         let num = poly::mulmod(fp, &gm, &gp, h);
         let mut ratio = poly::mulmod(fp, &num, &inv, h);
         let four_f = poly::scale(fp, &fxm, 4);
         if lam % 2 == 0 {
             // x_lam = x - g_{l-1} g_{l+1} / (4 F g_l^2)
-            let Some(i4f) = poly::invmod(fp, &four_f, h) else {
-                return None;
-            };
+            let i4f = poly::invmod(fp, &four_f, h)?;
             ratio = poly::mulmod(fp, &ratio, &i4f, h);
         } else {
             ratio = poly::mulmod(fp, &ratio, &four_f, h);

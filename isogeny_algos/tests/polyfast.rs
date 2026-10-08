@@ -107,7 +107,10 @@ fn composer_matches_naive_and_frobenius_powers() {
         }
     }
     check(&Zp::new((1u64 << 61) - 1), 71);
-    check(&FpM::<2>::from_dec("170141183460469231731687303715884105727"), 72);
+    check(
+        &FpM::<2>::from_dec("170141183460469231731687303715884105727"),
+        72,
+    );
 }
 
 /// Distinct-degree factorisation with composition Frobenius steps returns exactly what the
@@ -148,5 +151,8 @@ fn ddf_matches_exponentiation_ddf() {
         }
     }
     check(&Zp::new((1u64 << 61) - 1), 81);
-    check(&FpM::<2>::from_dec("170141183460469231731687303715884105727"), 82);
+    check(
+        &FpM::<2>::from_dec("170141183460469231731687303715884105727"),
+        82,
+    );
 }

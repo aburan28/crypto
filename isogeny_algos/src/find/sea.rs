@@ -65,14 +65,24 @@ pub fn elkies_eigenvalue<F: Field>(f: &F, e: &Curve<F::E>, h: &Poly<F>, ell: u64
         // next multiple
         let (s, xsum) = if lam == 1 {
             // doubling: slope = y S with S = (3x^2 + a)/(2 f(x))
-            let num = reduce(&poly::add(f, &poly::scale(f, &mulh(&xr, &xr), f.from_u64(3)), &poly::constant(f, e.a)));
+            let num = reduce(&poly::add(
+                f,
+                &poly::scale(f, &mulh(&xr, &xr), f.from_u64(3)),
+                &poly::constant(f, e.a),
+            ));
             let den = poly::scale(f, &fxh, f.from_u64(2));
-            (mulh(&num, &poly::invmod(f, &den, h)?), poly::scale(f, &xr, f.from_u64(2)))
+            (
+                mulh(&num, &poly::invmod(f, &den, h)?),
+                poly::scale(f, &xr, f.from_u64(2)),
+            )
         } else {
             // [lam]P + P: slope = y (B - 1)/(A - x)
             let num = poly::sub(f, &b, &one);
             let den = poly::sub(f, &a, &xr);
-            (mulh(&num, &poly::invmod(f, &den, h)?), poly::add(f, &xr, &a))
+            (
+                mulh(&num, &poly::invmod(f, &den, h)?),
+                poly::add(f, &xr, &a),
+            )
         };
         let a3 = poly::sub(f, &mulh(&fxh, &mulh(&s, &s)), &xsum);
         let b3 = poly::sub(f, &mulh(&s, &poly::sub(f, &xr, &a3)), &one);
@@ -83,7 +93,12 @@ pub fn elkies_eigenvalue<F: Field>(f: &F, e: &Curve<F::E>, h: &Poly<F>, ell: u64
 }
 
 /// [k](x, y) in F_q[x, y]/(g(x), y^2 - f(x)) as (A, B) with [k](x, y) = (A, y B) (k >= 1).
-pub fn ring_mul<F: Field>(f: &F, e: &Curve<F::E>, g: &Poly<F>, k: u64) -> Option<(Poly<F>, Poly<F>)> {
+pub fn ring_mul<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    g: &Poly<F>,
+    k: u64,
+) -> Option<(Poly<F>, Poly<F>)> {
     let fx = poly::rem(f, &vec![e.b, e.a, f.zero(), f.one()], g);
     let one = poly::constant(f, f.one());
     let mulg = |a: &Poly<F>, b: &Poly<F>| poly::mulmod(f, a, b, g);
@@ -91,10 +106,18 @@ pub fn ring_mul<F: Field>(f: &F, e: &Curve<F::E>, g: &Poly<F>, k: u64) -> Option
         let (a, b) = p;
         // slope (3 A^2 + a)/(2 y B) = y S with S = (3 A^2 + a) / (2 f B);
         // A3 = f S^2 - 2 A; B3 = S (A - A3) - B
-        let num = poly::add(f, &poly::scale(f, &mulg(a, a), f.from_u64(3)), &poly::constant(f, e.a));
+        let num = poly::add(
+            f,
+            &poly::scale(f, &mulg(a, a), f.from_u64(3)),
+            &poly::constant(f, e.a),
+        );
         let den = poly::scale(f, &mulg(&fx, b), f.from_u64(2));
         let s = mulg(&num, &poly::invmod(f, &den, g)?);
-        let a3 = poly::sub(f, &mulg(&fx, &mulg(&s, &s)), &poly::scale(f, a, f.from_u64(2)));
+        let a3 = poly::sub(
+            f,
+            &mulg(&fx, &mulg(&s, &s)),
+            &poly::scale(f, a, f.from_u64(2)),
+        );
         let b3 = poly::sub(f, &mulg(&s, &poly::sub(f, a, &a3)), b);
         Some((a3, b3))
     };
@@ -103,7 +126,10 @@ pub fn ring_mul<F: Field>(f: &F, e: &Curve<F::E>, g: &Poly<F>, k: u64) -> Option
             return if p.1 == q.1 { dbl(p) } else { None };
         }
         // S = (B2 - B1)/(A2 - A1); A3 = f S^2 - A1 - A2; B3 = S (A1 - A3) - B1
-        let s = mulg(&poly::sub(f, &q.1, &p.1), &poly::invmod(f, &poly::sub(f, &q.0, &p.0), g)?);
+        let s = mulg(
+            &poly::sub(f, &q.1, &p.1),
+            &poly::invmod(f, &poly::sub(f, &q.0, &p.0), g)?,
+        );
         let a3 = poly::sub(f, &poly::sub(f, &mulg(&fx, &mulg(&s, &s)), &p.0), &q.0);
         let b3 = poly::sub(f, &mulg(&s, &poly::sub(f, &p.0, &a3)), &p.1);
         Some((a3, b3))
@@ -140,7 +166,11 @@ pub fn compose_rational<F: Field>(f: &F, h: &Poly<F>, n: &Poly<F>, d: &Poly<F>) 
     }
     let mut out: Poly<F> = vec![f.zero()];
     for i in 0..=m {
-        out = poly::add(f, &out, &poly::scale(f, &poly::mul(f, &npow[i], &dpow[m - i]), h[i]));
+        out = poly::add(
+            f,
+            &out,
+            &poly::scale(f, &poly::mul(f, &npow[i], &dpow[m - i]), h[i]),
+        );
     }
     out
 }
@@ -172,14 +202,31 @@ pub fn eigenvalue_cycle<F: Field>(
     while k < k_max {
         let jc = jinv(f, &cur);
         let nbrs = phi.neighbors(f, jc, rng);
-        let Some(&jn) = nbrs.iter().find(|&&r| r != prev_j) else { break };
-        let Some(et) = crate::find::elkies::elkies_codomain(f, phi, &cur, jn) else { break };
-        let Some(psi) = bmss::isogeny(f, bmss::Method::FastElkiesPrime, &cur, &et, ell as usize, None) else { break };
+        let Some(&jn) = nbrs.iter().find(|&&r| r != prev_j) else {
+            break;
+        };
+        let Some(et) = crate::find::elkies::elkies_codomain(f, phi, &cur, jn) else {
+            break;
+        };
+        let Some(psi) = bmss::isogeny(
+            f,
+            bmss::Method::FastElkiesPrime,
+            &cur,
+            &et,
+            ell as usize,
+            None,
+        ) else {
+            break;
+        };
         let g = poly::monic(f, &compose_rational(f, &psi.ker, &n, &d));
         let xq = poly::powmod_big(f, &poly::x_poly(f), &q, &g);
         // [lam + c l^k] P for c = 0..l-1, by repeated addition of [l^k] P
-        let Some(mut cur_pt) = ring_mul(f, e, &g, lam) else { break };
-        let Some(step) = ring_mul(f, e, &g, modulus) else { break };
+        let Some(mut cur_pt) = ring_mul(f, e, &g, lam) else {
+            break;
+        };
+        let Some(step) = ring_mul(f, e, &g, modulus) else {
+            break;
+        };
         let mut found = None;
         for c in 0..ell {
             if cur_pt.0 == xq {
@@ -190,9 +237,15 @@ pub fn eigenvalue_cycle<F: Field>(
                 // (A1, y B1) + (A2, y B2)
                 let mulg = |a: &Poly<F>, b: &Poly<F>| poly::mulmod(f, a, b, &g);
                 let fx = poly::rem(f, &vec![e.b, e.a, f.zero(), f.one()], &g);
-                let Some(inv) = poly::invmod(f, &poly::sub(f, &step.0, &cur_pt.0), &g) else { break };
+                let Some(inv) = poly::invmod(f, &poly::sub(f, &step.0, &cur_pt.0), &g) else {
+                    break;
+                };
                 let s = mulg(&poly::sub(f, &step.1, &cur_pt.1), &inv);
-                let a3 = poly::sub(f, &poly::sub(f, &mulg(&fx, &mulg(&s, &s)), &cur_pt.0), &step.0);
+                let a3 = poly::sub(
+                    f,
+                    &poly::sub(f, &mulg(&fx, &mulg(&s, &s)), &cur_pt.0),
+                    &step.0,
+                );
                 let b3 = poly::sub(f, &mulg(&s, &poly::sub(f, &cur_pt.0, &a3)), &cur_pt.1);
                 cur_pt = (a3, b3);
             }
@@ -241,7 +294,7 @@ pub fn atkin_degree_with<F: Field>(f: &F, g: &Poly<F>, xi: &Poly<F>) -> Option<u
         let mut yk = xi.clone();
         for k in 2..=n {
             yk = qm.compose(f, &yk);
-            if n % k == 0 && yk == y {
+            if n.is_multiple_of(k) && yk == y {
                 return Some(k);
             }
         }
@@ -264,7 +317,12 @@ pub fn atkin_candidates(ell: u64, q_mod_l: u64, r: usize) -> Vec<u64> {
     let sqrt_l = |a: u64| (0..l).find(|&x| x * x % l == md(a));
     let nr = (2..l).find(|&a| sqrt_l(a).is_none()).unwrap_or(2);
     // F_{l^2} elements (a, b) = a + b s
-    let mul = |x: (u64, u64), y: (u64, u64)| (md(x.0 * y.0 + nr * md(x.1 * y.1)), md(x.0 * y.1 + x.1 * y.0));
+    let mul = |x: (u64, u64), y: (u64, u64)| {
+        (
+            md(x.0 * y.0 + nr * md(x.1 * y.1)),
+            md(x.0 * y.1 + x.1 * y.0),
+        )
+    };
     let pow = |mut x: (u64, u64), mut e: u64| {
         let mut r = (1u64, 0u64);
         while e > 0 {
@@ -277,7 +335,7 @@ pub fn atkin_candidates(ell: u64, q_mod_l: u64, r: usize) -> Vec<u64> {
         r
     };
     let inv = |x: (u64, u64)| pow(x, l * l - 2);
-    let inv2 = (l + 1) / 2;
+    let inv2 = l.div_ceil(2);
     let mut out = vec![];
     for t in 0..l {
         let disc = md(t * t + l * l * 4 - 4 * q_mod_l);
@@ -312,7 +370,12 @@ pub fn atkin_candidates(ell: u64, q_mod_l: u64, r: usize) -> Vec<u64> {
 /// eigenvalue step succeeds. Because elkies_eigenvalue only returns a value once Frobenius^d
 /// genuinely acts as [nu] on the kernel, that nu is a true eigenvalue of pi^d, i.e. nu = lambda^d
 /// or mu^d mod l. Returns None if no degree <= RMAX works. Curve over the prime field F_p.
-pub fn atkin_eigenvalue_tower(zp: &crate::field::Zp, e: &Curve<u64>, ell: u64, rng: &mut Rng) -> Option<(u64, usize)> {
+pub fn atkin_eigenvalue_tower(
+    zp: &crate::field::Zp,
+    e: &Curve<u64>,
+    ell: u64,
+    rng: &mut Rng,
+) -> Option<(u64, usize)> {
     let phi0 = Phi::compute(zp, ell as usize);
     atkin_eigenvalue_tower_with(zp, &phi0, e, ell, rng)
 }
@@ -337,15 +400,33 @@ pub fn atkin_eigenvalue_tower_with(
     // the eigenvalue over F_{p^d}, from a root jt of Phi_l(j, Y) there
     let try_root = |fr: &FpR, jt: crate::fpr::ER| -> Option<u64> {
         let e_ext = Curve::new(fr.embed(e.a), fr.embed(e.b));
-        let phi = Phi { ell: phi0.ell, c: phi0.c.iter().map(|row| row.iter().map(|&x| fr.embed(x)).collect()).collect() };
+        let phi = Phi {
+            ell: phi0.ell,
+            c: phi0
+                .c
+                .iter()
+                .map(|row| row.iter().map(|&x| fr.embed(x)).collect())
+                .collect(),
+        };
         let et = crate::find::elkies::elkies_codomain(fr, &phi, &e_ext, jt)?;
-        let iso = bmss::isogeny(fr, bmss::Method::FastElkiesPrime, &e_ext, &et, ell as usize, None)?;
+        let iso = bmss::isogeny(
+            fr,
+            bmss::Method::FastElkiesPrime,
+            &e_ext,
+            &et,
+            ell as usize,
+            None,
+        )?;
         elkies_eigenvalue(fr, &e_ext, &iso.ker, ell)
     };
     // squarefree part (repeated roots only for special j), then distinct-degree factorisation
     let dg = poly::derivative(zp, &g);
     let sq = poly::gcd(zp, &g, &dg);
-    let gs = if poly::deg(zp, &sq) > 0 { poly::monic(zp, &poly::divrem(zp, &g, &sq).0) } else { g.clone() };
+    let gs = if poly::deg(zp, &sq) > 0 {
+        poly::monic(zp, &poly::divrem(zp, &g, &sq).0)
+    } else {
+        g.clone()
+    };
     let parts = poly::ddf(zp, &gs);
     for (k, part) in &parts {
         if *k < 2 || *k > dmax {
@@ -367,7 +448,14 @@ pub fn atkin_eigenvalue_tower_with(
         }
         let fr = FpR::new(zp.p, d);
         let e_ext = Curve::new(fr.embed(e.a), fr.embed(e.b));
-        let phi = Phi { ell: phi0.ell, c: phi0.c.iter().map(|row| row.iter().map(|&x| fr.embed(x)).collect()).collect() };
+        let phi = Phi {
+            ell: phi0.ell,
+            c: phi0
+                .c
+                .iter()
+                .map(|row| row.iter().map(|&x| fr.embed(x)).collect())
+                .collect(),
+        };
         let roots = phi.neighbors(&fr, jinv(&fr, &e_ext), rng);
         for &jt in roots.iter().take(5) {
             if let Some(lam) = try_root(&fr, jt) {
@@ -387,7 +475,12 @@ pub fn atkin_candidates_tower(ell: u64, q_mod_l: u64, d: usize, nu: u64) -> Vec<
     let md = |a: u64| a % l;
     let sqrt_l = |a: u64| (0..l).find(|&x| x * x % l == md(a));
     let nr = (2..l).find(|&a| sqrt_l(a).is_none()).unwrap_or(2);
-    let mul = |x: (u64, u64), y: (u64, u64)| (md(x.0 * y.0 + nr * md(x.1 * y.1)), md(x.0 * y.1 + x.1 * y.0));
+    let mul = |x: (u64, u64), y: (u64, u64)| {
+        (
+            md(x.0 * y.0 + nr * md(x.1 * y.1)),
+            md(x.0 * y.1 + x.1 * y.0),
+        )
+    };
     let pow = |mut x: (u64, u64), mut e: u64| {
         let mut rr = (1u64, 0u64);
         while e > 0 {
@@ -407,8 +500,8 @@ pub fn atkin_candidates_tower(ell: u64, q_mod_l: u64, d: usize, nu: u64) -> Vec<
             continue;
         }
         let s = (0, sqrt_l(md(disc * pow((nr, 0), l * l - 2).0)).unwrap());
-        let l1 = mul((md(t + s.0), s.1), (md((l + 1) / 2), 0));
-        let l2 = mul((md(t + l - s.0), md(l - s.1)), (md((l + 1) / 2), 0));
+        let l1 = mul((md(t + s.0), s.1), (md(l.div_ceil(2)), 0));
+        let l2 = mul((md(t + l - s.0), md(l - s.1)), (md(l.div_ceil(2)), 0));
         if pow(l1, d as u64) == (md(nu), 0) || pow(l2, d as u64) == (md(nu), 0) {
             out.push(t);
         }
@@ -430,7 +523,12 @@ pub fn sea<F: Field>(
 
 /// Unique t mod l for an Atkin prime via the F_{p^d} tower, or None if the refined candidate set
 /// is not a singleton. This turns an Atkin prime into an Elkies-strength congruence for SEA.
-pub fn atkin_trace_tower(fp: &crate::field::Zp, e: &Curve<u64>, ell: u64, rng: &mut Rng) -> Option<u64> {
+pub fn atkin_trace_tower(
+    fp: &crate::field::Zp,
+    e: &Curve<u64>,
+    ell: u64,
+    rng: &mut Rng,
+) -> Option<u64> {
     let (nu, d) = atkin_eigenvalue_tower(fp, e, ell, rng)?;
     let cands = atkin_candidates_tower(ell, fp.p % ell, d, nu);
     if cands.len() == 1 {
@@ -450,13 +548,15 @@ pub fn sea_atkin_tower(
     rng: &mut Rng,
 ) -> Option<(Big, SeaStats)> {
     let ee = *e;
-    let fpc = fp.clone();
+    let fpc = *fp;
     let mut rng2 = Rng::new(0xA7C0 ^ fp.p);
     // the resolver cannot borrow `phis` (sea_resolved holds it), so it keeps its own base-field
     // Phi_l cache; each is computed once per prime and only embedded into the towers
     let mut cache: HashMap<u64, Phi<crate::field::Zp>> = HashMap::new();
     let mut resolver = move |l: u64| {
-        let phi0 = cache.entry(l).or_insert_with(|| Phi::compute(&fpc, l as usize));
+        let phi0 = cache
+            .entry(l)
+            .or_insert_with(|| Phi::compute(&fpc, l as usize));
         let (nu, d) = atkin_eigenvalue_tower_with(&fpc, phi0, &ee, l, &mut rng2)?;
         let cands = atkin_candidates_tower(l, fpc.p % l, d, nu);
         if cands.len() == 1 {
@@ -510,7 +610,10 @@ pub fn sea_resolved<F: Field>(
 ) -> Option<(Big, SeaStats)> {
     let q = Int::from_big(&f.q());
     let j = jinv(f, e);
-    assert!(j != f.zero() && j != f.from_u64(1728), "SEA here needs j != 0, 1728");
+    assert!(
+        j != f.zero() && j != f.from_u64(1728),
+        "SEA here needs j != 0, 1728"
+    );
     let mut st = SeaStats::default();
     // Elkies congruences (t mod m) and Atkin sets
     let mut te = Int::from(trace_mod2(f, e) as i64);
@@ -530,25 +633,43 @@ pub fn sea_resolved<F: Field>(
         let g = poly::monic(f, &phi.y_poly(f, j));
         let xi = poly::powmod_big(f, &poly::x_poly(f), &f.q(), &g);
         let mut roots = vec![];
-        poly::split_roots(f, &poly::gcd(f, &g, &poly::sub(f, &xi, &poly::x_poly(f))), rng, &mut roots);
+        poly::split_roots(
+            f,
+            &poly::gcd(f, &g, &poly::sub(f, &xi, &poly::x_poly(f))),
+            rng,
+            &mut roots,
+        );
         let l = ell as u64;
         let ql = q.mod_u64(l);
         if !roots.is_empty() {
             // Elkies: kernel polynomial of a rational l-isogeny, eigenvalue
             let mut done = false;
             for jt in roots.iter().take(2) {
-                let Some(et) = crate::find::elkies::elkies_codomain(f, phi, e, *jt) else { continue };
-                let Some(iso) = bmss::isogeny(f, bmss::Method::FastElkiesPrime, e, &et, ell, None) else { continue };
+                let Some(et) = crate::find::elkies::elkies_codomain(f, phi, e, *jt) else {
+                    continue;
+                };
+                let Some(iso) = bmss::isogeny(f, bmss::Method::FastElkiesPrime, e, &et, ell, None)
+                else {
+                    continue;
+                };
                 if let Some(lam1) = elkies_eigenvalue(f, e, &iso.ker, l) {
                     // isogeny cycles: eigenvalue mod l^k when the eigenvalues are distinct
                     let mut kmax = 1u32;
                     while roots.len() == 2 && (l.pow(kmax) * (l - 1) / 2) as usize <= cycle_degree {
                         kmax += 1;
                     }
-                    let (lam, k) = if kmax > 1 { eigenvalue_cycle(f, phi, e, &iso, l, lam1, kmax, rng) } else { (lam1, 1) };
+                    let (lam, k) = if kmax > 1 {
+                        eigenvalue_cycle(f, phi, e, &iso, l, lam1, kmax, rng)
+                    } else {
+                        (lam1, 1)
+                    };
                     let lk = l.pow(k);
-                    let lam_inv = Int::from(lam as i64).inv_mod(&Int::from(lk)).unwrap().mod_u64(lk);
-                    let tl = ((lam as u128 + q.mod_u64(lk) as u128 * lam_inv as u128) % lk as u128) as u64;
+                    let lam_inv = Int::from(lam as i64)
+                        .inv_mod(&Int::from(lk))
+                        .unwrap()
+                        .mod_u64(lk);
+                    let tl = ((lam as u128 + q.mod_u64(lk) as u128 * lam_inv as u128) % lk as u128)
+                        as u64;
                     st.elkies.push((lk, tl));
                     // CRT
                     let (_, u, _) = Int::xgcd(&m, &Int::from(lk));
@@ -664,7 +785,11 @@ pub fn sea_resolved<F: Field>(
         cands = Some(next);
     }
     let c = cands?;
-    let found = if c.len() == 1 { Some(c[0].clone()) } else { None };
+    let found = if c.len() == 1 {
+        Some(c[0].clone())
+    } else {
+        None
+    };
     let t = found?;
     Some(((&q1 - &t).mag().clone(), st))
 }

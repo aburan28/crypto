@@ -43,7 +43,10 @@ impl Quat {
         Quat::new(c.map(int), Int::one())
     }
     pub fn scalar(v: &Int) -> Quat {
-        Quat::new([v.clone(), Int::zero(), Int::zero(), Int::zero()], Int::one())
+        Quat::new(
+            [v.clone(), Int::zero(), Int::zero(), Int::zero()],
+            Int::one(),
+        )
     }
     pub fn zero() -> Quat {
         Quat::from_ints([0, 0, 0, 0])
@@ -147,17 +150,25 @@ pub struct Lattice {
 
 /// Row-style HNF of integer rows (at least four, full rank 4).
 fn hnf(rows: Vec<[Int; 4]>) -> [[Int; 4]; 4] {
-    let mut rows: Vec<[Int; 4]> = rows.into_iter().filter(|r| r.iter().any(|x| !x.is_zero())).collect();
+    let mut rows: Vec<[Int; 4]> = rows
+        .into_iter()
+        .filter(|r| r.iter().any(|x| !x.is_zero()))
+        .collect();
     let mut out: Vec<[Int; 4]> = vec![];
     for col in 0..4 {
         // combine all rows' entries in this column into one pivot row by gcd steps
         loop {
-            let nz: Vec<usize> = (0..rows.len()).filter(|&r| !rows[r][col].is_zero()).collect();
+            let nz: Vec<usize> = (0..rows.len())
+                .filter(|&r| !rows[r][col].is_zero())
+                .collect();
             if nz.len() <= 1 {
                 break;
             }
             // pick the row with smallest |entry| and reduce the others by it
-            let piv = *nz.iter().min_by(|&&a, &&b| rows[a][col].abs().cmp(&rows[b][col].abs())).unwrap();
+            let piv = *nz
+                .iter()
+                .min_by(|&&a, &&b| rows[a][col].abs().cmp(&rows[b][col].abs()))
+                .unwrap();
             let pv = rows[piv][col].clone();
             for &r in &nz {
                 if r == piv {
@@ -223,13 +234,19 @@ impl Lattice {
         }
         if g != Int::one() {
             let m2 = m.map(|r| r.map(|x| x.div_floor(&g)));
-            Lattice { m: m2, den: den.div_floor(&g) }
+            Lattice {
+                m: m2,
+                den: den.div_floor(&g),
+            }
         } else {
             Lattice { m, den }
         }
     }
     pub fn basis(&self) -> Vec<Quat> {
-        self.m.iter().map(|r| Quat::new(r.clone(), self.den.clone())).collect()
+        self.m
+            .iter()
+            .map(|r| Quat::new(r.clone(), self.den.clone()))
+            .collect()
     }
     /// Is x in the lattice? (back substitution in the triangular basis)
     pub fn contains(&self, x: &Quat) -> bool {
@@ -275,7 +292,10 @@ impl Lattice {
         Lattice::from_gens(&self.basis().iter().map(|b| b.conj()).collect::<Vec<_>>())
     }
     pub fn scale(&self, num: &Int, den: &Int) -> Lattice {
-        Lattice::from_int_rows(self.m.iter().map(|r| r.clone().map(|x| &x * num)).collect(), &self.den * den)
+        Lattice::from_int_rows(
+            self.m.iter().map(|r| r.clone().map(|x| &x * num)).collect(),
+            &self.den * den,
+        )
     }
     /// Covolume as a fraction (num, den) (determinant of the basis).
     pub fn det(&self) -> (Int, Int) {
@@ -295,7 +315,10 @@ impl Lattice {
         let g = n.gcd(&m);
         let (n, m) = (n.div_floor(&g), m.div_floor(&g));
         let (rn, rm) = (n.isqrt(), m.isqrt());
-        assert!(&rn * &rn == n && &rm * &rm == m, "not an ideal: index is not a square");
+        assert!(
+            &rn * &rn == n && &rm * &rm == m,
+            "not an ideal: index is not a square"
+        );
         (rn, rm)
     }
     /// Integral norm for integral ideals (panics if not integral).
@@ -338,7 +361,9 @@ impl Lattice {
     /// Returns (x, Nrd(x) * lattice den^2) pairs, one of each +-x, excluding 0; at most `cap`.
     pub fn short_vectors(&self, alg: &Alg, bound_scaled: &Int, cap: usize) -> Vec<([Int; 4], Int)> {
         let rb = self.reduced_basis(alg);
-        let g: Vec<Vec<f64>> = (0..4).map(|r| (0..4).map(|s| alg.bil(&rb[r], &rb[s]).to_f64()).collect()).collect();
+        let g: Vec<Vec<f64>> = (0..4)
+            .map(|r| (0..4).map(|s| alg.bil(&rb[r], &rb[s]).to_f64()).collect())
+            .collect();
         let bound = bound_scaled.to_f64() * (1.0 + 1e-9) + 1.0;
         // Cholesky-like decomposition q_ii, q_ij (Fincke-Pohst)
         let n = 4;
@@ -424,7 +449,9 @@ impl Lattice {
 pub fn lll_gram(g: &[[Int; 4]; 4]) -> [[Int; 4]; 4] {
     let n = 4usize;
     let mut b: Vec<Vec<Int>> = g.iter().map(|r| r.to_vec()).collect(); // current Gram
-    let mut h: Vec<Vec<Int>> = (0..n).map(|i| (0..n).map(|j| Int::from((i == j) as i64)).collect()).collect();
+    let mut h: Vec<Vec<Int>> = (0..n)
+        .map(|i| (0..n).map(|j| Int::from((i == j) as i64)).collect())
+        .collect();
     let mut d = vec![Int::one(); n + 1]; // d[0] = 1, d[i+1] = det of leading (i+1) block
     let mut lam = vec![vec![Int::zero(); n]; n];
     // incremental Gram-Schmidt in integral form
@@ -445,7 +472,11 @@ pub fn lll_gram(g: &[[Int; 4]; 4]) -> [[Int; 4]; 4] {
         gs(&b, &mut d, &mut lam, k);
     }
     let mut k = 1usize;
-    let swap = |k: usize, b: &mut Vec<Vec<Int>>, h: &mut Vec<Vec<Int>>, d: &mut Vec<Int>, lam: &mut Vec<Vec<Int>>| {
+    let swap = |k: usize,
+                b: &mut Vec<Vec<Int>>,
+                h: &mut Vec<Vec<Int>>,
+                d: &mut Vec<Int>,
+                lam: &mut Vec<Vec<Int>>| {
         h.swap(k, k - 1);
         b.swap(k, k - 1);
         for row in b.iter_mut() {
@@ -465,7 +496,12 @@ pub fn lll_gram(g: &[[Int; 4]; 4]) -> [[Int; 4]; 4] {
         }
         d[k] = bb;
     };
-    let red = |k: usize, l: usize, b: &mut Vec<Vec<Int>>, h: &mut Vec<Vec<Int>>, d: &Vec<Int>, lam: &mut Vec<Vec<Int>>| {
+    let red = |k: usize,
+               l: usize,
+               b: &mut Vec<Vec<Int>>,
+               h: &mut Vec<Vec<Int>>,
+               d: &Vec<Int>,
+               lam: &mut Vec<Vec<Int>>| {
         let two = Int::from(2i64);
         if (&lam[k][l] * &two).abs() > d[l + 1] {
             let q = lam[k][l].div_round(&d[l + 1]);

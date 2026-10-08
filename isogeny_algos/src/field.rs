@@ -11,6 +11,8 @@ impl Rng {
     pub fn new(seed: u64) -> Self {
         Rng(seed.wrapping_mul(0x9E3779B97F4A7C15) ^ 0xD1B54A32D192ED03)
     }
+    // a deterministic generator, not an iterator (callers draw words, ranges and field elements)
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E3779B97F4A7C15);
         let mut z = self.0;
@@ -33,6 +35,8 @@ pub trait Field: Clone + Send + Sync + 'static {
     fn mul(&self, a: Self::E, b: Self::E) -> Self::E;
     /// Inverse; panics on zero.
     fn inv(&self, a: Self::E) -> Self::E;
+    // the field (modulus, representation) converts the integer, hence &self
+    #[allow(clippy::wrong_self_convention)]
     fn from_u64(&self, n: u64) -> Self::E;
     fn char(&self) -> u64;
     /// Field size q (p or p^2).
@@ -71,7 +75,13 @@ pub trait Field: Clone + Send + Sync + 'static {
         if nb <= 64 {
             return self.pow(a, e.to_u128().unwrap());
         }
-        let w = if nb > 256 { 5 } else if nb > 128 { 4 } else { 3 };
+        let w = if nb > 256 {
+            5
+        } else if nb > 128 {
+            4
+        } else {
+            3
+        };
         let a2 = self.sq(a);
         let mut tbl = Vec::with_capacity(1 << (w - 1));
         tbl.push(a);
@@ -163,6 +173,7 @@ pub trait Field: Clone + Send + Sync + 'static {
         }
         out
     }
+    #[allow(clippy::wrong_self_convention)]
     fn from_i64(&self, n: i64) -> Self::E {
         if n >= 0 {
             self.from_u64(n as u64)
@@ -258,7 +269,7 @@ impl Zp {
         }
         let mut q = p - 1;
         let mut s = 0;
-        while q % 2 == 0 {
+        while q.is_multiple_of(2) {
             q /= 2;
             s += 1;
         }
@@ -269,7 +280,7 @@ impl Zp {
         let mut m = s;
         let mut c = self.pow(z, q as u128);
         let mut t = self.pow(a, q as u128);
-        let mut r = self.pow(a, ((q + 1) / 2) as u128);
+        let mut r = self.pow(a, q.div_ceil(2) as u128);
         while t != 1 {
             let mut i = 0;
             let mut tt = t;
@@ -522,13 +533,13 @@ pub fn is_prime(n: u64) -> bool {
         return false;
     }
     for &q in &[2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % q == 0 {
+        if n.is_multiple_of(q) {
             return n == q;
         }
     }
     let mut d = n - 1;
     let mut s = 0;
-    while d % 2 == 0 {
+    while d.is_multiple_of(2) {
         d /= 2;
         s += 1;
     }
@@ -559,7 +570,7 @@ pub fn is_prime(n: u64) -> bool {
 }
 
 pub fn next_prime(mut n: u64) -> u64 {
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         n += 1;
     }
     while !is_prime(n) {
@@ -579,7 +590,7 @@ pub fn factor_u64(n: u64) -> Vec<(u64, u32)> {
             return false;
         }
         for p in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-            if n % p == 0 {
+            if n.is_multiple_of(p) {
                 return n == p;
             }
         }
@@ -620,7 +631,7 @@ pub fn factor_u64(n: u64) -> Vec<(u64, u32)> {
         a
     }
     fn rho(n: u64) -> u64 {
-        if n % 2 == 0 {
+        if n.is_multiple_of(2) {
             return 2;
         }
         let mut c = 1u64;
@@ -675,7 +686,7 @@ pub fn factor_u64(n: u64) -> Vec<(u64, u32)> {
     let mut n = n;
     let mut ps = vec![];
     for p in 2..1000u64 {
-        while n % p == 0 {
+        while n.is_multiple_of(p) {
             ps.push(p);
             n /= p;
         }

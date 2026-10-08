@@ -21,7 +21,8 @@ fn theta_g2_matches_dimension_two_kani() {
         let want = (jinv(f, &inst.e0), jinv(f, &inst.x));
         assert!((j1, j2) == want || (j1, j2) == (want.1, want.0), "a = {a}");
         assert_eq!(res.gluing_steps, 1);
-        let kt: Vec<Vec<Pt<(u64, u64)>>> = inst.k_twisted.iter().map(|(x, y)| vec![*x, *y]).collect();
+        let kt: Vec<Vec<Pt<(u64, u64)>>> =
+            inst.k_twisted.iter().map(|(x, y)| vec![*x, *y]).collect();
         let res2 = chain_g(f, &[inst.c, inst.e], &kt, a, &[], iota).expect("chain");
         assert_eq!(even_zero_count(f, res2.nulls.last().unwrap()), 0);
         assert_eq!(even_zero_count(f, last), 1);
@@ -47,6 +48,9 @@ fn theta_g4_kani_embedding_splits() {
         assert!(z > 0, "n = {n}: no split");
         let res2 = chain_g(&f, &inst.curves, &inst.k_twisted, n, &[], iota).expect("chain");
         assert_eq!(split_score(&f, &res2, &[]), 0, "n = {n}");
-        eprintln!("n = {n}, b = {b}: zeros {z}, gluing steps {}", res.gluing_steps);
+        eprintln!(
+            "n = {n}, b = {b}: zeros {z}, gluing steps {}",
+            res.gluing_steps
+        );
     }
 }

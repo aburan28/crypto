@@ -159,7 +159,7 @@ impl BinCurve {
             let k = k.expect("BSGS: no multiple of the point order in the Hasse interval");
             let mut ord = k as u64;
             for (r, _) in crate::field::factor_u64(k as u64) {
-                while ord % r == 0 && self.mul(f, &p, (ord / r) as u128) == Pt::Inf {
+                while ord.is_multiple_of(r) && self.mul(f, &p, (ord / r) as u128) == Pt::Inf {
                     ord /= r;
                 }
             }
@@ -194,7 +194,11 @@ pub fn x_map(f: &GF2n, h: &Poly<GF2n>) -> (Poly<GF2n>, Poly<GF2n>) {
     let hp = poly::derivative(f, h);
     let h2 = poly::mul(f, h, h);
     let x = poly::x_poly(f);
-    let t = poly::add(f, &poly::add(f, &h2, &poly::mul(f, &x, &poly::mul(f, &hp, &hp))), &poly::mul(f, h, &hp));
+    let t = poly::add(
+        f,
+        &poly::add(f, &h2, &poly::mul(f, &x, &poly::mul(f, &hp, &hp))),
+        &poly::mul(f, h, &hp),
+    );
     (poly::mul(f, &x, &t), h2)
 }
 
@@ -281,7 +285,12 @@ pub fn division_poly(f: &GF2n, e: &BinCurve, n: usize) -> Poly<GF2n> {
             _ => {
                 let m = n / 2;
                 if n % 2 == 1 {
-                    let (a, b, c, d) = (get(f, a6, m + 2, memo), get(f, a6, m, memo), get(f, a6, m - 1, memo), get(f, a6, m + 1, memo));
+                    let (a, b, c, d) = (
+                        get(f, a6, m + 2, memo),
+                        get(f, a6, m, memo),
+                        get(f, a6, m - 1, memo),
+                        get(f, a6, m + 1, memo),
+                    );
                     let b3 = poly::mul(f, &poly::mul(f, &b, &b), &b);
                     let d3 = poly::mul(f, &poly::mul(f, &d, &d), &d);
                     poly::add(f, &poly::mul(f, &a, &b3), &poly::mul(f, &c, &d3))
@@ -338,8 +347,12 @@ pub fn is_kernel(f: &GF2n, e: &BinCurve, h: &Poly<GF2n>, rng: &mut Rng) -> bool 
     for _ in 0..20 {
         let p = en.random_point(f, rng);
         let Pt::Aff(x, _) = p else { continue };
-        let (Some(x2), Some(px)) = (xdbl_norm(f, en.a6, x), phi(x)) else { continue };
-        let (Some(lhs), Some(rhs)) = (phi(x2), xdbl_norm(f, cod.a6, px)) else { continue };
+        let (Some(x2), Some(px)) = (xdbl_norm(f, en.a6, x), phi(x)) else {
+            continue;
+        };
+        let (Some(lhs), Some(rhs)) = (phi(x2), xdbl_norm(f, cod.a6, px)) else {
+            continue;
+        };
         if lhs != rhs {
             return false;
         }

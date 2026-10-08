@@ -49,7 +49,11 @@ fn lagrange(fp: &Zp, xs: &[u64], ys: &[u64]) -> Vec<u64> {
 fn full_groups(fp: &Zp, e: &Curve<u64>, ell: usize, rng: &mut Rng) -> Option<Vec<Vec<u64>>> {
     let psi = poly::monic(fp, &division_poly(fp, e, ell));
     let x = poly::x_poly(fp);
-    if poly::deg(fp, &poly::sub(fp, &poly::powmod(fp, &x, fp.p as u128, &psi), &x)) >= 0 {
+    if poly::deg(
+        fp,
+        &poly::sub(fp, &poly::powmod(fp, &x, fp.p as u128, &psi), &x),
+    ) >= 0
+    {
         return None;
     }
     let mut xs = vec![];
@@ -91,7 +95,10 @@ fn velu_cod(fp: &Zp, e: &Curve<u64>, xs: &[u64]) -> Curve<u64> {
 /// x + sum v_Q / (x - x_Q) + u_Q / (x - x_Q)^2 (one batch inversion; x != x_Q because the
 /// kernel's order is prime to the order of the points mapped).
 fn push_x(fp: &Zp, reps: &[(u64, u64, u64)], xs: &[u64]) -> Vec<u64> {
-    let dens: Vec<u64> = xs.iter().flat_map(|&x| reps.iter().map(move |r| fp.sub(x, r.0))).collect();
+    let dens: Vec<u64> = xs
+        .iter()
+        .flat_map(|&x| reps.iter().map(move |r| fp.sub(x, r.0)))
+        .collect();
     let inv = fp.batch_inv(&dens);
     xs.iter()
         .enumerate()
@@ -136,7 +143,14 @@ fn hasse_multiples(p: u64, l2: u64) -> (u64, u64) {
 /// It only saves work: a false positive costs the exact test, a false negative a fresh curve.
 /// A curve with a rational point of order l can only qualify on its own side (Frobenius is 1,
 /// not -1, on that point), so it needs no twist point.
-fn may_qualify(fp: &Zp, e: &Curve<u64>, l2: u64, (m_lo, steps): (u64, u64), twist_too: bool, rng: &mut Rng) -> bool {
+fn may_qualify(
+    fp: &Zp,
+    e: &Curve<u64>,
+    l2: u64,
+    (m_lo, steps): (u64, u64),
+    twist_too: bool,
+    rng: &mut Rng,
+) -> bool {
     let c = XConst::new(fp, e);
     let scan = |x: u64| {
         let s = ladder(fp, &c, (x, 1), l2).0; // [l^2]P
@@ -160,7 +174,11 @@ fn may_qualify(fp: &Zp, e: &Curve<u64>, l2: u64, (m_lo, steps): (u64, u64), twis
         if r == 0 {
             continue;
         }
-        let side = if fp.legendre(r) == 1 { &mut on_e } else { &mut on_twist };
+        let side = if fp.legendre(r) == 1 {
+            &mut on_e
+        } else {
+            &mut on_twist
+        };
         if *side {
             continue;
         }
@@ -176,14 +194,22 @@ fn may_qualify(fp: &Zp, e: &Curve<u64>, l2: u64, (m_lo, steps): (u64, u64), twis
 /// (x_Q, v_Q, u_Q)): for m = 2 one per rational root x0 of x^3 + a x + b (v = 3 x0^2 + a,
 /// u = 0), for odd m x-only Velu from each rational root of psi_m (a rational x(P) makes the
 /// kernel's x-coordinates rational).
-fn small_isogenies(fp: &Zp, e: &Curve<u64>, m: usize, rng: &mut Rng) -> Vec<(Curve<u64>, Vec<(u64, u64, u64)>)> {
+fn small_isogenies(
+    fp: &Zp,
+    e: &Curve<u64>,
+    m: usize,
+    rng: &mut Rng,
+) -> Vec<(Curve<u64>, Vec<(u64, u64, u64)>)> {
     if m == 2 {
         let cubic = vec![e.b, e.a, 0, 1];
         return poly::roots(fp, &cubic, rng)
             .into_iter()
             .map(|x0| {
                 let v = fp.add(fp.mul(3, fp.sq(x0)), e.a);
-                let cod = Curve::new(fp.sub(e.a, fp.mul(5, v)), fp.sub(e.b, fp.mul(7, fp.mul(x0, v))));
+                let cod = Curve::new(
+                    fp.sub(e.a, fp.mul(5, v)),
+                    fp.sub(e.b, fp.mul(7, fp.mul(x0, v))),
+                );
                 (cod, vec![(x0, v, 0)])
             })
             .collect();
@@ -227,7 +253,10 @@ fn x1_curve(fp: &Zp, ell: usize, rng: &mut Rng) -> Option<Curve<u64>> {
 /// l+1 curves turn up does not change the result.
 pub fn phi_mod_p(p: u64, ell: usize, rng: &mut Rng) -> Option<Vec<Vec<u64>>> {
     assert!(is_prime(p), "p must be prime");
-    assert!(p % ell as u64 == 1, "need p = 1 mod l so the full l-torsion can be rational");
+    assert!(
+        p % ell as u64 == 1,
+        "need p = 1 mod l so the full l-torsion can be rational"
+    );
     let fp = Zp::new(p);
     let l1 = ell + 1;
     // Phi_l is monic of degree l+1 in Y (c[i][l+1] = [i = 0]), so each X^i coefficient minus
@@ -235,8 +264,8 @@ pub fn phi_mod_p(p: u64, ell: usize, rng: &mut Rng) -> Option<Vec<Vec<u64>>> {
     let need = l1;
     let mut j0s: Vec<u64> = vec![];
     let mut cols: Vec<Vec<u64>> = vec![]; // per curve: coeffs of Phi(X, j0) in X, length l+2
-    // j-invariants already tested (the property depends only on j: twists flip the sign of
-    // Frobenius, and j != 0, 1728 has no other twists)
+                                          // j-invariants already tested (the property depends only on j: twists flip the sign of
+                                          // Frobenius, and j != 0, 1728 has no other twists)
     let mut tested = HashSet::new();
     // curves known to qualify (prime-to-l isogenous to one that does) with their l-torsion
     // subgroups, qualifying curves whose prime-to-l neighbours are not generated yet, and
@@ -290,7 +319,9 @@ pub fn phi_mod_p(p: u64, ell: usize, rng: &mut Rng) -> Option<Vec<Vec<u64>>> {
                 if filter && !may_qualify(&fp, &e, l2, hm, !from_x1, rng) {
                     continue;
                 }
-                let Some(g) = full_groups(&fp, &e, ell, rng) else { continue };
+                let Some(g) = full_groups(&fp, &e, ell, rng) else {
+                    continue;
+                };
                 g
             }
         };
@@ -316,7 +347,13 @@ pub fn phi_mod_p(p: u64, ell: usize, rng: &mut Rng) -> Option<Vec<Vec<u64>>> {
         let ys: Vec<u64> = cols
             .iter()
             .zip(&j0s)
-            .map(|(col, &j0)| if i == 0 { fp.sub(col[0], fp.pow(j0, l1 as u128)) } else { col[i] })
+            .map(|(col, &j0)| {
+                if i == 0 {
+                    fp.sub(col[0], fp.pow(j0, l1 as u128))
+                } else {
+                    col[i]
+                }
+            })
             .collect();
         let py = lagrange(&fp, &j0s, &ys);
         c[i][..l1].copy_from_slice(&py);

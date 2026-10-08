@@ -60,12 +60,18 @@ impl FpR {
     /// extension. Irreducibility is checked (Rabin), since the arithmetic is wrong without it.
     pub fn from_modulus(p: u64, f: &[u64]) -> FpR {
         let r = f.len() - 1;
-        assert!((2..=RMAX).contains(&r) && f[r] == 1, "FpR::from_modulus: monic, 2 <= degree <= {RMAX}");
+        assert!(
+            (2..=RMAX).contains(&r) && f[r] == 1,
+            "FpR::from_modulus: monic, 2 <= degree <= {RMAX}"
+        );
         let mut red = [0u64; RMAX];
         for k in 0..r {
             red[k] = (p - f[k] % p) % p; // z^r = -(f_0 + ... + f_(r-1) z^(r-1))
         }
-        assert!(is_irreducible(&Zp::new(p), r, &red), "FpR::from_modulus: modulus is reducible");
+        assert!(
+            is_irreducible(&Zp::new(p), r, &red),
+            "FpR::from_modulus: modulus is reducible"
+        );
         Self::build(p, r, red)
     }
 
@@ -77,13 +83,22 @@ impl FpR {
     }
 
     fn build(p: u64, r: usize, red: ER) -> FpR {
-        let nz: Vec<(usize, u64)> = (0..r).filter(|&k| red[k] % p != 0).map(|k| (k, red[k] % p)).collect();
+        let nz: Vec<(usize, u64)> = (0..r)
+            .filter(|&k| !red[k].is_multiple_of(p))
+            .map(|k| (k, red[k] % p))
+            .collect();
         // worst case per accumulator entry: r products (2x for squaring) plus (r-1)*|nz| folds,
         // each < p^2; lazy accumulation is safe when that bound stays below 2^127
         let bits = 64 - p.leading_zeros();
         let terms = (2 * r + r.saturating_sub(1) * nz.len()).max(1) as u32;
         let lazy = 2 * bits + (32 - terms.leading_zeros()) <= 127;
-        let mut f = FpR { p, r, nz, lazy, frob: vec![] };
+        let mut f = FpR {
+            p,
+            r,
+            nz,
+            lazy,
+            frob: vec![],
+        };
         if r > 1 {
             let mut z = [0u64; RMAX];
             z[1] = 1;
@@ -200,7 +215,14 @@ fn search_tail(zp: &Zp, r: usize, weight: usize) -> Option<ER> {
     let smalls: Vec<u64> = (1..p.min(7)).collect();
     // choose `weight` positions among 0..r and assign small nonzero values
     let mut red = [0u64; RMAX];
-    fn rec(zp: &Zp, r: usize, pos: usize, left: usize, start: usize, smalls: &[u64], red: &mut ER) -> Option<ER> {
+    fn rec(
+        zp: &Zp,
+        r: usize,
+        left: usize,
+        start: usize,
+        smalls: &[u64],
+        red: &mut ER,
+    ) -> Option<ER> {
         if left == 0 {
             if is_irreducible(zp, r, red) {
                 return Some(*red);
@@ -210,7 +232,7 @@ fn search_tail(zp: &Zp, r: usize, weight: usize) -> Option<ER> {
         for position in start..r {
             for &v in smalls {
                 red[position] = v;
-                if let Some(ok) = rec(zp, r, pos + 1, left - 1, position + 1, smalls, red) {
+                if let Some(ok) = rec(zp, r, left - 1, position + 1, smalls, red) {
                     return Some(ok);
                 }
                 red[position] = 0;
@@ -218,16 +240,16 @@ fn search_tail(zp: &Zp, r: usize, weight: usize) -> Option<ER> {
         }
         None
     }
-    rec(zp, r, 0, weight, 0, &smalls, &mut red)
+    rec(zp, r, weight, 0, &smalls, &mut red)
 }
 
 fn distinct_primes(mut n: u64) -> Vec<u64> {
     let mut ps = vec![];
     let mut d = 2u64;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             ps.push(d);
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 n /= d;
             }
         }
@@ -263,7 +285,11 @@ impl Field for FpR {
     fn sub(&self, a: ER, b: ER) -> ER {
         let mut c = [0u64; RMAX];
         for i in 0..self.r {
-            c[i] = if a[i] >= b[i] { a[i] - b[i] } else { a[i] + (self.p - b[i]) };
+            c[i] = if a[i] >= b[i] {
+                a[i] - b[i]
+            } else {
+                a[i] + (self.p - b[i])
+            };
         }
         c
     }

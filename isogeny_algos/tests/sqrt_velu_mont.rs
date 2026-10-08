@@ -17,7 +17,12 @@ fn sqrt_velu_mont_matches_velu_on_csidh512() {
     e[0] = 1;
     e[3] = -1;
     let a = cs.action_fast(f.zero(), &e, &mut rng);
-    for &ell in &[3u64, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 587] {
+    for &ell in &[
+        3u64, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
+        97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181,
+        191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281,
+        283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 587,
+    ] {
         let cof = cs.p1.divrem_small(ell).0;
         let k = loop {
             let x = f.random(&mut rng);
@@ -30,7 +35,13 @@ fn sqrt_velu_mont_matches_velu_on_csidh512() {
         let ms = multiples(f, a24(f, a), k, d);
         let a_ref = velu_codomain(f, a, &ms, ell);
         let sv = SqrtVeluMont::new(f, a, k, ell).expect("kps");
-        assert_eq!(sv.codomain(f), a_ref, "codomain, l = {ell} (b = {}, b' = {})", sv.b, sv.bp);
+        assert_eq!(
+            sv.codomain(f),
+            a_ref,
+            "codomain, l = {ell} (b = {}, b' = {})",
+            sv.b,
+            sv.bp
+        );
         let u = f.random(&mut rng);
         assert_eq!(sv.eval(f, u), isog_x(f, &ms, u), "x-map, l = {ell}");
     }

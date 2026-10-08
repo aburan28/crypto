@@ -34,7 +34,12 @@ pub type Th<E> = [E; 4];
 pub fn hadamard<F: Field>(f: &F, x: &Th<F::E>) -> Th<F::E> {
     let (s01, d01) = (f.add(x[0], x[1]), f.sub(x[0], x[1]));
     let (s23, d23) = (f.add(x[2], x[3]), f.sub(x[2], x[3]));
-    [f.add(s01, s23), f.add(d01, d23), f.sub(s01, s23), f.sub(d01, d23)]
+    [
+        f.add(s01, s23),
+        f.add(d01, d23),
+        f.sub(s01, s23),
+        f.sub(d01, d23),
+    ]
 }
 
 pub fn squared<F: Field>(f: &F, x: &Th<F::E>) -> Th<F::E> {
@@ -59,10 +64,17 @@ pub struct Theta1<E> {
     pub s: E,
 }
 
-pub fn theta1_structure<F: Field>(f: &F, e: &Curve<F::E>, p4: &Pt<F::E>, q4: &Pt<F::E>) -> Option<Theta1<F::E>> {
+pub fn theta1_structure<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    p4: &Pt<F::E>,
+    q4: &Pt<F::E>,
+) -> Option<Theta1<F::E>> {
     let Pt::Aff(xp, _) = *p4 else { return None };
     let Pt::Aff(xq, _) = *q4 else { return None };
-    let Pt::Aff(e0, _) = pmul(f, e, p4, 2) else { return None };
+    let Pt::Aff(e0, _) = pmul(f, e, p4, 2) else {
+        return None;
+    };
     let d = f.sub(xp, e0);
     if f.is_zero(d) {
         return None;
@@ -114,8 +126,16 @@ impl<E: Copy> Theta1<E> {
 /// ([a0 : a1], [b0 : b1]) projectively. None if all zero.
 pub fn factor_product<F: Field>(f: &F, p: &Th<F::E>) -> Option<([F::E; 2], [F::E; 2])> {
     // rows (a0 b*, a1 b*): [a0 : a1] from a non-zero column; [b0 : b1] from a non-zero row
-    let a = if !f.is_zero(p[0]) || !f.is_zero(p[2]) { [p[0], p[2]] } else { [p[1], p[3]] };
-    let b = if !f.is_zero(p[0]) || !f.is_zero(p[1]) { [p[0], p[1]] } else { [p[2], p[3]] };
+    let a = if !f.is_zero(p[0]) || !f.is_zero(p[2]) {
+        [p[0], p[2]]
+    } else {
+        [p[1], p[3]]
+    };
+    let b = if !f.is_zero(p[0]) || !f.is_zero(p[1]) {
+        [p[0], p[1]]
+    } else {
+        [p[2], p[3]]
+    };
     if a.iter().chain(b.iter()).all(|&v| f.is_zero(v)) {
         return None;
     }
@@ -149,7 +169,12 @@ pub struct ProductTheta<E> {
 }
 
 fn glue_change<F: Field>(f: &F, x: &Th<F::E>) -> Th<F::E> {
-    [f.add(x[0], x[3]), f.sub(x[0], x[3]), f.add(x[1], x[2]), f.sub(x[2], x[1])]
+    [
+        f.add(x[0], x[3]),
+        f.sub(x[0], x[3]),
+        f.add(x[1], x[2]),
+        f.sub(x[2], x[1]),
+    ]
 }
 
 impl<E: Copy> ProductTheta<E> {
@@ -157,7 +182,12 @@ impl<E: Copy> ProductTheta<E> {
     pub fn product_point<F: Field<E = E>>(&self, f: &F, p1: &Pt<E>, p2: &Pt<E>) -> Th<E> {
         let a = self.t1.point(f, p1);
         let b = self.t2.point(f, p2);
-        [f.mul(a[0], b[0]), f.mul(a[0], b[1]), f.mul(a[1], b[0]), f.mul(a[1], b[1])]
+        [
+            f.mul(a[0], b[0]),
+            f.mul(a[0], b[1]),
+            f.mul(a[1], b[0]),
+            f.mul(a[1], b[1]),
+        ]
     }
     pub fn point<F: Field<E = E>>(&self, f: &F, p1: &Pt<E>, p2: &Pt<E>) -> Th<E> {
         glue_change(f, &self.product_point(f, p1, p2))
@@ -167,7 +197,12 @@ impl<E: Copy> ProductTheta<E> {
     }
     /// Inverse of glue_change: product coordinates from the K2-structure coordinates.
     pub fn unglue<F: Field<E = E>>(f: &F, g: &Th<E>) -> Th<E> {
-        [f.add(g[0], g[1]), f.sub(g[2], g[3]), f.add(g[2], g[3]), f.sub(g[0], g[1])]
+        [
+            f.add(g[0], g[1]),
+            f.sub(g[2], g[3]),
+            f.add(g[2], g[3]),
+            f.sub(g[0], g[1]),
+        ]
     }
     /// The (x1, x2) of a point from its K2-structure coordinates (x-coordinates on the two
     /// factors; None where a factor coordinate is the identity or a troublesome 2-torsion point).
@@ -196,13 +231,19 @@ pub struct ThetaIso<E> {
 /// The isogeny with kernel K2 from the theta coordinates of T''_1, T''_2 (order 8, with
 /// 2 T''_i = e_i / 4 + K2). None if the data is inconsistent (wrong structure or torsion):
 /// D^2 must be proportional to H(S(null)). Projective throughout: no field inversion.
-pub fn theta_isogeny<F: Field>(f: &F, null: &Th<F::E>, t1: &Th<F::E>, t2: &Th<F::E>) -> Option<ThetaIso<F::E>> {
+pub fn theta_isogeny<F: Field>(
+    f: &F,
+    null: &Th<F::E>,
+    t1: &Th<F::E>,
+    t2: &Th<F::E>,
+) -> Option<ThetaIso<F::E>> {
     let x1 = hadamard(f, &squared(f, t1));
     let x2 = hadamard(f, &squared(f, t2));
     // D_{chi ^ 2} / D_chi = x1[chi ^ 2] / x1[chi],  D_{chi ^ 1} / D_chi = x2[chi ^ 1] / x2[chi];
     // with D_b = x1[b] x2[b] x1[b ^ 1] all four are products (b: a base index with the needed
     // coordinates non-zero; for a gluing one D vanishes and b avoids it)
-    let b = (0..4usize).find(|&b| !f.is_zero(x1[b]) && !f.is_zero(x2[b]) && !f.is_zero(x1[b ^ 1]))?;
+    let b =
+        (0..4usize).find(|&b| !f.is_zero(x1[b]) && !f.is_zero(x2[b]) && !f.is_zero(x1[b ^ 1]))?;
     let mut d = [f.zero(); 4];
     let u = f.mul(x1[b], x1[b ^ 1]);
     d[b] = f.mul(u, x2[b]);
@@ -222,11 +263,21 @@ pub fn theta_isogeny<F: Field>(f: &F, null: &Th<F::E>, t1: &Th<F::E>, t2: &Th<F:
     // projective 1/D: dinv_i = prod_{j != i} D_j (skipping the zero coordinate, whose dinv is 0)
     let w = d.map(|v| if f.is_zero(v) { f.one() } else { v });
     let (p01, p23) = (f.mul(w[0], w[1]), f.mul(w[2], w[3]));
-    let mut dinv = [f.mul(w[1], p23), f.mul(w[0], p23), f.mul(p01, w[3]), f.mul(p01, w[2])];
+    let mut dinv = [
+        f.mul(w[1], p23),
+        f.mul(w[0], p23),
+        f.mul(p01, w[3]),
+        f.mul(p01, w[2]),
+    ];
     if let Some(&z) = zeros.first() {
         dinv[z] = f.zero();
     }
-    Some(ThetaIso { dinv, zero: zeros.first().copied(), domain: *null, codomain: hadamard(f, &d) })
+    Some(ThetaIso {
+        dinv,
+        zero: zeros.first().copied(),
+        domain: *null,
+        codomain: hadamard(f, &d),
+    })
 }
 
 impl<E: Copy> ThetaIso<E> {
@@ -242,8 +293,16 @@ impl<E: Copy> ThetaIso<E> {
     }
     /// Image of x through a gluing isogeny, given also the coordinates of x + T'_i where
     /// T'_i has order 4 and f(T'_i) = e_i / 2 (i = 1: `shift` = 2, i = 2: `shift` = 1).
-    pub fn eval_glue<F: Field<E = E>>(&self, f: &F, x: &Th<E>, xt: &Th<E>, shift: usize) -> Option<Th<E>> {
-        let Some(z) = self.zero else { return Some(self.eval(f, x)) };
+    pub fn eval_glue<F: Field<E = E>>(
+        &self,
+        f: &F,
+        x: &Th<E>,
+        xt: &Th<E>,
+        shift: usize,
+    ) -> Option<Th<E>> {
+        let Some(z) = self.zero else {
+            return Some(self.eval(f, x));
+        };
         let y = self.dual(f, x);
         let yt = self.dual(f, xt);
         // Y(f(x + T'))_chi = lambda Y(f x)_{chi ^ shift}: y[z] = yt[z ^ shift] y[c] / yt[c ^ shift],
@@ -276,7 +335,11 @@ pub fn fundamental_squares<F: Field>(f: &F, n: &Th<F::E>) -> [F::E; 16] {
                     let ci = 2 * c1 + c2;
                     let cai = 2 * (c1 ^ a1) + (c2 ^ a2);
                     let t = f.mul(n[ci], n[cai]);
-                    s = if (b1 * c1 + b2 * c2) % 2 == 1 { f.sub(s, t) } else { f.add(s, t) };
+                    s = if (b1 * c1 + b2 * c2) % 2 == 1 {
+                        f.sub(s, t)
+                    } else {
+                        f.add(s, t)
+                    };
                 }
             }
             out[b1 + 2 * b2 + 4 * a1 + 8 * a2] = s;
@@ -329,7 +392,9 @@ pub fn split_j<F: Field>(f: &F, n: &Th<F::E>) -> Option<(F::E, F::E)> {
     }
     let mate = nb.iter().copied().find(|&k| adj(nb[0], k))?;
     let row0 = [ch[0], nb[0], mate];
-    let col0: Vec<usize> = std::iter::once(ch[0]).chain(nb.iter().copied().filter(|&k| k != nb[0] && k != mate)).collect();
+    let col0: Vec<usize> = std::iter::once(ch[0])
+        .chain(nb.iter().copied().filter(|&k| k != nb[0] && k != mate))
+        .collect();
     if col0.len() != 3 {
         return None;
     }
@@ -340,7 +405,11 @@ pub fn split_j<F: Field>(f: &F, n: &Th<F::E>) -> Option<(F::E, F::E)> {
         grid[r][0] = c0;
         // the rest of c0's row: its neighbours outside column 0, placed under the row-0 element
         // of their column (each shares a column with exactly one of row0[1], row0[2])
-        for o in ch.iter().copied().filter(|&k| adj(c0, k) && !col0.contains(&k)) {
+        for o in ch
+            .iter()
+            .copied()
+            .filter(|&k| adj(c0, k) && !col0.contains(&k))
+        {
             let c = (1..3).find(|&c| adj(row0[c], o))?;
             grid[r][c] = o;
         }
@@ -357,7 +426,10 @@ pub fn split_j<F: Field>(f: &F, n: &Th<F::E>) -> Option<(F::E, F::E)> {
     }
     let col = [v4(grid[0][0]), v4(grid[1][0]), v4(grid[2][0])];
     let row = [v4(grid[0][0]), v4(grid[0][1]), v4(grid[0][2])];
-    Some((j_from_jacobi_triple(f, &col)?, j_from_jacobi_triple(f, &row)?))
+    Some((
+        j_from_jacobi_triple(f, &col)?,
+        j_from_jacobi_triple(f, &row)?,
+    ))
 }
 
 /// j from (theta_3^4, theta_4^4, theta_2^4) of one elliptic factor, in unknown order, up to a
@@ -398,7 +470,12 @@ fn proj_inv<F: Field>(f: &F, v: &Th<F::E>) -> Option<Th<F::E>> {
         return None;
     }
     let (p01, p23) = (f.mul(v[0], v[1]), f.mul(v[2], v[3]));
-    Some([f.mul(v[1], p23), f.mul(v[0], p23), f.mul(p01, v[3]), f.mul(p01, v[2])])
+    Some([
+        f.mul(v[1], p23),
+        f.mul(v[0], p23),
+        f.mul(p01, v[3]),
+        f.mul(p01, v[2]),
+    ])
 }
 
 /// Doubling on the Kummer surface of A in level-2 theta coordinates: with X = H(S(x)),
@@ -414,7 +491,10 @@ pub struct ThetaDoubler<E> {
 
 impl<E: Copy> ThetaDoubler<E> {
     pub fn new<F: Field<E = E>>(f: &F, null: &Th<E>) -> Option<Self> {
-        Some(ThetaDoubler { inv_x0: proj_inv(f, &hadamard(f, &squared(f, null)))?, inv_null: proj_inv(f, null)? })
+        Some(ThetaDoubler {
+            inv_x0: proj_inv(f, &hadamard(f, &squared(f, null)))?,
+            inv_null: proj_inv(f, null)?,
+        })
     }
     pub fn double<F: Field<E = E>>(&self, f: &F, x: &Th<E>) -> Th<E> {
         let xx = squared(f, &hadamard(f, &squared(f, x)));
@@ -456,7 +536,9 @@ pub fn chain_opts<F: Field>(
 ) -> Option<ChainResult<F::E>> {
     assert!(n >= 1);
     let dbl1 = |p: &(Pt<F::E>, Pt<F::E>)| (padd(f, e1, &p.0, &p.0), padd(f, e2, &p.1, &p.1));
-    let add = |p: &(Pt<F::E>, Pt<F::E>), q: &(Pt<F::E>, Pt<F::E>)| (padd(f, e1, &p.0, &q.0), padd(f, e2, &p.1, &q.1));
+    let add = |p: &(Pt<F::E>, Pt<F::E>), q: &(Pt<F::E>, Pt<F::E>)| {
+        (padd(f, e1, &p.0, &q.0), padd(f, e2, &p.1, &q.1))
+    };
     // multiples [2^j] K_i for j = 0..=n, incrementally
     let mults: Vec<Vec<(Pt<F::E>, Pt<F::E>)>> = (0..2)
         .map(|i| {
@@ -470,10 +552,18 @@ pub fn chain_opts<F: Field>(
         .collect();
     // 4-torsion above the gluing kernel and the one-dimensional structures
     let t4 = [mults[0][n as usize], mults[1][n as usize]];
-    let th = ProductTheta { t1: theta1_structure(f, e1, &t4[0].0, &t4[1].0)?, t2: theta1_structure(f, e2, &t4[0].1, &t4[1].1)? };
+    let th = ProductTheta {
+        t1: theta1_structure(f, e1, &t4[0].0, &t4[1].0)?,
+        t2: theta1_structure(f, e2, &t4[0].1, &t4[1].1)?,
+    };
     let null = th.null(f);
     let t8 = [mults[0][n as usize - 1], mults[1][n as usize - 1]];
-    let glue = theta_isogeny(f, &null, &th.point(f, &t8[0].0, &t8[0].1), &th.point(f, &t8[1].0, &t8[1].1))?;
+    let glue = theta_isogeny(
+        f,
+        &null,
+        &th.point(f, &t8[0].0, &t8[0].1),
+        &th.point(f, &t8[1].0, &t8[1].1),
+    )?;
     let push_glue = |p: &(Pt<F::E>, Pt<F::E>)| -> Option<Th<F::E>> {
         let x = th.point(f, &p.0, &p.1);
         for (ti, shift) in [(0usize, 2usize), (1, 1)] {
@@ -492,7 +582,11 @@ pub fn chain_opts<F: Field>(
     let mut nulls = vec![glue.codomain];
     if n == 1 {
         let split = split_j(f, &glue.codomain);
-        return Some(ChainResult { nulls, split, images });
+        return Some(ChainResult {
+            nulls,
+            split,
+            images,
+        });
     }
     let mut cur = glue.codomain;
     if strategy {
@@ -566,5 +660,9 @@ pub fn chain_opts<F: Field>(
         }
     }
     let split = split_j(f, &cur);
-    Some(ChainResult { nulls, split, images })
+    Some(ChainResult {
+        nulls,
+        split,
+        images,
+    })
 }
