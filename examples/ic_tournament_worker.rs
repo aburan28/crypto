@@ -105,6 +105,8 @@ struct Config {
     support_local_stream: bool,
     #[serde(skip_serializing_if = "is_false")]
     support_local_bitmap_columns: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    support_local_profile: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -127,6 +129,7 @@ impl Default for Config {
             active_multipliers: false,
             support_local_stream: false,
             support_local_bitmap_columns: false,
+            support_local_profile: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -716,8 +719,12 @@ fn run_prepared_target(
     crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_bitmap_columns(
         job.config.support_local_bitmap_columns,
     );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_profile(
+        job.config.support_local_profile,
+    );
     let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
+    crypto_lib::cryptanalysis::koblitz_groebner::support_local_build_profile_reset();
     measurement::begin_online(Phase::TargetQuery);
     let online_start = Instant::now();
     let answer = solver.solve_observed(q);
@@ -726,6 +733,8 @@ fn run_prepared_target(
     let online_ns = online_start.elapsed().as_nanos();
     measurement::end_online();
     let f4_stage_profile = crypto_lib::cryptanalysis::koblitz_groebner::f4_profile();
+    let support_local_build_profile =
+        crypto_lib::cryptanalysis::koblitz_groebner::support_local_build_profile();
     let layout_after = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     let verified = replay == Some(true);
     Ok(
@@ -743,6 +752,7 @@ fn run_prepared_target(
             "trials":answer.trials,"relation":answer.relation,"attempts":answer.attempts}],
         "online_timing_schema":1,"online_wall_ns":online_ns,
         "f4_stage_profile":f4_stage_profile,
+        "support_local_build_profile":support_local_build_profile,
         "f4_layout_hits_online":layout_after.0-layout_before.0,
         "f4_layout_misses_online":layout_after.1-layout_before.1,
         "target_input":"supplied_public_point","reusable_setup_excluded":true,
@@ -865,6 +875,16 @@ mod prepared_target_tests {
             opted_in.get("support_local_bitmap_columns"),
             Some(&json!(true))
         );
+    }
+
+    #[test]
+    fn default_support_local_profile_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("support_local_profile").is_none());
+        config.support_local_profile = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("support_local_profile"), Some(&json!(true)));
     }
 
     fn prepared_job(cap: u64) -> Job {

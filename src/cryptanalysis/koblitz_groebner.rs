@@ -2360,8 +2360,16 @@ pub(crate) fn build_inherited_macaulay_support_local(
     multiplier_mask: u64,
     quadratic_generators: bool,
 ) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    use std::sync::atomic::Ordering::Relaxed;
+    let profiling = F4_SUPPORT_LOCAL_PROFILE_ENABLED.load(Relaxed);
+    if profiling {
+        support_local_counters::CALLS.fetch_add(1, Relaxed);
+    }
     let support = |p: &F2BoolPoly| p.terms.iter().fold(0u64, |acc, t| acc | t.mask);
     if polys.iter().all(|p| multiplier_mask & !support(p) == 0) {
+        if profiling {
+            support_local_counters::DELEGATED.fetch_add(1, Relaxed);
+        }
         return build_inherited_macaulay(
             polys,
             n_vars,
@@ -2370,35 +2378,57 @@ pub(crate) fn build_inherited_macaulay_support_local(
             quadratic_generators,
         );
     }
-    let rows_monos = if F4_SUPPORT_LOCAL_STREAM.load(std::sync::atomic::Ordering::Relaxed) {
-        support_local_rows_stream(polys, n_vars, degree, multiplier_mask, max_f4_rows())?
-    } else {
-        let mut rows_monos: Vec<Vec<u64>> = Vec::new();
-        for p in polys {
-            let rows = macaulay_rows_monos_with_mask(
-                std::slice::from_ref(p),
-                n_vars,
-                degree,
-                multiplier_mask & support(p),
-                None,
-            )?;
-            rows_monos.extend(rows);
-            if rows_monos.len() > max_f4_rows() {
-                return None;
+    let rows_started = profiling.then(std::time::Instant::now);
+    let rows_result = (|| {
+        if F4_SUPPORT_LOCAL_STREAM.load(Relaxed) {
+            support_local_rows_stream(polys, n_vars, degree, multiplier_mask, max_f4_rows())
+        } else {
+            let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+            for p in polys {
+                let rows = macaulay_rows_monos_with_mask(
+                    std::slice::from_ref(p),
+                    n_vars,
+                    degree,
+                    multiplier_mask & support(p),
+                    None,
+                )?;
+                rows_monos.extend(rows);
+                if rows_monos.len() > max_f4_rows() {
+                    return None;
+                }
             }
+            Some(rows_monos)
         }
-        rows_monos
-    };
+    })();
+    if let Some(started) = rows_started {
+        support_local_counters::ROWS_NS.fetch_add(started.elapsed().as_nanos() as u64, Relaxed);
+        if let Some(rows) = rows_result.as_ref() {
+            support_local_counters::ROWS.fetch_add(rows.len() as u64, Relaxed);
+        }
+    }
+    let rows_monos = rows_result?;
     if rows_monos.is_empty() {
         return Some((Vec::new(), Vec::new()));
     }
-    let columns = if F4_SUPPORT_LOCAL_BITMAP_COLUMNS.load(std::sync::atomic::Ordering::Relaxed) {
+    let columns_started = profiling.then(std::time::Instant::now);
+    let columns_result = if F4_SUPPORT_LOCAL_BITMAP_COLUMNS.load(Relaxed) {
         support_local_bitmap_columns(&rows_monos, n_vars, degree)
-            .or_else(|| macaulay_columns(&rows_monos))?
+            .or_else(|| macaulay_columns(&rows_monos))
     } else {
-        macaulay_columns(&rows_monos)?
+        macaulay_columns(&rows_monos)
     };
+    if let Some(started) = columns_started {
+        support_local_counters::COLUMNS_NS.fetch_add(started.elapsed().as_nanos() as u64, Relaxed);
+        if let Some(columns) = columns_result.as_ref() {
+            support_local_counters::COLUMNS.fetch_add(columns.len() as u64, Relaxed);
+        }
+    }
+    let columns = columns_result?;
+    let pack_started = profiling.then(std::time::Instant::now);
     let matrix = pack_rows(&rows_monos, &columns);
+    if let Some(started) = pack_started {
+        support_local_counters::PACK_NS.fetch_add(started.elapsed().as_nanos() as u64, Relaxed);
+    }
     Some((columns, matrix))
 }
 
@@ -3061,6 +3091,40 @@ static F4_SUPPORT_LOCAL_STREAM: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 static F4_SUPPORT_LOCAL_BITMAP_COLUMNS: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
+static F4_SUPPORT_LOCAL_PROFILE_ENABLED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+mod support_local_counters {
+    use std::sync::atomic::AtomicU64;
+    pub(super) static CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static DELEGATED: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROWS_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static COLUMNS_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static PACK_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROWS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static COLUMNS: AtomicU64 = AtomicU64::new(0);
+
+    pub(super) fn all() -> [&'static AtomicU64; 7] {
+        [
+            &CALLS,
+            &DELEGATED,
+            &ROWS_NS,
+            &COLUMNS_NS,
+            &PACK_NS,
+            &ROWS,
+            &COLUMNS,
+        ]
+    }
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct SupportLocalBuildProfile {
+    pub calls: u64,
+    pub delegated: u64,
+    pub rows_ns: u64,
+    pub columns_ns: u64,
+    pub pack_ns: u64,
+    pub rows: u64,
+    pub columns: u64,
+}
 static F4_BUILD_ROWS_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_BUILD_PACK_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 struct F4ColumnLayout {
@@ -3161,6 +3225,30 @@ pub fn set_f4_support_local_stream(enabled: bool) {
 /// Opt-in exact bitmap column collection for support-local Macaulay rows.
 pub fn set_f4_support_local_bitmap_columns(enabled: bool) {
     F4_SUPPORT_LOCAL_BITMAP_COLUMNS.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Enable nested support-local build timers before a single-threaded solve.
+pub fn set_f4_support_local_profile(enabled: bool) {
+    F4_SUPPORT_LOCAL_PROFILE_ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn support_local_build_profile_reset() {
+    for counter in support_local_counters::all() {
+        counter.store(0, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+pub fn support_local_build_profile() -> SupportLocalBuildProfile {
+    use std::sync::atomic::Ordering::Relaxed;
+    SupportLocalBuildProfile {
+        calls: support_local_counters::CALLS.load(Relaxed),
+        delegated: support_local_counters::DELEGATED.load(Relaxed),
+        rows_ns: support_local_counters::ROWS_NS.load(Relaxed),
+        columns_ns: support_local_counters::COLUMNS_NS.load(Relaxed),
+        pack_ns: support_local_counters::PACK_NS.load(Relaxed),
+        rows: support_local_counters::ROWS.load(Relaxed),
+        columns: support_local_counters::COLUMNS.load(Relaxed),
+    }
 }
 
 pub fn f4_build_subprofile() -> (u64, u64) {
@@ -5675,6 +5763,50 @@ mod tests {
         let bitmap = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
         assert_eq!(original, bitmap);
         set_f4_support_local_bitmap_columns(false);
+    }
+
+    #[test]
+    fn support_local_timers_preserve_rows_and_count_delegation() {
+        let n_vars = 4;
+        let mask = all_variable_mask(n_vars);
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b0001), F2BoolMono::from_mask(0b0011)],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b0100)], n_vars),
+        ];
+        set_f4_support_local_profile(false);
+        let original = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        set_f4_support_local_profile(true);
+        support_local_build_profile_reset();
+        let profiled = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        assert_eq!(original, profiled);
+        let p = support_local_build_profile();
+        assert_eq!(p.calls, 1);
+        assert_eq!(p.delegated, 0);
+        assert_eq!(p.rows as usize, profiled.as_ref().unwrap().1.len());
+        assert_eq!(p.columns as usize, profiled.as_ref().unwrap().0.len());
+
+        support_local_build_profile_reset();
+        let zero = [F2BoolPoly::zero(n_vars)];
+        assert_eq!(
+            build_inherited_macaulay_support_local(&zero, n_vars, 3, mask, false),
+            Some((Vec::new(), Vec::new()))
+        );
+        let p = support_local_build_profile();
+        assert_eq!((p.calls, p.delegated, p.rows, p.columns), (1, 0, 0, 0));
+
+        support_local_build_profile_reset();
+        let full = [F2BoolPoly::from_monos(
+            vec![F2BoolMono::from_mask(0b0011), F2BoolMono::from_mask(0b1100)],
+            n_vars,
+        )];
+        let _ = build_inherited_macaulay_support_local(&full, n_vars, 3, mask, false);
+        let p = support_local_build_profile();
+        assert_eq!((p.calls, p.delegated), (1, 1));
+        set_f4_support_local_profile(false);
+        support_local_build_profile_reset();
     }
 
     #[test]
