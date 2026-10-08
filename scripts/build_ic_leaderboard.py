@@ -67,6 +67,7 @@ SOURCES = {
     "f6_small_cold_rows": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
     "f6_small_cold_replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
     "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+    "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -692,6 +693,42 @@ def build() -> dict:
         "panel_k8_over_k16_online_wall_ci95": native_wall_decision["panel_descriptive_ratios"]["k8_over_k16"]["target_block_bootstrap_95"],
         "admitted_online_speedup": None,
     }
+    n4153 = load(SOURCES["n41_n53_counted"])
+    if (n4153["schema"] != "ecbench.n41_n53_shared_rank_decision/v1"
+            or n4153["status"] != "complete_l0_counted_diagnostic"
+            or n4153["online_speedup"] is not None
+            or n4153["fully_priced_cold_speedup"] is not None
+            or n4153["all_measured_L2"]
+            or n4153["measured_runs"] != 640):
+        raise SystemExit("review the n41/n53 counted decision before updating the leaderboard")
+
+    def quotient(c: dict, key: str) -> dict:
+        q = c["secondary_counted"][key]
+        return {"ratio_of_sums": q["ratio_of_sums"], "ci95": q["ci95"], "pairs": q["pairs"]}
+    n41_n53_diagnostic = {
+        "source": SOURCES["n41_n53_counted"],
+        "decision": n4153["decision"],
+        "class": "accounting; counted lower bounds with native work unpriced, L0 wall exploratory, "
+                 "L2 host run pending",
+        "measured_runs": n4153["measured_runs"],
+        "measured_verified_runs": n4153["measured_verified_runs"],
+        "isolation_levels": n4153["isolation_levels"],
+        "curves": [
+            {"curve": names(c["curve"])["slug"], "log2_r": c["log2_r"],
+             "primary_workload_id": c["primary_workload_id"],
+             "arms": [{"arm": a["arm"], "measured": a["measured"], "verified": a["verified"],
+                       "timeouts": a["timeouts"], "errors": a["errors"],
+                       "usable_points": a.get("usable_points"), "folded_columns": a.get("folded_columns"),
+                       "mean_cold_s_lower_bound": a["mean_cold_s_lower_bound"]} for a in c["arms"]],
+             "k8_over_rho": quotient(c, "ic-k8_over_rho-strong"),
+             "k16_over_rho": quotient(c, "ic-k16_over_rho-strong"),
+             "k16_over_k8": quotient(c, "ic-k16_over_ic-k8"),
+             "h1": c["h1_counted_ic_over_rho_above_one"],
+             "h2_verdict": c["h2_target_only_counted_k16_over_k8"]["verdict"]}
+            for c in n4153["curves"]],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -730,6 +767,7 @@ def build() -> dict:
         "n37_native_wall_diagnostic": native_wall_diagnostic,
         "f6_small_cold_diagnostic": small_cold_diagnostic,
         "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
+        "n41_n53_counted_diagnostic": n41_n53_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -907,6 +945,35 @@ def markdown(doc: dict) -> str:
         L.append(f"| {z['m']} | `{z['curve']}` | {z['targets']} | {z['rho_s']:.3f} | "
                  f"{z['f4_s_lower_over_rho']:.3f} | {z['f6_s_lower_over_rho']:.3f} | "
                  f"{z['median_log2_w4_over_w6']:.3f} |")
+    L.append("")
+    v = doc["n41_n53_counted_diagnostic"]
+
+    def qmd(q: dict) -> str:
+        if q["ratio_of_sums"] is None:
+            return f"unknown ({q['pairs']} verified pairs)"
+        ci = q["ci95"]
+        return (f"{q['ratio_of_sums']:.3f} [{ci[0]:.3f}, {ci[1]:.3f}]" if ci
+                else f"{q['ratio_of_sums']:.3f} (no interval)")
+    L += ["## n41/n53 shared-rank counted panel, outside tables A–C", "",
+          "The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 control, "
+          "method parameters unchanged) ran on 16 new public one-target workloads on each of the next "
+          "two registered sizes, five paired rounds each, on macOS at L0. Counted cold IC/rho is a "
+          "quotient of two lower bounds (native work unpriced); a cell whose arm never verifies under "
+          "the frozen parameters is unknown, not a cost. "
+          f"{v['measured_verified_runs']} of {v['measured_runs']} measured runs verified; "
+          f"decision `{v['decision']}`; the L2 host run is pending. "
+          f"Read the [frozen decision](../../{v['source']}).", "",
+          "| curve | log2 r | arm | verified / measured | usable points | columns | mean cold S (lower bound) | counted IC/rho [95%] |",
+          "|:--|--:|:--|--:|--:|--:|--:|:--|"]
+    for c in v["curves"]:
+        for a in c["arms"]:
+            q = {"ic-k8": c["k8_over_rho"], "ic-k16": c["k16_over_rho"]}.get(a["arm"])
+            s_txt = f"{a['mean_cold_s_lower_bound']:.3f}" if a["mean_cold_s_lower_bound"] is not None else "—"
+            L.append(f"| `{c['curve']}` | {c['log2_r']:.2f} | {a['arm']} | {a['verified']}/{a['measured']} | "
+                     f"{a['usable_points'] if a['usable_points'] is not None else '—'} | "
+                     f"{a['folded_columns'] if a['folded_columns'] is not None else '—'} | {s_txt} | "
+                     f"{qmd(q) if q else ('reference' if a['arm'] == 'rho-strong' else 'A/A control')} |")
+        L.append(f"| `{c['curve']}` | {c['log2_r']:.2f} | K16 / K8 | — | — | — | — | {qmd(c['k16_over_k8'])} |")
     L.append("")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
@@ -1181,6 +1248,38 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{z["m"]}</td><td><code>{esc(z["curve"])}</code></td><td>{z["targets"]}</td>'
                  f'<td>{z["rho_s"]:.3f}</td><td>{z["f4_s_lower_over_rho"]:.3f}</td>'
                  f'<td>{z["f6_s_lower_over_rho"]:.3f}</td><td>{z["median_log2_w4_over_w6"]:.3f}</td></tr>')
+    P.append('</tbody></table></section>')
+    v = doc["n41_n53_counted_diagnostic"]
+
+    def qhtml(q: dict) -> str:
+        if q["ratio_of_sums"] is None:
+            return f'unknown ({q["pairs"]} verified pairs)'
+        ci = q["ci95"]
+        return (f'{q["ratio_of_sums"]:.3f} <span class="muted">[{ci[0]:.3f}, {ci[1]:.3f}]</span>' if ci
+                else f'{q["ratio_of_sums"]:.3f} <span class="muted">(no interval)</span>')
+    P.append(f'<section class="card" id="bounded-n41-n53-counted"><h2>n41/n53 shared-rank counted panel, outside the priced tables</h2>'
+             '<p>The four n37 arms, method parameters unchanged, on 16 new public one-target workloads '
+             'on each of the next two registered sizes, five paired rounds each, on macOS at L0. '
+             'Counted cold IC/rho is a quotient of two lower bounds with native work unpriced; a cell '
+             'whose arm never verifies under the frozen parameters is unknown, not a cost. '
+             f'{v["measured_verified_runs"]} of {v["measured_runs"]} measured runs verified; decision '
+             f'<code>{esc(v["decision"])}</code>; the L2 host run is pending. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(v["source"])}">Frozen decision</a>.</p>')
+    P.append('<table><thead><tr><th>Curve</th><th class="n">log₂ r</th><th>Arm</th><th class="n">Verified / measured</th>'
+             '<th class="n">Usable points</th><th class="n">Columns</th><th class="n">Mean cold S (lower bound)</th>'
+             '<th>Counted IC/rho [95%]</th></tr></thead><tbody>')
+    for c in v["curves"]:
+        for a in c["arms"]:
+            q = {"ic-k8": c["k8_over_rho"], "ic-k16": c["k16_over_rho"]}.get(a["arm"])
+            s_txt = f'{a["mean_cold_s_lower_bound"]:.3f}' if a["mean_cold_s_lower_bound"] is not None else "—"
+            P.append(f'<tr><td><code>{esc(c["curve"])}</code></td><td class="n">{c["log2_r"]:.2f}</td><td>{esc(a["arm"])}</td>'
+                     f'<td class="n">{a["verified"]}/{a["measured"]}</td>'
+                     f'<td class="n">{a["usable_points"] if a["usable_points"] is not None else "—"}</td>'
+                     f'<td class="n">{a["folded_columns"] if a["folded_columns"] is not None else "—"}</td>'
+                     f'<td class="n">{s_txt}</td>'
+                     f'<td>{qhtml(q) if q else ("reference" if a["arm"] == "rho-strong" else "A/A control")}</td></tr>')
+        P.append(f'<tr><td><code>{esc(c["curve"])}</code></td><td class="n">{c["log2_r"]:.2f}</td><td>K16 / K8</td>'
+                 f'<td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td>{qhtml(c["k16_over_k8"])}</td></tr>')
     P.append('</tbody></table></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'

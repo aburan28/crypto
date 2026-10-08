@@ -748,6 +748,14 @@ worse than none:
   step's elimination once the residue echelon is full, is round 6 (§15):
   every output unchanged, 39% fewer multiply-adds at `m = 4`, `N = 12` and
   25% at `N = 16`, all in the refutation step.
+
+  Round 7 (§16) finishes `m = 3` at `N = 18`, where round 2 had only
+  `D ≥ 7`: `D = 7` on both targets. The `m = 3` line reads 6, 6, 7, 7
+  over `N = 9`–18, which A1 calls inconclusive, like `m = 4`'s 7, 7. Its
+  address space peaked at 96% of the 14 GB that machine allows, so
+  `m = 3` at `N = 21` is beyond it too. The round's checks run on a native
+  checker (`examples/pkm_tower_check.rs`) that reproduces the retired
+  Python scripts line for line.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
