@@ -6599,7 +6599,7 @@ fn add_coordinate_domain(
 }
 
 /// Absolute trace F_(2^n) -> F_2 in the configured field representation.
-fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
+pub(crate) fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
     let mut t = F2mElement::zero(n);
     let mut power = x.clone();
     for _ in 0..n {
