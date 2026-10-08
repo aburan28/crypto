@@ -24,6 +24,7 @@
   "docs/ic/leaderboard.json": "bf8e682b1fd3fdeb9a11f9644ccc315cf8d9731ddfac5d4f1f2979716cd34b36",
   "docs/curves/registry.json": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
   "docs/curves/covers.json": "b1634d75fff27add2e27adf996ba820a8852ea72468088d9eb3c88bb69759a39",
+  "docs/ic/leaderboard.json": "ecfcfa4e5b522c34d6c51f2bf349cbf572fdb11b395405a72f5efab7c5d439c9",
   "docs/ic/leaderboard.json": "f06718881306df35453ba137238cec0d538070903ae426abc1397a7ccca2e2ea",
   "docs/ic/leaderboard.json": "259363c762ad248ac6327013efa7788ca2c496f71e9bb83942e82cc66fca6f99",
   "docs/ic/leaderboard.json": "f06718881306df35453ba137238cec0d538070903ae426abc1397a7ccca2e2ea",
@@ -3925,9 +3926,9 @@
      "log2_r": 18.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 4.872889458440391,
-     "ratio_rho": 14.896649773263793,
-     "ratio_floor": 120.62428246801784,
+     "best_s": 4.87288945844,
+     "ratio_rho": 14.8966497733,
+     "ratio_floor": 120.624282468,
      "verified": true
     }
    ],
@@ -5130,9 +5131,9 @@
      "log2_r": 22.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 1.432406399234411,
-     "ratio_rho": 6.988294347307033,
-     "ratio_floor": 39.01229984655938,
+     "best_s": 1.43240639923,
+     "ratio_rho": 6.98829434731,
+     "ratio_floor": 39.0122998466,
      "verified": true
     }
    ],
@@ -6419,9 +6420,9 @@
      "log2_r": 27.78,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.48528077638942624,
-     "ratio_rho": 5.260801523504233,
-     "ratio_floor": 16.763524472349825,
+     "best_s": 0.485280776389,
+     "ratio_rho": 5.2608015235,
+     "ratio_floor": 16.7635244723,
      "verified": true
     }
    ],
@@ -7003,6 +7004,9 @@
      "log2_r": 39.0,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
+     "best_s": 5.58064429862,
+     "ratio_rho": 8.04429021325,
+     "ratio_floor": 40.3210032811,
      "best_s": 11.16913986167439,
      "ratio_rho": 7.657141173367715,
      "ratio_floor": 80.69873314109438,
@@ -7013,9 +7017,9 @@
      "log2_r": 39.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.24079642651229552,
-     "ratio_rho": 3.6156712977275385,
-     "ratio_floor": 8.756153147889457,
+     "best_s": 0.240796426512,
+     "ratio_rho": 3.61567129773,
+     "ratio_floor": 8.75615314789,
      "verified": true
     }
    ],
@@ -7298,9 +7302,9 @@
      "log2_r": 32.11,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.3248333744103279,
-     "ratio_rho": 4.875031509653909,
-     "ratio_floor": 12.09668173360119,
+     "best_s": 0.32483337441,
+     "ratio_rho": 4.87503150965,
+     "ratio_floor": 12.0966817336,
      "verified": true
     }
    ],
@@ -7558,9 +7562,9 @@
      "log2_r": 24.8,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.8563454652154826,
-     "ratio_rho": 7.190079591360827,
-     "ratio_floor": 32.62320627281522,
+     "best_s": 0.856345465215,
+     "ratio_rho": 7.19007959136,
+     "ratio_floor": 32.6232062728,
      "verified": true
     }
    ],
@@ -7672,6 +7676,9 @@
      "log2_r": 36.64,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
+     "best_s": 4.26774899371,
+     "ratio_rho": 4.94676916595,
+     "ratio_floor": 33.0143580405,
      "best_s": 9.506805780776906,
      "ratio_rho": 5.2259258441371435,
      "ratio_floor": 73.54253737303847,
@@ -7682,9 +7689,9 @@
      "log2_r": 36.64,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.23441213095035382,
-     "ratio_rho": 3.8928784425876555,
-     "ratio_floor": 9.12641881482961,
+     "best_s": 0.23441213095,
+     "ratio_rho": 3.89287844259,
+     "ratio_floor": 9.12641881483,
      "verified": true
     }
    ],
@@ -7848,6 +7855,9 @@
      "log2_r": 44.26,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
+     "best_s": 7.39881063707,
+     "ratio_rho": 14.7038673194,
+     "ratio_floor": 60.7791897773,
      "best_s": 16.97618299454087,
      "ratio_rho": 13.24099753697916,
      "ratio_floor": 139.45466353062287,
@@ -7858,9 +7868,9 @@
      "log2_r": 44.26,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.2605273559740867,
-     "ratio_rho": 5.113845470925767,
-     "ratio_floor": 10.77116427992114,
+     "best_s": 0.260527355974,
+     "ratio_rho": 5.11384547093,
+     "ratio_floor": 10.7711642799,
      "verified": true
     }
    ],
@@ -8101,6 +8111,9 @@
      "log2_r": 38.0,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
+     "best_s": 8.12117350521,
+     "ratio_rho": 1.98456265413,
+     "ratio_floor": 69.1848934212,
      "best_s": 11.014581514064941,
      "ratio_rho": 6.121194064269396,
      "ratio_floor": 93.8340558345144,
@@ -8214,6 +8227,9 @@
      "log2_r": 44.52,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
+     "best_s": 9.03281027772,
+     "ratio_rho": 15.6681638536,
+     "ratio_floor": 78.2895782822,
      "best_s": 16.25703234767737,
      "ratio_rho": 12.030889434458363,
      "ratio_floor": 140.90367975056634,
@@ -8420,6 +8436,9 @@
      "log2_r": 47.21,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
+     "best_s": 15.1490066472,
+     "ratio_rho": 31.5994057949,
+     "ratio_floor": 133.507029473,
      "best_s": 24.931644865085715,
      "ratio_rho": 20.970861959576446,
      "ratio_floor": 219.72066706038663,
@@ -8430,9 +8449,9 @@
      "log2_r": 47.21,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.4884575885497573,
-     "ratio_rho": 9.202036756044834,
-     "ratio_floor": 21.66522289873162,
+     "best_s": 0.48845758855,
+     "ratio_rho": 9.20203675604,
+     "ratio_floor": 21.6652228987,
      "verified": true
     }
    ],
@@ -11688,12 +11707,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 13.994265033718973,
+     "log2_r": 13.9942650337,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 26.313945594196156,
-     "ratio_rho": 13.069161008261789,
-     "ratio_floor": 29.692108012575694,
+     "best_s": 26.3139455942,
+     "ratio_rho": 13.0691610083,
+     "ratio_floor": 29.6921080126,
      "verified": true
     }
    ],
@@ -12568,12 +12587,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 14.997841035008591,
+     "log2_r": 14.997841035,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 21.30470007604251,
-     "ratio_rho": 10.621069650895725,
-     "ratio_floor": 24.039779727024555,
+     "best_s": 21.304700076,
+     "ratio_rho": 10.6210696509,
+     "ratio_floor": 24.039779727,
      "verified": true
     }
    ],
@@ -12872,12 +12891,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 19.998217158598404,
+     "log2_r": 19.9982171586,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 24.390627126303627,
-     "ratio_rho": 17.986362549690746,
-     "ratio_floor": 27.521875521715703,
+     "best_s": 24.3906271263,
+     "ratio_rho": 17.9863625497,
+     "ratio_floor": 27.5218755217,
      "verified": true
     }
    ],
@@ -13468,12 +13487,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 21.000262077754154,
+     "log2_r": 21.0002620778,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 27.240364296650327,
-     "ratio_rho": 23.025248464568847,
-     "ratio_floor": 30.737459576432638,
+     "best_s": 27.2403642967,
+     "ratio_rho": 23.0252484646,
+     "ratio_floor": 30.7374595764,
      "verified": true
     }
    ],
@@ -13772,12 +13791,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 24.414902680079198,
+     "log2_r": 24.4149026801,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 36.929397566960354,
-     "ratio_rho": 38.21077630869644,
-     "ratio_floor": 41.67036286794578,
+     "best_s": 36.929397567,
+     "ratio_rho": 38.2107763087,
+     "ratio_floor": 41.6703628679,
      "verified": true
     }
    ],
@@ -14542,12 +14561,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 9.684748620421626,
+     "log2_r": 9.68474862042,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 22.84909965469822,
-     "ratio_rho": 6.338382939564868,
-     "ratio_floor": 25.782448037250745,
+     "best_s": 22.8490996547,
+     "ratio_rho": 6.33838293956,
+     "ratio_floor": 25.7824480373,
      "verified": true
     }
    ],
@@ -14732,12 +14751,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 11.925183519434208,
+     "log2_r": 11.9251835194,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 15.617808489239641,
-     "ratio_rho": 5.4703789655979405,
-     "ratio_floor": 17.622809734945452,
+     "best_s": 15.6178084892,
+     "ratio_rho": 5.4703789656,
+     "ratio_floor": 17.6228097349,
      "verified": true
     }
    ],
@@ -15000,12 +15019,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 13.986464267334126,
+     "log2_r": 13.9864642673,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.07494054076345,
-     "ratio_rho": 6.42943611579286,
-     "ratio_floor": 14.753490517210013,
+     "best_s": 13.0749405408,
+     "ratio_rho": 6.42943611579,
+     "ratio_floor": 14.7534905172,
      "verified": true
     }
    ],
@@ -15416,12 +15435,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 15.988218682078955,
+     "log2_r": 15.9882186821,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 11.683400801861266,
-     "ratio_rho": 6.714597175542405,
-     "ratio_floor": 13.18330606564726,
+     "best_s": 11.6834008019,
+     "ratio_rho": 6.71459717554,
+     "ratio_floor": 13.1833060656,
      "verified": true
     }
    ],
@@ -15884,12 +15903,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 17.997405546030816,
+     "log2_r": 17.997405546,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 8.413718646746405,
-     "ratio_rho": 5.819428361014084,
-     "ratio_floor": 9.493864838791692,
+     "best_s": 8.41371864675,
+     "ratio_rho": 5.81942836101,
+     "ratio_floor": 9.49386483879,
      "verified": true
     }
    ],
@@ -16634,12 +16653,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 19.99782863366001,
+     "log2_r": 19.9978286337,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 10.722871957641596,
-     "ratio_rho": 8.300039808611233,
-     "ratio_floor": 12.099465328435453,
+     "best_s": 10.7228719576,
+     "ratio_rho": 8.30003980861,
+     "ratio_floor": 12.0994653284,
      "verified": true
     }
    ],
@@ -17121,12 +17140,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 21.650392222310906,
+     "log2_r": 21.6503922223,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 12.770222471900254,
-     "ratio_rho": 10.501329293724387,
-     "ratio_floor": 14.409652996467209,
+     "best_s": 12.7702224719,
+     "ratio_rho": 10.5013292937,
+     "ratio_floor": 14.4096529965,
      "verified": true
     }
    ],
@@ -17311,12 +17330,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 23.38228535388855,
+     "log2_r": 23.3822853539,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.965657630366684,
-     "ratio_rho": 13.455139231662017,
-     "ratio_floor": 15.75855712489425,
+     "best_s": 13.9656576304,
+     "ratio_rho": 13.4551392317,
+     "ratio_floor": 15.7585571249,
      "verified": true
     }
    ],

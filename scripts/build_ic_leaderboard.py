@@ -70,7 +70,10 @@ SOURCES = {
     "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "registry": "docs/curves/registry.json",
+    "curves_schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
 }
+GITHUB = "https://github.com/aburan28/crypto/blob/main/"
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
 S23_RUNS = "research/ic_single_target_20260930/runs"
 RULE_V3_RUNS = "research/ic_tool_program/rule/v3/runs"
@@ -202,6 +205,62 @@ class Names:
         if c is None:
             raise SystemExit(f"{legacy!r} is not in docs/curves/registry.json")
         return c
+
+
+def curve_records() -> dict:
+    """The IC curve records in docs/curves/ic/curves.yaml, keyed by ICV1 slug.
+
+    The CI interpreter has no YAML parser, so this reads only the fields the
+    page cites (record key, ICV1 slug, factor-base references and their link
+    status) from the file's fixed two-space layout, and refuses to build if
+    the layout is not the one it expects.
+    """
+    lines = (REPO / SOURCES["curves_yaml"]).read_text().splitlines()
+    if "schema_version: 1" not in lines or "curves:" not in lines:
+        raise SystemExit(f"{SOURCES['curves_yaml']}: expected schema_version 1 with a top-level curves map")
+    recs, cur, in_icv1, in_refs = [], None, False, False
+    for line in lines[lines.index("curves:") + 1:]:
+        if line and not line.startswith(" "):
+            break
+        m = re.fullmatch(r"  ([A-Za-z0-9_]+):", line)
+        if m:
+            cur = {"key": m.group(1), "slug": None, "factor_base_refs": None, "factor_base_link_status": None}
+            recs.append(cur)
+            in_icv1 = in_refs = False
+            continue
+        if cur is None:
+            continue
+        if re.fullmatch(r"    [A-Za-z_]+:.*", line):
+            in_icv1 = line == "    icv1_identity:"
+            in_refs = False
+            m = re.fullmatch(r"    factor_base_refs:(.*)", line)
+            if m:
+                v = m.group(1).strip()
+                if v == "[]":
+                    cur["factor_base_refs"] = []
+                elif v == "":
+                    cur["factor_base_refs"], in_refs = [], True
+                else:
+                    raise SystemExit(f"{SOURCES['curves_yaml']}: unreadable factor_base_refs for {cur['key']}")
+            m = re.fullmatch(r"    factor_base_link_status: (\S+)", line)
+            if m:
+                cur["factor_base_link_status"] = m.group(1)
+        elif in_icv1 and (m := re.fullmatch(r"      slug: (\S+)", line)):
+            cur["slug"] = None if m.group(1) == "null" else m.group(1)
+        elif in_refs and (m := re.fullmatch(r"    - (.+)", line)):
+            cur["factor_base_refs"].append(m.group(1).strip().strip("'\""))
+    if not recs or any(r["factor_base_refs"] is None or r["factor_base_link_status"] is None for r in recs):
+        raise SystemExit(f"{SOURCES['curves_yaml']}: every record needs factor_base_refs and factor_base_link_status")
+    return {r["slug"]: r for r in recs if r["slug"]}, len(recs)
+
+
+def curve_record(records: dict, slug: str) -> dict:
+    """Where a curve's identity and factor base are recorded."""
+    rec = records.get(slug)
+    return {"registry": SOURCES["registry"], "schema": SOURCES["curves_schema"],
+            "curves_yaml": SOURCES["curves_yaml"], "curves_yaml_key": rec["key"] if rec else None,
+            "factor_base_refs": rec["factor_base_refs"] if rec else [],
+            "factor_base_link_status": rec["factor_base_link_status"] if rec else "no_curves_yaml_record"}
 
 
 def ec1_of(c: dict) -> str | None:
@@ -750,6 +809,13 @@ def build() -> dict:
     for r in board:
         r["family"] = FAMILY_OF[r["regime"]]
     measured = {r["slug"] for r in board}
+    records, n_records = curve_records()
+    for r in board:
+        r["curve_record"] = curve_record(records, r["slug"])
+        r["factor_base"] = {"points": r["best"]["base_points"], "recipe": r["best"]["label"],
+                            "variant": r["best"].get("variant"), "source": r["source"],
+                            "refs": r["curve_record"]["factor_base_refs"],
+                            "link_status": r["curve_record"]["factor_base_link_status"]}
     leaders = {}
     for regime in ("prime", "char2", "koblitz", "koblitz_batch"):
         rows = [r for r in board if r["regime"] == regime]
@@ -783,6 +849,19 @@ def build() -> dict:
         "n37_native_wall_diagnostic": native_wall_diagnostic,
         "f6_small_cold_diagnostic": small_cold_diagnostic,
         "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
+        "curve_records": {
+            "registry": SOURCES["registry"], "schema": SOURCES["curves_schema"], "yaml": SOURCES["curves_yaml"],
+            "yaml_records": n_records,
+            "board_curves": len(measured),
+            "board_curves_in_yaml": sum(s in records for s in measured),
+            "board_curves_factor_base_reconciled": sum(
+                1 for s in measured if s in records and records[s]["factor_base_refs"]),
+        },
+        "exponents": exponents(), "roster": [
+            {**c, "curves_yaml_key": (records.get(c["slug"]) or {}).get("key"),
+             "factor_base_link_status": (records.get(c["slug"]) or {}).get(
+                 "factor_base_link_status", "no_curves_yaml_record")}
+            for c in roster(names, measured)],
         "n41_n53_counted_diagnostic": n41_n53_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
@@ -810,6 +889,23 @@ def times(v: float) -> str:
 
 def esc(s) -> str:
     return html.escape(str(s))
+
+
+def gh(path: str, text: str | None = None) -> str:
+    return f'<a href="{esc(GITHUB + path)}"><code>{esc(text or path)}</code></a>'
+
+
+def record_cell(r: dict) -> str:
+    """The curve's registry, curves.yaml and factor-base references under its slug."""
+    cr, fb = r["curve_record"], r["factor_base"]
+    yml = (gh(cr["curves_yaml"], f'curves.yaml#{cr["curves_yaml_key"]}') if cr["curves_yaml_key"]
+           else f'{gh(cr["curves_yaml"], "curves.yaml")}: no record')
+    refs = (", ".join(f"<code>{esc(x)}</code>" for x in fb["refs"]) if fb["refs"]
+            else "none" if not cr["curves_yaml_key"] else f'none ({esc(fb["link_status"])})')
+    # |F| and the recipe have their own columns; this names where the base was defined.
+    return (f'<br><span class="muted">{gh(cr["registry"], "registry")} · {yml}</span>'
+            f'<br><span class="muted" title="{fb["points"]:,} points, {esc(fb["variant"] or fb["recipe"])}">'
+            f'factor base: {gh(fb["source"], fb["source"].rsplit("/", 1)[-1])} · refs {refs}</span>')
 
 
 def rich(s) -> str:
@@ -865,6 +961,20 @@ def markdown(doc: dict) -> str:
             ph, s = r["best"]["phases_s"], r["best"]["s"]
             L.append(f"| {code} | `{r['slug']}` | " + " | ".join(
                 (f"{100 * ph[i] / s:.1f}%" if i in ph else "—") for i, _, _ in PHASES) + " |")
+    cr = doc["curve_records"]
+    L += ["", "## Curve records and factor bases", "",
+          f"Identity: [`{cr['registry']}`](../../{cr['registry']}). IC curve records: schema "
+          f"[`{cr['schema']}`](../../{cr['schema']}), records [`{cr['yaml']}`](../../{cr['yaml']}) "
+          f"({cr['yaml_records']} records). {cr['board_curves_in_yaml']} of the {cr['board_curves']} board curves "
+          f"have a record there; {cr['board_curves_factor_base_reconciled']} have a reconciled factor base.", "",
+          "| table | curve | curves.yaml record | factor base (points, recipe) | factor-base source | refs |",
+          "|:--|:--|:--|:--|:--|:--|"]
+    for code in ("A", "B", "C"):
+        for r in (r for r in doc["board"] if r["family"] == code):
+            fb, key = r["factor_base"], r["curve_record"]["curves_yaml_key"]
+            L.append(f"| {code} | `{r['slug']}` | {('`' + key + '`') if key else 'none'} | "
+                     f"{fb['points']:,}, {fb['variant'] or fb['recipe']} | `{fb['source']}` | "
+                     + (", ".join(f"`{x}`" for x in fb["refs"]) or f"none ({fb['link_status']})") + " |")
     d = doc["bounded_diagnostics"][0]
     L += ["", "## Bounded n37 diagnostic outside tables A–C", "",
           f"The separately calibrated `{d['curve']}` shared-rank K16 candidate "
@@ -1329,7 +1439,7 @@ def page(doc: dict, standalone: bool) -> str:
                      f'(§20; not table A\'s measurement)</span>')
             rank = "—" if b.get("construction_artefact") else i
             P.append(f'<tr class="{"lead" if r["slug"] == L[g]["slug"] else ""}"><td class="n">{rank}</td>'
-                     f'<td><span class="slug">{esc(r["slug"])}</span></td><td class="n">{r["log2_r"]:.1f}</td>'
+                     f'<td><span class="slug">{esc(r["slug"])}</span>{record_cell(r)}</td><td class="n">{r["log2_r"]:.1f}</td>'
                      f'<td class="recipe">{esc(b["label"])}</td><td class="n">{b["m"]}</td><td class="n">{b["base_points"]:,}</td>'
                      f'<td class="n">{b["columns"]:,}</td><td class="n">{g3(b["s"])}</td>'
                      f'<td class="n">{g3(r["reference_s"])}</td><td class="n"><span class="ratio">{times(b["ratio_rho"])}</span>{ci}</td>'
@@ -1513,6 +1623,13 @@ def page(doc: dict, standalone: bool) -> str:
              '<p>From the curve registry. The slug is the curve\'s name in text; the EC1 alias identifies the exact '
              'representation measured (subgroup and generator included) for comparisons across repositories. '
              'Legacy spellings are what older notes and frozen reports called the curve.</p>')
+    cr = doc["curve_records"]
+    P.append(f'<p id="curve-records"><strong>Curve records.</strong> Identity comes from {gh(cr["registry"])}. '
+             f'IC curve records follow the schema {gh(cr["schema"])} and live in {gh(cr["yaml"])} '
+             f'({cr["yaml_records"]} records), which carries each curve\'s <code>factor_base_refs</code> and '
+             f'<code>factor_base_link_status</code>. {cr["board_curves_in_yaml"]} of the {cr["board_curves"]} curves '
+             f'on the board have a record there, and {cr["board_curves_factor_base_reconciled"]} have a reconciled '
+             'factor base; each board row shows its own record and the factor base its source file used.</p>')
     for fam in fam_order:
         rows = [c for c in doc["roster"] if c["family"] == fam]
         if not rows:
@@ -1520,14 +1637,15 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<details {"open" if fam == "koblitz" else ""}><summary>{esc(fam)} · {len(rows)} curves · '
                  f'{sum(c["on_board"] for c in rows)} on the board</summary><div class="scroll"><table><thead><tr>'
                  '<th>slug</th><th>field</th><th>coefficients</th><th class="n">#E bits</th><th>EC1</th>'
-                 '<th>also called</th><th>board</th></tr></thead><tbody>')
+                 '<th>also called</th><th>curves.yaml</th><th>board</th></tr></thead><tbody>')
         for c in rows:
             ec1 = ", ".join(c["ec1"]) if c["ec1"] else f'<span class="muted">{esc(c["ec1_unresolved"])}</span>'
             also = ", ".join(c["standard"] + c["legacy"])
             P.append(f'<tr><td><span class="slug">{esc(c["slug"])}</span></td><td>{esc(c["field"])}</td>'
                      f'<td>{esc(c["coefficients"])}</td><td class="n">{c["order_bits"]}</td>'
                      f'<td><code>{ec1 if c["ec1"] else ""}</code>{"" if c["ec1"] else ec1}</td>'
-                     f'<td>{esc(also)}</td><td>{"✓" if c["on_board"] else ""}</td></tr>')
+                     f'<td>{esc(also)}</td><td>{esc(c["curves_yaml_key"] or "—")}</td>'
+                     f'<td>{"✓" if c["on_board"] else ""}</td></tr>')
         P.append('</tbody></table></div></details>')
     P.append('</section>')
 
@@ -1541,7 +1659,9 @@ def page(doc: dict, standalone: bool) -> str:
              f'<p>Current through ledger §{LEDGER_COVERED_THROUGH}. Built by '
              '<code>scripts/build_ic_leaderboard.py</code> from: '
              + ", ".join(f'<code>{esc(v["path"])}</code> ({v["sha256"][:12]})' for v in doc["sources"].values())
-             + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>).</p></footer></div>')
+             + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>); '
+             f'curve records: {gh(SOURCES["curves_schema"])} and {gh(SOURCES["curves_yaml"])} '
+             '(<a href="#curve-records">coverage</a>).</p></footer></div>')
     body = "\n".join(P)
     if standalone:
         return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
@@ -1552,13 +1672,32 @@ def page(doc: dict, standalone: bool) -> str:
     return head + body + "\n"
 
 
+def stable(o):
+    """Round every float to 12 significant figures.
+
+    Phase totals are sums and means of many frozen readings, and their last
+    one or two digits differ between Python builds (summation and mean
+    rounding), which made `--check` call the committed file stale on a
+    runner whose interpreter differed from the author's.  Twelve figures is
+    far below anything the page or a ratio reads, and identical everywhere.
+    """
+    if isinstance(o, float):
+        return float(f"{o:.12g}") if math.isfinite(o) else o
+    if isinstance(o, dict):
+        return {k: stable(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [stable(v) for v in o]
+    return o
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--artifact", type=Path)
     args = ap.parse_args()
     doc = build()
-    outs = {OUT_JSON: json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
+    # Round only the JSON: rendering compares recipe rows by identity.
+    outs = {OUT_JSON: json.dumps(stable(doc), indent=1, ensure_ascii=False) + "\n",
             OUT_MD: markdown(doc), OUT_HTML: page(doc, standalone=True)}
     if args.check:
         sections = [int(m) for m in re.findall(r"^## (\d+)\.", (REPO / LEDGER).read_text(), re.M)]
