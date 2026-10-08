@@ -1,0 +1,118 @@
+{
+  "collision_study": {
+    "all_dlp_solutions_verified": true,
+    "bad_points": 0,
+    "matched_run_ids": true,
+    "mean_iterations": {
+      "eight_jump": 170.408,
+      "four_jump": 174.424,
+      "two_jump": 172.637
+    },
+    "median_iterations": {
+      "eight_jump": 159,
+      "four_jump": 166,
+      "two_jump": 162
+    },
+    "p90_iterations": {
+      "eight_jump": 297,
+      "four_jump": 292,
+      "two_jump": 292
+    },
+    "trials_per_variant": 2000,
+    "two_jump_over_eight_jump_mean_iterations": 1.01308037181353
+  },
+  "correctness": {
+    "all_passed": true,
+    "bidirectional_resume": true,
+    "cpu_endpoint_replays": 64,
+    "drops": 0,
+    "fixed_sigma_gpu_pairs": 16646,
+    "matching_dp_records": 38885,
+    "sanitizers_per_candidate": [
+      "memcheck",
+      "initcheck",
+      "synccheck"
+    ]
+  },
+  "experiment": "two-jump rho and fixed Frobenius paths",
+  "full_dlp_S": null,
+  "generic_work_boundary": "sqrt(n/262)",
+  "generic_work_ratio": {
+    "selected": 1,
+    "two_jump": 1.01308037181353
+  },
+  "goal_billion_updates_per_second": 12,
+  "goal_met": false,
+  "passed": true,
+  "raw_labels": [
+    "timing-r0-selected",
+    "timing-r0-two-jump-indexed",
+    "timing-r0-two-jump-immediate",
+    "timing-r1-two-jump-immediate",
+    "timing-r1-two-jump-indexed",
+    "timing-r1-selected",
+    "timing-r2-two-jump-indexed",
+    "timing-r2-selected",
+    "timing-r2-two-jump-immediate"
+  ],
+  "rows": [
+    {
+      "collision_adjusted_billion_iterations_per_second": 6.279988,
+      "collision_work_ratio": 1,
+      "decision": "reference",
+      "median_billion_updates_per_second": 6.279988,
+      "paired_geomean_speedup": 1.0,
+      "paired_speedup_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rate_over_12b": 0.5233323333333334,
+      "rates": [
+        6.383845,
+        6.279988,
+        6.268825
+      ],
+      "variant": "selected"
+    },
+    {
+      "collision_adjusted_billion_iterations_per_second": 6.192320150048947,
+      "collision_work_ratio": 1.01308037181353,
+      "decision": "unconfirmed or regression",
+      "median_billion_updates_per_second": 6.273318000000001,
+      "paired_geomean_speedup": 0.9924296265897294,
+      "paired_speedup_95_ci": [
+        0.9642066497717021,
+        1.0214787089118615
+      ],
+      "rate_over_12b": 0.5227765000000001,
+      "rates": [
+        6.366979000000001,
+        6.150292,
+        6.273318000000001
+      ],
+      "variant": "two-jump-indexed"
+    },
+    {
+      "collision_adjusted_billion_iterations_per_second": 5.3486417768612755,
+      "collision_work_ratio": 1.01308037181353,
+      "decision": "unconfirmed or regression",
+      "median_billion_updates_per_second": 5.418604,
+      "paired_geomean_speedup": 0.8445423251188625,
+      "paired_speedup_95_ci": [
+        0.7782449587197804,
+        0.9164874515737047
+      ],
+      "rate_over_12b": 0.45155033333333333,
+      "rates": [
+        5.469921,
+        5.107673,
+        5.418604
+      ],
+      "variant": "two-jump-immediate"
+    }
+  ],
+  "selected_decision": "retain selected eight-jump executable",
+  "timing_samples": 9,
+  "unit": "billion_complete_scalar_updates_per_second",
+  "updates_per_sample": 34359738368
+}

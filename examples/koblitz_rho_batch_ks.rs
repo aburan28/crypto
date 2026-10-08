@@ -21,6 +21,7 @@ use std::time::Instant;
 const JUMPS: usize = 32;
 const PRECOMPUTED: u32 = u32::MAX;
 
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Quotient {
     Ordinary,
@@ -393,6 +394,7 @@ struct Trail {
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();
+    assert_eq!(args.len(), 6, "usage: <n> <a> <mode> <fixtures> <batch_seed>");
     assert_eq!(
         args.len(),
         6,
@@ -421,6 +423,12 @@ fn main() {
         Quotient::SignedFrobenius => signed_automorphism_size(lambda, modulus, n),
     };
     let generator = raw_point(curve.generator());
+    let mut charges = Charges::default();
+
+    let setup_started = Instant::now();
+    let jump_digest = blake3::hash(format!("KIC-KS-BATCH-JUMPS-v1|{n}|{a}|{batch_seed}").as_bytes());
+    let mut jump_rng =
+        StdRng::seed_from_u64(u64::from_le_bytes(jump_digest.as_bytes()[..8].try_into().unwrap()));
     let point_targets = public_point_targets(&curve, modulus);
     if let Some(points) = &point_targets {
         assert_eq!(
@@ -451,6 +459,8 @@ fn main() {
 
     let dp_mask = (1u64 << dp_bits) - 1;
     let walk_cap = 8u64 << dp_bits;
+    let ideal_single = (std::f64::consts::PI * modulus as f64 / (2.0 * automorphisms as f64)).sqrt();
+    let step_cap = (ideal_single.ceil() as u64).saturating_mul(2_000).max(1_000_000);
     let ideal_single =
         (std::f64::consts::PI * modulus as f64 / (2.0 * automorphisms as f64)).sqrt();
     let step_cap = (ideal_single.ceil() as u64)
@@ -462,6 +472,7 @@ fn main() {
     // Bernstein–Lange precomputation: G-only walks whose distinguished points
     // have known logarithms. Charged separately from the target loop.
     let precompute_walks: u64 = std::env::var("KIC_RHO_PRECOMPUTE_WALKS")
+        .map(|v| v.parse().expect("KIC_RHO_PRECOMPUTE_WALKS must be an integer"))
         .map(|v| {
             v.parse()
                 .expect("KIC_RHO_PRECOMPUTE_WALKS must be an integer")
@@ -471,6 +482,7 @@ fn main() {
     let mut precompute_steps = 0u64;
     if precompute_walks > 0 {
         let digest = blake3::hash(format!("KIC-KS-PRECOMPUTE-v1|{n}|{a}|{batch_seed}").as_bytes());
+        let mut rng = StdRng::seed_from_u64(u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap()));
         let mut rng = StdRng::seed_from_u64(u64::from_le_bytes(
             digest.as_bytes()[..8].try_into().unwrap(),
         ));
@@ -485,6 +497,7 @@ fn main() {
             if start == RawPoint::Infinity {
                 continue;
             }
+            let mut state = raw_canonicalize(&curve, RawState { point: start, a: start_a, b: 0 }, mode, modulus, lambda, &mut charges);
             let mut state = raw_canonicalize(
                 &curve,
                 RawState {
@@ -503,6 +516,12 @@ fn main() {
                 let jump = &jumps[raw_partition(state.point)];
                 let next = raw_canonicalize(
                     &curve,
+                    RawState { point: raw_add(&curve, state.point, jump.point), a: (state.a + jump.a) % modulus, b: 0 },
+                    mode, modulus, lambda, &mut charges,
+                );
+                precompute_steps += 1;
+                length += 1;
+                if next.point == state.point || previous.contains(&next.point) || length > walk_cap {
                     RawState {
                         point: raw_add(&curve, state.point, jump.point),
                         a: (state.a + jump.a) % modulus,
@@ -522,6 +541,7 @@ fn main() {
                 previous = [state.point, previous[0], previous[1], previous[2]];
                 state = next;
             }
+            table.entry(raw_key(state.point)).or_insert(Trail { a: state.a, b: 0, target: PRECOMPUTED });
             table.entry(raw_key(state.point)).or_insert(Trail {
                 a: state.a,
                 b: 0,
@@ -537,6 +557,7 @@ fn main() {
 
     for index in 0..fixtures {
         let material = match &shared_corpus {
+            Some(corpus) => format!("KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{corpus}|{batch_seed}|{index}"),
             Some(corpus) => {
                 format!("KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{corpus}|{batch_seed}|{index}")
             }
@@ -548,6 +569,10 @@ fn main() {
         let digest = blake3::hash(material.as_bytes());
         let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
         let mut rng = StdRng::seed_from_u64(seed);
+        let d0 = rng.gen_range(1..modulus);
+        let started = Instant::now();
+        let q = raw_scalar_mul(&curve, generator, d0);
+        charges.scalar_multiplications += 1;
         // Consume the same RNG word in both modes, so the walk schedule remains
         // frozen even though a point-only run has no target discrete-log label.
         let generated_d0 = rng.gen_range(1..modulus);
@@ -587,6 +612,7 @@ fn main() {
             }
             let mut state = raw_canonicalize(
                 &curve,
+                RawState { point: start, a: start_a, b: 1 },
                 RawState {
                     point: start,
                     a: start_a,
@@ -626,6 +652,7 @@ fn main() {
             charges.table_queries += 1;
             let Some(&hit) = table.get(&key) else {
                 if !freeze_table {
+                    table.insert(key, Trail { a: state.a, b: state.b, target: index });
                     table.insert(
                         key,
                         Trail {
@@ -644,6 +671,9 @@ fn main() {
                 inverse_mod(denominator, modulus)
                     .map(|inv| mul_mod(sub_mod(hit.a, state.a, modulus), inv, modulus))
             } else {
+                let base = if hit.target == PRECOMPUTED { 0 } else { solved[hit.target as usize] };
+                let known = (hit.a as u128 + mul_mod(hit.b, base, modulus) as u128)
+                    % modulus as u128;
                 let base = if hit.target == PRECOMPUTED {
                     0
                 } else {
@@ -668,6 +698,7 @@ fn main() {
         }
         let solve_ms = started.elapsed().as_secs_f64() * 1000.0;
         let recovered = recovered.expect("batched rho exceeded the per-target step cap");
+        assert_eq!(recovered, d0);
         if point_targets.is_none() {
             assert_eq!(recovered, generated_d0);
         }
@@ -685,6 +716,7 @@ fn main() {
                 "evidence_class":"measured_rho_observation",
                 "n":n,"a":a,"quotient_mode":mode.name(),"automorphism_size":automorphisms,
                 "fixture_index":index,"fixture_seed":seed,"batch_seed":batch_seed,
+                "published_fixture_scalar":d0,"recovered_fixture_scalar":recovered,
                 "target_source":if point_targets.is_some() {"explicit_public_points"} else {"derived_known_scalar"},
                 "published_fixture_scalar":point_targets.is_none().then_some(generated_d0),
                 "recovered_fixture_scalar":recovered,
@@ -702,6 +734,9 @@ fn main() {
     println!(
         "{}",
         json!({
+            "kind":"rho_ks_batch_summary","producer_version":"v3_precompute",
+            "n":n,"a":a,"quotient_mode":mode.name(),"automorphism_size":automorphisms,
+            "fixtures":fixtures,"batch_seed":batch_seed,"corpus":shared_corpus,"dp_bits":dp_bits,"jump_count":JUMPS,
             "kind":"rho_ks_batch_summary","producer_version":"v4_point_input",
             "n":n,"a":a,"quotient_mode":mode.name(),"automorphism_size":automorphisms,
             "fixtures":fixtures,"batch_seed":batch_seed,"corpus":shared_corpus,"dp_bits":dp_bits,"jump_count":JUMPS,
@@ -722,6 +757,7 @@ fn main() {
                 "table_inserts":charges.table_inserts,
                 "failed_collisions":charges.failed_collisions
             },
+            "scope":"published synthetic toy fixtures; no external point, unknown scalar, or production key"
             "scope":if point_targets.is_some() {
                 "public synthetic point-only targets; no scalar labels supplied to producer"
             } else {

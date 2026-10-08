@@ -1,0 +1,36 @@
+{
+  "schema": "ecc2k130-sigma-square-table-gpu-prebuild-failure-v1",
+  "status": "PRODUCER_FAILURE",
+  "sourceHead": "eb2672a919b3022c1e1f25a71574781d623cc631",
+  "modal": {
+    "appId": "ap-NwLJVMzokMvWnUKvJWDUKi",
+    "functionCallId": "fc-01M3Z12P18FB1WP821ZMVN6JJP",
+    "volumeToken": "ad0df65dcf1a4ef0b14bf9ad6c86741d",
+    "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.95.05",
+    "seconds": 7.436918258666992,
+    "exitCode": 1
+  },
+  "integrity": {
+    "resultsArchiveSha256": "f71d29c9a2b37c9d63b0dc082f658b98c1918bae3d6edae99bcf1c8828da7b76",
+    "sourceManifestSha256": "70517d39d644ed216363d18bb248a773790ee33c1fae5f09d71b1a59cb6970d9",
+    "nativeFailureLogSha256": "1d53f8691a2057aa9513aad0f86abf1e0839cdead2b557bf7828ecadd04d0a92"
+  },
+  "failure": {
+    "stage": "native field replay compilation",
+    "compiler": "g++ in nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "error": "Generated curve constants are unused in the focused replay translation unit and -Werror promoted GCC's unused-variable warnings.",
+    "cause": "The macOS Clang and GitHub Clang validations did not emit GCC's generated-header unused-variable warnings.",
+    "repair": "Keep strict warnings and suppress only unused-variable for the focused replay/audit translation units; bind Makefile CXX explicitly into run-native.sh so CI exercises the selected driver."
+  },
+  "claimBoundary": {
+    "sourceRevisionGatePassed": true,
+    "nativeHarnessSelfTestsPassed": true,
+    "clientBuildStarted": false,
+    "deviceKernelLaunched": false,
+    "occupancyMeasured": false,
+    "correctnessMeasured": false,
+    "timingMeasured": false,
+    "performanceDecision": null
+  }
+}

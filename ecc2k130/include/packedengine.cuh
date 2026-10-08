@@ -1,6 +1,15 @@
 // Included by main.cu after the common CUDA engine and checkpoint helpers.
 #pragma once
 #include "packedkernels.cuh"
+#ifndef ECC_PACKED_XONLY_ARITHMETIC_ONLY
+#define ECC_PACKED_XONLY_ARITHMETIC_ONLY 0
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT
+#define ECC_PACKED_XONLY_POLY_SELECT 0
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_DP_CONVERT
+#define ECC_PACKED_XONLY_POLY_DP_CONVERT 1
+#endif
 
 // Diagnostic builds only: mark a completed walk launch for Nsight range replay.
 // Timed benchmark builds leave this undefined (zero).
@@ -31,14 +40,17 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     unsigned *fieldBlob = nullptr;
 #endif
     // The table walk's addends and coefficients come from the resolver's
-    // TableWalk so device and re-walk share one table by construction.
+    // TableWalk so device and re-walk share one table by construction.  The
+    // sigma-square arm reuses twConsts for its smaller generated field table.
     const Solver<CfgF131> *sol = nullptr;
 
 #if ECC_PHASE_PROFILE
     double profWarpSteps = 0;
 #endif
+    uint32_t *sigmaTable = nullptr;
     PackedCudaEngine() { P = {}; }
     ~PackedCudaEngine() override {
+        cudaFree(sigmaTable);
 #if ECC_CYCLE_PROFILE
         if (P.cycleProfile) reportCycleProfile();
 #endif
@@ -73,8 +85,22 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     unsigned checkpointVersion() const override { return 35u; }
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
+#elif ECC_SIGMA_SQUARE_TABLE
+    static size_t dynamicSharedBytes() {
+        return size_t(eccPacked131::SQ_TAB_WORDS) * sizeof(uint32_t);
+    }
+    unsigned checkpointVersion() const override { return 2u + ECC_CKPT_BUMP; }
 #else
     static size_t dynamicSharedBytes() { return 0; }
+    unsigned checkpointVersion() const override {
+        return (ECC_PACKED_XONLY_POLY_SELECT ? 8u :
+            (ECC_PACKED_XONLY_ARITHMETIC_ONLY ? 7u :
+            (ECC_PACKED_XONLY_BRIDGE_MOD72 ? 6u :
+            (ECC_PACKED_XONLY_BRIDGE1_COMMON ? 5u :
+            (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u)))))) + ECC_CKPT_BUMP;
+    }
+    // The fused sigma walk's Frobenius nibble table, when compiled in.
+    static size_t dynamicSharedBytes() { return eccPacked131::SIGMA_SMEM_BYTES; }
     unsigned checkpointVersion() const override { return 2u + ECC_CKPT_BUMP; }
 #endif
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
@@ -164,7 +190,14 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #endif
     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM * (1 - ECC_TABLE_TAG_DENOM) *
         (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
-    const char *name() const { return "cuda-packed131"; }
+    const char *name() const {
+        return ECC_PACKED_XONLY_POLY_SELECT ? "cuda-packed131-xonly-bridge1-bridge3-poly12" :
+            (ECC_PACKED_XONLY_ARITHMETIC_ONLY ? "cuda-packed131-xonly-bridge1-arith-only" :
+            (ECC_PACKED_XONLY_BRIDGE_MOD72 ? "cuda-packed131-xonly-bridge1-bridge3-mod72" :
+            (ECC_PACKED_XONLY_BRIDGE1_COMMON ? "cuda-packed131-xonly-bridge1-bridge3" :
+            (ECC_PACKED_XONLY_BRIDGE3 ? "cuda-packed131-xonly23-bridge3" :
+            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131")))));
+    }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
 
@@ -214,7 +247,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         const size_t perThread = size_t(BATCH) *
             ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64)) + counterBytes + hintBytes;
 #endif
-        size_t threads = size_t(prop.multiProcessorCount) * ECC_THREADS * blocks;
+        size_t threads = size_t(prop.multiProcessorCount) * eccPacked131::walkWorkersPerBlock131 * blocks;
         const size_t fits = (freeBytes - freeBytes / 4) / perThread;
         if (threads > fits) threads = fits;
         threads -= threads % ECC_THREADS;
@@ -285,6 +318,18 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     void setup(const Options &o, const u64 *px, const u64 *py, const u64 *qx, const u64 *qy) {
         prepareKernel();
+#if ECC_PACKED_SIGMA_TABLE
+        {
+            // Built from the host arithmetic the tests verify; every walk block
+            // stages this global copy into its shared memory.
+            std::vector<uint32_t> table(eccPacked131::SIGMA_TABLE_WORDS);
+            eccPacked131::buildSigmaTable(table.data());
+            CUDA_CHECK(cudaMalloc(&sigmaTable, table.size() * sizeof(uint32_t)));
+            CUDA_CHECK(cudaMemcpy(sigmaTable, table.data(), table.size() * sizeof(uint32_t), cudaMemcpyHostToDevice));
+            const uint32_t *device = sigmaTable;
+            CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::eccSigmaTableDevice, &device, sizeof(device)));
+        }
+#endif
         if (o.preferL1)
             CUDA_CHECK(cudaFuncSetCacheConfig(eccPacked131::walk, cudaFuncCachePreferL1));
         P.threads = o.threads; P.steps = o.steps; P.dpWeight = o.dpWeight;
@@ -343,6 +388,15 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             exit(2);
         }
 #endif
+#elif ECC_SIGMA_SQUARE_TABLE
+        {
+            std::vector<uint32_t> consts(eccPacked131::SQ_TAB_WORDS);
+            eccPacked131::fillSquareTable131(consts.data());
+            CUDA_CHECK(cudaMalloc(&twConsts, consts.size() * sizeof(uint32_t)));
+            CUDA_CHECK(cudaMemcpy(twConsts, consts.data(), consts.size() * sizeof(uint32_t),
+                                  cudaMemcpyHostToDevice));
+            P.twConsts = twConsts;
+        }
 #endif
         CUDA_CHECK(cudaMalloc(&P.dp, size_t(P.dpCap) * sizeof(DpRecord)));
         // Second counter signals overdue restarts without emitting false DPs.
@@ -369,7 +423,20 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
+        // Occupancy is a resource limit, not a measured instruction-issue rate.
+        int activeDevice = -1, residentBlocks = 0;
+        cudaDeviceProp deviceProps;
+        CUDA_CHECK(cudaGetDevice(&activeDevice));
+        CUDA_CHECK(cudaGetDeviceProperties(&deviceProps, activeDevice));
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+            &residentBlocks, eccPacked131::walk, ECC_THREADS, 0));
+        const int gridBlocks = (P.threads + eccPacked131::walkWorkersPerBlock131 - 1) / eccPacked131::walkWorkersPerBlock131;
+        printf("packed theoretical occupancy: %.1f%% (%d blocks/SM, %d threads/block, %d SMs); grid %d blocks\n",
+               100.0 * residentBlocks * ECC_THREADS / deviceProps.maxThreadsPerMultiProcessor,
+               residentBlocks, ECC_THREADS, deviceProps.multiProcessorCount, gridBlocks);
         printf("packed launch bounds: %d threads, %d min blocks\n", ECC_THREADS, ECC_MINBLOCKS);
+        printf("packed sigma table: %d (%zu dynamic shared bytes)\n", ECC_PACKED_SIGMA_TABLE,
+               size_t(eccPacked131::SIGMA_SMEM_BYTES));
 #if ECC_PACKED_SHARED_SIGMA
         int diagnosticDevice = -1, driverReservedShared = -1;
         CUDA_CHECK(cudaGetDevice(&diagnosticDevice));
@@ -379,8 +446,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                driverReservedShared, diagnosticDevice);
 #endif
         printf("packed denominator cache: %d\n", ECC_PACKED_CACHE_DENOM);
+        printf("packed last-slot cache mode: %d\n", ECC_PACKED_LAST_SLOT_CACHE);
         printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
         printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);
+        printf("packed partial Frobenius routing mask: %d\n", ECC_PACKED_PARTIAL_SIGMA);
+        printf("packed Frobenius stage order: %d\n", ECC_PACKED_SIGMA_ORDER);
+        printf("packed byte-select Frobenius: %d\n", ECC_PACKED_BYTE_SIGMA);
+        printf("packed seven-stage conversion: %d\n", ECC_PACKED_FAST_CONVERT);
         printf("packed polynomial chain: %d\n", ECC_PACKED_POLY_CHAIN);
         printf("packed polynomial state: %d\n", ECC_PACKED_POLY_STATE);
         printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
@@ -398,22 +470,41 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
         printf("packed sigma fused: %d\n", ECC_SIGMA_FUSED);
         printf("packed sigma fused late y: %d\n", ECC_SIGMA_FUSED_LATE_Y);
+        printf("packed sigma fused shared slots: %d\n", ECC_SIGMA_FUSED_SHARED_SLOTS);
         printf("packed witness: %d\n", ECC_WITNESS);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
+        printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
-        printf("packed native carryless square: %d\n", ECC_PACKED_CLMAD_SQUARE);
-        printf("packed three-limb Karatsuba: %d\n", ECC_PACKED_KARAT3);
+        printf("packed native full product: %d\n", ECC_PACKED_NATIVE_PRODUCT);
+        printf("packed native reduction: %d\n", ECC_PACKED_NATIVE_REDUCE);
+        printf("packed fused sigma: %d\n", ECC_PACKED_FUSED_SIGMA);
+        printf("packed inline mask: %d\n", ECC_PACKED_INLINE);
         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
-        printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
+        printf("packed x-only 2/3 walk: %d\n", ECC_PACKED_XONLY_23);
+        printf("packed sparse sigma^3 bridge: %d\n", ECC_PACKED_XONLY_BRIDGE3);
+        printf("packed sigma^1 common path: %d\n", ECC_PACKED_XONLY_BRIDGE1_COMMON);
+        printf("packed sparse bridge modulus 72: %d\n", ECC_PACKED_XONLY_BRIDGE_MOD72);
+        printf("packed skip empty bridge phase: %d\n", ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE);
+        printf("packed arithmetic-only diagnostic: %d\n", ECC_PACKED_XONLY_ARITHMETIC_ONLY);
+        printf("packed polynomial-bit selector: %d\n", ECC_PACKED_XONLY_POLY_SELECT);
+        printf("packed polynomial-bit Hamming DP convert: %d\n", ECC_PACKED_XONLY_POLY_DP_CONVERT);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+        printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
+        printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);
+        printf("packed native carryless square: %d\n", ECC_PACKED_CLMAD_SQUARE);
+        printf("packed three-limb Karatsuba: %d\n", ECC_PACKED_KARAT3);
+        printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
         printf("packed alu square: %d\n", ECC_PACKED_ALU_SQUARE);
         printf("packed alu onb square: %d\n", ECC_PACKED_ALU_SQR);
         printf("packed square table: %d\n", ECC_PACKED_SQUARE_TABLE);
+        printf("packed sigma square table: %d, %zu shared bytes\n",
+               ECC_SIGMA_SQUARE_TABLE,
+               ECC_SIGMA_SQUARE_TABLE ? dynamicSharedBytes() : size_t(0));
         printf("packed polynomial inversion: %d\n", ECC_PACKED_INV_POLY);
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
         printf("packed table GPU-wide hints: %d\n", ECC_TABLE_GLOBAL_HINTS);
@@ -451,7 +542,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
-               ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());
+               ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0,
+               ECC_WALK_TABLE ? dynamicSharedBytes() : size_t(0));
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());
@@ -462,6 +554,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #if ECC_PROFILE_RANGE
         CUDA_CHECK(cudaProfilerStart());
 #endif
+        eccPacked131::walk<<<(P.threads + eccPacked131::walkWorkersPerBlock131 - 1) / eccPacked131::walkWorkersPerBlock131, ECC_THREADS,
 #if ECC_TABLE_GLOBAL_HINTS
         WalkParams<unsigned> one = P;
         one.steps = 1;

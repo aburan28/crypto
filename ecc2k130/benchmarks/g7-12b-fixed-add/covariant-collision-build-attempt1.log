@@ -1,0 +1,11 @@
+ecc2k130/benchmarks/g7-12b-fixed-add/covariant_collision_study.cpp: In function ‘int phase(const E&)’:
+ecc2k130/benchmarks/g7-12b-fixed-add/covariant_collision_study.cpp:28:35: error: ‘R::SF’ has not been declared
+   28 |     for(int i=0;i<C::M;i++) if(R::SF::bit(x,i)) sum=(sum+positions[i])%C::M;
+      |                                   ^~
+ecc2k130/benchmarks/g7-12b-fixed-add/covariant_collision_study.cpp: In function ‘long long unsigned int provePhase()’:
+ecc2k130/benchmarks/g7-12b-fixed-add/covariant_collision_study.cpp:35:16: error: ‘R::SF’ has not been declared
+   35 |         E x=R::SF::zero(); x.v[0]=bits;
+      |                ^~
+ecc2k130/benchmarks/g7-12b-fixed-add/covariant_collision_study.cpp:36:36: error: ‘R::SF’ has not been declared
+   36 |         int p=phase(x), q=phase(R::SF::sigma(x,1));
+      |                                    ^~
