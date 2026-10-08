@@ -254,6 +254,9 @@ pub fn read_registry(text: &str) -> Result<Vec<RegistryCurve>, String> {
         if BigInt::from(model.q()) + 1 - &trace != BigInt::from(order.clone()) {
             return Err(ctx(format!("order {order} ≠ q + 1 − t for t = {trace}")));
         }
+        if &trace * &trace > BigInt::from(model.q()) * 4u8 {
+            return Err(ctx(format!("|t| = |{trace}| exceeds the Hasse bound 2√q")));
+        }
         let end = match str_field(c, "end")? {
             "unk" => None,
             d => Some(d.parse().map_err(|_| ctx(format!("bad end {d}")))?),
@@ -352,6 +355,24 @@ pub struct SubfieldRecord {
     pub method: String,
 }
 
+/// What is known of `End(E)`, an order of `Q(π)` between `Z[π]` and
+/// `O_K`.  For an ordinary curve every geometric endomorphism is defined
+/// over the working field, so this is also the ring over that field.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct EndomorphismRecord {
+    /// `f₀` with the conductor `[O_K : End(E)]` dividing it: the conductor
+    /// `v` of `Z[π]`, sharpened by every other order known to lie in
+    /// `End(E)`.
+    pub conductor_divides: Option<String>,
+    /// `true` when `End(E) = O_K` is established; `false` when a
+    /// certificate fixes a smaller order; absent when unresolved.
+    pub maximal: Option<bool>,
+    /// [`Status::Bounded`] when only `conductor_divides` is known.
+    pub status: Status,
+    /// The orders known to lie in `End(E)`.
+    pub contains: Vec<String>,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Subgroup {
     pub order: Option<String>,
@@ -396,6 +417,7 @@ pub struct CurveTraits {
     /// `t / 2√q ∈ [−1, 1]`.
     pub trace_ratio: f64,
     pub frobenius: Frobenius,
+    pub endomorphism: EndomorphismRecord,
     pub small_primes: Vec<SmallPrime>,
     pub subfield: SubfieldRecord,
     pub subgroup: Subgroup,
@@ -607,6 +629,88 @@ fn twist(q: &BigUint, trace: &BigInt, budget: u64) -> Twist {
     }
 }
 
+/// Bound the conductor of `End(E)` by every order known to lie in it.
+/// `Z[π] ⊂ End(E)` gives `f | v`.  A field of definition `GF(2^k)` puts
+/// its Frobenius `π_k` in `End(E)` (`π = π_k^{n/k}`, and `Q(π_k) = Q(π)`),
+/// so `f | v_k` with `t_k² − 4·2^k = v_k²·d_K`.  `j = 0` and `j = 1728`
+/// on a prime-field model put `Z[ζ₃]` and `Z[i]`, both maximal, in
+/// `End(E)`.  A registry certificate fixes `End(E)` outright.  `Err` when
+/// one of these contradicts `d_K`.
+fn endomorphism(
+    c: &RegistryCurve,
+    frob: &Frobenius,
+    sub: &SubfieldRecord,
+    ordinary: bool,
+) -> Result<EndomorphismRecord, String> {
+    let record = |f0: Option<String>, maximal, status, contains: Vec<String>| EndomorphismRecord {
+        conductor_divides: f0,
+        maximal,
+        status,
+        contains,
+    };
+    if !ordinary {
+        return Ok(record(None, None, Status::NotApplicable, Vec::new()));
+    }
+    let (Some(dk), Status::Proved | Status::Probable) = (&frob.cm_disc, frob.status) else {
+        return Ok(record(None, None, Status::Unknown, Vec::new()));
+    };
+    let dk: BigInt = dk.parse().expect("written by frobenius()");
+    let mut f0: BigUint = frob.conductor.parse().expect("written by frobenius()");
+    let mut contains = vec!["Z[π]".to_string()];
+    if let (Model::Binary { n, .. }, Some(k), Some(tk)) =
+        (&c.model, sub.definition_degree, &sub.base_trace)
+    {
+        if k < *n {
+            let tk: BigInt = tk.parse().expect("written by subfield_record()");
+            let disc_k = (BigInt::one() << (k + 2)) - &tk * &tk;
+            let (sq, rem) = disc_k.div_rem(&-&dk);
+            let vk = sq.sqrt();
+            if !rem.is_zero() || &vk * &vk != sq {
+                return Err(format!(
+                    "t_k² − 4·2^{k} = {} is not v²·d_K for d_K = {dk}",
+                    -disc_k
+                ));
+            }
+            f0 = f0.gcd(vk.magnitude());
+            contains.push(format!("Z[π_{k}] (Frobenius of GF(2^{k}))"));
+        }
+    }
+    if let Model::Prime { a, b, .. } = &c.model {
+        for (special, d, ring) in [(a, -3, "Z[ζ₃] (j = 0)"), (b, -4, "Z[i] (j = 1728)")] {
+            if special.is_zero() {
+                if dk != BigInt::from(d) {
+                    return Err(format!("{ring} ⊂ End(E), but d_K = {dk}"));
+                }
+                f0 = BigUint::one();
+                contains.push(ring.to_string());
+            }
+        }
+    }
+    let status = frob.status;
+    if let Some(end) = &c.end {
+        let f = (end / &dk).sqrt();
+        if !(&f0 % f.magnitude()).is_zero() {
+            return Err(format!(
+                "registry certifies End(E) of conductor {f}, which does not divide {f0}"
+            ));
+        }
+        contains.push(format!(
+            "End(E) of discriminant {end} (registry certificate)"
+        ));
+        return Ok(record(
+            Some(f.to_string()),
+            Some(f.is_one()),
+            status,
+            contains,
+        ));
+    }
+    Ok(if f0.is_one() {
+        record(Some("1".into()), Some(true), status, contains)
+    } else {
+        record(Some(f0.to_string()), None, Status::Bounded, contains)
+    })
+}
+
 /// Derive every trait of one curve.  `Err` when the registry entry
 /// contradicts itself (an order the model refutes, a certified `End(E)`
 /// outside `Q(π)`).
@@ -627,6 +731,8 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
         arith::round_to(if c.trace.is_negative() { -mag } else { mag }, 6)
     };
     let (subgroup, r) = subgroup(c, budget).map_err(ctx)?;
+    let sub = subfield_record(c).map_err(ctx)?;
+    let endo = endomorphism(c, &frob, &sub, ordinary).map_err(ctx)?;
     let mut out = CurveTraits {
         slug: c.slug.clone(),
         family: c.family.clone(),
@@ -653,7 +759,8 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
         trace_ratio,
         small_primes: small_primes(&delta, &characteristic),
         frobenius: frob,
-        subfield: subfield_record(c).map_err(ctx)?,
+        endomorphism: endo,
+        subfield: sub,
         embedding: embedding(&q, r.as_ref(), budget),
         twist: twist(&q, &c.trace, budget),
         subgroup,
@@ -696,6 +803,10 @@ pub const KEYS: &[(&str, &str)] = &[
     ),
     ("split", "how 3, 5, 7, 11, 13 split in Q(π): s split, i inert, r ramified"),
     ("depth", "v_ℓ(v) for ℓ = 2, 3, 5, 7: the ℓ-volcano depths"),
+    (
+        "end_order",
+        "'maximal' when End(E) = O_K is established; 'non-maximal' when certified smaller; 'unresolved'; 'unknown'",
+    ),
 ];
 
 /// The keys a curve's default signature is made of.
@@ -712,6 +823,17 @@ fn keys(t: &CurveTraits) -> BTreeMap<String, String> {
     );
     put("family", t.family.clone());
     put("ordinary", if t.ordinary { "yes" } else { "no" }.into());
+    put(
+        "end_order",
+        match (t.endomorphism.maximal, t.endomorphism.status) {
+            (Some(true), _) => "maximal",
+            (Some(false), _) => "non-maximal",
+            (None, Status::Bounded) => "unresolved",
+            (None, Status::NotApplicable) => "n/a",
+            _ => "unknown",
+        }
+        .into(),
+    );
     put(
         "cm",
         match &t.frobenius.cm_disc {
@@ -926,6 +1048,34 @@ mod tests {
         assert_eq!(t.order_check.status, Status::Proved);
         assert!(t.order_check.method.starts_with("descent count"));
         assert_eq!(t.keys["descent"], "k1|t|=1");
+    }
+
+    #[test]
+    fn endomorphism_rings_from_contained_orders() {
+        let get = |slug: &str| compute(&curve(slug), DEFAULT_BUDGET).unwrap();
+        // K_0 over GF(2^7): Z[π] has conductor 7, but Z[τ] is maximal.
+        let t = get("icv1-f2m7-t13-616700dd");
+        assert_eq!(t.frobenius.conductor, "7");
+        assert_eq!(t.endomorphism.maximal, Some(true));
+        assert_eq!(t.keys["end_order"], "maximal");
+        // The GF(2^18) twist: π_2 with t₂ = 3, 9 − 16 = −7, is maximal.
+        let t = get("icv1-f2m18-t999-40751283");
+        assert_eq!(t.frobenius.conductor, "85");
+        assert_eq!(t.endomorphism.maximal, Some(true));
+        assert!(t
+            .endomorphism
+            .contains
+            .iter()
+            .any(|o| o.starts_with("Z[π_2]")));
+        // secp256k1: j = 0 puts Z[ζ₃] in End(E) though v has 128 bits.
+        let t = get("icv1-fp256-t432420386565659656852420866390673177327-76dadd18");
+        assert_eq!(t.endomorphism.maximal, Some(true));
+        // A generic prime curve with v = 7: End(E) is Z[π] or O_K, unresolved.
+        let t = get("icv1-fp10-t5-192cb216");
+        assert_eq!(t.endomorphism.conductor_divides.as_deref(), Some("7"));
+        assert_eq!(t.endomorphism.maximal, None);
+        assert_eq!(t.endomorphism.status, Status::Bounded);
+        assert_eq!(t.keys["end_order"], "unresolved");
     }
 
     #[test]

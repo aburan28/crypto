@@ -25,7 +25,8 @@ Every query reads the committed `traits.json`; nothing is recomputed.
 ## What each record holds
 
 All of it is derived from the registry's model and recorded order
-`#E = q + 1 − t`. The implementation is
+`#E = q + 1 − t`; reading the registry checks that identity and the Hasse
+bound `|t| ≤ 2√q` before any trace is classified. The implementation is
 [`src/cryptanalysis/curve_traits/`](../../src/cryptanalysis/curve_traits/mod.rs).
 
 | Field | Meaning | How |
@@ -37,6 +38,7 @@ All of it is derived from the registry's model and recorded order
 | `frobenius.conductor` | `v = [O_K : Z[π]]`: the gap between `Z[π]` and the maximal order, with its primes | the square part of `Δ` |
 | `frobenius.conductor_fraction` | `log v / log √|Δ|`: 0 when `Z[π]` is maximal, near 1 when `d_K` is tiny beside `Δ` | size-free |
 | `frobenius.class_number` | `h(d_K)` for `|d_K| ≤ 10^7` | reduced forms |
+| `endomorphism` | what is known of `End(E)`: `conductor_divides` (a bound `f₀` on its conductor), `maximal` (`End(E) = O_K` established), and the orders it is known to `contain` | see below |
 | `small_primes` | for each `ℓ ≤ 31`: `v_ℓ(v)` (the depth of the `ℓ`-isogeny volcano), how `ℓ` splits in `Q(π)`, and the number of rational `ℓ`-isogenies when the depth is 0 | exact from `Δ` modulo powers of `ℓ`, without factoring `Δ` |
 | `subfield` (binary) | `j_field_degree`: least `k` with `j ∈ GF(2^k)`; `definition_degree`: least `k` such that the curve is the base change of one over `GF(2^k)`; `base_trace`: that curve's trace `t_k` | see below |
 | `subgroup` | prime subgroup order `r` and cofactor | the registry representation, else the largest prime of `#E` |
@@ -54,12 +56,32 @@ counting points over `GF(2^k)` when the root is not unique. When `n/k` is
 even, both twists over `GF(2^k)` descend and only `|t_k|` is an invariant
 (`base_trace_sign_free`).
 
-**What is not decided.** `End(E)` lies between `Z[π]` and `O_K`. Which
-order it is, and so each curve's level in its volcanoes, needs a walk
-(`src/bin/isogeny_walk.rs`); the record gives the depths, not the levels.
-Except at depth 0, the rational `ℓ`-isogeny count depends on that level and
-is left out. Two registry models of one curve under different moduli are
-two records, as ICV1 requires; isomorphism across moduli is not detected.
+**Three orders, kept apart.** `Δ = t² − 4q` determines `Z[π]` and its
+conductor `v`; `d_K` determines the maximal order `O_K`; `End(E)` lies
+between them, and its conductor `f` divides `v` but is not fixed by `Δ`
+alone. (For an ordinary curve every geometric endomorphism is defined over
+the working field, so the two rings coincide.) The `endomorphism` record
+bounds `f` by every order known to lie in `End(E)`: `Z[π]`; the Frobenius
+`π_k` of a field of definition `GF(2^k)`, since `π = π_k^{n/k}`, giving
+`f | v_k` with `t_k² − 4·2^k = v_k²·d_K`; `Z[ζ₃]` for `j = 0` and `Z[i]` for
+`j = 1728` on a prime-field model; and a registry certificate, which fixes
+it. When the bound reaches 1, `End(E) = O_K` is established: every Koblitz
+curve (`Z[τ]` is already maximal), the registry curves defined over `GF(4)`,
+secp256k1. Otherwise `End(E)` is unresolved between `Z[π]` and `O_K`
+(`bounded`), and so is each curve's level in its volcanoes; resolving them
+needs a walk (`src/bin/isogeny_walk.rs`). The record gives volcano depths,
+not levels, and leaves out the rational `ℓ`-isogeny count except at depth 0,
+where it does not depend on the level.
+
+**What kind of claim each value is.** Every value is an exact invariant or
+a bound on one, in the sense of
+[`docs/endomorphism-rules.md`](../endomorphism-rules.md): none is a proposed
+route, an implemented map, a verified subgroup action or a measured
+advantage. A small class number, embedding degree, cofactor or conductor
+prime is a lead with specific hypotheses, not a verdict. Two curves with
+equal keys are alike in those invariants only: a shared signature supplies
+no isomorphism, isogeny or transfer between them, and two registry models
+of one curve under different moduli stay two records, as ICV1 requires.
 
 ## Status of a value
 
@@ -101,6 +123,7 @@ join curves of any size. `curve_traits keys` prints this list.
 | `conductor` | `1` when `Z[π]` is maximal; `smooth` when every prime of `v` is below 2¹⁶; `rough`; `unknown` |
 | `split` | how 3, 5, 7, 11, 13 split in `Q(π)`: `s`, `i` or `r` for split, inert, ramified |
 | `depth` | `v_ℓ(v)` for `ℓ = 2, 3, 5, 7` |
+| `end_order` | `maximal` when `End(E) = O_K` is established; `non-maximal` when a certificate fixes a smaller order; `unresolved`; `unknown` |
 
 A curve's **signature** is its values of `char, ordinary, cm, descent,
 cofactor`, the default of `group --by`.
@@ -139,6 +162,11 @@ From `group --by cm,descent --min-sizes 2` on the 121 registry curves:
 - secp256k1 has `d_K = −3` (`j = 0`) and a 128-bit conductor;
   P-256's `Δ` does not factor within the budget, so its `cm` is `unknown`
   and its conductor only bounded.
+- `End(E) = O_K` is established for 114 of the 121 curves, 61 of them
+  where `Z[π]` itself is not maximal: all 59 Koblitz curves through `Z[τ]`,
+  the four curves defined over `GF(4)` through their `GF(4)` Frobenius, and
+  secp256k1 through `Z[ζ₃]`. Six remain unresolved between `Z[π]` and
+  `O_K`; P-256 is unknown with its `d_K`.
 - Every order in the registry is certified: 60 by exhaustive count, 41 by
   a descent count, the rest by generator certificates (4 of those rest on
   a probable prime).

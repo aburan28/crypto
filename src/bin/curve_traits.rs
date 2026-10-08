@@ -168,6 +168,18 @@ fn show(c: &CurveTraits) {
         },
         status(f.status)
     );
+    let e = &c.endomorphism;
+    println!(
+        "  End(E)      {}  [{}]  contains {}",
+        match (e.maximal, e.conductor_divides.as_deref()) {
+            (Some(true), _) => "= O_K".to_string(),
+            (Some(false), Some(f)) => format!("has conductor {f}"),
+            (None, Some(f)) => format!("between Z[π] and O_K; conductor divides {f}"),
+            _ => "unknown".to_string(),
+        },
+        status(e.status),
+        e.contains.join(", ")
+    );
     let s = &c.subfield;
     if c.field.kind == "binary" {
         println!(
