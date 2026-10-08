@@ -1,0 +1,40 @@
+{
+ "table@96256": {
+  "rates": [
+   16193.707,
+   16094.131,
+   16080.83
+  ],
+  "median": 16094.131
+ },
+ "tablep@96256": {
+  "rates": [
+   16923.911,
+   16923.248,
+   16926.866
+  ],
+  "median": 16923.911
+ },
+ "tabletag@96256": {
+  "rates": [
+   12789.652,
+   12788.901,
+   12788.57
+  ],
+  "median": 12788.901
+ },
+ "tabletagp@96256": {
+  "rates": [
+   12790.784,
+   12790.191,
+   12788.909
+  ],
+  "median": 12790.191
+ },
+ "ratios": {
+  "tablep/table (L2 persist)": 1.0515579250597624,
+  "tabletag/table (tag denominators)": 0.7946313472905123,
+  "tabletagp/table (tag + persist)": 0.7947115007327827,
+  "tabletagp/tablep (tag given persist)": 0.755746765626456
+ }
+}

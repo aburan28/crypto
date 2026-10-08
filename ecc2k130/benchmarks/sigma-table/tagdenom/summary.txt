@@ -1,0 +1,8 @@
+table    @96256  rates ['16193.707', '16094.131', '16080.830'] median 16094.131
+tablep   @96256  rates ['16923.911', '16923.248', '16926.866'] median 16923.911
+tabletag @96256  rates ['12789.652', '12788.901', '12788.570'] median 12788.901
+tabletagp @96256  rates ['12790.784', '12790.191', '12788.909'] median 12790.191
+tablep/table (L2 persist)                        1.051558
+tabletag/table (tag denominators)                0.794631
+tabletagp/table (tag + persist)                  0.794712
+tabletagp/tablep (tag given persist)             0.755747

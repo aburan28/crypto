@@ -1,0 +1,73 @@
+build: gpu-rtx-pro6000-sigma-table  arch sm_120  batch 16  threads 512  regs 128  spills (0, 0)
+
+branches no rule covers: 7 reached less than once per 10^4 updates (inert), 2 reached more often
+  _ZN12eccPacked1314walkE10WalkParamsIjEPj+0x230  0.0003/update  back-edge, no loop rule  0.9
+  _ZN12eccPacked1314walkE10WalkParamsIjEPj+0x410  0.0006/update  back-edge, no loop rule  0.9
+
+dynamic lane-instructions per scalar update, by pipe:
+  issue     1754.67
+  alu       1355.21
+  fma        143.27
+  clmad       38.13
+  xu          14.81
+  lsu         95.01
+  const        1.25
+  uniform      1.44
+  control     13.57
+  nop         95.00
+
+by opcode:
+  LOP3         846.50
+  SHF          412.63
+  IMAD         136.26
+  NOP           95.00
+  LDS           70.00
+  CLMAD         38.13
+  MOV           32.50
+  IADD          26.45
+  SEL           23.50
+  LDG           17.00
+  ISETP         11.63
+  POPC          11.00
+  BRA            9.94
+  STG            8.00
+  HFMA2          4.00
+  BREV           3.81
+  IADD3          2.00
+  UISETP         1.13
+  LDCU           1.00
+  BSSY           1.00
+  BSYNC          1.00
+  CALL           0.81
+  RET            0.81
+  LDC            0.25
+  UMOV           0.13
+
+by source function (innermost inlined frame):
+  packeddirectreduce131.h:reducePolynomial131        440.81
+  packed131.h:product131                             376.93
+  packed131.h:sigmaPlusTable131                      335.00
+  packedtransform131.h:fromPolynomialProduct131      102.51
+  packed131.h:clmul64                                 90.38
+  packedtransform131.h:toPolynomial131                85.56
+  packed131.h:clmul128                                54.31
+  packedsigma131.h:sigmaInvNetwork131                 49.38
+  packedkernels.cuh:sigmaFusedSelect                  46.32
+  packed131.h:parity131                               38.00
+  packedsigma131.h:sigmaWalkNetwork131                30.13
+  packed131.h:add131                                  25.00
+
+roofline on RTX PRO 6000 Blackwell Server Edition (sm_120), 188 SMs at 2.415 GHz (benchmarks/two-chains/summary.json ref smClockMHz 2400-2422 (median 2415)):
+  pipe     work/upd  lanes/clk   SM-clk/upd  ceiling B/s        busy
+  issue      1754.7     128.00        13.71        33.12       47.9%
+  alu        1355.2      64.00        21.18        21.44       74.1%
+  fma         143.3      64.00         2.24       202.82        7.8%
+  xu           14.8      16.00         0.93       490.38        3.2%
+  lsu          95.0      16.00         5.94        76.46       20.8%
+  clmad        38.1       1.62        23.53        19.29       82.3%   1.62 (ONE-BLOCK-GEOMETRY.md section 1, 'kernel mix')
+  clmad        38.1       1.69        22.56        20.13       78.9%   1.69 (fast-clmad probe, CLMAD.lo-only stream)
+  clmad        38.1       1.99        19.16        23.70       67.0%   1.99 (fast-clmad probe, lo+hi product stream)
+  clmad        38.1       2.00        19.06        23.82       66.7%   2.00 (FP64 pipe at 1/64 of FP32: 2 lanes/SM-clk)
+
+measured 15.880 B/s = 28.59 SM-clocks per update.
+busiest pipe: clmad at 82.3% of 1.62 lanes/SM-clk (1.62 (ONE-BLOCK-GEOMETRY.md section 1, 'kernel mix')).

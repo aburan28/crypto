@@ -1,0 +1,74 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-7c2a0342-6fca-843c-94c5-2d1abc3e0c4e, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: origin/main 18ca29769 + claude/ecc2k130-sigma-table d503383da
+=== build tablep THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1 PACKED_L2_PERSIST=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic tablep
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration tablep
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build tablepipe THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1 PACKED_L2_PERSIST=1 SIGMA_PIPE_SLOT=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic tablepipe
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration tablepipe
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma tag denominators: 0
+packed sigma pipe slot: 0
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 1
+  finished: 4.904 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 128 registers/thread, 8 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma tag denominators: 0
+packed sigma pipe slot: 1
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 1
+  finished: 4.906 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+tablep 1709477 records sha256 7e0e8c90a7a1256c4f2c7f5ad4f23d5334de025a82590639f25516c0be25de92
+tablepipe 1709477 records IDENTICAL
+PASS: sorted corpus identity for every arm
+PASS: arithmetic, integration, replay and corpus gates
+warmup	0	96256	tablep	16902.115	 83886080 of 104726528 field bytes, cap 83886080	2422, 478.96, 45
+warmup	0	96256	tablepipe	16623.102	 83886080 of 104726528 field bytes, cap 83886080	2422, 512.64, 50
+one	1	96256	tablep	16895.282	 83886080 of 104726528 field bytes, cap 83886080	2422, 529.75, 60
+one	1	96256	tablepipe	16620.195	 83886080 of 104726528 field bytes, cap 83886080	2422, 521.56, 56
+one	2	96256	tablepipe	16610.299	 83886080 of 104726528 field bytes, cap 83886080	2422, 530.11, 59
+one	2	96256	tablep	16878.505	 83886080 of 104726528 field bytes, cap 83886080	2422, 524.86, 60
+one	3	96256	tablep	16876.849	 83886080 of 104726528 field bytes, cap 83886080	2422, 532.16, 66
+one	3	96256	tablepipe	16604.589	 83886080 of 104726528 field bytes, cap 83886080	2422, 539.37, 66
+one	4	96256	tablepipe	16601.176	 83886080 of 104726528 field bytes, cap 83886080	2422, 520.73, 62
+one	4	96256	tablep	16880.149	 83886080 of 104726528 field bytes, cap 83886080	2422, 510.71, 62
+tablep   @96256  rates ['16895.282', '16878.505', '16876.849', '16880.149'] median 16879.327
+tablepipe @96256  rates ['16620.195', '16610.299', '16604.589', '16601.176'] median 16607.444
+tablepipe/tablep (one-slot pipeline)             0.983893
+=== done

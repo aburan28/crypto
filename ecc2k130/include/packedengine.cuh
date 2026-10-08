@@ -166,7 +166,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #endif
     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM * (1 - ECC_TABLE_TAG_DENOM) *
-        (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
+        (1 - ECC_SIGMA_TAG_DENOM) * (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
     const char *name() const { return "cuda-packed131"; }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
@@ -310,14 +310,14 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         P.x = fieldBlob;
         P.y = fieldBlob + physicalFieldCount();
         P.pchain = fieldBlob + 2 * physicalFieldCount();
-#if ECC_PACKED_CACHE_DENOM && !ECC_TABLE_TAG_DENOM
+#if ECC_PACKED_CACHE_DENOM && !ECC_TABLE_TAG_DENOM && !ECC_SIGMA_TAG_DENOM
         denominators = fieldBlob + 3 * physicalFieldCount();
 #endif
         applyPackedL2Persist(fieldBlob, bytes * size_t(persistFieldCount()));
 #else
         CUDA_CHECK(cudaMalloc(&P.x, bytes)); CUDA_CHECK(cudaMalloc(&P.y, bytes));
         CUDA_CHECK(cudaMalloc(&P.pchain, bytes));
-#if ECC_PACKED_CACHE_DENOM && !ECC_TABLE_TAG_DENOM
+#if ECC_PACKED_CACHE_DENOM && !ECC_TABLE_TAG_DENOM && !ECC_SIGMA_TAG_DENOM
         CUDA_CHECK(cudaMalloc(&denominators, bytes * denominatorFields));
 #endif
 #endif
@@ -387,6 +387,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed launch bounds: %d threads, %d min blocks\n", ECC_THREADS, ECC_MINBLOCKS);
         printf("packed sigma table: %d (%zu dynamic shared bytes)\n", ECC_PACKED_SIGMA_TABLE,
                size_t(eccPacked131::SIGMA_SMEM_BYTES));
+        printf("packed sigma tag denominators: %d\n", ECC_SIGMA_TAG_DENOM);
+        printf("packed sigma pipe slot: %d\n", ECC_SIGMA_PIPE_SLOT);
 #if ECC_PACKED_SHARED_SIGMA
         int diagnosticDevice = -1, driverReservedShared = -1;
         CUDA_CHECK(cudaGetDevice(&diagnosticDevice));

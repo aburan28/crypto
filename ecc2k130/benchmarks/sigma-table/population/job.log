@@ -1,0 +1,215 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-d6b2a492-31c6-7bfa-2a6d-388eecc1ee6b, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: origin/main 18ca29769 + claude/ecc2k130-sigma-table d503383da
+=== build ctrl256 THREADS=256 MINBLOCKS=2 PACKED_SIGMA_TABLE=0 PACKED_L2_PERSIST=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic ctrl256
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+=== integration ctrl256
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build ctrl512 THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=0 PACKED_L2_PERSIST=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic ctrl512
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+=== integration ctrl512
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build table THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1 PACKED_L2_PERSIST=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic table
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration table
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build tablep THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1 PACKED_L2_PERSIST=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic tablep
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration tablep
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== roofline
+build: gpu-rtx-pro6000-sigma-fused  arch sm_120  batch 16  threads 256  regs 126  spills (0, 0)
+
+branches no rule covers: 9 reached less than once per 10^4 updates (inert), 2 reached more often
+  _ZN12eccPacked1314walkE10WalkParamsIjEPj+0x3a0  0.0002/update  back-edge, no loop rule  0.9
+  _ZN12eccPacked1314walkE10WalkParamsIjEPj+0x730  0.0002/update  back-edge, no loop rule  0.9
+
+dynamic lane-instructions per scalar update, by pipe:
+  issue     2125.73
+  alu       1650.20
+  fma        235.52
+  clmad       38.12
+  xu           9.81
+  lsu         81.01
+  const        1.19
+  uniform      4.44
+  control     15.56
+  nop         94.88
+
+by opcode:
+  LOP3        1023.81
+  SHF          548.38
+  IMAD         227.01
+  NOP           94.88
+  LDS           56.00
+  MOV           40.69
+  CLMAD         38.12
+  IADD          25.32
+  LDG           17.00
+  BRA            9.94
+  STG            8.00
+  ISETP          6.00
+  POPC           5.00
+  BREV           4.81
+  HFMA2          3.50
+  LEA            3.00
+  IADD3          2.00
+  CALL           1.81
+  RET            1.81
+  UISETP         1.13
+  UMOV           1.13
+build: gpu-rtx-pro6000-sigma-table  arch sm_120  batch 16  threads 512  regs 128  spills (0, 0)
+
+branches no rule covers: 7 reached less than once per 10^4 updates (inert), 2 reached more often
+  _ZN12eccPacked1314walkE10WalkParamsIjEPj+0x230  0.0003/update  back-edge, no loop rule  0.9
+  _ZN12eccPacked1314walkE10WalkParamsIjEPj+0x410  0.0006/update  back-edge, no loop rule  0.9
+
+dynamic lane-instructions per scalar update, by pipe:
+  issue     1754.67
+  alu       1355.21
+  fma        143.27
+  clmad       38.13
+  xu          14.81
+  lsu         95.01
+  const        1.25
+  uniform      1.44
+  control     13.57
+  nop         95.00
+
+by opcode:
+  LOP3         846.50
+  SHF          412.63
+  IMAD         136.26
+  NOP           95.00
+  LDS           70.00
+  CLMAD         38.13
+  MOV           32.50
+  IADD          26.45
+  SEL           23.50
+  LDG           17.00
+  ISETP         11.63
+  POPC          11.00
+  BRA            9.94
+  STG            8.00
+  HFMA2          4.00
+  BREV           3.81
+  IADD3          2.00
+  UISETP         1.13
+  LDCU           1.00
+  BSSY           1.00
+  BSYNC          1.00
+packed kernel: 126 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed sigma table: 0 (0 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 0
+  finished: 4.842 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed kernel: 126 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed sigma table: 0 (0 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 0
+  finished: 4.851 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 0
+  finished: 4.892 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 1
+  finished: 4.953 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+ctrl256 1709477 records sha256 7e0e8c90a7a1256c4f2c7f5ad4f23d5334de025a82590639f25516c0be25de92
+ctrl512 1709477 records IDENTICAL
+table 1709477 records IDENTICAL
+tablep 1709477 records IDENTICAL
+PASS: sorted corpus identity for every arm
+PASS: arithmetic, integration, replay and corpus gates
+warmup	0	96256	ctrl256	15161.348	none	2422, 545.97, 47
+warmup	0	96256	ctrl512	15958.214	none	2362, 553.60, 49
+warmup	0	96256	table	16206.317	none	2325, 567.38, 53
+warmup	0	96256	tablep	16917.304	 83886080 of 104726528 field bytes, cap 83886080	2422, 534.51, 50
+one	1	96256	ctrl256	15155.662	none	2422, 527.08, 53
+one	1	96256	ctrl512	15821.312	none	2385, 521.21, 54
+one	1	96256	table	16080.620	none	2302, 565.86, 60
+one	1	96256	tablep	16914.894	 83886080 of 104726528 field bytes, cap 83886080	2422, 562.66, 62
+four	1	385024	ctrl256	15557.820	none	2340, 531.32, 60
+four	1	385024	table	15912.958	none	2280, 545.34, 63
+one	2	96256	tablep	16876.952	 83886080 of 104726528 field bytes, cap 83886080	2415, 562.26, 69
+one	2	96256	table	15931.988	none	2317, 570.46, 70
+one	2	96256	ctrl512	15646.695	none	2325, 570.41, 70
+one	2	96256	ctrl256	15108.996	none	2415, 561.53, 67
+four	2	385024	table	15860.162	none	2272, 523.74, 63
+four	2	385024	ctrl256	15436.742	none	2332, 533.16, 66
+one	3	96256	table	15847.464	none	2310, 557.99, 73
+one	3	96256	ctrl256	15044.641	none	2415, 542.60, 63
+one	3	96256	tablep	16731.531	 83886080 of 104726528 field bytes, cap 83886080	2407, 535.41, 63
+one	3	96256	ctrl512	15608.638	none	2325, 532.62, 62
+ctrl256  @96256  rates ['15155.662', '15108.996', '15044.641'] median 15108.996
+ctrl512  @96256  rates ['15821.312', '15646.695', '15608.638'] median 15646.695
+table    @96256  rates ['16080.620', '15931.988', '15847.464'] median 15931.988
+tablep   @96256  rates ['16914.894', '16876.952', '16731.531'] median 16876.952
+ctrl256  @385024 rates ['15557.820', '15436.742'] median 15497.281
+table    @385024 rates ['15912.958', '15860.162'] median 15886.560
+ctrl512/ctrl256 @96256 (geometry alone)          1.035588
+table/ctrl256 @96256                             1.054470
+table/ctrl512 @96256 (table alone)               1.018233
+tablep/table @96256 (L2 persist)                 1.059312
+table@96256 / table@385024 (one wave vs four)    1.002860
+ctrl256@96256 / ctrl256@385024                   0.974945
+=== done

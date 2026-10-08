@@ -389,6 +389,24 @@ static const size_t SIGMA_SMEM_BYTES = size_t(SIGMA_TABLE_BYTES) + 256;
 #else
 static const size_t SIGMA_SMEM_BYTES = 0;
 #endif
+#ifndef ECC_SIGMA_TAG_DENOM
+#define ECC_SIGMA_TAG_DENOM 0
+#endif
+#if ECC_SIGMA_TAG_DENOM != 0 && ECC_SIGMA_TAG_DENOM != 1
+#error "ECC_SIGMA_TAG_DENOM must be 0 or 1"
+#endif
+#if ECC_SIGMA_TAG_DENOM && !ECC_PACKED_SIGMA_TABLE
+#error "ECC_SIGMA_TAG_DENOM requires the Frobenius table (ECC_PACKED_SIGMA_TABLE)"
+#endif
+#ifndef ECC_SIGMA_PIPE_SLOT
+#define ECC_SIGMA_PIPE_SLOT 0
+#endif
+#if ECC_SIGMA_PIPE_SLOT != 0 && ECC_SIGMA_PIPE_SLOT != 1
+#error "ECC_SIGMA_PIPE_SLOT must be 0 or 1"
+#endif
+#if ECC_SIGMA_PIPE_SLOT && (!ECC_SIGMA_FUSED || ECC_SIGMA_TAG_DENOM || ECC_UNROLL_SLOTS > 1)
+#error "ECC_SIGMA_PIPE_SLOT needs the fused sigma walk with a denominator field and no slot unrolling"
+#endif
 #if ECC_TABLE_GLOBAL_HINTS && ECC_PACKED_CHAINS != 1
 #error "GPU-wide hints require one Montgomery chain"
 #endif
@@ -667,17 +685,28 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
     const P131 dp = toPolynomial131(add131(x, sigmas.first));
     const P131 ep = toPolynomial131(add131(normalY, sigmas.second));
 #endif
+    P131 w;
     if (!first) {
         const PolynomialPair pair = mulPolynomialPair131(*prod, ep, dp);
-        store(p.pchain, slot, tid, p.threads, pair.first);
+        w = pair.first;
         *prod = pair.second;
     } else {
         *prod = dp;
-        store(p.pchain, slot, tid, p.threads, ep);
+        w = ep;
     }
+#if ECC_SIGMA_TAG_DENOM
+    // No denominator field: the jump index rides in the prefix's spare tail
+    // bits (the compact tail byte's domain is 0..63) and the reverse pass
+    // rebuilds dp = x + sigma^j(x) from the table.  Same walk, bit for bit.
+    w.v[4] |= unsigned(j - 3) << 3;
+    store(p.pchain, slot, tid, p.threads, w);
+    (void)denominators;
+#else
+    store(p.pchain, slot, tid, p.threads, w);
     P131 tagged = dp;
     tagged.v[4] |= unsigned(j - 3) << 3;
     store(denominators, slot, tid, p.threads, tagged);
+#endif
 }
 
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
@@ -712,6 +741,59 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         const unsigned long long now = p.iterBase + step + 1;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
         P131 inv = invPolynomial131(prod), next;
+#if ECC_SIGMA_PIPE_SLOT
+        // One-slot software pipeline.  The next slot's loads and its pair
+        // product depend only on the inverse chain, so they are issued before
+        // the current slot's square, second product, stores and selection:
+        // the carry-less unit works on slot i+1 while the ALU finishes slot i.
+        // Same arithmetic in the same order per slot; the walk is bit-identical.
+        P131 xc, yc, dpc, lamc;
+        {
+            const int slot0 = forward ? 0 : ECC_BATCH - 1;
+            xc = load(p.x, slot0, tid, p.threads);
+            yc = load(p.y, slot0, tid, p.threads);
+            dpc = load(denominators, slot0, tid, p.threads);
+            dpc.v[4] &= 7;
+            const P131 w0 = load(p.pchain, slot0, tid, p.threads);
+            if (ECC_BATCH > 1) {
+                const PolynomialPair pair = mulPolynomialPair131(inv, w0, dpc);
+                lamc = pair.first;
+                inv = pair.second;
+            } else {
+                lamc = mulPolynomial131(inv, w0);
+            }
+        }
+#pragma unroll 1
+        for (int i = 0; i < ECC_BATCH; ++i) {
+            const int slot = forward ? i : ECC_BATCH - 1 - i;
+            const size_t id = size_t(slot) * p.threads + tid;
+            P131 xn, yn, dpn, lamn;
+            if (i + 1 < ECC_BATCH) {
+                const int slot1 = forward ? i + 1 : ECC_BATCH - 2 - i;
+                xn = load(p.x, slot1, tid, p.threads);
+                yn = load(p.y, slot1, tid, p.threads);
+                dpn = load(denominators, slot1, tid, p.threads);
+                dpn.v[4] &= 7;
+                const P131 w1 = load(p.pchain, slot1, tid, p.threads);
+                if (i + 2 < ECC_BATCH) {
+                    const PolynomialPair pair = mulPolynomialPair131(inv, w1, dpn);
+                    lamn = pair.first;
+                    inv = pair.second;
+                } else {
+                    lamn = mulPolynomial131(inv, w1);
+                }
+            }
+            const P131 nx = add131(add131(squarePolynomial131(lamc), lamc), dpc);
+            const P131 product = mulPolynomial131(lamc, add131(xc, nx));
+            const P131 ny = add131(add131(product, nx), yc);
+            store(p.x, slot, tid, p.threads, nx);
+            store(p.y, slot, tid, p.threads, ny);
+            if (!last)
+                sigmaFusedSelect(p, nx, ny, id, slot, tid, now, guard, i == 0,
+                                 denominators, &next, sigmaBase);
+            if (i + 1 < ECC_BATCH) { xc = xn; yc = yn; dpc = dpn; lamc = lamn; }
+        }
+#else
 #if ECC_UNROLL_SLOTS > 1
 #pragma unroll 2
 #else
@@ -722,9 +804,16 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const size_t id = size_t(slot) * p.threads + tid;
             const P131 x = load(p.x, slot, tid, p.threads);
             const P131 y = load(p.y, slot, tid, p.threads);
+#if ECC_SIGMA_TAG_DENOM
+            P131 w = load(p.pchain, slot, tid, p.threads);
+            const int jt = 3 + ((w.v[4] >> 3) & 7);
+            w.v[4] &= 7;
+            const P131 dp = sigmaPlusTable131(x, jt - 3, sigmaBase);
+#else
             P131 dp = load(denominators, slot, tid, p.threads);
             dp.v[4] &= 7;
             const P131 w = load(p.pchain, slot, tid, p.threads);
+#endif
             P131 lambdaPoly;
             if (i + 1 < ECC_BATCH) {
                 const PolynomialPair pair = mulPolynomialPair131(inv, w, dp);
@@ -742,6 +831,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 sigmaFusedSelect(p, nx, ny, id, slot, tid, now, guard, i == 0,
                                  denominators, &next, sigmaBase);
         }
+#endif  // ECC_SIGMA_PIPE_SLOT
         if (!last) prod = next;
     }
 }

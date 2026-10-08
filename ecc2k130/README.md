@@ -29,8 +29,13 @@ against a 15.513653 B/s same-session control: A/B paired median ratio
 1.023930 over five pairs, A/A drift 0.099%, identical sorted corpora,
 verdict promote as compatible engineering
 ([SIGMA-TABLE.md](SIGMA-TABLE.md), receipts in
-[benchmarks/sigma-table/headline](benchmarks/sigma-table/headline/)). The
-26 B/s goal remains unmet.
+[benchmarks/sigma-table/headline](benchmarks/sigma-table/headline/)). A
+population sweep attributes +3.6% of that to the 512 x 1 geometry and +1.8%
+to the table, and adds +5.9% from the L2 persisting window at one wave of
+workers: **16.88 B/s** for the table with `PACKED_L2_PERSIST=1` at the
+automatic 96,256 workers. `roofline.py` puts that build at 87% of the
+carry-less unit (38.1 `CLMAD`s per update, floor 19.3 B/s). The 26 B/s goal
+remains unmet.
 
 The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
 on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle

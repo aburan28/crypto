@@ -58,12 +58,17 @@ COMMON=(
 
 # control: the confirmed fused preset; candidate: the same with the Frobenius
 # nibble table, one 512-thread block per SM (SIGMA-TABLE.md).
+# HEADLINE_PERSIST=1 measures the recommended configuration instead: the
+# candidate adds PACKED_L2_PERSIST=1 and runs at one wave (96,256 workers),
+# its best population, against the preset at four waves, its best.
+HEADLINE_PERSIST=${HEADLINE_PERSIST:-0}
 knobs() {
   case "$1" in
     control)   echo "THREADS=256 MINBLOCKS=2 PACKED_SIGMA_TABLE=0" ;;
-    candidate) echo "THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1" ;;
+    candidate) echo "THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1 PACKED_L2_PERSIST=$HEADLINE_PERSIST" ;;
   esac
 }
+threadsOf() { if [ "$HEADLINE_PERSIST" = 1 ] && [ "$1" = candidate ]; then echo 96256; else echo "$BENCH_THREADS"; fi; }
 tableOf() { case "$1" in control) echo 0 ;; candidate) echo 1 ;; esac; }
 build() {
   local name=$1
@@ -132,7 +137,8 @@ sample() {
     *) return 2 ;;
   esac
   log="$R/${phase}-${pair}-${order}-${variant}.log"
-  ./ecc2k130-$binary --curve 131 --packed --threads "$BENCH_THREADS" \
+  local threads; threads=$(threadsOf "$binary")
+  ./ecc2k130-$binary --curve 131 --packed --threads "$threads" \
     --bench --steps 1024 --launches 64 --verify 0 > "$log" 2>&1
   rc=$?
   count=$(grep -c '^[[:space:]]*finished: [0-9.][0-9.]* M it/s' "$log" || true)
@@ -140,7 +146,7 @@ sample() {
   grep -qx "packed sigma fused: 1" "$log" || rc=1
   grep -q "^packed sigma table: $(tableOf "$binary") " "$log" || rc=1
   grep -qx "packed witness: 0" "$log" || rc=1
-  grep -Eq "^backend cuda-packed131: $BENCH_THREADS threads x 16 slots x 1 lanes = $((BENCH_THREADS*16)) walks, dp weight 0, 1024 steps per launch$" \
+  grep -Eq "^backend cuda-packed131: $threads threads x 16 slots x 1 lanes = $((threads*16)) walks, dp weight 0, 1024 steps per launch$" \
     "$log" || rc=1
   if [ "$count" != 1 ] || ! awk -v r="$rate" 'BEGIN{exit !(r+0>0)}'; then rc=1; fi
   digest=$(sha256sum "$log" | awk '{print $1}')

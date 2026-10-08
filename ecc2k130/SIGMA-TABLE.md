@@ -10,6 +10,12 @@ nothing about the iteration function, the distinguished-point rule, reports
 or checkpoints: the map is the same field automorphism, only evaluated in
 different coordinates. `make gpu-rtx-pro6000-sigma-table` builds it.
 
+The headline below compares the table at 512 x 1 against the preset at
+256 x 2 with four waves of workers; the population sweep further down
+attributes +3.6% of that to the one-block geometry and +1.8% to the table,
+and finds another +5.9% in the L2 persisting window at one wave, for
+**16.88 B/s** in the recommended configuration.
+
 Under the fused headline protocol on one RTX PRO 6000 (five A/A pairs, five
 alternating A/B pairs, 64 launches per sample, replay and sorted-corpus gates),
 the verdict is **promote as compatible engineering**: A/B paired median ratio
@@ -176,6 +182,79 @@ preset's batch 16 stands. The polynomial-basis inversion is a consistent
 small gain on top of the table, as it was in the fused star, but stays below
 the 1.015 promotion gate; the five-word inverse conversion is flat. Receipts
 under [benchmarks/sigma-table/star/](benchmarks/sigma-table/star/).
+
+### Attribution, population and the persisting window
+
+[benchmarks/sigma-table/gpujob-population.sh](benchmarks/sigma-table/gpujob-population.sh)
+separates the three things the table build changed at once and adds the two
+run-time levers ONE-BLOCK-GEOMETRY.md found for the table walk. Four builds,
+all gates and identical corpora, three rotating rounds at 32 launches on one
+RTX PRO 6000 (driver 580.95.05):
+
+| build | workers | B/s (median of 3) |
+|---|---:|---:|
+| fused preset, 256 x 2 | 96,256 (one wave) | 15.109 |
+| fused preset, 512 x 1 (no table) | 96,256 | 15.647 |
+| table, 512 x 1 | 96,256 | 15.932 |
+| table, 512 x 1, `PACKED_L2_PERSIST=1` | 96,256 | **16.877** |
+| fused preset, 256 x 2 | 385,024 (four waves, 2 rounds) | 15.497 |
+| table, 512 x 1 | 385,024 (2 rounds) | 15.887 |
+
+So the one-block geometry alone is +3.6%, the table on top of it +1.8%, and
+the persisting L2 window (80 MiB of the 104.7 MB one-wave blob, x/y/pchain
+entirely inside it) a further +5.9%. The 256 x 2 preset is 2.6% faster at
+four waves than at one, while the table build is indifferent to the
+population, which is why the four-wave headline above credits the table with
+only 2.4%. The recommended configuration is the table at 512 x 1 with the
+persisting window at the automatic one-wave population: **16.88 B/s**, 8.9%
+above the preset at its best population in the same session.
+
+[benchmarks/sigma-table/gpujob-tagdenom.sh](benchmarks/sigma-table/gpujob-tagdenom.sh)
+tried the table walk's other lever, `SIGMA_TAG_DENOM=1`: no denominator
+field, the jump index tagged into the prefix's spare tail bits and
+`x + sigma^j(x)` rebuilt from the table in the reverse pass. The walk stays
+bit-identical (all gates, identical corpora) but the rate falls to **0.795**
+of the table build, with or without the window: the rebuilt lookup lands on
+the serial inverse chain, and the GPU sits at its maximum clock with 100 W
+to spare, so this is latency, not work. Rejected; the knob stays for the
+record. Receipts under [population/](benchmarks/sigma-table/population/) and
+[tagdenom/](benchmarks/sigma-table/tagdenom/).
+
+[benchmarks/sigma-table/gpujob-pipeslot.sh](benchmarks/sigma-table/gpujob-pipeslot.sh)
+tried `SIGMA_PIPE_SLOT=1`: the fused reverse pass issues the next slot's
+loads and its pair product (which depend only on the inverse chain) before
+the current slot's square, second product, stores and selection, so the
+carry-less unit has work during the ALU tail. Bit-identical walk, all gates,
+128 registers with 8 bytes of local memory. Four rounds against the table
+with the persisting window at one wave: **0.983893** (16.607 against 16.879
+B/s, every round between 0.9836 and 0.9841). ptxas was evidently already
+overlapping across the slot boundary as far as the registers allow, and the
+explicit pipeline costs more in live state than it buys. Rejected; the knob
+stays for the record. Receipts under [pipeslot/](benchmarks/sigma-table/pipeslot/).
+
+### Where the update's time goes
+
+`roofline.py` on both builds (receipts in `population/roofline-*.txt`), dynamic
+lane-instructions per scalar update and the pipe ceilings at 2.415 GHz:
+
+| pipe | fused preset | table build | ceiling (table) |
+|---|---:|---:|---:|
+| ALU (LOP3, SHF, IADD, ...) | 1,650 | 1,355 | 21.4 B/s |
+| FMA-pipe integer | 236 | 143 | |
+| LSU | 81 | 95 | 76 B/s |
+| `CLMAD` | 38.1 | 38.1 | **19.3 B/s** at 1.62 lanes/SM-clk, 23.7 at 1.99 |
+
+By function the table build spends 441 lanes in `reducePolynomial131`,
+377 in `product131`, 335 in the two table lookups, 103 in the weight's
+`fromPolynomial131`, 86 in the inversion's `toPolynomial131` and 38 in the
+top-bit parities. The carry-less unit is the busiest pipe: 82% at the
+four-wave 15.88 B/s and 87% at 16.88, against ONE-BLOCK-GEOMETRY.md's
+1.62 lane-CLMADs per SM-clock. The sigma walk issues 38.1 `CLMAD`s per
+update, five more than the table walk's 33.1, because its generated reducer
+spends one `CLMAD` per product on the quotient; at that count the unit's
+floor is 19.3 B/s, and 22 B/s needs the count back at 33 with the ALU no
+heavier than today, which is what a low-weight pentanomial basis would buy
+(THROUGHPUT-30B.md lever 1, now that the basis machinery is a table).
 
 ### Earlier preset
 
