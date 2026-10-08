@@ -2138,7 +2138,10 @@ mod tests {
         for p in [7_u64, 11, 13, 17, 37] {
             let f = Fq3::new(p);
             let old = E2([f.f.w, 0]);
-            assert!(f.f.is_square(&old), "p={p}: F_p element must square in F_p2");
+            assert!(
+                f.f.is_square(&old),
+                "p={p}: F_p element must square in F_p2"
+            );
             let q = p * p;
             let e2 = |k: u64| E2([k % p, k / p]);
             let w = (1..q).map(e2).find(|x| !f.f.is_square(x)).unwrap();
