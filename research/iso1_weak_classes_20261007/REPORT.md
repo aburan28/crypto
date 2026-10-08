@@ -14,7 +14,8 @@ and a necessary-and-sufficient formula remain open.
 |:--|:--|:--|
 | Every trace at p = 37 | Measured, probabilistic point-count assignment | [p37 trace rows](p37_twist_derived.csv), 50,654 Hasse candidates and 49,284 ordinary rows |
 | Every trace at p = 41 through about 200 | Not completed | Direct normalized-representative enumeration is too costly at that range with the present point counter |
-| Fit 2-splitting, 2-depth, trace residues, class-number parity | Completed on p = 11, 13; tested on p = 17 and p = 37 | [held-out p37 fit](fit_p11_p13_to_p37.txt), [held-out p17 fit](fit_p11_p13_to_p17.txt) |
+| Fit 2-splitting, Frobenius-order 2-depth, trace residues, class-number parity | Completed on p = 11, 13; tested on p = 17 and p = 37 | [held-out p37 fit](fit_p11_p13_to_p37.txt), [held-out p17 fit](fit_p11_p13_to_p17.txt) |
+| Actual endomorphism-ring 2-volcano levels | Not measured | A curve's level needs its endomorphism order; `v₂(f_pi)` is only a class-wide upper bound |
 | Exact criterion replacing reach census and seed sieve | Not established | The strongest simple condition has 290 false positives at p = 37; see counterexample below |
 
 ## Field, representatives, and trace assignment
@@ -86,7 +87,9 @@ above do have binomial sampling intervals.
 Write `D = t²-4p⁶ = f_pi² D_K`, with `D_K` the fundamental CM
 discriminant.  The field and class trace determine `f_pi`; it is the
 **Frobenius-order** conductor, not the conductor of a particular curve's
-endomorphism ring or its 2-volcano level.  For ordinary `t ≡ 2 (mod 4)`,
+endomorphism ring or its 2-volcano level. It bounds the possible 2-adic
+conductor level within the class, but the census has no per-curve
+endomorphism-order proof. For ordinary `t ≡ 2 (mod 4)`,
 the following two tests are arithmetically equivalent:
 
 `v₂(f_pi) >= 2`  iff  `(t/2)² ≡ p⁶ (mod 16)`  iff
