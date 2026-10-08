@@ -16,7 +16,7 @@ use std::env;
 use std::fs;
 
 use crypto_lib::cryptanalysis::jv_isogeny_walk::{
-    exact_census, run_end_to_end, run_walk, run_walk2, summarize_walk2, trace_census,
+    exact_census_full, run_end_to_end, run_walk, run_walk2, summarize_walk2, trace_census,
     EndToEndReport, ExactCensus, TraceCensus, Walk2Report, WalkReport,
 };
 
@@ -33,6 +33,7 @@ fn main() {
     let mut summarize: Vec<String> = Vec::new();
     let mut census = false;
     let mut exact = false;
+    let mut uniform = 0u64;
     let mut from_weak_class = false;
     let mut moves = 8usize;
     let mut cap_mult = 3u64;
@@ -67,6 +68,7 @@ fn main() {
             "--summarize" => summarize.push(next(&mut i)),
             "--census" => census = true,
             "--exact-census" => exact = true,
+            "--uniform" => uniform = next(&mut i).parse().expect("--uniform"),
             "--from-weak-class" => from_weak_class = true,
             "--moves" => moves = next(&mut i).parse().expect("--moves"),
             "--e2e" => e2e = true,
@@ -145,12 +147,12 @@ fn main() {
     }
     if exact {
         let mut rows: Vec<ExactCensus> = Vec::new();
-        println!("| p | q | weak representatives | weak classes | random curves (distinct classes) | random curves in a weak class | largest weak classes (t: representatives) |");
-        println!("|---:|--:|--:|--:|:--|--:|:--|");
+        println!("| p | q | weak representatives | weak classes | random full-2-torsion curves (distinct classes) | full-2-torsion in a weak class | uniform curves | uniform odd order | uniform 4 divides | ALL curves in a weak class | largest weak classes (t: representatives) |");
+        println!("|---:|--:|--:|--:|:--|--:|--:|--:|--:|--:|:--|");
         for &p in &sizes {
-            let r = exact_census(p, seed, samples);
+            let r = exact_census_full(p, seed, samples, uniform);
             println!(
-                "| {} | {} | {} | {} | {} ({}) | {:.4} | {} |",
+                "| {} | {} | {} | {} | {} ({}) | {:.4} | {} | {:.4} | {:.4} | {:.4} | {} |",
                 r.p,
                 r.q,
                 r.weak_representatives,
@@ -158,6 +160,10 @@ fn main() {
                 r.n,
                 r.random_distinct,
                 r.random_in_weak_classes,
+                r.n_uniform,
+                r.uniform_odd_order as f64 / r.n_uniform.max(1) as f64,
+                r.uniform_four_divides as f64 / r.n_uniform.max(1) as f64,
+                r.uniform_in_weak_classes,
                 r.top_weak
                     .iter()
                     .take(6)
