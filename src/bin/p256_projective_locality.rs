@@ -1148,6 +1148,6 @@ mod tests {
     #[test]
     fn projective_storage_gate() {
         assert_eq!(std::mem::size_of::<P256ProjectivePoint>(), ENTRY_BYTES);
-        assert!(FULL_TABLE_BYTES < (1u64 << 50));
+        const { assert!(FULL_TABLE_BYTES < (1u64 << 50)) };
     }
 }
