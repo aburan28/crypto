@@ -1,0 +1,73 @@
+{
+  "schema": "p256-radix-portfolio-round-v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "round": 164,
+  "family": "round-33 known-log selector radix routing",
+  "comparison_factor_base": "FB1h2f8621cda105",
+  "radix_width": 34,
+  "start_bits": 18,
+  "starts": 262144,
+  "requests": 2097152,
+  "pass_count": 2,
+  "histogram_bits": [
+    34,
+    2
+  ],
+  "histogram_buckets": [
+    17179869184,
+    4
+  ],
+  "largest_histogram_counters": 17179869184,
+  "complete_checked": false,
+  "evidence_class": "projection_only",
+  "applicable_memory_tier_measured": false,
+  "distinct_pairs": null,
+  "expected_distinct_pairs": 2097088.3761276775,
+  "sorted_mismatches": null,
+  "accumulator_mismatches": null,
+  "regenerated_failures": null,
+  "negative_controls": null,
+  "false_positives": null,
+  "false_negatives": null,
+  "sorted_blake3": null,
+  "accumulator_blake3": null,
+  "reference_sorted_blake3": null,
+  "reference_accumulator_blake3": null,
+  "one_shot_wall_ns": null,
+  "one_shot_routing_addition_equivalents_per_start": null,
+  "operation_counts": {
+    "request_generations_algorithmic": 2097152,
+    "request_generations_timed": 0,
+    "histogram_increments": 4194304,
+    "scatter_writes": 4194304,
+    "histogram_bucket_scans": 17179869188,
+    "sorted_record_scans": 2097152,
+    "accumulator_updates": 2097152,
+    "native_field_operations": 0,
+    "native_group_operations": 0
+  },
+  "traffic": {
+    "record_bytes": "268435456",
+    "histogram_bytes": "412316860512",
+    "total_logical_bytes": "412585295968",
+    "disk_bytes": 0
+  },
+  "peak_algorithmic_bytes": 137510256640,
+  "peak_log2_bytes": 37.00074827441139,
+  "time_exponent_across_complete_depths": null,
+  "memory_exponent_across_registered_depths": 0.35825493359702343,
+  "shortlist_timing": null,
+  "structured_residual_degree_for_measured_family": null,
+  "gates": {
+    "zero_false_positives_and_false_negatives_for_this_cell": false,
+    "structured_residual_degree_at_most_5_for_measured_family": false,
+    "relation_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "materialized_storage_below_2_50": true,
+    "measured_complete_selector_below_rho_in_applicable_tier": false,
+    "no_discarded_branch_counted_as_exhaustive": true,
+    "promoted": false
+  },
+  "full_depth_unplanted_attempted": false,
+  "interpretation": "Formula-only cell. Exact pass, traffic, and memory counts are registered, but no allocation, routing, exactness result, or applicable timing was performed."
+}
