@@ -1,0 +1,307 @@
+{
+  "schema": "p256-algebraic-quotient-rigidity-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 304,
+  "execution_status": "complete",
+  "factor_base": "FB1hc72514a2a8d3",
+  "registered_s17_factor_base": "FB1h2f8621cda105",
+  "columns": 164,
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_orbit_round25_20261006/scalar-orbit-result.json",
+      "bytes": 14033,
+      "sha256": "dcb191f7d5d7a660e3ce13128b25ce1c017c7d89ec2d01a242ab536651647faf",
+      "schema": "p256.scalar_orbit_factor_base_screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_stabilizer_round297_20261007/scalar-stabilizer-result.json",
+      "bytes": 13187,
+      "sha256": "53949881daf4a48769c9ef8f869fad633c3dc69d11b0d341a5b7416de2e43982",
+      "schema": "p256-union-scalar-stabilizer/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_parity_escapes_round298_20261007/parity-escape-result.json",
+      "bytes": 50776,
+      "sha256": "8718bbe26751ff0191164b0665618226a97556c64c6e2feeef72468a38206965",
+      "schema": "p256-parity-escape-screen/v2"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_jacobian_row_capacity_round303_20261008/jacobian-row-capacity-result.json",
+      "bytes": 18217,
+      "sha256": "6b023f47fbb2c57eb79f870f1c25be48e0b4230d974c3823caf76784a095caa0",
+      "schema": "p256-jacobian-row-capacity-screen/v1"
+    }
+  ],
+  "rigidity_statement": "Every rational algebraic self-map f:E->E has f(P)=phi(P)+T; on E(F_p)[n], Round 25 gives phi(P)=[a]P, so the induced log action is affine x->a*x+b.",
+  "induced_log_action": "log_G(f(P))=a*log_G(P)+b mod n; unknown b is an anchor variable, known b is a scalar label.",
+  "exhaustive_function_control": {
+    "modulus": 7,
+    "functions_enumerated": 823543,
+    "additive_law_evaluations": 40353607,
+    "affine_law_evaluations": 40353607,
+    "additive_functions": 7,
+    "affine_functions": 49,
+    "bijective_affine_functions": 42,
+    "non_scalar_additive_functions": 0,
+    "non_affine_affine_law_functions": 0,
+    "admitted_table_replays": 56,
+    "replay_failures": 0,
+    "first_nonzero_additive": {
+      "values": [
+        0,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "multiplier": 6,
+      "offset": 0
+    },
+    "first_nontrivial_affine": {
+      "values": [
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "multiplier": 6,
+      "offset": 6
+    }
+  },
+  "graph_profiles": [
+    {
+      "variant": "independent",
+      "nodes": 164,
+      "edges": 0,
+      "known_affine_edge_labels": false,
+      "rank_mod_2_61_minus_1": 0,
+      "rank_mod_p256_n": 0,
+      "reversed_rank_mod_2_61_minus_1": 0,
+      "reversed_rank_mod_p256_n": 0,
+      "independent_log_quotient_dimension": 164,
+      "anchor_status": "164 independent logs",
+      "equation_replays": 0,
+      "replay_failures": 0,
+      "rank_replay_discrepancies": 0,
+      "materialized_bytes_mod_p256_n": 0,
+      "p61_cycle": null,
+      "p256_cycle": null,
+      "operations": {
+        "matrices": 4,
+        "rows_materialized": 0,
+        "entries_materialized": 0,
+        "pivot_row_scans": 0,
+        "pivot_swaps": 0,
+        "modular_inversions": 0,
+        "modular_multiplications": 0,
+        "modular_subtractions": 0
+      }
+    },
+    {
+      "variant": "connected-chain",
+      "nodes": 164,
+      "edges": 163,
+      "known_affine_edge_labels": true,
+      "rank_mod_2_61_minus_1": 163,
+      "rank_mod_p256_n": 163,
+      "reversed_rank_mod_2_61_minus_1": 163,
+      "reversed_rank_mod_p256_n": 163,
+      "independent_log_quotient_dimension": 1,
+      "anchor_status": "one unknown anchor",
+      "equation_replays": 326,
+      "replay_failures": 0,
+      "rank_replay_discrepancies": 0,
+      "materialized_bytes_mod_p256_n": 855424,
+      "p61_cycle": null,
+      "p256_cycle": null,
+      "operations": {
+        "matrices": 4,
+        "rows_materialized": 652,
+        "entries_materialized": 106928,
+        "pivot_row_scans": 13936,
+        "pivot_swaps": 162,
+        "modular_inversions": 652,
+        "modular_multiplications": 54116,
+        "modular_subtractions": 0
+      }
+    },
+    {
+      "variant": "dependent-cycle",
+      "nodes": 164,
+      "edges": 164,
+      "known_affine_edge_labels": true,
+      "rank_mod_2_61_minus_1": 163,
+      "rank_mod_p256_n": 163,
+      "reversed_rank_mod_2_61_minus_1": 163,
+      "reversed_rank_mod_p256_n": 163,
+      "independent_log_quotient_dimension": 1,
+      "anchor_status": "one unknown anchor",
+      "equation_replays": 328,
+      "replay_failures": 0,
+      "rank_replay_discrepancies": 0,
+      "materialized_bytes_mod_p256_n": 860672,
+      "p61_cycle": {
+        "modulus": "2305843009213693951",
+        "chain_multiplier": "1733835270172652400",
+        "chain_offset": "965894947591139192",
+        "closing_multiplier": "795517504057433518",
+        "closing_offset": "1543018096383384944",
+        "composed_multiplier": "1",
+        "composed_offset": "0",
+        "composition_is_identity": true,
+        "composition_fixes_witness_anchor": true
+      },
+      "p256_cycle": {
+        "modulus": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+        "chain_multiplier": "4808287398467349458667217950021949434858432340747245244377291290602856021132",
+        "chain_offset": "29636107685083820261371739997893270795939752136887220420998283916817075534754",
+        "closing_multiplier": "20279016114156514972013222307427847542243576019154444288973178501760068308580",
+        "closing_offset": "73034535767976331607699675854935426117873790901718958766086310585596743907792",
+        "composed_multiplier": "1",
+        "composed_offset": "0",
+        "composition_is_identity": true,
+        "composition_fixes_witness_anchor": true
+      },
+      "operations": {
+        "matrices": 4,
+        "rows_materialized": 656,
+        "entries_materialized": 107584,
+        "pivot_row_scans": 13778,
+        "pivot_swaps": 162,
+        "modular_inversions": 652,
+        "modular_multiplications": 108232,
+        "modular_subtractions": 54116
+      }
+    },
+    {
+      "variant": "anchor-solving-cycle",
+      "nodes": 164,
+      "edges": 164,
+      "known_affine_edge_labels": true,
+      "rank_mod_2_61_minus_1": 164,
+      "rank_mod_p256_n": 164,
+      "reversed_rank_mod_2_61_minus_1": 164,
+      "reversed_rank_mod_p256_n": 164,
+      "independent_log_quotient_dimension": 0,
+      "anchor_status": "anchor solved by an independent affine label",
+      "equation_replays": 328,
+      "replay_failures": 0,
+      "rank_replay_discrepancies": 0,
+      "materialized_bytes_mod_p256_n": 860672,
+      "p61_cycle": {
+        "modulus": "2305843009213693951",
+        "chain_multiplier": "1733835270172652400",
+        "chain_offset": "965894947591139192",
+        "closing_multiplier": "1591035008114867036",
+        "closing_offset": "780193183553075895",
+        "composed_multiplier": "2",
+        "composed_offset": "2305843009213693909",
+        "composition_is_identity": false,
+        "composition_fixes_witness_anchor": true
+      },
+      "p256_cycle": {
+        "modulus": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+        "chain_multiplier": "4808287398467349458667217950021949434858432340747245244377291290602856021132",
+        "chain_offset": "29636107685083820261371739997893270795939752136887220420998283916817075534754",
+        "closing_multiplier": "40558032228313029944026444614855695084487152038308888577946357003520136617160",
+        "closing_offset": "30276982325596414452701904760463278705750626579302157189750362110124975771173",
+        "composed_multiplier": "2",
+        "composed_offset": "115792089210356248762697446949407573529996955224135760342422259061068512044327",
+        "composition_is_identity": false,
+        "composition_fixes_witness_anchor": true
+      },
+      "operations": {
+        "matrices": 4,
+        "rows_materialized": 656,
+        "entries_materialized": 107584,
+        "pivot_row_scans": 13778,
+        "pivot_swaps": 162,
+        "modular_inversions": 656,
+        "modular_multiplications": 108236,
+        "modular_subtractions": 54116
+      }
+    }
+  ],
+  "aggregate_rank_operations": {
+    "matrices": 16,
+    "rows_materialized": 1964,
+    "entries_materialized": 322096,
+    "pivot_row_scans": 41492,
+    "pivot_swaps": 486,
+    "modular_inversions": 1960,
+    "modular_multiplications": 270584,
+    "modular_subtractions": 108232
+  },
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "independent_log_classes": 0,
+      "free_oracle_ratio_to_rho": 1.0,
+      "direct_measured_ratio_to_rho": 1.0,
+      "complete_attack_measured": true,
+      "status": "reference"
+    },
+    {
+      "variant": "unquotiented geometry-defined FB1hc72514a2a8d3",
+      "independent_log_classes": 164,
+      "free_oracle_ratio_to_rho": 13.920747397073491,
+      "direct_measured_ratio_to_rho": null,
+      "complete_attack_measured": false,
+      "status": "no replayable log transport"
+    },
+    {
+      "variant": "connected affine orbit, unknown anchor",
+      "independent_log_classes": 1,
+      "free_oracle_ratio_to_rho": 1.4465047156952717,
+      "direct_measured_ratio_to_rho": 11.572037725562172,
+      "complete_attack_measured": false,
+      "status": "free oracle already above rho; direct Round-25 control higher"
+    },
+    {
+      "variant": "affine orbit, known or cycle-solved anchor",
+      "independent_log_classes": 0,
+      "free_oracle_ratio_to_rho": 0.964336477130181,
+      "direct_measured_ratio_to_rho": 7.714691817041447,
+      "complete_attack_measured": false,
+      "status": "scalar-labelled generic control; Round-25 direct implementation above rho"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "independent_log_classes": 164,
+      "free_oracle_ratio_to_rho": 394.42528,
+      "direct_measured_ratio_to_rho": null,
+      "complete_attack_measured": false,
+      "status": "unchanged free-perfect-oracle comparison"
+    }
+  ],
+  "structured_residual_degree_of_regularity": null,
+  "relations_reported_on_p256": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "exploration_boundary": "Exact for algebraic self-map transports and affine factor-base quotient graphs; not universal over non-homomorphic relation mechanisms.",
+  "transfer_assessment_semantic_sha256": "4add09ce20a2df44d30c2ad806845e06a16c94fd3f930e77210e161328144ee5",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "exhaustive_function_census_passed": true,
+    "zero_non_affine_exact_transports": true,
+    "dual_modulus_graph_ranks_and_replays_passed": true,
+    "non_scalar_non_affine_p256_log_quotient": false,
+    "complete_relation_decomposition_and_recovery": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "complete_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "projected_storage_below_2_50": false,
+    "discarded_probabilistic_branches_counted_as_exhaustive": false,
+    "promoted": false
+  },
+  "classification": "algebraic-factor-base-quotient/affine-scalar-rigidity/anchor-conservation/parity-blocked",
+  "dominant_obstruction": "Every algebraic P-256 self-map induces log transport x->a*x+b. A connected affine transport graph reduces 164 logs only to one unknown anchor, whose free-oracle boundary is already 1.446505 times rho. Solving the anchor requires an independent known affine label and yields a scalar-labelled generic control; the registered direct instance costs 7.714692 times rho. No replayable non-affine quotient or complete below-rho pipeline is constructed.",
+  "decision": "Reject algebraic coordinate symmetry as an unpriced logarithm quotient. Credit only replayable affine scalar edges, retain one variable per unknown-anchor component, and classify solved-anchor orbits as scalar-labelled generic controls. Keep genuinely non-homomorphic relation mechanisms open; do not attempt an unplanted full-depth relation.",
+  "semantic_evidence_sha256": "372c93d6b283710e8e744aa7afc05fb73388b3b065fd001ddbb1e0cc4c25cb52",
+  "result_json_bytes": 12449
+}
