@@ -7762,13 +7762,23 @@ fn groebner_decompose_with_geometry(
         if let Some(mut gate) = F6GeometricGate::new(kc, fb, index_of, target, m, order.as_deref())
         {
             gate.pair_index_enabled = pair_index_enabled;
+            let mut oracle_calls = 0u64;
+            let mut oracle_ns = 0u64;
             let (_, mut stats) = solve_boolean_system_with_node_oracle(
                 equations,
                 sys.n_vars,
                 &opts,
                 &mut accept_root,
-                |assignment, defined_mask| gate.decide(assignment, defined_mask),
+                |assignment, defined_mask| {
+                    let started = std::time::Instant::now();
+                    let decision = gate.decide(assignment, defined_mask);
+                    oracle_ns = oracle_ns.saturating_add(started.elapsed().as_nanos() as u64);
+                    oracle_calls += 1;
+                    decision
+                },
             );
+            stats.geometric_oracle_calls = oracle_calls;
+            stats.geometric_oracle_ns = oracle_ns;
             stats.geometric_support_checks = gate.support_checks;
             stats.geometric_residual_lookups = gate.residual_lookups;
             stats.geometric_fast_residual_lookups = gate.fast_residual_lookups;

@@ -2881,9 +2881,24 @@ fn build_inherited_macaulay_with_layout(
         let layout_key = (multiplier_mask, degree, false);
         let cached = cached_f4_layout(layout_key);
         if let Some(layout) = cached {
-            if let Some(matrix) =
-                pack_polynomials_nested_fused(polys, n_vars, degree, multiplier_mask, &layout)
-            {
+            let matrix = if F4_DIRECT_FUSED_PACK.load(std::sync::atomic::Ordering::Relaxed) {
+                pack_polynomials_nested_fused::<true>(
+                    polys,
+                    n_vars,
+                    degree,
+                    multiplier_mask,
+                    &layout,
+                )
+            } else {
+                pack_polynomials_nested_fused::<false>(
+                    polys,
+                    n_vars,
+                    degree,
+                    multiplier_mask,
+                    &layout,
+                )
+            };
+            if let Some(matrix) = matrix {
                 F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 return Some((layout.columns.clone(), matrix));
             }
@@ -3084,7 +3099,7 @@ fn pack_polynomials_flat_fused(
     Some(FlatF2Matrix { data, rows, words })
 }
 
-fn pack_polynomials_nested_fused(
+fn pack_polynomials_nested_fused<const DIRECT: bool>(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,
@@ -3125,13 +3140,36 @@ fn pack_polynomials_nested_fused(
         .map(|polynomial| polynomial.terms.len())
         .max()
         .unwrap_or(0);
-    let mut product = Vec::with_capacity(max_terms);
+    let mut product = Vec::with_capacity(if DIRECT { 0 } else { max_terms });
     for (polynomial, gap) in polys.iter().zip(gaps) {
         let Some(gap) = gap else {
             continue;
         };
         let multipliers = schedules[gap].as_ref().unwrap();
         for &multiplier in multipliers.iter() {
+            if DIRECT {
+                let mut row = vec![0u64; words];
+                for term in &polynomial.terms {
+                    let monomial = term.mask | multiplier;
+                    let &column = layout.index.get(&monomial)?;
+                    row[column / 64] ^= 1 << (column % 64);
+                }
+                if row.iter().all(|&word| word == 0) {
+                    continue;
+                }
+                if matrix.len() == row_cap {
+                    return None;
+                }
+                for (word_index, &word) in row.iter().enumerate() {
+                    let mut bits = word;
+                    while bits != 0 {
+                        seen[word_index * 64 + bits.trailing_zeros() as usize] = true;
+                        bits &= bits - 1;
+                    }
+                }
+                matrix.push(row);
+                continue;
+            }
             product.clear();
             product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
             product.sort_unstable();
@@ -3327,6 +3365,8 @@ pub static F4_WORD_OPS_TOTAL: std::sync::atomic::AtomicU64 = std::sync::atomic::
 
 static F4_LAYOUT_HITS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_LAYOUT_MISSES: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+static F4_DIRECT_FUSED_PACK: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 static F4_BUILD_ROWS_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_BUILD_PACK_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 struct F4ColumnLayout {
@@ -3410,6 +3450,12 @@ pub fn f4_layout_stats_reset() {
     F4_LAYOUT_HITS.store(0, Relaxed);
     F4_LAYOUT_MISSES.store(0, Relaxed);
     F4_LAYOUTS.with(|layouts| layouts.borrow_mut().clear());
+}
+
+/// Opt-in direct parity packing for inherited F4 cached-layout hits.
+/// Set before a single-threaded diagnostic solve; the default is sorted.
+pub fn set_f4_direct_fused_pack(enabled: bool) {
+    F4_DIRECT_FUSED_PACK.store(enabled, std::sync::atomic::Ordering::Relaxed);
 }
 
 pub fn f4_build_subprofile() -> (u64, u64) {
@@ -4818,6 +4864,13 @@ pub struct SolveStats {
     /// Exact pair-sum hash lookups made by the opt-in IC node oracle.
     #[serde(default)]
     pub geometric_pair_index_lookups: u64,
+    /// Calls to the exact IC node oracle. Profiling diagnostics only.
+    #[serde(default)]
+    pub geometric_oracle_calls: u64,
+    /// Time inside the exact IC node oracle, including its witness replay.
+    /// This is nested in target PDP and is not a sixth online phase.
+    #[serde(default)]
+    pub geometric_oracle_ns: u64,
     /// The IC gate could not prove that its coordinate encoding matched
     /// this base, so the solve used plain inherited F4 instead.
     #[serde(default)]
@@ -5702,6 +5755,53 @@ fn solve_rec(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn direct_fused_pack_matches_sorted_parity_and_exact_layout() {
+        let n_vars = 4;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b0001),
+                    F2BoolMono::from_mask(0b0011),
+                    F2BoolMono::from_mask(0b0100),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b0001), F2BoolMono::from_mask(0b0011)],
+                n_vars,
+            ),
+        ];
+        let mask = all_variable_mask(n_vars);
+        let degree = 3;
+        let rows = macaulay_rows_monos_with_mask(&polys, n_vars, degree, mask, None).unwrap();
+        let columns = macaulay_columns(&rows).unwrap();
+        let layout = F4ColumnLayout::new(columns.clone());
+        let sorted = pack_polynomials_nested_fused::<false>(&polys, n_vars, degree, mask, &layout);
+        let direct = pack_polynomials_nested_fused::<true>(&polys, n_vars, degree, mask, &layout);
+        assert_eq!(direct, sorted);
+        assert_eq!(direct.as_ref().unwrap().len(), rows.len());
+
+        let missing = F4ColumnLayout::new(columns[1..].to_vec());
+        assert!(
+            pack_polynomials_nested_fused::<false>(&polys, n_vars, degree, mask, &missing)
+                .is_none()
+        );
+        assert!(
+            pack_polynomials_nested_fused::<true>(&polys, n_vars, degree, mask, &missing).is_none()
+        );
+
+        let mut extra_columns = columns;
+        extra_columns.push(0b1111);
+        let extra = F4ColumnLayout::new(extra_columns);
+        assert!(
+            pack_polynomials_nested_fused::<false>(&polys, n_vars, degree, mask, &extra).is_none()
+        );
+        assert!(
+            pack_polynomials_nested_fused::<true>(&polys, n_vars, degree, mask, &extra).is_none()
+        );
+    }
 
     #[test]
     fn node_oracle_never_treats_affine_placeholders_as_fixed_bits() {
