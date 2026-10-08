@@ -1,0 +1,102 @@
+{
+  "anf_path": "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-cms-execution-v1/query-015/instance/instance.anf",
+  "anf_sha256": "e4e37fd8437e79075b7fbecd4bb21bb6837d08290f5b4d305ca777df9d1e8d5a",
+  "cms_path": "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-cms-capsule-v1/immutable/assets/bin/cms",
+  "cms_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+  "cms_unchanged": true,
+  "cnf_path": "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-cms-execution-v1/query-015/instance/instance.xor.cnf",
+  "cnf_sha256": "0e337d0a9b15579c087a94b61fd81940fa5e42b3009fc5e7156038a013e1f3a1",
+  "cold": {
+    "argv": [
+      "--verb",
+      "1",
+      "--threads",
+      "1",
+      "--random",
+      "1",
+      "--maxsol",
+      "1",
+      "--maxconfl",
+      "1000000",
+      "/Volumes/SSD990/llm/tmp/ic-sat-budget-pilot-20261005-query015-v1/cold-input.xor.cnf"
+    ],
+    "exit_code": 10,
+    "model_check": {
+      "full_point_witness_indices": [
+        32,
+        13,
+        54
+      ],
+      "model_sha256": "dc55a90815a97255619fd2ca72bc9c8e451de753fda06ba42a8a0365cef8f05f",
+      "source_model_valid": true
+    },
+    "pid": 17041,
+    "status": "SAT_MODEL",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 24819,
+    "stdout_sha256": "aa0001d3ada2c1921359bdc81320c9a1627dfaa96f10f4cadf6d2c4963352ce7",
+    "timed_out": false
+  },
+  "cold_input_unchanged": true,
+  "conflict_budget": 1000000,
+  "expected_status": "SAT_MODEL",
+  "geometric_class_valid": true,
+  "geometric_witness": [
+    32,
+    54,
+    13
+  ],
+  "magma_sha256": "32a3bafc120217d3fe6d538c17be15aec7891597acd58c28e2b63a083ed00714",
+  "manifest_path": "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-cms-execution-v1/query-015/instance/manifest.json",
+  "manifest_sha256": "c52941652ba9981a5c59a5470f5a35245122c8944e385370e312dd0e0474c465",
+  "native_child_group_drain_audited": false,
+  "online_speedup": null,
+  "preparation_path": "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/result-v1/data/preparation.json",
+  "preparation_sha256": "67319e5bb0c65e9ae9a10bfbd929487afd5a7e4e8c885b7d123da79b385a9d49",
+  "prestarted_stdin_compatible": true,
+  "public_point": [
+    103877,
+    110181
+  ],
+  "question": "disclosed-cms-prestarted-stdin-control-v1",
+  "reader_ready_before_cnf_delivery": true,
+  "reader_ready_wait_ns": 17568583,
+  "schema_version": 1,
+  "source_bound_target_admitted": false,
+  "source_model_parity": true,
+  "source_unchanged": true,
+  "status_parity": true,
+  "stdin": {
+    "argv": [
+      "--verb",
+      "1",
+      "--threads",
+      "1",
+      "--random",
+      "1",
+      "--maxsol",
+      "1",
+      "--maxconfl",
+      "1000000"
+    ],
+    "exit_code": 10,
+    "model_check": {
+      "full_point_witness_indices": [
+        32,
+        13,
+        54
+      ],
+      "model_sha256": "dc55a90815a97255619fd2ca72bc9c8e451de753fda06ba42a8a0365cef8f05f",
+      "source_model_valid": true
+    },
+    "pid": 17436,
+    "status": "SAT_MODEL",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 24698,
+    "stdout_sha256": "88b2051ada43ae0c1a237aa690e1c79ba093d5ddc1e247c4b985ada17990a56e",
+    "timed_out": false
+  },
+  "timeout_ms": 120000
+}

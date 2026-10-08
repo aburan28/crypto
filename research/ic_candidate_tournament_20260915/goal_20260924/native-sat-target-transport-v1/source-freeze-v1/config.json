@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "question": "disclosed-n17-native-one-target-cms-v1",
+  "plan": {
+    "schema_version": 1,
+    "question": "prepared-public-target-n17-cms-v1",
+    "algorithm_seed": 2026100601,
+    "max_queries": 8,
+    "export_nonce": 2026100602,
+    "conflict_budget": 1000000,
+    "exporter_timeout_ms": 30000,
+    "solver_timeout_ms": 120000,
+    "controller_timeout_ms": 900000
+  },
+  "worker_timeout_ms": 900000
+}

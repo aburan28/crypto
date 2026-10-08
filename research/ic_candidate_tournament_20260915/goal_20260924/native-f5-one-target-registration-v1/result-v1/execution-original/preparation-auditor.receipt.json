@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-f5-capsule-v1/immutable/bin/icprog",
+    "ordinary-control-audit",
+    "--capsule",
+    "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-f5-capsule-v1",
+    "--execution",
+    "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-f5-execution-v1",
+    "--registration-sha256",
+    "89de6a771df622536b83ae15744f47a429c3e63063a696c6b9012e8ca0fcca97",
+    "--out",
+    "/Volumes/SSD990/llm/tmp/ic-native-f5-one-target-registration-20261005-execution-v1/preparation-recheck.json"
+  ],
+  "child_wall_ns": 5910710000,
+  "cwd": "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-f5-capsule-v1",
+  "deadline_ms": 900000,
+  "environment": {
+    "LC_ALL": "C",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "executable_sha256_after": "d91874905c02431504e3e530388a70e48ab6a9ebfcb09cb4ca1ccc4099d7f14d",
+  "executable_sha256_before": "d91874905c02431504e3e530388a70e48ab6a9ebfcb09cb4ca1ccc4099d7f14d",
+  "exit_code": 0,
+  "output_limit": false,
+  "pid": 42214,
+  "process_group_drain_confirmed": true,
+  "process_group_drain_requested": true,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 13100,
+  "stdout_sha256": "c9ff3eb84090433ba8c884b015f85a922cfba573155d8653ae5d9069e781d097",
+  "timed_out": false
+}

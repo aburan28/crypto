@@ -1,0 +1,22 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Disclosed n17 public-point strong-rho control before fresh four-arm card",
+  "description": "Development correctness only. This seed and point are excluded from the fresh paired campaign.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 1, "n": 17}],
+    "targets_per_curve": 1,
+    "target_seed": 11,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"lanes": "32", "dp_bits": "4", "step_cap_factor": "2000"}}}
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 2026100601,
+    "isolation_required": "L0",
+    "timeout_seconds": 120
+  }
+}

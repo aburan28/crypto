@@ -1,0 +1,94 @@
+{
+  "archive": {
+    "bytes": 38064088,
+    "path": "capsule.tar.gz",
+    "sha256": "5eb6ff20746bf89cd7c1a29ffb49486641ec63dd845114c124c1954eb63d2d76"
+  },
+  "capsule_root": "/Volumes/SSD990/llm/tmp/ic-native-sat-target-build-validation-20261006-v1",
+  "execution_admitted": false,
+  "files": {
+    "config.json": {
+      "bytes": 430,
+      "sha256": "4bc01f6f5aa6aad07dee07b493282671ca3af5f6db85794ff506d7690f83a57e"
+    },
+    "host-context.json": {
+      "bytes": 321,
+      "sha256": "c45b4dda697a6a2cb631b49a0c00444c78119a89971b9534527b3a9c8dc16b9f"
+    },
+    "immutable/assets/controls/marked-audit.json": {
+      "bytes": 1076,
+      "sha256": "1cecc6161179445317644a92a4ecc9e13fa714f3d2dc015ea5862818f79e3da5"
+    },
+    "immutable/assets/controls/preparation-audit.json": {
+      "bytes": 13188,
+      "sha256": "e2e9caa59ffa61713e4ffd47d98a05850fe4e22bef9594d9431c2c7b24d283be"
+    },
+    "immutable/build-receipts/build-artifacts.json": {
+      "bytes": 545,
+      "sha256": "a2df0ef89c4358635b42894c1d6828b1af2d42c174d88a9869a4589ff4f7587f"
+    },
+    "immutable/build-receipts/build-identity.json": {
+      "bytes": 937,
+      "sha256": "ab1e2ec3ee45cbdc47a50f5a6b4440459bfd08f6346c380a7cf81a75f4010d56"
+    },
+    "immutable/build-receipts/build.log": {
+      "bytes": 3971,
+      "sha256": "aec1d3bf5883469d7eeb249d85c2709f758838878ce6a0a4a743b21d3e64fae8"
+    },
+    "immutable/build-receipts/build.receipt.json": {
+      "bytes": 2951,
+      "sha256": "10386eba844d25bb5de6f1539b64a397bd95b519d32b2937e7f363354095cbb8"
+    },
+    "immutable/build-receipts/cargo.log": {
+      "bytes": 213,
+      "sha256": "2acedc6d91ea99958f144b6e38dc6419f20e834ecc6154591888896d0a1691ea"
+    },
+    "immutable/build-receipts/cargo.receipt.json": {
+      "bytes": 2802,
+      "sha256": "68f842fa4cfb8b546943cde011a616bf0e9f12c5f4d88fbe732d7ec2f7eea8b3"
+    },
+    "immutable/build-receipts/rustc.log": {
+      "bytes": 203,
+      "sha256": "dbd639801eacf9d8900b64719640b726c1ad6b3e8fc216b7f0b2eae7c256a602"
+    },
+    "immutable/build-receipts/rustc.receipt.json": {
+      "bytes": 2801,
+      "sha256": "afd21dde420c196b3f36925f0192bf46337aa756959d10f4efe9d45d435f888d"
+    },
+    "immutable/build-receipts/vendor.log": {
+      "bytes": 29439,
+      "sha256": "a73c6eac3a87219b2df34b99d38b04aca4973176ab17647f2e36f7d091acd119"
+    },
+    "immutable/build-receipts/vendor.receipt.json": {
+      "bytes": 2259,
+      "sha256": "837463d05989f7b3071d520056146c0601c321eaf796c3f9ba5b4be804487dd4"
+    },
+    "immutable/build-receipts/worker-identity.log": {
+      "bytes": 260,
+      "sha256": "433ea6cc040f608fe8da99cfda4d38456a261891fe3797e77064de2323a20245"
+    },
+    "immutable/build-receipts/worker-identity.receipt.json": {
+      "bytes": 686,
+      "sha256": "99e00b82994db522dc485e7a16d0dea9ae7132b42071920074df76748b887078"
+    },
+    "registration.json": {
+      "bytes": 1187097,
+      "sha256": "3739b5d4b4959e96a72e75fa3b3cec1743ac9537eb999305d6c4f7243769d319"
+    },
+    "seal.json": {
+      "bytes": 95,
+      "sha256": "fca652b6214a93d699436a89c6059caea2371d98887c0945a43f179c14a1d024"
+    }
+  },
+  "fresh_paired_qualification": false,
+  "immutable_file_count": 6970,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "question": "sat-target-build-custody-n17-v1",
+  "registration_sha256": "df824d634e829032cb209374d1f395ced43d0604496414cb5d67f464c3e5c865",
+  "schema_version": 1,
+  "scientific_worker_calls": 0,
+  "source_bound_execution_admitted": false,
+  "source_commit": "7135af53971e0a34b643b15dbb66c65694e8485f",
+  "stage": "validation-only-not-dispatched"
+}

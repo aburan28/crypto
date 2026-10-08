@@ -87,6 +87,20 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 .readiness td:first-child { min-width: 170px; }
 .readiness small { display: block; font-size: 11px; color: var(--lab-muted); line-height: 1.6; margin-top: 4px; }
 .readiness tr:last-child td { border-bottom: 0; }
+.stage-figure { margin-bottom: 18px; }
+.stage-row { display: grid; grid-template-columns: 230px minmax(0,1fr) 84px; gap: 14px; align-items: center; margin: 18px 0; }
+.stage-row>div:first-child { display: flex; flex-direction: column; gap: 4px; }
+.stage-row strong { font-size: 13px; }
+.stage-row span,.stage-row>b { font-size: 11px; color: var(--lab-muted); }
+.stage-row>b { text-align: right; color: var(--lab-ink); }
+.stage-track { display: flex; height: 22px; border-radius: 4px; overflow: hidden; background: var(--lab-bg); }
+.stage-track i { display: block; height: 100%; }
+.stage-witness { background: var(--lab-green); }
+.stage-negative { background: var(--lab-line); }
+.stage-incomplete { background: var(--lab-orange); }
+.stage-legend { display: flex; flex-wrap: wrap; gap: 7px 18px; color: var(--lab-muted); font-size: 11px; }
+.stage-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.stage-legend i { width: 11px; height: 11px; display: inline-block; border-radius: 2px; }
 .pipeline-zone { border: 1px solid var(--lab-line); border-radius: 12px; background: var(--lab-card); padding: 20px; margin-bottom: 14px; }
 .online-zone { background: var(--lab-tint); border-color: var(--lab-blue); }
 .pipeline-zone-label { font-size: 12px; font-weight: 650; margin-bottom: 18px; }
@@ -138,6 +152,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   .dash-metrics h2 { font-size: 19px; margin: 9px 0 6px; }
   .dash-result-grid { grid-template-columns: 1fr; gap: 14px; }
   .dash-chart { padding: 16px; }
+  .stage-row { grid-template-columns: 1fr auto; gap: 7px 10px; }
+  .stage-row .stage-track { grid-column: 1 / -1; grid-row: 2; }
   .plot-row { grid-template-columns: 50px minmax(0,1fr) 53px; gap: 8px; font-size: 11px; }
   .dash h2 { font-size: 23px; }
   .dash-section-head { align-items: flex-start; }

@@ -635,6 +635,30 @@ mod boundary_tests {
             "geometric_base":geometry,"attempts":attempts,
             "stop":"panel_complete","claimed_column_logs":logs})
     }
+
+    #[test]
+    fn audited_natural_sat_logs_enter_exact_target_table() {
+        let _guard = CLOCK.lock().unwrap();
+        let math: Value = serde_json::from_str(include_str!(
+            "../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-million-registration-v1/result-v1/mathematical-input.json"
+        ))
+        .unwrap();
+        assert_eq!(
+            super::super::prepared_sat_control::canonical_sha(&math).unwrap(),
+            "d5a428b182ef32f9f7e2b7408befa0bf41c4d194bc3a4bd13cf34d2cd38f6c83"
+        );
+        assert_eq!(math["plan"]["family"], "cryptominisat");
+        assert_eq!(math["attempts"].as_array().unwrap().len(), 512);
+        let state = PreparedN17Target::from_ordinary_math(&math).unwrap();
+        assert_eq!(state.preparation_family, "cryptominisat");
+        assert_eq!(
+            state.preparation_math_sha256,
+            "d5a428b182ef32f9f7e2b7408befa0bf41c4d194bc3a4bd13cf34d2cd38f6c83"
+        );
+        assert_eq!(state.geometry.len(), 63);
+        assert_eq!(state.table.len(), 29);
+        assert!(state.table.verify(&state.curve));
+    }
     pub(super) fn plan(cap: usize) -> F5TargetPlan {
         F5TargetPlan {
             schema_version: 1,

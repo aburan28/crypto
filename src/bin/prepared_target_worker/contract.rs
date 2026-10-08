@@ -91,7 +91,7 @@ pub struct PreparationBinding {
     pub producer_sha256: String,
     pub mathematics_sha256: String,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Registration {
     pub schema_version: u32,

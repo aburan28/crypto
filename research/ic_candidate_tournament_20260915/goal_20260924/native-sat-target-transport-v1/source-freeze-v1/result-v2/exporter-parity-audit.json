@@ -1,0 +1,53 @@
+{
+  "accepted_exporter_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+  "audited_controls": [
+    {
+      "accepted_role_audited": true,
+      "control_index": 0,
+      "fixed_source_hashes_verified": true,
+      "native_executables_called_by_auditor": 0,
+      "prepared_roles_audited": 4,
+      "public_point": [
+        40991,
+        73355
+      ],
+      "result_sha256": "1152e47414a1bfe5ba66d17bf05244fe5e2717e27f8f7738de12d94153d9e348"
+    },
+    {
+      "accepted_role_audited": true,
+      "control_index": 1,
+      "fixed_source_hashes_verified": true,
+      "native_executables_called_by_auditor": 0,
+      "prepared_roles_audited": 4,
+      "public_point": [
+        73003,
+        104622
+      ],
+      "result_sha256": "d052317920728ff1f22dd6c8e2dacb51e3c6d086ba7077e7085ec345be81c9fb"
+    },
+    {
+      "accepted_role_audited": true,
+      "control_index": 2,
+      "fixed_source_hashes_verified": true,
+      "native_executables_called_by_auditor": 0,
+      "prepared_roles_audited": 4,
+      "public_point": [
+        59775,
+        2910
+      ],
+      "result_sha256": "784cacdae71b765c1b1420817d1a48f8e736bfd94ca396b375f12f1f57eb2723"
+    }
+  ],
+  "evidence_inventory_sha256": "053c4d32f478c1fc14b49536778f2ff359b6149102f6599643a98e3b7516e12e",
+  "fresh_paired_qualification": false,
+  "native_executables_called_by_auditor": 0,
+  "online_speedup": null,
+  "prepared_exporter_sha256": "14ec27ac31a4181a96ae95f8fda97301708d97dc05ac66623474d256927cd07e",
+  "probe_sha256": "a9005ea75e03d35e251880166f0f69bb59b73b6726ae042205eff7b634b23f5e",
+  "publication_archive_sha256": "c8bda14b39b9f15beaeb39f61d956ffa0b72d2deb7f89873e6a5cf73291ceacf",
+  "registration_sha256": "bc88384114c6c679ebae57f16c84a40f166f3b92ea5d28c3e09a82a0d78376f1",
+  "schema_version": 1,
+  "source_bound_target_admitted": false,
+  "source_manifest_sha256": "a350820504793162a8028b6e3d627b72d689366123f5d55c3dc7d2ee7f928024",
+  "status": "PASS_DISCLOSED_EXACT_BUILT_EXPORTER_PARITY"
+}

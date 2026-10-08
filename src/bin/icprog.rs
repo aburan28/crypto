@@ -41,6 +41,8 @@ mod f5_control_publication;
 mod f5_target;
 #[path = "icprog/identity.rs"]
 mod identity;
+#[path = "icprog/marked_cms_audit.rs"]
+mod marked_cms_audit;
 #[path = "icprog/oracle.rs"]
 mod oracle;
 #[path = "icprog/ordinary_build.rs"]
@@ -52,6 +54,8 @@ mod ordinary_preparation;
 #[path = "icprog/report.rs"]
 mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
+#[path = "icprog/f5_source_custody.rs"]
+mod f5_source_custody;
 #[path = "icprog/json.rs"]
 #[allow(dead_code)]
 mod json;
@@ -73,22 +77,36 @@ mod runs;
 mod sat_control;
 #[path = "icprog/sat_control_publication.rs"]
 mod sat_control_publication;
+#[path = "icprog/sat_exporter_audit.rs"]
+mod sat_exporter_audit;
 #[path = "icprog/sat_query_law.rs"]
 mod sat_query_law;
 #[path = "icprog/sat_source.rs"]
 mod sat_source;
+#[path = "icprog/sat_target_build.rs"]
+mod sat_target_build;
+#[path = "icprog/sat_target_control.rs"]
+mod sat_target_control;
+#[path = "icprog/sat_target_custody.rs"]
+mod sat_target_custody;
 #[path = "icprog/stats.rs"]
 mod stats;
 #[path = "icprog/suite.rs"]
 mod suite;
 #[path = "icprog/target_build.rs"]
 mod target_build;
+#[path = "icprog/target_card.rs"]
+mod target_card;
 #[path = "icprog/target_control.rs"]
 mod target_control;
 #[path = "icprog/target_custody.rs"]
 mod target_custody;
 #[path = "icprog/target_math.rs"]
 mod target_math;
+#[path = "icprog/target_sat_math.rs"]
+mod target_sat_math;
+#[path = "icprog/target_sat_transport.rs"]
+mod target_sat_transport;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -121,6 +139,117 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Freeze target-free SAT source, prepared exporter/CMS, and original logs; no target or solver run.
+    SatTargetFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        preparation_binding: PathBuf,
+        #[arg(long)]
+        marked_cms: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        validation_only: bool,
+        #[arg(long)]
+        validation_publication: Option<PathBuf>,
+        #[arg(long)]
+        validation_registration_sha256: Option<String>,
+        #[arg(long)]
+        exporter_controls: Option<PathBuf>,
+        #[arg(long)]
+        exporter_probe: Option<PathBuf>,
+        #[arg(long)]
+        exporter_audit: Option<PathBuf>,
+    },
+    /// Publish a target-free SAT build or scientific registration as a full archive.
+    SatTargetPublish {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        scientific: bool,
+    },
+    /// Independently replay a SAT publication as data, without executing it.
+    SatTargetReplay {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        scientific: bool,
+    },
+    /// Audit exact-built prepared-exporter parity on three disclosed points as data.
+    SatExporterAudit {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        controls: PathBuf,
+        #[arg(long)]
+        probe: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Consume one scientific SAT target capsule after publication/card preflight.
+    SatTargetExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        source_descriptor: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Inspect a consumed SAT attempt prefix without executing a child.
+    SatTargetInspect {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Audit original SAT worker, transport, mathematics and five-phase clock.
+    SatTargetAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        transport_out: PathBuf,
+    },
     /// Freeze the complete native n17 target source/build; never runs a solve.
     TargetControlFreeze {
         #[arg(long, default_value = ".")]
@@ -139,6 +268,52 @@ enum Command {
         host_context: PathBuf,
         #[arg(long)]
         validation_only: bool,
+    },
+    /// Publish only the exact F5 source/build bytes before a fresh point exists.
+    TargetControlPublishSource {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay the target-free F5 source archive as data without executing it.
+    TargetControlReplaySource {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        source_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Irreversibly bind a later public card to the prepublished F5 binary.
+    TargetControlAdoptCard {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        source_publication: PathBuf,
+        #[arg(long)]
+        source_registration_sha256: String,
+        #[arg(long)]
+        source_descriptor: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Recheck the original F5 source/card adoption before target dispatch.
+    TargetControlAuditAdoption {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
     },
     /// Publish full data custody of an unconsumed validation-only target build.
     TargetControlPublishBuild {
@@ -160,10 +335,32 @@ enum Command {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Publish full data custody of an unconsumed scientific target registration.
+    TargetControlPublishRegistration {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Verify published scientific target registration as data; no execution.
+    TargetControlReplayRegistration {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Consume one separately published target registration; no retry or resume.
     TargetControlExecute {
         #[arg(long)]
         capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
         #[arg(long)]
         execution: PathBuf,
         #[arg(long)]
@@ -208,6 +405,59 @@ enum Command {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Replay SAT one-target mathematics only; no solver, native-source or runtime admission.
+    TargetSatMathematicsAudit {
+        #[arg(long)]
+        preparation: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        producer: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay prepared SAT role files and source models as data; no execution admission.
+    TargetSatTransportAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Independently replay the nine disclosed CMS transport roles as data.
+    MarkedCmsTransportAudit {
+        #[arg(long)]
+        root: PathBuf,
+        #[arg(long)]
+        accepted_cms: PathBuf,
+        #[arg(long)]
+        marked_build: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Create one postpublication n17 public-point card; no target logarithm is generated.
+    TargetCardGenerate {
+        #[arg(long)]
+        publications: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay the public point and source-descriptor hashes without invoking any solver.
+    TargetCardAudit {
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        publications: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Publish full data custody of an unconsumed validation-only build; no search.
     OrdinaryControlPublishBuild {
         #[arg(long)]
@@ -225,6 +475,26 @@ enum Command {
         publication: PathBuf,
         #[arg(long)]
         validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish an unconsumed scientific ordinary registration before dispatch.
+    OrdinaryControlPublishRegistration {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Check the published scientific registration as data, without execution.
+    OrdinaryControlReplayRegistration {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
         #[arg(long)]
         out: PathBuf,
     },
@@ -249,6 +519,8 @@ enum Command {
     OrdinaryControlExecute {
         #[arg(long)]
         capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
         #[arg(long)]
         execution: PathBuf,
         #[arg(long)]
@@ -814,6 +1086,113 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::SatTargetFreeze {
+            root,
+            out,
+            config,
+            preparation_binding,
+            marked_cms,
+            cargo,
+            rustc,
+            host_context,
+            validation_only,
+            validation_publication,
+            validation_registration_sha256,
+            exporter_controls,
+            exporter_probe,
+            exporter_audit,
+        } => sat_target_build::freeze(sat_target_build::FreezeRequest {
+            root: &root,
+            out: &out,
+            config: &config,
+            preparation_binding: &preparation_binding,
+            marked_cms: &marked_cms,
+            cargo: &cargo,
+            rustc: &rustc,
+            host_context: &host_context,
+            validation_only,
+            validation_publication: validation_publication.as_deref(),
+            validation_registration_sha256: validation_registration_sha256.as_deref(),
+            exporter_controls: exporter_controls.as_deref(),
+            exporter_probe: exporter_probe.as_deref(),
+            exporter_audit: exporter_audit.as_deref(),
+        }),
+        Command::SatTargetPublish {
+            capsule,
+            publication,
+            registration_sha256,
+            out,
+            scientific,
+        } => sat_target_custody::publish(
+            &capsule,
+            &publication,
+            &registration_sha256,
+            &out,
+            if scientific {
+                sat_target_custody::Kind::Scientific
+            } else {
+                sat_target_custody::Kind::Validation
+            },
+        ),
+        Command::SatTargetReplay {
+            publication,
+            registration_sha256,
+            out,
+            scientific,
+        } => sat_target_custody::replay(
+            &publication,
+            &registration_sha256,
+            &out,
+            if scientific {
+                sat_target_custody::Kind::Scientific
+            } else {
+                sat_target_custody::Kind::Validation
+            },
+        ),
+        Command::SatExporterAudit {
+            publication,
+            registration_sha256,
+            controls,
+            probe,
+            out,
+        } => sat_exporter_audit::audit(&publication, &registration_sha256, &controls, &probe, &out),
+        Command::SatTargetExecute {
+            capsule,
+            publication,
+            source_descriptor,
+            card,
+            execution,
+            registration_sha256,
+        } => sat_target_control::execute(
+            &capsule,
+            &publication,
+            &source_descriptor,
+            &card,
+            &execution,
+            &registration_sha256,
+        ),
+        Command::SatTargetInspect {
+            capsule,
+            execution,
+            card,
+            registration_sha256,
+            out,
+        } => sat_target_control::inspect(&capsule, &execution, &card, &registration_sha256, &out),
+        Command::SatTargetAudit {
+            capsule,
+            execution,
+            card,
+            registration_sha256,
+            out,
+            transport_out,
+        } => sat_target_control::audit(
+            &capsule,
+            &execution,
+            &card,
+            &registration_sha256,
+            &out,
+            &transport_out,
+        ),
         Command::TargetControlFreeze {
             root,
             out,
@@ -833,6 +1212,44 @@ fn main() -> ExitCode {
             host: &host_context,
             validation_only,
         }),
+        Command::TargetControlPublishSource {
+            capsule,
+            publication,
+            validation_registration_sha256,
+            out,
+        } => f5_source_custody::publish(
+            &capsule,
+            &publication,
+            &validation_registration_sha256,
+            &out,
+        ),
+        Command::TargetControlReplaySource {
+            publication,
+            source_registration_sha256,
+            out,
+        } => f5_source_custody::replay(&publication, &source_registration_sha256, &out),
+        Command::TargetControlAdoptCard {
+            capsule,
+            source_publication,
+            source_registration_sha256,
+            source_descriptor,
+            card,
+            validation_registration_sha256,
+            out,
+        } => f5_source_custody::adopt_card(
+            &capsule,
+            &source_publication,
+            &source_registration_sha256,
+            &source_descriptor,
+            &card,
+            &validation_registration_sha256,
+            &out,
+        ),
+        Command::TargetControlAuditAdoption {
+            capsule,
+            registration_sha256,
+            out,
+        } => f5_source_custody::audit_adoption(&capsule, &registration_sha256, &out),
         Command::TargetControlPublishBuild {
             capsule,
             publication,
@@ -849,11 +1266,23 @@ fn main() -> ExitCode {
             validation_registration_sha256,
             out,
         } => target_custody::replay(&publication, &validation_registration_sha256, &out),
+        Command::TargetControlPublishRegistration {
+            capsule,
+            publication,
+            registration_sha256,
+            out,
+        } => target_custody::publish_scientific(&capsule, &publication, &registration_sha256, &out),
+        Command::TargetControlReplayRegistration {
+            publication,
+            registration_sha256,
+            out,
+        } => target_custody::replay_scientific(&publication, &registration_sha256, &out),
         Command::TargetControlExecute {
             capsule,
+            publication,
             execution,
             registration_sha256,
-        } => target_control::execute(&capsule, &execution, &registration_sha256),
+        } => target_control::execute(&capsule, &publication, &execution, &registration_sha256),
         Command::TargetControlInspect {
             capsule,
             execution,
@@ -882,6 +1311,17 @@ fn main() -> ExitCode {
             validation_registration_sha256,
             out,
         } => ordinary_build::replay(&publication, &validation_registration_sha256, &out),
+        Command::OrdinaryControlPublishRegistration {
+            capsule,
+            publication,
+            registration_sha256,
+            out,
+        } => ordinary_build::publish_scientific(&capsule, &publication, &registration_sha256, &out),
+        Command::OrdinaryControlReplayRegistration {
+            publication,
+            registration_sha256,
+            out,
+        } => ordinary_build::replay_scientific(&publication, &registration_sha256, &out),
         Command::OrdinaryControlFreeze {
             root,
             out,
@@ -901,9 +1341,10 @@ fn main() -> ExitCode {
         ),
         Command::OrdinaryControlExecute {
             capsule,
+            publication,
             execution,
             registration_sha256,
-        } => ordinary_control::execute(&capsule, &execution, &registration_sha256),
+        } => ordinary_control::execute(&capsule, &publication, &execution, &registration_sha256),
         Command::OrdinaryControlInspect {
             capsule,
             execution,
@@ -934,6 +1375,34 @@ fn main() -> ExitCode {
             &worker_sha256,
             &out,
         ),
+        Command::TargetSatMathematicsAudit {
+            preparation,
+            config,
+            producer,
+            out,
+        } => target_sat_math::run(&preparation, &config, &producer, &out),
+        Command::TargetSatTransportAudit {
+            capsule,
+            execution,
+            card,
+            registration_sha256,
+            out,
+        } => target_sat_transport::run(&capsule, &execution, &card, &registration_sha256, &out),
+        Command::MarkedCmsTransportAudit {
+            root,
+            accepted_cms,
+            marked_build,
+            execution,
+            out,
+        } => marked_cms_audit::run(&root, &accepted_cms, &marked_build, &execution, &out),
+        Command::TargetCardGenerate { publications, out } => {
+            target_card::generate(&publications, &out)
+        }
+        Command::TargetCardAudit {
+            card,
+            publications,
+            out,
+        } => target_card::audit(&card, &publications, &out),
         Command::F5ControlReplayCustody {
             publication,
             registration_sha256,

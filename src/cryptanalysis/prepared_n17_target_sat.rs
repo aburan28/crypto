@@ -26,7 +26,10 @@ impl SatTargetPlan {
                 && (1..=8).contains(&self.max_queries)
                 && (100_000..=1_000_000).contains(&self.conflict_budget)
                 && (1..=30_000).contains(&self.exporter_timeout_ms)
-                && (1..=60_000).contains(&self.solver_timeout_ms)
+                // Match the registered one-million-conflict natural panel's
+                // 120-second per-query watchdog. The separate 900-second
+                // one-target controller cap still bounds total work.
+                && (1..=120_000).contains(&self.solver_timeout_ms)
                 && (30_000..=900_000).contains(&self.controller_timeout_ms),
             "outside the bounded disclosed n17 CMS target interface",
         )
@@ -635,6 +638,11 @@ mod sat_boundary_tests {
         bad = plan();
         bad.solver_timeout_ms = 0;
         assert!(bad.validate().is_err());
+        let mut matched_panel = plan();
+        matched_panel.solver_timeout_ms = 120_000;
+        assert!(matched_panel.validate().is_ok());
+        matched_panel.solver_timeout_ms = 120_001;
+        assert!(matched_panel.validate().is_err());
         let mut value = serde_json::to_value(plan()).unwrap();
         value["known_scalar"] = json!(24886);
         assert!(serde_json::from_value::<SatTargetPlan>(value).is_err());

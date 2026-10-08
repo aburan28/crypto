@@ -1,0 +1,269 @@
+{
+  "accepted_exporter_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+  "accepted_files": {
+    "instance.anf": {
+      "bytes": 35760,
+      "sha256": "eab39a019e5298286e92169efcbe0eb381ce77af2d46749748d0ef202e1478ff"
+    },
+    "instance.magma": {
+      "bytes": 57519,
+      "sha256": "c5f7baa8ef80be4d749fb3be5ac6c3d957978166d534826090455378ec6e5d7e"
+    },
+    "instance.xor.cnf": {
+      "bytes": 42662,
+      "sha256": "03a017d1763f5be128f8069f78158723a456b0803757eaa03ffbb647d9c6d960"
+    }
+  },
+  "accepted_receipt": {
+    "argv": [
+      "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-cms-capsule-v1/immutable/assets/bin/exporter",
+      "17",
+      "6",
+      "standard",
+      "2026100303",
+      "1000000",
+      "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1/accepted-instance",
+      "1",
+      "0",
+      "--target-x",
+      "73003",
+      "--target-y",
+      "104622",
+      "--blind-instance-id",
+      "native-control-01",
+      "--export-only"
+    ],
+    "child_wall_ns": 33931250,
+    "cwd": "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1",
+    "deadline_ms": 30000,
+    "environment": {
+      "LC_ALL": "C"
+    },
+    "executable_sha256_after": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+    "executable_sha256_before": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+    "exit_code": 0,
+    "output_limit": false,
+    "pid": 99285,
+    "process_group_drain_confirmed": true,
+    "process_group_drain_requested": true,
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 4055,
+    "stdout_sha256": "7a4f7cc9c099effc9fac5f2c71b4232c91d911525d54756e5f870e44b076bba5",
+    "timed_out": false
+  },
+  "control_index": 1,
+  "deterministic_manifest_match": true,
+  "fixed_source_hashes_match": true,
+  "negative_controls": [
+    {
+      "name": "malformed",
+      "receipt": {
+        "argv": [
+          "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/target/release/examples/koblitz_pdp_export",
+          "17",
+          "6",
+          "standard",
+          "2026100303",
+          "1000000",
+          "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1/reject-malformed-instance",
+          "1",
+          "0",
+          "--export-only",
+          "--prestart-stdin"
+        ],
+        "cwd": "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1",
+        "deadline_ms": 30000,
+        "environment": {
+          "LC_ALL": "C"
+        },
+        "executable_sha256_after": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+        "executable_sha256_before": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+        "exit_code": 101,
+        "launch_to_ready_ns": 13430167,
+        "marker": "c EXPORTER_PREPARED_STDIN_READY_v1",
+        "output_limit": false,
+        "pid": 99365,
+        "process_group_drain_confirmed": true,
+        "readiness_marker_count": 1,
+        "request_to_exit_ns": 7535250,
+        "schema_version": 1,
+        "state": "used",
+        "stderr_bytes": 237,
+        "stderr_sha256": "31163c4e5a1965251131e8a7e36c4c660031289d7727511634f96b2e3d91da42",
+        "stdin_bytes": 6,
+        "stdin_sha256": "9c1b9a81fd4dad8959a7e958eda355b060a24ae388be9abdd5ac1cfbea6fa538",
+        "stdin_write_error": null,
+        "stdin_written_bytes": 6,
+        "stdout_bytes": 35,
+        "stdout_sha256": "ac3b52164cc27113f887bea3fd9d03381257edcfa704f89db072fc2bbd4cbbda",
+        "timed_out": false
+      },
+      "rejected_as_expected": true,
+      "request_bytes": 6,
+      "request_sha256": "9c1b9a81fd4dad8959a7e958eda355b060a24ae388be9abdd5ac1cfbea6fa538"
+    },
+    {
+      "name": "oversized",
+      "receipt": {
+        "argv": [
+          "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/target/release/examples/koblitz_pdp_export",
+          "17",
+          "6",
+          "standard",
+          "2026100303",
+          "1000000",
+          "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1/reject-oversized-instance",
+          "1",
+          "0",
+          "--export-only",
+          "--prestart-stdin"
+        ],
+        "cwd": "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1",
+        "deadline_ms": 30000,
+        "environment": {
+          "LC_ALL": "C"
+        },
+        "executable_sha256_after": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+        "executable_sha256_before": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+        "exit_code": 101,
+        "launch_to_ready_ns": 5352875,
+        "marker": "c EXPORTER_PREPARED_STDIN_READY_v1",
+        "output_limit": false,
+        "pid": 99373,
+        "process_group_drain_confirmed": true,
+        "readiness_marker_count": 1,
+        "request_to_exit_ns": 6269209,
+        "schema_version": 1,
+        "state": "used",
+        "stderr_bytes": 219,
+        "stderr_sha256": "c40ba49aa826b51a6561c317ede93e05c88a006a3a5398602f20744cd99e50b1",
+        "stdin_bytes": 512,
+        "stdin_sha256": "75970ef61ff84555c541925c867dbaf2a43f469c1a82cfb695d83206a4a18442",
+        "stdin_write_error": null,
+        "stdin_written_bytes": 512,
+        "stdout_bytes": 35,
+        "stdout_sha256": "ac3b52164cc27113f887bea3fd9d03381257edcfa704f89db072fc2bbd4cbbda",
+        "timed_out": false
+      },
+      "rejected_as_expected": true,
+      "request_bytes": 512,
+      "request_sha256": "75970ef61ff84555c541925c867dbaf2a43f469c1a82cfb695d83206a4a18442"
+    }
+  ],
+  "negative_controls_pass": true,
+  "online_speedup": null,
+  "prepared_child_groups_drained": true,
+  "prepared_exporter_sha256": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+  "prepared_files": {
+    "instance.anf": {
+      "bytes": 35760,
+      "sha256": "eab39a019e5298286e92169efcbe0eb381ce77af2d46749748d0ef202e1478ff"
+    },
+    "instance.magma": {
+      "bytes": 57519,
+      "sha256": "c5f7baa8ef80be4d749fb3be5ac6c3d957978166d534826090455378ec6e5d7e"
+    },
+    "instance.xor.cnf": {
+      "bytes": 42662,
+      "sha256": "03a017d1763f5be128f8069f78158723a456b0803757eaa03ffbb647d9c6d960"
+    }
+  },
+  "prepared_ready_receipt": {
+    "argv": [
+      "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/target/release/examples/koblitz_pdp_export",
+      "17",
+      "6",
+      "standard",
+      "2026100303",
+      "1000000",
+      "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1/prepared-instance",
+      "1",
+      "0",
+      "--export-only",
+      "--prestart-stdin"
+    ],
+    "cwd": "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1",
+    "environment": {
+      "LC_ALL": "C"
+    },
+    "executable_sha256": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+    "marker": "c EXPORTER_PREPARED_STDIN_READY_v1",
+    "pid": 99333,
+    "ready_after_launch_ns": 8130208,
+    "schema_version": 1,
+    "state": "ready-without-input",
+    "stdin_written_bytes": 0,
+    "stdout_at_ready_sha256": "ac3b52164cc27113f887bea3fd9d03381257edcfa704f89db072fc2bbd4cbbda"
+  },
+  "prepared_receipt": {
+    "argv": [
+      "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/target/release/examples/koblitz_pdp_export",
+      "17",
+      "6",
+      "standard",
+      "2026100303",
+      "1000000",
+      "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1/prepared-instance",
+      "1",
+      "0",
+      "--export-only",
+      "--prestart-stdin"
+    ],
+    "cwd": "/Volumes/SSD990/llm/tmp/ic-exporter-prestart-control-01-v1",
+    "deadline_ms": 30000,
+    "environment": {
+      "LC_ALL": "C"
+    },
+    "executable_sha256_after": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+    "executable_sha256_before": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+    "exit_code": 0,
+    "launch_to_ready_ns": 8130208,
+    "marker": "c EXPORTER_PREPARED_STDIN_READY_v1",
+    "output_limit": false,
+    "pid": 99333,
+    "process_group_drain_confirmed": true,
+    "readiness_marker_count": 1,
+    "request_to_exit_ns": 17364792,
+    "schema_version": 1,
+    "state": "used",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdin_bytes": 81,
+    "stdin_sha256": "e4da17fe1bfe49e8311aa68eb56725d24d3e60bbe06b8a366dccfbff504f7bcd",
+    "stdin_write_error": null,
+    "stdin_written_bytes": 81,
+    "stdout_bytes": 4333,
+    "stdout_sha256": "b659be2d6823ecf22e0d4bfecbdccee4ebea6037152261258a73e98c0f4abc28",
+    "timed_out": false
+  },
+  "public_point": [
+    73003,
+    104622
+  ],
+  "question": "disclosed-prepared-exporter-parity-v1",
+  "ready_before_delivery": true,
+  "schema_version": 1,
+  "source_bound_target_admitted": false,
+  "source_bytes_match": true,
+  "source_instance_match": true,
+  "transport_control_pass": true,
+  "unused_cancel_pass": true,
+  "unused_cancel_receipt": {
+    "executable_sha256_after": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+    "executable_sha256_before": "676c85f7e08b9339462ce8cc1cb079ae476539cb7b0bf9103fda4cf541003dd8",
+    "exit_code": null,
+    "launch_to_ready_ns": 13384292,
+    "pid": 99380,
+    "process_group_drain_confirmed": true,
+    "readiness_marker_count": 1,
+    "ready_to_cancel_ns": 14813250,
+    "schema_version": 1,
+    "state": "cancelled-unused",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdin_written_bytes": 0,
+    "stdout_bytes": 35,
+    "stdout_sha256": "ac3b52164cc27113f887bea3fd9d03381257edcfa704f89db072fc2bbd4cbbda"
+  }
+}

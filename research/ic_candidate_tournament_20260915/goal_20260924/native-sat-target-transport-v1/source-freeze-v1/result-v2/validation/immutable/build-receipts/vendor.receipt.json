@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "vendor",
+    "--locked",
+    "--offline",
+    "/Volumes/SSD990/llm/tmp/ic-native-sat-target-build-validation-20261006-v3/immutable/source/vendor"
+  ],
+  "cwd": "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005",
+  "environment": [
+    [
+      "PATH",
+      "/Users/adamburan/.local/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Volumes/SSD990/.codex/tmp/arg0/codex-arg0QxkNks:/Users/adamburan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Users/adamburan/.local/bin:/Users/adamburan/.bun/bin:/Users/adamburan/bin:/Users/adamburan/.opencode/bin:/Users/adamburan/.atuin/bin:/Users/adamburan/.pyenv/shims:/Users/adamburan/.pyenv/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamburan/.cargo/bin:/Users/adamburan/.docker/bin:/Users/adamburan/go/bin:/Users/adamburan/istio-1.24.0/bin:/Users/adamburan/.lmstudio/bin:/Users/adamburan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS:/Users/adamburan/.docker/bin"
+    ],
+    [
+      "LC_ALL",
+      "C"
+    ]
+  ],
+  "exit_code": 0,
+  "log_sha256": "000a5d3e616b04659e5b8503a8ec969b33b4f8cbc9f51443ffbf047dc99d9f85",
+  "program": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+  "program_sha256_after": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "program_sha256_before": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "wall_ns": "6317952000"
+}

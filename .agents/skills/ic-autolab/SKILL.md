@@ -34,7 +34,7 @@ Use a new output path: replay refuses to overwrite evidence. This command checks
 the retained source witness, ordinary rows, exact geometric negatives, rank and
 logs. It launches no solver and establishes neither new yield nor performance.
 The [native migration gates](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-v1/PROTOCOL.md)
-separate this replay from the pending native controller and fresh comparison.
+separate this replay from the later native controllers and fresh comparison.
 The [native controller protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-control-v1/PROTOCOL.md)
 describes `icprog sat-control-freeze`, `sat-control-execute`, and
 `sat-control-audit`. Freeze builds the producer and independent checker from
@@ -102,9 +102,9 @@ strict target-free n17 transcripts. It independently reconstructs the whole
 geometric base, input law, exact negatives, projected rows, rank and logs,
 preserving failed attempts and incomplete panels. It executes no solver and
 admits neither source-bound production nor new natural yield or performance.
-Native target-free F5 and external CryptoMiniSat producers, their own one-use
-registrations and per-attempt costs remain pending. Never use the worker's Rust
-CDCL engine as evidence for the accepted external CryptoMiniSat pipeline.
+The later target-free F5 and external CryptoMiniSat producers, their one-use
+registrations and per-attempt costs are recorded below. Never use the worker's
+Rust CDCL engine as evidence for the accepted external CryptoMiniSat pipeline.
 The [native target-free preparation API](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-target-free-preparation-v1/PROTOCOL.md)
 now constructs fresh n17 geometry and the matrix without Q or imported logs,
 retains the fixed panel and exclusive attempt costs, and runs one final LA
@@ -131,8 +131,92 @@ its external validation seal for portable data verification; it executes no
 archived binary and cannot admit a scientific run. Keep validation-only mode;
 never dispatch an archive restoration. Do not loosen an old target-control
 registration for this worker.
+The [fresh scientific ordinary registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-registration-v1/PROTOCOL.md)
+separately freezes the 512-query natural MatrixF5 and external CryptoMiniSat
+panels on identical ordered n17 points. Its
+[`REGISTRATION_RESULT.md`](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-registration-v1/REGISTRATION_RESULT.md)
+pins distinct external seals, source/build manifests, complete capsule archives
+and two matching data-only replay receipts per arm. For a new registration,
+publish and push the full unconsumed scientific archive with
+`ordinary-control-publish-registration`, then check it with
+`ordinary-control-replay-registration` before the sole invocation. The
+original frozen `ordinary-control-execute` now requires `--publication` and
+replays its bytes before consuming the claim; its frozen audit checks that
+preflight again. Never substitute the validation-only publication. Preserve
+each arm's original execution, partial prefixes, failed attempts and audit;
+stage yield and exploratory wall time are not complete one-target results.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
+Both scientific ordinary registrations are now consumed and closed. Their
+[original frozen-audit result](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-registration-v1/result-v1/RESULT.md)
+preserves all 512 paired attempts per arm, full raw execution archives and
+original checker receipts. MatrixF5 reached rank 29/29 with 29 independently
+replayed logs; the frozen 100,000-conflict CryptoMiniSat arm reached 22/29
+and has no complete log table. Audit PASS validates custody and mathematics,
+not full-rank preparation. Do not refill the missing SAT rows from F5 or an
+oracle, rerun either consumed capsule, or turn shorter incomplete CMS attempts
+into a CPU speedup. A revised SAT budget/encoding needs a newly registered
+natural panel. F5 may bind its audited logs to a separate new target claim.
+For a new F5 target capsule, publish its full unconsumed scientific bytes with
+`target-control-publish-registration`, replay them with
+`target-control-replay-registration`, and pass `--publication` to the original
+frozen `target-control-execute`. Its independent audit must match the saved
+preflight to the same publication. The older `target-control-publish-build` is
+validation-only and cannot authorize a solve. A disclosed target recovery
+still needs fresh-target qualification, a same-point rho arm, canonical IDs
+and host isolation before any speedup claim.
+The [SAT target transport design](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/DESIGN.md)
+specifies a new source-bound prestarted exporter and one CMS child per permitted
+attempt. This is a feasibility design, not a dispatch registration. The
+[disclosed control result](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/controls-v1/RESULT.md)
+retains all three fixed exporter parity passes, two accepted-CMS stdin parity
+passes and the first frozen CMS parity **failure** (file-mode wall timeout).
+A separately predeclared 120-second diagnostic on that first point passed but
+does not repair the frozen 60-second result. The accepted reader line occurs
+before parser initialization, so even passing compatibility does not establish
+the online boundary. A new post-buffer-marker CMS binary needs its own
+source/build pin and the predeclared three-way parity protocol in
+[`MARKED_CMS_CONTROL_V1.md`](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/MARKED_CMS_CONTROL_V1.md).
+The separately sealed [512-query, one-million-conflict natural SAT preparation](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-million-registration-v1/result-v1/RESULT.md)
+is consumed and closed. Its original frozen auditor admitted 145 witnesses,
+339 geometric negatives, 15 incomplete attempts and 13 timeouts; it verified
+all 29 folded logs. Never restart or refill it. The guarded build then made a
+distinct post-buffer-marked binary, and the [nine-role disclosed control](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/result-v1/RESULT.md)
+passed an independent data-only transport audit. This is disclosed-input
+compatibility, not natural target yield or a one-target speed measurement; the
+historical 60-second control failure remains. The
+[validation-only SAT source build](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/source-freeze-v1/result-v1/RESULT.md)
+passed a 6,974-file data-only archive replay; its exact-built exporter passed
+three new disclosed controls and an independent raw-file/receipt audit. This
+validation capsule cannot dispatch. `icprog sat-target-freeze` now requires
+the matching validation publication, exact exporter controls and audit before
+it can issue a separate scientific registration. Publish that new unconsumed
+capsule with `sat-target-publish --scientific`, replay it as data with
+`sat-target-replay --scientific`, and check the CMS source descriptor against
+the public card before `sat-target-execute` consumes the one-use claim. Use the
+frozen `sat-target-inspect` for interrupted prefixes and `sat-target-audit` for
+original runtime/source/math admission. None of these new scientific paths has
+yet passed a frozen registration or target run. The public-point card requires
+all four independently checked source publications before creation; old
+registrations and disclosed controls cannot substitute for a fresh target.
+The [fresh paired n17 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/PROTOCOL.md)
+predeclares the four source-publication roles, native public-point workload,
+one-use four-arm execution and non-promotion of exploratory wall ratios.
+Its [MatrixF5 source result](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/f5-source-v1/result-v1/RESULT.md)
+retains the new unconsumed validation capsule's target-free source seal and
+complete data-only archive replay. `icprog target-control-publish-source` and
+`target-control-replay-source` handle this pre-card gate. After all four arms
+have independently checked source publications and a public card exists,
+`target-control-adopt-card` and `target-control-audit-adoption` may bind that
+card to the same F5 capsule before the ordinary one-use scientific publication
+and dispatch. The adoption path has not yet been exercised; the old consumed
+F5 capsule cannot be adopted. Incumbent IC and rho source gates remain open.
+The [disclosed strong-rho readiness control](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/rho-readiness-v1/RESULT.md)
+passed scalar replay and deterministic session audit on one already exposed
+public point. It is L0, source-unpublished and unpaired. Use its exact
+hex/decimal curve crosswalk and unpriced-operation caveat before registering
+the rho reference for a fresh card.
+Do not charge child startup to the online interval by stopwatch subtraction.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation
 still requires the Linux implementation. Do not infer a quiet measurement host

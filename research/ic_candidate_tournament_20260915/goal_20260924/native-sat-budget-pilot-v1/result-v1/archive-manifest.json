@@ -1,0 +1,54 @@
+{
+  "files": {
+    "query-000/cold-input.xor.cnf": {
+      "bytes": 40811,
+      "sha256": "ddde57d4e0b355d3f01773f128efe7ebda54defcdd81b6a59ab3729546ed4baa"
+    },
+    "query-000/cold.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "query-000/cold.stdout": {
+      "bytes": 39966,
+      "sha256": "b01776e5fe565697be35631ba56967d8339866670f6d7e997ab2267b1b91b36b"
+    },
+    "query-000/result.json": {
+      "bytes": 3085,
+      "sha256": "51ca35d7d0afe9a3bf5e41337f325fc29cc81c94f8f3f1205962a1b96635f387"
+    },
+    "query-000/stdin.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "query-000/stdin.stdout": {
+      "bytes": 39845,
+      "sha256": "adf027d89dbe6343c663afe343d2144780d343f34018ad2e7e800fd8b272eda9"
+    },
+    "query-015/cold-input.xor.cnf": {
+      "bytes": 41568,
+      "sha256": "0e337d0a9b15579c087a94b61fd81940fa5e42b3009fc5e7156038a013e1f3a1"
+    },
+    "query-015/cold.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "query-015/cold.stdout": {
+      "bytes": 24819,
+      "sha256": "aa0001d3ada2c1921359bdc81320c9a1627dfaa96f10f4cadf6d2c4963352ce7"
+    },
+    "query-015/result.json": {
+      "bytes": 3516,
+      "sha256": "b4bd23aa4a5d6d0f277a80c5d5f011041918d6812adc390081debc0b6865552d"
+    },
+    "query-015/stdin.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "query-015/stdin.stdout": {
+      "bytes": 24698,
+      "sha256": "88b2051ada43ae0c1a237aa690e1c79ba093d5ddc1e247c4b985ada17990a56e"
+    }
+  },
+  "schema_version": 1,
+  "source": "original disclosed SAT budget pilot execution outputs"
+}
