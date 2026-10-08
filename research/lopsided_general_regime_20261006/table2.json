@@ -1,0 +1,105 @@
+{
+  "anchor_rows": {
+    "corollary_26": {
+      "c": 21,
+      "gamma": 0.063,
+      "kappa": 0.5,
+      "note": "c=21 row at kappa=1/2 (|W| <= N^2/sqrt(D)): O(N^2/D^0.063); query form O(D^0.437) per entry. The concrete line encoded in the round-2 gate (N >= D^18)."
+    },
+    "theorem_5": {
+      "c": 19,
+      "gamma": 0.0555,
+      "kappa": 0.5,
+      "note": "c=19 row at kappa=1/2, q=0.43: gamma = 1/18 = 0.0555 (bold in print)"
+    }
+  },
+  "columns": {
+    "c": "ratio c = L/m (larger c: larger gamma, smaller eps)",
+    "eps": "thinness ceiling; row holds whenever D <= N^eps",
+    "gamma_at_kappa": "proven saving: |W| <= N^2/D^kappa wanted entries in O(N^2/D^gamma)"
+  },
+  "epsilon_star": 0.1204,
+  "kappa_columns": [
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "provenance": {
+    "corrections": "text extraction gave 0.2442 for (c=40, kappa=1.0); the rendered page reads 0.2412, frozen here. All other cells matched extraction.",
+    "paper": "Alman-Vassilevska Williams, arXiv:2610.06783v1 (76 pp)",
+    "pdf": "p.40, Table 2 (right half: Theorem 25, wanted-entries form)",
+    "pdf_sha256": "d91a79c5cc9e76005 (local /tmp/lopsided.pdf, as in round 1)",
+    "transcription": "pypdf text extraction, every cell verified against a 150dpi render of p.40 read as an image"
+  },
+  "reading": "Each row: for D <= N^eps and |W| <= N^2/D^kappa, wanted entries of the thin product XY cost O(N^2 log^2 D / D^gamma). Values rounded down by the authors. Beyond eps*: no theorem; paper Sec. 6 leaves D > N^0.12 to future base identities.",
+  "rows": [
+    {
+      "c": 40,
+      "eps": 0.029,
+      "gamma": [
+        0.0166,
+        0.0473,
+        0.106,
+        0.172,
+        0.2412
+      ]
+    },
+    {
+      "c": 21,
+      "eps": 0.056,
+      "gamma": [
+        0.0099,
+        0.0286,
+        0.0653,
+        0.1074,
+        0.1546
+      ]
+    },
+    {
+      "c": 19,
+      "eps": 0.062,
+      "gamma": [
+        0.0087,
+        0.0253,
+        0.0578,
+        0.0954,
+        0.1379
+      ]
+    },
+    {
+      "c": 15,
+      "eps": 0.079,
+      "gamma": [
+        0.0057,
+        0.0168,
+        0.0389,
+        0.0646,
+        0.0941
+      ]
+    },
+    {
+      "c": 12,
+      "eps": 0.099,
+      "gamma": [
+        0.0027,
+        0.008,
+        0.0186,
+        0.0312,
+        0.0459
+      ]
+    },
+    {
+      "c": 10.5,
+      "eps": 0.114,
+      "gamma": [
+        0.0007,
+        0.0022,
+        0.0052,
+        0.0087,
+        0.0129
+      ]
+    }
+  ]
+}

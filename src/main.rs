@@ -909,6 +909,15 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                 if due || solved || lanes_done || timed_out {
                     last_sync = Instant::now();
                     do_sync(true);
+                    // Rate-limited inside: asked every tick, posts every
+                    // HEARTBEAT_SECS. A failure is one line and the next
+                    // tick tries again; a node without the route is told
+                    // once and then left alone.
+                    if let Some(c) = &cairn {
+                        if let Err(e) = c.lock().unwrap().heartbeat() {
+                            eprintln!("[cairn] heartbeat failed: {e}");
+                        }
+                    }
                     let st = state.lock().unwrap();
                     let p = st.progress(
                         &ctx,
@@ -930,8 +939,8 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                         let c = c.lock().unwrap();
                         let s = c.stats();
                         eprintln!(
-                            "[cairn]  committed {}  revealed {}  pending {}  refused {}  paid {} unit(s) = {}  rejected {}  log points {}",
-                            s.committed, s.revealed, c.pending(), s.refused, s.paid_units, s.paid_total, s.rejected, s.log_dps,
+                            "[cairn]  committed {}  revealed {}  pending {}  refused {}  paid {} unit(s) = {}  rejected {}  log points {}  heartbeats {}",
+                            s.committed, s.revealed, c.pending(), s.refused, s.paid_units, s.paid_total, s.rejected, s.log_dps, s.heartbeats,
                         );
                     }
                 }

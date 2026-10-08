@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 199, 2026-10-02.
+Current through Stage 201, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -266,6 +266,43 @@ a measured lower bound of 14 components, 205.639384 wall-seconds and
 verification passes 17/17 with result SHA-256
 `2f4551a1644b5fc49d15a8be07a13ff4a5b56219595d496ef9e12b2077902edd`.
 This is selected one-target F4 engineering; no SOTA gate changes.
+
+Stage 200 tests size-gated parallel target-row clearing inside the selected
+full-M4RI matrices. The corrected candidate/control ratios are 1.058804 wall,
+0.963229 total core and 1.008040 RSS: CPU falls 3.68 percent, but wall rises
+5.88 percent and misses the frozen strict-below-0.98 joint gate. Both arms
+route exactly 481 matrices and 351,164 blocks through full M4RI, perform
+102,707,985,015 XORs, complete all 242 systems and return exhaustive UNSAT.
+The candidate parallelizes 75,803 blocks covering 106,712,818,981 scheduled
+target-row words. Its first attempt panicked on re-entrant thread-local scratch;
+that failed process is preserved and charged, a twelve-outer-call regression
+certifies the correction, and the entire frozen pair is rerun from a fresh
+corrected binary. Confirmation is prohibited and runtime source is reverted to
+the Stage 199 default. Stage 200 adds a measured lower bound of 26 components,
+1,088.370919 wall-seconds and 4,553.408345 core-seconds. The cumulative lower
+bound becomes 722 components, 26,616.264678 wall-seconds and 73,077.015408
+core-seconds at the unchanged 6,310,576,128-byte maximum RSS. Complete cost
+remains `null`. Final native verification passes 27/27 with result SHA-256
+`5a1530a9f89645076b99c1c027996793c107f7eacb1d4907ec1cdedb76756f31`.
+This is a rejected one-target scheduling experiment; no SOTA gate changes.
+
+Stage 201 tests exact last-nonzero-word ends for each full-M4RI combination
+while retaining the control's downstream row-end metadata and schedule. It
+trims 5,057,385 table entries and 106,080,228 row lookups, saving exactly
+7,706,619 table-preparation words plus 184,308,693 row-application words.
+Performed XORs fall from 102,707,985,015 to 102,515,969,703, a 0.186953
+percent reduction. Candidate/control ratios are 1.044330 wall, 0.986995 total
+core, 1.014116 RSS and 0.998130 performed work. Both arms route 481 matrices
+and 351,164 blocks, retain identical logical work and algebra, complete all 242
+systems and return exhaustive UNSAT. The candidate misses the frozen wall and
+CPU gates, so confirmation is prohibited and runtime source is reverted.
+Stage 201 adds a measured lower bound of 16 components, 1,016.740619
+wall-seconds and 2,349.721545 core-seconds. The cumulative lower bound becomes
+738 components, 27,633.005297 wall-seconds and 75,426.736953 core-seconds at
+the unchanged 6,310,576,128-byte maximum RSS. Complete cost remains `null`.
+Final native verification passes 22/22 with result SHA-256
+`1f267740b9823c73f8bceb687a46f4e91199ce512fd74f208a18a8cbdd0a2813`.
+This is a rejected one-target implementation experiment; no SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the

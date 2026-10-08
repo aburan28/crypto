@@ -179,7 +179,9 @@ impl FastCurve {
         FastPoint::affine(x3, y3)
     }
 
-    #[inline]
+    /// Always inlined, so that in the `pclmulqdq` copies of the batched
+    /// loops its products inline too.
+    #[inline(always)]
     fn add_with_lambda(&self, p: FastPoint, q: FastPoint, lambda: u64) -> FastPoint {
         let f = &self.field;
         let x3 = f.sqr(lambda) ^ lambda ^ p.x ^ q.x ^ self.a;
@@ -211,6 +213,44 @@ impl FastCurve {
     /// denominators `x_P + x_{Q_j}`).  Degenerate pairs (an `O`
     /// operand, `Q_j = ±P`) are handled individually.
     pub fn add_many(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.add_many_clmul(p, qs, out, scratch) };
+        }
+        self.add_many_inline(p, qs, out, scratch);
+    }
+
+    /// [`Self::add_many`] compiled with `pclmulqdq`, so that every field
+    /// multiplication in it inlines instead of being a call (see
+    /// `Gf2::batch_inv_clmul`).  The other batched loops below and the
+    /// scalar ladder have the same pair of bodies.
+    ///
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn add_many_clmul(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.add_many_inline(p, qs, out, scratch);
+    }
+
+    #[inline(always)]
+    fn add_many_inline(
         &self,
         p: FastPoint,
         qs: &[FastPoint],
@@ -285,6 +325,41 @@ impl FastCurve {
         lambdas: &mut Vec<u64>,
         scratch: &mut BatchScratch,
     ) {
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.add_many_lazy_clmul(p, qs, out, lambdas, scratch) };
+        }
+        self.add_many_lazy_inline(p, qs, out, lambdas, scratch);
+    }
+
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn add_many_lazy_clmul(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        lambdas: &mut Vec<u64>,
+        scratch: &mut BatchScratch,
+    ) {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.add_many_lazy_inline(p, qs, out, lambdas, scratch);
+    }
+
+    #[inline(always)]
+    fn add_many_lazy_inline(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        lambdas: &mut Vec<u64>,
+        scratch: &mut BatchScratch,
+    ) {
         let f = &self.field;
         scratch.dens.clear();
         scratch.dens.extend(qs.iter().map(|q| {
@@ -340,6 +415,39 @@ impl FastCurve {
         scratch: &mut BatchScratch,
     ) {
         assert_eq!(ps.len(), qs.len(), "pairwise addition needs equal slices");
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.add_pairwise_clmul(ps, qs, out, scratch) };
+        }
+        self.add_pairwise_inline(ps, qs, out, scratch);
+    }
+
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn add_pairwise_clmul(
+        &self,
+        ps: &[FastPoint],
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.add_pairwise_inline(ps, qs, out, scratch);
+    }
+
+    #[inline(always)]
+    fn add_pairwise_inline(
+        &self,
+        ps: &[FastPoint],
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
         let f = &self.field;
         scratch.dens.clear();
         scratch.dens.extend(ps.iter().zip(qs).map(|(p, q)| {
@@ -390,6 +498,30 @@ impl FastCurve {
     /// The point is the same, so everything downstream — the probe, the
     /// pair table, the pinned counters — sees no difference.
     fn ladder(&self, p: FastPoint, bits: u64, bit: impl Fn(u64) -> bool) -> FastPoint {
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.ladder_clmul(p, bits, bit) };
+        }
+        self.ladder_inline(p, bits, bit)
+    }
+
+    /// The doubling and the addition are always inlined into this, or
+    /// their products would be calls again.
+    ///
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn ladder_clmul(&self, p: FastPoint, bits: u64, bit: impl Fn(u64) -> bool) -> FastPoint {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.ladder_inline(p, bits, bit)
+    }
+
+    #[inline(always)]
+    fn ladder_inline(&self, p: FastPoint, bits: u64, bit: impl Fn(u64) -> bool) -> FastPoint {
         let mut r = LdPoint::INFINITY;
         for i in (0..bits).rev() {
             r = self.ld_double(r);
@@ -404,7 +536,7 @@ impl FastCurve {
     /// `Z₃ = X₁²Z₁²`, `X₃ = X₁⁴ + bZ₁⁴`,
     /// `Y₃ = bZ₁⁴·Z₃ + X₃·(aZ₃ + Y₁² + bZ₁⁴)`.  `O` and the 2-torsion
     /// point (`X₁ = 0`) both give `Z₃ = 0`, which is `O`.
-    #[inline]
+    #[inline(always)]
     fn ld_double(&self, p: LdPoint) -> LdPoint {
         if p.z == 0 {
             return LdPoint::INFINITY;
@@ -434,7 +566,7 @@ impl FastCurve {
     /// `X₃ = A² + C(A + B² + aC)`,
     /// `Y₃ = (x₂Z₃ + X₃)(AC + Z₃) + (x₂ + y₂)Z₃²`.
     /// `B = 0` means equal abscissae: `Q` again (double it) or `−Q` (`O`).
-    #[inline]
+    #[inline(always)]
     fn ld_add_affine(&self, p: LdPoint, q: FastPoint) -> LdPoint {
         let affine_q = LdPoint {
             x: q.x,
@@ -597,59 +729,17 @@ impl FrobeniusCanon {
         self.least_rotation(self.coords(x)).0
     }
 
-    /// Canonical folded-table keys for a slice of points, keeping eight
-    /// independent rotation chains in flight.  A scalar call to
-    /// [`Self::canon`] carries a dependency from every rotation to the
-    /// next; the relation scan has a whole block of unrelated points, so
-    /// interleaving their chains exposes the instruction-level
-    /// parallelism without changing the key.  `out` is cleared first.
+    /// Canonical folded-table keys for a slice of points, through
+    /// [`Self::canon_in_place`]: the relation scan has a whole block of
+    /// unrelated points, so their keys are computed side by side rather
+    /// than one serial chain at a time.  `out` is cleared first.
     #[inline]
     pub(crate) fn point_keys(&self, points: &[FastPoint], out: &mut Vec<u64>) {
-        const LANES: usize = 8;
         out.clear();
-        #[cfg(target_arch = "x86_64")]
-        if canon_simd_enabled() {
-            out.extend(points.iter().map(|p| p.x));
-            self.canon_in_place(out);
-            for (key, p) in out.iter_mut().zip(points) {
-                *key = if p.infinity { 0 } else { *key + 1 };
-            }
-            return;
-        }
-        out.resize(points.len(), 0);
-        let full = points.len() / LANES * LANES;
-        for base in (0..full).step_by(LANES) {
-            let chunk = &points[base..base + LANES];
-            let keys = &mut out[base..base + LANES];
-            let mut v = [0u64; LANES];
-            let mut best = [0u64; LANES];
-            for lane in 0..LANES {
-                let point = chunk[lane];
-                if !point.infinity {
-                    let c = self.coords(point.x);
-                    v[lane] = c;
-                    best[lane] = c;
-                }
-            }
-            for _ in 1..self.n {
-                for lane in 0..LANES {
-                    v[lane] = ((v[lane] << 1) | (v[lane] >> (self.n - 1))) & self.mask;
-                    if v[lane] < best[lane] {
-                        best[lane] = v[lane];
-                    }
-                }
-            }
-            for lane in 0..LANES {
-                let point = chunk[lane];
-                keys[lane] = if point.infinity { 0 } else { best[lane] + 1 };
-            }
-        }
-        for (point, key) in points[full..].iter().zip(&mut out[full..]) {
-            *key = if point.infinity {
-                0
-            } else {
-                self.canon(point.x) + 1
-            };
+        out.extend(points.iter().map(|p| p.x));
+        self.canon_in_place(out);
+        for (key, p) in out.iter_mut().zip(points) {
+            *key = if p.infinity { 0 } else { *key + 1 };
         }
     }
 
@@ -725,6 +815,76 @@ impl FrobeniusCanon {
         (best, best_t)
     }
 
+    /// [`Self::least_rotation`]'s word on `L` independent inputs at once,
+    /// for throughput where the scalar search is tuned for latency.
+    ///
+    /// The scalar search grows the run length one bit per step and exits
+    /// when it stops growing, which is the shortest chain for one word but
+    /// a mispredicted exit for nearly every word in a block, since run
+    /// lengths spread over 3–9 bits.  Here the run length takes a fixed
+    /// number of steps: as `Z_{a+b} = Z_a ∧ rotl^a(Z_b)`, the masks
+    /// `Z_{2^k}` are a few doublings, and the longest run is read off by
+    /// binary lifting from the largest power down, with selects for
+    /// branches.  The two highest run tops are compared with a select as
+    /// well — 90% of random words have at most two — and only the rest
+    /// loop.  The lanes advance in lockstep so their chains overlap.  Only
+    /// the word is returned; ties between rotations do not change it.
+    #[inline]
+    fn least_rotations<const L: usize>(&self, words: [u64; L]) -> [u64; L] {
+        let (n, mask) = (self.n, self.mask);
+        // `rotl^t` for any `0 ≤ t < n` without a branch on `t = 0`:
+        // `n ≤ 63`, so `v >> n` is a legal shift, zero on an `n`-bit word.
+        let rot = |v: u64, t: u32| ((v << t) | (v >> (n - t))) & mask;
+        // All zeros and all ones are their own least rotation; they are
+        // run on a stand-in so every lane takes the same steps.
+        let flat: [bool; L] = std::array::from_fn(|l| words[l] == 0 || words[l] == mask);
+        let c: [u64; L] = std::array::from_fn(|l| if flat[l] { 1 } else { words[l] });
+        // `pow[k] = Z_{2^k}` for every `2^k < n`: as many levels as `n − 1`
+        // has bits, at most six.
+        let levels = (u32::BITS - (n - 1).leading_zeros()) as usize;
+        let mut pow = [[0u64; L]; 6];
+        pow[0] = std::array::from_fn(|l| !c[l] & mask);
+        for k in 1..levels {
+            let w = 1u32 << (k - 1);
+            for l in 0..L {
+                pow[k][l] = pow[k - 1][l] & rot(pow[k - 1][l], w);
+            }
+        }
+        // Lift from `Z_1`.  A longer run implies a shorter one, so taking
+        // each power that still leaves a run reaches the longest, and the
+        // powers below `n` sum past any `L ≤ n − 1`; `len < n` throughout.
+        let mut run = pow[0];
+        let mut len = [1u32; L];
+        for k in (0..levels).rev() {
+            for l in 0..L {
+                let next = run[l] & rot(pow[k][l], len[l]);
+                let longer = next != 0;
+                run[l] = if longer { next } else { run[l] };
+                len[l] += if longer { 1 << k } else { 0 };
+            }
+        }
+        // `run` marks the top bit `p` of every longest zero run, and the
+        // rotation starting there is `rotl^{n − 1 − p}`.
+        std::array::from_fn(|l| {
+            let (r, c) = (run[l], c[l]);
+            let p1 = 63 - r.leading_zeros();
+            let rest = r & !(1u64 << p1);
+            let p2 = 63 - if rest != 0 { rest } else { r }.leading_zeros();
+            let mut best = rot(c, n - 1 - p1).min(rot(c, n - 1 - p2));
+            let mut tops = rest & !(1u64 << p2);
+            while tops != 0 {
+                let p = 63 - tops.leading_zeros();
+                tops &= !(1u64 << p);
+                best = best.min(rot(c, n - 1 - p));
+            }
+            if flat[l] {
+                words[l]
+            } else {
+                best
+            }
+        })
+    }
+
     /// [`Self::canon`] of every element of `xs`, appended to `out` in
     /// order — the same values, computed in bulk.
     ///
@@ -770,7 +930,13 @@ impl FrobeniusCanon {
             }
             return;
         }
-        for x in xs {
+        const LANES: usize = 8;
+        let mut chunks = xs.chunks_exact_mut(LANES);
+        for chunk in &mut chunks {
+            let words: [u64; LANES] = std::array::from_fn(|l| self.coords(chunk[l]));
+            chunk.copy_from_slice(&self.least_rotations(words));
+        }
+        for x in chunks.into_remainder() {
             *x = self.canon(*x);
         }
     }
@@ -1058,11 +1224,14 @@ mod simd512 {
             qx.resize(padded, 0);
             qy.resize(padded, 0);
             dens.resize(padded, 1);
-            acc.clear();
-            acc.resize(padded, 0);
+            // Grown, never zeroed: the kernel stores every prefix before it
+            // reads one back.
+            if acc.len() < padded {
+                acc.resize(padded, 0);
+            }
             // SAFETY: a `Simd512` is only built after detecting avx512f
             // and vpclmulqdq; every slice holds `padded` words.
-            unsafe { self.kernel(curve, p, dens, acc, qx, qy) };
+            unsafe { self.kernel(curve, p, dens, &mut acc[..padded], qx, qy) };
             // `acc` now holds the abscissae and `dens` the slopes.
             out.reserve(qs.len());
             lambdas.reserve(qs.len());
@@ -1165,10 +1334,10 @@ mod simd512 {
 mod tests {
     use super::*;
 
-    /// The run-based least rotation against the exhaustive scan, on
-    /// random words and on the patterns where it could go wrong: all
-    /// zeros and ones, single bits, periodic words where several
-    /// rotations tie, and runs that wrap around bit `n − 1`.
+    /// The run-based least rotation, scalar and laned, against the
+    /// exhaustive scan, on random words and on the patterns where it could
+    /// go wrong: all zeros and ones, single bits, periodic words where
+    /// several rotations tie, and runs that wrap around bit `n − 1`.
     #[test]
     fn least_rotation_matches_exhaustive_scan() {
         fn brute(c: u64, n: u32, mask: u64) -> (u64, u32) {
@@ -1211,12 +1380,22 @@ mod tests {
                 words.push(s & (s >> 3) & (s >> 7) & mask);
                 words.push((s | (s >> 5) | (s >> 11)) & mask);
             }
-            for c in words {
+            for &c in &words {
                 assert_eq!(
                     canon.least_rotation(c),
                     brute(c, n, mask),
                     "n = {n}, c = {c:#x}"
                 );
+            }
+            // The laned search, on the same words in every lane position.
+            for shift in 0..8 {
+                for chunk in words[shift..].chunks(8) {
+                    let lanes: [u64; 8] = std::array::from_fn(|l| chunk[l % chunk.len()]);
+                    let got = canon.least_rotations(lanes);
+                    for (&c, &v) in lanes.iter().zip(&got) {
+                        assert_eq!(v, brute(c, n, mask).0, "laned, n = {n}, c = {c:#x}");
+                    }
+                }
             }
         }
     }
@@ -1704,9 +1883,137 @@ mod tests {
         }
     }
 
+    /// Every batched routine and the ladder give the same points on a
+    /// field that folds, which runs their `pclmulqdq` copies, as on the
+    /// same field held to the portable multiply and the table, which runs
+    /// the ordinary bodies — so both copies stay tested on any CPU.
+    #[test]
+    fn folded_and_portable_fields_give_the_same_points() {
+        for (a, n) in [(1u8, 19u32), (0, 31), (0, 41)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            let fast = FastCurve::new(&kc.curve).unwrap();
+            let mut slow = fast.clone();
+            slow.field = Gf2::portable(&kc.curve.irreducible);
+            #[cfg(target_arch = "x86_64")]
+            {
+                slow.simd = None;
+            }
+            assert!(!slow.field.folds());
+            let points: Vec<FastPoint> = random_points(&kc, 24, 5 * u64::from(n))
+                .iter()
+                .map(|p| fast.lift(p))
+                .collect();
+            // Q = P, Q = −P and O among the addends.
+            let mut qs = points.clone();
+            qs.extend([points[0], fast.neg(points[0]), FastPoint::INFINITY]);
+            let mut scratch = BatchScratch::default();
+            for &p in points.iter().take(8) {
+                let (mut want, mut got) = (Vec::new(), Vec::new());
+                slow.add_many(p, &qs, &mut want, &mut scratch);
+                fast.add_many(p, &qs, &mut got, &mut scratch);
+                assert_eq!(got, want, "add_many, n = {n}");
+                let (mut want, mut want_l) = (Vec::new(), Vec::new());
+                let (mut got, mut got_l) = (Vec::new(), Vec::new());
+                slow.add_many_lazy_scalar(p, &qs, &mut want, &mut want_l, &mut scratch);
+                fast.add_many_lazy_scalar(p, &qs, &mut got, &mut got_l, &mut scratch);
+                assert_eq!((got, got_l), (want, want_l), "add_many_lazy, n = {n}");
+                let k = BigUint::from(0x9E37_79B9_7F4A_7C15u64 ^ p.x);
+                assert_eq!(fast.mul(p, &k), slow.mul(p, &k), "mul, n = {n}");
+                assert_eq!(fast.double(p), slow.double(p), "double, n = {n}");
+            }
+            let ps: Vec<FastPoint> = qs.iter().rev().copied().collect();
+            let (mut want, mut got) = (Vec::new(), Vec::new());
+            slow.add_pairwise(&ps, &qs, &mut want, &mut scratch);
+            fast.add_pairwise(&ps, &qs, &mut got, &mut scratch);
+            assert_eq!(got, want, "add_pairwise, n = {n}");
+        }
+    }
+
     #[test]
     fn refuses_fields_wider_than_a_word() {
         let curve = BinaryCurve::sect113r1();
         assert!(FastCurve::new(&curve).is_none());
+    }
+
+    /// The folded copies of the batched routines and the ladder at the
+    /// widths the pipeline and perfbench run (53 above all), against the
+    /// portable-and-table bodies and, for the ladder, against the generic
+    /// `binary_ecc` scalar multiplication.  Edge scalars (0, 1, 2, the
+    /// full word) and empty batches included.
+    #[test]
+    fn folded_fields_agree_at_the_pipeline_widths() {
+        for (a, n) in [(0u8, 53u32), (1, 53), (0, 23), (1, 29), (0, 61), (1, 13)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            let fast = FastCurve::new(&kc.curve).unwrap();
+            let mut slow = fast.clone();
+            slow.field = Gf2::portable(&kc.curve.irreducible);
+            #[cfg(target_arch = "x86_64")]
+            {
+                slow.simd = None;
+                if std::arch::is_x86_feature_detected!("pclmulqdq") {
+                    assert!(fast.field.folds(), "n = {n}: the pipeline's modulus folds");
+                }
+            }
+            let bp: Vec<BinaryPoint> = random_points(&kc, 16, 11 * u64::from(n) + u64::from(a));
+            let points: Vec<FastPoint> = bp.iter().map(|p| fast.lift(p)).collect();
+            let mut scratch = BatchScratch::default();
+            let (mut want, mut got) = (vec![FastPoint::INFINITY], Vec::new());
+            slow.add_many(points[0], &[], &mut want, &mut scratch);
+            fast.add_many(points[0], &[], &mut got, &mut scratch);
+            assert_eq!(got.len(), 0);
+            assert_eq!(want.len(), 1);
+            let mut qs = points.clone();
+            qs.extend([
+                points[1],
+                fast.neg(points[1]),
+                FastPoint::INFINITY,
+                points[1],
+            ]);
+            for (i, &p) in points.iter().enumerate() {
+                let (mut want, mut got) = (Vec::new(), Vec::new());
+                slow.add_many(p, &qs, &mut want, &mut scratch);
+                fast.add_many(p, &qs, &mut got, &mut scratch);
+                assert_eq!(got, want, "add_many, a = {a}, n = {n}");
+                let (mut want, mut want_l) = (Vec::new(), Vec::new());
+                let (mut got, mut got_l) = (Vec::new(), Vec::new());
+                slow.add_many_lazy_scalar(p, &qs, &mut want, &mut want_l, &mut scratch);
+                fast.add_many_lazy_scalar(p, &qs, &mut got, &mut got_l, &mut scratch);
+                assert_eq!(
+                    (got, got_l),
+                    (want, want_l),
+                    "add_many_lazy, a = {a}, n = {n}"
+                );
+                for k in [0u64, 1, 2, 3, u64::MAX, 0x8000_0000_0000_0001] {
+                    assert_eq!(
+                        fast.mul_u64(p, k),
+                        slow.mul_u64(p, k),
+                        "mul_u64 {k}, n = {n}"
+                    );
+                }
+                let k = BigUint::from(0xC0FF_EE00_D15E_A5E5u64) * BigUint::from(i as u64 + 3);
+                let got = fast.mul(p, &k);
+                assert_eq!(got, slow.mul(p, &k), "mul, a = {a}, n = {n}");
+                let reference = scalar_mul(&kc.curve, &bp[i], &k);
+                assert_eq!(
+                    fast.lower(got),
+                    reference,
+                    "mul vs binary_ecc, a = {a}, n = {n}"
+                );
+                assert_eq!(fast.double(p), slow.double(p), "double, a = {a}, n = {n}");
+            }
+            let ps: Vec<FastPoint> = qs.iter().rev().copied().collect();
+            let (mut want, mut got) = (Vec::new(), Vec::new());
+            slow.add_pairwise(&ps, &qs, &mut want, &mut scratch);
+            fast.add_pairwise(&ps, &qs, &mut got, &mut scratch);
+            assert_eq!(got, want, "add_pairwise, a = {a}, n = {n}");
+            let (mut want, mut got) = (Vec::new(), Vec::new());
+            slow.add_pairwise(&[], &[], &mut want, &mut scratch);
+            fast.add_pairwise(&[], &[], &mut got, &mut scratch);
+            assert!(got.is_empty() && want.is_empty());
+        }
     }
 }

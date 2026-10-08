@@ -458,6 +458,40 @@ are shared with the parent — and none of it moved a word operation.  The
 `27%` readback the predecessor note found is gone with the matrices it read
 from.
 
+### 4.1 The work outside the unit (2026-10-05)
+
+By the `E_0` ladder of the F6-IC round (`m = 3` chains, cubic Macaulay
+degree), the engine had moved on from the quadratic rungs above. On
+`icv1-f2m19-t797-b6cf2467`, one whole-process `ecbench exec` of the
+inherited-F4 arm ran about **120 instructions per counted word XOR**. The
+unit sees almost none of the machine work. A Callgrind profile of one
+frozen run placed it in the per-bit column remap of `rewrite` (19%), in
+`insert` (18%, including the counted XORs), in sorting for completion rows
+and layout extension (~13%), in allocation (~8%), in `specialise_shared`'s
+own bookkeeping (8%) and in substituting the system at every node (5%).
+
+The round `research/inherited_f4_overhead_20261005` removed most of the
+sorting and three of the four hash lookups per completion monomial
+(`CompletionBatch`), merged new columns into the sorted layout instead of
+re-sorting it, inlined the pivot is-current test, and vectorised the pivot
+XOR. It was preregistered, and gated on byte-identical outputs on 48 frozen
+inputs: ladder rounds at m = 13, 19 and 23 and fresh holdouts at m = 13 and
+19. On them the candidate runs these fractions of the baseline's
+instructions:
+
+| arm | m = 13 | m = 19 |
+| :-- | --: | --: |
+| inherited F4 | 0.863 | 0.793 |
+| F6-IC | 0.947 | 0.917 |
+
+That is 0.847 on the confirmatory m = 19 inputs, against a preregistered
+0.90. At m = 19 the inherited arm now runs about 95 instructions per word
+XOR. **Class: engineering, outside the unit.** Every counted operation, and
+so every `S`, is identical. Rejected: a branch-free sink-word scatter in
+`rewrite`, which cost 2.5 × 10⁹ more instructions than it saved. What remains
+is the remap, the re-reduction, allocation and substitution, in that
+order.
+
 ## 5. What this does not establish
 
 Per `AGENTS.md` §8, and because the number is large enough to tempt:

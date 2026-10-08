@@ -1,0 +1,39 @@
+// Macaulay refutation degree of an affine Boolean system, by a degree-truncated
+// Groebner basis of its homogenisation (Lazard: for a homogeneous ideal the basis
+// truncated at degree D spans exactly the degree-D Macaulay matrix's row space).
+//
+//   Singular -q -c 'string SINGFILE="cell-dN-arm.sing"; int DMAX=9;' refute.sing
+//
+// SINGFILE defines `ring R = 2, x(1..v), dp;` and `ideal I`.  The driver homogenises
+// every generator with `h`, adds the homogenised field equations x(i)^2 + x(i)*h,
+// computes slimgb with degBound = DMAX, and reports the least d <= DMAX with
+// h^d in the truncated basis's span (0 when none): that d is the affine
+// refutation degree, the degree at which the Boolean Macaulay matrix contains 1.
+system("--ticks-per-sec", 1000);
+int t0 = timer;
+execute("< \"" + SINGFILE + "\";");
+int nv = nvars(R);
+ring S = 2, (x(1..nv), h), dp;
+ideal J = imap(R, I);
+J = homog(J, h);
+int i;
+for (i = 1; i <= nv; i++) { J = J + ideal(x(i)^2 + x(i)*h); }
+option(redSB);
+degBound = DMAX;
+ideal G = slimgb(J);
+degBound = 0;
+int dt = timer - t0;
+int d; int ref = 0;
+for (d = 1; d <= DMAX; d++) { if (reduce(h^d, G, 1) == 0) { ref = d; break; } }
+// pinned variables: a basis element whose leading monomial is x(i)*h^k (no other x)
+// is `x(i) = c` after dehomogenising; every variable pinned resolves a satisfiable system
+// (the in-tree `resolves()` rule), at the degree of the first basis that pins them all.
+int pinned = 0; int j; poly lm;
+for (i = 1; i <= nv; i++) {
+  for (j = 1; j <= size(G); j++) {
+    lm = leadmonom(G[j]);
+    if (lm / var(i) * var(i) == lm and deg(lm) == deg(lm, intvec(0:nv, 1)) + 1) { pinned++; break; }
+  }
+}
+print("RESULT dmax=" + string(DMAX) + " refuted_at=" + string(ref) + " pinned=" + string(pinned) + " nvars=" + string(nv) + " gb_size=" + string(size(G)) + " ms=" + string(dt));
+quit;

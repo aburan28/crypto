@@ -1236,7 +1236,6 @@ fn fingerprint(pt: &PtE) -> u64 {
 }
 
 pub fn rate_census(p: u64, seed: u64) -> RateCensus {
-    use std::collections::HashSet;
     let start = Instant::now();
     let inst = generate_instance_edwards(p, seed);
     let curve = &inst.curve;
@@ -1260,8 +1259,11 @@ pub fn rate_census(p: u64, seed: u64) -> RateCensus {
             );
         }
     }
-    let mut two: HashSet<u64> = HashSet::new();
-    let mut sat: HashSet<u64> = HashSet::new();
+    // One entry per signed sum: the 63-bit fingerprint of the point in the
+    // subgroup and, in the low bit, whether it is also a 2-torsion sum
+    // (even `Z/4` class).  Sorted and deduplicated at the end, which keeps
+    // 10⁹ entries in 8 GB where two hash sets would not fit.
+    let mut sums: Vec<u64> = Vec::new();
     let mut two_hits = 0u64;
     let mut sat_hits = 0u64;
     let mut quadruples = 0u64;
@@ -1292,11 +1294,9 @@ pub fn rate_census(p: u64, seed: u64) -> RateCensus {
                                         };
                                     }
                                     sat_hits += 1;
-                                    sat.insert(fingerprint(&w));
-                                    if c % 2 == 0 {
-                                        two_hits += 1;
-                                        two.insert(fingerprint(&w));
-                                    }
+                                    let even = (c % 2 == 0) as u64;
+                                    two_hits += even;
+                                    sums.push((fingerprint(&w) << 1) | even);
                                 }
                             }
                         }
@@ -1305,6 +1305,19 @@ pub fn rate_census(p: u64, seed: u64) -> RateCensus {
             }
         }
     }
+    sums.sort_unstable();
+    let (mut sat_distinct, mut two_distinct) = (0u64, 0u64);
+    let mut i = 0;
+    while i < sums.len() {
+        let key = sums[i] >> 1;
+        let mut any_even = false;
+        while i < sums.len() && sums[i] >> 1 == key {
+            any_even |= sums[i] & 1 == 1;
+            i += 1;
+        }
+        sat_distinct += 1;
+        two_distinct += any_even as u64;
+    }
     RateCensus {
         p,
         seed,
@@ -1312,15 +1325,15 @@ pub fn rate_census(p: u64, seed: u64) -> RateCensus {
         base: m,
         quadruples,
         two_torsion_in_subgroup: two_hits,
-        two_torsion_distinct: two.len() as u64,
+        two_torsion_distinct: two_distinct,
         two_torsion_predicted: 8 * quadruples,
-        two_torsion_rate: two.len() as f64 / n as f64,
-        two_torsion_rate_x_192p: two.len() as f64 / n as f64 * 192.0 * p as f64,
+        two_torsion_rate: two_distinct as f64 / n as f64,
+        two_torsion_rate_x_192p: two_distinct as f64 / n as f64 * 192.0 * p as f64,
         saturated_in_subgroup: sat_hits,
-        saturated_distinct: sat.len() as u64,
+        saturated_distinct: sat_distinct,
         saturated_predicted: 16 * quadruples,
-        saturated_rate: sat.len() as f64 / n as f64,
-        saturated_rate_x_96p: sat.len() as f64 / n as f64 * 96.0 * p as f64,
+        saturated_rate: sat_distinct as f64 / n as f64,
+        saturated_rate_x_96p: sat_distinct as f64 / n as f64 * 96.0 * p as f64,
         group_ops: curve.ops(),
         wall_ms: start.elapsed().as_secs_f64() * 1e3,
     }

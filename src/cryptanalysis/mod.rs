@@ -99,6 +99,8 @@ pub mod aut_folded_rho;
 pub mod auto_attack;
 pub mod avalanche;
 pub mod b_seed_profile;
+pub mod bielliptic_quartic;
+pub mod binary_field_basis;
 pub mod binary_isogeny;
 pub mod binary_semaev;
 pub mod binary_semaev_s4;
@@ -119,7 +121,9 @@ pub mod coordinate_quotients;
 pub mod coordinate_search;
 pub mod crossbred;
 pub mod curve_catalog;
+pub mod curve_construction;
 pub mod curve_id;
+pub mod curve_traits;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod descent_algebraic;
@@ -130,7 +134,13 @@ pub mod diem_descent;
 pub mod ec_index_calculus;
 pub mod ec_index_calculus_j0;
 pub mod ec_trapdoor;
+pub mod ecbench;
+pub mod ecbench_large_prime;
 pub mod ecc2k130_guard;
+#[cfg(unix)]
+pub mod ecc2k130_merge;
+pub mod ecc2k130_pyjson;
+pub mod ecc2k130_status;
 pub mod ecdlp_variants;
 pub mod ecdsa_audit;
 pub mod ecm;
@@ -141,6 +151,7 @@ pub mod eds_tate;
 pub mod ext_curve;
 pub mod f4_fp;
 pub mod f4_fp_tower;
+pub mod f6_wide_geometry;
 pub mod fes_gpu;
 pub mod ffd_harness;
 pub mod fghr_line;
@@ -152,6 +163,7 @@ pub mod gf2_elim;
 pub mod gf3m;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
+pub mod ghs_screen;
 pub mod gls_fp2;
 pub mod glv_gaudry;
 pub mod glv_invariant_base;
@@ -171,14 +183,19 @@ pub mod ic_measurement;
 pub mod ic_oracle_pricing;
 pub mod ic_progress;
 pub mod ic_run;
+pub mod identity_certificate;
 pub mod inherited_f4;
 pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
 pub mod isogeny_degree_search;
+pub mod isogeny_walk;
 pub mod j0_twists;
+pub mod jv_cover;
+pub mod jv_isogeny_walk;
 pub mod jv_quartic;
 pub mod jv_quintic;
 pub mod jv_quintic_edwards;
+pub mod jv_sieve;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
 pub mod koblitz_fast;
@@ -188,13 +205,18 @@ pub mod koblitz_index_calculus;
 pub mod koblitz_isogeny_cost;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
+pub mod koblitz_rotated_chain;
 pub mod koblitz_sparse_la;
 pub mod koblitz_strong_rho;
 pub mod koblitz_symmetrised;
+pub mod koblitz_wide;
+pub mod large_prime_filter;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod line_oracle;
 pub mod line_s4_oracle;
+pub mod lopsided_thin_product;
+pub mod matmul_exponent;
 pub mod matrix_f5_f2;
 pub mod mazur_tate_sigma;
 pub mod md5_chosen_prefix;
@@ -210,11 +232,23 @@ pub mod mov_attack;
 pub mod mq_fes;
 pub mod mq_monica;
 pub mod multi_key_hnp;
+pub mod native_signed_mitm;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
 pub mod orbit_pair_table;
+pub mod p192_cm_norm_sieve;
+pub mod p192_cm_relation_search;
+pub mod p192_interval_bsgs;
+pub mod p192_native;
+pub mod p192_singular_recovery;
 pub mod p256_attacks;
+pub mod p256_backdoor_map;
+pub mod p256_bitbox_factor_base;
+pub mod p256_dickson_factor_base;
+pub mod p256_isogeny_campaign;
 pub mod p256_isogeny_cover;
+pub mod p256_isogeny_task;
+pub mod p256_isogeny_walk;
 pub mod p256_structural;
 pub mod pc_degree_avg;
 pub mod pc_degree_harness;
@@ -231,10 +265,14 @@ pub mod pq_groebner_f2;
 pub mod pq_sparse_la;
 pub mod pq_wiedemann;
 pub mod pq_xl;
+pub mod prepared_control_archive;
+pub mod prepared_sat_control;
 pub mod preprocessing_rho;
+pub mod prime_field_smt;
 pub mod q_curve;
 pub mod quantum_estimator;
 pub mod quasi_subfield;
+pub mod recursive_descent;
 pub mod research_bench;
 pub mod residual_walk;
 pub mod sat;
@@ -260,7 +298,9 @@ pub mod visual_demos;
 pub mod visualize;
 pub mod wdsat_oracle;
 pub mod weil_charts;
+pub mod wide_gf2m;
 pub mod wide_groebner;
+pub mod wide_sixsum;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,
@@ -341,9 +381,10 @@ pub use koblitz_index_calculus::{
     SatDecompositionStats, MAX_SUBFIELD_DEGREE, PRECOMPUTE_BATCH_TRIALS,
 };
 pub use koblitz_sparse_la::{
-    block_wiedemann_kernel, filter_relations, solve_sparse_system, BlockWiedemannOptions,
-    BlockWiedemannReport, CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseRow,
-    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
+    BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
+    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseCoreSolver, SparseRow,
+    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend, SpmvOptions,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{

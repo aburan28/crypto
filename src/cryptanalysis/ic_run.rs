@@ -34,8 +34,8 @@ use crate::cryptanalysis::ic_boundary::{
 };
 use crate::cryptanalysis::ic_engine::{classify, Regime};
 use crate::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, DescentAlgebraicOracle, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    SubtractOracle,
+    BinarySubspaceBase, DescentAlgebraicOracle, KoblitzOrbitBase, KoblitzTraceZeroBase, MitmOracle,
+    PrimeAbscissaBase, SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
 use crate::cryptanalysis::ic_framework::stages::{
@@ -364,6 +364,7 @@ fn run_binary_analogue(
 
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
+    let trace_zero = KoblitzTraceZeroBase { instance: inst };
 
     let mut reports = Vec::new();
     let mut label = String::new();
@@ -374,9 +375,10 @@ fn run_binary_analogue(
         let base: &dyn FactorBaseBuilder<BinaryGroup> = match spec.factor_base.as_str() {
             "binary-subspace" => &subspace,
             "koblitz-orbit" => &orbit,
+            "koblitz-trace-zero" => &trace_zero,
             other => {
                 return Err(format!(
-                    "factor base `{other}` is not available on a binary curve; try binary-subspace or koblitz-orbit"
+                    "factor base `{other}` is not available on a binary curve; try binary-subspace, koblitz-orbit or koblitz-trace-zero"
                 ))
             }
         };

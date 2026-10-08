@@ -954,6 +954,11 @@ impl SystemSolver for SatCdcl {
             "original_clauses".into(),
             enc.solver.n_original_clauses() as u64,
         );
+        // The encoding's size, as maxima over calls (`*_max`, see
+        // `SolverTotals::absorb`): the ICMS registry's cnf_variables and
+        // cnf_clauses.
+        extra.insert("variables_max".into(), u64::from(enc.solver.n_vars()));
+        extra.insert("clauses_max".into(), enc.solver.n_clauses() as u64);
         let cost = SolverCost {
             ops: st.conflicts,
             op_unit: "conflicts".into(),

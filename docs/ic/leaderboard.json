@@ -42,9 +42,53 @@
    "path": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
    "sha256": "2271c4aa5236e2bdc8ff3d8b7782beddcbe1bc733a9343db3e833eba49fe75c5"
   },
+  "n37_rank_columns": {
+   "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+   "sha256": "f7b950edc74978cbdf2dbc3da54c73bde6c05c0827fbe29ff8bd33659168afa1"
+  },
+  "n37_k8_k16": {
+   "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+   "sha256": "c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127"
+  },
+  "n37_online_ir": {
+   "path": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+   "sha256": "e711979f64d08ea3417844b980e54e0fe095b4802bb803cf4f726c555be0e36a"
+  },
+  "n37_online_k8_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json",
+   "sha256": "369e99e76d8ba12a376ae3be47445fbc705ff375766421b3e841ed9a0a93942a"
+  },
+  "n37_online_k16_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
+   "sha256": "a708e63cb4ccfe36bccb0e81ad69a43e651bec17a11c62412fcce6fa64b2f444"
+  },
+  "n37_native_wall": {
+   "path": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+   "sha256": "eebbe2eef9524c7f45a5bfd1c0a2b312d72063a3a8865140a6e25200235c21e2"
+  },
+  "n37_native_wall_evidence": {
+   "path": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+   "sha256": "bb4dd48030029d21019a21db3cd10e646ef815d727db084013b7bdba3ed8d422"
+  },
+  "f6_small_cold_rows": {
+   "path": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+   "sha256": "b65613c68d68d744fd2e3c26251b8f33d2c8fdd2b86c486551ac376e00e274eb"
+  },
+  "f6_small_cold_replay": {
+   "path": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+   "sha256": "307f02ce84e5cb463257c5bfc9a572aed8508a90f8c9b58e1c3d550589bb0d90"
+  },
+  "f6_ecbench_ladder": {
+   "path": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+   "sha256": "69ca54385c62a50e2a1b8fcb5245459dd8550966221f5ba94fcdf3437c1bada6"
+  },
+  "n41_n53_counted": {
+   "path": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+   "sha256": "fe55908f837840eeee173cfeae463368bb272e3c65ef03fa2b66efeead769331"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
+   "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed"
   }
  },
  "families": {
@@ -3709,7 +3753,7 @@
   {
    "regime": "koblitz_batch",
    "slug": "icv1-f2m19-tm797-9c54981b",
-   "ec1": "EC1N19Ce1h7e63aa468dcc",
+   "ec1": "EC1N19Ce1h6186a62ebfaa",
    "legacy": "K_1/GF(2^19)",
    "log2_r": 18.0,
    "cofactor": null,
@@ -5074,6 +5118,337 @@
    }
   }
  ],
+ "bounded_diagnostics": [
+  {
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "source": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+   "class": "counted engineering lead over K42; no admitted IC/rho speedup",
+   "candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772",
+   "usable_points": 1184,
+   "folded_columns": 16,
+   "measured_runs": 40,
+   "mean_cold_s_lower_bound": 2.1112608814666936,
+   "cold_counted_over_rho_diagnostic": 5.034403533221078,
+   "cold_counted_over_k42_diagnostic": 0.3489815492255774,
+   "online_speedup": null,
+   "fully_priced_cold_speedup": null
+  }
+ ],
+ "n37_k8_k16_confirmation": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+  "candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54",
+  "usable_points": 592,
+  "folded_columns": 8,
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "select_k8_for_larger_field_gate",
+  "k16_over_k8_ir": 1.1902596062530095,
+  "k16_over_k8_ir_ci95": [
+   1.1584168328385342,
+   1.2217540127906004
+  ],
+  "k8_over_rho_ir": 3.6445922113828733,
+  "k8_over_rho_ir_ci95": [
+   3.2353443778426585,
+   4.136017279722061
+  ],
+  "online_speedup": null,
+  "cold_wall_speedup": null
+ },
+ "n37_online_ir_diagnostic": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+  "k8_candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+  "k16_candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "prioritize_k16_for_isolated_n37_online_wall_gate",
+  "k8_over_k16_online_ir": 2.8860076532738073,
+  "k8_over_k16_online_ir_ci95": [
+   1.730215437274574,
+   4.601504089537422
+  ],
+  "k16_over_rho_online_ir": 0.15337193605882804,
+  "k16_over_rho_online_ir_ci95": [
+   0.09233888610436006,
+   0.24000314990195315
+  ],
+  "k8_over_k16_cold_ir": 0.8484004913354137,
+  "online_wall_speedup": null
+ },
+ "n37_native_wall_diagnostic": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+  "evidence": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+  "k8_candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+  "k16_candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+  "primary_workload_id": "Wd281dbafa0cb",
+  "measured_verified_runs": 320,
+  "isolation_levels": {
+   "L1": 320
+  },
+  "decision": "carry_both_host_noise_exceeds_gate",
+  "aa_max_relative_deviation": 0.12850955895249527,
+  "primary_rho_over_k16_online_wall": 7.177938244139939,
+  "panel_k8_over_k16_online_wall": 7.110329833407259,
+  "panel_k8_over_k16_online_wall_ci95": [
+   3.669282492389011,
+   16.981811137190903
+  ],
+  "admitted_online_speedup": null
+ },
+ "f6_small_cold_diagnostic": {
+  "curve": "icv1-f2m9-tm5-4a3ea183",
+  "source": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+  "replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+  "workload_id": "f6d79f6dd9f2",
+  "target": [
+   305,
+   466
+  ],
+  "usable_points": 14,
+  "folded_columns": 2,
+  "verified_relations": 8,
+  "arms": {
+   "inherited_f4": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f4RCsampleLAgaussTDpdpISO0h09c74e3fcd1d",
+    "cold_inside_worker_ns": 4707375,
+    "online_wall_ns": 371666
+   },
+   "f6_ic": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2",
+    "cold_inside_worker_ns": 3149750,
+    "online_wall_ns": 272125
+   },
+   "f5": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5",
+    "cold_inside_worker_ns": 61936875,
+    "online_wall_ns": 3117833
+   }
+  },
+  "rho_online_ms": null,
+  "online_speedup": null,
+  "cpu_isolation": "L0-unverified-mac"
+ },
+ "f6_ecbench_ladder_diagnostic": {
+  "source": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+  "decision": "not decidable: fewer than six targets completed at some size, or fewer than four sizes",
+  "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+  "sizes": [
+   {
+    "m": 13,
+    "curve": "icv1-f2m13-t181-515ee569",
+    "targets": 8,
+    "rho_s": 14.713116223286512,
+    "f4_s_lower_over_rho": 1.105362599399004,
+    "f6_s_lower_over_rho": 54.75104049279727,
+    "median_log2_w4_over_w6": 0.37728567379745975
+   },
+   {
+    "m": 19,
+    "curve": "icv1-f2m19-t797-b6cf2467",
+    "targets": 8,
+    "rho_s": 3.1338637392766118,
+    "f4_s_lower_over_rho": 1.582275124863434,
+    "f6_s_lower_over_rho": 2090.8492586008015,
+    "median_log2_w4_over_w6": 0.432982288712685
+   },
+   {
+    "m": 23,
+    "curve": "icv1-f2m23-t5197-69e76b73",
+    "targets": 8,
+    "rho_s": 1.0462204446268615,
+    "f4_s_lower_over_rho": 2.090818628531976,
+    "f6_s_lower_over_rho": 2.721264717429671,
+    "median_log2_w4_over_w6": 0.0
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
+ },
+ "n41_n53_counted_diagnostic": {
+  "source": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+  "decision": "frozen_parameters_do_not_transfer",
+  "class": "accounting; counted lower bounds with native work unpriced, L0 wall exploratory, L2 host run pending",
+  "measured_runs": 640,
+  "measured_verified_runs": 206,
+  "isolation_levels": {
+   "L0": 640
+  },
+  "curves": [
+   {
+    "curve": "icv1-f2m41-tm2308219-7f48b14a",
+    "log2_r": 39.00000151433405,
+    "primary_workload_id": "W15dcf1a74cb8",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.1571109102911619
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.56858739277729
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.56858739277729
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": 256.2364154308237,
+     "ci95": [
+      202.45868581141588,
+      332.75248237158803
+     ],
+     "pairs": 23
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": [
+       202.45868581141588,
+       332.75248237158803
+      ],
+      "ratio_of_sums": 256.2364154308237,
+      "verdict": "retained"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   },
+   {
+    "curve": "icv1-f2m53-tm56619371-dac20a85",
+    "log2_r": 44.258533022667656,
+    "primary_workload_id": "W32013b060ceb",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.14140798998954648
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
+ },
  "exponents": {
   "prime": {
    "variant": "mitm_m2_negfold_walk_balanced",
@@ -5337,6 +5712,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "family": "koblitz",
+   "field": "GF(2^11)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 11,
+   "standard": [],
+   "ec1": [
+    "EC1N11Ce1h41243ed45ca3"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "family": "koblitz",
    "field": "GF(2^13)",
@@ -5373,6 +5764,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "family": "koblitz",
+   "field": "GF(2^13)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [
+    "EC1N13Ce1h98fd3bab3884"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "family": "koblitz",
    "field": "GF(2^15)",
@@ -5388,6 +5795,22 @@
     "K_0 / GF(2^15)",
     "K_0/2^15",
     "K_0/F_2^15"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "family": "koblitz",
+   "field": "GF(2^15)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 15,
+   "standard": [],
+   "ec1": [
+    "EC1N15Ce1h68b09ca2a6f8"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n15-l5"
    ],
    "on_board": false
   },
@@ -5435,14 +5858,15 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
+    "EC1N17Ce1h381f66e2762a",
     "EC1N17Ce1hdfbf24105ef5"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
-    "K_1/2^17",
-    "K_1/F_2^17"
+    "K_1/2^17"
    ],
    "on_board": false
   },
@@ -5473,14 +5897,15 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
+    "EC1N19Ce1h6186a62ebfaa",
     "EC1N19Ce1h7e63aa468dcc"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
-    "K_1/2^19",
-    "K_1/F_2^19"
+    "K_1/2^19"
    ],
    "on_board": true
   },
@@ -5540,6 +5965,22 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "family": "koblitz",
+   "field": "GF(2^23)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [
+    "EC1N23Ce1he238479aae6d"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "family": "koblitz",
    "field": "GF(2^29)",
@@ -5559,6 +6000,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "family": "koblitz",
+   "field": "GF(2^29)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [
+    "EC1N29Ce1h7fed23ba87ea"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
    "family": "koblitz",
    "field": "GF(2^31)",
@@ -5574,6 +6031,22 @@
     "K_0 / GF(2^31)",
     "K_0/2^31",
     "K_0/F_2^31"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "family": "koblitz",
+   "field": "GF(2^31)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 31,
+   "standard": [],
+   "ec1": [
+    "EC1N31Ce1h6be2d6a625f9"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n31-l8"
    ],
    "on_board": false
   },
@@ -6802,6 +7275,18 @@
    "on_board": true
   },
   {
+   "slug": "icv1-fp14-tm63-1a762b57",
+   "family": "prime",
+   "field": "GF(p), p = 11617",
+   "coefficients": "a = 3797, b = 2081",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
+  },
+  {
    "slug": "icv1-fp14-tm143-dec4cf6b",
    "family": "prime",
    "field": "GF(p), p = 14389",
@@ -6832,6 +7317,18 @@
     "bench-14bit"
    ],
    "on_board": true
+  },
+  {
+   "slug": "icv1-fp16-tm393-20f8a24e",
+   "family": "prime",
+   "field": "GF(p), p = 53197",
+   "coefficients": "a = 40230, b = 5",
+   "order_bits": 16,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
   },
   {
    "slug": "icv1-fp16-t295-8d3c3165",
@@ -7086,6 +7583,42 @@
    "ec1_unresolved": null,
    "legacy": [
     "generated-26bit-42652151"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+   "family": "prime",
+   "field": "GF(p), 192-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 192,
+   "standard": [
+    "P-192"
+   ],
+   "ec1": [
+    "EC1P192Cp192h5531c4a08bdb"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "P-192"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+   "family": "prime",
+   "field": "GF(p), 224-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 224,
+   "standard": [
+    "P-224"
+   ],
+   "ec1": [
+    "EC1P224Cp224h8e110c585480"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "P-224"
    ],
    "on_board": false
   },

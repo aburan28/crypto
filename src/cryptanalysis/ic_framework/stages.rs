@@ -224,6 +224,12 @@ pub trait DecompositionOracle<G: CountedGroup> {
         Ok(())
     }
 
+    /// Native work performed by `prepare`, charged to the oracle setup
+    /// phase after preparation completes. Existing oracles default to none.
+    fn setup_native(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
+
     /// Decompose `point`, or decide it does not decompose.
     fn decompose(
         &mut self,
@@ -295,8 +301,15 @@ impl SolverTotals {
             self.solving_degree_max = self.solving_degree_max.max(d);
             self.calls_with_a_degree += 1;
         }
+        // A key that names a maximum (`*_max`) is the maximum over
+        // calls; every other key is a total over the run.
         for (k, v) in &c.extra {
-            *self.extra.entry(k.clone()).or_insert(0) += v;
+            let entry = self.extra.entry(k.clone()).or_insert(0);
+            if k.ends_with("_max") {
+                *entry = (*entry).max(*v);
+            } else {
+                *entry += v;
+            }
         }
     }
 

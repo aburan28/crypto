@@ -1,0 +1,76 @@
+{
+  "schema": "n37-shared-rank-target-gate-v1",
+  "class": "accounting",
+  "scope": "point-only target correctness diagnostic",
+  "decision": "SHARED_RANK_TARGET16_RECOVERY_ADMITTED_N37_SOURCE",
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "preregistered_commit": "611cf9db",
+  "input_freeze_commit": "5a8f7fff",
+  "producer_source_commit": "c4219948cff8939c0eea31799697089b1294c223",
+  "host": {
+    "os": "Darwin",
+    "architecture": "arm64",
+    "rustc": "1.93.1 (01f6ddf75 2026-02-11)",
+    "timing_eligible": false,
+    "reason": "unisolated correctness gate; no same-Q rho arm or native-work calibration"
+  },
+  "source_sha256": {
+    "dependency_lock": "b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365",
+    "shared_rank": "37a571155cc76eeab41d913d94e47bdf52e83ebf8cc1907d22f6a3e1067b3966",
+    "target_producer": "f0f56b231c645bba6cbdd7cdb111da79da87fa3d10676d0d1d09f8508c3f0d97",
+    "fixture_generator": "37b40042f9888197bdb46ac0d0895ae2a61faf2cb273c33b56d5e4b138738a",
+    "independent_replay": "e35dadd334f752d6339a997c82c3a052269c675df8b46642f9967a8d0a0a61c8"
+  },
+  "binary_sha256": {
+    "target_producer": "063d8afbf12e018542f9087c4bc19d9b3bf6301b715802ed2c992e4b975e88c7",
+    "independent_replay": "8568fdffc0a5be8a4e5641a3d00e044758fefb08bd7c442018fe90e34277310a"
+  },
+  "artifact_sha256": {
+    "TARGETS.points.jsonl": "81e49c561bd208fa1f51f7bc38f62d430e1758ad20230be989f151c0168d3775",
+    "FIXTURE.json": "31743d59af4c82cf176bc807ec70eb1b35709156b4ab2b6102bbf57c6b112ee9",
+    "INPUT_REPLAY.json": "b3fa3cd7419a16958429aec3048dfda9e531af2d309e5d7c847b77f723f3483c",
+    "RAW.json": "0c6a744910036bc93954452b08a26ee0398d2364cb0eca7129b9370321e5ba7a",
+    "REPLAY.json": "4a01bc462f77aba09c3c4e7108f031094cb471c1c7e15ccac6906c1d5801730d"
+  },
+  "inventory": {
+    "tracked_point_files": 126,
+    "historical_point_rows": 55368,
+    "excluded_n37_signed_frobenius_orbits": 13443,
+    "list_sha256": "d3fb7f5cebe274618771c3585e875bf62f9a32a09f720974693869cc5da13428"
+  },
+  "counts": {
+    "targets": 16,
+    "verified_scalar_recoveries": 16,
+    "direct_three_summand_hits": 16,
+    "shifted_attempts": 0,
+    "failed_pdp_attempts": 0,
+    "rank": 42,
+    "rank_trials": 55
+  },
+  "gae_lower_bound": {
+    "shared_setup": 194826,
+    "target_query": 736,
+    "target_pdp": 1220,
+    "target_relation_check": 48,
+    "target_descent": 0,
+    "target_recovery_check": 624,
+    "targets_total": 2628,
+    "cold_total": 197454
+  },
+  "unisolated_target_online_wall_ns_total": 1266917,
+  "rho_ratio": null,
+  "complete_calibrated_cost": null,
+  "n131_transfer": null,
+  "mutations_rejected": [
+    {
+      "edit": "increase target 0 first witness index by one",
+      "mutant_sha256": "34c0756db06abadd0f350cd5c4ee9d30ee978f4627fa10ca55d374eb4070776b",
+      "error": "target 0 witness sum or folded row differs"
+    },
+    {
+      "edit": "increase target 0 recovered logarithm by one",
+      "mutant_sha256": "6d6da346984a750db489a1cabe2be2cb6fcab3eb96c5604ddb8d3557a9821a13",
+      "error": "target 0 recovered scalar differs"
+    }
+  ]
+}

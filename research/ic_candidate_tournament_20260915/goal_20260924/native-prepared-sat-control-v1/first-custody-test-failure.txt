@@ -1,0 +1,19 @@
+Native implementation control; no scientific solver dispatch.
+Command: cargo test --offline --bin icprog sat_control -- --test-threads=1
+Host: macOS ARM64; Rust 1.93.1 Homebrew; native busy serialization.
+
+running 5 tests
+test sat_control::native::tests::accepted_archive_custody_extracts_without_executing_binaries ... FAILED
+test sat_control::native::tests::create_only_and_tree_mutation_controls ... ok
+test sat_control::native::tests::retained_exports_have_exact_layout_and_hashes ... ok
+test sat_control::native::tests::watchdog_preserves_exit_and_kills_a_timed_out_group ... ok
+test sat_control::tests::independent_complete_flow_and_mutation_controls_without_search ... ok
+
+called `Result::unwrap()` on an `Err` value: "invalid digit found in string"
+test result: FAILED. 4 passed; 1 failed
+
+Cause: tar checksum header has both a NUL and trailing space. The reader trimmed
+NUL before trimming whitespace, leaving an embedded terminator for octal parsing.
+Correction: trim both characters together. The accepted archive and all original
+pins are unchanged. The corrected five-control rerun passes, including extraction
+of all fourteen files. No registration or scientific invocation was consumed.

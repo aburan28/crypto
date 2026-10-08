@@ -23,6 +23,10 @@ ROOT = Path(__file__).resolve().parents[1]
 CLIENT = ROOT / "ecc2k130-cpu"
 FIXTURE = ROOT / "build/test-production"
 RECORD = struct.Struct("<4Q")
+# The Rust port (`cargo build --release --bin ecc2k-merge`) answers to the
+# same command line; set this to run the merge tests below against it.
+MERGE_BIN = os.environ.get("ECC_MERGE_BIN")
+MERGE = [MERGE_BIN] if MERGE_BIN else [sys.executable, str(ROOT / "aws/merge.py")]
 
 
 class Certification(unittest.TestCase):
@@ -57,7 +61,7 @@ class Certification(unittest.TestCase):
         return path
 
     def callMerge(self, *extra):
-        return subprocess.run([sys.executable, str(ROOT / "aws/merge.py"), "--work", str(self.work),
+        return subprocess.run([*MERGE, "--work", str(self.work),
                                "--local", str(self.source), "--campaign", str(self.configPath),
                                "--client", str(CLIENT), "--buckets", "16", *extra],
                               text=True, capture_output=True, timeout=30)

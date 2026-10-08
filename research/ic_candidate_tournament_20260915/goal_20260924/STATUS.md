@@ -1,5 +1,28 @@
 # September 24 bounded IC goal
 
+Current native status (October 3): both disclosed synthetic n17 prepared-target
+controls are consumed and closed. The [native SAT result](native-sat-control-registration-v1/RESULT.md)
+is accepted in PR #1277. The [new native F5 result](native-f5-control-registration-v1/RESULT.md)
+retains its sole invocation after main accepted PR #1294, and the original
+preexecution-frozen checker admits source-bound execution, two exact negatives,
+third-query decomposition and scalar 24886. Its result-publication follow-up is
+unmerged until that PR's exact-head gates pass. Never dispatch, retry, resume or
+execute restorations of either control. Data-only publication replay starts no
+solver and cannot replace the original frozen admission audit.
+
+This is correctness progress only: zero new ordinary queries, no fresh paired
+performance qualification and no measured speedup. F5's producer stopwatch is
+500 ns below its phase sum; both raw values remain explicit diagnostics. All
+historical Python preparation provenance remains visible. The full active goal
+still requires native natural-yield and failed-attempt evidence for the exact
+F5 and CryptoMiniSat pipelines, complete exposure exclusions, strong incumbent
+and same-point rho references, IC1 identities, calibration/resources and a new
+frozen fresh one-target protocol. The built-in Rust SAT worker is a different
+backend and cannot supply CryptoMiniSat's admission. The three historical
+confirmation sets remain closed.
+
+The dated entries below preserve the historical gate state and failures.
+
 Current family-admission status (September 30): the complete source-bound
 [SAT v3 development solve](static-sat-runtime-v3/full-development-20260929/README.md)
 is accepted. The single [F5 v1 invocation](f5-source-bound-runtime-v1/README.md)
@@ -297,18 +320,16 @@ audit and the disclosed-point
 [dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
 diagnostics.
 
-The next planned competitive registration is
-[generic-backend-qualification-v3](generic-backend-qualification-v3/PROTOCOL.md):
-seed `2026093001`, smoke-only schedule, `standard_subspace` dimension 6 for
-algebraic arms (`factor-base-policy`), F4/F5 family only (SAT deferred), 180/35/240
-minute measure/pack/job caps. Panel intent SHA-256
-`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`.
-Both exposure corpora are on `main`. The runner
-`run_generic_backend_qualification_v3.py` and workflow
-`ic-generic-backend-qualification-v3.yml` authorize one `workflow_dispatch`
-campaign on the smoke schedule (`dispatch_authorized` true;
-`measurement` still `not_run` until that job runs with `--out`). Seed
-`2026093001` has not been dispatched.
+The third registration
+[generic-backend-qualification-v3](generic-backend-qualification-v3/RESULT.md)
+(seed `2026093001`, panel SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`)
+ran once as [Actions run 37399021219](https://github.com/aburan28/crypto/actions/runs/37399021219).
+The job completed and packed. The family gate is `NEGATIVE_FAMILY_QUALIFICATION`:
+both F4 and F5 smoke arms were censored on all five cells, with no retained
+ordinary queries, so their yield and cost are unknown and neither arm qualified.
+`promotion_eligible` is false. Do not redispatch seed `2026093001`. The ten
+generated points are retained with that result and must be excluded later.
 
 Post-registration source audit (PR
 [#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev
@@ -469,3 +490,13 @@ and cross-version rejection pass, together with 36 focused old/new runtime and
 transport controls. Actual isolated imports and synthetic transport children
 execute no native solver. A newly frozen native scientific control is still
 required; its complete result and fresh paired qualification are not established.
+
+The [corrected prepared F5 disclosed control](prepared-f5-v3-control-v1/RESULT.md)
+now completes under its source-bound runtime and own preexecution-frozen helper.
+PR #1159 accepted its external registration before its one invocation. Three
+target attempts, two exact negatives and scalar 24886 independently replay;
+all original bytes restore and audit identically. This known target/seed control
+is consumed and closed, not fresh qualification or a measured speedup. The raw
+11,955,969,917 ns interval includes every failed attempt and scalar replay;
+calibration and matched reference are absent. SAT and fresh paired gates remain
+open, and all historical registrations/confirmation sets remain closed.

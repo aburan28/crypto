@@ -1,0 +1,18 @@
+{
+  "schema": "n37-one-target-host-v1",
+  "resource_envelope": {
+    "machine": "MacBook Pro Mac16,7",
+    "cpu": "Apple M4 Pro",
+    "logical_cores": 14,
+    "memory_gib": 48,
+    "os": "Darwin 25.6.0",
+    "arch": "arm64",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+    "rayon_threads": 1,
+    "concurrent_panel_processes": 1,
+    "cpu_pinning": "unavailable in this macOS sandbox",
+    "wall_timer": "/usr/bin/time -p"
+  },
+  "wall_time_status": "descriptive only; no isolated core or host-contention proof",
+  "operation_count_status": "raw IC and rho counters retained; common calibrated unit pending"
+}
