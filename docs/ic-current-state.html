@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 323 panels, one line each</summary>
+    <summary>Show all 324 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -509,6 +509,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-event-provenance-round307-20261008">P-256 Round 307: derived rows conserve primitive rank</a> <span class="chip">exact provenance audit / negative</span><br>Modulo independently verified pre-event equations W0, all scalar, group-law, column, and charged affine post-processing of one primitive row r remains in W0+span(r). Syntactic row multiplicity cannot replace a second equality.</li>
       <li><a href="./#p256-product-lift-round308-20261008">P-256 Round 308: direct product lifts add cost, not useful rank</a> <span class="chip">exact information audit / negative</span><br>A collision in G×G replays two coordinate equalities, but linked coordinates are scalar-dependent and independent coordinates add a new unknown log block. In both cases the useful rank on the original recovery variables is one.</li>
       <li><a href="./#p256-dickson-permutation-round309-20261008">P-256 Round 309: Dickson half-turn fixes rank, not search cost</a> <span class="chip">same-base permutation / negative</span><br>The exact x→−x intersection produces FB1h6255ce9746fe, with 65,724 columns in 32,862 closed two-cycles. A planted (Q,G) product hit has two useful rows on one log vector, but S17 has mean product-target yield only 2−271.270334.</li>
+      <li><a href="./#p256-permutation-dichotomy-round310-20261008">P-256 Round 310: rank-one permutation images are exactly affine</a> <span class="chip">linear-image dichotomy / negative</span><br>On the complete fixed-sum S17 coefficient span, a same-base column permutation has a one-dimensional paired image if and only if its transported log vector is affine in the original logs. Such a transport is impossible for an unaligned product target or is a direct target-log witness; non-affine transports have rank two.</li>
     </ol>
   </details>
 <!-- END panel-index -->

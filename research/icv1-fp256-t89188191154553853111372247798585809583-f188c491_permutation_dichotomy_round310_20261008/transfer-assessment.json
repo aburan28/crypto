@@ -1,0 +1,61 @@
+{
+  "schema": "p256-permutation-dichotomy-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 310,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "typed_correspondence_graph": [
+    "factor-base log vector ell --[column permutation T]--> transported vector T(ell)",
+    "fixed-sum coefficient slice A_s --[differences]--> H=1^perp",
+    "H --[(ell,T(ell))]--> one dimension iff T(ell)=a*ell+b*1",
+    "affine image --[target condition]--> impossible or direct target-log witness",
+    "non-affine image --> two-dimensional linear image; no global one-coordinate quotient"
+  ],
+  "obligations": [
+    {
+      "name": "rank-one equivalence",
+      "status": "supported",
+      "evidence": "All 3720 nondegenerate toy profile/permutation pairs satisfy affine iff rank one.",
+      "scope": "Complete F_5 width-four census and linear-algebra proof."
+    },
+    {
+      "name": "S17 difference span",
+      "status": "supported",
+      "evidence": "Toy rank is 3; both P-256 control fields have rank 16.",
+      "scope": "All fixed eight-plus/nine-minus patterns over an odd field."
+    },
+    {
+      "name": "P-256 non-affine control",
+      "status": "supported as labelled control",
+      "evidence": "Half-turn image and planted augmented rows have rank 2, with 2 group replays and zero failures.",
+      "scope": "Deterministic scalar labels, not actual factor-base logs."
+    },
+    {
+      "name": "one-dimensional non-affine image",
+      "status": "refuted in scope",
+      "evidence": "Rank one on the full fixed-sum difference space is equivalent to affine log transport.",
+      "scope": "Linear same-base column permutations."
+    },
+    {
+      "name": "nonlinear restricted selector",
+      "status": "open",
+      "evidence": "A restricted nonlinear coefficient family may have a smaller image, but must measure yield and retain two-row rank.",
+      "scope": "Outside the full fixed-sum linear-span theorem."
+    }
+  ],
+  "controls": [
+    "Complete toy census: 156 profiles, 24 permutations, 468000 affine-slice rows.",
+    "Dual-field P-256 controls rank every matrix in both row orders and replay both planted group equations.",
+    "Rounds 39, 304, and 309 are imported only after exact hash, schema, curve, conclusion, and boundary checks."
+  ],
+  "cost_accounting": [
+    "Measured: complete toy enumeration, bucket occupancies, span/rank operations, P-256 group replay, isolation telemetry, and artifact sizes.",
+    "Imported modeled boundary: Round 309 S17 product yield and balanced arity-40 projection; not reclassified as measurement.",
+    "Unset: a nonlinear restricted family, its yield and degree, relation collection, sparse linear algebra, and recovery."
+  ],
+  "exploration_boundary": "Exact for linear product images induced by arbitrary permutations on the complete fixed-sum coefficient span; not a universal bound on nonlinear or restricted coefficient families.",
+  "weakest_open_obligation": "Construct a nonlinear restricted coefficient family whose joint image is near size n, whose two augmented rows stay independent, whose retained yield is exhaustive, and whose structured degree is at most five.",
+  "narrowest_supported_finding": "No same-base column permutation can give both a globally one-dimensional joint coefficient image and two independent useful rows: rank one is exactly affine log transport; non-affine transport has rank two.",
+  "semantic_evidence_sha256": "332fb3eb73e3a8f0e7e890215f037fcb7872f000d35a999a768a93fc5c7f61b8",
+  "assessment_json_bytes": 3623
+}
