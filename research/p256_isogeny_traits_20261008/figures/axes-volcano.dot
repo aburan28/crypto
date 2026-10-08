@@ -1,0 +1,81 @@
+digraph p256_trait_census {
+  graph [
+    rankdir=TB,
+    bgcolor="#ffffff",
+    fontname="Helvetica",
+    label="Construction coordinates are not volcano directions",
+    labelloc=t,
+    fontsize=20,
+    newrank=true,
+    ordering=out,
+    nodesep=0.5,
+    ranksep=0.72,
+    pad=0.25
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#f7f9fc",
+    color="#355070",
+    fontname="Helvetica",
+    fontsize=10,
+    margin="0.13,0.09"
+  ];
+  edge [color="#557a95", fontname="Helvetica", fontsize=9, penwidth=1.5];
+
+  subgraph cluster_grid {
+    label="Certified product-grid construction";
+    color="#a9bfd2";
+    style="rounded,filled";
+    fillcolor="#ffffff";
+
+    root [fillcolor="#e8f3ff", label="P-256\nE(0,0)"];
+    spine [fillcolor="#fff4db", label="spine point\nE(0,y)"];
+    row [fillcolor="#e7f8ee", label="row point\nE(x,y)"];
+    terminal [fillcolor="#dff5e8", penwidth=2, label="terminal\nE(999,1063)"];
+    scope [
+      shape=note,
+      fillcolor="#ffffff",
+      color="#8b8b8b",
+      fontsize=9,
+      label="The large path degree is a composition of individually certified\nsmall-degree maps. No single 7,390-bit-degree kernel polynomial or\nrational map was materialized, and no ECDLP solver speed was measured."
+    ];
+
+    { rank=same; root; spine; row; terminal; scope; }
+
+    root -> spine [label="y degree-13 edges\nconstruction spine", color="#c67c00"];
+    spine -> row [label="x degree-11 edges\nconstruction row", color="#2a9d8f"];
+    row -> terminal [style=dashed, label="maximum represented path\n11^999 * 13^1063\n7,390 bits", color="#6b7280"];
+    terminal -> scope [style=dotted, arrowhead=none, color="#8b8b8b"];
+  }
+
+  subgraph cluster_cm {
+    label="Class-wide CM / volcano proof";
+    color="#a9bfd2";
+    style="rounded,filled";
+    fillcolor="#ffffff";
+
+    delta [fillcolor="#f0eafa", label="Delta_pi = t^2 - 4p\ncomplete proved factorization\nsquarefree and 1 mod 4"];
+    maximal [fillcolor="#e8f3ff", label="Delta_pi = D_K\nf_pi = 1\nZ[pi] = O_K"];
+    allmax [fillcolor="#dff5e8", penwidth=2, label="For every E'/F_p in the class:\nZ[pi] subset End(E') subset O_K\ntherefore End(E') = O_K"];
+    split11 [label="ell = 11\nElkies split\nv_11(Delta_pi) = 0\ndepth 0"];
+    split13 [label="ell = 13\nElkies split\nv_13(Delta_pi) = 0\ndepth 0"];
+    horizontal [fillcolor="#dff5e8", penwidth=2, label="1,063,999 certified edges\nHORIZONTAL\nascending 0 / descending 0 / unknown 0"];
+    novertical [shape=note, fillcolor="#fff7ed", color="#c96a22", label="No conductor gap exists.\nA drawn vertical spine is not\na descending volcano edge."];
+
+    { rank=same; delta; maximal; allmax; }
+    { rank=same; split11; split13; }
+    { rank=same; horizontal; novertical; }
+
+    delta -> maximal -> allmax;
+    allmax -> split11;
+    allmax -> split13;
+    split11 -> horizontal [label="1,062,936 degree-11 edges", color="#2a9d8f"];
+    split13 -> horizontal [label="1,063 degree-13 edges", color="#c67c00"];
+    horizontal -> novertical [style=dotted, arrowhead=none, color="#c96a22"];
+  }
+
+  spine -> split13 [style=dashed, constraint=false, label="classified by proof,\nnot drawing", color="#c67c00"];
+  row -> split11 [style=dashed, constraint=false, label="classified by proof,\nnot drawing", color="#2a9d8f"];
+  scope -> delta [style=invis, weight=100, minlen=2];
+}

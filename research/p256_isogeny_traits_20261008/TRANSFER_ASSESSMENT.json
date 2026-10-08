@@ -1,0 +1,143 @@
+{
+  "schema": "crypto-transfer-assessment/draft-v1",
+  "status": "evidence_snapshot_not_a_ledger_certificate",
+  "subject": "structural census of 1064000 certified P-256-isogenous curves",
+  "methodology_resource_status": "top-level transfer obligations applied; linked skill methodology and template were unavailable from the skill store",
+  "source": {
+    "curve": "P-256",
+    "field": "F_p",
+    "subgroup_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "canonical_id": "icv1-fp256-t89188191154553853111372247798585809583-f188c491"
+  },
+  "destination": {
+    "family": "certified product-grid coordinates 0 <= x < 1000 and 0 <= y < 1064",
+    "unique_curves": 1064000,
+    "unique_j_invariants": 1064000,
+    "group_order": "same prime P-256 group order",
+    "endomorphism_order": "the maximal order O_K for every F_p-isogenous curve"
+  },
+  "typed_correspondence": [
+    {
+      "from": "registered P-256 E_(0,0)/F_p",
+      "to": "E_(0,y)/F_p",
+      "map": "composition of y certified separable cyclic degree-13 isogenies",
+      "classification": "F_p-rational group homomorphism; each constituent edge is volcano-horizontal"
+    },
+    {
+      "from": "E_(0,y)/F_p",
+      "to": "E_(x,y)/F_p",
+      "map": "composition of x certified separable cyclic degree-11 isogenies",
+      "classification": "F_p-rational group homomorphism; each constituent edge is volcano-horizontal"
+    },
+    {
+      "from": "E_(0,0)(F_p)",
+      "to": "E_(x,y)(F_p)",
+      "map": "induced rational-point group homomorphism",
+      "classification": "group isomorphism because 11 and 13 are coprime to the prime rational group order"
+    }
+  ],
+  "obligations": [
+    {
+      "name": "map_existence",
+      "status": "supported",
+      "evidence": "1063999 incoming source-certificate edges were generated and independently replayed before this census"
+    },
+    {
+      "name": "census_correctness",
+      "status": "supported",
+      "evidence": "independent source replay reconstructed all 2983712323 uncompressed bytes and record-chain SHA-256 9368fc972d7c93c7c2c425f63092464bdda504f87ea2f9a4011e8a4c48e950b1"
+    },
+    {
+      "name": "subgroup_preservation",
+      "status": "supported",
+      "evidence": "the source certificates audit the prime group order and every edge degree is 11 or 13, neither of which divides it"
+    },
+    {
+      "name": "endomorphism_conductor_gap",
+      "status": "refuted_for_the_entire_fp_isogeny_class",
+      "evidence": "the proved squarefree Frobenius discriminant is fundamental, so Z[pi] = O_K and every intermediate endomorphism order equals O_K; conductor is 1"
+    },
+    {
+      "name": "ascending_or_descending_fp_edges",
+      "status": "refuted_for_the_entire_fp_isogeny_class",
+      "evidence": "there is no nonmaximal intermediate endomorphism order; all 1063999 certified degree-11/13 edges are horizontal"
+    },
+    {
+      "name": "single_large_degree_map",
+      "status": "not_materialized",
+      "evidence": "the maximum path degree is the exact composition 11^999*13^1063, 7390 bits, not one kernel polynomial or one evaluated rational map"
+    },
+    {
+      "name": "large_prime_degree_isogeny",
+      "status": "not_attempted_by_this_two_generator_census",
+      "evidence": "the only certified edge degrees are 11 and 13; the 136-bit discriminant factor and 241-bit twist-order factor are class integers, not map degrees"
+    },
+    {
+      "name": "point_transport_and_recovery_cost",
+      "status": "unknown",
+      "evidence": "no ECDLP payload was transported and no dual-chain recovery was timed"
+    },
+    {
+      "name": "measured_index_calculus_advantage",
+      "status": "unknown",
+      "evidence": "relation generation, factor-base setup, matrix work, individual-log descent, target recovery, and matched Pollard rho were not run"
+    },
+    {
+      "name": "scaling_to_2_pow_32_or_the_full_class",
+      "status": "unknown",
+      "evidence": "the artifact covers exactly 1064000 source-certified curves; only the conductor conclusion is class-wide"
+    }
+  ],
+  "costs": {
+    "trait_generation": {
+      "status": "measured",
+      "wall_seconds": 210.541,
+      "user_cpu_seconds": 209.472538,
+      "system_cpu_seconds": 1.058918,
+      "peak_rss_bytes": 184426496
+    },
+    "independent_source_replay": {
+      "status": "measured",
+      "wall_seconds": 167.653,
+      "user_cpu_seconds": 166.935553,
+      "system_cpu_seconds": 0.710198,
+      "peak_rss_bytes": 184356864
+    },
+    "point_conversion": {
+      "status": "not_measured"
+    },
+    "relation_generation": {
+      "status": "not_attempted"
+    },
+    "linear_algebra": {
+      "status": "not_attempted"
+    },
+    "target_log_recovery": {
+      "status": "not_attempted"
+    },
+    "matched_pollard_rho": {
+      "status": "not_attempted"
+    }
+  },
+  "controls": [
+    "frozen exact source gzip, content, and record-chain hashes",
+    "1064000-to-1064000 exact full-width j union",
+    "independent complete byte replay from the two original certificates",
+    "recursive Pocklington and deterministic-u64 primality proof fixtures",
+    "adjacent source fixture passes while overlap and changed-source fixtures fail",
+    "altered direction, omitted field, and reasonless unresolved status fixtures fail",
+    "future transported-data and coordinate-isomorphism controls before any solver claim",
+    "future cold one-target solver comparison including setup, transport, matrix, recovery, and verification"
+  ],
+  "exploration_boundary": {
+    "unique_curves": 1064000,
+    "certified_edges": 1063999,
+    "edge_degrees": [11, 13],
+    "maximum_path_degree": "11^999*13^1063",
+    "maximum_path_degree_bits": 7390,
+    "finding": "no conductor gap, no vertical edge, no discrepancy, and no frozen QR-prefix trigger within the executed population",
+    "universal_nonexistence_claim": false,
+    "class_wide_claim": "all F_p-isogenous curves have maximal endomorphism order because the Frobenius discriminant is fundamental",
+    "ecdlp_speedup": null
+  }
+}
