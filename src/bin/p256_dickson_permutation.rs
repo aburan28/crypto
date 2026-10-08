@@ -531,7 +531,7 @@ fn factor_base_census(
         degree_inherited_from_parent: false,
     };
     if receipt.derived_columns == 0
-        || receipt.derived_columns % 2 != 0
+        || !receipt.derived_columns.is_multiple_of(2)
         || receipt.fixed_points != 0
         || receipt.closure_failures != 0
         || receipt.bijection_failures != 0
