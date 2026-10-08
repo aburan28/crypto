@@ -26,7 +26,7 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `gf3n.rs` GF(3ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 98 tests, all pass)
+## Correctness checks (`cargo test --release`: 101 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -64,8 +64,13 @@ Added in V3:
   chain = Weierstrass Vélu chain; generic F_{p²} = the u64 F_{p²};
 * GF(3ⁿ): bitsliced multiplication and Itoh–Tsujii inversion = digit-by-digit schoolbook arithmetic
   (n = 2..40); the polynomial-time modulus search returns the same reduction polynomials as the
-  earlier exhaustive scan (n ≤ 17, where that scan finished); Sutherland Φ_ℓ mod p from ℓ + 1 curves
-  found by the ψ_ℓ test and the volcano walk is still exactly the Hecke Φ_ℓ (ℓ = 3, 5, 7).
+  earlier exhaustive scan (n ≤ 17, where that scan finished); Sutherland Φ_ℓ mod p (X₁(ℓ) samples for
+  ℓ = 3, 5, 7, uniform curves behind the ℓ² filter for ℓ = 11, prime-to-ℓ walk with transported torsion)
+  is still exactly the Hecke Φ_ℓ;
+* Brent–Kung / Q-matrix composition = the naive Σ hᵢ ξⁱ mod g and, iterated from ξ = Y^q, = repeated
+  exponentiation (61 and 127 bits, degree 5–90); distinct-degree factorisation with composition steps =
+  the exponentiation version; the SEA Atkin degree (equality at the divisors of ℓ + 1) = the gcd
+  definition on 60 Atkin cases.
 
 The benchmark re-verifies each result before timing and stores `verified` in every record.
 
@@ -77,7 +82,7 @@ cargo run --release --bin bench -- --out results/run.jsonl                 # V1 
 cargo run --release --bin bench -- v2 --out results/run-v2.jsonl           # V2 groups: kernel2 chain bmss csidh v2path
 cargo run --release --bin bench -- --out results/run-v3.jsonl p1kernel big char2 quat genus2 phi radical relation models
 cargo run --release --bin bench -- --out results/run-v3b.jsonl theta twopow sea                # sea = SEA part of phi
-cargo run --release --bin bench -- --out results/run-p10.jsonl nc_fields nc_atkin nc_suth find sea
+cargo run --release --bin bench -- --out results/run-p10.jsonl nc_fields nc_atkin nc_suth find sea   # p10 / p11 groups
 cargo run --release --bin bench -- --quick kernel2                         # smoke test of one group
 cargo run --release --bin micro -- --out results/micro.jsonl               # field / polynomial / GF(2^n) micro benchmarks
 python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
@@ -102,8 +107,25 @@ python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
 | `results/p8-sea.jsonl`, `p8-sea-walk.jsonl` | SEA with cycle bounds 0/20/40/80, BSGS recombination; the earlier run with the linear walk |
 | `results/p8-twopow.jsonl` | 2^216-isogeny chains over the SIKEp434 F_{p²} |
 | `results/p10-speed.jsonl` | speed pass: groups `nc_fields nc_atkin nc_suth find sea`, three alternating runs each of the build before it (`"build": "before"`, commit `5208c95a`) and after (`"after"`), tagged with `run` |
+| `results/p11-speed.jsonl` | second speed pass: groups `nc_atkin nc_suth find sea`, before = `51d4823c` (built with the current bench file, so the Sutherland record is the same 16-prime median), after = `04df8550`, three alternating runs |
 
 Selected V3 measurements (medians unless stated; all records `verified: true`):
+
+* **Second speed pass** (`p11-speed.jsonl`, median of three alternating runs against `51d4823c`):
+  Sutherland Φ_ℓ mod p, median over 16 primes ≈ 2¹⁶: ℓ = 3 / 5 / 7 160 µs / 1.71 ms / 11.0 ms → 92 µs /
+  0.27 ms / 0.50 ms (rational 2-, 3-, 5-isogenous curves of a qualifying curve qualify too and carry its
+  ℓ-torsion along Vélu's x-map; X₁(ℓ) samples; an ℓ² test over the Hasse interval); the q-expansion Φ_ℓ
+  takes 8 / 21 / 62 µs, so Sutherland is still 8–13× slower there. CRT integer Φ₅ 29.3 → 4.8 ms, Φ₃
+  1.26 → 1.02 ms. For ℓ = 11 / 13 (uniform curves; one-off runs over 8 primes) the ℓ² filter alone took
+  93 → 5.8 ms and 395 → 33 ms. Atkin eigenvalue over F_{p^d} (roots from F_p factors of Φ_ℓ(j, Y), no root
+  finding in the extension): 3.4–5.0× (ℓ = 11, d = 4 12.0 → 2.8 ms). SEA at 127 bits 2.3–21× (median
+  4.9×; 0.14–3.8 s → 45–180 ms): the Atkin factor degree, 85–95 % of the time, now takes Q-matrix
+  products instead of a 127-bit exponentiation per k. Division-polynomial factoring median 2.1×
+  (61-bit ℓ = 23 655 → 163 ms) from composition in DDF and EDF. Unchanged within noise: SEA at 40 and
+  61 bits (median 1.06× and 1.03×, single cases 0.77–1.89×), Φ_ℓ root finding (0.54–1.11×; an isolated
+  A/B of `poly::roots` showed no difference), BMSS, Φ_ℓ precomputation, factoring at ℓ = 3 (6 µs).
+  The nc_suth record used to time one random path (one prime, one seed); one change looked 3× slower
+  on it and was 1.5× faster over 16 primes, so the record is now the 16-prime median.
 
 * **Speed pass** (`p10-speed.jsonl`, median of three alternating before/after runs):
   Sutherland Φ_ℓ mod p (17-bit p) ℓ = 3 / 5 / 7: 1.07 ms / 53 ms / 1.86 s → 0.15 / 2.2 / 17.4 ms (one test
@@ -191,9 +213,9 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
   (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5, 7 (N = 13 needs the genus-2 X₁(13)); Jacobi-quartic models;
   Enge's quasi-linear Φ_ℓ evaluation. Atkin-prime isogeny cycles over F_{pʳ} towers (t mod ℓ,
   verified against BSGS, tower degree ≤ 6) and Sutherland's volcano/CRT Φ_ℓ (verified equal to the
-  q-expansion Φ_ℓ) are now implemented; the latter finds its curves by random search plus a volcano
-  walk rather than from CM orders with a known volcano, and stays slower than the q-expansion Φ_ℓ
-  for the ℓ measured. Not implementable here (resource limit): quantum algorithms.
+  q-expansion Φ_ℓ) are now implemented; the latter finds its curves by X₁(ℓ) or uniform sampling plus
+  isogeny walks rather than from CM orders with a known volcano, and stays 8–13× slower than the
+  q-expansion Φ_ℓ for the ℓ measured. Not implementable here (resource limit): quantum algorithms.
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
 * KLPT is for left O₀-ideals with ℓ = 2 and p ≡ 3 mod 4; e/log₂p ≈ 3.8 at 128 bits, above the ≈ 3.5 heuristic.
