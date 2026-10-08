@@ -889,6 +889,13 @@ vs 3.64–3.81 s across 4 interleaved rounds (~1.37×), and end-to-end
 
 ## Open problems from the talk (unimplemented)
 
+- Couveignes–Lercier invariant factor bases via isogenies between
+  algebraic tori and elliptic curves — a second, denser family.
+  **Closed for this ladder (2026-10-08):** elliptic periods for
+  `F_{2^n}/F_2` need an auxiliary elliptic curve over `F_2` with a rational
+  point of order `n`; Hasse bounds `#E'(F_2) ≤ 5`, so the construction is
+  empty for every `n > 5`, in particular at `n = 131`.  See
+  `docs/ic/RESEARCH_ISOGENY_CONDUCTOR_GAP_20261007.md` §1.
 - ~~Couveignes–Lercier invariant factor bases via isogenies between
   algebraic tori and elliptic curves — a second, denser family.~~
   **Closed 2026-10-07 for this curve family.**  Their Galois-invariant

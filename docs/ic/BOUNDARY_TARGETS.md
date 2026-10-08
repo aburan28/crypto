@@ -192,6 +192,27 @@ scope and claim limit.
 finite public-synthetic single-target online comparison on one frozen binary
 curve (52-bit subgroup) after reusable compact-orbit IC preparation on `u128`
 words (no explicit pair table at any stage). It is a constant-factor win only
+— it does not establish an asymptotic exponent below Pollard rho (the total
+operation-count boundary is not comparable; S unknown), an external/private
+target capability, production key recovery, or deployed-curve security impact.
+It is **not ECC2K-130 evidence** (n=131 is a different curve and field degree).
+The retained multi-target shared-log results remain secondary evidence and are
+not promoted by this record.
+
+**Accounting non-claims added 2026-10-08 for every `vs_rho` rung (n=41…83),
+from `PLAN_IC_ACCOUNTING_FIXES_20261007.md`:** (1) the paired rho arm runs
+without precomputation while the IC arm's reusable preparation is excluded
+from its clock; the equal-precompute, equal-memory Bernstein–Lange baseline
+has not been run and is predicted to beat the IC online phase at every rung
+from n=71 up (F1). (2) `online_speedup` is a wall-clock ratio; in operation
+counts (`target_probes` vs `rho_walk_steps`, both recorded) the mean-target
+ratios are ≈ 25×, 3.5×, 0.5×, 3.6× at n=61, 71, 73, 83, and at n=83 the IC
+arm used more operations than rho in two of three paired runs (F2). (3) each
+rung measures one frozen target; the n=71 and n=73 targets needed 154× and
+125× fewer probes than the rank-stage mean (F3). (4) the n=73 R2/R3 rho walls
+were host-contended and the promoted median is R3 (F4). Until Phases 1–3 of
+the plan have run, these rows are `single_target_online` wall-ratio records,
+not crossover evidence, whatever their verdict strings say.
 — it does not establish an asymptotic exponent below Pollard rho, an
 external/private target capability, production key recovery, or deployed-curve
 security impact. It is **not ECC2K-130 evidence** (n=131 is a different curve
