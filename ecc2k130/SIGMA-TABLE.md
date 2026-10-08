@@ -258,6 +258,12 @@ lane-instructions per scalar update and the pipe ceilings at 2.415 GHz:
 | LSU | 81 | 95 | 76 B/s |
 | `CLMAD` | 38.1 | 38.1 | **19.3 B/s** at 1.62 lanes/SM-clk, 23.7 at 1.99 |
 
+One pipe the tool misprices: it counts an `LDS.128` as one lane, but the
+two nibble lookups move about 1.2 KB of shared memory per update, 45 bytes
+per SM-clock at 16.9 B/s against the pipe's 64, so the shared-memory pipe is
+about 70% busy. [PENTA-BASIS.md](PENTA-BASIS.md) measures what one more
+lookup per slot does.
+
 By function the table build spends 441 lanes in `reducePolynomial131`,
 377 in `product131`, 335 in the two table lookups, 103 in the weight's
 `fromPolynomial131`, 86 in the inversion's `toPolynomial131` and 38 in the

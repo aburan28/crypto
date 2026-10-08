@@ -38,7 +38,11 @@ the automatic 96,256 workers measures **16.864369 B/s** against the preset's
 pairs with A/A drift 0.05%, verdict promote as compatible engineering
 ([headline-persist](benchmarks/sigma-table/headline-persist/)).
 `roofline.py` puts that build at 87% of the carry-less unit (38.1 `CLMAD`s
-per update, floor 19.3 B/s). The 26 B/s goal remains unmet.
+per update, floor 19.3 B/s), and its two nibble lookups near 70% of the
+shared-memory pipe, which is why holding the walk in
+[Certicom's pentanomial basis](PENTA-BASIS.md) (no quotient `CLMAD`, but a
+third lookup per slot for the weight) measured 0.785 and stays off. The
+26 B/s goal remains unmet.
 
 The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
 on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle

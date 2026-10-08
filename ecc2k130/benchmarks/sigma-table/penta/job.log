@@ -1,0 +1,78 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-bbb6d183-108e-1672-067d-bfa172f1d662, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: origin/main 18ca29769 + claude/ecc2k130-sigma-table d503383da
+=== build tablep THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1 PACKED_L2_PERSIST=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic tablep
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration tablep
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build penta THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1 PACKED_L2_PERSIST=1 PACKED_PENTA_STATE=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic penta
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+PASS: 2600 GPU pentanomial map lookups through shared memory against the host maps
+PASS: 1261 GPU pentanomial reductions against long division
+=== integration penta
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma tag denominators: 0
+packed sigma pipe slot: 0
+packed penta state: 0
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 1
+  finished: 4.806 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 128 registers/thread, 48 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (87296 dynamic shared bytes)
+packed sigma tag denominators: 0
+packed sigma pipe slot: 0
+packed penta state: 1
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed L2 persist: 1
+  finished: 4.872 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+tablep 1709477 records sha256 7e0e8c90a7a1256c4f2c7f5ad4f23d5334de025a82590639f25516c0be25de92
+penta 1709477 records IDENTICAL
+PASS: sorted corpus identity for every arm
+PASS: arithmetic, integration, replay and corpus gates
+warmup	0	96256	tablep	16848.779	 83886080 of 104726528 field bytes, cap 83886080	2422, 493.30, 42
+warmup	0	96256	penta	13221.814	 83886080 of 104726528 field bytes, cap 83886080	2392, 432.56, 43
+one	1	96256	tablep	16913.159	 83886080 of 104726528 field bytes, cap 83886080	2422, 518.37, 48
+one	1	96256	penta	13271.548	 83886080 of 104726528 field bytes, cap 83886080	2422, 468.81, 49
+one	2	96256	penta	13273.271	 83886080 of 104726528 field bytes, cap 83886080	2422, 484.74, 51
+one	2	96256	tablep	16917.080	 83886080 of 104726528 field bytes, cap 83886080	2422, 512.75, 52
+one	3	96256	tablep	16918.317	 83886080 of 104726528 field bytes, cap 83886080	2422, 550.40, 52
+one	3	96256	penta	13272.879	 83886080 of 104726528 field bytes, cap 83886080	2422, 480.13, 54
+one	4	96256	penta	13273.348	 83886080 of 104726528 field bytes, cap 83886080	2422, 498.76, 56
+one	4	96256	tablep	16918.181	 83886080 of 104726528 field bytes, cap 83886080	2422, 516.30, 55
+tablep   @96256  rates ['16913.159', '16917.080', '16918.317', '16918.181'] median 16917.630
+penta    @96256  rates ['13271.548', '13273.271', '13272.879', '13273.348'] median 13273.075
+penta/tablep (pentanomial basis)                 0.784571
+=== done

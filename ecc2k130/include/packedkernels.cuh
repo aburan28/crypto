@@ -242,6 +242,19 @@ __device__ __forceinline__ int weight(P131 a) {
     return __popc(a.v[0]) + __popc(a.v[1]) + __popc(a.v[2]) + __popc(a.v[3]) + __popc(a.v[4]);
 }
 
+#if ECC_PACKED_SIGMA_TABLE && !ECC_SIGMA_FUSED
+#error "ECC_PACKED_SIGMA_TABLE is implemented for the fused sigma walk only"
+#endif
+#if ECC_PACKED_SIGMA_TABLE
+// Dynamic shared memory for the Frobenius nibble table (SIGMA_TABLE_BYTES
+// plus 256 bytes of alignment slack); the engine sizes every walk launch and
+// publishes the global copy through this symbol.
+extern __shared__ __align__(256) uint32_t eccSigmaSmem[];
+static __device__ const uint32_t *eccSigmaTableDevice;
+static const size_t SIGMA_SMEM_BYTES = size_t(ECC_PACKED_PENTA_STATE ? PENTA_TABLE_BYTES : SIGMA_TABLE_BYTES) + 256;
+#else
+static const size_t SIGMA_SMEM_BYTES = 0;
+#endif
 static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
     const size_t id = size_t(blockIdx.x) * blockDim.x + threadIdx.x;
     if (id >= size_t(p.threads) * ECC_BATCH || (reseed && !p.dead[id])) return;
@@ -264,7 +277,12 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
     // is the one place that has to do it.
     for (int k = 0; k < ECC_JCOUNT; ++k) p.counts[eccScalarCountIndex(slot, k, tid, p.threads)] = 0;
 #endif
-#if ECC_PACKED_POLY_STATE
+#if ECC_PACKED_PENTA_STATE
+    // Seed construction uses the established normal-basis point arithmetic;
+    // the persistent coordinates are pentanomial, through the global table.
+    x = applyMapMemory131(eccSigmaTableDevice + PENTA_MAP_FROM_ONB * MAP_WORDS, x);
+    y = applyMapMemory131(eccSigmaTableDevice + PENTA_MAP_FROM_ONB * MAP_WORDS, y);
+#elif ECC_PACKED_POLY_STATE
     // Seed construction uses the established normal-basis point arithmetic.
     // Only the persistent coordinate representation changes.
     x = toPolynomial131(x);
@@ -375,19 +393,6 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #endif
 #if ECC_SIGMA_FUSED && ECC_PACKED_CHAINS != 1
 #error "ECC_SIGMA_FUSED requires one Montgomery chain"
-#endif
-#if ECC_PACKED_SIGMA_TABLE && !ECC_SIGMA_FUSED
-#error "ECC_PACKED_SIGMA_TABLE is implemented for the fused sigma walk only"
-#endif
-#if ECC_PACKED_SIGMA_TABLE
-// Dynamic shared memory for the Frobenius nibble table (SIGMA_TABLE_BYTES
-// plus 256 bytes of alignment slack); the engine sizes every walk launch and
-// publishes the global copy through this symbol.
-extern __shared__ __align__(256) uint32_t eccSigmaSmem[];
-static __device__ const uint32_t *eccSigmaTableDevice;
-static const size_t SIGMA_SMEM_BYTES = size_t(SIGMA_TABLE_BYTES) + 256;
-#else
-static const size_t SIGMA_SMEM_BYTES = 0;
 #endif
 #ifndef ECC_SIGMA_TAG_DENOM
 #define ECC_SIGMA_TAG_DENOM 0
@@ -613,6 +618,24 @@ void resolveGlobalHints(WalkParams<unsigned> p, const unsigned *queue, const uns
 #endif
 
 #if ECC_SIGMA_FUSED
+#if ECC_PACKED_PENTA_STATE
+// Pentanomial coordinates: products reduce by the four-tap fold, the
+// weight's normal-basis view and the Frobenius steps come from the maps in
+// shared memory, and the inverse goes through the normal basis.
+#define ECC_WALK_PAIR mulPentaPair131
+#define ECC_WALK_MUL mulPenta131
+#define ECC_WALK_SQR squarePenta131
+#define ECC_WALK_INV(v) invPentaShared131((v), sigmaBase)
+#define ECC_WALK_TO_ONB(v) applyMapShared131((v), sigmaBase + PENTA_MAP_TO_ONB * MAP_BYTES)
+#define ECC_WALK_SIGMA(v, q) applyMapShared131((v), sigmaBase + (PENTA_MAP_SIGMA + (q)) * MAP_BYTES)
+#else
+#define ECC_WALK_PAIR mulPolynomialPair131
+#define ECC_WALK_MUL mulPolynomial131
+#define ECC_WALK_SQR squarePolynomial131
+#define ECC_WALK_INV(v) invPolynomial131(v)
+#define ECC_WALK_TO_ONB(v) fromPolynomial131(v)
+#define ECC_WALK_SIGMA(v, q) sigmaPlusTable131((v), (q), sigmaBase)
+#endif
 // Forward work for one polynomial-state sigma slot.  `xp` and `yp` are either
 // freshly loaded launch inputs or the reverse pass's register outputs.  The
 // latter is the fusion: selection and prefix construction do not reload the
@@ -623,7 +646,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                                                  unsigned long long now, bool guard,
                                                  bool first, unsigned *denominators,
                                                  P131 *prod, uint32_t sigmaBase) {
-    const P131 x = fromPolynomial131(xp);
+    const P131 x = ECC_WALK_TO_ONB(xp);
 #if !ECC_SIGMA_FUSED_LATE_Y && !ECC_PACKED_SIGMA_TABLE
     const P131 normalY = fromPolynomial131(yp);
 #endif
@@ -638,7 +661,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                 rec.iters = now - p.startIter[id];
                 toLimbs(x, rec.x);
 #if ECC_SIGMA_FUSED_LATE_Y || ECC_PACKED_SIGMA_TABLE
-                const P131 reportY = fromPolynomial131(yp);
+                const P131 reportY = ECC_WALK_TO_ONB(yp);
                 toLimbs(reportY, rec.y);
 #else
                 toLimbs(normalY, rec.y);
@@ -667,8 +690,8 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #if ECC_PACKED_SIGMA_TABLE
     // x + sigma^j(x) and y + sigma^j(y) straight from the polynomial
     // coordinates: no normal-basis y, no swap network, no conversions back.
-    const P131 dp = sigmaPlusTable131(xp, j - 3, sigmaBase);
-    const P131 ep = sigmaPlusTable131(yp, j - 3, sigmaBase);
+    const P131 dp = ECC_WALK_SIGMA(xp, j - 3);
+    const P131 ep = ECC_WALK_SIGMA(yp, j - 3);
 #else
 #if ECC_SIGMA_FUSED_LATE_Y
     // Keep normal Y out of the report/guard branch's live range on the hot
@@ -687,7 +710,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #endif
     P131 w;
     if (!first) {
-        const PolynomialPair pair = mulPolynomialPair131(*prod, ep, dp);
+        const PolynomialPair pair = ECC_WALK_PAIR(*prod, ep, dp);
         w = pair.first;
         *prod = pair.second;
     } else {
@@ -714,7 +737,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
-#if ECC_PACKED_SIGMA_TABLE
+#if ECC_PACKED_PENTA_STATE
+    const uint32_t sigmaBase = stagePentaTable(eccSigmaTableDevice, eccSigmaSmem);
+#elif ECC_PACKED_SIGMA_TABLE
     // Whole-block staging must precede the per-thread exit below.
     const uint32_t sigmaBase = stageSigmaTable(eccSigmaTableDevice, eccSigmaSmem);
 #else
@@ -740,7 +765,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         const bool last = step + 1 == p.steps;
         const unsigned long long now = p.iterBase + step + 1;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
-        P131 inv = invPolynomial131(prod), next;
+        P131 inv = ECC_WALK_INV(prod), next;
 #if ECC_SIGMA_PIPE_SLOT
         // One-slot software pipeline.  The next slot's loads and its pair
         // product depend only on the inverse chain, so they are issued before
@@ -756,11 +781,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             dpc.v[4] &= 7;
             const P131 w0 = load(p.pchain, slot0, tid, p.threads);
             if (ECC_BATCH > 1) {
-                const PolynomialPair pair = mulPolynomialPair131(inv, w0, dpc);
+                const PolynomialPair pair = ECC_WALK_PAIR(inv, w0, dpc);
                 lamc = pair.first;
                 inv = pair.second;
             } else {
-                lamc = mulPolynomial131(inv, w0);
+                lamc = ECC_WALK_MUL(inv, w0);
             }
         }
 #pragma unroll 1
@@ -776,15 +801,15 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 dpn.v[4] &= 7;
                 const P131 w1 = load(p.pchain, slot1, tid, p.threads);
                 if (i + 2 < ECC_BATCH) {
-                    const PolynomialPair pair = mulPolynomialPair131(inv, w1, dpn);
+                    const PolynomialPair pair = ECC_WALK_PAIR(inv, w1, dpn);
                     lamn = pair.first;
                     inv = pair.second;
                 } else {
-                    lamn = mulPolynomial131(inv, w1);
+                    lamn = ECC_WALK_MUL(inv, w1);
                 }
             }
-            const P131 nx = add131(add131(squarePolynomial131(lamc), lamc), dpc);
-            const P131 product = mulPolynomial131(lamc, add131(xc, nx));
+            const P131 nx = add131(add131(ECC_WALK_SQR(lamc), lamc), dpc);
+            const P131 product = ECC_WALK_MUL(lamc, add131(xc, nx));
             const P131 ny = add131(add131(product, nx), yc);
             store(p.x, slot, tid, p.threads, nx);
             store(p.y, slot, tid, p.threads, ny);
@@ -808,7 +833,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             P131 w = load(p.pchain, slot, tid, p.threads);
             const int jt = 3 + ((w.v[4] >> 3) & 7);
             w.v[4] &= 7;
-            const P131 dp = sigmaPlusTable131(x, jt - 3, sigmaBase);
+            const P131 dp = ECC_WALK_SIGMA(x, jt - 3);
 #else
             P131 dp = load(denominators, slot, tid, p.threads);
             dp.v[4] &= 7;
@@ -816,14 +841,14 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
             P131 lambdaPoly;
             if (i + 1 < ECC_BATCH) {
-                const PolynomialPair pair = mulPolynomialPair131(inv, w, dp);
+                const PolynomialPair pair = ECC_WALK_PAIR(inv, w, dp);
                 lambdaPoly = pair.first;
                 inv = pair.second;
             } else {
-                lambdaPoly = mulPolynomial131(inv, w);
+                lambdaPoly = ECC_WALK_MUL(inv, w);
             }
-            const P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
-            const P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
+            const P131 nx = add131(add131(ECC_WALK_SQR(lambdaPoly), lambdaPoly), dp);
+            const P131 product = ECC_WALK_MUL(lambdaPoly, add131(x, nx));
             const P131 ny = add131(add131(product, nx), y);
             store(p.x, slot, tid, p.threads, nx);
             store(p.y, slot, tid, p.threads, ny);
@@ -835,6 +860,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         if (!last) prod = next;
     }
 }
+#undef ECC_WALK_PAIR
+#undef ECC_WALK_MUL
+#undef ECC_WALK_SQR
+#undef ECC_WALK_INV
+#undef ECC_WALK_TO_ONB
+#undef ECC_WALK_SIGMA
 #elif ECC_TABLE_FUSED
 // The forward-pass work for one point of one slot: the normal-basis weight and
 // distinguished-point test, the table-walk selection with its history update,

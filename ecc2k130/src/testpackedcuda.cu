@@ -344,9 +344,80 @@ static bool sigmaTableChecks() {
     return true;
 }
 
+#if ECC_PACKED_PENTA_STATE
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void pentaProbe(const uint32_t *__restrict__ table, const P131 *input, const int *maps, P131 *output, int n) {
+    const uint32_t base = eccPacked131::stagePentaTable(table, eccSigmaSmem);
+    const int i = blockIdx.x*blockDim.x+threadIdx.x;
+    if (i < n) output[i] = eccPacked131::applyMapShared131(input[i], base + uint32_t(maps[i]) * eccPacked131::MAP_BYTES);
+}
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void pentaReduceProbe(const RawPolynomial *input, P131 *output, int n) {
+    const int i = blockIdx.x*blockDim.x+threadIdx.x;
+    if (i < n) output[i] = eccPacked131::reducePenta131(input[i].v);
+}
+static P131 reducePentaReference(RawPolynomial h) {
+    h.v[8]&=31u;
+    const int terms[]={0,1,2,13,131};
+    for (int degree=260;degree>=131;--degree) if ((h.v[degree/32]>>(degree%32))&1u)
+        for (int term:terms) { int bit=degree-131+term; h.v[bit/32]^=1u<<(bit%32); }
+    return P131{{h.v[0],h.v[1],h.v[2],h.v[3],h.v[4]&7u}};
+}
+#endif
+static bool pentaChecks() {
+#if ECC_PACKED_PENTA_STATE
+    std::vector<uint32_t> table(eccPacked131::PENTA_TABLE_WORDS);
+    eccPacked131::buildPentaTable(table.data());
+    std::vector<P131> input; std::vector<int> maps;
+    uint32_t state=0x7131007u;
+    for (int m=0;m<eccPacked131::PENTA_TABLE_MAPS;m++) {
+        for (int bit=0;bit<131;bit++) { P131 a{}; a.v[bit/32]=1u<<(bit%32); input.push_back(a); maps.push_back(m); }
+        input.push_back(P131{{~0u,~0u,~0u,~0u,7u}}); maps.push_back(m);
+        for (int i=0;i<128;i++) {
+            P131 a; for (int w=0;w<5;w++) { state^=state<<13;state^=state>>17;state^=state<<5; a.v[w]=state; }
+            a.v[4]&=7u; input.push_back(a); maps.push_back(m);
+        }
+    }
+    const int n=int(input.size()); std::vector<P131> output(n);
+    uint32_t *deviceTable; P131 *deviceInput,*deviceOutput; int *deviceMaps;
+    checked(cudaMalloc(&deviceTable,table.size()*sizeof(uint32_t)));
+    checked(cudaMalloc(&deviceInput,n*sizeof(P131))); checked(cudaMalloc(&deviceOutput,n*sizeof(P131)));
+    checked(cudaMalloc(&deviceMaps,n*sizeof(int)));
+    checked(cudaMemcpy(deviceTable,table.data(),table.size()*sizeof(uint32_t),cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(deviceInput,input.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(deviceMaps,maps.data(),n*sizeof(int),cudaMemcpyHostToDevice));
+    const size_t smem=size_t(eccPacked131::PENTA_TABLE_BYTES)+256;
+    checked(cudaFuncSetAttribute(pentaProbe,cudaFuncAttributeMaxDynamicSharedMemorySize,int(smem)));
+    pentaProbe<<<(n+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS,smem>>>(deviceTable,deviceInput,deviceMaps,deviceOutput,n);
+    checked(cudaGetLastError()); checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(output.data(),deviceOutput,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    for (int i=0;i<n;i++) {
+        const P131 want=eccPacked131::applyMapMemory131(table.data()+maps[i]*eccPacked131::MAP_WORDS,input[i]);
+        if (!same(output[i],want)) { fprintf(stderr,"GPU pentanomial map mismatch at %d (map %d)\n",i,maps[i]); return false; }
+    }
+    printf("PASS: %d GPU pentanomial map lookups through shared memory against the host maps\n",n);
+    std::vector<RawPolynomial> raw;
+    for (int bit=0;bit<261;bit++) { RawPolynomial h{}; h.v[bit/32]=1u<<(bit%32); raw.push_back(h); }
+    for (int i=0;i<1000;i++) { RawPolynomial h; for (int j=0;j<9;j++) { state^=state<<13;state^=state>>17;state^=state<<5; h.v[j]=state; } raw.push_back(h); }
+    const int rn=int(raw.size()); std::vector<P131> rout(rn);
+    RawPolynomial *deviceRaw; checked(cudaMalloc(&deviceRaw,rn*sizeof(RawPolynomial)));
+    checked(cudaMemcpy(deviceRaw,raw.data(),rn*sizeof(RawPolynomial),cudaMemcpyHostToDevice));
+    pentaReduceProbe<<<(rn+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS>>>(deviceRaw,deviceOutput,rn);
+    checked(cudaGetLastError()); checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(rout.data(),deviceOutput,rn*sizeof(P131),cudaMemcpyDeviceToHost));
+    for (int i=0;i<rn;i++) if (!same(rout[i],reducePentaReference(raw[i]))) { fprintf(stderr,"GPU pentanomial reduction mismatch at %d\n",i); return false; }
+    printf("PASS: %d GPU pentanomial reductions against long division\n",rn);
+    checked(cudaFree(deviceTable)); checked(cudaFree(deviceInput)); checked(cudaFree(deviceOutput)); checked(cudaFree(deviceMaps)); checked(cudaFree(deviceRaw));
+#else
+    printf("pentanomial basis not compiled in; checks skipped\n");
+#endif
+    return true;
+}
+
 int main() {
     printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
     printf("packed arithmetic sigma table: %d\n",ECC_PACKED_SIGMA_TABLE);
+    printf("packed arithmetic penta state: %d\n",ECC_PACKED_PENTA_STATE);
     printf("packed arithmetic generated product: %d\n",ECC_PACKED_GENERATED_PRODUCT);
     printf("packed arithmetic native carryless multiply: %d\n",ECC_PACKED_CLMAD);
     printf("packed arithmetic top clmad: %d\n",ECC_PACKED_TOP_CLMAD);
@@ -390,6 +461,6 @@ int main() {
         }
     }
     printf("PASS: %d GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases\n",n);
-    return polynomialChecks() && squareChecks() && pairedFrobeniusChecks() && sigmaTableChecks()?0:1;
+    return polynomialChecks() && squareChecks() && pairedFrobeniusChecks() && sigmaTableChecks() && pentaChecks()?0:1;
 }
 

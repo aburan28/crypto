@@ -110,8 +110,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                 eccPacked131::P131 a;
                 for (int word = 0; word < 5; ++word)
                     a.v[word] = words[(size_t(slot) * 5 + word) * threads + tid];
+#if ECC_PACKED_PENTA_STATE
+                const auto b = toPolynomial ? eccPacked131::pentaFromOnbHost(a)
+                                            : eccPacked131::pentaToOnbHost(a);
+#else
                 const auto b = toPolynomial ? eccPacked131::toPolynomial131(a)
                                             : eccPacked131::fromPolynomial131(a);
+#endif
                 for (int word = 0; word < 5; ++word)
                     words[(size_t(slot) * 5 + word) * threads + tid] = b.v[word];
             }
@@ -292,8 +297,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         {
             // Built from the host arithmetic the tests verify; every walk block
             // stages this global copy into its shared memory.
+#if ECC_PACKED_PENTA_STATE
+            std::vector<uint32_t> table(eccPacked131::PENTA_TABLE_WORDS);
+            eccPacked131::buildPentaTable(table.data());
+#else
             std::vector<uint32_t> table(eccPacked131::SIGMA_TABLE_WORDS);
             eccPacked131::buildSigmaTable(table.data());
+#endif
             CUDA_CHECK(cudaMalloc(&sigmaTable, table.size() * sizeof(uint32_t)));
             CUDA_CHECK(cudaMemcpy(sigmaTable, table.data(), table.size() * sizeof(uint32_t), cudaMemcpyHostToDevice));
             const uint32_t *device = sigmaTable;
@@ -389,6 +399,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                size_t(eccPacked131::SIGMA_SMEM_BYTES));
         printf("packed sigma tag denominators: %d\n", ECC_SIGMA_TAG_DENOM);
         printf("packed sigma pipe slot: %d\n", ECC_SIGMA_PIPE_SLOT);
+        printf("packed penta state: %d\n", ECC_PACKED_PENTA_STATE);
 #if ECC_PACKED_SHARED_SIGMA
         int diagnosticDevice = -1, driverReservedShared = -1;
         CUDA_CHECK(cudaGetDevice(&diagnosticDevice));

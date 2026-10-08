@@ -1,0 +1,53 @@
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 128 registers/thread, 48 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed launch bounds: 512 threads, 1 min blocks
+packed sigma table: 1 (87296 dynamic shared bytes)
+packed sigma tag denominators: 0
+packed sigma pipe slot: 0
+packed penta state: 1
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 0
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed inline polynomial: 3
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed witness: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed square table: 0
+packed polynomial inversion: 0
+packed profile ranges: 0
+packed table GPU-wide hints: 0
+packed hint scheduling: table fused 0, pipe select 0, chain first 0, inline polynomial 3, phase profile 0, cycle profile 0
+packed table walk: 0 (0 branches, 87296 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch
+       2.0 s   13269.156 M it/s  26809991168 iterations         0 dp         0 stored         0 dropped
+       3.8 s   13272.153 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped
+  finished: 13271.548 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

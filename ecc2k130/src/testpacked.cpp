@@ -73,7 +73,71 @@ static bool sigmaTableChecks() {
     printf("PASS: %d host Frobenius table lookups against the network and the independent reference\n",cases);
     return true;
 }
+static P reducePentaReference(RawPolynomial h) {
+    h.v[8]&=31u;
+    const int terms[]={0,1,2,13,131};
+    for (int degree=260;degree>=131;--degree) if ((h.v[degree/32]>>(degree%32))&1u)
+        for (int term:terms) { int bit=degree-131+term; h.v[bit/32]^=1u<<(bit%32); }
+    return P{{h.v[0],h.v[1],h.v[2],h.v[3],h.v[4]}};
+}
+static bool pentaChecks() {
+    using namespace eccPacked131;
+    uint32_t rng=0x131007u;
+    auto next=[&]() { rng^=rng<<13;rng^=rng>>17;rng^=rng<<5;return rng; };
+    int cases=0;
+    for (int test=0;test<261+1000;test++) {
+        RawPolynomial h{};
+        if (test<261) h.v[test/32]=1u<<(test%32); else { for (auto &word:h.v) word=next(); }
+        h.v[8]&=31u;
+        const P want=reducePentaReference(h);
+        for (int poison=0;poison<2;poison++) {
+            if (poison) h.v[8]|=0xffffffe0u;
+            if (!same(reducePenta131(h.v),want)) { printf("pentanomial reduction mismatch at %d\n",test); return false; }
+            ++cases;
+        }
+    }
+    printf("PASS: %d host pentanomial reductions against long division\n",cases);
+    for (int i=0;i<131;i++) {
+        P e{}; e.v[i/32]=1u<<(i%32);
+        if (!same(pentaFromOnbHost(pentaToOnbHost(e)),e) || !same(pentaToOnbHost(pentaFromOnbHost(e)),e)) {
+            printf("pentanomial change of basis does not round-trip on %d\n",i); return false;
+        }
+    }
+    std::vector<uint32_t> table(PENTA_TABLE_WORDS);
+    buildPentaTable(table.data());
+    cases=0;
+    for (int test=0;test<400;test++) {
+        unsigned long long av[3]={randomWord(),randomWord(),randomWord()&7},bv[3]={randomWord(),randomWord(),randomWord()&7};
+        if (test<131) {av[0]=av[1]=av[2]=0;av[test/64]=1ull<<(test%64);}
+        auto a=R::fromLimbs(av),b=R::fromLimbs(bv);
+        const P pa=pack(a),pb=pack(b);
+        const P ta=pentaFromOnbHost(pa),tb=pentaFromOnbHost(pb);
+        if (unpack(pentaToOnbHost(mulPenta131(ta,tb)))!=R::mul(a,b) ||
+            unpack(pentaToOnbHost(squarePenta131(ta)))!=R::sqr(a) ||
+            unpack(pentaToOnbHost(invPentaHost131(ta)))!=R::inv(a)) {
+            printf("pentanomial field mismatch at case %d\n",test); return false;
+        }
+        const PolynomialPair pair=mulPentaPair131(ta,tb,ta);
+        if (unpack(pentaToOnbHost(pair.first))!=R::mul(a,b) || unpack(pentaToOnbHost(pair.second))!=R::sqr(a)) {
+            printf("pentanomial pair mismatch at case %d\n",test); return false;
+        }
+        if (!same(applyMapMemory131(table.data()+PENTA_MAP_TO_ONB*MAP_WORDS,ta),pa) ||
+            !same(applyMapMemory131(table.data()+PENTA_MAP_FROM_ONB*MAP_WORDS,pa),ta)) {
+            printf("pentanomial basis map mismatch at case %d\n",test); return false;
+        }
+        for (int q=0;q<8;q++) {
+            const P want=pentaFromOnbHost(pack(R::add(a,R::sigma(a,q+3))));
+            if (!same(applyMapMemory131(table.data()+(PENTA_MAP_SIGMA+q)*MAP_WORDS,ta),want)) {
+                printf("pentanomial sigma map mismatch at case %d, map %d\n",test,q); return false;
+            }
+            ++cases;
+        }
+    }
+    printf("PASS: %d pentanomial sigma-map lookups, 400 products, squares, inverses and basis maps against the independent reference\n",cases);
+    return true;
+}
 int main() {
+    if (!pentaChecks()) return 1;
     if (!sigmaTableChecks()) return 1;
     printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
     if (!reductionChecks()) return 1;

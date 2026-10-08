@@ -1011,6 +1011,220 @@ inline P131 sigmaPlusTable131(const uint32_t *table, const P131 &a, int q) {
     const uint32_t w4 = parity131(a, m) | (parity131(a, m + 5) << 1) | (parity131(a, m + 10) << 2);
     return P131{{r[0], r[1], r[2], r[3], w4}};
 }
+#ifndef ECC_PACKED_PENTA_STATE
+#define ECC_PACKED_PENTA_STATE 0
+#endif
+#if ECC_PACKED_PENTA_STATE != 0 && ECC_PACKED_PENTA_STATE != 1
+#error "ECC_PACKED_PENTA_STATE must be 0 or 1"
+#endif
+#if ECC_PACKED_PENTA_STATE && !ECC_PACKED_SIGMA_TABLE
+#error "ECC_PACKED_PENTA_STATE requires the Frobenius table machinery (ECC_PACKED_SIGMA_TABLE)"
+#endif
+// Pentanomial coordinates: F_2[t]/(t^131 + t^13 + t^2 + t + 1), Certicom's
+// own polynomial basis for ECC2K-130 (codegen/genpenta.py).  Products are the
+// same carryless product as the optimal polynomial basis; the reduction is a
+// four-tap shift fold with no quotient multiply, so it costs about 36 logic
+// operations and no CLMAD.  Everything basis-dependent -- the normal-basis
+// weight, the Frobenius steps, the inversion's entry and exit -- is one
+// F_2-linear map applied through a nibble table (SIGMA-TABLE.md).
+#include "packedpenta131.h"
+ECC_HD P131 inv131(P131 a);
+// Reduce a degree <= 260 product (nine words, unused high bits of the ninth
+// ignored) modulo t^131 + t^13 + t^2 + t + 1.
+ECC_HD P131 reducePenta131(const uint32_t *h) {
+    const uint32_t H0 = (h[4] >> 3) | (h[5] << 29), H1 = (h[5] >> 3) | (h[6] << 29);
+    const uint32_t H2 = (h[6] >> 3) | (h[7] << 29), H3 = (h[7] >> 3) | (h[8] << 29);
+    const uint32_t H4 = (h[8] >> 3) & 3u;
+    uint32_t v0 = h[0] ^ H0 ^ (H0 << 1) ^ (H0 << 2) ^ (H0 << 13);
+    uint32_t v1 = h[1] ^ H1 ^ ((H1 << 1) | (H0 >> 31)) ^ ((H1 << 2) | (H0 >> 30)) ^ ((H1 << 13) | (H0 >> 19));
+    uint32_t v2 = h[2] ^ H2 ^ ((H2 << 1) | (H1 >> 31)) ^ ((H2 << 2) | (H1 >> 30)) ^ ((H2 << 13) | (H1 >> 19));
+    uint32_t v3 = h[3] ^ H3 ^ ((H3 << 1) | (H2 >> 31)) ^ ((H3 << 2) | (H2 >> 30)) ^ ((H3 << 13) | (H2 >> 19));
+    uint32_t v4 = (h[4] & 7u) ^ H4 ^ ((H4 << 1) | (H3 >> 31)) ^ ((H4 << 2) | (H3 >> 30)) ^ ((H4 << 13) | (H3 >> 19));
+    // The taps push at most 15 bits past t^130; fold them once more.
+    const uint32_t T = v4 >> 3;
+    v0 ^= T ^ (T << 1) ^ (T << 2) ^ (T << 13);
+    return P131{{v0, v1, v2, v3, v4 & 7u}};
+}
+#if ECC_PACKED_INLINE_POLY & 1
+#define ECC_PENTA_SINGLE ECC_HD
+#else
+#define ECC_PENTA_SINGLE static ECC_BIG
+#endif
+#if ECC_PACKED_INLINE_POLY & 2
+#define ECC_PENTA_PAIR ECC_HD
+#else
+#define ECC_PENTA_PAIR static ECC_BIG
+#endif
+ECC_PENTA_SINGLE P131 mulPenta131(P131 a, P131 b) {
+    uint32_t h[9]; product131(a, b, h);
+    return reducePenta131(h);
+}
+ECC_PENTA_PAIR PolynomialPair mulPentaPair131(P131 a, P131 b, P131 c) {
+    uint32_t h[9];
+    product131(a, b, h);
+    const P131 first = reducePenta131(h);
+    product131(a, c, h);
+    return PolynomialPair{first, reducePenta131(h)};
+}
+#undef ECC_PENTA_SINGLE
+#undef ECC_PENTA_PAIR
+ECC_HD P131 squarePenta131(P131 a) {
+    uint32_t h[9];
+#pragma unroll
+    for (int i = 0; i < 4; ++i) {
+        const uint64_t w = spread32p(a.v[i]);
+        h[2 * i] = uint32_t(w);
+        h[2 * i + 1] = uint32_t(w >> 32);
+    }
+    h[8] = uint32_t(spread32p(a.v[4]));
+    return reducePenta131(h);
+}
+// Change of basis on the host from the generated matrices: the ground truth
+// the nibble maps are built from and tested against.
+inline P131 pentaToOnbHost(const P131 &a) {
+    P131 r{};
+    for (int i = 0; i < 131; ++i)
+        if ((a.v[i / 32] >> (i % 32)) & 1u)
+            for (int w = 0; w < 5; ++w) r.v[w] ^= pentaToOnb131[i][w];
+    return r;
+}
+inline P131 pentaFromOnbHost(const P131 &a) {
+    P131 r{};
+    for (int i = 0; i < 131; ++i)
+        if ((a.v[i / 32] >> (i % 32)) & 1u)
+            for (int w = 0; w < 5; ++w) r.v[w] ^= pentaFromOnb131[i][w];
+    return r;
+}
+// Generic nibble maps.  One map is 33 positions x 16 values x 16-byte rows
+// (output bits 0..127) followed by three 131-bit parity masks for bits
+// 128..130, padded to 256 bytes so every position group stays 256-byte
+// aligned: MAP_BYTES per map.  The pentanomial table holds ten maps:
+// 0..7 are I + sigma^(q+3) on pentanomial coordinates, 8 is pentanomial to
+// normal basis (the weight and the inversion's entry), 9 is its inverse.
+static const int MAP_ROW_BYTES = SIGMA_TABLE_NIBBLES * 16 * 16;   // 8448
+static const int MAP_BYTES = MAP_ROW_BYTES + 256;                  // 8704
+static const int MAP_WORDS = MAP_BYTES / 4;
+static const int PENTA_MAP_SIGMA = 0, PENTA_MAP_TO_ONB = 8, PENTA_MAP_FROM_ONB = 9;
+static const int PENTA_TABLE_MAPS = 10;
+static const int PENTA_TABLE_WORDS = PENTA_TABLE_MAPS * MAP_WORDS;
+static const int PENTA_TABLE_BYTES = PENTA_TABLE_WORDS * 4;
+inline void buildMap131(uint32_t *map, const P131 *image) {
+    for (int w = 0; w < MAP_WORDS; ++w) map[w] = 0;
+    for (int k = 0; k < SIGMA_TABLE_NIBBLES; ++k)
+        for (int n = 0; n < 16; ++n) {
+            uint32_t *row = map + (k * 16 + n) * 4;
+            for (int b = 0; b < 4; ++b) {
+                const int i = 4 * k + b;
+                if (i < 131 && ((n >> b) & 1))
+                    for (int w = 0; w < 4; ++w) row[w] ^= image[i].v[w];
+            }
+        }
+    uint32_t *top = map + MAP_ROW_BYTES / 4;
+    for (int b = 0; b < 3; ++b)
+        for (int i = 0; i < 131; ++i)
+            if ((image[i].v[4] >> b) & 1u) top[b * 5 + i / 32] |= 1u << (i % 32);
+}
+inline void buildPentaTable(uint32_t *table) {
+    P131 image[131];
+    for (int q = 0; q < 8; ++q) {
+        for (int i = 0; i < 131; ++i) {
+            P131 e{}; e.v[i / 32] = 1u << (i % 32);
+            const P131 a = pentaToOnbHost(e);
+            image[i] = pentaFromOnbHost(add131(a, sigma131(a, q + 3)));
+        }
+        buildMap131(table + (PENTA_MAP_SIGMA + q) * MAP_WORDS, image);
+    }
+    for (int i = 0; i < 131; ++i) for (int w = 0; w < 5; ++w) image[i].v[w] = pentaToOnb131[i][w];
+    buildMap131(table + PENTA_MAP_TO_ONB * MAP_WORDS, image);
+    for (int i = 0; i < 131; ++i) for (int w = 0; w < 5; ++w) image[i].v[w] = pentaFromOnb131[i][w];
+    buildMap131(table + PENTA_MAP_FROM_ONB * MAP_WORDS, image);
+}
+// Apply one map from ordinary memory: the host, and the device's global copy
+// (the restart kernel converts a handful of points per launch).
+ECC_HD P131 applyMapMemory131(const uint32_t *map, const P131 &a) {
+    uint32_t r[4] = {0, 0, 0, 0};
+    for (int k = 0; k < SIGMA_TABLE_NIBBLES; ++k) {
+        const uint32_t n = (k < 32 ? a.v[k / 8] >> (4 * (k % 8)) : a.v[4]) & 15u;
+        const uint32_t *row = map + (k * 16 + int(n)) * 4;
+        for (int w = 0; w < 4; ++w) r[w] ^= row[w];
+    }
+    const uint32_t *m = map + MAP_ROW_BYTES / 4;
+    const uint32_t w4 = parity131(a, m) | (parity131(a, m + 5) << 1) | (parity131(a, m + 10) << 2);
+    return P131{{r[0], r[1], r[2], r[3], w4}};
+}
+#ifdef __CUDACC__
+// Apply one map from shared memory; `mapBase` is the 256-byte-aligned shared
+// address of the map (table base plus index * MAP_BYTES).
+__device__ __forceinline__ P131 applyMapShared131(const P131 &a, uint32_t mapBase) {
+    uint32_t r0 = 0, r1 = 0, r2 = 0, r3 = 0;
+#define ECC_MAP_ROW(K, OFF) do { \
+        uint32_t e0, e1, e2, e3; \
+        asm volatile("ld.shared.v4.u32 {%0,%1,%2,%3}, [%4+%5];" \
+            : "=r"(e0), "=r"(e1), "=r"(e2), "=r"(e3) : "r"(mapBase | (OFF)), "n"((K) * 256)); \
+        r0 ^= e0; r1 ^= e1; r2 ^= e2; r3 ^= e3; } while (0)
+    ECC_MAP_ROW(0, (a.v[0] << 4) & 0xf0u);
+    ECC_MAP_ROW(1, a.v[0] & 0xf0u);
+    ECC_MAP_ROW(2, (a.v[0] >> 4) & 0xf0u);
+    ECC_MAP_ROW(3, (a.v[0] >> 8) & 0xf0u);
+    ECC_MAP_ROW(4, (a.v[0] >> 12) & 0xf0u);
+    ECC_MAP_ROW(5, (a.v[0] >> 16) & 0xf0u);
+    ECC_MAP_ROW(6, (a.v[0] >> 20) & 0xf0u);
+    ECC_MAP_ROW(7, (a.v[0] >> 24) & 0xf0u);
+    ECC_MAP_ROW(8, (a.v[1] << 4) & 0xf0u);
+    ECC_MAP_ROW(9, a.v[1] & 0xf0u);
+    ECC_MAP_ROW(10, (a.v[1] >> 4) & 0xf0u);
+    ECC_MAP_ROW(11, (a.v[1] >> 8) & 0xf0u);
+    ECC_MAP_ROW(12, (a.v[1] >> 12) & 0xf0u);
+    ECC_MAP_ROW(13, (a.v[1] >> 16) & 0xf0u);
+    ECC_MAP_ROW(14, (a.v[1] >> 20) & 0xf0u);
+    ECC_MAP_ROW(15, (a.v[1] >> 24) & 0xf0u);
+    ECC_MAP_ROW(16, (a.v[2] << 4) & 0xf0u);
+    ECC_MAP_ROW(17, a.v[2] & 0xf0u);
+    ECC_MAP_ROW(18, (a.v[2] >> 4) & 0xf0u);
+    ECC_MAP_ROW(19, (a.v[2] >> 8) & 0xf0u);
+    ECC_MAP_ROW(20, (a.v[2] >> 12) & 0xf0u);
+    ECC_MAP_ROW(21, (a.v[2] >> 16) & 0xf0u);
+    ECC_MAP_ROW(22, (a.v[2] >> 20) & 0xf0u);
+    ECC_MAP_ROW(23, (a.v[2] >> 24) & 0xf0u);
+    ECC_MAP_ROW(24, (a.v[3] << 4) & 0xf0u);
+    ECC_MAP_ROW(25, a.v[3] & 0xf0u);
+    ECC_MAP_ROW(26, (a.v[3] >> 4) & 0xf0u);
+    ECC_MAP_ROW(27, (a.v[3] >> 8) & 0xf0u);
+    ECC_MAP_ROW(28, (a.v[3] >> 12) & 0xf0u);
+    ECC_MAP_ROW(29, (a.v[3] >> 16) & 0xf0u);
+    ECC_MAP_ROW(30, (a.v[3] >> 20) & 0xf0u);
+    ECC_MAP_ROW(31, (a.v[3] >> 24) & 0xf0u);
+    ECC_MAP_ROW(32, (a.v[4] << 4) & 0x70u);
+#undef ECC_MAP_ROW
+    const uint32_t top = mapBase + MAP_ROW_BYTES;
+    uint32_t m[16];
+#define ECC_MAP_MASKS(I) \
+    asm volatile("ld.shared.v4.u32 {%0,%1,%2,%3}, [%4+%5];" \
+        : "=r"(m[4 * (I)]), "=r"(m[4 * (I) + 1]), "=r"(m[4 * (I) + 2]), "=r"(m[4 * (I) + 3]) : "r"(top), "n"((I) * 16))
+    ECC_MAP_MASKS(0); ECC_MAP_MASKS(1); ECC_MAP_MASKS(2); ECC_MAP_MASKS(3);
+#undef ECC_MAP_MASKS
+    const uint32_t w4 = parity131(a, m) | (parity131(a, m + 5) << 1) | (parity131(a, m + 10) << 2);
+    return P131{{r0, r1, r2, r3, w4}};
+}
+__device__ __forceinline__ uint32_t stagePentaTable(const uint32_t *__restrict__ global, uint32_t *shared) {
+    const uint32_t raw = uint32_t(__cvta_generic_to_shared(shared));
+    const uint32_t aligned = (raw + 255u) & ~255u;
+    uint4 *dst = reinterpret_cast<uint4 *>(shared + (aligned - raw) / 4);
+    const uint4 *src = reinterpret_cast<const uint4 *>(global);
+    for (int i = threadIdx.x; i < PENTA_TABLE_WORDS / 4; i += blockDim.x) dst[i] = src[i];
+    __syncthreads();
+    return aligned;
+}
+// The walk's inverse on pentanomial coordinates: through the normal basis,
+// where the Itoh-Tsujii chain's Frobenius powers are permutation networks.
+__device__ __forceinline__ P131 invPentaShared131(const P131 &ap, uint32_t base) {
+    const P131 an = applyMapShared131(ap, base + PENTA_MAP_TO_ONB * MAP_BYTES);
+    return applyMapShared131(inv131(an), base + PENTA_MAP_FROM_ONB * MAP_BYTES);
+}
+#endif
+inline P131 invPentaHost131(const P131 &ap) {
+    return pentaFromOnbHost(inv131(pentaToOnbHost(ap)));
+}
 ECC_HD P131 inv131(P131 a){
 #if ECC_PACKED_ONB_INV
 #define ECC_INV_MUL mulOnb131

@@ -1,0 +1,9 @@
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+PASS: 2600 GPU pentanomial map lookups through shared memory against the host maps
+PASS: 1261 GPU pentanomial reductions against long division

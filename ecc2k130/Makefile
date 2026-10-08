@@ -24,6 +24,7 @@
 #   PACKED_SIGMA_TABLE  fused-walk Frobenius steps from shared nibble tables (default 0)
 #   SIGMA_TAG_DENOM  no denominator field; jump index tagged into the prefix (default 0)
 #   SIGMA_PIPE_SLOT  fused walk issues the next slot's pair product before this slot's tail (default 0)
+#   PACKED_PENTA_STATE  walk coordinates in F_2[t]/(t^131+t^13+t^2+t+1); four-tap reduction (default 0)
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
@@ -110,6 +111,7 @@ PACKED_FROM_REDUCED ?= 0
 PACKED_SIGMA_TABLE ?= 0
 SIGMA_TAG_DENOM ?= 0
 SIGMA_PIPE_SLOT ?= 0
+PACKED_PENTA_STATE ?= 0
 PACKED_CLMUL_FLAT ?= 0
 PACKED_PAIR_CLMUL ?= 0
 PACKED_ALU_SQR ?= 0
@@ -237,7 +239,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedpenta131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -267,7 +269,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
        -DECC_PACKED_FROM_REDUCED=$(PACKED_FROM_REDUCED) \
-       -DECC_PACKED_SIGMA_TABLE=$(PACKED_SIGMA_TABLE) -DECC_SIGMA_TAG_DENOM=$(SIGMA_TAG_DENOM) -DECC_SIGMA_PIPE_SLOT=$(SIGMA_PIPE_SLOT) \
+       -DECC_PACKED_SIGMA_TABLE=$(PACKED_SIGMA_TABLE) -DECC_SIGMA_TAG_DENOM=$(SIGMA_TAG_DENOM) -DECC_SIGMA_PIPE_SLOT=$(SIGMA_PIPE_SLOT) -DECC_PACKED_PENTA_STATE=$(PACKED_PENTA_STATE) \
        -DECC_PACKED_CLMUL_FLAT=$(PACKED_CLMUL_FLAT) \
        -DECC_PACKED_PAIR_CLMUL=$(PACKED_PAIR_CLMUL) \
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
@@ -310,6 +312,7 @@ generate:
 	cd codegen && python3 gensigma.py
 	cd codegen && python3 genpolyreduce.py
 	cd codegen && python3 gendirectreduce.py
+	cd codegen && python3 genpenta.py
 	python3 codegen/genpackedproduct.py
 
 # FPGA datapath: the same IR emitted as pipelined Verilog instead of C.
@@ -342,6 +345,7 @@ check-cli:
 	python3 codegen/gensigma.py --check --out include/packedsigma131.h
 	python3 codegen/genpolyreduce.py --check --out include/packedpolyreduce131.h
 	python3 codegen/gendirectreduce.py --check --out include/packeddirectreduce131.h
+	python3 codegen/genpenta.py --check --out include/packedpenta131.h
 	python3 codegen/checkcli.py modal_app.py
 	python3 codegen/checkcli.py profile_diagnostic.py
 	python3 codegen/checkcli.py packed_audit.py
@@ -768,6 +772,13 @@ bench-rtx-pro6000-sigma-table:
 	    --out $(TABLE_BENCH_OUT)
 TABLE_BENCH_OUT ?= /tmp/ecc2k-sigma-table-benchmark
 .PHONY: gpu-rtx-pro6000-sigma-table bench-rtx-pro6000-sigma-table
+
+# The table build with the walk's coordinates in Certicom's pentanomial basis
+# (PENTA-BASIS.md): no quotient CLMAD in the reduction.
+PRO6000_PENTA_KNOBS = $(PRO6000_SIGMA_TABLE_KNOBS) PACKED_PENTA_STATE=1
+gpu-rtx-pro6000-penta:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_PENTA_KNOBS)
+.PHONY: gpu-rtx-pro6000-penta
 
 # Matched replay, A/A noise and five-pair confirmation; benchmark-only.
 bench-rtx-pro6000-sigma-fused:
