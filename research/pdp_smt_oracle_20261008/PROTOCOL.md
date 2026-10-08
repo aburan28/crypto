@@ -134,6 +134,25 @@ its largest native cell used 183,749 conflicts, under the cap.  The
 unbudgeted `n = 19` and `n = 23` runs were stopped before any cell was
 written and are not cited.  Predictions P1–P4 are unchanged.
 
+## Amendment 2 (2026-10-08, before any `n = 19` cell was written)
+
+The 4,000,000-conflict cap was calibrated at `n = 13` and is wrong at
+`n = 19`: the first refuting cell there spent over 570 s inside
+`Solver::propagate` without reaching it, because each conflict costs far
+more on the longer parity rows and Macaulay rows.  Calibrating a
+conflict cap per `n` would be a moving target.  Instead the native
+solver gained a wall-clock deadline checked at every conflict
+(`Solver::deadline`, `SatDecompositionOptions::wall_budget`), and the
+native arm now runs under the same **120 s wall budget per target** as
+every SMT solver call, with the conflict cap left at 4,000,000 as a
+second ceiling.  Reaching either ends the cell as `exhausted`.  Every arm
+is therefore budgeted the same way, which is what P3 and P4 assume; the
+cost is that an `exhausted` native cell is host-dependent, as the SMT
+arms' timeouts already were, and the host is named above.  The
+`n = 13` run stands: its slowest native cell took 6.9 s.  The capped
+`n = 19` run under amendment 1 was stopped with no cell written and is
+not cited.  Predictions P1–P4 are unchanged.
+
 ## Stop condition and inadmissible moves
 
 Bounded: three `n`, 40 cells, five arms, one run.  It stops when P1–P4
