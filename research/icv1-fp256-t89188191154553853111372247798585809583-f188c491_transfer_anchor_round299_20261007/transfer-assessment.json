@@ -1,0 +1,127 @@
+{
+  "schema": "p256-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 299,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/H --[phi|H=0]--> one point: nonrecoverable",
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/H --[phi|H nonzero, injective]--> phi(H)~=C_n: log scalar preserved",
+    "phi(H) --[any image endomorphism]--> phi(H): scalar [a] mod n",
+    "destination representation --[separately required decomposition and recovery evidence]--> possible algorithmic claim: open"
+  ],
+  "theorem_cases": [
+    {
+      "name": "zero homomorphic restriction",
+      "source": "<icv1-fp256-t89188191154553853111372247798585809583-f188c491, H=<G>, |H|=n prime>",
+      "destination": "abelian group A",
+      "transformation_type": "group homomorphism with phi(G)=0",
+      "field_of_definition": "arbitrary",
+      "relevant_subgroup": "H is contained in the kernel",
+      "obligations": [
+        {
+          "name": "kernel intersection",
+          "status": "supported",
+          "evidence": "phi([x]G)=[x]phi(G)=0 for every x.",
+          "scope": "all zero restrictions"
+        },
+        {
+          "name": "recovery",
+          "status": "refuted",
+          "evidence": "All n source elements have the same image; recovery on H is impossible.",
+          "scope": "all zero restrictions"
+        }
+      ],
+      "conclusion": "Killing the subgroup is not useful transport.",
+      "exploration_boundary": "Complete for group homomorphisms restricted to H."
+    },
+    {
+      "name": "nonzero homomorphic restriction",
+      "source": "<icv1-fp256-t89188191154553853111372247798585809583-f188c491, H=<G>, |H|=n prime>",
+      "destination": "abelian group A containing phi(H)",
+      "transformation_type": "group homomorphism induced by a typed correspondence",
+      "field_of_definition": "must be supplied by the proposed correspondence",
+      "relevant_subgroup": "H and phi(H), both order n",
+      "obligations": [
+        {
+          "name": "existence and formulas",
+          "status": "unknown",
+          "evidence": "No new cover/Jacobian formulas were supplied in Round 299.",
+          "scope": "construction-specific"
+        },
+        {
+          "name": "kernel intersection",
+          "status": "supported",
+          "evidence": "For prime-order H, phi(G)!=0 makes ker(phi) a proper subgroup of H, hence trivial.",
+          "scope": "all group-homomorphic restrictions"
+        },
+        {
+          "name": "subgroup preservation",
+          "status": "supported",
+          "evidence": "First isomorphism theorem gives |phi(H)|=n and phi([x]G)=[x]phi(G).",
+          "scope": "all nonzero restrictions"
+        },
+        {
+          "name": "logarithm transport",
+          "status": "supported",
+          "evidence": "log_{phi(G)} phi([x]G)=x; the unknown scalar is preserved rather than quotiented.",
+          "scope": "all nonzero restrictions"
+        },
+        {
+          "name": "measured decomposition advantage",
+          "status": "unknown",
+          "evidence": "No executable destination decomposition system or paired P-256 cost was supplied.",
+          "scope": "construction-specific"
+        },
+        {
+          "name": "recovery",
+          "status": "unknown",
+          "evidence": "Injectivity on H proves uniqueness but does not price or implement an inverse map.",
+          "scope": "construction-specific"
+        }
+      ],
+      "conclusion": "A nonzero homomorphic lift relocates the same cyclic DLP. It can help only through a separately demonstrated destination decomposition advantage, not through log quotienting alone.",
+      "exploration_boundary": "Exact algebraic statement for the restriction to the P-256 prime-order subgroup; not a search over cover/Jacobian constructions."
+    },
+    {
+      "name": "endomorphism of transported image",
+      "source": "phi(H) ~= C_n",
+      "destination": "phi(H)",
+      "transformation_type": "group endomorphism",
+      "field_of_definition": "irrelevant to the abstract cyclic restriction; executable formulas remain construction-specific",
+      "relevant_subgroup": "phi(H)",
+      "obligations": [
+        {
+          "name": "action",
+          "status": "supported",
+          "evidence": "End(C_n)=Z/nZ: the image of phi(G) uniquely determines scalar [a].",
+          "scope": "all image-preserving endomorphisms"
+        },
+        {
+          "name": "non-generic quotient",
+          "status": "refuted",
+          "evidence": "Known invertible a gives a scalar orbit; a=0 kills the subgroup; neither creates independent-log identifications for a generic geometric base.",
+          "scope": "endomorphism action alone"
+        }
+      ],
+      "conclusion": "Post-transport symmetries on the prime cyclic image are scalar actions.",
+      "exploration_boundary": "Does not classify nonlinear set maps or additional destination relations."
+    }
+  ],
+  "controls": [
+    "Complete order-149 toy subgroup and exact group replay for every registered row.",
+    "Scalar-defined high-multiplicity families are explicit generic-transport controls, not promotable geometric bases.",
+    "Low-coordinate and hash-coordinate families select points without toy discrete-log labels.",
+    "All C(74,4) factor bases at arity two form the exhaustive implementation reference."
+  ],
+  "cost_accounting": [
+    "Measured in the companion result: base proposals, unique bases, raw and normalized rows, logical group additions, exact transition construction, wall/user/system time and RSS.",
+    "Unset for P-256: cover construction, conversion, unsuccessful attempts, destination membership, relation yield, verification, inverse recovery, memory and sparse linear algebra."
+  ],
+  "weakest_open_obligation": "No executable non-endomorphism cover/Jacobian correspondence with destination relation system, inverse recovery and complete paired P-256 cost has been supplied.",
+  "narrowest_supported_finding": "Any nonzero group-homomorphic restriction from the prime-order P-256 subgroup is injective and preserves discrete-log scalars; representation transport alone is not a logarithm quotient.",
+  "semantic_evidence_sha256": "06ce7180c57727528755e5f6598990bd0f56739f0ece89956fc1dda5d76146df",
+  "assessment_json_bytes": 6725
+}

@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 312 panels, one line each</summary>
+    <summary>Show all 313 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -498,6 +498,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-rr-selector-round296-20261007">P-256 Round 296: quadratic RR selector reaches degree 6 at 13 variables</a> <span class="chip">structured diagnostic / negative</span><br>The 164-column Dickson union has an exact one-chain quadratic circuit and a normalized 273-variable divisor selector, but the global degree gate fails on the m=5 toy control and larger cells time out.</li>
       <li><a href="./#p256-scalar-stabilizer-round297-20261007">P-256 Round 297: exhaustive scalar stabilizer is only ±1</a> <span class="chip">exact closure / negative</span><br>All possible scalar set-stabilizers of the 328 signed points reduce to eight eighth roots; only the already-folded negation survives, so the quotient remains K=164 and the 13.920747× rho boundary does not move.</li>
       <li><a href="./#p256-parity-escapes-round298-20261007">P-256 Round 298: multi-row and transport escapes do not reach parity</a> <span class="chip">exact rank diagnostic / negative</span><br>Parity requires one target event carrying all 164 independent rows; the exact P-256 mean distinct occupancy is 1.00511, while complete toy domains reach full rank only after occupancy becomes dense.</li>
+      <li><a href="./#p256-transfer-anchor-round299-20261007">P-256 Round 299: homomorphic lifts preserve the anchor; geometric multiplicity misses</a> <span class="chip">exact transfer certificate / negative</span><br>A nonzero homomorphic lift of the prime-order subgroup is injective and preserves every discrete-log scalar. Complete sparse toy controls find full known-target rank only in bases selected from known scalar labels, not in 1,848 geometry-defined bases.</li>
     </ol>
   </details>
 <!-- END panel-index -->

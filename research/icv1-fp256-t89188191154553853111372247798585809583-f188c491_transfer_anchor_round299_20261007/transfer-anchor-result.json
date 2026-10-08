@@ -1,0 +1,1631 @@
+{
+  "schema": "p256-transfer-anchor-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "factor_base": "FB1hc72514a2a8d3",
+  "screening_round": 299,
+  "execution_status": "complete",
+  "dependency": {
+    "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_parity_escapes_round298_20261007/parity-escape-result.json",
+    "bytes": 50776,
+    "sha256": "8718bbe26751ff0191164b0665618226a97556c64c6e2feeef72468a38206965"
+  },
+  "p256_boundary_correction": {
+    "columns": 164,
+    "prior_round_distinct_rows_required": 165,
+    "known_nonzero_target_distinct_rows_required": 164,
+    "equivalent_raw_folded_preimages_required": 328,
+    "homogeneous_same_target_rank_ceiling": 163,
+    "exact_global_negation_quotient_domain": "58191887563875222213524008097554601544558227237900511180641613175619196026880",
+    "canonical_target_space": "57896044605178124381348723474703786764998477612067880171211129530534256022185",
+    "mean_distinct_rows_per_canonical_target": 1.0051098993154817,
+    "random_map_null_log2_union_bound_any_bucket_at_164": -713.8306082049356,
+    "random_map_null_log2_poisson_expected_buckets_at_164": -720.2771172534033,
+    "random_map_null_is_measurement": false,
+    "one_event_ratio_to_rho_before_omitted_costs": 0.9640877979350002,
+    "two_event_ratio_to_rho_before_omitted_costs": 1.4461316969025004
+  },
+  "toy_curve": "E/F_1151: y^2=x^3-3x+241",
+  "toy_group_order": 1192,
+  "cofactor": 8,
+  "prime_subgroup_order": 149,
+  "subgroup_generator": "360,129",
+  "subgroup_generator_source_point": "0,486",
+  "subgroup_points_enumerated": 149,
+  "folded_columns": 74,
+  "primary_columns": 6,
+  "primary_arity": 3,
+  "raw_rows_per_primary_base": 160,
+  "distinct_rows_per_primary_base": 80,
+  "canonical_subgroup_targets": 75,
+  "fixed_distinct_mean_occupancy": 1.0666666666666667,
+  "family_summaries": [
+    {
+      "name": "affine-progression",
+      "selection_uses_discrete_log_labels": true,
+      "proposals": 21904,
+      "admissible_proposals": 20424,
+      "unique_bases": 5032,
+      "raw_rows_replayed": 805120,
+      "distinct_rows_checked": 402560,
+      "bases_with_full_known_target_rank": 740,
+      "bases_with_homogeneous_rank_b_minus_1": 740,
+      "bases_with_subgroup_ceiling_violation": 0,
+      "bases_with_formal_rank_divergence": 0,
+      "subgroup_kernel_failures": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "scalar_label_additions": 2415360,
+      "rank_field_operations": {
+        "additions_or_subtractions": 11074902,
+        "multiplications": 148791870,
+        "inversions": 1930068
+      },
+      "maximum_distinct_occupancy": 10,
+      "max_occupancy_histogram": [
+        {
+          "value": 7,
+          "count": 4588
+        },
+        {
+          "value": 8,
+          "count": 148
+        },
+        {
+          "value": 9,
+          "count": 148
+        },
+        {
+          "value": 10,
+          "count": 148
+        }
+      ],
+      "max_known_rank_histogram": [
+        {
+          "value": 5,
+          "count": 4292
+        },
+        {
+          "value": 6,
+          "count": 740
+        }
+      ],
+      "best_base": {
+        "folded_scalar_labels": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          11
+        ],
+        "canonical_points": [
+          "360,129",
+          "1073,381",
+          "317,566",
+          "1037,507",
+          "591,385",
+          "716,313"
+        ],
+        "metrics": {
+          "raw_rows": 160,
+          "distinct_normalized_rows": 80,
+          "nonempty_target_buckets": 14,
+          "maximum_distinct_occupancy": 10,
+          "maximum_occupancy_target": 1,
+          "maximum_known_target_coefficient_rank_mod_149": 6,
+          "maximum_homogeneous_rank_mod_149": 5,
+          "maximum_unknown_target_augmented_rank_mod_149": 6,
+          "maximum_formal_coefficient_rank_mod_2_61_minus_1": 6,
+          "maximum_formal_homogeneous_rank_mod_2_61_minus_1": 5,
+          "maximum_formal_augmented_rank_mod_2_61_minus_1": 6,
+          "nonzero_buckets_with_full_known_target_rank": 7,
+          "buckets_with_homogeneous_rank_b_minus_1": 7,
+          "buckets_with_formal_rank_divergence": 0,
+          "subgroup_kernel_failures": 0,
+          "subgroup_rank_ceiling_violations": 0,
+          "replay_failures": 0,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "scalar_label_additions": 480,
+          "logical_group_additions": 480,
+          "rank_field_operations": {
+            "additions_or_subtractions": 4048,
+            "multiplications": 28807,
+            "inversions": 350
+          },
+          "occupancy_histogram_all_75_targets": [
+            {
+              "value": 0,
+              "count": 61
+            },
+            {
+              "value": 1,
+              "count": 2
+            },
+            {
+              "value": 2,
+              "count": 1
+            },
+            {
+              "value": 3,
+              "count": 1
+            },
+            {
+              "value": 4,
+              "count": 1
+            },
+            {
+              "value": 5,
+              "count": 2
+            },
+            {
+              "value": 7,
+              "count": 2
+            },
+            {
+              "value": 8,
+              "count": 2
+            },
+            {
+              "value": 9,
+              "count": 1
+            },
+            {
+              "value": 10,
+              "count": 2
+            }
+          ],
+          "coefficient_rank_histogram_nonempty_targets": [
+            {
+              "value": 1,
+              "count": 2
+            },
+            {
+              "value": 2,
+              "count": 1
+            },
+            {
+              "value": 3,
+              "count": 1
+            },
+            {
+              "value": 4,
+              "count": 1
+            },
+            {
+              "value": 5,
+              "count": 2
+            },
+            {
+              "value": 6,
+              "count": 7
+            }
+          ],
+          "homogeneous_rank_histogram_nonempty_targets": [
+            {
+              "value": 0,
+              "count": 2
+            },
+            {
+              "value": 1,
+              "count": 1
+            },
+            {
+              "value": 2,
+              "count": 1
+            },
+            {
+              "value": 3,
+              "count": 1
+            },
+            {
+              "value": 4,
+              "count": 2
+            },
+            {
+              "value": 5,
+              "count": 7
+            }
+          ],
+          "best_bucket_rows": [
+            [
+              -1,
+              -1,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              -1,
+              0,
+              -1,
+              1,
+              0,
+              0
+            ],
+            [
+              -1,
+              0,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              -1,
+              0,
+              0,
+              0,
+              -1,
+              1
+            ],
+            [
+              0,
+              -1,
+              -1,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              0,
+              -1,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0,
+              -1
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              1,
+              -1
+            ],
+            [
+              0,
+              1,
+              0,
+              1,
+              -1,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              -1,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "geometric-progression",
+      "selection_uses_discrete_log_labels": true,
+      "proposals": 21904,
+      "admissible_proposals": 21312,
+      "unique_bases": 2664,
+      "raw_rows_replayed": 426240,
+      "distinct_rows_checked": 213120,
+      "bases_with_full_known_target_rank": 0,
+      "bases_with_homogeneous_rank_b_minus_1": 0,
+      "bases_with_subgroup_ceiling_violation": 0,
+      "bases_with_formal_rank_divergence": 0,
+      "subgroup_kernel_failures": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "scalar_label_additions": 1278720,
+      "rank_field_operations": {
+        "additions_or_subtractions": 1065486,
+        "multiplications": 73340702,
+        "inversions": 1003884
+      },
+      "maximum_distinct_occupancy": 6,
+      "max_occupancy_histogram": [
+        {
+          "value": 2,
+          "count": 148
+        },
+        {
+          "value": 3,
+          "count": 1184
+        },
+        {
+          "value": 4,
+          "count": 1110
+        },
+        {
+          "value": 5,
+          "count": 148
+        },
+        {
+          "value": 6,
+          "count": 74
+        }
+      ],
+      "max_known_rank_histogram": [
+        {
+          "value": 2,
+          "count": 148
+        },
+        {
+          "value": 3,
+          "count": 1480
+        },
+        {
+          "value": 4,
+          "count": 888
+        },
+        {
+          "value": 5,
+          "count": 148
+        }
+      ],
+      "best_base": {
+        "folded_scalar_labels": [
+          1,
+          24,
+          40,
+          41,
+          42,
+          66
+        ],
+        "canonical_points": [
+          "360,129",
+          "688,246",
+          "734,184",
+          "62,356",
+          "1011,80",
+          "278,446"
+        ],
+        "metrics": {
+          "raw_rows": 160,
+          "distinct_normalized_rows": 80,
+          "nonempty_target_buckets": 35,
+          "maximum_distinct_occupancy": 6,
+          "maximum_occupancy_target": 65,
+          "maximum_known_target_coefficient_rank_mod_149": 5,
+          "maximum_homogeneous_rank_mod_149": 4,
+          "maximum_unknown_target_augmented_rank_mod_149": 5,
+          "maximum_formal_coefficient_rank_mod_2_61_minus_1": 5,
+          "maximum_formal_homogeneous_rank_mod_2_61_minus_1": 4,
+          "maximum_formal_augmented_rank_mod_2_61_minus_1": 5,
+          "nonzero_buckets_with_full_known_target_rank": 0,
+          "buckets_with_homogeneous_rank_b_minus_1": 0,
+          "buckets_with_formal_rank_divergence": 0,
+          "subgroup_kernel_failures": 0,
+          "subgroup_rank_ceiling_violations": 0,
+          "replay_failures": 0,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "scalar_label_additions": 480,
+          "logical_group_additions": 480,
+          "rank_field_operations": {
+            "additions_or_subtractions": 930,
+            "multiplications": 29658,
+            "inversions": 400
+          },
+          "occupancy_histogram_all_75_targets": [
+            {
+              "value": 0,
+              "count": 40
+            },
+            {
+              "value": 1,
+              "count": 14
+            },
+            {
+              "value": 2,
+              "count": 8
+            },
+            {
+              "value": 3,
+              "count": 6
+            },
+            {
+              "value": 4,
+              "count": 5
+            },
+            {
+              "value": 6,
+              "count": 2
+            }
+          ],
+          "coefficient_rank_histogram_nonempty_targets": [
+            {
+              "value": 1,
+              "count": 14
+            },
+            {
+              "value": 2,
+              "count": 8
+            },
+            {
+              "value": 3,
+              "count": 6
+            },
+            {
+              "value": 4,
+              "count": 5
+            },
+            {
+              "value": 5,
+              "count": 2
+            }
+          ],
+          "homogeneous_rank_histogram_nonempty_targets": [
+            {
+              "value": 0,
+              "count": 14
+            },
+            {
+              "value": 1,
+              "count": 8
+            },
+            {
+              "value": 2,
+              "count": 6
+            },
+            {
+              "value": 3,
+              "count": 4
+            },
+            {
+              "value": 4,
+              "count": 3
+            }
+          ],
+          "best_bucket_rows": [
+            [
+              -1,
+              0,
+              0,
+              -1,
+              -1,
+              0
+            ],
+            [
+              -1,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              -1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              -1,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              -1,
+              -1
+            ],
+            [
+              1,
+              1,
+              1,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "hash-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "proposals": 924,
+      "admissible_proposals": 924,
+      "unique_bases": 924,
+      "raw_rows_replayed": 147840,
+      "distinct_rows_checked": 73920,
+      "bases_with_full_known_target_rank": 0,
+      "bases_with_homogeneous_rank_b_minus_1": 0,
+      "bases_with_subgroup_ceiling_violation": 0,
+      "bases_with_formal_rank_divergence": 0,
+      "subgroup_kernel_failures": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "scalar_label_additions": 443520,
+      "rank_field_operations": {
+        "additions_or_subtractions": 304346,
+        "multiplications": 25201458,
+        "inversions": 345604
+      },
+      "maximum_distinct_occupancy": 6,
+      "max_occupancy_histogram": [
+        {
+          "value": 2,
+          "count": 29
+        },
+        {
+          "value": 3,
+          "count": 577
+        },
+        {
+          "value": 4,
+          "count": 262
+        },
+        {
+          "value": 5,
+          "count": 46
+        },
+        {
+          "value": 6,
+          "count": 10
+        }
+      ],
+      "max_known_rank_histogram": [
+        {
+          "value": 2,
+          "count": 29
+        },
+        {
+          "value": 3,
+          "count": 666
+        },
+        {
+          "value": 4,
+          "count": 217
+        },
+        {
+          "value": 5,
+          "count": 12
+        }
+      ],
+      "best_base": {
+        "folded_scalar_labels": [
+          4,
+          13,
+          14,
+          22,
+          40,
+          41
+        ],
+        "canonical_points": [
+          "492,463",
+          "776,530",
+          "17,221",
+          "300,468",
+          "734,184",
+          "62,356"
+        ],
+        "metrics": {
+          "raw_rows": 160,
+          "distinct_normalized_rows": 80,
+          "nonempty_target_buckets": 37,
+          "maximum_distinct_occupancy": 6,
+          "maximum_occupancy_target": 5,
+          "maximum_known_target_coefficient_rank_mod_149": 5,
+          "maximum_homogeneous_rank_mod_149": 4,
+          "maximum_unknown_target_augmented_rank_mod_149": 5,
+          "maximum_formal_coefficient_rank_mod_2_61_minus_1": 5,
+          "maximum_formal_homogeneous_rank_mod_2_61_minus_1": 4,
+          "maximum_formal_augmented_rank_mod_2_61_minus_1": 5,
+          "nonzero_buckets_with_full_known_target_rank": 0,
+          "buckets_with_homogeneous_rank_b_minus_1": 0,
+          "buckets_with_formal_rank_divergence": 0,
+          "subgroup_kernel_failures": 0,
+          "subgroup_rank_ceiling_violations": 0,
+          "replay_failures": 0,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "scalar_label_additions": 480,
+          "logical_group_additions": 480,
+          "rank_field_operations": {
+            "additions_or_subtractions": 1182,
+            "multiplications": 29441,
+            "inversions": 394
+          },
+          "occupancy_histogram_all_75_targets": [
+            {
+              "value": 0,
+              "count": 38
+            },
+            {
+              "value": 1,
+              "count": 15
+            },
+            {
+              "value": 2,
+              "count": 11
+            },
+            {
+              "value": 3,
+              "count": 6
+            },
+            {
+              "value": 4,
+              "count": 2
+            },
+            {
+              "value": 5,
+              "count": 1
+            },
+            {
+              "value": 6,
+              "count": 2
+            }
+          ],
+          "coefficient_rank_histogram_nonempty_targets": [
+            {
+              "value": 1,
+              "count": 15
+            },
+            {
+              "value": 2,
+              "count": 11
+            },
+            {
+              "value": 3,
+              "count": 6
+            },
+            {
+              "value": 4,
+              "count": 2
+            },
+            {
+              "value": 5,
+              "count": 3
+            }
+          ],
+          "homogeneous_rank_histogram_nonempty_targets": [
+            {
+              "value": 0,
+              "count": 15
+            },
+            {
+              "value": 1,
+              "count": 11
+            },
+            {
+              "value": 2,
+              "count": 6
+            },
+            {
+              "value": 3,
+              "count": 2
+            },
+            {
+              "value": 4,
+              "count": 3
+            }
+          ],
+          "best_bucket_rows": [
+            [
+              -1,
+              -1,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              -1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              -1,
+              -1,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              1,
+              -1,
+              0,
+              0
+            ],
+            [
+              1,
+              -1,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              -1,
+              1
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "hash-scalar",
+      "selection_uses_discrete_log_labels": true,
+      "proposals": 4096,
+      "admissible_proposals": 4096,
+      "unique_bases": 4096,
+      "raw_rows_replayed": 655360,
+      "distinct_rows_checked": 327680,
+      "bases_with_full_known_target_rank": 0,
+      "bases_with_homogeneous_rank_b_minus_1": 0,
+      "bases_with_subgroup_ceiling_violation": 0,
+      "bases_with_formal_rank_divergence": 0,
+      "subgroup_kernel_failures": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "scalar_label_additions": 1966080,
+      "rank_field_operations": {
+        "additions_or_subtractions": 1487976,
+        "multiplications": 112436729,
+        "inversions": 1540542
+      },
+      "maximum_distinct_occupancy": 8,
+      "max_occupancy_histogram": [
+        {
+          "value": 2,
+          "count": 104
+        },
+        {
+          "value": 3,
+          "count": 2288
+        },
+        {
+          "value": 4,
+          "count": 1332
+        },
+        {
+          "value": 5,
+          "count": 310
+        },
+        {
+          "value": 6,
+          "count": 55
+        },
+        {
+          "value": 7,
+          "count": 6
+        },
+        {
+          "value": 8,
+          "count": 1
+        }
+      ],
+      "max_known_rank_histogram": [
+        {
+          "value": 2,
+          "count": 104
+        },
+        {
+          "value": 3,
+          "count": 2662
+        },
+        {
+          "value": 4,
+          "count": 1233
+        },
+        {
+          "value": 5,
+          "count": 97
+        }
+      ],
+      "best_base": {
+        "folded_scalar_labels": [
+          2,
+          7,
+          10,
+          11,
+          15,
+          19
+        ],
+        "canonical_points": [
+          "363,369",
+          "1037,507",
+          "161,246",
+          "716,313",
+          "72,119",
+          "408,164"
+        ],
+        "metrics": {
+          "raw_rows": 160,
+          "distinct_normalized_rows": 80,
+          "nonempty_target_buckets": 30,
+          "maximum_distinct_occupancy": 8,
+          "maximum_occupancy_target": 6,
+          "maximum_known_target_coefficient_rank_mod_149": 5,
+          "maximum_homogeneous_rank_mod_149": 4,
+          "maximum_unknown_target_augmented_rank_mod_149": 5,
+          "maximum_formal_coefficient_rank_mod_2_61_minus_1": 5,
+          "maximum_formal_homogeneous_rank_mod_2_61_minus_1": 4,
+          "maximum_formal_augmented_rank_mod_2_61_minus_1": 5,
+          "nonzero_buckets_with_full_known_target_rank": 0,
+          "buckets_with_homogeneous_rank_b_minus_1": 0,
+          "buckets_with_formal_rank_divergence": 0,
+          "subgroup_kernel_failures": 0,
+          "subgroup_rank_ceiling_violations": 0,
+          "replay_failures": 0,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "scalar_label_additions": 480,
+          "logical_group_additions": 480,
+          "rank_field_operations": {
+            "additions_or_subtractions": 1420,
+            "multiplications": 29774,
+            "inversions": 396
+          },
+          "occupancy_histogram_all_75_targets": [
+            {
+              "value": 0,
+              "count": 45
+            },
+            {
+              "value": 1,
+              "count": 11
+            },
+            {
+              "value": 2,
+              "count": 1
+            },
+            {
+              "value": 3,
+              "count": 11
+            },
+            {
+              "value": 4,
+              "count": 5
+            },
+            {
+              "value": 6,
+              "count": 1
+            },
+            {
+              "value": 8,
+              "count": 1
+            }
+          ],
+          "coefficient_rank_histogram_nonempty_targets": [
+            {
+              "value": 1,
+              "count": 11
+            },
+            {
+              "value": 2,
+              "count": 1
+            },
+            {
+              "value": 3,
+              "count": 11
+            },
+            {
+              "value": 4,
+              "count": 5
+            },
+            {
+              "value": 5,
+              "count": 2
+            }
+          ],
+          "homogeneous_rank_histogram_nonempty_targets": [
+            {
+              "value": 0,
+              "count": 11
+            },
+            {
+              "value": 1,
+              "count": 1
+            },
+            {
+              "value": 2,
+              "count": 11
+            },
+            {
+              "value": 3,
+              "count": 5
+            },
+            {
+              "value": 4,
+              "count": 2
+            }
+          ],
+          "best_bucket_rows": [
+            [
+              -1,
+              -1,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              -1,
+              0,
+              0,
+              -1,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              1,
+              -1
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              -1,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              -1,
+              0,
+              0
+            ],
+            [
+              1,
+              -1,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              -1,
+              1
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "low-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "proposals": 924,
+      "admissible_proposals": 924,
+      "unique_bases": 924,
+      "raw_rows_replayed": 147840,
+      "distinct_rows_checked": 73920,
+      "bases_with_full_known_target_rank": 0,
+      "bases_with_homogeneous_rank_b_minus_1": 0,
+      "bases_with_subgroup_ceiling_violation": 0,
+      "bases_with_formal_rank_divergence": 0,
+      "subgroup_kernel_failures": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "scalar_label_additions": 443520,
+      "rank_field_operations": {
+        "additions_or_subtractions": 279232,
+        "multiplications": 25207950,
+        "inversions": 345980
+      },
+      "maximum_distinct_occupancy": 6,
+      "max_occupancy_histogram": [
+        {
+          "value": 2,
+          "count": 26
+        },
+        {
+          "value": 3,
+          "count": 598
+        },
+        {
+          "value": 4,
+          "count": 258
+        },
+        {
+          "value": 5,
+          "count": 35
+        },
+        {
+          "value": 6,
+          "count": 7
+        }
+      ],
+      "max_known_rank_histogram": [
+        {
+          "value": 2,
+          "count": 26
+        },
+        {
+          "value": 3,
+          "count": 676
+        },
+        {
+          "value": 4,
+          "count": 212
+        },
+        {
+          "value": 5,
+          "count": 10
+        }
+      ],
+      "best_base": {
+        "folded_scalar_labels": [
+          8,
+          41,
+          46,
+          49,
+          54,
+          59
+        ],
+        "canonical_points": [
+          "85,138",
+          "62,356",
+          "8,27",
+          "1,315",
+          "123,55",
+          "58,312"
+        ],
+        "metrics": {
+          "raw_rows": 160,
+          "distinct_normalized_rows": 80,
+          "nonempty_target_buckets": 32,
+          "maximum_distinct_occupancy": 6,
+          "maximum_occupancy_target": 5,
+          "maximum_known_target_coefficient_rank_mod_149": 5,
+          "maximum_homogeneous_rank_mod_149": 4,
+          "maximum_unknown_target_augmented_rank_mod_149": 5,
+          "maximum_formal_coefficient_rank_mod_2_61_minus_1": 5,
+          "maximum_formal_homogeneous_rank_mod_2_61_minus_1": 4,
+          "maximum_formal_augmented_rank_mod_2_61_minus_1": 5,
+          "nonzero_buckets_with_full_known_target_rank": 0,
+          "buckets_with_homogeneous_rank_b_minus_1": 0,
+          "buckets_with_formal_rank_divergence": 0,
+          "subgroup_kernel_failures": 0,
+          "subgroup_rank_ceiling_violations": 0,
+          "replay_failures": 0,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "scalar_label_additions": 480,
+          "logical_group_additions": 480,
+          "rank_field_operations": {
+            "additions_or_subtractions": 1202,
+            "multiplications": 30722,
+            "inversions": 412
+          },
+          "occupancy_histogram_all_75_targets": [
+            {
+              "value": 0,
+              "count": 43
+            },
+            {
+              "value": 1,
+              "count": 11
+            },
+            {
+              "value": 2,
+              "count": 8
+            },
+            {
+              "value": 3,
+              "count": 3
+            },
+            {
+              "value": 4,
+              "count": 7
+            },
+            {
+              "value": 5,
+              "count": 2
+            },
+            {
+              "value": 6,
+              "count": 1
+            }
+          ],
+          "coefficient_rank_histogram_nonempty_targets": [
+            {
+              "value": 1,
+              "count": 11
+            },
+            {
+              "value": 2,
+              "count": 8
+            },
+            {
+              "value": 3,
+              "count": 3
+            },
+            {
+              "value": 4,
+              "count": 7
+            },
+            {
+              "value": 5,
+              "count": 3
+            }
+          ],
+          "homogeneous_rank_histogram_nonempty_targets": [
+            {
+              "value": 0,
+              "count": 11
+            },
+            {
+              "value": 1,
+              "count": 8
+            },
+            {
+              "value": 2,
+              "count": 3
+            },
+            {
+              "value": 3,
+              "count": 6
+            },
+            {
+              "value": 4,
+              "count": 4
+            }
+          ],
+          "best_bucket_rows": [
+            [
+              -1,
+              -1,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              -1,
+              0,
+              -1,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              -1,
+              0,
+              -1,
+              -1,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              1,
+              0,
+              1,
+              -1,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "pair-sum-closure",
+      "selection_uses_discrete_log_labels": true,
+      "proposals": 64824,
+      "admissible_proposals": 59139,
+      "unique_bases": 58497,
+      "raw_rows_replayed": 9359520,
+      "distinct_rows_checked": 4679760,
+      "bases_with_full_known_target_rank": 1401,
+      "bases_with_homogeneous_rank_b_minus_1": 1401,
+      "bases_with_subgroup_ceiling_violation": 0,
+      "bases_with_formal_rank_divergence": 0,
+      "subgroup_kernel_failures": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "scalar_label_additions": 28078560,
+      "rank_field_operations": {
+        "additions_or_subtractions": 43152172,
+        "multiplications": 1715018414,
+        "inversions": 23260664
+      },
+      "maximum_distinct_occupancy": 10,
+      "max_occupancy_histogram": [
+        {
+          "value": 4,
+          "count": 29515
+        },
+        {
+          "value": 5,
+          "count": 19317
+        },
+        {
+          "value": 6,
+          "count": 7113
+        },
+        {
+          "value": 7,
+          "count": 1922
+        },
+        {
+          "value": 8,
+          "count": 556
+        },
+        {
+          "value": 9,
+          "count": 59
+        },
+        {
+          "value": 10,
+          "count": 15
+        }
+      ],
+      "max_known_rank_histogram": [
+        {
+          "value": 4,
+          "count": 36705
+        },
+        {
+          "value": 5,
+          "count": 20391
+        },
+        {
+          "value": 6,
+          "count": 1401
+        }
+      ],
+      "best_base": {
+        "folded_scalar_labels": [
+          3,
+          32,
+          35,
+          38,
+          41,
+          70
+        ],
+        "canonical_points": [
+          "1073,381",
+          "667,548",
+          "241,332",
+          "593,191",
+          "62,356",
+          "677,399"
+        ],
+        "metrics": {
+          "raw_rows": 160,
+          "distinct_normalized_rows": 80,
+          "nonempty_target_buckets": 19,
+          "maximum_distinct_occupancy": 10,
+          "maximum_occupancy_target": 73,
+          "maximum_known_target_coefficient_rank_mod_149": 6,
+          "maximum_homogeneous_rank_mod_149": 5,
+          "maximum_unknown_target_augmented_rank_mod_149": 6,
+          "maximum_formal_coefficient_rank_mod_2_61_minus_1": 6,
+          "maximum_formal_homogeneous_rank_mod_2_61_minus_1": 5,
+          "maximum_formal_augmented_rank_mod_2_61_minus_1": 6,
+          "nonzero_buckets_with_full_known_target_rank": 3,
+          "buckets_with_homogeneous_rank_b_minus_1": 4,
+          "buckets_with_formal_rank_divergence": 0,
+          "subgroup_kernel_failures": 0,
+          "subgroup_rank_ceiling_violations": 0,
+          "replay_failures": 0,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "scalar_label_additions": 480,
+          "logical_group_additions": 480,
+          "rank_field_operations": {
+            "additions_or_subtractions": 2648,
+            "multiplications": 31241,
+            "inversions": 402
+          },
+          "occupancy_histogram_all_75_targets": [
+            {
+              "value": 0,
+              "count": 56
+            },
+            {
+              "value": 1,
+              "count": 2
+            },
+            {
+              "value": 2,
+              "count": 3
+            },
+            {
+              "value": 3,
+              "count": 3
+            },
+            {
+              "value": 4,
+              "count": 1
+            },
+            {
+              "value": 5,
+              "count": 6
+            },
+            {
+              "value": 6,
+              "count": 2
+            },
+            {
+              "value": 7,
+              "count": 1
+            },
+            {
+              "value": 10,
+              "count": 1
+            }
+          ],
+          "coefficient_rank_histogram_nonempty_targets": [
+            {
+              "value": 1,
+              "count": 2
+            },
+            {
+              "value": 2,
+              "count": 3
+            },
+            {
+              "value": 3,
+              "count": 3
+            },
+            {
+              "value": 4,
+              "count": 2
+            },
+            {
+              "value": 5,
+              "count": 6
+            },
+            {
+              "value": 6,
+              "count": 3
+            }
+          ],
+          "homogeneous_rank_histogram_nonempty_targets": [
+            {
+              "value": 0,
+              "count": 2
+            },
+            {
+              "value": 1,
+              "count": 3
+            },
+            {
+              "value": 2,
+              "count": 3
+            },
+            {
+              "value": 3,
+              "count": 2
+            },
+            {
+              "value": 4,
+              "count": 5
+            },
+            {
+              "value": 5,
+              "count": 4
+            }
+          ],
+          "best_bucket_rows": [
+            [
+              -1,
+              -1,
+              0,
+              0,
+              -1,
+              0
+            ],
+            [
+              -1,
+              0,
+              -1,
+              -1,
+              0,
+              0
+            ],
+            [
+              -1,
+              0,
+              1,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              -1,
+              1,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              -1,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              -1,
+              -1
+            ],
+            [
+              0,
+              1,
+              0,
+              -1,
+              0,
+              -1
+            ],
+            [
+              1,
+              0,
+              0,
+              -1,
+              -1,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              1,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "global_unique_primary_bases": 71992,
+  "global_primary_raw_rows_replayed": 11518720,
+  "global_primary_distinct_rows_checked": 5759360,
+  "global_primary_scalar_label_additions": 34556160,
+  "global_primary_logical_group_additions": 34556160,
+  "global_primary_rank_field_operations": {
+    "additions_or_subtractions": 57100246,
+    "multiplications": 2095739750,
+    "inversions": 28370872
+  },
+  "transition_table_exact_group_additions": 22052,
+  "transition_table_field_operations": {
+    "additions_or_subtractions": 130388,
+    "multiplications": 457320,
+    "inversions": 21756
+  },
+  "primary_enumeration_blake3": "8a0dfe5a99464b9237a231781998d54ea5f79da974fab240372758f5bcddfcd4",
+  "exhaustive_reference": {
+    "columns": 4,
+    "arity": 2,
+    "all_factor_bases": 1150626,
+    "raw_rows_per_base": 24,
+    "distinct_rows_per_base": 12,
+    "raw_rows_replayed": 27615024,
+    "distinct_rows_checked": 13807512,
+    "maximum_distinct_occupancy": 3,
+    "maximum_known_target_rank_mod_149": 3,
+    "maximum_homogeneous_rank_mod_149": 2,
+    "maximum_formal_known_target_rank_mod_2_61_minus_1": 3,
+    "maximum_formal_homogeneous_rank_mod_2_61_minus_1": 2,
+    "bases_with_full_known_target_rank": 0,
+    "bases_with_formal_rank_divergence": 0,
+    "subgroup_kernel_failures": 0,
+    "subgroup_rank_ceiling_violations": 0,
+    "replay_failures": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "scalar_label_additions": 55230048,
+    "logical_group_additions": 55230048,
+    "rank_field_operations": {
+      "additions_or_subtractions": 1686368,
+      "multiplications": 3964764098,
+      "inversions": 56354404
+    },
+    "enumeration_blake3": "b8d08baf4a125e55a2ea7b22109bd9ef5ef39785fdc7d5ffe89a8e21c49cba89"
+  },
+  "transfer_assessment_semantic_sha256": "06ce7180c57727528755e5f6598990bd0f56739f0ece89956fc1dda5d76146df",
+  "relations_reported_on_p256": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "gates": {
+    "dependency_hash_checked": true,
+    "toy_group_and_prime_subgroup_exact": true,
+    "all_registered_factor_base_families_complete": true,
+    "exhaustive_b4_reference_complete": true,
+    "every_raw_row_group_replayed": true,
+    "zero_false_positives_and_false_negatives": true,
+    "subgroup_rank_ceilings_hold": true,
+    "independent_anchor_eliminated_by_homomorphic_transfer": false,
+    "geometry_defined_sparse_full_rank_candidate_observed": false,
+    "p256_geometry_construction_and_scaling_measured": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "per_usable_relation_below_2_103": false,
+    "complete_collection_below_2_120": false,
+    "projected_storage_below_2_50": false,
+    "promoted": false
+  },
+  "classification": "structured-multiplicity-control/anchor-conservation-proved/promotion-negative",
+  "dominant_obstruction": "A nonzero homomorphic lift of the prime-order P-256 subgroup is injective and preserves the discrete-log scalar. Same-target homogeneous rows retain a one-dimensional log kernel. Structured multiplicity can supply known-target rank only if the factor-base construction and decomposition search are both available; no P-256 geometry construction, degree<=5 solver, measured yield or complete cost was established.",
+  "decision": "Close homomorphic representation transport as a quotient mechanism and treat scalar-defined multiplicity as a generic control. No geometry-defined toy family passes the sparse full-rank trigger. Do not attempt an unplanted P-256 relation.",
+  "semantic_evidence_sha256": "8b82e8d7eda1e65737ffd0617103861a0ea9b102ef830b80a31057d4a56a17ed",
+  "result_json_bytes": 39954
+}
