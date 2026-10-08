@@ -212,16 +212,44 @@ pub fn eigenvalue_cycle<F: Field>(
     (lam % modulus, k)
 }
 
-/// Degree r of the irreducible factors of Phi_l(j, Y) when it has no root (Atkin prime).
+/// Degree r of the irreducible factors of Phi_l(j, Y) when it has no root (Atkin prime): the
+/// least k with gcd(Y^(q^k) - Y, Phi_l(j, Y)) != 1. One exponentiation gives Y^q; the further
+/// Frobenius powers are modular compositions with it (`poly::Composer`).
 pub fn atkin_degree<F: Field>(f: &F, g: &Poly<F>) -> Option<usize> {
     let g = poly::monic(f, g);
+    let xi = poly::powmod_big(f, &poly::x_poly(f), &f.q(), &g);
+    atkin_degree_with(f, &g, &xi)
+}
+
+/// `atkin_degree` for g = Phi_l(j, Y) monic, with xi = Y^q mod g already known (SEA has it from
+/// the root test). The Frobenius powers Y^(q^k) come from the Q-matrix of xi (one
+/// matrix-vector product each). When g is squarefree and has no root, Frobenius permutes its
+/// l+1 roots like an element of a non-split torus of PGL_2(F_l), which acts freely on P^1(F_l):
+/// all factors then have one degree r, r | deg g, and Y^(q^k) = Y mod g exactly when r | k, so
+/// an equality at the divisors of deg g replaces the gcd at every k. Otherwise (repeated roots,
+/// or no equality up to deg g) the gcd scan decides.
+pub fn atkin_degree_with<F: Field>(f: &F, g: &Poly<F>, xi: &Poly<F>) -> Option<usize> {
     let y = poly::x_poly(f);
-    let q = f.q();
-    let mut yk = y.clone();
-    for k in 1..=g.len() {
-        yk = poly::powmod_big(f, &yk, &q, &g);
-        let d = poly::gcd(f, &g, &poly::sub(f, &yk, &y));
-        if poly::deg(f, &d) > 0 {
+    let n = g.len() - 1;
+    let has_gcd = |yk: &Poly<F>| poly::deg(f, &poly::gcd(f, g, &poly::sub(f, yk, &y))) > 0;
+    if has_gcd(xi) {
+        return Some(1);
+    }
+    let sqfree = poly::deg(f, &poly::gcd(f, g, &poly::derivative(f, g))) == 0;
+    let qm = poly::Composer::with_baby_steps(f, xi, g, n);
+    if sqfree {
+        let mut yk = xi.clone();
+        for k in 2..=n {
+            yk = qm.compose(f, &yk);
+            if n % k == 0 && yk == y {
+                return Some(k);
+            }
+        }
+    }
+    let mut yk = xi.clone();
+    for k in 2..=n {
+        yk = qm.compose(f, &yk);
+        if has_gcd(&yk) {
             return Some(k);
         }
     }
@@ -497,8 +525,12 @@ pub fn sea_resolved<F: Field>(
             continue;
         }
         let phi = phis.entry(ell).or_insert_with(|| Phi::compute(f, ell));
-        let g = phi.y_poly(f, j);
-        let roots = phi.neighbors(f, j, rng);
+        // roots of Phi_l(j, Y) as in Phi::neighbors (gcd with Y^q - Y, then splitting), keeping
+        // Y^q mod Phi_l(j, Y) for the Atkin degree below
+        let g = poly::monic(f, &phi.y_poly(f, j));
+        let xi = poly::powmod_big(f, &poly::x_poly(f), &f.q(), &g);
+        let mut roots = vec![];
+        poly::split_roots(f, &poly::gcd(f, &g, &poly::sub(f, &xi, &poly::x_poly(f))), rng, &mut roots);
         let l = ell as u64;
         let ql = q.mod_u64(l);
         if !roots.is_empty() {
@@ -531,7 +563,7 @@ pub fn sea_resolved<F: Field>(
             if !done && roots.len() >= 2 {
                 // fall back to the repeated-eigenvalue constraint is not valid here; skip prime
             }
-        } else if let Some(r) = atkin_degree(f, &g) {
+        } else if let Some(r) = atkin_degree_with(f, &g, &xi) {
             // tower resolution to a unique congruence (Elkies-strength from an Atkin prime)
             let resolved = atkin_resolver.as_deref_mut().and_then(|res| res(l));
             if let Some(tl) = resolved {

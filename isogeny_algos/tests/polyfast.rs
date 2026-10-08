@@ -74,3 +74,38 @@ fn fast_poly_and_series_match_reference() {
     );
     check(&Zp2::new(next_prime(1 << 30)), &mut rng);
 }
+
+/// Brent–Kung composition equals the naive sum h_i xi^i mod g, and iterating it from xi = Y^q
+/// gives Y^(q^k) exactly as repeated exponentiation does (Zp at 61 bits and FpM at 127 bits,
+/// moduli of degree 5..90, both reducer regimes of PolyModulus).
+#[test]
+fn composer_matches_naive_and_frobenius_powers() {
+    fn check<F: Field>(f: &F, seed: u64) {
+        let mut rng = Rng::new(seed);
+        for &n in &[5usize, 12, 31, 64, 90] {
+            let mut g: Vec<F::E> = (0..n).map(|_| f.random(&mut rng)).collect();
+            g.push(f.one());
+            let xi: Vec<F::E> = (0..n).map(|_| f.random(&mut rng)).collect();
+            let c = poly::Composer::new(f, &xi, &g);
+            for _ in 0..3 {
+                let h: Vec<F::E> = (0..n).map(|_| f.random(&mut rng)).collect();
+                let mut naive: Vec<F::E> = vec![];
+                for &hi in h.iter().rev() {
+                    naive = poly::add(f, &poly::mulmod(f, &naive, &xi, &g), &poly::constant(f, hi));
+                }
+                assert_eq!(c.compose(f, &h), poly::rem(f, &naive, &g), "n = {n}");
+            }
+            let y = poly::x_poly(f);
+            let yq = poly::powmod_big(f, &y, &f.q(), &g);
+            let frob = poly::Composer::new(f, &yq, &g);
+            let (mut by_pow, mut by_comp) = (yq.clone(), yq.clone());
+            for _ in 0..4 {
+                by_pow = poly::powmod_big(f, &by_pow, &f.q(), &g);
+                by_comp = frob.compose(f, &by_comp);
+                assert_eq!(by_comp, by_pow, "n = {n}");
+            }
+        }
+    }
+    check(&Zp::new((1u64 << 61) - 1), 71);
+    check(&FpM::<2>::from_dec("170141183460469231731687303715884105727"), 72);
+}

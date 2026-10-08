@@ -399,6 +399,60 @@ impl<F: Field> TableModulus<F> {
     }
 }
 
+/// Repeated modular composition h -> h(xi) mod g for a fixed xi (Brent–Kung baby-step
+/// giant-step): the powers xi^0 .. xi^(s-1) and xi^s are computed once, after which each
+/// composition is n/s blocks of n dot products of length s plus n/s multiplications mod g
+/// (n = deg g). `new` takes s = ceil(sqrt(n)); `with_baby_steps(.., n)` stores all n powers (the
+/// matrix of h -> h(xi), Berlekamp's Q-matrix when xi = Y^q), so each composition is one
+/// matrix-vector product, which pays when many compositions share one xi. With xi = Y^q mod g
+/// over F_q it iterates the Frobenius, Y^(q^k) -> Y^(q^(k+1)), without another exponentiation:
+/// g(Y^q) = g(Y)^q = 0 mod g.
+pub struct Composer<F: Field> {
+    m: PolyModulus<F>,
+    n: usize,
+    s: usize,
+    /// cols[t][s-1-i] = coefficient t of xi^i (reversed for `dot_rev`)
+    cols: Vec<Vec<F::E>>,
+    giant: Poly<F>,
+}
+
+impl<F: Field> Composer<F> {
+    pub fn new(f: &F, xi: &Poly<F>, g: &Poly<F>) -> Self {
+        let n = g.len().saturating_sub(1);
+        Self::with_baby_steps(f, xi, g, ((n as f64).sqrt().ceil() as usize).max(1))
+    }
+    pub fn with_baby_steps(f: &F, xi: &Poly<F>, g: &Poly<F>, s: usize) -> Self {
+        let m = PolyModulus::new(f, g);
+        let n = m.m.len() - 1;
+        let s = s.clamp(1, n.max(1));
+        let xi = rem(f, xi, &m.m);
+        let mut pows: Vec<Poly<F>> = vec![constant(f, f.one())];
+        for _ in 1..=s {
+            let next = m.mulmod(f, pows.last().unwrap(), &xi);
+            pows.push(next);
+        }
+        let giant = pows.pop().unwrap();
+        let at = |p: &Poly<F>, t: usize| if t < p.len() { p[t] } else { f.zero() };
+        let cols = (0..n).map(|t| (0..s).map(|i| at(&pows[s - 1 - i], t)).collect()).collect();
+        Composer { m, n, s, cols, giant }
+    }
+    /// h(xi) mod g
+    pub fn compose(&self, f: &F, h: &Poly<F>) -> Poly<F> {
+        let h = rem(f, h, &self.m.m);
+        let (n, s) = (self.n, self.s);
+        let blocks = h.len().div_ceil(s);
+        let mut acc: Poly<F> = vec![];
+        for j in (0..blocks).rev() {
+            let hb = &h[j * s..((j + 1) * s).min(h.len())];
+            let k = hb.len();
+            let mut block: Poly<F> = (0..n).map(|t| f.dot_rev(hb, &self.cols[t][s - k..])).collect();
+            trim(f, &mut block);
+            acc = if acc.is_empty() { block } else { add(f, &self.m.mulmod(f, &acc, &self.giant), &block) };
+        }
+        acc
+    }
+}
+
 /// Subproduct tree of the linear factors (x - r_i): level 0 = leaves, last level = product.
 pub fn subproduct_tree<F: Field>(f: &F, roots: &[F::E]) -> Vec<Vec<Poly<F>>> {
     let mut levels: Vec<Vec<Poly<F>>> =

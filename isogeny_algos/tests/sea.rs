@@ -266,3 +266,45 @@ fn isogeny_cycles_give_t_mod_l_power() {
     assert!(reached.get(&3).copied().unwrap_or(0) >= 3);
     assert!(reached.get(&5).copied().unwrap_or(0) >= 2);
 }
+
+/// The Atkin degree (Q-matrix Frobenius powers, equality at the divisors of l+1) equals the
+/// definition: the least k with gcd(Y^(q^k) - Y, Phi_l(j, Y)) != 1, each Y^(q^k) by a fresh
+/// exponentiation. Random curves at 40 bits, every Atkin prime l <= 31.
+#[test]
+fn atkin_degree_matches_gcd_definition() {
+    use isogeny_algos::find::modpoly::Phi;
+    use isogeny_algos::poly;
+    let mut p = (1u64 << 39) + 777;
+    while !is_prime(p) {
+        p += 1;
+    }
+    let fp = Zp::new(p);
+    let mut rng = Rng::new(4100);
+    let phis: Vec<(usize, Phi<Zp>)> = [3usize, 5, 7, 11, 13, 17, 19, 23, 29, 31].iter().map(|&l| (l, Phi::compute(&fp, l))).collect();
+    let mut checked = 0;
+    while checked < 60 {
+        let e = Curve::new(fp.random(&mut rng), fp.random(&mut rng));
+        let j = jinv(&fp, &e);
+        if !is_smooth(&fp, &e) || j == 0 || j == 1728 {
+            continue;
+        }
+        for (_, phi) in &phis {
+            let g = poly::monic(&fp, &phi.y_poly(&fp, j));
+            let y = poly::x_poly(&fp);
+            let mut yk = y.clone();
+            let mut naive = None;
+            for k in 1..g.len() {
+                yk = poly::powmod_big(&fp, &yk, &fp.q(), &g);
+                if poly::deg(&fp, &poly::gcd(&fp, &g, &poly::sub(&fp, &yk, &y))) > 0 {
+                    naive = Some(k);
+                    break;
+                }
+            }
+            if naive == Some(1) {
+                continue; // Elkies prime (or l = j-special): not an Atkin degree
+            }
+            assert_eq!(atkin_degree(&fp, &g), naive, "p = {p}, j = {j}, l = {}", phi.ell);
+            checked += 1;
+        }
+    }
+}
