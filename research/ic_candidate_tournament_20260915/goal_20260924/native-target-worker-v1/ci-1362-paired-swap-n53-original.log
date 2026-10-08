@@ -1,0 +1,524 @@
+paired-swap-grid (53)	Set up job	﻿2026-10-05T02:21:16.8897920Z Current runner version: '2.337.0'
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8921681Z ##[group]Runner Image Provisioner
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8922532Z Hosted Compute Agent
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8923249Z Version: 20260901.588
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8923807Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8924469Z Build Date: 2026-09-01T19:56:44Z
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8925054Z Worker ID: {ee60dce5-34b2-4adb-8191-b3644dbee76a}
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8925704Z Azure Region: westus
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8926316Z ##[endgroup]
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8927518Z ##[group]Operating System
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8928110Z Ubuntu
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8928570Z 24.04.5
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8929000Z LTS
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8929542Z ##[endgroup]
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8930012Z ##[group]Runner Image
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8930561Z Image: ubuntu-24.04
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8931073Z Version: 20260927.320.1
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8932029Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8933770Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8934631Z ##[endgroup]
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8937146Z ##[group]GITHUB_TOKEN Permissions
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8939291Z Actions: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8939823Z ArtifactMetadata: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8940344Z Attestations: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8940923Z Checks: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8941398Z CodeQuality: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8941938Z Contents: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8942475Z CopilotRequests: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8942968Z Deployments: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8943722Z Discussions: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8944202Z Drives: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8944723Z Issues: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8945196Z Metadata: read
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8945746Z Models: read
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8946248Z Packages: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8946732Z Pages: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8947285Z PullRequests: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8947801Z RepositoryProjects: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8948360Z SecurityEvents: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8948893Z Statuses: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8949379Z VulnerabilityAlerts: read
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8949909Z ##[endgroup]
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8951879Z Secret source: Actions
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8952682Z Cache mode: write
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.8953563Z Prepare workflow directory
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.9238756Z Prepare all required actions
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:16.9292462Z Getting action download info
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:17.2794067Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:17.6541744Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+paired-swap-grid (53)	Set up job	2026-10-05T02:21:18.0086580Z Complete job name: paired-swap-grid (53)
+paired-swap-grid (53)	Run actions/checkout@v4	﻿2026-10-05T02:21:18.0765249Z ##[group]Run actions/checkout@v4
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0765979Z with:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0766369Z   sparse-checkout-cone-mode: false
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0770863Z   sparse-checkout: Cargo.toml
+paired-swap-grid (53)	Run actions/checkout@v4	docs/ic/calibration.json
+paired-swap-grid (53)	Run actions/checkout@v4	src
+paired-swap-grid (53)	Run actions/checkout@v4	examples/koblitz_orbit_dlp_fast.rs
+paired-swap-grid (53)	Run actions/checkout@v4	examples/koblitz_orbit_dlp_swap.rs
+paired-swap-grid (53)	Run actions/checkout@v4	examples/koblitz_rho_batch_ks_v2_n61.rs
+paired-swap-grid (53)	Run actions/checkout@v4	examples/koblitz_rho_batch_ks_v3.rs
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+paired-swap-grid (53)	Run actions/checkout@v4	research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_k_boundary_20260929/fixtures
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_swap_quotient_20260929
+paired-swap-grid (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_frozen_source_replay_20260929
+paired-swap-grid (53)	Run actions/checkout@v4	.github/workflows/compact-swap-quotient.yml
+paired-swap-grid (53)	Run actions/checkout@v4	
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0775929Z   repository: aburan28/crypto
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0779002Z   token: ***
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0779380Z   ssh-strict: true
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0780055Z   ssh-user: git
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0780432Z   persist-credentials: true
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0780837Z   clean: true
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0781194Z   fetch-depth: 1
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0781557Z   fetch-tags: false
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0781922Z   show-progress: true
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0782290Z   lfs: false
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0782637Z   submodules: false
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0783150Z   set-safe-directory: true
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0783580Z   allow-unsafe-pr-checkout: false
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.0784422Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1737836Z Syncing repository: aburan28/crypto
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1740143Z ##[group]Getting Git version info
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1740995Z Working directory is '/home/runner/work/crypto/crypto'
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1742211Z [command]/usr/bin/git version
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1803183Z git version 2.55.0
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1814781Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1827779Z Temporarily overriding HOME='/home/runner/work/_temp/0ea65c9a-aa66-4f87-8284-02463f395964' before making global git config changes
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1829709Z Adding repository directory to the temporary git global config as a safe directory
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1832579Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1879169Z Deleting the contents of '/home/runner/work/crypto/crypto'
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1883414Z ##[group]Initializing the repository
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1886944Z [command]/usr/bin/git init /home/runner/work/crypto/crypto
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1967007Z hint: Using 'master' as the name for the initial branch. This default branch name
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1968510Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1969880Z hint: to use in all of your new repositories, which will suppress this warning,
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1971279Z hint: call:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1971824Z hint:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1972459Z hint: 	git config --global init.defaultBranch <name>
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1973495Z hint:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1974236Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1975318Z hint: 'development'. The just-created branch can be renamed via this command:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1976194Z hint:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1976675Z hint: 	git branch -m <name>
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1977235Z hint:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1977915Z hint: Disable this message with "git config set advice.defaultBranchName false"
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1978855Z Initialized empty Git repository in /home/runner/work/crypto/crypto/.git/
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.1980965Z [command]/usr/bin/git remote add origin https://github.com/aburan28/crypto
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2027489Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2028487Z ##[group]Disabling automatic garbage collection
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2032499Z [command]/usr/bin/git config --local gc.auto 0
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2064426Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2065385Z ##[group]Setting up auth
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2070891Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2104930Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2591313Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2624508Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2842127Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.2876657Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.3088118Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.3125593Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.3126373Z ##[group]Fetching the repository
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.3133624Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin +509268435509486297773e885598d7c2e90d4137:refs/remotes/pull/1362/merge
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8723298Z From https://github.com/aburan28/crypto
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8724549Z  * [new ref]         509268435509486297773e885598d7c2e90d4137 -> pull/1362/merge
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8727682Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8728811Z ##[group]Determining the checkout info
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8730096Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8731074Z ##[group]Setting up sparse checkout
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8735487Z [command]/usr/bin/git config core.sparseCheckout true
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8770258Z [command]/usr/bin/git rev-parse --git-path info/sparse-checkout
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8793641Z .git/info/sparse-checkout
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8801208Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8802662Z ##[group]Checking out the ref
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:18.8805498Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1362/merge
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:22.6443920Z Updating files:   0% (1/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:22.6453670Z Updating files:   1% (9/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:22.6459341Z Updating files:   2% (17/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:22.6465127Z Updating files:   3% (25/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:22.6477374Z Updating files:   4% (33/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:23.0168790Z Updating files:   5% (41/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.0300918Z Updating files:   5% (43/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.5150865Z Updating files:   6% (49/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7661833Z Updating files:   7% (57/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7666301Z Updating files:   8% (65/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7672047Z Updating files:   9% (73/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7675903Z Updating files:  10% (81/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7680932Z Updating files:  11% (89/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7689099Z Updating files:  12% (97/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7694887Z Updating files:  13% (106/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7699238Z Updating files:  14% (114/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7702038Z Updating files:  15% (122/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7744080Z Updating files:  16% (130/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7762856Z Updating files:  17% (138/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7769494Z Updating files:  18% (146/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7781816Z Updating files:  19% (154/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7794865Z Updating files:  20% (162/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.7800446Z Updating files:  21% (170/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8764292Z Updating files:  22% (178/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8780668Z Updating files:  23% (186/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8789499Z Updating files:  24% (194/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8799981Z Updating files:  25% (202/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8806342Z Updating files:  26% (211/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8823230Z Updating files:  27% (219/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8832049Z Updating files:  28% (227/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8840421Z Updating files:  29% (235/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8847295Z Updating files:  30% (243/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8852720Z Updating files:  31% (251/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8861291Z Updating files:  32% (259/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8866833Z Updating files:  33% (267/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8873390Z Updating files:  34% (275/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8879703Z Updating files:  35% (283/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8885138Z Updating files:  36% (291/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8892333Z Updating files:  37% (299/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8900665Z Updating files:  38% (308/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8913195Z Updating files:  39% (316/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8927870Z Updating files:  40% (324/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8937767Z Updating files:  41% (332/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8947361Z Updating files:  42% (340/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8956245Z Updating files:  43% (348/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8963843Z Updating files:  44% (356/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8973696Z Updating files:  45% (364/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.8988412Z Updating files:  46% (372/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9005375Z Updating files:  47% (380/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9017242Z Updating files:  48% (388/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9037831Z Updating files:  49% (396/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9049152Z Updating files:  50% (404/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9061054Z Updating files:  51% (413/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9075415Z Updating files:  52% (421/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9182560Z Updating files:  53% (429/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9183448Z Updating files:  54% (437/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9183780Z Updating files:  55% (445/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9184076Z Updating files:  56% (453/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9184314Z Updating files:  57% (461/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9184533Z Updating files:  58% (469/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9184874Z Updating files:  59% (477/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9189197Z Updating files:  60% (485/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9205611Z Updating files:  61% (493/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9215403Z Updating files:  62% (501/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9235243Z Updating files:  63% (510/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9246879Z Updating files:  64% (518/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9254844Z Updating files:  65% (526/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9261632Z Updating files:  66% (534/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9265533Z Updating files:  67% (542/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9268811Z Updating files:  68% (550/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9271348Z Updating files:  69% (558/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9274688Z Updating files:  70% (566/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9278350Z Updating files:  71% (574/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9281404Z Updating files:  72% (582/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9284747Z Updating files:  72% (586/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9290362Z Updating files:  73% (590/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9295393Z Updating files:  74% (598/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9299478Z Updating files:  75% (606/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9307025Z Updating files:  76% (615/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9314880Z Updating files:  77% (623/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9320307Z Updating files:  78% (631/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9327644Z Updating files:  79% (639/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9334021Z Updating files:  80% (647/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9340152Z Updating files:  81% (655/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9345112Z Updating files:  82% (663/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9353324Z Updating files:  83% (671/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9360519Z Updating files:  84% (679/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9367735Z Updating files:  85% (687/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9380247Z Updating files:  86% (695/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9394937Z Updating files:  87% (703/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9401368Z Updating files:  88% (712/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9408661Z Updating files:  89% (720/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9417464Z Updating files:  90% (728/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9422726Z Updating files:  91% (736/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9429602Z Updating files:  92% (744/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9434554Z Updating files:  93% (752/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9439448Z Updating files:  94% (760/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9446154Z Updating files:  95% (768/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9452833Z Updating files:  96% (776/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9458611Z Updating files:  97% (784/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9465351Z Updating files:  98% (792/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9471144Z Updating files:  99% (800/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9471445Z Updating files: 100% (808/808)
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9471776Z Updating files: 100% (808/808), done.
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9860290Z Note: switching to 'refs/remotes/pull/1362/merge'.
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9860656Z 
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9860848Z You are in 'detached HEAD' state. You can look around, make experimental
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9861250Z changes and commit them, and you can discard any commits you make in this
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9861627Z state without impacting any branches by switching back to a branch.
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9861850Z 
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9862000Z If you want to create a new branch to retain commits you create, you may
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9862444Z do so (now or later) by using -c with the switch command. Example:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9862659Z 
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9862763Z   git switch -c <new-branch-name>
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9862907Z 
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9863464Z Or undo this operation with:
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9863599Z 
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9863687Z   git switch -
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9863800Z 
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9863971Z Turn off this advice by setting config variable advice.detachedHead to false
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9864215Z 
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9864477Z HEAD is now at 5092684 Merge 30c84566f782e6503901d187348709dfaad05cc2 into e3508a67797401525ba7bc0ebd3b99349a8cac13
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9889439Z ##[endgroup]
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9927231Z [command]/usr/bin/git log -1 --format=%H
+paired-swap-grid (53)	Run actions/checkout@v4	2026-10-05T02:21:24.9949715Z 509268435509486297773e885598d7c2e90d4137
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	﻿2026-10-05T02:21:25.0139204Z ##[group]Run python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.0140089Z ^[[36;1mpython3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v^[[0m
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.0618752Z shell: /usr/bin/bash -e {0}
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.0619103Z ##[endgroup]
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1408732Z test_drifted_file_replayed_from_snapshot (test_materialize.MaterializeTest.test_drifted_file_replayed_from_snapshot) ... ok
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1428483Z test_missing_snapshot_fails_closed (test_materialize.MaterializeTest.test_missing_snapshot_fails_closed) ... ok
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1446269Z test_snapshot_for_other_path_rejected (test_materialize.MaterializeTest.test_snapshot_for_other_path_rejected) ... ok
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1468740Z test_tampered_snapshot_fails_closed (test_materialize.MaterializeTest.test_tampered_snapshot_fails_closed) ... ok
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1469379Z 
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1469699Z ----------------------------------------------------------------------
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1470211Z Ran 4 tests in 0.009s
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1470386Z 
+paired-swap-grid (53)	Check fail-closed frozen-source materialization	2026-10-05T02:21:25.1470492Z OK
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	﻿2026-10-05T02:21:25.1609897Z ##[group]Run python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.1610492Z ^[[36;1mpython3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \^[[0m
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.1610995Z ^[[36;1m  --freeze research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json \^[[0m
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.1611366Z ^[[36;1m  --dest "/home/runner/work/_temp/frozen-src"^[[0m
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.1669325Z shell: /usr/bin/bash -e {0}
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.1669578Z ##[endgroup]
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2970380Z {
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2970772Z   "freezes": [
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2971263Z     "research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json"
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2971712Z   ],
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2971934Z   "live": [
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2972148Z     "Cargo.toml",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2972397Z     "docs/ic/calibration.json",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2972710Z     "examples/koblitz_orbit_dlp_fast.rs",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2973246Z     "examples/koblitz_orbit_dlp_swap.rs",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2973725Z     "examples/koblitz_rho_batch_ks_v2_n61.rs",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2974070Z     "examples/koblitz_rho_batch_ks_v3.rs",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2974522Z     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2975107Z     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2975686Z     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2976212Z     "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2976721Z     "research/notes/ecc2k130/compact_swap_quotient_20260929/PROTOCOL.md",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2977220Z     "research/notes/ecc2k130/compact_swap_quotient_20260929/archive.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2977720Z     "research/notes/ecc2k130/compact_swap_quotient_20260929/prepare.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2978224Z     "research/notes/ecc2k130/compact_swap_quotient_20260929/run_panel.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2978771Z     "research/notes/ecc2k130/compact_swap_quotient_20260929/verify_panel.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2979394Z     "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2980187Z     "src/lib.rs"
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2980429Z   ],
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2980656Z   "pinned_files": 21,
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2980954Z   "replayed_from_snapshot": {
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2981310Z     ".github/workflows/compact-swap-quotient.yml": {
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2981895Z       "frozen_sha256": "4e3094a6037e696b2d57230ca5eedd6d7e0178b502801501c71fe7e77c6de216",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2982595Z       "live_sha256": "74094723396fb089ebd421ddf05b6ceb6c48cf00a10d46014d13dd8a023aff3e"
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2983260Z     },
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2983519Z     "src/cryptanalysis/koblitz_fast.rs": {
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2984058Z       "frozen_sha256": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2984744Z       "live_sha256": "0b86548e12930040177e1b84a0955e2bb983d3945b538d2cdc6cc2ad4f154de5"
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2985241Z     },
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2985529Z     "src/cryptanalysis/koblitz_index_calculus.rs": {
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2986066Z       "frozen_sha256": "747596aa01a360ca4b010457a739ea12c829a81e845100b4cc7d8f6cb226cd20",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2986689Z       "live_sha256": "4308533e6ae62437766e6e64a66ad45546050ec876e3076207928e2def5b824c"
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2987155Z     },
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2987416Z     "src/cryptanalysis/semaev_decomp.rs": {
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2987953Z       "frozen_sha256": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2",
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2988664Z       "live_sha256": "88e4351922a8c0b3e3bc1dc692e4beaae332ff515d38b080be8911d5669e3bb5"
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2989168Z     }
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2989398Z   },
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2989719Z   "schema": "compact-frozen-source-materialization-v1"
+paired-swap-grid (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:21:25.2990133Z }
+paired-swap-grid (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	﻿2026-10-05T02:21:25.3060731Z ##[group]Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+paired-swap-grid (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	2026-10-05T02:21:25.3061241Z ^[[36;1mcp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock^[[0m
+paired-swap-grid (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	2026-10-05T02:21:25.3121106Z shell: /usr/bin/bash -e {0}
+paired-swap-grid (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	2026-10-05T02:21:25.3121372Z ##[endgroup]
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	﻿2026-10-05T02:21:25.3247951Z ##[group]Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:25.3248712Z ^[[36;1mcargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap^[[0m
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:25.3307739Z shell: /usr/bin/bash -e {0}
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:25.3308023Z ##[endgroup]
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:25.8300016Z     Updating crates.io index
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.1202992Z  Downloading crates ...
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.1499413Z   Downloaded anstyle-query v1.1.5
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2043596Z   Downloaded clap_derive v4.6.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2061403Z   Downloaded crc32fast v1.5.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2078581Z   Downloaded proc-macro2 v1.0.107
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2103598Z   Downloaded simd-adler32 v0.3.10
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2177292Z   Downloaded zmij v1.0.23
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2194581Z   Downloaded utf8parse v0.2.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2203360Z   Downloaded rand_chacha v0.3.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2212198Z   Downloaded serde_derive v1.0.229
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2238070Z   Downloaded clap_lex v1.1.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2246583Z   Downloaded either v1.18.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2258106Z   Downloaded cc v1.4.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2284893Z   Downloaded find-msvc-tools v0.1.13
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2297572Z   Downloaded base64 v0.21.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2328397Z   Downloaded memchr v2.8.3
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2372586Z   Downloaded heck v0.5.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2382556Z   Downloaded rand v0.8.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2409454Z   Downloaded anstyle-parse v1.0.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2422429Z   Downloaded anstream v1.0.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2438378Z   Downloaded unicode-ident v1.0.26
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2459839Z   Downloaded serde_json v1.0.151
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2519285Z   Downloaded zlib-rs v0.6.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2566249Z   Downloaded crossbeam-epoch v0.9.21
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2587066Z   Downloaded clap v4.6.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2671802Z   Downloaded adler2 v2.0.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2682908Z   Downloaded num-bigint v0.4.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.2734220Z   Downloaded libc v0.2.189
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3077201Z   Downloaded syn v2.0.119
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3165155Z   Downloaded zeroize v1.9.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3178935Z   Downloaded serde_core v1.0.229
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3201737Z   Downloaded blake3 v1.8.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3267228Z   Downloaded cfg-if v1.0.5
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3278375Z   Downloaded subtle v2.6.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3288685Z   Downloaded quote v1.0.47
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3311074Z   Downloaded is_terminal_polyfill v1.70.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3319944Z   Downloaded arrayvec v0.7.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3337583Z   Downloaded num-traits v0.2.19
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3359233Z   Downloaded clap_builder v4.6.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3412771Z   Downloaded zeroize_derive v1.5.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3421891Z   Downloaded crossbeam-deque v0.8.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3435031Z   Downloaded itoa v1.0.18
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3448096Z   Downloaded constant_time_eq v0.4.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3466112Z   Downloaded flate2 v1.1.10
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3507465Z   Downloaded colorchoice v1.0.5
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3523897Z   Downloaded rayon-core v1.13.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3551435Z   Downloaded anstyle v1.0.14
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3563493Z   Downloaded miniz_oxide v0.9.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3584175Z   Downloaded ppv-lite86 v0.2.21
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3594535Z   Downloaded autocfg v1.5.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3609421Z   Downloaded crossbeam-utils v0.8.23
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3631694Z   Downloaded getrandom v0.2.17
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3655227Z   Downloaded hex v0.4.3
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3667951Z   Downloaded rand_core v0.6.4
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3678914Z   Downloaded serde v1.0.229
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3706612Z   Downloaded cpufeatures v0.3.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3718086Z   Downloaded shlex v2.0.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3728810Z   Downloaded num-integer v0.1.47
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3741602Z   Downloaded syn v3.0.6
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3827837Z   Downloaded strsim v0.11.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3838473Z   Downloaded rayon v1.12.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.3915183Z   Downloaded zerocopy v0.8.57
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.4623853Z    Compiling proc-macro2 v1.0.107
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.4624299Z    Compiling quote v1.0.47
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.4624741Z    Compiling unicode-ident v1.0.26
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.4625245Z    Compiling cfg-if v1.0.5
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.7048479Z    Compiling libc v0.2.189
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:26.8245673Z    Compiling crossbeam-utils v0.8.23
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:27.0503396Z    Compiling zerocopy v0.8.57
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:27.0713417Z    Compiling crossbeam-epoch v0.9.21
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:27.1528041Z    Compiling autocfg v1.5.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:27.5484591Z    Compiling num-traits v0.2.19
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:27.8075065Z    Compiling syn v3.0.6
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.3185376Z    Compiling getrandom v0.2.17
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.6334812Z    Compiling serde_core v1.0.229
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.6481388Z    Compiling crossbeam-deque v0.8.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.7566062Z    Compiling find-msvc-tools v0.1.13
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.7736319Z    Compiling shlex v2.0.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.8804097Z    Compiling utf8parse v0.2.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.8994474Z    Compiling cc v1.4.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:28.9394067Z    Compiling anstyle-parse v1.0.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:29.1076051Z    Compiling rand_core v0.6.4
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:29.7058108Z    Compiling anstyle-query v1.1.5
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:29.7554205Z    Compiling zmij v1.0.23
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:29.8754143Z    Compiling colorchoice v1.0.5
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:29.9212512Z    Compiling rayon-core v1.13.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:30.0175004Z    Compiling is_terminal_polyfill v1.70.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:30.0624231Z    Compiling crc32fast v1.5.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:30.1762738Z    Compiling anstyle v1.0.14
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:30.1925677Z    Compiling blake3 v1.8.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:30.3674103Z    Compiling anstream v1.0.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:30.8964377Z    Compiling syn v2.0.119
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:31.1829995Z    Compiling ppv-lite86 v0.2.21
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:31.1894453Z    Compiling clap_lex v1.1.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:31.4574842Z    Compiling serde_json v1.0.151
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:31.5343850Z    Compiling strsim v0.11.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:31.6734191Z    Compiling rand_chacha v0.3.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:32.3400272Z    Compiling adler2 v2.0.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:32.3939157Z    Compiling heck v0.5.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:32.4484706Z    Compiling serde v1.0.229
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:32.5194155Z    Compiling simd-adler32 v0.3.10
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:32.6144206Z    Compiling clap_derive v4.6.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:33.0445069Z    Compiling miniz_oxide v0.9.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:33.4214446Z    Compiling rand v0.8.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:34.1774927Z    Compiling clap_builder v4.6.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:34.1834131Z    Compiling num-integer v0.1.47
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:34.8364764Z    Compiling serde_derive v1.0.229
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:34.8536638Z    Compiling zeroize_derive v1.5.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:36.7610172Z    Compiling memchr v2.8.3
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:37.1684478Z    Compiling cpufeatures v0.3.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:37.2002349Z    Compiling either v1.18.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:37.3158000Z    Compiling arrayvec v0.7.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:37.4651350Z    Compiling itoa v1.0.18
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:37.6283638Z    Compiling constant_time_eq v0.4.2
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:37.8640846Z    Compiling rayon v1.12.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:39.7934751Z    Compiling flate2 v1.1.10
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:40.0054312Z    Compiling clap v4.6.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:40.0464123Z    Compiling zeroize v1.9.0
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:40.1944443Z    Compiling num-bigint v0.4.8
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:40.2618946Z    Compiling base64 v0.21.7
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:40.6757057Z    Compiling subtle v2.6.1
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:40.6870255Z    Compiling hex v0.4.3
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:41.9884368Z    Compiling crypto v0.1.0 (/home/runner/work/_temp/frozen-src)
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.7514774Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/ic/boundary_targets.json`: No such file or directory (os error 2)
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.7515684Z   --> src/cryptanalysis/ecbench/claim.rs:37:32
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.7516063Z    |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.7516733Z 37 | pub const CLAIM_LEDGER: &str = include_str!("../../../docs/ic/boundary_targets.json");
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.7517714Z    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.7518017Z 
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.8333753Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/ecbench/schema.sql`: No such file or directory (os error 2)
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.8374619Z   --> src/cryptanalysis/ecbench/db.rs:31:30
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.8375650Z    |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.8404353Z 31 | pub const SCHEMA_SQL: &str = include_str!("../../../docs/ecbench/schema.sql");
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.8434077Z    |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.8443624Z 
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.9445200Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/curves/registry.json`: No such file or directory (os error 2)
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.9447124Z    --> src/cryptanalysis/ecbench/workload.rs:201:24
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.9447799Z     |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.9448424Z 201 | const REGISTRY: &str = include_str!("../../../docs/curves/registry.json");
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.9449268Z     |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:42.9449725Z 
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5280368Z error[E0432]: unresolved imports `super::koblitz_index_calculus::IndividualLogInterruption`, `super::koblitz_index_calculus::IndividualLogObserver`
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5281021Z   --> src/cryptanalysis/prepared_n17_target.rs:12:9
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5281283Z    |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5281615Z 12 |         IndividualLogInterruption, IndividualLogObserver, IndividualLogReport, IndividualLogSolver,
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5282203Z    |         ^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^ no `IndividualLogObserver` in `cryptanalysis::koblitz_index_calculus`
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5282551Z    |         |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5282837Z    |         no `IndividualLogInterruption` in `cryptanalysis::koblitz_index_calculus`
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5283618Z    |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5283797Z help: a similar name exists in the module
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5284018Z    |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5284369Z 12 -         IndividualLogInterruption, IndividualLogObserver, IndividualLogReport, IndividualLogSolver,
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5284903Z 12 +         IndividualLogInterruption, IndividualLogSolver, IndividualLogReport, IndividualLogSolver,
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5285261Z    |
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:43.5285348Z 
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:45.9708229Z For more information about this error, try `rustc --explain E0432`.
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:45.9851520Z error: could not compile `crypto` (lib) due to 4 previous errors
+paired-swap-grid (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap	2026-10-05T02:21:46.0182974Z ##[error]Process completed with exit code 101.
+paired-swap-grid (53)	Run actions/upload-artifact@v4	﻿2026-10-05T02:21:46.0316543Z ##[group]Run actions/upload-artifact@v4
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0316796Z with:
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0316994Z   name: compact-swap-quotient-n53-L1024
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0317260Z   path: /home/runner/work/_temp/compact-swap/n53_L1024
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0317536Z   if-no-files-found: warn
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0317758Z   retention-days: 90
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0317945Z   compression-level: 6
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0318132Z   overwrite: false
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0318319Z   include-hidden-files: false
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.0318527Z ##[endgroup]
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.1755730Z (node:3233) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.1756485Z (Use `node --trace-deprecation ...` to show where the warning was created)
+paired-swap-grid (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:46.1783195Z ##[warning]No files were found with the provided path: /home/runner/work/_temp/compact-swap/n53_L1024. No artifacts will be uploaded.
+paired-swap-grid (53)	Post Run actions/checkout@v4	﻿2026-10-05T02:21:46.2341633Z Post job cleanup.
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3108326Z [command]/usr/bin/git version
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3143460Z git version 2.55.0
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3173946Z Temporarily overriding HOME='/home/runner/work/_temp/61eb6979-0645-42da-b174-39270e28f452' before making global git config changes
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3174896Z Adding repository directory to the temporary git global config as a safe directory
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3179528Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3223512Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3261463Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3536617Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3570393Z http.https://github.com/.extraheader
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3582236Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3624012Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3900250Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+paired-swap-grid (53)	Post Run actions/checkout@v4	2026-10-05T02:21:46.3940410Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+paired-swap-grid (53)	Complete job	﻿2026-10-05T02:21:46.4382374Z Cleaning up orphan processes
+paired-swap-grid (53)	Complete job	2026-10-05T02:21:46.4641532Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
