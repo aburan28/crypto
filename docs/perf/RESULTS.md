@@ -27,7 +27,9 @@ arithmetic for the cryptanalysis walks (see "Largest kernel speedups").  It
 is an instruction-count index of fixed kernels in the **engineering** class
 (`AGENTS.md` §3), not a wall-clock index and not an end-to-end speedup of any
 attack or workload.  Scope: the changes merged through PR #1172; later PRs
-append to this file.
+append to this file.  PR #1242 has since merged and has its own per-PR index;
+with it the product over five PRs is **2.107x** (see "The index after #1242").
+The sections below describe the four-PR state unless they say otherwise.
 
 ## How it was measured
 
@@ -253,7 +255,10 @@ with no PR: `pdp/descend_s3_n31_np20` 2.36x wall / 3.46x `Ir`,
 ## Changes after #1172
 
 Changes accepted after the four PRs above.  They are not in the 1.904x, which
-covers #908 to #1172 only; each gets a per-PR index when its PR merges.
+covers #908 to #1172 only.  The one change here, `gf2-fold-reduce`, merged in
+PR #1242 (merge commit `6c046fbb`, 2026-10-02); its per-PR index and the
+five-PR campaign figures are in "The index after #1242", after the
+`gf2-fold-reduce` write-up.
 
 ### `gf2-fold-reduce`: `Gf2` reduced by two carry-less folds
 
@@ -337,6 +342,56 @@ commit `809a7318`, the second in a later commit):
   only; every in-domain case still runs on every field (commit `e378cae2`).
   This narrows a test that another change had added, so it is stated here and
   in the PR.
+
+### The index after #1242
+
+PR #1242 (merge `6c046fbb`, base `cde09f88`, head `48529d3f`) was compared with its
+first parent by the same method as the four PRs above: callgrind `Ir`, one thread,
+133 kernels, every fingerprint equal (valid).  Its performance index is **1.106x**.
+It carries `gf2-fold-reduce` and this file; the instruction ratios agree with the
+merged-tree figures in the section above to within rounding.  Multiplying its
+per-kernel ratios into the earlier four gives the campaign index over five PRs,
+**2.107x**.
+
+| PR | merge commit | base (first parent) | performance index |
+|:--|:--|:--|--:|
+| #908 | `524d3877` | `92ac774b` | 1.201x |
+| #915 | `717d0aaf` | `0ec2a0dc` | 1.135x |
+| #1167 | `88ff556f` | `b7d3f9ca` | 1.367x |
+| #1172 | `441293ee` | `848f145b` | 1.022x |
+| #1242 | `6c046fbb` | `cde09f88` | 1.106x |
+| **campaign (kernel product)** | | | **2.107x** |
+
+| area | #908 | #915 | #1167 | #1172 | #1242 | campaign |
+|:--|--:|--:|--:|--:|--:|--:|
+| bool_gb | 1.212x | 1.001x | 0.997x | 1.000x | 1.000x | **1.210x** |
+| dlp | 1.021x | 2.405x | 4.122x | 0.997x | 1.091x | **11.002x** |
+| field_ec | 1.763x | 0.997x | 1.000x | 1.000x | 1.421x | **2.497x** |
+| fp_gb | 1.002x | 1.000x | 0.998x | 1.000x | 1.000x | **0.999x** |
+| gf2_la | 1.005x | 1.004x | 0.995x | 1.000x | 1.000x | **1.004x** |
+| pdp | 1.473x | 1.002x | 1.999x | 1.013x | 1.221x | **3.649x** |
+| relation | 1.352x | 1.136x | 1.273x | 1.000x | 1.184x | **2.316x** |
+| sat | 0.993x | 1.003x | 1.172x | 1.178x | 1.003x | **1.379x** |
+
+Largest kernel ratios in #1242 alone: `field_ec/koblitz_curve_mul_n53_1k` 9.01x,
+`field_ec/koblitz_n53_fast_mul_2k` 6.27x, `field_ec/gf2_n53_inv_16k` 5.05x,
+`field_ec/gf2_n53_mul_sqr_1m` 2.97x, `field_ec/gf2_n53_batch_inv_4x64k` 2.53x,
+`dlp/koblitz_signed_rho_k0_n41` 2.35x, `pdp/mitm_m4_n31` 2.22x,
+`pdp/pair_table_build_n31_l10` 2.17x, `pdp/mitm_m3_n31` 2.09x,
+`pdp/enumerate_m3_n15` 2.04x; 23 of the 133 kernels carry a "faster" verdict and none
+carries "slower".  Two kernels read just under 1: `dlp/gaudry_schost_negation_demo32`
+0.989x and `dlp/rho_dp_zp_multi_q34_x3` 0.984x, both with a "neutral" verdict; they
+were not profiled, so they are not explained.
+
+Across the five PRs, the kernels that read below 0.99 in the product are the same three
+as before: `field_ec/ct_scalar_mul_p256_x16` 0.866x, `field_ec/ct_scalar_mul_secp256k1_x16`
+0.934x and `fp_gb/f4_pkm_kummer_m2_t5` 0.974x (see "Kernels below 0.99 in the campaign
+product" for the first two being an inlining artifact).  The largest product ratios are
+`dlp/pohlig_hellman_smooth47` 239.26x, `pdp/build_system_m2_n23` 124.74x,
+`field_ec/ecdsa_verify_secp256k1_x4` 31.98x and `field_ec/point_scalar_mul_secp256k1_x8`
+31.95x; `pdp/enumerate_m3_n15` reaches 21.19x as the product of #908 and #1242.  Source:
+the per-PR `instr.json` outputs of the five comparisons (`pr-index/` in the campaign
+working files).
 
 ## Caveats
 
