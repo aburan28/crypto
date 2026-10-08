@@ -381,6 +381,69 @@
    ]
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "icv1": "ICV1:f2m-11-4c26487e:67:1982:0x1:-7:unk:r:ae0facd240e8",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 11,
+    "modulus": "0x913",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-4c26487e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x913\",\"v\":\"1\"}",
+   "trace": 67,
+   "order": "1982",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N11Ce1h41243ed45ca3",
+     "curve_uid": "urn:ec-record:1:sha256:41243ed45ca391b7b99cc37e02cfcd9ad4ae329b034049781a11c9701f91ab59",
+     "field_sha256": "f543818d44d80ccfc7304e554a8996fc088efec91d10737afa8cbd000db626e2",
+     "field": {
+      "characteristic": 2,
+      "degree": 11,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       11,
+       8,
+       4,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "991",
+      "cofactor": 2,
+      "generator": [
+       "0x4a9",
+       "0x3ef"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
    "family": "koblitz",
@@ -486,6 +549,73 @@
    "ec1_unresolved": "KoblitzCurve::new(1, 13) finds no usable prime-order subgroup, so the repository has built no generator on it"
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "icv1": "ICV1:f2m-13-517bd51f:-181:8374:0x1:-7:unk:r:e4cd523ec44f",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 13,
+    "modulus": "0x3d33",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-517bd51f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3d33\",\"v\":\"1\"}",
+   "trace": -181,
+   "order": "8374",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N13Ce1h98fd3bab3884",
+     "curve_uid": "urn:ec-record:1:sha256:98fd3bab3884fa9d550cb6f4afeb86a8ce5cb7b973875cf7ecfe1197de65338c",
+     "field_sha256": "3d031731cfa077f91d91963d5ffb49c0de20961274ee6cb493fe2ad6a899bfc1",
+     "field": {
+      "characteristic": 2,
+      "degree": 13,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       13,
+       12,
+       11,
+       10,
+       8,
+       5,
+       4,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "79",
+      "cofactor": 106,
+      "generator": [
+       "0x112d",
+       "0xbe3"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
    "family": "koblitz",
@@ -556,6 +686,69 @@
       "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "icv1": "ICV1:f2m-15-bcb514a8:275:32494:0x1:-7:unk:r:25edae8389f1",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 15,
+    "modulus": "0x8035",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-bcb514a8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8035\",\"v\":\"1\"}",
+   "trace": 275,
+   "order": "32494",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n15-l5"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N15Ce1h68b09ca2a6f8",
+     "curve_uid": "urn:ec-record:1:sha256:68b09ca2a6f858390f7dfbd1021e3b41ff530d8c7d0161893a0693b9fdfd8a56",
+     "field_sha256": "2b4fd0025d243056fa16f939bfea0b58226de62a02c78bbf316e491178d9e198",
+     "field": {
+      "characteristic": 2,
+      "degree": 15,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       15,
+       5,
+       4,
+       2,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "211",
+      "cofactor": 154,
+      "generator": [
+       "0x8e4",
+       "0x203a"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
      ]
     }
    ]
@@ -662,8 +855,7 @@
     "a": 1,
     "n": 17,
     "modulus": "0x20009",
-    "modulus_rule": "recorded in the run",
-    "generator_call": "KoblitzCurve::new(1, 17)"
+    "modulus_rule": "recorded in the run"
    },
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
    "trace": -101,
@@ -671,6 +863,7 @@
    "j": "0x1",
    "end": "-7",
    "aliases": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
     "K_1/2^17",
@@ -678,14 +871,50 @@
    ],
    "standard_names": [],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "representations": [
+    {
+     "ec1": "EC1N17Ce1h381f66e2762a",
+     "curve_uid": "urn:ec-record:1:sha256:381f66e2762a47b4af4fe5a8b915914be8cbc242ecad57198264dc254c63d57e",
+     "field_sha256": "ec5263b2c422af2421c7e0191c033c81f521be737d653ec90302c138cb1761bc",
+     "field": {
+      "characteristic": 2,
+      "degree": 17,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       17,
+       3,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "65587",
+      "cofactor": 2,
+      "generator": [
+       "0x1fa03",
+       "0xd814"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    },
     {
      "ec1": "EC1N17Ce1hdfbf24105ef5",
      "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d",
@@ -805,8 +1034,7 @@
     "a": 1,
     "n": 19,
     "modulus": "0x80027",
-    "modulus_rule": "recorded in the run",
-    "generator_call": "KoblitzCurve::new(1, 19)"
+    "modulus_rule": "recorded in the run"
    },
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
    "trace": -797,
@@ -814,6 +1042,7 @@
    "j": "0x1",
    "end": "-7",
    "aliases": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
     "K_1/2^19",
@@ -821,14 +1050,52 @@
    ],
    "standard_names": [],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "representations": [
+    {
+     "ec1": "EC1N19Ce1h6186a62ebfaa",
+     "curve_uid": "urn:ec-record:1:sha256:6186a62ebfaa1d11afc99ffa6ef0b9067190b7a03bc67150c379ffbf30e6a7d9",
+     "field_sha256": "d26d0e22ee9d83f595adcd635db277e93215fb5b8992f07f1aef694d8c38c750",
+     "field": {
+      "characteristic": 2,
+      "degree": 19,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       19,
+       5,
+       2,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "262543",
+      "cofactor": 2,
+      "generator": [
+       "0x7e3ea",
+       "0x24541"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    },
     {
      "ec1": "EC1N19Ce1h7e63aa468dcc",
      "curve_uid": "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23",
@@ -1044,6 +1311,81 @@
    ]
   },
   {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "icv1": "ICV1:f2m-23-bb3650c7:-5197:8393806:0x1:-7:unk:r:a023238e6474",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 23,
+    "modulus": "0xdcf5eb",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-bb3650c7\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0xdcf5eb\",\"v\":\"1\"}",
+   "trace": -5197,
+   "order": "8393806",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N23Ce1he238479aae6d",
+     "curve_uid": "urn:ec-record:1:sha256:e238479aae6dae6c48e4c249888db39e58360f2d9d6fd36418f9648bcc0d8b80",
+     "field_sha256": "0cda052d4fbfa35af452fc0fdc71f84cee9ee1d4c8f190cc791b428032153470",
+     "field": {
+      "characteristic": 2,
+      "degree": 23,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       23,
+       22,
+       20,
+       19,
+       18,
+       15,
+       14,
+       13,
+       12,
+       10,
+       8,
+       7,
+       6,
+       5,
+       3,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "4196903",
+      "cofactor": 2,
+      "generator": [
+       "0x2e62c9",
+       "0x55e90c"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "icv1": "ICV1:f2m-29-1a13acc8:-40309:536911222:0x1:-7:unk:r:30c52b963005",
    "family": "koblitz",
@@ -1119,6 +1461,81 @@
    ]
   },
   {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "icv1": "ICV1:f2m-29-797da7cf:-40309:536911222:0x1:-7:unk:r:6aecea52fac9",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 29,
+    "modulus": "0x3a0b7cb9",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-797da7cf\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3a0b7cb9\",\"v\":\"1\"}",
+   "trace": -40309,
+   "order": "536911222",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N29Ce1h7fed23ba87ea",
+     "curve_uid": "urn:ec-record:1:sha256:7fed23ba87eaf8303f4a16985bb0e665733faae9285069c5a430a9bdd9fab8a7",
+     "field_sha256": "a6a97dd064be5cd9ee39a62834ebeb74e82a5eca4fbaec774a318afa97071c4a",
+     "field": {
+      "characteristic": 2,
+      "degree": 29,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       29,
+       28,
+       27,
+       25,
+       19,
+       17,
+       16,
+       14,
+       13,
+       12,
+       11,
+       10,
+       7,
+       5,
+       4,
+       3,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "42457",
+      "cofactor": 12646,
+      "generator": [
+       "0x1a849ba3",
+       "0x4b3542e"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
    "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
    "family": "koblitz",
@@ -1189,6 +1606,77 @@
       "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "icv1": "ICV1:f2m-31-eaa21191:90707:2147392942:0x1:-7:unk:r:5fc996f03a86",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 31,
+    "modulus": "0x851e410f",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-eaa21191\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x851e410f\",\"v\":\"1\"}",
+   "trace": 90707,
+   "order": "2147392942",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n31-l8"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N31Ce1h6be2d6a625f9",
+     "curve_uid": "urn:ec-record:1:sha256:6be2d6a625f9a828dca420147995b710ca572754e3fde55313ff248ee4ec42cc",
+     "field_sha256": "50e1567028464a6e751ffc6ff3403d3e06735b6c7efff545d0c29ac01cf92048",
+     "field": {
+      "characteristic": 2,
+      "degree": 31,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       31,
+       26,
+       24,
+       20,
+       19,
+       18,
+       17,
+       14,
+       8,
+       3,
+       2,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "41231",
+      "cofactor": 52082,
+      "generator": [
+       "0x6347c766",
+       "0xc3503f0"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
      ]
     }
    ]

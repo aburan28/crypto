@@ -25,6 +25,18 @@ name = "decomp_demo"
 path = "src/bin/decomp_demo.rs"
 
 [[bin]]
+name = "m3_decomp_bench"
+path = "src/bin/m3_decomp_bench.rs"
+
+[[bin]]
+name = "m3_witness_ffd"
+path = "src/bin/m3_witness_ffd.rs"
+
+[[bin]]
+name = "m3_f4_matrix_probe"
+path = "src/bin/m3_f4_matrix_probe.rs"
+
+[[bin]]
 name = "ecdlp_demo"
 path = "src/bin/ecdlp_demo.rs"
 

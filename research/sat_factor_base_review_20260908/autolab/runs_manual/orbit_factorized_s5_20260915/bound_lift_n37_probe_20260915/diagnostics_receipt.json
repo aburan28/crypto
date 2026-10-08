@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "kind": "n37_planted_units_diagnostics",
+  "updated_at": "2026-09-15T19:40:18Z",
+  "claim_boundary": "Public-synthetic diagnostics only. NOT ledger promotion; NOT vs_rho; NOT key recovery.",
+  "control_n23_fullstack_planted_units": {
+    "verdict": "SAT",
+    "conflicts": 115,
+    "valid_x_tuples": 1,
+    "invalid_group_lifts": 0,
+    "pair_table_entries": 0,
+    "variables": 34375,
+    "note": "Winning stack still SAT@115 on n23 \u2014 binary/regression OK; n_bound metadata now 41."
+  },
+  "n37_eta1_2_fullstack_smoke_1k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 1000,
+    "variables": 428195,
+    "pair_table_entries": 0,
+    "positive_clauses": 6894820,
+    "sec_per_1k": 93.686459041
+  },
+  "n37_lean_no_pairsum_no_positive": {
+    "at_5k": {
+      "verdict": "UNKNOWN",
+      "conflicts": 5000,
+      "variables": 12585,
+      "solve_ms": 3771.801375
+    },
+    "at_100k": {
+      "verdict": "UNKNOWN",
+      "conflicts": 100000,
+      "variables": 12585,
+      "solve_ms": 68106.858916
+    },
+    "note": "Lean stack insufficient even with planted units \u2014 pair_sum+relative-positive required (as on n23)."
+  },
+  "n37_eta1_16_fullstack_5k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 5000,
+    "variables": 116927,
+    "factor_base_points": 444,
+    "intermediate_domain_x": 48618,
+    "positive_clauses": 1719820,
+    "pair_table_entries": 0,
+    "solve_ms": 113932.314125,
+    "cert": "n37_eta1_16_seed1.cert.json"
+  },
+  "aborted_no_positive_20k": "no_output_after_21m; killed",
+  "in_flight": "eta1_16_planted_units_50k",
+  "ledger_promotion": false
+}

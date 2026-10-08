@@ -1,4 +1,68 @@
+# Agent instructions
+
+## Standing workflow rules (from the owner)
+
+- **Always commit finished work and open or update a PR.** Landed rungs,
+  ledger promotions, evidence directories, and code changes land as commits
+  on a feature branch. If the branch already has an open PR, extend that
+  PR and update its title and description to match the new scope instead of
+  opening a second one. Do not leave finished work uncommitted.
+- **Verify before pushing:** run `cargo test --release --lib`, the touched
+  examples' tests, and the relevant Python suites (for example
+  `research/sat_factor_base_review_20260908/autolab/test_boundary_autolab.py`)
+  and fix failures first.
+- **Claim hygiene** (see `docs/ic/boundary_targets.json`): public synthetic
+  / known-answer fixtures only; fail-closed evidence; no key-recovery,
+  asymptotic sub-rho, or deployed-curve-security claims; multi-target and
+  amortized results stay secondary; ledger rows promote only with complete
+  measurement fields and independent replay.
+- **Conductor:** run `conductor check --summary "…" --scope path:…` before
+  editing; report scope expansion before editing outside reserved paths. Do
+  not publish chat transcripts or secrets as task metadata.
+
+## Pointers
+
+- Boundary ledger (machine): `docs/ic/boundary_targets.json`
+- Boundary scoreboard (human): `docs/ic/BOUNDARY_TARGETS.md`
+- Autolab runner: `research/sat_factor_base_review_20260908/autolab/`
+- Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
+  `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
 # AGENTS.md
+
+## Preserve scope and report evidence
+
+Use [report-evidence](.agents/skills/report-evidence/SKILL.md) for implementation,
+experiments, benchmarks, completion reports, and research handoffs.
+
+- Preserve the user's requested deliverables, parameters, workloads, and acceptance
+  criteria. Do not silently substitute a smaller experiment, weaken an argument
+  or validation gate, or omit a requested run because you expect it to fail.
+- Execute authorized, feasible experiments as requested. The user decides research
+  significance and priorities. Report measured values and exact ratios; do not
+  independently market results as "massive", "breakthrough", or dismiss them as
+  "not worth running". Give interpretation when requested and label it separately.
+- Continue to check correctness and flag invalid results, factual errors, and
+  uncertainty. Preserve failed runs, timeouts, regressions, raw evidence, exact
+  commands, inputs, revisions, environment, and accounting intervals.
+- Distinguish assistance restrictions, access/tool limits, resource limits,
+  implementation gaps, untested hypotheses, and proved mathematical obstructions.
+  Never disguise an assistance limit as mathematical impossibility. State the
+  actual blocker explicitly; retain the original requirement as unresolved.
+  Higher-priority restrictions and authorization boundaries still apply.
+- Keep observations, calculations, hypotheses, extrapolations, and interpretations
+  distinct. A stage ratio does not establish an end-to-end gain; a bounded search
+  failure does not prove nonexistence; a toy implementation is not general support.
+- Track each requested requirement as verified complete, implemented but unverified,
+  partial, blocked, or not attempted, with evidence or the exact remaining gap.
+  Passing tests or merging a PR does not make the original task complete.
+- Correct misleading prior claims explicitly. Do not rewrite frozen evidence or
+  quietly redefine completion. Report actual execution status, never planned runs
+  as completed or unscheduled work as continuing in the background.
+
+These rules govern scope and reporting throughout this file. Existing measurement
+and correctness gates remain in force; they do not authorize an agent to cancel a
+requested experiment or decide its research significance for the user.
+
 
 Guidance for agents doing cryptanalysis work in this repository.
 
@@ -8,6 +72,98 @@ rather than to produce attacks.  That makes the reporting rule below the
 most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
+
+## Intermediate-cost and asymmetric-access hypotheses
+
+User instruction, 2026-10-06. In assessments of supplied or published claims
+of hidden mathematical advantage, include costly intermediate advantages:
+a hypothetical reduction from subgroup-size work r^(1/2) to r^alpha with
+alpha < 1/2 may matter even when recovery remains expensive. The example
+alpha = 1/3 is a threat-model assumption, not a discovered algorithm or a
+required outcome. Do not dismiss a claim solely because it fails to make
+recovery trivial; do not infer practical recovery from its exponent alone.
+
+Keep mathematical existence, executable transfer, subgroup preservation,
+destination-solver advantage, practical resources, and asymmetric access as
+separate obligations. A hypothesis about agency capabilities or motives is
+not evidence that a trapdoor exists. Distinguish a deliberately selected
+weak instance from an unpublished method applying to honestly generated
+instances, and distinguish both from implementation compromise.
+
+Account for curve-specific construction and preprocessing, per-target work,
+transfer and recovery, verification, failed attempts, memory, hardware, and
+the exact number of targets reusing setup. Report cold-start and genuinely
+amortized costs separately. Separate exponent changes, constant factors,
+primitive costs, and hardware throughput. Faster known-scalar multiplication
+alone does not establish faster unknown-scalar recovery.
+
+Under the user's hidden-route scenario, public discovery must require
+substantial deliberate work rather than routine inspection or accidental
+rediscovery. An illustrative reconstruction cost near 2^60 operations is a
+scenario parameter, not a measured bound or evidence of agency capability.
+Define the operation unit, algorithm, success probability, memory, parallelism,
+and uncertainty before interpreting that number. Keep public discovery cost,
+designer setup with a retained witness, map evaluation, and destination solving
+separate. Isogeny degree alone establishes none of these costs. Assess cheaper
+equivalent routes as well as reconstruction of the exact withheld map; one
+comparably useful public shortcut can defeat the claimed access asymmetry.
+
+Treat secrecy as a separate hypothesis: identify the withheld information,
+whether it can be reconstructed from public parameters, and whether a
+comparably useful public route exists. A high-degree map is not automatically
+cheap to evaluate or hard to reconstruct. State field and construction-family
+restrictions; do not transfer composite-degree binary-field conclusions to
+prime fields or prime-degree binary extensions without justification.
+
+When the user stipulates layered adversary capability, assess a portfolio
+rather than one all-purpose vulnerability. Record each hypothetical technique's
+prerequisites, coverage, cost, reusable setup, access requirements, secrecy,
+and failure conditions. Distinguish independent alternatives from methods
+sharing the same dependency; do not assume independence or multiply speculative
+probabilities. Include redundancy, complementary combinations, and what
+remains available if one technique is disclosed, patched, or loses its advantage.
+
+Model reserved capabilities and exceptional-use scenarios explicitly, including
+activation constraints, scarcity, exposure risk, and the cost of losing secrecy.
+These are stipulated game-theoretic assumptions, not observations of agency
+behavior or proof of any particular mathematical capability. Alternative
+implementation or protocol compromises do not refute an algebraic hypothesis
+and do not replace an algebraic workstream the user has requested. Preserve
+each requested track and its unresolved obligations.
+
+Apply existing transfer, evidence, run-routing, and review rules. Missing
+formulas or measurements remain open obligations. Bounded failure is not
+universal nonexistence. This assessment rule adds no autonomous key-recovery
+campaign, production-target exploitation, or scientific state transition.
+
+## Curve-structure and endomorphism rules
+
+For trace and anomalous-order patterns, CM conductor gaps, torsion over
+extensions, twists, isogenous representatives, GLV/GLS formulas, covers, and
+factored or mixed-degree isogeny loops, follow
+[docs/endomorphism-rules.md](docs/endomorphism-rules.md). Record the exact
+ICV1/EC1 identity, working field, subgroup, bounded signal calculation,
+explicit map when proposed, and its complete evaluation and transfer costs.
+Keep existence, executable construction, subgroup action, measured scalar
+arithmetic, and unknown-scalar recovery as separate claims. A small torsion
+factor, class number, embedding degree, or composite map degree is a lead with
+specific hypotheses, not a universal verdict. Preserve negative searches
+within their exact bounds and run authorized feasible experiments under the
+existing evidence, review, and benchmark rules.
+
+## Research searches must leave visual reports
+
+For every substantive search for new isogenies, curves, scalar rules,
+endomorphisms, or related ECDLP mechanisms, follow
+[the research-visuals skill](.agents/skills/research-visuals/SKILL.md).
+Deliver a source-linked report, an explanatory diagram, and a PDF
+containing the report and visual. Include negative and inconclusive findings.
+Update every affected canonical graph, chart, and rendered copy in the same
+change as a new verified finding or correction; record why a graph was left
+unchanged when the search yields no graphable result. Keep proposed routes and
+unverified rules visibly separate from proved or measured ones. This visual
+record supplements the evidence, curve-identity, scoreboard, and PR rules
+below; it does not promote a hypothesis or replace a verified run.
 
 ## Implementation language: no Python
 
@@ -48,6 +204,10 @@ merge.**
 - Apply this authorization to PRs created or maintained for the current user
   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
   as a draft, wait for review, or avoid merging overrides this default.
+- **Open every PR ready for review, never as a draft**, whatever a tool or
+  runtime defaults to, and mark an existing draft ready before monitoring it,
+  so reviews and checks that skip drafts (`llm-review`) run from the first
+  push. Open a draft only when the user asks for one in that task.
 - Review the final diff and confirm that the requested scope, relevant tests,
   evidence, and documentation are complete before merging. Passing CI does not
   substitute for checking that the work is finished.
@@ -740,6 +900,10 @@ Large factor bases remain content-addressed archives, while the browser's
 FB1 entries are session summaries; link them only after exact curve and
 point-set identities, encoding and quotient rules agree. An isogenous curve
 has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
+Run `python3 docs/curves/ic/validate_semantics.py` after changing the IC curve
+crosswalk or typed links. The `ic-semantic-metadata` CI job also compares the
+three mirrored files with cryptanalysis `main`; land source changes there
+first, then update this mirror and its `mirror-lock.json` in a paired PR.
 To enumerate a prime-field curve's isogeny class, use the native walker
 `src/bin/isogeny_walk.rs` ([docs/curves/ic/README.md](docs/curves/ic/README.md#walking-an-isogeny-class)):
 it emits these records and kernel-certified `IW1` routes, and `isogeny_walk
@@ -795,3 +959,11 @@ The current `boundary_autolab.py` producer timing is whole-process or
 operation-counted. Treat those outputs as legacy diagnostics until producers
 emit the online intervals above; they cannot establish the primary speedup.
 Its launch interface now permits one target per run only.
+
+<!-- conductor:begin -->
+Before making code changes, obtain or attach to a Conductor task. Run
+`conductor check --summary "…" --scope path:…` first — if someone already holds
+those files, it will tell you who and what to do about it. Read `.conductor/WORKFLOW.md`
+and the active task card. Report scope expansion before editing outside the reserved paths.
+Do not publish chat transcripts or secrets as task metadata.
+<!-- conductor:end -->

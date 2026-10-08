@@ -1,0 +1,104 @@
+{
+  "gpu_observation": {
+    "passed": true,
+    "pid": 438940,
+    "observations": 9,
+    "nominal_sampling_interval_seconds": 0.5,
+    "external_gpu_processes": [],
+    "observation_errors": [],
+    "receipt": "workers-r1-w262-pid.json",
+    "receipt_sha256": "ac7affdb3ce74ee2f2dc821ec7fbb5df46a9d299aefd1522e2ce4eee67e98952",
+    "samples": "workers-r1-w262-gpu-processes.jsonl",
+    "samples_sha256": "6606fde62dc59f74d5a2b6e350d6b7cc57baa03d693b242056f55246500ba617",
+    "scope": "Each query retains the launched child PID until completion. No process observation occurs after that child is reaped. Sampling cannot exclude activity between queries.",
+    "source_sha256": "7dee6c1e2686ae51464ae0d0ac93f6431f89a90d5277f9431044b192cbd4269a"
+  },
+  "hardware": {
+    "provider": "aws",
+    "instance_type": "g7.2xlarge",
+    "hardware_type": null,
+    "identity_source": "local DMI",
+    "captured_at_utc": "2026-09-17T22:18:42.519439+00:00",
+    "gpu_name": "NVIDIA RTX PRO 4500 Blackwell Server Edition",
+    "gpu_uuid": "GPU-827e82b5-4739-d339-d95e-b7214337553e",
+    "driver_version": "595.91.07",
+    "power_limit_watts": 165.0,
+    "memory_mib": 32623,
+    "compute_capability": "12.0",
+    "gpu_selector": "0",
+    "measured_gpu_count": 1,
+    "measurement_scope": "single_gpu",
+    "cpu_affinity_count": 8
+  },
+  "hardware_key": "1f924b694c2e82c4fb97249871bafb50f5ab75057f69c87cc45661d87529a2e7",
+  "label": "workers-r1-w262",
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block",
+    "--packed",
+    "--threads",
+    "262144",
+    "--steps",
+    "1024",
+    "--launches",
+    "8",
+    "--verify",
+    "0",
+    "--run-id",
+    "62573",
+    "--bench"
+  ],
+  "workers": 262144,
+  "steps": 1024,
+  "launches": 8,
+  "batch": 16,
+  "scalar_updates": 34359738368,
+  "million_updates_per_second": 9700.34,
+  "wall_seconds": 4.707205116996192,
+  "binary_sha256": "2822f74c72de0c00b412ffe705c7ce6731a98c9d66e3f3559c42d14cf60af06e",
+  "passed": true,
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 900,
+  "log_sha256": "1cbf9a310b794db1c0a389c529b45f87a8732346dc481c8b8e3f9dea1a94eed9",
+  "process_wall_scope": "All client setup, initialization, execution and process observation; client reported rate excludes setup",
+  "telemetry_sha256": "6374b85adc20c1ee8ec028e8ae9eb009fe1b95bf4655adb9241b512e87754baa",
+  "telemetry_command": [
+    "nvidia-smi",
+    "-i",
+    "0",
+    "--query-gpu=timestamp,utilization.gpu,utilization.memory,power.draw,power.limit,clocks.sm,clocks.mem,temperature.gpu",
+    "--format=csv",
+    "-lms",
+    "200"
+  ],
+  "steady_telemetry": {
+    "samples": 7,
+    "excluded_initial_samples": 15,
+    "excluded_final_samples": 2,
+    "gpu_busy_percent": {
+      "min": 100.0,
+      "median": 100.0,
+      "max": 100.0
+    },
+    "memory_busy_percent": {
+      "min": 3.0,
+      "median": 4.0,
+      "max": 6.0
+    },
+    "power_watts": {
+      "min": 165.03,
+      "median": 165.71,
+      "max": 166.12
+    },
+    "sm_clock_mhz": {
+      "min": 2047.0,
+      "median": 2055.0,
+      "max": 2100.0
+    },
+    "temperature_c": {
+      "min": 59.0,
+      "median": 59.0,
+      "max": 59.0
+    }
+  }
+}

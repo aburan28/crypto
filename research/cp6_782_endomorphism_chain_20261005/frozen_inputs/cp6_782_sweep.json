@@ -1,0 +1,1907 @@
+{
+ "name": "CP6-782 G1",
+ "family": "deployed",
+ "verified": true,
+ "verification": "order pinned externally: h*n in Hasse interval, (h*n)*G = O, h*G of prime order n (cp6_chain.py)",
+ "q_bits": 782,
+ "n_bits": 377,
+ "ext_degree": 1,
+ "cost_model": "weierstrass_jacobian_generic_a",
+ "frobenius_discriminant_bits": 784,
+ "discriminant_certificate": "t^2-4q = (-339) * 513025011189245362189291037990710422610397276367601556209885360626933410105300729369470840216346069866385567317670496^2; CM field Q(sqrt(-339))",
+ "cm_discriminant": -339,
+ "class_number": 6,
+ "min_nonscalar_degree": 85,
+ "cheap_endomorphisms": [
+  {
+   "name": "endo[4+1w] deg 3*5*7",
+   "degree": 105,
+   "height": 4,
+   "cost_M": 48.8,
+   "kind": "isogeny",
+   "a": 4,
+   "b": 1,
+   "chain": "3*5*7"
+  },
+  {
+   "name": "endo[9+1w] deg 5^2*7",
+   "degree": 175,
+   "height": 9,
+   "cost_M": 52.8,
+   "kind": "isogeny",
+   "a": 9,
+   "b": 1,
+   "chain": "5^2*7"
+  },
+  {
+   "name": "endo[5+2w] deg 3*5^3",
+   "degree": 375,
+   "height": 5,
+   "cost_M": 54.4,
+   "kind": "isogeny",
+   "a": 5,
+   "b": 2,
+   "chain": "3*5^3"
+  },
+  {
+   "name": "endo[2+1w] deg 7*13",
+   "degree": 91,
+   "height": 2,
+   "cost_M": 59.2,
+   "kind": "isogeny",
+   "a": 2,
+   "b": 1,
+   "chain": "7*13"
+  },
+  {
+   "name": "endo[10+1w] deg 3*5*13",
+   "degree": 195,
+   "height": 10,
+   "cost_M": 60.8,
+   "kind": "isogeny",
+   "a": 10,
+   "b": 1,
+   "chain": "3*5*13"
+  },
+  {
+   "name": "endo[1+2w] deg 7^3",
+   "degree": 343,
+   "height": 2,
+   "cost_M": 60.8,
+   "kind": "isogeny",
+   "a": 1,
+   "b": 2,
+   "chain": "7^3"
+  },
+  {
+   "name": "endo[0+1w] deg 5*17",
+   "degree": 85,
+   "height": 1,
+   "cost_M": 63.2,
+   "kind": "isogeny",
+   "a": 0,
+   "b": 1,
+   "chain": "5*17"
+  },
+  {
+   "name": "endo[15+1w] deg 5^2*13",
+   "degree": 325,
+   "height": 15,
+   "cost_M": 64.8,
+   "kind": "isogeny",
+   "a": 15,
+   "b": 1,
+   "chain": "5^2*13"
+  },
+  {
+   "name": "endo[16+1w] deg 3*7*17",
+   "degree": 357,
+   "height": 16,
+   "cost_M": 72.8,
+   "kind": "isogeny",
+   "a": 16,
+   "b": 1,
+   "chain": "3*7*17"
+  },
+  {
+   "name": "endo[23+1w] deg 7^2*13",
+   "degree": 637,
+   "height": 23,
+   "cost_M": 72.8,
+   "kind": "isogeny",
+   "a": 23,
+   "b": 1,
+   "chain": "7^2*13"
+  },
+  {
+   "name": "endo[5+1w] deg 5*23",
+   "degree": 115,
+   "height": 5,
+   "cost_M": 75.2,
+   "kind": "isogeny",
+   "a": 5,
+   "b": 1,
+   "chain": "5*23"
+  },
+  {
+   "name": "endo[15+2w] deg 5*7*17",
+   "degree": 595,
+   "height": 15,
+   "cost_M": 76.8,
+   "kind": "isogeny",
+   "a": 15,
+   "b": 2,
+   "chain": "5*7*17"
+  },
+  {
+   "name": "endo[1+1w] deg 3*29",
+   "degree": 87,
+   "height": 1,
+   "cost_M": 83.2,
+   "kind": "isogeny",
+   "a": 1,
+   "b": 1,
+   "chain": "3*29"
+  },
+  {
+   "name": "endo[11+2w] deg 3*7*23",
+   "degree": 483,
+   "height": 11,
+   "cost_M": 84.8,
+   "kind": "isogeny",
+   "a": 11,
+   "b": 2,
+   "chain": "3*7*23"
+  },
+  {
+   "name": "endo[17+2w] deg 3*13*17",
+   "degree": 663,
+   "height": 17,
+   "cost_M": 84.80000000000001,
+   "kind": "isogeny",
+   "a": 17,
+   "b": 2,
+   "chain": "3*13*17"
+  },
+  {
+   "name": "endo[11+1w] deg 7*31",
+   "degree": 217,
+   "height": 11,
+   "cost_M": 95.2,
+   "kind": "isogeny",
+   "a": 11,
+   "b": 1,
+   "chain": "7*31"
+  }
+ ],
+ "pumps": [
+  {
+   "ell": 5,
+   "cycle_length": 6,
+   "generator": "97+8w",
+   "norm": 15625,
+   "height": 97,
+   "step_cost_M": 9.6,
+   "cost_per_height_bit_M": 8.268989915009147
+  },
+  {
+   "ell": 7,
+   "cycle_length": 3,
+   "generator": "1+2w",
+   "norm": 343,
+   "height": 2,
+   "step_cost_M": 13.6,
+   "cost_per_height_bit_M": 9.688835489338203
+  },
+  {
+   "ell": 13,
+   "cycle_length": 3,
+   "generator": "27+4w",
+   "norm": 2197,
+   "height": 27,
+   "step_cost_M": 25.6,
+   "cost_per_height_bit_M": 13.836193506678772
+  },
+  {
+   "ell": 17,
+   "cycle_length": 6,
+   "generator": "4607+160w",
+   "norm": 24137569,
+   "height": 4607,
+   "step_cost_M": 33.6,
+   "cost_per_height_bit_M": 16.44051643034479
+  },
+  {
+   "ell": 23,
+   "cycle_length": 6,
+   "generator": "10093+680w",
+   "norm": 148035889,
+   "height": 10093,
+   "step_cost_M": 45.6,
+   "cost_per_height_bit_M": 20.16110332652434
+  },
+  {
+   "ell": 29,
+   "cycle_length": 2,
+   "generator": "27+1w",
+   "norm": 841,
+   "height": 27,
+   "step_cost_M": 57.6,
+   "cost_per_height_bit_M": 23.71355509944205
+  },
+  {
+   "ell": 31,
+   "cycle_length": 3,
+   "generator": "141+10w",
+   "norm": 29791,
+   "height": 141,
+   "step_cost_M": 61.6,
+   "cost_per_height_bit_M": 24.867807466914705
+  },
+  {
+   "ell": 47,
+   "cycle_length": 2,
+   "generator": "7+5w",
+   "norm": 2209,
+   "height": 7,
+   "step_cost_M": 93.6,
+   "cost_per_height_bit_M": 33.70186435013286
+  }
+ ],
+ "configs": [
+  {
+   "label": "GLV-2 [endo[9+1w] deg 5^2*7]",
+   "generators": [
+    "1",
+    "endo[9+1w] deg 5^2*7"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 2432.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 52.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 52.8,
+   "speedup_vs_generic": 1.500797553074279,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[4+1w] deg 3*5*7]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 190,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    187,
+    190
+   ],
+   "cost_M": 2439.92,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 48.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 48.8,
+   "speedup_vs_generic": 1.4961965966097248,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[10+1w] deg 3*5*13]",
+   "generators": [
+    "1",
+    "endo[10+1w] deg 3*5*13"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 2440.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 60.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 60.8,
+   "speedup_vs_generic": 1.4958777925292157,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[15+1w] deg 5^2*13]",
+   "generators": [
+    "1",
+    "endo[15+1w] deg 5^2*13"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 2444.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 64.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 64.8,
+   "speedup_vs_generic": 1.4934299880545234,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[5+2w] deg 3*5^3]",
+   "generators": [
+    "1",
+    "endo[5+2w] deg 3*5^3"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 190,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    187,
+    190
+   ],
+   "cost_M": 2445.52,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 54.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 54.4,
+   "speedup_vs_generic": 1.4927704537276325,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[16+1w] deg 3*7*17]",
+   "generators": [
+    "1",
+    "endo[16+1w] deg 3*7*17"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 2452.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 72.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 72.8,
+   "speedup_vs_generic": 1.4885583337410901,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[15+2w] deg 5*7*17]",
+   "generators": [
+    "1",
+    "endo[15+2w] deg 5*7*17"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 2456.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 76.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 76.8,
+   "speedup_vs_generic": 1.4861344058881956,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[2+1w] deg 7*13]",
+   "generators": [
+    "1",
+    "endo[2+1w] deg 7*13"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 190,
+   "coeff_bits_empirical": 190,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    186,
+    191
+   ],
+   "cost_M": 2461.8,
+   "cost_breakdown": {
+    "doublings": 189,
+    "additions": 76.0,
+    "precomp_M": 228.8,
+    "endomorphism_M": 59.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 59.2,
+   "speedup_vs_generic": 1.4828986920139733,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[1+2w] deg 7^3]",
+   "generators": [
+    "1",
+    "endo[1+2w] deg 7^3"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 190,
+   "coeff_bits_empirical": 190,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    186,
+    191
+   ],
+   "cost_M": 2463.4000000000005,
+   "cost_breakdown": {
+    "doublings": 189,
+    "additions": 76.0,
+    "precomp_M": 228.8,
+    "endomorphism_M": 60.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 60.8,
+   "speedup_vs_generic": 1.48193553625071,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[23+1w] deg 7^2*13]",
+   "generators": [
+    "1",
+    "endo[23+1w] deg 7^2*13"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    190
+   ],
+   "cost_M": 2463.92,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 72.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 72.8,
+   "speedup_vs_generic": 1.4816227799603883,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[11+2w] deg 3*7*23]",
+   "generators": [
+    "1",
+    "endo[11+2w] deg 3*7*23"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 2464.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 84.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 84.8,
+   "speedup_vs_generic": 1.4813101556540225,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[17+2w] deg 3*13*17]",
+   "generators": [
+    "1",
+    "endo[17+2w] deg 3*13*17"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 2464.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 84.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 84.80000000000001,
+   "speedup_vs_generic": 1.4813101556540225,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[0+1w] deg 5*17]",
+   "generators": [
+    "1",
+    "endo[0+1w] deg 5*17"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 190,
+   "coeff_bits_empirical": 190,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    186,
+    191
+   ],
+   "cost_M": 2465.8,
+   "cost_breakdown": {
+    "doublings": 189,
+    "additions": 76.0,
+    "precomp_M": 228.8,
+    "endomorphism_M": 63.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 63.2,
+   "speedup_vs_generic": 1.4804931462405708,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[5+1w] deg 5*23]",
+   "generators": [
+    "1",
+    "endo[5+1w] deg 5*23"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    190
+   ],
+   "cost_M": 2466.3199999999997,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 75.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 75.2,
+   "speedup_vs_generic": 1.4801809984105876,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[11+1w] deg 7*31]",
+   "generators": [
+    "1",
+    "endo[11+1w] deg 7*31"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 2474.84,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 95.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 95.2,
+   "speedup_vs_generic": 1.4750852580368832,
+   "note": ""
+  },
+  {
+   "label": "GLV-2 [endo[1+1w] deg 3*29]",
+   "generators": [
+    "1",
+    "endo[1+1w] deg 3*29"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 191,
+   "coeff_bits_empirical": 191,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    186,
+    192
+   ],
+   "cost_M": 2497.2799999999997,
+   "cost_breakdown": {
+    "doublings": 190,
+    "additions": 76.4,
+    "precomp_M": 228.8,
+    "endomorphism_M": 83.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds)",
+   "endomorphism_cost_M": 83.2,
+   "speedup_vs_generic": 1.46183047155305,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[5^78]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[5^78]",
+    "endo[4+1w] deg 3*5*7*cycle[5^78]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 98,
+   "coeff_bits_empirical": 98,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    91,
+    91,
+    98,
+    98
+   ],
+   "cost_M": 2741.4799999999996,
+   "cost_breakdown": {
+    "doublings": 97,
+    "additions": 78.4,
+    "precomp_M": 357.6,
+    "endomorphism_M": 866.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 866.4,
+   "speedup_vs_generic": 1.3316164991172652,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[7^66]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[7^66]",
+    "endo[4+1w] deg 3*5*7*cycle[7^66]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 97,
+   "coeff_bits_empirical": 96,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    92,
+    94,
+    95,
+    97
+   ],
+   "cost_M": 2859.16,
+   "cost_breakdown": {
+    "doublings": 95,
+    "additions": 76.8,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1015.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 1015.2,
+   "speedup_vs_generic": 1.276808573147358,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[5^72]]",
+   "generators": [
+    "1",
+    "cycle[5^72]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 3090.84,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 711.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 711.1999999999999,
+   "speedup_vs_generic": 1.18110287171125,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[5^78]]",
+   "generators": [
+    "1",
+    "cycle[5^78]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 3148.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 768.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 768.8,
+   "speedup_vs_generic": 1.1594948609470084,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[5^84]]",
+   "generators": [
+    "1",
+    "cycle[5^84]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 3206.0400000000004,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 826.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 826.4,
+   "speedup_vs_generic": 1.1386632730720763,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[13^51]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[13^51]",
+    "endo[4+1w] deg 3*5*7*cycle[13^51]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 96,
+   "coeff_bits_empirical": 94,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    94,
+    95,
+    95,
+    95
+   ],
+   "cost_M": 3236.04,
+   "cost_breakdown": {
+    "doublings": 93,
+    "additions": 75.2,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1423.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 1423.2,
+   "speedup_vs_generic": 1.128107192741746,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[7^63]]",
+   "generators": [
+    "1",
+    "cycle[7^63]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 3267.92,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 876.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 876.8,
+   "speedup_vs_generic": 1.1171020098411222,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[7^66]]",
+   "generators": [
+    "1",
+    "cycle[7^66]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 3297.2400000000002,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 917.6,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 917.6,
+   "speedup_vs_generic": 1.1071684196479479,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[7^69]]",
+   "generators": [
+    "1",
+    "cycle[7^69]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 3338.0400000000004,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 958.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 958.4,
+   "speedup_vs_generic": 1.093635786269787,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [cycle[5^42] x cycle[7^33]]",
+   "generators": [
+    "1",
+    "cycle[5^42]",
+    "cycle[7^33]",
+    "cycle[5^42]*cycle[7^33]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 120,
+   "coeff_bits_empirical": 119,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    69,
+    70,
+    119,
+    120
+   ],
+   "cost_M": 3517.04,
+   "cost_breakdown": {
+    "doublings": 118,
+    "additions": 95.2,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1315.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: two-cycle box (this sweep)",
+   "endomorphism_cost_M": 1315.2,
+   "speedup_vs_generic": 1.037975115437982,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[17^48]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[17^48]",
+    "endo[4+1w] deg 3*5*7*cycle[17^48]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 96,
+   "coeff_bits_empirical": 94,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    94,
+    95,
+    95,
+    95
+   ],
+   "cost_M": 3543.2400000000002,
+   "cost_breakdown": {
+    "doublings": 93,
+    "additions": 75.2,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1730.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 1730.4,
+   "speedup_vs_generic": 1.0302999514568587,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[13^48]]",
+   "generators": [
+    "1",
+    "cycle[13^48]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    187,
+    190
+   ],
+   "cost_M": 3639.92,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1248.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1248.8000000000002,
+   "speedup_vs_generic": 1.0029341304204487,
+   "note": ""
+  },
+  {
+   "label": "generic",
+   "generators": [
+    "1"
+   ],
+   "dim": 1,
+   "coeff_bits_bound": 376,
+   "coeff_bits_empirical": 376,
+   "balanced_bits": 376.0,
+   "basis_inf_norm_bits": [
+    377
+   ],
+   "cost_M": 3650.6,
+   "cost_breakdown": {
+    "doublings": 375,
+    "additions": 62.7,
+    "precomp_M": 236.4,
+    "endomorphism_M": 0.0,
+    "window": 5,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "double-and-add / wNAF (no endomorphism)",
+   "endomorphism_cost_M": 0.0,
+   "speedup_vs_generic": 1.0,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [cycle[5^42] x cycle[13^24]]",
+   "generators": [
+    "1",
+    "cycle[5^42]",
+    "cycle[13^24]",
+    "cycle[5^42]*cycle[13^24]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 121,
+   "coeff_bits_empirical": 120,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    68,
+    68,
+    121,
+    121
+   ],
+   "cost_M": 3698.2000000000003,
+   "cost_breakdown": {
+    "doublings": 119,
+    "additions": 96.0,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1480.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: two-cycle box (this sweep)",
+   "endomorphism_cost_M": 1480.8000000000002,
+   "speedup_vs_generic": 0.9871288735060298,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[13^51]]",
+   "generators": [
+    "1",
+    "cycle[13^51]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 3705.2400000000007,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1325.6,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1325.6000000000001,
+   "speedup_vs_generic": 0.9852533169241396,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[13^54]]",
+   "generators": [
+    "1",
+    "cycle[13^54]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 3782.0400000000004,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1402.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1402.4,
+   "speedup_vs_generic": 0.9652462692092098,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[17^42]]",
+   "generators": [
+    "1",
+    "cycle[17^42]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    190
+   ],
+   "cost_M": 3822.3199999999997,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1431.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1431.2,
+   "speedup_vs_generic": 0.9550744050733586,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [cycle[7^33] x cycle[13^24]]",
+   "generators": [
+    "1",
+    "cycle[7^33]",
+    "cycle[13^24]",
+    "cycle[7^33]*cycle[13^24]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 123,
+   "coeff_bits_empirical": 123,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    65,
+    68,
+    122,
+    124
+   ],
+   "cost_M": 3836.08,
+   "cost_breakdown": {
+    "doublings": 122,
+    "additions": 98.4,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1572.0,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: two-cycle box (this sweep)",
+   "endomorphism_cost_M": 1572.0,
+   "speedup_vs_generic": 0.9516485579028592,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [cycle[5^42] x cycle[17^24]]",
+   "generators": [
+    "1",
+    "cycle[5^42]",
+    "cycle[17^24]",
+    "cycle[5^42]*cycle[17^24]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 118,
+   "coeff_bits_empirical": 117,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    69,
+    73,
+    118,
+    118
+   ],
+   "cost_M": 3843.52,
+   "cost_breakdown": {
+    "doublings": 116,
+    "additions": 93.6,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1672.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: two-cycle box (this sweep)",
+   "endomorphism_cost_M": 1672.8000000000002,
+   "speedup_vs_generic": 0.9498064274415119,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[23^42]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[23^42]",
+    "endo[4+1w] deg 3*5*7*cycle[23^42]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 96,
+   "coeff_bits_empirical": 94,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    93,
+    94,
+    95,
+    95
+   ],
+   "cost_M": 3845.6400000000003,
+   "cost_breakdown": {
+    "doublings": 93,
+    "additions": 75.2,
+    "precomp_M": 357.6,
+    "endomorphism_M": 2032.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 2032.8,
+   "speedup_vs_generic": 0.9492828241853111,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [cycle[7^33] x cycle[17^24]]",
+   "generators": [
+    "1",
+    "cycle[7^33]",
+    "cycle[17^24]",
+    "cycle[7^33]*cycle[17^24]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 119,
+   "coeff_bits_empirical": 118,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    69,
+    70,
+    119,
+    119
+   ],
+   "cost_M": 3950.28,
+   "cost_breakdown": {
+    "doublings": 117,
+    "additions": 94.4,
+    "precomp_M": 357.6,
+    "endomorphism_M": 1764.0,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: two-cycle box (this sweep)",
+   "endomorphism_cost_M": 1764.0,
+   "speedup_vs_generic": 0.9241370231983554,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[17^48]]",
+   "generators": [
+    "1",
+    "cycle[17^48]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 4012.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1632.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1632.8000000000002,
+   "speedup_vs_generic": 0.9098204583744554,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[23^36]]",
+   "generators": [
+    "1",
+    "cycle[23^36]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 4041.2400000000007,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1661.6,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1661.6000000000001,
+   "speedup_vs_generic": 0.9033365996575307,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[29^38]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[29^38]",
+    "endo[4+1w] deg 3*5*7*cycle[29^38]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 97,
+   "coeff_bits_empirical": 97,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    93,
+    93,
+    95,
+    98
+   ],
+   "cost_M": 4165.92,
+   "cost_breakdown": {
+    "doublings": 96,
+    "additions": 77.6,
+    "precomp_M": 357.6,
+    "endomorphism_M": 2306.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 2306.4,
+   "speedup_vs_generic": 0.8763010331451395,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[17^54]]",
+   "generators": [
+    "1",
+    "cycle[17^54]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 4214.040000000001,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1834.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1834.4,
+   "speedup_vs_generic": 0.866294577175347,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[23^42]]",
+   "generators": [
+    "1",
+    "cycle[23^42]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 4314.84,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 1935.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 1935.2,
+   "speedup_vs_generic": 0.8460568642174449,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[31^39]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[31^39]",
+    "endo[4+1w] deg 3*5*7*cycle[31^39]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 96,
+   "coeff_bits_empirical": 95,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    93,
+    94,
+    94,
+    96
+   ],
+   "cost_M": 4348.400000000001,
+   "cost_breakdown": {
+    "doublings": 94,
+    "additions": 76.0,
+    "precomp_M": 357.6,
+    "endomorphism_M": 2520.0,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 2520.0,
+   "speedup_vs_generic": 0.8395271824119215,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [cycle[13^24] x cycle[17^24]]",
+   "generators": [
+    "1",
+    "cycle[13^24]",
+    "cycle[17^24]",
+    "cycle[13^24]*cycle[17^24]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 123,
+   "coeff_bits_empirical": 123,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    65,
+    67,
+    122,
+    124
+   ],
+   "cost_M": 4359.280000000001,
+   "cost_breakdown": {
+    "doublings": 122,
+    "additions": 98.4,
+    "precomp_M": 357.6,
+    "endomorphism_M": 2095.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: two-cycle box (this sweep)",
+   "endomorphism_cost_M": 2095.2000000000003,
+   "speedup_vs_generic": 0.8374318694830337,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[29^36]]",
+   "generators": [
+    "1",
+    "cycle[29^36]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 4473.24,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 2093.6,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 2093.6,
+   "speedup_vs_generic": 0.8160975042698357,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[23^48]]",
+   "generators": [
+    "1",
+    "cycle[23^48]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 4588.4400000000005,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 2208.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 2208.8,
+   "speedup_vs_generic": 0.7956080933825003,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[29^38]]",
+   "generators": [
+    "1",
+    "cycle[29^38]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    190
+   ],
+   "cost_M": 4599.92,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 2208.8,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 2208.8,
+   "speedup_vs_generic": 0.7936224977825701,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[31^36]]",
+   "generators": [
+    "1",
+    "cycle[31^36]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 4617.24,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 2237.6,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 2237.6,
+   "speedup_vs_generic": 0.7906454938448078,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[29^40]]",
+   "generators": [
+    "1",
+    "cycle[29^40]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 4703.64,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 2324.0,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 2324.0,
+   "speedup_vs_generic": 0.7761223222865695,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[31^39]]",
+   "generators": [
+    "1",
+    "cycle[31^39]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    189,
+    189
+   ],
+   "cost_M": 4813.52,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 2422.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 2422.4,
+   "speedup_vs_generic": 0.7584054911997872,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[31^42]]",
+   "generators": [
+    "1",
+    "cycle[31^42]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    190
+   ],
+   "cost_M": 4998.32,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 2607.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 2607.2000000000003,
+   "speedup_vs_generic": 0.7303654027753326,
+   "note": ""
+  },
+  {
+   "label": "pump-4 [endo[4+1w] deg 3*5*7 x cycle[47^34]]",
+   "generators": [
+    "1",
+    "endo[4+1w] deg 3*5*7",
+    "cycle[47^34]",
+    "endo[4+1w] deg 3*5*7*cycle[47^34]"
+   ],
+   "dim": 4,
+   "coeff_bits_bound": 96,
+   "coeff_bits_empirical": 95,
+   "balanced_bits": 94.0,
+   "basis_inf_norm_bits": [
+    92,
+    95,
+    95,
+    95
+   ],
+   "cost_M": 5128.4,
+   "cost_breakdown": {
+    "doublings": 94,
+    "additions": 76.0,
+    "precomp_M": 357.6,
+    "endomorphism_M": 3300.0,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "no literature match found: small-degree endomorphism x isogeny-cycle box (this sweep)",
+   "endomorphism_cost_M": 3299.9999999999995,
+   "speedup_vs_generic": 0.7118399500818969,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[47^32]]",
+   "generators": [
+    "1",
+    "cycle[47^32]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 188,
+   "coeff_bits_empirical": 188,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    189
+   ],
+   "cost_M": 5394.84,
+   "cost_breakdown": {
+    "doublings": 187,
+    "additions": 75.2,
+    "precomp_M": 228.8,
+    "endomorphism_M": 3015.2,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 3015.2,
+   "speedup_vs_generic": 0.6766836458541866,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[47^34]]",
+   "generators": [
+    "1",
+    "cycle[47^34]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 191,
+   "coeff_bits_empirical": 191,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    186,
+    192
+   ],
+   "cost_M": 5616.48,
+   "cost_breakdown": {
+    "doublings": 190,
+    "additions": 76.4,
+    "precomp_M": 228.8,
+    "endomorphism_M": 3202.4,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 3202.3999999999996,
+   "speedup_vs_generic": 0.649980058684443,
+   "note": ""
+  },
+  {
+   "label": "pump-2 [cycle[47^36]]",
+   "generators": [
+    "1",
+    "cycle[47^36]"
+   ],
+   "dim": 2,
+   "coeff_bits_bound": 189,
+   "coeff_bits_empirical": 189,
+   "balanced_bits": 188.0,
+   "basis_inf_norm_bits": [
+    188,
+    190
+   ],
+   "cost_M": 5780.719999999999,
+   "cost_breakdown": {
+    "doublings": 188,
+    "additions": 75.6,
+    "precomp_M": 228.8,
+    "endomorphism_M": 3389.6,
+    "window": 4,
+    "DBL_M": 7.4,
+    "loop_add_M": 10.2
+   },
+   "known_as": "GLV 2001 with a cycle endomorphism (degree ell^k)",
+   "endomorphism_cost_M": 3389.6,
+   "speedup_vs_generic": 0.6315130295188143,
+   "note": ""
+  }
+ ],
+ "best": "GLV-2 [endo[9+1w] deg 5^2*7]",
+ "best_cost_M": 2432.4400000000005,
+ "generic_cost_M": 3650.6,
+ "conclusion": "Best modelled configuration: GLV-2 [endo[9+1w] deg 5^2*7] at 2432 M (1.50x generic); literature: GLV 2001 with a degree-N endomorphism evaluated as a chain of prime-degree isogenies (cf. Guillevic-Masson-Thome 2020 for single maps of degree in the hundreds). Best isogeny-cycle pump: pump-4 [endo[4+1w] deg 3*5*7 x cycle[5^78]] at 2741 M vs GLV-2 [endo[9+1w] deg 5^2*7] at 2432 M (loses by 12.7% under this cost model).",
+ "elapsed_s": 2.0927469730377197
+}

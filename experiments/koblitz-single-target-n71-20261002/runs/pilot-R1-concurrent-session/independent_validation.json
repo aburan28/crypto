@@ -1,0 +1,27 @@
+{
+  "curve": "y^2 + x*y = x^3 + 1",
+  "curve_order_record_consistency_verified": true,
+  "curve_trace": "48653080717",
+  "field_degree": 71,
+  "field_polynomial": "x^71 + x^5 + x^3 + x + 1",
+  "fixture_scalar_validation_only": "314159265358979",
+  "frobenius_action_on_generator_verified": true,
+  "frobenius_eigenvalue_mod_r": "5336382444749771",
+  "frobenius_order_on_subgroup": 71,
+  "generator_exact_order_verified": true,
+  "ic_recovered_scalar": "314159265358979",
+  "ic_scalar_replay_verified": true,
+  "kind": "sage_independent_single_target_scalar_replay",
+  "public_target": [
+    "1850589826078099102726",
+    "2157895285144092536687"
+  ],
+  "rho_recovered_scalar": "314159265358979",
+  "rho_scalar_replay_verified": true,
+  "sage_runtime_info": "/Volumes/SSD990/crypto/experiments/koblitz-single-target-n71-20261002/runs/R1/sage_runtime_info.json",
+  "same_public_point_verified": true,
+  "signed_frobenius_orbit_size": 142,
+  "subgroup_order": "5513228015079457",
+  "subgroup_order_factorization": "5513228015079457",
+  "target_count": 1
+}
