@@ -1,0 +1,70 @@
+{
+  "schema": "p256-jacobian-row-capacity-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 303,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "C/F_p --[separable pi]--> icv1-fp256-t89188191154553853111372247798585809583-f188c491/E",
+    "J(C) --[pi_*]--> E; Prym(pi)=ker(pi_*)^0 with dim g-1",
+    "Prym(pi) --[E-isotypic quotient]--> E^m, with m<=g-1",
+    "E^m(F_p)[n] --[Round-25 scalar quotient]--> at most m independent log coordinates",
+    "one pi-fibre --[Abel-Jacobi differences]--> Prym(pi)(F_p)[n]"
+  ],
+  "obligations": [
+    {
+      "name": "Prym dimension ceiling",
+      "status": "supported",
+      "evidence": "For a separable cover C->E, dim Prym(pi)=g-1 and an E-isogeny factor has dimension one.",
+      "scope": "Homomorphic quotient maps from a smooth curve Jacobian."
+    },
+    {
+      "name": "scalar-action quotient",
+      "status": "supported",
+      "evidence": "Round 25 certifies every rational P-256 endomorphism acts as a known scalar on E(F_p)[n].",
+      "scope": "The P-256 rational prime-order subgroup."
+    },
+    {
+      "name": "rank-164 capacity threshold",
+      "status": "supported",
+      "evidence": "Dual-modulus complete character controls reach rank 164 only after supplying 164 abstract Prym coordinates; the first permitted genus is 165.",
+      "scope": "Capacity, not existence of a curve."
+    },
+    {
+      "name": "explicit genus-165 cover",
+      "status": "unknown",
+      "evidence": "No genus-165, degree-at-least-165 cover with 164 P-256 Prym factors is constructed.",
+      "scope": "Future homomorphic cover work."
+    },
+    {
+      "name": "non-homomorphic relation mechanism",
+      "status": "unknown",
+      "evidence": "The dimension theorem does not apply to a mechanism that does not factor through rational homomorphisms J(C)->E.",
+      "scope": "Outside this screen."
+    },
+    {
+      "name": "inverse recovery and complete cost",
+      "status": "unknown",
+      "evidence": "No qualifying cover, fibre, relation solver, or recovery pipeline exists in the evidence.",
+      "scope": "End-to-end P-256 attack."
+    }
+  ],
+  "controls": [
+    "11 genus profiles were completely materialized and ranked over two coefficient fields in forward and reversed sheet order.",
+    "The full control uses 256 sheets, 164 character columns, and rank 164 under both moduli.",
+    "Round 300 rank-gain zero and Round 302 complementary transport failure are exact negative controls.",
+    "Round 25, 298, 300, and 302 were imported only after exact byte-hash, curve, schema, and conclusion checks."
+  ],
+  "cost_accounting": [
+    "Measured: character-matrix rows, entries, pivot scans, swaps, inversions, multiplications, subtractions, and deterministic artifact/process telemetry.",
+    "Derived exactly: g>=165, Prym dimension and P-256 multiplicity >=164, degree>=165, and minimum total ramification 328 at minimum genus.",
+    "Unset: cover construction, rational fibre yield, relation-system degree, unsuccessful attempts, sparse linear algebra, inverse recovery, and complete attack cost."
+  ],
+  "exploration_boundary": "Exact for relation rows obtained from same-target fibre differences through rational homomorphisms from a smooth cover Jacobian to P-256 factors; not a universal bound on non-homomorphic encodings or algorithms.",
+  "weakest_open_obligation": "Construct and replay a genus-at-least-165, degree-at-least-165 P-256 cover whose Prym contains at least 164 rational P-256 order-n factors, or supply a demonstrably non-homomorphic mechanism outside the dimension bound.",
+  "narrowest_supported_finding": "A homomorphic same-target cover/Jacobian route cannot meet the one-event rank-164 parity gate below genus 165; the registered genus-two split cover has zero P-256 Prym directions.",
+  "semantic_evidence_sha256": "a11f0c269c2c98c5ea6a617b3f760cf5df939098627079f3e236dc7b48437e46",
+  "assessment_json_bytes": 4303
+}
