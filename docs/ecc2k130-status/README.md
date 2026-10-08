@@ -28,21 +28,24 @@ published snapshots, divided by the time between them, with the span it
 used printed beside it. The **ETA** is the work still expected at exactly
 that rate. A snapshot carrying no iteration total falls back to the point
 count at one point per `2^25.27` iterations at `HW(x) <= 34`, which reads
-about six times low for this campaign and is labelled on the page as the
+about 8.8 times low against this campaign's measured weight-32 interval
+of `2^28.41` and is labelled on the page as the
 fallback; a campaign with one total so far says the rate arrives with the
 next snapshot rather than showing a number it cannot measure yet. See
 `scripts/rho_status/README.md` for where the total comes from and why the
 derivation is only a fallback.
 
 **What the walk builds**, between the cumulative chart and the worker
-table, is `walk-forest.svg`: real ECC2K-130 walks the campaign client made
-on the challenge curve, replayed with the client's own kernel, sampled along
-their length and drawn, generated from the hashed trails in `walk-forest/`
-by `scripts/site/walk_forest.py`. Only walks short enough to draw are shown,
-the caption says so and states the counts, and the orbits are named by hash
+table, is `walk-forest.svg`: real ECC2K-130 walks from a separate client run
+on the challenge curve at weight 34, replayed with the client's own kernel,
+sampled along their length and drawn, generated from the hashed trails in
+`walk-forest/` by `scripts/site/walk_forest.py`. Only walks short enough to
+draw are shown. The caption states the counts, and the orbits are named by hash
 because a distinguished point's orbit is its key and the page publishes
-counts only. `walk-forest/README.md` has the exact commands, including how
-to point the same pipeline at the fleet's corpus, and
+counts only. This run's endpoints were not uploaded to the live weight-32
+campaign or included in the counts above the figure. `walk-forest/README.md`
+has the exact commands, including how to point the same pipeline at the
+fleet's corpus, and
 `scripts/site/test_build.py` fails if the SVG, the trails, their recorded
 endpoints, the scalar reference's replay and the caption disagree.
 `scripts/site/build.py` copies the SVG next to the page so the relative
