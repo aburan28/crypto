@@ -681,6 +681,9 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 </section></div></details>
 <details class="dash-details"><summary>Research progress over time · separate regimes and references</summary><div class="dash-detail-body"><section class="dash-section" id="lab-progress" aria-labelledby="progress-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Progress over time / The rho barrier</p><h2 id="progress-title">Where index calculus stands against rho, by the day each result landed.</h2>
 <p class="panel-summary">Plots verified IC over rho ratios in each regime by the day they landed, with early below-one points hollow because their rho later proved unmatched, citing frozen timeline data.</p></div><span class="status neutral">Log scale &middot; rho = 1</span></div>
+<p class="dash-section-intro">Every point quotes a verified comparison from the named result on the day it landed on <code>main</code>. Below one means index calculus is cheaper only when both arms have a complete common cost. The heavy series is the repository&rsquo;s whole-method, cold, one-target test against matched rho. Early below-one points used a rho later proved unmatched and remain hollow as &ldquo;was&rdquo;. Grey series are separate regimes; the n37 counted-work point is a quotient of two incomplete lower bounds and is not a barrier test.</p>
+<figure class="dash-chart" id="progress-figure"><figcaption><strong>IC / rho on a log axis, 14 September to 5 October 2026</strong><span>Hover or focus a point for the figure, its interval and its source &middot; filled = matched or qualified reference, hollow = later shown unmatched</span></figcaption>
+<div id="progress-chart" role="img" aria-label="Index calculus over rho by date: the whole-method cold series rises above one once the reference is matched; online-only diagnostics include a near-parity n37 compact-orbit point without host isolation, an n17 F4 development result far above one, and older pair-table and genus-4 points below one."></div>
 <p class="dash-section-intro">Every point quotes a verified comparison from the named result on the day it landed on <code>main</code>. Below one means index calculus is cheaper only when both arms have a complete common cost. The heavy series is the repository&rsquo;s whole-method, cold, one-target test against matched rho. Early below-one points used a rho later proved unmatched and remain hollow as &ldquo;was&rdquo;. Grey series are separate regimes; the n37 counted-work point is a quotient of two incomplete lower bounds, and the n41/n53 example wall points lack <code>ecbench</code> and host isolation. Neither is a barrier test.</p>
 <figure class="dash-chart" id="progress-figure"><figcaption><strong>IC / rho on a log axis, 14 September to 4 October 2026</strong><span>Hover or focus a point for the figure, its interval and its source &middot; filled = matched or qualified reference, hollow = later shown unmatched</span></figcaption>
 <div id="progress-chart" role="img" aria-label="Index calculus over rho by date: the whole-method cold series rises above one once the reference is matched; separate unisolated n41 and n53 compact-orbit cold diagnostics are far above one while their online diagnostics fall below one, with no admitted speedup."></div>
@@ -722,6 +725,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-09-26</td><td>Elliptic curve, 32 targets together (historical diagnostic)</td><td>Ledger section 20: every phase on the clock</td><td class="n">12.5&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#plain-reading">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading">source</a></td></tr>
 <tr><td>2026-09-26</td><td>Elliptic curve, 32 targets together (historical diagnostic)</td><td>Ledger section 21: constructions built once per base</td><td class="n">4.3&times;</td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#plain-reading">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading">source</a></td></tr>
 <tr><td>2026-09-30</td><td>Elliptic curve, 32 targets together (historical diagnostic)</td><td>Ledger section 22: descent fixed cost cut</td><td class="n">3.6&times;</td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#koblitz-descent-20260930">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#koblitz-descent-20260930">source</a></td></tr>
+<tr><td>2026-10-05</td><td>Elliptic curve, n37 1,024-target native batch CPU diagnostic</td><td>n37 descendant-native K42 batch, first native schedule</td><td class="n">10.298&times; <small>unisolated native batch CPU diagnostic; not admitted</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#n37-native-batch-rho-20261005">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_rho_20261005/RESULT.md">source</a></td></tr>
+<tr><td>2026-10-05</td><td>Elliptic curve, n37 1,024-target native batch CPU diagnostic</td><td>n37 descendant-native K42 batch, formatted-source replication</td><td class="n">10.767&times; <small>unisolated native batch CPU diagnostic; not admitted</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#n37-native-batch-rho-20261005">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_rho_20261005/RESULT.md">source</a></td></tr>
 <tr><td>2026-09-28</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>Bounded autolab round 3, pair-table incumbent, six toy cells</td><td class="n">0.134&times;</td><td>qualified</td><td><span class="chip">engineering</span></td><td><a href="#rho-results-title">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n17 prepared inherited-F4 development target, same-point rho</td><td class="n">9,104.845&times; <small>online wall time</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#ic-f5-inherited-f4-online-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_solver_online_20261003/confirmation/RESULT.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n61 compact orbit vs strong rho rung 3, 256 one-target workloads, hosted isolated</td><td class="n">0.0682&times; <small>isolated wall time; median per workload</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
@@ -845,6 +850,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       ]
     },
     {
+      "id": "ec-native-batch-n37",
+      "label": "Elliptic curve, n37 1,024-target native batch CPU diagnostic",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Complete-process child CPU on the same 1,024 public points, including reusable setup and shared within-batch rho collision work. The unisolated host and failed duplicate-drift gate in both schedules make these descriptive, not admitted speed or one-target online results.",
+      "points": [
+        {"date": "2026-10-05", "value": 10.297652822556913, "reference": "matched", "unit": "unisolated native batch CPU diagnostic", "label": "n37 descendant-native K42 batch, first native schedule", "detail": "Five interleaved four-arm blocks, each method recovering the same 1,024 b01 public points twice: median complete-process child CPU IC/rho 10.298, descriptive log-t interval [9.728, 10.886]. Native audit checked 20,480 scalar outputs and ten independent IC replays. Two blocks failed the frozen 10% duplicate-drift gate and the host was unisolated; no admitted speedup, common-unit S, or one-target online inference.", "class": "accounting", "anchor": "#n37-native-batch-rho-20261005", "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_rho_20261005/RESULT.md"},
+        {"date": "2026-10-05", "value": 10.766848430462483, "reference": "matched", "unit": "unisolated native batch CPU diagnostic", "label": "n37 descendant-native K42 batch, formatted-source replication", "detail": "Unchanged producer binaries, public b01 Q, seed and four-arm schedule with a formatted Rust driver: median complete-process child CPU IC/rho 10.767, descriptive log-t interval [10.222, 10.952]. Native audit checked another 20,480 scalar outputs and ten independent IC replays. One block failed the frozen 10% duplicate-drift gate; no admitted speedup or one-target inference.", "class": "accounting", "anchor": "#n37-native-batch-rho-20261005", "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_rho_20261005/RESULT.md"}
+      ]
+    },
+    {
       "id": "ec-online",
       "label": "Elliptic curve, online phase only (reusable set-up excluded)",
       "role": "context",
@@ -897,7 +913,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       ]
     }
   ]
-}</script>
+}
+</script>
 <script>
 (function () {
   var el = document.getElementById('progress-chart'); if (!el) return;
@@ -1516,6 +1533,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         bit-identical trajectories, so the saving is a subtraction rather than an estimate &mdash;
         537 of 537 rows identical in every counter but the pool&rsquo;s, zero trajectories moved,
         zero rows whose saving differs from the offsets they stopped drawing.</p>
+      <p><strong>P-256 S17 boundary, corrected for the finite representation domain.</strong> This route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm. Round 18 rejected fixed-atom enumeration at 2<sup>272.404</sup> field multiplications; Round 19&rsquo;s exact global 8+9 frontier lowered that to 2<sup>165.156</sup>. Round 20 initially reported 2<sup>144.625</sup>, but that symmetric projection demanded 2<sup>136.538</sup> distinct left images from a domain containing only 2<sup>128.734</sup> and is withdrawn. Materialising the complete finite left domain and charging streamed right images plus duplicate occupancy gives 2<sup>151.885</sup> P-256 field-multiplication equivalents, <strong>19.419 bits above rho</strong>. Even the corrected one-addition-per-image boundary is 16.203 bits above rho. This remains a rejected stage projection and is not inserted into the end-to-end table.</p>
     </div>
     <div class="table-scroll">
       <table>
@@ -2006,6 +2024,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           (the matched walk, &sect;18; 0.27&ndash;0.30 with the plain walk) and 0.25 on the Koblitz
           ladder is its unamortised setup.
           Anything to the right of one half loses as the group grows, whatever its constant.</p>
+        <p>The P-256 S17 diagnostics are intentionally not plotted on this group-order axis. Round 18 measures a fixed-atom depth-prefix slope; Round 19 measures local <code>B=17..20</code> list growth, with slopes 11.650 and 11.684 against <code>log B</code>. Round 20 measures a projected-key birthday ladder whose counted-work slope is 0.499979 per key bit and whose logical-memory slope is 0.5; none is a multi-size exponent in subgroup order. Its initial symmetric 2<sup>144.625</sup> projection is withdrawn because it exceeds the signed-eight domain. Corrected finite-domain accounting projects the collector to 2<sup>151.885</sup> FME, 19.419 bits above rho, while its optimistic image floor remains 16.203 bits above rho.</p>
       </div>
       <div class="exp">
         <div class="erow"><div class="name">char2: Meet in the middle, m = 2, negation-folded table</div><div class="track"><i class="dot" style="left:82.8%" title="r^0.79 (R² 1.00, 5 sizes)"></i></div><div class="num">0.79</div></div>
@@ -4558,6 +4577,45 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <!-- BEGIN ECC2K130 XONLY BRIDGE -->
+  <div class="panel" id="ecc2k130-xonly-bridge">
+    <div class="panel-head"><h2>ECC2K-130 · g7.2xlarge full-generator x-only bridge</h2><p>The sparse bridge repairs scalar generation but decisively regresses; retain the selected packed runtime. The 12 B/s goal remains unmet.</p></div>
+    <div class="table-scroll"><table><caption>Billions of complete scalar updates/s; three paired equal-workload repetitions per valid candidate on the same 165 W g7.2xlarge.</caption>
+<thead><tr><th>Variant</th><th>B complete updates/s</th><th>Paired speedup</th><th>95% CI</th><th>Rate / 12 B/s</th><th>Generic work ratio</th><th>Correctness</th><th>Decision</th></tr></thead><tbody>
+<tr><td>Selected packed runtime, initial screen</td><td>6.311324</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.525944</td><td>1</td><td>passed</td><td>reference</td></tr>
+<tr><td>Sparse bridge, initial</td><td>5.248565</td><td>0.827384</td><td>[0.814735, 0.840229]</td><td>0.437380</td><td>1</td><td>passed</td><td>engineering regression</td></tr>
+<tr><td>Selected packed runtime, recompute screen</td><td>6.310157</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.525846</td><td>1</td><td>passed</td><td>reference</td></tr>
+<tr><td>Sparse bridge, low-live recompute</td><td>5.264523</td><td>0.829866</td><td>[0.816504, 0.843447]</td><td>0.438710</td><td>1</td><td>passed</td><td>engineering regression</td></tr>
+</tbody></table></div>
+    <div class="panel-head"><p>The full transition set has scalar order <code>ell-1</code>. Both timed builds pass all 117 built-in checks, complete-state and CPU endpoint replay with zero drops, bidirectional checkpoint-version rejection, bit-identical version-4 resume, and memory/init/synchronization checks. The low-live rewrite reduced walk spills from 72/60 to 64/40 bytes but did not recover throughput. Every timing sample performs 34,359,738,368 complete updates. The separate zero-spill [2]/[3] diagnostic measured 0.993150 times selected but cannot be promoted because it generates only an index-two scalar subgroup. Generic <code>sqrt(n/262)</code> work stays fixed and full-DLP S is null.</p><p><a href="../ecc2k130/benchmarks/g7-12b-xonly-23-bridge/RESULTS.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison.json">Initial frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison-recompute.json">Recompute frozen comparison</a></p></div>
+  </div>
+  <!-- END ECC2K130 XONLY BRIDGE -->
+
+  <!-- BEGIN ECC2K130 DIRECT DELTA34 -->
+  <div class="panel" id="ecc2k130-direct-delta34">
+    <div class="panel-head"><h2>ECC2K-130 · g7.2xlarge direct polynomial delta-3/4</h2><p>Repeated polynomial squaring decisively regresses; retain the selected eight-jump runtime. The 12 B/s goal remains unmet.</p></div>
+    <div class="table-scroll"><table><caption>Billions of complete scalar updates/s; three paired equal-workload repetitions on the same 165 W g7.2xlarge.</caption>
+<thead><tr><th>Variant</th><th>B complete updates/s</th><th>Raw paired speedup</th><th>Raw 95% CI</th><th>Collision-adjusted speedup</th><th>Adjusted 95% CI</th><th>Rate / 12 B/s</th><th>Decision</th></tr></thead><tbody>
+<tr><td>Selected eight-jump</td><td>6.272357</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.522696</td><td>reference</td></tr>
+<tr><td>Indexed two-jump</td><td>6.289420</td><td>1.001295</td><td>[0.992584, 1.010083]</td><td>0.988367</td><td>[0.979768, 0.997041]</td><td>0.524118</td><td>algorithmic regression</td></tr>
+<tr><td>Direct polynomial delta-3/4</td><td>4.363499</td><td>0.689846</td><td>[0.676097, 0.703874]</td><td>0.680939</td><td>[0.667367, 0.694786]</td><td>0.363625</td><td>engineering regression</td></tr>
+</tbody></table></div>
+    <div class="panel-head"><p>Each of nine retained samples performs 34,359,738,368 complete updates with zero drops and no observed foreign GPU process. The two-jump rates are divided by the frozen 1.0130803718 collision-work ratio. The candidate passes 16,652 independent delta comparisons, exact full and ragged GPU state/DP comparison, CPU replay, bidirectional resume and three CUDA sanitizers. Its timing kernel uses 80 registers, 16 local bytes per thread and 28,032 shared bytes per block. Generic <code>sqrt(n/262)</code> work remains fixed and full-DLP S is null.</p><p><a href="../ecc2k130/benchmarks/g7-12b-direct-delta34/RESULTS.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-direct-delta34/comparison.json">Frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-direct-delta34/validation-audit.json">Validation audit</a></p></div>
+  </div>
+  <!-- END ECC2K130 DIRECT DELTA34 -->
+
+  <!-- BEGIN ECC2K130 LARGER SPLIT BATCH -->
+  <div class="panel" id="ecc2k130-larger-split-batch">
+    <div class="panel-head"><h2>ECC2K-130 · g7.2xlarge larger split batches</h2><p>B24 and B32 increase coordinate pressure and regress; retain selected B16. The 12 B/s goal remains unmet.</p></div>
+    <div class="table-scroll"><table><caption>Billions of complete scalar updates/s; three paired equal-work repetitions on the same 165 W g7.2xlarge.</caption>
+<thead><tr><th>Variant</th><th>Physical slots/thread</th><th>B complete updates/s</th><th>Paired speedup</th><th>95% CI</th><th>Rate / 12 B/s</th><th>Generic work ratio</th><th>Decision</th></tr></thead><tbody>
+<tr><td>Selected B16</td><td>8</td><td>6.274186</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.522849</td><td>1</td><td>reference</td></tr>
+<tr><td>Split B24</td><td>12</td><td>6.121832</td><td>0.971864</td><td>[0.961912, 0.981919]</td><td>0.510153</td><td>1</td><td>regression</td></tr>
+<tr><td>Split B32</td><td>16</td><td>5.994967</td><td>0.948253</td><td>[0.930625, 0.966215]</td><td>0.499581</td><td>1</td><td>regression</td></tr>
+</tbody></table></div>
+    <div class="panel-head"><p>Each sample performs 34,359,607,296 complete updates with zero drops and no observed foreign GPU process. All variants retain 80 registers, an 8-byte spill frame, 29,568 shared bytes and three blocks per SM. Median memory activity rises from about 12% to 36%/50%, while sustained clocks fall under the fixed power cap. Built-ins, native identity, exact normalized state/DP comparison, 96 CPU replays, same-format resume, cross-format rejection, six unit suites and six sanitizer runs pass. Generic <code>sqrt(n/262)</code> work and ratio 1 remain fixed; full-DLP S is null.</p><p><a href="../ecc2k130/benchmarks/g7-12b-batch32-split/RESULTS.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-batch32-split/comparison.json">Frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-batch32-split/validation-audit.json">Validation audit</a></p></div>
+  </div>
+  <!-- END ECC2K130 LARGER SPLIT BATCH -->
   <!-- BEGIN boolean-degree-replay-20260922 -->
 <section class="panel" id="boolean-degree-replay-20260922">
   <div class="panel-head"><h2>Boolean degree evidence replay <span class="chip">accounting</span></h2>
@@ -5099,6 +5157,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     window.addEventListener('scroll', hide, { passive: true });
   })();
 </script>
+<div class="panel" id="ecc2k130-larger-batch-xcache-12b"><div class="panel-head"><h2>ECC2K-130 · larger-batch shared-X cache toward 12 B/s</h2><p>A larger shared-X cache consistently helps B32, but neither larger batch beats selected B16. Retain the selected runtime; the 12 B/s G7 goal remains unmet.</p></div><div class="table-scroll"><table><caption>Follow-up billions of complete scalar updates/s on g7.2xlarge / RTX PRO 4500 at 165 W. Generic work ratio 1; full-DLP S null.</caption><thead><tr><th>Variant</th><th>B updates/s</th><th>Paired ratio vs selected</th><th>95% CI</th><th>Rate / 12 B/s</th><th>Correctness</th><th>Decision</th></tr></thead><tbody><tr><td>selected B16/cache4/min3</td><td>6.208908</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.517409</td><td>passed</td><td>reference</td></tr><tr><td>B24/cache4/min3</td><td>6.056122</td><td>0.970602</td><td>[0.960041, 0.981280]</td><td>0.504677</td><td>passed</td><td>regression</td></tr><tr><td>B24/cache6/min3</td><td>6.045993</td><td>0.967811</td><td>[0.951462, 0.984442]</td><td>0.503833</td><td>passed</td><td>regression</td></tr><tr><td>B32/cache4/min3</td><td>5.950580</td><td>0.949334</td><td>[0.927919, 0.971242]</td><td>0.495882</td><td>passed</td><td>regression</td></tr><tr><td>B32/cache8/min3</td><td>6.050341</td><td>0.963305</td><td>[0.935844, 0.991572]</td><td>0.504195</td><td>passed</td><td>regression</td></tr></tbody></table></div><div class="panel-head"><p>The direct B32 cache8/cache4 contrast is 1.014717 with 95% CI [1.008190, 1.021287], confirming the local cache benefit. Cache6 is flat within B24. All six candidates reproduce built-ins and exact state/DP comparisons. Actual-walk shared-X probes and memory/init/synchronization checks pass. Each timing row retains three samples of 34,359,607,296 complete updates.</p><p><a href="../ecc2k130/benchmarks/g7-12b-larger-batch-xcache/RESULTS.md">Result</a> · <a href="../ecc2k130/benchmarks/g7-12b-larger-batch-xcache/comparison-followup.json">Frozen follow-up timings</a></p></div></div>
+<div class="panel" id="ecc2k130-xonly-15b-ceiling"><div class="panel-head"><h2>ECC2K-130 · g7.2xlarge product+inverse ceiling is 14.1 B/s</h2><p>Skipping Hamming conversion raises complete-iteration throughput, but the always-<code>x+1/x</code> diagnostic still measures only 14.141587 B/s. The 15 B/s G7 goal is not available on this denominator tree. Retain the modulus-72 complete map.</p></div><div class="table-scroll"><table><caption>Billions of complete scalar updates/s on g7.2xlarge / RTX PRO 4500 at 165 W. Arithmetic-only is not a complete map. Poly12 is exact on GF(2^131) but has no admissible F23 mixing measurement. Generic work is sqrt(n/262) times collision work. Full-DLP S null.</caption><thead><tr><th>Variant</th><th>B updates/s</th><th>Paired ratio</th><th>95% CI</th><th>Rate / 15 B/s</th><th>Correctness</th><th>Class</th><th>Decision</th></tr></thead><tbody><tr><td>modulus-72 control</td><td>12.584091</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.838939</td><td>passed</td><td>engineering</td><td>selected</td></tr><tr><td>poly12 complete map</td><td>13.010086</td><td>1.043192</td><td>[1.023164, 1.063612]</td><td>0.867339</td><td>oracle passed; F23 mixing inadmissible</td><td>engineering</td><td>not promoted</td></tr><tr><td>arithmetic-only diagnostic</td><td>14.141587</td><td>1.129142</td><td>[1.117458, 1.140948]</td><td>0.942772</td><td>oracle passed; DLP builtin expected-fail</td><td>engineering</td><td>ceiling; not a complete map</td></tr></tbody></table></div><div class="panel-head"><p>Each paired sample performs 34,359,738,368 complete updates. All three minblocks-3 kernels use 80 registers and zero walk-kernel local bytes. A minblocks-4 arithmetic-only compile drops to 64 registers with 28-byte spills and is rejected before timing. The GF(2^23) poly12 study recorded zero sparse bridges, so its 1.133 work ratio is not a two-bridge mixing result.</p><p><a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-comparison.json">Frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-validation.json">Validation</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-arith4-build.json">Four-block spill rejection</a></p></div></div>
+<div class="panel" id="ecc2k130-xonly-doubling-bridge"><div class="panel-head"><h2>ECC2K-130 · g7.2xlarge complete two-bridge map reaches 12.5 B/s</h2><p>The modulus-72 <code>P+sigma(P)</code> / sparse <code>P+sigma^3(P)</code> map is the selected G7 runtime. The original 10 B/s goal and the 12 B/s milestone are both exceeded on the complete-iteration benchmark. The 15 B/s goal is not; the product+inverse ceiling on this GPU is 14.141587 B/s. DP34 collection for this map remains unmeasured.</p></div><div class="table-scroll"><table><caption>Billions of complete scalar updates/s on g7.2xlarge / RTX PRO 4500 at 165 W. Frozen 2,000-trial collision-work ratio 1.006696. Generic work is sqrt(n/262) times that ratio. Full-DLP S null.</caption><thead><tr><th>Variant</th><th>B updates/s</th><th>Paired ratio</th><th>95% CI</th><th>Rate / 10 B/s</th><th>Rate / 12 B/s</th><th>Correctness</th><th>Class</th><th>Decision</th></tr></thead><tbody><tr><td>modulus-32 pipeline</td><td>11.218437</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>1.121844</td><td>0.934870</td><td>passed</td><td>engineering</td><td>reference</td></tr><tr><td>modulus-72 pipeline</td><td>12.499203</td><td>1.121079</td><td>[1.105668, 1.136704]</td><td>1.249920</td><td>1.041600</td><td>passed</td><td>engineering</td><td>selected</td></tr></tbody></table></div><div class="panel-head"><p>Each paired sample performs 34,359,738,368 complete updates. A fresh run ID at twice that work measured 12.567029, 12.457221 and 12.366415 B/s. The production binary then measured 12.632704 B/s over 68,719,476,736 updates with no foreign GPU process. The kernel uses 80 registers, zero walk-kernel local bytes and 32,400 shared bytes, retaining three blocks per SM. Built-ins and an independent 2,048-point seven-step affine-x oracle pass. Multipliers <code>1+s</code> and <code>1+s^3</code> generate the full scalar group. G7e throughput is unmeasured.</p><p><a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-comparison.json">Frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-confirmation.json">Confirmation</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/production-mod72-final.json">Production sample</a></p></div></div>
 <!-- BEGIN ic-tournament-reference-history -->
 <section class="panel" id="ic-tournament-reference-history">
 <div class="panel-head"><h2>The tournament&rsquo;s rho, as the reference was matched <span class="chip">accounting</span></h2>
@@ -11089,9 +11150,21 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <tr><td>b00 bare direct 3+3, PR #1254</td><td>917</td><td>not attempted</td><td>1,024</td><td>917</td><td>107 complete misses</td></tr>
 <tr><td>b01 direct + frozen shifts, PR #1261</td><td>939</td><td>85 (79 on first shift, six on second)</td><td>1,115</td><td>1,024</td><td>complete on this block</td></tr>
 </tbody></table></div>
-<p>The one diagnostic b01 process took 2.37 s wall on macOS arm64 and counted 33,647,429 logical addition requests plus 4,289 explicit scalar multiplications; scalar internals and isogeny arithmetic are not converted to a common unit. Matched b01 batch rho, common-unit S, speedup, n41/n53 transfer and Certicom-scale conclusions remain unset. The b02 one-target same-Q gate is reported separately below. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_20261002/RESULT.md">Protocol, raw archive, replay receipt, timing and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1261">PR #1261</a>.</p>
+<p>The one diagnostic b01 process took 2.37 s wall on macOS arm64 and counted 33,647,429 logical addition requests plus 4,289 explicit scalar multiplications; scalar internals and isogeny arithmetic are not converted to a common unit. At that result's publication, matched b01 batch rho was unset; the new same-Q batch diagnostic appears below. Common-unit S, admitted speedup, n41/n53 transfer and Certicom-scale conclusions remain unset. The b02 one-target same-Q gate is reported separately below. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_20261002/RESULT.md">Protocol, raw archive, replay receipt, timing and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1261">PR #1261</a>.</p>
 </section>
 <!-- END n37-native-residual-20261002 -->
+<!-- BEGIN n37-native-batch-rho-20261005 -->
+<section class="panel" id="n37-native-batch-rho-20261005">
+<div class="panel-head"><h2>n37 descendant-native batch versus same-Q strong rho <span class="chip">exploratory accounting</span></h2>
+<p class="panel-summary">The complete K42 six-sum and bounded-residual batch recovered all 1,024 b01 logs in every arm. Median complete-process child CPU cost was 10.298&times; matched signed-Frobenius rho in the first native schedule and 10.767&times; in its formatting-only repeat. Both schedules failed the all-block noise gate and the host was unisolated.</p>
+<p>Two frozen alternating five-block schedules each ran the same public b01 points twice with IC and twice with strong rho. Native Rust audits checked all 40,960 scalar outputs; all 20 IC arms additionally passed independent full-rank source-curve replay. Every block, including the noisy ones, is retained. The earlier Python-driver pilot is preserved separately as historical evidence and excluded from this result.</p></div>
+<div class="table-scroll"><table><caption>Exploratory blockwise IC/rho complete-process child CPU ratio; each denominator solves the same 1,024 targets with a shared within-batch distinguished-point table. This is not the one-target online comparison.</caption><thead><tr><th>Schedule / block</th><th>IC / rho CPU</th><th>IC A/A drift</th><th>Rho A/A drift</th><th>10% drift gate</th></tr></thead><tbody>
+<tr><td>First / 0</td><td>9.896&times;</td><td>1.047</td><td>1.061</td><td>pass</td></tr><tr><td>First / 1</td><td>10.399&times;</td><td>1.115</td><td>1.175</td><td>fail</td></tr><tr><td>First / 2</td><td>11.032&times;</td><td>1.035</td><td>1.019</td><td>pass</td></tr><tr><td>First / 3</td><td>9.870&times;</td><td>1.195</td><td>1.092</td><td>fail</td></tr><tr><td>First / 4</td><td>10.298&times;</td><td>1.046</td><td>1.016</td><td>pass</td></tr>
+<tr><td>Repeat / 0</td><td>10.810&times;</td><td>1.016</td><td>1.015</td><td>pass</td></tr><tr><td>Repeat / 1</td><td>10.143&times;</td><td>1.009</td><td>1.063</td><td>pass</td></tr><tr><td>Repeat / 2</td><td>10.767&times;</td><td>1.025</td><td>1.039</td><td>pass</td></tr><tr><td>Repeat / 3</td><td>10.428&times;</td><td>1.010</td><td>1.113</td><td>fail</td></tr><tr><td>Repeat / 4</td><td>10.773&times;</td><td>1.004</td><td>1.012</td><td>pass</td></tr>
+</tbody></table></div>
+<p>Separate descriptive log-t intervals: 9.728&ndash;10.886 (first) and 10.222&ndash;10.952 (repeat). The IC arm rebuilt rank 42 and used 1,115 target queries (939 direct hits, 85 shifted recoveries); median target query and verification time was 1,777.317/1,635.493 ms of 1,933.659/1,800.933 ms internal process time. IC counted 33,647,429 logical addition requests, rho 632,240 group additions and 596,818 walk steps, but these counters are not a common cost unit. Isolated CPU speedup, counted <code>S</code> and primary one-target online speedup remain unknown. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_rho_20261005/RESULT.md">Frozen protocol, both native archives, full audits, and limits</a>.</p>
+</section>
+<!-- END n37-native-batch-rho-20261005 -->
 <!-- BEGIN n37-native-one-target-20261003 -->
 <section class="panel" id="n37-native-one-target-20261003">
 <div class="panel-head"><h2>Degree-73 descendant-native n37 versus one-target rho on disjoint b02 Q <span class="chip">accounting</span></h2>
@@ -11854,6 +11927,400 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-dickson-residual-scaling-20261004 -->
+<!-- BEGIN p256-dickson-s3-image-filter-20261004 -->
+<section class="panel" id="p256-dickson-s3-image-filter-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson final-S3 gate: indexed quadratic image replaces the squared branch scan <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Recovers exactly all 33 true pairs from 87,040 toy candidates with 914 quadratic solves, zero misses or surplus pairs, and 0.002008 of the all-pairs F4 field-operation count.</p>
+    <p>For fixed left x-coordinate <code>u</code> and known target coordinate <code>t</code>, direct <code>S3(u,v,t)</code> is quadratic in <code>v</code>. Round 7 solves that quadratic for every liftable left x, then looks its at most two roots up in an <code>x &rarr; right boundary</code> index. Exhaustive signed-point addition independently supplies the exact pair set; retained systems still run through native F4.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Both terminals and positive/negative targets aggregated. Candidate work includes index construction, counted Tonelli&ndash;Shanks/inversion multiplications, and retained F4 row reduction.</caption>
+    <thead><tr><th>Original depth</th><th>All-pairs frontier</th><th>Left boundaries</th><th>Quadratic solves</th><th>Retained = exact</th><th>Baseline F4 ops</th><th>Candidate ops</th><th>Ratio</th><th>Max degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>5</td><td class="n">1,024</td><td class="n">64</td><td class="n">86</td><td class="n">4 = 4</td><td class="n">807,800</td><td class="n">13,536</td><td class="n">0.016757</td><td class="n">3</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>6</td><td class="n">4,096</td><td class="n">128</td><td class="n">94</td><td class="n">4 = 4</td><td class="n">3,230,804</td><td class="n">14,714</td><td class="n">0.004554</td><td class="n">3</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>7</td><td class="n">16,384</td><td class="n">256</td><td class="n">250</td><td class="n">6 = 6</td><td class="n">12,925,397</td><td class="n">34,981</td><td class="n">0.002706</td><td class="n">3</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>8</td><td class="n">65,536</td><td class="n">512</td><td class="n">484</td><td class="n">19 = 19</td><td class="n">51,702,629</td><td class="n">74,656</td><td class="n">0.001444</td><td class="n">3</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exact</span> 33 / 33 exhaustive-positive pairs retained; zero false negatives, false positives, universal degeneracies, timeouts, or degree-cap stops</span>
+    <span><span class="chip">charged result</span> 137,887 candidate operations / 68,666,630 baseline operations = 0.002008, or 497.99&times; less in the frozen stage unit</span>
+    <span><span class="chip">frontier</span> a depth-18 residual-1 shape has 2<sup>17</sup> left boundaries versus 4<sup>17</sup> ordered pairs; this round measures only depths 5&ndash;8</span>
+    <span><span class="chip">scope</span> exact for the tested final two-summand gate with known target x; unknown chained intermediates, S18, full P-256, relation collection, linear algebra, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_s3_image_filter_round7_20261004/RESULT.md</code>; this is not a novelty claim over direct meet-in-the-middle or point-addition methods</span>
+  </div>
+</section>
+<!-- END p256-dickson-s3-image-filter-20261004 -->
+<!-- BEGIN p256-s3-image-transfer-20261004 -->
+<section class="panel" id="p256-s3-image-transfer-20261004">
+  <div class="panel-head">
+    <h2>P-256 final-S3 transfer: exact indexed images on the selected 131,458-column factor base <span class="chip">engineering</span></h2>
+    <p class="panel-summary">Validates the quadratic image at the actual P-256 modulus: two frozen targets match a 262,916-row signed-point oracle exactly, replacing a 17.281-billion-pair frontier with 131,458 solves and 262,916 root lookups.</p>
+    <p>The complete <code>FB1h2f8621cda105</code> dump rebuilds and verifies before the test. For each factor-base x-coordinate <code>u</code>, Round 8 solves <code>S3(u,v,target_x)=0</code> directly over P-256 and indexes its two roots. An independent public-point path computes <code>Q-P</code> for every signed factor-base point and folds exact hits to ordered columns.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Pair trials, field multiplications and group operations remain separate stage units; the frontier ratio is structural, not a whole-ECDLP speedup.</caption>
+    <thead><tr><th>Target</th><th>Rejected pair frontier</th><th>Quadratic solves</th><th>Root lookups</th><th>Algebra = reference pairs</th><th>FN / FP</th><th>Field muls</th><th>Reference group ops</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Planted positive</td><td class="n">17,281,205,764</td><td class="n">131,458</td><td class="n">262,916</td><td class="n"><strong>2 = 2</strong></td><td class="n">0 / 0</td><td class="n">90,443,104</td><td class="n">262,916</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>Hash public</td><td class="n">17,281,205,764</td><td class="n">131,458</td><td class="n">262,916</td><td class="n"><strong>0 = 0</strong></td><td class="n">0 / 0</td><td class="n">90,443,104</td><td class="n">262,916</td><td><span class="chip">engineering</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exact</span> both pair sets equal; all emitted sign combinations independently verify against <code>Q</code> or <code>-Q</code>; zero linear or universal degeneracies</span>
+    <span><span class="chip">frontier</span> solves are 131,458&times; fewer than ordered pair trials; solves plus root lookups are 43,819.33&times; fewer abstract visits</span>
+    <span><span class="chip">degree</span> the final known-target gate now needs no Gr&ouml;bner run; it is a family of univariate quadratics, not a new degree-of-regularity claim for <code>S18</code></span>
+    <span><span class="chip">scope</span> actual P-256 field and factor base, but only the final two-summand gate; unknown intermediate coordinates, relation collection, linear algebra, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s3_image_transfer_round8_20261004/RESULT.md</code>; deterministic result SHA-256 <code>c2a5178aea46223fb1e6f82a65df4d273c68aeacdf5c664a827bec50b144a6e7</code></span>
+  </div>
+</section>
+<!-- END p256-s3-image-transfer-20261004 -->
+<!-- BEGIN p256-balanced-s5-round9-20261004 -->
+<section class="panel" id="p256-balanced-s5-round9-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson four-summand screen: one fibre reaches degree 2, the other ties at 3 <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Rejects uniform liftability specialisation: terminal 0 falls from solving degree 3 to 2, terminal 369 remains at 3, and three exhaustive-positive cells expose missing point-at-infinity charts in every affine S3 arm.</p>
+    <p>Round 9 balances four factor-base leaves through two unknown pair-sum x-coordinates. The baseline carries each leaf's curve lift; the candidate replaces it with the exact degree-1/2 polynomial of x-coordinates stored in that Dickson branch. A third arm composes only univariate quadratic images. All are checked against exhaustive signed four-point addition.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>All F4 cells complete. Correctness includes pair cancellations through the point at infinity, which an affine intermediate x chart omits.</caption>
+    <thead><tr><th>Terminal</th><th>Arm</th><th>Cells correct</th><th>Variables / equations</th><th>Max degree</th><th>Max columns</th><th>Field ops</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>Curve-lift F4</td><td class="n">6 / 8</td><td class="n">23 / 24</td><td class="n">3</td><td class="n">453</td><td class="n">4,114,322</td><td><span class="chip">reference failure</span></td></tr>
+      <tr><td>0</td><td>Liftability-specialised F4</td><td class="n">6 / 8</td><td class="n">15 / 16</td><td class="n"><strong>2</strong></td><td class="n">32</td><td class="n">7,768</td><td><span class="chip">advance</span> but incomplete chart</td></tr>
+      <tr><td>369</td><td>Curve-lift F4</td><td class="n">7 / 8</td><td class="n">23 / 24</td><td class="n">3</td><td class="n">453</td><td class="n">4,536,753</td><td><span class="chip">reference failure</span></td></tr>
+      <tr><td>369</td><td>Liftability-specialised F4</td><td class="n">7 / 8</td><td class="n">15 / 16</td><td class="n"><strong>3</strong></td><td class="n">447</td><td class="n">3,011,675</td><td><span class="chip">rejected</span> degree tie</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">degree gate</span> fails because both terminals had to improve by at least one; the terminal-369 maximum remains 3</span>
+    <span><span class="chip">failure custody</span> mismatches are <code>(25,25,767,1110)</code>, <code>(25,25,1110,767)</code>, and <code>(94,94,288,1057)</code>; none is dropped</span>
+    <span><span class="chip">next lever</span> atomise multi-root leaves to stored x columns and add explicit identity charts, charging every resulting subcomponent</span>
+    <span><span class="chip">scope</span> 16 toy-prime four-summand cells; no P-256 S18 system, relation, logarithm, S or rho comparison</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_balanced_s5_round9_20261004/RESULT.md</code>; deterministic result SHA-256 <code>44f8412ff1c4dec61d0fd05bc2d66f8788e14da4063239e7431e6410da67565a</code></span>
+  </div>
+</section>
+<!-- END p256-balanced-s5-round9-20261004 -->
+<!-- BEGIN p256-atomized-s5-round10-20261004 -->
+<section class="panel" id="p256-atomized-s5-round10-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson four-summand atoms: exact charts, but 44 negatives remain degree 3 <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Closes every infinity-chart mismatch across 1,664 signed tuples and cuts terminal-369 F4 work 22.16&times;, but 44 of 96 affine atoms still require solving degree 3, so the degree-2 gate fails.</p>
+    <p>Round 10 splits every multi-root factor-base leaf into its exact stored x-coordinate, runs all 104 resulting affine F4 atoms, and unions them with explicit left/right point-at-infinity charts. An enhanced indexed-image control carries the same identity sentinels without F4.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>All affine atoms and identity charts match their signed references; units are not converted across F4, staged field arithmetic and group-law enumeration.</caption>
+    <thead><tr><th>Terminal</th><th>Arm</th><th>Parents / atoms</th><th>Correct</th><th>Max degree</th><th>Max columns</th><th>Field ops</th><th>FN / FP</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>Round-9 specialised</td><td class="n">8 / 8</td><td class="n">6 / 8 cells</td><td class="n">2</td><td class="n">32</td><td class="n">7,768</td><td class="n">2 / 0</td><td><span class="chip">incomplete chart</span></td></tr>
+      <tr><td>0</td><td>Atomized + identity</td><td class="n">8 / 8</td><td class="n"><strong>8 / 8</strong></td><td class="n"><strong>2</strong></td><td class="n">32</td><td class="n">7,768</td><td class="n">0 / 0</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>369</td><td>Round-9 specialised</td><td class="n">8 / 8</td><td class="n">7 / 8 cells</td><td class="n">3</td><td class="n">447</td><td class="n">3,011,675</td><td class="n">1 / 0</td><td><span class="chip">incomplete chart</span></td></tr>
+      <tr><td>369</td><td>Atomized + identity</td><td class="n">8 / 96</td><td class="n"><strong>96 / 96 atoms; 8 / 8 cells</strong></td><td class="n"><strong>3</strong></td><td class="n">67</td><td class="n">135,927</td><td class="n">0 / 0</td><td><span class="chip">rejected</span> degree gate</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exact charts</span> all 104 affine F4 atoms and identity checks agree with 1,664 signed tuples; all three round-9 false negatives are recovered</span>
+    <span><span class="chip">degree histogram</span> terminal 0: 8 degree-2 atoms; terminal 369: 52 degree-2 and 44 degree-3 atoms</span>
+    <span><span class="chip">cost</span> terminal-369 atomization expands 8 parents to 96 atoms but uses 0.045133 of specialised F4 operations and 67 versus 447 maximum columns</span>
+    <span><span class="chip">next lever</span> atomize the fixed pair-image roots before the final join, charging the new image-component factor</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_atomized_s5_round10_20261004/RESULT.md</code>; deterministic result SHA-256 <code>1e14e88f624bb1dadee3ea398f33d4fe0c51b9ea0956d8a4377bbccd6810bc93</code></span>
+  </div>
+</section>
+<!-- END p256-atomized-s5-round10-20261004 -->
+<!-- BEGIN p256-image-atomized-s5-round11-20261004 -->
+<section class="panel" id="p256-image-atomized-s5-round11-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson four-summand images: uniform solving degree 2 after exact splitting <span class="chip">advance</span></h2>
+    <p class="panel-summary">Certifies all 152 image atoms at solving degree 2 with maximum 3 columns, zero mismatches across 1,664 signed tuples, and only 1.462&times; expansion over the 104 exact leaf atoms.</p>
+    <p>Round 11 solves each fixed leaf pair's affine <code>S3</code> image, cross-checks every root against signed point addition, then splits each left image root into a one-variable final join against the right image polynomial. Round 10's explicit infinity charts remain part of the exact union.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Candidate field work is image construction plus final coefficients plus F4 row reduction; identity checks and group additions remain separate.</caption>
+    <thead><tr><th>Terminal</th><th>Parents</th><th>Leaf &rarr; image atoms</th><th>Complete / correct</th><th>Max degree</th><th>Max columns</th><th>Build + coefficient + F4 ops</th><th>FN / FP</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="n">8</td><td class="n">8 &rarr; 8</td><td class="n"><strong>8 / 8</strong></td><td class="n"><strong>2</strong></td><td class="n">3</td><td class="n">585 + 88 + 130 = 803</td><td class="n">0 / 0</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>369</td><td class="n">8</td><td class="n">96 &rarr; 144</td><td class="n"><strong>144 / 144</strong></td><td class="n"><strong>2</strong></td><td class="n">3</td><td class="n">7,800 + 1,584 + 2,454 = 11,838</td><td class="n">0 / 0</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">degree</span> every final image join is one variable with two degree-&le;2 polynomials; all 152 measured solving degrees are 2</span>
+    <span><span class="chip">correctness</span> all affine images match signed point addition and the affine-plus-identity union matches all 16 parent classifications</span>
+    <span><span class="chip">cost</span> terminal-369 total counted field work is 0.087091 of round 10's F4 count; image atoms expand only 1.5&times; over leaf atoms on that row</span>
+    <span><span class="chip">scope</span> exact toy four-summand decomposition; rounds 12&ndash;13 measure the later toy image growth, while actual P-256 S18, relations, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_image_atomized_s5_round11_20261004/RESULT.md</code>; deterministic result SHA-256 <code>7266c05093c815734db0a0319b946f76d003e836cce0911541be5ab4d50f2e60</code></span>
+  </div>
+</section>
+<!-- END p256-image-atomized-s5-round11-20261004 -->
+<!-- BEGIN p256-s9-image-growth-round12-20261004 -->
+<section class="panel" id="p256-s9-image-growth-round12-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson eight-summand images: exact degree-2 joins use 0.0799 of signed visits <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Matches 101,888 exhaustive signed tuples with zero image or classification errors: 5,057 quadratic solves plus 3,080 lookups give a 0.079862 structural-visit ratio, while four-leaf image width grows to 8.</p>
+    <p>Round 12 composes the exact pair images from Round 11 into balanced four-leaf images with explicit infinity sentinels, verifies every intermediate against group addition, and joins two four-leaf blocks to a known target using only indexed univariate quadratics.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Visits are quadratic solves plus final indexed root lookups; field multiplications and exhaustive group-law work remain separate.</caption>
+    <thead><tr><th>Terminal</th><th>Cells</th><th>x atoms</th><th>Signed tuples</th><th>Solves + lookups</th><th>Visit ratio</th><th>Max pair / four image</th><th>FN / FP</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="n">4</td><td class="n">6</td><td class="n">1,536</td><td class="n">97 + 72</td><td class="n"><strong>0.110026</strong></td><td class="n">2 / 8</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>369</td><td class="n">4</td><td class="n">392</td><td class="n">100,352</td><td class="n">4,960 + 3,008</td><td class="n"><strong>0.079401</strong></td><td class="n">2 / 8</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> all four-leaf affine images and identity flags match exhaustive group sums before every final join</span>
+    <span><span class="chip">degree</span> every algebraic operation is a univariate quadratic; this is an explicitly split local degree, not unsplit S9 regularity</span>
+    <span><span class="chip">growth boundary</span> maximum affine width grows from 2 at two leaves to 8 at four; Round 13 measures the 16-summand doubling and finds width 117 at eight leaves</span>
+    <span><span class="chip">scope</span> toy field, eight summands and known target; actual P-256 S18, relations, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s9_image_growth_round12_20261004/RESULT.md</code>; deterministic result SHA-256 <code>11512f946ee9256dcb978f11280f577f2fefff3f3d761feafded1b93349bbde5</code></span>
+  </div>
+</section>
+<!-- END p256-s9-image-growth-round12-20261004 -->
+<!-- BEGIN p256-s17-image-growth-round13-20261004 -->
+<section class="panel" id="p256-s17-image-growth-round13-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson sixteen-summand images: degree 2 survives while width jumps to 117 <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Matches 2,883,584 represented signed tuples with zero intermediate-image or classification errors: 10,474 quadratic solves plus 8,600 lookups give a 0.006615 structural-visit ratio, but eight-leaf width reaches 117.</p>
+    <p>Round 13 composes complete four-leaf images into exact eight-leaf images with explicit infinity sentinels, verifies both layers against group addition, and joins two eight-leaf blocks to a known target using only indexed univariate quadratics.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Visits are quadratic solves plus final indexed root lookups; field multiplications and exact group-law references remain separate.</caption>
+    <thead><tr><th>Terminal</th><th>Cells</th><th>x atoms</th><th>Signed tuples</th><th>Solves + lookups</th><th>Visit ratio</th><th>Max 2 / 4 / 8 image</th><th>FN / FP</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="n">4</td><td class="n">10</td><td class="n">655,360</td><td class="n">2,149 + 1,776</td><td class="n"><strong>0.005989</strong></td><td class="n">2 / 8 / 117</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>369</td><td class="n">4</td><td class="n">34</td><td class="n">2,228,224</td><td class="n">8,325 + 6,824</td><td class="n"><strong>0.006799</strong></td><td class="n">2 / 8 / 110</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> every four- and eight-leaf affine image and identity flag matches exact signed group sums before the final join</span>
+    <span><span class="chip">degree</span> every algebraic operation is a univariate quadratic; this is explicitly split local degree, not unsplit S17 regularity</span>
+    <span><span class="chip">width warning</span> positive-cell width grows 2 &rarr; 8 &rarr; 117; exact sixteen-leaf references reach 298 of the toy curve's 596 affine x-coordinates</span>
+    <span><span class="chip">scope</span> toy field, sixteen summands and known target; actual P-256 S18, relations, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_image_growth_round13_20261004/RESULT.md</code>; deterministic result SHA-256 <code>2008dcb659d3120157480b6096a4873d1f9c23ee30123f4dd3a32d450f53ba1d</code></span>
+  </div>
+</section>
+<!-- END p256-s17-image-growth-round13-20261004 -->
+<!-- BEGIN p256-s17-image-width-round14-20261004 -->
+<section class="panel" id="p256-s17-image-width-round14-20261004">
+  <div class="panel-head">
+    <h2>P-256 sixteen-summand images: degree 2 transfers, but state reaches the generic ceiling <span class="chip">no compression</span></h2>
+    <p class="panel-summary">All four actual-P-256 samples match exact signed group addition at widths 2 &rarr; 8 &rarr; 128 &rarr; 32,768; the local degree stays 2, while the full factor-base pair image has a 515.020-GiB raw storage floor.</p>
+    <p>Round 14 rebuilds <code>FB1h2f8621cda105</code>, forms every balanced image node with indexed univariate quadratics, and independently enumerates signed P-256 group sums for the prefix sample and three hash-frozen samples.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Each sample verifies every two-, four-, eight-, and sixteen-leaf node; field multiplications and group additions remain separate units.</caption>
+    <thead><tr><th>Sample</th><th>Leaves</th><th>Widths 2 / 4 / 8 / 16</th><th>16 width / ceiling</th><th>Quadratic solves</th><th>Field muls</th><th>Reference additions</th><th>Exact</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>prefix</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+      <tr><td>hash-0</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+      <tr><td>hash-1</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+      <tr><td>hash-2</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">degree</span> every local algebraic operation is a univariate quadratic; this is not unsplit P-256 S17 or S18 regularity</span>
+    <span><span class="chip">correctness</span> all candidate affine images and identity flags equal exhaustive signed P-256 point-sum references</span>
+    <span><span class="chip">storage floor</span> one fixed sixteen-leaf image is 1 MiB raw; the identity-corrected full pair layer is 17,281,205,764 affine entries and 515.020 GiB raw</span>
+    <span><span class="chip">decision</span> retain the degree-2 decomposition, reject collision compression, and require the next solver to share work without materialising the pair frontier</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_image_width_round14_20261004/RESULT.md</code>; deterministic result SHA-256 <code>6eefb6b27768023af5850cd785d75ef3729484ac85e5defef9d1d596834ebccc</code></span>
+  </div>
+</section>
+<!-- END p256-s17-image-width-round14-20261004 -->
+<!-- BEGIN p256-s17-target-join-round15-20261005 -->
+<section class="panel" id="p256-s17-target-join-round15-20261005">
+  <div class="panel-head">
+    <h2>P-256 target-indexed images: exact state falls 128&times; without leaving degree 2 <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Retains two 128-entry eight-leaf images instead of one 32,768-entry sixteen-leaf image: 8 KiB versus 1 MiB raw, 280 versus 16,536 cold quadratic solves, and zero errors on eight P-256 targets.</p>
+    <p>Round 15 stops the balanced tree one layer early and probes the right half-image with one univariate quadratic per left x-coordinate. Four planted targets hit exactly once; four hash-public controls miss; exhaustive 65,536-sign group references agree.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Counts are identical on the prefix and three hash-frozen samples; half-image construction is reusable across targets.</caption>
+    <thead><tr><th>Arm</th><th>Stored entries</th><th>Raw bytes</th><th>Build solves</th><th>Query solves</th><th>Cold solves</th><th>Cold field muls</th><th>Targets correct</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Round-14 materialised image</td><td class="n">32,768</td><td class="n">1,048,576</td><td class="n">16,536</td><td class="n">lookup</td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">4 / 4 width samples</td><td class="n">2</td><td><span class="chip">reference</span></td></tr>
+      <tr><td>Target-indexed halves</td><td class="n"><strong>256</strong></td><td class="n"><strong>8,192</strong></td><td class="n">152</td><td class="n">128</td><td class="n"><strong>280</strong></td><td class="n"><strong>192,640</strong></td><td class="n"><strong>8 / 8 targets</strong></td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">state</span> 256 / 32,768 = 0.0078125, an exact 128&times; raw-coordinate reduction with no fingerprints or truncation</span>
+    <span><span class="chip">work</span> cold one-target solves fall 59.057&times;; each additional warm target costs 128 solves and 88,064 field multiplications</span>
+    <span><span class="chip">correctness</span> zero intermediate mismatches, FN, FP, identity errors, linear degeneracies or universal degeneracies</span>
+    <span><span class="chip">remaining boundary</span> fixed-atom state is compressed; sharing these half-images across the Dickson branch-cell frontier remains unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_target_join_round15_20261005/RESULT.md</code>; deterministic result SHA-256 <code>4220dafa066613630338886a916218602cd61ca914bd66ac7994cde163a53ad5</code></span>
+  </div>
+</section>
+<!-- END p256-s17-target-join-round15-20261005 -->
+<!-- BEGIN p256-s17-packed-atom-round16-20261005 -->
+<section class="panel" id="p256-s17-packed-atom-round16-20261005">
+  <div class="panel-head">
+    <h2>P-256 packed atoms: 36 exact bytes, another 227.56&times; reduction <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Stores sixteen 18-bit factor-base column IDs instead of two 128-entry half-images: 36 persistent bytes versus 8,192, with byte-exact reconstruction and zero errors on eight P-256 targets.</p>
+    <p>Round 16 treats the hash-pinned factor base as a shared dictionary. Four canonical packets decode to every frozen column and x-coordinate, reproduce both half-image and hit digests, and pass fresh exhaustive 65,536-sign references while every algebraic operation remains quadratic.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Persistent raw state excludes the shared factor base on every row; transient reconstruction state and algebraic work remain charged explicitly.</caption>
+    <thead><tr><th>Representation</th><th>Persistent bytes</th><th>Reduction from prior</th><th>Cold solves</th><th>Two-target solves</th><th>Transient bytes</th><th>Targets correct</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Round-14 full image</td><td class="n">1,048,576</td><td class="n">reference</td><td class="n">16,536</td><td class="n">16,536 + lookups</td><td class="n">1,048,576</td><td class="n">4 / 4 width samples</td><td class="n">2</td><td><span class="chip">reference</span></td></tr>
+      <tr><td>Round-15 half-images</td><td class="n">8,192</td><td class="n">128&times;</td><td class="n">280</td><td class="n">408</td><td class="n">8,192</td><td class="n">8 / 8</td><td class="n">2</td><td><span class="chip">prior</span></td></tr>
+      <tr><td>Round-16 packed columns</td><td class="n"><strong>36</strong></td><td class="n"><strong>227.556&times;</strong></td><td class="n">280</td><td class="n">408</td><td class="n">8,192</td><td class="n"><strong>8 / 8</strong></td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">state</span> sixteen 18-bit IDs occupy exactly 288 bits; 8,192 / 36 = 227.5556&times; beyond round 15 and 1,048,576 / 36 = 29,127.1111&times; beyond round 14</span>
+    <span><span class="chip">exactness</span> canonical decode/re-encode, full frozen-receipt equality, four positive hits, four public negative controls, zero FN, FP or degeneracies</span>
+    <span><span class="chip">dictionary boundary</span> exact decoding requires <code>FB1h2f8621cda105</code> and its pinned point-set hash; the shared factor base is excluded from both storage arms</span>
+    <span><span class="chip">remaining boundary</span> persistent state is compressed, but reconstruction still peaks at 8 KiB; a later streaming round must price recomputation against that transient working set</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_packed_atom_round16_20261005/RESULT.md</code>; deterministic result SHA-256 <code>af2874ef5f0bdabec75b9bf707067232d0d6e3985f0cce4eba6834c2b5790e44</code></span>
+  </div>
+</section>
+<!-- END p256-s17-packed-atom-round16-20261005 -->
+<!-- BEGIN p256-s17-batch-inversion-round17-20261005 -->
+<section class="panel" id="p256-s17-batch-inversion-round17-20261005">
+  <div class="panel-head">
+    <h2>P-256 batched inversions cut exact oracle arithmetic by 2.10&times; <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Round 17 replaces independent quadratic denominator inversions with exact Montgomery batches. Cold fixed-atom cost falls from 192,640 to 91,689 charged field multiplications, while all eight frozen target classifications and the local degree-2 boundary remain unchanged.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact charged P-256 field multiplication counts; ratios are scalar total divided by batched total.</caption>
+    <thead><tr><th>Boundary</th><th>Scalar muls</th><th>Batched muls</th><th>Reduction</th><th>Scalar inversion</th><th>Batched inversion</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Image build</td><td class="n">104,576</td><td class="n"><strong>52,010</strong></td><td class="n"><strong>2.011&times;</strong></td><td class="n">58,368</td><td class="n">5,802</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>Warm target</td><td class="n">88,064</td><td class="n"><strong>39,679</strong></td><td class="n"><strong>2.219&times;</strong></td><td class="n">49,152</td><td class="n">767</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>Cold target</td><td class="n">192,640</td><td class="n"><strong>91,689</strong></td><td class="n"><strong>2.101&times;</strong></td><td class="n">107,520</td><td class="n">6,569</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>Two targets, one build</td><td class="n">280,704</td><td class="n"><strong>131,368</strong></td><td class="n"><strong>2.137&times;</strong></td><td class="n">156,672</td><td class="n">7,336</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">batch shape</span> build batches <code>[4,4,64,4,4,64]</code> with eight scalar leaf fallbacks; each target uses one batch of 128 nonzero denominators</span>
+    <span><span class="chip">exactness</span> identical half-image and hit digests, four planted hits, four public misses, and zero FN, FP or degeneracies against fresh exhaustive signed-group references</span>
+    <span><span class="chip">algebra</span> 152 build solves and 128 solves per target are unchanged; the local maximum degree remains 2</span>
+    <span><span class="chip">E2E boundary</span> relation yield remains 96.400018%; the complete-collector oracle fraction <code>f</code>, end-to-end speedup, <code>S</code>, and rho ratio remain null</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_batch_inversion_round17_20261005/RESULT.md</code>; deterministic result SHA-256 <code>57cf49ffbab65356b4ef69848e7824f0377bc058ddd57fe0bf6a8f7b77089ce7</code></span>
+  </div>
+</section>
+<!-- END p256-s17-batch-inversion-round17-20261005 -->
+<!-- BEGIN p256-s17-outer-scan-round18-20261005 -->
+<section class="panel" id="p256-s17-outer-scan-round18-20261005">
+  <div class="panel-head">
+    <h2>P-256 S17 outer scan: low degree survives, fixed-atom collection projects to 2^272.404 <span class="chip">accounting</span></h2>
+    <p class="panel-summary">Prices the missing outer relation search: 4,096 actual P-256 oracle calls are exact, but the optimistic 138,031-row collection projection is 144.404 bits above rho, rejecting fixed-atom enumeration.</p>
+    <p>Round 18 scans both signs of a hash-selected seventeenth factor-base column around the frozen 36-byte <code>hash-0</code> atom. Every batched quadratic classification is checked against an independent full-point table of all 65,536 signed atom sums. The planted length-17 relation is recovered and directly verified; the hash-public bounded prefix has no hit.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Measured cumulative public-target prefix. The 52,010-multiplication image build is charged once on every total row.</caption>
+    <thead><tr><th>Outer depth</th><th>Positions</th><th>Oracle calls</th><th>Query muls</th><th>Build + query</th><th>FN / FP</th><th>Public relations</th></tr></thead>
+    <tbody>
+      <tr><td class="n">4</td><td class="n">16</td><td class="n">32</td><td class="n">1,269,728</td><td class="n">1,321,738</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">5</td><td class="n">32</td><td class="n">64</td><td class="n">2,539,456</td><td class="n">2,591,466</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">6</td><td class="n">64</td><td class="n">128</td><td class="n">5,078,912</td><td class="n">5,130,922</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">7</td><td class="n">128</td><td class="n">256</td><td class="n">10,157,824</td><td class="n">10,209,834</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">8</td><td class="n">256</td><td class="n">512</td><td class="n">20,315,648</td><td class="n">20,367,658</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">9</td><td class="n">512</td><td class="n">1,024</td><td class="n">40,631,296</td><td class="n">40,683,306</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">10</td><td class="n">1,024</td><td class="n">2,048</td><td class="n">81,262,592</td><td class="n">81,314,602</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Optimistic enumeration projection; atom generation and no-relation target exhaustion are omitted, so they cannot improve these figures.</caption>
+    <thead><tr><th>Boundary</th><th>Count / probability</th><th>log<sub>2</sub> work</th><th>Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Complete signed outer scan, one atom</td><td class="n">262,884 calls; 1.48787&middot;10<sup>&minus;67</sup> success</td><td class="n">33.280 muls</td><td><span class="chip">measured-cost projection</span></td></tr>
+      <tr><td>Expected atom scans per relation</td><td class="n">6.72101&middot;10<sup>66</sup></td><td class="n">221.996 scans</td><td><span class="chip">enumeration floor</span></td></tr>
+      <tr><td>One relation</td><td class="n">7.01071&middot;10<sup>76</sup> field muls</td><td class="n"><strong>255.276</strong></td><td><span class="chip">rejected</span></td></tr>
+      <tr><td>138,031-row collection</td><td class="n">1.00383&middot;10<sup>82</sup> field muls</td><td class="n"><strong>272.404</strong></td><td><span class="chip">144.404 bits above rho</span></td></tr>
+      <tr><td>Sparse Wiedemann, separate unit</td><td class="n">616,939,492,732 nonzero additions</td><td class="n">39.166</td><td><span class="chip">not the bottleneck</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">growth</span> oracle-call slope 1.000 and field-multiplication slope 0.991543 per outer depth; each query remains exactly 39,679 multiplications</span>
+    <span><span class="chip">degree</span> local image degree 2; frozen residual depths 1 / 2 / 3 retain maximum degrees 3 / 3 / 4; unsplit S17 regularity remains unknown</span>
+    <span><span class="chip">correctness</span> 4,096 / 4,096 candidate-reference agreements, one direct 17-point planted witness, zero FN or FP, and no public-prefix hit</span>
+    <span><span class="chip">memory</span> 36-byte packet, 8,192-byte images, 75,008-byte candidate peak, 24.278-MiB sparse-matrix model; relation acquisition dominates</span>
+    <span><span class="chip">decision</span> further constant-factor oracle tuning cannot close the gap; a follow-on must change the atom-selection exponent</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_outer_scan_round18_20261005/RESULT.md</code>; deterministic result SHA-256 <code>b9081ea3cd3957dcae7805852371e395a2a63c8d4a2062e5c8e2c0b23980fce3</code></span>
+  </div>
+</section>
+<!-- END p256-s17-outer-scan-round18-20261005 -->
+<!-- BEGIN p256-s17-multilevel-selector-round19-20261005 -->
+<section class="panel" id="p256-s17-multilevel-selector-round19-20261005">
+  <div class="panel-head">
+    <h2>P-256 variable-column S17: 107 bits recovered, but the exact 8+9 frontier still loses <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Replaces fixed atoms with exact global 8+9 and 4+4+4+5 selectors: all four P-256 prefix cells agree with zero errors, but Dickson membership prunes nothing and the optimistic collector remains 32.690 bits above rho.</p>
+    <p>Round 19 keeps all 17 factor-base columns variable. The direct arm indexes every signed eight-sum; the structured arm constructs the same frontier through exact signed four- and five-lists and all 256 external buckets. Complete compressed point keys are matched and every hit is replayed by fresh P-256 group addition.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Measured actual-P-256 counts. FME converts each complete projective addition to 17 field multiplications. Candidate storage is the simultaneous exact-key disk frontier.</caption>
+    <thead><tr><th>Active B</th><th>Signed 8-list</th><th>Signed 9-list</th><th>Direct 8+9 FME</th><th>4+4+4+5 FME</th><th>Candidate / direct</th><th>Candidate frontier</th><th>FN / FP</th></tr></thead>
+    <tbody>
+      <tr><td class="n">17</td><td class="n">6,223,360</td><td class="n">12,446,720</td><td class="n">903,818,583</td><td class="n">1,113,769,569</td><td class="n">1.2323</td><td class="n">765,473,280 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">18</td><td class="n">11,202,048</td><td class="n">24,893,440</td><td class="n">1,779,616,529</td><td class="n">2,197,217,483</td><td class="n">1.2347</td><td class="n">1,479,915,008 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">19</td><td class="n">19,348,992</td><td class="n">47,297,536</td><td class="n">3,337,713,009</td><td class="n">4,128,581,739</td><td class="n">1.2369</td><td class="n">2,732,507,648 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">20</td><td class="n">32,248,320</td><td class="n">85,995,520</td><td class="n">6,002,572,382</td><td class="n">7,437,716,615</td><td class="n"><strong>1.2391</strong></td><td class="n">4,847,997,440 B</td><td class="n">0 / 0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Full-factor-base lower-bound projection in one FME unit. Sorting and byte I/O are omitted, so they cannot improve these figures.</caption>
+    <thead><tr><th>Boundary</th><th>Exact / projected quantity</th><th>log<sub>2</sub></th><th>Gate / ratio</th></tr></thead>
+    <tbody>
+      <tr><td>Signed eight-sum list</td><td class="n">C(131,458,8)&middot;2<sup>8</sup></td><td class="n">128.734 records</td><td><span class="chip">exact combinatorics</span></td></tr>
+      <tr><td>Signed nine-sum list</td><td class="n">C(131,458,9)&middot;2<sup>9</sup></td><td class="n">143.569 records</td><td><span class="chip">exact combinatorics</span></td></tr>
+      <tr><td>One usable relation</td><td class="n">optimistic warm lower bound</td><td class="n"><strong>148.081 FME</strong></td><td><span class="chip">45.081 bits above 2^103</span></td></tr>
+      <tr><td>138,031-row collection + sparse LA</td><td class="n">143,185.66 projected targets</td><td class="n"><strong>165.156 FME</strong></td><td><span class="chip">32.690 bits above rho</span></td></tr>
+      <tr><td>Structured materialised frontier</td><td class="n">41-byte exact-key records</td><td class="n"><strong>148.926 bytes</strong></td><td><span class="chip">98.926 bits above 2^50</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> the planted relation is recovered in every cell; the hash-public target has no bounded-prefix hit; selectors agree throughout; independent 17-sum references cover B=17 and B=18</span>
+    <span><span class="chip">Dickson</span> every depth-18 leaf reaches the frozen terminal and survival is 1.0; membership is separable by leaf and gives no cross-column pruning</span>
+    <span><span class="chip">degree</span> local join degree 2; frozen residual maxima 3 / 3 / 4; unsplit S17 regularity remains unknown</span>
+    <span><span class="chip">classification</span> global 8+9 is a stage advance over fixed atoms but remains rejected; external 4+4+4+5 lowers resident bucket memory while raising FME and disk traffic, so it is relabelling</span>
+    <span><span class="chip">decision</span> per-relation, collection, storage and rho gates fail; the preregistered full-depth unplanted attempt was not run</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_multilevel_selector_round19_20261005/RESULT.md</code>; deterministic result SHA-256 <code>3096540621408e4a48cfa18963ad01da9686d3527ee26776c8b6cf6f45a71114</code></span>
+  </div>
+</section>
+<!-- END p256-s17-multilevel-selector-round19-20261005 -->
+<!-- BEGIN p256-s17-batch-collision-round20-20261005 -->
+<section class="panel" id="p256-s17-batch-collision-round20-20261005">
+  <div class="panel-head">
+    <h2>P-256 S17 batch collisions: finite-domain correction leaves the generic floor 16.2 bits above rho <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Five exact P-256 sampled-list cells have zero errors and birthday slope 0.499979. The original symmetric projection exceeded the finite signed-eight domain and is withdrawn; corrected direct batching remains 19.419 bits above rho and the optimistic image floor remains 16.203 bits above.</p>
+    <p>Round 20 samples signed eight-sums on the left and target-adjusted signed nine-sums on the right for 256 hash-selected unplanted targets. It sorts projected point keys only as a bounded census: every match is checked against the complete compressed P-256 key, every full-key hit is replayed from 17 fresh factor-base points, and an independent full-key reference covers every frozen sample list.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Measured actual-P-256 projected-image census. Each cell has one forced planted full-key match; random projected matches are screening candidates, never reported relations.</caption>
+    <thead><tr><th>Key bits</th><th>Images / side</th><th>Projected matches</th><th>Random / expected</th><th>Full-key hits</th><th>Unplanted relations</th><th>FME</th><th>Logical lists</th><th>FN / FP</th></tr></thead>
+    <tbody>
+      <tr><td class="n">20</td><td class="n">8,192</td><td class="n">72</td><td class="n">71 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">2,311,203</td><td class="n">1,310,720 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">22</td><td class="n">16,384</td><td class="n">65</td><td class="n">64 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">4,622,113</td><td class="n">2,621,440 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">24</td><td class="n">32,768</td><td class="n">57</td><td class="n">56 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">9,243,933</td><td class="n">5,242,880 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">26</td><td class="n">65,536</td><td class="n">57</td><td class="n">56 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">18,487,573</td><td class="n">10,485,760 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">28</td><td class="n">131,072</td><td class="n">58</td><td class="n">57 / 64</td><td class="n">1 planted</td><td class="n">0</td><td class="n">36,974,853</td><td class="n">20,971,520 B</td><td class="n">0 / 0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>138,031-row projection in one FME unit. The correction materialises all signed-eight images and streams signed-nine images with duplicate occupancy charged. The lower boundary assumes only one group addition per image; neither live row prices sorting or I/O.</caption>
+    <thead><tr><th>Variant</th><th>Image / addition boundary</th><th>Total log<sub>2</sub> FME</th><th>Per row</th><th>Ratio to rho</th><th>Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Round-19 exhaustive 8+9</td><td class="n">complete frontier per target</td><td class="n">165.156</td><td class="n">148.081</td><td class="n">+32.690 bits</td><td><span class="chip">superseded projection</span></td></tr>
+      <tr><td>Initial symmetric batching</td><td class="n">required left 2<sup>136.538</sup> &gt; domain 2<sup>128.734</sup></td><td class="n"><s>144.625</s></td><td class="n"><s>127.551</s></td><td class="n"><s>+12.159 bits</s></td><td><span class="chip">withdrawn</span></td></tr>
+      <tr><td>Direct finite-domain signed sums</td><td class="n">all left + 2<sup>144.581</sup> streamed right</td><td class="n"><strong>151.885</strong></td><td class="n">134.811</td><td class="n"><strong>+19.419 bits</strong></td><td><span class="chip">rejected</span></td></tr>
+      <tr><td>One-addition-per-image boundary</td><td class="n">2<sup>144.581</sup> total images</td><td class="n"><strong>148.668</strong></td><td class="n">131.594</td><td class="n"><strong>+16.203 bits</strong></td><td><span class="chip">generic floor</span></td></tr>
+      <tr><td>Complete left materialisation</td><td class="n">80-byte exact records</td><td class="n">135.056 bytes</td><td class="n">&mdash;</td><td class="n">+85.056 bits over gate</td><td><span class="chip">storage fails</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> five planted relations replay exactly; 304 random projected matches versus 320 expected all fail the full-key check; zero FN, FP or duplicates; the 20-bit cell additionally scans all 67,108,864 pairs</span>
+    <span><span class="chip">growth</span> counted FME slope 0.499979 and logical-memory slope 0.5 per projected key bit, matching the frozen birthday prediction</span>
+    <span><span class="chip">accounting correction</span> the old symmetric schedule repeated left representations; the corrected target allowance is 143,185.658, its expected relation population is 475,983.691, and 163,013.787 collision events are charged for 138,031 distinct rows</span>
+    <span><span class="chip">classification</span> batching is projected engineering against the generic image floor; replacing the unattainable symmetric projection is accounting, not an algorithmic gain</span>
+    <span><span class="chip">Dickson</span> all 131,458 leaves pass all 18 chain steps; survival remains 1.0 and supplies no cross-column pruning</span>
+    <span><span class="chip">degree</span> local join degree 2; frozen residual maxima 3 / 3 / 4; unsplit S17 regularity remains unknown</span>
+    <span><span class="chip">decision</span> exactness and degree pass; per-row, collection, storage and rho parity fail; no full-depth unplanted attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_batch_collision_round20_20261005/RESULT.md</code>; result SHA-256 <code>72f269c401d5192fda1e2a9f8c7e4b7bd537d92fe29a18b851882b610fa5c459</code></span>
+  </div>
+</section>
+<!-- END p256-s17-batch-collision-round20-20261005 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by

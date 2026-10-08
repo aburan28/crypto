@@ -1,0 +1,13 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-bridge1-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/packedxonly23.cuh	2026-09-17 21:04:24.229562987 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-bridge1-src/include/packedxonly23.cuh	2026-09-17 22:27:52.435356047 +0000
+@@ -170,7 +170,8 @@
+                 } else {
+                     inverseX = inv;
+                 }
+-                const P131 nx = squarePolynomial131(add131(x, inverseX));
++                // x(P + sigma(P)) = x + 1/x.
++                const P131 nx = add131(x, inverseX);
+ #else
+                 P131 nx;
+                 if (localSlot) {

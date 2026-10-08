@@ -1,0 +1,39 @@
+{
+  "candidate_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4",
+  "claim_boundary": "One public synthetic n=73 target only; exploratory unless CPU isolation is independently receipted. Not ECC2K-130 evidence or an asymptotic sub-rho claim.",
+  "ic_rank_seed": 7,
+  "kind": "n73_single_target_online_ic_vs_rho_protocol",
+  "paired_run_order": [
+    "rho",
+    "ic"
+  ],
+  "paired_target": [
+    "1852858978593996699777",
+    "7821257062942871962177"
+  ],
+  "resource_cap_bytes_per_arm": null,
+  "resource_policy": "No finite process memory cap; run both arms sequentially on the same host and record each peak RSS.",
+  "rho_reference": {
+    "binary_sha256": "8a17723a2b0d26658ea684d19b6527aced19f91daffe85f4b838a1ad8d454527",
+    "quotient_mode": "signed_frobenius",
+    "source_sha256": "0a35b2f7820110e773023108706bfee0aa91d7bbe5953290f0a5b2fc7cc2b60f",
+    "workers": 1
+  },
+  "rho_walk_seed": 202610041,
+  "run_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR1",
+  "target_count": 1,
+  "target_generation_excluded": true,
+  "timing_contract": {
+    "exclude": [
+      "process launch",
+      "input loading",
+      "fixture point generation",
+      "IC target-independent setup"
+    ],
+    "ic_start": "First target-dependent query operation after reusable base, index, and full factor-log rank are ready.",
+    "ic_stop": "Recovered scalar and in-process [d]G=Q check complete.",
+    "rho_start": "First target-dependent jump-table setup after Q is supplied.",
+    "rho_stop": "Recovered scalar and in-process validation complete."
+  },
+  "workload_id": "e79c49b134ea"
+}

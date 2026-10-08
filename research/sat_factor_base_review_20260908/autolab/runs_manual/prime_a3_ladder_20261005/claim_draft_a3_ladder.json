@@ -1,0 +1,208 @@
+{
+ "all_runs_verified_and_agree_rho": true,
+ "beat_id": "prime.end_to_end_dlp.a3_ladder",
+ "claim_boundary": "synthetic_known_answer_a_minus_3_ladder",
+ "claim_boundary_non_claims": [
+  "not P-256 or CryptoPro-B themselves (synthetic small-field members of the a=-3, generic-j family)",
+  "not key recovery on deployed curves",
+  "not asymptotic sub-rho",
+  "not a vs_rho claim (IC wall exceeds rho wall at every measured size)",
+  "not ledger promotion until independent validation"
+ ],
+ "created_at": "2026-10-05T23:03:35.741679+00:00",
+ "evidence_paths": [
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/a3_16bit_p256class_seed20261005.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/a3_20bit_cryptoproclass_seed20261005.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/a3_20bit_p256class_seed20261005.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/a3_20bit_p256class_seed20261006.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/a3_20bit_p256class_seed20261007.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/a3_24bit_cryptoproclass_seed20261005.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/a3_24bit_p256class_seed20261005.json"
+ ],
+ "executable_or_source_hash": {
+  "source": "db146f66ca8ae1d9cfbc9b0ad8634a8466d4121a72f39238d10bf6d4a9f9846b",
+  "source_bench": "0d596a1e7589d24e2fc5ebc88b4aac00135651b99ecf99c154f742ed068d00fd",
+  "source_j0": "cb43529ed6025770731cd008dfdf83c17d34fa838ea4f7d6bd622487d8a2d8a4"
+ },
+ "family": "y^2 = x^3 - 3x + b, prime order, h=1, a = p - 3; p256class p = 3 mod 4, cryptoproclass p = 1 mod 4",
+ "fixture_hash": "d6b7b07efed8d2d2e764858b47b39dd71850827fe2fda63c75574f0b354d430d",
+ "host_id": {
+  "node": "Adams-MacBook-Pro.local",
+  "platform": "macOS-26.6-arm64-arm-64bit"
+ },
+ "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_a3_ladder_20261005/claim_draft_a3_ladder.json",
+ "ladder": [
+  {
+   "bits": 16,
+   "curve": "a3-bench-16bit-p256class",
+   "curve_class": "p256_shape",
+   "file": "a3_16bit_p256class_seed20261005.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 461.149625,
+   "ic_ok": true,
+   "relations_collected": 128,
+   "rho_ms": 22.299917,
+   "rho_ok": true,
+   "seed": 20261005,
+   "stage_timers": {
+    "factor_base_ms": 1.936917,
+    "linear_algebra_ms": 1.57725,
+    "relations_ms": 457.498,
+    "verify_ms": 0.046333
+   },
+   "trials_per_relation_max": 10,
+   "trials_per_relation_median": 2.0,
+   "trials_total": 381
+  },
+  {
+   "bits": 20,
+   "curve": "a3-bench-20bit-cryptoproclass",
+   "curve_class": "cryptopro_b_shape",
+   "file": "a3_20bit_cryptoproclass_seed20261005.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 37191.468542,
+   "ic_ok": true,
+   "relations_collected": 128,
+   "rho_ms": 186.84258400000002,
+   "rho_ok": true,
+   "seed": 20261005,
+   "stage_timers": {
+    "factor_base_ms": 5.5472079999999995,
+    "linear_algebra_ms": 2.128584,
+    "relations_ms": 37183.560458,
+    "verify_ms": 0.108792
+   },
+   "trials_per_relation_max": 138,
+   "trials_per_relation_median": 20.0,
+   "trials_total": 4015
+  },
+  {
+   "bits": 20,
+   "curve": "a3-bench-20bit-p256class",
+   "curve_class": "p256_shape",
+   "file": "a3_20bit_p256class_seed20261005.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 22477.399833,
+   "ic_ok": true,
+   "relations_collected": 128,
+   "rho_ms": 197.828,
+   "rho_ok": true,
+   "seed": 20261005,
+   "stage_timers": {
+    "factor_base_ms": 1.729791,
+    "linear_algebra_ms": 3.383166,
+    "relations_ms": 22472.072957999997,
+    "verify_ms": 0.09674999999999999
+   },
+   "trials_per_relation_max": 141,
+   "trials_per_relation_median": 28.0,
+   "trials_total": 4655
+  },
+  {
+   "bits": 20,
+   "curve": "a3-bench-20bit-p256class",
+   "curve_class": "p256_shape",
+   "file": "a3_20bit_p256class_seed20261006.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 18691.6915,
+   "ic_ok": true,
+   "relations_collected": 128,
+   "rho_ms": 155.56504199999998,
+   "rho_ok": true,
+   "seed": 20261006,
+   "stage_timers": {
+    "factor_base_ms": 2.312708,
+    "linear_algebra_ms": 2.013125,
+    "relations_ms": 18687.132541,
+    "verify_ms": 0.100958
+   },
+   "trials_per_relation_max": 145,
+   "trials_per_relation_median": 23.5,
+   "trials_total": 4094
+  },
+  {
+   "bits": 20,
+   "curve": "a3-bench-20bit-p256class",
+   "curve_class": "p256_shape",
+   "file": "a3_20bit_p256class_seed20261007.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 9177.492834,
+   "ic_ok": true,
+   "relations_collected": 128,
+   "rho_ms": 63.743708,
+   "rho_ok": true,
+   "seed": 20261007,
+   "stage_timers": {
+    "factor_base_ms": 1.827,
+    "linear_algebra_ms": 1.5950840000000002,
+    "relations_ms": 9173.907167,
+    "verify_ms": 0.074792
+   },
+   "trials_per_relation_max": 155,
+   "trials_per_relation_median": 24.0,
+   "trials_total": 5051
+  },
+  {
+   "bits": 24,
+   "curve": "a3-bench-24bit-cryptoproclass",
+   "curve_class": "cryptopro_b_shape",
+   "file": "a3_24bit_cryptoproclass_seed20261005.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 512978.49633299996,
+   "ic_ok": true,
+   "relations_collected": 128,
+   "rho_ms": 1273.84925,
+   "rho_ok": true,
+   "seed": 20261005,
+   "stage_timers": {
+    "factor_base_ms": 4.6785000000000005,
+    "linear_algebra_ms": 2.003084,
+    "relations_ms": 512971.58104200003,
+    "verify_ms": 0.122917
+   },
+   "trials_per_relation_max": 2566,
+   "trials_per_relation_median": 505.5,
+   "trials_total": 79364
+  },
+  {
+   "bits": 24,
+   "curve": "a3-bench-24bit-p256class",
+   "curve_class": "p256_shape",
+   "file": "a3_24bit_p256class_seed20261005.json",
+   "ic_agrees_rho": true,
+   "ic_matches_truth": true,
+   "ic_ms": 272422.18958299997,
+   "ic_ok": true,
+   "relations_collected": 128,
+   "rho_ms": 1167.58125,
+   "rho_ok": true,
+   "seed": 20261005,
+   "stage_timers": {
+    "factor_base_ms": 10.735750000000001,
+    "linear_algebra_ms": 2.561334,
+    "relations_ms": 272408.6595,
+    "verify_ms": 0.122416
+   },
+   "trials_per_relation_max": 4067,
+   "trials_per_relation_median": 379.0,
+   "trials_total": 76181
+  }
+ ],
+ "n_or_bits": 24,
+ "regime": "prime",
+ "resource_caps": {},
+ "schema_version": 2,
+ "seeds": [
+  20261005,
+  20261006,
+  20261007
+ ],
+ "stage": "end_to_end_dlp",
+ "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

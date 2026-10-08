@@ -1,0 +1,23 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-factor-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh	2026-09-17 22:51:27.267085804 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-factor-src/include/packedxonly23.cuh	2026-09-17 23:04:09.237147603 +0000
+@@ -16,14 +16,13 @@
+ 
+ static __device__ __forceinline__ PolynomialPair sparseBridge3Rational131(P131 x) {
+     const P131 x2 = squarePolynomial131(x);
+-    const P131 x4 = squarePolynomial131(x2);
+     const P131 x3 = mulPolynomial131(x, x2);
+-    const P131 x5 = mulPolynomial131(x, x4);
+-    const P131 x6 = mulPolynomial131(x2, x4);
+-    const P131 x7 = mulPolynomial131(x, x6);
++    const P131 x6 = squarePolynomial131(x3);
+     const P131 one{{1, 0, 0, 0, 0}};
+-    const P131 a = add131(add131(add131(add131(add131(x7, x6), x4), x3), x), one);
+-    const P131 b = add131(add131(add131(add131(add131(add131(x6, x5), x4), x3), x2), x), one);
++    const P131 a = mulPolynomial131(add131(x, one),
++        add131(add131(x6, x3), one));
++    const P131 b = mulPolynomial131(add131(add131(x3, x), one),
++        add131(add131(x3, x2), one));
+     return PolynomialPair{squarePolynomial131(a),
+         mulPolynomial131(x, squarePolynomial131(b))};
+ }

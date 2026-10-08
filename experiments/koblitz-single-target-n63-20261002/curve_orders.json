@@ -1,0 +1,364 @@
+{
+  "conclusion": "n=62 and n=63 admit no usable prime-order subgroup on either K_a (largest prime ~2^18-2^20 << cofactor): n=61 is the u64-packing ceiling for this curve family. The next rung is beyond-63 multi-word field arithmetic; the natural target is n=71, a=0 (prime degree, r=5513228015079457 ~ 2^52.3, cofactor 428276), requiring u128 packing.",
+  "date": "2026-10-02",
+  "fail_closed_receipts": {
+    "a0": "experiments/koblitz-single-target-n63-20261002/smoke_time.txt (KoblitzCurve::new(0,63) panic 'admitted Koblitz rung', <0.1 s)",
+    "a1": "experiments/koblitz-single-target-n63-20261002/smoke_a1_time.txt (KoblitzCurve::new(1,63) panic, <0.1 s)"
+  },
+  "kind": "koblitz_curve_order_viability_map",
+  "method": "Koblitz trace recurrence t_{k+1}=t_k*t_1-2*t_{k-1} (t_1=-1 for a=0, +1 for a=1, t_0=2; same recurrence as koblitz_point_count), orders factored with sympy.factorint; recurrence pinned against the landed n=61 fixture order 2305843009055095052",
+  "rows": [
+    {
+      "a": 0,
+      "cofactor_of_rest": "57284756",
+      "curve_order": "576460751359875076",
+      "factorization": [
+        [
+          "2",
+          2
+        ],
+        [
+          "14321189",
+          1
+        ],
+        [
+          "10063074221",
+          1
+        ]
+      ],
+      "largest_prime": "10063074221",
+      "largest_prime_log2": 33,
+      "largest_prime_multiplicity": 1,
+      "n": 59,
+      "usable_subgroup": true
+    },
+    {
+      "a": 1,
+      "cofactor_of_rest": "22894",
+      "curve_order": "576460753246971902",
+      "factorization": [
+        [
+          "2",
+          1
+        ],
+        [
+          "11447",
+          1
+        ],
+        [
+          "25179555920633",
+          1
+        ]
+      ],
+      "largest_prime": "25179555920633",
+      "largest_prime_log2": 44,
+      "largest_prime_multiplicity": 1,
+      "n": 59,
+      "usable_subgroup": true
+    },
+    {
+      "a": 0,
+      "cofactor_of_rest": "14156",
+      "curve_order": "2305843009055095052",
+      "factorization": [
+        [
+          "2",
+          2
+        ],
+        [
+          "3539",
+          1
+        ],
+        [
+          "162888033982417",
+          1
+        ]
+      ],
+      "largest_prime": "162888033982417",
+      "largest_prime_log2": 47,
+      "largest_prime_multiplicity": 1,
+      "n": 61,
+      "usable_subgroup": true
+    },
+    {
+      "a": 1,
+      "cofactor_of_rest": "200247874",
+      "curve_order": "2305843009372292854",
+      "factorization": [
+        [
+          "2",
+          1
+        ],
+        [
+          "977",
+          1
+        ],
+        [
+          "102481",
+          1
+        ],
+        [
+          "11514943771",
+          1
+        ]
+      ],
+      "largest_prime": "11514943771",
+      "largest_prime_log2": 33,
+      "largest_prime_multiplicity": 1,
+      "n": 61,
+      "usable_subgroup": true
+    },
+    {
+      "a": 0,
+      "cofactor_of_rest": "3203910269464",
+      "curve_order": "4611686014494595352",
+      "factorization": [
+        [
+          "2",
+          3
+        ],
+        [
+          "373",
+          1
+        ],
+        [
+          "26041",
+          1
+        ],
+        [
+          "41231",
+          1
+        ],
+        [
+          "1439393",
+          1
+        ]
+      ],
+      "largest_prime": "1439393",
+      "largest_prime_log2": 20,
+      "largest_prime_multiplicity": 1,
+      "n": 62,
+      "usable_subgroup": false
+    },
+    {
+      "a": 1,
+      "cofactor_of_rest": "3203910269464",
+      "curve_order": "4611686014494595352",
+      "factorization": [
+        [
+          "2",
+          3
+        ],
+        [
+          "373",
+          1
+        ],
+        [
+          "26041",
+          1
+        ],
+        [
+          "41231",
+          1
+        ],
+        [
+          "1439393",
+          1
+        ]
+      ],
+      "largest_prime": "1439393",
+      "largest_prime_log2": 20,
+      "largest_prime_multiplicity": 1,
+      "n": 62,
+      "usable_subgroup": false
+    },
+    {
+      "a": 0,
+      "cofactor_of_rest": "25639636398044",
+      "curve_order": "9223372041104766164",
+      "factorization": [
+        [
+          "2",
+          2
+        ],
+        [
+          "29",
+          1
+        ],
+        [
+          "43",
+          1
+        ],
+        [
+          "127",
+          2
+        ],
+        [
+          "421",
+          1
+        ],
+        [
+          "757",
+          1
+        ],
+        [
+          "359731",
+          1
+        ]
+      ],
+      "largest_prime": "359731",
+      "largest_prime_log2": 18,
+      "largest_prime_multiplicity": 1,
+      "n": 63,
+      "usable_subgroup": false
+    },
+    {
+      "a": 1,
+      "cofactor_of_rest": "18531953989654",
+      "curve_order": "9223372032604785454",
+      "factorization": [
+        [
+          "2",
+          1
+        ],
+        [
+          "7",
+          3
+        ],
+        [
+          "37",
+          1
+        ],
+        [
+          "43",
+          1
+        ],
+        [
+          "71",
+          1
+        ],
+        [
+          "379",
+          1
+        ],
+        [
+          "631",
+          1
+        ],
+        [
+          "497701",
+          1
+        ]
+      ],
+      "largest_prime": "497701",
+      "largest_prime_log2": 18,
+      "largest_prime_multiplicity": 1,
+      "n": 63,
+      "usable_subgroup": false
+    },
+    {
+      "a": 0,
+      "cofactor_of_rest": "1926828573412",
+      "curve_order": "147573952609023177892",
+      "factorization": [
+        [
+          "2",
+          2
+        ],
+        [
+          "2011",
+          1
+        ],
+        [
+          "7639",
+          1
+        ],
+        [
+          "31357",
+          1
+        ],
+        [
+          "76589041",
+          1
+        ]
+      ],
+      "largest_prime": "76589041",
+      "largest_prime_log2": 26,
+      "largest_prime_multiplicity": 1,
+      "n": 67,
+      "usable_subgroup": false
+    },
+    {
+      "a": 1,
+      "cofactor_of_rest": "2159006662",
+      "curve_order": "147573952570329647966",
+      "factorization": [
+        [
+          "2",
+          1
+        ],
+        [
+          "1079503331",
+          1
+        ],
+        [
+          "68352708293",
+          1
+        ]
+      ],
+      "largest_prime": "68352708293",
+      "largest_prime_log2": 35,
+      "largest_prime_multiplicity": 1,
+      "n": 67,
+      "usable_subgroup": true
+    },
+    {
+      "a": 0,
+      "cofactor_of_rest": "428276",
+      "curve_order": "2361183241386169526132",
+      "factorization": [
+        [
+          "2",
+          2
+        ],
+        [
+          "107069",
+          1
+        ],
+        [
+          "5513228015079457",
+          1
+        ]
+      ],
+      "largest_prime": "5513228015079457",
+      "largest_prime_log2": 52,
+      "largest_prime_multiplicity": 1,
+      "n": 71,
+      "usable_subgroup": true
+    },
+    {
+      "a": 1,
+      "cofactor_of_rest": "4013206",
+      "curve_order": "2361183241483475687566",
+      "factorization": [
+        [
+          "2",
+          1
+        ],
+        [
+          "2006603",
+          1
+        ],
+        [
+          "588353361747061",
+          1
+        ]
+      ],
+      "largest_prime": "588353361747061",
+      "largest_prime_log2": 49,
+      "largest_prime_multiplicity": 1,
+      "n": 71,
+      "usable_subgroup": true
+    }
+  ]
+}

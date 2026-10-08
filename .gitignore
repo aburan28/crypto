@@ -67,6 +67,8 @@ gpu/btcpuzzle/tune_kangaroo
 # Local convenience link to the index-calculus executable.
 /ic
 
+# Fleet id fleet.sh records per region for the running campaign
+ecc2k130/aws/.fleet-id-*
 # gpu/macaulay generated headers, test binary and CUDA bench binary
 gpu/macaulay/params.h
 gpu/macaulay/vectors.h

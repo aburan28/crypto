@@ -1,0 +1,17 @@
+{
+  "logical_walks": 16400,
+  "validation": [
+    {
+      "run_id": 27135,
+      "checkpoint_sha256": "a9ac79f629cbf93efce00bcf4cfb5965b1c0d670c27aa94b32f69366ab5380d1",
+      "matching_dp_records": 38939,
+      "reference_replays_per_binary": 16
+    }
+  ],
+  "bidirectional_resume": true,
+  "candidate_batch": 16,
+  "binary_sha256": {
+    "reference": "6e50c7464b863633c28a5eaecefa74623b2b692813bb70a3bc701f394c691245",
+    "candidate": "8d0f6e677272667f1fde968f7c42562a79f3469d1c43c14599073a9137aaef48"
+  }
+}

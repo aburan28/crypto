@@ -1,0 +1,66 @@
+{
+ "beat_id": "prime.end_to_end_dlp.j0_20bit",
+ "claim_boundary": "synthetic_known_answer",
+ "claim_boundary_non_claims": [
+  "not key recovery on deployed curves",
+  "not asymptotic sub-rho",
+  "not a vs_rho claim (IC wall exceeds rho wall at this size)",
+  "not ledger promotion until independent validation"
+ ],
+ "created_at": "2026-10-05T23:03:35.741679+00:00",
+ "curve": "j0-bench-20bit",
+ "evidence_paths": [
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/ka_20bit_seed20261005.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/ka_20bit_seed20261006.json",
+  "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/ka_20bit_seed20261007.json"
+ ],
+ "executable_or_source_hash": {
+  "source": "db146f66ca8ae1d9cfbc9b0ad8634a8466d4121a72f39238d10bf6d4a9f9846b",
+  "source_bench": "0d596a1e7589d24e2fc5ebc88b4aac00135651b99ecf99c154f742ed068d00fd",
+  "source_j0": "cb43529ed6025770731cd008dfdf83c17d34fa838ea4f7d6bd622487d8a2d8a4"
+ },
+ "fixture_hash": "fad62a8797bc46b3439834e55d07f7eaa2829b109966a71987decca8408b6153",
+ "host_id": {
+  "node": "Adams-MacBook-Pro.local",
+  "platform": "macOS-26.6-arm64-arm-64bit"
+ },
+ "ic_agrees_rho": true,
+ "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_20bit_20261005/claim_draft_20bit.json",
+ "n_or_bits": 20,
+ "policy": {
+  "extra_relations": 8,
+  "max_relation_attempts": 64,
+  "max_trials_per_relation": 1000000,
+  "rho_steps_cap": 262144,
+  "target_orbits": 40
+ },
+ "recovered_d_verified": true,
+ "regime": "prime",
+ "relations": {
+  "attempts_exhausted": 0,
+  "collected": 48,
+  "orbit_count": 40,
+  "trials_per_relation_median": 242.0,
+  "trials_total": 14645
+ },
+ "resource_caps": {},
+ "schema_version": 2,
+ "seeds": {
+  "replay_target_seeds": [
+   20261006,
+   20261007
+  ],
+  "target_seed": 20261005
+ },
+ "stage": "end_to_end_dlp",
+ "stage_timers": {
+  "factor_base_ms": 5.7845830000000005,
+  "ic_total_ms": 56810.551292,
+  "linear_algebra_ms": 0.207333,
+  "relations_ms": 56804.127917000005,
+  "rho_ms": 74.27095899999999,
+  "target_generation_ms_excluded": 0.369667,
+  "verify_ms": 0.06658299999999999
+ },
+ "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

@@ -1,0 +1,21 @@
+{
+  "applies_to_l8_subspace_beat": false,
+  "created_at": "2026-09-11T06:30:19.267527+00:00",
+  "ffd": {
+    "draws_per_n": 1,
+    "max": 3,
+    "mean": 3.0,
+    "min": 3
+  },
+  "headline": "FFD=3 on all n in 3..7 (D<=4)",
+  "n_range": [
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "note": "Ledger beat wants subspace/oracle FFD at l=8; this is the related full-field harness only.",
+  "scope": "full_field_binary_S3_weil_descent",
+  "source": "examples/ffd_sweep_demo"
+}

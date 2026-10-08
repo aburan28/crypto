@@ -300,7 +300,7 @@ const retainedPanels = [
   if (id === 'lab-progress') {
     const marker = /(<script type="application\/json" id="progress-data">)[\s\S]*?(<\/script>)/;
     assert.ok(marker.test(html), 'Progress panel has no canonical data embed');
-    html = html.replace(marker, (_, start, end) => start + progressRaw.toString('utf8').trim() + end);
+    html = html.replace(marker, (_, start, end) => start + progressRaw.toString('utf8') + end);
   }
   return {id,label,html};
 });
