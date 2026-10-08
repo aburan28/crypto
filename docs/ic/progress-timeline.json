@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-05",
+  "updated": "2026-10-06",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -91,6 +91,15 @@
         {"date": "2026-10-03", "value": 9104.845, "reference": "matched", "unit": "online wall time", "label": "n17 prepared inherited-F4 development target, same-point rho", "detail": "Median paired IC/rho online cost 9,105x across three clean verified repetitions on one new n17 public point. The inherited-F4 solver family is 227x faster than production F5 on the same point, but this is not a win against rho and does not price the n53 PDP4root path.", "class": "accounting", "anchor": "#ic-f5-inherited-f4-online-20261003", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_solver_online_20261003/confirmation/RESULT.md"},
         {"date": "2026-10-03", "value": 0.0682, "reference": "matched", "unit": "isolated wall time", "label": "n61 compact orbit vs strong rho rung 3, 256 one-target workloads, hosted isolated", "detail": "Median of 256 per-workload IC/rho online ratios 0.0682 (rho/IC median 14.67, 95% 12.40-17.21); IC faster online on 255 of 256 public targets, at r = 2^47.2 on a pinned hosted AMD EPYC 7763 core. Cold, with its 22 s set-up charged, the same IC is 74.8x slower (cold series). Same-runner replay 256/256; PENDING_INDEPENDENT_VALIDATION.", "class": "engineering", "anchor": "#n61-compact-orbit-hosted-20261003", "source": "https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md"},
         {"date": "2026-10-04", "value": 0.9276907676250028, "reference": "matched", "unit": "unisolated online wall diagnostic", "label": "n37 compact-orbit K7, one frozen public point, six paired repeats", "detail": "Median paired IC/rho online wall ratio 0.927691 (rho/IC paired median 1.0780), spanning 0.875695-1.554470 in six repeats on one public point. IC median 0.136063 ms; strong rho median 0.144334 ms. All six pairs and all 518 base logs independently replayed. Apple M4 Pro host was not isolated; controlled speedup and cold fully charged cost remain unknown. The RSS change is accounting, not an algorithm improvement.", "class": "accounting", "anchor": "#n37-compact-orbit-online-20261004", "source": "https://github.com/aburan28/crypto/blob/main/experiments/koblitz-n37-single-target-20261004/RESULT.md"}
+      ]
+    },
+    {
+      "id": "ec-selector-stage",
+      "label": "Elliptic curve, selector construction stage only",
+      "role": "context",
+      "note": "Counted P-256 selector-generation work against the frozen rho boundary. Coverage, collision detection, relation solving and scalar recovery are excluded, so values below one are stage diagnostics rather than speedups.",
+      "points": [
+        {"date": "2026-10-06", "value": 0.9686171464465044, "reference": "stage-boundary", "unit": "counted P-256 addition equivalents", "label": "P-256 Round 291 serpentine sign-orbit construction", "detail": "Complete 2^17-sign primary orbit: 29,884,416 exactly replayed states, 1.004439 additions/state and 9,808 bytes live state. The pair table and radix router are removed. Achieved correlated-stream coverage, same-family degree, relation collection, sparse linear algebra and a complete DLP remain unset.", "class": "advance", "anchor": "#p256-serpentine-sign-orbit-round291-20261006", "source": "https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/RESULT.md"}
       ]
     },
     {

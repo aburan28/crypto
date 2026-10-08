@@ -717,6 +717,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-03</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n17 prepared inherited-F4 development target, same-point rho</td><td class="n">9,104.845&times; <small>online wall time</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#ic-f5-inherited-f4-online-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_solver_online_20261003/confirmation/RESULT.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n61 compact orbit vs strong rho rung 3, 256 one-target workloads, hosted isolated</td><td class="n">0.0682&times; <small>isolated wall time; median per workload</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-10-04</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n37 compact-orbit K7, one frozen public point, six paired repeats</td><td class="n">0.927691&times; <small>unisolated online wall diagnostic; controlled speedup unknown</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#n37-compact-orbit-online-20261004">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/experiments/koblitz-n37-single-target-20261004/RESULT.md">source</a></td></tr>
+<tr><td>2026-10-06</td><td>Elliptic curve, selector construction stage only</td><td>P-256 Round 291 serpentine sign-orbit construction</td><td class="n">0.968617&times; <small>counted P-256 addition equivalents; stage only</small></td><td>stage-boundary</td><td><span class="chip">advance</span></td><td><a href="#p256-serpentine-sign-orbit-round291-20261006">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/RESULT.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Elliptic curve, n61 batch of L &ge; 1,024 targets vs frozen KS v2 rho (historical diagnostic)</td><td>n61 L = 4,096, K = 700, hosted isolated</td><td class="n">0.213&times; <small>isolated wall time</small></td><td>unmatched</td><td><span class="chip">accounting</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Elliptic curve, n61 batch of L &ge; 1,024 targets vs frozen KS v2 rho (historical diagnostic)</td><td>n61 L = 16,384, K = 700, hosted isolated</td><td class="n">0.323&times; <small>isolated wall time</small></td><td>unmatched</td><td><span class="chip">accounting</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-09-19</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Genus-4 crossover exponent</td><td class="n">0.21&times;</td><td>matched</td><td><span class="chip">advance, exponent</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
@@ -732,7 +733,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
 <script type="application/json" id="progress-data">{
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-05",
+  "updated": "2026-10-06",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -823,6 +824,15 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         {"date": "2026-10-03", "value": 9104.845, "reference": "matched", "unit": "online wall time", "label": "n17 prepared inherited-F4 development target, same-point rho", "detail": "Median paired IC/rho online cost 9,105x across three clean verified repetitions on one new n17 public point. The inherited-F4 solver family is 227x faster than production F5 on the same point, but this is not a win against rho and does not price the n53 PDP4root path.", "class": "accounting", "anchor": "#ic-f5-inherited-f4-online-20261003", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_solver_online_20261003/confirmation/RESULT.md"},
         {"date": "2026-10-03", "value": 0.0682, "reference": "matched", "unit": "isolated wall time", "label": "n61 compact orbit vs strong rho rung 3, 256 one-target workloads, hosted isolated", "detail": "Median of 256 per-workload IC/rho online ratios 0.0682 (rho/IC median 14.67, 95% 12.40-17.21); IC faster online on 255 of 256 public targets, at r = 2^47.2 on a pinned hosted AMD EPYC 7763 core. Cold, with its 22 s set-up charged, the same IC is 74.8x slower (cold series). Same-runner replay 256/256; PENDING_INDEPENDENT_VALIDATION.", "class": "engineering", "anchor": "#n61-compact-orbit-hosted-20261003", "source": "https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md"},
         {"date": "2026-10-04", "value": 0.9276907676250028, "reference": "matched", "unit": "unisolated online wall diagnostic", "label": "n37 compact-orbit K7, one frozen public point, six paired repeats", "detail": "Median paired IC/rho online wall ratio 0.927691 (rho/IC paired median 1.0780), spanning 0.875695-1.554470 in six repeats on one public point. IC median 0.136063 ms; strong rho median 0.144334 ms. All six pairs and all 518 base logs independently replayed. Apple M4 Pro host was not isolated; controlled speedup and cold fully charged cost remain unknown. The RSS change is accounting, not an algorithm improvement.", "class": "accounting", "anchor": "#n37-compact-orbit-online-20261004", "source": "https://github.com/aburan28/crypto/blob/main/experiments/koblitz-n37-single-target-20261004/RESULT.md"}
+      ]
+    },
+    {
+      "id": "ec-selector-stage",
+      "label": "Elliptic curve, selector construction stage only",
+      "role": "context",
+      "note": "Counted P-256 selector-generation work against the frozen rho boundary. Coverage, collision detection, relation solving and scalar recovery are excluded, so values below one are stage diagnostics rather than speedups.",
+      "points": [
+        {"date": "2026-10-06", "value": 0.9686171464465044, "reference": "stage-boundary", "unit": "counted P-256 addition equivalents", "label": "P-256 Round 291 serpentine sign-orbit construction", "detail": "Complete 2^17-sign primary orbit: 29,884,416 exactly replayed states, 1.004439 additions/state and 9,808 bytes live state. The pair table and radix router are removed. Achieved correlated-stream coverage, same-family degree, relation collection, sparse linear algebra and a complete DLP remain unset.", "class": "advance", "anchor": "#p256-serpentine-sign-orbit-round291-20261006", "source": "https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/RESULT.md"}
       ]
     },
     {
@@ -12790,6 +12800,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-radix-portfolio-round43-290-20261006 -->
+<!-- BEGIN p256-serpentine-sign-orbit-round291-20261006 -->
+<section class="panel" id="p256-serpentine-sign-orbit-round291-20261006">
+  <div class="panel-head">
+    <h2>P-256 Round 291: serpentine signs remove the table and cross the stage boundary <span class="chip">advance / stage only</span></h2>
+    <p class="panel-summary">A complete 2<sup>17</sup>-sign P-256 orbit emits 29.88 million exactly replayed states at 1.004439 additions/state and 0.968617&times; rho in counted construction work, with 9.8 KB live state; achieved coverage, degree and end-to-end collection remain unset.</p>
+    <p>Alternating the common-edge path forward and backward lets each Gray sign flip update the 17-term group sum once. The result preserves every per-tuple state multiplicity while eliminating the 1.141-TB pair table and all radix routing.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One addition-equivalent boundary; all non-rho rows are selector-stage evidence.</caption>
+    <thead><tr><th>Variant</th><th class="n">Additions / state or start</th><th class="n">Ratio to rho</th><th class="n">Live/materialized state</th><th>Evidence boundary</th></tr></thead>
+    <tbody>
+      <tr><td>Pollard rho</td><td class="n">complete reference</td><td class="n">1.000000</td><td class="n">reference</td><td>whole method</td></tr>
+      <tr><td>Round 33 pair-table stage</td><td class="n">1.035499/state</td><td class="n">0.998569</td><td class="n">1.141 TB</td><td>traffic and achieved coverage unpriced</td></tr>
+      <tr><td>Round 108 width-9 routing</td><td class="n">0.449605/start extra</td><td class="n">1.000493 floor</td><td class="n">17.83 MB</td><td>request generation excluded</td></tr>
+      <tr><td>Direct table-free signs</td><td class="n">1.071000/state</td><td class="n">1.032802</td><td class="n">small</td><td>exact baseline</td></tr>
+      <tr><td><strong>Round 291 serpentine</strong></td><td class="n"><strong>1.004439/state</strong></td><td class="n"><strong>0.968617</strong></td><td class="n"><strong>9,808 bytes</strong></td><td>exact counted stage; not end to end</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exactness</span> two exhaustive toy multisets and nine native P-256 cells have zero transition, endpoint, FP or FN failures</span>
+    <span><span class="chip">measurement</span> seven-run depth-12 kernel median is 819.475 ms versus 859.939 ms direct; A/A ratio 1.02291, wall result descriptive</span>
+    <span><span class="chip">open gate</span> toy support saturates at only 73 and 177 states; full P-256 correlated-stream coverage is not inferred from visit count</span>
+    <span><span class="chip">degree scope</span> measured-family degree remains unknown; <code>FB1h2f8621cda105</code>'s residual maximum 4 is comparison evidence only</span>
+    <span><span class="chip">decision</span> retain as a stage candidate; no parity claim, promotion or full-depth relation attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/RESULT.md</code>; result SHA-256 <code>068be64f508ea2fb2996c265426dd8213088d1cad905859470792fcbc80972da</code></span>
+  </div>
+</section>
+<!-- END p256-serpentine-sign-orbit-round291-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
