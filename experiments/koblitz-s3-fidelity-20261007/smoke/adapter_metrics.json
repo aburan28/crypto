@@ -1,0 +1,115 @@
+{
+  "consistency": [],
+  "metrics": {
+    "decomposition": {
+      "arity": 4,
+      "native": {
+        "rank_s3_calls": 348982,
+        "s3_calls": 349610,
+        "target_s3_calls": 628
+      },
+      "oracle": "PDP4root",
+      "relations_found": 252,
+      "targets_tried": 252
+    },
+    "factor_base": {
+      "columns": 244,
+      "family": "explicit",
+      "native": {
+        "enumerated_set_digest": "994ebecce7d2a7ff0da957b7a58cbcf97ef5bf364b4cf17e12f58bfc61cda64a",
+        "index_entries": 2439851
+      },
+      "orbit_representatives": 244,
+      "usable_points": 20008
+    },
+    "instance": {
+      "degree": 41,
+      "koblitz_a": 0,
+      "r": "549756390943"
+    },
+    "linear_algebra": {
+      "dependent": 9,
+      "method": "incremental_gauss",
+      "rank": 243,
+      "rows": 243
+    }
+  },
+  "outcome": {
+    "recovered": 123212651130,
+    "status": "complete",
+    "target": [
+      1761330823552,
+      1351273910822
+    ],
+    "verified": true
+  },
+  "phases": {
+    "recovery_check": {
+      "ops": null,
+      "ops_unit": null,
+      "wall_ns": 20959
+    },
+    "target_descent": {
+      "ops": null,
+      "ops_unit": null,
+      "wall_ns": 16111376
+    },
+    "target_pdp": {
+      "ops": null,
+      "ops_unit": null,
+      "wall_ns": 54261623
+    },
+    "target_query": {
+      "ops": null,
+      "ops_unit": null,
+      "wall_ns": 21625
+    },
+    "target_relation_check": {
+      "ops": null,
+      "ops_unit": null,
+      "wall_ns": 9917
+    }
+  },
+  "producer": {
+    "binary_sha256": "145457f4f66a7f54d6b09fac69ad16b2647b1d00ef63f214c9b3de8d0ff92ad4",
+    "kind": "s3_pair_root_solver",
+    "native_report_kind": "unknown_log_orbit_slice_ic_run",
+    "online_boundary": "after reusable base/index setup through recovered scalar point replay"
+  },
+  "reference": null,
+  "units": {
+    "count.s3_solves": {
+      "deterministic": true,
+      "host_dependent_because": [],
+      "total": 349610
+    },
+    "time.wall_ns": {
+      "deterministic": false,
+      "host_dependent_because": [
+        "target-online wall clock on the measured host"
+      ],
+      "total": 70425500
+    }
+  },
+  "windows": {
+    "online_one_target": {
+      "composition": {
+        "recovery_check": "timing_ms.target_recovery_check",
+        "target_descent": "timing_ms.target_descent",
+        "target_pdp": "timing_ms.target_pdp_charged",
+        "target_query": "timing_ms.target_query",
+        "target_relation_check": "timing_ms.target_relation_check"
+      },
+      "conformance": "exact",
+      "ops": null,
+      "ops_unit": null,
+      "wall_ns": 70425500
+    },
+    "whole_process": {
+      "conformance": "runner",
+      "ops": null,
+      "ops_unit": null,
+      "wall_ns": null
+    }
+  }
+}

@@ -1,0 +1,118 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.68in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,tikz,xcolor,hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{ISO-1 weak isogeny classes: trace census and invariant audit}
+\author{Research evidence report}
+\date{7 October 2026}
+\begin{document}
+\maketitle
+
+\noindent\textbf{Requested scope.} Base primes $p=37$ through about $200$,
+$q=p^2$, and curves over $\mathbb F_{q^3}=\mathbb F_{p^6}$: label every
+full-2-torsion isogeny class and find a criterion for weak-class reach.
+This round completed the every-trace census at $p=37$ and diagnostic
+censuses at $p=11,13,17$. The other requested primes and an exact
+necessary-and-sufficient criterion remain open.
+
+\medskip
+\noindent\textbf{Method.} A weak representative has
+$y^2=x(x-\alpha)(x-\sigma\alpha)$, with $\sigma$ the $p^2$-Frobenius.
+After translation and $\mathbb F_{p^2}$ square scaling there are
+$2q^2+2q$ normalized representatives. The $p=37$ run evaluated one
+representative per quadratic-twist pair and derived the opposite trace.
+Trace assignment uses a randomized two-point baby-step/giant-step
+counter. Its labels are computational evidence, not independent
+certificates of every cardinality. Full and twist-derived CSVs agreed
+exactly at $p=13$; two false individual assignments at $p=7$ were found
+by exact square-table counting.
+An independent PARI/GP \texttt{ellcard} check placed all 100 distinct
+sampled norm-one Legendre traces at $p=37$ in the census's positive set.
+
+\begin{center}
+\begin{tabular}{@{}r r r r r r r@{}}
+\toprule
+$p$ & $q$ & weak reps & ordinary $t$ & weak $t$ & depth-1 weak & depth-$\geq2$ zero \\
+\midrule
+11 & 121 & 29,524 & 1,210 & 542 & 0/606 & 62/604 \\
+13 & 169 & 57,460 & 2,028 & 928 & 0/1,014 & 86/1,014 \\
+17 & 289 & 167,620 & 4,624 & 2,198 & 0/2,312 & 114/2,312 \\
+\textbf{37} & \textbf{1,369} & \textbf{3,751,060} & \textbf{49,284} & \textbf{24,352} & \textbf{0/24,642} & \textbf{290/24,642} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent At $p=37$ the run took 1,106.807 seconds with four Rayon
+threads and counted 563,856,133,786 $\mathbb F_p$ multiplications.
+The 50,654 CSV rows cover every candidate $t\equiv2\pmod4$ in the
+Hasse interval; 49,284 are ordinary. Of 4,000 sampled random
+full-2-torsion curves, 2,433 were in an observed weak class:
+$0.6083$, Wilson 95\% interval $[0.5930,0.6233]$.
+The zero-label share is 50.59\% of ordinary trace rows but 39.18\%
+of sampled curves; these use different denominators.
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm, every node/.style={font=\small}]
+\node[draw,rounded corners,fill=blue!10,minimum width=3.3cm,minimum height=0.8cm] (trace) at (0,0) {trace $t$, $t\equiv2\pmod4$};
+\node[draw,rounded corners,fill=red!12,minimum width=3.2cm,minimum height=0.8cm] (low) at (4.0,0.6) {$v_2(f_\pi)=1$: 0 weak};
+\node[draw,rounded corners,fill=green!12,minimum width=3.2cm,minimum height=0.8cm] (high) at (4.0,-0.6) {$v_2(f_\pi)\geq2$: mostly weak};
+\draw[->,thick] (trace.east) -- (low.west);
+\draw[->,thick] (trace.east) -- (high.west);
+\end{tikzpicture}
+\end{center}
+
+\noindent\textbf{Candidate invariant.} Let
+$t^2-4p^6=f_\pi^2D_K$, where $D_K$ is the fundamental CM
+discriminant. The measured $v_2(f_\pi)$ is a class-wide bound, not
+a certified endomorphism-ring volcano level. For ordinary
+$t\equiv2\pmod4$, the arithmetic tests
+\[
+ v_2(f_\pi)\geq2\quad\Longleftrightarrow\quad
+ (t/2)^2\equiv p^6\pmod{16}\quad\Longleftrightarrow\quad
+ t/2\equiv\pm p^3\pmod8
+\]
+are equivalent. All observed weak classes at $p=11,13,17,37$ pass.
+This is an \emph{empirical necessary condition}; universal necessity
+is unproved here. It is not sufficient. On held-out $p=37$ rows it
+has 24,352 true positives, 290 false positives, no false negatives,
+and 24,642 true negatives (99.41\% correct).
+
+\noindent\textbf{Counterexample to the proposed small invariants.}
+At $p=37$, $t=-92{,}218$ has zero observed weak representatives and
+$t=38{,}854$ has 24. Both have Frobenius conductor depth 3,
+ramified 2, even maximal-order class number, and the same trace
+modulo $2^{17}$. Their PARI/GP class numbers are 912 and 3,168.
+Thus 2-splitting, conductor depth, small 2-power trace residues,
+and class-number parity do not classify all rows together.
+
+\noindent\textbf{Where the residual zeros occur.} At $p=37$,
+234 of 290 high-depth zero rows lie in the outer fifth of
+$|t|/(2p^3)$ (234/4,930 rows there, versus 6/4,926 in the inner
+fifth). This is an association, not a causal proof or an exact rule.
+
+\medskip
+\noindent\textbf{Correction to prior evidence.} The earlier census
+used an $\mathbb F_p$ nonsquare for the second
+$\mathbb F_{p^2}$ square class. Every nonzero element of $\mathbb F_p$
+is a square in $\mathbb F_{p^2}$, so it duplicated one branch and
+omitted the other. The corrected code selects a genuine
+$\mathbb F_{p^2}$ nonsquare. Old $p\leq31$ values remain historical;
+$p=23,31$ await corrected reruns.
+
+\noindent\textbf{Limit.} At $p=199$ the same algorithm would need
+1,568,278,802 direct point counts even after twist symmetry.
+Scaling the measured $p=37$ run by work count and the approximate
+$p^{3/2}$ cost per point count gives roughly 130 days on comparable
+resources for that prime alone. This is an extrapolation, not a run.
+The requested $p=41$--200 census and a replacement formula have not
+been established.
+
+\medskip
+\noindent\textbf{Evidence.} The accompanying Markdown report links
+the code, complete CSVs, fit output, samples, and SVG. The $p=37$ command used
+\texttt{RAYON\_NUM\_THREADS=4} and \texttt{--derive-twists}.
+The weak-model and reach assumptions are in
+\href{https://eprint.iacr.org/2011/020.pdf}{Joux--Vitse, \S4.1};
+\href{https://arxiv.org/abs/math/0106273}{Auer--Top} proves a
+broader Legendre-family statement.
+\end{document}

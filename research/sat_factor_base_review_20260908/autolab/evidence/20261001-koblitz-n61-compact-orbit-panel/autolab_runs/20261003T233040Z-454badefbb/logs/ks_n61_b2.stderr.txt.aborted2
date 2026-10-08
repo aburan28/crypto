@@ -1,0 +1,22 @@
+
+thread 'main' (13190713) panicked at library/std/src/io/stdio.rs:1165:9:
+failed printing to stdout: No space left on device (os error 28)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+     1091.04 real       933.16 user        17.04 sys
+          2468446208  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              308686  page reclaims
+                  40  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 476  voluntary context switches
+             2275709  involuntary context switches
+      14395433097115  instructions retired
+       2901112737185  cycles elapsed
+          2469611608  peak memory footprint

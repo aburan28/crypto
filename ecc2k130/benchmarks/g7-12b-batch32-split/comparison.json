@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "unit": "billion_complete_scalar_updates_per_second",
+  "scalar_walks_per_arm": 8388576,
+  "updates_per_sample": 34359607296,
+  "timing_samples": 9,
+  "rows": [
+    {
+      "variant": "selected",
+      "median_billion_updates_per_second": 6.274185999999999,
+      "rate_over_12b": 0.5228488333333333,
+      "paired_geomean_speedup": 1.0,
+      "paired_speedup_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rates": [
+        6.3768590000000005,
+        6.274185999999999,
+        6.266754
+      ],
+      "decision": "reference"
+    },
+    {
+      "variant": "batch24",
+      "median_billion_updates_per_second": 6.121832,
+      "rate_over_12b": 0.5101526666666667,
+      "paired_geomean_speedup": 0.9718643702527358,
+      "paired_speedup_95_ci": [
+        0.9619122303922655,
+        0.9819194769792806
+      ],
+      "rates": [
+        6.170801,
+        6.121832,
+        6.092575
+      ],
+      "decision": "unconfirmed or regression"
+    },
+    {
+      "variant": "batch32",
+      "median_billion_updates_per_second": 5.994967,
+      "rate_over_12b": 0.49958058333333333,
+      "paired_geomean_speedup": 0.9482530058834497,
+      "paired_speedup_95_ci": [
+        0.9306251048882132,
+        0.9662148145842336
+      ],
+      "rates": [
+        6.001717999999999,
+        5.994967,
+        5.941788
+      ],
+      "decision": "unconfirmed or regression"
+    }
+  ],
+  "raw_labels": [
+    "timing-r0-selected",
+    "timing-r0-batch24",
+    "timing-r0-batch32",
+    "timing-r1-batch32",
+    "timing-r1-batch24",
+    "timing-r1-selected",
+    "timing-r2-batch24",
+    "timing-r2-selected",
+    "timing-r2-batch32"
+  ],
+  "goal_billion_updates_per_second": 12,
+  "goal_met": false,
+  "generic_work_boundary": "sqrt(n/262)",
+  "generic_work_ratio": 1,
+  "full_dlp_S": null
+}

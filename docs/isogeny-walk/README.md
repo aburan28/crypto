@@ -113,6 +113,110 @@ Choose the primes `ℓ` with `--max-ell N` (every odd prime up to N) or
 | `--prune-local` | after a successful publish, delete the local `curves.yaml` and `isogeny_routes.json` |
 | `--include-atkin` | also try Atkin primes (they find nothing) |
 
+## Compact P-256 grids
+
+The generic `isogeny_walk walk` output keeps the explored multigraph and a
+complete root route for every curve.  For a million-curve screening prefix,
+use the specialised streaming certificate instead:
+
+```bash
+cargo build --release --bin p256_isogeny_million
+M=./target/release/p256_isogeny_million
+C=$(git rev-parse HEAD)
+
+$M --threads 4 generate --side 1000 --source-commit "$C" \
+  --output runs/p256-grid-1m.jsonl.gz > runs/GENERATE.json
+$M --threads 4 verify --input runs/p256-grid-1m.jsonl.gz \
+  --audit-points 2 --audit-seed-x 7 > runs/VERIFY.json
+
+# After the receipts agree, derive deterministic on-demand cache slices.
+$M stage-cache --input runs/p256-grid-1m.jsonl.gz \
+  --generation-receipt runs/GENERATE.json \
+  --verification-receipt runs/VERIFY.json \
+  --run p256-grid-1m-20261006 --output runs/cache
+
+# Uses only the AWS CLI's ambient worker identity. The exact certificate,
+# receipts, and 127 cache parts are content-addressed; complete.json is last.
+$M publish --store s3://BUCKET/p256-isogeny-grid --cache runs/cache \
+  --input runs/p256-grid-1m.jsonl.gz \
+  --generation-receipt runs/GENERATE.json \
+  --verification-receipt runs/VERIFY.json --scratch runs/s3-scratch
+
+# Hydrate the full canonical evidence or one low-latency eight-row slice.
+$M fetch --store s3://BUCKET/p256-isogeny-grid \
+  --run p256-grid-1m-20261006 --output cache/p256-grid-1m.jsonl.gz \
+  --scratch cache/s3-scratch
+$M fetch --store s3://BUCKET/p256-isogeny-grid \
+  --run p256-grid-1m-20261006 --part part-0002-rows-0008-0015 \
+  --output cache/rows-0008-0015.jsonl.gz --scratch cache/s3-scratch
+```
+
+The fixed 1,000 by 1,000 grid has a degree-13 spine and degree-11 rows.  It
+records exactly one explicit kernel-certified parent isogeny for every
+non-root curve, streams deterministic gzip JSON Lines, and independently
+replays root choices, models, generators, identities, detector values, order
+proofs, kernels and target isomorphisms.  Any repeated j-invariant aborts the
+run; it is not replaced by an adaptively selected curve.  This compact grid is
+a registered P-256 screening experiment, not a replacement for the generic
+multigraph walker and not evidence of an ECDLP speedup.  Its frozen protocol is
+[`research/p256_isogeny_million_20261006/PROTOCOL.md`](../../research/p256_isogeny_million_20261006/PROTOCOL.md).
+
+The cache keeps the canonical gzip as the archival byte sequence and derives a
+preamble, 125 eight-row slices, and a summary member.  Concatenating the 127
+members after decompression reproduces the canonical uncompressed bytes.  S3
+objects live at `objects/sha256/<first-two>/<digest>` and are uploaded with a
+declared SHA-256 plus `If-None-Match: *`; `runs/<run>/complete.json` is the only
+authoritative completion record and is created last.  Fetches use a partial
+file, check both stored and decompressed SHA-256, then rename atomically.
+
+`publish` can also commit the compact completion receipt through Cairn by
+adding `--cairn URL --objective ID --identity FILE --cairn-state FILE` (or the
+explicit Stage-0 `--submitter NAME`).  Run it again after the configured Cairn
+epoch to reveal the persisted commitment.  Cairn carries a
+`coordination-receipt` labelled `s3-content-address-only`; S3 remains the byte
+authority, and the receipt is not an ECDLP result or a claim that Cairn replayed
+the million curve certificates.
+
+### Continuing the compact grid by global rows
+
+Do not increase `--side` merely to continue the frozen million prefix. That
+would regenerate and recount the complete square. A strip records a disjoint
+half-open interval of global degree-13 spine rows while keeping the same
+degree-11 row width:
+
+```bash
+$M --threads 4 generate-strip --width 1000 --y-start 1000 --height 64 \
+  --source-commit "$C" --output runs/p256-strip-y1000-h64.jsonl.gz \
+  > runs/STRIP_GENERATE.json
+$M --threads 4 verify-strip --input runs/p256-strip-y1000-h64.jsonl.gz \
+  --audit-points 2 --audit-seed-x 7 > runs/STRIP_VERIFY.json
+
+# This checks both record chains and every full-width j value. It rejects an
+# overlap instead of silently subtracting duplicates.
+$M audit-j-union runs/p256-grid-1m.jsonl.gz \
+  runs/p256-strip-y1000-h64.jsonl.gz > runs/J_UNION.json
+```
+
+For a nonzero `--y-start`, the certificate binds one preceding spine curve as
+context and does not count it. The first emitted spine curve still carries its
+explicit degree-13 kernel certificate; every horizontal curve carries its
+degree-11 certificate. `verify-strip` independently reconstructs the boundary
+from P-256 before replaying the emitted interval. `audit-j-union` is an exact
+identity-accounting gate over already replayed certificates, not a substitute
+for mathematical replay.
+
+Adjacent row coordinates do not by themselves prove distinct curves. Report
+cumulative coverage only after the union audit returns a unique count equal to
+the sum of its inputs. A coordinate collision is retained as a discrepancy and
+is never replaced adaptively. The frozen continuation protocol is
+[`research/p256_j_windows_20261007/PROTOCOL.md`](../../research/p256_j_windows_20261007/PROTOCOL.md).
+
+The executed 64-row continuation passed generation, independent replay and an
+exact union audit: the prior million plus 64,000 new curves yielded 1,064,000
+distinct full-width j-invariants. The
+[result report](../../research/p256_j_windows_20261007/RESULTS.md) preserves
+the receipts, transfer boundary, visuals and the still-unset ECDLP speedup.
+
 ## Sizing
 
 Measured on a 14-core Apple M4 Pro, unisolated.  Treat these as estimates
@@ -132,8 +236,9 @@ for your machine.
 | 100,000 | ~9 GB | ~2 GB | a 16 GB laptop |
 | 300,000 | ~26 GB | ~6 GB | a 32–48 GB machine |
 
-Beyond that, use more machines on different roots or `ℓ` sets rather than
-one bigger walk, until a resumable, streaming walk exists.
+Beyond that, use more machines on different roots or `ℓ` sets for full
+multigraph output.  The compact P-256 grid above is streaming, but deliberately
+retains only one parent edge per curve and has a different coverage contract.
 
 ## Running offline
 
@@ -256,6 +361,41 @@ $B collect --from s3://crypto-autoresearcher/isogeny-walk --run <run id> --of 16
 - **`--walk-from-store`** makes each job fetch the stored walk instead of
   rebuilding it.  Publish the walk first, with `walk --store`.
 - **Credentials.** The workers need AWS credentials for the prefix.
+
+## Portable bounded P-256 task
+
+The separate `p256_isogeny_task` binary packages PR #1351's exact
+degree-11 P-256 prefix as one content-addressed job.  It is useful for testing
+an untrusted worker boundary: the result is accepted only after every edge is
+replayed and every digest is recomputed.
+
+Run the local, no-network path with:
+
+```bash
+tools/run_p256_isogeny_task.sh ./runs/p256-prefix 4096 "$(git rev-parse HEAD)"
+```
+
+For a small integration check, replace `4096` with `2`.  The directory gets
+the input task, compressed certificate, verified result and an offline Cairn
+coordination receipt.  Nothing is submitted.  To emit a TaskQ spec from the
+same task:
+
+```bash
+target/release/p256_isogeny_task plan-taskq \
+  --task runs/p256-prefix/input-task.json --output p256-prefix-taskq.json
+```
+
+The binary also has `publish-cairn`, but it requires
+`--ack-coordination-only`: the current receipt says only that its publisher
+performed a local full replay.  It is not a self-contained Cairn checker and
+must not be used on a paid objective.
+
+This adapter is intentionally one semantic job.  The degree-11 rule produces
+a sequential chain, so changing `run_id` or `task_id` leaves `work_sha256`
+unchanged.  Racing several workers may reduce latency or add redundancy; it
+does not enumerate more curves.  The frozen contract and the frontier-anchor
+requirement for real fan-out are in
+[`research/p256_isogeny_shared_task_20261005/PROTOCOL.md`](../../research/p256_isogeny_shared_task_20261005/PROTOCOL.md).
 
 ## Reading the results
 

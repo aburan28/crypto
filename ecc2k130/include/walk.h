@@ -33,7 +33,7 @@
 // witness; they want a table-walk binary, not a diagnostic.  An explicit
 // ECC_WITNESS=1 alongside the table walk is a different thing and still fails.
 #ifndef ECC_WITNESS
-#if defined(ECC_WALK_TABLE) && ECC_WALK_TABLE
+#if (defined(ECC_WALK_TABLE) && ECC_WALK_TABLE) || (defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23)
 #define ECC_WITNESS 0
 #else
 #define ECC_WITNESS 1
@@ -50,6 +50,10 @@
 // that path's report sites never fill them.
 #if ECC_WITNESS && defined(ECC_WALK_TABLE) && ECC_WALK_TABLE
 #error "WITNESS=1 needs the sigma^j + 1 iteration: the table walk has no (1 + s^j)^{n_j} factorisation. Build with WITNESS=0 or WALK_TABLE=0."
+#endif
+// The x-only walk's kernel never fills the eight counters either.
+#if ECC_WITNESS && defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23
+#error "WITNESS=1 needs the sigma^j + 1 iteration: the x-only walk does not carry the eight counters. Build with WITNESS=0 or PACKED_XONLY_23=0."
 #endif
 
 // Counters are walk state, so a checkpoint written with them cannot be read by

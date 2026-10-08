@@ -2,6 +2,9 @@
 
 `curve_cover_check` constructs and replays explicit covers **H -> E** for
 the supported elliptic model forms in the ICV1 catalog. Findings are in
+the elliptic models in the ICV1 catalog: short Weierstrass models over
+`GF(p)` and over extensions `GF(p^k)` with `p > 3`, and ordinary binary
+models. Findings are in
 [`covers.json`](covers.json), joined to [`registry.json`](registry.json)
 by slug **and the full SHA-256 of the exact model JSON**. The registry's
 model and EC1 identities stay unchanged. The lab browser shows the finding
@@ -36,7 +39,12 @@ Minimum genus and minimum degree remain null.
 Prime moduli pass a fixed 20-base Miller-Rabin screen. This is **not a
 primality proof**: that field's primality remains an explicit registry input
 assumption, including when a row says `verified_over_declared_field`.
-Binary defining polynomials pass the exact Rabin irreducibility criterion.
+Binary defining polynomials pass the exact Rabin irreducibility criterion,
+and so does an extension's modulus `t^k + c_{k-1}t^(k-1) + ... + c_0`, over
+`GF(p)`: `t^(p^k) = t`, and `gcd(t^(p^(k/l)) - t, f) = 1` for every prime
+`l | k`. An extension's field label must be the one ICV1 derives from `p`,
+`k` and the modulus, and its prime `p` passes the same screen as a prime
+field's.
 Canonical coefficients, field-label consistency and the elliptic
 discriminant condition are checked. Field sizes above 4096 bits are rejected.
 The checker certifies model geometry, not the catalog's group order,
@@ -45,6 +53,11 @@ generator or EC1 subgroup parameters.
 The certificate stores ascending-power coefficient arrays for
 
 `H: v^2 + h(u)*v = f(u)` and `x = x(u), y = y_v(u)*v + y_0(u)`.
+
+A field element is one `0x` integer: a prime-field element itself, a binary
+element its polynomial-basis bits, and an element
+`e_0 + e_1*t + ... + e_{k-1}*t^(k-1)` of `GF(p^k)` the integer
+`e_0 + e_1*p + ... + e_{k-1}*p^(k-1)`.
 
 The curves mean their smooth projective models. The verifier substitutes
 the supplied map into the target equation, reduces using H's equation,
@@ -67,6 +80,13 @@ or a repeated root of F. Thus H is a geometrically integral hyperelliptic
 curve of genus 2. Both H and E are quadratic over their coordinate lines;
 the line map has degree 2, so the function-field tower gives
 `[K(H):K(E)]=2`. The map is separable and defined over the **same** field.
+
+**Over an extension `GF(p^k)`** the construction is the same, under the
+same name (`prime_quadratic_pullback_v1`): nothing in it uses that the field
+is prime. The constants `0, 1, 2, 3` are distinct in characteristic
+`p > 3`, the cubic still has at most three roots, and squarefreeness is the
+same gcd, taken over `GF(p^k)`. The map is defined over the model's own
+field `GF(p^k)`, not over `GF(p)`.
 
 This elementary construction is stronger for this one-map question than
 the previously discussed genus-at-most-5 result about *two independent*
@@ -115,8 +135,11 @@ The elliptic factor already accounts for part of the cover's Jacobian;
 its existence alone does not establish cheaper computation there.
 
 The Rust tests enumerate all affine cover points on every nonsingular
-short Weierstrass model over F5, F7 and F11, and on every ordinary model
-over F8. They also reject singular/reducible inputs and altered maps,
+short Weierstrass model over F5, F7, F11 and F25 (`t^2 + 2`), on four
+models over F125 (`t^3 + t + 1`) and on every ordinary model over F8; every
+nonsingular model over F49 (`t^2 + 1`) verifies. Rabin's test over `GF(p)`
+counts the monic irreducible polynomials of degrees 2, 3 and 4 over F5,
+2 over F7, 4 over F2 and 3 over F3, against the necklace formula. They also reject singular/reducible inputs and altered maps,
 coefficients, genus, degree and identity bindings, and replay the entire
 catalog deterministically. Point enumeration checks the maps; the genus
 and function-field degree arguments above establish the geometric claims.

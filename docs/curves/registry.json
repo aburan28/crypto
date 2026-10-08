@@ -381,6 +381,69 @@
    ]
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "icv1": "ICV1:f2m-11-4c26487e:67:1982:0x1:-7:unk:r:ae0facd240e8",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 11,
+    "modulus": "0x913",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-4c26487e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x913\",\"v\":\"1\"}",
+   "trace": 67,
+   "order": "1982",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N11Ce1h41243ed45ca3",
+     "curve_uid": "urn:ec-record:1:sha256:41243ed45ca391b7b99cc37e02cfcd9ad4ae329b034049781a11c9701f91ab59",
+     "field_sha256": "f543818d44d80ccfc7304e554a8996fc088efec91d10737afa8cbd000db626e2",
+     "field": {
+      "characteristic": 2,
+      "degree": 11,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       11,
+       8,
+       4,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "991",
+      "cofactor": 2,
+      "generator": [
+       "0x4a9",
+       "0x3ef"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
    "family": "koblitz",
@@ -486,6 +549,73 @@
    "ec1_unresolved": "KoblitzCurve::new(1, 13) finds no usable prime-order subgroup, so the repository has built no generator on it"
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "icv1": "ICV1:f2m-13-517bd51f:-181:8374:0x1:-7:unk:r:e4cd523ec44f",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 13,
+    "modulus": "0x3d33",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-517bd51f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3d33\",\"v\":\"1\"}",
+   "trace": -181,
+   "order": "8374",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N13Ce1h98fd3bab3884",
+     "curve_uid": "urn:ec-record:1:sha256:98fd3bab3884fa9d550cb6f4afeb86a8ce5cb7b973875cf7ecfe1197de65338c",
+     "field_sha256": "3d031731cfa077f91d91963d5ffb49c0de20961274ee6cb493fe2ad6a899bfc1",
+     "field": {
+      "characteristic": 2,
+      "degree": 13,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       13,
+       12,
+       11,
+       10,
+       8,
+       5,
+       4,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "79",
+      "cofactor": 106,
+      "generator": [
+       "0x112d",
+       "0xbe3"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
    "family": "koblitz",
@@ -556,6 +686,69 @@
       "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "icv1": "ICV1:f2m-15-bcb514a8:275:32494:0x1:-7:unk:r:25edae8389f1",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 15,
+    "modulus": "0x8035",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-bcb514a8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8035\",\"v\":\"1\"}",
+   "trace": 275,
+   "order": "32494",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n15-l5"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N15Ce1h68b09ca2a6f8",
+     "curve_uid": "urn:ec-record:1:sha256:68b09ca2a6f858390f7dfbd1021e3b41ff530d8c7d0161893a0693b9fdfd8a56",
+     "field_sha256": "2b4fd0025d243056fa16f939bfea0b58226de62a02c78bbf316e491178d9e198",
+     "field": {
+      "characteristic": 2,
+      "degree": 15,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       15,
+       5,
+       4,
+       2,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "211",
+      "cofactor": 154,
+      "generator": [
+       "0x8e4",
+       "0x203a"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
      ]
     }
    ]
@@ -662,8 +855,7 @@
     "a": 1,
     "n": 17,
     "modulus": "0x20009",
-    "modulus_rule": "recorded in the run",
-    "generator_call": "KoblitzCurve::new(1, 17)"
+    "modulus_rule": "recorded in the run"
    },
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
    "trace": -101,
@@ -671,6 +863,7 @@
    "j": "0x1",
    "end": "-7",
    "aliases": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
     "K_1/2^17",
@@ -678,14 +871,50 @@
    ],
    "standard_names": [],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "representations": [
+    {
+     "ec1": "EC1N17Ce1h381f66e2762a",
+     "curve_uid": "urn:ec-record:1:sha256:381f66e2762a47b4af4fe5a8b915914be8cbc242ecad57198264dc254c63d57e",
+     "field_sha256": "ec5263b2c422af2421c7e0191c033c81f521be737d653ec90302c138cb1761bc",
+     "field": {
+      "characteristic": 2,
+      "degree": 17,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       17,
+       3,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "65587",
+      "cofactor": 2,
+      "generator": [
+       "0x1fa03",
+       "0xd814"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    },
     {
      "ec1": "EC1N17Ce1hdfbf24105ef5",
      "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d",
@@ -805,8 +1034,7 @@
     "a": 1,
     "n": 19,
     "modulus": "0x80027",
-    "modulus_rule": "recorded in the run",
-    "generator_call": "KoblitzCurve::new(1, 19)"
+    "modulus_rule": "recorded in the run"
    },
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
    "trace": -797,
@@ -814,6 +1042,7 @@
    "j": "0x1",
    "end": "-7",
    "aliases": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
     "K_1/2^19",
@@ -821,14 +1050,52 @@
    ],
    "standard_names": [],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "representations": [
+    {
+     "ec1": "EC1N19Ce1h6186a62ebfaa",
+     "curve_uid": "urn:ec-record:1:sha256:6186a62ebfaa1d11afc99ffa6ef0b9067190b7a03bc67150c379ffbf30e6a7d9",
+     "field_sha256": "d26d0e22ee9d83f595adcd635db277e93215fb5b8992f07f1aef694d8c38c750",
+     "field": {
+      "characteristic": 2,
+      "degree": 19,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       19,
+       5,
+       2,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "262543",
+      "cofactor": 2,
+      "generator": [
+       "0x7e3ea",
+       "0x24541"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    },
     {
      "ec1": "EC1N19Ce1h7e63aa468dcc",
      "curve_uid": "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23",
@@ -1044,6 +1311,81 @@
    ]
   },
   {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "icv1": "ICV1:f2m-23-bb3650c7:-5197:8393806:0x1:-7:unk:r:a023238e6474",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 23,
+    "modulus": "0xdcf5eb",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-bb3650c7\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0xdcf5eb\",\"v\":\"1\"}",
+   "trace": -5197,
+   "order": "8393806",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N23Ce1he238479aae6d",
+     "curve_uid": "urn:ec-record:1:sha256:e238479aae6dae6c48e4c249888db39e58360f2d9d6fd36418f9648bcc0d8b80",
+     "field_sha256": "0cda052d4fbfa35af452fc0fdc71f84cee9ee1d4c8f190cc791b428032153470",
+     "field": {
+      "characteristic": 2,
+      "degree": 23,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       23,
+       22,
+       20,
+       19,
+       18,
+       15,
+       14,
+       13,
+       12,
+       10,
+       8,
+       7,
+       6,
+       5,
+       3,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "4196903",
+      "cofactor": 2,
+      "generator": [
+       "0x2e62c9",
+       "0x55e90c"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "icv1": "ICV1:f2m-29-1a13acc8:-40309:536911222:0x1:-7:unk:r:30c52b963005",
    "family": "koblitz",
@@ -1119,6 +1461,81 @@
    ]
   },
   {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "icv1": "ICV1:f2m-29-797da7cf:-40309:536911222:0x1:-7:unk:r:6aecea52fac9",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 29,
+    "modulus": "0x3a0b7cb9",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-797da7cf\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3a0b7cb9\",\"v\":\"1\"}",
+   "trace": -40309,
+   "order": "536911222",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N29Ce1h7fed23ba87ea",
+     "curve_uid": "urn:ec-record:1:sha256:7fed23ba87eaf8303f4a16985bb0e665733faae9285069c5a430a9bdd9fab8a7",
+     "field_sha256": "a6a97dd064be5cd9ee39a62834ebeb74e82a5eca4fbaec774a318afa97071c4a",
+     "field": {
+      "characteristic": 2,
+      "degree": 29,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       29,
+       28,
+       27,
+       25,
+       19,
+       17,
+       16,
+       14,
+       13,
+       12,
+       11,
+       10,
+       7,
+       5,
+       4,
+       3,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "42457",
+      "cofactor": 12646,
+      "generator": [
+       "0x1a849ba3",
+       "0x4b3542e"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
    "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
    "family": "koblitz",
@@ -1189,6 +1606,77 @@
       "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "icv1": "ICV1:f2m-31-eaa21191:90707:2147392942:0x1:-7:unk:r:5fc996f03a86",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 31,
+    "modulus": "0x851e410f",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-eaa21191\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x851e410f\",\"v\":\"1\"}",
+   "trace": 90707,
+   "order": "2147392942",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n31-l8"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N31Ce1h6be2d6a625f9",
+     "curve_uid": "urn:ec-record:1:sha256:6be2d6a625f9a828dca420147995b710ca572754e3fde55313ff248ee4ec42cc",
+     "field_sha256": "50e1567028464a6e751ffc6ff3403d3e06735b6c7efff545d0c29ac01cf92048",
+     "field": {
+      "characteristic": 2,
+      "degree": 31,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       31,
+       26,
+       24,
+       20,
+       19,
+       18,
+       17,
+       14,
+       8,
+       3,
+       2,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "41231",
+      "cofactor": 52082,
+      "generator": [
+       "0x6347c766",
+       "0xc3503f0"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
      ]
     }
    ]
@@ -5359,6 +5847,187 @@
      },
      "sources": [
       "docs/curves/sources/generated.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x17ef6a3b098891f6b4c529b62f0dd:unk:unk:r:5de3030fefcc",
+   "family": "binary",
+   "params": {
+    "m": 113,
+    "modulus": "0x20000000000000000000000000201",
+    "a": "0x3088250ca6e7c7fe649ce85820f7",
+    "b": "0x162b1a595685a1387c82647bf44cf"
+   },
+   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0x162b1a595685a1387c82647bf44cf\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
+   "trace": -122610772499221213,
+   "order": "10384593717069655379671765157661406",
+   "j": "0x17ef6a3b098891f6b4c529b62f0dd",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N113Crbh2ee3581888f2",
+     "curve_uid": "urn:ec-record:1:sha256:2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386",
+     "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3",
+     "field": {
+      "characteristic": 2,
+      "degree": 113,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       113,
+       9,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       984342157317881800509153672175863,
+       0,
+       0,
+       7194047630107071490846023131022543
+      ],
+      "subgroup_order": "5192296858534827689835882578830703",
+      "cofactor": 2,
+      "generator": [
+       "0x18f4e7a48635b736527e45354b897",
+       "0x7eea00533a71541476d03dcdf4b8"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb",
+   "family": "binary",
+   "params": {
+    "m": 113,
+    "modulus": "0x20000000000000000000000000201",
+    "a": "0x3088250ca6e7c7fe649ce85820f7",
+    "b": "0xe8bee4d3e2260744188be0e9c723"
+   },
+   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0xe8bee4d3e2260744188be0e9c723\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
+   "trace": -122610772499221213,
+   "order": "10384593717069655379671765157661406",
+   "j": "0x6942e38fc45c62366c09aa8204cd",
+   "end": "unk",
+   "aliases": [
+    "sect113r1"
+   ],
+   "standard_names": [
+    "sect113r1"
+   ],
+   "sources": [
+    "src/binary_ecc/curve.rs"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N113Csect113r1hf529f17bd191",
+     "curve_uid": "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97",
+     "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3",
+     "field": {
+      "characteristic": 2,
+      "degree": 113,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       113,
+       9,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       984342157317881800509153672175863,
+       0,
+       0,
+       4720643197658441292834747278018339
+      ],
+      "subgroup_order": "5192296858534827689835882578830703",
+      "cofactor": 2,
+      "generator": [
+       "0x9d73616f35f4ab1407d73562c10f",
+       "0xa52830277958ee84d1315ed31886"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "src/binary_ecc/curve.rs"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0xb1df3d9c423aa919217735a6d6ba:unk:unk:r:fd54d0ebcd45",
+   "family": "binary",
+   "params": {
+    "m": 113,
+    "modulus": "0x20000000000000000000000000201",
+    "a": "0x3088250ca6e7c7fe649ce85820f7",
+    "b": "0x109267245489e254e8f14002629a1"
+   },
+   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0x109267245489e254e8f14002629a1\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
+   "trace": -122610772499221213,
+   "order": "10384593717069655379671765157661406",
+   "j": "0xb1df3d9c423aa919217735a6d6ba",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N113Crbh921ab2cd913f",
+     "curve_uid": "urn:ec-record:1:sha256:921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6",
+     "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3",
+     "field": {
+      "characteristic": 2,
+      "degree": 113,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       113,
+       9,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       984342157317881800509153672175863,
+       0,
+       0,
+       5377884580193163554495428156598689
+      ],
+      "subgroup_order": "5192296858534827689835882578830703",
+      "cofactor": 2,
+      "generator": [
+       "0x13046f06d2108d8dbf031f5a033ab",
+       "0x11bb93fb05d5d549787a527aaf285"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
      ]
     }
    ]
@@ -20568,6 +21237,1001 @@
     }
    ],
    "trace": 4121212830778224615705967802929256988250492817320673387316
+   "slug": "icv1-fp6k11-tm527622722-07ccd925",
+   "icv1": "ICV1:fpk-37-11-02fde89a:-527622722:177917622307083136:16,4,11,23,19,29,29,1,8,23,29:unk:unk:r:07ccd925d696",
+   "family": "extension",
+   "params": {
+    "p": "37",
+    "k": 11,
+    "modulus": [
+     "26",
+     "21",
+     "7",
+     "6",
+     "4",
+     "31",
+     "21",
+     "29",
+     "14",
+     "16",
+     "7"
+    ],
+    "a": [
+     "18",
+     "2",
+     "14",
+     "25",
+     "8",
+     "30",
+     "31",
+     "18",
+     "12",
+     "21",
+     "25"
+    ],
+    "b": [
+     "27",
+     "36",
+     "7",
+     "5",
+     "6",
+     "18",
+     "26",
+     "26",
+     "16",
+     "14",
+     "34"
+    ]
+   },
+   "model_json": "{\"a\":[\"18\",\"2\",\"14\",\"25\",\"8\",\"30\",\"31\",\"18\",\"12\",\"21\",\"25\"],\"b\":[\"27\",\"36\",\"7\",\"5\",\"6\",\"18\",\"26\",\"26\",\"16\",\"14\",\"34\"],\"field\":\"fpk-37-11-02fde89a\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"11\",\"modulus\":[\"26\",\"21\",\"7\",\"6\",\"4\",\"31\",\"21\",\"29\",\"14\",\"16\",\"7\"],\"p\":\"37\",\"v\":\"1\"}",
+   "trace": -527622722,
+   "order": "177917622307083136",
+   "j": "16,4,11,23,19,29,29,1,8,23,29",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E11-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q37D11Cfpkh06d0f78d2fde",
+     "curve_uid": "urn:ec-record:1:sha256:06d0f78d2fdea20265e940969142fcd4daed58279fc2121acc85eb91fff9fce2",
+     "field_sha256": "5b6b560e8be65fa252ffa27ba8ad72d12279a40046188c8fd6650fe206e76892",
+     "field": {
+      "characteristic": 37,
+      "degree": 11,
+      "representation": "polynomial",
+      "modulus": [
+       26,
+       21,
+       7,
+       6,
+       4,
+       31,
+       21,
+       29,
+       14,
+       16,
+       7,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        18,
+        2,
+        14,
+        25,
+        8,
+        30,
+        31,
+        18,
+        12,
+        21,
+        25
+       ],
+       [
+        27,
+        36,
+        7,
+        5,
+        6,
+        18,
+        26,
+        26,
+        16,
+        14,
+        34
+       ]
+      ],
+      "subgroup_order": "49850497589",
+      "cofactor": 3569024,
+      "generator": [
+       [
+        27,
+        35,
+        36,
+        18,
+        20,
+        16,
+        8,
+        16,
+        8,
+        6,
+        30
+       ],
+       [
+        12,
+        5,
+        11,
+        10,
+        33,
+        24,
+        26,
+        24,
+        28,
+        19,
+        32
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/E11-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp9k3-t1227-55c8d640",
+   "icv1": "ICV1:fpk-271-3-725abf60:1227:19901285:202,155,118:unk:unk:r:55c8d6404e98",
+   "family": "extension",
+   "params": {
+    "p": "271",
+    "k": 3,
+    "modulus": [
+     "269",
+     "0",
+     "0"
+    ],
+    "a": [
+     "88",
+     "60",
+     "158"
+    ],
+    "b": [
+     "233",
+     "70",
+     "211"
+    ]
+   },
+   "model_json": "{\"a\":[\"88\",\"60\",\"158\"],\"b\":[\"233\",\"70\",\"211\"],\"field\":\"fpk-271-3-725abf60\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"269\",\"0\",\"0\"],\"p\":\"271\",\"v\":\"1\"}",
+   "trace": 1227,
+   "order": "19901285",
+   "j": "202,155,118",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/H1-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q271D3Cfpkhd6a8a65a8a4c",
+     "curve_uid": "urn:ec-record:1:sha256:d6a8a65a8a4cdc11ee858a30bea829d77dd41024b02530bc0c7c7a8b234885e6",
+     "field_sha256": "e42118a0aa09555de1fde40c9d479bd89757cf6aa3ffb132ab22b7367998066b",
+     "field": {
+      "characteristic": 271,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       269,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        88,
+        60,
+        158
+       ],
+       [
+        233,
+        70,
+        211
+       ]
+      ],
+      "subgroup_order": "50383",
+      "cofactor": 395,
+      "generator": [
+       [
+        88,
+        252,
+        245
+       ],
+       [
+        255,
+        69,
+        184
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/H1-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp9k3-tm4575-aba104ba",
+   "icv1": "ICV1:fpk-271-3-725abf60:-4575:19907087:109,150,85:unk:unk:r:aba104bae738",
+   "family": "extension",
+   "params": {
+    "p": "271",
+    "k": 3,
+    "modulus": [
+     "269",
+     "0",
+     "0"
+    ],
+    "a": [
+     "168",
+     "59",
+     "35"
+    ],
+    "b": [
+     "212",
+     "72",
+     "29"
+    ]
+   },
+   "model_json": "{\"a\":[\"168\",\"59\",\"35\"],\"b\":[\"212\",\"72\",\"29\"],\"field\":\"fpk-271-3-725abf60\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"269\",\"0\",\"0\"],\"p\":\"271\",\"v\":\"1\"}",
+   "trace": -4575,
+   "order": "19907087",
+   "j": "109,150,85",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G1-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q271D3Cfpkh800837f403ee",
+     "curve_uid": "urn:ec-record:1:sha256:800837f403eeba121cd787ec4015aed256fb2046a64e10eca701ac56f11b9b37",
+     "field_sha256": "e42118a0aa09555de1fde40c9d479bd89757cf6aa3ffb132ab22b7367998066b",
+     "field": {
+      "characteristic": 271,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       269,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        168,
+        59,
+        35
+       ],
+       [
+        212,
+        72,
+        29
+       ]
+      ],
+      "subgroup_order": "19907087",
+      "cofactor": 1,
+      "generator": [
+       [
+        14,
+        102,
+        40
+       ],
+       [
+        152,
+        203,
+        44
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/G1-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp10k3-t3589-bbd5cc8b",
+   "icv1": "ICV1:fpk-523-3-c6b97896:3589:143052079:432,170,295:unk:unk:r:bbd5cc8b7e15",
+   "family": "extension",
+   "params": {
+    "p": "523",
+    "k": 3,
+    "modulus": [
+     "521",
+     "0",
+     "0"
+    ],
+    "a": [
+     "345",
+     "215",
+     "106"
+    ],
+    "b": [
+     "424",
+     "373",
+     "36"
+    ]
+   },
+   "model_json": "{\"a\":[\"345\",\"215\",\"106\"],\"b\":[\"424\",\"373\",\"36\"],\"field\":\"fpk-523-3-c6b97896\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"521\",\"0\",\"0\"],\"p\":\"523\",\"v\":\"1\"}",
+   "trace": 3589,
+   "order": "143052079",
+   "j": "432,170,295",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G2-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q523D3Cfpkhfb90ff16ed62",
+     "curve_uid": "urn:ec-record:1:sha256:fb90ff16ed6280a00b19e7f65249080e8fff2a71a2878977102278d641bd7977",
+     "field_sha256": "77b892654796c5e23ecf10181dc19349fb4edb11ded53a8e174f77e087c457a5",
+     "field": {
+      "characteristic": 523,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       521,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        345,
+        215,
+        106
+       ],
+       [
+        424,
+        373,
+        36
+       ]
+      ],
+      "subgroup_order": "143052079",
+      "cofactor": 1,
+      "generator": [
+       [
+        249,
+        32,
+        448
+       ],
+       [
+        386,
+        88,
+        501
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/G2-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp10k3-t41822-dfa3991d",
+   "icv1": "ICV1:fpk-1009-3-e3fbfd05:41822:1027201908:974,955,327:unk:unk:r:dfa3991d2668",
+   "family": "extension",
+   "params": {
+    "p": "1009",
+    "k": 3,
+    "modulus": [
+     "776",
+     "595",
+     "960"
+    ],
+    "a": [
+     "670",
+     "300",
+     "374"
+    ],
+    "b": [
+     "47",
+     "257",
+     "560"
+    ]
+   },
+   "model_json": "{\"a\":[\"670\",\"300\",\"374\"],\"b\":[\"47\",\"257\",\"560\"],\"field\":\"fpk-1009-3-e3fbfd05\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"776\",\"595\",\"960\"],\"p\":\"1009\",\"v\":\"1\"}",
+   "trace": 41822,
+   "order": "1027201908",
+   "j": "974,955,327",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b2/params/C050-cubic-extension.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q1009D3Cfpkh957c64a1ac0d",
+     "curve_uid": "urn:ec-record:1:sha256:957c64a1ac0d70205d16d43a313f3c7c6dc5336178982bd04b3cecbba057594b",
+     "field_sha256": "01e51c4c8605d33ec4884a9afe9f3806a811e5be257950308e974d00cb0c6ece",
+     "field": {
+      "characteristic": 1009,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       776,
+       595,
+       960,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        670,
+        300,
+        374
+       ],
+       [
+        47,
+        257,
+        560
+       ]
+      ],
+      "subgroup_order": "674017",
+      "cofactor": 1524,
+      "generator": [
+       [
+        179,
+        892,
+        250
+       ],
+       [
+        146,
+        197,
+        22
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b2/params/C050-cubic-extension.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp11k3-tm30789-3c2726bc",
+   "icv1": "ICV1:fpk-1039-3-c47db6db:-30789:1121653109:752,81,656:unk:unk:r:3c2726bc5e60",
+   "family": "extension",
+   "params": {
+    "p": "1039",
+    "k": 3,
+    "modulus": [
+     "1037",
+     "0",
+     "0"
+    ],
+    "a": [
+     "335",
+     "1030",
+     "289"
+    ],
+    "b": [
+     "701",
+     "99",
+     "145"
+    ]
+   },
+   "model_json": "{\"a\":[\"335\",\"1030\",\"289\"],\"b\":[\"701\",\"99\",\"145\"],\"field\":\"fpk-1039-3-c47db6db\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"1037\",\"0\",\"0\"],\"p\":\"1039\",\"v\":\"1\"}",
+   "trace": -30789,
+   "order": "1121653109",
+   "j": "752,81,656",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G3-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q1039D3Cfpkh1d1f8afd3a95",
+     "curve_uid": "urn:ec-record:1:sha256:1d1f8afd3a95b5b8d341e196ec918b9984e52584f2987f908879c7285cb92f19",
+     "field_sha256": "bb3e453929417626d341b3ebc5f3a2087f2f5ab5537b01edc30a432f45869a2f",
+     "field": {
+      "characteristic": 1039,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       1037,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        335,
+        1030,
+        289
+       ],
+       [
+        701,
+        99,
+        145
+       ]
+      ],
+      "subgroup_order": "1121653109",
+      "cofactor": 1,
+      "generator": [
+       [
+        792,
+        757,
+        118
+       ],
+       [
+        754,
+        980,
+        697
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/G3-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp12k5-tm296780010-475f4271",
+   "icv1": "ICV1:fpk-2053-5-b778c5c5:-296780010:36470754699785504:584,1698,1294,850,1945:unk:unk:r:475f42718ca5",
+   "family": "extension",
+   "params": {
+    "p": "2053",
+    "k": 5,
+    "modulus": [
+     "1536",
+     "882",
+     "535",
+     "1934",
+     "211"
+    ],
+    "a": [
+     "420",
+     "738",
+     "2017",
+     "1352",
+     "1667"
+    ],
+    "b": [
+     "1807",
+     "597",
+     "1599",
+     "912",
+     "658"
+    ]
+   },
+   "model_json": "{\"a\":[\"420\",\"738\",\"2017\",\"1352\",\"1667\"],\"b\":[\"1807\",\"597\",\"1599\",\"912\",\"658\"],\"field\":\"fpk-2053-5-b778c5c5\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"5\",\"modulus\":[\"1536\",\"882\",\"535\",\"1934\",\"211\"],\"p\":\"2053\",\"v\":\"1\"}",
+   "trace": -296780010,
+   "order": "36470754699785504",
+   "j": "584,1698,1294,850,1945",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E5-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q2053D5Cfpkhe85f97f97912",
+     "curve_uid": "urn:ec-record:1:sha256:e85f97f97912f08c6a5fd63b4cede93430651f82d1b5e687a7e9daa4b7456462",
+     "field_sha256": "0ea22979d523c9c72155127cce14bb14bae709e77e95ee5c8b6a40c2b3abca1a",
+     "field": {
+      "characteristic": 2053,
+      "degree": 5,
+      "representation": "polynomial",
+      "modulus": [
+       1536,
+       882,
+       535,
+       1934,
+       211,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        420,
+        738,
+        2017,
+        1352,
+        1667
+       ],
+       [
+        1807,
+        597,
+        1599,
+        912,
+        658
+       ]
+      ],
+      "subgroup_order": "698780554487",
+      "cofactor": 52192,
+      "generator": [
+       [
+        78,
+        1089,
+        61,
+        911,
+        482
+       ],
+       [
+        126,
+        911,
+        496,
+        1983,
+        1270
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/E5-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp31k2-t1044939202-6687f4aa",
+   "icv1": "ICV1:fpk-2147483647-2-2dd74626:1044939202:4611686013087481408:1684628177,1856063102:unk:unk:r:6687f4aa0d02",
+   "family": "extension",
+   "params": {
+    "p": "2147483647",
+    "k": 2,
+    "modulus": [
+     "996971330",
+     "270963791"
+    ],
+    "a": [
+     "459164876",
+     "1077033002"
+    ],
+    "b": [
+     "87384810",
+     "1624838696"
+    ]
+   },
+   "model_json": "{\"a\":[\"459164876\",\"1077033002\"],\"b\":[\"87384810\",\"1624838696\"],\"field\":\"fpk-2147483647-2-2dd74626\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"996971330\",\"270963791\"],\"p\":\"2147483647\",\"v\":\"1\"}",
+   "trace": 1044939202,
+   "order": "4611686013087481408",
+   "j": "1684628177,1856063102",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E2-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q2147483647D2Cfpkhf7a0a063fa34",
+     "curve_uid": "urn:ec-record:1:sha256:f7a0a063fa34935ec81cc9a9904e5926efbea39d8e1e0a2c45e0dfa2c43460be",
+     "field_sha256": "2f5529645c14abdfd039a8a4f8706a4ec6d8ad334f333febc07707f27c679137",
+     "field": {
+      "characteristic": 2147483647,
+      "degree": 2,
+      "representation": "polynomial",
+      "modulus": [
+       996971330,
+       270963791,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        459164876,
+        1077033002
+       ],
+       [
+        87384810,
+        1624838696
+       ]
+      ],
+      "subgroup_order": "50612514727",
+      "cofactor": 91117504,
+      "generator": [
+       [
+        605757450,
+        1161662889
+       ],
+       [
+        1780798159,
+        718871902
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/E2-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp36k2-tm52676205250-0d78f787",
+   "icv1": "ICV1:fpk-34359738421-2-8286ea01:-52676205250:1180591624412219778492:34103994903,19452403749:unk:unk:r:0d78f7872138",
+   "family": "extension",
+   "params": {
+    "p": "34359738421",
+    "k": 2,
+    "modulus": [
+     "26331252790",
+     "2511667419"
+    ],
+    "a": [
+     "14233520128",
+     "7914896054"
+    ],
+    "b": [
+     "26838110637",
+     "17581638592"
+    ]
+   },
+   "model_json": "{\"a\":[\"14233520128\",\"7914896054\"],\"b\":[\"26838110637\",\"17581638592\"],\"field\":\"fpk-34359738421-2-8286ea01\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"26331252790\",\"2511667419\"],\"p\":\"34359738421\",\"v\":\"1\"}",
+   "trace": -52676205250,
+   "order": "1180591624412219778492",
+   "j": "34103994903,19452403749",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/B2-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q34359738421D2Cfpkh988322aa091b",
+     "curve_uid": "urn:ec-record:1:sha256:988322aa091b3f9eb837e9ae88e8a4fbfe8f9ae554a856d6d59da7792508ddf2",
+     "field_sha256": "e275210105d86a7dfccf1400a61848b6e5b7910acef2899b984972358fe1ef2d",
+     "field": {
+      "characteristic": 34359738421,
+      "degree": 2,
+      "representation": "polynomial",
+      "modulus": [
+       26331252790,
+       2511667419,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        14233520128,
+        7914896054
+       ],
+       [
+        26838110637,
+        17581638592
+       ]
+      ],
+      "subgroup_order": "5986912233091",
+      "cofactor": 197195412,
+      "generator": [
+       [
+        15167988613,
+        19608674438
+       ],
+       [
+        28472194760,
+        22214387862
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/B2-known.json"
+     ]
+    }
+   ]
   }
  ],
  "standards_source": "docs/curves/standards/registry.json"

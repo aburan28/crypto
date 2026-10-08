@@ -1,0 +1,6 @@
+command: RAYON_NUM_THREADS=4 target/release/examples/iso1_class_census 37 research/iso1_weak_classes_20261007/p37_twist_derived.csv --derive-twists
+exit_code: 0
+binary_sha256_at_run: 923d687011fd804adb2fae9c105509f4b2b337b0187a7b0d43d9cdba67864b55
+csv_sha256: e57ab6ef3f84675cf6e6dbb23fcab90158b9bbb568115298fa44ee8ce3d82a6c
+base_commit: 9fbdf13c17184ff0866e61fa326adcfd477b041c
+stderr: p=37 q=1369 reps=3751060 expected=3751060 weak_classes=24352 ordinary_traces=49284 all_traces=50654 muls=563856133786 wall_s=1106.807 method=twist-derived output=research/iso1_weak_classes_20261007/p37_twist_derived.csv

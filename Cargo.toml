@@ -5,6 +5,15 @@ edition = "2021"
 default-run = "crypto"
 description = "Educational comprehensive cryptography library: ECC, RSA, AES, ChaCha20, SHA, KDF, PQC"
 
+# Frozen S3 source snapshots for matched Linux baseline/candidate builds.
+[[example]]
+name = "s3_pair_baseline_frozen"
+path = "experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs"
+
+[[example]]
+name = "s3_pair_candidate_frozen"
+path = "experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs"
+
 [[bin]]
 name = "crypto"
 path = "src/main.rs"
@@ -17,6 +26,12 @@ path = "src/bin/ic.rs"
 name = "quartic-ic"
 path = "src/bin/quartic_ic.rs"
 
+# Standalone construction, certificate replay, checked Jacobian arithmetic,
+# and catalog export for the explicitly supported hyperelliptic families.
+[[bin]]
+name = "hyperelliptic-cover"
+path = "src/bin/hyperelliptic_cover.rs"
+
 # `icx` — index calculus across every standardized curve (catalog + engine).
 [[bin]]
 name = "icx"
@@ -27,6 +42,18 @@ path = "src/bin/icx.rs"
 [[bin]]
 name = "ecc2k-guard"
 path = "src/bin/ecc2k_guard.rs"
+
+# `ecc2k-merge` — the ECC2K-130 distinguished-point merge, byte-for-byte
+# with ecc2k130/aws/merge.py.
+[[bin]]
+name = "ecc2k-merge"
+path = "src/bin/ecc2k_merge.rs"
+
+# `ecc2k-status` — the ECC2K-130 campaign dashboard from the slot table,
+# ported from ecc2k130/aws/status.py.
+[[bin]]
+name = "ecc2k-status"
+path = "src/bin/ecc2k_status.rs"
 
 # Exact CM polarization checker with a standalone catalog/database CLI.
 [[bin]]
@@ -40,6 +67,14 @@ path = "src/bin/jacobian_certificate.rs"
 name = "cryptopro-b-glv-bench"
 path = "src/bin/cryptopro_b_glv_bench.rs"
 
+# `cryptopro-b-chain-sweep` — every chain realisation of the CryptoPro-B
+# GLV endomorphisms (frozen chain set) with the scalar-multiplication
+# parameters around them; counting run with --features cryptopro-b-opcount
+# (research/cryptopro_b_chain_sweep_20261006).
+[[bin]]
+name = "cryptopro-b-chain-sweep"
+path = "src/bin/cryptopro_b_chain_sweep.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
@@ -51,6 +86,9 @@ f4-wide-tables = []
 redis-cache = ["dep:redis"]
 # Verbose tracing in the isogeny rho attack's linear-algebra step.
 rho_debug = []
+# Field-operation counters in the CryptoPro-B field (`cryptopro_b_field::opcount`),
+# for the counting run of `cryptopro-b-chain-sweep`; timing builds leave it off.
+cryptopro-b-opcount = []
 
 [lints.rust]
 # `hashclash_linked` is set by a downstream build script that links the
@@ -95,6 +133,11 @@ hex = "0.4"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["arbitrary_precision"] }
+# `raw_value` lets the P-192 CM certificates parse their one float exactly
+# (`exact_f64` in p192_cm_relation_search.rs) without `float_roundtrip`, which
+# changes every float parse in the crate and broke replay of ecbench evidence
+# sealed under the default parser.
+serde_json = { version = "1.0", features = ["raw_value"] }
 # Data-parallel sweeps for the isogeny experimental harness.
 rayon = "1.10"
 # BLAKE3 is kept as a crate: its Merkle-tree construction is too complex to
@@ -107,6 +150,7 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
+redis = { version = "1.7.0", features = ["tls-native-tls"] }
 
 [[bench]]
 name = "pqc_speed"

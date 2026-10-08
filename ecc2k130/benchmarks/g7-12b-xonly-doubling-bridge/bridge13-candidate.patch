@@ -1,0 +1,103 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/packedengine.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/packedengine.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/packedengine.cuh	2026-09-17 21:47:35.031834780 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/packedengine.cuh	2026-09-17 22:44:44.372320275 +0000
+@@ -26,7 +26,8 @@
+ #endif
+     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
+     unsigned checkpointVersion() const override {
+-        return ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u);
++        return ECC_PACKED_XONLY_BRIDGE1_COMMON ? 5u :
++            (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u));
+     }
+     int checkpointLanes() const override { return 1; }
+ #if ECC_PACKED_POLY_STATE
+@@ -99,8 +100,9 @@
+     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
+         (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
+     const char *name() const {
+-        return ECC_PACKED_XONLY_BRIDGE3 ? "cuda-packed131-xonly23-bridge3" :
+-            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131");
++        return ECC_PACKED_XONLY_BRIDGE1_COMMON ? "cuda-packed131-xonly-bridge1-bridge3" :
++            (ECC_PACKED_XONLY_BRIDGE3 ? "cuda-packed131-xonly23-bridge3" :
++            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131"));
+     }
+     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
+     bool needsReseed() const { return restartPending; }
+@@ -216,6 +218,7 @@
+         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
+         printf("packed x-only 2/3 walk: %d\n", ECC_PACKED_XONLY_23);
+         printf("packed sparse sigma^3 bridge: %d\n", ECC_PACKED_XONLY_BRIDGE3);
++        printf("packed sigma^1 common path: %d\n", ECC_PACKED_XONLY_BRIDGE1_COMMON);
+         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+         printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
+         printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/packedxonly23.cuh	2026-09-17 21:48:34.741913357 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/packedxonly23.cuh	2026-09-17 22:44:44.372088551 +0000
+@@ -265,7 +265,11 @@
+                 const P131 nx = sparseBridge
+                     ? mulPolynomial131(inverseX,
+                         load(p.y, slot, tid, p.threads))
++#if ECC_PACKED_XONLY_BRIDGE1_COMMON
++                    : add131(x, inverseX);
++#else
+                     : squarePolynomial131(add131(x, inverseX));
++#endif
+ #else
+                 P131 nx;
+                 if (localSlot) {
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/ref.h /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/ref.h
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/ref.h	2026-09-17 21:47:35.049165329 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/ref.h	2026-09-17 22:44:44.372209643 +0000
+@@ -28,6 +28,15 @@
+ #if ECC_PACKED_XONLY_BRIDGE3 && !ECC_PACKED_XONLY_23
+ #error "ECC_PACKED_XONLY_BRIDGE3 requires ECC_PACKED_XONLY_23"
+ #endif
++#ifndef ECC_PACKED_XONLY_BRIDGE1_COMMON
++#define ECC_PACKED_XONLY_BRIDGE1_COMMON 0
++#endif
++#if ECC_PACKED_XONLY_BRIDGE1_COMMON != 0 && ECC_PACKED_XONLY_BRIDGE1_COMMON != 1
++#error "ECC_PACKED_XONLY_BRIDGE1_COMMON must be 0 or 1"
++#endif
++#if ECC_PACKED_XONLY_BRIDGE1_COMMON && (!ECC_PACKED_XONLY_BRIDGE3 || !ECC_PACKED_XONLY_DOUBLE_ONLY)
++#error "ECC_PACKED_XONLY_BRIDGE1_COMMON requires the sparse bridge-3 doubling core"
++#endif
+ 
+ typedef unsigned long long u64;
+ 
+@@ -413,7 +422,9 @@
+ #if ECC_PACKED_XONLY_BRIDGE3
+         if ((hw & 31) == 14) return addPt(p, frob(p, 3));
+ #endif
+-#if ECC_PACKED_XONLY_DOUBLE_ONLY
++#if ECC_PACKED_XONLY_BRIDGE1_COMMON
++        return addPt(p, frob(p, 1));
++#elif ECC_PACKED_XONLY_DOUBLE_ONLY
+         return dbl(p);
+ #else
+         const Point twice = dbl(p);
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/solver.h /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/solver.h
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-block-src/include/solver.h	2026-09-17 21:47:35.049248842 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-src/include/solver.h	2026-09-17 22:44:44.372262089 +0000
+@@ -107,12 +107,21 @@
+     U192 multiplier(const unsigned long long *counts) const {
+         U192 mu = u192_from(1);
+ #if ECC_PACKED_XONLY_23
++#if ECC_PACKED_XONLY_BRIDGE1_COMMON
++        if (counts[0]) {
++            U192 e = u192_zero();
++            e.v[0] = counts[0];
++            const U192 bridge1 = mod_add(u192_from(1), spow[1], ell);
++            mu = mod_mul(mu, mod_pow(bridge1, e, ell), ell);
++        }
++#else
+         for (int j = 0; j < 2; ++j) {
+             if (!counts[j]) continue;
+             U192 e = u192_zero();
+             e.v[0] = counts[j];
+             mu = mod_mul(mu, mod_pow(u192_from(j + 2), e, ell), ell);
+         }
++#endif
+ #if ECC_PACKED_XONLY_BRIDGE3
+         if (counts[2]) {
+             U192 e = u192_zero();

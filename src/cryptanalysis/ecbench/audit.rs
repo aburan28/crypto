@@ -13,8 +13,11 @@
 //!   record's status must agree with that check;
 //! - with `--replay N`, N measured deterministic runs are re-executed and
 //!   must reproduce their answer, total, phases, counters and factor base
-//!   exactly.  Operation counts do not depend on the host, so a replay on
-//!   any machine is an independent check of the figure.
+//!   exactly, and their field-operation block when both the record and
+//!   the replay carry one (a record written before the block existed has
+//!   none, and unknown is not a disagreement).  Operation counts do not
+//!   depend on the host, so a replay on any machine is an independent
+//!   check of the figure.
 //!
 //! The receipt names every file by hash and every check by result; its
 //! own SHA-256 is the replay certificate a claim cites.
@@ -516,6 +519,14 @@ pub fn audit_with(
                     }
                     if rep.factor_base != r.factor_base {
                         diffs.push("factor_base");
+                    }
+                    // Field operations compare only when both sides carry
+                    // them: a committed record written before they were
+                    // counted has none, and unknown is not a disagreement.
+                    if let (Some(a), Some(b)) = (rep.field_ops, r.field_ops) {
+                        if a != b {
+                            diffs.push("field_ops");
+                        }
                     }
                     if rep.unpriced != r.cost.unpriced
                         || rep.deterministic != r.cost.deterministic

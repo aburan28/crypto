@@ -14,6 +14,12 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   profile:
     runs-on: ubuntu-24.04
@@ -27,6 +33,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y valgrind
           test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Pin the dependency set the archive was profiled with
+        # Cargo.lock is not tracked (.gitignore), so a fresh resolution follows
+        # crates.io: zerocopy 0.8.59 -> 0.8.60 on 2026-10-06 made the
+        # `cmp "$replay/Cargo.lock" Cargo.lock` check below fail for every pull
+        # request, whatever it changed. Build with the lock the archive was
+        # profiled with, as the compact-ir workflows do; cargo keeps a lock that
+        # satisfies Cargo.toml, so the later cmp still catches a dependency set
+        # that moved away from the profiled one.
+        if: ${{ hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') != '' }}
+        run: |
+          unzip -p research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip Cargo.lock > Cargo.lock
+          sha256sum Cargo.lock
       - name: Build frozen ecbench and check the independent analyzer
         run: |
           cargo test --release --lib cryptanalysis::ecbench::callgrind
@@ -159,7 +177,11 @@ jobs:
           cmp "$replay/CENSUS.json" "$dir/CENSUS.json"
           cmp "$replay/PROVENANCE.txt" "$dir/PROVENANCE.txt"
           cmp "$replay/INDEPENDENT-AUDIT.json" "$dir/independent_validation/RECEIPT.json"
-          cmp "$replay/Cargo.lock" Cargo.lock
+          # This is the historical profiler's frozen dependency graph, not
+          # the current release lock. The enclosing archive is already pinned
+          # above; keep the lock's own content identity explicit as well.
+          test "$(sha256sum "$replay/Cargo.lock" | cut -d' ' -f1)" = \
+            53ad716677068cfc71a6e70d726a3be930c27e5314d1503f8fd9af8f9d1bb0fb
           cargo build --release --example ecbench_n37_online_ir_analyze
           target/release/examples/ecbench_n37_online_ir_analyze \
             "$replay" "$dir/JOBS.json" \

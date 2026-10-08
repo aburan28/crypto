@@ -1,0 +1,18 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n41/n53 shared-rank K8 and K16 carried from n37 in counted units",
+  "description": "Sixteen new public one-target workloads on each of icv1-f2m41-tm2308219-7f48b14a and icv1-f2m53-tm56619371-dac20a85, the four n37 arms with identical method parameters, five paired measured rounds and one warmup. Operation counts are the result at any isolation level; a wall-clock figure needs L2, which this spec requires so that the same file can run on the future L2 host. On macOS every run earns L0 and wall is exploratory.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 41}, {"kind": "koblitz", "a": 0, "n": 53}],
+    "targets_per_curve": 16,
+    "target_seed": 202610055101,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"lanes": "32", "dp_bits": "8", "step_cap_factor": "2000"}}},
+    {"name": "ic-k8", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k16", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k16-control", "role": "control", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}}
+  ],
+  "measurement": {"rounds": 5, "warmup": 1, "order": "alternate", "seed": 202610055102, "isolation_required": "L2", "timeout_seconds": 600}
+}

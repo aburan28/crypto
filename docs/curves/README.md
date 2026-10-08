@@ -13,6 +13,12 @@ same-field cover certificates to each supported catalog model in
 the verified genus, map degree and field assumptions. Descent and DLP
 advantage remain unmeasured.
 
+The [hyperelliptic infrastructure guide](HYPERELLIPTIC_INFRASTRUCTURE.md)
+documents the standalone construction, verification, arithmetic, and catalog
+commands; the one-infinity arithmetic boundary; bounded binary transfer; and
+the additive evidence schema. In particular, the prime even-sextic cover does
+not use the odd-degree one-infinity Jacobian implementation.
+
 [IC curve records and cross-repo links](ic/README.md), including
 [typed links](ic/curve-links/README.md), retain the exact EC1 representations,
 optional trait statuses, and the factor-base/isogeny storage contract beside
@@ -38,6 +44,8 @@ registry equals the one a thread's `curve_ids.json` carries; the builder fails i
 | [`registry.json`](registry.json) | every curve named anywhere in the repository: slug, ICV1, parameters, every legacy spelling that denotes it, and its EC1 representations |
 | [`sources/specs.txt`](sources/specs.txt) | the constructor calls whose curves no tracked record states in full |
 | [`sources/generated.json`](sources/generated.json) | those curves rebuilt: model, subgroup, generator, legacy handle, ICV1 computed in Rust |
+| [`TRAITS.md`](TRAITS.md) | size-independent traits of every registered curve (CM field, conductor, subfield of definition, volcano depths, cofactors, embedding degree) and how to group curves or find similar ones with `curve_traits` |
+| [`traits.json`](traits.json) | those traits, one record per registry curve, each value with its status; built by `cargo run --release --bin curve_traits -- build` |
 
 ## Two identities, and which to use
 

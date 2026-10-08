@@ -1,0 +1,161 @@
+{
+  "schema_version": 2,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "beat_id": "prime.decomposition.m3_gbrl_ffd",
+  "stage": "decomposition",
+  "regime": "prime",
+  "claim_boundary": "Public synthetic Semaev m=3 Buchberger+F_p Macaulay FFD probe in gbrl on fixed F_1000003.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not >=14-bit curve-order claim",
+    "not ledger promotion",
+    "not independent validation"
+  ],
+  "created_at": "2026-09-11T15:53:02.549637+00:00",
+  "n_or_bits": 20,
+  "m_summands": 3,
+  "dimension_l_or_dim": 6,
+  "unknowns": 3,
+  "system_degree": "20",
+  "eq_var_ratio": 1.3333333333333333,
+  "oracle_class": "groebner",
+  "median_ms_per_target": 42.015875,
+  "largest_solvable": {
+    "fb_size": 6,
+    "buchberger_steps": 459,
+    "wall_ms": 212.940667,
+    "ffd": 12,
+    "field": "F_1000003",
+    "note": "toy fixed prime field; not 14-bit j=0 curve order"
+  },
+  "ffd_or_degree_of_regularity": {
+    "status": "measured",
+    "draws": 4,
+    "min": 6,
+    "max": 12,
+    "mean": 9.0,
+    "ffds": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "d_max": 16,
+    "definition": "smallest D>=2 with Macaulay rank < rows and rank < cols over F_p",
+    "note": "FFD observed = 2*|F| on this ladder (fb 3..6 \u2192 6,8,10,12); S4 deg dominates system_degree=20"
+  },
+  "ladder": [
+    {
+      "arith_ops": 2242,
+      "basis_len": 22,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 45,
+      "done": true,
+      "eq_var_ratio": 1.3333333333333333,
+      "eqs": 4,
+      "fb_size": 3,
+      "ffd": 6,
+      "ffd_d_max": 16,
+      "ffd_status": "measured",
+      "ffd_wall_ms": 43.8025,
+      "macaulay_last": {
+        "cols": 968,
+        "degree": 16,
+        "rank": 942,
+        "rows": 1680
+      },
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 12.351166000000001
+    },
+    {
+      "arith_ops": 4060,
+      "basis_len": 52,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 116,
+      "done": true,
+      "eq_var_ratio": 1.3333333333333333,
+      "eqs": 4,
+      "fb_size": 4,
+      "ffd": 8,
+      "ffd_d_max": 16,
+      "ffd_status": "measured",
+      "ffd_wall_ms": 32.2455,
+      "macaulay_last": {
+        "cols": 968,
+        "degree": 16,
+        "rank": 905,
+        "rows": 1365
+      },
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 19.764958999999998
+    },
+    {
+      "arith_ops": 9726,
+      "basis_len": 104,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 250,
+      "done": true,
+      "eq_var_ratio": 1.3333333333333333,
+      "eqs": 4,
+      "fb_size": 5,
+      "ffd": 10,
+      "ffd_d_max": 16,
+      "ffd_status": "measured",
+      "ffd_wall_ms": 30.826292000000002,
+      "macaulay_last": {
+        "cols": 968,
+        "degree": 16,
+        "rank": 844,
+        "rows": 1092
+      },
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 42.015875
+    },
+    {
+      "arith_ops": 24251,
+      "basis_len": 184,
+      "bits_note": "field is fixed F_1000003 (~20-bit prime); not a 14-bit curve order claim",
+      "buchberger_steps": 459,
+      "done": true,
+      "eq_var_ratio": 1.3333333333333333,
+      "eqs": 4,
+      "fb_size": 6,
+      "ffd": 12,
+      "ffd_d_max": 16,
+      "ffd_status": "measured",
+      "ffd_wall_ms": 15.491583,
+      "macaulay_last": {
+        "cols": 968,
+        "degree": 16,
+        "rank": 753,
+        "rows": 858
+      },
+      "nvars": 3,
+      "system_degree": 20,
+      "wall_ms": 212.940667
+    }
+  ],
+  "seeds": {
+    "gbrl_semaev3": "fixed_x_r_24990"
+  },
+  "resource_caps": {},
+  "fixture_hash": "c6ceb44a36b8db827cd48edbc02a51b5de116ee44d207774befd629639d04668",
+  "executable_or_source_hash": {
+    "source": "c6ceb44a36b8db827cd48edbc02a51b5de116ee44d207774befd629639d04668"
+  },
+  "host_id": {
+    "node": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_m3_ffd_20260911/m3_decomp_bench.jsonl",
+    "research/gbrl/src/ffd.rs"
+  ],
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_m3_ffd_20260911/claim_draft.json",
+  "verdict": "M3_BUCHBERGER_LADDER_PASS_FFD_MEASURED_NOT_14BIT_CURVE"
+}
