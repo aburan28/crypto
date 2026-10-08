@@ -1,5 +1,6 @@
 //! EXP7: complete Fourier sweep of cheap point predicates on toy prime curves.
-//! Protocol: research/prime_fourier_flatness_exp7_20261007/PROTOCOL.md
+//! Protocols: research/prime_fourier_flatness_exp7_20261007/PROTOCOL.md
+//! and research/prime_fourier_flatness_exp7_20261007/PROTOCOL_ALL_PATTERNS.md
 
 use crypto_lib::cryptanalysis::ic_boundary::{
     find_prime_order_curve, CountedGroup, GroupOps, PrimeCurve, PrimeInstance, PrimePoint,
@@ -17,14 +18,21 @@ use std::path::Path;
 
 const CURVE_BITS: [u32; 4] = [8, 10, 12, 14];
 const CURVE_SEED: u64 = 20261007;
-const NULL_REPS: usize = 512;
-const CASES: [&str; 9] = [
+const NULL_REPS: usize = 2048;
+const CASES: [&str; 16] = [
     "smooth",
     "cf16",
     "cantor3",
     "hamming",
     "farey",
     "legendre+++",
+    "legendre++-",
+    "legendre+-+",
+    "legendre+--",
+    "legendre-++",
+    "legendre-+-",
+    "legendre--+",
+    "legendre---",
     "sha-x",
     "random-pairs",
     "log-interval",
@@ -256,7 +264,18 @@ fn coordinate_member(case: &str, x: u64, curve: &PrimeCurve) -> bool {
         "cantor3" => cantor_digits(x),
         "hamming" => x.count_ones() <= (63 - p.leading_zeros()) / 2,
         "farey" => farey_height(x, p, (isqrt(p) / 3).max(2)),
-        "legendre+++" => (0..3).all(|i| curve.legendre((x + i) % p) == 1),
+        name if name.starts_with("legendre") => {
+            let signs = name.trim_start_matches("legendre").as_bytes();
+            assert_eq!(signs.len(), 3);
+            signs.iter().enumerate().all(|(i, &sign)| {
+                let desired = match sign {
+                    b'+' => 1,
+                    b'-' => -1,
+                    _ => panic!("bad Legendre sign"),
+                };
+                curve.legendre((x + i as u64) % p) == desired
+            })
+        }
         "sha-x" => {
             let mut input = b"exp7-sha-x-v1".to_vec();
             input.extend_from_slice(&p.to_le_bytes());
@@ -457,7 +476,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "points_by_log": point_rows, "cases": rows
         }));
     }
-    let threshold = 0.05 / 24.0;
+    let threshold = 0.05 / 52.0;
     let mut leads = Vec::new();
     let mut controls_pass = true;
     for curve in &curves {
@@ -479,9 +498,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     let document = json!({
-        "schema": "exp7-fourier-flatness-v1", "source_revision": source_revision,
+        "schema": "exp7-fourier-flatness-v2", "source_revision": source_revision,
         "curve_seed": CURVE_SEED, "null_replicates": NULL_REPS,
-        "candidate_family_cells": 24, "bonferroni_threshold": threshold,
+        "candidate_family_cells": 52, "bonferroni_threshold": threshold,
         "positive_controls_pass": controls_pass, "leads": leads,
         "bitset_order": "byte k/8, bit k%8; index 0 is identity",
         "null_quantile": "nearest-rank ceil(q*R)-1; median averages middle two",
@@ -570,6 +589,16 @@ mod tests {
             assert_eq!(set[k], set[101 - k]);
         }
         assert_eq!(set, random_set(101, 24, true, null_seed(101, "smooth", 0)));
+        let curve = find_prime_order_curve(8, CURVE_SEED).curve;
+        for x in 0..curve.p {
+            let matching_patterns = CASES
+                .iter()
+                .filter(|name| name.starts_with("legendre"))
+                .filter(|name| coordinate_member(name, x, &curve))
+                .count();
+            let expected = usize::from((0..3).all(|i| curve.legendre((x + i) % curve.p) != 0));
+            assert_eq!(matching_patterns, expected, "x={x}");
+        }
     }
 
     #[test]
