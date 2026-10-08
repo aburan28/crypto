@@ -38,8 +38,12 @@ the literature and carries the label LITERATURE-DERIVED unless marked.
 | kernel from `(a′, b′)` | about `ℓ²` | `Õ(ℓ)` [BMSS08], needs `p > 4ℓ` | power sums of `℘` at the kernel |
 | edge certificate | about `ℓ²` | `Õ(ℓ log p)` | UNTESTED: Frobenius-and-`[λ]` closure in place of `[g]` closure |
 
-The `ℓ⁵` construction is the wall.  It is why the cap sits at 61.  Nothing
-downstream is worse than quadratic.
+The `ℓ⁵` construction was the wall.  It is why the cap sat at 61.  Nothing
+downstream is worse than quadratic.  **Landed 2026-10-08 on this branch**:
+the construction in `modpoly.rs` now uses a transform over `F_{p²}` for
+the powers of `j` (P-256 and P-192 have `2⁹⁶ | p + 1`; `p − 1` has one
+factor of two), Kronecker substitution as the fallback for other primes,
+and a blockwise `O(ℓ⁴)` solve.  See [`RESULTS_E5.md`](RESULTS_E5.md).
 
 ## Candidates
 
