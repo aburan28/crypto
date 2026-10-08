@@ -1,0 +1,13 @@
+# R06's GFNI exploration bench, outside the repository's crate: the
+# normal-basis change by byte tables and by GFNI, compared word for word.
+# Its own workspace, so nothing at the root picks it up.
+[package]
+name = "gfnibench"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[profile.release]
+opt-level = 3
+codegen-units = 1

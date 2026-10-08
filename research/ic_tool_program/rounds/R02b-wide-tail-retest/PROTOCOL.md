@@ -345,3 +345,34 @@ stopped run trees are archived in [`stopped/`](stopped/), checked by
 
 **Unchanged:** the hypothesis, the rows and holdouts, the callgrind
 control's rule, the prediction and the success rule.
+
+## Amendment 4 (2026-10-06, after the go/no-go exploration): withdrawn
+
+**The exploration amendment 3 declared ran on v3,** after R07 accepted
+main's head `995ea207` as the baseline
+([record](../../explorations/R02b-go-no-go-20261006/README.md)):
+- **the arms:** the base, against the base plus R02's `candidate.patch`,
+  which applied unchanged, so no port is disclosed;
+- **the tests:** this protocol's, 30 passed on the candidate's tree;
+- **the rows:** `M1`'s two rows at each target size, three rounds, the
+  order alternating, every process isolated.
+
+**The rule's figure, cold time base over candidate, on the clean pairs:**
+- **0.962** at `icv1-f2m59-tm943548413-98844ecc` (5 pairs, interval
+  [0.865, 1.069]);
+- **0.918** at `icv1-f2m61-t158598901-ab42b6c5` (5 pairs, interval
+  [0.858, 0.982]).
+
+On all six pairs the figures are 0.960 and 0.922. Every pair recovered the
+same logarithm in both arms.
+
+**So R02b is withdrawn without running.** The figure is below 1.05 at both
+target sizes; it is below 1, since on v3 the kernel is slower than the
+scalar path it replaces. As item 3 directs:
+- the kernel is retired, as a rejection would have retired it, and no
+  further test of it is declared;
+- the withdrawal counts as neither an acceptance nor a failed round on the
+  scan (plan §11);
+- the stopped trees stay in [`stopped/`](stopped/), never pooled.
+
+**Unchanged:** everything above, which stays on record as declared.
