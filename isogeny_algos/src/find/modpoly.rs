@@ -38,34 +38,35 @@ fn s_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
     for n in 1..len {
         e4[n] = f.mul(c240, f.from_u64(sigma3(n)));
     }
-    let e4_3 = series::mul(f, &series::mul(f, &e4, &e4, len), &e4, len);
-    // prod (1-q^n) via pentagonal numbers
-    let mut eta = vec![f.zero(); len];
-    let mut k: i64 = 0;
-    loop {
-        let mut any = false;
-        for (idx, kk) in [k, -k].into_iter().enumerate() {
-            if k == 0 && idx == 1 {
-                continue;
+    // S = q j = E4^3 / prod(1 - q^n)^24 = (E4 P^8)^3 with P = 1 / prod(1 - q^n) = sum p(n) q^n,
+    // the partition numbers by Euler's pentagonal recurrence (additions only):
+    // p(n) = sum_{k >= 1} (-1)^(k+1) (p(n - k(3k-1)/2) + p(n - k(3k+1)/2)).
+    // Six series products in all (three squarings for P^8, one for E4 P^8, two for the cube).
+    let mut part = vec![f.zero(); len];
+    part[0] = f.one();
+    for n in 1..len {
+        let mut acc = f.zero();
+        let mut k = 1usize;
+        loop {
+            let g1 = k * (3 * k - 1) / 2;
+            if g1 > n {
+                break;
             }
-            let e = kk * (3 * kk - 1) / 2;
-            if e >= 0 && (e as usize) < len {
-                any = true;
-                let sgn = if kk % 2 == 0 { f.one() } else { f.neg(f.one()) };
-                eta[e as usize] = f.add(eta[e as usize], sgn);
+            let mut t = part[n - g1];
+            let g2 = g1 + k; // k (3k + 1) / 2
+            if g2 <= n {
+                t = f.add(t, part[n - g2]);
             }
+            acc = if k % 2 == 1 { f.add(acc, t) } else { f.sub(acc, t) };
+            k += 1;
         }
-        if !any && k > 0 {
-            break;
-        }
-        k += 1;
+        part[n] = acc;
     }
-    let e2 = series::mul(f, &eta, &eta, len);
-    let e4s = series::mul(f, &e2, &e2, len);
-    let e8 = series::mul(f, &e4s, &e4s, len);
-    let e16 = series::mul(f, &e8, &e8, len);
-    let e24 = series::mul(f, &e16, &e8, len);
-    series::mul(f, &e4_3, &series::inv(f, &e24, len), len)
+    let p2 = series::mul(f, &part, &part, len);
+    let p4 = series::mul(f, &p2, &p2, len);
+    let p8 = series::mul(f, &p4, &p4, len);
+    let t = series::mul(f, &e4, &p8, len);
+    series::mul(f, &series::mul(f, &t, &t, len), &t, len)
 }
 
 /// Integer coefficients of Phi_l (symmetric residues of a CRT over 62-bit primes; the
@@ -139,7 +140,8 @@ impl<F: Field> Phi<F> {
     /// of q^{l n} of j^m, as a series in q^n), so Newton's identities give the coefficients of G as
     /// Laurent series with at most a simple pole, to precision q^l; then
     /// E_k = e_k + j(q^l) e_{k-1} is a polynomial of degree <= l + 1 in j, read off its polar part
-    /// and constant term. Cost: l + 1 products of series of length ~l^2 plus O(l^2) short
+    /// and constant term. Cost: about 2 sqrt(l) products of series of length ~l^2 (baby and giant
+    /// powers of S) and l^2 dot products for the coefficients actually read, plus O(l^2) short
     /// products, against the O(l^6) dense solve of `compute_linear_algebra`.
     pub fn compute_hecke(f: &F, ell: usize) -> Phi<F> {
         assert!(f.char() > ell as u64 + 1 || f.char() == 0, "characteristic must exceed l + 1");
@@ -148,13 +150,42 @@ impl<F: Field> Phi<F> {
         let prec = l + 1; // non-negative powers q^0 .. q^l of the e_k(j_r)
         let len = l * prec + l1 + 2; // indices of S^m needed: n + m with n <= l (prec - 1), m <= l + 1
         let s = s_series(f, len);
-        // S^m, m = 0..=l+1 (j^m = q^{-m} S^m)
-        let mut sp: Vec<Vec<F::E>> = vec![vec![f.zero(); len]];
-        sp[0][0] = f.one();
+        let one_series = || {
+            let mut v = vec![f.zero(); len];
+            v[0] = f.one();
+            v
+        };
+        // j^m = q^{-m} S^m. The power sums below read [S^m] only at every l-th index up to ~l^2,
+        // so the full powers are not formed: baby powers S^a (a < bsz) and giant powers
+        // S^(g bsz) are, and each needed coefficient is one dot product
+        // [S^(g bsz + a)]_N = sum_i [S^(g bsz)]_i [S^a]_(N-i). The polar parts (`jpow`) read
+        // [S^d] at indices <= d + 1 only: those powers are kept to l + 3 terms.
+        let low = l1 + 2;
+        let mut sp_low: Vec<Vec<F::E>> = vec![one_series()[..low].to_vec()];
         for m in 1..=l1 {
-            let next = series::mul(f, &sp[m - 1], &s, len);
-            sp.push(next);
+            let next = series::mul(f, &sp_low[m - 1], &s[..low], low);
+            sp_low.push(next);
         }
+        let bsz = ((l1 as f64).sqrt().ceil() as usize).max(1);
+        let mut baby: Vec<Vec<F::E>> = vec![one_series()];
+        for a in 1..bsz {
+            let next = series::mul(f, &baby[a - 1], &s, len);
+            baby.push(next);
+        }
+        let step = series::mul(f, &baby[bsz - 1], &s, len); // S^bsz
+        let mut giant: Vec<Vec<F::E>> = vec![one_series()];
+        for _ in 1..=l / bsz {
+            let next = series::mul(f, giant.last().unwrap(), &step, len);
+            giant.push(next);
+        }
+        let coeff = |m: usize, n: usize| -> F::E {
+            let (g, a) = (m / bsz, m % bsz);
+            match (g, a) {
+                (0, _) => baby[a][n],
+                (_, 0) => giant[g][n],
+                _ => f.dot_rev(&giant[g][..=n], &baby[a][..=n]),
+            }
+        };
         // Laurent series with offset 1: index i <-> q^{i-1}, i = 0 ..= prec
         let w = prec + 1;
         let lf = f.from_u64(l as u64);
@@ -167,27 +198,14 @@ impl<F: Field> Phi<F> {
                 let n = e * l as i64;
                 let idx = n + m as i64;
                 if idx >= 0 && (idx as usize) < len {
-                    *slot = f.mul(lf, sp[m][idx as usize]);
+                    *slot = f.mul(lf, coeff(m, idx as usize));
                 }
             }
             pw.push(v);
         }
-        let lmul = |a: &[F::E], b: &[F::E]| -> Vec<F::E> {
-            // offset-1 Laurent product truncated to q^{prec-1}: (q^{i-1})(q^{k-1}) = q^{i+k-2}
-            let mut r = vec![f.zero(); w];
-            for (i, &x) in a.iter().enumerate() {
-                if f.is_zero(x) {
-                    continue;
-                }
-                for (k, &y) in b.iter().enumerate() {
-                    let t = i + k;
-                    if t >= 1 && t - 1 < w {
-                        r[t - 1] = f.add(r[t - 1], f.mul(x, y));
-                    }
-                }
-            }
-            r
-        };
+        // offset-1 Laurent product truncated to q^{prec-1}: (q^{i-1})(q^{k-1}) = q^{i+k-2}, i.e.
+        // coefficients 1..=w of the plain product (lazily accumulated)
+        let lmul = |a: &[F::E], b: &[F::E]| -> Vec<F::E> { f.conv_trunc(a, b, w + 1)[1..].to_vec() };
         // Newton: k e_k = sum_{i=1}^k (-1)^{i-1} e_{k-i} s_i
         let mut e: Vec<Vec<F::E>> = vec![{
             let mut one = vec![f.zero(); w];
@@ -212,8 +230,8 @@ impl<F: Field> Phi<F> {
         let jpow = |d: usize, ex: i64| -> F::E {
             // coefficient of q^ex in j^d
             let idx = ex + d as i64;
-            if idx >= 0 && (idx as usize) < len {
-                sp[d][idx as usize]
+            if idx >= 0 && (idx as usize) < low {
+                sp_low[d][idx as usize]
             } else {
                 f.zero()
             }
