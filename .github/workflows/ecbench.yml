@@ -52,8 +52,11 @@ jobs:
     runs-on: ubuntu-24.04
     # The committed-evidence step replays every measured run of every
     # committed session; with the pair-claw (about 24 min) and yield-sweep
-    # sessions that no longer fits in an hour on a hosted runner.
-    timeout-minutes: 180
+    # sessions that no longer fits in an hour on a hosted runner, and the
+    # n41/n53 shared-rank session adds 320 verified K16 solves of about
+    # 15-25 s each (its failed cells are not replayed), so three hours is
+    # no longer safe either.
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
