@@ -119,6 +119,7 @@ enum Round {
     R06,
     R07,
     R08,
+    R09,
 }
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]
@@ -596,12 +597,12 @@ enum Command {
     /// class and 3 outside it, so a chain can check before it starts a
     /// round; `run` refuses outside it.
     HostClass { round: Round },
-    /// One of a round's declared steps, natively (R05, R02b, R06, R07, R08).
+    /// One of a round's declared steps, natively (R05, R02b, R06, R07, R08, R09).
     Run {
         round: Round,
         /// R05: plan, manifest-resumed, pin, compare, holdout or extend.
         /// R02b and R07: plan, manifest, pin, aa, compare, holdout, extend,
-        /// callgrind or manifest-resumed; R06 and R08 the same but callgrind.
+        /// callgrind or manifest-resumed; R06, R08 and R09 the same but callgrind.
         step: String,
         /// The repository checkout (default: the current directory).
         #[arg(long, default_value = ".")]
@@ -637,6 +638,7 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R06 => "R06-scan-key",
         Round::R07 => "R07-main-head",
         Round::R08 => "R08-scan-fold",
+        Round::R09 => "R09-slope-keys",
     };
     let round_dir = programme.join("rounds").join(dir);
     Ok((programme, round_dir))
@@ -677,6 +679,7 @@ fn round_spec(round: Round) -> Option<&'static rounds::Spec> {
         Round::R06 => Some(&rounds::r06::SPEC),
         Round::R07 => Some(&rounds::r07::SPEC),
         Round::R08 => Some(&rounds::r08::SPEC),
+        Round::R09 => Some(&rounds::r09::SPEC),
     }
 }
 
@@ -727,7 +730,7 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
             let missing = rounds::missing_features(spec.requires)?;
             if !missing.is_empty() {
                 return Err(format!(
-                    "this host is outside the round's hardware class: it lacks {} of {} (see `icprog host-class`)",
+                    "this host is outside the round's hardware class: it fails {} of {} (`!` marks a feature the class excludes; see `icprog host-class`)",
                     missing.join(", "),
                     spec.requires.join(", ")
                 ));
@@ -775,6 +778,7 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
         Round::R06 => rounds::r06::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R07 => rounds::r07::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R08 => rounds::r08::run(&ctx, step, &b, &arms, &root, &commits)?,
+        Round::R09 => rounds::r09::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
     Ok(match doc {
@@ -932,6 +936,7 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
         Round::R06 => rounds::r06::analyse(&ctx)?,
         Round::R07 => rounds::r07::analyse(&ctx)?,
         Round::R08 => rounds::r08::analyse(&ctx)?,
+        Round::R09 => rounds::r09::analyse(&ctx)?,
     };
     Ok(json::dumps(&doc, 1))
 }
@@ -1673,7 +1678,9 @@ fn main() -> ExitCode {
             },
         ),
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
-            Round::R05 | Round::R02b | Round::R06 | Round::R07 | Round::R08 => report::r05(&doc),
+            Round::R05 | Round::R02b | Round::R06 | Round::R07 | Round::R08 | Round::R09 => {
+                report::r05(&doc)
+            }
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
         }),
         Command::Holdouts {

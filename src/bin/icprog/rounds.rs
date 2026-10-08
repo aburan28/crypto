@@ -445,11 +445,19 @@ pub fn host_has(feature: &str) -> Result<bool, String> {
     }
 }
 
-/// The features of a round's class this host lacks, in the class's order.
+/// The requirements of a round's class this host fails, in the class's
+/// order.  A name is a feature the host must have; `!name` one it must
+/// not, for a class defined by an absence (R09's: the hosts on which the
+/// scan's subtraction is the scalar product, which VPCLMULQDQ would
+/// replace).
 pub fn missing_features(requires: &[&'static str]) -> Result<Vec<&'static str>, String> {
     let mut missing = Vec::new();
     for &f in requires {
-        if !host_has(f)? {
+        let met = match f.strip_prefix('!') {
+            Some(absent) => !host_has(absent)?,
+            None => host_has(f)?,
+        };
+        if !met {
             missing.push(f);
         }
     }
@@ -1540,6 +1548,79 @@ pub mod r08 {
                 root,
                 commits,
                 "the host R08 ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend or manifest-resumed"
+            )),
+        }
+    }
+}
+
+// ── R09: the scan keyed from slopes, pipelined ───────────────────────
+
+pub mod r09 {
+    use super::*;
+
+    /// R09's class: x86-64 with AVX-512F and PCLMULQDQ and without
+    /// VPCLMULQDQ, the hosts on which the scan's subtraction and the
+    /// build's rows are the scalar product the candidate's slope path
+    /// replaces (Skylake-SP and Cascade Lake among them).  Where VPCLMULQDQ
+    /// is present the eight-lane kernel runs instead and the candidate
+    /// keeps it, so no claim is made there.
+    pub const CLASS: &[&str] = &["avx512f", "pclmulqdq", "!vpclmulqdq"];
+
+    /// R09's declaration: the target sizes, eight fresh holdouts at each
+    /// (recipe seeds 226 to 229, `T143` to `T150`), and an interval above
+    /// 1.05 at each, on the suite rows and the holdouts separately.
+    /// Valgrind cannot run the candidate's AVX-512 key, so there are no
+    /// callgrind profiles.
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (226, 143),
+            (226, 144),
+            (227, 145),
+            (227, 146),
+            (228, 147),
+            (228, 148),
+            (229, 149),
+            (229, 150),
+        ],
+        what_this_is: "R09, the scan keyed from slopes and pipelined: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Above(1.05),
+        resumed_note: "the host R09 resumed on after its container changed",
+        requires: CLASS,
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R09's declared steps: R07's, without the callgrind profiles.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R09 ran on, at the round's start",
             ),
             "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
             "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),

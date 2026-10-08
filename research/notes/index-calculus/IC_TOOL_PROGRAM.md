@@ -558,6 +558,40 @@ but no GFNI, VBMI, VBMI2 or VPCLMULQDQ.
   round's timed steps on a host outside it, and `icprog host-class
   <round>` reports the class against the host (§5).
 
+**This host's class, explored, and R09 declared (2026-10-08).** On the
+Cascade Lake host the scan's subtraction is the scalar product at every
+suite size, and the scan costs 38–41 ns a summand: 15.3–15.5 to subtract,
+12.0–13.7 to key, 10–12 for the filter and the admitted keys
+([record](../../ic_tool_program/explorations/slope-keys-cl-20261008/README.md)).
+These are stage diagnostics.
+- **Pipelining alone** (trial `t`'s filter words fetched during trial
+  `t + 1`'s keys) moved the scan 3–7% and cold time not reliably: the
+  fetches came earlier, not cheaper. A2's huge pages, re-checked here,
+  read 0.950 and 1.022.
+- **Keys from slopes** moved it 15–16%. In a normal basis
+  `coords(λ²) = rotl(coords(λ))`, so a rest's key is
+  `c + rotl(c) + d + e` with `c = coords(λ)`: the squaring, the
+  abscissa and its store go for every rejected summand, and only the
+  admitted ones are completed. The build keys its rows the same way.
+- **The final candidate** (that, the pipelining, eight inversion chains
+  and a cheaper rotation step) ran 1.119 [1.093, 1.146], 1.112 [1.060,
+  1.166] and 1.103 [1.071, 1.136] times faster in cold time at the three
+  target sizes, eight pairs each, every logarithm v3's.
+- **R09 is declared on it**
+  ([protocol](../../ic_tool_program/rounds/R09-slope-keys/PROTOCOL.md)),
+  predicted 1.09–1.15×, 1.06–1.17× and 1.07–1.14×, accepted if each
+  interval lies above 1.05 on the suite rows and on fresh holdouts.
+- **Its class is its own:** AVX-512F and PCLMULQDQ without VPCLMULQDQ
+  (`icprog host-class r09`; a `!` in a class now marks an excluded
+  feature). It runs now, on v3; R06 and R08 keep waiting for the
+  reference class, on v3's code. Where VPCLMULQDQ runs the eight-lane
+  kernel, the candidate leaves it in place.
+- **Main has moved under v3** (`4b02be35`), and the standing rule asks for
+  a drift round first. The drift is off the path a round times (the
+  scan, the build and `ic price`'s cold time are unchanged; the SAT
+  decomposition and the strong rho changed), so R09's protocol discloses
+  it and checks it with a pin of main's head instead.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**

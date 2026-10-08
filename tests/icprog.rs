@@ -523,8 +523,17 @@ fn icprog_reports_and_enforces_each_round_s_hardware_class() {
         ("r07", reference),
         ("r06", r06),
         ("r08", r06),
+        ("r09", &["avx512f", "pclmulqdq", "!vpclmulqdq"]),
     ] {
-        let missing: Vec<&str> = class.iter().copied().filter(|f| !host_has(f)).collect();
+        // `!name` is a feature the class excludes: failed where the host has it.
+        let missing: Vec<&str> = class
+            .iter()
+            .copied()
+            .filter(|f| match f.strip_prefix('!') {
+                Some(absent) => host_has(absent),
+                None => !host_has(f),
+            })
+            .collect();
         let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
             .args(["host-class", round])
             .output()
