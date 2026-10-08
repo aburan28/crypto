@@ -76,20 +76,58 @@ def cmd_worker(args) -> None:
                         format="%(asctime)s %(levelname)s %(name)s %(message)s")
     cpus = parse_cpulist(args.cpus) if args.cpus else []
 
+    slots = _worker_slots(args, cpus)
+    base_id = args.id or default_worker_id()
+
     async def go() -> None:
-        fabric = await Fabric(name=f"isolab-worker-{args.id or default_worker_id()}", lease_s=args.lease_seconds).connect()
-        w = Worker(fabric, worker_id=args.id or default_worker_id(), pools=args.pool or ["default"],
-                   labels=_labels(args.label), lab_cpus=cpus, state_dir=Path(args.state_dir).expanduser(),
-                   backend=args.backend, default_image=args.default_image, oci_runtime=args.oci_runtime,
-                   pull_policy=args.pull, userns=args.userns, keep_job_dirs=args.keep_job_dirs,
-                   lock_path=args.lock, cgroup_root=args.cgroup_root)
-        install_signal_handlers(w)
+        from .worker import SlotRegistry
+        registry = SlotRegistry() if slots else None
+        host_lab = sorted({c for s in slots for c in s}) if slots else []
+        fabrics, workers = [], []
         try:
-            await w.start()
-            await w.run_forever(max_jobs=args.max_jobs)
+            for i, slot_cpus in enumerate(slots or [cpus]):
+                slot = f"s{i}" if slots else None
+                wid = f"{base_id}.{slot}" if slot else base_id
+                fabric = await Fabric(name=f"isolab-worker-{wid}", lease_s=args.lease_seconds).connect()
+                fabrics.append(fabric)
+                w = Worker(fabric, worker_id=wid, pools=args.pool or ["default"],
+                           labels={**_labels(args.label), **({"slot": slot} if slot else {})},
+                           lab_cpus=slot_cpus, state_dir=Path(args.state_dir).expanduser().resolve(),
+                           backend=args.backend, default_image=args.default_image, oci_runtime=args.oci_runtime,
+                           pull_policy=args.pull, userns=args.userns, keep_job_dirs=args.keep_job_dirs,
+                           lock_path=args.lock, cgroup_root=args.cgroup_root,
+                           slot=slot, host_lab_cpus=host_lab, registry=registry)
+                workers.append(w)
+                install_signal_handlers(*workers)
+                await w.start()  # one after another: they share the state dir's launcher build
+            await asyncio.gather(*(w.run_forever(max_jobs=args.max_jobs) for w in workers))
         finally:
-            await fabric.close()
+            for fabric in fabrics:
+                await fabric.close()
     asyncio.run(go())
+
+
+def _worker_slots(args, cpus: list[int]) -> list[list[int]]:
+    """The slots asked for: explicit ``--slot`` lists, or ``--slots N`` cut from ``--cpus``; empty for one worker."""
+    if args.slot and args.slots:
+        raise SystemExit("give --slot lists or --slots N, not both")
+    if args.slot:
+        slots = [parse_cpulist(x) for x in args.slot]
+        seen: set[int] = set()
+        for s in slots:
+            if seen & set(s):
+                raise SystemExit(f"--slot lists overlap on cpus {sorted(seen & set(s))}")
+            seen |= set(s)
+        return slots if len(slots) > 1 else []
+    if args.slots and args.slots > 1:
+        from .inventory import Paths, cpu_topology
+        from .planner import PlanError, split_slots
+        topo = cpu_topology(Paths())
+        try:
+            return split_slots(topo, cpus or topo["online"][1:], args.slots)
+        except PlanError as err:
+            raise SystemExit(str(err)) from err
+    return []
 
 
 def cmd_inventory(args) -> None:
@@ -151,6 +189,8 @@ def cmd_images(args) -> None:
         argv = [tool, "build", "-t", tag, "-f", str(d / "Containerfile")]
         for a in args.build_arg or []:
             argv += ["--build-arg", a]
+        if args.ca_bundle:
+            argv += ["--secret", f"id=ca,src={Path(args.ca_bundle).expanduser().resolve()}"]
         argv.append(str(d))
         print("+", " ".join(argv), file=sys.stderr)
         subprocess.run(argv, check=True)
@@ -327,6 +367,9 @@ def main(argv: list[str] | None = None) -> None:
     w.add_argument("--pool", action="append", help="in priority order; default: default")
     w.add_argument("--label", action="append", metavar="K=V")
     w.add_argument("--cpus", help="lab cpus this worker may hand to jobs, e.g. 4-15")
+    w.add_argument("--slots", type=int, help="run N slots, cut from --cpus along whole cores, each taking its own jobs concurrently")
+    w.add_argument("--slot", action="append", metavar="CPULIST",
+                   help="one slot's cpus (repeat for each slot); instead of --slots")
     w.add_argument("--backend", default="auto", choices=["auto", "podman", "docker", "direct"])
     w.add_argument("--default-image", default=os.environ.get("ISOLAB_DEFAULT_IMAGE"))
     w.add_argument("--oci-runtime", help="default OCI runtime for containers (crun, runc, runsc)")
@@ -358,6 +401,7 @@ def main(argv: list[str] | None = None) -> None:
     im.add_argument("names", nargs="*", help="base, sage, cuda")
     im.add_argument("--tool", choices=["podman", "docker"])
     im.add_argument("--build-arg", action="append")
+    im.add_argument("--ca-bundle", metavar="PEM", help="CA bundle for a TLS-intercepting proxy, given to the build as secret id=ca")
     im.set_defaults(fn=cmd_images)
 
     r = sub.add_parser("run", help="submit one command (the common case)")

@@ -190,3 +190,21 @@ def test_reservation_unprivileged_enters_and_exits(tmp_path):
             assert r.mechanisms["cgroup"] and r.job_cgroup is not None and r.job_cgroup.exists()
     if c["cgroup_writable"]:
         assert not r.job_cgroup.exists()
+
+
+def test_image_digest_inspect_format_per_engine():
+    from isolab.runners import DockerBackend, PodmanBackend
+    seen = []
+
+    def run(argv, timeout=None):
+        seen.append(argv)
+        # docker rejects a template naming a key its inspect output lacks
+        if argv[0].endswith("docker") and "{{.Digest}}" in " ".join(argv):
+            return 1, 'template: :1:10: executing "" at <.Digest>: map has no entry for key "Digest"'
+        return 0, 'sha256:abc||["localhost/x@sha256:def"]'
+
+    which = lambda exe: f"/usr/bin/{exe}"
+    d = DockerBackend(run=run, which=which).resolve_image("localhost/x:latest", "never")
+    assert d == {"image": "localhost/x:latest", "id": "sha256:abc", "digest": "sha256:def"}
+    p = PodmanBackend(run=run, which=which).resolve_image("localhost/x:latest", "never")
+    assert p["digest"] == "sha256:def" and "{{.Digest}}" in " ".join(seen[-1])
