@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_public_factor_base_discovery",
+    "31",
+    "0",
+    "3",
+    "5"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 120.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.014042250011698343,
+    "user_seconds": 0.011392,
+    "system_seconds": 0.001266,
+    "total_core_seconds": 0.012657999999999999,
+    "single_core_seconds": 0.012657999999999999,
+    "peak_rss_bytes": 2916352,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

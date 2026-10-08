@@ -1,0 +1,18 @@
+
+running 13 tests
+test cryptanalysis::pq_f4_f2::tests::batched_basis_install_matches_repeated_update ... ok
+test cryptanalysis::pq_f4_f2::tests::dense_monomial_multiply_matches_sorted_reference ... ok
+test cryptanalysis::pq_f4_f2::tests::dense_symbolic_monomial_sets_match_hash_sets ... ok
+test cryptanalysis::pq_f4_f2::tests::direct_mask_order_matches_degrevlex ... ok
+test cryptanalysis::pq_f4_f2::tests::extraction_enumerates_only_the_free_variables ... ok
+test cryptanalysis::pq_f4_f2::tests::f4_and_buchberger_agree_where_buchberger_is_certified ... ok
+test cryptanalysis::pq_f4_f2::tests::grouped_pair_selection_matches_quadratic_update ... ok
+test cryptanalysis::pq_f4_f2::tests::indexed_reducer_selection_matches_linear_scan ... ok
+test cryptanalysis::pq_f4_f2::tests::m4ri_and_streaming_have_the_same_row_space ... ok
+test cryptanalysis::pq_f4_f2::tests::symbolic_memory_cap_is_reported_as_oversize ... ok
+test cryptanalysis::pq_f4_f2::tests::the_basis_is_a_certified_boolean_groebner_basis ... ok
+test cryptanalysis::pq_f4_f2::tests::the_budget_is_reported ... ok
+test cryptanalysis::pq_f4_f2::tests::the_field_pairs_close_the_toy_ideal ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 2906 filtered out; finished in 0.29s
+

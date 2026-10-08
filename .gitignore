@@ -1,11 +1,14 @@
 /target
-Cargo.lock
+**/Cargo.lock
+!/Cargo.lock
+!ecc2k130/dp-ingest/Cargo.lock
+!research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1/data/Cargo.lock
 
 # Claude Code agent worktrees (local scratch checkouts for background
 # subagent tasks; not repository content).
 /.claude/worktrees/
 # Stage 20 deliberately freezes a separate lockfile for its metered,
-# source-archived Rust build while the library root lock remains ignored.
+# source-archived Rust build; the root lock pins the released binaries.
 !research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock
 
 # macOS resource-fork sidecar files (created on filesystems mounted via

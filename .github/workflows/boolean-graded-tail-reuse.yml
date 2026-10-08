@@ -1,0 +1,80 @@
+name: Graded Boolean tail reuse
+
+on:
+  push:
+    paths:
+      - 'research/boolean_graded_tail_reuse_20261003/**'
+      - '.github/workflows/boolean-graded-tail-reuse.yml'
+  pull_request:
+    paths:
+      - 'research/boolean_graded_tail_reuse_20261003/**'
+      - '.github/workflows/boolean-graded-tail-reuse.yml'
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Qualified comparison phase
+        required: true
+        default: discovery
+        type: choice
+        options: [discovery, full]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: boolean-graded-tail-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native mathematical and verifier tests
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_graded_tail_reuse_20261003/Cargo.toml -- --test-threads=1
+      - name: Rust formatting
+        run: cargo fmt --manifest-path research/boolean_graded_tail_reuse_20261003/Cargo.toml --check
+  qualified-discovery:
+    if: github.event_name == 'workflow_dispatch' && inputs.phase == 'discovery'
+    needs: correctness
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 75
+    env:
+      RAYON_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native frozen discovery and resource replay
+        run: bash research/boolean_graded_tail_reuse_20261003/run.sh discovery research/boolean_graded_tail_reuse_20261003/ci_discovery_${{ github.run_id }}_${{ github.run_attempt }}
+      - name: Preserve successful or failed execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boolean-graded-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research/boolean_graded_tail_reuse_20261003/ci_discovery_${{ github.run_id }}_${{ github.run_attempt }}/
+          if-no-files-found: error
+  qualified-full:
+    if: github.event_name == 'workflow_dispatch' && inputs.phase == 'full'
+    needs: correctness
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 75
+    env:
+      RAYON_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native fresh holdouts bound to qualified discovery
+        run: bash research/boolean_graded_tail_reuse_20261003/run.sh full research/boolean_graded_tail_reuse_20261003/ci_full_${{ github.run_id }}_${{ github.run_attempt }} research/boolean_graded_tail_reuse_20261003/qualified_discovery_01
+      - name: Preserve successful or failed execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boolean-graded-full-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research/boolean_graded_tail_reuse_20261003/ci_full_${{ github.run_id }}_${{ github.run_attempt }}/
+          if-no-files-found: error

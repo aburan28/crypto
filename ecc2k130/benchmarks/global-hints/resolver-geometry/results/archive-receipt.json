@@ -1,0 +1,26 @@
+{
+  "schema": "ecc2k130-resolver-geometry-archive-receipt-v1",
+  "sourceCommit": "5c91ec05166342bea08251a4ce6351f926f9fc6c",
+  "provider": "modal",
+  "appId": "ap-C2uddr7YbNrDuB9gql7iZa",
+  "functionCallId": "fc-01M3YS5WFQGW55TH9W3NY2AC31",
+  "recoveryToken": "eadf78ddce55420a8fb16b3e72d21f35",
+  "volume": "ecc2k130-jobs",
+  "volumeObject": "eadf78ddce55420a8fb16b3e72d21f35/results.tgz",
+  "archiveBytes": 167011872,
+  "archiveSha256": "02edcd5e654ee16a2077bc4f3dd69518644fde2f9752fc1f970afe7d3580060d",
+  "archiveEntries": 182,
+  "archivePathAudit": "PASS: sorted listing contains no absolute or parent-traversal member",
+  "launchSha256": "e5b7690f299138610dbe6aeb0c5e380dcfc11ebeace66331d8ac4f842c3c7b11",
+  "resultSha256": "b9e8d2aa388b15c63ee04b2677d91a384f5707c7bf68b2d1f89854ae4e9ac9b9",
+  "independentAuditSourceSha256": "ff0d4b7ee8ab99642ba5734de28f2ba83f9936d0f118632f922b82f86cc33db0",
+  "independentAuditSha256": "35f5d10d6333fdbaf23b75cae02b34564f22430be81e14563c15bf97bf1b7b87",
+  "producerExitCode": 0,
+  "decision": "DO_NOT_PROMOTE",
+  "claimBoundary": {
+    "benchmarkOnly": true,
+    "searchRun": false,
+    "solverRun": false,
+    "collisionRecoveryRun": false
+  }
+}

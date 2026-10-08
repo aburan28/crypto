@@ -1,0 +1,54 @@
+{
+  "schema": "ecc2k130-sparse-table-multicast-probe-v1",
+  "valid": true,
+  "scope": "Primitive exact-layout table timing only; not sparse-walk throughput, search, collision recovery or key recovery.",
+  "provenance": {
+    "sourceRevision": "9603d7653b216fd09d0e3bdc914e494cf40bb19c",
+    "sourceSha256": "f84c73a3cfc25c9065fedaca014fec1a84fd7a0638d60b86c4b072c044a1bde0",
+    "binarySha256": "eceadfbb2abf9baf8e461206594e9129a77faeeeaaf6d106b94059fa77b4efe1",
+    "cubinSha256": "03c7c396a9df117cbfd8f9d121de9eee4cbe622e3356125d5d47466758ea232b",
+    "sassSha256": "1c633829ba9cd476b73038d58feca50c8b13cbf6637d19cab5fdef0a51acb36d",
+    "sassAuditSha256": "31b6fb4aa6124cd3f454ce688da390ac63713a85374535a64947387791704803",
+    "tablesSha256": "0d8662afe5b454c028c6fb38125fadaf1ab836a22414e27b6babe3fc7ec9d8f2",
+    "samplesSha256": "8227860bd3b44985804f5c048a4832fe027d4dcc7c18080df062f4a2dba52aec"
+  },
+  "warmupsExcluded": 7,
+  "rankedSamples": 35,
+  "applicationsPerSample": 6308233216,
+  "ldsInstructionsPerApplication": 88,
+  "medianBillionMapApplicationsPerSecond": {
+    "joint_varying": 28.638982584931,
+    "fixed_normal": 64.225526141236,
+    "fixed_to_beta": 64.237371779930,
+    "fixed_from_beta": 64.245682301486,
+    "joint_fixed_j": 64.250689617549,
+    "joint_uniform_key": 82.976896454549,
+    "fixed_normal_clone": 64.239253313326
+  },
+  "rankedBillionMapApplicationsPerSecond": {
+    "joint_varying": [28.639972602855,28.637199138187,28.639956730284,28.638982584931,28.629080221183],
+    "fixed_normal": [64.215106190909,64.235340646111,64.246980234700,64.215924102048,64.225526141236],
+    "fixed_to_beta": [64.237746081505,64.237371779930,64.232221833177,64.210608052051,64.237666230137],
+    "fixed_from_beta": [64.248487899885,64.234691908074,64.231428455490,64.249805916821,64.245682301486],
+    "joint_fixed_j": [64.240740651144,64.243256305411,64.250689617549,64.252092604794,64.251483471133],
+    "joint_uniform_key": [82.989297443077,82.938251475266,82.979169830454,82.963633415155,82.976896454549],
+    "fixed_normal_clone": [64.239253313326,64.216068734844,64.247484445976,64.251503442545,64.236179034675]
+  },
+  "aaRatiosCloneOverNormal": [1.000376034922,0.999699979621,1.000007848015,1.000554057907,1.000165866970],
+  "aaMaximumAbsoluteDrift": 0.000554057907,
+  "aaNoiseGate": true,
+  "lookupOnlyRouteCapacityBillionUpdatesPerSecond": 11.448092294734,
+  "referenceBillionUpdatesPerSecond": 15.436677000000,
+  "admissionBillionUpdatesPerSecond": 16.208510850000,
+  "lookupRatioToReference": 0.741616365668,
+  "lookupPrerequisitePass": false,
+  "aluSquarePrice": {
+    "controlClmadPerUpdate": 38.125,
+    "candidateClmadPerUpdate": 33.125,
+    "idealClmadCeilingBillionUpdatesPerSecond": 27.582792452830,
+    "addedSourceAluPerUpdate": 75,
+    "candidateChargedReducerMapAndSpreadSourceOpsPerUpdate": 1542.25,
+    "permits26BAtIdealClmadRate": true
+  },
+  "decision": "FAIL_LOOKUP_PREREQUISITE_RETAIN_CONDITIONAL_NO_GO"
+}

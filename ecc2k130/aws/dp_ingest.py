@@ -116,6 +116,10 @@ import time
 import urllib.request
 
 RECORD_BYTES = 32
+# A WITNESS=1 client's corpus: 72-byte records behind a 16-byte header. The
+# campaign contract is 32-byte records, so such an object comes from a
+# misbuilt client and is refused, never decoded as 32-byte records.
+DP_MAGIC_V2 = b"ECC2KDP2"
 CAMPAIGN = os.environ.get("RHO_CAMPAIGN", "ecc2k-130")
 COEFF_BYTES = 17  # 17-byte big-endian mod 2^131, per rho_campaigns.meta
 # dp/slot-00002/1789311001-0000000000000000.bin -- the original worker's
@@ -737,6 +741,14 @@ def ingestObject(conn, s3, bucket, key, found_at):
     Returns (rows added, records seen, collisions found).
     """
     body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
+    if body[:len(DP_MAGIC_V2)] == DP_MAGIC_V2:
+        # Read as 32-byte records its header would be stored as a point and
+        # every record after it as two and a quarter. Raising leaves the
+        # object outstanding, so the page reads INGEST_BEHIND rather than a
+        # fleet adding points nothing can collide with.
+        raise ValueError("%s: a WITNESS=1 corpus (72-byte v2 records); this store "
+                         "takes 32-byte records only, rebuild the client with WITNESS=0"
+                         % key)
     manifest = readEnvelope(s3, bucket, key)
     checkEnvelope(key, body, manifest)
     body = tableRecordBody(body)

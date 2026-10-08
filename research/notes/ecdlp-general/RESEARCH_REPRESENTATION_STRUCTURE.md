@@ -691,7 +691,9 @@ different and neither implies the other:
   cryptographic parameters and lands somewhere more expensive than where
   it started.  Covers of ECC2K-130 exist in **every** genus and all cost
   at least `2^131`, which is `2^70.19×` rho; the genus that would pay
-  sits in `[130, 290…300]`, a window `2^120.77` away.
+  sits in `[130, 290…300]`, a window `2^120.77` away from every GHS descent
+  and `2^20.69` from the best explicit construction, a modular curve
+  ([`RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`](../ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md)).
 
 R5b is the sharper warning of the two, because R5a announces itself — a
 handle that only works on toys looks like a toy — whereas R5b produces a

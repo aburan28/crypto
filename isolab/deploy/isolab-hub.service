@@ -1,0 +1,19 @@
+[Unit]
+Description=isolab hub (NATS JetStream)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/isolab/hub.env
+ExecStart=/opt/isolab/bin/isolab hub --listen ${ISOLAB_HUB_LISTEN} --store ${ISOLAB_HUB_STORE} --token ${ISOLAB_TOKEN} --name ${ISOLAB_HUB_NAME} $ISOLAB_HUB_EXTRA
+Restart=always
+RestartSec=2
+User=isolab
+Group=isolab
+LimitNOFILE=65536
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/isolab/hub
+
+[Install]
+WantedBy=multi-user.target

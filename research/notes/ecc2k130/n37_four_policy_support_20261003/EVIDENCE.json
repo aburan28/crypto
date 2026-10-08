@@ -1,0 +1,50 @@
+{
+  "schema": "n37-four-policy-support-evidence-v1",
+  "pre_registration_commit": "bc19274f0e5a20c3727006de0beddfec4ac7297c",
+  "base_main_commit": "5aa8dd3bb7311f9aa57fc0119b14fada2753d8ff",
+  "input_sha256": {
+    "source_archive_tar_gz": "d0b20298f95cd93a892a7994cd6262548dfbb6b18bf269147de08677b11992ed",
+    "source42_jsonl": "0a32de24a5680ff46baf9543e8bf8e32447323491e2a2adedce2548c14a25f75",
+    "native42_json": "bd4bd8af982bcc65234ae1fae1ad52eb0ed41a1c203bf4d2556fd8e87f788a4c",
+    "degree73_archive_json_gz": "eb4773d556886672e8b80735fc486c16b73765fd5069ff81133100bfc3eafa90"
+  },
+  "final_source_sha256": {
+    "producer": "ae4ddcbdfde89b9663a02960d38fc0b52e617505ebdf7a83b8589c4fd62b491b",
+    "independent_replay": "9b8c5f6da8f4ea9e55381ca1d465a200ae605fd2ab00f7b47388eef68aed1790",
+    "shared_input_parser": "ffe89798e42c70e28075094db9541ca8bc79f92d73d9780aec4112cfe8adb99b"
+  },
+  "runs": [
+    {
+      "name": "initial",
+      "producer_raw_sha256": "bed76a96285f71dfa1387fa14f1f715b3f1ff1011f1964ec254beec66870906c",
+      "producer_gzip_sha256": "c114e313c708a47db8863e6eca91f92130da83294a8105bc823cc3de965154a6",
+      "replay_raw_sha256": "f3d337803e27214d9deb38ca17b9ea36027127092029ba4efa5ddfac870aceae",
+      "replay_gzip_sha256": "ac8dd0361082944cb45ad2e21d1514917f9efeeeee6219ae56b0d0a347651757",
+      "status": "PASS, superseded by explicit negative-map checks"
+    },
+    {
+      "name": "sign_audit",
+      "producer_raw_sha256": "c021eb5f38fa0a2ed23d981d809546f417cb854d2eaf5ad425bd42819cb0fea4",
+      "producer_gzip_sha256": "f78b866858dc0f4245ee0ddd7a543dead0bba6015daef8b65855bcee790984d5",
+      "replay_raw_sha256": "aa20df1faa88d1302ece559fa49697ea83c37136212a7a4ba528d58fbe19ce69",
+      "replay_gzip_sha256": "58f68a12bbcb61f38ef034efdbcad6bb217f982af663197c787e3b11904722ec",
+      "status": "PASS, superseded by retained-memory accounting"
+    },
+    {
+      "name": "final",
+      "producer_raw_sha256": "05664103a6dab090a8b4298f34c0964e6f253f625cd73d661562d85a2fce87af",
+      "producer_bytes": 2611829,
+      "producer_gzip_sha256": "8eac2ae4b8d8f0fc452b7cd7c8edbd3183558e55454abbd67349665bd64610d5",
+      "producer_gzip_bytes": 207435,
+      "replay_raw_sha256": "758159afc85d989d2cb95008c8b0c0e2ac4c411ca9ae14cfed0105b40dc80dd2",
+      "replay_bytes": 575,
+      "policy_arrays_sha256_canonical_jq": "f1e8cb50eb8f191291d979777afde410bd055390f7ed42909158e0a26068b438",
+      "status": "PASS"
+    }
+  ],
+  "decision": "EQUAL_USEFUL_SUPPORT_ADMITTED_FOR_N37_K42",
+  "pdp_yield": null,
+  "rank": null,
+  "s": null,
+  "rho_ratio": null
+}

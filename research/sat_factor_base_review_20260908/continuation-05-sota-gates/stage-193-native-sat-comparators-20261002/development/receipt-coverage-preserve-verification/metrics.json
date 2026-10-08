@@ -1,0 +1,20 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/bin/mv",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/verification.json",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/superseded-receipt-coverage/verification.json"
+  ],
+  "environment": {},
+  "pid": 88502,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 30,
+  "wall_seconds": 0.02379175,
+  "user_seconds": 0.000479,
+  "system_seconds": 0.000621,
+  "total_core_seconds": 0.0011,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 1245184
+}

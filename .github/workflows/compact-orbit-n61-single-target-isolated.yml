@@ -1,0 +1,160 @@
+name: Compact-orbit n61 isolated single-target panel
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compact-orbit-n61-single-target-isolated.yml'
+      - 'examples/koblitz_orbit_dlp_fast_online.rs'
+      - 'examples/koblitz_rho_batch_ks_strong_online.rs'
+      - 'research/sat_factor_base_review_20260908/autolab/**'
+  workflow_dispatch:
+    inputs:
+      workloads:
+        description: 'One-target eval workloads (>= 16)'
+        default: '64'
+        required: true
+      tune_workloads:
+        description: 'Disjoint one-target tune workloads per K'
+        default: '4'
+        required: true
+      k:
+        description: 'Fixed K (empty: tune on the disjoint one-target workloads)'
+        default: ''
+        required: false
+
+permissions:
+  contents: read
+
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            src
+            examples/koblitz_orbit_dlp_fast.rs
+            examples/koblitz_orbit_dlp_fast_online.rs
+            examples/koblitz_rho_batch_ks_strong.rs
+            examples/koblitz_rho_batch_ks_strong_online.rs
+            examples/koblitz_rank_fixture.rs
+            examples/koblitz_rho_fixture.rs
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            research/sat_factor_base_review_20260908/autolab
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
+            research/ic_candidate_tournament_20260915/identity.py
+            research/ic_candidate_tournament_20260915/oracle.py
+            research/ic_single_target_20260930/curve_ids.json
+            tools/curve_identity.py
+            tools/isolated_bench.py
+            .github/workflows/compact-orbit-n61-single-target-isolated.yml
+      - name: Harness tests and single-target guards
+        run: |
+          cd research/sat_factor_base_review_20260908/autolab
+          python3 -m py_compile boundary_autolab.py single_target_panel.py
+          python3 -m unittest test_boundary_autolab.py -v
+          python3 boundary_autolab.py plan > /dev/null
+          if python3 boundary_autolab.py launch-single --beat koblitz.compact_orbit.n61_single_target --workloads 4; then exit 1; fi
+      - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+      - run: cargo build --release --locked --example koblitz_orbit_dlp_fast_online --example koblitz_rho_batch_ks_strong_online --example koblitz_orbit_dlp_fast --example koblitz_rho_batch_ks_strong
+      - run: cargo test --release --locked --example koblitz_rho_batch_ks_strong_online
+
+  measure:
+    if: github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            src
+            examples/koblitz_orbit_dlp_fast.rs
+            examples/koblitz_orbit_dlp_fast_online.rs
+            examples/koblitz_rho_batch_ks_strong.rs
+            examples/koblitz_rho_batch_ks_strong_online.rs
+            examples/koblitz_rank_fixture.rs
+            examples/koblitz_rho_fixture.rs
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            research/sat_factor_base_review_20260908/autolab
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
+            research/ic_candidate_tournament_20260915/identity.py
+            research/ic_candidate_tournament_20260915/oracle.py
+            research/ic_single_target_20260930/curve_ids.json
+            tools/curve_identity.py
+            tools/isolated_bench.py
+            .github/workflows/compact-orbit-n61-single-target-isolated.yml
+      - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+      - run: cargo build --release --locked --example koblitz_orbit_dlp_fast_online --example koblitz_rho_batch_ks_strong_online --example koblitz_orbit_dlp_fast --example koblitz_rho_batch_ks_strong
+      - name: Run the single-target panel through the autolab on a reserved core
+        id: run
+        env:
+          RAYON_NUM_THREADS: '1'
+          WORKLOADS: ${{ inputs.workloads }}
+          TUNE_WORKLOADS: ${{ inputs.tune_workloads }}
+          FIXED_K: ${{ inputs.k }}
+        run: |
+          set -euo pipefail
+          CPU=$(python3 -c 'import os; print(sorted(os.sched_getaffinity(0))[-1])')
+          CPUS=$(cat "/sys/devices/system/cpu/cpu${CPU}/topology/thread_siblings_list")
+          OUT="${{ runner.temp }}/n61-single"
+          RUN_ID="gha-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$OUT"
+          K_ARGS=()
+          if [ -n "$FIXED_K" ]; then K_ARGS=(--k "$FIXED_K"); fi
+          STATUS=1
+          for ATTEMPT in 1 2 3 4 5 6; do
+            sleep 20
+            LOG="$OUT/preflight_${ATTEMPT}.log"
+            set +e
+            python3 tools/isolated_bench.py reserve --cpus "$CPUS" --max-psi 5 \
+              --out "$OUT/isolation.jsonl" --label "compact-orbit-n61-single-W${WORKLOADS}" -- \
+              python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch-single \
+                --beat koblitz.compact_orbit.n61_single_target --workloads "$WORKLOADS" \
+                --tune-workloads "$TUNE_WORKLOADS" --run-id "$RUN_ID" --cpu "$CPU" "${K_ARGS[@]}" > "$LOG" 2>&1
+            STATUS=$?
+            set -e
+            cat "$LOG"
+            if [ "$STATUS" -eq 0 ] || [ -d "research/sat_factor_base_review_20260908/autolab/runs/$RUN_ID" ]; then
+              break
+            fi
+            if ! grep -q '^machine is busy:' "$LOG"; then
+              break
+            fi
+          done
+          RUN_DIR="research/sat_factor_base_review_20260908/autolab/runs/$RUN_ID"
+          if [ -d "$RUN_DIR" ]; then
+            python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py verify --run-id "$RUN_ID" \
+              > "$OUT/verify.json" || true
+            cp -r "$RUN_DIR" "$OUT/run"
+          fi
+          lscpu > "$OUT/lscpu.txt" || true
+          exit "$STATUS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compact-orbit-n61-single-target-W${{ inputs.workloads }}
+          path: ${{ runner.temp }}/n61-single
+          if-no-files-found: warn
+          retention-days: 90

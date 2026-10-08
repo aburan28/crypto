@@ -12,6 +12,7 @@
 //! | `prime-abscissa` | prime | the smallest abscissae carrying a point, one column each |
 //! | `binary-subspace` | binary, Koblitz | points whose abscissa lies in an `F_2`-subspace |
 //! | `koblitz-orbit` | Koblitz | the same, each signed Frobenius orbit folded onto one column |
+//! | `compact-orbit-scan` | Koblitz | deterministic raw-abscissa scan, subgroup projection and signed Frobenius closure |
 //! | `glv-orbit` | prime | the closure of the smallest abscissae under the curve's automorphism group, each orbit folded onto one column (`j = 0`: 6 points a column, `j = 1728`: 4, generic: 2) |
 //! | `gls-line` | GLS over `F_{p²}` | the `ψ`-stable line `x ∈ u·s·F_p`, each `⟨−1, ψ⟩`-orbit folded onto one column (4 points a column) |
 //!
@@ -29,12 +30,15 @@
 //! | `subtract` | 2 | test `R − P ∈ F` for every signed base point; no table |
 //! | `mitm` | 2 or 3 | a pair table probed once per target, or once per `R − P` |
 //! | `mitm-frobenius` | 2 or 3 | the same on a Frobenius-folded table (Koblitz) |
+//! | `mitm-frobenius-counted` | 2 or 3 | the same table and probe, with native table setup counters |
 //!
 //! The pair table is where memory buys time, and `mitm`'s
 //! `negation_folded` parameter halves the additions that build it.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::time::{Duration, Instant};
+
+use num_traits::ToPrimitive;
 
 use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
@@ -47,7 +51,9 @@ use crate::cryptanalysis::ic_boundary::{
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
     FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
 };
+use crate::cryptanalysis::koblitz_factor_base_search::subspace_is_trace_zero;
 use crate::cryptanalysis::koblitz_fast::FastPoint;
+use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
 use crate::cryptanalysis::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base_from_divisor;
 use crate::cryptanalysis::koblitz_symmetrised::{
@@ -143,6 +149,65 @@ pub struct KoblitzOrbitBase<'i> {
     pub instance: &'i BinaryInstance,
 }
 
+/// A signed-Frobenius-orbit base whose abscissa subspace is contained in
+/// `ker Tr_{F_{2^n}/F_2}`.  This is an executable factor-base policy rather
+/// than merely a score attached to a search candidate: a divisor that is not
+/// trace-zero is rejected before relation collection starts.
+pub struct KoblitzTraceZeroBase<'i> {
+    pub instance: &'i BinaryInstance,
+}
+
+impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzTraceZeroBase<'_> {
+    fn name(&self) -> &str {
+        "koblitz-trace-zero"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!(
+            "the trace-zero Frobenius-invariant abscissa subspace selected by divisor {}, each signed orbit folded onto one column",
+            params.get("divisor").unwrap_or("?")
+        )
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[(
+            "divisor",
+            "`;`-separated factors of x^n - 1; the resulting invariant subspace must lie in the absolute-trace kernel",
+        )]
+    }
+
+    fn build(
+        &self,
+        _ctx: &InstanceCtx<BinaryGroup<'a>>,
+        params: &Params,
+        _ops: &mut GroupOps,
+    ) -> Result<FactorBase<FastPoint>, String> {
+        let kc = self
+            .instance
+            .koblitz
+            .as_ref()
+            .ok_or("koblitz-trace-zero requires a Koblitz curve")?;
+        let idx = divisor_indices(params)?;
+        let frob = build_frobenius_factor_base_from_divisor(kc, &idx)
+            .ok_or_else(|| format!("no invariant subspace for divisor {idx:?}"))?;
+        if !subspace_is_trace_zero(kc, &frob) {
+            return Err(format!(
+                "divisor {idx:?} is not trace-zero: at least one abscissa has absolute trace one"
+            ));
+        }
+        koblitz_factor_base(
+            self.instance,
+            &frob,
+            ColumnFold::SignedFrobeniusOrbit,
+            format!(
+                "trace-zero invariant subspace, divisor {idx:?}, dimension {}",
+                frob.ell
+            ),
+        )
+        .ok_or_else(|| "the trace-zero subspace produced no usable factor base".into())
+    }
+}
+
 impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
     fn name(&self) -> &str {
         "koblitz-orbit"
@@ -164,8 +229,9 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
         &[
             (
                 "divisor",
-                "comma-separated indices into the factorisation of the Frobenius characteristic \
-                 polynomial; the invariant subspace they span becomes the abscissa set. This is \
+                "`;`-separated indices into the factorisation of the Frobenius characteristic \
+                 polynomial, e.g. `divisor=1;2` (a `,` would end the parameter on the command \
+                 line); the invariant subspace they span becomes the abscissa set. This is \
                  the knob that chooses the base, so sweeping it sweeps factor bases",
             ),
             (
@@ -186,22 +252,7 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
             .koblitz
             .as_ref()
             .ok_or("this instance is not a Koblitz curve, so it has no Frobenius to fold by")?;
-        let raw = params
-            .get("divisor")
-            .ok_or("missing parameter `divisor`; try 0 or 0,1")?;
-        let idx: Result<Vec<usize>, String> = raw
-            .split([',', ';'])
-            .filter(|s| !s.is_empty())
-            .map(|s| {
-                s.trim()
-                    .parse::<usize>()
-                    .map_err(|_| format!("divisor index `{s}` is not a number"))
-            })
-            .collect();
-        let idx = idx?;
-        if idx.is_empty() {
-            return Err("parameter `divisor` selected no factors".into());
-        }
+        let idx = divisor_indices(params)?;
         let frob = build_frobenius_factor_base_from_divisor(kc, &idx)
             .ok_or_else(|| format!("no invariant subspace for divisor {idx:?} on this curve"))?;
         let fold = if params.flag("no_fold") {
@@ -219,6 +270,204 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
             ),
         )
         .ok_or_else(|| "the invariant subspace produced no usable factor base".into())
+    }
+}
+
+/// The archived compact-orbit producer's public, deterministic raw-x scan.
+/// All group work is charged to `ops`; native field and container work is
+/// retained on the base as priced counters or explicit lower-bound gaps.
+pub struct CompactOrbitScanBase<'i> {
+    pub instance: &'i BinaryInstance,
+}
+
+impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
+    fn name(&self) -> &str {
+        "compact-orbit-scan"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!(
+            "the first {} distinct projected signed Frobenius orbits from raw x <= {}",
+            params.get("columns").unwrap_or("?"),
+            params.get("raw_x_cap").unwrap_or("?")
+        )
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            ("columns", "number of distinct signed Frobenius orbits"),
+            (
+                "raw_x_cap",
+                "inclusive maximum raw abscissa; exhaustion is an error",
+            ),
+        ]
+    }
+
+    fn build(
+        &self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<FactorBase<FastPoint>, String> {
+        let inst = self.instance;
+        let kc = inst
+            .koblitz
+            .as_ref()
+            .ok_or("compact-orbit-scan requires a Koblitz curve")?;
+        if ctx.r != inst.r || ctx.cofactor != inst.cofactor || ctx.field_degree != Some(inst.n) {
+            return Err("compact-orbit-scan context does not match its binary instance".into());
+        }
+        let columns =
+            usize::try_from(params.u64("columns")?).map_err(|_| "columns does not fit in usize")?;
+        let raw_x_cap = params.u64("raw_x_cap")?;
+        if columns == 0 || raw_x_cap == 0 || inst.n == 0 || inst.n >= 64 || inst.n.is_multiple_of(2)
+        {
+            return Err(
+                "compact-orbit-scan requires positive columns and cap and odd degree < 64".into(),
+            );
+        }
+        // The archived source selects the half-trace root first. The
+        // framework's linear Artin-Schreier solver can choose its other
+        // valid root, changing representatives, point order and base hash.
+        let source_curve = FastBinaryCurve::new(&inst.irreducible, inst.a)
+            .ok_or("compact-orbit source curve is outside its field limit")?;
+        let orbit_size = (inst.n as usize)
+            .checked_mul(2)
+            .ok_or("orbit size overflows usize")?;
+        let capacity = columns
+            .checked_mul(orbit_size)
+            .ok_or("factor base size overflows usize")?;
+        let lambda = kc
+            .lambda
+            .to_u64()
+            .ok_or("Frobenius eigenvalue does not fit in u64")?;
+        let g = ctx.group;
+        let mut seen = HashSet::new();
+        let mut points = Vec::with_capacity(capacity);
+        let mut col_of = Vec::with_capacity(capacity);
+        let mut coef_of = Vec::with_capacity(capacity);
+        let mut scanned = 0u64;
+        let mut lifts = 0u64;
+        let mut projected = 0u64;
+        let mut key_squares = 0u64;
+        let mut frobenius_maps = 0u64;
+        let mut equation_checks = 0u64;
+        let max_x = raw_x_cap.min((1u64 << inst.n) - 1);
+        for raw_x in 1..=max_x {
+            scanned += 1;
+            for source_point in source_curve.points_with_x(inst.b, raw_x) {
+                let (x, y) = source_point.ok_or("raw-x lift unexpectedly returned infinity")?;
+                let point = FastPoint::affine(x, y);
+                lifts += 1;
+                let seed = g.mul(ops, point, ctx.cofactor);
+                if g.is_identity(&seed) || seed.x <= 1 {
+                    continue;
+                }
+                projected += 1;
+                equation_checks += 1;
+                if !inst.fast.is_on_curve(seed) {
+                    return Err(format!("projected point from raw x {raw_x} is off curve"));
+                }
+                let mut x = seed.x;
+                let mut key = x;
+                for _ in 1..inst.n {
+                    x = inst.gf.sqr(x);
+                    key = key.min(x);
+                    key_squares += 1;
+                }
+                if !seen.insert(key) {
+                    continue;
+                }
+                if !g.is_identity(&g.mul(ops, seed, ctx.r)) {
+                    return Err(format!(
+                        "projected point from raw x {raw_x} has wrong order"
+                    ));
+                }
+                if g.mul(ops, seed, lambda) != inst.fast.frobenius_k(seed, 1) {
+                    return Err(format!(
+                        "Frobenius eigenvalue check failed for raw x {raw_x}"
+                    ));
+                }
+                frobenius_maps += 1;
+                let column = seen.len() - 1;
+                let mut member = seed;
+                let mut coefficient = 1u64;
+                for _ in 0..inst.n {
+                    equation_checks += 1;
+                    if !inst.fast.is_on_curve(member) {
+                        return Err(format!("Frobenius image from raw x {raw_x} is off curve"));
+                    }
+                    points.push(member);
+                    col_of.push(column);
+                    coef_of.push(coefficient);
+                    points.push(g.neg(member));
+                    col_of.push(column);
+                    coef_of.push((ctx.r - coefficient) % ctx.r);
+                    member = inst.fast.frobenius_k(member, 1);
+                    frobenius_maps += 1;
+                    coefficient = ((coefficient as u128 * lambda as u128) % ctx.r as u128) as u64;
+                }
+                if member != seed || coefficient != 1 {
+                    return Err(format!("Frobenius orbit from raw x {raw_x} is not closed"));
+                }
+                if seen.len() == columns {
+                    break;
+                }
+            }
+            if seen.len() == columns {
+                break;
+            }
+        }
+        if seen.len() != columns {
+            return Err(format!(
+                "raw-x cap {raw_x_cap} exhausted after {scanned} abscissae with {} of {columns} orbits",
+                seen.len()
+            ));
+        }
+        let mut fb = FactorBase::from_column_map(
+            format!("first {columns} projected signed Frobenius orbits, raw x <= {raw_x_cap}"),
+            points,
+            col_of,
+            coef_of,
+            columns,
+            |p| p.pack(),
+            |p| inst.fast.neg(*p).pack(),
+            |p| p.x,
+        )?;
+        fb.cost.count("abscissae_scanned_uncharged", scanned);
+        fb.cost.count("inversions", scanned);
+        fb.cost.count("legacy_as_solves_uncharged", scanned);
+        fb.cost.count("point_lifts_uncharged", lifts);
+        fb.cost.count(
+            "lift_field_squares_uncharged",
+            scanned * inst.n as u64 + lifts / 2 * (inst.n as u64 - 1),
+        );
+        fb.cost
+            .count("lift_field_multiplies_uncharged", scanned + lifts / 2);
+        fb.cost.count("cofactor_projected_points", projected);
+        fb.cost
+            .count("curve_equation_checks_uncharged", equation_checks);
+        fb.cost
+            .count("min_key_field_squares_uncharged", key_squares);
+        fb.cost.count("frobenius_maps", frobenius_maps);
+        fb.cost.count(
+            "hash_probes_uncharged",
+            projected + fb.points.len() as u64 * 3,
+        );
+        fb.cost.count(
+            "point_negations_uncharged",
+            lifts / 2 + columns as u64 * inst.n as u64 + fb.points.len() as u64,
+        );
+        fb.cost
+            .count("factor_point_inserts_uncharged", fb.points.len() as u64);
+        fb.cost.count(
+            "factor_base_vec_bytes_floor_uncharged",
+            (fb.points.len() * std::mem::size_of::<FastPoint>()
+                + fb.col_of.len() * std::mem::size_of::<usize>()
+                + fb.coef_of.len() * std::mem::size_of::<u64>()
+                + fb.neg_index.len() * std::mem::size_of::<usize>()) as u64,
+        );
+        Ok(fb)
     }
 }
 
@@ -441,6 +690,7 @@ pub struct FrobeniusMitmOracle<'i> {
     m: u32,
     instance: &'i BinaryInstance,
     table: Option<FrobeniusPairTable>,
+    count_setup: bool,
 }
 
 impl<'i> FrobeniusMitmOracle<'i> {
@@ -449,13 +699,27 @@ impl<'i> FrobeniusMitmOracle<'i> {
             m,
             instance,
             table: None,
+            count_setup: false,
+        }
+    }
+
+    pub fn new_counted(m: u32, instance: &'i BinaryInstance) -> Self {
+        Self {
+            m,
+            instance,
+            table: None,
+            count_setup: true,
         }
     }
 }
 
 impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
     fn name(&self) -> &str {
-        "mitm-frobenius"
+        if self.count_setup {
+            "mitm-frobenius-counted"
+        } else {
+            "mitm-frobenius"
+        }
     }
 
     fn summands(&self) -> u32 {
@@ -478,6 +742,20 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
         ops.merge(table.build_ops);
         self.table = Some(table);
         Ok(())
+    }
+
+    fn setup_native(&self) -> BTreeMap<String, u64> {
+        let mut counts = BTreeMap::new();
+        if self.count_setup {
+            if let Some(table) = &self.table {
+                counts.insert("canonicalisations".into(), table.build_canonicalisations);
+                counts.insert("frobenius_maps".into(), table.build_frobenius_maps);
+                counts.insert("lookups".into(), table.build_lookups);
+                counts.insert("pair_table_entries".into(), table.entries);
+                counts.insert("pair_table_representatives".into(), table.representatives);
+            }
+        }
+        counts
     }
 
     fn decompose(
@@ -756,7 +1034,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
 
 /// Parse a `divisor` parameter: indices into
 /// [`crate::cryptanalysis::koblitz_index_calculus::all_factors_of_x_n_minus_1`],
-/// separated by `;` (a `,` would split the plug-in spec itself).
+/// separated by `;` (a `,` would split the plug-in spec itself; a `,` is
+/// still accepted here for a [`Params`] built in code, but
+/// [`Params::parse_spec`] never lets one through from a command line).
 fn divisor_indices(params: &Params) -> Result<Vec<usize>, String> {
     let raw = params
         .get("divisor")
@@ -816,9 +1096,10 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzSymmetrisedBase<'_> {
         &[
             (
                 "divisor",
-                "`;`-separated indices into the factorisation of xⁿ − 1 (index 0 is x + 1, which \
-                 must be included so that 1 ∈ V); the same indices on koblitz-orbit give the \
-                 x-frame base for the same V",
+                "`;`-separated indices into the factorisation of xⁿ − 1, e.g. `divisor=0;1` (a `,` \
+                 would end the parameter on the command line); index 0 is x + 1, which must be \
+                 included so that 1 ∈ V; the same indices on koblitz-orbit give the x-frame base \
+                 for the same V",
             ),
             (
                 "no_fold",
@@ -1142,5 +1423,147 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
 
     fn solver_totals(&self) -> Option<SolverTotals> {
         Some(self.totals.clone())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cryptanalysis::ic_boundary::koblitz_instance;
+
+    /// The command-line form of a multi-factor divisor, end to end from
+    /// the plug-in string to the indices both Koblitz bases read.
+    #[test]
+    fn divisor_indices_parse_the_semicolon_form_from_a_plugin_string() {
+        for spec in [
+            "koblitz-orbit:divisor=1;2",
+            "koblitz-symmetrised:divisor=1;2",
+        ] {
+            let (_, params) = Params::parse_spec(spec).unwrap();
+            assert_eq!(divisor_indices(&params).unwrap(), vec![1, 2], "{spec}");
+        }
+        let (_, params) = Params::parse_spec("koblitz-orbit:divisor=0,no_fold=1").unwrap();
+        assert_eq!(divisor_indices(&params).unwrap(), vec![0]);
+    }
+
+    /// The comma form never reaches `divisor_indices` from a command
+    /// line: the spec parser refuses it first, and says why.
+    #[test]
+    fn the_comma_form_is_refused_before_the_plugin_sees_it() {
+        let err = Params::parse_spec("koblitz-orbit:divisor=1,2").unwrap_err();
+        assert!(err.contains("`divisor=1;2`"), "{err}");
+    }
+
+    #[test]
+    fn divisor_indices_reject_a_missing_empty_or_non_numeric_value() {
+        let mut p = Params::default();
+        assert!(divisor_indices(&p)
+            .unwrap_err()
+            .contains("missing parameter `divisor`"));
+        p.set("divisor", ";");
+        assert!(divisor_indices(&p)
+            .unwrap_err()
+            .contains("selected no factors"));
+        p.set("divisor", "1;x");
+        assert!(divisor_indices(&p)
+            .unwrap_err()
+            .contains("`x` is not a number"));
+    }
+
+    #[test]
+    fn trace_zero_factor_base_is_an_executable_policy() {
+        let inst = koblitz_instance(1, 9).expect("registered n9 Koblitz instance");
+        let group = BinaryGroup(&inst.fast);
+        let ctx = InstanceCtx {
+            group: &group,
+            generator: inst.generator,
+            target: inst.generator,
+            r: inst.r,
+            cofactor: inst.cofactor,
+            group_order: inst.group_order,
+            name: inst.name.clone(),
+            field_degree: Some(inst.n),
+        };
+        let mut ops = GroupOps::default();
+        let (_, trace_zero) = Params::parse_spec("koblitz-trace-zero:divisor=1").unwrap();
+        let base = KoblitzTraceZeroBase { instance: &inst }
+            .build(&ctx, &trace_zero, &mut ops)
+            .expect("a divisor omitting x + 1 is trace-zero");
+        assert!(base.columns > 0);
+
+        let (_, trace_one) = Params::parse_spec("koblitz-trace-zero:divisor=0").unwrap();
+        let error =
+            match (KoblitzTraceZeroBase { instance: &inst }).build(&ctx, &trace_one, &mut ops) {
+                Err(error) => error,
+                Ok(_) => panic!("a divisor containing x + 1 must be rejected"),
+            };
+        assert!(error.contains("not trace-zero"), "{error}");
+    }
+
+    /// Freeze the entire producer support, not merely its size or first
+    /// representative. This is the preregistered gate before fresh Q.
+    #[test]
+    fn compact_orbit_scan_matches_archived_n37_source42() {
+        let inst = koblitz_instance(0, 37).expect("registered n37 Koblitz instance");
+        let g = BinaryGroup(&inst.fast);
+        let ctx = InstanceCtx {
+            group: &g,
+            generator: inst.generator,
+            target: inst.generator,
+            r: inst.r,
+            cofactor: inst.cofactor,
+            group_order: inst.group_order,
+            name: inst.name.clone(),
+            field_degree: Some(inst.n),
+        };
+        let (_, params) =
+            Params::parse_spec("compact-orbit-scan:columns=42,raw_x_cap=1000000").unwrap();
+        let mut ops = GroupOps::default();
+        let fb = CompactOrbitScanBase { instance: &inst }
+            .build(&ctx, &params, &mut ops)
+            .unwrap();
+        let source = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl"
+        ))
+        .unwrap();
+        let frozen: serde_json::Value =
+            serde_json::from_str(source.lines().next().unwrap()).unwrap();
+        let coordinates: Vec<[u64; 2]> =
+            serde_json::from_value(frozen["factor_base_point_coordinates"].clone()).unwrap();
+        let labels: Vec<[u64; 2]> =
+            serde_json::from_value(frozen["factor_base_point_labels"].clone()).unwrap();
+        let representatives: Vec<[u64; 2]> =
+            serde_json::from_value(frozen["factor_base_representatives"].clone()).unwrap();
+        assert_eq!(fb.columns, 42);
+        assert_eq!(fb.points.len(), 3108);
+        assert_eq!(coordinates.len(), fb.points.len());
+        assert_eq!(labels.len(), fb.points.len());
+        assert_eq!(representatives.len(), fb.columns);
+        for (i, p) in fb.points.iter().enumerate() {
+            assert_eq!([p.x, p.y], coordinates[i], "point {i}");
+            assert_eq!([fb.col_of[i] as u64, fb.coef_of[i]], labels[i], "label {i}");
+        }
+        for (column, rep) in representatives.iter().enumerate() {
+            let p = fb.points[column * 2 * inst.n as usize];
+            assert_eq!([p.x, p.y], *rep, "representative {column}");
+        }
+        let mut base_hash = blake3::Hasher::new();
+        base_hash.update(b"compact-orbit-constructed-base-v1");
+        for (i, p) in fb.points.iter().enumerate() {
+            for word in [p.x, p.y, fb.col_of[i] as u64, fb.coef_of[i]] {
+                base_hash.update(&word.to_le_bytes());
+            }
+        }
+        assert_eq!(
+            base_hash.finalize().to_hex().as_str(),
+            frozen["base_hash"].as_str().unwrap()
+        );
+        assert_eq!(
+            frozen["base_hash"].as_str().unwrap(),
+            "8423b135df3515b0e284126d9eeb95f71e3901ae12908b3cad8eb03d1f31d4bc"
+        );
+        assert!(ops.scalar_mults > 0 && fb.cost.get("inversions") > 0);
+        assert!(fb.cost.get("min_key_field_squares_uncharged") > 0);
     }
 }

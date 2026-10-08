@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Volumes/SSD990/koblitz-ggmp-build24-786c3ca4/bin/koblitz_public_factor_base_discovery",
+    "59",
+    "1",
+    "3",
+    "9"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 120.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.44863433300633915,
+    "user_seconds": 0.040594,
+    "system_seconds": 0.001774,
+    "total_core_seconds": 0.042367999999999996,
+    "single_core_seconds": 0.042367999999999996,
+    "peak_rss_bytes": 2473984,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

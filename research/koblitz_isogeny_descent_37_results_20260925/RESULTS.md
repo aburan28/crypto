@@ -22,3 +22,9 @@ Every row is a Boolean matrix-stage diagnostic. The comparison does not solve a 
 Run the frozen contract with the command in `research/koblitz_isogeny_descent_37_20260925/README.md`. The raw result is `raw.json.gz` in this directory; its SHA-256 is `eb4773d556886672e8b80735fc486c16b73765fd5069ff81133100bfc3eafa90` and its compressed size is `40311` bytes. The summary is derived from those committed raw cases.
 
 Provenance: workflow run [36087300313](https://github.com/aburan28/crypto/actions/runs/36087300313), head commit `2679fe8acec49750b1775c7dd8e85facc90bd7f4`; GitHub artifact 10843942663 has archive digest `sha256:7b5305016d2490b0cfac7accff90aa977ccf5a9e28daf95e341ebcf378126665`. Source hashes and the Sage map/kernel data are preserved inside `raw.json.gz`.
+
+The committed raw file was restored from that original artifact after a
+non-gzip Git blob was found at this path. The custody record, independent
+summary reconstruction, and deterministic replay receipt are in
+[ARCHIVE_REPAIR.md](ARCHIVE_REPAIR.md), [EVIDENCE.json](EVIDENCE.json), and
+[REPLAY.json](REPLAY.json). The measured result and negative verdict are unchanged.

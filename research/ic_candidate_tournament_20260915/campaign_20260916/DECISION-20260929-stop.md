@@ -88,3 +88,75 @@ under the isolated runner and a registration made before the run:
 
 The reopening item "a rho stronger than the lean rho at small `n`" is met for the time lead. The
 sized rho is now the reference rho at `n ≤ 23` for any reopened round.
+
+## Addendum 2, 2026-10-02: the two symmetry items and the Riemann–Roch route
+
+This addendum records what the 2026-09-30 shortlist's remaining leads measured. It changes no
+decision.
+
+- **"A symmetry not tested here."** Both halves are now settled for `m = 3` ladders.
+  Frobenius-orbit coordinates are closed by structure
+  ([NOTE-20260930-frobenius-orbit-coordinates.md](NOTE-20260930-frobenius-orbit-coordinates.md)):
+  Frobenius moves the target, so it is no per-target symmetry, and the stable-subspace fold
+  is survey §3.4's constant. The symmetric-group action is measured by the Riemann–Roch norm
+  form, which is fully symmetric in the summands:
+  [ic_rr_norm_ladder_20260930](../../ic_rr_norm_ladder_20260930/RESULTS.md) reads
+  `s̄ = 1.167`, a constant lever like the torsion one (`s̄ = 1.033`). Item 3 above stays
+  stopped: no symmetry measured flattens the degree.
+- **"A decomposition that is not a table and not the chained `S₃`."** The Nagao /
+  Riemann–Roch encoding, survey §3.3, is closed for the exponent at these sizes in each of
+  its algebraic readings: the search form by the pair-table ceiling (RR panel §8, Shoup); the
+  support form by its system degree rising 2 per unit `ℓ`
+  ([support-degree.txt](../../ic_rr_norm_ladder_20260930/support-degree.txt)); the norm form
+  by the ladder above. The norm form is a cheaper presentation (`3ℓ + 1` unknowns at `m = 3`,
+  2–3 degrees below the direct `S₄`), which is engineering. What remains of §3.3 is Nagao's
+  first-fall-degree claim on the incidence form, owned by the SEMBIN lane.
+
+Open after this: Nagao's first-fall-degree claim (SEMBIN), and the SEMBIN lane's typed-system
+cost, which would make the conjugate-coset reading of Frobenius-orbit coordinates worth
+building. Nothing here reopens items 1–3.
+
+
+## Addendum 3, 2026-10-04: the `m = 3` ladder re-read and extended by an external engine
+
+This addendum records what
+[ic_gb_ladder_20261003](../../ic_gb_ladder_20261003/RESULTS.md) measured. It changes no
+decision.
+
+- **The in-tree readings are confirmed by an independent engine.** Singular's degree-truncated
+  `slimgb` on the homogenisation, which spans exactly the Macaulay row space, agrees with the
+  sparse scan on every shared draw above the scan's floor (20 of 20). Below that floor it
+  found two things the scan could not: the direct `S₄` descent at `ℓ = 2` refutes at 5, and
+  the "degree-4 refutations at `ℓ = 5`" of the earlier ladder were draws containing a constant
+  equation (Erratum 1 of that ladder).
+- **One rung further, still rising.** At `ℓ = 5` on `K₁/2¹⁷` the direct `S₄` descent refutes
+  at degree 10 on all four draws, three above the sharp first-fall bound 7
+  (Kousidis–Wiemers), and the symmetric norm form at 8 on every genuine draw. Slopes over
+  `ℓ = 2…5`: 1.6 and 1.3. No reading at any rung is equal to or below the one before it.
+- **`ℓ = 6` is beyond this engine on this host.** Both `n = 19` curves die at 12 GB at degree
+  8 (`rr`) and degree 9 (`x4`); the readings there are `≥ 8` and `≥ 9`. The registered
+  verdict is therefore *inconclusive at `ℓ ≥ 6`*, with growth confirmed at `ℓ = 5`.
+- **What it leaves.** Item 3 stays stopped: the measured solving degree is 3 above the
+  first-fall bound and rising at the largest size any engine here resolves. The reopening
+  item "a published degree bound for Weil-descended systems" is unchanged. The next rung is
+  an engine and memory question (about 21 GB for a dense elimination at `ℓ = 6`, more for
+  this engine's truncated basis), not a mathematical one.
+
+## Addendum 4, 2026-10-05: the `ℓ = 6` rung resolved by a dense in-tree engine
+
+This addendum records what
+[ic_dense_ladder_20261004](../../ic_dense_ladder_20261004/RESULTS.md) measured. It changes no
+decision.
+
+- **The rung Addendum 3 left open is resolved.** A bit-packed dense Macaulay elimination
+  (`examples/macaulay_dense.rs`) reads the same systems. It agrees with the external engine
+  on all 32 calibration draws. At `ℓ = 6` the direct `S₄` descent refutes at 11 on all
+  eight draws of both `n = 19` curves, and the symmetric norm form at 8. Degree 11 needed
+  about 5.5 GB, not the 21 GB estimated above, because the echelon basis stores only the
+  rows it finds.
+- **What it leaves.** Item 3 stays stopped, now on firmer ground. The measured solving
+  degree is 4 above the first-fall bound at `ℓ = 6`, after 3 at `ℓ = 5`. It rises by
+  one per rung from `ℓ = 3` and shows no sign of flattening. The next rung, `ℓ = 7`, needs
+  about 1.2 million columns at degree 9. A dense basis there would be near 180 GB, so it
+  needs a sparse or structured elimination. The reopening item "a published degree bound
+  for Weil-descended systems" is unchanged.

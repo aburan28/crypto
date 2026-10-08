@@ -1,0 +1,406 @@
+{
+ "a": {
+  "arm": 0,
+  "label": "random 20-bit prime curve: 67 smallest abscissae, enumerate m=3 (autoresearcher)",
+  "spec_id": "ICS1hcff45cfed423"
+ },
+ "aa": false,
+ "aa_noise": [
+  {
+   "arms": [
+    0,
+    2
+   ],
+   "estimate": {
+    "ci95": [
+     0.9091257452905439,
+     1.0011309995936597
+    ],
+    "excludes_1": false,
+    "max_ratio": 1.0011309995936597,
+    "median_ratio": 0.9855320273736367,
+    "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+    "min_ratio": 0.9091257452905439,
+    "n_pairs": 5
+   },
+   "spec_id": "ICS1hcff45cfed423"
+  }
+ ],
+ "b": {
+  "arm": 1,
+  "label": "random 20-bit prime curve: 67 smallest abscissae, mitm m=3, tails of 2 (autoresearcher)",
+  "spec_id": "ICS1hf1e387d9c444"
+ },
+ "confounds": [],
+ "declared_variables": [
+  {
+   "a": "enumerate",
+   "b": "mitm",
+   "field": "decomposition.method"
+  },
+  {
+   "a": {},
+   "b": null,
+   "field": "decomposition.params"
+  },
+  {
+   "a": null,
+   "b": 2,
+   "field": "decomposition.params.table_arity"
+  }
+ ],
+ "env_class_id": "ENV1h0aa2154374f6",
+ "forbidden": [],
+ "ops": {
+  "a_median": 558967.0,
+  "a_spread": [
+   558967.0,
+   558967.0
+  ],
+  "admitted": true,
+  "b_median": 9935.0,
+  "b_spread": [
+   9935.0,
+   9935.0
+  ],
+  "completed": {
+   "a": "5/5",
+   "b": "5/5"
+  },
+  "deterministic": true,
+  "lower_bound": false,
+  "ratio_b_over_a": 0.017773857848495528,
+  "speedup_a_over_b": 56.26240563663815,
+  "unit": "count.s3_solves",
+  "window": "cold_end_to_end"
+ },
+ "outcomes": {
+  "a": [
+   "complete",
+   "complete",
+   "complete",
+   "complete",
+   "complete"
+  ],
+  "b": [
+   "complete",
+   "complete",
+   "complete",
+   "complete",
+   "complete"
+  ]
+ },
+ "records_sha256": "e55acc670ebecf18d8227f1f5228e4065d9548ea398c38c6e89f600de63f4c4a",
+ "refusals": [],
+ "request": {
+  "a": 0,
+  "b": 1,
+  "declared": [
+   "decomposition.method",
+   "decomposition.params.table_arity"
+  ]
+ },
+ "schema": "icms.comparison/v1",
+ "session_id": "ICSESS1hdcf85c1c60d4",
+ "structure": {
+  "a": {
+   "decomposition.arity": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "decomposition.hit_rate": {
+    "max": 0.38125,
+    "median": 0.38125,
+    "min": 0.38125,
+    "n": 5
+   },
+   "decomposition.native.censored_attempts": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.membership_tests": {
+    "max": 1117872.0,
+    "median": 1117872.0,
+    "min": 1117872.0,
+    "n": 5
+   },
+   "decomposition.native.s3_solves": {
+    "max": 558967.0,
+    "median": 558967.0,
+    "min": 558967.0,
+    "n": 5
+   },
+   "decomposition.native.table_arity": {
+    "max": 1.0,
+    "median": 1.0,
+    "min": 1.0,
+    "n": 5
+   },
+   "decomposition.native.table_entries": {
+    "max": 67.0,
+    "median": 67.0,
+    "min": 67.0,
+    "n": 5
+   },
+   "decomposition.native.table_s3_solves": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.target_ops": {
+    "max": 9270.0,
+    "median": 9270.0,
+    "min": 9270.0,
+    "n": 5
+   },
+   "decomposition.relations_found": {
+    "max": 61.0,
+    "median": 61.0,
+    "min": 61.0,
+    "n": 5
+   },
+   "decomposition.targets_tried": {
+    "max": 160.0,
+    "median": 160.0,
+    "min": 160.0,
+    "n": 5
+   },
+   "factor_base.abscissae_allowed": {
+    "max": 135.0,
+    "median": 135.0,
+    "min": 135.0,
+    "n": 5
+   },
+   "factor_base.abscissae_with_points": {
+    "max": 67.0,
+    "median": 67.0,
+    "min": 67.0,
+    "n": 5
+   },
+   "factor_base.columns": {
+    "max": 67.0,
+    "median": 67.0,
+    "min": 67.0,
+    "n": 5
+   },
+   "factor_base.native.bound": {
+    "max": 135.0,
+    "median": 135.0,
+    "min": 135.0,
+    "n": 5
+   },
+   "factor_base.orbit_representatives": {
+    "max": 67.0,
+    "median": 67.0,
+    "min": 67.0,
+    "n": 5
+   },
+   "factor_base.points_per_column": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "factor_base.signed_points": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "factor_base.usable_points": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "linear_algebra.rank": {
+    "max": 60.0,
+    "median": 60.0,
+    "min": 60.0,
+    "n": 5
+   },
+   "linear_algebra.rows": {
+    "max": 61.0,
+    "median": 61.0,
+    "min": 61.0,
+    "n": 5
+   },
+   "linear_algebra.work": {
+    "max": 1683.0,
+    "median": 1683.0,
+    "min": 1683.0,
+    "n": 5
+   }
+  },
+  "b": {
+   "decomposition.arity": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "decomposition.hit_rate": {
+    "max": 0.38125,
+    "median": 0.38125,
+    "min": 0.38125,
+    "n": 5
+   },
+   "decomposition.native.censored_attempts": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.membership_tests": {
+    "max": 15314.0,
+    "median": 15314.0,
+    "min": 15314.0,
+    "n": 5
+   },
+   "decomposition.native.s3_solves": {
+    "max": 9935.0,
+    "median": 9935.0,
+    "min": 9935.0,
+    "n": 5
+   },
+   "decomposition.native.table_arity": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "decomposition.native.table_entries": {
+    "max": 4489.0,
+    "median": 4489.0,
+    "min": 4489.0,
+    "n": 5
+   },
+   "decomposition.native.table_s3_solves": {
+    "max": 2278.0,
+    "median": 2278.0,
+    "min": 2278.0,
+    "n": 5
+   },
+   "decomposition.native.target_ops": {
+    "max": 9270.0,
+    "median": 9270.0,
+    "min": 9270.0,
+    "n": 5
+   },
+   "decomposition.relations_found": {
+    "max": 61.0,
+    "median": 61.0,
+    "min": 61.0,
+    "n": 5
+   },
+   "decomposition.targets_tried": {
+    "max": 160.0,
+    "median": 160.0,
+    "min": 160.0,
+    "n": 5
+   },
+   "factor_base.abscissae_allowed": {
+    "max": 135.0,
+    "median": 135.0,
+    "min": 135.0,
+    "n": 5
+   },
+   "factor_base.abscissae_with_points": {
+    "max": 67.0,
+    "median": 67.0,
+    "min": 67.0,
+    "n": 5
+   },
+   "factor_base.columns": {
+    "max": 67.0,
+    "median": 67.0,
+    "min": 67.0,
+    "n": 5
+   },
+   "factor_base.native.bound": {
+    "max": 135.0,
+    "median": 135.0,
+    "min": 135.0,
+    "n": 5
+   },
+   "factor_base.orbit_representatives": {
+    "max": 67.0,
+    "median": 67.0,
+    "min": 67.0,
+    "n": 5
+   },
+   "factor_base.points_per_column": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "factor_base.signed_points": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "factor_base.usable_points": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "linear_algebra.rank": {
+    "max": 60.0,
+    "median": 60.0,
+    "min": 60.0,
+    "n": 5
+   },
+   "linear_algebra.rows": {
+    "max": 61.0,
+    "median": 61.0,
+    "min": 61.0,
+    "n": 5
+   },
+   "linear_algebra.work": {
+    "max": 1683.0,
+    "median": 1683.0,
+    "min": 1683.0,
+    "n": 5
+   }
+  }
+ },
+ "wall": {
+  "admitted": false,
+  "contended_runs": 5,
+  "estimate": {
+   "ci95": [
+    0.020046629173091333,
+    0.030986380232857127
+   ],
+   "excludes_1": true,
+   "max_ratio": 0.030986380232857127,
+   "median_ratio": 0.021748560315005182,
+   "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+   "min_ratio": 0.020046629173091333,
+   "n_pairs": 5
+  },
+  "pairs": 5,
+  "refusals": [
+   {
+    "blocking": [
+     "bare_metal",
+     "fixed_frequency",
+     "foreign_runnable",
+     "kernel_isolation",
+     "steal"
+    ],
+    "count": 5,
+    "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+   }
+  ],
+  "window": "cold_end_to_end"
+ }
+}

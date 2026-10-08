@@ -65,7 +65,7 @@ KOBLITZ_STANDARDS = {
     "sect409k1": (0, 409), "sect571k1": (0, 571),
 }
 PRIME_STANDARDS = {
-    # name: (p, a, b, n, h, (gx, gy)), as src/ecc/curve.rs constructs them.
+    # name: (p, a, b, n, h, (gx, gy)), as the source tree constructs them.
     "secp256k1": (
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F, 0, 7,
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141, 1,
@@ -78,7 +78,23 @@ PRIME_STANDARDS = {
         0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551, 1,
         (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
          0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5)),
+    "P-224": (
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFE,
+        0xB4050A850C04B3ABF54132565044B0B7D7BFD8BA270B39432355FFB4,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFF16A2E0B8F03E13DD29455C5C2A3D, 1,
+        (0xB70E0CBD6BB4BF7F321390B94A03C1D356C21122343280D6115C1D21,
+         0xBD376388B5F723FB4C22DFE6CD4375A05A07476444D5819985007E34)),
+    "P-192": (
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFC,
+        0x64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1,
+        0xFFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831, 1,
+        (0x188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012,
+         0x07192B95FFC8DA78631011ED6B24CDD573F977A11E794811)),
 }
+# Where the source tree constructs each prime standard, when not curve.rs.
+PRIME_STANDARD_SOURCES = {"P-224": "src/ecc/curve_zoo.rs", "P-192": "src/ecc/curve_zoo.rs"}
 # Binary standards whose generator the source tree carries, in the basis of
 # the modulus above: (subgroup order, cofactor, gx, gy).
 BINARY_GENERATORS = {
@@ -287,7 +303,11 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
                     if o.get("generator_call"):
                         params["generator_call"] = o["generator_call"]
                     names = [name] if name else []
-                    if fam == "koblitz":
+                    # An explicit model may certify the Koblitz endomorphism
+                    # while using a different polynomial basis from the
+                    # repository constructor. Its record name is safe, but
+                    # the bare `K_a / GF(2^n)` aliases would be ambiguous.
+                    if fam == "koblitz" and not o.get("suppress_koblitz_aliases"):
                         names += koblitz_aliases(a, m)
                     check_rust(o, ident, rel, fatal)
                     reg.add(ident, fam, params, rel, names)
@@ -445,11 +465,20 @@ def harvest_text_koblitz(reg: Registry) -> None:
 
 # Curves the repository designates without a standard name: (a, n).
 DESIGNATED_KOBLITZ = [(0, 83)]
+# Koblitz curves the ic tool programme names as instances on two-word and
+# wider fields, under the repository's modulus rule: (a, n) -> where.
+B3B = "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)"
+B4 = "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)"
+PROGRAMME_KOBLITZ = {(0, 67): B3B, (1, 67): B3B, (0, 79): B3B,
+                     (0, 127): B4, (0, 137): B4, (0, 151): B4, (1, 157): B4, (1, 173): B4, (0, 179): B4,
+                     (0, 577): B4}
 
 
 def harvest_standards(reg: Registry) -> None:
     for a, n in DESIGNATED_KOBLITZ:
         add_koblitz(reg, a, n, STANDARD_MODULI[n][1])
+    for (a, n), why in PROGRAMME_KOBLITZ.items():
+        add_koblitz(reg, a, n, why)
     for name, (a, n) in KOBLITZ_STANDARDS.items():
         add_koblitz(reg, a, n, STANDARD_MODULI[n][1], standard=name)
         if name in BINARY_GENERATORS:
@@ -461,9 +490,10 @@ def harvest_standards(reg: Registry) -> None:
                           STANDARD_MODULI[n][1])
     for name, (p, a, b, n, h, g) in PRIME_STANDARDS.items():
         ident = cid.prime_id(p, a, b, n * h)
+        src = PRIME_STANDARD_SOURCES.get(name, "src/ecc/curve.rs")
         reg.add(ident, "prime", {"p": str(p), "a": str(a), "b": str(b)},
-                "src/ecc/curve.rs", [], standard=name)
-        reg.represent(ident, *prime_record(p, a, b, n * h, n, h, g), "src/ecc/curve.rs")
+                src, [], standard=name)
+        reg.represent(ident, *prime_record(p, a, b, n * h, n, h, g), src)
 
 
 def unresolved_text(reg: Registry) -> list[str]:

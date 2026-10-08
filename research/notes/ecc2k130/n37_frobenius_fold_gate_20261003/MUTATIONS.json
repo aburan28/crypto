@@ -1,0 +1,35 @@
+{
+  "schema": "n37-frobenius-fold-mutations/v1",
+  "source_raw_result_sha256": "f1bcf4fcea33a90b6b2d9d3becf2eab96c16484a9114a06d03137c7f5ba50d75",
+  "replay_binary": "target/release/examples/n37_frobenius_fold_replay",
+  "mutations": [
+    {
+      "name": "witness_index",
+      "recipe": "jq '.policies[0].targets[0].m3.indices[0] = 1' RESULT_A.json",
+      "mutated_sha256": "64d3b303d1c1ba68eff49ac24420a79699c4dd1eb3a8cce6a3f37a074ad4e666",
+      "exit_code": 101,
+      "failure": "original m3 target 0: witness sum or relation row invalid"
+    },
+    {
+      "name": "hit_flag",
+      "recipe": "jq '.policies[0].targets[0].m3.status = \"proved_miss\"' RESULT_A.json",
+      "mutated_sha256": "7f8d748385291caedb7ecad46ffb40c96ea8c0bb38ccc3f1c7895e3550a7156a",
+      "exit_code": 101,
+      "failure": "original m3 target 0: decision or query counter mismatch"
+    },
+    {
+      "name": "setup_additions",
+      "recipe": "jq '.policies[0].table.build_adds += 1' RESULT_A.json",
+      "mutated_sha256": "78146ac24439d6fb2ccadb4b651222f52f1526b05605e2a5c321c6edf8bcfa09",
+      "exit_code": 101,
+      "failure": "original: independent table count mismatch"
+    },
+    {
+      "name": "support_coordinate",
+      "recipe": "gzip -cd SUPPORT.json.gz | jq '.policies[0].entries[0].point[0] += 1' | gzip -n > mutated.json.gz; pass mutated.json.gz as replay's third argument",
+      "mutated_sha256": "90f36b891e35a4e2c55163fb16e2a83b98642c4a8e906292d737e74c2e0f455b",
+      "exit_code": 101,
+      "failure": "pinned SHA-256 mismatch"
+    }
+  ]
+}

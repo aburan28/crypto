@@ -1,0 +1,95 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1h6e1a32a777e9",
+  "a": {
+    "session_id": "ECBS1h33c3e5e4f75d",
+    "arm": "ic-shared",
+    "method_id": "ECM1ha10cd743c1f5",
+    "method": "ic.shared_rank",
+    "measured": 5,
+    "verified": 5,
+    "statuses": {
+      "verified": 5
+    },
+    "mean_s": 5.748204761975246,
+    "mean_ratio_to_floor": 39.45373756813113,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1h33c3e5e4f75d",
+    "arm": "ic-control",
+    "method_id": "ECM1ha10cd743c1f5",
+    "method": "ic.shared_rank",
+    "measured": 5,
+    "verified": 5,
+    "statuses": {
+      "verified": 5
+    },
+    "mean_s": 5.748204761975246,
+    "mean_ratio_to_floor": 39.45373756813113,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "W157bda94ea05",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "r": 230603167,
+      "floor_s": 0.14569480906717375,
+      "pairs": 5,
+      "a_mean_s": 5.748204761975246,
+      "b_mean_s": 5.748204761975246,
+      "ratio_b_over_a": 1.0
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "log2_r": 27.78083708554834,
+      "workloads": 1,
+      "pairs": 5,
+      "ratio_b_over_a": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "ci_method": "within"
+    }
+  ],
+  "ops": {
+    "status": "ok",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": 1.0,
+    "ci95": [
+      1.0,
+      1.0
+    ],
+    "ci_method": "within",
+    "pairs": 5,
+    "unpaired_runs": 0,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 1,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "5 of 5 pairs did not reach L2",
+      "0 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L2",
+    "pairs": 5,
+    "pairs_below_level": 5,
+    "median_ratio": 1.0154108386314047,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "verdict": "ops (ok): ic-control / ic-shared = 1.0000 [1.000, 1.000] (within) over 5 pairs on 1 workloads, 1 curve(s), bounded (unpriced work); wall: descriptive (median 1.0154, not a result: 5 of 5 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)"
+}
