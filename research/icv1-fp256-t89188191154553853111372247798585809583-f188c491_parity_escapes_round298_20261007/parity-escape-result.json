@@ -1,0 +1,2308 @@
+{
+  "schema": "p256-parity-escape-screen/v2",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 298,
+  "execution_status": "complete",
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_stabilizer_round297_20261007/scalar-stabilizer-result.json",
+      "bytes": 13187,
+      "sha256": "53949881daf4a48769c9ef8f869fad633c3dc69d11b0d341a5b7416de2e43982"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_rr_selector_round296_20261007/rr-selector-result.json",
+      "bytes": 14332,
+      "sha256": "52cbea224df1e1d4d6e8406f368ba413fd4e508f5309fcde65f67a98bc91c5ba"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_orbit_round25_20261006/scalar-orbit-result.json",
+      "bytes": 14033,
+      "sha256": "dcb191f7d5d7a660e3ce13128b25ce1c017c7d89ec2d01a242ab536651647faf"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_isogenous_dickson_round28_20261006/isogenous-dickson-result.json",
+      "bytes": 587117,
+      "sha256": "950d4b7f4997e146ee30fc7c61174070595fa5d344b9a30cbc0ca578ae7e60f4"
+    }
+  ],
+  "p256_boundary": {
+    "columns": 164,
+    "arity": 109,
+    "exact_raw_signed_domain": "116383775127750444427048016195109203089116454475801022361283226351238392053760",
+    "exact_global_negation_quotient_domain": "58191887563875222213524008097554601544558227237900511180641613175619196026880",
+    "subgroup_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "canonical_target_space": "57896044605178124381348723474703786764998477612067880171211129530534256022185",
+    "mean_distinct_normalized_rows_per_canonical_target": 1.0051098993154817,
+    "conditional_mean_distinct_rows_given_nonempty_random_map": 1.5853578692340067,
+    "parity_collision_events": 1,
+    "parity_event_ratio_to_rho": 0.9640877979350002,
+    "two_event_ratio_to_rho": 1.4461316969025004,
+    "minimum_independent_rows_per_event": 164,
+    "minimum_distinct_bucket_occupancy_for_collision_rows": 165,
+    "equivalent_minimum_raw_folded_bucket_occupancy": 330,
+    "random_map_null_log2_union_bound_any_bucket_at_required_occupancy": -721.185196502076,
+    "random_map_null_log2_poisson_expected_buckets_at_required_occupancy": -727.6361394774523,
+    "random_map_null_is_measurement": false
+  },
+  "toy_curve": "E/F_1151: y^2=x^3-3x+241",
+  "toy_support_pool": [
+    273,
+    390,
+    1040,
+    878,
+    583,
+    318,
+    372,
+    330,
+    988,
+    519,
+    320,
+    1061,
+    681,
+    138,
+    409,
+    725,
+    577,
+    235,
+    678,
+    743,
+    163,
+    470,
+    408,
+    229,
+    328,
+    574,
+    969,
+    935,
+    462
+  ],
+  "toy_support_pool_sha256": "1a8ba825012e671d799ba1bbaf17230babdb4c515fd539c7e384292e9106c90c",
+  "toy_cases": [
+    {
+      "arity": 3,
+      "columns": 5,
+      "support_x": [
+        273,
+        390,
+        1040,
+        878,
+        583
+      ],
+      "exact_raw_domain": 80,
+      "raw_candidates_enumerated": 80,
+      "normalized_distinct_rows": 40,
+      "curve_group_order": 1192,
+      "canonical_target_space": 597,
+      "nonempty_target_buckets": 37,
+      "nonidentity_nonempty_target_buckets": 37,
+      "identity_raw_occupancy": 0,
+      "identity_distinct_occupancy": 0,
+      "raw_mean_rows_per_canonical_target": 0.13400335008375208,
+      "distinct_mean_rows_per_canonical_target": 0.06700167504187604,
+      "maximum_raw_bucket_occupancy": 4,
+      "maximum_raw_bucket_target": "684,141",
+      "maximum_distinct_bucket_occupancy": 2,
+      "maximum_distinct_bucket_target": "684,141",
+      "maximum_augmented_rank": 2,
+      "maximum_homogeneous_rank": 1,
+      "maximum_homogeneous_rank_target": "684,141",
+      "buckets_with_full_column_rank": 0,
+      "raw_occupancy_histogram_all_targets": [
+        {
+          "value": 0,
+          "buckets": 560
+        },
+        {
+          "value": 2,
+          "buckets": 34
+        },
+        {
+          "value": 4,
+          "buckets": 3
+        }
+      ],
+      "distinct_occupancy_histogram_all_targets": [
+        {
+          "value": 0,
+          "buckets": 560
+        },
+        {
+          "value": 1,
+          "buckets": 34
+        },
+        {
+          "value": 2,
+          "buckets": 3
+        }
+      ],
+      "augmented_rank_histogram_nonempty_targets": [
+        {
+          "value": 1,
+          "buckets": 34
+        },
+        {
+          "value": 2,
+          "buckets": 3
+        }
+      ],
+      "homogeneous_rank_histogram_nonempty_targets": [
+        {
+          "value": 0,
+          "buckets": 34
+        },
+        {
+          "value": 1,
+          "buckets": 3
+        }
+      ],
+      "rank_modulus": 2305843009213693951,
+      "hadamard_log2_bound": 10.804820237218404,
+      "rank_transfer_to_p256_exact": true,
+      "logical_candidate_group_additions": 240,
+      "precomputed_group_additions": 11920,
+      "replayed_rows": 80,
+      "replay_failures": 0,
+      "enumeration_sha256": "5b3f494d89558d6525dffb9f5faa3a2d5f8e624b7ab67ada8447a36d8c721bb8",
+      "summary_sha256": "e98f63201a17fd73e6a4d6d971fba4c79e38af591dd23ee7343969c363e00ae9"
+    },
+    {
+      "arity": 5,
+      "columns": 8,
+      "support_x": [
+        273,
+        390,
+        1040,
+        878,
+        583,
+        318,
+        372,
+        330
+      ],
+      "exact_raw_domain": 1792,
+      "raw_candidates_enumerated": 1792,
+      "normalized_distinct_rows": 896,
+      "curve_group_order": 1192,
+      "canonical_target_space": 597,
+      "nonempty_target_buckets": 487,
+      "nonidentity_nonempty_target_buckets": 486,
+      "identity_raw_occupancy": 4,
+      "identity_distinct_occupancy": 2,
+      "raw_mean_rows_per_canonical_target": 3.0016750418760467,
+      "distinct_mean_rows_per_canonical_target": 1.5008375209380234,
+      "maximum_raw_bucket_occupancy": 10,
+      "maximum_raw_bucket_target": "66,503",
+      "maximum_distinct_bucket_occupancy": 5,
+      "maximum_distinct_bucket_target": "66,503",
+      "maximum_augmented_rank": 5,
+      "maximum_homogeneous_rank": 4,
+      "maximum_homogeneous_rank_target": "66,503",
+      "buckets_with_full_column_rank": 0,
+      "raw_occupancy_histogram_all_targets": [
+        {
+          "value": 0,
+          "buckets": 110
+        },
+        {
+          "value": 2,
+          "buckets": 224
+        },
+        {
+          "value": 4,
+          "buckets": 157
+        },
+        {
+          "value": 6,
+          "buckets": 73
+        },
+        {
+          "value": 8,
+          "buckets": 26
+        },
+        {
+          "value": 10,
+          "buckets": 7
+        }
+      ],
+      "distinct_occupancy_histogram_all_targets": [
+        {
+          "value": 0,
+          "buckets": 110
+        },
+        {
+          "value": 1,
+          "buckets": 224
+        },
+        {
+          "value": 2,
+          "buckets": 157
+        },
+        {
+          "value": 3,
+          "buckets": 73
+        },
+        {
+          "value": 4,
+          "buckets": 26
+        },
+        {
+          "value": 5,
+          "buckets": 7
+        }
+      ],
+      "augmented_rank_histogram_nonempty_targets": [
+        {
+          "value": 1,
+          "buckets": 224
+        },
+        {
+          "value": 2,
+          "buckets": 157
+        },
+        {
+          "value": 3,
+          "buckets": 74
+        },
+        {
+          "value": 4,
+          "buckets": 25
+        },
+        {
+          "value": 5,
+          "buckets": 7
+        }
+      ],
+      "homogeneous_rank_histogram_nonempty_targets": [
+        {
+          "value": 0,
+          "buckets": 224
+        },
+        {
+          "value": 1,
+          "buckets": 156
+        },
+        {
+          "value": 2,
+          "buckets": 75
+        },
+        {
+          "value": 3,
+          "buckets": 25
+        },
+        {
+          "value": 4,
+          "buckets": 7
+        }
+      ],
+      "rank_modulus": 2305843009213693951,
+      "hadamard_log2_bound": 20.0,
+      "rank_transfer_to_p256_exact": true,
+      "logical_candidate_group_additions": 8960,
+      "precomputed_group_additions": 19072,
+      "replayed_rows": 1792,
+      "replay_failures": 0,
+      "enumeration_sha256": "c0559350bf0ecef28040f29e71eb0d15ff6c6885e1d380caabd53172fb1c5e4b",
+      "summary_sha256": "d76bc0ca80abf3ba3ab7e7a41f223b0ce4b80f45b13405aee1a658eefa2245da"
+    },
+    {
+      "arity": 7,
+      "columns": 11,
+      "support_x": [
+        273,
+        390,
+        1040,
+        878,
+        583,
+        318,
+        372,
+        330,
+        988,
+        519,
+        320
+      ],
+      "exact_raw_domain": 42240,
+      "raw_candidates_enumerated": 42240,
+      "normalized_distinct_rows": 21120,
+      "curve_group_order": 1192,
+      "canonical_target_space": 597,
+      "nonempty_target_buckets": 597,
+      "nonidentity_nonempty_target_buckets": 596,
+      "identity_raw_occupancy": 44,
+      "identity_distinct_occupancy": 22,
+      "raw_mean_rows_per_canonical_target": 70.7537688442211,
+      "distinct_mean_rows_per_canonical_target": 35.37688442211055,
+      "maximum_raw_bucket_occupancy": 128,
+      "maximum_raw_bucket_target": "999,110",
+      "maximum_distinct_bucket_occupancy": 64,
+      "maximum_distinct_bucket_target": "999,110",
+      "maximum_augmented_rank": 12,
+      "maximum_homogeneous_rank": 11,
+      "maximum_homogeneous_rank_target": "infinity",
+      "buckets_with_full_column_rank": 560,
+      "raw_occupancy_histogram_all_targets": [
+        {
+          "value": 30,
+          "buckets": 1
+        },
+        {
+          "value": 32,
+          "buckets": 1
+        },
+        {
+          "value": 34,
+          "buckets": 1
+        },
+        {
+          "value": 36,
+          "buckets": 2
+        },
+        {
+          "value": 38,
+          "buckets": 4
+        },
+        {
+          "value": 40,
+          "buckets": 8
+        },
+        {
+          "value": 42,
+          "buckets": 7
+        },
+        {
+          "value": 44,
+          "buckets": 9
+        },
+        {
+          "value": 46,
+          "buckets": 10
+        },
+        {
+          "value": 48,
+          "buckets": 21
+        },
+        {
+          "value": 50,
+          "buckets": 24
+        },
+        {
+          "value": 52,
+          "buckets": 24
+        },
+        {
+          "value": 54,
+          "buckets": 21
+        },
+        {
+          "value": 56,
+          "buckets": 25
+        },
+        {
+          "value": 58,
+          "buckets": 22
+        },
+        {
+          "value": 60,
+          "buckets": 24
+        },
+        {
+          "value": 62,
+          "buckets": 26
+        },
+        {
+          "value": 64,
+          "buckets": 21
+        },
+        {
+          "value": 66,
+          "buckets": 18
+        },
+        {
+          "value": 68,
+          "buckets": 29
+        },
+        {
+          "value": 70,
+          "buckets": 21
+        },
+        {
+          "value": 72,
+          "buckets": 23
+        },
+        {
+          "value": 74,
+          "buckets": 23
+        },
+        {
+          "value": 76,
+          "buckets": 21
+        },
+        {
+          "value": 78,
+          "buckets": 23
+        },
+        {
+          "value": 80,
+          "buckets": 12
+        },
+        {
+          "value": 82,
+          "buckets": 18
+        },
+        {
+          "value": 84,
+          "buckets": 24
+        },
+        {
+          "value": 86,
+          "buckets": 15
+        },
+        {
+          "value": 88,
+          "buckets": 25
+        },
+        {
+          "value": 90,
+          "buckets": 10
+        },
+        {
+          "value": 92,
+          "buckets": 10
+        },
+        {
+          "value": 94,
+          "buckets": 13
+        },
+        {
+          "value": 96,
+          "buckets": 6
+        },
+        {
+          "value": 98,
+          "buckets": 7
+        },
+        {
+          "value": 100,
+          "buckets": 9
+        },
+        {
+          "value": 102,
+          "buckets": 8
+        },
+        {
+          "value": 104,
+          "buckets": 6
+        },
+        {
+          "value": 106,
+          "buckets": 5
+        },
+        {
+          "value": 110,
+          "buckets": 3
+        },
+        {
+          "value": 112,
+          "buckets": 6
+        },
+        {
+          "value": 114,
+          "buckets": 3
+        },
+        {
+          "value": 116,
+          "buckets": 3
+        },
+        {
+          "value": 118,
+          "buckets": 3
+        },
+        {
+          "value": 120,
+          "buckets": 1
+        },
+        {
+          "value": 128,
+          "buckets": 1
+        }
+      ],
+      "distinct_occupancy_histogram_all_targets": [
+        {
+          "value": 15,
+          "buckets": 1
+        },
+        {
+          "value": 16,
+          "buckets": 1
+        },
+        {
+          "value": 17,
+          "buckets": 1
+        },
+        {
+          "value": 18,
+          "buckets": 2
+        },
+        {
+          "value": 19,
+          "buckets": 4
+        },
+        {
+          "value": 20,
+          "buckets": 8
+        },
+        {
+          "value": 21,
+          "buckets": 7
+        },
+        {
+          "value": 22,
+          "buckets": 9
+        },
+        {
+          "value": 23,
+          "buckets": 10
+        },
+        {
+          "value": 24,
+          "buckets": 21
+        },
+        {
+          "value": 25,
+          "buckets": 24
+        },
+        {
+          "value": 26,
+          "buckets": 24
+        },
+        {
+          "value": 27,
+          "buckets": 21
+        },
+        {
+          "value": 28,
+          "buckets": 25
+        },
+        {
+          "value": 29,
+          "buckets": 22
+        },
+        {
+          "value": 30,
+          "buckets": 24
+        },
+        {
+          "value": 31,
+          "buckets": 26
+        },
+        {
+          "value": 32,
+          "buckets": 21
+        },
+        {
+          "value": 33,
+          "buckets": 18
+        },
+        {
+          "value": 34,
+          "buckets": 29
+        },
+        {
+          "value": 35,
+          "buckets": 21
+        },
+        {
+          "value": 36,
+          "buckets": 23
+        },
+        {
+          "value": 37,
+          "buckets": 23
+        },
+        {
+          "value": 38,
+          "buckets": 21
+        },
+        {
+          "value": 39,
+          "buckets": 23
+        },
+        {
+          "value": 40,
+          "buckets": 12
+        },
+        {
+          "value": 41,
+          "buckets": 18
+        },
+        {
+          "value": 42,
+          "buckets": 24
+        },
+        {
+          "value": 43,
+          "buckets": 15
+        },
+        {
+          "value": 44,
+          "buckets": 25
+        },
+        {
+          "value": 45,
+          "buckets": 10
+        },
+        {
+          "value": 46,
+          "buckets": 10
+        },
+        {
+          "value": 47,
+          "buckets": 13
+        },
+        {
+          "value": 48,
+          "buckets": 6
+        },
+        {
+          "value": 49,
+          "buckets": 7
+        },
+        {
+          "value": 50,
+          "buckets": 9
+        },
+        {
+          "value": 51,
+          "buckets": 8
+        },
+        {
+          "value": 52,
+          "buckets": 6
+        },
+        {
+          "value": 53,
+          "buckets": 5
+        },
+        {
+          "value": 55,
+          "buckets": 3
+        },
+        {
+          "value": 56,
+          "buckets": 6
+        },
+        {
+          "value": 57,
+          "buckets": 3
+        },
+        {
+          "value": 58,
+          "buckets": 3
+        },
+        {
+          "value": 59,
+          "buckets": 3
+        },
+        {
+          "value": 60,
+          "buckets": 1
+        },
+        {
+          "value": 64,
+          "buckets": 1
+        }
+      ],
+      "augmented_rank_histogram_nonempty_targets": [
+        {
+          "value": 10,
+          "buckets": 1
+        },
+        {
+          "value": 11,
+          "buckets": 37
+        },
+        {
+          "value": 12,
+          "buckets": 559
+        }
+      ],
+      "homogeneous_rank_histogram_nonempty_targets": [
+        {
+          "value": 9,
+          "buckets": 1
+        },
+        {
+          "value": 10,
+          "buckets": 36
+        },
+        {
+          "value": 11,
+          "buckets": 560
+        }
+      ],
+      "rank_modulus": 2305843009213693951,
+      "hadamard_log2_bound": 30.026873902505134,
+      "rank_transfer_to_p256_exact": true,
+      "logical_candidate_group_additions": 295680,
+      "precomputed_group_additions": 26224,
+      "replayed_rows": 42240,
+      "replay_failures": 0,
+      "enumeration_sha256": "fd201eed465198f18e0e74bd4d4a541bc19cd0ad869e3ff825c276206af7b415",
+      "summary_sha256": "8efa76236d67d1f25f818cfc10506b911d33cfb3e2f776a972aac6e6a6191cc2"
+    },
+    {
+      "arity": 9,
+      "columns": 14,
+      "support_x": [
+        273,
+        390,
+        1040,
+        878,
+        583,
+        318,
+        372,
+        330,
+        988,
+        519,
+        320,
+        1061,
+        681,
+        138
+      ],
+      "exact_raw_domain": 1025024,
+      "raw_candidates_enumerated": 1025024,
+      "normalized_distinct_rows": 512512,
+      "curve_group_order": 1192,
+      "canonical_target_space": 597,
+      "nonempty_target_buckets": 597,
+      "nonidentity_nonempty_target_buckets": 596,
+      "identity_raw_occupancy": 858,
+      "identity_distinct_occupancy": 429,
+      "raw_mean_rows_per_canonical_target": 1716.9581239530987,
+      "distinct_mean_rows_per_canonical_target": 858.4790619765494,
+      "maximum_raw_bucket_occupancy": 1950,
+      "maximum_raw_bucket_target": "435,243",
+      "maximum_distinct_bucket_occupancy": 975,
+      "maximum_distinct_bucket_target": "435,243",
+      "maximum_augmented_rank": 15,
+      "maximum_homogeneous_rank": 14,
+      "maximum_homogeneous_rank_target": "infinity",
+      "buckets_with_full_column_rank": 597,
+      "raw_occupancy_histogram_all_targets": [
+        {
+          "value": 858,
+          "buckets": 1
+        },
+        {
+          "value": 908,
+          "buckets": 1
+        },
+        {
+          "value": 1538,
+          "buckets": 1
+        },
+        {
+          "value": 1540,
+          "buckets": 1
+        },
+        {
+          "value": 1544,
+          "buckets": 1
+        },
+        {
+          "value": 1558,
+          "buckets": 2
+        },
+        {
+          "value": 1568,
+          "buckets": 1
+        },
+        {
+          "value": 1570,
+          "buckets": 3
+        },
+        {
+          "value": 1574,
+          "buckets": 1
+        },
+        {
+          "value": 1578,
+          "buckets": 2
+        },
+        {
+          "value": 1582,
+          "buckets": 2
+        },
+        {
+          "value": 1586,
+          "buckets": 1
+        },
+        {
+          "value": 1588,
+          "buckets": 3
+        },
+        {
+          "value": 1590,
+          "buckets": 2
+        },
+        {
+          "value": 1592,
+          "buckets": 3
+        },
+        {
+          "value": 1594,
+          "buckets": 2
+        },
+        {
+          "value": 1596,
+          "buckets": 2
+        },
+        {
+          "value": 1598,
+          "buckets": 2
+        },
+        {
+          "value": 1600,
+          "buckets": 4
+        },
+        {
+          "value": 1602,
+          "buckets": 3
+        },
+        {
+          "value": 1604,
+          "buckets": 1
+        },
+        {
+          "value": 1606,
+          "buckets": 4
+        },
+        {
+          "value": 1610,
+          "buckets": 1
+        },
+        {
+          "value": 1612,
+          "buckets": 2
+        },
+        {
+          "value": 1614,
+          "buckets": 3
+        },
+        {
+          "value": 1616,
+          "buckets": 6
+        },
+        {
+          "value": 1618,
+          "buckets": 6
+        },
+        {
+          "value": 1620,
+          "buckets": 5
+        },
+        {
+          "value": 1622,
+          "buckets": 3
+        },
+        {
+          "value": 1624,
+          "buckets": 5
+        },
+        {
+          "value": 1626,
+          "buckets": 4
+        },
+        {
+          "value": 1628,
+          "buckets": 5
+        },
+        {
+          "value": 1630,
+          "buckets": 2
+        },
+        {
+          "value": 1632,
+          "buckets": 8
+        },
+        {
+          "value": 1634,
+          "buckets": 4
+        },
+        {
+          "value": 1636,
+          "buckets": 2
+        },
+        {
+          "value": 1638,
+          "buckets": 2
+        },
+        {
+          "value": 1640,
+          "buckets": 6
+        },
+        {
+          "value": 1642,
+          "buckets": 3
+        },
+        {
+          "value": 1644,
+          "buckets": 3
+        },
+        {
+          "value": 1646,
+          "buckets": 10
+        },
+        {
+          "value": 1648,
+          "buckets": 2
+        },
+        {
+          "value": 1650,
+          "buckets": 1
+        },
+        {
+          "value": 1652,
+          "buckets": 5
+        },
+        {
+          "value": 1654,
+          "buckets": 5
+        },
+        {
+          "value": 1656,
+          "buckets": 2
+        },
+        {
+          "value": 1658,
+          "buckets": 4
+        },
+        {
+          "value": 1660,
+          "buckets": 5
+        },
+        {
+          "value": 1662,
+          "buckets": 7
+        },
+        {
+          "value": 1664,
+          "buckets": 4
+        },
+        {
+          "value": 1666,
+          "buckets": 4
+        },
+        {
+          "value": 1668,
+          "buckets": 13
+        },
+        {
+          "value": 1670,
+          "buckets": 3
+        },
+        {
+          "value": 1672,
+          "buckets": 3
+        },
+        {
+          "value": 1674,
+          "buckets": 6
+        },
+        {
+          "value": 1676,
+          "buckets": 7
+        },
+        {
+          "value": 1678,
+          "buckets": 6
+        },
+        {
+          "value": 1680,
+          "buckets": 3
+        },
+        {
+          "value": 1682,
+          "buckets": 7
+        },
+        {
+          "value": 1684,
+          "buckets": 5
+        },
+        {
+          "value": 1686,
+          "buckets": 8
+        },
+        {
+          "value": 1688,
+          "buckets": 4
+        },
+        {
+          "value": 1690,
+          "buckets": 3
+        },
+        {
+          "value": 1692,
+          "buckets": 7
+        },
+        {
+          "value": 1694,
+          "buckets": 7
+        },
+        {
+          "value": 1696,
+          "buckets": 5
+        },
+        {
+          "value": 1698,
+          "buckets": 6
+        },
+        {
+          "value": 1700,
+          "buckets": 5
+        },
+        {
+          "value": 1702,
+          "buckets": 6
+        },
+        {
+          "value": 1704,
+          "buckets": 4
+        },
+        {
+          "value": 1706,
+          "buckets": 6
+        },
+        {
+          "value": 1708,
+          "buckets": 2
+        },
+        {
+          "value": 1710,
+          "buckets": 3
+        },
+        {
+          "value": 1712,
+          "buckets": 9
+        },
+        {
+          "value": 1714,
+          "buckets": 3
+        },
+        {
+          "value": 1716,
+          "buckets": 6
+        },
+        {
+          "value": 1718,
+          "buckets": 14
+        },
+        {
+          "value": 1720,
+          "buckets": 4
+        },
+        {
+          "value": 1722,
+          "buckets": 4
+        },
+        {
+          "value": 1724,
+          "buckets": 8
+        },
+        {
+          "value": 1726,
+          "buckets": 6
+        },
+        {
+          "value": 1728,
+          "buckets": 7
+        },
+        {
+          "value": 1730,
+          "buckets": 6
+        },
+        {
+          "value": 1732,
+          "buckets": 4
+        },
+        {
+          "value": 1734,
+          "buckets": 4
+        },
+        {
+          "value": 1736,
+          "buckets": 5
+        },
+        {
+          "value": 1738,
+          "buckets": 6
+        },
+        {
+          "value": 1740,
+          "buckets": 6
+        },
+        {
+          "value": 1742,
+          "buckets": 4
+        },
+        {
+          "value": 1744,
+          "buckets": 2
+        },
+        {
+          "value": 1746,
+          "buckets": 4
+        },
+        {
+          "value": 1748,
+          "buckets": 7
+        },
+        {
+          "value": 1750,
+          "buckets": 5
+        },
+        {
+          "value": 1752,
+          "buckets": 5
+        },
+        {
+          "value": 1754,
+          "buckets": 3
+        },
+        {
+          "value": 1756,
+          "buckets": 3
+        },
+        {
+          "value": 1758,
+          "buckets": 5
+        },
+        {
+          "value": 1760,
+          "buckets": 6
+        },
+        {
+          "value": 1762,
+          "buckets": 2
+        },
+        {
+          "value": 1764,
+          "buckets": 1
+        },
+        {
+          "value": 1766,
+          "buckets": 5
+        },
+        {
+          "value": 1768,
+          "buckets": 7
+        },
+        {
+          "value": 1770,
+          "buckets": 5
+        },
+        {
+          "value": 1772,
+          "buckets": 9
+        },
+        {
+          "value": 1774,
+          "buckets": 7
+        },
+        {
+          "value": 1776,
+          "buckets": 9
+        },
+        {
+          "value": 1778,
+          "buckets": 3
+        },
+        {
+          "value": 1780,
+          "buckets": 5
+        },
+        {
+          "value": 1782,
+          "buckets": 3
+        },
+        {
+          "value": 1784,
+          "buckets": 4
+        },
+        {
+          "value": 1786,
+          "buckets": 4
+        },
+        {
+          "value": 1788,
+          "buckets": 2
+        },
+        {
+          "value": 1790,
+          "buckets": 3
+        },
+        {
+          "value": 1792,
+          "buckets": 1
+        },
+        {
+          "value": 1794,
+          "buckets": 8
+        },
+        {
+          "value": 1796,
+          "buckets": 1
+        },
+        {
+          "value": 1798,
+          "buckets": 5
+        },
+        {
+          "value": 1800,
+          "buckets": 5
+        },
+        {
+          "value": 1802,
+          "buckets": 1
+        },
+        {
+          "value": 1804,
+          "buckets": 3
+        },
+        {
+          "value": 1806,
+          "buckets": 1
+        },
+        {
+          "value": 1808,
+          "buckets": 6
+        },
+        {
+          "value": 1810,
+          "buckets": 2
+        },
+        {
+          "value": 1812,
+          "buckets": 2
+        },
+        {
+          "value": 1814,
+          "buckets": 6
+        },
+        {
+          "value": 1816,
+          "buckets": 7
+        },
+        {
+          "value": 1818,
+          "buckets": 2
+        },
+        {
+          "value": 1820,
+          "buckets": 3
+        },
+        {
+          "value": 1822,
+          "buckets": 1
+        },
+        {
+          "value": 1828,
+          "buckets": 1
+        },
+        {
+          "value": 1830,
+          "buckets": 1
+        },
+        {
+          "value": 1832,
+          "buckets": 2
+        },
+        {
+          "value": 1834,
+          "buckets": 1
+        },
+        {
+          "value": 1836,
+          "buckets": 4
+        },
+        {
+          "value": 1838,
+          "buckets": 1
+        },
+        {
+          "value": 1840,
+          "buckets": 2
+        },
+        {
+          "value": 1844,
+          "buckets": 1
+        },
+        {
+          "value": 1846,
+          "buckets": 1
+        },
+        {
+          "value": 1848,
+          "buckets": 2
+        },
+        {
+          "value": 1850,
+          "buckets": 1
+        },
+        {
+          "value": 1852,
+          "buckets": 1
+        },
+        {
+          "value": 1854,
+          "buckets": 2
+        },
+        {
+          "value": 1858,
+          "buckets": 4
+        },
+        {
+          "value": 1860,
+          "buckets": 1
+        },
+        {
+          "value": 1862,
+          "buckets": 3
+        },
+        {
+          "value": 1864,
+          "buckets": 2
+        },
+        {
+          "value": 1868,
+          "buckets": 3
+        },
+        {
+          "value": 1870,
+          "buckets": 2
+        },
+        {
+          "value": 1872,
+          "buckets": 1
+        },
+        {
+          "value": 1878,
+          "buckets": 1
+        },
+        {
+          "value": 1880,
+          "buckets": 3
+        },
+        {
+          "value": 1884,
+          "buckets": 1
+        },
+        {
+          "value": 1886,
+          "buckets": 1
+        },
+        {
+          "value": 1890,
+          "buckets": 1
+        },
+        {
+          "value": 1894,
+          "buckets": 1
+        },
+        {
+          "value": 1896,
+          "buckets": 2
+        },
+        {
+          "value": 1900,
+          "buckets": 1
+        },
+        {
+          "value": 1904,
+          "buckets": 1
+        },
+        {
+          "value": 1906,
+          "buckets": 1
+        },
+        {
+          "value": 1908,
+          "buckets": 1
+        },
+        {
+          "value": 1910,
+          "buckets": 1
+        },
+        {
+          "value": 1912,
+          "buckets": 1
+        },
+        {
+          "value": 1916,
+          "buckets": 1
+        },
+        {
+          "value": 1918,
+          "buckets": 1
+        },
+        {
+          "value": 1926,
+          "buckets": 1
+        },
+        {
+          "value": 1938,
+          "buckets": 1
+        },
+        {
+          "value": 1950,
+          "buckets": 1
+        }
+      ],
+      "distinct_occupancy_histogram_all_targets": [
+        {
+          "value": 429,
+          "buckets": 1
+        },
+        {
+          "value": 454,
+          "buckets": 1
+        },
+        {
+          "value": 769,
+          "buckets": 1
+        },
+        {
+          "value": 770,
+          "buckets": 1
+        },
+        {
+          "value": 772,
+          "buckets": 1
+        },
+        {
+          "value": 779,
+          "buckets": 2
+        },
+        {
+          "value": 784,
+          "buckets": 1
+        },
+        {
+          "value": 785,
+          "buckets": 3
+        },
+        {
+          "value": 787,
+          "buckets": 1
+        },
+        {
+          "value": 789,
+          "buckets": 2
+        },
+        {
+          "value": 791,
+          "buckets": 2
+        },
+        {
+          "value": 793,
+          "buckets": 1
+        },
+        {
+          "value": 794,
+          "buckets": 3
+        },
+        {
+          "value": 795,
+          "buckets": 2
+        },
+        {
+          "value": 796,
+          "buckets": 3
+        },
+        {
+          "value": 797,
+          "buckets": 2
+        },
+        {
+          "value": 798,
+          "buckets": 2
+        },
+        {
+          "value": 799,
+          "buckets": 2
+        },
+        {
+          "value": 800,
+          "buckets": 4
+        },
+        {
+          "value": 801,
+          "buckets": 3
+        },
+        {
+          "value": 802,
+          "buckets": 1
+        },
+        {
+          "value": 803,
+          "buckets": 4
+        },
+        {
+          "value": 805,
+          "buckets": 1
+        },
+        {
+          "value": 806,
+          "buckets": 2
+        },
+        {
+          "value": 807,
+          "buckets": 3
+        },
+        {
+          "value": 808,
+          "buckets": 6
+        },
+        {
+          "value": 809,
+          "buckets": 6
+        },
+        {
+          "value": 810,
+          "buckets": 5
+        },
+        {
+          "value": 811,
+          "buckets": 3
+        },
+        {
+          "value": 812,
+          "buckets": 5
+        },
+        {
+          "value": 813,
+          "buckets": 4
+        },
+        {
+          "value": 814,
+          "buckets": 5
+        },
+        {
+          "value": 815,
+          "buckets": 2
+        },
+        {
+          "value": 816,
+          "buckets": 8
+        },
+        {
+          "value": 817,
+          "buckets": 4
+        },
+        {
+          "value": 818,
+          "buckets": 2
+        },
+        {
+          "value": 819,
+          "buckets": 2
+        },
+        {
+          "value": 820,
+          "buckets": 6
+        },
+        {
+          "value": 821,
+          "buckets": 3
+        },
+        {
+          "value": 822,
+          "buckets": 3
+        },
+        {
+          "value": 823,
+          "buckets": 10
+        },
+        {
+          "value": 824,
+          "buckets": 2
+        },
+        {
+          "value": 825,
+          "buckets": 1
+        },
+        {
+          "value": 826,
+          "buckets": 5
+        },
+        {
+          "value": 827,
+          "buckets": 5
+        },
+        {
+          "value": 828,
+          "buckets": 2
+        },
+        {
+          "value": 829,
+          "buckets": 4
+        },
+        {
+          "value": 830,
+          "buckets": 5
+        },
+        {
+          "value": 831,
+          "buckets": 7
+        },
+        {
+          "value": 832,
+          "buckets": 4
+        },
+        {
+          "value": 833,
+          "buckets": 4
+        },
+        {
+          "value": 834,
+          "buckets": 13
+        },
+        {
+          "value": 835,
+          "buckets": 3
+        },
+        {
+          "value": 836,
+          "buckets": 3
+        },
+        {
+          "value": 837,
+          "buckets": 6
+        },
+        {
+          "value": 838,
+          "buckets": 7
+        },
+        {
+          "value": 839,
+          "buckets": 6
+        },
+        {
+          "value": 840,
+          "buckets": 3
+        },
+        {
+          "value": 841,
+          "buckets": 7
+        },
+        {
+          "value": 842,
+          "buckets": 5
+        },
+        {
+          "value": 843,
+          "buckets": 8
+        },
+        {
+          "value": 844,
+          "buckets": 4
+        },
+        {
+          "value": 845,
+          "buckets": 3
+        },
+        {
+          "value": 846,
+          "buckets": 7
+        },
+        {
+          "value": 847,
+          "buckets": 7
+        },
+        {
+          "value": 848,
+          "buckets": 5
+        },
+        {
+          "value": 849,
+          "buckets": 6
+        },
+        {
+          "value": 850,
+          "buckets": 5
+        },
+        {
+          "value": 851,
+          "buckets": 6
+        },
+        {
+          "value": 852,
+          "buckets": 4
+        },
+        {
+          "value": 853,
+          "buckets": 6
+        },
+        {
+          "value": 854,
+          "buckets": 2
+        },
+        {
+          "value": 855,
+          "buckets": 3
+        },
+        {
+          "value": 856,
+          "buckets": 9
+        },
+        {
+          "value": 857,
+          "buckets": 3
+        },
+        {
+          "value": 858,
+          "buckets": 6
+        },
+        {
+          "value": 859,
+          "buckets": 14
+        },
+        {
+          "value": 860,
+          "buckets": 4
+        },
+        {
+          "value": 861,
+          "buckets": 4
+        },
+        {
+          "value": 862,
+          "buckets": 8
+        },
+        {
+          "value": 863,
+          "buckets": 6
+        },
+        {
+          "value": 864,
+          "buckets": 7
+        },
+        {
+          "value": 865,
+          "buckets": 6
+        },
+        {
+          "value": 866,
+          "buckets": 4
+        },
+        {
+          "value": 867,
+          "buckets": 4
+        },
+        {
+          "value": 868,
+          "buckets": 5
+        },
+        {
+          "value": 869,
+          "buckets": 6
+        },
+        {
+          "value": 870,
+          "buckets": 6
+        },
+        {
+          "value": 871,
+          "buckets": 4
+        },
+        {
+          "value": 872,
+          "buckets": 2
+        },
+        {
+          "value": 873,
+          "buckets": 4
+        },
+        {
+          "value": 874,
+          "buckets": 7
+        },
+        {
+          "value": 875,
+          "buckets": 5
+        },
+        {
+          "value": 876,
+          "buckets": 5
+        },
+        {
+          "value": 877,
+          "buckets": 3
+        },
+        {
+          "value": 878,
+          "buckets": 3
+        },
+        {
+          "value": 879,
+          "buckets": 5
+        },
+        {
+          "value": 880,
+          "buckets": 6
+        },
+        {
+          "value": 881,
+          "buckets": 2
+        },
+        {
+          "value": 882,
+          "buckets": 1
+        },
+        {
+          "value": 883,
+          "buckets": 5
+        },
+        {
+          "value": 884,
+          "buckets": 7
+        },
+        {
+          "value": 885,
+          "buckets": 5
+        },
+        {
+          "value": 886,
+          "buckets": 9
+        },
+        {
+          "value": 887,
+          "buckets": 7
+        },
+        {
+          "value": 888,
+          "buckets": 9
+        },
+        {
+          "value": 889,
+          "buckets": 3
+        },
+        {
+          "value": 890,
+          "buckets": 5
+        },
+        {
+          "value": 891,
+          "buckets": 3
+        },
+        {
+          "value": 892,
+          "buckets": 4
+        },
+        {
+          "value": 893,
+          "buckets": 4
+        },
+        {
+          "value": 894,
+          "buckets": 2
+        },
+        {
+          "value": 895,
+          "buckets": 3
+        },
+        {
+          "value": 896,
+          "buckets": 1
+        },
+        {
+          "value": 897,
+          "buckets": 8
+        },
+        {
+          "value": 898,
+          "buckets": 1
+        },
+        {
+          "value": 899,
+          "buckets": 5
+        },
+        {
+          "value": 900,
+          "buckets": 5
+        },
+        {
+          "value": 901,
+          "buckets": 1
+        },
+        {
+          "value": 902,
+          "buckets": 3
+        },
+        {
+          "value": 903,
+          "buckets": 1
+        },
+        {
+          "value": 904,
+          "buckets": 6
+        },
+        {
+          "value": 905,
+          "buckets": 2
+        },
+        {
+          "value": 906,
+          "buckets": 2
+        },
+        {
+          "value": 907,
+          "buckets": 6
+        },
+        {
+          "value": 908,
+          "buckets": 7
+        },
+        {
+          "value": 909,
+          "buckets": 2
+        },
+        {
+          "value": 910,
+          "buckets": 3
+        },
+        {
+          "value": 911,
+          "buckets": 1
+        },
+        {
+          "value": 914,
+          "buckets": 1
+        },
+        {
+          "value": 915,
+          "buckets": 1
+        },
+        {
+          "value": 916,
+          "buckets": 2
+        },
+        {
+          "value": 917,
+          "buckets": 1
+        },
+        {
+          "value": 918,
+          "buckets": 4
+        },
+        {
+          "value": 919,
+          "buckets": 1
+        },
+        {
+          "value": 920,
+          "buckets": 2
+        },
+        {
+          "value": 922,
+          "buckets": 1
+        },
+        {
+          "value": 923,
+          "buckets": 1
+        },
+        {
+          "value": 924,
+          "buckets": 2
+        },
+        {
+          "value": 925,
+          "buckets": 1
+        },
+        {
+          "value": 926,
+          "buckets": 1
+        },
+        {
+          "value": 927,
+          "buckets": 2
+        },
+        {
+          "value": 929,
+          "buckets": 4
+        },
+        {
+          "value": 930,
+          "buckets": 1
+        },
+        {
+          "value": 931,
+          "buckets": 3
+        },
+        {
+          "value": 932,
+          "buckets": 2
+        },
+        {
+          "value": 934,
+          "buckets": 3
+        },
+        {
+          "value": 935,
+          "buckets": 2
+        },
+        {
+          "value": 936,
+          "buckets": 1
+        },
+        {
+          "value": 939,
+          "buckets": 1
+        },
+        {
+          "value": 940,
+          "buckets": 3
+        },
+        {
+          "value": 942,
+          "buckets": 1
+        },
+        {
+          "value": 943,
+          "buckets": 1
+        },
+        {
+          "value": 945,
+          "buckets": 1
+        },
+        {
+          "value": 947,
+          "buckets": 1
+        },
+        {
+          "value": 948,
+          "buckets": 2
+        },
+        {
+          "value": 950,
+          "buckets": 1
+        },
+        {
+          "value": 952,
+          "buckets": 1
+        },
+        {
+          "value": 953,
+          "buckets": 1
+        },
+        {
+          "value": 954,
+          "buckets": 1
+        },
+        {
+          "value": 955,
+          "buckets": 1
+        },
+        {
+          "value": 956,
+          "buckets": 1
+        },
+        {
+          "value": 958,
+          "buckets": 1
+        },
+        {
+          "value": 959,
+          "buckets": 1
+        },
+        {
+          "value": 963,
+          "buckets": 1
+        },
+        {
+          "value": 969,
+          "buckets": 1
+        },
+        {
+          "value": 975,
+          "buckets": 1
+        }
+      ],
+      "augmented_rank_histogram_nonempty_targets": [
+        {
+          "value": 14,
+          "buckets": 1
+        },
+        {
+          "value": 15,
+          "buckets": 596
+        }
+      ],
+      "homogeneous_rank_histogram_nonempty_targets": [
+        {
+          "value": 14,
+          "buckets": 597
+        }
+      ],
+      "rank_modulus": 2305843009213693951,
+      "hadamard_log2_bound": 40.651484454403224,
+      "rank_transfer_to_p256_exact": true,
+      "logical_candidate_group_additions": 9225216,
+      "precomputed_group_additions": 33376,
+      "replayed_rows": 1025024,
+      "replay_failures": 0,
+      "enumeration_sha256": "07095f733625ad6bdf74b7c060cf0c170ea0e3255735f037c17885f9e6aafef7",
+      "summary_sha256": "71c6e5caf20841808c30735f9528dd48c86e6e741093b38a57d1c252577381b2"
+    }
+  ],
+  "transfer_assessment": {
+    "skill_profile": "transfer assessment applied manually; required referenced methodology/template resources were unavailable",
+    "required_skill_resources_available": false,
+    "typed_correspondence_graph": [
+      "icv1-fp256-t89188191154553853111372247798585809583-f188c491 --[a+b*pi on E(F_p) = scalar [a+b]]--> icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+      "icv1-fp256-t89188191154553853111372247798585809583-f188c491 --[degree-11 isogeny, kernel disjoint from order-n subgroup]--> certified isogenous model",
+      "icv1-fp256-t89188191154553853111372247798585809583-f188c491 --[no supplied executable map]--> extension/cover/Jacobian: unknown"
+    ],
+    "paths": [
+      {
+        "name": "base-field endomorphism action",
+        "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+        "destination": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+        "transformation_type": "endomorphism inducing a prime-subgroup homomorphism",
+        "field_of_definition": "F_p",
+        "subgroup_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+        "obligations": [
+          {
+            "name": "endomorphism-ring construction",
+            "status": "supported",
+            "evidence": "Round 25 verifies the fundamental CM discriminant, conductor one, and End(E)=Z[pi]."
+          },
+          {
+            "name": "rational-point action",
+            "status": "supported",
+            "evidence": "Every a+b*pi acts on E(F_p) as the scalar [a+b]."
+          },
+          {
+            "name": "non-scalar transport",
+            "status": "refuted",
+            "evidence": "Within base-field endomorphisms, the rational P-256 subgroup action is always scalar; the minimum noninteger degree is about 2^255.975."
+          },
+          {
+            "name": "exact quotient",
+            "status": "supported",
+            "evidence": "The 139,592-column scalar orbit has quotient dimension one and 139,592 replayed transport edges."
+          },
+          {
+            "name": "complete parity advantage",
+            "status": "refuted",
+            "evidence": "Known-anchor transport is a generic claw/rho encoding; unknown-anchor elimination needs two events and its free-oracle boundary is 1.446505 times rho."
+          }
+        ],
+        "quotient_dimension": 1,
+        "measured_ratio_to_rho": 1.4465047156952717,
+        "classification": "exact transport, but scalar/generic and above rho after anchor elimination",
+        "exploration_boundary": "Complete for base-field P-256 endomorphism actions on E(F_p); not a claim about arbitrary covers or higher-dimensional correspondences."
+      },
+      {
+        "name": "degree-11 isogeny walk",
+        "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+        "destination": "4,096 certified adjacent models; staged Dickson full-depth subset",
+        "transformation_type": "separable degree-11 isogeny inducing a subgroup isomorphism",
+        "field_of_definition": "F_p",
+        "subgroup_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+        "obligations": [
+          {
+            "name": "map existence and certificate",
+            "status": "supported",
+            "evidence": "Round 28 replays 4,096 continuous degree-11 edges over 4,097 distinct generic-j models with zero certificate failures."
+          },
+          {
+            "name": "subgroup kernel",
+            "status": "supported",
+            "evidence": "The target subgroup has prime order n and gcd(n,11)=1, so a degree-11 kernel intersects it trivially."
+          },
+          {
+            "name": "DLP transport",
+            "status": "supported",
+            "evidence": "The isogeny restricts to an injective map on the order-n subgroup; recovery requires the certified dual/path and its conversion costs."
+          },
+          {
+            "name": "factor-base quotient reduction",
+            "status": "refuted",
+            "evidence": "Every screened geometric column remains an independent log class; Round 28 credits no quotient reduction."
+          },
+          {
+            "name": "degree and complete-cost advantage",
+            "status": "refuted",
+            "evidence": "The selected model retains universal degree-four S3 support, worsens the boundary to 494.612 times rho, and fails degree, storage and collection gates."
+          },
+          {
+            "name": "all-model full-depth search",
+            "status": "unknown",
+            "evidence": "The walk is exhaustive at depth eight, but prefix selection retains only 64 depth-12 and nine full-depth models; discarded branches are not counted as exhaustive."
+          }
+        ],
+        "quotient_dimension": null,
+        "measured_ratio_to_rho": 494.61185169050134,
+        "classification": "certified subgroup transfer without logarithm quotient or cost advantage",
+        "exploration_boundary": "Complete certificate replay for 4,096 edges; staged, non-exhaustive full-depth Dickson inventory as explicitly recorded by Round 28."
+      },
+      {
+        "name": "extension, cover, or Jacobian correspondence",
+        "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+        "destination": "unspecified",
+        "transformation_type": "unknown until explicit formulas and induced subgroup maps are supplied",
+        "field_of_definition": "unknown",
+        "subgroup_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+        "obligations": [
+          {
+            "name": "executable construction",
+            "status": "unknown",
+            "evidence": "No new lift, cover, Jacobian map, or recovery formula is supplied by the frozen artifacts."
+          },
+          {
+            "name": "homomorphism and kernel",
+            "status": "unknown",
+            "evidence": "Source/destination dimensions, fields, exceptional points, kernel intersection and subgroup image are unset."
+          },
+          {
+            "name": "paired conversion cost",
+            "status": "unknown",
+            "evidence": "Construction, conversion, failed attempts, verification, recovery, memory and matched-rho costs are unset."
+          },
+          {
+            "name": "non-generic quotient",
+            "status": "unknown",
+            "evidence": "No certified action on factor-base logarithms exists, so no quotient or speed credit is assigned."
+          }
+        ],
+        "quotient_dimension": null,
+        "measured_ratio_to_rho": null,
+        "classification": "open obligation; no evidence of advantage",
+        "exploration_boundary": "Not searched in this round because no concrete correspondence is supplied; this is not a nonexistence result."
+      }
+    ],
+    "weakest_open_obligation": "No explicit non-endomorphism cover/Jacobian correspondence with subgroup, recovery and full-cost certificates has been supplied; without it, non-generic transport remains unknown and receives no parity credit."
+  },
+  "relations_reported": 0,
+  "full_depth_unplanted_relation_attempted": false,
+  "process_telemetry_recorded_in_isolation_receipt": true,
+  "gates": {
+    "dependency_hashes_checked": true,
+    "complete_toy_domains": true,
+    "zero_toy_replay_failures": true,
+    "exact_rank_transfer": true,
+    "p256_rank_164_event_measured": false,
+    "exact_non_generic_log_transport": false,
+    "parity_at_or_below_rho": false,
+    "zero_false_positives_and_false_negatives_on_complete_relation_instances": true,
+    "structured_residual_degree_at_most_5": false,
+    "per_usable_relation_below_2_103": false,
+    "complete_cost_below_2_120": false,
+    "projected_materialized_storage_below_2_50": false,
+    "promoted": false
+  },
+  "classification": "multi-row-negative/measured-transport-families-closed/promotion-negative",
+  "dominant_obstruction": "Rho parity permits only one collision event, so this 164-class base needs one canonical target bucket carrying at least 164 independent rows (165 distinct normalized preimages, or 330 raw folded preimages before removing global-negation duplicates). Its exact fixed-arity domain has mean distinct normalized occupancy only 1.005110 per canonical P-256 target. Complete toy enumeration reaches full row rank only in the dense regime, while certified endomorphism and degree-11 isogeny transports do not supply a non-generic quotient.",
+  "decision": "Reject raw multi-relation count as a parity lever without rank-164 event evidence. Close base-field endomorphism and the measured degree-11 isogeny families; retain covers/Jacobians as explicit unknown obligations, not credited improvements. Do not attempt an unplanted P-256 relation.",
+  "semantic_evidence_sha256": "f5c634bff7357c4e422811b2f2b22ec5bdbc228e6ab0a7acf7d4bd8d37b7a49e",
+  "result_json_bytes": 50776
+}

@@ -1033,7 +1033,9 @@ mod tests {
 
     #[test]
     fn two_pass_covers_full_pair_key() {
-        assert!(PAIR_UNIVERSE < (1u64 << 36));
+        const {
+            assert!(PAIR_UNIVERSE < (1u64 << 36));
+        }
         assert_eq!(18 * 2, 36);
     }
 }

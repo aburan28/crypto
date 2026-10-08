@@ -342,7 +342,7 @@ fn exact_quotient(deltas: &[BigUint]) -> Result<(Vec<BigUint>, ExactStateQuotien
         return Err("exact hidden-state quotient did not have the frozen two-atom classes".into());
     }
     let information_bits = (classes.len() as f64).log2();
-    let minimum_bits = (u64::BITS - (COLUMNS - 1).leading_zeros()) as u32;
+    let minimum_bits = u64::BITS - (COLUMNS - 1).leading_zeros();
     let packed_bytes = (COLUMNS * u64::from(minimum_bits)).div_ceil(8);
     Ok((
         classes.keys().cloned().collect(),
@@ -637,10 +637,12 @@ mod tests {
 
     #[test]
     fn minimum_exact_key_is_eighteen_bits() {
-        let bits = (u64::BITS - (COLUMNS - 1).leading_zeros()) as u32;
+        let bits = u64::BITS - (COLUMNS - 1).leading_zeros();
         assert_eq!(bits, 18);
-        assert!(1u64 << 17 < COLUMNS);
-        assert!(1u64 << 18 >= COLUMNS);
+        const {
+            assert!(1u64 << 17 < COLUMNS);
+            assert!(1u64 << 18 >= COLUMNS);
+        }
     }
 
     #[test]
