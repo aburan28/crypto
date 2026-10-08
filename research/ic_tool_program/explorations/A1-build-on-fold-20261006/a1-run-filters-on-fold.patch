@@ -1,0 +1,136 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b99ba37a8..e39c30b8f 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4305,51 +4305,79 @@ impl PairSumTable {
+         }
+         let total = part_start[parts];
+         // 2. Each partition counting-sorted into its own bucket range.
++        //
++        // **The filter.**  A pair's filter word comes from its hash's low
++        // bits and its partition from the top ones, so a partition's
++        // filter bits land anywhere in a filter of megabytes, a miss
++        // each.  An atomic OR there is a locked read-modify-write that
++        // waits out its miss before the next can start, and it was most
++        // of this step.  Instead the partitions are cut into contiguous
++        // runs, one a thread, and each run sets a filter of its own with
++        // plain ORs, the word `FILL_AHEAD` pairs on prefetched so the
++        // misses overlap; the runs' filters are ORed together at the end.
++        // At one thread there is one run, and its filter is the filter.
++        // Every bit is set either way, so the filter is the same.
++        const FILL_AHEAD: usize = 16;
+         let filter_bits = filter_bits_for(total);
+         let present_mask = (1u64 << filter_bits) - 1;
+-        let present_atomic: Vec<AtomicU64> = (0..(1usize << filter_bits) / 64)
+-            .map(|_| AtomicU64::new(0))
+-            .collect();
++        let filter_words = (1usize << filter_bits) / 64;
+         let per_part = buckets / parts;
++        let fill_runs = rayon::current_num_threads().clamp(1, parts);
++        let parts_per_run = parts.div_ceil(fill_runs);
+         let mut bucket_start = vec![0u32; buckets + 1];
+         let mut rests = vec![0u32; total];
+         let rp = rests.as_mut_ptr() as usize;
+-        bucket_start[..buckets]
+-            .par_chunks_mut(per_part)
++        let filters: Vec<Vec<u64>> = bucket_start[..buckets]
++            .par_chunks_mut(per_part * parts_per_run)
+             .enumerate()
+-            .for_each(|(p, starts)| {
+-                let first = p * per_part;
+-                let mut at = vec![0usize; per_part];
+-                for (hs, _) in &streams {
+-                    for &h in &hs[p] {
+-                        at[(h >> bucket_shift) as usize - first] += 1;
++            .map(|(run, run_starts)| {
++                let mut present = vec![0u64; filter_words];
++                for (k, starts) in run_starts.chunks_mut(per_part).enumerate() {
++                    let p = run * parts_per_run + k;
++                    let first = p * per_part;
++                    let mut at = vec![0usize; per_part];
++                    for (hs, _) in &streams {
++                        for &h in &hs[p] {
++                            at[(h >> bucket_shift) as usize - first] += 1;
++                        }
+                     }
+-                }
+-                let mut next = part_start[p];
+-                for (b, slot) in at.iter_mut().enumerate() {
+-                    starts[b] = next as u32;
+-                    let n = *slot;
+-                    *slot = next;
+-                    next += n;
+-                }
+-                for (hs, ws) in &streams {
+-                    for (&h, &w) in hs[p].iter().zip(&ws[p]) {
+-                        let b = (h >> bucket_shift) as usize - first;
+-                        // SAFETY: partition `p` owns
+-                        // `rests[part_start[p]..part_start[p + 1]]`, and its
+-                        // bucket cursors stay inside it.
+-                        unsafe { *(rp as *mut u32).add(at[b]) = w };
+-                        at[b] += 1;
+-                        let (word, bits) = filter_slot(h, present_mask, FILTER_EXTRA);
+-                        present_atomic[word].fetch_or(bits, Ordering::Relaxed);
++                    let mut next = part_start[p];
++                    for (b, slot) in at.iter_mut().enumerate() {
++                        starts[b] = next as u32;
++                        let n = *slot;
++                        *slot = next;
++                        next += n;
++                    }
++                    for (hs, ws) in &streams {
++                        let (hs, ws) = (&hs[p], &ws[p]);
++                        for (i, (&h, &w)) in hs.iter().zip(ws).enumerate() {
++                            if let Some(&ahead) = hs.get(i + FILL_AHEAD) {
++                                prefetch(&present[filter_slot(ahead, present_mask, 0).0]);
++                            }
++                            let b = (h >> bucket_shift) as usize - first;
++                            // SAFETY: partition `p` owns
++                            // `rests[part_start[p]..part_start[p + 1]]`, and
++                            // its bucket cursors stay inside it.
++                            unsafe { *(rp as *mut u32).add(at[b]) = w };
++                            at[b] += 1;
++                            let (word, bits) = filter_slot(h, present_mask, FILTER_EXTRA);
++                            present[word] |= bits;
++                        }
+                     }
+                 }
+-            });
+-        bucket_start[buckets] = total as u32;
+-        let present = present_atomic
+-            .iter()
+-            .map(|w| w.load(Ordering::Relaxed))
++                present
++            })
+             .collect();
++        bucket_start[buckets] = total as u32;
++        let present = filters
++            .into_iter()
++            .reduce(|mut all, run| {
++                for (a, r) in all.iter_mut().zip(&run) {
++                    *a |= r;
++                }
++                all
++            })
++            .unwrap_or_else(|| vec![0u64; filter_words]);
+         (bucket_start, rests, present, present_mask)
+     }
+ 
+@@ -14733,6 +14761,8 @@ mod tests {
+         // words, their order inside each bucket included, cannot depend
+         // on the threads.  On one thread the two-pass build fills each
+         // bucket in row order too, so it is the same table word for word.
++        // The filter is set a run of partitions at a time, each run its
++        // own, and ORed: the same bits whatever the runs.
+         let pool = |threads: usize| {
+             rayon::ThreadPoolBuilder::new()
+                 .num_threads(threads)
+@@ -14744,6 +14774,8 @@ mod tests {
+             (0, 31, 5, 400),
+             (1, 47, 3, 1500),
+             (0, 53, 1, 3000),
++            (1, 59, 1, 3000),
++            (0, 61, 1, 3000),
+         ] {
+             let kc = KoblitzCurve::new(a, n).unwrap();
+             let fb = build_subgroup_orbit_factor_base(&kc, seed, points).unwrap();

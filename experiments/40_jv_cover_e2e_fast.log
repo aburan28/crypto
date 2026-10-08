@@ -1,0 +1,51 @@
+| p | seed | moves | l | non-weak C | walk found | path (2/odd) | walk | transport | model | route muls | reach share | solved | correct | verified on C | S | S/rho (e2e) | S/rho (route only) | e2e/route |
+|---:|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|
+| 503 | 1 | 8 | 2^51.8 | true | true | 0/1 | 6.44e5 | 2.20e3 | 7.27e4 | 1.245e10 | 0.0001 | true | true | true | 5.912e-1 | 0.4344 | 1.3552 | 0.3205 |
+p=503 seed=1 moves=8: stage=ok 93 s
+| 503 | 1 | 64 | 2^51.8 | true | true | 1/3 | 1.26e8 | 7.71e3 | 7.27e4 | 2.119e10 | 0.0059 | true | true | true | 1.012e0 | 0.7437 | 1.3552 | 0.5488 |
+p=503 seed=1 moves=64: stage=ok 105 s
+| 503 | 2 | 8 | 2^51.8 | true | true | 1/1 | 1.05e7 | 7.27e3 | 7.23e4 | 1.008e10 | 0.0010 | true | true | true | 4.791e-1 | 0.3521 | 0.1604 | 2.1954 |
+p=503 seed=2 moves=8: stage=ok 34 s
+| 503 | 2 | 64 | 2^51.8 | true | true | 3/1 | 3.67e7 | 9.47e3 | 7.23e4 | 1.596e10 | 0.0023 | true | true | true | 7.594e-1 | 0.5580 | 0.1604 | 3.4796 |
+p=503 seed=2 moves=64: stage=ok 44 s
+| 503 | 3 | 8 | 2^51.8 | true | true | 2/2 | 1.77e7 | 6.61e3 | 7.24e4 | 2.282e10 | 0.0008 | true | true | true | 1.084e0 | 0.7969 | 0.6672 | 1.1944 |
+p=503 seed=3 moves=8: stage=ok 84 s
+| 503 | 3 | 64 | 2^51.8 | true | true | 4/2 | 8.06e7 | 8.81e3 | 7.28e4 | 2.641e10 | 0.0030 | true | true | true | 1.258e0 | 0.9242 | 0.6672 | 1.3852 |
+p=503 seed=3 moves=64: stage=ok 93 s
+| 503 | 4 | 8 | 2^51.8 | true | true | 4/0 | 1.32e7 | 4.41e3 | 7.21e4 | 1.073e10 | 0.0012 | true | true | true | 5.099e-1 | 0.3747 | 0.8606 | 0.4354 |
+p=503 seed=4 moves=8: stage=ok 57 s
+| 503 | 4 | 64 | 2^51.8 | true | true | 6/0 | 1.84e7 | 6.61e3 | 7.21e4 | 1.032e10 | 0.0018 | true | true | true | 4.911e-1 | 0.3608 | 0.8606 | 0.4193 |
+p=503 seed=4 moves=64: stage=ok 58 s
+| 1009 | 1 | 8 | 2^57.9 | true | true | 1/1 | 1.75e7 | 7.27e3 | 1.48e5 | 1.040e10 | 0.0017 | true | true | true | 6.126e-2 | 0.0450 | 0.0594 | 0.7571 |
+p=1009 seed=1 moves=8: stage=ok 43 s
+| 1009 | 1 | 64 | 2^57.9 | true | true | 1/1 | 2.31e7 | 7.27e3 | 1.48e5 | 1.295e10 | 0.0018 | true | true | true | 7.631e-2 | 0.0561 | 0.0594 | 0.9432 |
+p=1009 seed=1 moves=64: stage=ok 49 s
+| 1009 | 2 | 8 | 2^57.9 | true | true | 1/1 | 5.80e5 | 3.30e3 | 1.48e5 | 1.905e10 | 0.0000 | true | true | true | 1.121e-1 | 0.0823 | 0.1197 | 0.6878 |
+p=1009 seed=2 moves=8: stage=ok 82 s
+| 1009 | 2 | 64 | 2^57.9 | true | true | 1/3 | 1.84e7 | 7.71e3 | 1.49e5 | 3.515e10 | 0.0005 | true | true | true | 2.069e-1 | 0.1520 | 0.1197 | 1.2695 |
+p=1009 seed=2 moves=64: stage=ok 106 s
+| 1009 | 3 | 8 | 2^57.9 | true | true | 4/0 | 6.34e4 | 4.41e3 | 1.48e5 | 1.432e10 | 0.0000 | true | true | true | 8.425e-2 | 0.0619 | 0.0255 | 2.4273 |
+p=1009 seed=3 moves=8: stage=ok 46 s
+| 1009 | 3 | 64 | 2^57.9 | true | true | 2/0 | 2.98e4 | 2.20e3 | 1.48e5 | 2.334e10 | 0.0000 | true | true | true | 1.373e-1 | 0.1009 | 0.0255 | 3.9559 |
+p=1009 seed=3 moves=64: stage=ok 62 s
+| 1009 | 4 | 8 | 2^57.9 | true | true | 4/0 | 1.35e6 | 4.41e3 | 1.49e5 | 8.049e9 | 0.0002 | true | true | true | 4.736e-2 | 0.0348 | 0.0110 | 3.1770 |
+p=1009 seed=4 moves=8: stage=ok 17 s
+| 1009 | 4 | 64 | 2^57.9 | true | true | 4/0 | 1.93e6 | 4.41e3 | 1.48e5 | 2.121e10 | 0.0001 | true | true | true | 1.248e-1 | 0.0917 | 0.0110 | 8.3705 |
+p=1009 seed=4 moves=64: stage=ok 39 s
+| 1511 | 1 | 8 | 2^61.4 | true | true | 3/1 | 1.77e6 | 5.51e3 | 2.41e5 | 3.841e9 | 0.0005 | true | true | true | 6.732e-3 | 0.0049 | 0.0195 | 0.2534 |
+p=1511 seed=1 moves=8: stage=ok 78 s
+| 1511 | 1 | 64 | 2^61.4 | true | true | 2/0 | 6.01e5 | 2.20e3 | 2.41e5 | 6.373e9 | 0.0001 | true | true | true | 1.116e-2 | 0.0082 | 0.0195 | 0.4203 |
+p=1511 seed=1 moves=64: stage=ok 83 s
+| 1511 | 2 | 8 | 2^61.4 | true | true | 2/0 | 1.72e7 | 2.20e3 | 2.42e5 | 7.070e9 | 0.0025 | true | true | true | 1.241e-2 | 0.0091 | 0.0214 | 0.4254 |
+p=1511 seed=2 moves=8: stage=ok 48 s
+| 1511 | 2 | 64 | 2^61.4 | true | true | 4/0 | 3.44e7 | 4.41e3 | 2.42e5 | 1.661e10 | 0.0021 | true | true | true | 2.915e-2 | 0.0214 | 0.0214 | 0.9990 |
+p=1511 seed=2 moves=64: stage=ok 66 s
+| 1511 | 3 | 8 | 2^61.4 | true | true | 2/0 | 2.40e4 | 2.20e3 | 2.41e5 | 6.442e9 | 0.0000 | true | true | true | 1.128e-2 | 0.0083 | 0.0062 | 1.3270 |
+p=1511 seed=3 moves=8: stage=ok 50 s
+| 1511 | 3 | 64 | 2^61.4 | true | true | 1/0 | 1.07e4 | 1.10e3 | 2.41e5 | 4.865e9 | 0.0001 | true | true | true | 8.522e-3 | 0.0063 | 0.0062 | 1.0023 |
+p=1511 seed=3 moves=64: stage=ok 52 s
+| 1511 | 4 | 8 | 2^61.4 | true | true | 2/2 | 1.19e8 | 8.59e3 | 2.42e5 | 1.471e10 | 0.0081 | true | true | true | 2.598e-2 | 0.0191 | 0.0165 | 1.1575 |
+p=1511 seed=4 moves=8: stage=ok 109 s
+| 1511 | 4 | 64 | 2^61.4 | true | true | 1/0 | 1.07e4 | 1.10e3 | 2.42e5 | 6.526e9 | 0.0000 | true | true | true | 1.143e-2 | 0.0084 | 0.0165 | 0.5093 |
+p=1511 seed=4 moves=64: stage=ok 99 s
+e2e-fast exit 0

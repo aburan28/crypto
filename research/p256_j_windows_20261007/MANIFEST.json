@@ -1,0 +1,173 @@
+{
+  "schema": "p256.isogeny-grid-strip-result-manifest/v1",
+  "run_id": "p256-strip-y1000-h64-20261007",
+  "date": "2026-10-07",
+  "status": "complete_verified_negative_screen",
+  "result_class": "bounded-structural-screen-no-ecdlp-speedup",
+  "production_source_commit": "581aeff3d89b412e718207e05f4002808271f1ef",
+  "production_source_tree": "4580c2924f58a7170ebfb0e89a14578be14884fb",
+  "registered_root": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "population": {
+    "construction": "width-1000 global rows 1000 through 1063 over the degree-13/degree-11 product grid",
+    "new_unique_curves": 64000,
+    "new_parent_edges": 64000,
+    "new_kernel_certificates": 64000,
+    "cumulative_unique_j_invariants": 1064000,
+    "fraction_of_2_pow_32": 0.0002477318048477173,
+    "coverage_percent_of_2_pow_32": 0.02477318048477173,
+    "universal_class_claim": false
+  },
+  "verification": {
+    "status": "pass",
+    "generation_audit_points_per_curve": 1,
+    "replay_audit_points_per_curve": 2,
+    "replay_audit_seed_x": 7,
+    "strip_record_chain_sha256": "7d542b93aec2f21d9237e86f9d079cee4f858b5650bc0995c2f85ca0857cf87d",
+    "primary_qr_threshold": 54,
+    "primary_screen_hits": 0,
+    "comparison_qr_threshold": 52,
+    "comparison_screen_hits": 0,
+    "minimum_b_signed_bits": 240,
+    "minimum_a_signed_bits_without_a_minus_3": 239,
+    "j_union_status": "pass",
+    "j_union_inputs": 1064000,
+    "j_union_unique": 1064000,
+    "ecdlp_speedup": null
+  },
+  "artifacts": [
+    {
+      "role": "prior_immutable_certificate",
+      "publication": "local_only",
+      "local_path": "/tmp/p256-isogeny-million-20261006/p256-grid-1m.jsonl.gz",
+      "encoding": "gzip",
+      "stored_bytes": 527157501,
+      "stored_sha256": "87522b6de08e64804dcee17bba058eb91922d6b8dd9853cd32523f67a3d0cbdc",
+      "content_bytes": 1773118481,
+      "content_sha256": "2a1a27d06f48b22b85ce3c96ac4017f5af6a0256e9d1ad277e3fb1f516475454",
+      "record_chain_sha256": "4de6e93e0d7a90ff53a26f8f1fd1cbd03ab55f701a25f8e49874cb8bead40302"
+    },
+    {
+      "role": "new_canonical_certificate",
+      "publication": "local_only",
+      "local_path": "/tmp/p256-j-strip-20261007/runs/p256-strip-y1000-h64/p256-strip-y1000-h64.jsonl.gz",
+      "encoding": "gzip",
+      "stored_bytes": 33739337,
+      "stored_sha256": "90f22f7aadaef78cff5a72889e5539b2ae81459d57d7a84b37a9009e96a3f701",
+      "content_bytes": 114464825,
+      "content_sha256": "a24593f9d1d1c880b63f1da86d10e375981f72aaa358e1eae428e63b3d4714b1",
+      "jsonl_records": 64002,
+      "record_chain_sha256": "7d542b93aec2f21d9237e86f9d079cee4f858b5650bc0995c2f85ca0857cf87d"
+    },
+    {
+      "role": "generation_receipt",
+      "publication": "git",
+      "path": "runs/p256-strip-y1000-h64/GENERATE.json",
+      "bytes": 4921,
+      "sha256": "f8965169b464dc8db294be0534d04c1963d2022ca2a7ef2049ffcd5d4f868305"
+    },
+    {
+      "role": "independent_replay_receipt",
+      "publication": "git",
+      "path": "runs/p256-strip-y1000-h64/VERIFY.json",
+      "bytes": 4963,
+      "sha256": "a11ab708d6b3192faf1a4052ef2820bd8c6a43ffe14540af52b54970f8f26619"
+    },
+    {
+      "role": "cross_certificate_j_union_receipt",
+      "publication": "git",
+      "path": "runs/p256-strip-y1000-h64/J_UNION.json",
+      "bytes": 1654,
+      "sha256": "44f5e746668bb797d51bcbcc26a795c1b32e83dae8c96dcd877167b97de086bb"
+    },
+    {
+      "role": "result_report_source",
+      "publication": "git",
+      "path": "RESULTS.md",
+      "bytes": 12039,
+      "sha256": "7390e08068b6ddff3a096d689450d060189fb0744c43b3b8bd63ea1ee353e789"
+    },
+    {
+      "role": "result_report_pdf",
+      "publication": "git",
+      "path": "RESULTS.pdf",
+      "bytes": 88408,
+      "sha256": "45c2085c36b89a949e8f9794581e7e112b6dff283e764ca08b6958f061a860ba"
+    },
+    {
+      "role": "transfer_assessment",
+      "publication": "git",
+      "path": "TRANSFER_ASSESSMENT.json",
+      "bytes": 6224,
+      "sha256": "7767a1ced5769e7cf4dfc041f3e3aa514856a30d9b4d769fc1fdca5318f8af12"
+    },
+    {
+      "role": "lattice_diagram_source",
+      "publication": "git",
+      "path": "figures/lattice.dot",
+      "bytes": 2417,
+      "sha256": "d45e4436374e1d4ebabfac85a98186a69ae56c3c44d8cec0af65e7ccd4346d0d"
+    },
+    {
+      "role": "lattice_diagram_svg",
+      "publication": "git",
+      "path": "figures/lattice.svg",
+      "bytes": 10584,
+      "sha256": "c15fb05432190e530e8a315b877ffed5fbc68adeba9202f04c6fa49176b4e749"
+    },
+    {
+      "role": "coverage_graph_data",
+      "publication": "git",
+      "path": "figures/coverage.csv",
+      "bytes": 433,
+      "sha256": "d0600fbb163b01e3b7c795bb9fda0b1ad2bd6c3424d2d4fefe28d6f254dd93e7"
+    },
+    {
+      "role": "coverage_graph_svg",
+      "publication": "git",
+      "path": "figures/coverage.svg",
+      "bytes": 3348,
+      "sha256": "9e095e83d5bad72c860c4d605e5d3efcce1c74a17f7de490d133afa686781eeb"
+    },
+    {
+      "role": "report_style_source",
+      "publication": "git",
+      "path": "figures/report.css",
+      "bytes": 1181,
+      "sha256": "cb4ddb489664fb5ea70b532c86a01423e1bf0e37a9747c0e3458bbe855e7dad5"
+    },
+    {
+      "role": "production_binary",
+      "publication": "local_only",
+      "local_path": "/tmp/crypto-pr.xIRzjS/target-p256-window/release/p256_isogeny_million",
+      "bytes": 4874560,
+      "sha256": "1591684928920cc67e7be5b44d50d76b8489560189ef59d072faa8800be1d8c3"
+    }
+  ],
+  "retained_failures": [
+    {
+      "phase": "debug_build",
+      "status": "failed_not_counted",
+      "error": "No space left on device",
+      "response": "removed only the disposable debug target and rebuilt with incremental compilation and debuginfo disabled"
+    },
+    {
+      "phase": "first_production_launcher",
+      "status": "failed_before_program_start_not_counted",
+      "exit_status": 127,
+      "error": "/usr/bin/time: No such file or directory",
+      "empty_receipt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "3e737f6a9117cec194b02103b357f8668fae9adb86a8a8cd0bf25efab8948548"
+    }
+  ],
+  "durable_storage": {
+    "status": "blocked_no_ambient_identity_or_destination",
+    "upload_attempted": false,
+    "object_key_template": "objects/sha256/<first-two>/<sha256>",
+    "completion_marker_created": false
+  },
+  "cairn": {
+    "status": "local_change_metadata_only_no_network_submission",
+    "submission_attempted": false,
+    "change_id": "continue-p256-j-windows"
+  }
+}

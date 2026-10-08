@@ -33,6 +33,7 @@ packs rows as `u64` mod `r < 2⁶⁴`).
 Single-thread guided-rank measurements on the frozen K=600-column bases
 (fully charged precompute, excluded from the online claim):
 
+| rung | r (bits) | rank wall | probes/relation (mean) | B = 2nK points | ordered 4-tuples per point ≈ B⁴/r (unordered ≈ B⁴/(24r)) |
 | rung | r (bits) | rank wall | probes/relation (mean) | B = 2nK points | ordered 4-tuples per point ≈ B⁴/r |
 |---|---:|---:|---:|---:|---:|
 | n=61 | 47.2 | 13.1 s | ~4·10⁴ | 73,200 | 1.8·10⁵ |
@@ -46,6 +47,14 @@ Two independent reads of the same cliff:
    distribution; the n=73 target relation needed only 4.6·10⁵ probes,
    i.e. the median is far below the mean).
 2. **Structural count** — a uniform subgroup point has ≈ `B⁴/r` ordered
+   4-tuples of factor-base points summing to it; the scan space is
+   ≈ `4K²n²` probes per point.  Their ratio is `4K²n²·r/B⁴ = r/(4n²K²)`,
+   i.e. `C = 0.25`, which **does not** reproduce the fit: the measured `C`
+   is 0.27 at n=61 but 1.2–1.5 at n=71 and n=73 (corrected 2026-10-08,
+   `docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md` F5).  The 5× gap at the
+   larger rungs is unexplained by the structural model and should be
+   reconciled against first-hit distributions over many targets before the
+   fit is extrapolated to n=131.
    4-tuples of factor-base points summing to it (≈ `B⁴/(24r)` unordered;
    this document counts ordered tuples unless it says otherwise); the
    scan space is ≈ `4K²n²` probes per point, so their ratio gives
@@ -84,6 +93,13 @@ point, as at n=73) needs `K` between 10⁹ and 10¹² — with:
   iterations; the repo's RTX PRO 6000 client sustains 6.9·10⁹ it/s, i.e.
   **≈ 10 GPU-years** on one card (the Certicom-scale effort).
 - **Compact-orbit 4-sum IC total work** ≈ `K·(probes/relation)` ≈
+  `K · r/(n²K²) = r/(n²K)` probes (this is what the table above uses:
+  `6.6·10³¹` at K = 600 is `r/(n²K)`; an earlier version of this bullet
+  wrote `r/(nK)`, off by a factor `n` — corrected 2026-10-08): at K = 10⁹
+  that is 4·10²⁵ probes — **~2·10⁷ × rho's operation count**.  The
+  precompute-only-equals-rho crossover is `K = r/(n²·2^60.9) ≈ 1.8·10¹⁶`
+  columns (not the `2.4·10¹⁸` previously stated), still beyond any linear
+  algebra ever contemplated.
   `r/(n²K)` probes (fit constant `C = 1`): at K = 10⁹ that is 4·10²⁵
   probes — **~2·10⁷ × rho's operation count**.  The
   precompute-only-equals-rho crossover is `K = r/(n²·2^60.9) ≈ 1.8·10¹⁶`
@@ -118,6 +134,12 @@ once.  Beating rho on total work requires a relation-shape change
 ## 4. Unexplored areas (ecc2k-130)
 
 1. **Higher-arity relations (m=5, 6).**  With 5-sums, decompositions per
+   point scale as `B⁵/(120r)` instead of `B⁴/(24r)`: at n=131, K=10⁹,
+   B=2.6·10¹¹ gives ~1.4·10¹⁶ unordered 5-sums per point against
+   ~2.9·10⁵ unordered 4-sums (corrected 2026-10-08: the earlier figures
+   "~10¹⁴" and "~0.017" do not follow from either formula; what kills
+   4-sums at n=131 is not the count per point but the scan cost
+   `r/(n²K²)` per relation, see §2).  The repo already carries exact
    point scale as `B⁵/(120r)` instead of `B⁴/(24r)` (unordered): at
    n=131, K=10⁹, B=2.6·10¹¹ gives ≈1.5·10¹⁶ 5-sums per point vs
    ≈2.9·10⁵ 4-sums.  Decompositions exist at 4-sums too at this K; what

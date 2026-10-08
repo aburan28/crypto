@@ -1,6 +1,8 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
+  "updated": "2026-10-08",
+  "updated": "2026-10-05",
   "updated": "2026-10-07",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Primary vs_rho claims use exactly one unseen target paired on the identical public point and resource envelope. Headline time is verified online wall after reusable IC preparation; exclude process launch, input loading, target generation, and target-independent setup. Multi-target averages, batch throughput, and shared-table amortization are secondary only and require a separate declared question after the primary one-target result. Never combine best component costs from different runs into a synthetic win.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
@@ -2674,6 +2676,69 @@
               },
               "superseded_on": "2026-09-21"
             }
+          ],
+          "accounting_non_claims_20261008": "Accounting non-claims (2026-10-08, PLAN_IC_ACCOUNTING_FIXES_20261007.md): (1) paired rho arm has no precomputation while IC's reusable preparation is excluded from its clock; the equal-precompute Bernstein-Lange baseline is unrun and predicted to beat IC online from n=71 up (F1). (2) online_speedup is wall-clock; operation-count ratios at the rank-stage mean target are ~25x, 3.5x, 0.5x, 3.6x at n=61,71,73,83, and at n=83 IC used more operations than rho in 2 of 3 runs (F2). (3) one frozen target per rung; n=71 and n=73 targets were 154x and 125x luckier than the rank-stage mean (F3). (4) n=73 R2/R3 rho walls were host-contended; the promoted median is R3 (F4). Rows remain single_target_online wall-ratio records, not crossover evidence, until plan Phases 1-3 run."
+          "timing_audit": {
+            "status": "LEGACY_N41_N53_ONLINE_INTERVAL_OVERLAP",
+            "affected_verdicts": [
+              "N41_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+              "N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+            ],
+            "finding": "The legacy rank fixture collection_ms timer spans final solve and solution validation; old online totals re-add both. Recompute exact numbers from raw receipts before citing them.",
+            "fixed_producer_fields": [
+              "target_online_phase_ms",
+              "target_online_wall_ms",
+              "charged_total_ms",
+              "online_charged_ms"
+            ],
+            "unaffected_scope": "This finding does not assess the separate compact-orbit n61/n71 producer.",
+            "evidence": "https://github.com/aburan28/cryptanalysis/pull/353",
+            "claim_limit": "Historical numeric ratios are exploratory and not exact exclusive-phase results; no new controlled speedup is promoted."
+          }
+        }
+      }
+    },
+    "prime": {
+      "label": "Prime fields",
+      "best_stack": [
+        "ec_index_calculus_j0",
+        "ec_index_calculus"
+      ],
+      "implementation_caps": {
+        "generic_ic_bench_bits": 12,
+        "j0_ic_bench_bits": 14,
+        "module_doc_sub_bits": 40,
+        "dense_3sum_nonscaling_wall_bits": 80
+      },
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "Small-x and zeta-orbit bases on toy primes; Eisenstein-smooth FB implemented",
+            "metrics": {
+              "construction_methods": [
+                "small_x",
+                "zeta_orbit",
+                "eisenstein_smooth"
+              ],
+              "materialized": true,
+              "construction_wall_ms": null,
+              "retained_bytes": null
+            }
+          },
+          "next_target": {
+            "summary": "Orbit-reduced base on a 16-bit j=0 prime-order curve",
+            "acceptance_gates": [
+              "no duplicate orbits",
+              "size vs theory within 5%",
+              "construction_wall_ms and retained_bytes logged"
+            ]
+          },
+          "evidence": [
+            "docs/RESEARCH_BENCH_LOG.md",
+            "src/cryptanalysis/ec_index_calculus_j0.rs"
+          ],
+          "history": []
           ]
         },
         "rank": {

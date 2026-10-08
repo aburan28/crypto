@@ -5,6 +5,15 @@ edition = "2021"
 default-run = "crypto"
 description = "Educational comprehensive cryptography library: ECC, RSA, AES, ChaCha20, SHA, KDF, PQC"
 
+# Frozen S3 source snapshots for matched Linux baseline/candidate builds.
+[[example]]
+name = "s3_pair_baseline_frozen"
+path = "experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs"
+
+[[example]]
+name = "s3_pair_candidate_frozen"
+path = "experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs"
+
 [[bin]]
 name = "crypto"
 path = "src/main.rs"

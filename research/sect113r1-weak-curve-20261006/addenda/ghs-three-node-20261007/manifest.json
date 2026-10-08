@@ -1,0 +1,265 @@
+{
+  "schema": "crypto.sect113r1-ghs-three-node-screen/v1",
+  "diagnostic_id": "SECT113R1-GHS-3NODE-20261007-DIAG1",
+  "execution_date_utc": "2026-10-07",
+  "evidence_status": "ADDITIVE_PRE_ADMISSION_STRUCTURAL_DIAGNOSTIC",
+  "admitted_scientific_run": false,
+  "independent_implementation_validation": false,
+  "frozen_predecessor": {
+    "path": "../../diagnostics/pre-admission-certificate.json",
+    "raw_sha256": "8f77c0a21d5a51df372ce0a3a69784c58c3e404e5f1f52ad953c5e5714eeed24",
+    "semantic_sha256": "1cf4a3733e98c6acdc2219c24f29c15771fc67578bdb33dd426ab643e12572d8",
+    "modified_by_this_addendum": false,
+    "prior_ghs_status": "NOT_CERTIFIED_MAGIC_NUMBER_UNCOMPUTED"
+  },
+  "producer": {
+    "repository": "https://github.com/aburan28/crypto",
+    "git_commit": "1f0d0bd7863c78ac9d7291b84e78ed937e8c4e2f",
+    "branch": "codex/sect113r1-audit-pr",
+    "tracked_worktree_clean_at_execution": true,
+    "profile": "release",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "binary": {
+      "name": "ghs_screen",
+      "bytes": 2402944,
+      "sha256": "498b711179ec8a9dd9e7a12528b2025b1b7f7a89f210c28ccc6f625dc899f9ca"
+    },
+    "source_files": [
+      {
+        "path": "src/bin/ghs_screen.rs",
+        "sha256": "be6c24daa77211f2d612572249cc6abf42d4318397d95343f966719a936ffdf4"
+      },
+      {
+        "path": "src/cryptanalysis/ghs_screen.rs",
+        "sha256": "01538520a04f83af9877c65787d10a6bf4cb86657e011c71bf3fc02d45fedcba"
+      },
+      {
+        "path": "src/cryptanalysis/ec_trapdoor.rs",
+        "sha256": "dd0abc99a45564b5662f17b6e52a0924a56d974fcd1efc059baf875a96c1ceae"
+      },
+      {
+        "path": "src/cryptanalysis/sect113r1_audit.rs",
+        "sha256": "0e3f9fcd41473d12feb0508da5bed0badfd97253bfa6a9f9a69693aa1d929105"
+      },
+      {
+        "path": "src/cryptanalysis/binary_velu.rs",
+        "sha256": "1e93ff1ca36c787792240b7c017297a96a34f056a6f52d3a8a3602804946b4c6"
+      },
+      {
+        "path": "src/binary_ecc/curve.rs",
+        "sha256": "175656465a90db03d5dca365c4764c9b2a3db326ec7b9637cf956095e9b8ddfb"
+      },
+      {
+        "path": "Cargo.lock",
+        "sha256": "4ddc5ef76119493b41352c64a551fbd3fea3b5789644949ee775975b38150bca"
+      }
+    ]
+  },
+  "protocol": {
+    "curve_model": "y^2+xy=x^3+a*x^2+b",
+    "absolute_degree": 113,
+    "field_modulus": "0x20000000000000000000000000201",
+    "a": "0x3088250ca6e7c7fe649ce85820f7",
+    "genus_bound": "64",
+    "command_argv_template": [
+      "ghs_screen",
+      "--degree",
+      "113",
+      "--modulus",
+      "0x20000000000000000000000000201",
+      "--a",
+      "0x003088250CA6E7C7FE649CE85820F7",
+      "--b",
+      "<node-b>",
+      "--genus-bound",
+      "64",
+      "--output",
+      "<node-output>"
+    ],
+    "screen_scope": "all nontrivial factorizations 113=n*l for each of three frozen nodes named by registered ICV1 slug",
+    "performance_scope": "none; elapsed observations are custody metadata only"
+  },
+  "executions": [
+    {
+      "node": "icv1-f2m113-tm122610772499221213-97df4ac6",
+      "role": "source (standard name: sect113r1)",
+      "prior_curve_ref": "sect113r1/source",
+      "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb",
+      "icv1_slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+      "curve_id": "EC1N113Csect113r1hf529f17bd191",
+      "curve_uid": "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97",
+      "b": "0xe8bee4d3e2260744188be0e9c723",
+      "output": "source.json",
+      "output_sha256": "08c763d46c87c8c416fd6688d99d9b84a40c2a256ecf31127e06a8eefb458b5d",
+      "replay_output_sha256": "08c763d46c87c8c416fd6688d99d9b84a40c2a256ecf31127e06a8eefb458b5d",
+      "replay_byte_equal": true,
+      "first_exit_code": 0,
+      "replay_exit_code": 0,
+      "timing_observation": {
+        "real_seconds": "0.001",
+        "user_seconds": "0.001",
+        "sys_seconds": "0.000",
+        "raw_timing_sha256": "d79782b56d080a7a96e1984df822b4ebc32ce27f505b2d3d8e8b576ace3deae4",
+        "performance_claim_eligible": false
+      },
+      "result": {
+        "factorizations": 1,
+        "relative_degree": 113,
+        "base_degree": 1,
+        "magic_number": 113,
+        "ghs_type": "I",
+        "genus": "5192296858534827628530496329220095",
+        "artin_schreier_cover_degree": "10384593717069655257060992658440192",
+        "within_genus_bound": false
+      }
+    },
+    {
+      "node": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+      "role": "degree-5 codomain A",
+      "prior_curve_ref": "sect113r1/degree5-a",
+      "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0xb1df3d9c423aa919217735a6d6ba:unk:unk:r:fd54d0ebcd45",
+      "icv1_slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+      "curve_id": "EC1N113Crbh921ab2cd913f",
+      "curve_uid": "urn:ec-record:1:sha256:921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6",
+      "b": "0x109267245489e254e8f14002629a1",
+      "output": "degree5-a.json",
+      "output_sha256": "4bc30b46310dffd334ba858bbe6d67cec394c556a69e7e85a2a7e3fb00fad88f",
+      "replay_output_sha256": "4bc30b46310dffd334ba858bbe6d67cec394c556a69e7e85a2a7e3fb00fad88f",
+      "replay_byte_equal": true,
+      "first_exit_code": 0,
+      "replay_exit_code": 0,
+      "timing_observation": {
+        "real_seconds": "0.001",
+        "user_seconds": "0.000",
+        "sys_seconds": "0.002",
+        "raw_timing_sha256": "769c104142bf90e2685cb60fdeada57bb02b9c031ca8627208fc0e4736ad511a",
+        "performance_claim_eligible": false
+      },
+      "result": {
+        "factorizations": 1,
+        "relative_degree": 113,
+        "base_degree": 1,
+        "magic_number": 113,
+        "ghs_type": "I",
+        "genus": "5192296858534827628530496329220095",
+        "artin_schreier_cover_degree": "10384593717069655257060992658440192",
+        "within_genus_bound": false
+      }
+    },
+    {
+      "node": "icv1-f2m113-tm122610772499221213-5de3030f",
+      "role": "degree-5 codomain B",
+      "prior_curve_ref": "sect113r1/degree5-b",
+      "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x17ef6a3b098891f6b4c529b62f0dd:unk:unk:r:5de3030fefcc",
+      "icv1_slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+      "curve_id": "EC1N113Crbh2ee3581888f2",
+      "curve_uid": "urn:ec-record:1:sha256:2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386",
+      "b": "0x162b1a595685a1387c82647bf44cf",
+      "output": "degree5-b.json",
+      "output_sha256": "79fd42d92e984cc4de339fe245b2d3aa2f247aa8536777975570bf241919be6a",
+      "replay_output_sha256": "79fd42d92e984cc4de339fe245b2d3aa2f247aa8536777975570bf241919be6a",
+      "replay_byte_equal": true,
+      "first_exit_code": 0,
+      "replay_exit_code": 0,
+      "timing_observation": {
+        "real_seconds": "0.001",
+        "user_seconds": "0.001",
+        "sys_seconds": "0.000",
+        "raw_timing_sha256": "d79782b56d080a7a96e1984df822b4ebc32ce27f505b2d3d8e8b576ace3deae4",
+        "performance_claim_eligible": false
+      },
+      "result": {
+        "factorizations": 1,
+        "relative_degree": 113,
+        "base_degree": 1,
+        "magic_number": 113,
+        "ghs_type": "I",
+        "genus": "5192296858534827628530496329220095",
+        "artin_schreier_cover_degree": "10384593717069655257060992658440192",
+        "within_genus_bound": false
+      }
+    }
+  ],
+  "validation": {
+    "same_implementation_replay_only": true,
+    "focused_tests": [
+      {
+        "filter": "--lib ghs_screen",
+        "passed": 3,
+        "failed": 0
+      },
+      {
+        "filter": "--bin ghs_screen",
+        "passed": 2,
+        "failed": 0
+      },
+      {
+        "filter": "--lib ec_trapdoor",
+        "passed": 9,
+        "failed": 0
+      },
+      {
+        "filter": "--lib sect113r1",
+        "passed": 11,
+        "failed": 0
+      }
+    ],
+    "additive_verifier": {
+      "path": "tests/sect113r1_ghs_evidence.rs",
+      "source_sha256": "f525f88c73674c6f0c606fe4982ec486af1d30ae714b9b2916e62c2efcbe6d3d",
+      "command_argv": [
+        "/workspace/.cargo-curve-audit/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--release",
+        "--test",
+        "sect113r1_ghs_evidence",
+        "--",
+        "--nocapture"
+      ],
+      "environment": {
+        "CARGO_HOME": "/workspace/.cargo-curve-audit",
+        "RUSTUP_HOME": "/workspace/.rustup-curve-audit",
+        "CARGO_TARGET_DIR": "/tmp/sect113-ghs-evidence-test.y6Ls7U/target"
+      },
+      "test_binary_bytes": 2483248,
+      "test_binary_sha256": "8ad35ac91d8dc8f54213510c2d1a24304174a750076c483a81f1c462b159ada4",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "same_codebase": true,
+      "source_independent": false
+    },
+    "derived_capacity_gate": {
+      "subgroup_order": "5192296858534827689835882578830703",
+      "bound": "#Jac(C)(F_2) <= (1+sqrt(2))^(2g)",
+      "exact_integer_comparison": "(3+2*sqrt(2))^44 < subgroup_order",
+      "conclusion": "a genus at most 44 target cannot contain the prime-order subgroup",
+      "sufficiency": "necessary condition only"
+    }
+  },
+  "custody": {
+    "temporary_build_directory": "/tmp/sect113r1-ghs-screen.2aPnZs",
+    "temporary_build_bytes_approximate": 387973120,
+    "temporary_build_removed_after_hashing": true,
+    "repository_files_modified_during_execution": false,
+    "raw_outputs_preserved_in_this_addendum": true,
+    "raw_timing_files_preserved": false
+  },
+  "interpretation": {
+    "verdict": "NO_LOW_GENUS_GHS_CANDIDATE_AT_THE_THREE_TESTED_NODES",
+    "scope": "source plus the two already-certified rational degree-5 neighbors only",
+    "not_established": [
+      "independent arithmetic verification",
+      "an exhaustive isogeny-class result",
+      "a smooth descended curve model",
+      "Jacobian subgroup transport",
+      "a discrete-log solve",
+      "an end-to-end attack cost",
+      "a performance comparison",
+      "absence of a special representative outside the three tested nodes"
+    ]
+  }
+}

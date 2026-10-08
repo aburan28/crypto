@@ -1,0 +1,38 @@
+   Compiling crypto v0.1.0 (/tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/r06m-wt)
+    Finished `release` profile [optimized] target(s) in 3m 44s
+     Running unittests src/lib.rs (/tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/r06m-target/release/deps/crypto_lib-b601b224daf789bf)
+
+running 30 tests
+test cryptanalysis::koblitz_fast::tests::batched_additions_equal_individual_ones ... ok
+test cryptanalysis::koblitz_fast::tests::canon_many_is_canon_elementwise ... ok
+test cryptanalysis::koblitz_fast::tests::folded_and_portable_fields_give_the_same_points ... ok
+test cryptanalysis::koblitz_fast::tests::lazy_batched_additions_equal_eager_ones ... ok
+test cryptanalysis::koblitz_fast::tests::least_rotation_matches_exhaustive_scan ... ok
+test cryptanalysis::koblitz_fast::tests::matches_the_general_arithmetic_on_random_points ... ok
+test cryptanalysis::koblitz_fast::tests::avx512_kernel_matches_scalar_arithmetic ... ok
+test cryptanalysis::koblitz_fast::tests::pairwise_additions_equal_individual_ones ... ok
+test cryptanalysis::koblitz_fast::tests::refuses_fields_wider_than_a_word ... ok
+test cryptanalysis::koblitz_fast::tests::the_change_of_basis_is_a_bijection_and_turns_squaring_into_a_rotation ... ok
+test cryptanalysis::koblitz_fast::tests::the_funnel_kernel_matches_the_chained_one ... ok
+test cryptanalysis::koblitz_fast::tests::the_laned_point_keys_equal_scalar_canonicalisation ... ok
+test cryptanalysis::koblitz_fast::tests::the_least_rotation_is_constant_on_a_frobenius_orbit ... ok
+test cryptanalysis::koblitz_fast::tests::folded_fields_agree_at_the_pipeline_widths ... ok
+test cryptanalysis::koblitz_fast::tests::every_degree_the_pipeline_reaches_has_a_normal_element ... ok
+test cryptanalysis::koblitz_fast_arith::tests::batch_add_matches_single_add ... ok
+test cryptanalysis::koblitz_fast_arith::tests::batch_double_matches_double ... ok
+test cryptanalysis::koblitz_fast::tests::projective_ladder_matches_affine_double_and_add ... ok
+test cryptanalysis::koblitz_fast_arith::tests::batch_scalar_mul_matches_scalar_mul ... ok
+test cryptanalysis::koblitz_fast_arith::tests::fast_double_matches_slow ... ok
+test cryptanalysis::koblitz_fast_arith::tests::artin_schreier_root_matches_slow ... ok
+test cryptanalysis::koblitz_fast_arith::tests::fast_points_with_x_matches_slow ... ok
+test cryptanalysis::koblitz_fast_arith::tests::fast_scalar_mul_matches_slow ... ok
+test cryptanalysis::koblitz_fast_arith::tests::s3_roots_degenerate_pairs_are_exact ... ok
+test cryptanalysis::koblitz_fast_arith::tests::pack_words_matches_pack_point ... ok
+test cryptanalysis::koblitz_fast_arith::tests::fast_add_matches_slow_on_random_points ... ok
+test cryptanalysis::koblitz_fast_arith::tests::s3_roots_match_slow_reference_on_generic_pairs ... ok
+test cryptanalysis::koblitz_fast_arith::tests::s3_roots_satisfy_semaev_independently ... ok
+test cryptanalysis::koblitz_fast::tests::the_least_rotation_partitions_exactly_as_the_squaring_chain ... ok
+test cryptanalysis::koblitz_fast_arith::tests::s3_roots_none_is_exact_on_tiny_field ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 3536 filtered out; finished in 0.95s
+

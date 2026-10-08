@@ -647,6 +647,16 @@ impl<'a> EllE<'a> {
             ops: Cell::new(0),
         }
     }
+    /// `y² = x³ + a₂x² + a₄x` from its coefficients (the model of a curve
+    /// with full 2-torsion after one root is moved to `0`; §17's walk).
+    pub fn from_a2_a4(f: &'a Fq3, a2: E6, a4: E6) -> EllE<'a> {
+        EllE {
+            f,
+            a2,
+            a4,
+            ops: Cell::new(0),
+        }
+    }
     pub fn ops(&self) -> u64 {
         self.ops.get()
     }
@@ -1714,6 +1724,39 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
             transfer_muls,
         };
     }
+}
+
+/// An instance on a given weak curve `y² = x(x − α)(x − σα)` with given
+/// points: `G` of prime order `l`, `Q = [d]G` (`d` is the planted answer, used
+/// only to report correctness; the route never reads it).  `None` when the
+/// cover refuses `α` or a transfer degenerates.  §18 builds this from the
+/// curve the walk reached and the transported points.
+pub fn spec_from_curve(p: u64, alpha: E6, l: u64, g: PtE6, q: PtE6, d: u64) -> Option<Spec> {
+    let f = Fq3::new(p);
+    let cov = Cover::new(&f, &alpha)?;
+    f.reset_muls();
+    let gj = cov.transfer(&f, &g)?;
+    let qj = cov.transfer(&f, &q)?;
+    let transfer_muls = f.muls();
+    let jac = Hyp {
+        f: &f.f,
+        h: cov.hx.clone(),
+        g: 3,
+    };
+    if jac.is_identity(&gj) || !jac.is_identity(&jac.mul(&gj, l as u128)) {
+        return None;
+    }
+    Some(Spec {
+        p,
+        alpha,
+        l,
+        g,
+        q,
+        d,
+        gj,
+        qj,
+        transfer_muls,
+    })
 }
 
 #[derive(Clone, Debug)]

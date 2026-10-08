@@ -397,6 +397,40 @@ impl GeoCi {
     }
 }
 
+/// Least squares of `ys` on `xs` with a `t` interval on the slope, as the
+/// harness's `stats.fit`; `None` below three points.
+pub fn fit(xs: &[f64], ys: &[f64], level: f64) -> Option<J> {
+    let n = xs.len();
+    if n < 3 || ys.len() != n {
+        return None;
+    }
+    let (xm, ym) = (fmean(xs), fmean(ys));
+    let sxx: f64 = xs.iter().map(|x| (x - xm).powi(2)).sum();
+    let beta = xs
+        .iter()
+        .zip(ys)
+        .map(|(x, y)| (x - xm) * (y - ym))
+        .sum::<f64>()
+        / sxx;
+    let alpha = ym - beta * xm;
+    let dof = n - 2;
+    let s2 = xs
+        .iter()
+        .zip(ys)
+        .map(|(x, y)| (y - alpha - beta * x).powi(2))
+        .sum::<f64>()
+        / dof as f64;
+    let h = t_quantile(0.5 + level / 2.0, dof) * (s2 / sxx).sqrt();
+    Some(J::Obj(vec![
+        ("beta".into(), J::Float(beta)),
+        ("lo".into(), J::Float(beta - h)),
+        ("hi".into(), J::Float(beta + h)),
+        ("alpha".into(), J::Float(alpha)),
+        ("points".into(), J::Int(n as i128)),
+        ("dof".into(), J::Int(dof as i128)),
+    ]))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

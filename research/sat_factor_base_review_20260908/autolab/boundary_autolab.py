@@ -855,6 +855,63 @@ def seed_for(beat_id: str, arm: str, repetition: int) -> int:
     return int.from_bytes(hashlib.sha256(material).digest()[:8], "big")
 
 
+def exclusive_online_timing_ok(row: dict[str, Any] | None) -> bool:
+    """Reject a phase sum that re-adds nested LA/replay to collection_ms."""
+    if not isinstance(row, dict):
+        return False
+    phases = row.get("target_online_phase_ms")
+    if not isinstance(phases, dict):
+        return False
+    keys = ("fixture_setup_ms", "collection_ms", "linear_solve_ms",
+            "solution_validation_ms", "reference_validation_ms", "target_online_wall_ms")
+    values = {key: row.get(key) for key in keys}
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) or value < 0 for value in values.values()):
+        return False
+    breakdown = row.get("timing_breakdown_ms")
+    if not isinstance(breakdown, dict):
+        return False
+    target_generation_ms = breakdown.get("target_generation")
+    packed_verification_ms = breakdown.get("packed_verification")
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) or value < 0
+           for value in (target_generation_ms, packed_verification_ms)):
+        return False
+    expected_pdp = (values["collection_ms"] - values["linear_solve_ms"]
+                    - values["solution_validation_ms"] - target_generation_ms
+                    - packed_verification_ms)
+    tolerance = max(1e-6, values["target_online_wall_ms"] * 1e-8)
+    if expected_pdp < -tolerance:
+        return False
+    expected = {
+        "target_query": values["fixture_setup_ms"] + target_generation_ms,
+        "target_pdp": expected_pdp,
+        "target_relation_check": values["reference_validation_ms"]
+                                 + packed_verification_ms,
+        "target_descent": 0.0,
+        "target_recovery_check": values["linear_solve_ms"] + values["solution_validation_ms"],
+    }
+    if set(phases) != set(expected):
+        return False
+    if any(isinstance(phases[key], bool) or not isinstance(phases[key], (int, float))
+           or not math.isfinite(phases[key]) or phases[key] < 0
+           or abs(phases[key] - value) > tolerance for key, value in expected.items()):
+        return False
+    charged = (values["fixture_setup_ms"] + values["collection_ms"]
+               + values["reference_validation_ms"])
+    return abs(charged - values["target_online_wall_ms"]) <= tolerance
+
+
+def exclusive_precomputation_ms(row: dict[str, Any] | None) -> float | None:
+    """Collection already contains final LA and solution validation."""
+    if not isinstance(row, dict):
+        return None
+    keys = ("setup_ms", "fixture_setup_ms", "collection_ms", "reference_validation_ms")
+    values = [row.get(key) for key in keys]
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) or value < 0 for value in values):
+        return None
+    return sum(values)
 def positive_cost(value):
     return float(value) if type(value) in (int, float) and math.isfinite(value) and value > 0 else None
 
@@ -984,6 +1041,7 @@ def draft_vs_rho_claim(
     if isinstance(ic_phases, dict) and isinstance(ic_online, (int, float)):
         phase_sum = sum(float(value) for value in ic_phases.values())
         ic_phase_sum_ok = abs(phase_sum - float(ic_online)) <= max(0.02, float(ic_online) * 1e-8)
+    ic_phase_exclusive_ok = exclusive_online_timing_ok(online_row)
     rho_phases = None
     rho_online = None
     if rho_row is not None:
@@ -1004,6 +1062,7 @@ def draft_vs_rho_claim(
         and online_row.get("linear_solution_verified") is True
         and online_row.get("recovered_fixture_scalar") == ic_scalar
         and ic_phase_sum_ok
+        and ic_phase_exclusive_ok
     )
     rho_verified = bool(
         rho_row
@@ -1032,12 +1091,7 @@ def draft_vs_rho_claim(
         direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
         and pairing_ok and ic_verified and rho_verified
     )
-    precompute_ms = None
-    if precompute_row is not None:
-        precompute_ms = sum(float(precompute_row.get(key, 0.0)) for key in (
-            "setup_ms", "fixture_setup_ms", "collection_ms", "linear_solve_ms",
-            "solution_validation_ms", "reference_validation_ms",
-        ))
+    precompute_ms = exclusive_precomputation_ms(precompute_row)
     if timing_class == "single_target_online":
         ic_cost = float(ic_online) if isinstance(ic_online, (int, float)) else None
         rho_cost = float(rho_online) if isinstance(rho_online, (int, float)) else None
@@ -1109,7 +1163,8 @@ def draft_vs_rho_claim(
         "rho_cost": rho_cost,
         "automorphism_discount": automorphism_discount(int(beat["n"])),
         "all_stages_charged_same_series": bool(
-            pairing_ok and ic_verified and rho_verified and ic_phase_sum_ok
+            pairing_ok and ic_verified and rho_verified
+            and ic_phase_sum_ok and ic_phase_exclusive_ok
         ),
         "all_stages_charged_same_series": bool(producers_ok and integrity['status'] == 'MATCHED'
             and timing_class == 'whole_process_wall'
@@ -1152,6 +1207,7 @@ def draft_vs_rho_claim(
             ),
         },
         "ic_verified": ic_verified,
+        "ic_exclusive_timing_verified": ic_phase_exclusive_ok,
         "rho_verified": rho_verified,
         "ic_online_ms": float(ic_online) if isinstance(ic_online, (int, float)) else None,
         "rho_online_ms": float(rho_online) if isinstance(rho_online, (int, float)) else None,

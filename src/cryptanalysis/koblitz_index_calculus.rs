@@ -606,6 +606,14 @@ pub struct KoblitzCurve {
     pub cofactor: BigUint,
     /// The eigenvalue of `π` on `⟨generator⟩`: `π(Q) = [λ]Q`.
     pub lambda: BigUint,
+    /// Whether the 2-power Frobenius `(x, y) ↦ (x², y²)` is an
+    /// endomorphism of this model.  True for the Koblitz models `K_a`
+    /// (all coefficients in `F_2`).  False for an isogenous model with
+    /// `b ∉ F_2` built by [`KoblitzCurve::isogenous_model`]: there
+    /// squaring maps `E_b` onto its conjugate `E_{b²}`, so
+    /// [`KoblitzCurve::frobenius`] is the identity, every orbit walk
+    /// degenerates to `{P, −P}`, and `λ = 1`.
+    pub frobenius_is_endomorphism: bool,
     /// Degree `k` of the subfield the curve is defined over, `q = 2^k`;
     /// `1` for a Koblitz curve.  `π` is the `q`-power Frobenius and
     /// `trace`, `lambda` refer to it.
@@ -993,6 +1001,144 @@ impl KoblitzCurve {
             cofactor: BigUint::one(),
         };
 
+        let group_order = koblitz_point_count(a, n);
+        let (r, cofactor) = attach_prime_subgroup(&mut curve, a, n, &group_order)?;
+
+        let trace: i64 = if a == 0 { -1 } else { 1 };
+        let lambda = frobenius_eigenvalue(&curve, trace, &r)?;
+
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda,
+            frobenius_is_endomorphism: true,
+        })
+    }
+
+    /// Build an **isogenous member of the class of `K_a`**: the model
+    /// `y² + xy = x³ + a x² + b` over `F_{2^n}` with `b` arbitrary (in
+    /// practice `b ∉ F_2`, a floor curve of the isogeny volcano).
+    ///
+    /// Isogenous curves have equal point counts, so `#E` is taken from the
+    /// Koblitz recurrence for the class and then **certified** on sampled
+    /// points: every sample is killed by `#E`, and some sample realises the
+    /// full 2-part of `#E`.  With `r > 2√q` (every admitted rung) `#E` is
+    /// the only multiple of `r` in the Hasse interval, so the certificate
+    /// pins `#E`; a `b` whose curve is not in the class fails it and yields
+    /// `None`.
+    ///
+    /// The 2-power Frobenius is **not** an endomorphism of such a model:
+    /// `frobenius_is_endomorphism` is false, [`KoblitzCurve::frobenius`]
+    /// is the identity, `λ = 1`, and the factor-base machinery folds only
+    /// by negation.  `modulus` fixes the field representation (`None`
+    /// selects the same sparse search as [`KoblitzCurve::new`], so toy
+    /// classes built on that modulus can pass `b` verbatim).
+    pub fn isogenous_model(
+        a: u8,
+        n: u32,
+        b: F2mElement,
+        modulus: Option<IrreduciblePoly>,
+    ) -> Option<Self> {
+        if a > 1 || n < 3 || n > MAX_N {
+            return None;
+        }
+        let irreducible = match modulus {
+            Some(m) => {
+                if m.degree != n {
+                    return None;
+                }
+                m
+            }
+            None if n <= 63 => find_irreducible_sparse(n)?,
+            None => find_irreducible_sparse_wide(n)?,
+        };
+        let a_fe = if a == 0 {
+            F2mElement::zero(n)
+        } else {
+            F2mElement::one(n)
+        };
+        if b.is_zero() {
+            return None; // singular
+        }
+        let mut curve = BinaryCurve {
+            m: n,
+            irreducible,
+            a: a_fe,
+            b,
+            generator: BinaryPoint::Infinity,
+            order: BigUint::zero(),
+            cofactor: BigUint::one(),
+        };
+        let group_order = koblitz_point_count(a, n);
+
+        // Certify the class order on sampled points.
+        let half_order = &group_order >> 1u32;
+        let mask = if n >= 64 {
+            u64::MAX
+        } else {
+            (1u64 << n) - 1
+        };
+        let mut state = 0x2545_f491_4f6c_dd1du64 ^ (n as u64) ^ ((a as u64) << 32);
+        let mut samples = 0usize;
+        // Every sample must be killed by `#E`; with `r > 2√q` (every admitted
+        // rung) `#E` is the only multiple of `r` in the Hasse interval, so a
+        // point of order `r` plus this check pins `#E`.  The second check,
+        // that some sample realises the full 2-part of `#E`, is a cheap extra
+        // guard against a twist of the same `r`-part.
+        let mut saw_full_two_part = false;
+        let mut tries = 0u32;
+        while samples < 16 && tries < 4096 {
+            tries += 1;
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            let x = F2mElement::from_biguint(&BigUint::from(state & mask), n);
+            for p in points_with_x(&curve, &x) {
+                samples += 1;
+                if scalar_mul(&curve, &p, &group_order) != BinaryPoint::Infinity {
+                    return None;
+                }
+                if scalar_mul(&curve, &p, &half_order) != BinaryPoint::Infinity {
+                    saw_full_two_part = true;
+                }
+            }
+        }
+        if samples < 8 || !saw_full_two_part {
+            return None;
+        }
+
+        let (r, cofactor) = attach_prime_subgroup(&mut curve, a, n, &group_order)?;
+        let trace: i64 = if a == 0 { -1 } else { 1 };
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda: BigUint::one(),
+            frobenius_is_endomorphism: false,
+        })
+    }
+}
+
+/// Factor `#E`, split off the largest prime `r` (which must be simple
+/// and exceed the cofactor), find a generator of the order-`r` subgroup,
+/// and store generator / order / cofactor on `curve`.  Shared by
+/// [`KoblitzCurve::new`] and [`KoblitzCurve::isogenous_model`].
+fn attach_prime_subgroup(
+    curve: &mut BinaryCurve,
+    a: u8,
+    n: u32,
+    group_order: &BigUint,
+) -> Option<(BigUint, BigUint)> {
+    {
         let trace = q as i128 + 1 - subfield_point_count(&curve, &subfield_basis, k) as i128;
         let group_order = subfield_group_order(trace, q, ext);
         let factors = factorise(group_order.clone());
@@ -1000,7 +1146,7 @@ impl KoblitzCurve {
         if e != 1 {
             return None;
         }
-        let cofactor = &group_order / &r;
+        let cofactor = group_order / &r;
         if r <= cofactor {
             return None;
         }
@@ -1033,13 +1179,13 @@ impl KoblitzCurve {
                 state & mask
             };
             let x = F2mElement::from_biguint(&BigUint::from(raw), n);
-            let pts = points_with_x(&curve, &x);
+            let pts = points_with_x(curve, &x);
             let mut found = false;
             for p in pts {
-                let cand = scalar_mul(&curve, &p, &cofactor);
+                let cand = scalar_mul(curve, &p, &cofactor);
                 if cand != BinaryPoint::Infinity {
                     // Confirm order divides r (reject accidental torsion).
-                    if scalar_mul(&curve, &cand, &r) == BinaryPoint::Infinity {
+                    if scalar_mul(curve, &cand, &r) == BinaryPoint::Infinity {
                         generator = cand;
                         found = true;
                         break;
@@ -1056,6 +1202,7 @@ impl KoblitzCurve {
         curve.generator = generator;
         curve.order = r.clone();
         curve.cofactor = cofactor.clone();
+        Some((r, cofactor))
 
         let trace = i64::try_from(trace).ok()?;
         let lambda = frobenius_eigenvalue_q(&curve, trace, q, k, &r)?;
@@ -1076,10 +1223,17 @@ impl KoblitzCurve {
             subfield_basis,
         })
     }
+}
 
+impl KoblitzCurve {
+    /// The `2`-power Frobenius `π(x, y) = (x², y²)`; the identity on an
+    /// isogenous model where squaring would leave the curve.
     /// The `q`-power Frobenius `π(x, y) = (x^q, y^q)` — squaring for a
     /// Koblitz curve.
     pub fn frobenius(&self, p: &BinaryPoint) -> BinaryPoint {
+        if !self.frobenius_is_endomorphism {
+            return p.clone();
+        }
         match p {
             BinaryPoint::Infinity => BinaryPoint::Infinity,
             BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
@@ -1648,6 +1802,7 @@ impl FrobeniusFactorBase {
                 }
                 current = match current {
                     None => None,
+                    Some(_) if !kc.frobenius_is_endomorphism => current,
                     Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
                 };
             }
@@ -1704,11 +1859,17 @@ impl FrobeniusFactorBase {
         let frob = |p: FastPoint| -> FastPoint {
             match p {
                 None => None,
+                Some(_) if !kc.frobenius_is_endomorphism => p,
                 Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
             }
         };
         for _ in 1..m {
-            let reps = signed_frobenius_orbit_representatives_fast(&fast, kc.n, &layer);
+            let reps = signed_frobenius_orbit_representatives_fast(
+                &fast,
+                kc.n,
+                kc.frobenius_is_endomorphism,
+                &layer,
+            );
             // One batch for the reps × classes grid; replayed below in
             // the same nested order, so traversal matches exactly.
             let mut pairs = Vec::with_capacity(reps.len() * class_pts.len());
@@ -1882,6 +2043,7 @@ fn signed_frobenius_orbit_representatives(
 fn signed_frobenius_orbit_representatives_fast(
     fast: &FastBinaryCurve,
     n: u32,
+    frobenius_is_endomorphism: bool,
     points: &[FastPoint],
 ) -> Vec<FastPoint> {
     let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
@@ -1897,6 +2059,7 @@ fn signed_frobenius_orbit_representatives_fast(
             seen.insert(pack_fast(FastBinaryCurve::neg(current)));
             current = match current {
                 None => None,
+                Some(_) if !frobenius_is_endomorphism => current,
                 Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
             };
         }
@@ -3126,7 +3289,13 @@ fn orbit_maps_bigint(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Option<OrbitM
         index_of.insert(point_key(p), i);
     }
 
-    let frob = |(x, y): (u64, u64)| (fast.gf.sqr(x), fast.gf.sqr(y));
+    let frob = |(x, y): (u64, u64)| {
+        if kc.frobenius_is_endomorphism {
+            (fast.gf.sqr(x), fast.gf.sqr(y))
+        } else {
+            (x, y)
+        }
+    };
     let neg = |(x, y): (u64, u64)| (x, x ^ y);
 
     let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); wpoints.len()];
@@ -5490,6 +5659,7 @@ fn projected_signed_orbit_map(
     let frob = |p: FastPoint| -> FastPoint {
         match p {
             None => None,
+            Some(_) if !kc.frobenius_is_endomorphism => p,
             Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
         }
     };
@@ -19315,6 +19485,85 @@ fn decompose_once(
         assert!(model.relation_collection_speedup > model.rho_speedup);
     }
 }
+
+#[cfg(test)]
+mod isogenous_model_tests {
+    use super::*;
+    use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
+
+    /// Brute-force a floor curve of the class of `K_a / F_{2^n}`: the first
+    /// `b ∉ F_2` whose model has the Koblitz point count.  (The class of
+    /// `K_1 / F_{2^11}` has conductor 23 and 22 floor curves.)
+    fn floor_curve(n: u32, a: u8) -> (KoblitzCurve, F2mElement) {
+        let kc0 = KoblitzCurve::new(a, n).expect("Koblitz rung");
+        let fast = FastBinaryCurve::new(&kc0.curve.irreducible, a as u64).expect("fast curve");
+        let order = kc0.group_order.to_u64_digits()[0];
+        for b_word in 2u64..(1u64 << n) {
+            let mut count = 1u64;
+            for x in 0..(1u64 << n) {
+                count += fast.points_with_x(b_word, x).len() as u64;
+            }
+            if count == order {
+                return (kc0, fast.element(b_word));
+            }
+        }
+        panic!("no floor curve found at n = {n}");
+    }
+
+    #[test]
+    fn isogenous_model_certifies_the_class_order_and_has_no_frobenius() {
+        let (kc0, b) = floor_curve(11, 1);
+        let kc = KoblitzCurve::isogenous_model(1, 11, b.clone(), None).expect("isogenous model");
+        assert!(!kc.frobenius_is_endomorphism);
+        assert_eq!(kc.group_order, kc0.group_order);
+        assert_eq!(kc.subgroup_order, kc0.subgroup_order);
+        assert_eq!(kc.cofactor, kc0.cofactor);
+        assert_eq!(kc.lambda, BigUint::one());
+        assert_eq!(kc.curve.b, b);
+        let g = kc.generator().clone();
+        assert_ne!(g, BinaryPoint::Infinity);
+        assert_eq!(kc.frobenius(&g), g);
+        assert_eq!(kc.mul(&g, &kc.subgroup_order), BinaryPoint::Infinity);
+        // Squaring really leaves the curve: `(x², y²)` is not a point of `E_b`.
+        if let BinaryPoint::Affine { x, y } = &g {
+            let irr = &kc.curve.irreducible;
+            let (xs, ys) = (x.square(irr), y.square(irr));
+            let lifted = points_with_x(&kc.curve, &xs);
+            assert!(!lifted.contains(&BinaryPoint::Affine { x: xs.clone(), y: ys }));
+        }
+        // Some small `b` lies outside the class and must fail the certificate.
+        let fast = FastBinaryCurve::new(&kc0.curve.irreducible, 1).unwrap();
+        let rejected = (2u64..64)
+            .any(|w| KoblitzCurve::isogenous_model(1, 11, fast.element(w), None).is_none());
+        assert!(rejected);
+        // The Koblitz model itself passes the certificate too (b = 1).
+        assert!(KoblitzCurve::isogenous_model(1, 11, F2mElement::one(11), None).is_some());
+    }
+
+    #[test]
+    fn isogenous_model_solves_the_dlp_with_every_oracle() {
+        let (_, b) = floor_curve(11, 1);
+        let kc = KoblitzCurve::isogenous_model(1, 11, b, None).expect("isogenous model");
+        let fb = build_frobenius_factor_base(&kc, 0).expect("factor base on the model");
+        // Without a Frobenius endomorphism every point is its own orbit.
+        for p in &fb.points {
+            assert_eq!(kc.frobenius(p), *p);
+        }
+        let d = BigUint::from(53u32) % &kc.subgroup_order;
+        let q = kc.mul(kc.generator(), &d);
+        for strategy in [
+            DecompositionStrategy::Enumerate,
+            DecompositionStrategy::Groebner,
+            DecompositionStrategy::Sat,
+        ] {
+            let opts = KoblitzIcOptions {
+                m: 2,
+                strategy,
+                ..KoblitzIcOptions::default()
+            };
+            let report = koblitz_index_calculus_dlp(&kc, &q, &opts).expect("the DLP solves");
+            assert_eq!(report.log, Some(d.clone()));
+        }
 #[cfg(test)]
 mod subfield_tests {
     use super::*;

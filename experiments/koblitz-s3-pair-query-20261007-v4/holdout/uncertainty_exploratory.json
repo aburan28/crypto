@@ -1,0 +1,23 @@
+{
+  "bootstrap_median_ratio_percentile_95_interval": [
+    0.9898923158376128,
+    1.2924892331725975
+  ],
+  "bootstrap_resamples": 20000,
+  "bootstrap_seed": 20261007,
+  "independent_sage_replay_sha256": "00a5a3430be89db97d4f775092e6aedc530764d5350f45c45e13f970e4a7f4d2",
+  "interpretation": "Descriptive resampling of twelve fixed paired targets on an unisolated host. This interval is not an auditable CPU speedup claim or a population guarantee.",
+  "kind": "conditional_fresh_target_exploratory_spread",
+  "paired_online_delta_ms_median": 268.34831199999996,
+  "paired_online_delta_ms_range": [
+    -323.28645800000027,
+    724.0482920000002
+  ],
+  "paired_ratio_median": 1.1673959645982024,
+  "paired_ratio_range": [
+    0.7944779068799065,
+    1.647957580402291
+  ],
+  "paired_summary_sha256": "f4e3db737f4ca8b1af4e6498b731aa1a014518469046bc316eb56dce735915ee",
+  "target_count": 12
+}

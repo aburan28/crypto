@@ -1,6 +1,7 @@
 # Index-calculus vs rho accounting: review findings and fix plan
 
 **Date:** 2026-10-07
+**Status:** plan, not executed. No ledger row changes until Phase 1 lands.
 **Status:** Phase 0 and most of Phase 1 executed 2026-10-07 (see §5); the
 verdicts themselves are untouched until Phases 2-4. Numbers below are the
 recomputed values from `op_accounting.py`.
@@ -30,6 +31,10 @@ rung:
    precomputation from its clock.
 2. Verdicts use wall-clock ratios while the rho arm runs 7-16x slower per
    operation than the IC probe loop. In operation counts, the online phase is
+   roughly 1-4x rho on mean targets, not 8-2,864x.
+3. Each rung measures one frozen target. IC's online cost is deterministic per
+   target, so three "paired runs" sample timing noise only. The n=71 and n=73
+   targets were 154x and 125x luckier than the rank-stage mean.
    0.5-23x rho on mean targets, not 8-2,864x.
 3. Each rung measures one frozen target. IC's online cost is deterministic per
    target, so three "paired runs" sample timing noise only. The n=71 and n=73
@@ -70,6 +75,8 @@ IC ties equal-budget BL on the online metric only when `K > ~r^(1/3)/n`
 
 ### F2 (A). Wall-clock ratios measure implementation speed
 
+Measured rates: rho fixture 0.10-0.23 M steps/s (n=83: 6.6M/65s, 6.0M/43s,
+12.2M/71s; n=73 R1: 10.6M/46s). IC probe loop 1.1-1.8 M probes/s. A probe is
 Measured rates over all paired runs: rho fixture 0.06-0.32 M steps/s (n=83:
 6.6M/65s, 6.0M/43s, 12.2M/71s; n=73 R1: 10.6M/46s). IC probe loop 0.84-3.9 M
 probes/s. Per-run IC/rho rate ratio: median 7.4x (n=71) to 13.1x (n=73). A probe is
@@ -78,6 +85,10 @@ one batched rho step of arithmetic.
 
 | rung | IC probes, frozen target | IC probes, rank mean | rho steps, measured | rho steps, expected sqrt(pi r/4n) | op ratio frozen | op ratio mean | ledger wall ratio |
 |---|---:|---:|---:|---:|---:|---:|---:|
+| n=61 | 227,437 | 64,000 | 0.78M-2.7M | 1.6M | 7x | 25x | 125x |
+| n=71 | 14,554 | 2.24M | 3.0M-10.2M | 7.8M | 535x | 3.5x | 2,864x |
+| n=73 | 457,561 | 57M-65M | 10.6M-43.9M | 31M | 68x | 0.5x | 1,190x |
+| n=83 | 8,845,441 | 2.3M-2.6M | 6.0M-12.2M | 9.0M | 1.0x | 3.6x | 8.2x |
 | n=61 | 227,437 | 64,000 | 0.78M-2.7M | 1.45M | 6.4x | 22.6x | 125x |
 | n=71 | 14,554 | 2.24M | 3.0M-10.2M | 7.8M | 537x | 3.5x | 2,864x |
 | n=73 | 457,561 | 57M-65M | 10.6M-43.9M | 30.4M | 66.5x | 0.5x | 1,190x |
@@ -94,6 +105,8 @@ them.
 ### F3 (A). One frozen target per rung; two headline rungs drew lucky ones
 
 `target_probes` is identical across the three runs of each rung (deterministic
+scan). Against `rank_probes_mean_range`: n=71 is 154x lucky, n=73 is 125x
+lucky, n=61 is 3.6x unlucky, n=83 is 3.5x unlucky. The two largest ledger
 scan). Against the pooled rank mean: n=71 is 154x lucky, n=73 is 134x lucky
 (125x against the lowest of its three rank seeds), n=61 is 3.6x unlucky, n=83
 is 3.6x unlucky. The two largest ledger
@@ -119,6 +132,8 @@ crypto ledger has none.
 - Table header: "4-sums per point ~ B^4/r" (ordered). Text: `B^4/(24r)`
   (unordered). 24x apart.
 - Structural scan model gives `C = 0.25` in `probes/relation ~ C r/(n^2 K^2)`;
+  fit gives `C ~ 1.2-1.5` at n=71/73 (`0.27` at n=61). The doc says they
+  "reproduce" each other.
   fit gives `C ~ 1.3-1.5` at n=71/73 (`0.33` at n=61, exact r; the first draft
   said 0.27 from a rounded r). The doc says they "reproduce" each other.
 - Section 4.1: "~10^14 5-sum decompositions/point vs ~0.017 at 4-sums" at
@@ -138,6 +153,7 @@ rung pairing measured IC online time against a *projected* rho step rate.
 - Couveignes-Lercier elliptic-period bases need an auxiliary curve over F_2
   with a point of order 131; Hasse caps #E(F_2) at 5. Empty at n=131.
 - E[4]-closure of the compact-orbit base adds nothing after cofactor
+  projection: sums of translates land in the same coset.
   projection: sums of translates land in the same coset. (This item does not
   appear in this repo's research docs; it lives in the cryptanalysis or
   autoresearcher notes and is left for those repos.)
@@ -157,6 +173,18 @@ table, loaded outside the clock) is not a scored axis in either repo.
 attempt. Every m>=5 search at n=41 returned INDETERMINATE at 120 s. The
 official N131 R2 setup query is live with rank 0/14.
 
+## 2. Fix plan
+
+### Phase 0. Correct the documents (1 day, no compute) — **done 2026-10-08**
+
+0.1 and 0.2 landed in `RESEARCH_ECC2K130_IC_FEASIBILITY.md` (formula,
+crossover, counting convention, the `C_struct = 0.25` vs `C_fit ≈ 1.2–1.5`
+gap, and two 5-sum/4-sum count figures that followed from no formula) and
+`RESEARCH_KOBLITZ_INDEX_CALCULUS.md` (Couveignes–Lercier closed by Hasse).
+0.3 landed as a dated non-claims paragraph in `docs/ic/BOUNDARY_TARGETS.md`
+and an `accounting_non_claims_20261008` field on the Koblitz `vs_rho` block
+of `boundary_targets.json`; the per-rung `claim_report_vs_rho.json` files are
+frozen evidence and were left untouched, contrary to the original 0.3 text.
 ### F10 (A). Two promoted rungs fail the ledger's own claim check
 
 `boundary_autolab.py claim-check --stage vs_rho` returns FAIL on the n=73 and
@@ -182,6 +210,7 @@ measurement fields"). n=61 and n=71 pass. Found 2026-10-07 while executing 1.1.
 
 | # | Change | File | Acceptance |
 |---|---|---|---|
+| 1.1 | Required fields `ic_probes`, `rho_steps`, `S_online = ic_probes/rho_steps`, `S_total = (precompute_probes + ic_probes)/rho_steps`; promotion refused without them | `assemble_claim_report.py` (all rungs), `boundary_autolab.py` claim-check, `boundary_targets.json` schema | re-assembling the four existing reports yields the F2 table unchanged |
 | 1.1 | Required fields `ic_probes`, `rho_steps`, `S_online = rho_steps/ic_probes`, `S_total = rho_steps/(precompute_probes + ic_probes)` (above 1: IC used fewer operations; the first draft wrote these inverted); promotion refused without them | `assemble_claim_report.py` (all rungs), `boundary_autolab.py` claim-check, `boundary_targets.json` schema | re-assembling the four existing reports yields the F2 table unchanged |
 | 1.2 | Calibration microbench: ns/probe and ns/step on the same backend, same host, same n; publish ratio | new `examples/koblitz_op_calibration.rs` | ratio recorded per rung; used to convert wall to ops |
 | 1.3 | Rho arm: switch to the batched Kuhn-Struik path (`examples/koblitz_rho_batch_ks.rs` exists); record steps/s; require arm rate within 2x of the calibration step cost | rho fixture producer | n=83 rho arm >= 1 M steps/s single core |
@@ -197,6 +226,8 @@ measurement fields"). n=61 and n=71 pass. Found 2026-10-07 while executing 1.1.
 | 2.3 | Rule: the promoted statistic is the mean operation ratio over targets with CI; a single-target number cannot promote | `BOUNDARY_TARGETS.md` measurement schema |
 | 2.4 | Reconcile `C_struct` vs `C_fit` using the distribution data (F5) | feasibility doc |
 
+Prediction: mean-target `S_online` lands at 25x (n=61), 3.5x (n=71), 0.5x
+(n=73), 3.6x (n=83), within a factor 2.
 Prediction: mean-target `S_online` lands at 22.6x (n=61), 3.5x (n=71), 0.5x
 (n=73), 3.7x (n=83), within a factor 2 (the rank-mean estimates in
 `operation_accounting`).

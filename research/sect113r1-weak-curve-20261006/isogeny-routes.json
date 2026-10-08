@@ -1,0 +1,147 @@
+{
+  "schema": "crypto.sect113r1-degree5-isogeny-routes/v2",
+  "evidence_status": "PRE_ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES",
+  "admitted_scientific_run": false,
+  "certificate_ref": "diagnostics/pre-admission-certificate.json",
+  "certificate_sha256": "1cf4a3733e98c6acdc2219c24f29c15771fc67578bdb33dd426ab643e12572d8",
+  "curve_records_ref": "degree5_curve_records.json",
+  "field": {
+    "name": "F2^113",
+    "representation": "polynomial",
+    "modulus": "0x20000000000000000000000000201",
+    "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3"
+  },
+  "curve_nodes": [
+    {
+      "ref": "sect113r1/source",
+      "role": "source",
+      "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb",
+      "icv1_slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+      "curve_id": "EC1N113Csect113r1hf529f17bd191",
+      "curve_uid": "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97",
+      "group_order": "10384593717069655379671765157661406",
+      "subgroup_order": "5192296858534827689835882578830703",
+      "cofactor": 2
+    },
+    {
+      "ref": "sect113r1/degree5-a",
+      "role": "degree-5 codomain",
+      "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0xb1df3d9c423aa919217735a6d6ba:unk:unk:r:fd54d0ebcd45",
+      "icv1_slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+      "curve_id": "EC1N113Crbh921ab2cd913f",
+      "curve_uid": "urn:ec-record:1:sha256:921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6",
+      "group_order": "10384593717069655379671765157661406",
+      "subgroup_order": "5192296858534827689835882578830703",
+      "cofactor": 2
+    },
+    {
+      "ref": "sect113r1/degree5-b",
+      "role": "degree-5 codomain",
+      "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x17ef6a3b098891f6b4c529b62f0dd:unk:unk:r:5de3030fefcc",
+      "icv1_slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+      "curve_id": "EC1N113Crbh2ee3581888f2",
+      "curve_uid": "urn:ec-record:1:sha256:2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386",
+      "group_order": "10384593717069655379671765157661406",
+      "subgroup_order": "5192296858534827689835882578830703",
+      "cofactor": 2
+    }
+  ],
+  "edges": [
+    {
+      "id": "sect113r1-degree5-kernel-14f04e52dd79",
+      "evidence_status": "PRE_ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES",
+      "source_curve_ref": "sect113r1/source",
+      "target_curve_ref": "sect113r1/degree5-a",
+      "degree": 5,
+      "direction": "source_to_codomain",
+      "separable": true,
+      "map": "binary-velu/v1",
+      "kernel_coefficients_low_first": [
+        "0x5aa14af71294c84d25326260c3c9",
+        "0x17e628d91dfd1939a7b20495a0fde",
+        "0x1"
+      ],
+      "kernel_sha256": "14f04e52dd7986c49fc019f3777569f5c4d5212aa427d1c771e94e1f637a43a5",
+      "dual_kernel_sha256": "b3ea0c7ea9ed92f3cfc18b0155df5fbe11d9c871d0111a99431f9a00f3b64d28",
+      "source_generator_image": [
+        "0x13046f06d2108d8dbf031f5a033ab",
+        "0x11bb93fb05d5d549787a527aaf285"
+      ],
+      "exact_checks": {
+        "kernel_certificate": true,
+        "codomain_nonsingular": true,
+        "generator_image_on_codomain": true,
+        "generator_image_exact_order_n": true,
+        "endpoint_identity_recomputed_in_certificate": true,
+        "planted_target_forward_homomorphism": true,
+        "dual_kernel_certificate_exact": true,
+        "dual_returns_exact_source_model": true,
+        "dual_composition_on_generator_is_times_five": true,
+        "dual_composition_on_planted_target_is_times_five": true,
+        "planted_target_pullback_to_source": true,
+        "broader_point_set_composition_checked": false
+      },
+      "dlp_pullback_formula": "P=[5^{-1} mod n]*dual(phi(P)) for P in <G>",
+      "verdict": "TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+    },
+    {
+      "id": "sect113r1-degree5-kernel-75c8d7947572",
+      "evidence_status": "PRE_ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES",
+      "source_curve_ref": "sect113r1/source",
+      "target_curve_ref": "sect113r1/degree5-b",
+      "degree": 5,
+      "direction": "source_to_codomain",
+      "separable": true,
+      "map": "binary-velu/v1",
+      "kernel_coefficients_low_first": [
+        "0x15cdf3bfe496bda979b4d76b642bd",
+        "0x10f30d7c3e2e2e8c46efadd41e81d",
+        "0x1"
+      ],
+      "kernel_sha256": "75c8d79475727db308e7b368c76b0a2318832358925dbefefc43a3c4b0d0ccb2",
+      "dual_kernel_sha256": "335fc8485b574bbd7827b6148e0511c9d7c64573826dc7804f803e7efecd47bf",
+      "source_generator_image": [
+        "0x18f4e7a48635b736527e45354b897",
+        "0x7eea00533a71541476d03dcdf4b8"
+      ],
+      "exact_checks": {
+        "kernel_certificate": true,
+        "codomain_nonsingular": true,
+        "generator_image_on_codomain": true,
+        "generator_image_exact_order_n": true,
+        "endpoint_identity_recomputed_in_certificate": true,
+        "planted_target_forward_homomorphism": true,
+        "dual_kernel_certificate_exact": true,
+        "dual_returns_exact_source_model": true,
+        "dual_composition_on_generator_is_times_five": true,
+        "dual_composition_on_planted_target_is_times_five": true,
+        "planted_target_pullback_to_source": true,
+        "broader_point_set_composition_checked": false
+      },
+      "dlp_pullback_formula": "P=[5^{-1} mod n]*dual(phi(P)) for P in <G>",
+      "verdict": "TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+    }
+  ],
+  "routes": [
+    {
+      "id": "sect113r1-to-degree5-a",
+      "evidence_status": "PRE_ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES",
+      "source_curve_ref": "sect113r1/source",
+      "target_curve_ref": "sect113r1/degree5-a",
+      "edge_ids": [
+        "sect113r1-degree5-kernel-14f04e52dd79"
+      ],
+      "verdict": "TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+    },
+    {
+      "id": "sect113r1-to-degree5-b",
+      "evidence_status": "PRE_ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES",
+      "source_curve_ref": "sect113r1/source",
+      "target_curve_ref": "sect113r1/degree5-b",
+      "edge_ids": [
+        "sect113r1-degree5-kernel-75c8d7947572"
+      ],
+      "verdict": "TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+    }
+  ]
+}
