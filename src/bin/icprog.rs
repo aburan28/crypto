@@ -81,6 +81,8 @@ mod sat_source;
 mod stats;
 #[path = "icprog/suite.rs"]
 mod suite;
+#[path = "icprog/target_math.rs"]
+mod target_math;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -113,6 +115,23 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Independently replay bounded n17 target records and mathematics; no solver or runtime admission.
+    TargetMathematicsAudit {
+        #[arg(long)]
+        preparation: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        producer: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        worker_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Publish full data custody of an unconsumed validation-only build; no search.
     OrdinaryControlPublishBuild {
         #[arg(long)]
@@ -770,6 +789,23 @@ fn main() -> ExitCode {
             out,
         } => ordinary_control::audit(&capsule, &execution, &registration_sha256, &out),
         Command::OrdinaryPreparationAudit { input, out } => ordinary_preparation::run(&input, &out),
+        Command::TargetMathematicsAudit {
+            preparation,
+            config,
+            producer,
+            execution,
+            registration_sha256,
+            worker_sha256,
+            out,
+        } => target_math::run(
+            &preparation,
+            &config,
+            &producer,
+            &execution,
+            &registration_sha256,
+            &worker_sha256,
+            &out,
+        ),
         Command::F5ControlReplayCustody {
             publication,
             registration_sha256,
