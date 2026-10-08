@@ -1,0 +1,36 @@
+# Track B's chain arms on main, bundled in stack-20261005-main.bundle
+# each arm a merge of its step's branch tip into the arm before it, from main at 995ea2071cc7453877a503d30eb561ae82cddab9
+
+## arms, in the chain's order
+tbarm-B0 2177afa86ad4135c27805b756430dfae9bca314b Track B's chain on main, arm B0: b0-port (216dbcd8) into main (995ea207)
+tbarm-B1 ac74627eb6ceec20cd41f9427da99bfaa6278b81 Track B's chain on main, arm B1: b1-local (4deec0de) into arm B0
+tbarm-B3 ff3b96242c4e1d0ba33c5ea4327edad6a1f20b96 Track B's chain on main, arm B3: b3-int (911b24d7) into arm B1
+tbarm-B2 603c6317045b9c24be4d1595ba320541f42de580 Track B on main, arm B2: ic's estimates read sizes by their ICV1 slug
+tbarm-B2b 1aed30b0377f2ad2286bde8a2e8a7695c6887cbb Track B's chain on main, arm B2b: b2b-int (5c93e142) into arm B2
+tbarm-B7a 570d4e9ae938fdb67d0047677621aa5f55bf8873 Track B's chain on main, arm B7a: b7a-int (58cada36) into arm B2b
+tbarm-B3b 98320f2f66d71246d0e9f8a11c59906a0cdf8878 Track B on main, arm B3b: R05's presence filter in the two-word table
+tbarm-B4 d5761c134f4a6e980660a6e99d4663e7d9e2a7e9 Track B on main, arm B4: R05's presence filter in the W-word table
+
+## prerequisites: main's head, and each step's tip (in stack-20261001.bundle and stack-20261001-b4.bundle)
+216dbcd878c89bbb0033d165abec0ddc38965ae1 B0 declared: refuse what is wrong today, with conformance suite v1
+995ea2071cc7453877a503d30eb561ae82cddab9 Native n83 rotated-m10 complete-point gate (#1343)
+4deec0de6cfad0c8f10a3d680768f3e14a165713 ic B1: count a subfield curve's points correctly past one word
+911b24d7cb7f5572386268f12c88b79a21a2620f ic B3 (work in progress): rho-koblitz on two-word fields, and solve: rho
+5c93e142483423e237f2fc7ebca77a1783c1ce06 ic B2b (work in progress): kic on curves over a subfield, kic alone, order certificates
+474659afd304dc0617b478127549e31aa9c01b27 ic B2 (work in progress): prime and extension fields, curve forms, importers, rho-bignum, estimates
+58cada36350b47b0b701027c9297994524aef14b ic B7a (work in progress): test the full table's stored entries
+eaa842aaead128958d4aa1b7b83a0349df71aa63 ic B3b (work in progress): the index calculus on two-word binary fields, at F0
+8a2519e66ca698ddd1c8777fef1cc82b7825a11a B4 (work in progress): design §5's remaining tests
+
+## every commit in the bundle, oldest first
+2177afa86ad4135c27805b756430dfae9bca314b 2026-10-05 Track B's chain on main, arm B0: b0-port (216dbcd8) into main (995ea207)
+ac74627eb6ceec20cd41f9427da99bfaa6278b81 2026-10-05 Track B's chain on main, arm B1: b1-local (4deec0de) into arm B0
+ff3b96242c4e1d0ba33c5ea4327edad6a1f20b96 2026-10-05 Track B's chain on main, arm B3: b3-int (911b24d7) into arm B1
+3eed2f56d61f2d60b6d10e0bf78af0c53eef6117 2026-10-05 Track B's chain on main, arm B2: b2-int (474659af) into arm B3
+603c6317045b9c24be4d1595ba320541f42de580 2026-10-05 Track B on main, arm B2: ic's estimates read sizes by their ICV1 slug
+1aed30b0377f2ad2286bde8a2e8a7695c6887cbb 2026-10-05 Track B's chain on main, arm B2b: b2b-int (5c93e142) into arm B2
+570d4e9ae938fdb67d0047677621aa5f55bf8873 2026-10-05 Track B's chain on main, arm B7a: b7a-int (58cada36) into arm B2b
+380503f5e84aea469ff9da41fb0a359166a46c92 2026-10-05 Track B's chain on main, arm B3b: b3b-int (eaa842aa) into arm B7a
+98320f2f66d71246d0e9f8a11c59906a0cdf8878 2026-10-05 Track B on main, arm B3b: R05's presence filter in the two-word table
+5dd0523b1905b76cc19b3bc087ca49d13e5cebc3 2026-10-05 Track B's chain on main, arm B4: b4-int (8a2519e6) into arm B3b
+d5761c134f4a6e980660a6e99d4663e7d9e2a7e9 2026-10-05 Track B on main, arm B4: R05's presence filter in the W-word table

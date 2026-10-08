@@ -223,6 +223,24 @@ fn proof_receipt(model: &checker::Model) -> Result<Value, String> {
             "pushforward": "not_implemented_for_this_cover_family",
             "subgroup_transfer": "unknown",
         })),
+        // The same sextic cover over `GF(p^k)`; the checker also proves the
+        // modulus irreducible over `GF(p)` by Rabin's test.
+        checker::Field::Extension { .. } => Ok(json!({
+            "construction": "explicit",
+            "field_of_definition": "same_as_target",
+            "field_validation": "fixed-base_probable_prime_screen_of_p_and_rabin_irreducible_modulus",
+            "target_smoothness": "verified_by_discriminant",
+            "source_smoothness": "verified_by_squarefree_sextic",
+            "genus": "verified_genus_2",
+            "defining_equation_identity": "verified_exact_polynomial_identity",
+            "degree": "verified_degree_2",
+            "separability": "verified_characteristic_not_2",
+            "infinity": "two_base_field_rational_points",
+            "jacobian_arithmetic": "unsupported_even_degree_two_infinity_model",
+            "pullback": "not_implemented_for_this_cover_family",
+            "pushforward": "not_implemented_for_this_cover_family",
+            "subgroup_transfer": "unknown",
+        })),
         checker::Field::Binary(irreducible) => {
             let cover = OrdinaryBinaryCover::new(
                 irreducible.degree,
@@ -430,6 +448,20 @@ fn binary_arithmetic(request: &ArithmeticRequest, model_value: &Value) -> (Value
         );
     }
     let irr = match &model.field {
+        checker::Field::Extension { .. } => {
+            return (
+                response(
+                    "arithmetic",
+                    "unsupported",
+                    json!({
+                        "reason": "the explicit GF(p^k) cover is an even-degree sextic with two rational points at infinity; the checked odd-characteristic implementation currently supports only odd-degree one-infinity models over prime fields",
+                        "construction_status": "explicit_verified",
+                        "arithmetic_status": "unsupported_infinity_configuration",
+                    }),
+                ),
+                2,
+            )
+        }
         checker::Field::Prime(_) => {
             return (
                 response(

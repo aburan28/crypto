@@ -130,6 +130,8 @@ begin
 
   dut : entity work.ec2k_axil
     generic map (NENG => NENG, ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
+                 FLUSH_CLK => 16, CNT_W => 32, DP_WEIGHT => 56, DP_FIFO_W => 3,
+                 CLK_KHZ => 333333)
                  FLUSH_CLK => 16, CNT_W => 32, CNT_LO_W => CNT_LO_W, DP_WEIGHT => 56,
                  DP_FIFO_W => 3, CLK_KHZ => 333333)
     port map (

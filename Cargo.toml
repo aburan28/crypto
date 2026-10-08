@@ -132,7 +132,11 @@ zeroize = { version = "1.7", features = ["zeroize_derive"] }
 hex = "0.4"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0", features = ["float_roundtrip"] }
+# `raw_value` lets the P-192 CM certificates parse their one float exactly
+# (`exact_f64` in p192_cm_relation_search.rs) without `float_roundtrip`, which
+# changes every float parse in the crate and broke replay of ecbench evidence
+# sealed under the default parser.
+serde_json = { version = "1.0", features = ["raw_value"] }
 # Data-parallel sweeps for the isogeny experimental harness.
 rayon = "1.10"
 # BLAKE3 is kept as a crate: its Merkle-tree construction is too complex to
@@ -145,6 +149,7 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
+redis = { version = "1.7.0", features = ["tls-native-tls"] }
 
 [[bench]]
 name = "pqc_speed"

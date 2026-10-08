@@ -66,7 +66,7 @@ EDGE_L, EDGE_R = r"(?<![A-Za-z0-9_./-])", r"(?![A-Za-z0-9_.-]*[A-Za-z0-9_])(?![.
 STEM = re.compile(EDGE_L + r"(k[01]n\d{1,3}|bench-\d+bit|generated-\d+bit-\d+"
                   r"|random-binary-n\d+-b[0-9a-f]+)" + EDGE_R)
 SUBFIELD = re.compile(r"E_\{(\d+),(\d+)\}/GF\((?:2\^(\d+)|(\d+))\)(?:\s+over\s+GF\(2\^(\d+)\))?")
-SLUG = re.compile(r"icv1-(?:f2m|fp)\d+-tm?\d+-[0-9a-f]{8}")
+SLUG = re.compile(r"icv1-(?:f2m\d+|fp\d+(?:k\d+)?)-tm?\d+-[0-9a-f]{8}")
 RETIRED_FILE = re.compile(r"(?:^|/)(k[01]n\d+|bench-\d+bit|generated-\d+bit-\d+"
                           r"|random-binary-n\d+-b[0-9a-f]+)[-_.]")
 

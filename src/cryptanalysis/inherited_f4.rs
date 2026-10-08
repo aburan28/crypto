@@ -85,6 +85,14 @@ use crate::cryptanalysis::pq_groebner_f2::{
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static COMPACT_REFUTED_BASIS: AtomicBool = AtomicBool::new(false);
+
+/// Keep only the decisive constant row after a basis proves `1`.
+pub fn set_compact_refuted_basis(enabled: bool) {
+    COMPACT_REFUTED_BASIS.store(enabled, Ordering::Relaxed);
+}
 
 /// Degree of a Boolean polynomial (`0` for a constant or zero).
 fn poly_degree(p: &F2BoolPoly) -> u32 {
@@ -776,6 +784,23 @@ impl ReducedBasis {
     /// Reduce the basis to its row `r`, which is the constant `1`.
     fn collapse_to_one(&mut self, r: usize) {
         debug_assert_eq!(self.columns[self.pivot_col[r] as usize], 0);
+        if COMPACT_REFUTED_BASIS.load(Ordering::Relaxed) {
+            self.columns = vec![0];
+            self.column_index = None;
+            self.words = 1;
+            self.history.clear();
+            self.rows = vec![LazyRow {
+                version: 0,
+                start: 0,
+                lead: 0,
+                data: Rc::from([1u64].as_slice()),
+            }];
+            self.pivot_col = vec![0];
+            self.pivot_of = vec![Some(0)];
+            self.pending.clear();
+            self.refuted = true;
+            return;
+        }
         let row = self.rows.swap_remove(r);
         let c = self.pivot_col[r];
         self.rows = vec![row];
@@ -2305,6 +2330,54 @@ mod tests {
             refuted_children > 0,
             "no specialisation refuted; the test exercised nothing"
         );
+    }
+
+    #[test]
+    #[ignore = "global compact-refutation toggle requires an isolated test process"]
+    fn compact_refuted_basis_survives_two_more_specialisations() {
+        let mut seed = 0x0bad_5eed_0dd5_0001u64;
+        set_compact_refuted_basis(false);
+        for trial in 0..120 {
+            let n_vars = 5 + trial % 3;
+            let system: Vec<F2BoolPoly> = (0..3 + trial % 3)
+                .map(|k| random_poly(n_vars, 2, 4 + k, &mut seed))
+                .filter(|p| poly_degree(p) >= 1)
+                .collect();
+            let Some((root, _)) = ReducedBasis::from_system(&system, n_vars, 3) else {
+                continue;
+            };
+            if root.refuted {
+                continue;
+            }
+            for v in 0..n_vars as u32 {
+                for value in [false, true] {
+                    let (ordinary, _) = root.specialise(v, value);
+                    if !ordinary.refuted {
+                        continue;
+                    }
+                    set_compact_refuted_basis(true);
+                    let (compact, _) = root.specialise(v, value);
+                    set_compact_refuted_basis(false);
+                    assert!(compact.refuted);
+                    assert_eq!(compact.columns, vec![0]);
+                    assert_eq!(compact.words, 1);
+                    assert!(compact.history.is_empty());
+                    let remaining: Vec<u32> =
+                        (0..n_vars as u32).filter(|&w| w != v).take(2).collect();
+                    let (mut ordinary, _) =
+                        ordinary.specialise_all(&[(remaining[0], true), (remaining[1], false)]);
+                    let (mut compact, cost) =
+                        compact.specialise_all(&[(remaining[0], true), (remaining[1], false)]);
+                    assert_eq!(cost.word_ops(), 0);
+                    assert_eq!(
+                        ordinary.decisive_rows(&mut InheritCost::default()),
+                        compact.decisive_rows(&mut InheritCost::default())
+                    );
+                    return;
+                }
+            }
+        }
+        panic!("seeded systems produced no refuted child");
     }
 
     #[test]

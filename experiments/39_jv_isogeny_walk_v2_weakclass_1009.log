@@ -1,0 +1,4 @@
+| p | q | weak × q (sampled) | jumps | walks found / capped / exhausted (start weak) | success | curves met median / mean (q/3) | first component mean, weak share | components mean | jumps 3/5/7, wasted | muls per curve | muls per jump | muls per found walk | rho at p | walk / rho (found) | walk / rho (all) |
+|---:|--:|--:|:--|:--|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|
+p= 1009 q= 1018081 | weak×q 0.00 (2000) | found 20 capped 0 exhausted 0 start-weak 0 of 20 | success 1.00 | curves median 10 mean 4894 (q/3 339360) | first comp 4889.3 weak 0.65 | comps 1.6 | jumps [9, 7, 1] wasted 2 | c_curve 4509 c_jump 8.283e5 | muls/found walk 5.337e7 all 5.337e7 | walk/rho 0.0002 all 0.0002 | 6 s
+| 1009 | 1018081 | 0.00 (2000) | 3,5,7 (from a weak class) | 20 / 0 / 0 (0) | 1.00 | 10 / 4894 (339360) | 4889.3, 0.65 | 1.6 | 9/7/1, 2 | 4509 | 8.28e5 | 5.337e7 | 2.210e11 | 0.0002 | 0.0002 |

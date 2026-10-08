@@ -1,0 +1,36 @@
+{
+  "checks": {
+    "field_irreducible": true,
+    "generator_on_curve": true,
+    "ic_and_rho_scalar_identical": true,
+    "ic_and_rho_target_identical": true,
+    "ic_scalar_replays_target": true,
+    "rho_scalar_replays_target": true,
+    "subgroup_order_annihilates_generator": true,
+    "target_on_curve": true
+  },
+  "curve": {
+    "a": 0,
+    "b": 1,
+    "field_modulus": "x^41 + x^3 + 1",
+    "weierstrass_model": "y^2 + x*y = x^3 + 1"
+  },
+  "generator": [
+    2056947637384,
+    1635505394702
+  ],
+  "ic_recovered_scalar": 122329249266,
+  "kind": "independent_binary_curve_scalar_replay",
+  "method": "standalone Python polynomial-basis GF(2^41) arithmetic and binary Weierstrass group law; separate from Rust producers",
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "python": "3.9.10 (main, Feb 15 2026, 13:00:19) \n[Clang 17.0.0 (clang-1700.0.13.5)]",
+  "rho_recovered_scalar": 122329249266,
+  "run_id": "20261002T213001Z-3e68b28a95",
+  "status": "PASS",
+  "subgroup_order": 549756390943,
+  "target": [
+    32261361846,
+    1686243023477
+  ],
+  "validator_sha256": "2c3244087fb8bcd46a6569d931a3bd897c0435348d11608fb2cbc8ec2f04299c"
+}

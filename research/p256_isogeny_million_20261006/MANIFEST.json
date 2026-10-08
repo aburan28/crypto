@@ -1,0 +1,107 @@
+{
+  "schema": "p256.isogeny-grid-result-manifest/v1",
+  "run_id": "p256-grid-1m-20261006",
+  "date": "2026-10-06",
+  "status": "complete_verified_negative_screen",
+  "result_class": "bounded-structural-screen-no-ecdlp-speedup",
+  "production_source_commit": "316f546373db8f42ac894ef7d8b4232e57d87f8e",
+  "production_source_tree": "c6daafdf0dc8913bd72f0f0d8ba8ecaa8fc46ee9",
+  "production_remote_equivalent_commit": "86cf65727adf50451b48008149098b470e038d77",
+  "storage_source_commit": "53aff5c2a4ccc1c924a83e0844a62c1cf082a6a7",
+  "storage_source_tree": "25fd5ae0304fad8127af2ccd420f5f7b07b9619b",
+  "storage_remote_equivalent_commit": "59a2915b9eed1012a4a34270bf6e3c62c03d1011",
+  "registered_root": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "population": {
+    "construction": "1000-by-1000 degree-13/degree-11 product grid",
+    "unique_curves": 1000000,
+    "parent_edges": 999999,
+    "kernel_certificates": 999999,
+    "fraction_of_2_pow_32": 0.00023283064365386963,
+    "coverage_percent_of_2_pow_32": 0.023283064365386963
+  },
+  "verification": {
+    "status": "pass",
+    "generation_audit_points_per_curve": 1,
+    "replay_audit_points_per_curve": 2,
+    "replay_audit_seed_x": 7,
+    "record_chain_sha256": "4de6e93e0d7a90ff53a26f8f1fd1cbd03ab55f701a25f8e49874cb8bead40302",
+    "primary_qr_threshold": 54,
+    "primary_screen_hits": 0,
+    "comparison_qr_threshold": 52,
+    "comparison_screen_hits": 0,
+    "minimum_b_signed_bits": 233,
+    "minimum_a_signed_bits_without_a_minus_3": 236,
+    "ecdlp_speedup": null
+  },
+  "artifacts": [
+    {
+      "role": "canonical_certificate",
+      "publication": "local_only",
+      "local_path": "/tmp/p256-isogeny-million-20261006/p256-grid-1m.jsonl.gz",
+      "encoding": "gzip",
+      "stored_bytes": 527157501,
+      "stored_sha256": "87522b6de08e64804dcee17bba058eb91922d6b8dd9853cd32523f67a3d0cbdc",
+      "content_bytes": 1773118481,
+      "content_sha256": "2a1a27d06f48b22b85ce3c96ac4017f5af6a0256e9d1ad277e3fb1f516475454",
+      "jsonl_records": 1000002
+    },
+    {
+      "role": "generation_receipt",
+      "publication": "git",
+      "path": "runs/p256-grid-1m/GENERATE.json",
+      "bytes": 24346,
+      "sha256": "2e330d01a1df8ba4e722e1ac5d8dc0d25e80ddc4d1c811c70e8db10d806cbba3"
+    },
+    {
+      "role": "independent_replay_receipt",
+      "publication": "git",
+      "path": "runs/p256-grid-1m/VERIFY.json",
+      "bytes": 24388,
+      "sha256": "0cf69c6180e2f9759f88982e3cd05787f442772c28dd2ffadf7ab1a9962529df"
+    },
+    {
+      "role": "cache_receipt",
+      "publication": "git",
+      "path": "runs/p256-grid-1m/CACHE.json",
+      "bytes": 570,
+      "sha256": "55408727b68f9a39489f3b3e0ef728b5e03f2be5ae3d8c80c6c7f1d27a478f9e"
+    },
+    {
+      "role": "transfer_assessment",
+      "publication": "git",
+      "path": "TRANSFER_ASSESSMENT.json",
+      "bytes": 4262,
+      "sha256": "4fa1b858ca3c735ffdce879b9cb189fc56bb9d3573ae33a7e2eb0c2407dc124d"
+    },
+    {
+      "role": "row_cache",
+      "publication": "local_only",
+      "local_path": "/tmp/p256-isogeny-million-20261006/cache-rows8",
+      "manifest_bytes": 92736,
+      "manifest_sha256": "4e4cceae95d7cc11632204877f29e2a608d2d4b60a211f177fd6868c884241c3",
+      "parts": 127,
+      "content_bytes": 1773118481,
+      "content_sha256": "2a1a27d06f48b22b85ce3c96ac4017f5af6a0256e9d1ad277e3fb1f516475454"
+    },
+    {
+      "role": "production_binary",
+      "publication": "local_only",
+      "local_path": "/tmp/p256-isogeny-million-20261006/p256_isogeny_million.generator",
+      "bytes": 3522416,
+      "sha256": "37ccab8a4076cf04d06ffd87d00eb9f1b76fbbc411f6e5bc688f675656231b71"
+    }
+  ],
+  "durable_storage": {
+    "status": "blocked_no_ambient_identity_or_aws_cli",
+    "upload_attempted": false,
+    "object_key_template": "objects/sha256/<first-two>/<sha256>",
+    "completion_marker": "runs/p256-grid-1m-20261006/complete.json",
+    "completion_marker_created": false
+  },
+  "cairn": {
+    "status": "blocked_no_node_objective_or_identity",
+    "submission_attempted": false,
+    "receipt_kind": "coordination-receipt",
+    "storage_claim": "s3-content-address-only"
+  }
+}

@@ -1,0 +1,90 @@
+{
+ "binary": "/tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/bin/ic-tbarm-B0-2177afa86",
+ "steps": [
+  "B0"
+ ],
+ "cases": 8,
+ "passed": 8,
+ "results": [
+  {
+   "id": "C001-generate-degree-range-message",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "error: invalid value '65' for '--degree <DEGREE>': synthetic degree must be odd and 3..=63",
+    "",
+    "For more information, try '--help'."
+   ]
+  },
+  {
+   "id": "C002-workflow-foreign-state-short-digest",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: run directory /tmp/ic-conf-C002-workflow-foreign-state-short-digest-17302-1791237117787270443/run belongs to a different parameter set (digest ab); use a fresh directory"
+   ]
+  },
+  {
+   "id": "C003-subgroup-orbits-points-beyond-the-abscissa-limit",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: subgroup_orbits points must be 1..=1048576 (two per abscissa, at most 524288 abscissae), got 2000000"
+   ]
+  },
+  {
+   "id": "C004-boundary-random-binary-degree-bound",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: random binary curves are counted by enumerating 2^n abscissae, so their degrees must lie in 5..=32, got 40"
+   ]
+  },
+  {
+   "id": "C005-rho-random-binary-degree-bound",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: random binary curves are counted by enumerating 2^n abscissae, so their degrees must lie in 5..=32, got 40"
+   ]
+  },
+  {
+   "id": "C006-bench-random-binary-degree-bound",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: random binary curves are counted by enumerating 2^n abscissae, so their degrees must lie in 5..=32, got 40"
+   ]
+  },
+  {
+   "id": "C007-pair-table-budget-named",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: no pair table of tier Auto for 496 base points fits pair_table_bytes = 1; raise it or use a smaller base"
+   ]
+  },
+  {
+   "id": "C008-single-target-smoke-row-solves",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  }
+ ]
+}

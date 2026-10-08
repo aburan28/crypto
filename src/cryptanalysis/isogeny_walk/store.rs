@@ -25,6 +25,7 @@
 //! The transport is the AWS CLI (`aws s3api`), run as a subprocess with the
 //! caller's credentials; no SDK is linked.
 
+use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -140,6 +141,161 @@ pub enum Put {
     Created,
     /// The key already existed; nothing was written.
     Exists,
+}
+
+/// Metadata S3 reports for an object uploaded with a SHA-256 checksum.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Head {
+    pub bytes: u64,
+    pub sha256: String,
+}
+
+fn missing(err: &str) -> bool {
+    err.contains("NoSuchKey") || err.contains("Not Found") || err.contains("404")
+}
+
+fn checksum_hex(value: &str) -> Result<String, String> {
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(value)
+        .map_err(|e| format!("invalid S3 SHA-256 checksum: {e}"))?;
+    if bytes.len() != 32 {
+        return Err(format!(
+            "S3 SHA-256 checksum decoded to {} bytes, expected 32",
+            bytes.len()
+        ));
+    }
+    Ok(hex::encode(bytes))
+}
+
+/// Read an object's exact byte count and stored SHA-256 checksum.
+pub fn head(loc: &S3Loc, key: &str) -> Result<Option<Head>, String> {
+    let (ok, out, err) = aws(&[
+        "s3api",
+        "head-object",
+        "--bucket",
+        &loc.bucket,
+        "--key",
+        key,
+        "--checksum-mode",
+        "ENABLED",
+        "--output",
+        "json",
+    ])?;
+    if !ok {
+        if missing(&err) {
+            return Ok(None);
+        }
+        return Err(format!("head s3://{}/{key}: {}", loc.bucket, err.trim()));
+    }
+    let value: serde_json::Value = serde_json::from_str(&out).map_err(|e| e.to_string())?;
+    let bytes = value["ContentLength"]
+        .as_u64()
+        .ok_or("S3 head response has no ContentLength")?;
+    let encoded = value["ChecksumSHA256"]
+        .as_str()
+        .ok_or("S3 head response has no ChecksumSHA256")?;
+    Ok(Some(Head {
+        bytes,
+        sha256: checksum_hex(encoded)?,
+    }))
+}
+
+/// Upload an existing file without buffering it, conditional on the key not
+/// existing. An existing content-addressed object is accepted only when its
+/// byte count and S3-reported SHA-256 match the caller's descriptor.
+pub fn put_file_once(
+    loc: &S3Loc,
+    key: &str,
+    path: &Path,
+    expected_sha256: &str,
+    expected_bytes: u64,
+) -> Result<Put, String> {
+    let metadata = std::fs::metadata(path).map_err(|e| format!("stat {}: {e}", path.display()))?;
+    if metadata.len() != expected_bytes {
+        return Err(format!(
+            "{} has {} bytes, expected {expected_bytes}",
+            path.display(),
+            metadata.len()
+        ));
+    }
+    let digest = hex::decode(expected_sha256)
+        .map_err(|e| format!("invalid expected SHA-256 {expected_sha256}: {e}"))?;
+    if digest.len() != 32 {
+        return Err("expected SHA-256 must contain 32 bytes".into());
+    }
+    let expected_b64 = base64::engine::general_purpose::STANDARD.encode(digest);
+    let body = path.to_string_lossy().into_owned();
+    let (ok, out, err) = aws(&[
+        "s3api",
+        "put-object",
+        "--bucket",
+        &loc.bucket,
+        "--key",
+        key,
+        "--body",
+        &body,
+        "--if-none-match",
+        "*",
+        "--checksum-algorithm",
+        "SHA256",
+        "--checksum-sha256",
+        &expected_b64,
+        "--output",
+        "json",
+    ])?;
+    if !ok {
+        if !err.contains("PreconditionFailed") && !err.contains("ConditionalRequestConflict") {
+            return Err(format!("put s3://{}/{key}: {}", loc.bucket, err.trim()));
+        }
+        let existing = head(loc, key)?.ok_or_else(|| format!("{key}: object vanished"))?;
+        if existing.bytes != expected_bytes || existing.sha256 != expected_sha256 {
+            return Err(format!(
+                "s3://{}/{key}: existing object differs from its content address",
+                loc.bucket
+            ));
+        }
+        return Ok(Put::Exists);
+    }
+    let value: serde_json::Value = serde_json::from_str(&out).map_err(|e| e.to_string())?;
+    if value["ChecksumSHA256"].as_str() != Some(expected_b64.as_str()) {
+        return Err(format!(
+            "put s3://{}/{key}: S3 reports SHA-256 {:?}, expected {expected_b64}",
+            loc.bucket, value["ChecksumSHA256"]
+        ));
+    }
+    Ok(Put::Created)
+}
+
+/// Download an object directly to a new local file. Returns `false` when the
+/// key does not exist and never exposes a successful partial download.
+pub fn get_to_file(loc: &S3Loc, key: &str, output: &Path) -> Result<bool, String> {
+    if output.exists() {
+        return Err(format!("refusing to overwrite {}", output.display()));
+    }
+    if let Some(parent) = output.parent().filter(|path| !path.as_os_str().is_empty()) {
+        std::fs::create_dir_all(parent).map_err(|e| format!("create {}: {e}", parent.display()))?;
+    }
+    let outfile = output.to_string_lossy().into_owned();
+    let (ok, _, err) = aws(&[
+        "s3api",
+        "get-object",
+        "--bucket",
+        &loc.bucket,
+        "--key",
+        key,
+        &outfile,
+    ])?;
+    if !ok {
+        let _ = std::fs::remove_file(output);
+        if missing(&err) {
+            return Ok(false);
+        }
+        return Err(format!("get s3://{}/{key}: {}", loc.bucket, err.trim()));
+    }
+    File::open(output)
+        .and_then(|file| file.sync_all())
+        .map_err(|e| format!("sync {}: {e}", output.display()))?;
+    Ok(true)
 }
 
 /// Create `key` with `bytes` unless it exists, and check S3's SHA-256 of

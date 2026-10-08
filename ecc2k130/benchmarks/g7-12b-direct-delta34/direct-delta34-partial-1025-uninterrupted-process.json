@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-two-jump-indexed",
+    "--packed",
+    "--threads",
+    "1025",
+    "--steps",
+    "64",
+    "--launches",
+    "4",
+    "--run-id",
+    "27235",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/direct-delta34-partial-1025-uninterrupted.ckpt",
+    "--bench",
+    "--verify",
+    "0"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 0.5166972199986049,
+  "log": "direct-delta34-partial-1025-uninterrupted.log",
+  "log_sha256": "1b68a750f790abbe6716d0b145a482f662572782b5f767382c30b00ea0425430",
+  "binary_sha256": "6e50c7464b863633c28a5eaecefa74623b2b692813bb70a3bc701f394c691245"
+}

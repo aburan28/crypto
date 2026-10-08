@@ -43,12 +43,24 @@ fn units(row: &J) -> String {
 }
 
 /// The suite and holdout tables of a round whose analysis has R05's shape.
+/// The last column's bands are R01's, or the round's own where its host
+/// was not R01's (`aa_source`).
 pub fn r05(doc: &J) -> Result<String, String> {
+    let own_aa = doc
+        .get("aa_source")
+        .and_then(|s| s.get("aa"))
+        .and_then(J::as_str)
+        == Some("the round's own");
+    let aa_head = if own_aa {
+        "the round's A/A, cold"
+    } else {
+        "R01's A/A, cold"
+    };
     let mut out = String::new();
-    out.push_str(
-        "| curve | log₂ r | rows | rounds | cold [95%] | online | collection stage | rho online | `S` cold, base → candidate | collection, units a summand | R01's A/A, cold |\n\
+    out.push_str(&format!(
+        "| curve | log₂ r | rows | rounds | cold [95%] | online | collection stage | rho online | `S` cold, base → candidate | collection, units a summand | {aa_head} |\n\
          |:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n",
-    );
+    ));
     for row in doc.at("suite")?.as_arr().ok_or("`suite` is not a list")? {
         out.push_str(&format!(
             "| {} | {:.1} | {} | {} | {} | {} | {} | {} | {} | {} | {} |\n",

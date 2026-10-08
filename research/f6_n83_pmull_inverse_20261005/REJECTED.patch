@@ -1,0 +1,105 @@
+diff --git a/src/cryptanalysis/f6_wide_geometry.rs b/src/cryptanalysis/f6_wide_geometry.rs
+index 945c4e224..4343bfe2a 100644
+--- a/src/cryptanalysis/f6_wide_geometry.rs
++++ b/src/cryptanalysis/f6_wide_geometry.rs
+@@ -234,7 +234,6 @@ fn batch_x_keys_fixed_both_signs(
+ #[cfg(target_arch = "aarch64")]
+ mod packed83 {
+     use super::*;
+-    use num_bigint::BigUint;
+ 
+     pub(super) const MASK: u128 = (1u128 << 83) - 1;
+ 
+@@ -287,6 +286,35 @@ mod packed83 {
+         })
+     }
+ 
++    /// Itoh–Tsujii inversion for the pinned degree-83 field.
++    ///
++    /// # Safety
++    /// The caller must have checked ARM64 AES/PMULL support and the pinned
++    /// degree-83 irreducible polynomial.
++    #[target_feature(enable = "aes")]
++    pub(super) unsafe fn inverse(a: u128) -> Option<u128> {
++        if a == 0 {
++            return None;
++        }
++        // Build a^(2^82 - 1) by reading the remaining bits of 82 = 0b1010010.
++        let mut beta = a;
++        let mut len = 1;
++        for bit in [0, 1, 0, 0, 1, 0] {
++            let mut shifted = beta;
++            for _ in 0..len {
++                shifted = unsafe { square(shifted) };
++            }
++            beta = unsafe { mul(beta, shifted) };
++            len *= 2;
++            if bit == 1 {
++                beta = unsafe { mul(square(beta), a) };
++                len += 1;
++            }
++        }
++        debug_assert_eq!(len, 82);
++        Some(unsafe { square(beta) })
++    }
++
+     /// # Safety
+     /// The caller must have checked ARM64 AES/PMULL support and the pinned
+     /// degree-83 irreducible polynomial.
+@@ -326,8 +354,7 @@ mod packed83 {
+         for &denominator in &denominators {
+             prefix.push(unsafe { mul(*prefix.last()?, denominator) });
+         }
+-        let product = F2mElement::from_biguint(&BigUint::from(*prefix.last()?), 83);
+-        let mut inverse = packed(&product.flt_inverse(&curve.irreducible)?)?;
++        let mut inverse = unsafe { self::inverse(*prefix.last()?) }?;
+         for j in (0..positions.len()).rev() {
+             let i = positions[j];
+             let denominator_inverse = unsafe { mul(inverse, prefix[j]) };
+@@ -380,9 +407,7 @@ mod packed83 {
+         for &denominator in &denominators {
+             prefix.push(unsafe { mul(*prefix.last()?, denominator) });
+         }
+-        let product = *prefix.last()?;
+-        let product = F2mElement::from_words(&[product as u64, (product >> 64) as u64], 83);
+-        let mut inverse = packed(&product.flt_inverse(&curve.irreducible)?)?;
++        let mut inverse = unsafe { self::inverse(*prefix.last()?) }?;
+         for j in (0..positions.len()).rev() {
+             let i = positions[j];
+             let denominator_inverse = unsafe { mul(inverse, prefix[j]) };
+@@ -789,6 +814,35 @@ mod tests {
+         }
+     }
+ 
++    #[cfg(target_arch = "aarch64")]
++    #[test]
++    fn n83_pmull_inverse_matches_reference() {
++        if !std::arch::is_aarch64_feature_detected!("aes") {
++            return;
++        }
++        let curve = n83_curve();
++        // SAFETY: this test checks the CPU feature and uses the pinned field.
++        assert_eq!(unsafe { packed83::inverse(0) }, None);
++        let check = |a: u128| {
++            let element = F2mElement::from_words(&[a as u64, (a >> 64) as u64], 83);
++            let expected = packed(&element.flt_inverse(&curve.irreducible).unwrap()).unwrap();
++            // SAFETY: this test checks the CPU feature and uses the pinned field.
++            let actual = unsafe { packed83::inverse(a) }.unwrap();
++            assert_eq!(actual, expected, "inverse of {a:x}");
++            assert_eq!(unsafe { packed83::mul(a, actual) }, 1);
++        };
++        for a in [1, 2, 1 << 45, 1 << 64, 1 << 82, packed83::MASK] {
++            check(a);
++        }
++        let mut state = 0x93cd_b69f_47e2_180d_a54b_8c31_f739_62e1u128;
++        for _ in 0..10_000 {
++            state ^= state << 13;
++            state ^= state >> 7;
++            state ^= state << 17;
++            check((state & packed83::MASK).max(1));
++        }
++    }
++
+     #[cfg(target_arch = "aarch64")]
+     #[test]
+     fn n83_pmull_batch_keys_match_reference_with_exceptions() {

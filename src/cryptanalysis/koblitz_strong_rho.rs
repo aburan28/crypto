@@ -82,6 +82,8 @@ pub trait FieldWord:
     /// Byte `i` (bits `8i .. 8i + 8`).
     fn byte(self, i: u32) -> usize;
     fn bit(self, i: u32) -> bool;
+    /// Index of the lowest set bit (`BITS` for zero).
+    fn trailing_zeros(self) -> u32;
 }
 
 impl FieldWord for u64 {
@@ -98,6 +100,10 @@ impl FieldWord for u64 {
     fn bit(self, i: u32) -> bool {
         (self >> i) & 1 == 1
     }
+    #[inline(always)]
+    fn trailing_zeros(self) -> u32 {
+        u64::trailing_zeros(self)
+    }
 }
 
 impl FieldWord for u128 {
@@ -113,6 +119,10 @@ impl FieldWord for u128 {
     #[inline(always)]
     fn bit(self, i: u32) -> bool {
         (self >> i) & 1 == 1
+    }
+    #[inline(always)]
+    fn trailing_zeros(self) -> u32 {
+        u128::trailing_zeros(self)
     }
 }
 
@@ -625,6 +635,56 @@ impl<E: FieldWord> NormalBasis<E> {
         }
         ((v << k) | (v >> (self.n - k))) & self.mask
     }
+
+    /// What a scan of all `n` rotations of the normal coordinates `c` finds:
+    /// the least rotation, the smallest `k` with `rotate(c, k)` equal to it,
+    /// and whether another `k` reaches it too (a periodic or constant word).
+    ///
+    /// The scan need not try every `k`.  `rotate(c, k)` opens with as many
+    /// zeros as the zero run of `c` whose top is bit `n − 1 − k`, and more
+    /// leading zeros is a smaller word, so every least rotation starts at a
+    /// top of one of the *longest* cyclic zero runs.  Those tops are found
+    /// one AND-with-rotate per bit of run length — `Z_j = Z_{j−1} ∧
+    /// rotate(¬c, j − 1)` has bit `p` set when bits `p, p − 1, …, p − j + 1`
+    /// of `c` are zero — about `log₂ n` steps on a random word, and only the
+    /// rotations starting there are compared, usually one or two.  Every
+    /// `k` that reaches the least is among them, so the tie is exact.
+    fn least_rotation(&self, c: E) -> (E, u32, bool) {
+        let zero = E::default();
+        let zeros = c ^ self.mask;
+        if c == zero || zeros == zero {
+            // Every rotation is the same word.
+            return (c, 0, self.n > 1);
+        }
+        let mut run = zeros;
+        let mut len = 1u32;
+        loop {
+            let next = run & self.rotate(zeros, len);
+            if next == zero {
+                break;
+            }
+            run = next;
+            len += 1;
+        }
+        // Tops in ascending bit order are `k = n − 1 − p` descending, so an
+        // equal value found later has the smaller `k`.
+        let mut tops = run;
+        let mut best = (self.mask, 0u32, false);
+        let mut first = true;
+        while tops != zero {
+            let p = tops.trailing_zeros();
+            tops = tops & (tops - E::from(1u8));
+            let k = self.n - 1 - p;
+            let v = self.rotate(c, k);
+            if first || v < best.0 {
+                best = (v, k, false);
+                first = false;
+            } else if v == best.0 {
+                best = (v, k, true);
+            }
+        }
+        best
+    }
 }
 
 /// `a·b mod m`: a floating-point quotient estimate when `m < 2^50` (off by at
@@ -836,16 +896,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
     /// [`Self::canonicalize`] uses.
     pub fn x_orbit(&self, x: F::E) -> (F::E, u32) {
         let nb = &self.nb;
-        let xc = nb.to_normal.apply(x);
-        let mut best = xc;
-        let mut best_k = 0u32;
-        for k in 1..nb.n {
-            let cur = nb.rotate(xc, k);
-            if cur < best {
-                best = cur;
-                best_k = k;
-            }
-        }
+        let (best, best_k, _) = nb.least_rotation(nb.to_normal.apply(x));
         (best, best_k)
     }
 
@@ -1007,23 +1058,9 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             return state;
         };
         let nb = &self.nb;
-        let n = nb.n;
         let xc = nb.to_normal.apply(x);
         let yc = nb.to_normal.apply(y);
-        let mut best = xc;
-        let mut best_k = 0u32;
-        let mut cur = xc;
-        let mut tie = false;
-        for k in 1..n {
-            cur = ((cur << 1) | (cur >> (n - 1))) & nb.mask;
-            if cur < best {
-                best = cur;
-                best_k = k;
-                tie = false;
-            } else if cur == best {
-                tie = true;
-            }
-        }
+        let (best, best_k, tie) = nb.least_rotation(xc);
         let (k, negated) = if tie {
             self.choice_exhaustive(xc, yc)
         } else {
@@ -1259,6 +1296,68 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
 mod tests {
     use super::*;
     use num_bigint::BigUint;
+
+    /// The run-based search returns what the exhaustive scan of all `n`
+    /// rotations returns — the least word, the smallest `k` reaching it and
+    /// whether another `k` does — at both widths, on random words and on
+    /// the cases it could get wrong: constant words, single bits and
+    /// periodic words, where several rotations tie.
+    #[test]
+    fn least_rotation_matches_the_exhaustive_scan() {
+        fn check<E: FieldWord>(n: u32, words: &[E]) {
+            let mask = word_mask::<E>(n);
+            let nb = NormalBasis {
+                n,
+                mask,
+                to_normal: Linear { tables: Vec::new() },
+                to_poly: Linear { tables: Vec::new() },
+            };
+            for &c in words {
+                let c = c & mask;
+                let (mut best, mut best_k, mut tie) = (c, 0u32, false);
+                for k in 1..n {
+                    let v = nb.rotate(c, k);
+                    if v < best {
+                        (best, best_k, tie) = (v, k, false);
+                    } else if v == best {
+                        tie = true;
+                    }
+                }
+                assert_eq!(
+                    nb.least_rotation(c),
+                    (best, best_k, tie),
+                    "n = {n}, c = {c:?}"
+                );
+            }
+        }
+        let mut s = 0x2545_F491_4F6C_DD1Du64;
+        let mut next = move || {
+            s ^= s << 13;
+            s ^= s >> 7;
+            s ^= s << 17;
+            s
+        };
+        let pattern = |n: u32, period: u32, pat: u128| {
+            (0..n / period).fold(0u128, |w, k| w | (pat << (k * period)))
+        };
+        for n in 2u32..=127 {
+            let mut words: Vec<u128> = vec![0, u128::MAX, 1, 1 << (n - 1), 3, !1];
+            for period in 1..=n.min(10) {
+                if n % period == 0 {
+                    words.extend((1..(1u128 << period).min(48)).map(|p| pattern(n, period, p)));
+                }
+            }
+            for _ in 0..300 {
+                let w = (u128::from(next()) << 64) | u128::from(next());
+                // Sparse and dense words carry long runs of one kind.
+                words.extend([w, w & (w >> 3) & (w >> 7), w | (w >> 5) | (w >> 11)]);
+            }
+            if n <= 63 {
+                check::<u64>(n, &words.iter().map(|&w| w as u64).collect::<Vec<_>>());
+            }
+            check::<u128>(n, &words);
+        }
+    }
 
     /// Koblitz rungs that construct, small enough to solve in a unit test.
     fn curves() -> Vec<KoblitzCurve> {

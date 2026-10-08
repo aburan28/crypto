@@ -1,0 +1,123 @@
+{
+  "a": 1,
+  "base_id_or_hash": "koblitz_rank_fixture signed_expanded independent pair_pair_16 seed=1",
+  "claim_boundary": "Public synthetic Koblitz exact-coverage eta sweep only.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic yield law",
+    "not ledger promotion until CI/distributional gates"
+  ],
+  "eta_or_coverage_policy": "sweep eta_num=1..8 / 8",
+  "n_or_bits": 19,
+  "pr_decomposition_or_hit_rate_with_ci": {
+    "ci": "not_computed_single_draw_per_eta",
+    "definition": "reachable_nonzero_subgroup_targets / (2^n - 1)",
+    "rows": [
+      {
+        "base_hash": "ffc6ef33dd37e42673de68e945c2e0ee623a9f6947c5dca929992e5c1b7152d1",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 1,
+        "factor_base_points": 76,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 24.370834000000002
+      },
+      {
+        "base_hash": "ffc6ef33dd37e42673de68e945c2e0ee623a9f6947c5dca929992e5c1b7152d1",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 2,
+        "factor_base_points": 76,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 16.873791
+      },
+      {
+        "base_hash": "e0e6df4ca3d14b9292b34d3e2e002664d2f68a3c36407b73a20a448972473204",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 3,
+        "factor_base_points": 114,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 16.798542
+      },
+      {
+        "base_hash": "e0e6df4ca3d14b9292b34d3e2e002664d2f68a3c36407b73a20a448972473204",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 4,
+        "factor_base_points": 114,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 16.401667000000003
+      },
+      {
+        "base_hash": "e0e6df4ca3d14b9292b34d3e2e002664d2f68a3c36407b73a20a448972473204",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 5,
+        "factor_base_points": 114,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 16.44525
+      },
+      {
+        "base_hash": "e0e6df4ca3d14b9292b34d3e2e002664d2f68a3c36407b73a20a448972473204",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 6,
+        "factor_base_points": 114,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 16.322167
+      },
+      {
+        "base_hash": "e0e6df4ca3d14b9292b34d3e2e002664d2f68a3c36407b73a20a448972473204",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 7,
+        "factor_base_points": 114,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 16.846667
+      },
+      {
+        "base_hash": "1a0f6f6d12f72648e715735b90fedf43e0f65893c52da583d9aad7e7d68e99f8",
+        "complete_subgroup_coverage": null,
+        "distinct_pair_sum_points": null,
+        "eta_den": 8,
+        "eta_num": 8,
+        "factor_base_points": 152,
+        "hit_rate_proxy": null,
+        "ok": true,
+        "reachable_nonzero_subgroup_targets": null,
+        "wall_ms": 16.745708
+      }
+    ]
+  },
+  "regime": "binary",
+  "schema_version": 2,
+  "stage": "relation_yield",
+  "target_mix": {
+    "natural": "all_nonzero_subgroup_via_exact_coverage",
+    "planted_sat": 0,
+    "proven_unsat": 0
+  },
+  "trials_per_relation": "not_applicable_exact_coverage_scan"
+}

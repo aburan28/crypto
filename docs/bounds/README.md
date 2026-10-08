@@ -50,24 +50,32 @@ to let one masquerade as another.
 |:--|:--|:--|:--|
 | **exponent** `α` | the algorithmic class: `r^{1/2}` to `r^{1/3}` | the slope of `ln gae` against `ln r` over at least four sizes, with its interval disjoint from the incumbent's | any counted unit |
 | **constant** `C` | walk design, automorphisms used, distinguished-point parameters, table shape | the paired ratio `Σ S_candidate / Σ S_incumbent` with its interval excluding 1, at the same `α` | `ecbench.gae` |
-| **primitive weights** | formulas and coordinates: field multiplications, squarings and inversions per group operation | native counters per group operation, priced at pinned ratios (`docs/ic/calibration.json`) | field operations |
+| **primitive weights** | formulas and coordinates: field multiplications, squarings and inversions per group operation | for the prime-field generic walks and tables (`rho.*`, `bsgs.*`, `kangaroo.vow` on `PrimeCurve`): the record's `field_ops` block, tallied inside the group law — every modular multiplication (`muls`, one by a small constant included), every squaring where the formula squares a value (`sqrs`), every modular inversion (`invs`) — read as the axes `field_muls`, `field_sqrs`, `field_invs` per `√r` (§5); **unknown**, absent and never zero, on binary and Koblitz curves and for the index-calculus pipeline | field operations |
 | **machine** | cycles per primitive: micro-architecture, SIMD, memory layout | wall time, instructions retired, isolation level | seconds, Ir |
 
 The example that motivates the table: *one fewer squaring in the point
 addition formula*. It is a primitive-weight change. It cannot move `α`, and in
 `ecbench.gae` — which charges a group addition as one unit whatever its field
-cost — it cannot move `C` either. A bound in `ecbench.gae` is therefore blind
-to it by design, and a report that turns it into "`r^0.9`" has confused
-levels. It is real, and it is measured at its own level: in a unit that
-charges field operations (today, the native counters the IC pipeline reports;
-for the generic walks, a field-operation unit is a registry change, §7), and
-it reaches the end-to-end figure only through composition (§7), as a
-*derived* number until an end-to-end session in that unit confirms it.
+cost — it cannot move `C` either. The `gae` figure of a bound is therefore
+blind to it by design, and a report that turns it into "`r^0.9`" has confused
+levels. It is real, and it is measured at its own level: on prime-field
+curves the generic walks and tables count the field operations behind every
+group operation they charge, the record carries them as `field_ops`, the
+bound as the axes `field_muls`, `field_sqrs` and `field_invs` (§5), and a
+verdict reads them paired. One fewer squaring in the addition formula is then
+a move on `field_sqrs` at an unchanged `ops`, and the level it names is
+`primitive`. Where nothing counts them — binary and Koblitz curves, and the
+index-calculus pipeline, whose field arithmetic outside the group law (square
+roots, Legendre symbols, oracle inversions, the elimination) is counted
+natively and priced apart — the axes are unknown, not zero. The counts reach
+the end-to-end figure only through composition (§7), as a *derived* number
+until an end-to-end session in a field-operation unit confirms it.
 
 The level a verdict names is a statement about operations: `exponent` when
 both arms' fitted `α` intervals are disjoint over four or more sizes and the
-candidate's is lower, `constant` otherwise. An advance on memory alone names
-no level.
+candidate's is lower, `constant` otherwise when `ops` moved, and `primitive`
+when `ops` did not move but a field-operation axis did. An advance on memory
+alone names no level.
 
 ## 3. Records
 
@@ -106,7 +114,7 @@ a better entry in this one.
 | `sizes[]` | one row per curve, sorted by `r`: slug, `log2_r`, field bits, `A`, the floor, workloads, runs, verified runs, mean `gae`, mean `S` with its interval, ratio to the floor, the registry's derived `S` and its ratio to the floor, memory and unpriced work per `√r`, isolation levels earned |
 | `fit` | `gae = C · r^α`: `alpha` and `alpha_ci95`, `log2_c`, `r_squared`, the declared `α` (`0.5` for every method the registry derives an expectation for), whether the interval contains it, `scaling_claim` |
 | `constant` | mean `S` and mean ratio to the floor with intervals; the derived ratio to the floor when it is one number across sizes (`1.0` for `rho.negation`; `1.5 / √(π/4) = 1.69` for `bsgs.textbook`) |
-| `dimensions` | the axes (§5): `ops`, `memory`, `uncharged`, each with `known`, `value`, `ci95`, its statistic and source |
+| `dimensions` | the axes (§5): `ops`, `memory`, `uncharged`, each with `known`, `value`, `ci95`, its statistic and source; and `field_muls`, `field_sqrs`, `field_invs` (mean per `√r`, the same two-stage interval) **only when every verified run of the arm carries `field_ops`** — otherwise the keys are absent, not unknown, so a bound fitted from records written before the block existed is byte for byte the bound it was |
 | `stages[]` | per phase name: mean `gae`, share of the total, sizes with work, its own fitted `α` with interval when it has work on four or more sizes |
 | `provenance` | sessions (directory, session id, spec id, status, arm, role, binary hash, commit, environment class, SHA-256 of `records.jsonl`), audit receipts (path, hash, `ok`, replays, replays reproduced), record counts by status |
 | `admissibility` | `admissible` or `inadmissible` (a measured run did not verify, or a receipt reports problems), `bounded` (some work was counted and not priced: every total is a floor), the unpriced counters, determinism, reasons |
@@ -116,6 +124,26 @@ a better entry in this one.
 Every statistic carries a two-stage bootstrap interval — sizes resampled,
 then runs within each — the interval `compare` and `table` already use, with
 2 000 resamples from a fixed seed so a bound re-derives bit for bit.
+
+The run records a bound reads (`ecbench.record/v1`) carry one optional block
+of their own for the primitive level: `field_ops: {muls, sqrs, invs}`, the
+modular multiplications, squarings and inversions behind every addition and
+doubling of the solve, summed over its phases. It is written only when the
+method's group counted it (prime-field curves through the generic walks and
+tables), so an older record is unchanged and its seal still checks; it lives
+outside `counters` and `phases`, which the replay of a committed record
+compares exactly; and `verify` compares it on replay only when both the
+record and the replay carry it. What is counted: every modular multiplication
+the group law performs is a `mul` (the doubling's multiplications by the
+constants 3, 2 and 2 included, since the code performs them as modular
+multiplications), every squaring where the formula squares a value is a
+`sqr` (so `sqrs` is a genuine subset, not a reading of equal operands), every
+modular inversion is an `inv`; additions, subtractions, negations and
+comparisons are not counted. In the code as written an affine addition is
+`2M + 1S + 1I` and a doubling `5M + 2S + 1I` (`PrimeCurve::FIELD_OPS_PER_ADD`,
+`FIELD_OPS_PER_DOUBLE`); the special cases `∞ + P` and `P + (−P)` do no field
+arithmetic. Binary and Koblitz curves and the index-calculus pipeline write no
+block: unknown, never zero.
 
 ### 3.3 Frontier
 
@@ -133,7 +161,7 @@ committed; CI rebuilds both and fails when they are stale.
 | `incumbent` | the method to beat, as a method spec, and its committed `bound_id` when it holds one |
 | `workloads` | the curves (at least `acceptance.min_sizes`, all in the domain's family and tier — checked by building them), targets per curve, target kind, and a `nonce` |
 | `measurement` | rounds, warm-up, required isolation level, timeout |
-| `acceptance` | `axes` dominance reads (default `ops`, `memory`; `uncharged` opt-in); `min_sizes` (4); `min_runs_per_size` (8); `require_audit`; `require_replay_all`; `uncharged_tolerance` (0.05) |
+| `acceptance` | `axes` dominance reads (default `ops`, `memory`; `uncharged`, `field_muls`, `field_sqrs`, `field_invs` opt-in); `min_sizes` (4); `min_runs_per_size` (8); `require_audit`; `require_replay_all`; `uncharged_tolerance` (0.05) |
 
 The spec a candidate runs is a function of the challenge, the candidate's
 method spec and an **epoch**: `challenge spec --epoch N` derives the target
@@ -150,13 +178,13 @@ epoch is named.
 | `session` | directory, session id, its spec id, the spec id the challenge yields for this epoch and candidate, whether they match, status, binary hash, commit, levels earned |
 | `audit` | the audit run by the verdict itself: `ok`, problems, records, verified, replays and how many reproduced, whether every run was replayed, and the SHA-256 of every session file |
 | `incumbent`, `candidate`, `control` | arm names and method ids; the control's A/A ratio and interval (`1.000 [1.000, 1.000]` for a deterministic method under shared seeds) |
-| `axes[]` | per axis: both means, `Σ candidate / Σ incumbent` over matched `(workload, round)` pairs, its interval, pairs, `better` / `worse` / `indistinguishable` / `unknown`, and whether the axis decides |
+| `axes[]` | per axis: both means, `Σ candidate / Σ incumbent` over matched `(workload, round)` pairs, its interval, pairs, `better` / `worse` / `indistinguishable` / `unknown`, and whether the axis decides; `ops`, `memory` and `uncharged` always, and the three field axes when a measured run of either arm carries `field_ops` or the challenge names one — `unknown` unless every measured run of both arms carries it — so a verdict over a session that counted nothing re-derives as it always did |
 | `per_curve[]` | the ratio per size, the rows a scaling claim reads |
 | `fits` | both arms' `α` with intervals, and `exponent_moved` |
 | `stages[]` | per phase: each arm's share and the paired ratio — which sub-algorithm moved (§7) |
 | `accounting` | unpriced counters on each side, `bounded`, the unpriced-work ratio and `uncharged_shift` |
 | `incumbent_drift` | the incumbent's recorded ops figure against what it measured in this session, when `--bounds` is given: a disagreement is a reason for inadmissibility, because the recorded bound and the session cannot both be right |
-| `outcome`, `advances_on`, `regresses_on`, `level_moved`, `reasons`, `statement` | the decision and why |
+| `outcome`, `advances_on`, `regresses_on`, `level_moved`, `reasons`, `statement` | the decision and why; `level_moved` is `exponent` or `constant` when the advance includes `ops`, `primitive` when it does not and includes a field axis, `null` otherwise |
 
 ## 4. The fit
 
@@ -192,10 +220,28 @@ and across families. It is the `ops` axis.
 | `ops` | mean `S / √(π / 2A)` | `cost.total_gae`, `r`, `A` | decides |
 | `memory` | mean table entries per `√r` | the first of `inserts_uncharged`, `table_inserts_uncharged`, `table_entries`, `distinguished_points` the record carries | decides |
 | `uncharged` | mean `Σ *_uncharged` counters per `√r` | every counter the unit counts and does not price | reported; decides when a challenge names it |
+| `field_muls` | mean modular multiplications per `√r` | `field_ops.muls` | on a bound only when every verified run carries the block; on a verdict when a run of either arm carries it or the challenge names it; decides when a challenge names it |
+| `field_sqrs` | mean modular squarings per `√r` | `field_ops.sqrs` | as `field_muls` |
+| `field_invs` | mean modular inversions per `√r` | `field_ops.invs` | as `field_muls` |
 
 **Unknown is not zero.** A method that reports no table counter has `memory:
 known = false`; the axis is left out of every comparison involving it and the
 entry says so. The index-calculus pipeline is in that position today.
+
+The three field axes are the primitive level (§2). A bound carries them only
+when every verified run of its arm carries `field_ops` — today the generic
+walks and tables on prime-field curves — and a bound without them has no such
+key at all, so the committed records fitted before the axes existed are
+unchanged. On a frontier an axis one entry lacks is left out of comparisons
+with it, as `memory` is for index calculus, and the page shows the columns in
+a domain only when some entry there has them. A verdict carries them when a
+measured run of either arm counted them or the challenge names one, `unknown`
+unless every measured run of both arms carries the block, and deciding only
+when named; a session that counted nothing under a challenge that asked
+nothing gives the verdict it always gave, byte for byte. They are not a unit:
+`ops` still decides in `ecbench.gae`, and a candidate
+that is clearly better on `field_sqrs` and indistinguishable on `ops` has
+moved the primitive level, not the constant.
 
 On a frontier, bounds were measured apart and cannot be paired, so dominance
 is conservative. `A` dominates `B` when, on every axis both know, `A`'s point
@@ -277,12 +323,20 @@ unit's charging rule, `docs/ecbench/README.md` §7). A field-operation unit
 would weight an addition by its multiplications, squarings and inversions on
 the curve family at hand, and a time unit by pinned nanoseconds per native
 operation (`docs/ic/calibration.json`, the `ICBCAL1h…` discipline of
-`aburan28/cryptanalysis`). **A composed figure is derived, never measured,
-and never enters a frontier**: it predicts what an end-to-end session in that
+`aburan28/cryptanalysis`). On prime-field curves the weights are measured
+rather than assumed: every phase's `adds` and `doubles` and the solve's
+`field_ops` (§3.2) are the raw material of `w_field`, since dividing the
+solve's multiplications, squarings and inversions by its additions and
+doublings gives the weight per group operation the code actually paid —
+`2M + 1S + 1I` per affine addition and `5M + 2S + 1I` per doubling as written
+today — and a candidate formula shows up as a different quotient on the same
+group-operation counts. **A composed figure is derived, never measured, and
+never enters a frontier**: it predicts what an end-to-end session in that
 unit should find, and the session is what moves the frontier in that unit.
-This is where "one fewer squaring" lives — as a weight change whose end-to-end
-consequence is a prediction until measured — and it is why the four levels are
-kept apart.
+This is where "one fewer squaring" lives — as a weight change, now visible on
+the `field_sqrs` axis of the records that count it, whose end-to-end
+consequence in any other unit is a prediction until measured — and it is why
+the four levels are kept apart.
 
 ## 8. Rules
 
@@ -305,9 +359,11 @@ kept apart.
    frontier. Only a paired session on the challenge's frozen workloads, audited
    with every run replayed, moves it.
 7. **Levels are named, never inferred from the headline.** `exponent` needs
-   disjoint `α` intervals over four or more sizes. Everything else at fixed `α`
-   is `constant`. Primitive and machine changes are not measured in
-   `ecbench.gae` and are not claimed in it.
+   disjoint `α` intervals over four or more sizes. Everything else that moves
+   `ops` at fixed `α` is `constant`. `primitive` needs a field-operation axis
+   to move while `ops` does not, and exists only where the axes are known
+   (prime-field generic walks and tables). Machine changes are not measured
+   here and are not claimed.
 8. **Everything cites.** A bound names its sessions by directory, session id
    and `records.jsonl` hash, and its receipts by hash; a verdict names the
    session's files by hash and the challenge by id; a new bound names the
@@ -421,6 +477,9 @@ ecbench challenge spec --challenge C.json --candidate '{"id":...}' --epoch N --o
 ecbench challenge verdict --challenge C.json --dir SESSION --epoch N [--replay-all] [--bounds DIR]
                           [--root REPO] --out V.json [--bound-out B.json] [--audit-out A.json] [--exit-code]
 ```
+
+`--axes` and a challenge's `acceptance.axes` may name `ops`, `memory`,
+`uncharged`, `field_muls`, `field_sqrs` and `field_invs`.
 
 `refit.sh` regenerates every seed record and the frontier from the committed
 sessions, and runs the two committed verdicts again so the records they wrote
