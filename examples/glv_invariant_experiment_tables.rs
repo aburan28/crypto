@@ -1595,6 +1595,78 @@ fn e13_arm(r: &Value, stream_key: &str, base: &str) -> Option<E13Arm> {
     })
 }
 
+/// E16: the phases of the best arm (fold 12 + D₃, E13's rows at every
+/// size) against `p` and against `r`, beside the matched folded rho.
+fn e16(o: &mut String, rows: &[&Value]) {
+    o.push_str("### E16 — the best arm's phases against p and r, beside the matched rho (fold 12 + D₃, E13's driver)\n\n");
+    o.push_str("| p bits | #E(F_p) | log2 r | log2 r − 2·log2 #E(F_p) | cols | full-rank rel | solver | group arithmetic | linear algebra | total | LA share | S | rho S folded | S / rho S |\n");
+    o.push_str("|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    let rows = sorted(rows, &["log2_r", "seed"]);
+    let mut fits: BTreeMap<&str, (Vec<(f64, f64)>, Vec<(f64, f64)>)> = BTreeMap::new();
+    let mut gap: Vec<(f64, f64)> = Vec::new();
+    for r in &rows {
+        let Some(a) = e13_arm(r, "d3_fold12", "fold12") else {
+            continue;
+        };
+        if a.square.is_none() {
+            continue;
+        }
+        let rr = fl(r, "r");
+        let ep = fl(r, "base_order");
+        let k = fl(r, "inversion_in_multiplications");
+        let (_, rho) = price_walks(r, k);
+        for (name, v) in [
+            ("solver", a.phases[3]),
+            ("group arithmetic", a.phases[2]),
+            ("linear algebra", a.phases[4]),
+            ("total", a.total),
+            ("rho folded (total)", rho.total),
+        ] {
+            let e = fits.entry(name).or_default();
+            e.0.push((ep, v));
+            e.1.push((rr, v));
+        }
+        gap.push((rr, a.s / rho.s));
+        let _ = writeln!(
+            o,
+            "| {} | {} | {:.1} | {:+.2} | {} | {:.0} | {} | {} | {} | {} | {:.4} | {:.0} | {:.1} | {:.0} |",
+            py_str(at(r, "p_bits")),
+            py_str(at(r, "base_order")),
+            fl(r, "log2_r"),
+            fl(r, "log2_r") - 2.0 * ep.log2(),
+            a.columns,
+            a.square.unwrap(),
+            g3(a.phases[3]),
+            g3(a.phases[2]),
+            g3(a.phases[4]),
+            g3(a.total),
+            a.phases[4] / a.total,
+            a.s,
+            rho.s,
+            a.s / rho.s,
+        );
+    }
+    o.push_str("\n#### E16 — fitted exponents (least squares, log–log), rows at full rank\n\n");
+    o.push_str("| quantity | against #E(F_p) ≈ p | against r | rows |\n");
+    o.push_str("|:--|--:|--:|--:|\n");
+    for (name, (by_p, by_r)) in &fits {
+        let _ = writeln!(
+            o,
+            "| {} | {} | {} | {} |",
+            name,
+            fmt_f(fit_exponent(by_p)),
+            fmt_f(fit_exponent(by_r)),
+            by_p.len()
+        );
+    }
+    let _ = writeln!(
+        o,
+        "| S / rho S | — | {} | {} |",
+        fmt_f(fit_exponent(&gap)),
+        gap.len()
+    );
+}
+
 fn e13_ok(r: &Value) -> bool {
     ["d3_fold12", "d3_fold6", "s3_fold12", "s3_fold6"]
         .iter()
@@ -2027,7 +2099,7 @@ fn main() {
     }
     let mut o = String::new();
     type Printer = fn(&mut String, &[&Value]);
-    let printers: [(&str, Printer); 15] = [
+    let printers: [(&str, Printer); 16] = [
         ("e1", e1),
         ("e2", e2),
         ("e3", e3),
@@ -2041,6 +2113,7 @@ fn main() {
         ("e12", |o, r| e12(o, r, false)),
         ("e12p", |o, r| e12(o, r, true)),
         ("e13", e13),
+        ("e13", e16),
         ("e14", e14),
         ("e15", e15),
     ];

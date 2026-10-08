@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Content-addressed curve cover graph",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "registry_sha256",
+    "curves",
+    "covers",
+    "maps"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "curve-cover-graph/v1"
+    },
+    "registry_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "curves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "icv1_identity",
+          "model_sha256",
+          "model_json",
+          "representations",
+          "cover_links",
+          "status"
+        ],
+        "properties": {
+          "cover_links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "cover_uid",
+                "map_uid",
+                "direction"
+              ],
+              "properties": {
+                "direction": {
+                  "const": "H -> E"
+                },
+                "cover_uid": {
+                  "type": "string",
+                  "pattern": "^urn:hc-model:1:sha256:[0-9a-f]{64}$"
+                },
+                "map_uid": {
+                  "type": "string",
+                  "pattern": "^urn:curve-cover-map:1:sha256:[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "covers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "cover_uid",
+          "cover_id",
+          "record"
+        ],
+        "properties": {
+          "record": {
+            "type": "object",
+            "required": [
+              "schema_version",
+              "field",
+              "form",
+              "h",
+              "f",
+              "genus"
+            ],
+            "properties": {
+              "schema_version": {
+                "const": "hyperelliptic-model/v1"
+              },
+              "genus": {
+                "type": "integer",
+                "minimum": 2
+              },
+              "h": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "f": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "maps": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "map_uid",
+          "map_id",
+          "record",
+          "verification_status"
+        ],
+        "properties": {
+          "record": {
+            "type": "object",
+            "required": [
+              "schema_version",
+              "source_cover_uid",
+              "target_model_sha256",
+              "target_model_json",
+              "degree",
+              "x",
+              "y_v",
+              "y_0",
+              "target_model_map"
+            ],
+            "properties": {
+              "schema_version": {
+                "const": "curve-cover-map/v1"
+              },
+              "degree": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

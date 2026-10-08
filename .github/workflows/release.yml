@@ -98,6 +98,8 @@ jobs:
             "./target/${{ matrix.target }}/release/$bin$ext" --help > /dev/null
           done
           "./target/${{ matrix.target }}/release/ic$ext" --help > /dev/null
+          "./target/${{ matrix.target }}/release/curve_cover_check$ext" --help > /dev/null
+          "./target/${{ matrix.target }}/release/curve_standards$ext" --help > /dev/null
           "./target/${{ matrix.target }}/release/ic$ext" --version > /dev/null
           "./target/${{ matrix.target }}/release/ic$ext" --json > ic-smoke.json
           grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' ic-smoke.json
@@ -119,6 +121,15 @@ jobs:
           mkdir -p "dist/$name"
           ext=""
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
+          cp "target/${{ matrix.target }}/release/crypto$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/ic$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/curve_cover_check$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/curve_standards$ext" "dist/$name/"
+          mkdir -p "dist/$name/docs/curves"
+          cp docs/curves/registry.json docs/curves/covers.json docs/curves/cover-links.yaml \
+             docs/curves/cover-links.schema.json docs/curves/COVERS.md docs/curves/ICV1.md \
+             "dist/$name/docs/curves/"
+          cp -R docs/curves/standards "dist/$name/docs/curves/"
           for bin in crypto ic ecbench curve_cover_check hyperelliptic-cover; do
             cp "target/${{ matrix.target }}/release/$bin$ext" "dist/$name/"
           done

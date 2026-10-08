@@ -16,7 +16,7 @@ use blake3::Hasher;
 use num_bigint::{BigInt, BigUint, Sign};
 use num_integer::Integer;
 use num_traits::{One, Signed, ToPrimitive, Zero};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::cmp::Ordering;
 use std::collections::{BTreeSet, HashSet};
 use std::sync::OnceLock;
@@ -1200,11 +1200,22 @@ fn power_choices(records: &[GeneratorRecord]) -> Result<Vec<Vec<PowerChoice>>, S
     Ok(all)
 }
 
+/// Parses a JSON number with Rust's correctly rounded `str::parse::<f64>`, so a
+/// certificate written with `serde_json` reads back bit-for-bit.  The crate's
+/// default float parser can differ by one ULP, which the exact verifier rejects;
+/// enabling serde_json's `float_roundtrip` for the whole crate instead changed
+/// every other float parse and broke replay of sealed ecbench evidence.
+fn exact_f64<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f64, D::Error> {
+    let raw = Box::<serde_json::value::RawValue>::deserialize(deserializer)?;
+    raw.get().parse::<f64>().map_err(serde::de::Error::custom)
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RelationRecord {
     pub exponent_vector: Vec<i16>,
     pub oriented_ideals: Vec<String>,
     pub degree: String,
+    #[serde(deserialize_with = "exact_f64")]
     pub log2_degree: f64,
     pub degree_linear_proxy: u64,
     pub reduced_class_product: [String; 3],

@@ -1,0 +1,63 @@
+{
+  "candidate_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4",
+  "checks": {
+    "G_on_curve": true,
+    "Q_on_curve": true,
+    "fixture_order_factorization_matches": true,
+    "fixture_trace_matches_order": true,
+    "ic_in_process_verification_passed": true,
+    "ic_online_phase_sum_matches": true,
+    "ic_process_succeeded": true,
+    "ic_recovers_fixture_scalar": true,
+    "ic_uses_frozen_Q": true,
+    "known_answer_not_sent_to_ic": true,
+    "known_answer_not_sent_to_rho": true,
+    "no_edge_selectors": true,
+    "no_explicit_pair_table": true,
+    "one_ic_online_target": true,
+    "one_rho_online_target": true,
+    "rho_fixture_generation_excluded": true,
+    "rho_in_process_verification_passed": true,
+    "rho_process_succeeded": true,
+    "rho_recovers_fixture_scalar": true,
+    "rho_used_supplied_public_point": true,
+    "rho_uses_frozen_G": true,
+    "rho_uses_frozen_Q": true,
+    "scalar_replay_equals_Q": true,
+    "subgroup_order_replay_is_infinity": true
+  },
+  "ic_rank_seed": 8,
+  "inputs_sha256": {
+    "ic": "71bec9b6109942255da722770d0e4cb593d3a52f8a061df17596391d61fe9107",
+    "ic_execution": "152a1a1978d0e5a46face52375c9e063d15436cca3a40186cb17acfce20dd677",
+    "ic_summary": "1a196928c3aa213fd11d0495ca387961a1c39b2c7a11c228d6ceed751427713e",
+    "rho": "514db84ccfa8f3c882eae18a3934c303a6b22938efc4f99cdd127c9584603e4e",
+    "rho_execution": "65fadcbeee41c3f56f11b19fb3e65a1daa5dac6553e9284ed42b376eb85b70da"
+  },
+  "kind": "independent_n73_single_target_replay",
+  "rho_walk_seed": 202610042,
+  "run_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR2",
+  "run_tag": "R2",
+  "scope": "Standalone standard-library GF(2^73) curve replay, same-point pairing, one-target accounting, and phase sums; does not independently remeasure producer runtimes.",
+  "status": "PASS",
+  "timing_ms": {
+    "ic_online": 326.15937499999995,
+    "ic_peak_rss_bytes": 4458921984,
+    "ic_phases": {
+      "target_PDP": 325.987959,
+      "target_descent": 0.009417,
+      "target_query": 4.2e-05,
+      "target_recovery_check": 0.148125,
+      "target_relation_check": 0.013666
+    },
+    "online_speedup": 2094.667646891953,
+    "rho_online": 683195.490543,
+    "rho_peak_rss_bytes": 5007884288,
+    "rho_phases": {
+      "scalar_recovery_check": 11.343875,
+      "target_specific_jump_setup": 87.194584,
+      "target_walk": 683096.952084
+    }
+  },
+  "workload_id": "e79c49b134ea"
+}

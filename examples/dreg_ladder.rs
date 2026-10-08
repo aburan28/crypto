@@ -17,9 +17,15 @@
 //! Each cell's draws come from their own seed (`seed`, `n`, `ℓ`), so a cell
 //! reproduces run alone or in any order.  One JSON line per draw on stdout;
 //! the summary table on stderr at the end.
+//!
+//! `--m M` (default 3) measures the chained system with `M` summands:
+//! `M − 2` intermediate points, `(M − 2)·n + M·ℓ` unknowns, surplus
+//! `n − M·ℓ`.  At `M = 3` everything is as before; otherwise the cell seed is
+//! offset by `M << 48`, the JSON line carries `"m"`, and controls are off
+//! (their density is defined for `M = 3`).
 
 use crypto_lib::cryptanalysis::koblitz_bench::{
-    ladder_control, ladder_draw, LadderDraw, LadderOutcome,
+    ladder_control, ladder_draw_m, LadderDraw, LadderOutcome,
 };
 use rand::rngs::StdRng;
 use rand::SeedableRng;
@@ -86,6 +92,8 @@ fn main() {
     // in a committed run of the same draw; the JSON line records `d_min`.
     let d_min = num("--d-min", 1) as u32;
     let seed = num("--seed", 0x5EED);
+    let m = num("--m", 3) as usize;
+    assert!(m >= 3, "--m is at least 3 (the chained system)");
 
     // `--unsat-index K`: measure only the cell's K-th unsatisfiable draw
     // (from 0), replaying the draws before it through the exact solution
@@ -95,12 +103,16 @@ fn main() {
     // draws in flight.
     let only_unsat = flag("--unsat-index").map(|v| v.parse::<usize>().expect("--unsat-index K"));
     let control_only = args.iter().any(|a| a == "--control-only");
+    assert!(
+        m == 3 || (controls == 0 && !control_only),
+        "controls are defined for m = 3 only"
+    );
     if only_unsat.is_some() || control_only {
         assert_eq!(cells.len(), 1, "one cell per process in this mode");
         let (n, ell, d_max) = cells[0];
-        let cell_seed = seed ^ (u64::from(n) << 40) ^ ((ell as u64) << 32);
+        let cell_seed = cell_seed(seed, n, ell, m);
         if let Some(k) = only_unsat {
-            measure_one(n, ell, d_min, d_max, ffd_max, cell_seed, k, max_draws);
+            measure_one(m, n, ell, d_min, d_max, ffd_max, cell_seed, k, max_draws);
         }
         if control_only {
             let n_vars = 3 * ell + n as usize;
@@ -134,18 +146,19 @@ fn main() {
 
     let mut table = Vec::new();
     for &(n, ell, d_max) in &cells {
-        let cell_seed = seed ^ (u64::from(n) << 40) ^ ((ell as u64) << 32);
+        let cell_seed = cell_seed(seed, n, ell, m);
         let mut rng = StdRng::seed_from_u64(cell_seed);
         let mut unsat: Vec<LadderDraw> = Vec::new();
         let (mut drawn, mut sat) = (0usize, 0usize);
         let mut shape = None;
         while unsat.len() < want_unsat && drawn < max_draws {
-            let d = ladder_draw(n, ell, d_max, ffd_max, &mut rng).expect("cell builds");
+            let d = ladder_draw_m(m, n, ell, d_max, ffd_max, &mut rng).expect("cell builds");
             drawn += 1;
             shape = Some((d.n_vars, d.n_eqs));
             println!(
-                r#"{{"cell":"n{n}l{ell}","n":{n},"ell":{ell},"surplus":{},"d_max":{d_max},"draw":{},"n_vars":{},"n_eqs":{},"v_basis":{:?},"x_r":{},"solutions":{},"outcome":{},"ffd":{},"secs":{:.3}}}"#,
-                n as i64 - 3 * ell as i64,
+                r#"{{"cell":"{}","n":{n},"ell":{ell},"surplus":{},"d_max":{d_max},"draw":{},"n_vars":{},"n_eqs":{},"v_basis":{:?},"x_r":{},"solutions":{},"outcome":{},"ffd":{},"secs":{:.3}{}}}"#,
+                cell_name(n, ell, m),
+                n as i64 - (m * ell) as i64,
                 drawn - 1,
                 d.n_vars,
                 d.n_eqs,
@@ -154,7 +167,8 @@ fn main() {
                 d.solutions,
                 outcome_json(&d.outcome),
                 d.ffd.map_or("null".to_string(), |f| f.to_string()),
-                d.secs
+                d.secs,
+                m_json(m)
             );
             if d.outcome == LadderOutcome::Satisfiable {
                 sat += 1;
@@ -211,7 +225,7 @@ fn main() {
         let cs: Vec<String> = ctrl.iter().map(outcome_short).collect();
         eprintln!(
             "| {n} | {ell} | {} | {n_vars} | {n_eqs} | {d_max} | {drawn} | {sat} | {} | {} | {} |",
-            *n as i64 - 3 * *ell as i64,
+            *n as i64 - (m * *ell) as i64,
             outs.join(" "),
             ffds.join(" "),
             if cs.is_empty() {
@@ -223,10 +237,46 @@ fn main() {
     }
 }
 
+/// A cell's seed: `seed`, `n` and `ℓ` as before; `m` enters only when it is
+/// not 3, so every `m = 3` cell keeps the seed it was committed with.
+fn cell_seed(seed: u64, n: u32, ell: usize, m: usize) -> u64 {
+    let base = seed ^ (u64::from(n) << 40) ^ ((ell as u64) << 32);
+    if m == 3 {
+        base
+    } else {
+        base ^ ((m as u64) << 48)
+    }
+}
+
+fn cell_name(n: u32, ell: usize, m: usize) -> String {
+    if m == 3 {
+        format!("n{n}l{ell}")
+    } else {
+        format!("n{n}l{ell}m{m}")
+    }
+}
+
+/// The JSON field naming `m`, empty at `m = 3` so those lines are unchanged.
+fn m_json(m: usize) -> String {
+    if m == 3 {
+        String::new()
+    } else {
+        format!(r#","m":{m}"#)
+    }
+}
+
+/// This process's peak resident set (`VmHWM`, kB), where `/proc` has it.
+fn peak_rss_kb() -> Option<u64> {
+    let status = std::fs::read_to_string("/proc/self/status").ok()?;
+    let line = status.lines().find(|l| l.starts_with("VmHWM:"))?;
+    line.split_whitespace().nth(1)?.parse().ok()
+}
+
 /// The cell's `k`-th unsatisfiable draw, measured; the draws before it only
 /// counted.  Prints the draw's JSON line exactly as the sequential run does.
 #[allow(clippy::too_many_arguments)]
 fn measure_one(
+    m: usize,
     n: u32,
     ell: usize,
     d_min: u32,
@@ -238,7 +288,7 @@ fn measure_one(
 ) {
     use crypto_lib::binary_ecc::F2mElement;
     use crypto_lib::cryptanalysis::koblitz_bench::{
-        chained_s3_solution_count, ladder_measure_from, ladder_sample,
+        chained_s3_solution_count, chained_solution_count, ladder_measure_m, ladder_sample,
     };
     use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
     let irr = find_irreducible_sparse(n).expect("field");
@@ -247,17 +297,23 @@ fn measure_one(
     let mut unsat_seen = 0usize;
     for drawn in 0..max_draws {
         let (basis, x_r) = ladder_sample(n, ell, &mut rng);
-        if chained_s3_solution_count(&basis, &x_r, &b, &irr) > 0 {
+        let solutions = if m == 3 {
+            chained_s3_solution_count(&basis, &x_r, &b, &irr)
+        } else {
+            chained_solution_count(m, &basis, &x_r, &b, &irr)
+        };
+        if solutions > 0 {
             continue;
         }
         if unsat_seen < k {
             unsat_seen += 1;
             continue;
         }
-        let d = ladder_measure_from(n, &basis, &x_r, d_min, d_max, ffd_max).expect("cell builds");
+        let d = ladder_measure_m(m, n, &basis, &x_r, d_min, d_max, ffd_max).expect("cell builds");
         println!(
-            r#"{{"cell":"n{n}l{ell}","n":{n},"ell":{ell},"surplus":{},"d_max":{d_max},"draw":{drawn},"n_vars":{},"n_eqs":{},"v_basis":{:?},"x_r":{},"solutions":{},"outcome":{},"ffd":{},"secs":{:.3},"unsat_index":{k}{}}}"#,
-            n as i64 - 3 * ell as i64,
+            r#"{{"cell":"{}","n":{n},"ell":{ell},"surplus":{},"d_max":{d_max},"draw":{drawn},"n_vars":{},"n_eqs":{},"v_basis":{:?},"x_r":{},"solutions":{},"outcome":{},"ffd":{},"secs":{:.3},"unsat_index":{k}{}{}}}"#,
+            cell_name(n, ell, m),
+            n as i64 - (m * ell) as i64,
             d.n_vars,
             d.n_eqs,
             d.v_basis,
@@ -270,13 +326,17 @@ fn measure_one(
                 format!(r#","d_min":{d_min}"#)
             } else {
                 String::new()
-            }
+            },
+            m_json(m)
         );
         eprintln!(
             "n={n} ℓ={ell}: unsat draw {k} (draw {drawn}) -> {} ({:.1}s)",
             outcome_short(&d.outcome),
             d.secs
         );
+        if let Some(kb) = peak_rss_kb() {
+            eprintln!("peak_rss_kB {kb}");
+        }
         return;
     }
     eprintln!("n={n} ℓ={ell}: no unsatisfiable draw {k} within {max_draws} draws");

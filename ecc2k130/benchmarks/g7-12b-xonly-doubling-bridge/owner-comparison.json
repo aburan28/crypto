@@ -1,0 +1,37 @@
+{
+  "status": "complete-map-owner-local-rare-phase",
+  "checkpoint_mismatches": {
+    "owner": 0
+  },
+  "rows": [
+    {
+      "variant": "block",
+      "rates_billion_per_second": [
+        9.88592,
+        9.833647000000001,
+        9.723259
+      ],
+      "median_billion_per_second": 9.833647000000001,
+      "paired_geomean_vs_block": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "owner",
+      "rates_billion_per_second": [
+        9.034304,
+        8.89741,
+        8.863256
+      ],
+      "median_billion_per_second": 8.89741,
+      "paired_geomean_vs_block": 0.9100585740141891,
+      "paired_95_ci": [
+        0.898418958172239,
+        0.9218489888299539
+      ]
+    }
+  ],
+  "decision": "reject owner-local rare phase; retain block-local event queue"
+}

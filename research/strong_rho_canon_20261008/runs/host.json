@@ -1,0 +1,37 @@
+{
+  "baseline_commit": "7ce52fa2 (library) plus examples/strong_rho_step_rate.rs from the candidate",
+  "candidate_commit": "a8f4bb60b4d4427348d949a89530ea04e6408e66",
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_flags_relevant": [
+    "pclmulqdq",
+    "popcnt",
+    "avx2",
+    "bmi2",
+    "avx512f",
+    "avx512cd",
+    "avx512dq",
+    "avx512bw",
+    "avx512vl",
+    "gfni",
+    "vpclmulqdq"
+  ],
+  "logical_cores": 4,
+  "memory": "15 GiB",
+  "os": "Linux 6.18.44-fc-v80 x86_64",
+  "binaries_sha256": {
+    "ic-baseline": "d35469af7ffa3d51b2ecd8dc8659340a1a7280ec777b1c5cf1cef91237959a3a",
+    "ic-candidate": "b54bc353d4283f0b76177ad3e2f4a451947b76e9a832569ad9c0d0eaf55f78b4",
+    "isolated_bench": "4fd305a83f23b06d01272be05494401741233220c93180dd0dec28361fc462f1",
+    "koblitz_rho_fixture-baseline": "74d0248e33ff6adf84a34f339980e4d6304354626c397dab357b248b4d04e845",
+    "koblitz_rho_fixture-candidate": "0f2f081d28f8a381ca6e55f242390c745cf9b13e33ccabbe404ddfa0859bc0bf",
+    "strong_rho_step_rate-baseline": "0676a909bb5ff7ad1e971fcf27b27a7cf740c37279d61a3305f302a2a1310049",
+    "strong_rho_step_rate-candidate": "901c925c6f1d4532c1eb36e55696243e735b2c639a44c0e53daf2603c5b1d04b",
+    "ic-item1": "972037b49c0a5b8b13ed88d575bb58c79546160a1ecda076060e7a1c54b66249"
+  },
+  "pinning": "isolated_bench run --cpus 3 --max-other-cpu 0.3, RAYON_NUM_THREADS=1",
+  "isolation_note": "max-other-cpu 0.3 because the session harness process (about 0.1 CPU on another core) cannot be stopped in this container",
+  "hardware_class": "one x86-64 cloud container with AVX-512; no Arm64, AMD or GPU host measured",
+  "item1_commit": "23ed8d3a (the canonicalization change alone; used only by the post-hoc M3 arm)",
+  "valgrind": "valgrind-3.22.0 (Callgrind)"
+}

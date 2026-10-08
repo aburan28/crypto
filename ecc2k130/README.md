@@ -13,6 +13,248 @@ including a browser copy of the toy:
 
 # ECC2K-130 and ECC2K-95
 
+On the measured **AWS g7.2xlarge (RTX PRO 4500)**, use `make bench-local-packed`.
+The promoted complete two-bridge map measured **12.499203 billion complete
+scalar updates/s** median versus 11.218437 B/s for its matched modulus-32
+control. Its paired geometric-mean ratio is 1.121079 with a 95% confidence
+interval of [1.105668, 1.136704]. A fresh three-run confirmation measured
+12.567029, 12.457221 and 12.366415 B/s, and the production build separately
+measured 12.632704 B/s over 68,719,476,736 updates. The kernel uses the common
+`P + sigma(P)` transition and a sparse `P + sigma^3(P)` bridge selected by
+`weight mod 72 == 14`; their scalar multipliers generate the full group.
+All built-in checks and an independent 2,048-point affine checkpoint pass.
+The frozen 2,000-trial collision study transfers exactly from modulus 32 on
+GF(2^23), where both predicates select only weight 14, and gives a 1.006696
+mean-work ratio. Evidence: [G7 x-only doubling and bridge campaign](benchmarks/g7-12b-xonly-doubling-bridge/README.md).
+**The 12 B/s G7 milestone is reached. DP34 collection throughput for this map
+and G7e throughput remain unmeasured.**
+
+The [full-generator x-only bridge experiment](benchmarks/g7-12b-xonly-23-bridge/RESULTS.md)
+repaired the scalar subgroup defect of the [2]/[3] map with a sparse
+`P + sigma^3(P)` transition. The initial implementation measured 5.248565 B/s
+versus 6.311324 B/s selected, ratio 0.827384 with 95% interval
+[0.814735, 0.840229]. A low-live rewrite reduced spills from 72/60 to 64/40
+bytes but still measured 5.264523 B/s, ratio 0.829866
+[0.816504, 0.843447]. Both passed arithmetic, full-state, endpoint replay,
+resume and sanitizer gates. A non-promotable zero-spill [2]/[3] diagnostic ran
+at 0.993150 times selected, closing this bridge family without changing the
+selected runtime.
+
+The [two-jump rho experiment](benchmarks/g7-12b-two-jump/RESULTS.md)
+verified that jumps 3 and 4 span the full scalar group, then recovered 6,000
+matched planted DLPs. Two jumps needed 1.013080 times the mean collision work.
+The indexed GPU map measured 6.273318 B/s, statistically flat against 6.279988
+B/s selected, and 6.192320 B/s after collision adjustment. Fixed immediate
+sigma paths regressed to 5.418604 B/s. Both candidates passed full state, DP,
+replay, resume and sanitizer checks; the selected eight-jump runtime remains.
+
+The [direct polynomial delta-3/4 experiment](benchmarks/g7-12b-direct-delta34/RESULTS.md)
+kept that validated two-jump map but replaced its normal-basis delta routing
+with three or four polynomial squarings per coordinate. It decisively
+regressed to 4.363499 B/s versus 6.272357 B/s selected, with a raw paired ratio
+of 0.689846 and 95% interval [0.676097, 0.703874]. After the frozen collision
+penalty, its effective ratio is 0.680939 [0.667367, 0.694786]. Independent
+delta oracles, complete state, replay, resume and sanitizers pass; the slower
+candidate remains isolated.
+
+The [larger split-batch experiment](benchmarks/g7-12b-batch32-split/RESULTS.md)
+kept the selected two-thread block inverse while increasing the logical batch
+to 24 or 32. B24 regressed to 6.121832 B/s, ratio 0.971864 with 95% interval
+[0.961912, 0.981919]; B32 reached 5.994967 B/s, ratio 0.948253
+[0.930625, 0.966215], versus 6.274186 B/s selected. Exact normalized states,
+DPs, replay, resume, units and sanitizers pass. The four-slot X cache covers
+too little of the larger batches, raising memory activity and reducing clocks
+at the fixed power cap; B16 remains selected.
+
+The [seven-node shared-X cache experiment](benchmarks/g7-12b-seven-node-xcache/RESULTS.md)
+used the smaller inverse scratch area to retain five or six X slots while
+keeping three blocks per SM. Six slots measured 6.374050 B/s versus a 6.262430
+B/s selected median, but the paired ratio 1.009801 had a 95% interval of
+[0.991428, 1.028515]. Five slots and the four-slot control were also
+unconfirmed. Correctness, replay, resume and sanitizer checks passed; no
+candidate met the adoption gate, so the selected runtime is unchanged.
+
+The new [hybrid-reduction experiment](benchmarks/g7-40b-hybrid-reduce/README.md)
+reduced static instruction count but ran **14.76% slower** in a fresh paired
+comparison: 5.345890 B/s versus 6.245870 B/s, ratio 0.852432 with a 95%
+interval of [0.844867, 0.860064]. All arithmetic, state, replay, resume and
+sanitizer checks passed. The slower candidate remains isolated; the selected
+runtime and accepted rates above are retained. An earlier interrupted timing
+cohort and its GPU-interference evidence are preserved separately.
+
+The [half-native product-tail experiment](benchmarks/g7-40b-half-tail/RESULTS.md)
+eliminated spills and reduced static instructions, but ran **2.31% slower**:
+6.030275 B/s versus 6.189764 B/s, paired ratio 0.976857 with a 95% interval
+of [0.971401, 0.982345]. Arithmetic, complete state, replay, resume and
+sanitizer checks passed. The candidate remains isolated.
+
+The [quotient fan-in experiment](benchmarks/g7-40b-fanin-quotient/RESULTS.md)
+combined inputs before equal-distance shifts but ran **2.32% slower**:
+6.013909 B/s versus 6.173931 B/s, paired ratio 0.976804 with a 95% interval
+of [0.971919, 0.981714]. Five probes, seven sanitizers and 32 matched state
+clients passed. Generated GPU instructions and stack usage increased;
+the candidate remains isolated and the selected build is retained.
+
+The [register-retained inverse experiment](benchmarks/g7-40b-register-leaf/RESULTS.md)
+reduced kernel shared memory by 5,504 bytes and enabled four resident blocks,
+but established no speedup. The three-block variant measured 6.148728 B/s
+versus 6.172354 B/s, with a paired ratio of 0.997199
+and 95% interval [0.993338, 1.001075].
+The four-block variant measured 5.692167 B/s and ran
+7.63% slower. All 338 full-state clients, 1,472 CPU replays and
+25 sanitizer checks passed. Both candidates remain isolated; the selected
+runtime and accepted rates above are retained.
+
+The [paired inverse-leaf experiment](benchmarks/g7-40b-paired-leaves/RESULTS.md)
+retained both inputs to preserve paired multiplication within the smaller
+shared buffer. It established no speedup: the three-block variant measured
+6.114637 B/s versus 6.164256 B/s, paired ratio
+0.994117 with 95% interval
+[0.989593, 0.998662]. The four-block
+variant measured 5.650068 B/s, ratio 0.918447
+[0.913368, 0.923554]. All 338 full-state
+clients, 1,472 CPU replays and 25 sanitizer checks passed. Both variants
+remain isolated; the selected runtime and accepted rates are retained.
+
+The [logical-pair inversion experiment](benchmarks/g7-40b-logical-pair/RESULTS.md)
+paired the existing logical partners to retain the smaller shared buffer
+with eight block barriers. It established no speedup: the three-block variant measured
+6.103681 B/s versus 6.167459 B/s, paired ratio
+0.960251 with 95% interval
+[0.866104, 1.064631]. The four-block
+variant measured 5.672322 B/s, ratio 0.921410
+[0.915198, 0.927664]. All 338 full-state
+clients, 1,472 CPU replays and 25 sanitizer checks passed. Both variants
+remain isolated; the selected runtime and accepted rates are retained.
+
+The [seven-node inversion experiment](benchmarks/g7-12b-seven-node/RESULTS.md)
+uses seven shared nodes and retains lower results in registers
+across the eighth block barrier. It established no speedup: the three-block variant measured
+6.138753 B/s versus 6.182635 B/s, paired ratio
+0.995192 with 95% interval
+[0.991315, 0.999085]. The four-block
+variant measured 5.690393 B/s, ratio 0.923025
+[0.916083, 0.930020]. All 338 full-state
+clients, 1,472 CPU replays and 25 sanitizer checks passed. Both variants
+remain isolated; the selected runtime and accepted rates are retained.
+
+The [concurrent instance benchmark](INSTANCE-BENCHMARK.md) now measures total
+completed work across simultaneous GPU clients over one shared host window,
+including client setup. It passes eight accounting tests and the available
+one-GPU benchmark/DP34 checks. Multi-GPU hardware and G7e remain unmeasured;
+its setup-inclusive method checks do not replace the accepted kernel rates.
+
+The earlier [four multiplication experiments](benchmarks/g7-12b-products/ROUND.md)
+tested 65/66-bit and 33-bit products, byte-replicated masks and byte-sign masks.
+All four regressed in both workloads with paired 95% confidence intervals
+below 1, so the selected runtime is unchanged. Fresh matched controls measured
+5.756213–5.986755 B/s benchmark and 5.683779–5.798409 B/s DP34.
+All 536 correctness processes and 80 timed samples are retained. These G7
+measurements do not supply a G7e rate.
+
+The preceding [shared-X/Frobenius preset](benchmarks/g7-2xlarge-sigma-shared-x/README.md)
+remains recorded at 5.933673 B/s benchmark and 5.711187 B/s DP34. Those
+historical values are separate from the fresh matched reference above.
+
+The logical batch remains 16 walks; two CUDA threads handle eight slots each.
+Three blocks can reside per SM, with 80 registers per thread, an 8-byte spill
+frame, 29,568 shared bytes per block and 50% theoretical occupancy. Four X slots
+per thread stay in shared memory between steps, reducing coordinate-buffer traffic. Eight whole warps share each batch-product inverse.
+The Frobenius network routes the 131 live field bits without touching padding;
+its reordered shared walk-mask table uses 1,536 bytes instead of 1,664.
+Byte and halfword permutations followed by masked selects reduce swap instructions. Each thread retains
+its final tagged denominator in registers, avoiding one temporary store and load.
+Funnel shifts combine the high three product bits with fewer native instructions;
+the full unreduced polynomial product and all field arithmetic remain identical.
+The preset uses CUDA 13.3+, native carryless arithmetic, polynomial coordinates,
+inlining and the two-product normal multiplier inside inversion, with 524,288
+logical workers. Checkpoints, seeds, DP records and zero-denominator behavior
+match the prior preset, including partial blocks and restart transitions.
+The older-compiler software fallback retains 16 physical slots, its single-product
+multiplier and two-block bound, with inlining and shared inversion disabled.
+`make setup-local-assembler134` optionally installs the pinned CUDA 13.3 base
+and checksum-verified 13.4.59 assembler under `build/`. The ordinary build does
+not download tools. `make setup-local-cuda133` installs only the earlier compiler.
+Use `LOCAL_PACKED_NVCC=build/cuda133/nvidia/cu13/bin/nvcc` to select that compiler
+explicitly; all other hardware benchmark records retain their own configurations.
+`LOCAL_PACKED_SHARED_X_SLOTS=0` disables the shared X-coordinate cache.
+`LOCAL_PACKED_SIGMA_ORDER=0` disables the reordered partial walk stages.
+`LOCAL_PACKED_BYTE_SIGMA=0` disables byte/halfword shuffle-select.
+Both switches stay off in the software fallback.
+`LOCAL_PACKED_TAIL_LAYOUT=0` restores the prior multiplication tail.
+`LOCAL_PACKED_LAST_SLOT_CACHE=0` restores the prior denominator-buffer behavior.
+`LOCAL_PACKED_PARTIAL_SIGMA=0` restores the prior walk routing.
+`LOCAL_PACKED_BATCH_SPLIT=1` selects the previous physical batch and two-block bound.
+`LOCAL_PACKED_BLOCK_INVERSE=0` also disables the split and selects per-thread inversion;
+`LOCAL_PACKED_SINGLE_PRODUCT=1` selects the single-product normal multiplier.
+`LOCAL_PACKED_INLINE=0` selects the earlier native call boundaries.
+
+The [previous denominator-cache audit](benchmarks/g7-2xlarge-last-slot-cache/README.md)
+remains recorded at 5.561034 B/s benchmark and 5.346504 B/s collection.
+The [previous partial-routing audit](benchmarks/g7-2xlarge-partial-routing/README.md)
+remains recorded at 5.493168 B/s benchmark and 5.342973 B/s collection.
+The [previous physical-batch audit](benchmarks/g7-2xlarge-physical-batch/README.md)
+remains recorded at 5.357751 B/s benchmark and 5.206662 B/s collection.
+The [previous shared-inversion audit](benchmarks/g7-2xlarge-block-inverse/README.md)
+remains recorded at 5.227782 B/s benchmark and 5.086691 B/s collection.
+The [previous normal-inverter audit](benchmarks/g7-2xlarge-normal/README.md)
+remains recorded at 5.168517 B/s benchmark and 4.971923 B/s collection.
+The [previous inlining audit](benchmarks/local-10b/README.md) remains recorded at
+5.139671 B/s benchmark and 4.979691 B/s collection. The
+[earlier saturation comparison](benchmarks/local-saturation/README.md) remains
+at 4.952793 B/s benchmark and 4.767776 B/s collection, a 2.24× benchmark gain
+over its matched software preset. Absolute rates vary with temperature and
+workload; each gain uses its own contemporaneous paired controls. See the
+linked notes for exact work, correctness checks and measurement limits.
+
+The subsequent [native-pipeline, inverse and residency screens](benchmarks/g7-2xlarge-native-pipe/README.md)
+rejected six slower alternatives before the shared-inversion experiment.
+The [status-traffic and active-lane screens](benchmarks/g7-2xlarge-status/README.md)
+found no reliable status-path gain and ruled out faster native execution from sparse lane masks.
+The [slot-scheduling screen](benchmarks/g7-2xlarge-scheduling/README.md) also retained
+the selected preset after six unrolling/aliasing variants failed to establish a gain.
+The [native-accumulator screen](benchmarks/g7-2xlarge-clmad-accum/README.md)
+found no established gain across low, high and dual accumulator variants;
+all full-state, replay, resume and independent arithmetic checks passed.
+
+The [four-block residency screen](benchmarks/g7-2xlarge-residency-four/README.md)
+and [constant small-inverse screen](benchmarks/g7-2xlarge-small-inverse/README.md)
+also retained their reference after no gain was established.
+
+[Benchmarks by instance and hardware type](benchmarks/by-hardware/README.md) keep
+AWS G7 sizes, AWS G7e sizes and Modal GPU allocations separate. Untested entries
+remain unmeasured; a Modal rate is not an EC2 rate.
+
+The [earlier local software comparison](benchmarks/local-rtx4500/README.md)
+remains recorded: 1.014 → 2.286 B/s on the same GPU model using CUDA 13.2.
+These are complete-walk engineering measurements; they do not change the
+algorithm's scalar-iteration complexity.
+
+**20.078 B complete scalar walk iterations/s median on one RTX PRO 6000
+Blackwell** with `make gpu-rtx-pro6000-20b`
+([ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md)): the table walk in one
+512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt from
+the step tag instead of stored, products inlined and the forward pass
+software-pipelined. 300/300 device reports re-walked, the same distinguished
+points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
+the tree's previous best configuration rebuilt in the same session on the same
+card, 17.41 B/s: +15.3%. [ROOFLINE.md](ROOFLINE.md) prices it per pipe from
+dynamic SASS counts: the ALU pipe is 91% busy (1,320 logic lane-instructions
+per update at 64 per SM-clock), the carry-less unit 73%, and the speed of
+light for its 33.1 CLMADs per update is 27.4 B/s. The same note corrects the
+22.3 B/s "carry-less ceiling" quoted here before: it assumed 1.62 CLMADs per
+SM-clock, and a measured sweep build ran the unit at least 1.654 (accounting;
+no rate changes). The campaign default below is unchanged.  The table walk's
+first cycle rule let fruitless cycles through (four steps that sum to `O`
+through Frobenius's own `σ² + σ + 2 = 0`, and six-step pairwise ones), which
+at the campaign's distinguished-point weight trapped about half its walks.
+The rule now refuses them, and the table walk is projected at 0.81–0.86× the
+σ walk's cost per solve on these rates; the new kernel's own paired rate is
+the measurement the switch waits on ([WALK-CONSTANT.md](WALK-CONSTANT.md)
+§11).
+[CHEAPER-SELECTION.md](CHEAPER-SELECTION.md) prices the remaining forward-pass
+lever (phase via popc planes, `TABLE_PHASE_POPC`) against the earlier 0.90
+floor of that 22.3 B/s ceiling.
 The current confirmed sigma path reaches **15.436677 B complete scalar
 updates/s** on one RTX PRO 6000: the fused reverse/next-prefix schedule improves
 its same-allocation control by 2.826% across five alternating pairs. The
@@ -136,7 +378,9 @@ walk measurements.  The single-GPU objective is priced in
 [THROUGHPUT-30B.md](THROUGHPUT-30B.md): 30 B/s needs a 2.05x instruction cut
 from a kernel already issuing at 95% of the best rate measured on the part, so
 halving every instruction in it still lands at 29.3 B/s.  Two GPUs cross 30 B/s
-on a 2.5% per-GPU gain, and three cross it today.
+on a 2.5% per-GPU gain, and three cross it today.  Those two- and three-GPU
+figures are projections, not measured aggregate instance rates, and none of
+this describes the g7.2xlarge / RTX PRO 4500 target above.
 [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) asks whether a different
 iteration function reaches 28 B/s on one GPU and answers no from the
 one-addition-per-step floor; it then builds the table walk
@@ -376,7 +620,9 @@ a different contributor, `crypto cryptanalysis rho-collab work --cairn`
 | Field arithmetic, iteration function, solver | implemented and tested |
 | End-to-end discrete logarithms | recovered on `GF(2^23)` and `GF(2^41)` |
 | CPU client | measured, 12.6 M iterations/s per AVX-512 core, 15.7 M per M4 Pro core |
-| CUDA client | public-command median of 14.637530 B/s for complete packed walks on one RTX PRO 6000 |
+| CUDA — AWS g7.2xlarge / RTX PRO 4500 | 12.499203 B/s paired benchmark median; 12.457221 B/s fresh confirmation; promoted-map DP34 unmeasured |
+| CUDA — Modal RTX PRO 6000 | 14.637530 B/s benchmark; 14.106673 B/s DP34 collection |
+| Other AWS G7/G7e sizes | separate entries; unmeasured |
 | Modal integration | validate, benchmark, autotune, search, fan out |
 | ECC2K-95 instance | parameters recovered and independently verified |
 
@@ -1318,3 +1564,9 @@ what the instrument is for: finding where the curve bends, if it does.
 * The start-point PRF is a mixing function rather than AES. Any client that
   wants to interoperate with a different implementation must agree on it.
 * Multi-GPU is not implemented: one process drives one device.
+
+The [larger-batch shared-X cache experiment](benchmarks/g7-12b-larger-batch-xcache/RESULTS.md)
+confirms that eight cached X slots improve B32 by 1.47--1.75%, but the best B32
+candidate remains slower than selected B16: 6.050341 versus 6.208908 B/s in the
+fresh follow-up. That candidate remained isolated. The later complete two-bridge
+map described at the top supersedes it and reaches the 12 B/s G7 milestone.

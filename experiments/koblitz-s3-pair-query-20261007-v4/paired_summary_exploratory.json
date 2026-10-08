@@ -1,0 +1,81 @@
+{
+  "all_pairs_semantically_equal": true,
+  "candidate_ids": {
+    "baseline": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67",
+    "candidate": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2c"
+  },
+  "claim_limit": "Host-wide CPU isolation and noise gates were not recorded; ratios are exploratory. Independent Sage replay is pending.",
+  "exploratory_paired_online_ratio_median": 0.8710277885309387,
+  "kind": "s3_pair_query_exploratory_panel",
+  "measurement_rows_sha256": "3a4d7b573f1ff926a689cbb16b9b9637442ae8dfeee638b3ab2ea2090bdeecec",
+  "online_ms_median": {
+    "baseline": 1072.688,
+    "candidate": 1216.035208
+  },
+  "pairs": [
+    {
+      "baseline_online_ms": 943.690541,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wc3929365e014R1",
+      "candidate_online_ms": 978.7139999999999,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWc3929365e014R1",
+      "exploratory_online_ratio": 0.9642148176075954,
+      "repetition": 1,
+      "semantic_equal": true
+    },
+    {
+      "baseline_online_ms": 1457.143458,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wc3929365e014R2",
+      "candidate_online_ms": 1011.352834,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWc3929365e014R2",
+      "exploratory_online_ratio": 1.4407864486193747,
+      "repetition": 2,
+      "semantic_equal": true
+    },
+    {
+      "baseline_online_ms": 1072.688,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wc3929365e014R3",
+      "candidate_online_ms": 1791.48175,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWc3929365e014R3",
+      "exploratory_online_ratio": 0.598771380171749,
+      "repetition": 3,
+      "semantic_equal": true
+    },
+    {
+      "baseline_online_ms": 1685.965167,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wc3929365e014R4",
+      "candidate_online_ms": 2034.817791,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWc3929365e014R4",
+      "exploratory_online_ratio": 0.8285582986629195,
+      "repetition": 4,
+      "semantic_equal": true
+    },
+    {
+      "baseline_online_ms": 1059.200458,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wc3929365e014R5",
+      "candidate_online_ms": 1216.035208,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWc3929365e014R5",
+      "exploratory_online_ratio": 0.8710277885309387,
+      "repetition": 5,
+      "semantic_equal": true
+    }
+  ],
+  "promoted_speedup": null,
+  "repetitions": 5,
+  "run_order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline",
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline",
+    "baseline",
+    "candidate"
+  ],
+  "single_public_target": [
+    6825828048296061,
+    3029097503049988
+  ],
+  "workload_id": "c3929365e014"
+}

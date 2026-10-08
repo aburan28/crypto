@@ -259,6 +259,17 @@ def cmd_submit(args) -> None:
     _print(_run(go))
 
 
+def cmd_result(args) -> None:
+    from .views import result_view
+    res = _run(lambda f: f.get_result(args.job_id))
+    if res is None:
+        sys.exit(f"{args.job_id} has no result yet")
+    try:
+        _print(result_view(res, args.section))
+    except ValueError as e:
+        sys.exit(str(e))
+
+
 def cmd_fetch(args) -> None:
     from .blobs import sha256_file
 
@@ -416,11 +427,16 @@ def main(argv: list[str] | None = None) -> None:
     s.set_defaults(fn=cmd_submit, argv=None)
 
     for name, fn in (("status", lambda a: _print(_run(lambda f: f.get_job(a.job_id)))),
-                     ("result", lambda a: _print(_run(lambda f: f.get_result(a.job_id)))),
                      ("cancel", lambda a: print(_run(lambda f: f.cancel(a.job_id))))):
         p = sub.add_parser(name)
         p.add_argument("job_id")
         p.set_defaults(fn=fn)
+
+    p = sub.add_parser("result")
+    p.add_argument("job_id")
+    p.add_argument("--section", default="full",
+                   help="full (default), summary, fidelity, runs, host, placement or any top-level key")
+    p.set_defaults(fn=cmd_result)
 
     p = sub.add_parser("wait")
     p.add_argument("job_id")
@@ -474,7 +490,7 @@ def main(argv: list[str] | None = None) -> None:
 
 
 async def _summaries(f, stale: bool):
-    from .mcp_server import _worker_line
+    from .views import worker_line as _worker_line
     return [_worker_line(w) for w in await f.workers(stale)]
 
 

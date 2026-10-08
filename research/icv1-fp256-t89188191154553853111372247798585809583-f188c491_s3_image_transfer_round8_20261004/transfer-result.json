@@ -1,0 +1,95 @@
+{
+  "schema": "p256.s3_image_transfer/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "field_prime": "0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+  "curve_a": "0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc",
+  "curve_b": "0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b",
+  "factor_base": {
+    "spec": "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129",
+    "fb_id": "FB1h2f8621cda105",
+    "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+    "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+    "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5",
+    "columns": 131458,
+    "signed_points": 262916,
+    "complete_rebuild_verified": true
+  },
+  "target_preimage": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/s3-image-transfer-round8/target/0",
+  "targets": [
+    {
+      "kind": "planted-positive",
+      "scalar": null,
+      "target": [
+        "0x202f1d492dfdaf6d2b8ca40585f2ac8a812284d03f62fa6d8f37ac91cda07b74",
+        "0x6447d09272db8edf7e0b767016c00e8e1fef5c0570168dffd6d7c60a147e6dc3"
+      ],
+      "rejected_ordered_column_pairs": 17281205764,
+      "quadratic_solves": 131458,
+      "quadratic_roots_returned": 262916,
+      "algebra_index_lookups": 262916,
+      "linear_degeneracies": 0,
+      "universal_degeneracies": 0,
+      "algebra_pairs": 2,
+      "reference_pairs": 2,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "multiplication_counts": {
+        "coefficients": 1446038,
+        "discriminants": 262916,
+        "square_roots": 37991362,
+        "inversions": 50479872,
+        "root_construction": 262916,
+        "total": 90443104
+      },
+      "reference_group_subtractions": 262916,
+      "reference_index_lookups": 262916,
+      "verification_group_additions": 8,
+      "all_emitted_pairs_verified": true,
+      "exact": true,
+      "pair_sha256": "6101ec16015a127b9102cbc34d949c2a38335e11642cfd15c2f992197efa7722",
+      "pairs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "hash-public",
+      "scalar": "0x191dff478ed845a34715294b813d9e3cb29d1e524ea2a0a223794eebe4fef3d3",
+      "target": [
+        "0x1d5ed1307fcc472716e7f0e485072d5712f5340c1f526e1f2e56d73b29cc0269",
+        "0xb1db008d254fa19cf203ba7a126ca279b0d4b501fe72b1579de93249a346f9e6"
+      ],
+      "rejected_ordered_column_pairs": 17281205764,
+      "quadratic_solves": 131458,
+      "quadratic_roots_returned": 262916,
+      "algebra_index_lookups": 262916,
+      "linear_degeneracies": 0,
+      "universal_degeneracies": 0,
+      "algebra_pairs": 0,
+      "reference_pairs": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "multiplication_counts": {
+        "coefficients": 1446038,
+        "discriminants": 262916,
+        "square_roots": 37991362,
+        "inversions": 50479872,
+        "root_construction": 262916,
+        "total": 90443104
+      },
+      "reference_group_subtractions": 262916,
+      "reference_index_lookups": 262916,
+      "verification_group_additions": 0,
+      "all_emitted_pairs_verified": true,
+      "exact": true,
+      "pair_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pairs": []
+    }
+  ]
+}

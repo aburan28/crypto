@@ -1,0 +1,13 @@
+%% Editable source for figure.svg (screening funnel).
+%% Rendered by hand into figure.svg (SVG is the committed rendering).
+flowchart TB
+    ALL["12 candidate transfers surveyed [this work]"]
+    ALL --> SHAPE{"Gate 1 — Shape:\nshared bilinear middle?"}
+    SHAPE -- "no (5)" --> S_NEG["Structural rejects:\n#1 pair-table/MITM probes\n#2 BSGS lookups\n#3 rho tables\n#6 Macaulay batches\n(hash probes / poly matrices)"]
+    SHAPE -- "yes" --> RING{"Gate 2 — Ring:\nsmall integers?"}
+    RING -- "no (2)" --> R_NEG["Ring rejects:\n#4 batch MSM verify\n#5 Wiedemann blocks\n(group ops / Z/rZ)"]
+    RING -- "yes" --> SIZE{"Gate 3 — Size:\neps<=1/18, kap>=1/2?"}
+    SIZE -- "repo: 0 pass" --> SZ_NEG["Size rejects (demo):\nMSM shape eps=1 at R~=F\nfull-W demo kap=0"]
+    SIZE -- "synthetic: 1 pass" --> PASS["FitsConcrete (N=2^18,D=2)\nproves the gate is not vacuous"]
+    PASS --> PROMO["Promotion protocol:\nmatched full-DLP suites in S"]
+    ALL -. "paper-excluded lane (5)" .-> OOS["Out of scope:\n#9 no convolution stage\n#10 scale/model mismatch\n#11 real-RAM N/A\n#12 SETH/OV/k>=4/unhinted OMv"]

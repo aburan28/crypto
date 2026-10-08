@@ -905,6 +905,22 @@ impl Solver {
             .iter()
             .take_while(|&&lit| self.lit_value(lit) != Some(false))
             .count();
+        let idx = self.clauses.len();
+        let (l0, l1) = (lits[0], lits[1]);
+        self.clauses.push(lits);
+        self.watches[watch_index(l0)].push(Watcher {
+            cref: idx,
+            blocker: l1,
+        });
+        self.watches[watch_index(l1)].push(Watcher {
+            cref: idx,
+            blocker: l0,
+        });
+        self.detached.resize(self.clauses.len(), false);
+        // Theory clauses are permanent propagation lemmas. Advancing this
+        // boundary also retains any learnt clauses that preceded them, which
+        // costs memory but cannot change an answer.
+        self.n_orig_clauses = self.clauses.len();
         let (l0, l1) = (lits[0], lits[1]);
         let idx = self.push_clause(&lits);
         let (w0, w1) = (self.watch_slot(l0), self.watch_slot(l1));
@@ -1855,6 +1871,12 @@ impl Solver {
                     restart_limit = 100u64 * luby(luby_index);
                 }
             } else {
+                if !trigger_vars.is_empty()
+                    && trigger_vars
+                        .iter()
+                        .all(|&variable| self.assignment[(variable - 1) as usize].is_some())
+                {
+                    if let Some(clauses) = theory(&self.assignment) {
                 // Through the `n_vars`-long assignment, so a trigger past the
                 // variables panics on the index as it did before the tables
                 // had spare slots, instead of reading as never assigned.
@@ -1878,6 +1900,12 @@ impl Solver {
                         }
                         let has_current_conflict = normalized.iter().any(|clause| {
                             !clause.is_empty()
+                                && clause
+                                    .iter()
+                                    .all(|&lit| self.lit_value(lit) == Some(false))
+                        });
+                        if has_current_conflict
+                            || normalized.iter().any(|clause| clause.len() < 2)
                                 && clause.iter().all(|&lit| self.lit_value(lit) == Some(false))
                         });
                         if has_current_conflict || normalized.iter().any(|clause| clause.len() < 2)
@@ -1888,6 +1916,7 @@ impl Solver {
                                     return SolveResult::Unsat;
                                 }
                             }
+                            self.detached.resize(self.clauses.len(), false);
                             self.detached.resize(self.clause_at.len(), false);
                         } else {
                             for clause in normalized {
@@ -1964,6 +1993,9 @@ impl Solver {
 
     /// Force every saved phase to a constant polarity (search-polarity lever).
     pub fn set_all_saved_phases(&mut self, value: bool) {
+        for phase in &mut self.saved_phase {
+            *phase = value;
+        }
         self.saved_phase.fill(value);
     }
 
@@ -2186,6 +2218,12 @@ impl Solver {
 /// [`parse_dimacs_xor`].  A solver that is already inconsistent also emits an
 /// explicit empty clause so root UNSAT survives export.
 pub fn to_dimacs_xor(solver: &Solver) -> String {
+    let constraints = solver.n_orig_clauses
+        + solver.xors.len()
+        + usize::from(solver.is_unsat);
+    let mut output = format!("p cnf {} {}\n", solver.n_vars, constraints);
+    for clause in solver.clauses.iter().take(solver.n_orig_clauses) {
+        for &literal in clause {
     let constraints = solver.n_orig_clauses + solver.xors.len() + usize::from(solver.is_unsat);
     let mut output = format!("p cnf {} {}\n", solver.n_vars, constraints);
     for &cref in solver.clause_at.iter().take(solver.n_orig_clauses) {

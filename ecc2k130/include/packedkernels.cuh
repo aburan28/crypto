@@ -2,6 +2,19 @@
 #pragma once
 #include "kernel.h"
 #include "packed131.h"
+#ifndef ECC_PACKED_BLOCK_INVERSE
+#define ECC_PACKED_BLOCK_INVERSE 0
+#endif
+#if ECC_PACKED_BLOCK_INVERSE != 0 && ECC_PACKED_BLOCK_INVERSE != 1
+#error "ECC_PACKED_BLOCK_INVERSE must be 0 or 1"
+#endif
+#if ECC_PACKED_LOGICAL_PAIR_INVERSE && !ECC_PACKED_BLOCK_INVERSE
+#error "LOGICAL_PAIR_INVERSE requires BLOCK_INVERSE"
+#endif
+#if ECC_PACKED_BLOCK_INVERSE
+#include "packedblockinverse131.cuh"
+#endif
+#include "packedsigmascratch.h"
 #ifndef ECC_PACKED_COMPACT_STATE
 #define ECC_PACKED_COMPACT_STATE 0
 #endif
@@ -33,6 +46,9 @@ namespace eccPacked131 {
 #endif
 #if ECC_PACKED_POLY_CHAIN != 0 && ECC_PACKED_POLY_CHAIN != 1
 #error "ECC_PACKED_POLY_CHAIN must be 0 or 1"
+#endif
+#if ECC_PACKED_BLOCK_INVERSE && !ECC_PACKED_POLY_CHAIN
+#error "ECC_PACKED_BLOCK_INVERSE requires polynomial chains"
 #endif
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_CACHE_DENOM
 #error "ECC_PACKED_POLY_CHAIN requires the denominator cache"
@@ -143,6 +159,22 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED_LATE_Y && !ECC_SIGMA_FUSED
 #error "ECC_SIGMA_FUSED_LATE_Y requires ECC_SIGMA_FUSED"
 #endif
+#ifndef ECC_SIGMA_FUSED_SHARED_SLOTS
+#define ECC_SIGMA_FUSED_SHARED_SLOTS 0
+#endif
+#if ECC_SIGMA_FUSED_SHARED_SLOTS != 0 && ECC_SIGMA_FUSED_SHARED_SLOTS != 2 && \
+    ECC_SIGMA_FUSED_SHARED_SLOTS != 3 && ECC_SIGMA_FUSED_SHARED_SLOTS != 4
+#error "ECC_SIGMA_FUSED_SHARED_SLOTS must be 0, 2, 3 or 4"
+#if ECC_SIGMA_SQUARE_TABLE && (!ECC_SIGMA_FUSED || ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE)
+#error "ECC_SIGMA_SQUARE_TABLE requires the polynomial-state sigma-fused walk"
+#endif
+#if ECC_SIGMA_SQUARE_TABLE && (ECC_PACKED_SQUARE_TABLE || ECC_PACKED_ALU_SQUARE)
+#error "ECC_SIGMA_SQUARE_TABLE is a standalone first comparison; keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off"
+#endif
+#if ECC_SIGMA_SQUARE_TABLE
+static_assert(size_t(SQ_TAB_WORDS) * sizeof(uint32_t) == 8320,
+              "sigma lambda square table layout changed");
+#endif
 #if ECC_SIGMA_FUSED && (ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE || \
                         !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN || \
                         ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || \
@@ -150,6 +182,12 @@ namespace eccPacked131 {
                         ECC_PACKED_SLOT_PREFETCH || ECC_PHASE_PROFILE || \
                         ECC_PACKED_CHAIN_FIRST)
 #error "ECC_SIGMA_FUSED requires the one-chain polynomial sigma walk in weighted-prefix mode 2"
+#endif
+#if ECC_SIGMA_FUSED_SHARED_SLOTS && \
+    (!ECC_SIGMA_FUSED || ECC_BATCH != 16 || ECC_THREADS != 256 || ECC_MINBLOCKS != 2 || \
+     !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_SHARED_SIGMA || ECC_WITNESS || \
+     ECC_PACKED_INLINE_POLY != 3 || ECC_SIGMA_FUSED_LATE_Y || ECC_PACKED_SQUARE_TABLE)
+#error "sigma fused shared scratch requires the exact counter-free B16/T256/min2 fused preset"
 #endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
@@ -166,6 +204,50 @@ namespace eccPacked131 {
 #if ECC_PACKED_COMPACT_STATE && (ECC_PACKED_STATE_TILE != 256 || !ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_COMPACT_STATE requires TILE256, polynomial state, denominator cache and polynomial chains"
 #endif
+#if ECC_PACKED_FUSED_SIGMA && (!ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "ECC_PACKED_FUSED_SIGMA requires polynomial state and weighted-prefix mode 2"
+#endif
+#ifndef ECC_PACKED_BATCH_SPLIT
+#define ECC_PACKED_BATCH_SPLIT 1
+#endif
+#if ECC_PACKED_BATCH_SPLIT != 1 && ECC_PACKED_BATCH_SPLIT != 2
+#error "ECC_PACKED_BATCH_SPLIT must be 1 or 2"
+#endif
+#if ECC_PACKED_BATCH_SPLIT == 2 && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Split batches require an even batch16..32, threads256, block inversion and weighted-prefix mode2"
+#endif
+#ifndef ECC_PACKED_LAST_SLOT_CACHE
+#define ECC_PACKED_LAST_SLOT_CACHE 0
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE < 0 || ECC_PACKED_LAST_SLOT_CACHE > 2
+#error "ECC_PACKED_LAST_SLOT_CACHE must be 0, 1 or 2"
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Last-slot cache requires an even batch16..32, split2, block inversion and weighted-prefix mode2"
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE
+static constexpr int lastLocalSlot131 = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1;
+#endif
+#ifndef ECC_PACKED_SHARED_X_SLOTS
+#define ECC_PACKED_SHARED_X_SLOTS 0
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS != 0 && ECC_PACKED_SHARED_X_SLOTS != 2 && ECC_PACKED_SHARED_X_SLOTS != 4
+#error "SHARED_X_SLOTS must be 0, 2 or 4"
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "SHARED_X_SLOTS requires an even B16..32 split2 compact polynomial block-inverse layout"
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS
+static constexpr int firstSharedXLocalSlot131=ECC_BATCH/ECC_PACKED_BATCH_SPLIT-ECC_PACKED_SHARED_X_SLOTS;
+__device__ __forceinline__ P131 loadSharedX131(const uint4*low,const unsigned char*tail,int index) {
+    const uint4 v=low[index];return P131{{v.x,v.y,v.z,v.w,unsigned(tail[index])}};
+}
+__device__ __forceinline__ void storeSharedX131(uint4*low,unsigned char*tail,int index,P131 value) {
+    low[index]=uint4{value.v[0],value.v[1],value.v[2],value.v[3]};
+    tail[index]=static_cast<unsigned char>(value.v[4]);
+}
+#endif
+static constexpr int walkWorkersPerBlock131 = ECC_THREADS / ECC_PACKED_BATCH_SPLIT;
 #if ECC_PACKED_STATE_TILE
 ECC_HD size_t physicalStateThreads(size_t threads) {
     return ((threads + 255) / 256) * 256;
@@ -595,6 +677,37 @@ void resolveGlobalHints(WalkParams<unsigned> p, const unsigned *queue, const uns
 #endif
 
 #if ECC_SIGMA_FUSED
+#if ECC_SIGMA_FUSED_SHARED_SLOTS
+static __shared__ unsigned sigmaFusedSharedScratch131[
+    SIGMA_FUSED_SCRATCH_FIELDS * ECC_SIGMA_FUSED_SHARED_SLOTS * 5 * ECC_THREADS];
+#endif
+
+template<int Field>
+__device__ __forceinline__ P131 sigmaFusedScratchLoadOrGlobal131(
+    const unsigned *global, int slot, int tid, int threads) {
+#if ECC_SIGMA_FUSED_SHARED_SLOTS
+    if (slot < ECC_SIGMA_FUSED_SHARED_SLOTS)
+        return sigmaFusedScratchLoad131(sigmaFusedSharedScratch131, Field, slot,
+                                        int(threadIdx.x), ECC_SIGMA_FUSED_SHARED_SLOTS,
+                                        ECC_THREADS);
+#endif
+    return load(global, slot, tid, threads);
+}
+
+template<int Field>
+__device__ __forceinline__ void sigmaFusedScratchStoreOrGlobal131(
+    unsigned *global, int slot, int tid, int threads, P131 value) {
+#if ECC_SIGMA_FUSED_SHARED_SLOTS
+    if (slot < ECC_SIGMA_FUSED_SHARED_SLOTS) {
+        sigmaFusedScratchStore131(sigmaFusedSharedScratch131, Field, slot,
+                                  int(threadIdx.x), ECC_SIGMA_FUSED_SHARED_SLOTS,
+                                  ECC_THREADS, value);
+        return;
+    }
+#endif
+    store(global, slot, tid, threads, value);
+}
+
 // Forward work for one polynomial-state sigma slot.  `xp` and `yp` are either
 // freshly loaded launch inputs or the reverse pass's register outputs.  The
 // latter is the fusion: selection and prefix construction do not reload the
@@ -669,19 +782,39 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #endif
     if (!first) {
         const PolynomialPair pair = mulPolynomialPair131(*prod, ep, dp);
-        store(p.pchain, slot, tid, p.threads, pair.first);
+        sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_CHAIN>(
+            p.pchain, slot, tid, p.threads, pair.first);
         *prod = pair.second;
     } else {
         *prod = dp;
-        store(p.pchain, slot, tid, p.threads, ep);
+        sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_CHAIN>(
+            p.pchain, slot, tid, p.threads, ep);
     }
     P131 tagged = dp;
     tagged.v[4] |= unsigned(j - 3) << 3;
-    store(denominators, slot, tid, p.threads, tagged);
+    sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_DENOMINATOR>(
+        denominators, slot, tid, p.threads, tagged);
 }
 
+#if ECC_PACKED_XONLY_23 && ECC_WALK_TABLE
+#error "ECC_PACKED_XONLY_23 and ECC_WALK_TABLE select different walks"
+#endif
+#if !ECC_PACKED_XONLY_23
+#if ECC_PACKED_BATCH_SPLIT != 1 || ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_SHARED_X_SLOTS || ECC_PACKED_LAST_SLOT_CACHE || ECC_PACKED_FUSED_SIGMA
+#error "Split batches, block inversion, shared-X slots, the last-slot cache and fused sigma are implemented only by the x-only walk (ECC_PACKED_XONLY_23)"
+#endif
+#if ECC_TABLE_FUSED
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+#if ECC_SIGMA_SQUARE_TABLE
+    extern __shared__ uint32_t sigmaSquareShared[];
+    for (unsigned i = threadIdx.x; i < unsigned(SQ_TAB_WORDS); i += blockDim.x)
+        sigmaSquareShared[i] = p.twConsts[i];
+    __syncthreads();
+    const uint32_t *sigmaSquareTable = sigmaSquareShared;
+#else
+    const uint32_t *sigmaSquareTable = nullptr;
+#endif
 #if ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
@@ -722,9 +855,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const size_t id = size_t(slot) * p.threads + tid;
             const P131 x = load(p.x, slot, tid, p.threads);
             const P131 y = load(p.y, slot, tid, p.threads);
-            P131 dp = load(denominators, slot, tid, p.threads);
+            P131 dp = sigmaFusedScratchLoadOrGlobal131<SIGMA_FUSED_SCRATCH_DENOMINATOR>(
+                denominators, slot, tid, p.threads);
             dp.v[4] &= 7;
-            const P131 w = load(p.pchain, slot, tid, p.threads);
+            const P131 w = sigmaFusedScratchLoadOrGlobal131<SIGMA_FUSED_SCRATCH_CHAIN>(
+                p.pchain, slot, tid, p.threads);
             P131 lambdaPoly;
             if (i + 1 < ECC_BATCH) {
                 const PolynomialPair pair = mulPolynomialPair131(inv, w, dp);
@@ -733,7 +868,8 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             } else {
                 lambdaPoly = mulPolynomial131(inv, w);
             }
-            const P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
+            const P131 nx = add131(add131(sigmaLambdaSquare131(lambdaPoly, sigmaSquareTable),
+                                          lambdaPoly), dp);
             const P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
             const P131 ny = add131(add131(product, nx), y);
             store(p.x, slot, tid, p.threads, nx);
@@ -1485,6 +1621,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     }
 }
 #endif  // ECC_TABLE_FUSED
+#else
+#include "packedxonly23.cuh"
+#endif  // !ECC_PACKED_XONLY_23
 
 #if ECC_PHASE_PROFILE
 // Host: read and reset the phase counters.  `warpSteps` is the number of
