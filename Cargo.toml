@@ -83,7 +83,7 @@ path = "src/lib.rs"
 f4-four-tables = []
 f4-five-tables = []
 f4-wide-tables = []
-redis-cache = ["dep:redis"]
+redis-cache = []
 # Verbose tracing in the isogeny rho attack's linear-algebra step.
 rho_debug = []
 # Field-operation counters in the CryptoPro-B field (`cryptopro_b_field::opcount`),
@@ -114,7 +114,6 @@ result_unit_err = "allow"
 chunks_exact_to_as_chunks = "allow"
 
 [dependencies]
-redis = { version = "0.32", optional = true, default-features = false, features = ["tls-rustls"] }
 # Portable CPU-time and peak-RSS measurements for ic research reports.
 libc = "0.2"
 num-bigint = { version = "0.4", features = ["rand"] }
@@ -132,12 +131,12 @@ zeroize = { version = "1.7", features = ["zeroize_derive"] }
 hex = "0.4"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0", features = ["arbitrary_precision"] }
+serde_json = { version = "1.0", features = ["arbitrary_precision", "raw_value"] }
 # `raw_value` lets the P-192 CM certificates parse their one float exactly
 # (`exact_f64` in p192_cm_relation_search.rs) without `float_roundtrip`, which
 # changes every float parse in the crate and broke replay of ecbench evidence
-# sealed under the default parser.
-serde_json = { version = "1.0", features = ["raw_value"] }
+# sealed under the default parser. `arbitrary_precision` is required by the
+# exact-float certificate tooling that round-trips large integers.
 # Data-parallel sweeps for the isogeny experimental harness.
 rayon = "1.10"
 # BLAKE3 is kept as a crate: its Merkle-tree construction is too complex to
