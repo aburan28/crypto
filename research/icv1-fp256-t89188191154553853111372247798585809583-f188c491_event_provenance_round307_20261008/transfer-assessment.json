@@ -1,0 +1,63 @@
+{
+  "schema": "p256-event-provenance-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 307,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "pre-event equations --[span]--> W0",
+    "one primitive event r --[known scalar/group operations]--> W0+span(r)",
+    "replayed affine transport --[charged identity]--> W0",
+    "one complete projective quotient line --> rank increment one",
+    "two distinct primitive quotient lines --> rank increment two"
+  ],
+  "obligations": [
+    {
+      "name": "one-event closure rank",
+      "status": "supported",
+      "evidence": "All 3200 complete projective-line closures add one dimension over W0.",
+      "scope": "Linear, scalar, group-law, and charged affine-transport post-processing."
+    },
+    {
+      "name": "two-line independence",
+      "status": "supported",
+      "evidence": "All 11200 distinct-line pairs add two dimensions with zero discrepancies.",
+      "scope": "Complete order-seven quotient control."
+    },
+    {
+      "name": "P-256 derived-row replay",
+      "status": "supported as scalar-labelled control",
+      "evidence": "1024 distinct derived rows retain rank 164; the independent primitive reaches rank 165 across 1844 group replays.",
+      "scope": "Synthetic deterministic labels, not a relation construction on FB1hc72514a2a8d3."
+    },
+    {
+      "name": "two-primitive P-256 event",
+      "status": "unknown",
+      "evidence": "No non-scalar-labelled mechanism emits two independently certified quotient lines.",
+      "scope": "Future non-homomorphic relation mechanisms."
+    },
+    {
+      "name": "complete below-rho recovery",
+      "status": "unknown",
+      "evidence": "The two-primitive free oracle is above rho and no complete relation/decomposition/recovery pipeline exists.",
+      "scope": "End-to-end P-256 attack."
+    }
+  ],
+  "controls": [
+    "The toy census enumerated and replayed 6722800 exact equations, 3200 line closures, and 11200 distinct-line pairs with zero discrepancies.",
+    "Five P-256 stages were ranked over two fields in both row orders and replayed through 1844 exact group equations.",
+    "Rounds 39, 304, and 306 were imported only after exact byte-hash, schema, curve, factor-base, boundary, and gate checks."
+  ],
+  "cost_accounting": [
+    "Measured: complete toy equation enumeration, line partition, rank operations, P-256 scalar multiplications, group additions, equation replays, process telemetry, and artifact sizes.",
+    "Imported without extrapolation: Round-304 unquotiented, two-primitive, and known-anchor oracle boundaries.",
+    "Unset: a non-labelled two-primitive event, relation yield, structured solver, sparse linear algebra, target recovery, and complete attack cost."
+  ],
+  "exploration_boundary": "Exact for rows derived from one primitive equation using pre-event equations and linear group-law operations; not a bound on a search that independently discovers a second equality.",
+  "weakest_open_obligation": "Construct and replay one non-scalar-labelled P-256 mechanism that independently certifies two quotient lines, then price complete recovery below rho.",
+  "narrowest_supported_finding": "Arbitrarily many rows obtained by replayable post-processing of one primitive event add at most one dimension modulo pre-event knowledge. A second dimension requires independently certified information.",
+  "semantic_evidence_sha256": "9c079dff2fc5e8b9617ca49b9ed759b6678fa578f7d43b9e9791f7b9247bc0b4",
+  "assessment_json_bytes": 3874
+}

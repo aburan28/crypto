@@ -1,0 +1,311 @@
+{
+  "schema": "p256-event-provenance-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 307,
+  "execution_status": "complete",
+  "factor_base": "FB1hc72514a2a8d3",
+  "registered_s17_factor_base": "FB1h2f8621cda105",
+  "columns": 164,
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_affine_log_orbit_round39_20261006/affine-log-orbit-result.json",
+      "bytes": 9211,
+      "sha256": "189e48a45ab2919dd3e279bf058940230c4a0461c745fba42dffb26f785ba079",
+      "schema": "p256.affine_log_orbit_screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_algebraic_quotient_rigidity_round304_20261008/algebraic-quotient-rigidity-result.json",
+      "bytes": 12449,
+      "sha256": "c94e339eca07b96ea0ef890592fb13b80815f0baf52af0e6bd57de17dd46ac9c",
+      "schema": "p256-algebraic-quotient-rigidity-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_bucket_signature_round306_20261008/bucket-signature-result.json",
+      "bytes": 12292,
+      "sha256": "08e11b9c0c829210100730f01710d2b68d80702bcd5d1768b3e594ca88713a31",
+      "schema": "p256-bucket-signature-screen/v1"
+    }
+  ],
+  "provenance_definition": "With W0 the independently replayed pre-event equation space, any row derived from one primitive r by known scalar/group operations and identities already charged to W0 lies in W0+span(r).",
+  "one_event_bound": "Arbitrary replayable post-processing of one primitive equation adds at most one quotient dimension; any new independent identity is itself a second primitive and must be charged.",
+  "exhaustive_toy_census": {
+    "modulus": 7,
+    "base_columns": 4,
+    "homogeneous_columns": 6,
+    "projective_profiles": 400,
+    "exact_equations_enumerated": 6722800,
+    "equation_replays": 6722800,
+    "static_rows": 137200,
+    "nonstatic_rows": 6585600,
+    "projective_line_closures": 3200,
+    "rows_per_line_closure": 2058,
+    "distinct_line_pairs": 11200,
+    "single_line_rank_discrepancies": 0,
+    "pair_rank_discrepancies": 0,
+    "partition_discrepancies": 0,
+    "replay_failures": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "minimum_single_line_rank": 4,
+    "maximum_single_line_rank": 4,
+    "minimum_distinct_pair_rank": 5,
+    "maximum_distinct_pair_rank": 5,
+    "rank_operations": {
+      "matrices": 28800,
+      "rows_materialized": 115248000,
+      "entries_materialized": 691488000,
+      "pivot_row_scans": 186738535,
+      "pivot_swaps": 107037,
+      "modular_inversions": 137600,
+      "modular_multiplications": 1860539016,
+      "modular_subtractions": 1859976748
+    },
+    "first_line": {
+      "normalized_first": 0,
+      "normalized_second": 1,
+      "rows": 2058,
+      "forward_rank": 4,
+      "reversed_rank": 4
+    },
+    "last_line": {
+      "normalized_first": 1,
+      "normalized_second": 6,
+      "rows": 2058,
+      "forward_rank": 4,
+      "reversed_rank": 4
+    }
+  },
+  "p256_control": {
+    "scalar_labelled_control": true,
+    "base_columns": 164,
+    "homogeneous_columns": 166,
+    "derived_rows_requested": 1024,
+    "distinct_derived_rows": 1024,
+    "derived_row_digest": "5b11496f8fae9b004cda33803cabc3cd9e2deaf5b69c526aa00662e8263a48c7",
+    "witness_log_vector_sha256": "54d9a22822efee6f91f917140741a7e158ae6d733bc53fec1ddc59f7195dbda9",
+    "witness_point_vector_sha256": "849bcbffd8fd77da848590222a02bb937ccba8ecf0e6041fbc1fc6f68b119dad",
+    "target_log_sha256": "ebe5e29ca48d43d5f7b7814d0e2c1251312a3c8170a30cdd06a35a7a83848e35",
+    "target_point": {
+      "infinity": false,
+      "x": "51997179315284847964913870430280356079252804666889782519036411407629470731626",
+      "y": "72103359241922306582119243026922764784382447749649837768442056828882935864668"
+    },
+    "stage_profiles": [
+      {
+        "variant": "static-pre-event-space",
+        "rows": 163,
+        "homogeneous_columns": 166,
+        "expected_rank": 163,
+        "rank_mod_2_61_minus_1": 163,
+        "reversed_rank_mod_2_61_minus_1": 163,
+        "rank_mod_p256_n": 163,
+        "reversed_rank_mod_p256_n": 163,
+        "quotient_rank_increment": 0,
+        "provenance_status": "W0 has rank 163 before any target event",
+        "scalar_equation_replays": 326,
+        "p256_group_equation_replays": 163,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 865856,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 652,
+          "entries_materialized": 108232,
+          "pivot_row_scans": 13774,
+          "pivot_swaps": 162,
+          "modular_inversions": 652,
+          "modular_multiplications": 3075478,
+          "modular_subtractions": 3020058
+        }
+      },
+      {
+        "variant": "one-primitive-target-event",
+        "rows": 164,
+        "homogeneous_columns": 166,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "quotient_rank_increment": 1,
+        "provenance_status": "one primitive adds exactly one equation modulo W0",
+        "scalar_equation_replays": 328,
+        "p256_group_equation_replays": 164,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 871168,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 656,
+          "entries_materialized": 108896,
+          "pivot_row_scans": 13940,
+          "pivot_swaps": 162,
+          "modular_inversions": 656,
+          "modular_multiplications": 3103532,
+          "modular_subtractions": 3048100
+        }
+      },
+      {
+        "variant": "complete-derived-row-control",
+        "rows": 1187,
+        "homogeneous_columns": 166,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "quotient_rank_increment": 1,
+        "provenance_status": "1,024 distinct u*r+w rows retain one primitive quotient line",
+        "scalar_equation_replays": 2374,
+        "p256_group_equation_replays": 1187,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 6305344,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 4748,
+          "entries_materialized": 788168,
+          "pivot_row_scans": 16580,
+          "pivot_swaps": 160,
+          "modular_inversions": 656,
+          "modular_multiplications": 32252072,
+          "modular_subtractions": 32196640
+        }
+      },
+      {
+        "variant": "second-proportional-primitive",
+        "rows": 165,
+        "homogeneous_columns": 166,
+        "expected_rank": 164,
+        "rank_mod_2_61_minus_1": 164,
+        "reversed_rank_mod_2_61_minus_1": 164,
+        "rank_mod_p256_n": 164,
+        "reversed_rank_mod_p256_n": 164,
+        "quotient_rank_increment": 1,
+        "provenance_status": "a proportional second primitive does not add quotient rank",
+        "scalar_equation_replays": 330,
+        "p256_group_equation_replays": 165,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 876480,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 660,
+          "entries_materialized": 109560,
+          "pivot_row_scans": 14112,
+          "pivot_swaps": 164,
+          "modular_inversions": 656,
+          "modular_multiplications": 3131580,
+          "modular_subtractions": 3076148
+        }
+      },
+      {
+        "variant": "second-independent-primitive",
+        "rows": 165,
+        "homogeneous_columns": 166,
+        "expected_rank": 165,
+        "rank_mod_2_61_minus_1": 165,
+        "reversed_rank_mod_2_61_minus_1": 165,
+        "rank_mod_p256_n": 165,
+        "reversed_rank_mod_p256_n": 165,
+        "quotient_rank_increment": 2,
+        "provenance_status": "an independent generator equation adds the second dimension",
+        "scalar_equation_replays": 330,
+        "p256_group_equation_replays": 165,
+        "replay_failures": 0,
+        "rank_discrepancies": 0,
+        "materialized_bytes_mod_p256_n": 876480,
+        "operations": {
+          "matrices": 4,
+          "rows_materialized": 660,
+          "entries_materialized": 109560,
+          "pivot_row_scans": 14108,
+          "pivot_swaps": 164,
+          "modular_inversions": 660,
+          "modular_multiplications": 3131588,
+          "modular_subtractions": 3076148
+        }
+      }
+    ],
+    "aggregate_rank_operations": {
+      "matrices": 20,
+      "rows_materialized": 7376,
+      "entries_materialized": 1224416,
+      "pivot_row_scans": 72514,
+      "pivot_swaps": 812,
+      "modular_inversions": 3280,
+      "modular_multiplications": 44694250,
+      "modular_subtractions": 44417094
+    },
+    "group_operations": {
+      "points_constructed": 165,
+      "equations_replayed": 1844,
+      "scalar_multiplications": 5905,
+      "scalar_bits_processed": 1504906,
+      "scalar_one_bits": 748294,
+      "point_additions": 4711
+    },
+    "group_replay_failures": 0,
+    "all_points_on_curve": true
+  },
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "ratio_to_rho": 1.0,
+      "complete_attack_measured": true,
+      "status": "complete reference"
+    },
+    {
+      "variant": "unquotiented geometry-defined FB1hc72514a2a8d3",
+      "ratio_to_rho": 13.920747397073491,
+      "complete_attack_measured": false,
+      "status": "executable free-oracle boundary unchanged"
+    },
+    {
+      "variant": "one unknown anchor plus two independent primitive events",
+      "ratio_to_rho": 1.4465047156952717,
+      "complete_attack_measured": false,
+      "status": "optimistic oracle; post-processing cannot reduce primitive count"
+    },
+    {
+      "variant": "known anchor plus one primitive event",
+      "ratio_to_rho": 0.964336477130181,
+      "complete_attack_measured": false,
+      "status": "ideal oracle below rho; registered direct labelled control is 7.714692x"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "ratio_to_rho": 394.42528,
+      "complete_attack_measured": false,
+      "status": "unchanged free-perfect-oracle comparison"
+    }
+  ],
+  "structured_residual_degree_of_regularity": null,
+  "relations_reported_on_actual_factor_base": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "exploration_boundary": "Exact for the linear closure of one primitive equation modulo independently verified pre-event knowledge; not universal over searches that discover a second independent equality.",
+  "transfer_assessment_semantic_sha256": "9c079dff2fc5e8b9617ca49b9ed759b6678fa578f7d43b9e9791f7b9247bc0b4",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "complete_projective_provenance_census": true,
+    "every_one_line_closure_adds_at_most_one_dimension": true,
+    "distinct_quotient_lines_add_two_dimensions": true,
+    "zero_false_positives_and_false_negatives": true,
+    "dual_modulus_p256_ranks_and_group_replays_passed": true,
+    "non_scalar_labelled_two_primitive_p256_event": false,
+    "primitive_information_provenance_accounted": true,
+    "complete_relation_decomposition_and_recovery": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "complete_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "projected_storage_below_2_50": false,
+    "discarded_probabilistic_branches_counted_as_exhaustive": false,
+    "promoted": false
+  },
+  "classification": "many-rows-per-event/one-primitive-provenance-rank-one/two-primitives-required/parity-blocked",
+  "dominant_obstruction": "Modulo all equations known before an event, scalar multiplication, group addition, column transport, and affine replay of one primitive relation remain in its one-dimensional span. The complete toy census closes every row in each quotient projective line, while the P-256 control retains rank 164 with 1,024 distinct derived rows and reaches rank 165 only with an independently certified generator equation. The two-primitive free oracle is already 1.446505 times rho, and no non-labelled source of the required pair is constructed.",
+  "decision": "Reject relation post-processing as a two-row parity escape. Count independently certified primitive equation rank, not emitted or replayed rows. Keep a genuinely joint two-primitive event open; do not attempt an unplanted full-depth relation.",
+  "semantic_evidence_sha256": "ce17b74cf28adb4294e00a92984290d7e76b6b405a1c1697e897642ced164d7b",
+  "result_json_bytes": 12817
+}
