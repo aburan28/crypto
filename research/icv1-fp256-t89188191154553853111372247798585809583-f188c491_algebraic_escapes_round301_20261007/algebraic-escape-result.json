@@ -1,0 +1,430 @@
+{
+  "schema": "p256-algebraic-escape-census/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 301,
+  "execution_status": "complete",
+  "factor_base": "FB1hc72514a2a8d3",
+  "registered_s17_factor_base": "FB1h2f8621cda105",
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_orbit_round25_20261006/scalar-orbit-result.json",
+      "bytes": 14033,
+      "sha256": "dcb191f7d5d7a660e3ce13128b25ce1c017c7d89ec2d01a242ab536651647faf",
+      "schema": "p256.scalar_orbit_factor_base_screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_isogenous_dickson_round28_20261006/isogenous-dickson-result.json",
+      "bytes": 587117,
+      "sha256": "950d4b7f4997e146ee30fc7c61174070595fa5d344b9a30cbc0ca578ae7e60f4",
+      "schema": "p256.isogenous_dickson_factor_base_screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_stabilizer_round297_20261007/scalar-stabilizer-result.json",
+      "bytes": 13187,
+      "sha256": "53949881daf4a48769c9ef8f869fad633c3dc69d11b0d341a5b7416de2e43982",
+      "schema": "p256-union-scalar-stabilizer/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_cover_fiber_round300_20261007/cover-fiber-result.json",
+      "bytes": 55005,
+      "sha256": "7d65f3e015c6d6c6d24b64ea2e59a6e9e8653c88a1900835838b1bc0a1ec36e5",
+      "schema": "p256-cover-fiber-screen/v1"
+    }
+  ],
+  "curve_invariants": {
+    "p": "115792089210356248762697446949407573530086143415290314195533631308867097853951",
+    "a": "115792089210356248762697446949407573530086143415290314195533631308867097853948",
+    "b": "41058363725152142129326129780047268409114441015993725554835256314039467401291",
+    "n": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "cofactor": "1",
+    "trace": "89188191154553853111372247798585809583",
+    "frobenius_discriminant": "-455213823400003756884736869668539463648899917731097708475249543966132856781915",
+    "frobenius_discriminant_abs": "455213823400003756884736869668539463648899917731097708475249543966132856781915",
+    "anomalous": false,
+    "supersingular": false,
+    "ordinary": true,
+    "j_invariant": "7958909377132088453074743217357398615041065282494610304372115906626967530147",
+    "j_is_zero": false,
+    "j_is_1728": false,
+    "exceptional_automorphism_case": false,
+    "prime_field_has_proper_smaller_subfield": false
+  },
+  "embedding_degree": {
+    "definition": "k=ord_n(p), the least positive k with n | p^k-1",
+    "n_minus_one_factorization": [
+      {
+        "prime": "2",
+        "exponent": 4
+      },
+      {
+        "prime": "3",
+        "exponent": 1
+      },
+      {
+        "prime": "71",
+        "exponent": 1
+      },
+      {
+        "prime": "131",
+        "exponent": 1
+      },
+      {
+        "prime": "373",
+        "exponent": 1
+      },
+      {
+        "prime": "3407",
+        "exponent": 1
+      },
+      {
+        "prime": "17449",
+        "exponent": 1
+      },
+      {
+        "prime": "38189",
+        "exponent": 1
+      },
+      {
+        "prime": "187019741",
+        "exponent": 1
+      },
+      {
+        "prime": "622491383",
+        "exponent": 1
+      },
+      {
+        "prime": "1002328039319",
+        "exponent": 1
+      },
+      {
+        "prime": "2624747550333869278416773953",
+        "exponent": 1
+      }
+    ],
+    "factorization_product_verified": true,
+    "reduction_steps": [
+      {
+        "prime": "2",
+        "occurrence": 1,
+        "candidate_order": "57896044605178124381348723474703786764998477612067880171211129530534256022184",
+        "residue": "115792089210356248762697446949407573529996955224135760342422259061068512044368",
+        "divided": false
+      },
+      {
+        "prime": "3",
+        "occurrence": 1,
+        "candidate_order": "38597363070118749587565815649802524509998985074711920114140753020356170681456",
+        "residue": "1",
+        "divided": true
+      },
+      {
+        "prime": "71",
+        "occurrence": 1,
+        "candidate_order": "543624831973503515317828389433838373380267395418477748086489479159946065936",
+        "residue": "68933511413111505318379451073232707245619282769232508558069510338505552418716",
+        "divided": false
+      },
+      {
+        "prime": "131",
+        "occurrence": 1,
+        "candidate_order": "294636359313883584637906989693149042061060954768793283314051549773711226576",
+        "residue": "23343990521459102455699664791977448589806524478636539831875026049330561337599",
+        "divided": false
+      },
+      {
+        "prime": "373",
+        "occurrence": 1,
+        "candidate_order": "103478185174581098089988781902955829785520067224428740252388077802563460272",
+        "residue": "83235909672434479833915183939842041349469176150560638914937269987387087317961",
+        "divided": false
+      },
+      {
+        "prime": "3407",
+        "occurrence": 1,
+        "candidate_order": "11328841523369166301017263178691671414734072519727596159125551224055230608",
+        "residue": "13405812805348131152351772576151348431466938987347391360015577144420376679463",
+        "divided": false
+      },
+      {
+        "prime": "17449",
+        "occurrence": 1,
+        "candidate_order": "2212010033246532728956720479672332197260529834071403525367686000364271344",
+        "residue": "10025023961940037547514747925880023373737651365989798051100884651463754751779",
+        "divided": false
+      },
+      {
+        "prime": "38189",
+        "occurrence": 1,
+        "candidate_order": "1010693211922772253464762514069562557542721335324620181574295033134048304",
+        "residue": "62938762501707165643713610561463270745335746098214783947333241378620761427081",
+        "divided": false
+      },
+      {
+        "prime": "187019741",
+        "occurrence": 1,
+        "candidate_order": "206381224055479520675658596114741301614779720364984999707280917581616",
+        "residue": "84668051988888384294580571432257314379436735919174549211628687664131512681315",
+        "divided": false
+      },
+      {
+        "prime": "622491383",
+        "occurrence": 1,
+        "candidate_order": "62004654400362598412974040557606440810762170943516370111971096988432",
+        "residue": "53600552707386744132634163630800452512161414546162114254648299621020290444570",
+        "divided": false
+      },
+      {
+        "prime": "1002328039319",
+        "occurrence": 1,
+        "candidate_order": "38507715594130743770441513496393052319520716695010875065854846224",
+        "residue": "2883082633868303354221664733779838052489734739910433716513618456205743682022",
+        "divided": false
+      },
+      {
+        "prime": "2624747550333869278416773953",
+        "occurrence": 1,
+        "candidate_order": "14705171575532719161752470918894067501352426250352",
+        "residue": "12764833947423922606621425851293430677690207102103527799899775275223038674089",
+        "divided": false
+      }
+    ],
+    "exact_embedding_degree": "38597363070118749587565815649802524509998985074711920114140753020356170681456",
+    "exact_embedding_degree_bits": 255,
+    "embedding_degree_factorization": [
+      {
+        "prime": "2",
+        "exponent": 4
+      },
+      {
+        "prime": "71",
+        "exponent": 1
+      },
+      {
+        "prime": "131",
+        "exponent": 1
+      },
+      {
+        "prime": "373",
+        "exponent": 1
+      },
+      {
+        "prime": "3407",
+        "exponent": 1
+      },
+      {
+        "prime": "17449",
+        "exponent": 1
+      },
+      {
+        "prime": "38189",
+        "exponent": 1
+      },
+      {
+        "prime": "187019741",
+        "exponent": 1
+      },
+      {
+        "prime": "622491383",
+        "exponent": 1
+      },
+      {
+        "prime": "1002328039319",
+        "exponent": 1
+      },
+      {
+        "prime": "2624747550333869278416773953",
+        "exponent": 1
+      }
+    ],
+    "final_residue": "1",
+    "final_residue_is_one": true,
+    "minimality_checks": [
+      {
+        "prime": "2",
+        "exponent_in_order": 4,
+        "tested_exponent": "19298681535059374793782907824901262254999492537355960057070376510178085340728",
+        "residue": "115792089210356248762697446949407573529996955224135760342422259061068512044368",
+        "residue_is_one": false
+      },
+      {
+        "prime": "71",
+        "exponent_in_order": 1,
+        "tested_exponent": "543624831973503515317828389433838373380267395418477748086489479159946065936",
+        "residue": "68933511413111505318379451073232707245619282769232508558069510338505552418716",
+        "residue_is_one": false
+      },
+      {
+        "prime": "131",
+        "exponent_in_order": 1,
+        "tested_exponent": "294636359313883584637906989693149042061060954768793283314051549773711226576",
+        "residue": "23343990521459102455699664791977448589806524478636539831875026049330561337599",
+        "residue_is_one": false
+      },
+      {
+        "prime": "373",
+        "exponent_in_order": 1,
+        "tested_exponent": "103478185174581098089988781902955829785520067224428740252388077802563460272",
+        "residue": "83235909672434479833915183939842041349469176150560638914937269987387087317961",
+        "residue_is_one": false
+      },
+      {
+        "prime": "3407",
+        "exponent_in_order": 1,
+        "tested_exponent": "11328841523369166301017263178691671414734072519727596159125551224055230608",
+        "residue": "13405812805348131152351772576151348431466938987347391360015577144420376679463",
+        "residue_is_one": false
+      },
+      {
+        "prime": "17449",
+        "exponent_in_order": 1,
+        "tested_exponent": "2212010033246532728956720479672332197260529834071403525367686000364271344",
+        "residue": "10025023961940037547514747925880023373737651365989798051100884651463754751779",
+        "residue_is_one": false
+      },
+      {
+        "prime": "38189",
+        "exponent_in_order": 1,
+        "tested_exponent": "1010693211922772253464762514069562557542721335324620181574295033134048304",
+        "residue": "62938762501707165643713610561463270745335746098214783947333241378620761427081",
+        "residue_is_one": false
+      },
+      {
+        "prime": "187019741",
+        "exponent_in_order": 1,
+        "tested_exponent": "206381224055479520675658596114741301614779720364984999707280917581616",
+        "residue": "84668051988888384294580571432257314379436735919174549211628687664131512681315",
+        "residue_is_one": false
+      },
+      {
+        "prime": "622491383",
+        "exponent_in_order": 1,
+        "tested_exponent": "62004654400362598412974040557606440810762170943516370111971096988432",
+        "residue": "53600552707386744132634163630800452512161414546162114254648299621020290444570",
+        "residue_is_one": false
+      },
+      {
+        "prime": "1002328039319",
+        "exponent_in_order": 1,
+        "tested_exponent": "38507715594130743770441513496393052319520716695010875065854846224",
+        "residue": "2883082633868303354221664733779838052489734739910433716513618456205743682022",
+        "residue_is_one": false
+      },
+      {
+        "prime": "2624747550333869278416773953",
+        "exponent_in_order": 1,
+        "tested_exponent": "14705171575532719161752470918894067501352426250352",
+        "residue": "12764833947423922606621425851293430677690207102103527799899775275223038674089",
+        "residue_is_one": false
+      }
+    ],
+    "all_minimality_checks_pass": true,
+    "low_degree_at_most_64": false,
+    "extension_field_bit_dimension": "9880924945950399894416848806349446274559740179126251549220032773211179694452736",
+    "extension_is_smaller_representation": false
+  },
+  "imported_certificates": [
+    {
+      "family": "CM/GLV endomorphisms",
+      "source_round": 25,
+      "checked_facts": [
+        "End(E)=Z[pi] is the maximal order (Frobenius conductor one)",
+        "minimum noninteger endomorphism degree 113803455850000939221184217417134865912224979432774427118812385991533214195479",
+        "every rational-point action restricts to a known scalar"
+      ],
+      "applicable_non_generic_quotient": false,
+      "status": "closed within exact rational endomorphism ring"
+    },
+    {
+      "family": "degree-11 isogeny class",
+      "source_round": 28,
+      "checked_facts": [
+        "4096 certified edges and 4097 models",
+        "all models generic-j; subgroup transport changes coordinates without log quotient"
+      ],
+      "applicable_non_generic_quotient": false,
+      "status": "complete registered walk; no quotient"
+    },
+    {
+      "family": "scalar factor-base stabilizer",
+      "source_round": 297,
+      "checked_facts": [
+        "all 8 possible eighth roots screened",
+        "effective folded action order 1",
+        "independent-log quotient dimension 164"
+      ],
+      "applicable_non_generic_quotient": false,
+      "status": "only already-folded negation survives"
+    },
+    {
+      "family": "cover/Jacobian fibre multiplicity",
+      "source_round": 300,
+      "checked_facts": [
+        "374400 complete lifted-row replays",
+        "sheet-collapse quotient identity holds in every bucket",
+        "maximum quotient-rank gain 0"
+      ],
+      "applicable_non_generic_quotient": false,
+      "status": "pure kernel-sheet multiplicity closed; distinct collapsed decompositions remain open"
+    }
+  ],
+  "operation_counts": {
+    "modular_exponentiations": 25,
+    "modular_multiplications": 2881,
+    "modular_squarings": 5873,
+    "integer_multiplications": 17,
+    "exact_divisions": 23,
+    "factor_divisibility_tests": 12
+  },
+  "maximum_integer_bits": 263,
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "optimistic_ratio_to_rho": 1.0,
+      "complete_cost_measured": true,
+      "status": "reference"
+    },
+    {
+      "variant": "minimum-width independent-log FB1hc72514a2a8d3",
+      "optimistic_ratio_to_rho": 13.920747397073491,
+      "complete_cost_measured": false,
+      "status": "free-oracle lower boundary; named algebraic escapes do not move it"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "optimistic_ratio_to_rho": 394.42528,
+      "complete_cost_measured": false,
+      "status": "free-oracle comparison; unchanged"
+    },
+    {
+      "variant": "unregistered future non-generic construction",
+      "optimistic_ratio_to_rho": null,
+      "complete_cost_measured": false,
+      "status": "open / no algorithm or projection"
+    }
+  ],
+  "named_families_complete": true,
+  "exploration_boundary": "Exact for the named standard algebraic families and pinned construction boundaries; no universal nonexistence claim for future algorithms.",
+  "relations_reported_on_p256": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "transfer_assessment_semantic_sha256": "709fdc4d0c68f60651454a705f59aefddc82a1380271d10b5216b65bd69e2cd6",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "curve_invariants_recomputed": true,
+    "n_minus_one_factorization_reverified": true,
+    "exact_embedding_degree_certified": true,
+    "imported_transfer_certificates_reconciled": true,
+    "applicable_non_generic_transfer_found": false,
+    "explicit_forward_inverse_and_recovery_implemented": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "per_usable_relation_below_2_103": false,
+    "complete_collection_below_2_120": false,
+    "projected_storage_below_2_50": false,
+    "promoted": false
+  },
+  "classification": "standard-algebraic-transfer-census/named-families-negative/parity-blocked",
+  "dominant_obstruction": "Every registered standard P-256 escape either fails its applicability hypothesis, preserves the prime-order logarithm scalar, maps only to kernel directions, or requires the exact high-degree pairing field. No named family supplies an executable easier destination or multiple distinct collapsed equations, so the 13.920747-times-rho free-oracle boundary remains unchanged.",
+  "decision": "Close only the named anomalous, supersingular/pairing, exceptional-automorphism, CM/GLV, registered isogeny, scalar-stabilizer, pure cover-fibre, and base-field descent families. Do not claim universal impossibility. Require a new P-256-specific construction outside this census with explicit recovery and complete cost below rho before another full-depth relation attempt.",
+  "semantic_evidence_sha256": "69982b49633ddb1ca8226360a4797a4d6c80562ae36310c6a6e9545e3dd0c141",
+  "result_json_bytes": 16618
+}

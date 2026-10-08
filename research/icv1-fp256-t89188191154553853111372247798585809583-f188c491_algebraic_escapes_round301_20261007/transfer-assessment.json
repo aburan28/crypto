@@ -1,0 +1,186 @@
+{
+  "schema": "p256-algebraic-escape-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 301,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E(F_p) --[Smart; requires n=p]--> additive lift: hypothesis false",
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E(F_p)[n] --[pairing]--> F_(p^38597363070118749587565815649802524509998985074711920114140753020356170681456)^*: exact high-degree destination",
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E(F_p) --[CM/isogeny/scalar action]--> cyclic image: scalar preserved",
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/relations --[cover sheet pushforward]--> destination rows: kernel directions vanish",
+    "F_p --[subfield descent]--> proper smaller finite field: no such field",
+    "future nonstandard construction --[explicit maps plus complete cost]--> possible parity claim: open"
+  ],
+  "families": [
+    {
+      "name": "Smart anomalous-curve transfer",
+      "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E(F_p)",
+      "destination": "additive p-adic residue representation",
+      "transformation_type": "anomalous-curve logarithm map",
+      "field_of_definition": "F_p with p-adic lift",
+      "source_dimension": 1,
+      "destination_dimension": 1,
+      "relevant_subgroup": "requires #E(F_p)=p",
+      "obligations": [
+        {
+          "name": "anomalous hypothesis",
+          "status": "refuted",
+          "evidence": "Exact p and n were recomputed from CurveParams::p256().",
+          "scope": "P-256 rational group"
+        }
+      ],
+      "conclusion": "P-256 is not anomalous; the required hypothesis fails.",
+      "exploration_boundary": "Complete applicability check for the anomalous-curve family."
+    },
+    {
+      "name": "MOV/Frey--Ruck pairing transfer",
+      "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E(F_p)[n]",
+      "destination": "F_(p^k)^*, k=38597363070118749587565815649802524509998985074711920114140753020356170681456",
+      "transformation_type": "bilinear pairing into the n-torsion embedding field",
+      "field_of_definition": "F_(p^38597363070118749587565815649802524509998985074711920114140753020356170681456)",
+      "source_dimension": 1,
+      "destination_dimension": null,
+      "relevant_subgroup": "prime order n",
+      "obligations": [
+        {
+          "name": "embedding degree",
+          "status": "supported",
+          "evidence": "Exact ord_n(p) certificate with prime-divisor minimality checks.",
+          "scope": "P-256 n-torsion"
+        },
+        {
+          "name": "low-degree destination",
+          "status": "refuted",
+          "evidence": "The exact k is compared with the preregistered low-degree bound 64.",
+          "scope": "registered pairing family"
+        },
+        {
+          "name": "measured advantage",
+          "status": "unknown",
+          "evidence": "No extension-field DLP implementation is run; the exact destination dimension already fails the low-degree applicability gate.",
+          "scope": "end-to-end algorithm"
+        }
+      ],
+      "conclusion": "The exact embedding field is not a low-degree transfer and is not a smaller representation.",
+      "exploration_boundary": "Complete embedding-degree certificate; no runtime extrapolation for finite-field DLP."
+    },
+    {
+      "name": "prime-field subfield descent",
+      "source": "F_p",
+      "destination": "proper smaller finite subfield",
+      "transformation_type": "restriction/descent of field of definition",
+      "field_of_definition": "F_p, p prime",
+      "source_dimension": 1,
+      "destination_dimension": null,
+      "relevant_subgroup": "P-256 rational points",
+      "obligations": [
+        {
+          "name": "proper smaller subfield",
+          "status": "refuted",
+          "evidence": "A prime field has no proper finite subfield.",
+          "scope": "base-field descent"
+        }
+      ],
+      "conclusion": "There is no smaller base field through which P-256 descends.",
+      "exploration_boundary": "Does not reject extension-field covers or Weil restriction; those increase dimension and require separate formulas and cost."
+    },
+    {
+      "name": "CM/GLV endomorphisms",
+      "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/prime-order subgroup",
+      "destination": "family-specific representation",
+      "transformation_type": "pinned exact certificate imported by hash",
+      "field_of_definition": "as recorded in source round",
+      "source_dimension": 1,
+      "destination_dimension": null,
+      "relevant_subgroup": "P-256 order-n subgroup",
+      "obligations": [
+        {
+          "name": "non-generic quotient",
+          "status": "refuted",
+          "evidence": "End(E)=Z[pi] is the maximal order (Frobenius conductor one); minimum noninteger endomorphism degree 113803455850000939221184217417134865912224979432774427118812385991533214195479; every rational-point action restricts to a known scalar",
+          "scope": "Round 25 registered family"
+        }
+      ],
+      "conclusion": "closed within exact rational endomorphism ring",
+      "exploration_boundary": "Exactly the construction family and search boundary of Round 25."
+    },
+    {
+      "name": "degree-11 isogeny class",
+      "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/prime-order subgroup",
+      "destination": "family-specific representation",
+      "transformation_type": "pinned exact certificate imported by hash",
+      "field_of_definition": "as recorded in source round",
+      "source_dimension": 1,
+      "destination_dimension": null,
+      "relevant_subgroup": "P-256 order-n subgroup",
+      "obligations": [
+        {
+          "name": "non-generic quotient",
+          "status": "refuted",
+          "evidence": "4096 certified edges and 4097 models; all models generic-j; subgroup transport changes coordinates without log quotient",
+          "scope": "Round 28 registered family"
+        }
+      ],
+      "conclusion": "complete registered walk; no quotient",
+      "exploration_boundary": "Exactly the construction family and search boundary of Round 28."
+    },
+    {
+      "name": "scalar factor-base stabilizer",
+      "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/prime-order subgroup",
+      "destination": "family-specific representation",
+      "transformation_type": "pinned exact certificate imported by hash",
+      "field_of_definition": "as recorded in source round",
+      "source_dimension": 1,
+      "destination_dimension": null,
+      "relevant_subgroup": "P-256 order-n subgroup",
+      "obligations": [
+        {
+          "name": "non-generic quotient",
+          "status": "refuted",
+          "evidence": "all 8 possible eighth roots screened; effective folded action order 1; independent-log quotient dimension 164",
+          "scope": "Round 297 registered family"
+        }
+      ],
+      "conclusion": "only already-folded negation survives",
+      "exploration_boundary": "Exactly the construction family and search boundary of Round 297."
+    },
+    {
+      "name": "cover/Jacobian fibre multiplicity",
+      "source": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/prime-order subgroup",
+      "destination": "family-specific representation",
+      "transformation_type": "pinned exact certificate imported by hash",
+      "field_of_definition": "as recorded in source round",
+      "source_dimension": 1,
+      "destination_dimension": null,
+      "relevant_subgroup": "P-256 order-n subgroup",
+      "obligations": [
+        {
+          "name": "non-generic quotient",
+          "status": "refuted",
+          "evidence": "374400 complete lifted-row replays; sheet-collapse quotient identity holds in every bucket; maximum quotient-rank gain 0",
+          "scope": "Round 300 registered family"
+        }
+      ],
+      "conclusion": "pure kernel-sheet multiplicity closed; distinct collapsed decompositions remain open",
+      "exploration_boundary": "Exactly the construction family and search boundary of Round 300."
+    }
+  ],
+  "controls": [
+    "All curve invariants are recomputed from CurveParams::p256().",
+    "The complete Round-25 factorization must multiply to n-1 before order reduction.",
+    "Embedding order is certified at k and falsified at k/q for every prime q dividing k.",
+    "Rounds 25, 28, 297, and 300 are imported only after exact byte-hash and fact checks."
+  ],
+  "cost_accounting": [
+    "Measured: exact modular exponentiation/multiplication/squaring counts, integer products/divisions, process telemetry, and artifact bytes.",
+    "Exact structural quantities: p, n, trace, discriminant, j, embedding degree, extension dimension, and imported certificate facts.",
+    "Unset: any unregistered future transfer, destination DLP implementation, inverse recovery, structured solver, relation yield, sparse linear algebra, and complete P-256 attack cost."
+  ],
+  "weakest_open_obligation": "Construct a nonstandard P-256-specific map or relation mechanism outside the named families that yields distinct collapsed equations or an easier destination, then provide executable recovery and complete cost below rho.",
+  "narrowest_supported_finding": "No applicable rho-parity route exists within the registered anomalous, supersingular/pairing, exceptional-automorphism, CM/GLV, degree-11 isogeny, scalar-stabilizer, pure cover-fibre, or base-field subfield families.",
+  "semantic_evidence_sha256": "709fdc4d0c68f60651454a705f59aefddc82a1380271d10b5216b65bd69e2cd6",
+  "assessment_json_bytes": 10088
+}
