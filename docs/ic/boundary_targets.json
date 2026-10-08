@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
-  "updated": "2026-10-06",
+  "updated": "2026-10-07",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Primary vs_rho claims use exactly one unseen target paired on the identical public point and resource envelope. Headline time is verified online wall after reusable IC preparation; exclude process launch, input loading, target generation, and target-independent setup. Multi-target averages, batch throughput, and shared-table amortization are secondary only and require a separate declared question after the primary one-target result. Never combine best component costs from different runs into a synthetic win.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
@@ -115,7 +115,8 @@
         "ic_online_phase_ms",
         "rho_online_phase_ms",
         "ic_online_interval",
-        "rho_online_interval"
+        "rho_online_interval",
+        "operation_accounting"
       ],
       "timing_class_enum": [
         "algorithmic_charged",
@@ -123,7 +124,8 @@
         "whole_process_wall",
         "single_target_online"
       ],
-      "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control"
+      "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control",
+      "operation_accounting_contract": "operation_accounting records both arms' online operation counts next to the wall ratio: ic_online_operations, rho_online_operations, operation_units, unit_assumption, and ops_speedup_online = rho_online_operations / ic_online_operations (claim-check verifies the ratio). A wall ratio alone mixes the algorithmic comparison with each arm's implementation speed. Koblitz single-target rungs also record the rank-stage mean probes (mean-target estimate), target_luck_factor, the total-work ratio with rank precompute charged, and host-contention flags; see research/sat_factor_base_review_20260908/autolab/op_accounting.py and docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md."
     }
   },
   "how_to_beat": [
@@ -893,7 +895,26 @@
                 "rho_peak_rss_bytes_max": 2188230656
               },
               "asymptotic_sub_rho": false,
-              "single_target_crossover": true
+              "single_target_crossover": true,
+              "operation_accounting": {
+                "source": "experiments/koblitz-single-target-n83-20261006/claim_report_vs_rho.json#operation_accounting",
+                "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                "ic_online_operations_frozen_target": 8845441,
+                "ic_rank_probes_mean_pooled": 2448320.0,
+                "rho_expected_steps": 9005150.0,
+                "ops_speedup_online_frozen_target": 1.018,
+                "ops_speedup_online_mean_target": 3.678,
+                "ops_speedup_total_mean_target_rank_precompute_charged": 0.00612,
+                "target_luck_factor": 0.2768,
+                "wall_speedup_median_all_runs": 8.181,
+                "wall_speedup_median_uncontended_runs": null,
+                "ic_to_rho_rate_ratio_median": 9.2,
+                "host_contended_runs": [
+                  "R1",
+                  "R2",
+                  "R3"
+                ]
+              }
             },
             "verdict": "N83_A1_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
             "claim_boundary": "Public synthetic Koblitz n=83 (a=1, b=1 over GF(2^83), 52.9-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point (sequential single-process arms, same host); constant-factor win only. The online walls are conservative: unrelated verification processes shared the host during the runs. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, no deployed-curve impact.",
@@ -1021,7 +1042,25 @@
                   "rho_peak_rss_bytes_max": 5199986688
                 },
                 "asymptotic_sub_rho": false,
-                "single_target_crossover": true
+                "single_target_crossover": true,
+                "operation_accounting": {
+                  "source": "experiments/koblitz-single-target-n73-20261003/claim_report_vs_rho.json#operation_accounting",
+                  "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                  "ic_online_operations_frozen_target": 457561,
+                  "ic_rank_probes_mean_pooled": 61301000.0,
+                  "rho_expected_steps": 30421800.0,
+                  "ops_speedup_online_frozen_target": 66.49,
+                  "ops_speedup_online_mean_target": 0.4963,
+                  "ops_speedup_total_mean_target_rank_precompute_charged": 0.0008257,
+                  "target_luck_factor": 134.0,
+                  "wall_speedup_median_all_runs": 1190.0,
+                  "wall_speedup_median_uncontended_runs": 184.9,
+                  "ic_to_rho_rate_ratio_median": 13.09,
+                  "host_contended_runs": [
+                    "R2",
+                    "R3"
+                  ]
+                }
               },
               "verdict": "N73_U128_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
               "recorded": "2026-10-05-pre-n83-rung"
@@ -1139,7 +1178,22 @@
                 },
                 "operation_count_boundary": "total operation-count comparison absent; S unknown (rho full charge accounting retained in the run rows)",
                 "asymptotic_sub_rho": false,
-                "single_target_crossover": true
+                "single_target_crossover": true,
+                "operation_accounting": {
+                  "source": "experiments/koblitz-single-target-n71-20261002/claim_report_vs_rho.json#operation_accounting",
+                  "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                  "ic_online_operations_frozen_target": 14554,
+                  "ic_rank_probes_mean_pooled": 2244770.0,
+                  "rho_expected_steps": 7809420.0,
+                  "ops_speedup_online_frozen_target": 536.6,
+                  "ops_speedup_online_mean_target": 3.479,
+                  "ops_speedup_total_mean_target_rank_precompute_charged": 0.005789,
+                  "target_luck_factor": 154.2,
+                  "wall_speedup_median_all_runs": 2864.0,
+                  "wall_speedup_median_uncontended_runs": 2864.0,
+                  "ic_to_rho_rate_ratio_median": 7.395,
+                  "host_contended_runs": []
+                }
               },
               "verdict": "N71_U128_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
               "recorded": "2026-10-02-pre-n73-rung"
@@ -1284,7 +1338,22 @@
                 },
                 "operation_count_boundary": "total operation-count comparison absent; S unknown (rho full charge accounting retained in runs/R4/rho.jsonl)",
                 "asymptotic_sub_rho": false,
-                "single_target_crossover": true
+                "single_target_crossover": true,
+                "operation_accounting": {
+                  "source": "experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json#operation_accounting",
+                  "units": "IC target probes vs rho walk steps, one operation each (uncalibrated, plan step 1.2)",
+                  "ic_online_operations_frozen_target": 227437,
+                  "ic_rank_probes_mean_pooled": 63992.7,
+                  "rho_expected_steps": 1448190.0,
+                  "ops_speedup_online_frozen_target": 6.367,
+                  "ops_speedup_online_mean_target": 22.63,
+                  "ops_speedup_total_mean_target_rank_precompute_charged": 0.03765,
+                  "target_luck_factor": 0.2814,
+                  "wall_speedup_median_all_runs": 75.83,
+                  "wall_speedup_median_uncontended_runs": 75.83,
+                  "ic_to_rho_rate_ratio_median": 8.887,
+                  "host_contended_runs": []
+                }
               },
               "recorded": "2026-10-02-third-single-target-rung",
               "verdict": "N61_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"

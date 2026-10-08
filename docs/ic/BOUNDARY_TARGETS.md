@@ -18,6 +18,14 @@ throughput, and shared-table amortization are secondary and need a separate
 declared question after the one-target result. No user keys, production
 secrets, or undeclared scalars.
 
+**Operation counts and host isolation (2026-10-07).** A wall ratio mixes the
+algorithmic comparison with each arm's implementation speed, so every
+`vs_rho` report also carries `operation_accounting`: both arms' online
+operation counts, their units, how the units compare, and their ratio
+(claim-check verifies it). Runs that shared the host with unrelated processes
+are flagged `host_contended` and are exploratory; a contended run must not be
+the promoted statistic. Promotion scripts run claim-check and refuse on FAIL.
+
 ---
 
 ## Measurement schema (fail closed)
@@ -47,7 +55,7 @@ it inapplicable (state why).
 | `relation_yield` | `n` (or `bits`); base id / hash; `eta` or coverage policy; `pr_decomposition` or hit-rate with CI; `trials_per_relation`; target mix (`natural` / `planted_sat` / `proven_unsat` counts) |
 | `rank` | `n` (or `bits`); `K` (orbit columns); `relations_collected`; `relations_needed` (usually `K` or `K+1`); `surplus`; `matrix_dims` `{rows,cols}`; `sparse_or_dense`; `rank_accumulation` (terminal rank + whether recomputed per row); `la_wall_ms` and/or `la_charged_ms` |
 | `end_to_end_dlp` | `n` (or `bits`); recovered `d` with `[d]G = Q`; stage timers (`factor_base`→`relations`→`la`→`verify`); `claim_boundary` (`synthetic_known_answer` / …) |
-| `vs_rho` | One target count; identical IC/rho public point; verified IC and rho scalars; target-specific online intervals and phase costs; `online_speedup = rho_online_ms / IC_online_ms`; `n` (or `bits`); `timing_class`; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); same resource envelope; `verdict`; `claim_boundary`; independent-replay pointer. Whole-process wall, batch throughput, and amortized tables are secondary only. |
+| `vs_rho` | One target count; identical IC/rho public point; verified IC and rho scalars; target-specific online intervals and phase costs; `online_speedup = rho_online_ms / IC_online_ms`; `n` (or `bits`); `timing_class`; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); same resource envelope; `verdict`; `claim_boundary`; independent-replay pointer; **`operation_accounting`** (`ic_online_operations`, `rho_online_operations`, `operation_units`, `unit_assumption`, `ops_speedup_online = rho / IC operations`). Whole-process wall, batch throughput, and amortized tables are secondary only. |
 
 Global provenance on every beat report: fixture hash, executable / source
 hash, host id, resource caps, seeds, and an explicit non-claim list.
@@ -134,7 +142,7 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 | `relation_yield` | At n=53, rank-guided eta 1/10 produced one verified four-sum relation for every requested public target; 1,244 target trials yielded 1,244 relations in the 1,024-target batch. Post-precomputation cost: 7.49 ms median, 27.38 ms p95 | Freeze and measure the same policy at growing n with target/probe tails and support density | Public-natural fixture domain; exact group checks; trials, probes, timing distribution, and policy hash retained | `autolab_n53_eta_sweep_20260912/results.json` |
 | `rank` | **n=53 minimum-rank accumulation**: guided eta 1/10 reached rank 221 in exactly 221 rows on every measured selection/holdout fixture; one factor-log table then served 1,023 targets with one row each; full transcript independently replayed | Growing-n shared-log rank/yield panel with the same guidance policy | Preserved rows or independent replay; matrix dimensions and LA time explicit; relation LA kept distinct from FFD | `runs/shared_factor_logs_n53_eta_1_10_full_batch4/`; `runs/shared_factor_logs_independent_replay.json` |
 | `end_to_end_dlp` | **1,024 public-synthetic n=53 known-answer targets** recovered with one retained factor-log table; all `[d]G = Q`, relation equations, and factor logs verified with zero replay discrepancies | Repeat at a second n≥53 rung or independent host under the same staged accounting | Public synthetic only; every target group-verified; support → rank → recover → verify timers present | `runs/shared_factor_logs_n53_eta_1_10_batch1024/`; independent replay |
-| `vs_rho` | **Sixth primary single-target online rung at n=83, a=1 (2026-10-06; first a=1 arm, first parallel-rank rung):** one previously unseen public target point solved online by IC (`koblitz_orbit_dlp_fast` wide path, a=1: 600 signed-Frobenius orbit columns, 99,600 base points, **zero pair-table entries**, ~5.75 GB peak RSS) and rho (`koblitz_rho_fixture` wide packed backend, A=166) on the identical frozen public point (Q, scalar 3141592653589793 validation-only sidecar). **Median 8.2× across three paired observations** (IC 5.6–7.9 s vs rho 43–71 s; range 5.5×–12.7×); deterministic 8,845,441-probe relation on all runs; both arms verified every run; standalone Python GF(2⁸³) replay PASS on all three. 52.9-bit subgroup (`r = 8569786107849059`, cofactor 1128547018); field `x^83+x^7+x^4+x^2+1`. Precompute used the **parallel guided rank** (`KIC_RANK_THREADS=12`, logs identical to the sequential path): 4.8 min wall (mean 2.48M probes/relation) vs the 5.1 h sequential n=73 rank. Margin smaller than n=73 because this rung's subgroup (2^52.9) is smaller than n=73's (2^56.3) — rho is easier here; online walls also conservative (unrelated host load). Constant-factor only — S unknown. Prior rungs retained in history: n=73 (median 1,189.7×), n=71 (2,864.1×), n=61, n=53, n=41 | A rho-projection-class rung at n=97 a=0 (r ~ 2^95, cofactor 4; online rho ~ 2^44 steps is not wall-runnable) or the u128-ceiling a=1 rungs (n=107/109/113/127, r ~ 2^107–2^115, cofactors 2/7114). ECC2K-130 itself (n=131, a=0, same curve family, `#E = 4·680564733841876926932320129493409985129`) needs u256 words, an implicit S3 index, and 130-bit sparse LA — see `RESEARCH_ECC2K130_IC_FEASIBILITY.md` | Exactly one unseen target; identical point + resources in both arms; online intervals exclude launch/loading/fixture generation/reusable setup; compact-orbit domain only; guided precompute (sequential or verified-parallel) establishes the reusable table; independent scalar replay; verified answer with speedup ≥ 1.20; multi-target amortized rows stay secondary | `experiments/koblitz-single-target-n83-20261006/` (claim_report_vs_rho.json, frozen fixture, R1–R3 raw runs + replays); `experiments/koblitz-single-target-n73-20261003/`; `runs_manual/koblitz_parallel_rank_n73_20261005/` |
+| `vs_rho` | **Sixth primary single-target online rung at n=83, a=1 (2026-10-06; first a=1 arm, first parallel-rank rung):** one previously unseen public target point solved online by IC (`koblitz_orbit_dlp_fast` wide path, a=1: 600 signed-Frobenius orbit columns, 99,600 base points, **zero pair-table entries**, ~5.75 GB peak RSS) and rho (`koblitz_rho_fixture` wide packed backend, A=166) on the identical frozen public point (Q, scalar 3141592653589793 validation-only sidecar). **Median 8.2× across three paired observations** (IC 5.6–7.9 s vs rho 43–71 s; range 5.5×–12.7×); deterministic 8,845,441-probe relation on all runs; both arms verified every run; standalone Python GF(2⁸³) replay PASS on all three. 52.9-bit subgroup (`r = 8569786107849059`, cofactor 1128547018); field `x^83+x^7+x^4+x^2+1`. Precompute used the **parallel guided rank** (`KIC_RANK_THREADS=12`, logs identical to the sequential path): 4.8 min wall (mean 2.48M probes/relation) vs the 5.1 h sequential n=73 rank. Margin smaller than n=73 because this rung's subgroup (2^52.9) is smaller than n=73's (2^56.3) — rho is easier here; online walls also conservative (unrelated host load). Constant-factor only; in operations (one probe = one rho step, uncalibrated) 1.0× on this frozen target and 3.7× on a mean target, and all three runs were host-contended — see §"Operation accounting" below. Prior rungs retained in history: n=73 (median 1,189.7×), n=71 (2,864.1×), n=61, n=53, n=41 | A rho-projection-class rung at n=97 a=0 (r ~ 2^95, cofactor 4; online rho ~ 2^44 steps is not wall-runnable) or the u128-ceiling a=1 rungs (n=107/109/113/127, r ~ 2^107–2^115, cofactors 2/7114). ECC2K-130 itself (n=131, a=0, same curve family, `#E = 4·680564733841876926932320129493409985129`) needs u256 words, an implicit S3 index, and 130-bit sparse LA — see `RESEARCH_ECC2K130_IC_FEASIBILITY.md` | Exactly one unseen target; identical point + resources in both arms; online intervals exclude launch/loading/fixture generation/reusable setup; compact-orbit domain only; guided precompute (sequential or verified-parallel) establishes the reusable table; independent scalar replay; verified answer with speedup ≥ 1.20; multi-target amortized rows stay secondary | `experiments/koblitz-single-target-n83-20261006/` (claim_report_vs_rho.json, frozen fixture, R1–R3 raw runs + replays); `experiments/koblitz-single-target-n73-20261003/`; `runs_manual/koblitz_parallel_rank_n73_20261005/` |
 
 Primary ledger verdict (single-target, achieved 2026-10-02): **`N71_U128_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (median 2,864.1×, range 1,532.8×–4,893.5×, three paired runs, Python replay PASS 15/15 each, zero pair-table entries) — fourth rung of the primary single-target ladder and the first past the old u64-packing ceiling (enabled by the `u128` field extension; every `n ≤ 63` fixture verified byte-identical after). Third rung **`N61_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (fresh 124.85×, frozen median 53.13×) is history, as are n=53 and n=41. (fresh reproduction 124.85×, frozen median 53.13×, four Python-replayed runs, zero pair-table entries) — third rung of the primary single-target ladder. Second rung: **`N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (51.0×–55.7×, two paired runs; explicit pair table this rung at 9.34 GB, logged). First rung: **`N41_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (17.7×–18.8×, three paired runs) — both are history. The prior multi-target verdict **`N53_PUBLIC_SYNTHETIC_SHARED_LOG_1024_PROCESS_WALL_CROSSOVER`** (compact-orbit shared-log DLP `koblitz_orbit_dlp_fast`, 86,112/86,112 independently replayed) is retained as historical secondary evidence only.
 
@@ -144,12 +152,52 @@ Primary ledger verdict (single-target, achieved 2026-10-02): **`N71_U128_COMPACT
 finite public-synthetic single-target online comparison on one frozen binary
 curve (52-bit subgroup) after reusable compact-orbit IC preparation on `u128`
 words (no explicit pair table at any stage). It is a constant-factor win only
-— it does not establish an asymptotic exponent below Pollard rho (the total
-operation-count boundary is not comparable; S unknown), an external/private
-target capability, production key recovery, or deployed-curve security impact.
-It is **not ECC2K-130 evidence** (n=131 is a different curve and field degree).
-The retained multi-target shared-log results remain secondary evidence and are
-not promoted by this record.
+— it does not establish an asymptotic exponent below Pollard rho, an
+external/private target capability, production key recovery, or deployed-curve
+security impact. It is **not ECC2K-130 evidence** (n=131 is a different curve
+and field degree). The retained multi-target shared-log results remain
+secondary evidence and are not promoted by this record. No rung is compared
+against Pollard rho with precomputation (Bernstein–Lange distinguished-point
+tables) at equal precompute and memory.
+
+### Operation accounting (2026-10-07)
+
+Generated by `research/sat_factor_base_review_20260908/autolab/op_accounting.py`
+from the retained run rows; the full block is `operation_accounting` in each
+rung's `claim_report_vs_rho.json`. One IC probe and one rho walk step each
+count as one operation; that is **not yet calibrated** on a common backend.
+"ops ×" is rho operations / IC operations (above 1: IC used fewer). The
+expected rho walk is `sqrt(πr/(4n))` on signed-Frobenius classes; the rank
+mean (probes per guided-rank relation, each a random subgroup point)
+estimates the online probes of a random target. "Luck" is rank mean /
+frozen-target probes.
+
+| rung | IC probes, frozen target | IC probes, rank mean | luck | rho steps, expected | ops ×, frozen target | ops ×, mean target | ops ×, rank precompute charged | wall ×, median | wall ×, uncontended | IC/rho ops per second |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| n=61 | 227,437 | 63,993 | 0.28 | 1.45M | 6.4 | 22.6 | 0.038 | 75.8 (R1–R4) | 75.8 | 8.9 |
+| n=71 | 14,554 | 2.24M | 154 | 7.81M | 537 | 3.5 | 0.0058 | 2,864 | 2,864 | 7.4 |
+| n=73 | 457,561 | 61.3M | 134 | 30.4M | 66.5 | 0.50 | 0.00083 | 1,190 | 184.9 (R1) | 13.1 |
+| n=83 | 8,845,441 | 2.45M | 0.28 | 9.01M | 1.02 | 3.7 | 0.0061 | 8.2 | none (R1–R3 contended) | 9.2 |
+
+Readings:
+
+- The IC probe loop runs 7–13× more operations per second than the rho
+  fixture, so the wall ratios overstate the operation ratios by that factor.
+- Every rung froze one target, and the IC scan is deterministic per target.
+  The n=71 and n=73 targets were 154× and 134× luckier than the rank mean;
+  on a mean target n=73 is 0.5× (rho ahead).
+- n=73 R2/R3 and all three n=83 runs shared the host with unrelated
+  processes (each rung's README). n=73's uncontended R1 is 184.9× wall.
+- With the rank precompute charged, IC spends 26–1,200× more operations
+  than one rho solve on every rung.
+- **Schema gap:** the n=73 and n=83 claim reports fail
+  `boundary_autolab.py claim-check --stage vs_rho` (12–13 required fields
+  and 4 provenance fields missing: they use `paired_runs` and medians
+  rather than the single-target field names). Their promotion scripts never
+  ran claim-check; they now do and refuse on FAIL. n=61 and n=71 PASS.
+- Plan and open steps: `docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md`
+  (calibration microbench, rho arm on the batched backend, ≥30-target
+  distributions, and the precomputed-rho arm).
 ---
 
 ## Regime C — Prime fields

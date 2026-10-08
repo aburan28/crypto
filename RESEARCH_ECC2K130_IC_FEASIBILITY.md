@@ -1,6 +1,7 @@
 # ECC2K-130 index-calculus feasibility and unexplored areas
 
-**Date:** 2026-10-05
+**Date:** 2026-10-05 (formulas and §3 operation counts corrected
+2026-10-07; see `docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md` F5)
 **Scope:** Where the compact-orbit Koblitz index-calculus ladder stands
 relative to Pollard rho on the actual ECC2K-130 challenge curve, what the
 measured rungs imply at n=131, and which areas remain unexplored for
@@ -32,9 +33,9 @@ packs rows as `u64` mod `r < 2⁶⁴`).
 Single-thread guided-rank measurements on the frozen K=600-column bases
 (fully charged precompute, excluded from the online claim):
 
-| rung | r (bits) | rank wall | probes/relation (mean) | B = 2nK points | 4-sums per point ≈ B⁴/r |
+| rung | r (bits) | rank wall | probes/relation (mean) | B = 2nK points | ordered 4-tuples per point ≈ B⁴/r |
 |---|---:|---:|---:|---:|---:|
-| n=61 | 47.5 | 13.1 s | ~4·10⁴ | 73,200 | 1.8·10⁵ |
+| n=61 | 47.2 | 13.1 s | ~4·10⁴ | 73,200 | 1.8·10⁵ |
 | n=71 | 52.3 | 1,485 s | ~4.6·10⁶ | 85,200 | 9.6·10³ |
 | n=73 | 56.3 | 18,398 s | 5.7·10⁷ | 87,600 | 6.9·10² |
 
@@ -45,8 +46,14 @@ Two independent reads of the same cliff:
    distribution; the n=73 target relation needed only 4.6·10⁵ probes,
    i.e. the median is far below the mean).
 2. **Structural count** — a uniform subgroup point has ≈ `B⁴/r` ordered
-   4-tuples of factor-base points summing to it; the scan space is
-   ≈ `4K²n²` probes per point, and their ratio reproduces the fit.
+   4-tuples of factor-base points summing to it (≈ `B⁴/(24r)` unordered;
+   this document counts ordered tuples unless it says otherwise); the
+   scan space is ≈ `4K²n²` probes per point, so their ratio gives
+   `probes/relation ≈ r/(4n²K²)`, i.e. `C = 0.25`.  This matches the fit's
+   `r/(n²K²)` scaling but not its constant: the fitted `C` is 1.3× (n=61)
+   to 6× (n=71) larger.  The gap is open (heavy-tailed rank distribution,
+   non-uniform hit positions, or scan overlap are candidates); the
+   extrapolation below uses the fit, `C = 1`.
 
 Extrapolating to n=131 (r = 6.8·10³⁸):
 
@@ -58,8 +65,9 @@ Extrapolating to n=131 (r = 6.8·10³⁸):
 | 10¹² | 4.0·10¹⁰ | 4.0·10²² | 6.8·10⁸ |
 
 The minimum K for the guided rank to work **at all** (≥ 1 expected
-4-sum per point) is `B⁴ > r`, i.e. `B > r^{1/4} = 5.1·10⁹` points,
-`K ≥ 2·10⁷` columns.  A *practical* yield (hundreds of decompositions per
+ordered 4-tuple per point) is `B⁴ > r`, i.e. `B > r^{1/4} = 5.1·10⁹`
+points, `K ≥ 2·10⁷` columns (≥ 1 unordered 4-sum: `B⁴ > 24r`,
+`K ≥ 4.3·10⁷`).  A *practical* yield (hundreds of decompositions per
 point, as at n=73) needs `K` between 10⁹ and 10¹² — with:
 
 - an S3 root index of `K²n ≈ 10¹⁹–10²⁵` states, so the **materialized root
@@ -76,10 +84,12 @@ point, as at n=73) needs `K` between 10⁹ and 10¹² — with:
   iterations; the repo's RTX PRO 6000 client sustains 6.9·10⁹ it/s, i.e.
   **≈ 10 GPU-years** on one card (the Certicom-scale effort).
 - **Compact-orbit 4-sum IC total work** ≈ `K·(probes/relation)` ≈
-  `r/(nK)` probes (both fits agree): at K = 10⁹ that is 4·10²⁵ probes —
-  **~2·10⁷ × rho's operation count**.  The precompute-only-equals-rho
-  crossover is `K = r/(n·2^60.9) ≈ 2.4·10¹⁸` columns, beyond any linear
-  algebra ever contemplated.
+  `r/(n²K)` probes (fit constant `C = 1`): at K = 10⁹ that is 4·10²⁵
+  probes — **~2·10⁷ × rho's operation count**.  The
+  precompute-only-equals-rho crossover is `K = r/(n²·2^60.9) ≈ 1.8·10¹⁶`
+  columns, beyond any linear algebra ever contemplated.  (Corrected
+  2026-10-07: this bullet previously wrote `r/(nK)` and `2.4·10¹⁸`, off
+  by a factor `n`; the tables always used `r/(n²K)`.)
 - Therefore the landed rungs' vs_rho wins are **online-after-precompute**
   (`single_target_online` timing class): legitimate under the frozen
   contract (precompute excluded, logged, reusable across targets), but the
@@ -87,19 +97,35 @@ point, as at n=73) needs `K` between 10⁹ and 10¹² — with:
   current 4-sum shape cannot reach it**.  At n=73 the fully-charged
   precompute is 18,400 s vs rho online 46 s — a ~400× total-work
   deficit, traded for a ~185× online win and amortization over targets.
+- **The online wins are smaller in operations than in wall time
+  (2026-10-07).**  The IC probe loop runs 7–13× more operations per
+  second than the rho fixture, and each rung froze one target.  Counting
+  one probe as one rho step (uncalibrated), the online ratio on a *mean*
+  target (rank-stage mean probes vs the expected rho walk) is 23× at
+  n=61, 3.5× at n=71, 0.5× at n=73 and 3.7× at n=83; the frozen n=71
+  and n=73 targets were 154× and 134× luckier than that mean.  With the
+  rank precompute charged, IC spends 26–1,200× more operations than one
+  rho solve on every rung.  None of this is compared against rho with
+  precomputation yet.  Per-rung numbers: `docs/ic/BOUNDARY_TARGETS.md`
+  §"Operation accounting".
 
 **Conclusion for ecc2k-130:** with 4-sum relations, index calculus
 does not beat rho on total work at the challenge scale; it can only win
-the online class, and only if a precompute of `r/(nK)` probes is paid
+the online class, and only if a precompute of `r/(n²K)` probes is paid
 once.  Beating rho on total work requires a relation-shape change
 (higher-arity sums), not engineering.
 
 ## 4. Unexplored areas (ecc2k-130)
 
 1. **Higher-arity relations (m=5, 6).**  With 5-sums, decompositions per
-   point scale as `B⁵/(120r)` instead of `B⁴/(24r)`: at n=131, K=10⁹,
-   B=2.6·10¹¹ gives ~10¹⁴ decompositions/point (vs ~0.017 at 4-sums —
-   the B⁴/r bound that kills 4-sums).  The repo already carries exact
+   point scale as `B⁵/(120r)` instead of `B⁴/(24r)` (unordered): at
+   n=131, K=10⁹, B=2.6·10¹¹ gives ≈1.5·10¹⁶ 5-sums per point vs
+   ≈2.9·10⁵ 4-sums.  Decompositions exist at 4-sums too at this K; what
+   kills the 4-sum shape is the scan cost `r/(n²K²)` ≈ 4·10¹⁶ probes
+   per relation, so 5-sums pay only if an extraction finds one in far
+   fewer probes.  (Corrected 2026-10-07: this item previously said ~10¹⁴
+   and ~0.017, which do not follow from the stated formulas at
+   K=10⁹.)  The repo already carries exact
    S5 machinery (compact-orbit S5 formula, 22,887 clauses at n=53) and
    the n=31 m=2 F4 cell; an m=5 *extraction* oracle for the compact-orbit
    domain (not SAT, direct S3-chain like `extract128`) is the missing
@@ -198,10 +224,12 @@ Readings:
   scalar multiplication but is invisible to both rho and IC.
 - Unexplored levers for prime fields (all open): S₄/S₅-based
   3-decomposition relations (the repo has `binary_semaev_s4`; the prime
-  twin is unmeasured beyond toys), SAT/Gröbner decomposition oracles
-  past the current 2-sum search, and isogeny-walk factor bases
-  (Couveignes–Lercier elliptic periods — noted as unimplemented in
-  `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` §"Open problems").
+  twin is unmeasured beyond toys) and SAT/Gröbner decomposition oracles
+  past the current 2-sum search.  Couveignes–Lercier elliptic periods,
+  previously listed here, do not apply: they build Galois-invariant
+  bases of an extension `F_{q^n}/F_q`, and a prime field has no such
+  extension (closed 2026-10-07; see `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`
+  §"Open problems").
 
 ## 6. Evidence pointers (this session)
 
