@@ -16,8 +16,8 @@ use std::env;
 use std::fs;
 
 use crypto_lib::cryptanalysis::jv_isogeny_walk::{
-    exact_census_full, run_end_to_end, run_walk, run_walk2, summarize_walk2, trace_census,
-    EndToEndReport, ExactCensus, TraceCensus, Walk2Report, WalkReport,
+    characterize_weak, exact_census_full, run_end_to_end, run_walk, run_walk2, summarize_walk2,
+    trace_census, EndToEndReport, ExactCensus, TraceCensus, Walk2Report, WalkReport,
 };
 
 fn main() {
@@ -31,6 +31,7 @@ fn main() {
     let mut v2 = false;
     let mut closure = false;
     let mut summarize: Vec<String> = Vec::new();
+    let mut characterize: Vec<String> = Vec::new();
     let mut census = false;
     let mut exact = false;
     let mut uniform = 0u64;
@@ -66,6 +67,7 @@ fn main() {
             "--v2" => v2 = true,
             "--closure" => closure = true,
             "--summarize" => summarize.push(next(&mut i)),
+            "--characterize" => characterize.push(next(&mut i)),
             "--census" => census = true,
             "--exact-census" => exact = true,
             "--uniform" => uniform = next(&mut i).parse().expect("--uniform"),
@@ -229,6 +231,17 @@ fn main() {
                 fs::write(path, serde_json::to_string_pretty(&rows).unwrap()).expect("write json");
             }
         }
+        return;
+    }
+    if !characterize.is_empty() {
+        let mut all: Vec<ExactCensus> = Vec::new();
+        for path in &characterize {
+            let text = fs::read_to_string(path).expect("read json");
+            let rows: Vec<ExactCensus> = serde_json::from_str(&text).expect("parse json");
+            all.extend(rows);
+        }
+        all.sort_by_key(|r| r.p);
+        print!("{}", characterize_weak(&all));
         return;
     }
     if !summarize.is_empty() {

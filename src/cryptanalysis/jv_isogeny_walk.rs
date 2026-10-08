@@ -2135,6 +2135,93 @@ pub fn exact_census_full(p: u64, seed: u64, n: u64, n_uniform: u64) -> ExactCens
     }
 }
 
+/// §18.3 (exploratory, post hoc): what distinguishes the weak classes.
+/// Weak membership depends only on the trace `t`, because the Weil
+/// restriction's characteristic polynomial over `F_q` is `T⁶ − tT³ + q³`.
+/// From frozen `ExactCensus` files: for the full-2-torsion classes the
+/// random sample met, the weak fraction by `v₂(D)`, `v₃(D)`, `t mod 3`,
+/// `t mod 8` and a class-size proxy (the class's multiplicity among the
+/// uniform all-curve sample), with `D = t² − 4q³`; plus twist symmetry
+/// (`t` weak ⟹ `−t` weak).  A feature that separates shows fractions of
+/// only 0 and 1.  Labelled exploratory; a rule found here is a candidate,
+/// to be registered and tested on a size it was not fitted on.
+pub fn characterize_weak(reports: &[ExactCensus]) -> String {
+    use std::collections::{BTreeMap, HashSet as HSet};
+    use std::fmt::Write;
+    fn val(mut n: i128, p: i128) -> u32 {
+        n = n.abs();
+        if n == 0 {
+            return 99;
+        }
+        let mut k = 0;
+        while n % p == 0 {
+            n /= p;
+            k += 1;
+        }
+        k
+    }
+    let mut out = String::new();
+    for r in reports {
+        let q3 = (r.p as i128).pow(6);
+        let weak: HSet<i128> = r.weak_traces.iter().map(|&(t, _)| t).collect();
+        let classes: HSet<i128> = r.random_traces.iter().copied().collect();
+        let mut umult: HashMap<i128, u64> = HashMap::new();
+        for &t in &r.uniform_traces {
+            *umult.entry(t).or_insert(0) += 1;
+        }
+        let twist_ok = weak.iter().filter(|t| weak.contains(&-**t)).count();
+        let _ = writeln!(
+            out,
+            "\n### p = {}: {} weak classes (exact), {} full-2-torsion classes sampled, {:.1} % of them weak; weak set closed under t ↦ −t: {}/{}",
+            r.p,
+            weak.len(),
+            classes.len(),
+            100.0 * classes.iter().filter(|t| weak.contains(t)).count() as f64
+                / classes.len().max(1) as f64,
+            twist_ok,
+            weak.len()
+        );
+        let mut feats: Vec<(&str, BTreeMap<String, (u64, u64)>)> = vec![
+            ("v2(D)", BTreeMap::new()),
+            ("v3(D)", BTreeMap::new()),
+            ("t mod 3", BTreeMap::new()),
+            ("t mod 8", BTreeMap::new()),
+            ("class size proxy (uniform hits)", BTreeMap::new()),
+        ];
+        for &t in &classes {
+            let d = t * t - 4 * q3;
+            let w = weak.contains(&t) as u64;
+            let um = *umult.get(&t).unwrap_or(&0);
+            let vals = [
+                format!("{}", val(d, 2)),
+                format!("{}", val(d, 3)),
+                format!("{}", t.rem_euclid(3)),
+                format!("{}", t.rem_euclid(8)),
+                format!("{}", um.min(4)),
+            ];
+            for (i, v) in vals.into_iter().enumerate() {
+                let e = feats[i].1.entry(v).or_insert((0, 0));
+                e.0 += w;
+                e.1 += 1;
+            }
+        }
+        for (name, m) in &feats {
+            let cells: Vec<String> = m
+                .iter()
+                .map(|(v, (w, n))| format!("{v}: {:.2} ({n})", *w as f64 / *n as f64))
+                .collect();
+            let separates = m.values().all(|(w, n)| *w == 0 || *w == *n);
+            let _ = writeln!(
+                out,
+                "- {name}{}: {}",
+                if separates { " — SEPARATES" } else { "" },
+                cells.join(" · ")
+            );
+        }
+    }
+    out
+}
+
 /// The derived tables of ledger §17.5, printed from frozen `Walk2Report`s
 /// (so that every number in the note is printed by this code from the
 /// experiment file, never computed by hand): per size, the success rate
