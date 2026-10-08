@@ -208,3 +208,24 @@ def test_image_digest_inspect_format_per_engine():
     assert d == {"image": "localhost/x:latest", "id": "sha256:abc", "digest": "sha256:def"}
     p = PodmanBackend(run=run, which=which).resolve_image("localhost/x:latest", "never")
     assert p["digest"] == "sha256:def" and "{{.Digest}}" in " ".join(seen[-1])
+
+
+def test_cli_result_section_matches_the_mcp_view(monkeypatch, capsys):
+    import json as _json
+    from isolab import cli
+    from isolab.views import result_view
+    res = {"job_id": "j1", "status": "succeeded", "outcome_class": "ok", "worker": "w", "attempt": 1,
+           "fidelity": {"policy": "standard", "tier": "B", "grade": "B", "contended": False, "violations": []},
+           "placement": {"cpus": [2]}, "host": {"hostname": "h"},
+           "runs": [{"index": 0, "warmup": False, "exit_code": 0, "wall_s": 1.0, "checks": [], "conditions": {}}]}
+    monkeypatch.setattr(cli, "_run", lambda fn: res)
+    for section in ("summary", "fidelity", "host", "full"):
+        cli.main(["result", "j1", "--section", section])
+        assert _json.loads(capsys.readouterr().out) == _json.loads(_json.dumps(result_view(res, section), default=str))
+    cli.main(["result", "j1"])  # the CLI default stays the whole result
+    assert _json.loads(capsys.readouterr().out) == res
+    with pytest.raises(SystemExit, match="unknown section"):
+        cli.main(["result", "j1", "--section", "nope"])
+    monkeypatch.setattr(cli, "_run", lambda fn: None)
+    with pytest.raises(SystemExit, match="no result yet"):
+        cli.main(["result", "j1"])
