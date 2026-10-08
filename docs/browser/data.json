@@ -3,26 +3,29 @@
  "generated_by": "scripts/build_lab_browser.py",
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
-  "curves": 115,
-  "methods": 46,
+  "curves": 121,
+  "methods": 49,
   "factor_bases": 29,
   "candidates": 258,
   "rounds": 30,
-  "sessions": 25,
+  "sessions": 28,
   "yields": 1956
  },
  "sources": {
-  "docs/curves/registry.json": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3",
-  "docs/curves/covers.json": "5f90fe0c1dfaa5cd2bd187a87dfd5ee5985c4d0171ea93e7874f9246527aaf9b",
-  "docs/ic/leaderboard.json": "bf8e682b1fd3fdeb9a11f9644ccc315cf8d9731ddfac5d4f1f2979716cd34b36",
+  "docs/curves/registry.json": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+  "docs/curves/covers.json": "b1634d75fff27add2e27adf996ba820a8852ea72468088d9eb3c88bb69759a39",
+  "docs/ic/leaderboard.json": "be92db5f036a2f94bb0b33a08a72b8da03d472e460049047509deac86a565dc3",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
   "research/ecbench_all_candidates_20261003/sessions/prime/records.jsonl": "6e5745b63dde26261040f0585363c3337da5569afb17abbe8eeb0275a4b902aa",
+  "research/ecbench_bounds_challenges_20261006/sessions/koblitz-toy-reference-e1/records.jsonl": "e2c5f797f7d04fbe4cb74a662a2f6b54d77e0cb38ddb0b9bb149cfd7b7b0c080",
+  "research/ecbench_bounds_challenges_20261006/sessions/prime-toy-reference-e1/records.jsonl": "27ea1485e5f840882af010f92ba78f16f2d4e365f67eed18a77f0892283b4f47",
   "research/ecbench_calibration_20261002/sessions/followup-koblitz/records.jsonl": "5893554789019f108376e2461dd389400af0a1aa86190a75fefcd8d435123bfd",
   "research/ecbench_calibration_20261002/sessions/followup-prime/records.jsonl": "87a60d048f8cb81bd302e560ae5dd4de197fb649599c214a1fb33fc3c0ef8c56",
   "research/ecbench_calibration_20261002/sessions/koblitz/records.jsonl": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
   "research/ecbench_calibration_20261002/sessions/prime/records.jsonl": "6945241ed68dbcfa2e1e8e86e2af6fc3879d69eb689ea5b6a72215054149d362",
+  "research/ecbench_m83_rho_20261005/sessions/calibration/records.jsonl": "8977db2d19cb027baa4d0e2b704b2c7eed026eea0380bd5f3cb4fba3c727827d",
   "research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01/records.jsonl": "d639e9a9ff8c5d152291bcae0683c070cd7a130b4359a27f59a25c5df06ca284",
   "research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/records.jsonl": "d7cddb33e59f86460acbe77e87d3e68ce0cfbf4c6fb46c0647bd9643072303fd",
   "research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01/records.jsonl": "60838cb661b6df9ba801cca089975ce0d6bca259e1bb18f148461340fbe0f169",
@@ -753,6 +756,102 @@
    }
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "icv1": "ICV1:f2m-11-4c26487e:67:1982:0x1:-7:unk:r:ae0facd240e8",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 11,
+    "degree": 11,
+    "modulus": "0x913"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "67",
+   "order": "1982",
+   "order_bits": 10.936,
+   "r": "991",
+   "r_bits": 9.936,
+   "cofactor": 2,
+   "generator": [
+    "0x4a9",
+    "0x3ef"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-4c26487e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x913\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N11Ce1h41243ed45ca3"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:41243ed45ca391b7b99cc37e02cfcd9ad4ae329b034049781a11c9701f91ab59"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "ae0facd240e84e43254c1fb74f0851b186e405bce8ed4a264913dd67d2d9a894",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m11-t67-ae0facd2",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
    "family": "koblitz",
@@ -1408,6 +1507,102 @@
    }
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "icv1": "ICV1:f2m-13-517bd51f:-181:8374:0x1:-7:unk:r:e4cd523ec44f",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 13,
+    "degree": 13,
+    "modulus": "0x3d33"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-181",
+   "order": "8374",
+   "order_bits": 13.022,
+   "r": "79",
+   "r_bits": 6.234,
+   "cofactor": 106,
+   "generator": [
+    "0x112d",
+    "0xbe3"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-517bd51f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3d33\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N13Ce1h98fd3bab3884"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:98fd3bab3884fa9d550cb6f4afeb86a8ce5cb7b973875cf7ecfe1197de65338c"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "e4cd523ec44fc00eb103a3ea48f2c4b6b6d11634ca16b0a83f0043565dd88a5e",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m13-tm181-e4cd523e",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
    "family": "koblitz",
@@ -1506,6 +1701,102 @@
     "model_sha256": "2d22ff5d351f96e9c028bb789f008bfcb31c6f84d9c1aa2868e957ec1bfaca90",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
     "slug": "icv1-f2m15-tm275-2d22ff5d",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "icv1": "ICV1:f2m-15-bcb514a8:275:32494:0x1:-7:unk:r:25edae8389f1",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 15,
+    "degree": 15,
+    "modulus": "0x8035"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "275",
+   "order": "32494",
+   "order_bits": 14.983,
+   "r": "211",
+   "r_bits": 7.648,
+   "cofactor": 154,
+   "generator": [
+    "0x8e4",
+    "0x203a"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-bcb514a8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8035\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N15Ce1h68b09ca2a6f8"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:68b09ca2a6f858390f7dfbd1021e3b41ff530d8c7d0161893a0693b9fdfd8a56"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n15-l5"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "25edae8389f13e4f7ba13ea611b2ae6c61d85c6409a79c7f39e3582c2535219c",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m15-t275-25edae83",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -1717,7 +2008,7 @@
    },
    "a": "1",
    "b": "0x1",
-   "construction": "KoblitzCurve::new(1, 17)",
+   "construction": null,
    "trace": "-101",
    "order": "131174",
    "order_bits": 17.001,
@@ -1725,33 +2016,36 @@
    "r_bits": 16.001,
    "cofactor": 2,
    "generator": [
-    "0xaaad",
-    "0x5b2b"
+    "0x1fa03",
+    "0xd814"
    ],
    "target_group": "prime-order subgroup",
    "j": "0x1",
    "endomorphism_discriminant": "-7",
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
    "ec1": [
+    "EC1N17Ce1h381f66e2762a",
     "EC1N17Ce1hdfbf24105ef5"
    ],
    "curve_uid": [
+    "urn:ec-record:1:sha256:381f66e2762a47b4af4fe5a8b915914be8cbc242ecad57198264dc254c63d57e",
     "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
    ],
    "ec1_unresolved": null,
    "retired_names": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
     "K_1/2^17",
     "K_1/F_2^17"
    ],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -2045,6 +2339,36 @@
      "verified": 6,
      "mean_s": 1.7578,
      "mean_ratio_to_floor": 8.178
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.4472,
+     "mean_ratio_to_floor": 6.733
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.066,
+     "mean_ratio_to_floor": 18.917
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.066,
+     "mean_ratio_to_floor": 18.917
     },
     {
      "session_id": "ECBS1h73210d525d59",
@@ -2917,6 +3241,36 @@
      "mean_ratio_to_floor": 3528.538
     },
     {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.7604,
+     "mean_ratio_to_floor": 3.74
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.0821,
+     "mean_ratio_to_floor": 15.16
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.0821,
+     "mean_ratio_to_floor": 15.16
+    },
+    {
      "session_id": "ECBS1hb0cb85a662d8",
      "arm": "ic-sub6-mitm",
      "method": "ic.pipeline",
@@ -3510,7 +3864,7 @@
    },
    "a": "1",
    "b": "0x1",
-   "construction": "KoblitzCurve::new(1, 19)",
+   "construction": null,
    "trace": "-797",
    "order": "525086",
    "order_bits": 19.002,
@@ -3518,33 +3872,36 @@
    "r_bits": 18.002,
    "cofactor": 2,
    "generator": [
-    "0x6001e",
-    "0x798a"
+    "0x7e3ea",
+    "0x24541"
    ],
    "target_group": "prime-order subgroup",
    "j": "0x1",
    "endomorphism_discriminant": "-7",
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
    "ec1": [
+    "EC1N19Ce1h6186a62ebfaa",
     "EC1N19Ce1h7e63aa468dcc"
    ],
    "curve_uid": [
+    "urn:ec-record:1:sha256:6186a62ebfaa1d11afc99ffa6ef0b9067190b7a03bc67150c379ffbf30e6a7d9",
     "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23"
    ],
    "ec1_unresolved": null,
    "retired_names": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
     "K_1/2^19",
     "K_1/F_2^19"
    ],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -3553,9 +3910,9 @@
      "log2_r": 18.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 4.872889458440391,
-     "ratio_rho": 14.896649773263793,
-     "ratio_floor": 120.62428246801784,
+     "best_s": 4.87288945844,
+     "ratio_rho": 14.8966497733,
+     "ratio_floor": 120.624282468,
      "verified": true
     }
    ],
@@ -4161,6 +4518,36 @@
      "mean_ratio_to_floor": 13107.556
     },
     {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.4404,
+     "mean_ratio_to_floor": 2.383
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0885,
+     "mean_ratio_to_floor": 5.89
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0885,
+     "mean_ratio_to_floor": 5.89
+    },
+    {
      "session_id": "ECBS1hf4c34c2455f9",
      "arm": "bsgs",
      "method": "bsgs.textbook",
@@ -4728,9 +5115,9 @@
      "log2_r": 22.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 1.432406399234411,
-     "ratio_rho": 6.988294347307033,
-     "ratio_floor": 39.01229984655938,
+     "best_s": 1.43240639923,
+     "ratio_rho": 6.98829434731,
+     "ratio_floor": 39.0122998466,
      "verified": true
     }
    ],
@@ -4796,6 +5183,102 @@
      "mean_ratio_to_floor": 8.192
     }
    ],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "icv1": "ICV1:f2m-23-bb3650c7:-5197:8393806:0x1:-7:unk:r:a023238e6474",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 23,
+    "degree": 23,
+    "modulus": "0xdcf5eb"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-5197",
+   "order": "8393806",
+   "order_bits": 23.001,
+   "r": "4196903",
+   "r_bits": 22.001,
+   "cofactor": 2,
+   "generator": [
+    "0x2e62c9",
+    "0x55e90c"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-bb3650c7\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0xdcf5eb\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N23Ce1he238479aae6d"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:e238479aae6dae6c48e4c249888db39e58360f2d9d6fd36418f9648bcc0d8b80"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
    "factor_bases": [],
    "tournament_cells": [
     {
@@ -4948,9 +5431,9 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "model_sha256": "a023238e6474f945bd8be7ddb502618b652064406ac23760b8ab5560b58ac039",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "slug": "icv1-f2m23-tm5197-a023238e",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -5009,6 +5492,36 @@
    "on_leaderboard": false,
    "leaderboard": [],
    "ecbench": [
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1733,
+     "mean_ratio_to_floor": 7.129
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5383,
+     "mean_ratio_to_floor": 27.577
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5383,
+     "mean_ratio_to_floor": 27.577
+    },
     {
      "session_id": "ECBS1hb0cb85a662d8",
      "arm": "ic-sub6-mitm",
@@ -5214,6 +5727,102 @@
     "FB1h280d69cfbf38",
     "FB1h3a3262d6867f"
    ],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "icv1": "ICV1:f2m-29-797da7cf:-40309:536911222:0x1:-7:unk:r:6aecea52fac9",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 29,
+    "degree": 29,
+    "modulus": "0x3a0b7cb9"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-40309",
+   "order": "536911222",
+   "order_bits": 29.0,
+   "r": "42457",
+   "r_bits": 15.296,
+   "cofactor": 12646,
+   "generator": [
+    "0x1a849ba3",
+    "0x4b3542e"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-797da7cf\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3a0b7cb9\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N29Ce1h7fed23ba87ea"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:7fed23ba87eaf8303f4a16985bb0e665733faae9285069c5a430a9bdd9fab8a7"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
    "tournament_cells": [
     {
      "round": "round-0016",
@@ -5329,9 +5938,9 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "model_sha256": "6aecea52fac93749eeedfd85e1121feaed9eb35764396fcadf862d8411b40307",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "slug": "icv1-f2m29-tm40309-6aecea52",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -5551,6 +6160,102 @@
    }
   },
   {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "icv1": "ICV1:f2m-31-eaa21191:90707:2147392942:0x1:-7:unk:r:5fc996f03a86",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 31,
+    "degree": 31,
+    "modulus": "0x851e410f"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "90707",
+   "order": "2147392942",
+   "order_bits": 31.0,
+   "r": "41231",
+   "r_bits": 15.258,
+   "cofactor": 52082,
+   "generator": [
+    "0x6347c766",
+    "0xc3503f0"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-eaa21191\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x851e410f\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N31Ce1h6be2d6a625f9"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:6be2d6a625f9a828dca420147995b710ca572754e3fde55313ff248ee4ec42cc"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n31-l8"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "5fc996f03a86af22aab8a078ea9e1e59ea1c188a4ca0ab837b81ee91fb31b322",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m31-t90707-5fc996f0",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
    "slug": "icv1-f2m31-t90707-8fd18741",
    "icv1": "ICV1:f2m-31-200700ef:90707:2147392942:0x1:-7:unk:r:8fd187414f75",
    "family": "koblitz",
@@ -5699,9 +6404,9 @@
      "log2_r": 27.78,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.48528077638942624,
-     "ratio_rho": 5.260801523504233,
-     "ratio_floor": 16.763524472349825,
+     "best_s": 0.485280776389,
+     "ratio_rho": 5.2608015235,
+     "ratio_floor": 16.7635244723,
      "verified": true
     }
    ],
@@ -6283,9 +6988,9 @@
      "log2_r": 39.0,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 5.580644298617035,
-     "ratio_rho": 8.044290213253069,
-     "ratio_floor": 40.3210032810846,
+     "best_s": 5.58064429862,
+     "ratio_rho": 8.04429021325,
+     "ratio_floor": 40.3210032811,
      "verified": true
     },
     {
@@ -6293,9 +6998,9 @@
      "log2_r": 39.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.24079642651229552,
-     "ratio_rho": 3.6156712977275385,
-     "ratio_floor": 8.756153147889457,
+     "best_s": 0.240796426512,
+     "ratio_rho": 3.61567129773,
+     "ratio_floor": 8.75615314789,
      "verified": true
     }
    ],
@@ -6536,9 +7241,9 @@
      "log2_r": 32.11,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.3248333744103279,
-     "ratio_rho": 4.875031509653909,
-     "ratio_floor": 12.09668173360119,
+     "best_s": 0.32483337441,
+     "ratio_rho": 4.87503150965,
+     "ratio_floor": 12.0966817336,
      "verified": true
     }
    ],
@@ -6796,9 +7501,9 @@
      "log2_r": 24.8,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.8563454652154826,
-     "ratio_rho": 7.190079591360827,
-     "ratio_floor": 32.62320627281522,
+     "best_s": 0.856345465215,
+     "ratio_rho": 7.19007959136,
+     "ratio_floor": 32.6232062728,
      "verified": true
     }
    ],
@@ -6910,9 +7615,9 @@
      "log2_r": 36.64,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 4.267748993706104,
-     "ratio_rho": 4.946769165949517,
-     "ratio_floor": 33.01435804053309,
+     "best_s": 4.26774899371,
+     "ratio_rho": 4.94676916595,
+     "ratio_floor": 33.0143580405,
      "verified": true
     },
     {
@@ -6920,9 +7625,9 @@
      "log2_r": 36.64,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.23441213095035382,
-     "ratio_rho": 3.8928784425876555,
-     "ratio_floor": 9.12641881482961,
+     "best_s": 0.23441213095,
+     "ratio_rho": 3.89287844259,
+     "ratio_floor": 9.12641881483,
      "verified": true
     }
    ],
@@ -7086,9 +7791,9 @@
      "log2_r": 44.26,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 7.398810637067995,
-     "ratio_rho": 14.703867319407847,
-     "ratio_floor": 60.779189777284564,
+     "best_s": 7.39881063707,
+     "ratio_rho": 14.7038673194,
+     "ratio_floor": 60.7791897773,
      "verified": true
     },
     {
@@ -7096,13 +7801,53 @@
      "log2_r": 44.26,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.2605273559740867,
-     "ratio_rho": 5.113845470925767,
-     "ratio_floor": 10.77116427992114,
+     "best_s": 0.260527355974,
+     "ratio_rho": 5.11384547093,
+     "ratio_floor": 10.7711642799,
      "verified": true
     }
    ],
    "ecbench": [
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.119,
+     "mean_ratio_to_floor": 0.977
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1063,
+     "mean_ratio_to_floor": 0.873
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.125,
+     "mean_ratio_to_floor": 1.027
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1099,
+     "mean_ratio_to_floor": 0.903
+    },
     {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
@@ -7259,9 +8004,9 @@
      "log2_r": 38.0,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 8.12117350520502,
-     "ratio_rho": 1.9845626541276857,
-     "ratio_floor": 69.18489342115318,
+     "best_s": 8.12117350521,
+     "ratio_rho": 1.98456265413,
+     "ratio_floor": 69.1848934212,
      "verified": true
     }
    ],
@@ -7372,13 +8117,53 @@
      "log2_r": 44.52,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 9.032810277716749,
-     "ratio_rho": 15.668163853624774,
-     "ratio_floor": 78.2895782821557,
+     "best_s": 9.03281027772,
+     "ratio_rho": 15.6681638536,
+     "ratio_floor": 78.2895782822,
      "verified": true
     }
    ],
    "ecbench": [
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1123,
+     "mean_ratio_to_floor": 0.973
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1059,
+     "mean_ratio_to_floor": 0.918
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1245,
+     "mean_ratio_to_floor": 1.079
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1055,
+     "mean_ratio_to_floor": 0.915
+    },
     {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
@@ -7538,9 +8323,9 @@
      "log2_r": 47.21,
      "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 15.14900664715143,
-     "ratio_rho": 31.599405794913018,
-     "ratio_floor": 133.50702947303913,
+     "best_s": 15.1490066472,
+     "ratio_rho": 31.5994057949,
+     "ratio_floor": 133.507029473,
      "verified": true
     },
     {
@@ -7548,13 +8333,53 @@
      "log2_r": 47.21,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.4884575885497573,
-     "ratio_rho": 9.202036756044834,
-     "ratio_floor": 21.66522289873162,
+     "best_s": 0.48845758855,
+     "ratio_rho": 9.20203675604,
+     "ratio_floor": 21.6652228987,
      "verified": true
     }
    ],
    "ecbench": [
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1176,
+     "mean_ratio_to_floor": 1.036
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1275,
+     "mean_ratio_to_floor": 1.123
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.126,
+     "mean_ratio_to_floor": 1.111
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.127,
+     "mean_ratio_to_floor": 1.119
+    },
     {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
@@ -10766,12 +11591,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 13.994265033718973,
+     "log2_r": 13.9942650337,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 26.313945594196156,
-     "ratio_rho": 13.069161008261789,
-     "ratio_floor": 29.692108012575694,
+     "best_s": 26.3139455942,
+     "ratio_rho": 13.0691610083,
+     "ratio_floor": 29.6921080126,
      "verified": true
     }
    ],
@@ -11646,12 +12471,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 14.997841035008591,
+     "log2_r": 14.997841035,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 21.30470007604251,
-     "ratio_rho": 10.621069650895725,
-     "ratio_floor": 24.039779727024555,
+     "best_s": 21.304700076,
+     "ratio_rho": 10.6210696509,
+     "ratio_floor": 24.039779727,
      "verified": true
     }
    ],
@@ -11950,12 +12775,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 19.998217158598404,
+     "log2_r": 19.9982171586,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 24.390627126303627,
-     "ratio_rho": 17.986362549690746,
-     "ratio_floor": 27.521875521715703,
+     "best_s": 24.3906271263,
+     "ratio_rho": 17.9863625497,
+     "ratio_floor": 27.5218755217,
      "verified": true
     }
    ],
@@ -12546,12 +13371,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 21.000262077754154,
+     "log2_r": 21.0002620778,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 27.240364296650327,
-     "ratio_rho": 23.025248464568847,
-     "ratio_floor": 30.737459576432638,
+     "best_s": 27.2403642967,
+     "ratio_rho": 23.0252484646,
+     "ratio_floor": 30.7374595764,
      "verified": true
     }
    ],
@@ -12850,12 +13675,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 24.414902680079198,
+     "log2_r": 24.4149026801,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 36.929397566960354,
-     "ratio_rho": 38.21077630869644,
-     "ratio_floor": 41.67036286794578,
+     "best_s": 36.929397567,
+     "ratio_rho": 38.2107763087,
+     "ratio_floor": 41.6703628679,
      "verified": true
     }
    ],
@@ -13334,12 +14159,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 9.684748620421626,
+     "log2_r": 9.68474862042,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 22.84909965469822,
-     "ratio_rho": 6.338382939564868,
-     "ratio_floor": 25.782448037250745,
+     "best_s": 22.8490996547,
+     "ratio_rho": 6.33838293956,
+     "ratio_floor": 25.7824480373,
      "verified": true
     }
    ],
@@ -13524,12 +14349,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 11.925183519434208,
+     "log2_r": 11.9251835194,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 15.617808489239641,
-     "ratio_rho": 5.4703789655979405,
-     "ratio_floor": 17.622809734945452,
+     "best_s": 15.6178084892,
+     "ratio_rho": 5.4703789656,
+     "ratio_floor": 17.6228097349,
      "verified": true
     }
    ],
@@ -13792,12 +14617,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 13.986464267334126,
+     "log2_r": 13.9864642673,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.07494054076345,
-     "ratio_rho": 6.42943611579286,
-     "ratio_floor": 14.753490517210013,
+     "best_s": 13.0749405408,
+     "ratio_rho": 6.42943611579,
+     "ratio_floor": 14.7534905172,
      "verified": true
     }
    ],
@@ -14208,12 +15033,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 15.988218682078955,
+     "log2_r": 15.9882186821,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 11.683400801861266,
-     "ratio_rho": 6.714597175542405,
-     "ratio_floor": 13.18330606564726,
+     "best_s": 11.6834008019,
+     "ratio_rho": 6.71459717554,
+     "ratio_floor": 13.1833060656,
      "verified": true
     }
    ],
@@ -14377,6 +15202,36 @@
      "verified": 24,
      "mean_s": 1.6592,
      "mean_ratio_to_floor": 1.872
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1111,
+     "mean_ratio_to_floor": 1.254
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.3054,
+     "mean_ratio_to_floor": 1.473
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.3054,
+     "mean_ratio_to_floor": 1.473
     },
     {
      "session_id": "ECBS1h548d49a71881",
@@ -14646,12 +15501,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 17.997405546030816,
+     "log2_r": 17.997405546,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 8.413718646746405,
-     "ratio_rho": 5.819428361014084,
-     "ratio_floor": 9.493864838791692,
+     "best_s": 8.41371864675,
+     "ratio_rho": 5.81942836101,
+     "ratio_floor": 9.49386483879,
      "verified": true
     }
    ],
@@ -14857,6 +15712,36 @@
      "verified": 24,
      "mean_s": 1.935,
      "mean_ratio_to_floor": 2.183
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0552,
+     "mean_ratio_to_floor": 1.191
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.289,
+     "mean_ratio_to_floor": 1.455
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.289,
+     "mean_ratio_to_floor": 1.455
     },
     {
      "session_id": "ECBS1h445dba3005bc",
@@ -15366,12 +16251,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 19.99782863366001,
+     "log2_r": 19.9978286337,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 10.722871957641596,
-     "ratio_rho": 8.300039808611233,
-     "ratio_floor": 12.099465328435453,
+     "best_s": 10.7228719576,
+     "ratio_rho": 8.30003980861,
+     "ratio_floor": 12.0994653284,
      "verified": true
     }
    ],
@@ -15535,6 +16420,36 @@
      "verified": 24,
      "mean_s": 1.6,
      "mean_ratio_to_floor": 1.805
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9866,
+     "mean_ratio_to_floor": 1.113
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.2474,
+     "mean_ratio_to_floor": 1.408
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.2474,
+     "mean_ratio_to_floor": 1.408
     },
     {
      "session_id": "ECBS1haf997766feb9",
@@ -15823,12 +16738,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 21.650392222310906,
+     "log2_r": 21.6503922223,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 12.770222471900254,
-     "ratio_rho": 10.501329293724387,
-     "ratio_floor": 14.409652996467209,
+     "best_s": 12.7702224719,
+     "ratio_rho": 10.5013292937,
+     "ratio_floor": 14.4096529965,
      "verified": true
     }
    ],
@@ -16013,12 +16928,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 23.38228535388855,
+     "log2_r": 23.3822853539,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.965657630366684,
-     "ratio_rho": 13.455139231662017,
-     "ratio_floor": 15.75855712489425,
+     "best_s": 13.9656576304,
+     "ratio_rho": 13.4551392317,
+     "ratio_floor": 15.7585571249,
      "verified": true
     }
    ],
@@ -16360,6 +17275,36 @@
      "verified": 24,
      "mean_s": 1.4954,
      "mean_ratio_to_floor": 1.687
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.96,
+     "mean_ratio_to_floor": 1.083
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1432,
+     "mean_ratio_to_floor": 1.29
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1432,
+     "mean_ratio_to_floor": 1.29
     },
     {
      "session_id": "ECBS1haf997766feb9",
@@ -17175,6 +18120,7 @@
    "sessions": [
     "ECBS1h14bbcca48793",
     "ECBS1h162089ae4d82",
+    "ECBS1h3a5708ad901b",
     "ECBS1h445dba3005bc",
     "ECBS1h46ed5b65cdcf",
     "ECBS1h498fa819ba21",
@@ -17207,8 +18153,8 @@
     "icv1-fp24-t1059-6df599df",
     "icv1-fp26-tm1775-7e8fb6df"
    ],
-   "runs": 841,
-   "verified": 841
+   "runs": 969,
+   "verified": 969
   },
   {
    "method_id": "ECM1h2ee5b13dfb35",
@@ -18181,6 +19127,7 @@
    "sessions": [
     "ECBS1h14bbcca48793",
     "ECBS1h162089ae4d82",
+    "ECBS1h3a5708ad901b",
     "ECBS1h445dba3005bc",
     "ECBS1h46ed5b65cdcf",
     "ECBS1h498fa819ba21",
@@ -18210,8 +19157,8 @@
     "icv1-fp24-t1059-6df599df",
     "icv1-fp26-tm1775-7e8fb6df"
    ],
-   "runs": 1022,
-   "verified": 1021
+   "runs": 1278,
+   "verified": 1277
   },
   {
    "method_id": "ECM1hb367476fce6c",
@@ -18257,6 +19204,7 @@
     "cap_multiple": "64"
    },
    "sessions": [
+    "ECBS1h5eaf9eef9f25",
     "ECBS1h6302265165a5",
     "ECBS1h6f9ddee85cae",
     "ECBS1h73210d525d59",
@@ -18274,8 +19222,8 @@
     "icv1-f2m41-tm2308219-7f48b14a",
     "icv1-f2m43-tm998717-e2e742b0"
    ],
-   "runs": 479,
-   "verified": 479
+   "runs": 607,
+   "verified": 607
   },
   {
    "method_id": "ECM1h1d9961ee4601",
@@ -18332,7 +19280,9 @@
    },
    "sessions": [
     "ECBS1h0d1ce1d04e54",
+    "ECBS1h5eaf9eef9f25",
     "ECBS1h6302265165a5",
+    "ECBS1ha38a29e8e509",
     "ECBS1ha960fa84a3c2",
     "ECBS1hb0cb85a662d8",
     "ECBS1hf4c34c2455f9"
@@ -18350,8 +19300,71 @@
     "icv1-f2m59-tm943548413-98844ecc",
     "icv1-f2m61-t158598901-ab42b6c5"
    ],
-   "runs": 813,
-   "verified": 813
+   "runs": 1141,
+   "verified": 1141
+  },
+  {
+   "method_id": "ECM1h3ed103818d38",
+   "method_sha256": "3ed103818d387757129913d713592eb2b7b27e406cebf306d1dd951b969ced83",
+   "method": "rho.signed_frobenius_strong_escape",
+   "family": "rho",
+   "params": {
+    "dp_bits": "10",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1ha38a29e8e509"
+   ],
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 72,
+   "verified": 72
+  },
+  {
+   "method_id": "ECM1h8629e993c452",
+   "method_sha256": "8629e993c4525f72860a30681a8b26fa3071bbed89c21cc52622f6b839c44907",
+   "method": "rho.signed_frobenius_strong_escape",
+   "family": "rho",
+   "params": {
+    "dp_bits": "8",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1ha38a29e8e509"
+   ],
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 72,
+   "verified": 72
+  },
+  {
+   "method_id": "ECM1hcd1c05c08f3e",
+   "method_sha256": "cd1c05c08f3eb2ebfc86a2b71742677cc846c7bdfe547db21616f96feb6455dd",
+   "method": "rho.signed_frobenius_strong_escape",
+   "family": "rho",
+   "params": {
+    "dp_bits": "4",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1ha38a29e8e509"
+   ],
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 72,
+   "verified": 72
   }
  ],
  "factor_bases": [
@@ -21914,7 +22927,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb138PDP3pairRCwalkLAgaussTDpdpISO0hcd55ee54e17e",
@@ -21933,7 +22946,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb138PDP3pairRCwalkLAgaussTDpdpISO0hd273669a2623",
@@ -21952,7 +22965,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb138PDP3pairRCwalkLAgaussTDpdpISO0hda5509efef7a",
@@ -21971,7 +22984,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb184PDP3pairRCwalkLAgaussTDpdpISO0hd7032a1281fe",
@@ -21990,7 +23003,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb184PDP3pairRCwalkLAgaussTDpdpISO0hdbfd01e36445",
@@ -22009,7 +23022,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb184PDP3pairRCwalkLAgaussTDpdpISO0hf5bb0071678f",
@@ -22028,7 +23041,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb230PDP3pairRCwalkLAgaussTDpdpISO0h3bc48f3497ee",
@@ -22047,7 +23060,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0h05b61e8db4bb",
@@ -22066,7 +23079,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0h37ba41c8ccd0",
@@ -22085,7 +23098,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0hcc07600f3441",
@@ -22104,7 +23117,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0hd48a73ea8906",
@@ -22123,7 +23136,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0hfc53d2a6f29d",
@@ -22142,7 +23155,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb322PDP3pairRCwalkLAgaussTDpdpISO0h789e2889acc5",
@@ -22161,7 +23174,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAbwTDpdpISO0hb95b67cfded7",
@@ -22180,7 +23193,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAbwTDpdpISO0hf41777c1fea6",
@@ -22199,7 +23212,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-readiness/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAgaussTDpdpISO0h9d5586f52481",
@@ -22218,7 +23231,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAgaussTDpdpISO0hbd7dc559e75a",
@@ -22237,7 +23250,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-readiness/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h03da90065b67",
@@ -22256,7 +23269,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1",
@@ -22275,7 +23288,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/initial-both.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0f14cffe097b",
@@ -22294,7 +23307,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/both.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h27e53cef191f",
@@ -22313,7 +23326,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/final-both.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h2baa00a720b0",
@@ -22332,7 +23345,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/scaled.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h3cb1b77bbe4d",
@@ -22351,7 +23364,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h3cf9e3807c82",
@@ -22370,7 +23383,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h4d79c8ae6114",
@@ -22389,7 +23402,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/initial-pairinv.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h5d512b8f7cad",
@@ -22408,7 +23421,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h6829c633f771",
@@ -22427,7 +23440,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/pairinv.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h693bc45574f0",
@@ -22449,7 +23462,7 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h73838861ba27",
@@ -22468,7 +23481,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h77b568eadee1",
@@ -22487,7 +23500,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548",
@@ -22506,7 +23519,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/initial-scaled.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hb0fb0791a0a7",
@@ -22525,7 +23538,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hc4acc940885a",
@@ -22546,7 +23559,7 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hd0e5bdac820a",
@@ -22565,7 +23578,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/final-pairinv.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hdc4a7de66899",
@@ -22584,7 +23597,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0he67ac9e439c3",
@@ -22603,7 +23616,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071",
@@ -22622,7 +23635,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/final-scaled.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hfb32d1e3c09e",
@@ -22641,7 +23654,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3f4RCsampleLAgaussTDpdpISO0h130cbe989b4c",
@@ -22660,7 +23673,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3f5RCsampleLAgaussTDpdpISO0hab2bc24e8b55",
@@ -22679,7 +23692,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3satcnfRCsampleLAgaussTDpdpISO0h1c2837b86f70",
@@ -22698,7 +23711,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3satxorRCsampleLAgaussTDpdpISO0hd6b8fed60562",
@@ -22717,7 +23730,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb92PDP3pairRCwalkLAgaussTDpdpISO0h146200cc5891",
@@ -22736,7 +23749,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb92PDP3pairRCwalkLAgaussTDpdpISO0hefc02b943487",
@@ -22755,7 +23768,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N29Ckb1fb290PDP3pairRCwalkLAgaussTDpdpISO0h320e15bc865f",
@@ -22774,7 +23787,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N29Ckb1fb348PDP3pairRCwalkLAgaussTDpdpISO0h48ce6a7778f3",
@@ -22793,7 +23806,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N29Ckb1fb464PDP3pairRCwalkLAgaussTDpdpISO0h2126e644a548",
@@ -22812,7 +23825,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N29Ckb1fb464PDP3pairRCwalkLAgaussTDpdpISO0h4dd57dfe6cd7",
@@ -22832,7 +23845,7 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N31Ckb0fb124PDP3pairRCwalkLAgaussTDpdpISO0h05a8422d4768",
@@ -27004,7 +28017,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27016,7 +28029,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27195,7 +28208,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27207,7 +28220,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27386,7 +28399,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27398,7 +28411,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27577,7 +28590,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27589,7 +28602,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27742,7 +28755,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27754,7 +28767,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27907,7 +28920,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27919,7 +28932,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28072,7 +29085,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -28084,7 +29097,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28293,7 +29306,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -28305,7 +29318,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28514,7 +29527,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -28526,7 +29539,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28919,6 +29932,88 @@
    ]
   },
   {
+   "session_id": "ECBS1h5eaf9eef9f25",
+   "dir": "research/ecbench_bounds_challenges_20261006/sessions/koblitz-toy-reference-e1",
+   "label": "challenge ECCH1h76d71da2a89c epoch 1: rho.signed_frobenius against rho.signed_frobenius_strong",
+   "status": "complete",
+   "spec_id": "ECS1h97880b56eeb4",
+   "env_class_id": "ECBENV2h393e9c141834",
+   "binary_sha256": "58c0eea59b37c190b86f7729fb5f613ee79d9a99a2e08b6df670f0379a519016",
+   "git_commit": null,
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791253767374,
+   "curves": [
+    "icv1-f2m17-tm101-00378d4e",
+    "icv1-f2m19-t797-b6cf2467",
+    "icv1-f2m23-t5197-69e76b73",
+    "icv1-f2m29-tm40309-30c52b96"
+   ],
+   "arms": [
+    {
+     "arm": "candidate",
+     "role": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b"
+    },
+    {
+     "arm": "incumbent",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
+    },
+    {
+     "arm": "incumbent-aa",
+     "role": "control",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h3a5708ad901b",
+   "dir": "research/ecbench_bounds_challenges_20261006/sessions/prime-toy-reference-e1",
+   "label": "challenge ECCH1h904625668686 epoch 1: bsgs.negation against rho.negation",
+   "status": "complete",
+   "spec_id": "ECS1h6ae84963ddfc",
+   "env_class_id": "ECBENV2h393e9c141834",
+   "binary_sha256": "58c0eea59b37c190b86f7729fb5f613ee79d9a99a2e08b6df670f0379a519016",
+   "git_commit": null,
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791253765415,
+   "curves": [
+    "icv1-fp18-tm337-d28d5e09",
+    "icv1-fp20-t727-cd198a38",
+    "icv1-fp22-tm1385-475dcb5f",
+    "icv1-fp24-t1059-6df599df"
+   ],
+   "arms": [
+    {
+     "arm": "candidate",
+     "role": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3"
+    },
+    {
+     "arm": "incumbent",
+     "role": "reference",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79"
+    },
+    {
+     "arm": "incumbent-aa",
+     "role": "control",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79"
+    }
+   ]
+  },
+  {
    "session_id": "ECBS1h6f9ddee85cae",
    "dir": "research/ecbench_calibration_20261002/sessions/followup-koblitz",
    "label": "calibration follow-up: plain rho on the largest Koblitz curve, 64 fresh targets",
@@ -29107,6 +30202,52 @@
      "role": "baseline",
      "method": "rho.plain",
      "method_id": "ECM1hb367476fce6c"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1ha38a29e8e509",
+   "dir": "research/ecbench_m83_rho_20261005/sessions/calibration",
+   "label": "escape-variant calibration on the three largest one-word Koblitz curves",
+   "status": "complete",
+   "spec_id": "ECS1hc00c9520e77b",
+   "env_class_id": "ECBENV2h59034d4cd61b",
+   "binary_sha256": "1e6b5f877ffe41f16c2f84f71e7d6a53dbb1fbaceac9d5bc7ebdc56b2d3e27a8",
+   "git_commit": "1b518f86635bfd3ce6f35e916bbb4418690cb89b",
+   "records": 288,
+   "status_counts": {
+    "verified": 288
+   },
+   "started_unix_ms": 1791219000397,
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "arms": [
+    {
+     "arm": "escape-dp10",
+     "role": "candidate",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38"
+    },
+    {
+     "arm": "escape-dp4",
+     "role": "candidate",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e"
+    },
+    {
+     "arm": "escape-dp8",
+     "role": "candidate",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
     }
    ]
   },

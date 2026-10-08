@@ -33,6 +33,7 @@ use num_traits::ToPrimitive;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::io::Write;
+use std::process::ExitCode;
 use std::time::{Duration, Instant};
 
 /// Consecutive laps on one clock: the laps of an interval sum to its length.
@@ -711,7 +712,7 @@ fn peak_rss_bytes() -> Option<u64> {
     }
 }
 
-fn main() {
+fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().collect();
     assert_eq!(
         arguments.len(),
@@ -836,7 +837,8 @@ fn main() {
         .iter()
         .map(|p| p.expect("affine representative")[0])
         .collect();
-    let base_load_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+    let base_elapsed = setup_started.elapsed();
+    let base_load_ms = ms(base_elapsed);
 
     let basis_started = Instant::now();
     let basis = NormalBasis::new(&gf);
@@ -852,12 +854,14 @@ fn main() {
         let y = (probe * 0x9E37_79B9) & basis.mask;
         assert_eq!(solver.roots(&gf, &basis, x, y), s3_x_roots(&gf, b, x, y));
     }
-    let basis_ms = basis_started.elapsed().as_secs_f64() * 1000.0;
+    let basis_elapsed = basis_started.elapsed();
+    let basis_ms = ms(basis_elapsed);
 
     let index_started = Instant::now();
     let index = build_index(&gf, &basis, &solver, &reps);
-    let index_ms = index_started.elapsed().as_secs_f64() * 1000.0;
-    let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+    let index_elapsed = index_started.elapsed();
+    let index_ms = ms(index_elapsed);
+    let setup_ms = ms(setup_started.elapsed());
 
     // Rank stage: rows sum(coefficient * L_column) = a for random [a]G.
     // The optional trace lets a separate implementation replay every attempted
@@ -889,10 +893,14 @@ fn main() {
     let mut rank_failures = 0u64;
     let mut rank_relations = 0u64;
     let mut rank_probes = 0u64;
+    let mut rank_query_elapsed = Duration::ZERO;
+    let mut rank_pdp_elapsed = Duration::ZERO;
+    let mut rank_relation_check_elapsed = Duration::ZERO;
     // Guided: decompose [a]G - R_j for a column j that has no pivot yet, so the
     // row a = L_j + sum(...) always contains column j and raises the rank.
     let mut rank_rows_without_gain = 0u64;
     while echelon.rank < base.columns {
+        let query_started = Instant::now();
         rank_seed = rank_seed
             .wrapping_mul(6364136223846793005)
             .wrapping_add(1442695040888963407);
@@ -907,7 +915,10 @@ fn main() {
         );
         rank_attempts += 1;
         let rank_before = echelon.rank;
-        match extract(
+        rank_query_elapsed += query_started.elapsed();
+        let mut rank_clock = PhaseClock::start();
+        let mut rank_split = ExtractSplit::default();
+        let relation = extract(
             &gf,
             &fast,
             &basis,
@@ -916,9 +927,12 @@ fn main() {
             &base,
             point,
             (rank_seed >> 20) as usize,
-            &mut PhaseClock::start(),
-            &mut ExtractSplit::default(),
-        ) {
+            &mut rank_clock,
+            &mut rank_split,
+        );
+        rank_pdp_elapsed += rank_split.pdp;
+        rank_relation_check_elapsed += rank_split.relation_check;
+        match relation {
             Some(relation) => {
                 rank_relations += 1;
                 rank_probes += relation.probes;
@@ -963,7 +977,11 @@ fn main() {
             }
         }
     }
-    let rank_ms = rank_started.elapsed().as_secs_f64() * 1000.0;
+    let rank_elapsed = rank_started.elapsed();
+    let rank_ms = ms(rank_elapsed);
+    let rank_matrix_elapsed = rank_elapsed
+        .checked_sub(rank_query_elapsed + rank_pdp_elapsed + rank_relation_check_elapsed)
+        .expect("rank phase accounting exceeds rank interval");
     let la_started = Instant::now();
     let logs = echelon.solve();
     if let Some(trace) = rank_trace.as_mut() {
@@ -980,13 +998,19 @@ fn main() {
         .unwrap();
         trace.flush().unwrap();
     }
-    let la_ms = la_started.elapsed().as_secs_f64() * 1000.0;
-    let setup_complete_ns = process_started.elapsed().as_nanos() as u64;
+    let la_elapsed = la_started.elapsed();
+    let la_ms = ms(la_elapsed);
+    let setup_complete_elapsed = process_started.elapsed();
+    let setup_complete_ns = setup_complete_elapsed.as_nanos() as u64;
+    let input_control_elapsed = setup_complete_elapsed
+        .checked_sub(base_elapsed + basis_elapsed + index_elapsed + rank_elapsed + la_elapsed)
+        .expect("setup phase accounting exceeds setup interval");
 
     let targets_started = Instant::now();
     let mut solved = 0usize;
     let mut failed = 0usize;
     let mut target_query_ms = Vec::with_capacity(target_inputs.len());
+    let mut single_target_phases = None;
     for (fixture_index, &target_input) in target_inputs.iter().enumerate() {
         // Fixture construction is outside the online interval: a real query
         // arrives as a point Q, not as its known-answer scalar.
@@ -1025,6 +1049,15 @@ fn main() {
         let recovery_check_phase = clock.lap();
         let online_stopped = clock.last;
         let online = online_stopped - online_started;
+        if target_inputs.len() == 1 {
+            single_target_phases = Some((
+                query_phase,
+                split.pdp,
+                split.relation_check,
+                descent_phase,
+                recovery_check_phase,
+            ));
+        }
         let elapsed = ms(online);
         target_query_ms.push(elapsed);
         if verified == Some(true) {
@@ -1032,6 +1065,7 @@ fn main() {
         } else {
             failed += 1;
         }
+        let target_exit_code = if verified == Some(true) { 0 } else { 1 };
         let record = json!({
             "kind":"compact_orbit_dlp_target",
             "n":n, "a":a, "fixture_index":fixture_index,
@@ -1039,7 +1073,7 @@ fn main() {
             "generator":generator.map(|(x, y)| [x, y]),
             "target":target.map(|(x, y)| [x, y]),
             "published_q":target.map(|(x, y)| [x, y]),
-            "exit_code":0,
+            "exit_code":target_exit_code,
             "x_codes":relation.as_ref().map(|relation| relation.x_codes),
             "pinned_intermediates":relation.as_ref().map(|relation| relation.intermediates),
             "point_indices":relation.as_ref().map(|relation| relation.point_indices),
@@ -1069,11 +1103,68 @@ fn main() {
     let mut sorted = target_query_ms.clone();
     sorted.sort_by(|x, y| x.partial_cmp(y).unwrap());
     let median = sorted.get(sorted.len() / 2).copied();
+    let (cold_in_process_ms, cold_phase_ms) = if let Some((
+        target_query,
+        target_pdp,
+        target_relation_check,
+        target_descent,
+        target_recovery_check,
+    )) = single_target_phases
+    {
+        let phases = [
+            input_control_elapsed,
+            base_elapsed,
+            basis_elapsed,
+            index_elapsed,
+            rank_query_elapsed,
+            rank_pdp_elapsed,
+            rank_relation_check_elapsed,
+            rank_matrix_elapsed,
+            la_elapsed,
+            target_query,
+            target_pdp,
+            target_relation_check,
+            target_descent,
+            target_recovery_check,
+        ];
+        let phase_sum: Duration = phases.iter().copied().sum();
+        let cold_total = setup_complete_elapsed
+            + target_query
+            + target_pdp
+            + target_relation_check
+            + target_descent
+            + target_recovery_check;
+        assert_eq!(phase_sum, cold_total, "exclusive cold phases differ");
+        (
+            Some(ms(cold_total)),
+            Some(json!({
+                "setup_input_control":ms(input_control_elapsed),
+                "isogeny":0.0,
+                "factor_base":ms(base_elapsed),
+                "precompute_basis_and_selftest":ms(basis_elapsed),
+                "precompute_index":ms(index_elapsed),
+                "rank_query":ms(rank_query_elapsed),
+                "rank_pdp":ms(rank_pdp_elapsed),
+                "rank_relation_check":ms(rank_relation_check_elapsed),
+                "rank_matrix_build":ms(rank_matrix_elapsed),
+                "relation_la":ms(la_elapsed),
+                "target_query":ms(target_query),
+                "target_pdp":ms(target_pdp),
+                "target_relation_check":ms(target_relation_check),
+                "target_descent":ms(target_descent),
+                "target_recovery_check":ms(target_recovery_check),
+            })),
+        )
+    } else {
+        (None, None)
+    };
     let summary = json!({
         "kind":"compact_orbit_dlp_summary",
         "schema_version":"1.0",
         "producer_version":"compact_orbit_online_v1",
         "setup_complete_ns":setup_complete_ns,
+        "cold_in_process_ms":cold_in_process_ms,
+        "cold_phase_ms":cold_phase_ms,
         "n":n, "a":a,
         "base_hash":base_hash,
         "base_source":if constructed.is_some() { "constructed_in_process_x_scan" } else { "retained_header" },
@@ -1124,5 +1215,10 @@ fn main() {
             "factor_base_representatives":representatives,
         });
         std::fs::write(path, format!("{dump}\n")).expect("write base dump");
+    }
+    if failed == 0 {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
     }
 }

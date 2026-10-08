@@ -621,3 +621,158 @@ on a disjoint 1,024-target corpus. The same-L-tuned runs stay in the bundle
 as history, and they show what the rule costs: at L≥4,096 a same-L tune
 picks a larger K and gives lower ratios (0.116–0.132 instructions against
 0.139–0.224 here).
+
+## K=700 offered on the 1,024-target grids (2026-10-03)
+
+The L=16,384 and L=65,536 grids above started at K=1,000, so K=700 was not
+offered. `k_candidates_by_tune_targets["1024"]` now includes K=700 and K=800
+at both of those L (K=1,000 and above stay). Both reruns below were launched
+from that registry at git `e8a2ca704`, with `--tune-targets 1024`. Each
+`state.json` records `tune_targets: 1024`. The tune corpus is again
+`n61-ks-growing-tune-1024-v1` (SHA-256 `8ec0c0438ba46a1b…`). Both runs record
+`tune_eval_disjoint: true` and `tune_eval_shared_targets: 0`. K is the lowest
+whole-process wall on that corpus. Status stays
+`PENDING_INDEPENDENT_VALIDATION`. No ledger row is promoted. These are still
+multi-target batch diagnostics against frozen KS v2, so `vs_rho` fails
+closed. Loaded-host walls are not AGENTS.md §10 evidence. The instruction
+ratio is the stable reading.
+
+### 1,024-target tunes
+
+Wall s, user s, sys s, instructions and est. / measured peak footprint GiB.
+The bold row is the lowest wall, which is the pick. Every candidate exited 0.
+
+| Panel L | K | Wall s | User s | Sys s | Instructions | Est. / measured GiB |
+|---:|---:|---:|---:|---:|---:|---|
+| 16,384 | **700** | **47.3** | 39.7 | 1.7 | **295.8 G** | 2.73 / 2.68 |
+| 16,384 | 800 | 52.9 | 41.6 | 2.8 | 310.5 G | 4.94 / 4.89 |
+| 16,384 | 1,000 | 68.0 | 48.0 | 3.2 | 357.9 G | 5.43 / 5.39 |
+| 16,384 | 1,200 | 755.8 | 77.7 | 257.4 | 1023.9 G | 10.03 / 9.99 |
+| 16,384 | 1,400 | 538.8 | 98.6 | 131.3 | 810.6 G | 10.73 / 10.71 |
+| 65,536 | **700** | **52.8** | 43.4 | 2.4 | **297.6 G** | 2.73 / 2.68 |
+| 65,536 | 800 | 65.8 | 44.5 | 8.3 | 322.9 G | 4.94 / 4.89 |
+| 65,536 | 1,000 | 60.2 | 47.8 | 2.8 | 357.5 G | 5.43 / 5.39 |
+| 65,536 | 1,200 | 129.4 | 66.6 | 25.5 | 497.6 G | 10.03 / 10.00 |
+| 65,536 | 1,400 | 223.8 | 92.2 | 68.5 | 698.5 G | 10.73 / 10.71 |
+| 65,536 | 1,480 | 269.8 | 93.7 | 89.5 | 804.9 G | 11.05 / 11.03 |
+
+- At both L the pick is K=700. It is also the lowest user CPU and the lowest
+  instruction count, so the choice does not hang on the inflated walls.
+- At L=16,384, K=1,200 and K=1,400 spent 257 s and 131 s in sys while the
+  encrypted swap volume was nearly full. Their walls are not comparable to
+  K=700's. User CPU still rises with K (39.7 → 41.6 → 48.0 → 77.7 → 98.6 s).
+- At L=65,536, K=1,000's wall (60.2 s) is below K=800's (65.8 s) and above
+  K=700's. User CPU and instructions both rise with K.
+- The earlier 1,024-target tunes that did not offer K=700 picked K=1,000
+  (`20261002T213417Z-6e1f87218b`, `20261002T230454Z-8be7370aae`).
+
+### Paired blocks
+
+Alternating order, the same eval targets in both arms. Wall s, with user s
+in parentheses. The IC peak column is the producer's reported peak RSS.
+Host: Apple M4 Pro, macOS 26.6 arm64, unpinned shared machine
+(`isolation: none`). Every kept process reports 0 swaps.
+
+| L | K | Block | Order | IC | Rho (KS v2) | Wall | User | Instr. | IC peak GiB |
+|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|
+| 16,384 | 700 | 0 | IC→rho | 331.9 (271.6) | 689.9 (541.0) | 0.481 | 0.502 | 0.226 | 2.05 |
+| 16,384 | 700 | 1 | rho→IC | 285.2 (245.3) | 671.2 (523.7) | 0.425 | 0.468 | 0.225 | 2.05 |
+| 16,384 | 700 | 2 | IC→rho | 298.0 (263.1) | 606.6 (531.0) | 0.491 | 0.496 | 0.225 | 2.10 |
+| 65,536 | 700 | 0 | IC→rho | 1,349.3 (1,071.7) | 1,256.7 (1,019.4) | 1.074 | 1.051 | 0.410 | 2.23 |
+| 65,536 | 700 | 1 | rho→IC | 1,140.2 (979.0) | 1,226.7 (1,089.2) | 0.929 | 0.899 | 0.406 | 2.20 |
+| 65,536 | 700 | 2 | IC→rho | 1,155.4 (1,019.3) | 1,118.1 (1,034.1) | 1.033 | 0.986 | 0.410 | 2.07 |
+
+Medians (range):
+
+| L | Run | K | Wall ratio | User-CPU ratio | Instructions ratio |
+|---:|---|---:|---|---:|---:|
+| 16,384 | `20261002T213417Z-6e1f87218b` | 1,000 | 0.414 (0.308–0.443) | 0.321 | 0.139 |
+| 16,384 | `20261003T211804Z-e9e3827d82` | **700** | 0.481 (0.425–0.491) | 0.496 | **0.225** |
+| 65,536 | `20261002T230454Z-8be7370aae` | 1,000 | 0.604 (0.579–0.722) | 0.491 | 0.224 |
+| 65,536 | `20261003T233040Z-454badefbb` | **700** | 1.033 (0.929–1.074) | 0.986 | **0.410** |
+
+- Offering K=700 raises the instruction ratio, from 0.139 to 0.225 at
+  L=16,384 and from 0.224 to 0.410 at L=65,536. Setup is smaller and the
+  per-target descent is longer, which is the trade the 1,024-target rule
+  makes at large L.
+- L=16,384 ran under 1-minute load 67–177. IC wall exceeds IC user CPU by
+  about 35–60 s. The instruction ratio sits in 0.2245–0.2260.
+- L=65,536 ran under 1-minute load 30–66. The wall ratio median is 1.033,
+  so on this loaded host IC does not beat frozen KS v2 on wall. The
+  instruction ratio sits in 0.406–0.410. That wall is not a ledger result.
+- The hosted isolated L=16,384 K=700 rerun already on main
+  (`gha-37159733133-1`, PR #1312) reads wall 0.323 with no instruction
+  counts. Its timer-stripped records hash to the same values as
+  `20261003T211804Z-e9e3827d82` (IC `892a95e5…`, rho `e533b6e3…`).
+
+### Block 2 of `20261003T233040Z-454badefbb`
+
+The run was tune-only, then resumed at 2026-10-03T23:44:26Z into the panel.
+Blocks 0 and 1 finished. Block 2's first attempt finished IC (exit 0, wall
+1,132.48 s, 65,536 records; receipt
+`receipts/ic_b2.resource.json.aborted2`) and then the KS v2 process panicked:
+
+`failed printing to stdout: No space left on device (os error 28)`
+
+after 1,091.04 s real. Its jsonl stops at 47,764 lines. There is no rho
+resource receipt for that attempt. The aborted files are kept under their
+`*.aborted2` names and are not the block-2 measurement.
+
+`launch-panel --resume` at 2026-10-04T01:46:27Z retimed the whole block:
+IC 1,155.37 s (from 01:46:40Z) then rho 1,118.11 s (through 02:24:33Z), both
+exit 0. Those receipts are the block-2 row above. Replay had not run yet.
+Two further resumes on 2026-10-05T18:28Z continued into replay and finished
+at 21:47Z. The run's `phase` is `done`. It was not resumed again.
+
+An earlier launch the same evening, `20261003T211601Z-09b1626e13`, is still
+`phase: build`, `status: ACTIVE`, with no measurements. It was left abandoned
+and was not resumed.
+
+### Verification, claim-check and archive
+
+| Run | L | IC replay | Rho replay | `verify` | `end_to_end_dlp` | `vs_rho` | Status |
+|---|---:|---:|---:|---|---|---|---|---|
+| `20261003T211804Z-e9e3827d82` | 16,384 | 49,152 / 49,152 | 49,152 / 49,152 | see below | PASS | FAIL (closed) | `PENDING_INDEPENDENT_VALIDATION` |
+| `20261003T233040Z-454badefbb` | 65,536 | 196,608 / 196,608 | 196,608 / 196,608 | PASS (69 files) | PASS | FAIL (closed) | `PENDING_INDEPENDENT_VALIDATION` |
+
+`claim-check --stage end_to_end_dlp` was run again on both
+`artifacts/claim_draft.json` files against current `main` (`63a09ff7b`).
+Both PASS. `claim-check --stage vs_rho` on the L=65,536 draft FAIL-closes
+(`target_count must equal 1`, plus the other single-target fields). The
+L=16,384 draft's stored `claim_check_vs_rho.json` is the same closed FAIL.
+In every kept block both arms solved all L targets, both arms walk the same
+points, the scalars match the eval corpus, and timer-stripped records hash
+equal across blocks in each arm. The replays are same-host. No ledger row
+is promoted.
+
+`verify` on `20261003T233040Z-454badefbb` was run while the per-target jsonl
+were still on disk and passed all 69 manifest files. The archive omits
+those jsonl (including the two `*.jsonl.aborted2` files). Their hashes stay
+in `artifacts/review_manifest.json`.
+
+`verify` on `20261003T211804Z-e9e3827d82` does not pass on the copy that is
+left. The seven per-target jsonl are no longer on disk:
+
+- `logs/base_n61_K700.jsonl`
+- `logs/ic_n61_b0.jsonl`
+- `logs/ic_n61_b1.jsonl`
+- `logs/ic_n61_b2.jsonl`
+- `logs/ks_n61_b0.jsonl`
+- `logs/ks_n61_b1.jsonl`
+- `logs/ks_n61_b2.jsonl`
+
+The other 51 manifest files rehash equal to `review_manifest.json`. Those
+seven hashes were not rewritten. The replay certificates
+(`artifacts/replay_ic.json`, `artifacts/replay_rho_b0.json` through
+`replay_rho_b2.json`) were written when the jsonl existed and record
+49,152 / 49,152 pass, fail 0, on each arm. `artifacts/verification.json` is
+the failed rehash receipt.
+
+Preflight on the producer tree at `e8a2ca704` (the tree that holds the run
+directories) was ok: ledger schema v2, cargo, rustc, and both producer
+sources. Each run also keeps the preflight receipt from its own launch.
+
+The runs are under `autolab_runs/<run-id>/` in the same layout as the
+2026-10-02 reruns: small producer logs, including the tune logs and the
+small `*.aborted2` stderr, summary and IC receipt, and without the
+per-target `logs/*.jsonl`, the base dump and `inputs/boundary_targets.json`.
