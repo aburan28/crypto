@@ -200,7 +200,7 @@ fn run(job: &Job) -> Result<Value, String> {
             || job.curve_a != 1
             || !matches!(
                 job.config.solver.as_str(),
-                "f4" | "f5" | "inherited_f4" | "f6_ic"
+                "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair"
             )
             || job.config.summands != 3
             || job.config.groebner_degree != 3
@@ -394,7 +394,7 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     let strategy = match cfg.solver.as_str() {
         "pair_table" => DecompositionStrategy::PairTable,
         "enumerate" => DecompositionStrategy::Enumerate,
-        "f4" | "f5" | "inherited_f4" | "f6_ic" => DecompositionStrategy::Groebner,
+        "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair" => DecompositionStrategy::Groebner,
         "sat_xor" | "sat_cnf" => DecompositionStrategy::Sat,
         _ => return Err("unsupported decomposition backend".into()),
     };
@@ -412,14 +412,15 @@ fn run_inner(job: &Job) -> Result<Value, String> {
         node_budget: cfg.node_budget,
         collection_window: cfg.collection_window,
         allow_direct_relation: false,
-        f6_ic: cfg.solver == "f6_ic",
+        f6_ic: matches!(cfg.solver.as_str(), "f6_ic" | "f6_ic_pair"),
+        f6_pair_index: cfg.solver == "f6_ic_pair",
         ..KoblitzIcOptions::default()
     };
     opts.engine = match cfg.solver.as_str() {
         "f5" => SolverEngine::MatrixF5 {
             max_degree: cfg.groebner_degree,
         },
-        "inherited_f4" | "f6_ic" => SolverEngine::InheritedF4 {
+        "inherited_f4" | "f6_ic" | "f6_ic_pair" => SolverEngine::InheritedF4 {
             max_degree: cfg.groebner_degree,
         },
         _ => SolverEngine::MatrixF4 {
