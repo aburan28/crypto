@@ -1,0 +1,25 @@
+{
+  "schema": "ecc2k130-base-window-screen-artifact-seal-v1",
+  "run_id": 36827211814,
+  "event": "workflow_dispatch",
+  "head_sha": "4978478120ae83a322c221e59d65a358d5510f29",
+  "artifacts": [
+    {
+      "id": 11146375217,
+      "name": "base-window-screen-n41-raw",
+      "zip_bytes": 33935508,
+      "zip_sha256": "85f593b11f094ac3eacf4b648dd19a3abb338401833d88d0bc38a38d6fe6358f"
+    },
+    {
+      "id": 11146456139,
+      "name": "base-window-screen-n41-replay",
+      "zip_bytes": 33940939,
+      "zip_sha256": "fe1aa7b0c9a8e8d0d472e94f1512d6e58e37ff721467cf949210d58e1e555c28"
+    }
+  ],
+  "replay_member_manifest": "MANIFEST.sha256",
+  "replay_member_count": 421,
+  "screen_run_sha256": "05d892a144d3eee6b1d7a0eed5280f2f378ab2c55bfa8ab0444069db65b2d22e",
+  "isolation_sha256": "9e32da87edf6205aba31e92d68c0ff6049bf1e142d98bceb3e69bb46f5b23ce4",
+  "raw_trace_bytes": "not committed; member hashes of the replay download are in MANIFEST.sha256 and the zip hashes above identify the Actions artifacts"
+}
