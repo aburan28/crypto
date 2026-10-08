@@ -448,7 +448,10 @@ thread_local! {
 
 fn full_m4ri_enabled() -> bool {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *ENABLED.get_or_init(|| std::env::var("F4_F2_FULL_M4RI").as_deref() == Ok("1"))
+    *ENABLED.get_or_init(|| {
+        let mode = std::env::var("F4_F2_FULL_M4RI").ok();
+        full_m4ri_enabled_for(mode.as_deref())
+    })
 }
 
 fn full_m4ri_shape(n_rows: usize, n_cols: usize) -> bool {
@@ -458,12 +461,21 @@ fn full_m4ri_shape(n_rows: usize, n_cols: usize) -> bool {
 fn full_m4ri_min_rows() -> usize {
     static MIN_ROWS: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
     *MIN_ROWS.get_or_init(|| {
-        std::env::var("F4_F2_FULL_M4RI_MIN_ROWS")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(128)
-            .max(128)
+        let mode = std::env::var("F4_F2_FULL_M4RI").ok();
+        let explicit = std::env::var("F4_F2_FULL_M4RI_MIN_ROWS").ok();
+        full_m4ri_min_rows_for(mode.as_deref(), explicit.as_deref())
     })
+}
+
+fn full_m4ri_enabled_for(mode: Option<&str>) -> bool {
+    mode != Some("0")
+}
+
+fn full_m4ri_min_rows_for(mode: Option<&str>, explicit: Option<&str>) -> usize {
+    explicit
+        .and_then(|value| value.parse().ok())
+        .unwrap_or_else(|| if mode == Some("1") { 128 } else { 4096 })
+        .max(128)
 }
 
 fn full_m4ri_shape_for(n_rows: usize, n_cols: usize, min_rows: usize) -> bool {
@@ -2572,6 +2584,18 @@ mod tests {
         assert!(!full_m4ri_shape_for(4096, 255, 4096));
         assert!(!full_m4ri_shape_for(4096, 16_385, 4096));
         assert!(full_m4ri_shape_for(128, 256, 128));
+    }
+
+    #[test]
+    fn full_m4ri_policy_resolves_selected_and_legacy_controls() {
+        assert!(full_m4ri_enabled_for(None));
+        assert!(full_m4ri_enabled_for(Some("1")));
+        assert!(!full_m4ri_enabled_for(Some("0")));
+        assert_eq!(full_m4ri_min_rows_for(None, None), 4096);
+        assert_eq!(full_m4ri_min_rows_for(Some("0"), None), 4096);
+        assert_eq!(full_m4ri_min_rows_for(Some("1"), None), 128);
+        assert_eq!(full_m4ri_min_rows_for(None, Some("2048")), 2048);
+        assert_eq!(full_m4ri_min_rows_for(Some("1"), Some("64")), 128);
     }
 
     /// A budget is honoured and reported, not silently turned into a

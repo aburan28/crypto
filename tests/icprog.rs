@@ -9,6 +9,56 @@ fn root() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))
 }
 
+#[test]
+fn disclosed_sat_cli_writes_verified_evidence_once_and_preserves_it_on_rejection() {
+    let dir = std::env::temp_dir().join(format!(
+        "icprog-native-sat-cli-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir(&dir).unwrap();
+    let report = dir.join("report.json");
+    let run = || {
+        Command::new(env!("CARGO_BIN_EXE_icprog"))
+            .args(["sat-source-replay", "--root"])
+            .arg(root())
+            .arg("--out")
+            .arg(&report)
+            .output()
+            .unwrap()
+    };
+    let first = run();
+    assert!(
+        first.status.success(),
+        "{}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    let bytes = std::fs::read(&report).unwrap();
+    let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(value["status"], "PASS_NATIVE_RETAINED_SAT_SOURCE_REPLAY");
+    assert_eq!(value["preparation_admission"]["rank"], 29);
+    assert_eq!(value["native_solvers_executed"], 0);
+    assert!(value["online_speedup"].is_null());
+    let second = run();
+    assert!(!second.status.success());
+    assert!(String::from_utf8_lossy(&second.stderr).contains("create immutable"));
+    assert_eq!(std::fs::read(&report).unwrap(), bytes);
+    let rejected = dir.join("rejected.json");
+    let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+        .args(["sat-source-replay", "--root"])
+        .arg(&dir)
+        .arg("--out")
+        .arg(&rejected)
+        .output()
+        .unwrap();
+    assert!(!out.status.success());
+    assert!(!rejected.exists());
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
 fn round(dir: &str) -> PathBuf {
     root().join("research/ic_tool_program/rounds").join(dir)
 }
@@ -80,6 +130,12 @@ fn icprog_reproduces_r05s_committed_analysis_byte_for_byte() {
 /// there).
 #[test]
 fn icprog_reproduces_r05s_pin_byte_for_byte() {
+    // This is only a preflight placeholder: frozen outputs prevent any binary run.
+    let true_bin = if cfg!(target_os = "macos") {
+        "/usr/bin/true"
+    } else {
+        "/bin/true"
+    };
     let dir = unpack(&round("R05-presence-filter"), "r05-pin");
     let pin = dir.join("runs/pin/pin.json");
     let frozen = std::fs::read(&pin).unwrap();
@@ -89,8 +145,8 @@ fn icprog_reproduces_r05s_pin_byte_for_byte() {
         .arg(root())
         .arg("--runs")
         .arg(dir.join("runs"))
-        .args(["--base", "/bin/true", "--cand", "/bin/true"])
-        .args(["--isolate", "/bin/true"])
+        .args(["--base", true_bin, "--cand", true_bin])
+        .args(["--isolate", true_bin])
         .output()
         .expect("icprog runs");
     assert!(
@@ -101,6 +157,93 @@ fn icprog_reproduces_r05s_pin_byte_for_byte() {
     let again = std::fs::read(&pin).unwrap();
     std::fs::remove_dir_all(&dir).ok();
     assert!(again == frozen, "the native pin differs from R05's");
+}
+
+fn holdouts(round_dir: &Path, sizes: &[&str], seeds: &str, first: &str, check: bool) -> Output {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_icprog"));
+    cmd.arg("holdouts").arg(round_dir).arg("--root").arg(root());
+    for s in sizes {
+        cmd.args(["--size", s]);
+    }
+    cmd.args(["--seeds", seeds, "--first-target", first]);
+    if check {
+        cmd.arg("--check");
+    }
+    cmd.output().expect("icprog runs")
+}
+
+/// R02b's and R05's holdouts were drawn by suite v1's `make_suite.py`
+/// construction; `icprog holdouts --check` must re-derive every file and
+/// each `SHA256SUMS` byte for byte, as it must every suite v1 row.
+#[test]
+fn icprog_reproduces_the_frozen_holdouts_and_suite_rows_byte_for_byte() {
+    for (dir, sizes, seeds, first) in [
+        (
+            "R02b-wide-tail-retest",
+            &["1,59", "0,61"][..],
+            "206,207,208,209",
+            "103",
+        ),
+        (
+            "R05-presence-filter",
+            &["0,53", "1,59", "0,61"][..],
+            "210,211,212,213",
+            "111",
+        ),
+    ] {
+        let out = holdouts(&round(dir), sizes, seeds, first, true);
+        assert!(
+            out.status.success(),
+            "{dir}: {}{}",
+            String::from_utf8_lossy(&out.stdout),
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+    // Suite v1's own rows: seeds 201–204 from target 1, file for file.
+    let tmp = std::env::temp_dir().join(format!("icprog-holdouts-{}", std::process::id()));
+    let suite = root().join("research/ic_tool_program/suite/v1/params/S");
+    for (a, n) in [
+        (1, 19),
+        (1, 23),
+        (1, 45),
+        (0, 37),
+        (1, 43),
+        (1, 47),
+        (0, 57),
+        (0, 41),
+        (0, 53),
+        (1, 59),
+        (0, 61),
+    ] {
+        let dir = tmp.join(format!("k{a}n{n}"));
+        let size = format!("{a},{n}");
+        let out = holdouts(&dir, &[&size], "201,202,203,204", "1", false);
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let drawn = dir.join("holdouts");
+        let slug = std::fs::read_dir(&drawn)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .find(|e| e.path().is_dir())
+            .expect("a slug directory")
+            .path();
+        for i in 1..=8u32 {
+            let m = i.div_ceil(2);
+            let ours = std::fs::read(slug.join(format!("M{m}-T{i}.json"))).unwrap();
+            let frozen = std::fs::read(suite.join(format!("k{a}n{n}/M{m}-T{i:02}.json"))).unwrap();
+            assert!(
+                ours == frozen,
+                "k{a}n{n} M{m}-T{i:02} differs from suite v1's"
+            );
+        }
+        // Drawn once: a second draw into the same round refuses.
+        let again = holdouts(&dir, &[&size], "201,202,203,204", "1", false);
+        assert!(!again.status.success());
+    }
+    std::fs::remove_dir_all(&tmp).ok();
 }
 
 /// The extension rule is re-tested from the runs: a record of extended

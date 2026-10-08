@@ -1,0 +1,78 @@
+{
+  "schema": "prime-field-smt.run/v1",
+  "input_path": "research/prime_field_smt_20261005/instances/toy_p17_unsat.json",
+  "input": {
+    "bytes": 268,
+    "blake3": "e014c699a8719f744e87baaeac07208b154c81e59e13526175e7839e9bab83d0"
+  },
+  "validation": {
+    "schema": "prime-field-smt.validation/v1",
+    "field_bits": 5,
+    "multiplication_bits": 10,
+    "primality_assurance": "deterministic-u64-miller-rabin",
+    "nonsingular": true,
+    "target_on_curve": true,
+    "valid": true
+  },
+  "encoding": {
+    "abscissa_bits": 1,
+    "boolean_field_variables": 2,
+    "canonical_instance_blake3": "776169a6fe9146beaaf8f46d8c335797e4ec3d89321d7048c5a3baf0220b6a80",
+    "complete_native_sign_lift_required": true,
+    "declared_field_variables": 4,
+    "exact_field_arithmetic": true,
+    "field_bits": 5,
+    "field_modulus": "17",
+    "liftable_abscissae": 1,
+    "liftable_abscissae_blake3": "148f02f92554e6acdee4cc513b5cd4e13883a1726b9dca02b19fe9a95c79a369",
+    "logic": "QF_FF",
+    "membership_trie_nodes": 3,
+    "query_blake3": "7631d9275d9aa03a6ff9c0928cbfebe285da0137ec9f566aa7d25b0252fe0292",
+    "query_bytes": 1096,
+    "recommended_solver_option": "--ff-solver=split",
+    "relation": "S3(x1,x2,x_target)=0 with exact liftable factor-base x",
+    "schema": "prime-field-smt.s3-encoding/v1",
+    "symmetry_breaking": "exact bitwise x1 <= x2",
+    "x_values_scanned": 1
+  },
+  "harness_binary_blake3": "aa771f284df39745f3cf43ca49f00e8815ff7cca9ea370485c65f025a1c29758",
+  "solver": {
+    "executable": "/workspace/.tools/cvc5-1.4.1-gpl/cvc5-Linux-x86_64-static-gpl/bin/cvc5",
+    "blake3_before": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "blake3_after": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "unchanged_during_run": true,
+    "arguments": [
+      "--lang=smt2",
+      "--tlimit-per=10000",
+      "--ff-solver=split",
+      "research/prime_field_smt_20261005/results/toy_unsat_qf_ff_s3_cvc5/query.smt2"
+    ],
+    "requested_timeout_ms": 10000,
+    "harness_grace_ms": 5000,
+    "elapsed_ms": 15,
+    "timed_out": false,
+    "success": true,
+    "exit_code": 0,
+    "stdout": {
+      "bytes": 73,
+      "blake3": "a5f61deec392fe76da865415c1359ea6eba235cfefac91db65ac060d7bac4e96"
+    },
+    "stderr": {
+      "bytes": 0,
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
+  },
+  "outcome": "solver_unsat_unverified",
+  "parsed": {
+    "status": "unsat"
+  },
+  "parse_error": null,
+  "verification": null,
+  "accepted_sat": false,
+  "claim_scope": {
+    "end_to_end_s": null,
+    "kind": "decomposition_stage_diagnostic",
+    "pollard_rho_ratio": null,
+    "speedup": null
+  }
+}

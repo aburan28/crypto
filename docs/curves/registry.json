@@ -29,7 +29,7 @@
    "standard_names": [],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -95,7 +95,7 @@
    "standard_names": [],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -236,7 +236,7 @@
    "standard_names": [],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -300,7 +300,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "KoblitzCurve::new(0, 11) finds no usable prime-order subgroup, so the repository has built no generator on it"
@@ -376,6 +376,69 @@
       "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "icv1": "ICV1:f2m-11-4c26487e:67:1982:0x1:-7:unk:r:ae0facd240e8",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 11,
+    "modulus": "0x913",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-4c26487e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x913\",\"v\":\"1\"}",
+   "trace": 67,
+   "order": "1982",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N11Ce1h41243ed45ca3",
+     "curve_uid": "urn:ec-record:1:sha256:41243ed45ca391b7b99cc37e02cfcd9ad4ae329b034049781a11c9701f91ab59",
+     "field_sha256": "f543818d44d80ccfc7304e554a8996fc088efec91d10737afa8cbd000db626e2",
+     "field": {
+      "characteristic": 2,
+      "degree": 11,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       11,
+       8,
+       4,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "991",
+      "cofactor": 2,
+      "generator": [
+       "0x4a9",
+       "0x3ef"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
      ]
     }
    ]
@@ -480,10 +543,77 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "KoblitzCurve::new(1, 13) finds no usable prime-order subgroup, so the repository has built no generator on it"
+  },
+  {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "icv1": "ICV1:f2m-13-517bd51f:-181:8374:0x1:-7:unk:r:e4cd523ec44f",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 13,
+    "modulus": "0x3d33",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-517bd51f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3d33\",\"v\":\"1\"}",
+   "trace": -181,
+   "order": "8374",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N13Ce1h98fd3bab3884",
+     "curve_uid": "urn:ec-record:1:sha256:98fd3bab3884fa9d550cb6f4afeb86a8ce5cb7b973875cf7ecfe1197de65338c",
+     "field_sha256": "3d031731cfa077f91d91963d5ffb49c0de20961274ee6cb493fe2ad6a899bfc1",
+     "field": {
+      "characteristic": 2,
+      "degree": 13,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       13,
+       12,
+       11,
+       10,
+       8,
+       5,
+       4,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "79",
+      "cofactor": 106,
+      "generator": [
+       "0x112d",
+       "0xbe3"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
   },
   {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
@@ -561,6 +691,69 @@
    ]
   },
   {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "icv1": "ICV1:f2m-15-bcb514a8:275:32494:0x1:-7:unk:r:25edae8389f1",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 15,
+    "modulus": "0x8035",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-bcb514a8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8035\",\"v\":\"1\"}",
+   "trace": 275,
+   "order": "32494",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n15-l5"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N15Ce1h68b09ca2a6f8",
+     "curve_uid": "urn:ec-record:1:sha256:68b09ca2a6f858390f7dfbd1021e3b41ff530d8c7d0161893a0693b9fdfd8a56",
+     "field_sha256": "2b4fd0025d243056fa16f939bfea0b58226de62a02c78bbf316e491178d9e198",
+     "field": {
+      "characteristic": 2,
+      "degree": 15,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       15,
+       5,
+       4,
+       2,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "211",
+      "cofactor": 154,
+      "generator": [
+       "0x8e4",
+       "0x203a"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m15-t275-b7f03703",
    "icv1": "ICV1:f2m-15-2d490b65:275:32494:0x1:-7:unk:r:b7f03703e5d7",
    "family": "koblitz",
@@ -585,7 +778,7 @@
    "standard_names": [],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -649,7 +842,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "KoblitzCurve::new(0, 17) finds no usable prime-order subgroup, so the repository has built no generator on it"
@@ -662,8 +855,7 @@
     "a": 1,
     "n": 17,
     "modulus": "0x20009",
-    "modulus_rule": "recorded in the run",
-    "generator_call": "KoblitzCurve::new(1, 17)"
+    "modulus_rule": "recorded in the run"
    },
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
    "trace": -101,
@@ -671,6 +863,7 @@
    "j": "0x1",
    "end": "-7",
    "aliases": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
     "K_1/2^17",
@@ -678,14 +871,50 @@
    ],
    "standard_names": [],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "representations": [
+    {
+     "ec1": "EC1N17Ce1h381f66e2762a",
+     "curve_uid": "urn:ec-record:1:sha256:381f66e2762a47b4af4fe5a8b915914be8cbc242ecad57198264dc254c63d57e",
+     "field_sha256": "ec5263b2c422af2421c7e0191c033c81f521be737d653ec90302c138cb1761bc",
+     "field": {
+      "characteristic": 2,
+      "degree": 17,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       17,
+       3,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "65587",
+      "cofactor": 2,
+      "generator": [
+       "0x1fa03",
+       "0xd814"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    },
     {
      "ec1": "EC1N17Ce1hdfbf24105ef5",
      "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d",
@@ -754,7 +983,7 @@
    "standard_names": [],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -805,8 +1034,7 @@
     "a": 1,
     "n": 19,
     "modulus": "0x80027",
-    "modulus_rule": "recorded in the run",
-    "generator_call": "KoblitzCurve::new(1, 19)"
+    "modulus_rule": "recorded in the run"
    },
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
    "trace": -797,
@@ -814,6 +1042,7 @@
    "j": "0x1",
    "end": "-7",
    "aliases": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
     "K_1/2^19",
@@ -821,14 +1050,52 @@
    ],
    "standard_names": [],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "representations": [
+    {
+     "ec1": "EC1N19Ce1h6186a62ebfaa",
+     "curve_uid": "urn:ec-record:1:sha256:6186a62ebfaa1d11afc99ffa6ef0b9067190b7a03bc67150c379ffbf30e6a7d9",
+     "field_sha256": "d26d0e22ee9d83f595adcd635db277e93215fb5b8992f07f1aef694d8c38c750",
+     "field": {
+      "characteristic": 2,
+      "degree": 19,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       19,
+       5,
+       2,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "262543",
+      "cofactor": 2,
+      "generator": [
+       "0x7e3ea",
+       "0x24541"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    },
     {
      "ec1": "EC1N19Ce1h7e63aa468dcc",
      "curve_uid": "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23",
@@ -897,7 +1164,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "KoblitzCurve::new(1, 21) finds no usable prime-order subgroup, so the repository has built no generator on it"
@@ -927,7 +1194,7 @@
    "standard_names": [],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -1044,6 +1311,81 @@
    ]
   },
   {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "icv1": "ICV1:f2m-23-bb3650c7:-5197:8393806:0x1:-7:unk:r:a023238e6474",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 23,
+    "modulus": "0xdcf5eb",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-bb3650c7\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0xdcf5eb\",\"v\":\"1\"}",
+   "trace": -5197,
+   "order": "8393806",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N23Ce1he238479aae6d",
+     "curve_uid": "urn:ec-record:1:sha256:e238479aae6dae6c48e4c249888db39e58360f2d9d6fd36418f9648bcc0d8b80",
+     "field_sha256": "0cda052d4fbfa35af452fc0fdc71f84cee9ee1d4c8f190cc791b428032153470",
+     "field": {
+      "characteristic": 2,
+      "degree": 23,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       23,
+       22,
+       20,
+       19,
+       18,
+       15,
+       14,
+       13,
+       12,
+       10,
+       8,
+       7,
+       6,
+       5,
+       3,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "4196903",
+      "cofactor": 2,
+      "generator": [
+       "0x2e62c9",
+       "0x55e90c"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "icv1": "ICV1:f2m-29-1a13acc8:-40309:536911222:0x1:-7:unk:r:30c52b963005",
    "family": "koblitz",
@@ -1114,6 +1456,81 @@
       "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
       "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "icv1": "ICV1:f2m-29-797da7cf:-40309:536911222:0x1:-7:unk:r:6aecea52fac9",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 29,
+    "modulus": "0x3a0b7cb9",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-797da7cf\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3a0b7cb9\",\"v\":\"1\"}",
+   "trace": -40309,
+   "order": "536911222",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N29Ce1h7fed23ba87ea",
+     "curve_uid": "urn:ec-record:1:sha256:7fed23ba87eaf8303f4a16985bb0e665733faae9285069c5a430a9bdd9fab8a7",
+     "field_sha256": "a6a97dd064be5cd9ee39a62834ebeb74e82a5eca4fbaec774a318afa97071c4a",
+     "field": {
+      "characteristic": 2,
+      "degree": 29,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       29,
+       28,
+       27,
+       25,
+       19,
+       17,
+       16,
+       14,
+       13,
+       12,
+       11,
+       10,
+       7,
+       5,
+       4,
+       3,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "42457",
+      "cofactor": 12646,
+      "generator": [
+       "0x1a849ba3",
+       "0x4b3542e"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
      ]
     }
    ]
@@ -1194,6 +1611,77 @@
    ]
   },
   {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "icv1": "ICV1:f2m-31-eaa21191:90707:2147392942:0x1:-7:unk:r:5fc996f03a86",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 31,
+    "modulus": "0x851e410f",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-eaa21191\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x851e410f\",\"v\":\"1\"}",
+   "trace": 90707,
+   "order": "2147392942",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ecbench-koblitz-n31-l8"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N31Ce1h6be2d6a625f9",
+     "curve_uid": "urn:ec-record:1:sha256:6be2d6a625f9a828dca420147995b710ca572754e3fde55313ff248ee4ec42cc",
+     "field_sha256": "50e1567028464a6e751ffc6ff3403d3e06735b6c7efff545d0c29ac01cf92048",
+     "field": {
+      "characteristic": 2,
+      "degree": 31,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       31,
+       26,
+       24,
+       20,
+       19,
+       18,
+       17,
+       14,
+       8,
+       3,
+       2,
+       1,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "subgroup_order": "41231",
+      "cofactor": 52082,
+      "generator": [
+       "0x6347c766",
+       "0xc3503f0"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "docs/curves/sources/ecbench-large-prime.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m31-t90707-8fd18741",
    "icv1": "ICV1:f2m-31-200700ef:90707:2147392942:0x1:-7:unk:r:8fd187414f75",
    "family": "koblitz",
@@ -1216,7 +1704,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "KoblitzCurve::new(1, 31) finds no usable prime-order subgroup, so the repository has built no generator on it"
@@ -1474,7 +1962,7 @@
    "sources": [
     "docs/curves/sources/generated.json",
     "research/ic_descent_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -1544,7 +2032,7 @@
    "sources": [
     "docs/curves/sources/generated.json",
     "research/ic_descent_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -1616,7 +2104,7 @@
     "research/ic_descent_20260930/curve_records.json",
     "research/ic_exponent_top_20260930/curve_records.json",
     "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -1761,7 +2249,7 @@
    "sources": [
     "research/ic_exponent_top_20260930/curve_records.json",
     "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -1904,7 +2392,7 @@
     "research/ic_descent_20260930/curve_records.json",
     "research/ic_exponent_top_20260930/curve_records.json",
     "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -1975,7 +2463,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2004,7 +2492,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2032,7 +2520,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2060,7 +2548,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2088,7 +2576,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2117,7 +2605,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2146,7 +2634,7 @@
    "standard_names": [],
    "sources": [
     "the m = 83 confidence gate (AGENTS.md §8a)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2174,7 +2662,7 @@
    ],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2206,7 +2694,7 @@
    ],
    "sources": [
     "ECC2K-95 (src/bin/ic/params.rs)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -2271,7 +2759,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2303,7 +2791,7 @@
    ],
    "sources": [
     "ECC2K-130 (src/cryptanalysis/ecc2k130_guard.rs)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "the challenge's normal-basis points are not imported (src/bin/ic/params.rs)"
@@ -2332,7 +2820,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2361,7 +2849,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2390,7 +2878,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2422,7 +2910,7 @@
    ],
    "sources": [
     "sect163k1, SEC 2 (src/binary_ecc/curve.rs)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [
     {
@@ -2489,7 +2977,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2518,7 +3006,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2550,7 +3038,7 @@
    ],
    "sources": [
     "sect233k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2582,7 +3070,7 @@
    ],
    "sources": [
     "sect239k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2614,7 +3102,7 @@
    ],
    "sources": [
     "sect283k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2646,7 +3134,7 @@
    ],
    "sources": [
     "sect409k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2678,7 +3166,7 @@
    ],
    "sources": [
     "sect571k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -2707,7 +3195,7 @@
    "standard_names": [],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -5116,6 +5604,28 @@
    ]
   },
   {
+   "slug": "icv1-fp14-tm63-1a762b57",
+   "icv1": "ICV1:fp-11617:-63:11681:9935:unk:unk:r:1a762b57ab66",
+   "family": "prime",
+   "params": {
+    "p": "11617",
+    "a": "3797",
+    "b": "2081"
+   },
+   "model_json": "{\"a\":\"3797\",\"b\":\"2081\",\"field\":\"fp-11617\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"11617\",\"v\":\"1\"}",
+   "trace": -63,
+   "order": "11681",
+   "j": "9935",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "tools/icms/tests/fixtures/autoresearcher-p14-smallx-m3-mitm.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp14-tm143-dec4cf6b",
    "icv1": "ICV1:fp-14389:-143:14533:7345:unk:unk:r:dec4cf6b8cf5",
    "family": "prime",
@@ -5237,6 +5747,28 @@
    ]
   },
   {
+   "slug": "icv1-fp16-tm393-20f8a24e",
+   "icv1": "ICV1:fp-53197:-393:53591:11973:unk:unk:r:20f8a24e456a",
+   "family": "prime",
+   "params": {
+    "p": "53197",
+    "a": "40230",
+    "b": "5"
+   },
+   "model_json": "{\"a\":\"40230\",\"b\":\"5\",\"field\":\"fp-53197\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"53197\",\"v\":\"1\"}",
+   "trace": -393,
+   "order": "53591",
+   "j": "11973",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "tools/icms/tests/fixtures/autoresearcher-p16-smallx-m2-enum.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp16-t295-8d3c3165",
    "icv1": "ICV1:fp-53411:295:53117:36611:unk:unk:r:8d3c316511e3",
    "family": "prime",
@@ -5256,7 +5788,10 @@
    ],
    "standard_names": [],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "representations": [
     {
@@ -5377,7 +5912,10 @@
    ],
    "standard_names": [],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "representations": [
     {
@@ -5498,7 +6036,12 @@
    ],
    "standard_names": [],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json",
+    "research/ecbench_numa_vm_20261002/sessions/auto/plan.json",
+    "research/ecbench_numa_vm_20261002/sessions/auto/spec.json"
    ],
    "representations": [
     {
@@ -5619,7 +6162,10 @@
    ],
    "standard_names": [],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "representations": [
     {
@@ -6043,7 +6589,10 @@
    ],
    "standard_names": [],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "representations": [
     {
@@ -6155,7 +6704,12 @@
    ],
    "standard_names": [],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/followup-prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/followup-prime/spec.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/followup-prime.json"
    ],
    "representations": [
     {
@@ -6187,6 +6741,120 @@
      },
      "sources": [
       "docs/curves/sources/generated.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+   "icv1": "ICV1:fp-6277101735386680763835789423207666416083908700390324961279:31607402316713927207482677199:6277101735386680763835789423176059013767194773182842284081:6234286251230310114240839169629130138801351179850969208331:unk:unk:r:52e4af591e39",
+   "family": "prime",
+   "params": {
+    "p": "6277101735386680763835789423207666416083908700390324961279",
+    "a": "6277101735386680763835789423207666416083908700390324961276",
+    "b": "2455155546008943817740293915197451784769108058161191238065"
+   },
+   "model_json": "{\"a\":\"6277101735386680763835789423207666416083908700390324961276\",\"b\":\"2455155546008943817740293915197451784769108058161191238065\",\"field\":\"fp-6277101735386680763835789423207666416083908700390324961279\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"6277101735386680763835789423207666416083908700390324961279\",\"v\":\"1\"}",
+   "trace": 31607402316713927207482677199,
+   "order": "6277101735386680763835789423176059013767194773182842284081",
+   "j": "6234286251230310114240839169629130138801351179850969208331",
+   "end": "unk",
+   "aliases": [
+    "P-192"
+   ],
+   "standard_names": [
+    "P-192"
+   ],
+   "sources": [
+    "src/ecc/curve_zoo.rs"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P192Cp192h5531c4a08bdb",
+     "curve_uid": "urn:ec-record:1:sha256:5531c4a08bdb64b6e86a6e30e9a08aa57edef7af15ac5f6d4d2a83a53bf2f646",
+     "field_sha256": "1a2739a7dfa28575a0a0a6b03e9a29670aced73943853a5d01d7bd1d852876fa",
+     "field": {
+      "characteristic": 6277101735386680763835789423207666416083908700390324961279,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       6277101735386680763835789423207666416083908700390324961276,
+       2455155546008943817740293915197451784769108058161191238065
+      ],
+      "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+      "cofactor": 1,
+      "generator": [
+       "0x188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012",
+       "0x7192b95ffc8da78631011ed6b24cdd573f977a11e794811"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "src/ecc/curve_zoo.rs"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+   "icv1": "ICV1:fp-26959946667150639794667015087019630673557916260026308143510066298881:4733100108545601916421827343930821:26959946667150639794667015087019625940457807714424391721682722368061:20781977079628996477063007379734849057519732242287194936686605794677:unk:unk:r:fec01e99874c",
+   "family": "prime",
+   "params": {
+    "p": "26959946667150639794667015087019630673557916260026308143510066298881",
+    "a": "26959946667150639794667015087019630673557916260026308143510066298878",
+    "b": "18958286285566608000408668544493926415504680968679321075787234672564"
+   },
+   "model_json": "{\"a\":\"26959946667150639794667015087019630673557916260026308143510066298878\",\"b\":\"18958286285566608000408668544493926415504680968679321075787234672564\",\"field\":\"fp-26959946667150639794667015087019630673557916260026308143510066298881\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"26959946667150639794667015087019630673557916260026308143510066298881\",\"v\":\"1\"}",
+   "trace": 4733100108545601916421827343930821,
+   "order": "26959946667150639794667015087019625940457807714424391721682722368061",
+   "j": "20781977079628996477063007379734849057519732242287194936686605794677",
+   "end": "unk",
+   "aliases": [
+    "P-224"
+   ],
+   "standard_names": [
+    "P-224"
+   ],
+   "sources": [
+    "src/ecc/curve_zoo.rs"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P224Cp224h8e110c585480",
+     "curve_uid": "urn:ec-record:1:sha256:8e110c5854808bfd2283aa4b15063d4c3052a0d742a47224e34876c6ade763bd",
+     "field_sha256": "143dc4e9d46f8c9f952e0ef49687826549d144055fdab3e2999f6d1af8c4467b",
+     "field": {
+      "characteristic": 26959946667150639794667015087019630673557916260026308143510066298881,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       26959946667150639794667015087019630673557916260026308143510066298878,
+       18958286285566608000408668544493926415504680968679321075787234672564
+      ],
+      "subgroup_order": "26959946667150639794667015087019625940457807714424391721682722368061",
+      "cofactor": 1,
+      "generator": [
+       "0xb70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21",
+       "0xbd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "src/ecc/curve_zoo.rs"
      ]
     }
    ]

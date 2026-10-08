@@ -102,6 +102,54 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 | C | `icv1-f2m53-tm56619371-dac20a85` | — | 6.6% | 2.2% | 2.5% | 23.4% | 56.3% | 0.2% | 7.8% | 0.9% |
 | C | `icv1-f2m61-t158598901-ab42b6c5` | — | 3.4% | 0.6% | 0.7% | 7.5% | 78.8% | 0.1% | 8.7% | 0.2% |
 
+## Bounded n37 diagnostic outside tables A–C
+
+The separately calibrated `icv1-f2m37-tm534059-32aad96b` shared-rank K16 candidate (`IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772`) has 1,184 usable points and 16 folded columns. Across 40 verified one-target runs, its mean cold counted `S` lower bound is 2.111; its counted IC/rho quotient is 5.034 and K16/K42 is 0.349. Native work is unpriced for both arms, and L0 timing cannot establish an online speedup. This row is intentionally outside the three fully priced unit families; read the [frozen decision](../../research/ecbench_n37_rank_columns_20261004/RESULT.json).
+
+The untouched 16-target K8/K16 confirmation selected `IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54` for the cold implementation route: K16/K8 whole-solve Callgrind Ir is 1.190 [1.158, 1.222], and K8/rho is 3.645 [3.235, 4.136]. All 64 profiles and 320 independent measured replays verified. The unit is simulated whole-solve instructions, not isolated online wall time; K16 remains a target-only candidate. Read the [raw instruction decision](../../research/ecbench_n37_k8_k16_20261004/DECISION.json).
+
+The fresh 16-target panel reverses the base choice inside the **target-only simulated-instruction** interval: `IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2` is prioritized for an isolated n37 online wall test because K8/K16 target-only Callgrind Ir is 2.886 [1.730, 4.602]. K16/rho is 0.153 [0.092, 0.240] in the same instruction unit, while K8/K16 complete-solve Ir is 0.848. All 64 profile scalars and 320 independent measured replays verified. Mac L0 timing leaves the primary online wall speedup unknown; both bases remain live at n41/n53. Read the [raw target-only decision](../../research/ecbench_n37_online_ir_20261004/DECISION.json).
+
+The next native hosted n37 screen independently replayed 320/320 measured executions. For preregistered one-target workload `Wd281dbafa0cb`, descriptive rho/K16 online wall is 7.178. The separate 16-target panel has K8/K16 online wall 7.110 [3.669, 16.982]. All measured rows earned L1 and the identical K16 A/A maximum deviation was 12.85%, above the frozen 5% gate. The admitted online speedup remains unknown; both K8 and K16 carry to the L2 host gate and n41/n53. Read the [sealed native decision](../../research/ecbench_n37_native_online_wall_20261004/DECISION.json).
+
+## Complete n9 F6-IC control outside tables A–C
+
+The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183` recovered the logarithm of public point `[305, 466]` with inherited F4, F6-IC and matrix F5. Each cold run built 14 usable base points, collected 8 verified ordinary relations, solved 2 folded columns and independently replayed the scalar, relations, column logs and phase totals. Inside-worker cold times were 4.707, 3.150 and 61.937 ms respectively; one-target online times were 0.372, 0.272 and 3.118 ms. These are exploratory L0 Mac wall observations on a tiny subgroup. No same-target rho reference or fully priced operation count exists, so IC/rho speedup and `S` are unknown; this control cannot enter tables A–C. Read the [keyed measurements](../../research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl) and [independent replay](../../research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json).
+
+| solver | candidate | cold ms | online ms |
+|:--|:--|--:|--:|
+| Inherited F4 | `IC1N9Ckb1fb14PDP3f4RCsampleLAgaussTDpdpISO0h09c74e3fcd1d` | 4.707 | 0.372 |
+| F6-IC | `IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2` | 3.150 | 0.272 |
+| Matrix F5 | `IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5` | 61.937 | 3.118 |
+
+## F6-IC E_0 ladder in ecbench, outside tables A–C
+
+#1333's inherited-F4 and F6-IC decomposers ran unmodified in `ic.pipeline` beside same-target strong rho on eight public one-target workloads per size. IC `S` is a lower bound: the solver's word XORs are counted but unpriced, and F6-IC's geometric point additions are charged. The F6-IC word-XOR saving vanishes once the base exceeds #1333's 256-point closure cap; charging its geometry makes the trade a relabelling. Decision: not decidable: fewer than six targets completed at some size, or fewer than four sizes (m = 31 incomplete). Read the [analysis](../../research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json).
+
+| m | curve | targets | rho S | F4 S/rho (lower bound) | F6-IC S/rho (lower bound) | median log2(W4/W6) |
+|--:|:--|--:|--:|--:|--:|--:|
+| 13 | `icv1-f2m13-t181-515ee569` | 8 | 14.713 | 1.105 | 54.751 | 0.377 |
+| 19 | `icv1-f2m19-t797-b6cf2467` | 8 | 3.134 | 1.582 | 2090.849 | 0.433 |
+| 23 | `icv1-f2m23-t5197-69e76b73` | 8 | 1.046 | 2.091 | 2.721 | 0.000 |
+
+## n41/n53 shared-rank counted panel, outside tables A–C
+
+The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 control, method parameters unchanged) ran on 16 new public one-target workloads on each of the next two registered sizes, five paired rounds each, on macOS at L0. Counted cold IC/rho is a quotient of two lower bounds (native work unpriced); a cell whose arm never verifies under the frozen parameters is unknown, not a cost. 206 of 640 measured runs verified; decision `frozen_parameters_do_not_transfer`; the L2 host run is pending. Read the [frozen decision](../../research/ecbench_n41_n53_shared_rank_20261005/DECISION.json).
+
+| curve | log2 r | arm | verified / measured | usable points | columns | mean cold S (lower bound) | counted IC/rho [95%] |
+|:--|--:|:--|--:|--:|--:|--:|:--|
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | rho-strong | 80/80 | — | — | 0.157 | reference |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | ic-k8 | 0/80 | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | ic-k16 | 23/80 | 1312 | 16 | 42.569 | 256.236 [202.459, 332.752] |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | ic-k16-control | 23/80 | 1312 | 16 | 42.569 | A/A control |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | K16 / K8 | — | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | rho-strong | 80/80 | — | — | 0.141 | reference |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k8 | 0/80 | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k16 | 0/80 | — | — | — | unknown (0 verified pairs) |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k16-control | 0/80 | — | — | — | A/A control |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.26 | K16 / K8 | — | — | — | — | unknown (0 verified pairs) |
+
+
 ## Sources
 
 - `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` — sha256 `28aadc91af9e4c0b…`
@@ -112,4 +160,15 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 - `research/ic_descent_20260930/analysis-isolated.json` — sha256 `060359c266e779db…`
 - `research/ic_single_target_20260930/analysis.json` — sha256 `109326d7c2882b71…`
 - `docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json` — sha256 `2271c4aa5236e2bd…`
-- `docs/curves/registry.json` — sha256 `ac96fc4a4e9c20e1…`
+- `research/ecbench_n37_rank_columns_20261004/RESULT.json` — sha256 `f7b950edc74978cb…`
+- `research/ecbench_n37_k8_k16_20261004/DECISION.json` — sha256 `c4a33ffd9045a479…`
+- `research/ecbench_n37_online_ir_20261004/DECISION.json` — sha256 `e711979f64d08ea3…`
+- `research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json` — sha256 `369e99e76d8ba12a…`
+- `research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json` — sha256 `a708e63cb4ccfe36…`
+- `research/ecbench_n37_native_online_wall_20261004/DECISION.json` — sha256 `eebbe2eef9524c7f…`
+- `research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json` — sha256 `bb4dd48030029d21…`
+- `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
+- `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
+- `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
+- `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
+- `docs/curves/registry.json` — sha256 `a43b9dd3529815ae…`

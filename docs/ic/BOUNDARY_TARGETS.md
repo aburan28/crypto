@@ -249,6 +249,17 @@ for **the tested W64 n41/n53 batch cold CPU cells** against strong rho; Ir alone
 is not a group-addition or cycle unit and does not establish a method speedup.
 
 The older point-panel native CPU references for n37/L1, n37/L1024, n41/L1
+and n53/L1 used a different rho/source snapshot. The separate four-cell
+protocol committed before inspection of the Ir results has now run once
+([cold-gap result](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)).
+Its current-source complete CPU ratios to the same-Q rho are **3.7362**
+(3.6901–3.7803), **1.7064** (1.6933–1.7146), **17.0499** (16.0731–18.1962)
+and **27.4483** (27.1951–27.6616). All four A/A and isolation gates passed.
+None is below one, so those cells also have no matched-rho cold CPU crossover. The K+L rank/recovery attempt floor is exactly
+met in all compact arms, but no instruction lower bound, calibrated generic
+S, disjoint target confirmation, n83 confidence, GF(2^131) transfer, or native
+leaf m≥3 PDP result follows. The degree-263 map/ring certificate and the
+review/label-gated m10 capacity PR #937 remain separate prerequisites.
 and n53/L1 used a different rho/source snapshot. The preregistered
 [four-cell current-source cold panel](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)
 now closes those cells: all 105 processes, 70 compact full-rank traces and
@@ -264,6 +275,19 @@ is exactly met in all compact arms, but no instruction lower bound, calibrated
 generic S, disjoint target confirmation, n83 confidence, GF(2^131) transfer,
 or native leaf m≥3 PDP result follows. The degree-263 map/ring certificate
 and review/label-gated m10 capacity PR #937 remain separate prerequisites.
+
+### Degree-263 leaf m10 physical support, 2026-09-30 — count transfer fails, no PDP
+
+The [frozen leaf census](../../research/notes/ecc2k130/leaf_m10_support_20260930/RESULT.md)
+ran once as Actions run 36707051160. Source low slots are 7,977 physical
+points ten times and the high slot is 16,125. Leaf `[1,0]` low slots are
+8,063–8,339 and its high slot is 16,259. Leaf `[1,4]` low slots are
+8,087–8,323 and its high slot is 16,323. Balanced projected-sign unions are
+39,880 / 40,875 / 40,994 and unequal unions are 43,954 / 44,932 / 45,075.
+Each arm's union equals the sum of its slot class counts. `N/q` remains a
+counting ceiling. `PDP_yield`, full ECDLP cost, `S`, matched rho, and
+method crossover stay unset. The census does not discharge review-gated
+m10 capacity PR #937, and it is not an equal-useful-size PDP comparison.
 
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 

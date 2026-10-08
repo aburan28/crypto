@@ -1,0 +1,41 @@
+{
+  "after_sha256": "2c9450d84b624e7050fc765cb5d137cbd4358506f8402dfeb120919deae39396",
+  "before_sha256": "2c9450d84b624e7050fc765cb5d137cbd4358506f8402dfeb120919deae39396",
+  "command": [
+    "/Volumes/SSD990/llm/tmp/ic-prepared-f5-v3-control-v1-20261001/execution/asset-files/bin/worker"
+  ],
+  "controller_group": 75848,
+  "environment_threads": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "RAYON_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "executable_sha256": "5d113a46f67c982bfdb6b81dc49aec7203ca990bd5b7574b4c2feec4c5011624",
+  "execution_sha256": "5c0a1473b7d2637a7e97666db68262d038c628f937f3b0ea0338fd83f949f98d",
+  "invocation_sha256": "0613d2df4a40dc0e6f5e495209e8524d73172a00f38beb236d65925e638e1b8a",
+  "metrics": {
+    "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+    "peak_rss_bytes": 51281920,
+    "single_core_seconds": 10.754555,
+    "system_seconds": 0.17149599999999998,
+    "total_core_seconds": 10.754555,
+    "user_seconds": 10.583059,
+    "wall_seconds": 11.999138125
+  },
+  "native_group_observed": 75848,
+  "native_pid": 76084,
+  "native_wall_ns": 11999138125,
+  "process_group_policy": "inherit-controller-group; no native fork or setsid",
+  "returncode": 0,
+  "schema_version": 3,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_argument": "job",
+  "stdin_bytes": 2628,
+  "stdin_sha256": "5c7e688587de245c8c164cd574ff534d3bfbf24057f1273e29b9e16d7d7fd44e",
+  "stdout_sha256": "57cb2e8e885c5da4912abd32b767b26ac6263175c5ec98f8f20b93fbc8d250ca",
+  "timed_out": false,
+  "watchdog_seconds": 870
+}

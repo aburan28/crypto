@@ -21,6 +21,7 @@
 #   PACKED_TOP_HOIST  hoisted 3-bit product correction, bit-identical (default 0)
 #   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
 #   PACKED_FROM_REDUCED  5-word inverse of toPolynomial131 (default 0)
+#   PACKED_SIGMA_TABLE  fused-walk Frobenius steps from shared nibble tables (default 0)
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
@@ -107,6 +108,7 @@ PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
 PACKED_FROM_REDUCED ?= 0
+PACKED_SIGMA_TABLE ?= 0
 PACKED_CLMUL_FLAT ?= 0
 PACKED_PAIR_CLMUL ?= 0
 PACKED_ALU_SQR ?= 0
@@ -265,6 +267,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
        -DECC_PACKED_FROM_REDUCED=$(PACKED_FROM_REDUCED) \
+       -DECC_PACKED_SIGMA_TABLE=$(PACKED_SIGMA_TABLE) \
        -DECC_PACKED_CLMUL_FLAT=$(PACKED_CLMUL_FLAT) \
        -DECC_PACKED_PAIR_CLMUL=$(PACKED_PAIR_CLMUL) \
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
@@ -362,6 +365,20 @@ check-cycles:
 	cargo run --release --quiet --manifest-path ../Cargo.toml --bin ecc2k-guard -- \
 	    cycles --max-length $(CYCLE_LENGTH)
 
+# The campaign dashboard (ecc2k-status, which replaced aws/status.py) and the
+# Python-compatible JSON and number formatting it prints through. Their
+# expected bytes were printed by CPython.
+test-status:
+	cargo test --release --quiet --manifest-path ../Cargo.toml --lib -- \
+	    ecc2k130_status ecc2k130_pyjson
+
+# Offline half of aws/dp_ingest.py (Phase A). Own workspace under
+# ecc2k130/dp-ingest/ so the IC autolab frozen root Cargo.lock stays untouched.
+# Live daemon remains aws/dp_ingest.py until Phase B/C.
+test-dp-ingest:
+	cargo +1.98 test --quiet --manifest-path dp-ingest/Cargo.toml
+	cargo +1.98 clippy --quiet --manifest-path dp-ingest/Cargo.toml --all-targets -- -D warnings
+
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
 #   pip install python-sat pycryptosat
@@ -434,7 +451,7 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_bootstrap_contract.py -v
 	python3 -m unittest discover -s aws -p test_campaign_guard.py -v
 	python3 -m unittest discover -s aws -p test_worker_family.py -v
-	python3 -m unittest discover -s aws -p test_status_walks.py -v
+	python3 -m unittest discover -s aws -p test_worker_banner.py -v
 	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
 	python3 -m unittest discover -s aws -p test_rollout.py -v
 	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
@@ -636,7 +653,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-table-v3-replay test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-status test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-table-v3-replay test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -737,6 +754,21 @@ PRO6000_SIGMA_FUSED_KNOBS = BATCH=16 THREADS=256 MINBLOCKS=2 \
     PACKED_INLINE_POLY=3 SIGMA_FUSED=1 WITNESS=0 WALK_TABLE=0
 gpu-rtx-pro6000-sigma-fused:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+
+# The fused sigma walk with the Frobenius steps read from shared-memory nibble
+# tables (SIGMA-TABLE.md): 68 KB of shared memory per block, so one 512-thread
+# block per SM keeps the register budget and resident warps of the preset.
+PRO6000_SIGMA_TABLE_KNOBS = $(PRO6000_SIGMA_FUSED_KNOBS) THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1
+gpu-rtx-pro6000-sigma-table:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_TABLE_KNOBS)
+
+# Headline protocol (A/A panel, five A/B pairs, 64 launches) for the table
+# against the fused preset; benchmark-only, receipts in benchmarks/sigma-table/.
+bench-rtx-pro6000-sigma-table:
+	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-table/gpujob-headline.sh \
+	    --out $(TABLE_BENCH_OUT)
+TABLE_BENCH_OUT ?= /tmp/ecc2k-sigma-table-benchmark
+.PHONY: gpu-rtx-pro6000-sigma-table bench-rtx-pro6000-sigma-table
 
 # Matched replay, A/A noise and five-pair confirmation; benchmark-only.
 bench-rtx-pro6000-sigma-fused:
@@ -1033,6 +1065,7 @@ clean:
 	rm -f build/sigma-fused-shared-scratch-model build/sigma-fused-shared-scratch-model.json
 
 .PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-sigma-square-table-native test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
+.PHONY: path-cost all generate check-cli check-cycles test-status perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:

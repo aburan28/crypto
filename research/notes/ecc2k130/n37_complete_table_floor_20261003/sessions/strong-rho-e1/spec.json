@@ -1,0 +1,24 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n37 complete m3 pair-table cold setup floor: public strong-rho controls",
+  "description": "Operations-only necessary-cost gate for the fixed four-policy complete pair table; not an IC/rho speed claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 37}],
+    "targets_per_curve": 8,
+    "target_seed": 202610030037,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {
+      "lanes": "32", "dp_bits": "4", "step_cap_factor": "2000"
+    }}}
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 373737,
+    "isolation_required": "L2",
+    "timeout_seconds": 120
+  }
+}

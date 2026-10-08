@@ -11,8 +11,11 @@
 //! changes the code it measures.
 //!
 //! - `icprog analyse <round>`: a round's figures and decision, from its run
-//!   tree only.  `r05` and `r02b` are native; `r03` reproduces R03's
+//!   tree only.  `r05`, `r02b` and `r07` are native; `r03` reproduces R03's
 //!   frozen `analysis.json` from its frozen runs.
+//! - `icprog holdouts`: a round's fresh holdouts by suite v1's own
+//!   construction (`suite/v1/make_suite.py`, ported), drawn once, or
+//!   checked against the files a round froze.
 //! - `icprog run <round> <step>`: a round's declared steps on the native
 //!   runner (`harness/bench.py`, ported), through `isolated_bench`: its
 //!   manifest, pin, A/A, timed rows and callgrind profiles.  It resumes a
@@ -33,10 +36,18 @@ mod autolab;
 mod bench;
 #[path = "icprog/callgrind.rs"]
 mod callgrind;
+#[path = "icprog/f5_control.rs"]
+mod f5_control;
+#[path = "icprog/f5_control_publication.rs"]
+mod f5_control_publication;
+#[path = "icprog/f5_target.rs"]
+mod f5_target;
 #[path = "icprog/identity.rs"]
 mod identity;
 #[path = "icprog/oracle.rs"]
 mod oracle;
+#[path = "icprog/ordinary_preparation.rs"]
+mod ordinary_preparation;
 #[path = "icprog/report.rs"]
 mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
@@ -45,6 +56,10 @@ mod report;
 mod json;
 #[path = "icprog/pin.rs"]
 mod pin;
+#[path = "icprog/prepared_f5.rs"]
+mod prepared_f5;
+#[path = "icprog/prepared_sat.rs"]
+mod prepared_sat;
 #[path = "icprog/pyrandom.rs"]
 mod pyrandom;
 #[path = "icprog/rounds.rs"]
@@ -53,6 +68,14 @@ mod rounds;
 mod rule;
 #[path = "icprog/runs.rs"]
 mod runs;
+#[path = "icprog/sat_control.rs"]
+mod sat_control;
+#[path = "icprog/sat_control_publication.rs"]
+mod sat_control_publication;
+#[path = "icprog/sat_query_law.rs"]
+mod sat_query_law;
+#[path = "icprog/sat_source.rs"]
+mod sat_source;
 #[path = "icprog/stats.rs"]
 mod stats;
 #[path = "icprog/suite.rs"]
@@ -79,6 +102,7 @@ enum Round {
     R02b,
     R03,
     R05,
+    R07,
 }
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]
@@ -89,6 +113,177 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Independently audit target-free synthetic n17 preparation data; no solver execution.
+    OrdinaryPreparationAudit {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay full published F5 capsule custody as data, without execution.
+    F5ControlReplayCustody {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish exact sidecars for an unconsumed F5 capsule and verify its archive.
+    F5ControlPublishCustody {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable data replay of a validation-only F5 build; no archive execution/custody.
+    F5ControlReplayValidation {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish compact receipts of a non-executable F5 build-validation capsule.
+    F5ControlPublishValidation {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Freeze a disclosed n17 F5 controller/worker/auditor; builds only, no job.
+    F5ControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        validation_only: bool,
+    },
+    /// Consume the sole invocation of a separately published disclosed F5 seal.
+    F5ControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Audit F5 source, transport and arithmetic using its frozen checker; no search.
+    F5ControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish the exact consumed native F5 control; never reruns its worker or audit.
+    F5ControlPublishResult {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        audit: PathBuf,
+        #[arg(long)]
+        source_acceptance: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable postexecution F5 data/math replay; executes no archived binary.
+    F5ControlReplayResult {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay retained disclosed F5 target mathematics; no worker, fresh yield or admission.
+    F5TargetReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Reconstruct retained F5 ordinary preparation natively; no search or new timing.
+    F5PreparationReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish the exact consumed native SAT control; creates a new immutable tree.
+    SatControlPublish {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        audit: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable postexecution data/math replay; executes no archived binary or solver.
+    SatControlReplayPublication {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Freeze disclosed n17 native-control sources, dependencies and binaries; no search.
+    SatControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+    },
+    /// Consume one frozen disclosed n17 registration before its sole native execution.
+    SatControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Independently audit a consumed control; must use its frozen checker binary.
+    SatControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Independently replay the retained disclosed n17 SAT source witness; no solver or new target.
+    SatSourceReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// Create an immutable report; refuses to overwrite any existing file.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
     /// A round's figures and decision, from its run tree only, as JSON.
     Analyse {
         round: Round,
@@ -182,11 +377,34 @@ enum Command {
         #[arg(long)]
         fixture_commit: Option<String>,
     },
-    /// One of a round's declared steps, natively (R05, R02b).
+    /// A round's fresh holdouts by suite v1's own construction
+    /// (`suite/v1/make_suite.py`, ported): written once into the round's
+    /// `holdouts/` with their `SHA256SUMS`, or, with `--check`, re-derived
+    /// and compared byte for byte with the files already there.
+    Holdouts {
+        /// The round's directory, e.g. `research/ic_tool_program/rounds/R07-main-head`.
+        round_dir: PathBuf,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// A size, as `a,n`; repeat for each.
+        #[arg(long = "size", required = true)]
+        sizes: Vec<String>,
+        /// The recipe seeds, two targets to a seed, in order.
+        #[arg(long, value_delimiter = ',', required = true)]
+        seeds: Vec<i128>,
+        /// The first target's number; the rest follow on.
+        #[arg(long)]
+        first_target: i128,
+        /// Compare with the files already there instead of writing.
+        #[arg(long)]
+        check: bool,
+    },
+    /// One of a round's declared steps, natively (R05, R02b, R07).
     Run {
         round: Round,
         /// R05: plan, manifest-resumed, pin, compare, holdout or extend.
-        /// R02b: plan, manifest, pin, aa, compare, holdout, extend,
+        /// R02b and R07: plan, manifest, pin, aa, compare, holdout, extend,
         /// callgrind or manifest-resumed.
         step: String,
         /// The repository checkout (default: the current directory).
@@ -220,6 +438,7 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R02b => "R02b-wide-tail-retest",
         Round::R03 => "R03-curve-construction",
         Round::R05 => "R05-presence-filter",
+        Round::R07 => "R07-main-head",
     };
     let round_dir = programme.join("rounds").join(dir);
     Ok((programme, round_dir))
@@ -296,6 +515,7 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
     let doc = match round {
         Round::R02b => rounds::r02b::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R05 => rounds::r05::run(&ctx, step, &b, &arms, &root)?,
+        Round::R07 => rounds::r07::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
     Ok(match doc {
@@ -449,14 +669,173 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
         Round::R02b => rounds::r02b::analyse(&ctx)?,
         Round::R03 => rounds::r03::analyse(&ctx)?,
         Round::R05 => rounds::r05::analyse(&ctx)?,
+        Round::R07 => rounds::r07::analyse(&ctx)?,
     };
     Ok(json::dumps(&doc, 1))
+}
+
+struct HoldoutArgs {
+    round_dir: PathBuf,
+    root: PathBuf,
+    sizes: Vec<String>,
+    seeds: Vec<i128>,
+    first_target: i128,
+    check: bool,
+}
+
+/// Write a round's fresh holdouts once, or check the ones it has.
+fn holdouts(args: HoldoutArgs) -> Result<String, String> {
+    let programme = suite::programme(&args.root)?;
+    let mut sizes = Vec::new();
+    for s in &args.sizes {
+        let size = s
+            .split_once(',')
+            .and_then(|(a, n)| Some((a.trim().parse().ok()?, n.trim().parse().ok()?)))
+            .ok_or_else(|| format!("--size {s:?} is not a,n"))?;
+        sizes.push(size);
+    }
+    let files = suite::holdouts(&programme, &sizes, &args.seeds, args.first_target)?;
+    let sums = suite::sums_text(&files);
+    let dir = args.round_dir.join("holdouts");
+    if args.check {
+        let mut mismatches = Vec::new();
+        for (path, text) in &files {
+            if std::fs::read(dir.join(path)).ok().as_deref() != Some(text.as_bytes()) {
+                mismatches.push(json::J::Str(path.clone()));
+            }
+        }
+        if std::fs::read_to_string(dir.join("SHA256SUMS"))
+            .ok()
+            .as_deref()
+            != Some(sums.as_str())
+        {
+            mismatches.push(json::J::Str("SHA256SUMS".into()));
+        }
+        let doc = json::obj([
+            ("files", json::J::Int(files.len() as i128)),
+            ("mismatches", json::J::Arr(mismatches.clone())),
+        ]);
+        return if mismatches.is_empty() {
+            Ok(json::dumps(&doc, 1))
+        } else {
+            Err(json::dumps(&doc, 1))
+        };
+    }
+    if dir.exists() {
+        return Err(format!(
+            "{} exists; a round's holdouts are drawn once (use --check)",
+            dir.display()
+        ));
+    }
+    for (path, text) in &files {
+        let out = dir.join(path);
+        if let Some(parent) = out.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| format!("{}: {e}", parent.display()))?;
+        }
+        std::fs::write(&out, text).map_err(|e| format!("{}: {e}", out.display()))?;
+    }
+    let out = dir.join("SHA256SUMS");
+    std::fs::write(&out, &sums).map_err(|e| format!("{}: {e}", out.display()))?;
+    Ok(format!(
+        "{} holdout files written to {}",
+        files.len(),
+        dir.display()
+    ))
 }
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::OrdinaryPreparationAudit { input, out } => ordinary_preparation::run(&input, &out),
+        Command::F5ControlReplayCustody {
+            publication,
+            registration_sha256,
+            out,
+        } => f5_control::replay_custody(&publication, &registration_sha256, &out),
+        Command::F5ControlPublishCustody {
+            capsule,
+            publication,
+            out,
+        } => f5_control::publish_custody(&capsule, &publication, &out),
+        Command::F5ControlReplayValidation {
+            publication,
+            validation_registration_sha256,
+            out,
+        } => f5_control::replay_validation(&publication, &validation_registration_sha256, &out),
+        Command::F5ControlPublishValidation { capsule, out } => {
+            f5_control::publish_validation(&capsule, &out)
+        }
+        Command::F5ControlFreeze {
+            root,
+            out,
+            config,
+            cargo,
+            rustc,
+            host_context,
+            validation_only,
+        } => f5_control::freeze(
+            &root,
+            &out,
+            &config,
+            &cargo,
+            &rustc,
+            &host_context,
+            validation_only,
+        ),
+        Command::F5ControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => f5_control::execute(&capsule, &execution, &registration_sha256),
+        Command::F5ControlAudit {
+            capsule,
+            execution,
+            registration_sha256,
+            out,
+        } => f5_control::audit(&capsule, &execution, &registration_sha256, &out),
+        Command::F5ControlPublishResult {
+            capsule,
+            execution,
+            audit,
+            source_acceptance,
+            out,
+        } => {
+            f5_control_publication::publish(&capsule, &execution, &audit, &source_acceptance, &out)
+        }
+        Command::F5ControlReplayResult { publication, out } => {
+            f5_control_publication::replay_to(&publication, &out)
+        }
+        Command::F5TargetReplay { root, out } => f5_target::replay(&root, &out),
+        Command::F5PreparationReplay { root, out } => prepared_f5::run(&root, &out),
+        Command::SatControlPublish {
+            capsule,
+            execution,
+            audit,
+            host_context,
+            out,
+        } => sat_control_publication::publish(&capsule, &execution, &audit, &host_context, &out),
+        Command::SatControlReplayPublication { publication, out } => {
+            sat_control_publication::replay_to(&publication, &out)
+        }
+        Command::SatControlFreeze {
+            root,
+            out,
+            config,
+            cargo,
+            rustc,
+        } => sat_control::freeze(&root, &out, &config, &cargo, &rustc),
+        Command::SatControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => sat_control::execute(&capsule, &execution, &registration_sha256),
+        Command::SatControlAudit {
+            capsule,
+            execution,
+            out,
+        } => sat_control::audit(&capsule, &execution, &out),
         Command::Analyse { round, root, runs } => analyse(round, root, runs),
+        Command::SatSourceReplay { root, out } => sat_source::run(&root, out.as_deref()),
         Command::Baseline {
             analysis,
             runs,
@@ -501,8 +880,23 @@ fn main() -> ExitCode {
             },
         ),
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
-            Round::R05 | Round::R02b => report::r05(&doc),
+            Round::R05 | Round::R02b | Round::R07 => report::r05(&doc),
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
+        }),
+        Command::Holdouts {
+            round_dir,
+            root,
+            sizes,
+            seeds,
+            first_target,
+            check,
+        } => holdouts(HoldoutArgs {
+            round_dir,
+            root,
+            sizes,
+            seeds,
+            first_target,
+            check,
         }),
         Command::Run {
             round,

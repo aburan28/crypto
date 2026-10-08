@@ -1,0 +1,38 @@
+{
+  "basis": "type_ii_optimal_normal",
+  "claim_boundary": "identity and representation replay only; no descent or speed claim",
+  "cofactor": 4,
+  "crypto_curve_id": "icv1-f2m83-tm6151469093347-debefd74",
+  "curve_id": "EC1N83Ckb1h876c2921cb64",
+  "degree": 83,
+  "generator": {
+    "infinity": false,
+    "x": "0x10dbcd28edfff9d7ca5a0",
+    "y": "0x6c82ad9b0b7b8bc36d66c"
+  },
+  "group_order": "9671406556923184866742756",
+  "model": "y^2 + x*y = x^3 + 1",
+  "rho_recovered_scalar": "467066815623456506232910",
+  "rho_scalar_replay": true,
+  "rho_walk_iterations": "201733439488",
+  "schema": "n83_rotated_m10_identity_v1",
+  "slot_dimensions": [
+    9,
+    9,
+    9,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8
+  ],
+  "status": "PASS",
+  "subgroup_order": "2417851639230796216685689",
+  "target": {
+    "infinity": false,
+    "x": "0x78f3daa4bf524e3e8e9c7",
+    "y": "0x2e08b1e3a8d43e5becd4"
+  }
+}

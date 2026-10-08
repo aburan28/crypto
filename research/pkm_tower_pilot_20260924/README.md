@@ -14,25 +14,35 @@ cargo build --release --example pkm_tower_pilot
 B=target/release/examples/pkm_tower_pilot
 $B <flags from the table below> --out runs/<name>.jsonl 2> runs/<name>.log
 
-python3 research/pkm_tower_pilot_20260924/analyze.py research/pkm_tower_pilot_20260924/runs/*.jsonl
-python3 research/pkm_tower_pilot_20260924/verify.py  research/pkm_tower_pilot_20260924/runs/*.jsonl
+cargo build --release --example pkm_tower_check
+C=target/release/examples/pkm_tower_check
+$C analyze research/pkm_tower_pilot_20260924/runs/*.jsonl
+$C verify  research/pkm_tower_pilot_20260924/runs/*.jsonl
 ```
 
-- `analyze.py` prints one table per (kind, `m`, control), the fit that §5.2 of
+- `analyze` prints one table per (kind, `m`, control), the fit that §5.2 of
   the note pre-registered, the slopes that replace its degenerate interval, and
   the generator-count ladder.
-- `verify.py` recounts every finished tower row by exhaustive search over
-  `V^m`, without F4. It exits non-zero on any disagreement.
+- `verify` recounts every finished tower row by exhaustive search over `V^m`,
+  without F4. It exits non-zero on any disagreement.
+
+**The checks are native since round 7 (note §16.3).**
+- `examples/pkm_tower_check.rs` replaces the Python scripts `analyze.py`,
+  `verify.py` and `test_verify.py`, which stay here as the legacy record
+  (`AGENTS.md`, "no Python").
+- `legacy_output/` holds what the scripts printed in CI on 2026-09-30. Its
+  `check.sh` requires the native checker to print the same, line for line, and
+  CI runs it.
 
 Every cell draws its tower, curve and targets from the seed `0x504B4D54`
 (`1347112276`) combined with (kind, `m`, `t`, `g`). A cell is therefore the same
-system in every run that contains it. Both scripts count such a system once.
-`analyze.py` also checks that every repeat agrees on every deterministic field
-and prints any that do not. Rows from the sparse tower engine (round 2,
+system in every run that contains it. Both checks count such a system once.
+`analyze` also checks that every repeat agrees on every deterministic field and
+prints any that do not. Rows from the sparse tower engine (round 2,
 `research/pkm_tower_round2_20260925/`) carry `"engine": "f4_fp_tower"`. The
-scripts count one system measured by both engines once per engine, and
-`analyze.py` compares the engines system by system. It fails if they disagree on
-whether a system has a solution.
+checks count one system measured by both engines once per engine, and `analyze`
+compares the engines system by system. It fails if they disagree on whether a
+system has a solution.
 
 ## Runs
 

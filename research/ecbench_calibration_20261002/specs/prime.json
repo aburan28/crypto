@@ -1,0 +1,130 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "calibration: generic methods on six registered prime-order curves",
+  "description": "Preregistered in ../PROTOCOL.md. Does ecbench charge each generic method what theory says it costs? The six curves are find_prime_order_curve(N, 59297) for N = 16..26 as docs/curves/registry.json records them, given explicitly so that planning and every audit skip the O(p) curve search. Operation counts only; wall time descriptive.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 53411,
+        "a": 4589,
+        "b": 186,
+        "group_order": 53117,
+        "r": 53117,
+        "gx": 43982,
+        "gy": 22687
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 212099,
+        "a": 188885,
+        "b": 173081,
+        "group_order": 212437,
+        "r": 212437,
+        "gx": 174945,
+        "gy": 10250
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 563153,
+        "a": 51142,
+        "b": 548946,
+        "group_order": 562427,
+        "r": 562427,
+        "gx": 271792,
+        "gy": 48157
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 2434423,
+        "a": 620112,
+        "b": 1810598,
+        "group_order": 2435809,
+        "r": 2435809,
+        "gx": 1448421,
+        "gy": 2354232
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 16483309,
+        "a": 8820674,
+        "b": 11008593,
+        "group_order": 16482251,
+        "r": 16482251,
+        "gx": 10566184,
+        "gy": 339081
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 42652151,
+        "a": 26623966,
+        "b": 14210560,
+        "group_order": 42653927,
+        "r": 42653927,
+        "gx": 40895024,
+        "gy": 26279521
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261002
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "rho-plain",
+      "role": "baseline",
+      "method": {
+        "id": "rho.plain"
+      }
+    },
+    {
+      "name": "rho-frozen",
+      "role": "baseline",
+      "method": {
+        "id": "rho.frozen_reference"
+      }
+    },
+    {
+      "name": "bsgs",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.textbook"
+      }
+    },
+    {
+      "name": "bsgs-il",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.interleaved"
+      }
+    },
+    {
+      "name": "bsgs-neg",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.negation"
+      }
+    },
+    {
+      "name": "kangaroo",
+      "role": "candidate",
+      "method": {
+        "id": "kangaroo.vow"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261002,
+    "isolation_required": "L2",
+    "timeout_seconds": 600
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "chosen_K": 500,
+  "k_source": "fixed",
+  "rows": [
+    {
+      "K": 500,
+      "estimated_ic_rss_bytes": 1506850688,
+      "state": "fixed",
+      "workload": null
+    }
+  ],
+  "selection": "lowest median whole-process IC wall (reusable setup plus one target, the cold cost of one workload) over the disjoint one-target tune workloads; a K that misses any tune workload is ineligible; candidates whose estimated IC RSS plus headroom exceeds available memory are skipped and recorded",
+  "table": [],
+  "tune_targets": [
+    0,
+    1,
+    2,
+    3
+  ]
+}

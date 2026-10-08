@@ -1,0 +1,117 @@
+{
+  "K": 1000,
+  "autolab_run_id": "20261002T213417Z-6e1f87218b",
+  "beat_id": "koblitz.compact_orbit.n61_panel",
+  "claim_boundary": "L=16384 batched whole-process diagnostic; ineligible for the single-target online vs_rho schema.",
+  "claim_boundary_non_claims": [
+    "public synthetic known-answer fixtures only",
+    "no key recovery",
+    "no asymptotic sub-rho claim; both arms scale as sqrt(L*r/n) at optimal K",
+    "multi-target L=16384 batch: diagnostic, not the one-target primary comparison",
+    "comparator is the frozen KS v2 batched rho (koblitz_rho_batch_ks_v2_n61), superseded by strong rho R3 and not listed in measurement_schema.vs_rho.rho_reference_minimum",
+    "same-host replay; independent-host validation still required"
+  ],
+  "comparator": "koblitz_rho_batch_ks_v2_n61",
+  "executable_or_source_hash": {
+    "git_head": "891b55068bddbb44a760aa4569f442aeea737535",
+    "ic_binary_sha256": "5e25f2405b8c1499fde8d01e2a0c7f1409dffd61a6530efd6951f6b3ccfcdaa3",
+    "koblitz_orbit_dlp_fast.rs_sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "koblitz_rho_batch_ks_v2_n61.rs_sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "rho_binary_sha256": "7cf543982732d2a5e23136e036eafb00f9c33e337bb56695a167cb278b362074",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  },
+  "fixture_hash": {
+    "base_hash": "0e68233f43f894c9c16971703120e1983dc30d38337b4996d119bce0bab40ec0",
+    "disjoint": true,
+    "eval": {
+      "name": "n61-ks-growing-16384-v1",
+      "scalars_sha256": "e9d4a883bd0a80b6386bb27e2936da1b5fb38b11ec5bf65389b507fffbe3b65e",
+      "targets": 16384
+    },
+    "tune": {
+      "name": "n61-ks-growing-tune-1024-v1",
+      "scalars_sha256": "8ec0c0438ba46a1b6e598dec2732c8103af07ce585a2f65ea78f102181c77abf",
+      "targets": 1024
+    },
+    "tune_eval_shared_targets": 0
+  },
+  "host_id": {
+    "cpu": "Apple M4 Pro",
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "ic_scalar_verified": true,
+  "independent_replay_pointer": [
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T213417Z-6e1f87218b/artifacts/replay_ic.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T213417Z-6e1f87218b/artifacts/replay_rho_b0.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T213417Z-6e1f87218b/artifacts/replay_rho_b1.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T213417Z-6e1f87218b/artifacts/replay_rho_b2.json"
+  ],
+  "independent_validation": false,
+  "instructions_retired_ratio_compact_over_rho": {
+    "median": 0.13934871579680458,
+    "range": [
+      0.1382942076498203,
+      0.14147208731716687
+    ],
+    "values": [
+      0.1382942076498203,
+      0.13934871579680458,
+      0.14147208731716687
+    ]
+  },
+  "n_or_bits": {
+    "a": 0,
+    "n": 61,
+    "subgroup_order_bits": 47.21
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "isolation": "none: unpinned shared host; per-run load, memory and swap recorded",
+    "memory": "no cap; K candidates skipped when the estimated IC RSS exceeded available memory",
+    "threads": 1
+  },
+  "result_class": "multi_target_batch_diagnostic",
+  "rho_scalar_verified": true,
+  "schema_version": 2,
+  "seeds": {
+    "batch_seed": 531310,
+    "ic_rank_seed": 7,
+    "rho_env": {
+      "KIC_RHO_DP_BITS": "4"
+    }
+  },
+  "stage": "vs_rho",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "target_count": 16384,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "whole_process_wall",
+  "user_cpu_ratio_compact_over_rho": {
+    "median": 0.3206077889284518,
+    "range": [
+      0.31974219360397443,
+      0.33503873952515023
+    ],
+    "values": [
+      0.33503873952515023,
+      0.3206077889284518,
+      0.31974219360397443
+    ]
+  },
+  "verdict": "BATCH_DIAGNOSTIC_ONLY_NOT_SINGLE_TARGET",
+  "wall_ratio_compact_over_rho": {
+    "median": 0.41418504401763423,
+    "range": [
+      0.3084353757493342,
+      0.44278370321461025
+    ],
+    "values": [
+      0.44278370321461025,
+      0.3084353757493342,
+      0.41418504401763423
+    ]
+  }
+}

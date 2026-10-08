@@ -1,0 +1,9 @@
+   1/6 rho-strong     icv1-f2m41-tm2308219-7f48b14a Wa0115b112f02  verified S=0.135 L0
+   2/6 ic-k8          icv1-f2m41-tm2308219-7f48b14a Wa0115b112f02     error S=- L0
+   3/6 ic-k16         icv1-f2m41-tm2308219-7f48b14a Wa0115b112f02  verified S=42.566 L0
+   4/6 rho-strong     icv1-f2m53-tm56619371-dac20a85 W2eadf640ad19  verified S=0.176 L0
+   5/6 ic-k8          icv1-f2m53-tm56619371-dac20a85 W2eadf640ad19     error S=- L0
+   6/6 ic-k16         icv1-f2m53-tm56619371-dac20a85 W2eadf640ad19     error S=- L0
+session ECBS1h9e7e5532edc9 complete -> ./session-1 (6 records: {"error": 3, "verified": 3})
+$E run --spec pilot-spec.json --out ./session-1 --cpus none --allow-busy  0    239.34s user 9.97s system 69% cpu 6:00.23 total
+EXIT 0

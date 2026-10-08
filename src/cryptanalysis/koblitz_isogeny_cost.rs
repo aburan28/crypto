@@ -362,6 +362,30 @@ pub struct IcCostOptions {
     /// explicit-isogeny walk, which proves `#E' = #E` on every edge — so a
     /// member skips its `O(2ⁿ)` point count.  `None` counts, as always.
     pub known_order: Option<u64>,
+    /// Accept a root pair when `[c](Σ ±Fᵢ) = [c]R`, `c` the cofactor,
+    /// instead of requiring `Σ ±Fᵢ = R` in the full group.  The recorded
+    /// relation is the `[c]`-projected one either way, and `[c]` is an
+    /// isomorphism on the order-`r` subgroup, so it stays sound; what changes
+    /// is that pairs whose cofactor components do not cancel are no longer
+    /// thrown away.  `false` reproduces every committed run.
+    pub cofactor_tolerant: bool,
+    /// Draw probe targets from the **full group**: `R = aG + bQ + T` with `T`
+    /// uniform cofactor torsion.  The recorded relation is `[c]`-projected,
+    /// and `[c]T = O`, so it stays sound; what changes is that every root
+    /// pair of `S_{m+1}` is a relation, so yield no longer depends on how the
+    /// factor base meets the cofactor cosets.  `false` reproduces every
+    /// committed run.
+    pub full_group_probes: bool,
+    /// Factor-base subspace `V`: `None` is `⟨1, z, …, z^{l−1}⟩`; `Some(s)`
+    /// draws `l` linearly independent elements of `F_{2^n}` from seed `s`,
+    /// so the presentation can be varied independently of the curve.
+    pub basis_seed: Option<u64>,
+    /// With `basis_seed = Some(s)`, draw `V = θ·⟨1, g, …, g^{l−1}⟩` for
+    /// seeded `θ, g` instead of a random basis.  Such `V` have
+    /// `dim span(V·V) ≤ 2l − 1`, which is what makes the monomial subspace
+    /// cheap (`subspace-structure-20261004.md`).  `false` reproduces every
+    /// committed run.
+    pub geometric_basis: bool,
 }
 
 impl Default for IcCostOptions {
@@ -378,6 +402,10 @@ impl Default for IcCostOptions {
             ffd_d_max: 6,
             seed: DEFAULT_SEED,
             known_order: None,
+            cofactor_tolerant: false,
+            full_group_probes: false,
+            basis_seed: None,
+            geometric_basis: false,
         }
     }
 }
@@ -796,7 +824,10 @@ pub fn measure_member(
     let mut rng = StdRng::seed_from_u64(opts.seed ^ (a6 << 1) ^ ((n as u64) << 40));
 
     // ── the factor base: abscissae in V, folded by cofactor projection ──
-    let basis: Vec<F2mElement> = (0..opts.l).map(|i| to_element(1u64 << i, n)).collect();
+    let basis: Vec<F2mElement> = match opts.basis_seed {
+        Some(seed) if opts.geometric_basis => geometric_basis(n, opts.l, seed, &me.irr),
+        seed => factor_base_basis(n, opts.l, seed),
+    };
     let st = FieldStructure::new(n, &me.irr);
 
     let mut entry_of: HashMap<u64, BaseEntry> = HashMap::new();
@@ -1014,7 +1045,17 @@ fn probe_once(
     let b = rng.gen_range(1..me.r);
     let ag = group.mul(ops, me.generator, a);
     let bq = group.mul(ops, q_point, b);
-    let target = group.add(ops, ag, bq);
+    let mut target = group.add(ops, ag, bq);
+    if opts.full_group_probes && me.cofactor > 1 {
+        // uniform cofactor torsion: [r]X for a random point X
+        let t = loop {
+            let x = rng.gen::<u64>() & ((1u64 << n) - 1);
+            if let Some(&p) = me.points_with_x(x).first() {
+                break group.mul(ops, p, me.r);
+            }
+        };
+        target = group.add(ops, target, t);
+    }
     if target.infinity {
         // `[a]G + [b]Q = O` gives `d = -a/b` without the relation matrix.
         // Counted and skipped so the benchmark measures index calculus
@@ -1038,7 +1079,7 @@ fn probe_once(
             let xs: Vec<u64> = (0..opts.m)
                 .map(|i| from_element(&sys.summand_x(basis, root, i, n)))
                 .collect();
-            match lift(me, group, entry_of, &xs, target) {
+            match lift(me, group, entry_of, &xs, target, opts.cofactor_tolerant) {
                 Some(terms) => {
                     lifted = Some(terms);
                     true
@@ -1084,6 +1125,51 @@ fn probe_once(
     }
 }
 
+/// `l` linearly independent elements of `F_{2^n}`: the monomials
+/// `1, z, …, z^{l−1}` when `seed` is `None`, otherwise drawn from `seed`
+/// and kept only if they raise the rank (elimination on bit masks).
+pub fn factor_base_basis(n: u32, l: u32, seed: Option<u64>) -> Vec<F2mElement> {
+    let Some(seed) = seed else {
+        return (0..l).map(|i| to_element(1u64 << i, n)).collect();
+    };
+    let mut rng = StdRng::seed_from_u64(seed ^ ((n as u64) << 48) ^ ((l as u64) << 40));
+    let mask = (1u64 << n) - 1;
+    let mut echelon: Vec<u64> = Vec::new();
+    let mut out = Vec::new();
+    while out.len() < l as usize {
+        let v = rng.gen::<u64>() & mask;
+        let mut red = v;
+        for &e in &echelon {
+            red = red.min(red ^ e);
+        }
+        if red != 0 {
+            echelon.push(red);
+            echelon.sort_unstable_by(|a, b| b.cmp(a));
+            out.push(to_element(v, n));
+        }
+    }
+    out
+}
+
+/// `θ·⟨1, g, …, g^{l−1}⟩` for seeded `θ, g ∉ F_2`.  Independent for prime
+/// `n ≥ l`, since `g` then has degree `n` over `F_2`.
+pub fn geometric_basis(n: u32, l: u32, seed: u64, irr: &IrreduciblePoly) -> Vec<F2mElement> {
+    let mut rng = StdRng::seed_from_u64(seed ^ 0x6e0 ^ ((n as u64) << 32));
+    let mut nz = || loop {
+        let v = rng.gen::<u64>() & ((1u64 << n) - 1);
+        if v > 1 {
+            break to_element(v, n);
+        }
+    };
+    let (theta, g) = (nz(), nz());
+    let mut out = vec![theta];
+    while out.len() < l as usize {
+        let next = out.last().unwrap().mul(&g, irr);
+        out.push(next);
+    }
+    out
+}
+
 /// The `F_2`-span value of a coefficient mask over `basis`.
 fn subspace_value(mask: u64, basis: &[F2mElement], n: u32) -> u64 {
     let mut acc = F2mElement::zero(n);
@@ -1097,6 +1183,108 @@ fn subspace_value(mask: u64, basis: &[F2mElement], n: u32) -> u64 {
 
 /// Lift a root to a signed relation.
 ///
+/// The cofactor-cancellation count of a member's factor base: over
+/// unordered pairs `{F_i, F_j}` of the points with abscissa in
+/// `V = ⟨1, z, …, z^{l−1}⟩`, the number of signs `s ∈ {+1, −1}` with
+/// `h(F_i) + s·h(F_j) = O`, where `h(F) = [r]F` is the component outside the
+/// order-`r` subgroup.  A root pair of `S₃` lifts to a relation in the exact
+/// (non-tolerant) test only through such a sign, so `2·C / r` predicts the
+/// relations per probe with no fitted constant.
+///
+/// Returns `(factor-base points, C)`.  `known_order` as in
+/// [`IcCostOptions::known_order`].
+pub fn cofactor_cancellation_count(
+    n: u32,
+    irr: &IrreduciblePoly,
+    a2: u8,
+    a6: u64,
+    l: u32,
+    known_order: Option<u64>,
+) -> Result<(usize, u64), SkipReason> {
+    let me = Member::build(n, irr, a2, a6, DEFAULT_SEED, known_order)?;
+    let group = BinaryGroup(&me.fast);
+    let mut ops = GroupOps::default();
+    let basis: Vec<F2mElement> = (0..l).map(|i| to_element(1u64 << i, n)).collect();
+    // Each cofactor component, keyed by its point, with the key of its
+    // negation, so `h_i = ∓h_j` is two lookups.
+    let mut hs: Vec<FastPoint> = Vec::new();
+    // `F = −F` (the abscissa-0 point): its 2F is O, never a usable target.
+    let mut two_torsion: Vec<bool> = Vec::new();
+    for mask in 0..(1u64 << l) {
+        let x = subspace_value(mask, &basis, n);
+        if let Some(&p) = me.points_with_x(x).first() {
+            hs.push(group.mul(&mut ops, p, me.r));
+            two_torsion.push(p == group.neg(p));
+        }
+    }
+    Ok((hs.len(), signed_cancellations(&group, &hs, &two_torsion)))
+}
+
+/// [`cofactor_cancellation_count`] restricted to one primary part of the
+/// cofactor: `C` computed on `[c/q^e]h` for each prime power `q^e ‖ c`.
+/// Returns `(q^e, C_q)` per part — which part of the cofactor group the
+/// factor base is unbalanced in.
+pub fn cofactor_cancellation_by_part(
+    n: u32,
+    irr: &IrreduciblePoly,
+    a2: u8,
+    a6: u64,
+    l: u32,
+    known_order: Option<u64>,
+) -> Result<Vec<(u64, u64)>, SkipReason> {
+    let me = Member::build(n, irr, a2, a6, DEFAULT_SEED, known_order)?;
+    let group = BinaryGroup(&me.fast);
+    let mut ops = GroupOps::default();
+    let basis: Vec<F2mElement> = (0..l).map(|i| to_element(1u64 << i, n)).collect();
+    let mut hs: Vec<FastPoint> = Vec::new();
+    // `F = −F` (the abscissa-0 point): its 2F is O, never a usable target.
+    let mut two_torsion: Vec<bool> = Vec::new();
+    for mask in 0..(1u64 << l) {
+        let x = subspace_value(mask, &basis, n);
+        if let Some(&p) = me.points_with_x(x).first() {
+            hs.push(group.mul(&mut ops, p, me.r));
+            two_torsion.push(p == group.neg(p));
+        }
+    }
+    let mut out = Vec::new();
+    for (q, e) in factorise(me.cofactor) {
+        let qe = q.pow(e);
+        let part: Vec<FastPoint> = hs
+            .iter()
+            .map(|h| group.mul(&mut ops, *h, me.cofactor / qe))
+            .collect();
+        out.push((qe, signed_cancellations(&group, &part, &two_torsion)));
+    }
+    Ok(out)
+}
+
+/// Unordered pairs `{i, j}` counted once per sign `s` with
+/// `h_i + s·h_j = O`, excluding the useless `F − F`; `i = j` counts only
+/// when `2h = O` and `F` itself is not 2-torsion (`2F = O` is useless too).
+fn signed_cancellations(group: &BinaryGroup<'_>, hs: &[FastPoint], two_torsion: &[bool]) -> u64 {
+    let mut count: HashMap<(bool, u64, u64), u64> = HashMap::new();
+    for h in hs {
+        *count.entry((h.infinity, h.x, h.y)).or_insert(0) += 1;
+    }
+    let key = |p: FastPoint| (p.infinity, p.x, p.y);
+    // Ordered pairs (i, j) with h_j = −h_i (sign +) or h_j = h_i (sign −),
+    // then folded to unordered pairs with i ≤ j.
+    let (mut ordered, mut diagonal, mut doubling) = (0u64, 0u64, 0u64);
+    for (h, &tt) in hs.iter().zip(two_torsion) {
+        let neg = group.neg(*h);
+        let same = count[&key(*h)];
+        let opp = count.get(&key(neg)).copied().unwrap_or(0);
+        ordered += same + opp;
+        // The i = j terms of `ordered`: sign − (h = h) always, sign + iff
+        // 2h = O.  Only the latter is a usable pair — F − F = O can never
+        // equal a target R ≠ O — so the diagonal is removed and 2F alone is
+        // added back.
+        diagonal += 1 + u64::from(*h == neg);
+        doubling += u64::from(*h == neg && !tt);
+    }
+    (ordered - diagonal) / 2 + doubling
+}
+
 /// A root of `S₃` fixes the summands only up to sign, so every sign pattern
 /// is tried and the first that closes the group identity `Σ ±Pᵢ = R` wins.
 /// Returns the `(class, sign)` terms after cofactor projection, or `None`
@@ -1107,6 +1295,7 @@ fn lift(
     entry_of: &HashMap<u64, BaseEntry>,
     xs: &[u64],
     target: FastPoint,
+    cofactor_tolerant: bool,
 ) -> Option<Vec<(usize, i8)>> {
     let m = xs.len();
     let mut points = Vec::with_capacity(m);
@@ -1118,6 +1307,7 @@ fn lift(
         points.push(candidates[0]);
     }
     let mut ops = GroupOps::default();
+    let target_c = group.mul(&mut ops, target, me.cofactor);
     for pattern in 0..(1u32 << m) {
         let mut acc = FastPoint::INFINITY;
         for (i, p) in points.iter().enumerate() {
@@ -1128,7 +1318,12 @@ fn lift(
             };
             acc = group.add(&mut ops, acc, signed);
         }
-        if acc == target {
+        let hit = if cofactor_tolerant {
+            group.mul(&mut ops, acc, me.cofactor) == target_c
+        } else {
+            acc == target
+        };
+        if hit {
             let mut terms = Vec::with_capacity(m);
             for (i, x) in xs.iter().enumerate() {
                 let entry = entry_of[x];
@@ -1554,6 +1749,89 @@ mod tests {
     }
 
     #[test]
+    fn full_group_probes_over_a_random_subspace_still_solve_soundly() {
+        // Cofactor-torsion targets and a random F2-basis for V: every relation
+        // must still be consistent and the secret must still be recovered.
+        let n = 13;
+        let irr = field_for(n).expect("field");
+        let (a2, _, h) = preferred_family(n).expect("family");
+        assert!(h > 1, "the test needs a nontrivial cofactor");
+        let opts = IcCostOptions {
+            l: 5,
+            m: 2,
+            max_trials: 4_000,
+            ffd_targets: 4,
+            full_group_probes: true,
+            basis_seed: Some(11),
+            ..Default::default()
+        };
+        let row = measure_member(n, &irr, a2, 1, &opts).expect("K_a carries the experiment");
+        assert_eq!(
+            row.inconsistent_relations, 0,
+            "a wrong relation was admitted"
+        );
+        assert!(
+            row.verified,
+            "IC and BSGS disagreed under full-group probes"
+        );
+        let b = factor_base_basis(n, 5, Some(11));
+        assert_eq!(b.len(), 5);
+    }
+
+    #[test]
+    fn geometric_basis_has_small_doubling_and_solves_soundly() {
+        // dim span(V·V) ≤ 2l − 1 for V = θ·⟨1, g, …⟩, against ≈ min(l², n)
+        // for a random V; and the instrument still recovers the secret.
+        let span_dim = |vals: Vec<u64>| {
+            let mut ech: Vec<u64> = Vec::new();
+            for v in vals {
+                let mut x = v;
+                for &e in &ech {
+                    x = x.min(x ^ e);
+                }
+                if x != 0 {
+                    ech.push(x);
+                    ech.sort_unstable_by(|a, b| b.cmp(a));
+                }
+            }
+            ech.len()
+        };
+        let products = |b: &[F2mElement], irr: &IrreduciblePoly| {
+            let mut v = Vec::new();
+            for x in b {
+                for y in b {
+                    v.push(from_element(&x.mul(y, irr)));
+                }
+            }
+            v
+        };
+        let (n, l) = (31, 6);
+        let irr = field_for(n).expect("field");
+        let g = geometric_basis(n, l, 3, &irr);
+        assert_eq!(span_dim(g.iter().map(from_element).collect()), l as usize);
+        assert!(span_dim(products(&g, &irr)) < 2 * l as usize);
+        let r = factor_base_basis(n, l, Some(3));
+        assert!(span_dim(products(&r, &irr)) >= 2 * l as usize);
+
+        let n = 13;
+        let irr = field_for(n).expect("field");
+        let (a2, _, _) = preferred_family(n).expect("family");
+        let opts = IcCostOptions {
+            l: 5,
+            m: 2,
+            max_trials: 4_000,
+            ffd_targets: 4,
+            full_group_probes: true,
+            basis_seed: Some(5),
+            geometric_basis: true,
+            ..Default::default()
+        };
+        let row = measure_member(n, &irr, a2, 1, &opts).expect("member");
+        assert_eq!(row.inconsistent_relations, 0);
+        assert!(row.verified, "IC and BSGS disagreed over a geometric V");
+    }
+
+    #[test]
     fn index_calculus_recovers_the_planted_secret_and_bsgs_agrees() {
         let n = 13;
         let irr = field_for(n).expect("degree 13 has a sparse irreducible");
@@ -1601,6 +1879,44 @@ mod tests {
         assert!(report.blocked_because.is_some());
         assert!(!report.modular_polynomial_available);
         assert!(report.log2_exhaustive_scan > EXHAUSTIVE_SCAN_LOG2_BUDGET);
+    }
+
+    #[test]
+    fn cofactor_cancellation_count_matches_brute_force() {
+        // Every usable signed pair, enumerated directly: F_i + s·F_j lies in
+        // the order-r subgroup and is not O.
+        for (n, a6) in [(11u32, 3u64), (13, 5), (16, 7)] {
+            let irr = field_for(n).expect("field");
+            let Ok(me) = Member::build(n, &irr, 0, a6, DEFAULT_SEED, None) else {
+                continue;
+            };
+            let group = BinaryGroup(&me.fast);
+            let mut ops = GroupOps::default();
+            let l = 4;
+            let basis: Vec<F2mElement> = (0..l).map(|i| to_element(1u64 << i, n)).collect();
+            let pts: Vec<FastPoint> = (0..(1u64 << l))
+                .filter_map(|m| {
+                    me.points_with_x(subspace_value(m, &basis, n))
+                        .first()
+                        .copied()
+                })
+                .collect();
+            let mut brute = 0u64;
+            for i in 0..pts.len() {
+                for j in i..pts.len() {
+                    for neg in [false, true] {
+                        let other = if neg { group.neg(pts[j]) } else { pts[j] };
+                        let sum = group.add(&mut ops, pts[i], other);
+                        if !sum.infinity && group.mul(&mut ops, sum, me.r).infinity {
+                            brute += 1;
+                        }
+                    }
+                }
+            }
+            let (fb, c) = cofactor_cancellation_count(n, &irr, 0, a6, l, None).unwrap();
+            assert_eq!(fb, pts.len());
+            assert_eq!(c, brute, "n={n} a6={a6}");
+        }
     }
 
     #[test]

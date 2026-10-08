@@ -2,7 +2,7 @@
 
 `../walk-forest.svg`, the drawing under **What the walk builds** on the
 status page, is generated from the files in this directory: real ECC2K-130
-walks, made by the campaign client on the challenge curve, replayed with the
+walks from a separate weight-34 run on the challenge curve, replayed with the
 client's own kernel and drawn. Nothing in it is drawn by hand: every node is
 an orbit one of those walks passed through, every edge a fixed number of
 iterations along the trail, and every filled node the distinguished point the
@@ -18,12 +18,12 @@ walk reported.
 | `gf2-23/` | The tool's regression set on the `GF(2^23)` test curve, where orbits can be committed in the clear: the client's own records for a run (`client-run1.bin`), the reference walk of that run's seed schedule (`trails.txt`) and its endpoints (`forest.bin`). Not drawn. |
 
 The walks are the client's: `ecc2k130-cpu --curve 131` on the Certicom
-ECC2K-130 parameters, distinguishing at normal-basis weight `w <= 34`, the
-cutoff in `ecc2k130/aws/campaign.json`, writing the same 32-byte
-`(seed, canonical orbit)` records the fleet uploads. A walk on this curve is
-expected to take `2^25.27` iterations to reach a distinguished point, which is
-far too long a trail to draw, so the figure draws the walks that finished
-early: every record's seed is replayed for at most `cap` steps and the ones
+ECC2K-130 parameters, distinguishing at normal-basis weight `w <= 34`. The
+live `ecc2k130/aws/campaign.json` uses weight 32. The separate run wrote the
+same 32-byte `(seed, canonical orbit)` record format as the fleet. A walk at
+weight 34 is expected to take `2^25.27` iterations to reach a distinguished
+point, which is far too long a trail to draw. The figure draws the walks that
+finished early: every record's seed is replayed for at most `cap` steps and the ones
 that reach their distinguished point inside that are kept. That is a real
 sample of real walks, biased towards short ones by construction, and the
 caption says so.
@@ -52,17 +52,17 @@ ecc2k130/ecc2k130-cpu --curve 131 --dp-weight 34 --run-id 65000 --threads 4 \
     --steps 1024 --launches 400 --verify 0 --dp-file /tmp/real131.bin
 
 # 2. the trails behind the first 256 records, replayed with the client's
-#    kernel, kept when they finish within the cap, sampled every 512 steps,
+#    kernel, kept when they finish within the cap, sampled every 2048 steps,
 #    named by hash, each checked against its record
 ecc2k130/build/trailforest --curve 131 --dp-weight 34 --sample \
-    --corpus /tmp/real131.bin --max 256 --cap 65536 --every 512 \
+    --corpus /tmp/real131.bin --max 256 --cap 65536 --every 2048 \
     --hashes-out docs/ecc2k130-status/walk-forest/forest.hashes \
     > docs/ecc2k130-status/walk-forest/trails.txt
 
 # 3. the scalar reference over the first records, hashed the same way
 ecc2k130/build/trailforest --curve 131 --dp-weight 34 \
     --corpus /tmp/real131.bin --max 8 > /tmp/ref131.txt
-python3 scripts/site/walk_forest.py --trails /tmp/ref131.txt --hash-trails 512 \
+python3 scripts/site/walk_forest.py --trails /tmp/ref131.txt --hash-trails 2048 \
     --out docs/ecc2k130-status/walk-forest/reference-check.txt
 
 # 4. the drawing, and the same forest as a graph for the page's explorer
@@ -73,7 +73,7 @@ python3 scripts/site/walk_forest.py \
 python3 scripts/site/walk_forest.py \
     --trails docs/ecc2k130-status/walk-forest/trails.txt \
     --corpus docs/ecc2k130-status/walk-forest/forest.hashes \
-    --json --title "ECC2K-130, real walks" --out docs/ecc2k130-status/walk-forest.json
+    --json --title "ECC2K-130, separate weight-34 sample" --out docs/ecc2k130-status/walk-forest.json
 python3 scripts/site/walk_forest.py \
     --trails docs/ecc2k130-status/walk-forest/gf2-23/trails.txt \
     --corpus docs/ecc2k130-status/walk-forest/gf2-23/forest.bin \

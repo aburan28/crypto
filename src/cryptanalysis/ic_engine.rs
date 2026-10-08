@@ -23,6 +23,9 @@
 //! so per curve.
 
 use crate::cryptanalysis::curve_catalog::{CatalogCurve, Family};
+use crate::cryptanalysis::matmul_exponent::{
+    self, Applicability, BinaryIcHeuristic, OmegaBound, BOUNDS,
+};
 
 /// Largest subgroup-order bit length this repository has solved end to end
 /// with the framework (a 48-bit subgroup of `K_0/F_{2^61}`; see
@@ -136,6 +139,56 @@ pub struct CostEstimate {
     pub regime: Regime,
     /// Plain-language notes: applicability, family speedups, heuristics.
     pub notes: Vec<String>,
+    /// The published heuristic exponent, per `ω` bound, for a curve over
+    /// `F_{2^n}`; `None` for every other field.
+    pub heuristic: Option<HeuristicIc>,
+}
+
+/// The Petit–Quisquater-type heuristic for a curve over `F_{2^n}`,
+/// evaluated at every `ω` bound in [`matmul_exponent::BOUNDS`].  A model
+/// resting on the first-fall-degree assumption, never a measurement, and no
+/// row below Strassen's is an algorithm anyone can run.
+#[derive(Clone, Debug)]
+pub struct HeuristicIc {
+    pub heuristic: BinaryIcHeuristic,
+    pub field_degree: u32,
+    pub rows: Vec<HeuristicRow>,
+}
+
+/// One `ω` bound's row of [`HeuristicIc`].
+#[derive(Clone, Debug)]
+pub struct HeuristicRow {
+    pub bound: OmegaBound,
+    /// What the bound is worth in characteristic 2.
+    pub applicability: Applicability,
+    /// `log2` of the heuristic cost at this `n`.
+    pub log2_cost: f64,
+    /// The field degree from which the heuristic stays below `2^{n/2}`.
+    pub turning_point: u32,
+    /// The exponent's ratio to its value at the tightest bound established
+    /// in characteristic 2 (it is linear in `ω`).
+    pub exponent_ratio_to_best_established: f64,
+}
+
+/// The heuristic table for `E(F_{2^n})`.
+pub fn binary_heuristic(n: u32) -> HeuristicIc {
+    let heuristic = BinaryIcHeuristic::KousidisWiemers2019;
+    let best = matmul_exponent::best_established(2).value;
+    let rows = BOUNDS
+        .iter()
+        .map(|b| HeuristicRow {
+            bound: *b,
+            applicability: b.in_characteristic(2),
+            log2_cost: heuristic.log2_cost(n as f64, b.value),
+            turning_point: heuristic.turning_point(b.value),
+            exponent_ratio_to_best_established: b.value / best,
+        })
+        .collect();
+    HeuristicIc {
+        heuristic,
+        field_degree: n,
+        rows,
+    }
 }
 
 /// Produce a cost estimate.  This is deliberately conservative: it reports the
@@ -201,6 +254,38 @@ pub fn estimate(curve: &CatalogCurve, envelope_bits: u64) -> CostEstimate {
         cls.rationale
     ));
 
+    let heuristic = (field.kind == "binary").then(|| binary_heuristic(field.bits as u32));
+    if let Some(h) = &heuristic {
+        let at = |id: &str| {
+            h.rows
+                .iter()
+                .find(|r| r.bound.id == id)
+                .expect("bound listed")
+        };
+        let (strassen, best, nine_fourths) = (
+            at(matmul_exponent::STRASSEN.id),
+            at(matmul_exponent::ALMAN_ET_AL_2024.id),
+            at(matmul_exponent::CORPUS_FAMILY_107.id),
+        );
+        notes.push(format!(
+            "Heuristic only ({}; first-fall-degree assumption, which Kosters-Yeo \
+             and Huang-Kosters-Yeo give evidence against): log2 T at n = {} is \
+             {:.1} at w = log2 7 (turning point n = {}), {:.1} at w < 2.371339 \
+             (published, galactic; n = {}), and {:.1} at w <= 9/4 (corpus family \
+             107: existence only, holds in characteristic 2 if its unverified \
+             characteristic-0 proof does; n = {}). w < 2.258 is undetermined in \
+             characteristic 2. None of the sub-Strassen rows is an algorithm.",
+            h.heuristic.id(),
+            h.field_degree,
+            strassen.log2_cost,
+            strassen.turning_point,
+            best.log2_cost,
+            best.turning_point,
+            nine_fourths.log2_cost,
+            nine_fourths.turning_point,
+        ));
+    }
+
     CostEstimate {
         curve: curve.name.to_string(),
         family: curve.family.tag(),
@@ -212,6 +297,7 @@ pub fn estimate(curve: &CatalogCurve, envelope_bits: u64) -> CostEstimate {
         ic_relevant: cls.ic_relevant,
         regime: cls.regime,
         notes,
+        heuristic,
     }
 }
 
@@ -241,6 +327,38 @@ mod tests {
         assert!(r.ic_relevant);
         // 163-bit curve is far above the 48-bit envelope.
         assert_eq!(r.regime, Regime::Scaled);
+    }
+
+    #[test]
+    fn binary_estimates_carry_the_omega_table_and_prime_ones_do_not() {
+        assert!(estimate(&by_name("p256").unwrap(), ATTACK_ENVELOPE_BITS)
+            .heuristic
+            .is_none());
+        let est = estimate(&by_name("sect283k1").unwrap(), ATTACK_ENVELOPE_BITS);
+        let h = est.heuristic.expect("binary field");
+        assert_eq!(h.field_degree, 283);
+        assert_eq!(h.rows.len(), BOUNDS.len());
+        let tags: Vec<&str> = h.rows.iter().map(|r| r.applicability.tag()).collect();
+        assert_eq!(
+            tags,
+            [
+                "established",
+                "established",
+                "established",
+                "undetermined",
+                "conditional"
+            ]
+        );
+        // Below 2^{n/2} only at the two corpus values, and only one of those
+        // is decided in characteristic 2.
+        let below: Vec<&str> = h
+            .rows
+            .iter()
+            .filter(|r| r.log2_cost < 283.0 / 2.0)
+            .map(|r| r.bound.id)
+            .collect();
+        assert_eq!(below, ["corpus-2.258", "corpus-family-107-9/4"]);
+        assert!(est.notes.iter().any(|n| n.contains("first-fall-degree")));
     }
 
     #[test]
