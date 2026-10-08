@@ -387,6 +387,15 @@ survives it. The antecedent holds for a different, sharper reason:
 > genericity but a concrete algebraic one — and EXP-J now **identifies the
 > syzygy**.
 
+> **Update 2026-10-08 (E1b, `research/fall_degree_bounds_20261008/`).**
+> The syzygy below is the trivial Boolean identity `(L+1)·L = 0` applied
+> to the Kosters–Yeo trace relation
+> `L = Tr(X_1) + Tr(X_2) + Tr(b/x_3²) ∈ span_{F_2}(F)`: multiplier
+> `ℓ = L + 1`, combination `Σ_{i∈S} f_i = L`, on 69 of 69 scored draws at
+> `n = 12 … 20`. So the bounded defect is *proved* to exist (Kosters–Yeo
+> Cor. 4.11). It carries no information beyond one linear equation, and it
+> cannot by itself support the conditional lower bound in this section.
+
 **The syzygy, identified (EXP-J).** Extracting the (1-dimensional)
 linear-syzygy space of the descended system reveals a single, sharply
 structured relation. The unique syzygy is
