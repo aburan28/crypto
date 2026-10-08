@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 288 panels, one line each</summary>
+    <summary>Show all 289 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -474,6 +474,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-selector-coalescence-round26-20261006">P-256 scalar-orbit selector: one addition or coalescence, not both</a> <span class="chip">measurement / negative</span><br>All 279,184 neighbour deltas are distinct. Across 4,096 exact S17 collisions, left/right legal delta intersections are zero, so one-addition walks do not coalesce. The cheapest global orbit action is at least 238.191× rho.</li>
       <li><a href="./#p256-affine-invariant-round27-20261006">P-256 affine-invariant bases: translation forces the full group</a> <span class="chip">measurement / negative</span><br>A complete affine classification and 856,183-action census leaves no proper width-band base near rho. The best target-corrected doubling floor is 228.548× parity; native FB1hd37fd8aa9f44 replays all 132,415 edges.</li>
       <li><a href="./#p256-isogenous-dickson-round28-20261006">P-256 isogenous Dickson bases: +73 columns, no degree or cost gain</a> <span class="chip">measurement / negative</span><br>A deterministic screen across a certified 4,097-model degree-11 isogeny walk improves full-depth factor-base inventory by just 73 columns. The selected model reaches 96.512% Poisson S17 success, but its collision boundary worsens to 494.612× rho and its universal S3 degree-four support is unchanged.</li>
+      <li><a href="./#p256-memoryless-closure-round29-20261006">P-256 exact-memoryless closure: parity is rho, not fixed S17</a> <span class="chip">classification / negative</span><br>A bounded update that coalesces on the represented group sum is a translation, while an algebraic elliptic transport is affine and reduces to scalar actions. The former is generic rho; the best proper signed scalar action remains 228.548× over parity.</li>
     </ol>
   </details>
 <!-- END panel-index -->

@@ -1,0 +1,348 @@
+{
+  "schema": "p256.memoryless_factor_base_closure/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation",
+  "dependencies": [
+    {
+      "round": 24,
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_negation_cross_colour_round24_20261006/negation-result.json",
+      "sha256": "d1e2fe33e1abbae8a9bf6885ca7cfef8012233363f4cd43e0d30d468a381fc9c",
+      "schema": "p256.negation_cross_colour/v1",
+      "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+      "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation"
+    },
+    {
+      "round": 25,
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_orbit_round25_20261006/scalar-orbit-result.json",
+      "sha256": "dcb191f7d5d7a660e3ce13128b25ce1c017c7d89ec2d01a242ab536651647faf",
+      "schema": "p256.scalar_orbit_factor_base_screen/v1",
+      "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+      "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation"
+    },
+    {
+      "round": 26,
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_selector_coalescence_round26_20261006/coalescence-result.json",
+      "sha256": "463c100dd951e2a7a7a419118f84bde90fc419358d8279a430a5a0e6191db029",
+      "schema": "p256.scalar_orbit_selector_coalescence/v1",
+      "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+      "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation"
+    },
+    {
+      "round": 27,
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_affine_invariant_round27_20261006/affine-invariant-result.json",
+      "sha256": "256271ebb6f1c3c736a01da4358f01a6822c4315bb2081adcba1dd05b1d847a5",
+      "schema": "p256.affine_invariant_factor_base_screen/v1",
+      "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+      "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation"
+    },
+    {
+      "round": 28,
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_isogenous_dickson_round28_20261006/isogenous-dickson-result.json",
+      "sha256": "950d4b7f4997e146ee30fc7c61174070595fa5d344b9a30cbc0ca578ae7e60f4",
+      "schema": "p256.isogenous_dickson_factor_base_screen/v1",
+      "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+      "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation"
+    }
+  ],
+  "scope": {
+    "included": [
+      "one-column exact transports whose transition factors through the represented group sum",
+      "bounded-tuple exact transports with representation-independent total delta",
+      "elliptic-curve morphisms and their affine translates on the prime-order P-256 subgroup",
+      "coordinate correspondences credited only when an exact group/log transport is supplied"
+    ],
+    "excluded": [
+      "non-memoryless solvers with unbounded representation state",
+      "unknown future relation algorithms outside fixed signed S17",
+      "probabilistic branch discards presented as exhaustive"
+    ],
+    "discarded_probabilistic_branches_counted_as_exhaustive": false
+  },
+  "translation_lemma": {
+    "group_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "group_order_is_odd_prime": true,
+    "nonzero_delta_gcd_group_order": "1",
+    "nonzero_translation_orbit_length": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "proper_nonempty_translation_invariant_subset_exists": false,
+    "signed_factor_base_contains_identity": false,
+    "consequence": "Closure under any nonzero constant delta forces the complete prime-order group, including the identity; a proper signed factor base therefore admits only zero constant delta."
+  },
+  "affine_identity_audit": {
+    "controls": 4096,
+    "inverses_verified": 4096,
+    "conjugated_negation_verified": 4096,
+    "generated_translation_verified": 4096,
+    "failures": 0,
+    "controls_sha256": "985b3e7ccb864a204a064f2a8b6864a0c973ba793daa81ec0aed7129e6a75006",
+    "conjugated_negation": "f o nu o f^-1: x -> -x+2b",
+    "generated_translation": "(f o nu o f^-1) o nu: x -> x+2b"
+  },
+  "exhaustive_small_prime_reference": {
+    "primes": [
+      3,
+      5,
+      7,
+      11,
+      13,
+      17,
+      19,
+      23,
+      29,
+      31
+    ],
+    "rows": [
+      {
+        "prime": 3,
+        "signed_nonempty_subsets": 1,
+        "nonzero_translation_cases": 2,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 6,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 2
+      },
+      {
+        "prime": 5,
+        "signed_nonempty_subsets": 3,
+        "nonzero_translation_cases": 12,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 60,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 8
+      },
+      {
+        "prime": 7,
+        "signed_nonempty_subsets": 7,
+        "nonzero_translation_cases": 42,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 294,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 18
+      },
+      {
+        "prime": 11,
+        "signed_nonempty_subsets": 31,
+        "nonzero_translation_cases": 310,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 3410,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 70
+      },
+      {
+        "prime": 13,
+        "signed_nonempty_subsets": 63,
+        "nonzero_translation_cases": 756,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 9828,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 156
+      },
+      {
+        "prime": 17,
+        "signed_nonempty_subsets": 255,
+        "nonzero_translation_cases": 4080,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 69360,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 560
+      },
+      {
+        "prime": 19,
+        "signed_nonempty_subsets": 511,
+        "nonzero_translation_cases": 9198,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 174762,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 1062
+      },
+      {
+        "prime": 23,
+        "signed_nonempty_subsets": 2047,
+        "nonzero_translation_cases": 45034,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 1035782,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 4114
+      },
+      {
+        "prime": 29,
+        "signed_nonempty_subsets": 16383,
+        "nonzero_translation_cases": 458724,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 13302996,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 33068
+      },
+      {
+        "prime": 31,
+        "signed_nonempty_subsets": 32767,
+        "nonzero_translation_cases": 983010,
+        "nonzero_translation_invariant_subsets": 0,
+        "affine_cases": 30473310,
+        "nonzero_translation_affine_invariants": 0,
+        "scalar_invariant_cases": 65730
+      }
+    ],
+    "signed_nonempty_subsets": 52068,
+    "nonzero_translation_cases": 1501168,
+    "affine_cases": 45069808,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "ordered_rows_sha256": "b1ad06f3258f76c33dad7b089c40315eb1628429784143d4531f8ee222f65944",
+    "complete_for_reported_instances": true
+  },
+  "coalescence_classification": [
+    {
+      "class": "one-column, representation-independent delta",
+      "coalesces_on_group_sum": true,
+      "preserves_proper_signed_fixed_s17": false,
+      "exact_log_transport": true,
+      "non_generic": false,
+      "terminal_class": "nonzero delta forces the full group; zero delta does not move",
+      "proof_obligation": "u(P)-P=C for every admitted column; closure under C"
+    },
+    {
+      "class": "bounded-tuple, representation-independent total delta",
+      "coalesces_on_group_sum": true,
+      "preserves_proper_signed_fixed_s17": false,
+      "exact_log_transport": true,
+      "non_generic": false,
+      "terminal_class": "partitioned S -> S+C is Pollard rho with redundant tuple state",
+      "proof_obligation": "sum(u(tuple))-sum(tuple)=C in each group-state partition"
+    },
+    {
+      "class": "identity-preserving elliptic-curve morphism",
+      "coalesces_on_group_sum": true,
+      "preserves_proper_signed_fixed_s17": true,
+      "exact_log_transport": true,
+      "non_generic": true,
+      "terminal_class": "scalar multiplication; proper signed invariant bases are scalar-orbit unions",
+      "proof_obligation": "elliptic morphism is a homomorphism; prime-order subgroup endomorphism is scalar"
+    },
+    {
+      "class": "coordinate-only low-degree correspondence",
+      "coalesces_on_group_sum": false,
+      "preserves_proper_signed_fixed_s17": true,
+      "exact_log_transport": false,
+      "non_generic": true,
+      "terminal_class": "independent logarithm quotient; collision boundary remains",
+      "proof_obligation": "no exact point delta or subgroup scalar is available"
+    }
+  ],
+  "scalar_action_census": {
+    "rho_s": 1.3,
+    "maximum_operations_per_sample_for_parity": 1.0369824472221065,
+    "divisors_enumerated": 10240,
+    "retained_orders_through_maximum_width": 79,
+    "exact_order_elements_visited": 1712366,
+    "unique_folded_actions": 856183,
+    "width_band_combinations_evaluated": 12712,
+    "enumeration_exhaustive": true,
+    "minimum_binary_width_at_least_17": 26483,
+    "minimum_binary_operations": 340,
+    "minimum_binary_scalar": "154410347155025119293275570919859591050360234274381103831027912432220504873",
+    "minimum_doubling_width_at_least_17": 9301,
+    "minimum_doubling_lower_bound": 236,
+    "minimum_doubling_scalar": "152918900535311551617472835739352639811851243692460361273286367213104126",
+    "target_corrected_minimum_doubling_operations": 237,
+    "target_corrected_minimum_doubling_ratio_to_rho": 228.5477450798529
+  },
+  "imported_correctness": {
+    "round24_false_positives": 0,
+    "round24_false_negatives": 0,
+    "round25_transport_failures": 0,
+    "round26_duplicate_deltas": 0,
+    "round26_control_false_positives": 0,
+    "round26_control_false_negatives": 0,
+    "round27_false_positives_gate": true,
+    "round27_false_negatives_gate": true,
+    "round28_false_positives": 0,
+    "round28_false_negatives": 0,
+    "all_imported_complete_checks_pass": true
+  },
+  "terminal_boundaries": [
+    {
+      "name": "Pollard rho partitioned translation",
+      "operations_per_accepted_sample": 1.0,
+      "ratio_to_rho": 1.0,
+      "projected_log2_operations": null,
+      "projected_log2_bytes": null,
+      "preserves_fixed_s17": false,
+      "coalesces": true,
+      "exact_log_quotient": true,
+      "non_generic": false,
+      "decision": "rho reference; not an index-calculus improvement"
+    },
+    {
+      "name": "known-log K=1 collision oracle",
+      "operations_per_accepted_sample": null,
+      "ratio_to_rho": 0.9643518672676804,
+      "projected_log2_operations": 128.32614317313806,
+      "projected_log2_bytes": 133.32614317313806,
+      "preserves_fixed_s17": true,
+      "coalesces": false,
+      "exact_log_quotient": true,
+      "non_generic": false,
+      "decision": "oracle constant reaches parity, but materialization fails and a memoryless realization is rho-equivalent"
+    },
+    {
+      "name": "one-addition scalar-orbit neighbour",
+      "operations_per_accepted_sample": 1.0,
+      "ratio_to_rho": 0.964336477130181,
+      "projected_log2_operations": null,
+      "projected_log2_bytes": 133.3261201489153,
+      "preserves_fixed_s17": true,
+      "coalesces": false,
+      "exact_log_quotient": true,
+      "non_generic": true,
+      "decision": "fails coalescence on every distinct-column collision control"
+    },
+    {
+      "name": "best proper signed scalar action, doubling floor",
+      "operations_per_accepted_sample": 237.0,
+      "ratio_to_rho": 228.5477450798529,
+      "projected_log2_operations": null,
+      "projected_log2_bytes": null,
+      "preserves_fixed_s17": true,
+      "coalesces": true,
+      "exact_log_quotient": true,
+      "non_generic": true,
+      "decision": "complete scalar-action census remains hundreds of times above parity"
+    },
+    {
+      "name": "best-width independent-log quotient",
+      "operations_per_accepted_sample": null,
+      "ratio_to_rho": 392.15498424614526,
+      "projected_log2_operations": 136.9937917498893,
+      "projected_log2_bytes": 141.9937917498893,
+      "preserves_fixed_s17": true,
+      "coalesces": false,
+      "exact_log_quotient": false,
+      "non_generic": true,
+      "decision": "negation quotient still leaves one unknown per column"
+    }
+  ],
+  "degree_boundary": {
+    "short_weierstrass_s3_total_degree": 4,
+    "all_isogenous_models_retain_universal_leading_support": true,
+    "isogeny_pullback_is_degree_reduction": false,
+    "structured_residual_degree_of_regularity": null,
+    "degree_at_most_5_gate_passed": false
+  },
+  "promotion_gates": {
+    "exact_coalescing_transition": true,
+    "preserves_fixed_s17": true,
+    "non_generic": false,
+    "exact_logarithm_quotient": true,
+    "structured_residual_degree_at_most_5": false,
+    "complete_cost_at_or_below_rho": false,
+    "relation_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "materialized_storage_below_2_50": false,
+    "zero_false_positives_and_false_negatives": true,
+    "promoted": false
+  },
+  "full_depth_unplanted_attempted": false,
+  "dominant_obstruction": "Exact coalescence collapses bounded local updates to group translations (generic rho) and algebraic transports to scalar actions (at least 228.548x rho at the optimistic doubling floor). Coordinate-only factor bases retain the independent-log quotient (at least 392.155x rho).",
+  "result_scope_limit": "This closes exact memoryless bounded-update and algebraic-transport selectors for proper signed fixed-S17 P-256 factor bases. It does not prove that every conceivable non-memoryless or future relation algorithm is impossible.",
+  "decision": "No admitted factor-base selector reaches rho parity. The only one-operation coalescing terminal class is ordinary Pollard rho; every class that preserves proper fixed S17 fails coalescence, exact-log transport, or cost."
+}
