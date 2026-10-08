@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/Volumes/SSD990/crypto/target/release/examples/koblitz_rho_fixture",
+    "83",
+    "1",
+    "signed_frobenius",
+    "1",
+    "packed"
+  ],
+  "arm": "rho",
+  "elapsed_process_wall_s": 65.918506375,
+  "finished_at_utc": "2026-10-07T03:41:23+00:00",
+  "heartbeat_at_utc": "2026-10-07T03:41:18+00:00",
+  "known_answer_environment_variable_present": false,
+  "memory_limit_bytes": null,
+  "memory_limit_mechanism": "No finite kernel cap; wait4 records per-process peak RSS",
+  "peak_rss_bytes": 1097678848,
+  "peak_rss_source": "wait4(2) ru_maxrss for this exact child process (bytes on macOS)",
+  "pid": 13991,
+  "return_code": 0,
+  "started_at_utc": "2026-10-07T03:40:17+00:00",
+  "status": "COMPLETED",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d97f131ed4ad94bf768075809175ba950caf5a70bb3a91be3d251b4e134596aa"
+}

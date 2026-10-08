@@ -1,0 +1,37 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "m = 83 strong-rho reference, target 2 of 8",
+  "description": "PROTOCOL.md. One unseen public target on the m = 83 gate curve icv1-f2m83-tm6151469093347-debefd74 (AGENTS.md §8a), solved cold by the strong signed-Frobenius rho with fruitless-cycle escape (rho.signed_frobenius_strong_escape) at dp_bits 13, the setting that keeps the distinguished-point table near 2^24 entries. Eight such sessions, target seeds 2026100501..2026100508, run side by side on one host, one physical core each.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 83
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 2026100502,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-escape",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong_escape",
+        "params": {
+          "dp_bits": "13"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 2026100502,
+    "isolation_required": "L2",
+    "timeout_seconds": 345600
+  }
+}

@@ -1,0 +1,51 @@
+--- ecc2k130/build/g7-seven-node-src/src/testsharedxcuda.cu	2026-09-17 07:25:48.180940852 +0000
++++ ecc2k130/build/g7-batch32-split-src/src/testsharedxcuda.cu	2026-09-17 19:04:04.144503667 +0000
+@@ -11,7 +11,7 @@
+ #if ECC_PACKED_LAST_SLOT_CACHE != 1 && ECC_PACKED_LAST_SLOT_CACHE != 2
+ #error "Last-slot storage probe requires cache mode 1 or 2"
+ #endif
+-#if !ECC_PACKED_COMPACT_STATE || ECC_BATCH != 16 || ECC_THREADS != 256
++#if !ECC_PACKED_COMPACT_STATE || (ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256
+ #error "Last-slot storage probe requires the selected compact layout"
+ #endif
+ static void need(bool ok,const char*why) { if(!ok) { std::fprintf(stderr,"FAIL: %s\n",why);std::exit(1); } }
+@@ -38,14 +38,14 @@
+     }
+     void unchanged() { need(read()==initial,"walk changed suppressed-report metadata"); }
+ };
+-static size_t fieldBytes(int workers) { return size_t((workers+255)/256)*16*4352; }
++static size_t fieldBytes(int workers) { return size_t((workers+255)/256)*ECC_BATCH*4352; }
+ // Independent byte addressing, rather than the compact load/store helper.
+-static size_t lowOffset(int slot,int tid) { return (size_t(tid/256)*16+slot)*4352+size_t(tid%256)*16; }
+-static size_t tailOffset(int slot,int tid) { return (size_t(tid/256)*16+slot)*4352+4096+tid%256; }
++static size_t lowOffset(int slot,int tid) { return (size_t(tid/256)*ECC_BATCH+slot)*4352+size_t(tid%256)*16; }
++static size_t tailOffset(int slot,int tid) { return (size_t(tid/256)*ECC_BATCH+slot)*4352+4096+tid%256; }
+ static unsigned randomWord(unsigned &s) { s^=s<<13;s^=s>>17;s^=s<<5;return s; }
+ static std::vector<unsigned char> coordinates(int workers,int pattern,unsigned seed) {
+     std::vector<unsigned char> result(fieldBytes(workers),0x42);
+-    for(int slot=0;slot<16;++slot)for(int tid=0;tid<workers;++tid) {
++    for(int slot=0;slot<ECC_BATCH;++slot)for(int tid=0;tid<workers;++tid) {
+         for(int word=0;word<4;++word) {
+             const unsigned value=pattern?0:randomWord(seed);
+             std::memcpy(result.data()+lowOffset(slot,tid)+4*word,&value,4);
+@@ -58,9 +58,9 @@
+ static void inspectField(const std::vector<unsigned char>&data,int workers,int kind,
+                          unsigned char poison,std::vector<unsigned char>&normalized) {
+     const int padded=((workers+255)/256)*256;
+-    for(int slot=0;slot<16;++slot)for(int tid=0;tid<padded;++tid) {
++    for(int slot=0;slot<ECC_BATCH;++slot)for(int tid=0;tid<padded;++tid) {
+         const bool active=tid<workers;
+-        const bool cached=active&&slot>=14&&(kind==3||(kind==2&&ECC_PACKED_LAST_SLOT_CACHE==2));
++        const bool cached=active&&slot>=ECC_BATCH-2&&(kind==3||(kind==2&&ECC_PACKED_LAST_SLOT_CACHE==2));
+         const size_t low=lowOffset(slot,tid),tail=tailOffset(slot,tid);
+         if(!active||cached) {
+             const unsigned char expected=kind<2?0x42:poison;
+@@ -77,7 +77,7 @@
+     }
+ }
+ static std::vector<unsigned char> run(int workers,int steps,int pattern,unsigned char poison,bool reference) {
+-    const size_t n=size_t(workers)*16,bytes=fieldBytes(workers);
++    const size_t n=size_t(workers)*ECC_BATCH,bytes=fieldBytes(workers);
+     Buffer x(coordinates(workers,pattern,0xb0163007u)),y(coordinates(workers,pattern,0xc1163008u));
+     Buffer chain(std::vector<unsigned char>(bytes,poison)),denom(std::vector<unsigned char>(bytes,poison));
+     std::vector<unsigned char> deadData(n*sizeof(unsigned));

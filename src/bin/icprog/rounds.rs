@@ -383,11 +383,39 @@ pub struct Spec {
     pub targets: &'static [(u8, u32)],
     pub holdouts: &'static [(i128, u32)],
     pub what_this_is: &'static str,
-    /// The sizes its callgrind control profiles, `M1`'s first target each;
-    /// none for a round without one.
+    /// The sizes its callgrind profiles cover, `M1`'s first target each;
+    /// none for a round without them.
     pub callgrind: &'static [(u8, u32)],
+    /// What those profiles decide.
+    pub callgrind_role: CallgrindRole,
+    /// What the target sizes must show.
+    pub accept: Accept,
     /// The note `manifest-resumed` writes into `host-resumed.json`.
     pub resumed_note: &'static str,
+}
+
+/// What a round's target sizes must show to be accepted, beyond the pin
+/// and the A/A bands that every round needs.
+#[derive(Clone, Copy)]
+pub enum Accept {
+    /// The paired cold ratio's interval lies above this at every target
+    /// size, on the suite rows and on the holdouts separately.
+    Above(f64),
+    /// No bound: a round that re-bases the programme on a newer commit is
+    /// accepted on its pin and its A/A bands alone, and its figures are
+    /// what the new baseline costs.
+    Pinned,
+}
+
+/// What a round's callgrind profiles decide.
+#[derive(Clone, Copy, PartialEq)]
+pub enum CallgrindRole {
+    /// R02b's control: its rule (the arithmetic kernels identical, the
+    /// total within tolerance, the same logarithm) must hold.
+    Control,
+    /// Plan §5's deterministic cross-check: the instruction ratios are
+    /// reported, and only a different logarithm decides.
+    CrossCheck,
 }
 
 pub mod speed {
@@ -584,8 +612,29 @@ pub mod speed {
         };
         let mut reasons = Vec::new();
         if let Some(cg) = &control {
-            if !cg.get("control_held").is_some_and(J::truthy) {
-                reasons.push(J::Str("the callgrind control did not hold".into()));
+            match s.callgrind_role {
+                CallgrindRole::Control => {
+                    if !cg.get("control_held").is_some_and(J::truthy) {
+                        reasons.push(J::Str("the callgrind control did not hold".into()));
+                    }
+                }
+                CallgrindRole::CrossCheck => {
+                    let pairs = cg.get("pairs").and_then(J::as_obj).unwrap_or(&[]);
+                    if pairs.len() != s.callgrind.len() {
+                        reasons.push(J::Str(format!(
+                            "the callgrind cross-check has {} of its {} profile pairs",
+                            pairs.len(),
+                            s.callgrind.len()
+                        )));
+                    }
+                    for (row, p) in pairs {
+                        if !p.get("same_log").is_some_and(J::truthy) {
+                            reasons.push(J::Str(format!(
+                                "{row}: the arms under callgrind did not recover the same logarithm"
+                            )));
+                        }
+                    }
+                }
             }
         }
         if !pin_flag(&pin, "held") {
@@ -594,10 +643,12 @@ pub mod speed {
         if !pin_flag(&pin, "names_agree") {
             reasons.push(J::Str("a name disagrees with the registry".into()));
         }
-        for &(a, n) in s.targets {
-            let slug = suite::curve_slug(a, n)?;
-            bound_reasons(&suite_j, &slug, "suite", ACCEPT_LO, &mut reasons);
-            bound_reasons(&holdouts, &slug, "holdouts", ACCEPT_LO, &mut reasons);
+        if let Accept::Above(accept_lo) = s.accept {
+            for &(a, n) in s.targets {
+                let slug = suite::curve_slug(a, n)?;
+                bound_reasons(&suite_j, &slug, "suite", accept_lo, &mut reasons);
+                bound_reasons(&holdouts, &slug, "holdouts", accept_lo, &mut reasons);
+            }
         }
         aa_reasons(&suite_j, &mut reasons);
         if !same_host {
@@ -654,11 +705,15 @@ pub mod speed {
                 "host_resumed".into(),
                 opt(json::read_opt(&c.runs.join("host-resumed.json"))?),
             ),
-            (
-                "aa_source".into(),
-                opt(json::read_opt(&c.runs.join("aa-source.json"))?),
-            ),
         ];
+        let later = later_resumes(c)?;
+        if !later.is_empty() {
+            doc.push(("hosts_resumed_later".into(), J::Arr(later)));
+        }
+        doc.push((
+            "aa_source".into(),
+            opt(json::read_opt(&c.runs.join("aa-source.json"))?),
+        ));
         if let Some(own) = own {
             doc.push(("aa".into(), own));
         }
@@ -927,7 +982,10 @@ pub mod speed {
         Ok(record)
     }
 
-    /// The host a round resumed on after its container changed, once.
+    /// The host a round resumed on after its container changed:
+    /// `host-resumed.json` the first time, and `host-resumed-<k>.json`,
+    /// `k = 2, 3, …`, at each later resume, so that every container a
+    /// round ran on is on record.  None is ever overwritten.
     pub fn manifest_resumed(
         c: &Ctx,
         s: &Spec,
@@ -935,13 +993,29 @@ pub mod speed {
         arms: &[Arm],
         root: &Path,
     ) -> Result<J, String> {
-        bench::host_manifest(
-            &c.runs.join("host-resumed.json"),
-            root,
-            binaries(arms, &[])?,
-            &b.isolate,
-            s.resumed_note,
-        )
+        let first = c.runs.join("host-resumed.json");
+        let out = if first.exists() {
+            (2..)
+                .map(|k| c.runs.join(format!("host-resumed-{k}.json")))
+                .find(|p| !p.exists())
+                .expect("an unbounded range has a free name")
+        } else {
+            first
+        };
+        bench::host_manifest(&out, root, binaries(arms, &[])?, &b.isolate, s.resumed_note)
+    }
+
+    /// The hosts of every resume after the first, in order: empty for a
+    /// round that resumed at most once.
+    fn later_resumes(c: &Ctx) -> Result<Vec<J>, String> {
+        let mut out = Vec::new();
+        for k in 2.. {
+            match json::read_opt(&c.runs.join(format!("host-resumed-{k}.json")))? {
+                Some(doc) => out.push(doc),
+                None => break,
+            }
+        }
+        Ok(out)
     }
 
     /// The round's own A/A: the base against a byte-identical copy beside
@@ -1079,6 +1153,8 @@ pub mod r05 {
         ],
         what_this_is: "R05, the sharper presence filter: every figure the README, the ledger and the scoreboard quote",
         callgrind: &[],
+        callgrind_role: CallgrindRole::Control,
+        accept: Accept::Above(speed::ACCEPT_LO),
         resumed_note: "the host R05 resumed on after its container was rebuilt mid-holdouts",
     };
 
@@ -1127,6 +1203,8 @@ pub mod r02b {
         ],
         what_this_is: "R02b, the wide-tail kernel re-tested on fresh holdouts: every figure the README, the ledger and the scoreboard quote",
         callgrind: &[(0, 61), (1, 59), (0, 41)],
+        callgrind_role: CallgrindRole::Control,
+        accept: Accept::Above(speed::ACCEPT_LO),
         resumed_note: "the host R02b resumed on after its container changed",
     };
 
@@ -1156,6 +1234,67 @@ pub mod r02b {
                 root,
                 commits,
                 "the host R02b ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            "callgrind" => speed::callgrind_step(c, &SPEC, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend, callgrind or manifest-resumed"
+            )),
+        }
+    }
+}
+
+// ── R07: the programme re-based on main's head ──────────────────────
+
+pub mod r07 {
+    use super::*;
+
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (214, 119),
+            (214, 120),
+            (215, 121),
+            (215, 122),
+            (216, 123),
+            (216, 124),
+            (217, 125),
+            (217, 126),
+        ],
+        what_this_is: "R07, the programme re-based on main's head: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[(0, 61), (0, 53)],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Pinned,
+        resumed_note: "the host R07 resumed on after its container changed",
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R07's declared steps: those R02b has, with the callgrind
+    /// profiles as plan §5's cross-check rather than a control.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R07 ran on, at the round's start",
             ),
             "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
             "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),

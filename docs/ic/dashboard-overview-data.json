@@ -56,7 +56,7 @@
     },
     {
       "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
-      "sha256": "9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb"
+      "sha256": "f7b950edc74978cbdf2dbc3da54c73bde6c05c0827fbe29ff8bd33659168afa1"
     },
     {
       "path": "research/ecbench_n37_rank_columns_20261004/independent_validation/RECEIPT.json",
@@ -625,7 +625,7 @@
         "cold_counted_over_k42_diagnostic": 0.6940660060915055,
         "cold_counted_over_rho_ci95_diagnostic": [
           8.290752472805886,
-          12.353679510974215
+          12.353679510974217
         ],
         "cold_counted_over_rho_diagnostic": 10.01258766003444,
         "diagnostic_claim_sha256": "e65c04b0dcca6e7f59fd2529656a5ebeb22a1cdf2f2fb6760c8e14a4df4239a2",
@@ -3351,6 +3351,8 @@
   ],
   "historical_ledger_sha256": "52aebe7ba1478f2e4f84e5573fd2f78ed72b354e2738952f3d330252f4cb9967",
   "historical_regime_summary_sha256": "893d88343b01aa36d7bf75f1bbd0dc4321ff8b923300c36201c42d7bb5ac3bf9",
+  "historical_ledger_sha256": "effc1112da8cb9f309aae94d794689c916bc7b1759d79d2b29056c7409136eff",
+  "historical_regime_summary_sha256": "f126ef2557b6060ba46f5d621da556cf183feec31baa53a1a1dc4f3d2c8c4fb5",
   "historical_overview_panels": [
     {
       "section_id": "cold-compact-orbit-20261003",
@@ -3374,12 +3376,12 @@
     },
     {
       "section_id": "lab-progress",
-      "sha256": "5152146eaced2af630a52a909b02b56bcf48048b0965d3a075a074337a45e37a"
+      "sha256": "3e59841218f55740a946c3ae8998a3b257078d3f4115139534200e7f778ee5cc"
     },
     {
       "section_id": "lab-currency",
       "sha256": "1258aca960d4b3555ac96e2a8b4d32e51fe3cf4925df10d7e60c143fab1c986c"
     }
   ],
-  "progress_timeline_sha256": "686611edb1ba4f8b174f2ad714fff4cf1296d0291eb2c9344e52762548d6e2a8"
+  "progress_timeline_sha256": "09b38d8c77aa53dcb1d413f3d067051448a27df1aab8786598c09ebb500ffcb0"
 }

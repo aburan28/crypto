@@ -1,0 +1,15 @@
+{
+  "schema":"ecc2k130_sigma_fused_shared_scratch_compile_v1",
+  "valid":true,
+  "sourceCommit":"fc3941078db32d1a81f2732fd3622c13866208e6",
+  "cuda":"13.3.73",
+  "architecture":"sm_120",
+  "gpuRun":false,
+  "arms":[
+    {"name":"control","cachedSlots":0,"registers":126,"stackBytes":0,"localBytes":0,"functionStaticSharedBytes":1792,"compiledReservedSharedBytes":1024,"compiledSharedExtentBytes":2816,"staticBlocksPerSm":2},
+    {"name":"cache2","cachedSlots":2,"registers":126,"stackBytes":0,"localBytes":0,"functionStaticSharedBytes":22272,"compiledReservedSharedBytes":1024,"compiledSharedExtentBytes":23296,"staticBlocksPerSm":2},
+    {"name":"cache3","cachedSlots":3,"registers":126,"stackBytes":0,"localBytes":0,"functionStaticSharedBytes":32512,"compiledReservedSharedBytes":1024,"compiledSharedExtentBytes":33536,"staticBlocksPerSm":2},
+    {"name":"cache4","cachedSlots":4,"registers":126,"stackBytes":0,"localBytes":0,"functionStaticSharedBytes":42752,"compiledReservedSharedBytes":1024,"compiledSharedExtentBytes":43776,"staticBlocksPerSm":2}
+  ],
+  "claimBoundary":"compile/resource feasibility only; actual occupancy and throughput unmeasured"
+}

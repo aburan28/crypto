@@ -924,6 +924,7 @@ pub fn symmetrised_groebner_decompose_accepting(
         n_vars: sys.n_vars,
         n_equations: sys.equations.len(),
         degree: system_degree(&sys.equations),
+        effort: stats.effort() as u64,
         effort: stats.splits as u64,
         built_degree: stats.max_degree_built,
         oversize: stats.oversize,
@@ -972,6 +973,7 @@ pub fn direct_x_groebner_decompose(
         n_vars,
         n_equations: equations.len(),
         degree: system_degree(&equations),
+        effort: stats.effort() as u64,
         effort: stats.splits as u64,
         built_degree: stats.max_degree_built,
         oversize: stats.oversize,
@@ -1367,6 +1369,25 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
             BinaryPoint::Affine { x, .. } => x.clone(),
             BinaryPoint::Infinity => unreachable!(),
         };
+        let chained_sys =
+            build_decomposition_system(&fb_x.subspace_basis, &x_r, &kc.curve.b, m, &st)?;
+        let o = OracleOutcome {
+            used_t: false,
+            complete: !stats.exhausted,
+            n_vars: chained_sys.n_vars,
+            n_equations: chained_sys.equations.len(),
+            degree: system_degree(&chained_sys.equations),
+            effort: stats.effort() as u64,
+            relation: rel.clone(),
+        };
+        x_chain.record(&o, ms, truth_x, sum_check_x(&rel));
+        if ti == 0 && opts.ffd_max_degree >= 2 {
+            x_chain.ffd = first_fall_degree(
+                &chained_sys.equations,
+                chained_sys.n_vars,
+                opts.ffd_max_degree,
+            )
+            .0;
 
         // x-chained (production path).
         if opts.chained_x {

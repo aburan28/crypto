@@ -1,0 +1,59 @@
+name: Native endomorphism search
+
+on:
+  pull_request:
+    paths:
+      - 'tools/endomorphism-search/**'
+      - 'research/endomorphism_search_20261005/**'
+      - 'src/hash/sha256.rs'
+      - '.github/workflows/endomorphism-search.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/endomorphism-search/**'
+      - 'research/endomorphism_search_20261005/**'
+      - 'src/hash/sha256.rs'
+      - '.github/workflows/endomorphism-search.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: tools/endomorphism-search
+      - name: Formatting and lint
+        run: |
+          cargo fmt --manifest-path tools/endomorphism-search/Cargo.toml --check
+          cargo clippy --manifest-path tools/endomorphism-search/Cargo.toml --locked --all-targets -- -D warnings
+      - name: Exact arithmetic and CLI tests
+        run: cargo test --manifest-path tools/endomorphism-search/Cargo.toml --locked --release
+      - name: Build the standalone binary
+        run: cargo build --manifest-path tools/endomorphism-search/Cargo.toml --locked --release
+      - name: Replay frozen evidence and reject tampering
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/endomorphism-replay
+          sha256sum --check research/endomorphism_search_20261005/native-manifest.sha256
+          bash tools/endomorphism-search/check.sh | tee /tmp/endomorphism-replay/verification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: endomorphism-native-correctness-replay
+          path: /tmp/endomorphism-replay/
