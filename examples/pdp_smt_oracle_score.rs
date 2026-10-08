@@ -104,6 +104,8 @@ struct ArmRow {
     own_decisions_on_common: Option<u64>,
     median_wall_refuting: Option<f64>,
     native_median_wall_on_common: Option<f64>,
+    /// Over this arm's found cells.
+    median_wall_found: Option<f64>,
 }
 
 fn arm_rows(run: &Run) -> BTreeMap<String, ArmRow> {
@@ -158,6 +160,9 @@ fn arm_rows(run: &Run) -> BTreeMap<String, ArmRow> {
                 native_median_wall_on_common: median(
                     common.iter().map(|(_, nc)| nc.wall_ms).collect(),
                 ),
+                median_wall_found: median(
+                    mine.iter().filter(|c| c.found).map(|c| c.wall_ms).collect(),
+                ),
             },
         );
     }
@@ -179,8 +184,8 @@ fn main() {
         let rows = arm_rows(run);
         let native = &rows[&run.arms[0]];
         println!("### n = {}\n", run.n);
-        println!("| arm | cells | found | refuted | exhausted | disagree | spurious | common refuted | native conflicts (common) | own conflicts (common) | own decisions (common) | median wall refuting, ms | native median wall (common), ms | wall ratio |");
-        println!("|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
+        println!("| arm | cells | found | refuted | exhausted | disagree | spurious | common refuted | native conflicts (common) | own conflicts (common) | own decisions (common) | median wall refuting, ms | native median wall (common), ms | wall ratio | median wall found, ms |");
+        println!("|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
         for arm in &run.arms {
             let r = &rows[arm];
             let ratio = match (r.median_wall_refuting, r.native_median_wall_on_common) {
@@ -188,7 +193,7 @@ fn main() {
                 _ => None,
             };
             println!(
-                "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+                "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
                 arm,
                 r.cells,
                 r.found,
@@ -203,6 +208,7 @@ fn main() {
                 fmt_ms(r.median_wall_refuting),
                 fmt_ms(r.native_median_wall_on_common),
                 ratio.map_or_else(|| "n/a".to_string(), |x| format!("{x:.2}")),
+                fmt_ms(r.median_wall_found),
             );
             if r.disagreements > 0 || r.spurious > 0 {
                 p1 = false;
