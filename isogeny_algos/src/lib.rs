@@ -11,6 +11,7 @@ pub mod field;
 pub mod fp2;
 pub mod find;
 pub mod fpm;
+pub mod fpr;
 pub mod genus2;
 pub mod gf2n;
 pub mod gf3n;

@@ -276,6 +276,71 @@ pub fn atkin_candidates(ell: u64, q_mod_l: u64, r: usize) -> Vec<u64> {
     out
 }
 
+/// Atkin-prime isogeny over the F_{p^d} tower. E/F_p has no rational l-isogeny, but over a large
+/// enough extension F_{p^d} Frobenius^d acquires an F_l-rational eigenvalue on E[l] (the smallest
+/// such d is the order of lambda over F_l, <= ord(lambda/mu)), so there E has a rational
+/// l-isogeny. We scan d = 2, 3, ...: over each F_{p^d} we run the ordinary Elkies codomain +
+/// kernel-polynomial + eigenvalue computation, and return the first (nu, d) for which the
+/// eigenvalue step succeeds. Because elkies_eigenvalue only returns a value once Frobenius^d
+/// genuinely acts as [nu] on the kernel, that nu is a true eigenvalue of pi^d, i.e. nu = lambda^d
+/// or mu^d mod l. Returns None if no degree <= RMAX works. Curve over the prime field F_p.
+pub fn atkin_eigenvalue_tower(zp: &crate::field::Zp, e: &Curve<u64>, ell: u64, rng: &mut Rng) -> Option<(u64, usize)> {
+    use crate::fpr::{FpR, RMAX};
+    for d in 2..=ATKIN_TOWER_MAX_DEGREE.min(RMAX) {
+        let fr = FpR::new(zp.p, d);
+        let e_ext = Curve::new(fr.embed(e.a), fr.embed(e.b));
+        let j_ext = jinv(&fr, &e_ext);
+        let phi = Phi::compute(&fr, ell as usize);
+        let roots = phi.neighbors(&fr, j_ext, rng);
+        for &jt in roots.iter().take(5) {
+            let Some(et) = crate::find::elkies::elkies_codomain(&fr, &phi, &e_ext, jt) else { continue };
+            let Some(iso) = bmss::isogeny(&fr, bmss::Method::FastElkiesPrime, &e_ext, &et, ell as usize, None) else { continue };
+            if let Some(lam) = elkies_eigenvalue(&fr, &e_ext, &iso.ker, ell) {
+                return Some((lam, d));
+            }
+        }
+    }
+    None
+}
+
+/// t mod l for an Atkin prime, refined by the F_{p^d} eigenvalue nu = lambda^d (or mu^d) mod l:
+/// of the Atkin candidates keep those whose roots lambda, mu of x^2 - t x + q (in F_{l^2})
+/// satisfy lambda^d = nu or mu^d = nu. Usually a single value, i.e. an Atkin prime pinned to
+/// Elkies strength.
+pub fn atkin_candidates_tower(ell: u64, q_mod_l: u64, d: usize, nu: u64) -> Vec<u64> {
+    let l = ell;
+    let md = |a: u64| a % l;
+    let sqrt_l = |a: u64| (0..l).find(|&x| x * x % l == md(a));
+    let nr = (2..l).find(|&a| sqrt_l(a).is_none()).unwrap_or(2);
+    let mul = |x: (u64, u64), y: (u64, u64)| (md(x.0 * y.0 + nr * md(x.1 * y.1)), md(x.0 * y.1 + x.1 * y.0));
+    let pow = |mut x: (u64, u64), mut e: u64| {
+        let mut rr = (1u64, 0u64);
+        while e > 0 {
+            if e & 1 == 1 {
+                rr = mul(rr, x);
+            }
+            x = mul(x, x);
+            e >>= 1;
+        }
+        rr
+    };
+    let mut out = vec![];
+    for t in 0..l {
+        let disc = md(t * t + l * l * 4 - 4 * q_mod_l);
+        // genuine Atkin: discriminant a non-residue (lambda, mu not in F_l)
+        if sqrt_l(disc).is_some() {
+            continue;
+        }
+        let s = (0, sqrt_l(md(disc * pow((nr, 0), l * l - 2).0)).unwrap());
+        let l1 = mul((md(t + s.0), s.1), (md((l + 1) / 2), 0));
+        let l2 = mul((md(t + l - s.0), md(l - s.1)), (md((l + 1) / 2), 0));
+        if pow(l1, d as u64) == (md(nu), 0) || pow(l2, d as u64) == (md(nu), 0) {
+            out.push(t);
+        }
+    }
+    out
+}
+
 /// #E(F_q) by SEA with primes l <= max_ell (the Phi_l are computed on demand into `phis`),
 /// with isogeny cycles for Elkies primes up to kernel-polynomial degree `CYCLE_DEGREE`.
 pub fn sea<F: Field>(
@@ -288,6 +353,34 @@ pub fn sea<F: Field>(
     sea_opts(f, e, max_ell, phis, rng, CYCLE_DEGREE)
 }
 
+/// Unique t mod l for an Atkin prime via the F_{p^d} tower, or None if the refined candidate set
+/// is not a singleton. This turns an Atkin prime into an Elkies-strength congruence for SEA.
+pub fn atkin_trace_tower(fp: &crate::field::Zp, e: &Curve<u64>, ell: u64, rng: &mut Rng) -> Option<u64> {
+    let (nu, d) = atkin_eigenvalue_tower(fp, e, ell, rng)?;
+    let cands = atkin_candidates_tower(ell, fp.p % ell, d, nu);
+    if cands.len() == 1 {
+        Some(cands[0])
+    } else {
+        None
+    }
+}
+
+/// SEA over F_p that additionally resolves Atkin primes to unique congruences through F_{p^d}
+/// towers (when the tower pins t mod l), so both Elkies and Atkin primes contribute congruences.
+pub fn sea_atkin_tower(
+    fp: &crate::field::Zp,
+    e: &Curve<u64>,
+    max_ell: usize,
+    phis: &mut HashMap<usize, Phi<crate::field::Zp>>,
+    rng: &mut Rng,
+) -> Option<(Big, SeaStats)> {
+    let ee = *e;
+    let fpc = fp.clone();
+    let mut rng2 = Rng::new(0xA7C0 ^ fp.p);
+    let mut resolver = move |l: u64| atkin_trace_tower(&fpc, &ee, l, &mut rng2);
+    sea_resolved(fp, e, max_ell, phis, rng, CYCLE_DEGREE, Some(&mut resolver))
+}
+
 /// Stop adding primes once at most this many candidates for t remain.
 pub const SEA_STOP_CANDIDATES: f64 = 4_194_304.0;
 /// Candidate counts up to this are walked one point addition each; above, baby-step giant-step.
@@ -295,6 +388,10 @@ pub const SEA_WALK_MAX: u128 = 1024;
 
 /// Default bound on the degree l^(k-1)(l-1)/2 of the polynomials used by isogeny cycles.
 pub const CYCLE_DEGREE: usize = 40;
+
+/// Largest tower degree F_{p^d} scanned for the Atkin-prime eigenvalue (Atkin primes whose
+/// lambda/mu has larger order are left as candidate sets). Bounds the cost per Atkin prime.
+pub const ATKIN_TOWER_MAX_DEGREE: usize = 6;
 
 /// SEA with an explicit bound on the isogeny-cycle polynomial degree (0: no cycles; t mod l
 /// only). An Elkies prime with two rational l-isogenies contributes t mod l^k for the largest k
@@ -306,6 +403,23 @@ pub fn sea_opts<F: Field>(
     phis: &mut HashMap<usize, Phi<F>>,
     rng: &mut Rng,
     cycle_degree: usize,
+) -> Option<(Big, SeaStats)> {
+    sea_resolved(f, e, max_ell, phis, rng, cycle_degree, None)
+}
+
+/// SEA with an optional Atkin resolver: for an Atkin prime l, `atkin_resolver(l)` may return a
+/// unique t mod l (e.g. from the F_{p^d} tower), which is CRT'd in as a congruence instead of
+/// being kept only as a filtering set. Generic in F; the resolver (when given) is specific to the
+/// base field it closes over.
+#[allow(clippy::too_many_arguments)]
+pub fn sea_resolved<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    max_ell: usize,
+    phis: &mut HashMap<usize, Phi<F>>,
+    rng: &mut Rng,
+    cycle_degree: usize,
+    mut atkin_resolver: Option<&mut dyn FnMut(u64) -> Option<u64>>,
 ) -> Option<(Big, SeaStats)> {
     let q = Int::from_big(&f.q());
     let j = jinv(f, e);
@@ -359,10 +473,21 @@ pub fn sea_opts<F: Field>(
                 // fall back to the repeated-eigenvalue constraint is not valid here; skip prime
             }
         } else if let Some(r) = atkin_degree(f, &g) {
-            let cands = atkin_candidates(l, ql, r);
-            st.atkin.push((l, r, cands.len()));
-            if !cands.is_empty() && (cands.len() as u64) < l {
-                atkin_sets.push((l, cands));
+            // tower resolution to a unique congruence (Elkies-strength from an Atkin prime)
+            let resolved = atkin_resolver.as_deref_mut().and_then(|res| res(l));
+            if let Some(tl) = resolved {
+                st.elkies.push((l, tl));
+                let (_, u, _) = Int::xgcd(&m, &Int::from(l as i64));
+                let diff = (&Int::from(tl as i64) - &te).modulo(&Int::from(l as i64));
+                te = &te + &(&m * &(&diff * &u).modulo(&Int::from(l as i64)));
+                m = &m * &Int::from(l as i64);
+                te = te.modulo(&m);
+            } else {
+                let cands = atkin_candidates(l, ql, r);
+                st.atkin.push((l, r, cands.len()));
+                if !cands.is_empty() && (cands.len() as u64) < l {
+                    atkin_sets.push((l, cands));
+                }
             }
         }
         // stop once the search over the candidates (Hasse width / M_E of them, ~2 sqrt(.) point

@@ -101,7 +101,7 @@ division polynomials, not from (E, Ẽ).
 | Frobenius eigenvalue on an Elkies kernel, ± separated via y | implemented V3 | `find/sea.rs::elkies_eigenvalue` | computed in F_q[x, y]/(h, y² − f) |
 | **Schoof–Elkies–Atkin point counting** (t mod 2, Elkies primes with isogeny cycles, Atkin candidate sets from the factor degree of Φ_ℓ(j, Y), recombination by baby-step giant-step) | implemented V3 | `find/sea.rs::sea`, `sea_opts` | equals BSGS orders at 40 and 61 bits; [#E]P = 0 for random P at 127 bits, same order for every cycle bound |
 | Isogeny cycles for Elkies primes: Frobenius eigenvalue mod ℓᵏ on the rational cyclic ℓᵏ-subgroup (pull-back of the next kernel along the non-backtracking chain) | implemented V3 | `find/sea.rs::eigenvalue_cycle` | t mod 3⁴, 5³, 7², 11² = BSGS trace; used by SEA up to kernel degree 40 |
-| Isogeny cycles for Atkin primes (Couveignes–Morain 1994 ✔, Couveignes 1996 ✔; needs F_{q^r}) | not implemented – implementation gap | — | SEA uses Atkin candidate *sets* |
+| Atkin primes over F_{p^r} towers (recover t mod l, not just a set) | implemented V3 | `find/sea.rs::atkin_eigenvalue_tower`, `atkin_candidates_tower`, `atkin_trace_tower`, `sea_atkin_tower`; `fpr.rs` (F_{p^r}, runtime r) | over F_{p^d} (d = order of lambda/mu, scanned up to 6) Frobenius^d has an F_l eigenvalue nu = lambda^d; the ordinary Elkies eigenvalue over F_{p^d} returns nu; the refined candidate set contains the true t mod l (checked against the BSGS trace at 39 bits) and is often a singleton — then `sea_atkin_tower` CRTs it like an Elkies congruence |
 | Sutherland's CRT/volcano Φ_ℓ (Bröker–Lauter–Sutherland), Enge's quasi-linear evaluation | not implemented – implementation gap | — | Hecke/Newton covers ℓ ≤ 127 at 61 bits |
 | Hilbert class polynomial / CM method | not implemented here; exists in the main crate (`src/cryptanalysis/hilbert_class_poly.rs`) | — | — |
 
@@ -160,8 +160,9 @@ division polynomials, not from (E, Ẽ).
 
 * **Couveignes**: hard homogeneous space / class-group action (V1 ordinary; V2 CSIDH-style + MITM + cycle
   orders; V3 CSIDH-512, tree strategy, relation lattice, radical steps).
-  Isogeny cycles (Couveignes–Morain) for Elkies primes are implemented (V3); not covered: the 1996
-  p-torsion method (small characteristic) and cycles for Atkin primes.
+  Isogeny cycles (Couveignes–Morain) for Elkies primes are implemented (V3), and Atkin primes are
+  now resolved to t mod l over F_{p^r} towers (V3); not covered: the 1996 p-torsion method (small
+  characteristic).
 * **Kohel**: kernel-polynomial formulas (V1 odd, V2 even, V3 char 2), volcano navigation (V1), ordinary
   End(E) (V2), and the supersingular half of the thesis: quaternion orders, Brandt matrices and the
   Deuring correspondence (V3); KLPT (Kohel–Lauter–Petit–Tignol, V3).
