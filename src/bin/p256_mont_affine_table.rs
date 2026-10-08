@@ -1252,6 +1252,6 @@ mod tests {
             PROJECTIVE_ENTRY_BYTES
         );
         assert_eq!(std::mem::size_of::<MontAffinePoint>(), AFFINE_ENTRY_BYTES);
-        assert!(FULL_TABLE_BYTES < (1u64 << 50));
+        const { assert!(FULL_TABLE_BYTES < (1u64 << 50)) };
     }
 }
