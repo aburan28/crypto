@@ -1,6 +1,7 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
+  "updated": "2026-10-05",
   "updated": "2026-10-07",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Primary vs_rho claims use exactly one unseen target paired on the identical public point and resource envelope. Headline time is verified online wall after reusable IC preparation; exclude process launch, input loading, target generation, and target-independent setup. Multi-target averages, batch throughput, and shared-table amortization are secondary only and require a separate declared question after the primary one-target result. Never combine best component costs from different runs into a synthetic win.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
@@ -2674,6 +2675,68 @@
               },
               "superseded_on": "2026-09-21"
             }
+          ],
+          "timing_audit": {
+            "status": "LEGACY_N41_N53_ONLINE_INTERVAL_OVERLAP",
+            "affected_verdicts": [
+              "N41_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+              "N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+            ],
+            "finding": "The legacy rank fixture collection_ms timer spans final solve and solution validation; old online totals re-add both. Recompute exact numbers from raw receipts before citing them.",
+            "fixed_producer_fields": [
+              "target_online_phase_ms",
+              "target_online_wall_ms",
+              "charged_total_ms",
+              "online_charged_ms"
+            ],
+            "unaffected_scope": "This finding does not assess the separate compact-orbit n61/n71 producer.",
+            "evidence": "https://github.com/aburan28/cryptanalysis/pull/353",
+            "claim_limit": "Historical numeric ratios are exploratory and not exact exclusive-phase results; no new controlled speedup is promoted."
+          }
+        }
+      }
+    },
+    "prime": {
+      "label": "Prime fields",
+      "best_stack": [
+        "ec_index_calculus_j0",
+        "ec_index_calculus"
+      ],
+      "implementation_caps": {
+        "generic_ic_bench_bits": 12,
+        "j0_ic_bench_bits": 14,
+        "module_doc_sub_bits": 40,
+        "dense_3sum_nonscaling_wall_bits": 80
+      },
+      "records": {
+        "factor_base": {
+          "status": "record",
+          "current": {
+            "summary": "Small-x and zeta-orbit bases on toy primes; Eisenstein-smooth FB implemented",
+            "metrics": {
+              "construction_methods": [
+                "small_x",
+                "zeta_orbit",
+                "eisenstein_smooth"
+              ],
+              "materialized": true,
+              "construction_wall_ms": null,
+              "retained_bytes": null
+            }
+          },
+          "next_target": {
+            "summary": "Orbit-reduced base on a 16-bit j=0 prime-order curve",
+            "acceptance_gates": [
+              "no duplicate orbits",
+              "size vs theory within 5%",
+              "construction_wall_ms and retained_bytes logged"
+            ]
+          },
+          "evidence": [
+            "docs/RESEARCH_BENCH_LOG.md",
+            "src/cryptanalysis/ec_index_calculus_j0.rs"
+          ],
+          "history": []
           ]
         },
         "rank": {
