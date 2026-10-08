@@ -1,0 +1,33 @@
+{
+  "base": {
+    "columns": 600,
+    "file": "base_n73_K600.jsonl",
+    "hash": "37f22aed4a55e30058bcdf9eb48a38238287b6fa6aec686a4bbe310016685c56",
+    "points": 87600
+  },
+  "checks": {
+    "generator_on_curve": true,
+    "subgroup_annihilates_generator": true,
+    "target_is_scalar_times_g": true,
+    "target_on_curve": true
+  },
+  "curve": {
+    "a": 0,
+    "generator": [
+      "4735344536444938487862",
+      "4753051995279452466153"
+    ],
+    "n": 73,
+    "subgroup_order": 86020738150056119
+  },
+  "date": "2026-10-02",
+  "fresh_scalar": 27182818284590453,
+  "kind": "koblitz_n73_ledger_target_freeze",
+  "method": "standalone Python GF(2^73) scalar multiplication (module replay arithmetic); no Rust producer involved in freezing",
+  "public_target_q": [
+    "8876887310739041083658",
+    "5142041772242564417390"
+  ],
+  "scalar_note": "fresh: never used in any prior fixture",
+  "target_q_sha256": "5c36c44fabdbed136f8d0795dbd0e4ec65086949cb1dc3822e862229662d0168"
+}

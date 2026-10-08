@@ -5,6 +5,7 @@
 --   stage 0                 latch a, b
 --   stage 1                 a' = prep(a), b' = prep(b)     gamma -> c-powers
 --   stages 2 .. 1+2L+F      a' b' over GF(2)[c]             Karatsuba, L levels, leaf F clocks
+--   stage 2+2L+F            r = to_onb(h)                   c-powers -> gamma
 --   stage 2+2L+F            h' = h                          a copy of the tree's top register
 --   stage 3+2L+F            r = to_onb(h')                  c-powers -> gamma
 --
@@ -12,6 +13,10 @@
 -- products (gf2_dsp_leaf, gf131_pkg.MUL_DSP_LEAVES).
 --
 -- There is no reduction: the back-conversion maps every c^k, k = 2..262,
+-- straight to normal-basis coordinates.  Every stage is a few LUT levels
+-- deep -- the widest single XOR is the 66-input column of prep -- and no
+-- DSP is involved anywhere, so the clock is set by LUT-to-LUT routing and
+-- nothing else.
 -- straight to normal-basis coordinates.  The register copy before it is
 -- for route, not depth: the tree's top register is spread over the whole
 -- multiplier, and in the routed 128-engine image at 375 MHz the XOR trees
@@ -64,6 +69,7 @@ architecture rtl of gf131_mul is
 
   signal s0_a, s0_b : gf_t := (others => '0');
   signal pa, pb     : poly_t := (others => '0');
+  signal h          : dpoly_t;
   signal h, h_q     : dpoly_t := (others => '0');
   attribute shreg_extract : string;
   attribute shreg_extract of h_q : signal is "no";
@@ -79,6 +85,8 @@ begin
     generic map (N => M, LEVELS => MUL_KARATSUBA, DSP_LEAVES => MUL_DSP_LEAVES)
     port map (clk => clk, a => pa, b => pb, r => h);
 
+  -- latch, prep, the tree, to_onb
+  assert MUL_LATENCY = KM_LAT + 3
   -- latch, prep, the tree, a copy of its top register, to_onb
   assert MUL_LATENCY = KM_LAT + 4
     report "gf131_mul: MUL_LATENCY does not match the tree" severity failure;
@@ -90,6 +98,7 @@ begin
       s0_b  <= in_b;
       pa    <= gf_prep(s0_a);
       pb    <= gf_prep(s0_b);
+      out_r <= gf_to_onb(h);
       h_q   <= h;
       out_r <= gf_to_onb(h_q);
     end if;

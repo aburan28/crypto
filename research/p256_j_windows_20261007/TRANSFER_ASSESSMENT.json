@@ -1,0 +1,156 @@
+{
+  "schema": "crypto-transfer-assessment/draft-v1",
+  "status": "evidence_snapshot_not_a_ledger_certificate",
+  "subject": "P-256 degree-13/degree-11 global-row continuation",
+  "source": {
+    "curve": "P-256",
+    "field": "F_p",
+    "subgroup_order": "P-256 prime group order",
+    "canonical_id": "icv1-fp256-t89188191154553853111372247798585809583-f188c491"
+  },
+  "destination": {
+    "family": "global coordinates 0 <= x < 1000 and 1000 <= y < 1064",
+    "new_unique_curves": 64000,
+    "cumulative_unique_j_invariants": 1064000,
+    "group_order": "same P-256 prime group order"
+  },
+  "typed_correspondence": [
+    {
+      "from": "registered P-256 E_(0,0)/F_p",
+      "to": "boundary context E_(0,999)/F_p",
+      "map": "composition of 999 separable cyclic degree-13 isogenies",
+      "certificate": "the independently replayed immutable million-curve certificate"
+    },
+    {
+      "from": "E_(0,999)/F_p",
+      "to": "each emitted spine curve E_(0,y)/F_p, 1000 <= y < 1064",
+      "map": "composition of replayed separable cyclic degree-13 isogenies",
+      "certificate": "one incoming kernel polynomial, Velu codomain and target isomorphism for every emitted spine curve"
+    },
+    {
+      "from": "E_(0,y)/F_p",
+      "to": "E_(x,y)/F_p, 0 < x < 1000",
+      "map": "composition of replayed separable cyclic degree-11 isogenies",
+      "certificate": "one incoming kernel polynomial, Velu codomain and target isomorphism for every emitted row curve"
+    },
+    {
+      "from": "E_(0,0)(F_p)",
+      "to": "E_(x,y)(F_p)",
+      "map": "induced rational-point group homomorphism",
+      "classification": "group isomorphism on the prime-order rational subgroup because 11 and 13 are coprime to its order"
+    }
+  ],
+  "obligations": [
+    {
+      "name": "map_existence",
+      "status": "supported",
+      "evidence": "64000 incoming edges were generated from the frozen modular-polynomial root rule and replayed"
+    },
+    {
+      "name": "executable_construction",
+      "status": "supported",
+      "evidence": "64000 kernel polynomials, Velu codomains and target isomorphisms were generated and independently replayed"
+    },
+    {
+      "name": "map_correctness",
+      "status": "supported",
+      "evidence": "generation and replay agree on every emitted curve, edge, target model, identity, detector, summary and rolling-chain value"
+    },
+    {
+      "name": "boundary_continuity",
+      "status": "supported",
+      "evidence": "replay independently reconstructed E_(0,999) from P-256 and checked the incoming degree-13 edge to E_(0,1000)"
+    },
+    {
+      "name": "subgroup_preservation",
+      "status": "supported",
+      "evidence": "all 64000 new curves passed prime-order audits; edge degrees 11 and 13 do not divide that order"
+    },
+    {
+      "name": "exceptional_points_and_kernel_intersection",
+      "status": "supported",
+      "evidence": "the rational prime-order subgroup intersects every degree-11 or degree-13 kernel trivially"
+    },
+    {
+      "name": "cross_certificate_identity_accounting",
+      "status": "supported_for_j_invariant",
+      "evidence": "the streaming union auditor validated both certificates and found exactly 1064000 distinct canonical 256-bit j-invariants"
+    },
+    {
+      "name": "single_large_degree_map",
+      "status": "not_materialized",
+      "evidence": "large composite degrees are represented as verified degree-11/degree-13 chains, not as one kernel polynomial or one evaluated rational map"
+    },
+    {
+      "name": "point_transport_and_recovery_cost",
+      "status": "unknown",
+      "evidence": "the certificate verifies curve maps, but no ECDLP payload transport, dual-map recovery or exceptional-case timing was run"
+    },
+    {
+      "name": "measured_index_calculus_advantage",
+      "status": "unknown",
+      "evidence": "no frozen structural screen selected a curve, so relation generation, matrix work and a full solver comparison were not run"
+    },
+    {
+      "name": "scaling_to_2_pow_32_or_the_full_class",
+      "status": "unknown",
+      "evidence": "the cumulative verified boundary is 1064000 unique j-invariants, not 2^32 and not the full P-256 isogeny class"
+    }
+  ],
+  "costs": {
+    "new_strip_generation": {
+      "status": "measured",
+      "wall_seconds": 369.899,
+      "user_cpu_seconds": 1380.471123,
+      "system_cpu_seconds": 0.2995,
+      "peak_rss_bytes": 86233088
+    },
+    "new_strip_independent_replay": {
+      "status": "measured",
+      "wall_seconds": 411.53,
+      "user_cpu_seconds": 1409.073127,
+      "system_cpu_seconds": 0.145185,
+      "peak_rss_bytes": 88707072
+    },
+    "cross_certificate_j_union": {
+      "status": "measured",
+      "wall_seconds": 19.514,
+      "user_cpu_seconds": 19.588493,
+      "system_cpu_seconds": 0.415647,
+      "peak_rss_bytes": 183721984
+    },
+    "point_conversion": {
+      "status": "not_measured"
+    },
+    "relation_generation": {
+      "status": "not_attempted"
+    },
+    "linear_algebra": {
+      "status": "not_attempted"
+    },
+    "target_log_recovery": {
+      "status": "not_attempted"
+    },
+    "matched_pollard_rho": {
+      "status": "not_attempted"
+    }
+  },
+  "controls": [
+    "frozen registered P-256 root and deterministic canonical-model identity",
+    "global row coordinates with a chain-bound preceding context curve",
+    "independent replay with two fresh order-audit points per emitted curve",
+    "exact streaming j-union audit of the immutable million certificate and continuation certificate",
+    "deliberately overlapping fixture rejected with both duplicate locations",
+    "future transported-data and coordinate-isomorphism controls before any solver claim",
+    "future cold one-target index-calculus versus matched Pollard-rho comparison including setup, transport, matrix and recovery costs"
+  ],
+  "exploration_boundary": {
+    "new_unique_curves": 64000,
+    "cumulative_unique_j_invariants": 1064000,
+    "fraction_of_2_pow_32": 0.0002477318048477173,
+    "coverage_percent_of_2_pow_32": 0.02477318048477173,
+    "finding": "no frozen structural candidate or full-width j discrepancy within the executed continuation",
+    "universal_nonexistence_claim": false,
+    "ecdlp_speedup": null
+  }
+}

@@ -342,9 +342,13 @@ produced constants, and the best of them is a factor of two **worse** than a
 double loop.
 
 The ceiling is not a proof of impossibility, and §5 of the contract says so:
-`F` is algebraically structured, 3SUM hardness is a conjecture about *generic*
-sets, and a genuinely sub-quadratic oracle exploiting the subspace structure is
-excluded by nothing measured here.  Exploiting that structure is what Semaev's
+`F` is algebraically structured, and the hardness invoked here is a conjecture
+about *generic* sets — not the integer 3SUM hypothesis as such:
+Alman–Vassilevska Williams (`arXiv:2610.06783v1`) refute the integer (and
+real-valued) 3SUM hypothesis via lopsided thin products, but that algorithm
+does not transfer to 3-term decomposition over curve points, so the
+curve-point analogue remains conjectural. A genuinely sub-quadratic oracle
+exploiting the subspace structure is excluded by nothing measured here.  Exploiting that structure is what Semaev's
 polynomials were *for*.  What is now measured is that neither the summation
 polynomials under SAT nor the Riemann–Roch reformulation does it.
 

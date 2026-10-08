@@ -38,13 +38,17 @@
    "path": "research/ic_single_target_20260930/analysis.json",
    "sha256": "109326d7c2882b7142972f38771534548f9d667fbda4ca8c11cd7509f8d906a1"
   },
+  "koblitz_rule_v3": {
+   "path": "research/ic_tool_program/rule/v3/analysis.json",
+   "sha256": "86a6e9163ebb6da7dcf1dafb78c1c2efe55ea548f9e9e91bd0155082ea1821de"
+  },
   "oracles": {
    "path": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
    "sha256": "2271c4aa5236e2bdc8ff3d8b7782beddcbe1bc733a9343db3e833eba49fe75c5"
   },
   "n37_rank_columns": {
    "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
-   "sha256": "9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb"
+   "sha256": "f7b950edc74978cbdf2dbc3da54c73bde6c05c0827fbe29ff8bd33659168afa1"
   },
   "n37_k8_k16": {
    "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
@@ -82,6 +86,10 @@
    "path": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
    "sha256": "69ca54385c62a50e2a1b8fcb5245459dd8550966221f5ba94fcdf3437c1bada6"
   },
+  "n41_n53_counted": {
+   "path": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+   "sha256": "fe55908f837840eeee173cfeae463368bb272e3c65ef03fa2b66efeead769331"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed"
@@ -93,6 +101,8 @@
   "curves_yaml": {
    "path": "docs/curves/ic/curves.yaml",
    "sha256": "566ed698a961aae8c81b7fb7863e808f9871d3080ee512afd111719783fab77e"
+   "sha256": "2342a3d22dd3a947dfc8ac2a791e2f42061dad4e7b723db6bd0abe7b851b64a6"
+   "sha256": "d11d19fcb65175b8a8ad363b2c15ea87ccc733331d5c20b36cb0954901108c92"
   }
  },
  "families": {
@@ -101,12 +111,12 @@
    "regimes": [
     "koblitz"
    ],
-   "section": "§23",
+   "section": "§23, re-run at baseline v3",
    "status": "primary comparison: one target, as AGENTS.md's one-target rule requires",
-   "targets": "one unseen public point per process, 64 per size",
+   "targets": "one unseen public point per process, 64 per size; §23's figures on the same curve are the before marks",
    "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r",
-   "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, and divides by this unit, measured around each repetition (§20, §23).",
-   "reference": "One-target rho on the same point, measured as built (its set-up plus its walk), in the same unit and the same process; its answer replayed and verified (§23).",
+   "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, and divides by this unit, measured around each repetition (§20, §23). Each process measures its own unit, which is 2.3–3.2 times cheaper at baseline v3 than in §23's processes, so S here is not compared with §23's; the ratios carry no unit (research/ic_tool_program/rule/v3/README.md).",
+   "reference": "One-target rho on the same point, measured as built (its set-up plus its walk), in the same unit and the same process; its answer replayed and verified (§23; rule v3 at baseline v3).",
    "floor": "√(π/4n) rho steps per √r: generic, one target, no precomputation, A = 2n by signed Frobenius and negation, n the extension degree. Stated in steps and not rescaled to units, so × floor here divides units by steps.",
    "unit_short": "batched-addition units",
    "ref_short": "one-target rho",
@@ -118,6 +128,12 @@
    "rho_step_units_as_built": [
     3.98506501834,
     4.97204654515
+    4.602731747316069,
+    5.394215359428946
+   ],
+   "rho_step_units_as_built": [
+    9.715071640681813,
+    11.820503447339632
    ]
   },
   "B": {
@@ -202,6 +218,15 @@
     "slug": "icv1-f2m61-t158598901-ab42b6c5",
     "log2_r": 47.21,
     "ratio_rho": 31.5994057949
+   "ratio_rho": 5.2259258441371435,
+   "s": 9.506805780776906,
+   "recipe": "aimed m = 3 collection, m = 3 descent; one target",
+   "one_target": null,
+   "online_speedup": 10.173012107266377,
+   "largest": {
+    "slug": "icv1-f2m61-t158598901-ab42b6c5",
+    "log2_r": 47.21,
+    "ratio_rho": 20.970861959576446
    }
   },
   "koblitz_batch": {
@@ -3432,6 +3457,9 @@
    "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
    "reference_s": 0.862734615369,
    "floor_s": 0.129269482946,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
+   "reference_s": 1.8191620134530595,
+   "floor_s": 0.12926948294637178,
    "targets": 1,
    "recipes": [
     {
@@ -3468,6 +3496,34 @@
      "rho_step_units_as_built": 4.86695968803,
      "cold_ratio_without_curve_construction": 6.31378924664,
      "ratio_floor": 33.0143580405,
+     "s": 9.506805780776906,
+     "s_online": 0.13819633087430783,
+     "s_setup": 9.368609449902598,
+     "phases_s": {
+      "precomputation": 9.368609449902598,
+      "descent": 0.1371489255809661,
+      "verify": 0.0004396774739923872
+     },
+     "ratio_rho": 5.2259258441371435,
+     "ratio_rho_ci": [
+      4.795148143026125,
+      5.72118042879613
+     ],
+     "ratio_rho_section23": 4.946769165949517,
+     "online_speedup_section23": 9.765321645722155,
+     "online_speedup": 10.173012107266377,
+     "online_speedup_ci": [
+      8.093434955750006,
+      13.113157837804373
+     ],
+     "online_speedup_canonical_step": 4.547405843227763,
+     "ic_online_over_precomputation_model": 2.391340729336279,
+     "break_even_targets": 7.3903780581851075,
+     "construction_artefact": false,
+     "canonical_step_units": 4.668288423567654,
+     "rho_step_units_as_built": 10.453734304147051,
+     "cold_ratio_without_curve_construction": 6.586251457111585,
+     "ratio_floor": 73.54253737303847,
      "verified": true
     }
    ],
@@ -3505,10 +3561,39 @@
     "rho_step_units_as_built": 4.86695968803,
     "cold_ratio_without_curve_construction": 6.31378924664,
     "ratio_floor": 33.0143580405,
+    "s": 9.506805780776906,
+    "s_online": 0.13819633087430783,
+    "s_setup": 9.368609449902598,
+    "phases_s": {
+     "precomputation": 9.368609449902598,
+     "descent": 0.1371489255809661,
+     "verify": 0.0004396774739923872
+    },
+    "ratio_rho": 5.2259258441371435,
+    "ratio_rho_ci": [
+     4.795148143026125,
+     5.72118042879613
+    ],
+    "ratio_rho_section23": 4.946769165949517,
+    "online_speedup_section23": 9.765321645722155,
+    "online_speedup": 10.173012107266377,
+    "online_speedup_ci": [
+     8.093434955750006,
+     13.113157837804373
+    ],
+    "online_speedup_canonical_step": 4.547405843227763,
+    "ic_online_over_precomputation_model": 2.391340729336279,
+    "break_even_targets": 7.3903780581851075,
+    "construction_artefact": false,
+    "canonical_step_units": 4.668288423567654,
+    "rho_step_units_as_built": 10.453734304147051,
+    "cold_ratio_without_curve_construction": 6.586251457111585,
+    "ratio_floor": 73.54253737303847,
     "verified": true
    },
-   "source": "research/ic_single_target_20260930/analysis.json",
-   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "source": "research/ic_tool_program/rule/v3/analysis.json",
+   "before_source": "research/ic_single_target_20260930/analysis.json",
+   "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
    "class": "accounting",
    "family": "A",
    "curve_record": {
@@ -3538,6 +3623,9 @@
    "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
    "reference_s": 4.09217289679,
    "floor_s": 0.117383623846,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
+   "reference_s": 1.7994171396001315,
+   "floor_s": 0.11738362384644484,
    "targets": 1,
    "recipes": [
     {
@@ -3574,6 +3662,34 @@
      "rho_step_units_as_built": 4.97204654515,
      "cold_ratio_without_curve_construction": 8.21301496898,
      "ratio_floor": 69.1848934212,
+     "s": 11.014581514064941,
+     "s_online": 0.08157449332238782,
+     "s_setup": 10.933007020742554,
+     "phases_s": {
+      "precomputation": 10.933007020742554,
+      "descent": 0.08128477787166705,
+      "verify": 0.0002901965449555733
+     },
+     "ratio_rho": 6.121194064269396,
+     "ratio_rho_ci": [
+      5.655504281946691,
+      6.6680798785640425
+     ],
+     "ratio_rho_section23": 1.9845626541276857,
+     "online_speedup_section23": 13.537727158347499,
+     "online_speedup": 16.297029013600017,
+     "online_speedup_ci": [
+      13.006029576740705,
+      20.822858750270225
+     ],
+     "online_speedup_canonical_step": 7.4189122919282005,
+     "ic_online_over_precomputation_model": 1.5087120599291393,
+     "break_even_targets": 8.761493671842066,
+     "construction_artefact": false,
+     "canonical_step_units": 5.371862787519074,
+     "rho_step_units_as_built": 11.820503447339632,
+     "cold_ratio_without_curve_construction": 8.098850678927207,
+     "ratio_floor": 93.8340558345144,
      "verified": true
     }
    ],
@@ -3611,10 +3727,39 @@
     "rho_step_units_as_built": 4.97204654515,
     "cold_ratio_without_curve_construction": 8.21301496898,
     "ratio_floor": 69.1848934212,
+    "s": 11.014581514064941,
+    "s_online": 0.08157449332238782,
+    "s_setup": 10.933007020742554,
+    "phases_s": {
+     "precomputation": 10.933007020742554,
+     "descent": 0.08128477787166705,
+     "verify": 0.0002901965449555733
+    },
+    "ratio_rho": 6.121194064269396,
+    "ratio_rho_ci": [
+     5.655504281946691,
+     6.6680798785640425
+    ],
+    "ratio_rho_section23": 1.9845626541276857,
+    "online_speedup_section23": 13.537727158347499,
+    "online_speedup": 16.297029013600017,
+    "online_speedup_ci": [
+     13.006029576740705,
+     20.822858750270225
+    ],
+    "online_speedup_canonical_step": 7.4189122919282005,
+    "ic_online_over_precomputation_model": 1.5087120599291393,
+    "break_even_targets": 8.761493671842066,
+    "construction_artefact": false,
+    "canonical_step_units": 5.371862787519074,
+    "rho_step_units_as_built": 11.820503447339632,
+    "cold_ratio_without_curve_construction": 8.098850678927207,
+    "ratio_floor": 93.8340558345144,
     "verified": true
    },
-   "source": "research/ic_single_target_20260930/analysis.json",
-   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "source": "research/ic_tool_program/rule/v3/analysis.json",
+   "before_source": "research/ic_single_target_20260930/analysis.json",
+   "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
    "class": "accounting",
    "family": "A",
    "curve_record": {
@@ -3644,6 +3789,9 @@
    "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
    "reference_s": 0.693739801856,
    "floor_s": 0.138405392835,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
+   "reference_s": 1.458656645971443,
+   "floor_s": 0.13840539283493047,
    "targets": 1,
    "recipes": [
     {
@@ -3680,6 +3828,34 @@
      "rho_step_units_as_built": 4.65292580378,
      "cold_ratio_without_curve_construction": 8.89112612417,
      "ratio_floor": 40.3210032811,
+     "s": 11.16913986167439,
+     "s_online": 0.1206379007855556,
+     "s_setup": 11.048501960888835,
+     "phases_s": {
+      "precomputation": 11.048501960888835,
+      "descent": 0.11876659864134673,
+      "verify": 0.00019090043302628871
+     },
+     "ratio_rho": 7.657141173367715,
+     "ratio_rho_ci": [
+      6.8996679827486975,
+      8.613117669541948
+     ],
+     "ratio_rho_section23": 8.044290213253069,
+     "online_speedup_section23": 9.383847456632276,
+     "online_speedup": 10.928284373853764,
+     "online_speedup_ci": [
+      8.629422955794224,
+      14.173228506591691
+     ],
+     "online_speedup_canonical_step": 5.118678703741787,
+     "ic_online_over_precomputation_model": 2.2091591944785334,
+     "break_even_targets": 9.22455485014717,
+     "construction_artefact": false,
+     "canonical_step_units": 4.602731747316069,
+     "rho_step_units_as_built": 9.715071640681813,
+     "cold_ratio_without_curve_construction": 8.415994096849225,
+     "ratio_floor": 80.69873314109438,
      "verified": true
     }
    ],
@@ -3717,10 +3893,39 @@
     "rho_step_units_as_built": 4.65292580378,
     "cold_ratio_without_curve_construction": 8.89112612417,
     "ratio_floor": 40.3210032811,
+    "s": 11.16913986167439,
+    "s_online": 0.1206379007855556,
+    "s_setup": 11.048501960888835,
+    "phases_s": {
+     "precomputation": 11.048501960888835,
+     "descent": 0.11876659864134673,
+     "verify": 0.00019090043302628871
+    },
+    "ratio_rho": 7.657141173367715,
+    "ratio_rho_ci": [
+     6.8996679827486975,
+     8.613117669541948
+    ],
+    "ratio_rho_section23": 8.044290213253069,
+    "online_speedup_section23": 9.383847456632276,
+    "online_speedup": 10.928284373853764,
+    "online_speedup_ci": [
+     8.629422955794224,
+     14.173228506591691
+    ],
+    "online_speedup_canonical_step": 5.118678703741787,
+    "ic_online_over_precomputation_model": 2.2091591944785334,
+    "break_even_targets": 9.22455485014717,
+    "construction_artefact": false,
+    "canonical_step_units": 4.602731747316069,
+    "rho_step_units_as_built": 9.715071640681813,
+    "cold_ratio_without_curve_construction": 8.415994096849225,
+    "ratio_floor": 80.69873314109438,
     "verified": true
    },
-   "source": "research/ic_single_target_20260930/analysis.json",
-   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "source": "research/ic_tool_program/rule/v3/analysis.json",
+   "before_source": "research/ic_single_target_20260930/analysis.json",
+   "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
    "class": "accounting",
    "family": "A",
    "curve_record": {
@@ -3750,6 +3955,9 @@
    "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
    "reference_s": 0.503188071298,
    "floor_s": 0.121732630267,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
+   "reference_s": 1.282092451654807,
+   "floor_s": 0.12173263026670363,
    "targets": 1,
    "recipes": [
     {
@@ -3786,6 +3994,34 @@
      "rho_step_units_as_built": 3.98506501834,
      "cold_ratio_without_curve_construction": 15.2409659815,
      "ratio_floor": 60.7791897773,
+     "s": 16.97618299454087,
+     "s_online": 0.05756656235833082,
+     "s_setup": 16.91861643218254,
+     "phases_s": {
+      "precomputation": 16.91861643218254,
+      "descent": 0.05566204020596536,
+      "verify": 3.6932353661773056e-05
+     },
+     "ratio_rho": 13.24099753697916,
+     "ratio_rho_ci": [
+      11.754994068871016,
+      15.012692544275554
+     ],
+     "ratio_rho_section23": 14.703867319407847,
+     "online_speedup_section23": 17.489057559646973,
+     "online_speedup": 21.46679276428554,
+     "online_speedup_ci": [
+      16.875992291379884,
+      27.64294955831363
+     ],
+     "online_speedup_canonical_step": 10.569317376335677,
+     "ic_online_over_precomputation_model": 1.770813096729363,
+     "break_even_targets": 14.359679817729845,
+     "construction_artefact": false,
+     "canonical_step_units": 4.996464436013792,
+     "rho_step_units_as_built": 9.926991258196168,
+     "cold_ratio_without_curve_construction": 13.713188657480423,
+     "ratio_floor": 139.45466353062287,
      "verified": true
     }
    ],
@@ -3823,10 +4059,39 @@
     "rho_step_units_as_built": 3.98506501834,
     "cold_ratio_without_curve_construction": 15.2409659815,
     "ratio_floor": 60.7791897773,
+    "s": 16.97618299454087,
+    "s_online": 0.05756656235833082,
+    "s_setup": 16.91861643218254,
+    "phases_s": {
+     "precomputation": 16.91861643218254,
+     "descent": 0.05566204020596536,
+     "verify": 3.6932353661773056e-05
+    },
+    "ratio_rho": 13.24099753697916,
+    "ratio_rho_ci": [
+     11.754994068871016,
+     15.012692544275554
+    ],
+    "ratio_rho_section23": 14.703867319407847,
+    "online_speedup_section23": 17.489057559646973,
+    "online_speedup": 21.46679276428554,
+    "online_speedup_ci": [
+     16.875992291379884,
+     27.64294955831363
+    ],
+    "online_speedup_canonical_step": 10.569317376335677,
+    "ic_online_over_precomputation_model": 1.770813096729363,
+    "break_even_targets": 14.359679817729845,
+    "construction_artefact": false,
+    "canonical_step_units": 4.996464436013792,
+    "rho_step_units_as_built": 9.926991258196168,
+    "cold_ratio_without_curve_construction": 13.713188657480423,
+    "ratio_floor": 139.45466353062287,
     "verified": true
    },
-   "source": "research/ic_single_target_20260930/analysis.json",
-   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "source": "research/ic_tool_program/rule/v3/analysis.json",
+   "before_source": "research/ic_single_target_20260930/analysis.json",
+   "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
    "class": "accounting",
    "family": "A",
    "curve_record": {
@@ -3856,6 +4121,9 @@
    "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
    "reference_s": 0.576507264163,
    "floor_s": 0.115376918307,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
+   "reference_s": 1.351274353923881,
+   "floor_s": 0.11537691830657834,
    "targets": 1,
    "recipes": [
     {
@@ -3892,6 +4160,34 @@
      "rho_step_units_as_built": 4.25386084637,
      "cold_ratio_without_curve_construction": 17.3170588679,
      "ratio_floor": 78.2895782822,
+     "s": 16.25703234767737,
+     "s_online": 0.04873967313821335,
+     "s_setup": 16.208292674539155,
+     "phases_s": {
+      "precomputation": 16.208292674539155,
+      "descent": 0.04706892115407195,
+      "verify": 3.634336566310399e-05
+     },
+     "ratio_rho": 12.030889434458363,
+     "ratio_rho_ci": [
+      10.575306911346974,
+      13.863793009191626
+     ],
+     "ratio_rho_section23": 15.668163853624774,
+     "online_speedup_section23": 16.87050545272324,
+     "online_speedup": 26.49570633402399,
+     "online_speedup_ci": [
+      20.52420296840639,
+      34.451957468740744
+     ],
+     "online_speedup_canonical_step": 13.335374008867896,
+     "ic_online_over_precomputation_model": 1.4232804802325472,
+     "break_even_targets": 13.043303794294529,
+     "construction_artefact": false,
+     "canonical_step_units": 5.295833940775191,
+     "rho_step_units_as_built": 10.63018425373876,
+     "cold_ratio_without_curve_construction": 12.556406016684766,
+     "ratio_floor": 140.90367975056634,
      "verified": true
     }
    ],
@@ -3929,10 +4225,39 @@
     "rho_step_units_as_built": 4.25386084637,
     "cold_ratio_without_curve_construction": 17.3170588679,
     "ratio_floor": 78.2895782822,
+    "s": 16.25703234767737,
+    "s_online": 0.04873967313821335,
+    "s_setup": 16.208292674539155,
+    "phases_s": {
+     "precomputation": 16.208292674539155,
+     "descent": 0.04706892115407195,
+     "verify": 3.634336566310399e-05
+    },
+    "ratio_rho": 12.030889434458363,
+    "ratio_rho_ci": [
+     10.575306911346974,
+     13.863793009191626
+    ],
+    "ratio_rho_section23": 15.668163853624774,
+    "online_speedup_section23": 16.87050545272324,
+    "online_speedup": 26.49570633402399,
+    "online_speedup_ci": [
+     20.52420296840639,
+     34.451957468740744
+    ],
+    "online_speedup_canonical_step": 13.335374008867896,
+    "ic_online_over_precomputation_model": 1.4232804802325472,
+    "break_even_targets": 13.043303794294529,
+    "construction_artefact": false,
+    "canonical_step_units": 5.295833940775191,
+    "rho_step_units_as_built": 10.63018425373876,
+    "cold_ratio_without_curve_construction": 12.556406016684766,
+    "ratio_floor": 140.90367975056634,
     "verified": true
    },
-   "source": "research/ic_single_target_20260930/analysis.json",
-   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "source": "research/ic_tool_program/rule/v3/analysis.json",
+   "before_source": "research/ic_single_target_20260930/analysis.json",
+   "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
    "class": "accounting",
    "family": "A",
    "curve_record": {
@@ -3962,6 +4287,9 @@
    "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
    "reference_s": 0.479407959297,
    "floor_s": 0.113469730447,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
+   "reference_s": 1.188870772843963,
+   "floor_s": 0.11346973044749432,
    "targets": 1,
    "recipes": [
     {
@@ -3998,6 +4326,34 @@
      "rho_step_units_as_built": 4.29425159437,
      "cold_ratio_without_curve_construction": 32.5003579861,
      "ratio_floor": 133.507029473,
+     "s": 24.931644865085715,
+     "s_online": 0.07883023828753016,
+     "s_setup": 24.852814626798185,
+     "phases_s": {
+      "precomputation": 24.852814626798185,
+      "descent": 0.07899413778679995,
+      "verify": 1.610741297317878e-05
+     },
+     "ratio_rho": 20.970861959576446,
+     "ratio_rho_ci": [
+      18.600068898222816,
+      23.835884826062138
+     ],
+     "ratio_rho_section23": 31.599405794913018,
+     "online_speedup_section23": 8.83874129306946,
+     "online_speedup": 14.81833810842446,
+     "online_speedup_ci": [
+      11.34423395690151,
+      19.779083913478527
+     ],
+     "online_speedup_canonical_step": 7.383964107123673,
+     "ic_online_over_precomputation_model": 3.517458713801748,
+     "break_even_targets": 22.815339011959953,
+     "construction_artefact": false,
+     "canonical_step_units": 5.394215359428946,
+     "rho_step_units_as_built": 10.762650516629304,
+     "cold_ratio_without_curve_construction": 21.331662219753902,
+     "ratio_floor": 219.72066706038663,
      "verified": true
     }
    ],
@@ -4035,10 +4391,39 @@
     "rho_step_units_as_built": 4.29425159437,
     "cold_ratio_without_curve_construction": 32.5003579861,
     "ratio_floor": 133.507029473,
+    "s": 24.931644865085715,
+    "s_online": 0.07883023828753016,
+    "s_setup": 24.852814626798185,
+    "phases_s": {
+     "precomputation": 24.852814626798185,
+     "descent": 0.07899413778679995,
+     "verify": 1.610741297317878e-05
+    },
+    "ratio_rho": 20.970861959576446,
+    "ratio_rho_ci": [
+     18.600068898222816,
+     23.835884826062138
+    ],
+    "ratio_rho_section23": 31.599405794913018,
+    "online_speedup_section23": 8.83874129306946,
+    "online_speedup": 14.81833810842446,
+    "online_speedup_ci": [
+     11.34423395690151,
+     19.779083913478527
+    ],
+    "online_speedup_canonical_step": 7.383964107123673,
+    "ic_online_over_precomputation_model": 3.517458713801748,
+    "break_even_targets": 22.815339011959953,
+    "construction_artefact": false,
+    "canonical_step_units": 5.394215359428946,
+    "rho_step_units_as_built": 10.762650516629304,
+    "cold_ratio_without_curve_construction": 21.331662219753902,
+    "ratio_floor": 219.72066706038663,
     "verified": true
    },
-   "source": "research/ic_single_target_20260930/analysis.json",
-   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "source": "research/ic_tool_program/rule/v3/analysis.json",
+   "before_source": "research/ic_single_target_20260930/analysis.json",
+   "round": "rule v3: §23's comparison at baseline v3 (2026-10-06); before marks §23 (2026-09-30)",
    "class": "accounting",
    "family": "A",
    "curve_record": {
@@ -4097,6 +4482,14 @@
       "linear_algebra": 0.130023194588,
       "descent": 0.913995627223,
       "verify": 0.95678871767
+      "setup": 0.6237339814760795,
+      "constructions": 0.914304009959341,
+      "factor_base": 0.571524901844298,
+      "table": 0.5043462314056679,
+      "relations": 0.2581727942743142,
+      "linear_algebra": 0.13002319458753586,
+      "descent": 0.9139956272233088,
+      "verify": 0.9567887176698456
      },
      "ratio_rho": 14.8966497733,
      "ratio_rho_ci": [
@@ -4146,6 +4539,16 @@
      "verify": 0.95678871767
     },
     "ratio_rho": 14.8966497733,
+     "setup": 0.6237339814760795,
+     "constructions": 0.914304009959341,
+     "factor_base": 0.571524901844298,
+     "table": 0.5043462314056679,
+     "relations": 0.2581727942743142,
+     "linear_algebra": 0.13002319458753586,
+     "descent": 0.9139956272233088,
+     "verify": 0.9567887176698456
+    },
+    "ratio_rho": 14.896649773263793,
     "ratio_rho_ci": [
      13.779195739,
      16.0483916089
@@ -4223,6 +4626,14 @@
       "linear_algebra": 0.0365422242652,
       "descent": 0.305526892217,
       "verify": 0.212804977105
+      "setup": 0.16446116776150432,
+      "constructions": 0.2886116008534978,
+      "factor_base": 0.1684686994182842,
+      "table": 0.13652435255426154,
+      "relations": 0.11946648505974385,
+      "linear_algebra": 0.03654222426518232,
+      "descent": 0.3055268922172965,
+      "verify": 0.2128049771046404
      },
      "ratio_rho": 6.98829434731,
      "ratio_rho_ci": [
@@ -4272,6 +4683,16 @@
      "verify": 0.212804977105
     },
     "ratio_rho": 6.98829434731,
+     "setup": 0.16446116776150432,
+     "constructions": 0.2886116008534978,
+     "factor_base": 0.1684686994182842,
+     "table": 0.13652435255426154,
+     "relations": 0.11946648505974385,
+     "linear_algebra": 0.03654222426518232,
+     "descent": 0.3055268922172965,
+     "verify": 0.2128049771046404
+    },
+    "ratio_rho": 6.988294347307033,
     "ratio_rho_ci": [
      4.43690944604,
      10.2671831268
@@ -4349,6 +4770,14 @@
       "linear_algebra": 0.0124806681533,
       "descent": 0.150636566883,
       "verify": 0.0796071988998
+      "setup": 0.18135162380042724,
+      "constructions": 0.19199834315659717,
+      "factor_base": 0.1300108689672182,
+      "table": 0.06965563710625806,
+      "relations": 0.04060455824877867,
+      "linear_algebra": 0.012480668153261888,
+      "descent": 0.15063656688310414,
+      "verify": 0.07960719889983717
      },
      "ratio_rho": 7.19007959136,
      "ratio_rho_ci": [
@@ -4398,6 +4827,16 @@
      "verify": 0.0796071988998
     },
     "ratio_rho": 7.19007959136,
+     "setup": 0.18135162380042724,
+     "constructions": 0.19199834315659717,
+     "factor_base": 0.1300108689672182,
+     "table": 0.06965563710625806,
+     "relations": 0.04060455824877867,
+     "linear_algebra": 0.012480668153261888,
+     "descent": 0.15063656688310414,
+     "verify": 0.07960719889983717
+    },
+    "ratio_rho": 7.190079591360827,
     "ratio_rho_ci": [
      6.41014854132,
      8.02150907165
@@ -4475,6 +4914,14 @@
       "linear_algebra": 0.00489380583978,
       "descent": 0.161890971305,
       "verify": 0.0320968395889
+      "setup": 0.07562128195935067,
+      "constructions": 0.06214807047463206,
+      "factor_base": 0.04114115835264887,
+      "table": 0.024323611366407268,
+      "relations": 0.08316503750296374,
+      "linear_algebra": 0.004893805839784593,
+      "descent": 0.16189097130470326,
+      "verify": 0.032096839588935784
      },
      "ratio_rho": 5.2608015235,
      "ratio_rho_ci": [
@@ -4524,6 +4971,16 @@
      "verify": 0.0320968395889
     },
     "ratio_rho": 5.2608015235,
+     "setup": 0.07562128195935067,
+     "constructions": 0.06214807047463206,
+     "factor_base": 0.04114115835264887,
+     "table": 0.024323611366407268,
+     "relations": 0.08316503750296374,
+     "linear_algebra": 0.004893805839784593,
+     "descent": 0.16189097130470326,
+     "verify": 0.032096839588935784
+    },
+    "ratio_rho": 5.260801523504233,
     "ratio_rho_ci": [
      4.39987399454,
      6.15229021594
@@ -4601,6 +5058,14 @@
       "linear_algebra": 0.00196171820334,
       "descent": 0.123914832066,
       "verify": 0.0112494668687
+      "setup": 0.03395506914921843,
+      "constructions": 0.023034166887328986,
+      "factor_base": 0.019384788042774336,
+      "table": 0.014164518508571462,
+      "relations": 0.0971688146840351,
+      "linear_algebra": 0.001961718203342925,
+      "descent": 0.12391483206638415,
+      "verify": 0.011249466868672486
      },
      "ratio_rho": 4.87503150965,
      "ratio_rho_ci": [
@@ -4650,6 +5115,16 @@
      "verify": 0.0112494668687
     },
     "ratio_rho": 4.87503150965,
+     "setup": 0.03395506914921843,
+     "constructions": 0.023034166887328986,
+     "factor_base": 0.019384788042774336,
+     "table": 0.014164518508571462,
+     "relations": 0.0971688146840351,
+     "linear_algebra": 0.001961718203342925,
+     "descent": 0.12391483206638415,
+     "verify": 0.011249466868672486
+    },
+    "ratio_rho": 4.875031509653909,
     "ratio_rho_ci": [
      4.16354578263,
      5.62243303003
@@ -4727,6 +5202,14 @@
       "linear_algebra": 0.00152954904479,
       "descent": 0.0764827393211,
       "verify": 0.00668609429674
+      "setup": 0.022026209336272286,
+      "constructions": 0.01568087091378731,
+      "factor_base": 0.017038702571894413,
+      "table": 0.03705563654823104,
+      "relations": 0.05791232891756848,
+      "linear_algebra": 0.0015295490447882387,
+      "descent": 0.07648273932107358,
+      "verify": 0.0066860942967385
      },
      "ratio_rho": 3.89287844259,
      "ratio_rho_ci": [
@@ -4776,6 +5259,16 @@
      "verify": 0.00668609429674
     },
     "ratio_rho": 3.89287844259,
+     "setup": 0.022026209336272286,
+     "constructions": 0.01568087091378731,
+     "factor_base": 0.017038702571894413,
+     "table": 0.03705563654823104,
+     "relations": 0.05791232891756848,
+     "linear_algebra": 0.0015295490447882387,
+     "descent": 0.07648273932107358,
+     "verify": 0.0066860942967385
+    },
+    "ratio_rho": 3.8928784425876555,
     "ratio_rho_ci": [
      3.45804662622,
      4.35084612255
@@ -4853,6 +5346,14 @@
       "linear_algebra": 0.00110313180534,
       "descent": 0.0479080421854,
       "verify": 0.00434279154792
+      "setup": 0.02091842765016521,
+      "constructions": 0.008451489741607268,
+      "factor_base": 0.00938943287520636,
+      "table": 0.02906451601016619,
+      "relations": 0.119618594696474,
+      "linear_algebra": 0.0011031318053380608,
+      "descent": 0.047908042185413786,
+      "verify": 0.004342791547924642
      },
      "ratio_rho": 3.61567129773,
      "ratio_rho_ci": [
@@ -4902,6 +5403,16 @@
      "verify": 0.00434279154792
     },
     "ratio_rho": 3.61567129773,
+     "setup": 0.02091842765016521,
+     "constructions": 0.008451489741607268,
+     "factor_base": 0.00938943287520636,
+     "table": 0.02906451601016619,
+     "relations": 0.119618594696474,
+     "linear_algebra": 0.0011031318053380608,
+     "descent": 0.047908042185413786,
+     "verify": 0.004342791547924642
+    },
+    "ratio_rho": 3.6156712977275385,
     "ratio_rho_ci": [
      3.27910503471,
      3.96953155208
@@ -5105,6 +5616,14 @@
       "linear_algebra": 0.00025765445894,
       "descent": 0.0425194788319,
       "verify": 0.00103065050687
+      "setup": 0.016734336446242996,
+      "constructions": 0.002957858709388231,
+      "factor_base": 0.0035389964287900373,
+      "table": 0.03642880599049212,
+      "relations": 0.3849898071771096,
+      "linear_algebra": 0.00025765445893974597,
+      "descent": 0.042519478831920324,
+      "verify": 0.0010306505068741973
      },
      "ratio_rho": 9.20203675604,
      "ratio_rho_ci": [
@@ -5154,6 +5673,16 @@
      "verify": 0.00103065050687
     },
     "ratio_rho": 9.20203675604,
+     "setup": 0.016734336446242996,
+     "constructions": 0.002957858709388231,
+     "factor_base": 0.0035389964287900373,
+     "table": 0.03642880599049212,
+     "relations": 0.3849898071771096,
+     "linear_algebra": 0.00025765445893974597,
+     "descent": 0.042519478831920324,
+     "verify": 0.0010306505068741973
+    },
+    "ratio_rho": 9.202036756044834,
     "ratio_rho_ci": [
      8.23632802231,
      10.2358630463
@@ -5727,6 +6256,187 @@
   "board_curves": 24,
   "board_curves_in_yaml": 0,
   "board_curves_factor_base_reconciled": 0
+ "n41_n53_counted_diagnostic": {
+  "source": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+  "decision": "frozen_parameters_do_not_transfer",
+  "class": "accounting; counted lower bounds with native work unpriced, L0 wall exploratory, L2 host run pending",
+  "measured_runs": 640,
+  "measured_verified_runs": 206,
+  "isolation_levels": {
+   "L0": 640
+  },
+  "curves": [
+   {
+    "curve": "icv1-f2m41-tm2308219-7f48b14a",
+    "log2_r": 39.00000151433405,
+    "primary_workload_id": "W15dcf1a74cb8",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.1571109102911619
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.56858739277729
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.56858739277729
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": 256.2364154308237,
+     "ci95": [
+      202.45868581141588,
+      332.75248237158803
+     ],
+     "pairs": 23
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": [
+       202.45868581141588,
+       332.75248237158803
+      ],
+      "ratio_of_sums": 256.2364154308237,
+      "verdict": "retained"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   },
+   {
+    "curve": "icv1-f2m53-tm56619371-dac20a85",
+    "log2_r": 44.258533022667656,
+    "primary_workload_id": "W32013b060ceb",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.14140798998954648
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
  },
  "exponents": {
   "prime": {
@@ -7678,6 +8388,52 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+   "family": "binary",
+   "field": "GF(2^113)",
+   "coefficients": "a = 0x3088250ca6e7c7fe649ce85820f7, b = 0x162b1a595685a1387c82647bf44cf",
+   "order_bits": 114,
+   "standard": [],
+   "ec1": [
+    "EC1N113Crbh2ee3581888f2"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+   "family": "binary",
+   "field": "GF(2^113)",
+   "coefficients": "a = 0x3088250ca6e7c7fe649ce85820f7, b = 0xe8bee4d3e2260744188be0e9c723",
+   "order_bits": 114,
+   "standard": [
+    "sect113r1"
+   ],
+   "ec1": [
+    "EC1N113Csect113r1hf529f17bd191"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "sect113r1"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+   "family": "binary",
+   "field": "GF(2^113)",
+   "coefficients": "a = 0x3088250ca6e7c7fe649ce85820f7, b = 0x109267245489e254e8f14002629a1",
+   "order_bits": 114,
+   "standard": [],
+   "ec1": [
+    "EC1N113Crbh921ab2cd913f"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
    "slug": "icv1-fp6-tm7-fc20da94",
    "family": "prime",
    "field": "GF(p), p = 59",
@@ -8178,6 +8934,133 @@
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp6k11-tm527622722-07ccd925",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['18', '2', '14', '25', '8', '30', '31', '18', '12', '21', '25'], b = ['27', '36', '7', '5', '6', '18', '26', '26', '16', '14', '34']",
+   "order_bits": 58,
+   "standard": [],
+   "ec1": [
+    "EC1Q37D11Cfpkh06d0f78d2fde"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp9k3-t1227-55c8d640",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['88', '60', '158'], b = ['233', '70', '211']",
+   "order_bits": 25,
+   "standard": [],
+   "ec1": [
+    "EC1Q271D3Cfpkhd6a8a65a8a4c"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp9k3-tm4575-aba104ba",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['168', '59', '35'], b = ['212', '72', '29']",
+   "order_bits": 25,
+   "standard": [],
+   "ec1": [
+    "EC1Q271D3Cfpkh800837f403ee"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp10k3-t3589-bbd5cc8b",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['345', '215', '106'], b = ['424', '373', '36']",
+   "order_bits": 28,
+   "standard": [],
+   "ec1": [
+    "EC1Q523D3Cfpkhfb90ff16ed62"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp10k3-t41822-dfa3991d",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['670', '300', '374'], b = ['47', '257', '560']",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [
+    "EC1Q1009D3Cfpkh957c64a1ac0d"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp11k3-tm30789-3c2726bc",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['335', '1030', '289'], b = ['701', '99', '145']",
+   "order_bits": 31,
+   "standard": [],
+   "ec1": [
+    "EC1Q1039D3Cfpkh1d1f8afd3a95"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp12k5-tm296780010-475f4271",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['420', '738', '2017', '1352', '1667'], b = ['1807', '597', '1599', '912', '658']",
+   "order_bits": 56,
+   "standard": [],
+   "ec1": [
+    "EC1Q2053D5Cfpkhe85f97f97912"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp31k2-t1044939202-6687f4aa",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['459164876', '1077033002'], b = ['87384810', '1624838696']",
+   "order_bits": 62,
+   "standard": [],
+   "ec1": [
+    "EC1Q2147483647D2Cfpkhf7a0a063fa34"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp36k2-tm52676205250-0d78f787",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['14233520128', '7914896054'], b = ['26838110637', '17581638592']",
+   "order_bits": 71,
+   "standard": [],
+   "ec1": [
+    "EC1Q34359738421D2Cfpkh988322aa091b"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
   }
  ],
  "phases": [

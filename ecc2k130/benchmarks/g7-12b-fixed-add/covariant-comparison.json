@@ -1,0 +1,47 @@
+{
+  "status": "closed-at-preregistered-pilot",
+  "phase_identity": {
+    "field_degree": 23,
+    "nonexceptional_coordinates_checked": 8388606,
+    "passed": true,
+    "exceptional_coordinates": 2
+  },
+  "selected": {
+    "trials": 100,
+    "solved": 100,
+    "bad": 0,
+    "invariant_bad": 0,
+    "overdue": 0,
+    "mean_complete_iterations": 166.64,
+    "median": 154,
+    "p90": 291,
+    "mean_walks": 122.21
+  },
+  "covariant_fixed_add_restart1024": {
+    "trials": 100,
+    "solved": 100,
+    "bad": 0,
+    "invariant_bad": 0,
+    "overdue": 1,
+    "degenerate_exact_collisions": 3,
+    "mean_complete_iterations": 197.26,
+    "median": 174,
+    "p90": 325,
+    "mean_walks": 132.87
+  },
+  "candidate_over_selected_mean_work_ratio": 1.1837493999039848,
+  "preregistered_continue_threshold": 1.1,
+  "cycle_witness": {
+    "seed": 5655958182028705792,
+    "trial": 94,
+    "walk": 73,
+    "preperiod": 0,
+    "cycle_length": 4,
+    "minimum_x_weight": 12,
+    "dp_weight": 10,
+    "exact_repeat": true
+  },
+  "decision": "close before CUDA implementation because pilot work ratio exceeds 1.10 and default max-iters would not escape witnessed cycle",
+  "generic_work": "sqrt(n/262) * 1.183749 for the restart1024 variant",
+  "full_dlp_S": null
+}

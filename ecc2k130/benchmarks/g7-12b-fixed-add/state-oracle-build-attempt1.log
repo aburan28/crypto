@@ -1,0 +1,43 @@
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:9:64: error: ‘uint32_t u32(const std::vector<unsigned char>&, size_t)’ redeclared as different kind of entity
+    9 | static uint32_t u32(const std::vector<unsigned char>&b,size_t o){uint32_t x;std::memcpy(&x,b.data()+o,4);return x;}
+      |                                                                ^
+In file included from ./ecc2k130/include/ref.h:14,
+                 from ./ecc2k130/include/curveparams.h:11,
+                 from ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:6:
+./ecc2k130/include/bigmod.h:9:22: note: previous declaration ‘typedef unsigned int u32’
+    9 | typedef unsigned int u32;
+      |                      ^~~
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:10:64: error: ‘uint64_t u64(const std::vector<unsigned char>&, size_t)’ redeclared as different kind of entity
+   10 | static uint64_t u64(const std::vector<unsigned char>&b,size_t o){uint64_t x;std::memcpy(&x,b.data()+o,8);return x;}
+      |                                                                ^
+./ecc2k130/include/ref.h:16:28: note: previous declaration ‘typedef long long unsigned int u64’
+   16 | typedef unsigned long long u64;
+      |                            ^~~
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp: In function ‘int main(int, char**)’:
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:12:26: error: expression list treated as compound expression in functional cast [-fpermissive]
+   12 |  unsigned version=u32(b,8),degree=u32(b,12),threads=u32(b,16),batch=u32(b,20),lanes=u32(b,24),runid=u32(b,28);uint64_t steps=u64(b,32);size_t n=size_t(threads)*batch;
+      |                          ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:12:43: error: expression list treated as compound expression in functional cast [-fpermissive]
+   12 |  unsigned version=u32(b,8),degree=u32(b,12),threads=u32(b,16),batch=u32(b,20),lanes=u32(b,24),runid=u32(b,28);uint64_t steps=u64(b,32);size_t n=size_t(threads)*batch;
+      |                                           ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:12:61: error: expression list treated as compound expression in functional cast [-fpermissive]
+   12 |  unsigned version=u32(b,8),degree=u32(b,12),threads=u32(b,16),batch=u32(b,20),lanes=u32(b,24),runid=u32(b,28);uint64_t steps=u64(b,32);size_t n=size_t(threads)*batch;
+      |                                                             ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:12:77: error: expression list treated as compound expression in functional cast [-fpermissive]
+   12 |  unsigned version=u32(b,8),degree=u32(b,12),threads=u32(b,16),batch=u32(b,20),lanes=u32(b,24),runid=u32(b,28);uint64_t steps=u64(b,32);size_t n=size_t(threads)*batch;
+      |                                                                             ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:12:93: error: expression list treated as compound expression in functional cast [-fpermissive]
+   12 |  unsigned version=u32(b,8),degree=u32(b,12),threads=u32(b,16),batch=u32(b,20),lanes=u32(b,24),runid=u32(b,28);uint64_t steps=u64(b,32);size_t n=size_t(threads)*batch;
+      |                                                                                             ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:12:109: error: expression list treated as compound expression in functional cast [-fpermissive]
+   12 |  unsigned version=u32(b,8),degree=u32(b,12),threads=u32(b,16),batch=u32(b,20),lanes=u32(b,24),runid=u32(b,28);uint64_t steps=u64(b,32);size_t n=size_t(threads)*batch;
+      |                                                                                                             ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:12:134: error: expression list treated as compound expression in functional cast [-fpermissive]
+   12 |  unsigned version=u32(b,8),degree=u32(b,12),threads=u32(b,16),batch=u32(b,20),lanes=u32(b,24),runid=u32(b,28);uint64_t steps=u64(b,32);size_t n=size_t(threads)*batch;
+      |                                                                                                                                      ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:17:103: error: expression list treated as compound expression in functional cast [-fpermissive]
+   17 |   uint64_t gx[3]{},gy[3]{};for(int w=0;w<5;w++){uint32_t x=u32(b,40+((size_t(slot)*5+w)*threads+tid)*4);uint32_t y=u32(b,40+n*20+((size_t(slot)*5+w)*threads+tid)*4);gx[w/2]|=uint64_t(x)<<(32*(w&1));gy[w/2]|=uint64_t(y)<<(32*(w&1));}
+      |                                                                                                       ^
+ecc2k130/benchmarks/g7-12b-fixed-add/check_state.cpp:17:164: error: expression list treated as compound expression in functional cast [-fpermissive]
+   17 |   uint64_t gx[3]{},gy[3]{};for(int w=0;w<5;w++){uint32_t x=u32(b,40+((size_t(slot)*5+w)*threads+tid)*4);uint32_t y=u32(b,40+n*20+((size_t(slot)*5+w)*threads+tid)*4);gx[w/2]|=uint64_t(x)<<(32*(w&1));gy[w/2]|=uint64_t(y)<<(32*(w&1));}
+      |                                                                                                                                                                    ^

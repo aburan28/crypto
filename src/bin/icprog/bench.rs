@@ -30,6 +30,7 @@ const PSI_READY: f64 = 4.0;
 const PSI_WAIT_MAX: Duration = Duration::from_secs(120);
 
 /// One arm: its name in the run tree and its binary.
+#[derive(Clone)]
 pub struct Arm {
     pub name: String,
     pub binary: PathBuf,

@@ -729,59 +729,17 @@ impl FrobeniusCanon {
         self.least_rotation(self.coords(x)).0
     }
 
-    /// Canonical folded-table keys for a slice of points, keeping eight
-    /// independent rotation chains in flight.  A scalar call to
-    /// [`Self::canon`] carries a dependency from every rotation to the
-    /// next; the relation scan has a whole block of unrelated points, so
-    /// interleaving their chains exposes the instruction-level
-    /// parallelism without changing the key.  `out` is cleared first.
+    /// Canonical folded-table keys for a slice of points, through
+    /// [`Self::canon_in_place`]: the relation scan has a whole block of
+    /// unrelated points, so their keys are computed side by side rather
+    /// than one serial chain at a time.  `out` is cleared first.
     #[inline]
     pub(crate) fn point_keys(&self, points: &[FastPoint], out: &mut Vec<u64>) {
-        const LANES: usize = 8;
         out.clear();
-        #[cfg(target_arch = "x86_64")]
-        if canon_simd_enabled() {
-            out.extend(points.iter().map(|p| p.x));
-            self.canon_in_place(out);
-            for (key, p) in out.iter_mut().zip(points) {
-                *key = if p.infinity { 0 } else { *key + 1 };
-            }
-            return;
-        }
-        out.resize(points.len(), 0);
-        let full = points.len() / LANES * LANES;
-        for base in (0..full).step_by(LANES) {
-            let chunk = &points[base..base + LANES];
-            let keys = &mut out[base..base + LANES];
-            let mut v = [0u64; LANES];
-            let mut best = [0u64; LANES];
-            for lane in 0..LANES {
-                let point = chunk[lane];
-                if !point.infinity {
-                    let c = self.coords(point.x);
-                    v[lane] = c;
-                    best[lane] = c;
-                }
-            }
-            for _ in 1..self.n {
-                for lane in 0..LANES {
-                    v[lane] = ((v[lane] << 1) | (v[lane] >> (self.n - 1))) & self.mask;
-                    if v[lane] < best[lane] {
-                        best[lane] = v[lane];
-                    }
-                }
-            }
-            for lane in 0..LANES {
-                let point = chunk[lane];
-                keys[lane] = if point.infinity { 0 } else { best[lane] + 1 };
-            }
-        }
-        for (point, key) in points[full..].iter().zip(&mut out[full..]) {
-            *key = if point.infinity {
-                0
-            } else {
-                self.canon(point.x) + 1
-            };
+        out.extend(points.iter().map(|p| p.x));
+        self.canon_in_place(out);
+        for (key, p) in out.iter_mut().zip(points) {
+            *key = if p.infinity { 0 } else { *key + 1 };
         }
     }
 
@@ -857,6 +815,76 @@ impl FrobeniusCanon {
         (best, best_t)
     }
 
+    /// [`Self::least_rotation`]'s word on `L` independent inputs at once,
+    /// for throughput where the scalar search is tuned for latency.
+    ///
+    /// The scalar search grows the run length one bit per step and exits
+    /// when it stops growing, which is the shortest chain for one word but
+    /// a mispredicted exit for nearly every word in a block, since run
+    /// lengths spread over 3–9 bits.  Here the run length takes a fixed
+    /// number of steps: as `Z_{a+b} = Z_a ∧ rotl^a(Z_b)`, the masks
+    /// `Z_{2^k}` are a few doublings, and the longest run is read off by
+    /// binary lifting from the largest power down, with selects for
+    /// branches.  The two highest run tops are compared with a select as
+    /// well — 90% of random words have at most two — and only the rest
+    /// loop.  The lanes advance in lockstep so their chains overlap.  Only
+    /// the word is returned; ties between rotations do not change it.
+    #[inline]
+    fn least_rotations<const L: usize>(&self, words: [u64; L]) -> [u64; L] {
+        let (n, mask) = (self.n, self.mask);
+        // `rotl^t` for any `0 ≤ t < n` without a branch on `t = 0`:
+        // `n ≤ 63`, so `v >> n` is a legal shift, zero on an `n`-bit word.
+        let rot = |v: u64, t: u32| ((v << t) | (v >> (n - t))) & mask;
+        // All zeros and all ones are their own least rotation; they are
+        // run on a stand-in so every lane takes the same steps.
+        let flat: [bool; L] = std::array::from_fn(|l| words[l] == 0 || words[l] == mask);
+        let c: [u64; L] = std::array::from_fn(|l| if flat[l] { 1 } else { words[l] });
+        // `pow[k] = Z_{2^k}` for every `2^k < n`: as many levels as `n − 1`
+        // has bits, at most six.
+        let levels = (u32::BITS - (n - 1).leading_zeros()) as usize;
+        let mut pow = [[0u64; L]; 6];
+        pow[0] = std::array::from_fn(|l| !c[l] & mask);
+        for k in 1..levels {
+            let w = 1u32 << (k - 1);
+            for l in 0..L {
+                pow[k][l] = pow[k - 1][l] & rot(pow[k - 1][l], w);
+            }
+        }
+        // Lift from `Z_1`.  A longer run implies a shorter one, so taking
+        // each power that still leaves a run reaches the longest, and the
+        // powers below `n` sum past any `L ≤ n − 1`; `len < n` throughout.
+        let mut run = pow[0];
+        let mut len = [1u32; L];
+        for k in (0..levels).rev() {
+            for l in 0..L {
+                let next = run[l] & rot(pow[k][l], len[l]);
+                let longer = next != 0;
+                run[l] = if longer { next } else { run[l] };
+                len[l] += if longer { 1 << k } else { 0 };
+            }
+        }
+        // `run` marks the top bit `p` of every longest zero run, and the
+        // rotation starting there is `rotl^{n − 1 − p}`.
+        std::array::from_fn(|l| {
+            let (r, c) = (run[l], c[l]);
+            let p1 = 63 - r.leading_zeros();
+            let rest = r & !(1u64 << p1);
+            let p2 = 63 - if rest != 0 { rest } else { r }.leading_zeros();
+            let mut best = rot(c, n - 1 - p1).min(rot(c, n - 1 - p2));
+            let mut tops = rest & !(1u64 << p2);
+            while tops != 0 {
+                let p = 63 - tops.leading_zeros();
+                tops &= !(1u64 << p);
+                best = best.min(rot(c, n - 1 - p));
+            }
+            if flat[l] {
+                words[l]
+            } else {
+                best
+            }
+        })
+    }
+
     /// [`Self::canon`] of every element of `xs`, appended to `out` in
     /// order — the same values, computed in bulk.
     ///
@@ -902,7 +930,13 @@ impl FrobeniusCanon {
             }
             return;
         }
-        for x in xs {
+        const LANES: usize = 8;
+        let mut chunks = xs.chunks_exact_mut(LANES);
+        for chunk in &mut chunks {
+            let words: [u64; LANES] = std::array::from_fn(|l| self.coords(chunk[l]));
+            chunk.copy_from_slice(&self.least_rotations(words));
+        }
+        for x in chunks.into_remainder() {
             *x = self.canon(*x);
         }
     }
@@ -1190,11 +1224,14 @@ mod simd512 {
             qx.resize(padded, 0);
             qy.resize(padded, 0);
             dens.resize(padded, 1);
-            acc.clear();
-            acc.resize(padded, 0);
+            // Grown, never zeroed: the kernel stores every prefix before it
+            // reads one back.
+            if acc.len() < padded {
+                acc.resize(padded, 0);
+            }
             // SAFETY: a `Simd512` is only built after detecting avx512f
             // and vpclmulqdq; every slice holds `padded` words.
-            unsafe { self.kernel(curve, p, dens, acc, qx, qy) };
+            unsafe { self.kernel(curve, p, dens, &mut acc[..padded], qx, qy) };
             // `acc` now holds the abscissae and `dens` the slopes.
             out.reserve(qs.len());
             lambdas.reserve(qs.len());
@@ -1297,10 +1334,10 @@ mod simd512 {
 mod tests {
     use super::*;
 
-    /// The run-based least rotation against the exhaustive scan, on
-    /// random words and on the patterns where it could go wrong: all
-    /// zeros and ones, single bits, periodic words where several
-    /// rotations tie, and runs that wrap around bit `n − 1`.
+    /// The run-based least rotation, scalar and laned, against the
+    /// exhaustive scan, on random words and on the patterns where it could
+    /// go wrong: all zeros and ones, single bits, periodic words where
+    /// several rotations tie, and runs that wrap around bit `n − 1`.
     #[test]
     fn least_rotation_matches_exhaustive_scan() {
         fn brute(c: u64, n: u32, mask: u64) -> (u64, u32) {
@@ -1343,12 +1380,22 @@ mod tests {
                 words.push(s & (s >> 3) & (s >> 7) & mask);
                 words.push((s | (s >> 5) | (s >> 11)) & mask);
             }
-            for c in words {
+            for &c in &words {
                 assert_eq!(
                     canon.least_rotation(c),
                     brute(c, n, mask),
                     "n = {n}, c = {c:#x}"
                 );
+            }
+            // The laned search, on the same words in every lane position.
+            for shift in 0..8 {
+                for chunk in words[shift..].chunks(8) {
+                    let lanes: [u64; 8] = std::array::from_fn(|l| chunk[l % chunk.len()]);
+                    let got = canon.least_rotations(lanes);
+                    for (&c, &v) in lanes.iter().zip(&got) {
+                        assert_eq!(v, brute(c, n, mask).0, "laned, n = {n}, c = {c:#x}");
+                    }
+                }
             }
         }
     }

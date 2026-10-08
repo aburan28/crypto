@@ -30,6 +30,11 @@ measurement, PR, and claim gates in force.
    Check that the PDF opens and the labels, citations, and graphs are legible.
    If the renderer is unavailable, save complete source and report the build
    blocker; do not present an old PDF as current.
+4. If the round claims an algebraic identity (a bilinear identity, a
+   summation-polynomial relation, a counting argument another result rests
+   on), ship an `identity.certificate/v1` record beside the claim and cite
+   its `IDC1h…` id, per `docs/identity-certificates/README.md`. A claim
+   without one is prose.
 
 ## Refresh existing graphs in the same change
 

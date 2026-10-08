@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""Save only non-identifying hardware fields for the exploratory panel."""
+
+import argparse
+import json
+import os
+import platform
+import subprocess
+from pathlib import Path
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", required=True, type=Path)
+    args = parser.parse_args()
+    assert not args.out.exists()
+    raw = subprocess.check_output(["system_profiler", "-json", "SPHardwareDataType"],
+                                  text=True)
+    hardware = json.loads(raw)["SPHardwareDataType"][0]
+    allowed = ("chip_type", "machine_model", "number_processors", "physical_memory")
+    receipt = {
+        "schema": "n37-native-batch-rho-host-supplement-v1",
+        "collection": "system_profiler SPHardwareDataType after the timed panel",
+        "hardware": {key: hardware.get(key) for key in allowed},
+        "platform": platform.platform(),
+        "logical_cpu_count": os.cpu_count(),
+        "exclusive_cpu_partition_verified": False,
+        "frequency_irq_quota_noise_gates_verified": False,
+        "identifiers_omitted": True,
+    }
+    args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({"chip_type": receipt["hardware"]["chip_type"],
+                      "machine_model": receipt["hardware"]["machine_model"],
+                      "isolation_verified": False}))
+
+
+if __name__ == "__main__":
+    main()

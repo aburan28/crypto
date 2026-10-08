@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-split-batch16",
+    "--packed",
+    "--threads",
+    "768",
+    "--steps",
+    "64",
+    "--launches",
+    "4",
+    "--run-id",
+    "58203",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/batch24-aligned-reference-58203.ckpt",
+    "--dp-weight",
+    "52",
+    "--verify",
+    "16",
+    "--dp-file",
+    "/home/ubuntu/crypto/ecc2k130/build/batch24-aligned-reference-58203.dp"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 5.078675856999325,
+  "log": "batch24-aligned-reference-58203.log",
+  "log_sha256": "45c133c150da47d12910a75fa8e59fbb0b0317465d54fa663cea28683308a553",
+  "binary_sha256": "5ef027f528fb25245014e5b3a0c983a009dab0cf58effe2ef886ace3474b118a"
+}

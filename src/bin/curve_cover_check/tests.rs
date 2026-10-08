@@ -10,6 +10,25 @@ fn binary(q: u32, a: u32, b: u32) -> Value {
     let hash = digest(format!("f2m-modulus:0x{q:x}").as_bytes());
     json!({"v":"1","form":"y^2+xy=x^3+a*x^2+b","modulus":format!("0x{q:x}"),"field":format!("f2m-{m}-{}",&hash[..8]),"a":a.to_string(),"b":b.to_string()})
 }
+/// A model over `GF(p)[t]/(t^k + low)`, coefficients as digit lists.
+fn ext(p: u32, low: &[u32], a: &[u32], b: &[u32]) -> Value {
+    let list = |d: &[u32]| d.iter().map(|x| x.to_string()).collect::<Vec<_>>();
+    let joined = list(low).join(",");
+    let hash = digest(format!("fpk-modulus:{p}:{joined}").as_bytes());
+    json!({"v":"1","form":"y^2=x^3+a*x+b","p":p.to_string(),"k":low.len().to_string(),
+        "modulus":list(low),"field":format!("fpk-{p}-{}-{}",low.len(),&hash[..8]),
+        "a":list(a),"b":list(b)})
+}
+/// The base-`p` digits of `n`, `k` of them.
+fn digits(p: u32, k: usize, mut n: u32) -> Vec<u32> {
+    (0..k)
+        .map(|_| {
+            let d = n % p;
+            n /= p;
+            d
+        })
+        .collect()
+}
 fn checked(v: &Value) -> Model {
     match model(v) {
         Ok(m) => m,
@@ -24,8 +43,9 @@ fn check_affine_points(m: &Model, c: &Certificate, q: u32) {
     let a = decoded(&c.y_v, k).unwrap();
     let b = decoded(&c.y_0, k).unwrap();
     for u in (0..q).map(BigUint::from) {
+        let (hu, fu) = (k.eval(&h, &u), k.eval(&f, &u));
         for v in (0..q).map(BigUint::from) {
-            if k.add(&k.mul(&v, &v), &k.mul(&k.eval(&h, &u), &v)) != k.eval(&f, &u) {
+            if k.add(&k.mul(&v, &v), &k.mul(&hu, &v)) != fu {
                 continue;
             }
             let x = k.eval(&x, &u);
@@ -34,7 +54,7 @@ fn check_affine_points(m: &Model, c: &Certificate, q: u32) {
             let mut lhs = k.mul(&y, &y);
             let mut rhs = k.add(&k.mul(&x2, &x), &m.b);
             match k {
-                Field::Prime(_) => rhs = k.add(&rhs, &k.mul(&m.a, &x)),
+                Field::Prime(_) | Field::Extension { .. } => rhs = k.add(&rhs, &k.mul(&m.a, &x)),
                 Field::Binary(_) => {
                     lhs = k.add(&lhs, &k.mul(&x, &y));
                     rhs = k.add(&rhs, &k.mul(&m.a, &x2));
@@ -81,6 +101,74 @@ fn all_f8_models_and_cover_points() {
     verify(&m, &construct(&m)).unwrap();
 }
 #[test]
+fn all_gf25_models_and_cover_points() {
+    // GF(25) = GF(5)[t]/(t^2 + 2): -2 = 3 is not a square mod 5.
+    let mut verified = 0;
+    for a in 0..25 {
+        for b in 0..25 {
+            let v = ext(5, &[2, 0], &digits(5, 2, a), &digits(5, 2, b));
+            let Ok(m) = model(&v) else {
+                // Singular: 4a^3 + 27b^2 = 0 in GF(25).
+                let k = Field::Extension {
+                    p: BigUint::from(5u32),
+                    low: vec![BigUint::from(2u32), BigUint::from(0u32)],
+                };
+                let (a, b) = (BigUint::from(a), BigUint::from(b));
+                let disc = k.add(
+                    &k.mul(&k.constant(4), &k.mul(&k.mul(&a, &a), &a)),
+                    &k.mul(&k.constant(27), &k.mul(&b, &b)),
+                );
+                assert_eq!(disc, BigUint::from(0u32));
+                continue;
+            };
+            let c = construct(&m);
+            verify(&m, &c).unwrap();
+            check_affine_points(&m, &c, 25);
+            verified += 1;
+        }
+    }
+    // 4a^3 = -27b^2 has 25 solutions (a, b) over GF(25): the singular models.
+    assert_eq!(verified, 625 - 25);
+}
+#[test]
+fn larger_extension_models_verify() {
+    // GF(49) = GF(7)[t]/(t^2 + 1), every model; GF(125) = GF(5)[t]/(t^3 +
+    // t + 1), a few models with every cover point.
+    for a in 0..49 {
+        for b in 0..49 {
+            if let Ok(m) = model(&ext(7, &[1, 0], &digits(7, 2, a), &digits(7, 2, b))) {
+                verify(&m, &construct(&m)).unwrap();
+            }
+        }
+    }
+    for (a, b) in [(0, 1), (1, 0), (5, 7), (124, 61)] {
+        let m = checked(&ext(5, &[1, 1, 0], &digits(5, 3, a), &digits(5, 3, b)));
+        let c = construct(&m);
+        verify(&m, &c).unwrap();
+        check_affine_points(&m, &c, 125);
+    }
+}
+#[test]
+fn rabin_counts_the_irreducible_polynomials() {
+    // Monic irreducibles of degree k over GF(p): (1/k) sum_{d|k} mu(d) p^(k/d).
+    for (p, k, expected) in [
+        (5u32, 2usize, 10usize),
+        (5, 3, 40),
+        (5, 4, 150),
+        (7, 2, 21),
+        (2, 4, 3),
+        (3, 3, 8),
+    ] {
+        let count = (0..p.pow(k as u32))
+            .filter(|n| {
+                let low: Vec<BigUint> = digits(p, k, *n).into_iter().map(BigUint::from).collect();
+                irreducible_over_prime(&BigUint::from(p), &low)
+            })
+            .count();
+        assert_eq!(count, expected, "p = {p}, k = {k}");
+    }
+}
+#[test]
 fn rejects_invalid_fields_singular_models_and_noncanonical_coefficients() {
     for v in [
         prime(5, 0, 0),
@@ -97,6 +185,36 @@ fn rejects_invalid_fields_singular_models_and_noncanonical_coefficients() {
     assert!(matches!(model(&v), Err(ModelError::Invalid(_))));
     assert!(matches!(
         model(&prime(3, 1, 1)),
+        Err(ModelError::Unsupported(_))
+    ));
+    // ICV1's extension part: ICV1.md's own example verifies, ...
+    let example = json!({"v":"1","form":"y^2=x^3+a*x+b","p":"5","k":"2","modulus":["2","0"],
+        "field":"fpk-5-2-90ac2fda","a":["1","0"],"b":["1","0"]});
+    assert_eq!(example, ext(5, &[2, 0], &[1, 0], &[1, 0]));
+    let m = checked(&example);
+    verify(&m, &construct(&m)).unwrap();
+    // ... and a reducible modulus (t^2 - 1), a field label that names
+    // another modulus, a coefficient not reduced mod p, a list of the wrong
+    // length, a singular model and a degree below 2 are invalid input.
+    let mut relabelled = ext(5, &[2, 0], &[1, 0], &[1, 0]);
+    relabelled["field"] = ext(5, &[3, 0], &[1, 0], &[1, 0])["field"].clone();
+    let mut short = ext(5, &[2, 0], &[1, 0], &[1, 0]);
+    short["a"] = json!(["1"]);
+    let mut degree_one = ext(5, &[2, 0], &[1, 0], &[1, 0]);
+    degree_one["k"] = json!("1");
+    for v in [
+        ext(5, &[4, 0], &[1, 0], &[1, 0]),
+        relabelled,
+        ext(5, &[2, 0], &[5, 0], &[1, 0]),
+        short,
+        ext(5, &[2, 0], &[0, 0], &[0, 0]),
+        degree_one,
+    ] {
+        assert!(matches!(model(&v), Err(ModelError::Invalid(_))));
+    }
+    // Characteristic 3 has no construction here.
+    assert!(matches!(
+        model(&ext(3, &[1, 0], &[1, 0], &[1, 0])),
         Err(ModelError::Unsupported(_))
     ));
 }
@@ -158,16 +276,14 @@ fn entire_catalog_replays_deterministically() {
     let first = catalog(input).unwrap();
     assert_eq!(first, catalog(input).unwrap());
     let registry: Value = serde_json::from_slice(input).unwrap();
+    // Every curve, the extension fields' included, has a verified cover.
+    let rows = registry["curves"].as_array().unwrap();
+    assert!(rows.iter().any(|r| r["family"] == "extension"));
     assert_eq!(
         first["summary"]["verified"].as_u64().unwrap() as usize,
-        registry["curves"].as_array().unwrap().len()
+        rows.len()
     );
-    for (row, finding) in registry["curves"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .zip(first["curves"].as_array().unwrap())
-    {
+    for (row, finding) in rows.iter().zip(first["curves"].as_array().unwrap()) {
         let m = checked(&serde_json::from_str(row["model_json"].as_str().unwrap()).unwrap());
         let c: Certificate = serde_json::from_value(finding["certificate"].clone()).unwrap();
         verify(&m, &c).unwrap();
