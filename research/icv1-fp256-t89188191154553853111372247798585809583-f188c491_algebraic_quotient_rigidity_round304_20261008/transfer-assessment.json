@@ -1,0 +1,69 @@
+{
+  "schema": "p256-algebraic-quotient-rigidity-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 304,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E --[rational self-map f]--> E",
+    "f(P)=phi(P)+T, with phi in End(E) and T=f(O)",
+    "E(F_p)[n] --[Round-25 action]--> log(f(P))=a*log(P)+b",
+    "factor-base affine transport graph --[connected components]--> one anchor variable per component",
+    "independent affine cycle --[known label]--> solved anchor / scalar-labelled generic control"
+  ],
+  "obligations": [
+    {
+      "name": "algebraic self-map classification",
+      "status": "supported",
+      "evidence": "Elliptic-curve morphism rigidity gives translation plus endomorphism; Round 25 gives scalar rational-subgroup action.",
+      "scope": "Rational algebraic self-maps of P-256."
+    },
+    {
+      "name": "finite affine-law control",
+      "status": "supported",
+      "evidence": "All 823543 functions Z/7Z->Z/7Z were checked; exactly 7 additive and 49 affine functions occurred.",
+      "scope": "Finite exact control for the induced log algebra."
+    },
+    {
+      "name": "connected quotient dimension",
+      "status": "supported",
+      "evidence": "The 164-node connected chain and dependent cycle have dual-modulus rank 163; one anchor remains.",
+      "scope": "Known affine transport labels."
+    },
+    {
+      "name": "anchor-solving cycle",
+      "status": "supported as algebra",
+      "evidence": "An independent labelled cycle raises dual-modulus rank to 164 and replays the deterministic solution.",
+      "scope": "A scalar-labelled control, not evidence that geometry reveals the labels."
+    },
+    {
+      "name": "non-affine global P-256 quotient",
+      "status": "unknown",
+      "evidence": "No replayable non-affine log transport is constructed; coordinate permutations receive no log quotient credit.",
+      "scope": "Future factor-base mechanisms."
+    },
+    {
+      "name": "complete below-rho recovery",
+      "status": "unknown",
+      "evidence": "The known-anchor Round-25 implementation is above rho and no new relation/decomposition pipeline exists.",
+      "scope": "End-to-end P-256 attack."
+    }
+  ],
+  "controls": [
+    "The exhaustive function census performed 40353607 additive and 40353607 affine law evaluations with zero replay failures.",
+    "4 graph variants were ranked over two fields in forward and reversed row order.",
+    "Round 25, 297, 298, and 303 were imported only after exact byte-hash, schema, curve, and conclusion checks."
+  ],
+  "cost_accounting": [
+    "Measured: exhaustive function tables and law evaluations; graph rows, matrix entries, pivot scans, swaps, inversions, multiplications, subtractions, equation replays, process telemetry, and artifact sizes.",
+    "Imported without extrapolation: Round-25 known/unknown-anchor oracle and direct ratios, and the Round-297 unquotiented boundary.",
+    "Unset: any non-affine factor base, structured relation solver, yield, sparse linear algebra, target recovery, and complete new attack cost."
+  ],
+  "exploration_boundary": "Exact for algebraic P-256 self-map transports and finite affine-log quotient graphs; not a universal impossibility theorem for non-homomorphic relation mechanisms.",
+  "weakest_open_obligation": "Produce a replayable P-256 factor-base quotient that is not affine scalar transport, or a non-homomorphic relation mechanism whose rank and complete recovery cost beat rho.",
+  "narrowest_supported_finding": "Algebraic P-256 self-map symmetry induces only affine scalar log transport: a connected base retains one unknown anchor unless known scalar labels solve it, and neither registered anchor case beats rho end to end.",
+  "semantic_evidence_sha256": "4add09ce20a2df44d30c2ad806845e06a16c94fd3f930e77210e161328144ee5",
+  "assessment_json_bytes": 4277
+}
