@@ -10,13 +10,16 @@ nothing about the iteration function, the distinguished-point rule, reports
 or checkpoints: the map is the same field automorphism, only evaluated in
 different coordinates. `make gpu-rtx-pro6000-sigma-table` builds it.
 
-Measured on one RTX PRO 6000 against the confirmed fused preset, five of
-five alternating pairs favour the table, with a **paired median ratio of
-1.025148** (minimum 1.023412, maximum 1.026641): session medians
-**15.904710** against 15.533439 B complete scalar updates/s. That clears the
-gate the fused tuning star preregistered (paired geometric mean at least
-1.015, every pair at least 1.005), which none of that star's ten arms met.
-The 26 B/s objective remains unmet.
+Under the fused headline protocol on one RTX PRO 6000 (five A/A pairs, five
+alternating A/B pairs, 64 launches per sample, replay and sorted-corpus gates),
+the verdict is **promote as compatible engineering**: A/B paired median ratio
+**1.023930** (minimum 1.023803, maximum 1.024086) against an A/A maximum drift
+of 0.099%, session medians **15.884369** against 15.513653 B complete scalar
+updates/s. An earlier 32-launch screen without an A/A panel measured a paired
+median of 1.025148 over five pairs. Both clear the gate the fused tuning star
+preregistered (paired geometric mean at least 1.015, every pair at least
+1.005), which none of that star's ten arms met. The 26 B/s objective remains
+unmet.
 
 ## Why this lever
 
@@ -112,14 +115,45 @@ the same change measured on the older software-multiplier preset (below).
 | `LOP3` / `SHF` / `IMAD` | 2,410 / 1,174 / 584 | 2,359 / 1,043 / 494 |
 | `LDS` / `CLMAD` | 56 / 79 | 140 / 79 |
 
-Receipts: [result.json](benchmarks/sigma-table/result.json),
+### Headline protocol
+
+[benchmarks/sigma-table/gpujob-headline.sh](benchmarks/sigma-table/gpujob-headline.sh)
+(`make bench-rtx-pro6000-sigma-table`) is the fused headline job with the
+table as candidate: the same frozen hardware and compiler checks, the GPU
+arithmetic and client integration suites for both binaries, the 300-report
+replay with sorted-corpus identity through the fused job's `corpus_identity`
+tool, four excluded warm-ups, five alternating control/control pairs, five
+alternating control/candidate pairs at `385024 x 16 x 1024 x 64` updates
+each, and the native summarizer. It ran on the same GPU and driver as the
+screen below.
+
+| pair | A/A control_a | A/A control_b | A/B control | A/B table | A/B ratio |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 15.498753 | 15.509355 | 15.511745 | 15.883911 | 1.023993 |
+| 2 | 15.503252 | 15.518575 | 15.514757 | 15.884515 | 1.023833 |
+| 3 | 15.507054 | 15.515976 | 15.513653 | 15.884899 | 1.023930 |
+| 4 | 15.513678 | 15.512937 | 15.514261 | 15.883553 | 1.023803 |
+| 5 | 15.516455 | 15.514619 | 15.510774 | 15.884369 | 1.024086 |
+
+A/A maximum absolute drift 0.000988; A/B median 1.023930, minimum 1.023803;
+decision `PROMOTE_ENGINEERING`, `goal_26b_met` false. Both replay corpora
+held 1,709,477 sorted v1 records and the identity tool reported them
+IDENTICAL. Receipts under
+[benchmarks/sigma-table/headline/](benchmarks/sigma-table/headline/):
+[result.json](benchmarks/sigma-table/headline/result.json),
+[samples.tsv](benchmarks/sigma-table/headline/samples.tsv), the per-run logs,
+build, arithmetic, integration, replay and corpus outputs, binary and source
+hashes.
+
+### Screen
+
+Receipts of the 32-launch screen: [result.json](benchmarks/sigma-table/result.json),
 [samples.tsv](benchmarks/sigma-table/samples.tsv), the per-run logs, build,
 arithmetic, integration, replay and corpus-identity outputs, binary and
 source hashes, and [walk-static-mix.json](benchmarks/sigma-table/walk-static-mix.json)
-(the 68 MB SASS dumps are not retained). This run has no A/A panel and uses
-32 rather than 64 launches per sample; the headline protocol in
-[benchmarks/sigma-fused/HEADLINE-PROTOCOL.md](benchmarks/sigma-fused/HEADLINE-PROTOCOL.md)
-should be run before the number replaces the confirmed 15.436677 B/s.
+(the 68 MB SASS dumps are not retained). The screen has no A/A panel and
+uses 32 rather than 64 launches per sample; the headline protocol above is
+the measurement of record.
 
 ### Earlier preset
 

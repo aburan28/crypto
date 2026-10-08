@@ -755,6 +755,14 @@ PRO6000_SIGMA_TABLE_KNOBS = $(PRO6000_SIGMA_FUSED_KNOBS) THREADS=512 MINBLOCKS=1
 gpu-rtx-pro6000-sigma-table:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_TABLE_KNOBS)
 
+# Headline protocol (A/A panel, five A/B pairs, 64 launches) for the table
+# against the fused preset; benchmark-only, receipts in benchmarks/sigma-table/.
+bench-rtx-pro6000-sigma-table:
+	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-table/gpujob-headline.sh \
+	    --out $(TABLE_BENCH_OUT)
+TABLE_BENCH_OUT ?= /tmp/ecc2k-sigma-table-benchmark
+.PHONY: gpu-rtx-pro6000-sigma-table bench-rtx-pro6000-sigma-table
+
 # Matched replay, A/A noise and five-pair confirmation; benchmark-only.
 bench-rtx-pro6000-sigma-fused:
 	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-fused/gpujob-headline.sh \

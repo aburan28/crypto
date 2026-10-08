@@ -24,9 +24,13 @@ screen retains B16/T256/min2. The goal of 26 B/s remains unmet.
 On that fused schedule, reading the walk's Frobenius steps from
 [shared-memory nibble tables](SIGMA-TABLE.md) in polynomial coordinates
 (`PACKED_SIGMA_TABLE=1`, `make gpu-rtx-pro6000-sigma-table`, one 512-thread
-block per SM) measured **15.904710 B/s** against a 15.533439 B/s
-same-allocation control, paired median ratio 1.025148 over five pairs with
-identical sorted corpora; the headline A/A protocol has not yet been run on it.
+block per SM) measures **15.884369 B/s** under the fused headline protocol
+against a 15.513653 B/s same-session control: A/B paired median ratio
+1.023930 over five pairs, A/A drift 0.099%, identical sorted corpora,
+verdict promote as compatible engineering
+([SIGMA-TABLE.md](SIGMA-TABLE.md), receipts in
+[benchmarks/sigma-table/headline](benchmarks/sigma-table/headline/)). The
+26 B/s goal remains unmet.
 
 The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
 on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle
