@@ -36,6 +36,12 @@ New cross-method comparisons use native `ecbench`, whose merged online-window
 extension is available for review and integration. Public unplanted targets,
 IC1 identity and prepared solver admission remain open. The Python entry points below are
 historical contracts, not commands for new research.
+The [ordinary preparation mathematical gate](goal_20260924/native-ordinary-preparation-v1/PROTOCOL.md)
+independently checks target-free n17 input chronology, the complete geometric
+base, every witness/negative/failure, projected duplicates, rank and logs.
+`icprog ordinary-preparation-audit` is data replay only: native production,
+source-model custody, per-attempt costs and fresh qualification remain pending.
+It does not reopen consumed controls or establish a new relation-yield result.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,
