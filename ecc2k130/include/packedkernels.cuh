@@ -143,6 +143,16 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED_LATE_Y && !ECC_SIGMA_FUSED
 #error "ECC_SIGMA_FUSED_LATE_Y requires ECC_SIGMA_FUSED"
 #endif
+#if ECC_SIGMA_SQUARE_TABLE && (!ECC_SIGMA_FUSED || ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE)
+#error "ECC_SIGMA_SQUARE_TABLE requires the polynomial-state sigma-fused walk"
+#endif
+#if ECC_SIGMA_SQUARE_TABLE && (ECC_PACKED_SQUARE_TABLE || ECC_PACKED_ALU_SQUARE)
+#error "ECC_SIGMA_SQUARE_TABLE is a standalone first comparison; keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off"
+#endif
+#if ECC_SIGMA_SQUARE_TABLE
+static_assert(size_t(SQ_TAB_WORDS) * sizeof(uint32_t) == 8320,
+              "sigma lambda square table layout changed");
+#endif
 #if ECC_SIGMA_FUSED && (ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE || \
                         !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN || \
                         ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || \
@@ -682,6 +692,15 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+#if ECC_SIGMA_SQUARE_TABLE
+    extern __shared__ uint32_t sigmaSquareShared[];
+    for (unsigned i = threadIdx.x; i < unsigned(SQ_TAB_WORDS); i += blockDim.x)
+        sigmaSquareShared[i] = p.twConsts[i];
+    __syncthreads();
+    const uint32_t *sigmaSquareTable = sigmaSquareShared;
+#else
+    const uint32_t *sigmaSquareTable = nullptr;
+#endif
 #if ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
@@ -733,7 +752,8 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             } else {
                 lambdaPoly = mulPolynomial131(inv, w);
             }
-            const P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
+            const P131 nx = add131(add131(sigmaLambdaSquare131(lambdaPoly, sigmaSquareTable),
+                                          lambdaPoly), dp);
             const P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
             const P131 ny = add131(add131(product, nx), y);
             store(p.x, slot, tid, p.threads, nx);
