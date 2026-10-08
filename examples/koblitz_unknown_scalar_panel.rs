@@ -523,6 +523,7 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         engine: SolverEngine::default(),
         f6_ic: false,
         f6_pair_index: false,
+        f6_shared_pair_index: false,
         // Caller-owned precomputation that this panel does not use; the field
         // was added to KoblitzIcOptions without updating this initializer.
         weil_charts: None,
