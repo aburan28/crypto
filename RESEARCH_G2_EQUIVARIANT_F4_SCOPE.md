@@ -169,6 +169,34 @@ formulation (`5n + 2l ≤ 64`). The next milestone is a wide-mask engine so the
 same measurement runs at `n = 17–31`, where the model predicts 10–100×, and
 then integration as a `reduce_system` engine with full-F4 agreement checks.
 
+### 3.3 Wide-mask engine: n = 13–23
+
+`g2_wide_probe` re-implements the formulation over 192-bit monomial masks
+(own Boolean polynomials, Weil restriction, Macaulay rows, orbits, blocks,
+and a dense `F₂` control) so that `5n + 2l ≤ 192`. It reproduces the
+64-variable engine at `n = 11` exactly (`13 595 = 1 275 + 10·1 232`) and
+extends the measurement; `l = 3`, degree 3, same process for both sides:
+
+| n | d | vars | eqs | symmetric rows × cols | block rows × cols | trivial rank | character block ranks | blocks (s) | full `F₂` rank | control (s) | ratio | identity |
+|---:|---:|---:|---:|---|---|---:|---|---:|---:|---:|---:|---|
+| 11 | 10 | 61 | 201 | 17 281 × 34 606 | 1 631 × 3 144 | 1 275 | χ₁×10: 1 232 | 0.05 | 13 595 | 1.4 | 31× | ✓ |
+| 13 | 12 | 71 | 276 | 26 404 × 54 752 | 2 092 × 4 210 | 1 655 | χ₁×12: 1 612 | 0.1 | 20 999 | 3.9 | 39× | ✓ |
+| 17 | 8 | 91 | 462 | 53 242 × 115 792 | 3 194 × 6 810 | 2 571 | χ₁×8: 2 528, χ₃×8: 2 528 | 0.4 | 43 019 | 37.9 | **105×** | ✓ |
+| 19 | 18 | 101 | 573 | 71 677 × 158 558 | 3 835 × 8 344 | 3 107 | χ₁×18: 3 064 | 0.7 | 58 259 | 78.3 | **105×** | ✓ |
+G2_N23_ROW
+
+Reading: the identity `rank(M) = rank(M₀) + Σ|orbit|·rank(N_j)` holds at every
+size, the block dimensions are `≈ 1/n` of the symmetric matrix (and 3–6×
+below the gauge-fixed matrix), and the time ratio climbs with `n` — 31×,
+39×, 105×, 105× — exactly the direction the cost model predicts, with the
+`F₂` control being plain dense elimination of the symmetric matrix in the
+same process. The block side (`0.4–0.7 s` including assembly) is still
+naive dense elimination over `F_{2^d}` with table arithmetic; nothing has
+been optimised on it. Against the *gauge-fixed* matrix (the fair baseline,
+`≈ 3–6×` smaller per dimension than the symmetric one) the implied gain is
+roughly `ratio / (3–6)³ … ratio / (3–6)²`, i.e. still ≥ 5–10× at `n = 17–19`
+and growing.
+
 ## 4. If it were to be built anyway
 
 1. Normal-basis Weil restriction so `σ` is a permutation (done in the probe).
