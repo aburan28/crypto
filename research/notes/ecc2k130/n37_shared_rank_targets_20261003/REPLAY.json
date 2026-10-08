@@ -1,0 +1,27 @@
+{
+  "fixture_sha256": "31743d59af4c82cf176bc807ec70eb1b35709156b4ab2b6102bbf57c6b112ee9",
+  "input": {
+    "candidate_count": 16,
+    "excluded_orbits": 13443,
+    "historical_rows": 55368,
+    "inventory_files": 126,
+    "inventory_sha256": "d3fb7f5cebe274618771c3585e875bf62f9a32a09f720974693869cc5da13428",
+    "orbit_rejections": 0,
+    "points_sha256": "81e49c561bd208fa1f51f7bc38f62d430e1758ad20230be989f151c0168d3775",
+    "status": "PASS",
+    "targets": 16,
+    "zero_rejections": 0
+  },
+  "raw_sha256": "0c6a744910036bc93954452b08a26ee0398d2364cb0eca7129b9370321e5ba7a",
+  "status": "PASS",
+  "target": {
+    "cold_gae_lower_bound": 197454.0,
+    "direct_hits": 16,
+    "rank_raw_sha256": "293d273c071c280326825c5a4f6d12bce00e46349735e5475b16bcd40264dd3b",
+    "shared_setup_gae": 194826.0,
+    "source_sha256": "0a32de24a5680ff46baf9543e8bf8e32447323491e2a2adedce2548c14a25f75",
+    "status": "PASS",
+    "targets_verified": 16,
+    "total_attempts": 16
+  }
+}

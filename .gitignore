@@ -1,7 +1,14 @@
 /target
-Cargo.lock
+**/Cargo.lock
+!/Cargo.lock
+!ecc2k130/dp-ingest/Cargo.lock
+!research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1/data/Cargo.lock
+
+# Claude Code agent worktrees (local scratch checkouts for background
+# subagent tasks; not repository content).
+/.claude/worktrees/
 # Stage 20 deliberately freezes a separate lockfile for its metered,
-# source-archived Rust build while the library root lock remains ignored.
+# source-archived Rust build; the root lock pins the released binaries.
 !research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock
 
 # macOS resource-fork sidecar files (created on filesystems mounted via
@@ -28,6 +35,10 @@ gpu/ecc/vec_*.h
 gpu/ecc/test_secp_fast
 gpu/ecc/test_secp_mont
 gpu/ecc/test_toy_mont
+gpu/ecc/test_toyj0_mont
+gpu/ecc/test_bsgs_toy
+gpu/ecc/test_bsgs_secp_fast
+gpu/ecc/test_bsgs_secp_mont
 gpu/ecc/bench
 
 # GHDL analysis artifacts
@@ -36,6 +47,15 @@ hdl/**/*.cf
 hdl/**/e~*
 gpu/ecc2k/curve_*.h
 gpu/ecc2k/vec_*.h
+gpu/ecc2k/fold_table_*.bin
+gpu/ecc2k/fold_plan_*.bin
+gpu/ecc2k/test_tsan_*
+gpu/ecc2k/test_racy_*
+gpu/ecc2k/tsan_*.log
+gpu/ecc2k/racy_*.log
+gpu/ecc2k/fold2k_k23
+gpu/ecc2k/fold2k_k41
+gpu/ecc2k/nvcc_check_fold2k
 gpu/ecc2k/test_ecc2k95
 gpu/ecc2k/test_k23
 gpu/ecc2k/test_k41
@@ -49,6 +69,26 @@ gpu/btcpuzzle/tune_kangaroo
 
 # Fleet id fleet.sh records per region for the running campaign
 ecc2k130/aws/.fleet-id-*
+# gpu/macaulay generated headers, test binary and CUDA bench binary
+gpu/macaulay/params.h
+gpu/macaulay/vectors.h
+gpu/macaulay/test_cpu_main
+gpu/macaulay/bench
+
+# gpu/semaev generated headers, test binary and CUDA bench binary
+gpu/semaev/params.h
+gpu/semaev/vectors.h
+gpu/semaev/test_cpu_main
+gpu/semaev/bench2
+gpu/ecc2k/test_pt_ecc2k95
+gpu/ecc2k/test_pt_k23
+gpu/ecc2k/test_pt_k41
+gpu/ecc2k/test_emu_ecc2k95
+gpu/ecc2k/test_emu_k23
+gpu/ecc2k/test_emu_k41
+
+# Assembled GitHub Pages site (scripts/site/build.py output).
+/_site
 
 # FPGA host program for the ECC2K-130 engine (built from hdl/ecc2k130/host)
 hdl/ecc2k130/host/ecc2k130-fpga
@@ -65,3 +105,8 @@ hdl/ecc2k130/aws/cl_ecc2k130/build/checkpoints/
 hdl/ecc2k130/aws/cl_ecc2k130/build/reports/
 hdl/ecc2k130/aws/cl_ecc2k130/build/src_post_encryption/
 hdl/ecc2k130/aws/cl_ecc2k130/build/constraints/generated_cl_clocks_aws.xdc
+
+# Build artifacts from ecc2k130/aws/ingest_lambda.sh package (vendored wheels
+# plus a 5 MB zip; rebuilt on demand and never a source of truth).
+ecc2k130/aws/build/
+ecc2k130/aws/ingest_lambda.zip

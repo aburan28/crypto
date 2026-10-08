@@ -37,7 +37,7 @@
 //! group of forms, which is feasible up to `|D| ≈ 10⁶` on a
 //! workstation.
 
-use num_bigint::{BigInt, Sign};
+use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::{One, Signed, Zero};
 use std::collections::HashMap;
@@ -181,7 +181,7 @@ impl BinaryQuadraticForm {
         assert_eq!(d_disc, other.discriminant());
 
         // Cohen's algorithm prefers a₁ ≤ a₂; swap if needed.
-        let (a1, b1, c1, a2, b2, c2) = if self.a <= other.a {
+        let (a1, b1, _c1, a2, b2, c2) = if self.a <= other.a {
             (
                 self.a.clone(),
                 self.b.clone(),
@@ -205,29 +205,35 @@ impl BinaryQuadraticForm {
         let s = (&b1 + &b2) / &two;
         let n = (&b2 - &b1) / &two;
 
-        // Step 1: ext_gcd(a₂, a₁) → (d1, _, y1) with y0·a₂ + y1·a₁ = d1.
-        let (d1, _y0, y1) = ext_gcd(&a2, &a1);
+        // Step 1: ext_gcd(a₂, a₁) → (d1, y0, _) with y0·a₂ + y1·a₁ = d1.
+        let (d1, y0, _y1) = ext_gcd(&a2, &a1);
 
         // Step 2: depending on whether d1 | s, take one of two
         // branches for (d, x2, y2).
         let (d, x2, y2) = if s.mod_floor(&d1).is_zero() {
-            (d1.clone(), BigInt::zero(), -y1.clone())
+            (d1.clone(), BigInt::zero(), -y0.clone())
         } else {
             // ext_gcd(s, d1) → (d, x2, y3) with x2·s + y3·d1 = d.
             let (d, x2, y3) = ext_gcd(&s, &d1);
-            (d, x2, -(&y3 * &y1))
+            (d, x2, -(&y3 * &y0))
         };
 
         let v1 = &a1 / &d;
         let v2 = &a2 / &d;
 
-        // r = (y2·n·v2 − x2·c2) mod v1, in [0, v1).
-        let r_raw = &y2 * &n * &v2 - &x2 * &c2;
+        // r = (y2·n − x2·c2) mod v1, in [0, v1).
+        let r_raw = &y2 * &n - &x2 * &c2;
         let r = r_raw.mod_floor(&v1);
 
         let b3 = &b2 + &two * &v2 * &r;
         let a3 = &v1 * &v2;
-        let c3 = (&b3 * &b3 - &d_disc) / (&a3 * BigInt::from(4));
+        let numerator = &b3 * &b3 - &d_disc;
+        let denominator = &a3 * BigInt::from(4);
+        assert!(
+            numerator.mod_floor(&denominator).is_zero(),
+            "class-group composition produced a non-integral third coefficient"
+        );
+        let c3 = numerator / denominator;
 
         BinaryQuadraticForm {
             a: a3,
@@ -562,12 +568,7 @@ mod tests {
         // The famous nine fundamental class-number-1 discriminants
         // for ℂ-CM curves with End_Q(E) maximal.
         for d_val in [-3, -4, -7, -8, -11, -19, -43, -67, -163] {
-            assert_eq!(
-                class_number(&d(d_val)),
-                1,
-                "expected h({}) = 1",
-                d_val
-            );
+            assert_eq!(class_number(&d(d_val)), 1, "expected h({}) = 1", d_val);
         }
     }
 
@@ -577,12 +578,15 @@ mod tests {
         // The three reduced forms are (1,1,6), (2,1,3), (2,-1,3).
         let forms = enumerate_reduced_forms(&d(-23));
         assert_eq!(forms.len(), 3);
-        let mut printed: Vec<String> =
-            forms.iter().map(|f| f.to_string()).collect();
+        let mut printed: Vec<String> = forms.iter().map(|f| f.to_string()).collect();
         printed.sort();
         assert_eq!(
             printed,
-            vec!["[1, 1, 6]".to_string(), "[2, -1, 3]".to_string(), "[2, 1, 3]".to_string()],
+            vec![
+                "[1, 1, 6]".to_string(),
+                "[2, -1, 3]".to_string(),
+                "[2, 1, 3]".to_string()
+            ],
         );
     }
 
@@ -625,6 +629,46 @@ mod tests {
         assert!(f213.is_reduced());
         let cube = f213.pow(3);
         assert_eq!(cube.a, BigInt::one());
+    }
+
+    #[test]
+    fn composition_preserves_large_p192_discriminant() {
+        // Regression for the Cohen correction term exposed by the P-192 CM
+        // census: the oriented classes above 103 and 107 must
+        // compose without silently changing the discriminant.
+        let disc: BigInt = "-24109379060336110122544161233113975664949272517896865359515"
+            .parse()
+            .unwrap();
+        let above_103 = BinaryQuadraticForm::new(
+            BigInt::from(103u8),
+            BigInt::from(-31),
+            "58517910340621626511029517556101882681915709994895304273"
+                .parse()
+                .unwrap(),
+            &disc,
+        )
+        .unwrap();
+        let above_107 = BinaryQuadraticForm::new(
+            BigInt::from(107u8),
+            BigInt::from(95u8),
+            "56330324907327360099402245871761625385395496537142208805"
+                .parse()
+                .unwrap(),
+            &disc,
+        )
+        .unwrap();
+        let expected = BinaryQuadraticForm::new(
+            BigInt::from(11021u16),
+            BigInt::from(2235u16),
+            "546896358323566602906817921085064324130053364438273985"
+                .parse()
+                .unwrap(),
+            &disc,
+        )
+        .unwrap();
+        let product = above_103.compose(&above_107);
+        assert_eq!(product.discriminant(), disc);
+        assert_eq!(product, expected);
     }
 
     #[test]

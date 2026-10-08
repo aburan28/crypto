@@ -1,0 +1,136 @@
+{
+  "all_pairs_semantically_equal": true,
+  "claim_limit": "No host-wide CPU isolation receipt; these paired ratios are exploratory. Independent Sage replay is pending.",
+  "controlled_speedup": null,
+  "exploratory_paired_ratio_median": 1.1673959645982024,
+  "fixtures_sha256": "3a3957a964833e765bf4a3f897c70a802a3f07e0f75793993825e95926a2a12b",
+  "kind": "s3_pair_fresh_one_target_panel_exploratory",
+  "measurement_rows_raw_sha256": "92c71f3deb463e66a7234c4bb02e89ce436b52c690e703b3ee323cc824130a02",
+  "observed_solved_target_pairs": 12,
+  "pairs": [
+    {
+      "baseline_online_ms": 1845.485708,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wa34028a5fc47R1",
+      "candidate_online_ms": 2103.162542,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWa34028a5fc47R1",
+      "exploratory_online_ratio": 0.8774812555595619,
+      "semantic_equal": true,
+      "target_label": "T01",
+      "workload_id": "a34028a5fc47"
+    },
+    {
+      "baseline_online_ms": 1660.977833,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wd21c6b591e4dR1",
+      "candidate_online_ms": 1947.136125,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWd21c6b591e4dR1",
+      "exploratory_online_ratio": 0.8530363191736273,
+      "semantic_equal": true,
+      "target_label": "T02",
+      "workload_id": "d21c6b591e4d"
+    },
+    {
+      "baseline_online_ms": 2029.795042,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wf6112272314cR1",
+      "candidate_online_ms": 1558.0953749999999,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWf6112272314cR1",
+      "exploratory_online_ratio": 1.3027412022194085,
+      "semantic_equal": true,
+      "target_label": "T03",
+      "workload_id": "f6112272314c"
+    },
+    {
+      "baseline_online_ms": 1593.914792,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67W1a480057bc98R1",
+      "candidate_online_ms": 1342.419292,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cW1a480057bc98R1",
+      "exploratory_online_ratio": 1.1873449685197164,
+      "semantic_equal": true,
+      "target_label": "T04",
+      "workload_id": "1a480057bc98"
+    },
+    {
+      "baseline_online_ms": 1473.934459,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67W5ae814939523R1",
+      "candidate_online_ms": 1313.4206669999999,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cW5ae814939523R1",
+      "exploratory_online_ratio": 1.122210496631389,
+      "semantic_equal": true,
+      "target_label": "T05",
+      "workload_id": "5ae814939523"
+    },
+    {
+      "baseline_online_ms": 1553.715583,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wdfd01c35dcedR1",
+      "candidate_online_ms": 1211.7223749999998,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWdfd01c35dcedR1",
+      "exploratory_online_ratio": 1.2822372641257864,
+      "semantic_equal": true,
+      "target_label": "T06",
+      "workload_id": "dfd01c35dced"
+    },
+    {
+      "baseline_online_ms": 1249.714542,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67W3a5fb0ef29baR1",
+      "candidate_online_ms": 1573.0010000000002,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cW3a5fb0ef29baR1",
+      "exploratory_online_ratio": 0.7944779068799065,
+      "semantic_equal": true,
+      "target_label": "T07",
+      "workload_id": "3a5fb0ef29ba"
+    },
+    {
+      "baseline_online_ms": 1841.4799170000001,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wa9718567ab5fR1",
+      "candidate_online_ms": 1117.431625,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWa9718567ab5fR1",
+      "exploratory_online_ratio": 1.647957580402291,
+      "semantic_equal": true,
+      "target_label": "T08",
+      "workload_id": "a9718567ab5f"
+    },
+    {
+      "baseline_online_ms": 1626.94325,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67Wedc162153d88R1",
+      "candidate_online_ms": 1225.009,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cWedc162153d88R1",
+      "exploratory_online_ratio": 1.3281071812533622,
+      "semantic_equal": true,
+      "target_label": "T09",
+      "workload_id": "edc162153d88"
+    },
+    {
+      "baseline_online_ms": 3564.577125,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67W2803f7b2d83aR1",
+      "candidate_online_ms": 3233.7532499999998,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cW2803f7b2d83aR1",
+      "exploratory_online_ratio": 1.1023033761156638,
+      "semantic_equal": true,
+      "target_label": "T10",
+      "workload_id": "2803f7b2d83a"
+    },
+    {
+      "baseline_online_ms": 1544.1054159999999,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67W2c4610e6e192R1",
+      "candidate_online_ms": 1258.904292,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cW2c4610e6e192R1",
+      "exploratory_online_ratio": 1.2265471059336097,
+      "semantic_equal": true,
+      "target_label": "T11",
+      "workload_id": "2c4610e6e192"
+    },
+    {
+      "baseline_online_ms": 1408.075625,
+      "baseline_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0hb53aed4f8b67W3255c52d3e5dR1",
+      "candidate_online_ms": 1227.137875,
+      "candidate_run_id": "IC1N53Ckb1fb25864PDP4rootRCguidedLAgaussTDdirectISO0h818f3b921f2cW3255c52d3e5dR1",
+      "exploratory_online_ratio": 1.1474469606766884,
+      "semantic_equal": true,
+      "target_label": "T12",
+      "workload_id": "3255c52d3e5d"
+    }
+  ],
+  "question": "Does paired S3 inversion preserve correctness across fresh one-target workloads?",
+  "run_count": 24,
+  "target_count": 12,
+  "verified_by_sage": false
+}

@@ -1,0 +1,83 @@
+{
+  "valid": true,
+  "scope": "Frozen host/source validation for CPU-only shared-sigma lowering screen; no CUDA compilation or device execution yet.",
+  "source": {
+    "path": "/private/tmp/ecc2k-shared-sigma-src-20260912",
+    "files": 160,
+    "manifestPath": "/private/tmp/ecc2k-shared-sigma-host-20260912/source-manifest.json",
+    "manifestSha256": "61e10ab6dde7fac5c966420cafef49f32eafa6f77a7cef217c342b9fd2d23533",
+    "baseline": "/private/tmp/ecc2k-compact-state-walk-20260912/source"
+  },
+  "flags": {
+    "ECC_THREADS": 256,
+    "ECC_MINBLOCKS": 2,
+    "ECC_PACKED_SINGLE_PRODUCT": 1,
+    "ECC_PACKED_BY_VALUE": 1,
+    "ECC_PACKED_PERM_SIGMA": 3,
+    "ECC_PACKED_DIRECT_REDUCE": 1,
+    "ECC_PACKED_GENERATED_PRODUCT": 1,
+    "ECC_PACKED_CLMAD": 1,
+    "ECC_PACKED_CACHE_DENOM": 1,
+    "ECC_PACKED_POLY_CHAIN": 1,
+    "ECC_PACKED_PAIR_PRODUCTS": 1,
+    "ECC_PACKED_POLY_STATE": 1,
+    "ECC_PACKED_UNROLL_INV": 1,
+    "ECC_PACKED_STATE_TILE": 256,
+    "ECC_PACKED_WEIGHTED_PREFIX": 2,
+    "ECC_PACKED_COMPACT_STATE": 1
+  },
+  "comparedSharedModes": [
+    0,
+    1
+  ],
+  "hostKernel": {
+    "receiptPath": "/private/tmp/ecc2k-shared-sigma-host-20260912/host-results.json",
+    "receiptSha256": "ea03fe69fca2fe1cbe8962c294ddce6f1da11ffa8d05a68090cdc8887fc9ee0d",
+    "runs": 30,
+    "comparisons": 15,
+    "referenceScalarSteps": 9590,
+    "zeroBatchSteps": 130,
+    "reportReplays": 632,
+    "positiveTrails": 364,
+    "rawScratchIncluded": true
+  },
+  "pairedHelpers": {
+    "receiptPath": "/private/tmp/ecc2k-shared-sigma-host-20260912/paired-results.json",
+    "receiptSha256": "fbf798658dd101509cdb74fb7d029a31e28854c21b5a2d674979c9e465101b1d",
+    "pairsPerBranch": 6240,
+    "branches": 3,
+    "globalAndSharedChecked": true,
+    "scope": "Ordinary host, emulated NVCC-host and emulated device branches; branch2 copies real table sequentially with a counted dummy barrier."
+  },
+  "sourceChecks": {
+    "receiptPath": "/private/tmp/ecc2k-shared-sigma-host-20260912/source-checks.json",
+    "receiptSha256": "0906091e2706032997a4d46c3c85dbe212306762cb8fa4e6023477dad0432219",
+    "defaultPreprocessingComparisons": 18,
+    "invalidGuards": 6,
+    "copyOwnershipWidths": 12,
+    "originalHeaderRestoredExactly": true
+  },
+  "deviceProbe": {
+    "path": "src/testsharedsigmacuda.cu",
+    "sha256": "760911d40894f39f1871f7ef24bafa51211d6a2579214b503db0ccc3d89f2248",
+    "compiled": false,
+    "executed": false,
+    "review": "pending; not part of CPU wrapper dependency closure",
+    "plannedScenarios": 21,
+    "plannedInputPairs": 21036,
+    "plannedBlockSnapshots": 114,
+    "plannedTableWords": 51072
+  },
+  "remaining": [
+    "CPU-only CUDA compilation, default code binding and native shared-space/resource inspection.",
+    "Dedicated device-probe review and execution; actual CUDA barrier/concurrency behavior remains untested.",
+    "Full GPU arithmetic/client/checkpoint/state checks and matched complete-walk timing."
+  ],
+  "limits": [
+    "Initial six-file source review found no blocker; final probe review is pending.",
+    "Host masking uses immutable post-barrier values, not CUDA concurrency.",
+    "No checkpoint format or field allocation change; broad unchanged checkpoint serialization tests were not repeated.",
+    "Source hash snapshot was taken after host runs; implementation files were unchanged during those runs.",
+    "Compiler and runtime speed claims are absent."
+  ]
+}

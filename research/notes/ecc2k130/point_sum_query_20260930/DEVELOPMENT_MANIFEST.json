@@ -1,0 +1,174 @@
+{
+  "build_command": "CARGO_INCREMENTAL=0 cargo build --release --offline --example koblitz_orbit_dlp_s3_batch --no-default-features",
+  "cargo": "cargo 1.93.1 (Homebrew)",
+  "control_main_commit": "0e7f5b482da270227e114b9020d958b4ea3b5578",
+  "control_source_sha256": "702a0a05709bc14bc10bafbb08edb2a2f5f86794e970d84c317da3bc65cdcf38",
+  "debug_binary_sha256": "f8e6b2ba40f7219ae9b1d1ba87db1fc8f88c4e55fb0375bd1ebc5d685e77ee14",
+  "files": {
+    "DEVELOPMENT_RECEIPT.json": {
+      "bytes": 10598,
+      "sha256": "624e696f97a5f9151d70fc926b4c7f805c9e4644005011afc27eb78cf11a8eff"
+    },
+    "development/n37_control_rank.jsonl": {
+      "bytes": 20970,
+      "sha256": "d9521f8f1f9f7dfb064350eb12bccc5666e478e1cd94d1e97c01b066717894b7"
+    },
+    "development/n37_control_release_base.jsonl": {
+      "bytes": 127620,
+      "sha256": "0a32de24a5680ff46baf9543e8bf8e32447323491e2a2adedce2548c14a25f75"
+    },
+    "development/n37_control_release_rank.jsonl": {
+      "bytes": 20970,
+      "sha256": "d9521f8f1f9f7dfb064350eb12bccc5666e478e1cd94d1e97c01b066717894b7"
+    },
+    "development/n37_control_release_summary.json": {
+      "bytes": 3145,
+      "sha256": "223a53278aa52baefbbb7255f0a378d79a601ae327b2289a91b234384f10826f"
+    },
+    "development/n37_control_release_targets.jsonl": {
+      "bytes": 1269767,
+      "sha256": "440590e819fa5986594ebcaf49a9d8d66ec4f410bb0f0b7ad153ae2760bc270c"
+    },
+    "development/n37_control_summary.json": {
+      "bytes": 3146,
+      "sha256": "200721e1c396e8a240ec8efb4a1b9bd32204abc359a174737061edc63b85695d"
+    },
+    "development/n37_control_targets.jsonl": {
+      "bytes": 1273670,
+      "sha256": "06d60d69f7260ce9b9b16cfee22517c228944933c165eb9e91e1294a44d610a2"
+    },
+    "development/n37_point_rank.jsonl": {
+      "bytes": 20970,
+      "sha256": "b49c367bc6f760b7d729e3fcc8f311bca0e6f80783b73c2cd2eba1b01e369000"
+    },
+    "development/n37_point_release_base.jsonl": {
+      "bytes": 127620,
+      "sha256": "0a32de24a5680ff46baf9543e8bf8e32447323491e2a2adedce2548c14a25f75"
+    },
+    "development/n37_point_release_rank.jsonl": {
+      "bytes": 20970,
+      "sha256": "b49c367bc6f760b7d729e3fcc8f311bca0e6f80783b73c2cd2eba1b01e369000"
+    },
+    "development/n37_point_release_summary.json": {
+      "bytes": 3175,
+      "sha256": "a31f3f46da3a7451eb2f1baefde9c5bd33780c044b294048ea7e6b24a2304402"
+    },
+    "development/n37_point_release_targets.jsonl": {
+      "bytes": 1272835,
+      "sha256": "2bad898ae8db33edef18f4a26985c139fb4d56cf1d9436d521057f0d9855c18b"
+    },
+    "development/n37_point_summary.json": {
+      "bytes": 3183,
+      "sha256": "516401bf149111966023bcdb93c23ee226b556893fe1e904e04618befb88f371"
+    },
+    "development/n37_point_targets.jsonl": {
+      "bytes": 1276342,
+      "sha256": "a3c29f0491dc3305882e6eb66d79bb9a9f24aa107edcd28fa095d408abd9577a"
+    },
+    "development/n41_control_release_base.jsonl": {
+      "bytes": 327386,
+      "sha256": "3214f008c507e37506e9fa841eb9795c20598d751542304a5a4fe2192ad18349"
+    },
+    "development/n41_control_release_rank.jsonl": {
+      "bytes": 52576,
+      "sha256": "66742ad5f34351d5254782d31e52f75d0514a58a20274f4e2e66efeaf2a9348f"
+    },
+    "development/n41_control_release_summary.json": {
+      "bytes": 3178,
+      "sha256": "b69af2d3b773c0992d95f064aec07ce8631298fbf28e6de4b6845b12ddc37cbf"
+    },
+    "development/n41_control_release_targets.jsonl": {
+      "bytes": 1283,
+      "sha256": "37fc99da8d4c7624a5576b3befb4c1906b5bbf56acac81d7608bd72d4f9b18f9"
+    },
+    "development/n41_point_release_base.jsonl": {
+      "bytes": 327386,
+      "sha256": "3214f008c507e37506e9fa841eb9795c20598d751542304a5a4fe2192ad18349"
+    },
+    "development/n41_point_release_rank.jsonl": {
+      "bytes": 52576,
+      "sha256": "88b23ea77821849e680f26dc2cdaa864f9d6e561822bb2ec223856568421b0b1"
+    },
+    "development/n41_point_release_summary.json": {
+      "bytes": 3218,
+      "sha256": "190151490f8d96e2483cb8768d7810f5a9fff289f1f190409fdd7b80d89aae35"
+    },
+    "development/n41_point_release_targets.jsonl": {
+      "bytes": 1307,
+      "sha256": "690998a17af60fed98db200ee0fbf856fb3e66012842ad95448c1c78ef1ee3b2"
+    },
+    "development/n53_control_release_base.jsonl": {
+      "bytes": 1305688,
+      "sha256": "53c9c8454be7f1454c96295ab3d00848bdf6bbda6a9266d47fc2dc1b18e0b22d"
+    },
+    "development/n53_control_release_rank.jsonl": {
+      "bytes": 204806,
+      "sha256": "24fdf67b2bd4e54d6a0c6a1d461db5a239b1c0de98c68e0d791add1af6d370d4"
+    },
+    "development/n53_control_release_summary.json": {
+      "bytes": 3229,
+      "sha256": "c8f6e9dfa8cc1643066613dbd6a50f1fb492da61976561db6826f601d0f2a033"
+    },
+    "development/n53_control_release_targets.jsonl": {
+      "bytes": 1338,
+      "sha256": "bf89bd341c5ad2227fea6eb07ae375d89c55ed84e2341720af076bdd3c81e06f"
+    },
+    "development/n53_point_release_base.jsonl": {
+      "bytes": 1305688,
+      "sha256": "53c9c8454be7f1454c96295ab3d00848bdf6bbda6a9266d47fc2dc1b18e0b22d"
+    },
+    "development/n53_point_release_rank.jsonl": {
+      "bytes": 204806,
+      "sha256": "50c4c22a1efc4738ddc3f2d3bc43c1ec650f9ad504799d5a495787e96327d22e"
+    },
+    "development/n53_point_release_summary.json": {
+      "bytes": 3261,
+      "sha256": "24837c268b0ef30842bfcdb33e74d0b9f9dee41aff1cbebd2dadbc1edd53a2df"
+    },
+    "development/n53_point_release_targets.jsonl": {
+      "bytes": 1347,
+      "sha256": "f7a30a18c4885a3727a035a7f6aeab4d04a5154bd3ff0e8daed3e5b241d4c5ea"
+    }
+  },
+  "host": {
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "processor": "arm"
+  },
+  "note": "Raw release arms and earlier n37 debug pair are retained. Timers are unpaired development diagnostics, not eligible full-process CPU measurements.",
+  "protocol_commit": "12a746d5a0af1b107a299431a5a5ed9d9e37a889",
+  "release_binary_sha256": "fe3b9ed7cc24d8c6f9105acd630fd5fbc4d9831c806fe367f3dccd0925556260",
+  "run_parameters": {
+    "base": "construct:<n>:0:<K>",
+    "cells": [
+      {
+        "K": 42,
+        "L": 1024,
+        "n": 37,
+        "points_file": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n37_L1024_eval.points.jsonl"
+      },
+      {
+        "K": 85,
+        "L": 1,
+        "n": 41,
+        "points_file": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n41_L1_eval.points.jsonl"
+      },
+      {
+        "K": 220,
+        "L": 1,
+        "n": 53,
+        "points_file": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n53_L1_eval.points.jsonl"
+      }
+    ],
+    "query_backend_arms": [
+      "s3",
+      "point_sum"
+    ],
+    "rank_seed": 7,
+    "s3_batch_window": 64,
+    "s3_prefilter": "blocked"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "schema": "compact-point-sum-development-manifest-v1",
+  "source_sha256": "7b2393731cd7da047b9404585c85dc2f384ee857e43778661e806649c6cf552d"
+}

@@ -1,0 +1,36 @@
+name: ECC2K-130 m3 base-selector protocol freeze
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ecc2k130-m3-base-selector-protocol.yml
+      - research/notes/ecc2k130/m3_base_selector_20260930/**
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ecc2k130-m3-base-selector-protocol.yml
+      - research/notes/ecc2k130/m3_base_selector_20260930/**
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            research/notes/ecc2k130/m3_base_selector_20260930
+            research/notes/ecc2k130/m3_four_policy_20260930/CONFIG.json
+            research/notes/ecc2k130/m3_four_policy_20260930/evidence_run_36722040881/result.json
+          sparse-checkout-cone-mode: false
+      - name: Check frozen pre-outcome contract
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/m3_base_selector_20260930/check_protocol.py
+          python3 research/notes/ecc2k130/m3_base_selector_20260930/check_protocol.py \
+            > "$RUNNER_TEMP/pre-outcome.json"
+          cmp "$RUNNER_TEMP/pre-outcome.json" \
+            research/notes/ecc2k130/m3_base_selector_20260930/PRE_OUTCOME.json

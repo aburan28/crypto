@@ -1,0 +1,467 @@
+CI failure log; trailing whitespace/blank lines removed.
+Original: https://github.com/aburan28/crypto/actions/runs/37159157206
+Original downloaded bytes SHA-256: 1f4ee2679e7edb1c42086f91e5c00fd3cf4f2820785e2381e84460f951df221c
+
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	﻿2026-10-03T22:43:14.6210060Z ##[group]Run "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6211270Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6212070Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6212800Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_f5 -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6213490Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_target -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6214150Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_control -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6214850Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6215500Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_control_archive -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6216300Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6217030Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6217730Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_sat_worker -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6218440Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin isolated_bench busy_unix -- --test-threads=1^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6219120Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- cargo build --locked --bin icprog --bin isolated_bench --bin prepared_sat_worker^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6219910Z ^[[36;1mtarget/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6220660Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-preparation-replay --out "$RUNNER_TEMP/native-f5-preparation-replay.json"^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6221460Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-target-replay --out "$RUNNER_TEMP/native-f5-target-replay.json"^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6222280Z ^[[36;1m"$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-control-replay-validation \^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6223050Z ^[[36;1m  --publication research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1 \^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6223760Z ^[[36;1m  --validation-registration-sha256 421ac32d7833673ae10e414a398ccb887dcf02556d88a135804ad73869eb61bf \^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6224880Z ^[[36;1m  --out "$RUNNER_TEMP/native-f5-build-validation-replay.json"^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6225320Z ^[[36;1mtarget/debug/isolated_bench busy --lock "$RUNNER_TEMP/portable-busy.lock" -- true^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6274560Z shell: /bin/bash -e {0}
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6274890Z env:
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6275310Z   CARGO_HOME: /Users/runner/.cargo
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6275650Z   CARGO_INCREMENTAL: 0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6275990Z   CARGO_TERM_COLOR: always
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.6276300Z ##[endgroup]
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.8199060Z ^[[1m^[[92m Downloading^[[0m crates ...
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9126850Z ^[[1m^[[92m  Downloaded^[[0m anstream v1.0.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9604700Z ^[[1m^[[92m  Downloaded^[[0m adler2 v2.0.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9635470Z ^[[1m^[[92m  Downloaded^[[0m clap_derive v4.6.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9702910Z ^[[1m^[[92m  Downloaded^[[0m itoa v1.0.18
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9729600Z ^[[1m^[[92m  Downloaded^[[0m anstyle-parse v1.0.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9785680Z ^[[1m^[[92m  Downloaded^[[0m cfg-if v1.0.5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9808720Z ^[[1m^[[92m  Downloaded^[[0m utf8parse v0.2.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9828660Z ^[[1m^[[92m  Downloaded^[[0m anstyle-query v1.1.5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9848420Z ^[[1m^[[92m  Downloaded^[[0m subtle v2.6.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9880960Z ^[[1m^[[92m  Downloaded^[[0m clap_lex v1.1.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9915870Z ^[[1m^[[92m  Downloaded^[[0m heck v0.5.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9947390Z ^[[1m^[[92m  Downloaded^[[0m zeroize_derive v1.5.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:14.9976030Z ^[[1m^[[92m  Downloaded^[[0m hex v0.4.3
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0025110Z ^[[1m^[[92m  Downloaded^[[0m is_terminal_polyfill v1.70.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0051570Z ^[[1m^[[92m  Downloaded^[[0m strsim v0.11.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0083590Z ^[[1m^[[92m  Downloaded^[[0m colorchoice v1.0.5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0101380Z ^[[1m^[[92m  Downloaded^[[0m anstyle v1.0.14
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0144090Z ^[[1m^[[92m  Downloaded^[[0m crossbeam-deque v0.8.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0482410Z ^[[1m^[[92m  Downloaded^[[0m ppv-lite86 v0.2.21
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0536080Z ^[[1m^[[92m  Downloaded^[[0m autocfg v1.5.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0601500Z ^[[1m^[[92m  Downloaded^[[0m constant_time_eq v0.4.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0670150Z ^[[1m^[[92m  Downloaded^[[0m num-integer v0.1.47
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0706050Z ^[[1m^[[92m  Downloaded^[[0m rand_chacha v0.3.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0775600Z ^[[1m^[[92m  Downloaded^[[0m zmij v1.0.23
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0824610Z ^[[1m^[[92m  Downloaded^[[0m either v1.18.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0877390Z ^[[1m^[[92m  Downloaded^[[0m find-msvc-tools v0.1.14
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0920150Z ^[[1m^[[92m  Downloaded^[[0m rand_core v0.6.4
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.0964020Z ^[[1m^[[92m  Downloaded^[[0m shlex v2.0.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1014910Z ^[[1m^[[92m  Downloaded^[[0m simd-adler32 v0.3.10
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1080240Z ^[[1m^[[92m  Downloaded^[[0m zeroize v1.9.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1114470Z ^[[1m^[[92m  Downloaded^[[0m arrayvec v0.7.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1166910Z ^[[1m^[[92m  Downloaded^[[0m crc32fast v1.5.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1226190Z ^[[1m^[[92m  Downloaded^[[0m crossbeam-epoch v0.9.21
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1292110Z ^[[1m^[[92m  Downloaded^[[0m getrandom v0.2.17
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1367300Z ^[[1m^[[92m  Downloaded^[[0m quote v1.0.47
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1438330Z ^[[1m^[[92m  Downloaded^[[0m crossbeam-utils v0.8.23
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1514900Z ^[[1m^[[92m  Downloaded^[[0m num-traits v0.2.19
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1586940Z ^[[1m^[[92m  Downloaded^[[0m serde_core v1.0.229
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1658700Z ^[[1m^[[92m  Downloaded^[[0m proc-macro2 v1.0.107
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.1815540Z ^[[1m^[[92m  Downloaded^[[0m unicode-ident v1.0.26
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.2184800Z ^[[1m^[[92m  Downloaded^[[0m clap v4.6.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.2475110Z ^[[1m^[[92m  Downloaded^[[0m flate2 v1.1.10
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.2620900Z ^[[1m^[[92m  Downloaded^[[0m miniz_oxide v0.9.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.2696220Z ^[[1m^[[92m  Downloaded^[[0m rayon-core v1.13.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.3445770Z ^[[1m^[[92m  Downloaded^[[0m serde_derive v1.0.229
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.3520920Z ^[[1m^[[92m  Downloaded^[[0m rand v0.8.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.3611700Z ^[[1m^[[92m  Downloaded^[[0m serde v1.0.229
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.3690650Z ^[[1m^[[92m  Downloaded^[[0m memchr v2.8.3
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.3847150Z ^[[1m^[[92m  Downloaded^[[0m num-bigint v0.4.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.4040460Z ^[[1m^[[92m  Downloaded^[[0m base64 v0.21.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.4177500Z ^[[1m^[[92m  Downloaded^[[0m cc v1.6.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.4293560Z ^[[1m^[[92m  Downloaded^[[0m serde_json v1.0.151
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.4575980Z ^[[1m^[[92m  Downloaded^[[0m rayon v1.12.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.5188480Z ^[[1m^[[92m  Downloaded^[[0m blake3 v1.8.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.5491470Z ^[[1m^[[92m  Downloaded^[[0m clap_builder v4.6.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.5676620Z ^[[1m^[[92m  Downloaded^[[0m zlib-rs v0.6.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.5823450Z ^[[1m^[[92m  Downloaded^[[0m syn v3.0.6
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.6425830Z ^[[1m^[[92m  Downloaded^[[0m zerocopy v0.8.59
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.7278460Z ^[[1m^[[92m  Downloaded^[[0m syn v2.0.119
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:15.7646040Z ^[[1m^[[92m  Downloaded^[[0m libc v0.2.190
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:16.0217260Z ^[[1m^[[92m   Compiling^[[0m proc-macro2 v1.0.107
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:16.0219690Z ^[[1m^[[92m   Compiling^[[0m quote v1.0.47
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:16.0220370Z ^[[1m^[[92m   Compiling^[[0m unicode-ident v1.0.26
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:16.2032570Z ^[[1m^[[92m   Compiling^[[0m cfg-if v1.0.5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:16.2763310Z ^[[1m^[[92m   Compiling^[[0m libc v0.2.190
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:16.4299330Z ^[[1m^[[92m   Compiling^[[0m zerocopy v0.8.59
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:16.8256630Z ^[[1m^[[92m   Compiling^[[0m crossbeam-utils v0.8.23
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:17.1044120Z ^[[1m^[[92m   Compiling^[[0m autocfg v1.5.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:17.5631570Z ^[[1m^[[92m   Compiling^[[0m crossbeam-epoch v0.9.21
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:17.7052850Z ^[[1m^[[92m   Compiling^[[0m syn v3.0.6
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:17.7896830Z ^[[1m^[[92m   Compiling^[[0m num-traits v0.2.19
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:17.9409640Z ^[[1m^[[92m   Compiling^[[0m getrandom v0.2.17
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:18.5435270Z ^[[1m^[[92m   Compiling^[[0m utf8parse v0.2.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:18.6223200Z ^[[1m^[[92m   Compiling^[[0m serde_core v1.0.229
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:18.8845970Z ^[[1m^[[92m   Compiling^[[0m shlex v2.0.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:19.0240280Z ^[[1m^[[92m   Compiling^[[0m find-msvc-tools v0.1.14
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:19.2561320Z ^[[1m^[[92m   Compiling^[[0m crossbeam-deque v0.8.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:19.4963690Z ^[[1m^[[92m   Compiling^[[0m cc v1.6.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.2564050Z ^[[1m^[[92m   Compiling^[[0m anstyle-parse v1.0.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.5020840Z ^[[1m^[[92m   Compiling^[[0m rand_core v0.6.4
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.6895450Z ^[[1m^[[92m   Compiling^[[0m zmij v1.0.23
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.7934570Z ^[[1m^[[92m   Compiling^[[0m ppv-lite86 v0.2.21
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.8652470Z ^[[1m^[[92m   Compiling^[[0m is_terminal_polyfill v1.70.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.9056500Z ^[[1m^[[92m   Compiling^[[0m colorchoice v1.0.5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.9178400Z ^[[1m^[[92m   Compiling^[[0m anstyle-query v1.1.5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.9569620Z ^[[1m^[[92m   Compiling^[[0m anstyle v1.0.14
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:21.9779590Z ^[[1m^[[92m   Compiling^[[0m rayon-core v1.13.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:22.0212810Z ^[[1m^[[92m   Compiling^[[0m crc32fast v1.5.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:22.1135600Z ^[[1m^[[92m   Compiling^[[0m anstream v1.0.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:22.1376080Z ^[[1m^[[92m   Compiling^[[0m rand_chacha v0.3.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:22.4782120Z ^[[1m^[[92m   Compiling^[[0m blake3 v1.8.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:22.7616400Z ^[[1m^[[92m   Compiling^[[0m syn v2.0.119
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:22.9228460Z ^[[1m^[[92m   Compiling^[[0m heck v0.5.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:23.1270630Z ^[[1m^[[92m   Compiling^[[0m strsim v0.11.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:23.4574460Z ^[[1m^[[92m   Compiling^[[0m clap_lex v1.1.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:23.7192620Z ^[[1m^[[92m   Compiling^[[0m serde_json v1.0.151
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:23.9998990Z ^[[1m^[[92m   Compiling^[[0m serde v1.0.229
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:24.4643300Z ^[[1m^[[92m   Compiling^[[0m simd-adler32 v0.3.10
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:24.6860520Z ^[[1m^[[92m   Compiling^[[0m adler2 v2.0.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:24.7961230Z ^[[1m^[[92m   Compiling^[[0m miniz_oxide v0.9.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:25.9067220Z ^[[1m^[[92m   Compiling^[[0m clap_builder v4.6.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:25.9476720Z ^[[1m^[[92m   Compiling^[[0m clap_derive v4.6.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:27.5887930Z ^[[1m^[[92m   Compiling^[[0m num-integer v0.1.47
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:28.8222460Z ^[[1m^[[92m   Compiling^[[0m zeroize_derive v1.5.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:29.8212710Z ^[[1m^[[92m   Compiling^[[0m rand v0.8.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:30.2431880Z ^[[1m^[[92m   Compiling^[[0m serde_derive v1.0.229
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:30.5133700Z ^[[1m^[[92m   Compiling^[[0m memchr v2.8.3
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:30.8943250Z ^[[1m^[[92m   Compiling^[[0m itoa v1.0.18
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:31.0081630Z ^[[1m^[[92m   Compiling^[[0m constant_time_eq v0.4.2
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:31.1227450Z ^[[1m^[[92m   Compiling^[[0m arrayvec v0.7.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:31.2530820Z ^[[1m^[[92m   Compiling^[[0m either v1.18.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:31.3809490Z ^[[1m^[[92m   Compiling^[[0m rayon v1.12.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:32.7041180Z ^[[1m^[[92m   Compiling^[[0m num-bigint v0.4.8
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:33.0276820Z ^[[1m^[[92m   Compiling^[[0m flate2 v1.1.10
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:33.3544660Z ^[[1m^[[92m   Compiling^[[0m zeroize v1.9.0
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:33.3747950Z ^[[1m^[[92m   Compiling^[[0m clap v4.6.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:33.4175550Z ^[[1m^[[92m   Compiling^[[0m subtle v2.6.1
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:33.4602850Z ^[[1m^[[92m   Compiling^[[0m base64 v0.21.7
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:33.5054990Z ^[[1m^[[92m   Compiling^[[0m hex v0.4.3
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:43:33.7301770Z ^[[1m^[[92m   Compiling^[[0m crypto v0.1.0 (/Users/runner/work/crypto/crypto)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0281900Z ^[[1m^[[33mwarning^[[0m^[[1m: variable does not need to be mutable^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0283530Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:484:9
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0284000Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0311400Z ^[[1m^[[94m484^[[0m ^[[1m^[[94m|^[[0m     let mut out = Vec::new();
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0325450Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m----^[[0m^[[1m^[[33m^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0326050Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0327030Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94mhelp: remove this `mut`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0327470Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0328110Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0328480Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0328710Z ^[[1m^[[33mwarning^[[0m^[[1m: unused variable: `max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0329100Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:459:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0329750Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0330350Z ^[[1m^[[94m459^[[0m ^[[1m^[[94m|^[[0m     max_solutions: usize,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0331410Z     ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^^^^^^^^[[0m ^[[1m^[[33mhelp: if this is intentional, prefix it with an underscore: `_max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0332030Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0332600Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:00.0332990Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.7739580Z ^[[1m^[[33mwarning^[[0m^[[1m: variants `Avx2` and `Avx512` are never constructed^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.7783100Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/f4_fp_tower.rs:1037:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.7885180Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.7986740Z ^[[1m^[[94m1035^[[0m ^[[1m^[[94m|^[[0m enum Lanes {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8088260Z      ^[[1m^[[94m|^[[0m      ^[[1m^[[94m-----^[[0m ^[[1m^[[94mvariants in this enum^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8191950Z ^[[1m^[[94m1036^[[0m ^[[1m^[[94m|^[[0m     Scalar,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8274350Z ^[[1m^[[94m1037^[[0m ^[[1m^[[94m|^[[0m     Avx2,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8275060Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8275520Z ^[[1m^[[94m1038^[[0m ^[[1m^[[94m|^[[0m     Avx512,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8276050Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8276440Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8277230Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8278290Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8278730Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8279040Z ^[[1m^[[33mwarning^[[0m^[[1m: fields `qx` and `qy` are never read^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8279620Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/koblitz_fast.rs:1077:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8280030Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8280390Z ^[[1m^[[94m1073^[[0m ^[[1m^[[94m|^[[0m pub struct BatchScratch {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8280940Z      ^[[1m^[[94m|^[[0m            ^[[1m^[[94m------------^[[0m ^[[1m^[[94mfields in this struct^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8344440Z ^[[1m^[[94m...^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8345230Z ^[[1m^[[94m1077^[[0m ^[[1m^[[94m|^[[0m     qx: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8346220Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8346980Z ^[[1m^[[94m1078^[[0m ^[[1m^[[94m|^[[0m     qy: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8347920Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8348690Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8350400Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:05.8351770Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:42.6232750Z ^[[1m^[[33mwarning^[[0m: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7075840Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 1m 32s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7336340Z ^[[1m^[[92m     Running^[[0m unittests src/bin/icprog.rs (target/debug/deps/icprog-1563caeb4891a363)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7388010Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7388580Z running 7 tests
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7397230Z test sat_source::tests::anf_constant_and_monomial_semantics_and_truncation ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7398900Z test sat_source::tests::auxiliary_definitions_must_be_complete_unique_and_satisfy_reverse_clauses ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7417930Z test sat_source::tests::cnf_rejects_invalid_headers_literals_counts_and_terminators ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:47.7830440Z test sat_source::tests::retained_model_corruption_is_rejected_by_source_rows ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:48.7163090Z test sat_source::tests::retained_native_source_replay_matches_independent_historical_assignment ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:48.7281990Z test sat_source::tests::same_length_mutation_and_truncated_sources_fail_the_pin ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:48.7381340Z test sat_source::tests::signed_xors_and_empty_rows_are_checked ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:48.7482320Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:48.7583290Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 71 filtered out; finished in 0.98s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:48.7648020Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1332020Z ^[[1m^[[33mwarning^[[0m^[[1m: variable does not need to be mutable^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1333070Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:484:9
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1333680Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1334580Z ^[[1m^[[94m484^[[0m ^[[1m^[[94m|^[[0m     let mut out = Vec::new();
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1335420Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m----^[[0m^[[1m^[[33m^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1336560Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1337000Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94mhelp: remove this `mut`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1337440Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1337910Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1338340Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1338620Z ^[[1m^[[33mwarning^[[0m^[[1m: unused variable: `max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1339090Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:459:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1342120Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1342740Z ^[[1m^[[94m459^[[0m ^[[1m^[[94m|^[[0m     max_solutions: usize,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1343580Z     ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^^^^^^^^[[0m ^[[1m^[[33mhelp: if this is intentional, prefix it with an underscore: `_max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1344480Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1344970Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1345400Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1345770Z ^[[1m^[[33mwarning^[[0m^[[1m: variants `Avx2` and `Avx512` are never constructed^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1346380Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/f4_fp_tower.rs:1037:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1346780Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1347270Z ^[[1m^[[94m1035^[[0m ^[[1m^[[94m|^[[0m enum Lanes {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1347750Z      ^[[1m^[[94m|^[[0m      ^[[1m^[[94m-----^[[0m ^[[1m^[[94mvariants in this enum^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1349150Z ^[[1m^[[94m1036^[[0m ^[[1m^[[94m|^[[0m     Scalar,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1349720Z ^[[1m^[[94m1037^[[0m ^[[1m^[[94m|^[[0m     Avx2,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1350190Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1350560Z ^[[1m^[[94m1038^[[0m ^[[1m^[[94m|^[[0m     Avx512,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1350970Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1351340Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1352160Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1354260Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1354650Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1355020Z ^[[1m^[[33mwarning^[[0m^[[1m: fields `qx` and `qy` are never read^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1355730Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/koblitz_fast.rs:1077:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1356080Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1356580Z ^[[1m^[[94m1073^[[0m ^[[1m^[[94m|^[[0m pub struct BatchScratch {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1357110Z      ^[[1m^[[94m|^[[0m            ^[[1m^[[94m------------^[[0m ^[[1m^[[94mfields in this struct^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1357660Z ^[[1m^[[94m...^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1358120Z ^[[1m^[[94m1077^[[0m ^[[1m^[[94m|^[[0m     qx: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1358930Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1360080Z ^[[1m^[[94m1078^[[0m ^[[1m^[[94m|^[[0m     qy: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1360560Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1360900Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1361780Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1362440Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1362970Z ^[[1m^[[33mwarning^[[0m: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1363650Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1364400Z ^[[1m^[[92m     Running^[[0m unittests src/bin/icprog.rs (target/debug/deps/icprog-1563caeb4891a363)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1388290Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1388710Z running 4 tests
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1668520Z test prepared_sat::tests::does_not_accept_a_witness_as_unsat_or_budget_as_a_relation ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.1681140Z test prepared_sat::tests::pair_complement_proof_retains_repetition_torsion_and_identity_sums ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.2021820Z test prepared_sat::tests::reconstructs_all_retained_rows_rank_logs_and_negatives ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.2662710Z test prepared_sat::tests::rejects_changed_witness_projection_log_and_rank_trajectory ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.2765690Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.2869620Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 74 filtered out; finished in 0.13s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.2971430Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4102870Z ^[[1m^[[33mwarning^[[0m^[[1m: variable does not need to be mutable^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4204580Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:484:9
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4306530Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4306790Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4409480Z ^[[1m^[[94m484^[[0m ^[[1m^[[94m|^[[0m     let mut out = Vec::new();
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4410200Z running 5 tests
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4512140Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m----^[[0m^[[1m^[[33m^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4614430Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4718560Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94mhelp: remove this `mut`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4719190Z test prepared_f5::tests::external_seal_rejects_provenance_swaps_and_promotion ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4872770Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4974350Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.4974810Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5082110Z ^[[1m^[[33mwarning^[[0m^[[1m: unused variable: `max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5186170Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:459:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5287560Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5389880Z ^[[1m^[[94m459^[[0m ^[[1m^[[94m|^[[0m     max_solutions: usize,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5491470Z     ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^^^^^^^^[[0m ^[[1m^[[33mhelp: if this is intentional, prefix it with an underscore: `_max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5593140Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5694630Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5695450Z test prepared_f5::tests::log_rank_target_chronology_and_outcome_corruption_are_rejected ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5796550Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5797080Z test prepared_f5::tests::missing_torsion_reordered_geometry_and_omitted_query_fail ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.5899970Z ^[[1m^[[33mwarning^[[0m^[[1m: variants `Avx2` and `Avx512` are never constructed^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6002940Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/f4_fp_tower.rs:1037:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6105630Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6207790Z ^[[1m^[[94m1035^[[0m ^[[1m^[[94m|^[[0m enum Lanes {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6208490Z test prepared_f5::tests::reconstructs_all_original_queries_and_full_rank_without_search ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6310690Z      ^[[1m^[[94m|^[[0m      ^[[1m^[[94m-----^[[0m ^[[1m^[[94mvariants in this enum^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6412210Z ^[[1m^[[94m1036^[[0m ^[[1m^[[94m|^[[0m     Scalar,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6412750Z test prepared_f5::tests::witness_as_negative_and_false_witness_fail_group_checks ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6515480Z ^[[1m^[[94m1037^[[0m ^[[1m^[[94m|^[[0m     Avx2,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6515780Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6618190Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6618760Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 73 filtered out; finished in 0.21s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6729790Z ^[[1m^[[94m1038^[[0m ^[[1m^[[94m|^[[0m     Avx512,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6729990Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6849890Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.6955320Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7064100Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7167830Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7296350Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7399860Z ^[[1m^[[33mwarning^[[0m^[[1m: fields `qx` and `qy` are never read^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7501540Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/koblitz_fast.rs:1077:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7603510Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7705050Z ^[[1m^[[94m1073^[[0m ^[[1m^[[94m|^[[0m pub struct BatchScratch {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7807830Z      ^[[1m^[[94m|^[[0m            ^[[1m^[[94m------------^[[0m ^[[1m^[[94mfields in this struct^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.7913110Z ^[[1m^[[94m...^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8020420Z ^[[1m^[[94m1077^[[0m ^[[1m^[[94m|^[[0m     qx: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8129670Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8130690Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8232620Z ^[[1m^[[94m1078^[[0m ^[[1m^[[94m|^[[0m     qy: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8233020Z running 6 tests
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8335260Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8436560Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8539840Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8639440Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8742570Z ^[[1m^[[33mwarning^[[0m: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8842750Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.8945230Z ^[[1m^[[92m     Running^[[0m unittests src/bin/icprog.rs (target/debug/deps/icprog-1563caeb4891a363)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9047760Z ^[[1m^[[33mwarning^[[0m^[[1m: variable does not need to be mutable^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9148080Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:484:9
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9249680Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9353000Z ^[[1m^[[94m484^[[0m ^[[1m^[[94m|^[[0m     let mut out = Vec::new();
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9456370Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m----^[[0m^[[1m^[[33m^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9561000Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9663360Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94mhelp: remove this `mut`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9771090Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9872350Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:49.9972420Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0073840Z ^[[1m^[[33mwarning^[[0m^[[1m: unused variable: `max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0174250Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:459:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0275160Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0375810Z ^[[1m^[[94m459^[[0m ^[[1m^[[94m|^[[0m     max_solutions: usize,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0477700Z     ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^^^^^^^^[[0m ^[[1m^[[33mhelp: if this is intentional, prefix it with an underscore: `_max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0580010Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0581230Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0682580Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0783930Z ^[[1m^[[33mwarning^[[0m^[[1m: variants `Avx2` and `Avx512` are never constructed^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0887310Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/f4_fp_tower.rs:1037:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.0992240Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1094340Z ^[[1m^[[94m1035^[[0m ^[[1m^[[94m|^[[0m enum Lanes {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1195980Z      ^[[1m^[[94m|^[[0m      ^[[1m^[[94m-----^[[0m ^[[1m^[[94mvariants in this enum^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1297420Z ^[[1m^[[94m1036^[[0m ^[[1m^[[94m|^[[0m     Scalar,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1411860Z ^[[1m^[[94m1037^[[0m ^[[1m^[[94m|^[[0m     Avx2,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1514610Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1616960Z ^[[1m^[[94m1038^[[0m ^[[1m^[[94m|^[[0m     Avx512,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1734580Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1836230Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.1937940Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2041700Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2091200Z test f5_target::tests::changed_query_witness_log_recovery_engine_and_phase_fail ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2091950Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2245220Z ^[[1m^[[33mwarning^[[0m^[[1m: fields `qx` and `qy` are never read^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2347230Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/koblitz_fast.rs:1077:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2457070Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2558980Z ^[[1m^[[94m1073^[[0m ^[[1m^[[94m|^[[0m pub struct BatchScratch {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2660830Z      ^[[1m^[[94m|^[[0m            ^[[1m^[[94m------------^[[0m ^[[1m^[[94mfields in this struct^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2765230Z ^[[1m^[[94m...^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2869010Z ^[[1m^[[94m1077^[[0m ^[[1m^[[94m|^[[0m     qx: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.2972510Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3078250Z ^[[1m^[[94m1078^[[0m ^[[1m^[[94m|^[[0m     qy: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3181260Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3284820Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3286130Z test f5_target::tests::failed_target_keeps_unknown_unperformed_phases_and_cannot_claim_scalar ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3389580Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3490830Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3593920Z ^[[1m^[[33mwarning^[[0m: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3718370Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3821260Z ^[[1m^[[92m     Running^[[0m unittests src/bin/icprog.rs (target/debug/deps/icprog-1563caeb4891a363)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:50.3921880Z test f5_target::tests::missing_phase_key_rejects_without_panicking ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.5126440Z test f5_target::tests::portable_replay_creates_once_and_never_reopens_the_control ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.5625740Z test f5_target::tests::retained_disclosed_math_reconstructs_all_queries_and_scalar_without_search ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.6028350Z test f5_target::tests::witness_cannot_be_reclassified_as_proved_negative ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.6129480Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.6232250Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 72 filtered out; finished in 2.78s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.6333510Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7111450Z ^[[1m^[[33mwarning^[[0m^[[1m: variable does not need to be mutable^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7187470Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:484:9
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7216390Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7262610Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7292460Z running 14 tests
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7337980Z ^[[1m^[[94m484^[[0m ^[[1m^[[94m|^[[0m     let mut out = Vec::new();
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7439690Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m----^[[0m^[[1m^[[33m^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7504690Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7527890Z     ^[[1m^[[94m|^[[0m         ^[[1m^[[94mhelp: remove this `mut`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7629000Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7731330Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7832360Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7863680Z ^[[1m^[[33mwarning^[[0m^[[1m: unused variable: `max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7898170Z    ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/mq_fes.rs:459:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.7999820Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8042100Z ^[[1m^[[94m459^[[0m ^[[1m^[[94m|^[[0m     max_solutions: usize,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8043890Z     ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^^^^^^^^[[0m ^[[1m^[[33mhelp: if this is intentional, prefix it with an underscore: `_max_solutions`^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8044650Z     ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8086840Z     ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8089320Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8089920Z ^[[1m^[[33mwarning^[[0m^[[1m: variants `Avx2` and `Avx512` are never constructed^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8091210Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/f4_fp_tower.rs:1037:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8091780Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8092050Z ^[[1m^[[94m1035^[[0m ^[[1m^[[94m|^[[0m enum Lanes {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8092520Z      ^[[1m^[[94m|^[[0m      ^[[1m^[[94m-----^[[0m ^[[1m^[[94mvariants in this enum^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8092910Z ^[[1m^[[94m1036^[[0m ^[[1m^[[94m|^[[0m     Scalar,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8093320Z ^[[1m^[[94m1037^[[0m ^[[1m^[[94m|^[[0m     Avx2,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8093640Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8093980Z ^[[1m^[[94m1038^[[0m ^[[1m^[[94m|^[[0m     Avx512,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8094250Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^^^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8094550Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8095140Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8095940Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8096210Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8096430Z ^[[1m^[[33mwarning^[[0m^[[1m: fields `qx` and `qy` are never read^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8096910Z     ^[[1m^[[94m--> ^[[0msrc/cryptanalysis/koblitz_fast.rs:1077:5
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8097210Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8097520Z ^[[1m^[[94m1073^[[0m ^[[1m^[[94m|^[[0m pub struct BatchScratch {
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8097940Z      ^[[1m^[[94m|^[[0m            ^[[1m^[[94m------------^[[0m ^[[1m^[[94mfields in this struct^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8098340Z ^[[1m^[[94m...^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8098580Z ^[[1m^[[94m1077^[[0m ^[[1m^[[94m|^[[0m     qx: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8098930Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8099280Z ^[[1m^[[94m1078^[[0m ^[[1m^[[94m|^[[0m     qy: Vec<u64>,
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8100620Z      ^[[1m^[[94m|^[[0m     ^[[1m^[[33m^^^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8100930Z      ^[[1m^[[94m|^[[0m
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8101570Z      ^[[1m^[[94m= ^[[0m^[[1mnote^[[0m: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8102130Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8102540Z ^[[1m^[[33mwarning^[[0m: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8103180Z ^[[1m^[[92m    Finished^[[0m `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:52.8103780Z ^[[1m^[[92m     Running^[[0m unittests src/bin/icprog.rs (target/debug/deps/icprog-1563caeb4891a363)
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:53.6009510Z test f5_control::tests::compact_build_replay_binds_external_seal_and_creates_receipt_once ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:55.2969180Z test f5_control::tests::compact_build_replay_rejects_resealed_missing_receipt_and_changed_inputs ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:55.3205540Z test f5_control::tests::compact_build_replay_rejects_runtime_and_performance_claims ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:55.3220970Z test f5_control::tests::empty_cargo_home_does_not_authorize_ancestor_build_configuration ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:55.6479620Z test f5_control::tests::full_capsule_custody_is_data_only_external_sealed_and_create_only ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:56.2604960Z test f5_control::tests::full_custody_rejects_resealed_sidecars_archives_and_promoted_claims ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:56.2979890Z test f5_control::tests::mathematical_stdin_contains_only_accepted_geometry_logs_point_and_limits ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:56.2981500Z test f5_control::tests::original_audit_and_dispatch_require_the_external_registration_seal ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:56.3519460Z test f5_control::tests::simulated_transport_rejects_modified_environment_input_output_claim_and_drain ... FAILED
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:56.3521750Z test f5_control::tests::strict_control_rejects_other_targets_budgets_questions_and_unknown_fields ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:56.3524190Z test f5_control::tests::validation_capsules_cannot_dispatch_or_admit_scientific_jobs ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:56.8393930Z test f5_control_publication::tests::original_result_replays_without_search_or_fresh_claim ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:44:59.6635170Z test f5_control_publication::tests::resealed_changes_do_not_replace_original_audit_claim_or_receipts ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.8699690Z ^[[1m^[[91merror^[[0m: test failed, to rerun pass `--bin icprog`
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.8702330Z test f5_control_publication::tests::resealed_fresh_promotion_and_overwrite_are_rejected ... ok
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.8702750Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.8803610Z failures:
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.8904410Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9005560Z ---- f5_control::tests::simulated_transport_rejects_modified_environment_input_output_claim_and_drain stdout ----
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9102360Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9203640Z thread 'f5_control::tests::simulated_transport_rejects_modified_environment_input_output_claim_and_drain' (71042) panicked at src/bin/icprog/f5_control.rs:1322:84:
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9305710Z called `Result::unwrap()` on an `Err` value: "F5 exact worker invocation/output receipt differs"
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9351420Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9387870Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9409630Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9416970Z failures:
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9448630Z     f5_control::tests::simulated_transport_rejects_modified_environment_input_output_claim_and_drain
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9464530Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9477520Z test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 64 filtered out; finished in 8.14s
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9486290Z
+disclosed-sat-replay (macos-latest)	Replay disclosed source and preparation, with mutation controls	2026-10-03T22:45:00.9506630Z ##[error]Process completed with exit code 101.

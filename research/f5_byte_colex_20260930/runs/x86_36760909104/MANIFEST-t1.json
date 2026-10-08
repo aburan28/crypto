@@ -1,0 +1,307 @@
+{
+  "archive": "segments-t1.tar.gz",
+  "archive_bytes": 69111,
+  "archive_sha256": "3144f35a6628c4144aca5aaffebbcfe63735bb25a5c886a28c64774c54c3cb06",
+  "artifact_name": "f5-byte-colex-segments-t1-147fecd2bf7d0adefb369cfc3a74f81ca59db637",
+  "extract_command": "tar -xzf segments-t1.tar.gz",
+  "file_count": 34,
+  "files": [
+    {
+      "bytes": 140,
+      "path": "segment-cpu-choice-t1.json",
+      "sha256": "4801b0c22b34be378aa48c6fea5c0fea2aa8c475696a815738ae49af92cbf239"
+    },
+    {
+      "bytes": 2943,
+      "path": "segments-t1/INDEX.json",
+      "sha256": "bd2e8eacfad3a63ac63baef5d35dc1566913549f8dbd08d4bf7883721df1dd3c"
+    },
+    {
+      "bytes": 219,
+      "path": "segments-t1/frozen/attempt1/STATUS.json",
+      "sha256": "2242ef8f022f354f238100e6130abc567f695b7f30b7501b510af4b23d6ecbaf"
+    },
+    {
+      "bytes": 2557,
+      "path": "segments-t1/frozen/attempt1/isolation.jsonl",
+      "sha256": "b447ae60efa48d6d317948ae783126f4dcadadf7dd86c588827be1e7258408b3"
+    },
+    {
+      "bytes": 212811,
+      "path": "segments-t1/frozen/attempt1/paired.json",
+      "sha256": "9c33fc0634788fa8b2283b727e417acc1a7de362bdb108020dd5dd29cb946b33"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/frozen/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2454,
+      "path": "segments-t1/frozen/attempt1/stdout.txt",
+      "sha256": "b4f6cde0dbbc93db9647347d0457d7b0222ca4ddc73de25b6626936326110148"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_a/attempt1/STATUS.json",
+      "sha256": "5af4b79a949a0de64a6d59712240dd01a5c66f7fe1bd0ede7258cef3a3cf6f6c"
+    },
+    {
+      "bytes": 366,
+      "path": "segments-t1/holdout_a/attempt1/stderr.txt",
+      "sha256": "a0af9bb09a05fe16bab779e9435943cefbf1559e6aa61f16d9491f437fad3f6a"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_a/attempt1/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t1/holdout_a/attempt2/STATUS.json",
+      "sha256": "d6674831e40145b6df4258ac18ae1ca4e9ab90c090c34c2726ee4ace838fd353"
+    },
+    {
+      "bytes": 2525,
+      "path": "segments-t1/holdout_a/attempt2/isolation.jsonl",
+      "sha256": "61f275a323a205ae27b2bc68ecaa0548f4c1279727050c4757e3d2e70bfbd1ae"
+    },
+    {
+      "bytes": 212713,
+      "path": "segments-t1/holdout_a/attempt2/paired.json",
+      "sha256": "4a5d2ab54a8febc79f286e23125a5d78ee1f5bcaa4237ca55bf886cf7f84aa25"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_a/attempt2/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2465,
+      "path": "segments-t1/holdout_a/attempt2/stdout.txt",
+      "sha256": "9c45f8d241167b0e93ccf4469f8d67ce886592b45cfe14eb7471d85896ffbb9c"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_b/attempt1/STATUS.json",
+      "sha256": "33409bd22a49ca7eb638d21d39290288d5d29e04c3581106d74481fd16c32cb1"
+    },
+    {
+      "bytes": 223,
+      "path": "segments-t1/holdout_b/attempt1/stderr.txt",
+      "sha256": "2850de587b402d79a8e807e602b41daf818ec1f27e72575a9ea18f87637e8e7b"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_b/attempt1/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_b/attempt2/STATUS.json",
+      "sha256": "b4d8dd79be612e2f2c7ff52d714304b13bbbeecc072501c32d0e907eb8310499"
+    },
+    {
+      "bytes": 366,
+      "path": "segments-t1/holdout_b/attempt2/stderr.txt",
+      "sha256": "2e23394d9fba0c8cf6597b616b0a156fbb076a12816435e842d4c4408b38b913"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_b/attempt2/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t1/holdout_b/attempt3/STATUS.json",
+      "sha256": "d038f160edeabd28a8df23b684130bb83871eec8a816de1ae81a4dfbab000354"
+    },
+    {
+      "bytes": 2425,
+      "path": "segments-t1/holdout_b/attempt3/isolation.jsonl",
+      "sha256": "f28bcf3cde41d61a28c43febfbfe7e6e0dfc1494397babab0dff913ffaf58395"
+    },
+    {
+      "bytes": 212641,
+      "path": "segments-t1/holdout_b/attempt3/paired.json",
+      "sha256": "d68424f86b6c981e040447f16ca824a41afe875e1fcb79ae040b15697e70b2bc"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_b/attempt3/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2461,
+      "path": "segments-t1/holdout_b/attempt3/stdout.txt",
+      "sha256": "eebff06e06ab927226d6c79989aa2264deab1533acab83ed54773890238b0cea"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_c/attempt1/STATUS.json",
+      "sha256": "7ad68d99a906250a05dd5bd6cbc9f707e331830f5054667b216516a1b610570b"
+    },
+    {
+      "bytes": 277,
+      "path": "segments-t1/holdout_c/attempt1/stderr.txt",
+      "sha256": "462e0e22d869dba8d41e253ecbe592f2e8c71e0cc2bb9865b063040d5f026d06"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_c/attempt1/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t1/holdout_c/attempt2/STATUS.json",
+      "sha256": "cb7688dc09c2cf6161c3f8c5070e0ce3456bf8e42a87ab11f911528ab95dc62c"
+    },
+    {
+      "bytes": 2610,
+      "path": "segments-t1/holdout_c/attempt2/isolation.jsonl",
+      "sha256": "1740f847ba2b022761c73d678d6510f3b362a9254b614fa7a10bb4e4ad730227"
+    },
+    {
+      "bytes": 212430,
+      "path": "segments-t1/holdout_c/attempt2/paired.json",
+      "sha256": "cac3f73e51a9f72084c5bd9ac68d07b66c282d35a62a64bfb4b1301c9bbc637c"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_c/attempt2/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2460,
+      "path": "segments-t1/holdout_c/attempt2/stdout.txt",
+      "sha256": "dee8e22e501e0004d48ab49ad1d97a9b1d21032c49b4835b258b407cdf47181c"
+    }
+  ],
+  "head_sha": "be6c6d3d918bf3cf41b3bbac965e603949d183d6",
+  "index": {
+    "seeds": {
+      "frozen": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "frozen",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_a": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_a",
+            "threads": 1
+          },
+          {
+            "attempt": 2,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_a",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 2
+      },
+      "holdout_b": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_b",
+            "threads": 1
+          },
+          {
+            "attempt": 2,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_b",
+            "threads": 1
+          },
+          {
+            "attempt": 3,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_b",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 3
+      },
+      "holdout_c": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_c",
+            "threads": 1
+          },
+          {
+            "attempt": 2,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_c",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 2
+      }
+    },
+    "status": "qualified",
+    "threads": 1
+  },
+  "merge_sha": "147fecd2bf7d0adefb369cfc3a74f81ca59db637",
+  "run_id": 36760909104,
+  "run_url": "https://github.com/aburan28/crypto/actions/runs/36760909104",
+  "threads": 1
+}

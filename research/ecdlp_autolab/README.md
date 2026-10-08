@@ -84,6 +84,6 @@ sufficient to break the benchmark in the AutoLab budget.
 
 ## Companion in this repo
 
-This directory complements the existing `RESEARCH_AUTOLAB_LOG.md`
+This directory complements the existing `research/notes/index-calculus/RESEARCH_AUTOLAB_LOG.md`
 at the repo root with reproducible scripts and detailed phase
 write-ups.

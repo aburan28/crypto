@@ -1,0 +1,25 @@
+{
+  "schema": "ecc2k130-sigma-square-table-native-portability-failure-v1",
+  "status": "PRODUCER_FAILURE",
+  "sourceHead": "e70406038b50466a713a28d335908a8677fc73f6",
+  "github": {
+    "runId": 37044967938,
+    "jobId": 110964020466,
+    "artifactId": 11243508776,
+    "artifactZipSha256": "e3bd057b95fedde0c5f53cb436f8329bc948ed6451d05419d15ac7584e341500"
+  },
+  "failure": {
+    "compiler": "Ubuntu clang++",
+    "file": "benchmarks/sigma-square-table/replay.cpp",
+    "error": "R::fromLimbs requires const unsigned long long*, but uint64_t is unsigned long on this Linux ABI",
+    "cause": "The macOS ABI aliases uint64_t to unsigned long long and did not expose the exact API-type mismatch.",
+    "repair": "Declare the replay limb array as unsigned long long and cast packed words to that exact type."
+  },
+  "unaffectedEvidence": {
+    "sm120CompileJobPassed": true,
+    "tableCudaCompileJobPassed": true,
+    "cudaKernelSourcesChangedByRepair": false,
+    "gpuUsed": false,
+    "performanceDecision": null
+  }
+}

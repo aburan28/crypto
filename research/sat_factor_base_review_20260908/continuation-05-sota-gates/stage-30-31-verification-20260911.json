@@ -1,0 +1,423 @@
+{
+  "comparisons": {
+    "amortised_ic_over_rho_wall": 844.4784720884969,
+    "online_ic_over_rho_wall": 13.025558272121303,
+    "stage31_outer_over_rho_total_wall": 848.1439422107227
+  },
+  "full_cost_gate_passed": false,
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "schema": "koblitz_stage30_31_result_verification.v1",
+  "stage30": {
+    "build_resources": {
+      "peak_rss_bytes": 1518333952,
+      "receipt": {
+        "bytes": 783,
+        "sha256": "207e5746d15876222f7146d547e39b41b992c3cbe3e19ae665a61a7886fa53ee"
+      },
+      "total_core_seconds": 261.74,
+      "wall_seconds": 85.91
+    },
+    "recipe": {
+      "bytes": 218,
+      "sha256": "23b37e218d82a54452883b745e9a83fe51bb9c67b50cd4011d807be9ac632a6c",
+      "value": {
+        "curve_a": 0,
+        "degree": 31,
+        "schema_version": 1,
+        "spec": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              1,
+              5
+            ],
+            "kind": "divisor"
+          }
+        }
+      }
+    },
+    "seal_inventory_sha256": "2bd2da76ff5e5b1ebbabf940a830b500121e0936c229aa961fdf672547011171",
+    "search_outer_resources": {
+      "average_parallelism": 3.0663427405568435,
+      "process_tree_rss_samples": 39721,
+      "sample_interval_seconds": 0.02,
+      "sampled_peak_process_tree_rss_bytes": 389509120,
+      "total_core_seconds": 4784.267883,
+      "wall_seconds": 1560.252159591
+    },
+    "search_process_resources": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 315174912,
+      "single_core_seconds": 4295.88343,
+      "system_seconds": 0.8645689999999999,
+      "total_core_seconds": 4295.88343,
+      "user_seconds": 4295.018861,
+      "wall_seconds": 1560.2021259540002
+    },
+    "selected_summary": {
+      "abscissae": 1986,
+      "build_ms": 161.129531,
+      "census_ms": 61429.483045,
+      "cofactor_admissible": true,
+      "coverage": 0.796875,
+      "covered": 204,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 15768841.0,
+      "expected_trials": 43.92156862745098,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 5.8125,
+      "pair_table_lookups_per_trial": 3971.0,
+      "points": 3971,
+      "projected_columns": 32,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 66,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            5
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 32
+    },
+    "validation": {
+      "holdouts": 2,
+      "median_process_seconds": 47.1723375955
+    },
+    "workflow": {
+      "artifact": {
+        "digest": "sha256:0310cb60af5e2ce5847a555f37ba80ae02565b08ffba0ea8c130760dfbcc4d17",
+        "expires_at": "2026-12-10T19:38:00Z",
+        "id": 10280522287,
+        "name": "koblitz-stage30-n31-search-34639879925",
+        "size_in_bytes": 41056
+      },
+      "url": "https://github.com/aburan28/crypto/actions/runs/34639879925",
+      "wall_seconds": 1668.0
+    }
+  },
+  "stage31": {
+    "baseline": {
+      "automorphism_discount": {
+        "family": "signed Frobenius classes, A = 2n",
+        "n": 31,
+        "sqrt_2n": 7.874007874011811
+      },
+      "claim_boundary": "public_hash_unknown_scalar",
+      "elapsed_seconds": 0.297816427,
+      "ic": {
+        "amortised_seconds_per_target": 49.489658460799994,
+        "descent_seconds_per_target": 0.7633473812,
+        "descent_seconds_total": 3.816736906,
+        "descent_trials_total": 6,
+        "pair_table_seconds": 0.0,
+        "precompute_seconds": 243.631555398,
+        "verified": 5
+      },
+      "n": 31,
+      "ratio": {
+        "amortised": 0.0011841628094164196,
+        "charged": 0.07677214128628232
+      },
+      "rho": {
+        "iterations_total": 1444,
+        "max_iterations_per_restart": 268435456,
+        "seconds_per_target": 0.058603813000000005,
+        "seconds_total": 0.293019065,
+        "seed": 5931241263826122831,
+        "verified": 5
+      },
+      "subgroup_order": "1439393",
+      "targets": 5,
+      "targets_detail": [
+        {
+          "index": 0,
+          "iterations": 844,
+          "recovered": "387577",
+          "restarts": 6,
+          "seconds": 0.161167545,
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31001,
+            "target_scalar_constructed": false,
+            "x": "2120207720",
+            "y": "1880876365"
+          },
+          "verified": true,
+          "walk_group_additions": 2532
+        },
+        {
+          "index": 1,
+          "iterations": 69,
+          "recovered": "157369",
+          "restarts": 1,
+          "seconds": 0.020674619,
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31002,
+            "target_scalar_constructed": false,
+            "x": "111379212",
+            "y": "555577684"
+          },
+          "verified": true,
+          "walk_group_additions": 207
+        },
+        {
+          "index": 2,
+          "iterations": 101,
+          "recovered": "88334",
+          "restarts": 1,
+          "seconds": 0.024586252,
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 1,
+            "public_hash_seed": 31003,
+            "target_scalar_constructed": false,
+            "x": "673639366",
+            "y": "1091840695"
+          },
+          "verified": true,
+          "walk_group_additions": 303
+        },
+        {
+          "index": 3,
+          "iterations": 162,
+          "recovered": "1049842",
+          "restarts": 2,
+          "seconds": 0.042827913,
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31004,
+            "target_scalar_constructed": false,
+            "x": "985859144",
+            "y": "1812606916"
+          },
+          "verified": true,
+          "walk_group_additions": 486
+        },
+        {
+          "index": 4,
+          "iterations": 268,
+          "recovered": "1409351",
+          "restarts": 1,
+          "seconds": 0.043762736,
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31005,
+            "target_scalar_constructed": false,
+            "x": "2048889642",
+            "y": "1570827429"
+          },
+          "verified": true,
+          "walk_group_additions": 804
+        }
+      ],
+      "timing_class": {
+        "amortised": "select + collect + logs + pair-table wall divided over the targets, plus descent",
+        "charged": "algorithmic_charged: per-target descent wall (one decomposition and a lookup) against the \u03c1 walk on the same target in the same process",
+        "whole_process": "the same precompute counted once against the \u03c1 total"
+      },
+      "verdict": {
+        "amortised_crossover": false,
+        "charged_crossover": false,
+        "charged_margin": -12.025558272121303,
+        "whole_process_crossover": false
+      }
+    },
+    "build_resources": {
+      "peak_rss_bytes": 1517907968,
+      "receipt": {
+        "bytes": 783,
+        "sha256": "454a2dbe57b66565115311cd4c430d4292cdb2bd513cb78aff6b90e8d341f209"
+      },
+      "total_core_seconds": 203.32,
+      "wall_seconds": 63.48
+    },
+    "collection": {
+      "elapsed_seconds": 240.919700027,
+      "ran": true,
+      "relations_now": 11312,
+      "relations_total": 11312,
+      "stage": "collect",
+      "status": "complete",
+      "trials_now": 16384,
+      "trials_total": 16384,
+      "units": {
+        "ignored": 0,
+        "indices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "max": 64,
+        "present": 4,
+        "ran_now": 4,
+        "requested": 4,
+        "trials_per_unit": 4096
+      },
+      "worker": false
+    },
+    "factor_base_logs": 32,
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.010947887,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 4,
+        "core_nonzeros": 44,
+        "filter": {
+          "columns_in": 32,
+          "columns_out": 4,
+          "dependent_rows_dropped": 3,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 11192,
+          "merged_columns": 18,
+          "nonzeros_in": 32808,
+          "nonzeros_out": 44,
+          "rows_in": 11256,
+          "rows_out": 33,
+          "singletons_removed": 10,
+          "uncovered_columns": 0
+        },
+        "reconstructed_columns": 28,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 5,
+          "extra_steps": 0,
+          "generator_degree": 1,
+          "products": 14,
+          "sequence_length": 12
+        }
+      }
+    },
+    "seal_inventory_sha256": "852a1d949ddec70516c81db0bc875aabfc02e255f67da9131d29723eb57dc594",
+    "targets": [
+      {
+        "descent_trials": 1,
+        "elapsed_seconds": 0.751574908,
+        "expected": "not_constructed",
+        "index": 0,
+        "recovered": "387577",
+        "target": {
+          "kind": "public_hash_to_curve_cofactor",
+          "public_hash_counter": 0,
+          "public_hash_seed": 31001,
+          "target_scalar_constructed": false,
+          "x": "2120207720",
+          "y": "1880876365"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1,
+        "elapsed_seconds": 0.760236745,
+        "expected": "not_constructed",
+        "index": 1,
+        "recovered": "157369",
+        "target": {
+          "kind": "public_hash_to_curve_cofactor",
+          "public_hash_counter": 0,
+          "public_hash_seed": 31002,
+          "target_scalar_constructed": false,
+          "x": "111379212",
+          "y": "555577684"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1,
+        "elapsed_seconds": 0.737489284,
+        "expected": "not_constructed",
+        "index": 2,
+        "recovered": "88334",
+        "target": {
+          "kind": "public_hash_to_curve_cofactor",
+          "public_hash_counter": 1,
+          "public_hash_seed": 31003,
+          "target_scalar_constructed": false,
+          "x": "673639366",
+          "y": "1091840695"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1,
+        "elapsed_seconds": 0.742004113,
+        "expected": "not_constructed",
+        "index": 3,
+        "recovered": "1049842",
+        "target": {
+          "kind": "public_hash_to_curve_cofactor",
+          "public_hash_counter": 0,
+          "public_hash_seed": 31004,
+          "target_scalar_constructed": false,
+          "x": "985859144",
+          "y": "1812606916"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 2,
+        "elapsed_seconds": 0.825431856,
+        "expected": "not_constructed",
+        "index": 4,
+        "recovered": "1409351",
+        "target": {
+          "kind": "public_hash_to_curve_cofactor",
+          "public_hash_counter": 0,
+          "public_hash_seed": 31005,
+          "target_scalar_constructed": false,
+          "x": "2048889642",
+          "y": "1570827429"
+        },
+        "verified": true
+      }
+    ],
+    "workflow": {
+      "artifact": {
+        "digest": "sha256:4e20284b44c32c52a4e1ca2d36ac0bd98f8de311b0973517ce981c8394b89a41",
+        "expires_at": "2026-12-10T20:08:27Z",
+        "id": 10280269378,
+        "name": "koblitz-stage31-n31-unknown-scalar-34642615206",
+        "size_in_bytes": 198343
+      },
+      "url": "https://github.com/aburan28/crypto/actions/runs/34642615206",
+      "wall_seconds": 340.0
+    },
+    "workflow_outer_resources": {
+      "average_parallelism": 3.884977720068505,
+      "process_tree_rss_samples": 6787,
+      "sample_interval_seconds": 0.02,
+      "sampled_peak_process_tree_rss_bytes": 203698176,
+      "total_core_seconds": 965.5037729999999,
+      "wall_seconds": 248.522344932
+    },
+    "workflow_process_resources": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 157622272,
+      "single_core_seconds": 905.399079,
+      "system_seconds": 0.250344,
+      "total_core_seconds": 905.399079,
+      "user_seconds": 905.148735,
+      "wall_seconds": 248.48423623400004
+    }
+  },
+  "status": "validated_factor_base_and_five_public_unknown_scalars_verified"
+}

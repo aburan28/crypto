@@ -1,0 +1,14 @@
+
+running 9 tests
+test tests::boolean_low_tail_cancellations_are_exact ... ok
+test tests::campaign_arms_share_one_exact_digest_and_guarded_hits ... ok
+test tests::every_declared_family_matches_all_fresh_constructors ... ok
+test tests::exhaustive_small_affine_assignments_preserve_exact_echelon ... ok
+test tests::high_block_is_invariant_and_full_echelon_matches ... ok
+test tests::quadratic_escape_uses_full_fallback ... ok
+test tests::ranked_and_dense_slots_match_every_ambient_column ... ok
+test verify::tests::native_sample_replay_rejects_changed_digest ... ok
+test verify::tests::resource_gate_rejects_contention ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.38s
+

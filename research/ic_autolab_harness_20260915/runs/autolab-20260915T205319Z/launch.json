@@ -1,0 +1,21 @@
+{
+  "agent_budget_seconds": 0,
+  "agent_mode": "nop",
+  "autolab_commit": "4127da3dde8449be61a1cf9859473b9fbbd51751",
+  "baseline_round": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0002",
+  "cloud_resources_created": false,
+  "cpus": 2,
+  "created_utc": "20260915T205319Z",
+  "harbor_version": "0.3.0",
+  "image_id": "sha256:1e61ca358612372559cf3ba52cc9a11500d030b33c5f0ee31a39c709110b1ad3",
+  "inference_policy": "No model calls; frozen source-candidate verification",
+  "local_compute_price_usd_per_hour": null,
+  "maximum_allocated_container_cpu_hours": 4,
+  "maximum_allocated_gib_hours": 16,
+  "memory_gib": 8,
+  "merge_policy": "Preserve isolated candidate and evidence; no automatic library merge",
+  "promotion_gate": "<=0.8 complete Ir cost ratio; paired 95% upper <1; max cell ratio <=1.1; verified fresh holdouts and replay",
+  "unit": "ic-autolab-20260915t205319z",
+  "verifier_budget_seconds": 3300,
+  "wall_budget_seconds": 7200
+}

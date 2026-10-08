@@ -1,0 +1,2227 @@
+{
+  "audited_report_rows": 16,
+  "exact_distinct_queries": 137,
+  "panel_sha256": "f795b7c896aca031eb37e630c14767b36e7f3922cef7f20fe9438748069cad67",
+  "parent_evidence_sha256": "e0ce19fc28c58e2dc1cae9649a16af74099016fff8183e5ce69f65b39c804f02",
+  "rows": [
+    {
+      "analysis_status": "UNKNOWN_NO_REPORT",
+      "attempts": null,
+      "bounded_incomplete": null,
+      "cell": "n17a1",
+      "exact_feasible": null,
+      "exact_infeasible": null,
+      "feasible_but_incomplete": null,
+      "final_rank": null,
+      "observed_witnesses": null,
+      "original_run_id": null,
+      "original_status": "TIMEOUT",
+      "solver": "f4"
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 104,
+      "bounded_incomplete": 75,
+      "cell": "n17a1",
+      "exact_feasible": 33,
+      "exact_infeasible": 71,
+      "feasible_but_incomplete": 4,
+      "final_rank": 29,
+      "folded_columns": 29,
+      "geometric_base_points": 63,
+      "observed_witnesses": 29,
+      "original_run_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h09c464aed32eW4705c3a3ef77R2",
+      "original_status": "VERIFIED_COMPLETE",
+      "queries": [
+        {
+          "a": 19198,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 42801,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            40,
+            42,
+            24
+          ],
+          "measured_outcome": "witness",
+          "trial": 1
+        },
+        {
+          "a": 25047,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            14,
+            15,
+            6
+          ],
+          "measured_outcome": "witness",
+          "trial": 2
+        },
+        {
+          "a": 7657,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        },
+        {
+          "a": 63975,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            44,
+            58,
+            9
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 4
+        },
+        {
+          "a": 26369,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 5
+        },
+        {
+          "a": 22924,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 6
+        },
+        {
+          "a": 5279,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 7
+        },
+        {
+          "a": 18083,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 8
+        },
+        {
+          "a": 38507,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            6,
+            44,
+            0
+          ],
+          "measured_outcome": "witness",
+          "trial": 9
+        },
+        {
+          "a": 14888,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 10
+        },
+        {
+          "a": 33571,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 11
+        },
+        {
+          "a": 5109,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            54,
+            55,
+            18
+          ],
+          "measured_outcome": "witness",
+          "trial": 12
+        },
+        {
+          "a": 8865,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 13
+        },
+        {
+          "a": 10420,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 14
+        },
+        {
+          "a": 33952,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 15
+        },
+        {
+          "a": 26257,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 16
+        },
+        {
+          "a": 4361,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            32,
+            33,
+            18
+          ],
+          "measured_outcome": "witness",
+          "trial": 17
+        },
+        {
+          "a": 65383,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 18
+        },
+        {
+          "a": 6053,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 19
+        },
+        {
+          "a": 46989,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 20
+        },
+        {
+          "a": 47536,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 21
+        },
+        {
+          "a": 36726,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 22
+        },
+        {
+          "a": 37886,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 23
+        },
+        {
+          "a": 34225,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 24
+        },
+        {
+          "a": 5822,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 25
+        },
+        {
+          "a": 19621,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            29,
+            36,
+            27
+          ],
+          "measured_outcome": "witness",
+          "trial": 26
+        },
+        {
+          "a": 35717,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 27
+        },
+        {
+          "a": 40193,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 28
+        },
+        {
+          "a": 47470,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 29
+        },
+        {
+          "a": 38513,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            32,
+            40,
+            9
+          ],
+          "measured_outcome": "witness",
+          "trial": 30
+        },
+        {
+          "a": 3288,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            2,
+            19,
+            2
+          ],
+          "measured_outcome": "witness",
+          "trial": 31
+        },
+        {
+          "a": 18560,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            35,
+            52,
+            27
+          ],
+          "measured_outcome": "witness",
+          "trial": 32
+        },
+        {
+          "a": 3372,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 33
+        },
+        {
+          "a": 5831,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 34
+        },
+        {
+          "a": 32970,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 35
+        },
+        {
+          "a": 51873,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 36
+        },
+        {
+          "a": 21165,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 37
+        },
+        {
+          "a": 16246,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 38
+        },
+        {
+          "a": 10244,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            38,
+            62,
+            20
+          ],
+          "measured_outcome": "witness",
+          "trial": 39
+        },
+        {
+          "a": 28991,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 40
+        },
+        {
+          "a": 46031,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            15,
+            58,
+            8
+          ],
+          "measured_outcome": "witness",
+          "trial": 41
+        },
+        {
+          "a": 13901,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 42
+        },
+        {
+          "a": 32697,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 43
+        },
+        {
+          "a": 29295,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 44
+        },
+        {
+          "a": 54706,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            36,
+            43,
+            17
+          ],
+          "measured_outcome": "witness",
+          "trial": 45
+        },
+        {
+          "a": 36732,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 46
+        },
+        {
+          "a": 61659,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 47
+        },
+        {
+          "a": 46098,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 48
+        },
+        {
+          "a": 52862,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 49
+        },
+        {
+          "a": 36232,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 50
+        },
+        {
+          "a": 11544,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 51
+        },
+        {
+          "a": 2530,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 52
+        },
+        {
+          "a": 25144,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 53
+        },
+        {
+          "a": 1784,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 54
+        },
+        {
+          "a": 37731,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 55
+        },
+        {
+          "a": 31978,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 56
+        },
+        {
+          "a": 24306,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            14,
+            18,
+            1
+          ],
+          "measured_outcome": "witness",
+          "trial": 57
+        },
+        {
+          "a": 54860,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 58
+        },
+        {
+          "a": 16377,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            45,
+            55,
+            7
+          ],
+          "measured_outcome": "witness",
+          "trial": 59
+        },
+        {
+          "a": 32733,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            13,
+            34,
+            5
+          ],
+          "measured_outcome": "witness",
+          "trial": 60
+        },
+        {
+          "a": 12439,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 61
+        },
+        {
+          "a": 53511,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 62
+        },
+        {
+          "a": 18200,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 63
+        },
+        {
+          "a": 13691,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 64
+        },
+        {
+          "a": 38756,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 65
+        },
+        {
+          "a": 40382,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            28,
+            37,
+            5
+          ],
+          "measured_outcome": "witness",
+          "trial": 66
+        },
+        {
+          "a": 27858,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            54,
+            62,
+            42
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 67
+        },
+        {
+          "a": 65580,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 68
+        },
+        {
+          "a": 12842,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 69
+        },
+        {
+          "a": 38519,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            41,
+            50,
+            24
+          ],
+          "measured_outcome": "witness",
+          "trial": 70
+        },
+        {
+          "a": 52899,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            38,
+            61,
+            26
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 71
+        },
+        {
+          "a": 2197,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 72
+        },
+        {
+          "a": 59691,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 73
+        },
+        {
+          "a": 6474,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 74
+        },
+        {
+          "a": 47448,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            58,
+            61,
+            53
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 75
+        },
+        {
+          "a": 42973,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 76
+        },
+        {
+          "a": 27572,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 77
+        },
+        {
+          "a": 55879,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 78
+        },
+        {
+          "a": 52415,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            47,
+            62,
+            21
+          ],
+          "measured_outcome": "witness",
+          "trial": 79
+        },
+        {
+          "a": 30898,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 80
+        },
+        {
+          "a": 34260,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            17,
+            40,
+            15
+          ],
+          "measured_outcome": "witness",
+          "trial": 81
+        },
+        {
+          "a": 10922,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 82
+        },
+        {
+          "a": 25677,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 83
+        },
+        {
+          "a": 64225,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            38,
+            55,
+            5
+          ],
+          "measured_outcome": "witness",
+          "trial": 84
+        },
+        {
+          "a": 26062,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            49,
+            52,
+            28
+          ],
+          "measured_outcome": "witness",
+          "trial": 85
+        },
+        {
+          "a": 61937,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            41,
+            60,
+            27
+          ],
+          "measured_outcome": "witness",
+          "trial": 86
+        },
+        {
+          "a": 37074,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            41,
+            47,
+            10
+          ],
+          "measured_outcome": "witness",
+          "trial": 87
+        },
+        {
+          "a": 48777,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 88
+        },
+        {
+          "a": 59291,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 89
+        },
+        {
+          "a": 62222,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 90
+        },
+        {
+          "a": 40959,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            38,
+            48,
+            25
+          ],
+          "measured_outcome": "witness",
+          "trial": 91
+        },
+        {
+          "a": 1812,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            19,
+            58,
+            9
+          ],
+          "measured_outcome": "witness",
+          "trial": 92
+        },
+        {
+          "a": 38113,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 93
+        },
+        {
+          "a": 26464,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            12,
+            48,
+            1
+          ],
+          "measured_outcome": "witness",
+          "trial": 94
+        },
+        {
+          "a": 57451,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            18,
+            62,
+            14
+          ],
+          "measured_outcome": "witness",
+          "trial": 95
+        },
+        {
+          "a": 32764,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 96
+        },
+        {
+          "a": 41869,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 97
+        },
+        {
+          "a": 52960,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 98
+        },
+        {
+          "a": 2645,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 99
+        },
+        {
+          "a": 14470,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 100
+        },
+        {
+          "a": 6333,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            21,
+            57,
+            11
+          ],
+          "measured_outcome": "witness",
+          "trial": 101
+        },
+        {
+          "a": 3744,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            25,
+            37,
+            4
+          ],
+          "measured_outcome": "witness",
+          "trial": 102
+        },
+        {
+          "a": 15442,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 103
+        }
+      ],
+      "solver": "f5",
+      "usable_base_points": 62
+    },
+    {
+      "analysis_status": "UNKNOWN_NO_REPORT",
+      "attempts": null,
+      "bounded_incomplete": null,
+      "cell": "n17a1",
+      "exact_feasible": null,
+      "exact_infeasible": null,
+      "feasible_but_incomplete": null,
+      "final_rank": null,
+      "observed_witnesses": null,
+      "original_run_id": null,
+      "original_status": "TIMEOUT",
+      "solver": "sat_xor"
+    },
+    {
+      "analysis_status": "UNKNOWN_NO_REPORT",
+      "attempts": null,
+      "bounded_incomplete": null,
+      "cell": "n17a1",
+      "exact_feasible": null,
+      "exact_infeasible": null,
+      "feasible_but_incomplete": null,
+      "final_rank": null,
+      "observed_witnesses": null,
+      "original_run_id": null,
+      "original_status": "TIMEOUT",
+      "solver": "sat_cnf"
+    },
+    {
+      "analysis_status": "UNKNOWN_NO_REPORT",
+      "attempts": null,
+      "bounded_incomplete": null,
+      "cell": "n19a0",
+      "exact_feasible": null,
+      "exact_infeasible": null,
+      "feasible_but_incomplete": null,
+      "final_rank": null,
+      "observed_witnesses": null,
+      "original_run_id": null,
+      "original_status": "TIMEOUT",
+      "solver": "f4"
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 24,
+      "bounded_incomplete": 22,
+      "cell": "n19a0",
+      "exact_feasible": 2,
+      "exact_infeasible": 22,
+      "feasible_but_incomplete": 0,
+      "final_rank": 2,
+      "folded_columns": 27,
+      "geometric_base_points": 65,
+      "observed_witnesses": 2,
+      "original_run_id": "IC1N19Ckb0fb62PDP3f5RCsampleLAgaussTDpdpISO0hd28f076c9755Wc6063b39bb23R6",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 38307,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 110293,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 15761,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 81459,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            22,
+            45,
+            4
+          ],
+          "measured_outcome": "witness",
+          "trial": 3
+        },
+        {
+          "a": 62838,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 4
+        },
+        {
+          "a": 101957,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 5
+        },
+        {
+          "a": 125093,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 6
+        },
+        {
+          "a": 57952,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 7
+        },
+        {
+          "a": 29375,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 8
+        },
+        {
+          "a": 70943,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 9
+        },
+        {
+          "a": 104177,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            46,
+            63,
+            14
+          ],
+          "measured_outcome": "witness",
+          "trial": 10
+        },
+        {
+          "a": 121340,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 11
+        },
+        {
+          "a": 4633,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 12
+        },
+        {
+          "a": 50209,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 13
+        },
+        {
+          "a": 20791,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 14
+        },
+        {
+          "a": 23097,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 15
+        },
+        {
+          "a": 77462,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 16
+        },
+        {
+          "a": 8701,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 17
+        },
+        {
+          "a": 130466,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 18
+        },
+        {
+          "a": 22920,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 19
+        },
+        {
+          "a": 93762,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 20
+        },
+        {
+          "a": 90026,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 21
+        },
+        {
+          "a": 73283,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 22
+        },
+        {
+          "a": 75598,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 23
+        }
+      ],
+      "solver": "f5",
+      "usable_base_points": 62
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 24,
+      "bounded_incomplete": 24,
+      "cell": "n19a0",
+      "exact_feasible": 2,
+      "exact_infeasible": 22,
+      "feasible_but_incomplete": 2,
+      "final_rank": 0,
+      "folded_columns": 27,
+      "geometric_base_points": 65,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N19Ckb0fb62PDP3satxorRCsampleLAgaussTDpdpISO0hbc4c83bd7c51Wc6063b39bb23R7",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 38307,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 110293,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 15761,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 81459,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            22,
+            45,
+            4
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 3
+        },
+        {
+          "a": 62838,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 4
+        },
+        {
+          "a": 101957,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 5
+        },
+        {
+          "a": 125093,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 6
+        },
+        {
+          "a": 57952,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 7
+        },
+        {
+          "a": 29375,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 8
+        },
+        {
+          "a": 70943,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 9
+        },
+        {
+          "a": 104177,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            46,
+            63,
+            14
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 10
+        },
+        {
+          "a": 121340,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 11
+        },
+        {
+          "a": 4633,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 12
+        },
+        {
+          "a": 50209,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 13
+        },
+        {
+          "a": 20791,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 14
+        },
+        {
+          "a": 23097,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 15
+        },
+        {
+          "a": 77462,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 16
+        },
+        {
+          "a": 8701,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 17
+        },
+        {
+          "a": 130466,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 18
+        },
+        {
+          "a": 22920,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 19
+        },
+        {
+          "a": 93762,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 20
+        },
+        {
+          "a": 90026,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 21
+        },
+        {
+          "a": 73283,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 22
+        },
+        {
+          "a": 75598,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 23
+        }
+      ],
+      "solver": "sat_xor",
+      "usable_base_points": 62
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 24,
+      "bounded_incomplete": 24,
+      "cell": "n19a0",
+      "exact_feasible": 2,
+      "exact_infeasible": 22,
+      "feasible_but_incomplete": 2,
+      "final_rank": 0,
+      "folded_columns": 27,
+      "geometric_base_points": 65,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N19Ckb0fb62PDP3satcnfRCsampleLAgaussTDpdpISO0had484b03242dWc6063b39bb23R8",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 38307,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 110293,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 15761,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 81459,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            22,
+            45,
+            4
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 3
+        },
+        {
+          "a": 62838,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 4
+        },
+        {
+          "a": 101957,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 5
+        },
+        {
+          "a": 125093,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 6
+        },
+        {
+          "a": 57952,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 7
+        },
+        {
+          "a": 29375,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 8
+        },
+        {
+          "a": 70943,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 9
+        },
+        {
+          "a": 104177,
+          "b": 0,
+          "exact_feasible": true,
+          "exact_witness_indices": [
+            46,
+            63,
+            14
+          ],
+          "measured_outcome": "incomplete",
+          "trial": 10
+        },
+        {
+          "a": 121340,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 11
+        },
+        {
+          "a": 4633,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 12
+        },
+        {
+          "a": 50209,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 13
+        },
+        {
+          "a": 20791,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 14
+        },
+        {
+          "a": 23097,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 15
+        },
+        {
+          "a": 77462,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 16
+        },
+        {
+          "a": 8701,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 17
+        },
+        {
+          "a": 130466,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 18
+        },
+        {
+          "a": 22920,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 19
+        },
+        {
+          "a": 93762,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 20
+        },
+        {
+          "a": 90026,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 21
+        },
+        {
+          "a": 73283,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 22
+        },
+        {
+          "a": 75598,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 23
+        }
+      ],
+      "solver": "sat_cnf",
+      "usable_base_points": 62
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 33,
+      "geometric_base_points": 75,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb0fb72PDP3f4RCsampleLAgaussTDpdpISO0h122a44f76413Wbb93f431a349R9",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 613468,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 1766287,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 252404,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 1304521,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "f4",
+      "usable_base_points": 72
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 33,
+      "geometric_base_points": 75,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb0fb72PDP3f5RCsampleLAgaussTDpdpISO0ha1baba8b26b0Wbb93f431a349R10",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 613468,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 1766287,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 252404,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 1304521,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "f5",
+      "usable_base_points": 72
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 33,
+      "geometric_base_points": 75,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb0fb72PDP3satxorRCsampleLAgaussTDpdpISO0he1730c7649ecWbb93f431a349R11",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 613468,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 1766287,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 252404,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 1304521,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "sat_xor",
+      "usable_base_points": 72
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 33,
+      "geometric_base_points": 75,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb0fb72PDP3satcnfRCsampleLAgaussTDpdpISO0hb7e884caff24Wbb93f431a349R12",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 613468,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 1766287,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 252404,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 1304521,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "sat_cnf",
+      "usable_base_points": 72
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a1",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 23,
+      "geometric_base_points": 53,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb1fb52PDP3f4RCsampleLAgaussTDpdpISO0h130cbe989b4cW230198bf40b4R13",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 34527,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 3536955,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 505434,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 2612278,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "f4",
+      "usable_base_points": 52
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a1",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 23,
+      "geometric_base_points": 53,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb1fb52PDP3f5RCsampleLAgaussTDpdpISO0hab2bc24e8b55W230198bf40b4R14",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 34527,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 3536955,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 505434,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 2612278,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "f5",
+      "usable_base_points": 52
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a1",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 23,
+      "geometric_base_points": 53,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb1fb52PDP3satxorRCsampleLAgaussTDpdpISO0hd6b8fed60562W230198bf40b4R15",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 34527,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 3536955,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 505434,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 2612278,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "sat_xor",
+      "usable_base_points": 52
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 4,
+      "bounded_incomplete": 4,
+      "cell": "n23a1",
+      "exact_feasible": 0,
+      "exact_infeasible": 4,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 23,
+      "geometric_base_points": 53,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N23Ckb1fb52PDP3satcnfRCsampleLAgaussTDpdpISO0h1c2837b86f70W230198bf40b4R16",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 34527,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        },
+        {
+          "a": 3536955,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 1
+        },
+        {
+          "a": 505434,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 2
+        },
+        {
+          "a": 2612278,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 3
+        }
+      ],
+      "solver": "sat_cnf",
+      "usable_base_points": 52
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 1,
+      "bounded_incomplete": 1,
+      "cell": "n31a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 1,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 27,
+      "geometric_base_points": 69,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N31Ckb0fb66PDP3f4RCsampleLAgaussTDpdpISO0ha91a42547665Wffcf600a37f4R17",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 421319,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        }
+      ],
+      "solver": "f4",
+      "usable_base_points": 66
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 1,
+      "bounded_incomplete": 1,
+      "cell": "n31a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 1,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 27,
+      "geometric_base_points": 69,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N31Ckb0fb66PDP3f5RCsampleLAgaussTDpdpISO0h735b723f9b4cWffcf600a37f4R18",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 421319,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        }
+      ],
+      "solver": "f5",
+      "usable_base_points": 66
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 1,
+      "bounded_incomplete": 1,
+      "cell": "n31a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 1,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 27,
+      "geometric_base_points": 69,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N31Ckb0fb66PDP3satxorRCsampleLAgaussTDpdpISO0h81f5717b175fWffcf600a37f4R19",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 421319,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        }
+      ],
+      "solver": "sat_xor",
+      "usable_base_points": 66
+    },
+    {
+      "analysis_status": "PASS_EXACT_GROUP_ORACLE",
+      "attempts": 1,
+      "bounded_incomplete": 1,
+      "cell": "n31a0",
+      "exact_feasible": 0,
+      "exact_infeasible": 1,
+      "feasible_but_incomplete": 0,
+      "final_rank": 0,
+      "folded_columns": 27,
+      "geometric_base_points": 69,
+      "observed_witnesses": 0,
+      "original_run_id": "IC1N31Ckb0fb66PDP3satcnfRCsampleLAgaussTDpdpISO0hfb154e2688c5Wffcf600a37f4R20",
+      "original_status": "BOUNDED_INCOMPLETE_REPORT",
+      "queries": [
+        {
+          "a": 421319,
+          "b": 0,
+          "exact_feasible": false,
+          "exact_witness_indices": null,
+          "measured_outcome": "incomplete",
+          "trial": 0
+        }
+      ],
+      "solver": "sat_cnf",
+      "usable_base_points": 66
+    }
+  ],
+  "runner_sha256": "2cba8a8af891c4d83fced3778f0bef34647f125493760fc97cda3cf069f453f8",
+  "schema_version": 1,
+  "scope": "retained ordinary queries only; no new worker run or speedup",
+  "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+  "status": "EXACT_DISCLOSED_QUERY_AUDIT",
+  "timeout_rows": 4,
+  "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+}

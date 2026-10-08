@@ -47,7 +47,8 @@ fn md4_from_state(state_in: &[u32; 4], msg: &[u8], prior_bytes: u64) -> [u8; 16]
 pub fn run() -> Report {
     let mut r = Report::new(30, "MD4 length extension");
     let key = b"YELLOW SUBMARINE";
-    let msg: &[u8] = b"comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon";
+    let msg: &[u8] =
+        b"comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon";
     let tag = md4_mac(key, msg);
     let suffix = b";admin=true";
     let kl = key.len();

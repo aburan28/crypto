@@ -1,0 +1,43 @@
+M3 d= 4 dim=[71, 71, 71, 71, 71] certificate=True
+M3 d= 5 dim=[97, 97, 97, 97, 97] certificate=True
+M3 d= 6 dim=[123, 123, 123, 123, 123] certificate=True
+M3 d= 7 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d= 8 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=10 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=12 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=16 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=24 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=32 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=40 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=44 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=45 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=48 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=64 dim=[131, 131, 131, 131, 131] certificate=False
+M3 d=80 dim=[131, 131, 131, 131, 131] certificate=False
+{
+  "certificate_alive_at_d": [
+    4,
+    5,
+    6
+  ],
+  "certificate_dead_at_d": [
+    7,
+    8,
+    10,
+    12,
+    16,
+    24,
+    32,
+    40,
+    44,
+    45,
+    48,
+    64,
+    80
+  ],
+  "largest_d_with_certificate": 6,
+  "existence_threshold_d": 45,
+  "certificate_available_at_existence_threshold": false,
+  "soundness_gate_passed": true,
+  "conclusion": "The F2-subspace structure yields a genuine linear NO-certificate, computable in time polynomial in d and requiring no search at all. It exists only while the affine span of the S4 value set misses 0, and the span saturates F_2^131 at small d. The cheap regime therefore ends far below the d at which decompositions begin to exist, and the two never overlap. The certificate is also one-sided: it proves absence and never produces a witness."
+}

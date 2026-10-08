@@ -77,8 +77,7 @@ pub fn parse_handshake(buf: &[u8]) -> Option<ParsedHandshake> {
         return None;
     }
     let msg_type = HandshakeType::from_u8(buf[0])?;
-    let len =
-        ((buf[1] as usize) << 16) | ((buf[2] as usize) << 8) | (buf[3] as usize);
+    let len = ((buf[1] as usize) << 16) | ((buf[2] as usize) << 8) | (buf[3] as usize);
     if buf.len() < 4 + len {
         return None;
     }
@@ -253,7 +252,7 @@ impl ServerHello {
         p += sid_len;
         p += 2; // cipher_suite
         p += 1; // legacy_compression_method
-        // Extensions
+                // Extensions
         if body.len() < p + 2 {
             return None;
         }
@@ -335,8 +334,7 @@ fn parse_key_share_x25519(ext_bytes: &[u8]) -> Option<[u8; 32]> {
     let mut p = 0;
     while p + 4 <= ext_bytes.len() {
         let ext_type = u16::from_be_bytes([ext_bytes[p], ext_bytes[p + 1]]);
-        let ext_len =
-            u16::from_be_bytes([ext_bytes[p + 2], ext_bytes[p + 3]]) as usize;
+        let ext_len = u16::from_be_bytes([ext_bytes[p + 2], ext_bytes[p + 3]]) as usize;
         if p + 4 + ext_len > ext_bytes.len() {
             return None;
         }
@@ -372,8 +370,7 @@ fn parse_key_share_body(body: &[u8]) -> Option<[u8; 32]> {
     let mut q = 2;
     while q + 4 <= 2 + total {
         let group = u16::from_be_bytes([body[q], body[q + 1]]);
-        let kx_len =
-            u16::from_be_bytes([body[q + 2], body[q + 3]]) as usize;
+        let kx_len = u16::from_be_bytes([body[q + 2], body[q + 3]]) as usize;
         if q + 4 + kx_len > 2 + total {
             return None;
         }
@@ -446,7 +443,9 @@ mod tests {
 
     #[test]
     fn finished_round_trip() {
-        let f = Finished { verify_data: vec![1, 2, 3, 4, 5, 6, 7, 8] };
+        let f = Finished {
+            verify_data: vec![1, 2, 3, 4, 5, 6, 7, 8],
+        };
         let body = f.encode();
         let f2 = Finished::decode(&body);
         assert_eq!(f2.verify_data, f.verify_data);

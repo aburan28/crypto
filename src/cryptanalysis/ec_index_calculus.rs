@@ -278,7 +278,7 @@ pub fn semaev_s4_in_x4(
     let s4 = sub_polys(&a_sq, &bc);
 
     [
-        s4.get(0).cloned().unwrap_or(zero.clone()),
+        s4.first().cloned().unwrap_or(zero.clone()),
         s4.get(1).cloned().unwrap_or(zero.clone()),
         s4.get(2).cloned().unwrap_or(zero.clone()),
         s4.get(3).cloned().unwrap_or(zero.clone()),
@@ -332,7 +332,7 @@ pub fn find_roots_fp(coeffs: &[FieldElement], p: &BigUint) -> Vec<FieldElement> 
         // gets empty.  See doc comment.
         return roots;
     }
-    let p_u64 = p.to_u64_digits().get(0).copied().unwrap_or(0);
+    let p_u64 = p.to_u64_digits().first().copied().unwrap_or(0);
     let coeffs_slice = &coeffs[..=deg];
     for v in 0..p_u64 {
         let elt = FieldElement::new(BigUint::from(v), p.clone());
@@ -737,7 +737,7 @@ pub struct FactorBaseEntry {
 pub fn build_factor_base(curve: &CurveParams, target_size: usize) -> Vec<FactorBaseEntry> {
     let mut out = Vec::with_capacity(target_size);
     let mut x = BigUint::one();
-    while out.len() < target_size && &x < &curve.p {
+    while out.len() < target_size && x < curve.p {
         // rhs = x³ + ax + b mod p
         let xf = curve.fe(x.clone());
         let rhs_value = xf
@@ -929,10 +929,7 @@ fn try_finalise(
             let p_j = if s_j > 0 { f_j.clone() } else { f_j.neg() };
             let lhs = p_i.add(&p_j, &a_fe);
             if &lhs == r {
-                let i_idx = match factor_base.iter().position(|fb| &fb.point == f_i) {
-                    Some(k) => k,
-                    None => return None,
-                };
+                let i_idx = factor_base.iter().position(|fb| &fb.point == f_i)?;
                 let mut entries = Vec::new();
                 if i_idx == j {
                     // Special case: same factor base index, combine.
@@ -1095,15 +1092,91 @@ fn try_finalise_s4(
 // ── Gaussian elimination mod n ─────────────────────────────────────────
 /// **Solve** `M · y ≡ rhs (mod n)` for `y`, where `M` is given as rows
 /// and `n` is prime (so every nonzero element is invertible).  Returns
-/// `None` if the system is inconsistent or under-determined.
+/// `None` if the system is inconsistent, under-determined (any column
+/// lacks a pivot), or a pivot is not invertible mod `n`.
 ///
-/// Used by the index-calculus driver to recover `log_G Q` from the
-/// matrix of relations.
+/// Callers that need only some unknowns pinned (typically `log_G Q`
+/// with unused factor-base columns left free) use
+/// [`gaussian_eliminate_mod_n_particular`] and check
+/// [`ModNSolution::determined`] for the columns they read.
+///
+/// `matrix` and `rhs` are left in reduced row-echelon form.
 pub fn gaussian_eliminate_mod_n(
-    matrix: &mut Vec<Vec<BigUint>>,
-    rhs: &mut Vec<BigUint>,
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
     n: &BigUint,
 ) -> Option<Vec<BigUint>> {
+    let sol = gaussian_eliminate_mod_n_particular(matrix, rhs, n)?;
+    sol.determined.iter().all(|&d| d).then_some(sol.values)
+}
+
+/// A consistent solution of `M · y ≡ rhs (mod n)` from
+/// [`gaussian_eliminate_mod_n_particular`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModNSolution {
+    /// The particular solution with every free unknown set to zero.
+    pub values: Vec<BigUint>,
+    /// `determined[c]` is true exactly when `y_c` takes the same value
+    /// in every solution: `c` has a pivot and its reduced row has no
+    /// entry in a free column.  Only determined values are answers.
+    pub determined: Vec<bool>,
+    /// Rank of `M`.
+    pub rank: usize,
+}
+
+/// Rank-checked Gauss–Jordan elimination mod prime `n` that tolerates
+/// free unknowns.  Returns `None` only when the system is inconsistent
+/// or a pivot is not invertible; otherwise the particular solution with
+/// free unknowns zero and, per column, whether that unknown is
+/// determined.  A value whose `determined` flag is false is arbitrary
+/// and must not be reported as a logarithm.
+pub fn gaussian_eliminate_mod_n_particular(
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
+    n: &BigUint,
+) -> Option<ModNSolution> {
+    let m = matrix.first().map(|r| r.len()).unwrap_or(0);
+    let n64 = n
+        .to_u64_digits()
+        .first()
+        .copied()
+        .filter(|&v| n.bits() <= 64 && v > 1);
+    // Both paths leave `matrix`/`rhs` in reduced row-echelon form with
+    // pivot rows 0..rank, and return the pivot row of each column.
+    let pivot_rows = match n64 {
+        Some(n64) => gaussian_eliminate_mod_u64(matrix, rhs, n64)?,
+        None => gaussian_eliminate_mod_biguint(matrix, rhs, n)?,
+    };
+    let rank = pivot_rows.iter().filter(|&&r| r != usize::MAX).count();
+    // Rows below the pivots are all-zero on the left; a nonzero
+    // right-hand side there is `0 = c`.
+    if rhs.iter().skip(rank).any(|v| !(v % n).is_zero()) {
+        return None;
+    }
+    let free: Vec<usize> = (0..m).filter(|&c| pivot_rows[c] == usize::MAX).collect();
+    let mut values = vec![BigUint::zero(); m];
+    let mut determined = vec![false; m];
+    for c in 0..m {
+        let pr = pivot_rows[c];
+        if pr == usize::MAX {
+            continue;
+        }
+        values[c] = rhs[pr].clone();
+        determined[c] = free.iter().all(|&f| matrix[pr][f].is_zero());
+    }
+    Some(ModNSolution {
+        values,
+        determined,
+        rank,
+    })
+}
+
+/// The arbitrary-precision path of [`gaussian_eliminate_mod_n`].
+fn gaussian_eliminate_mod_biguint(
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
+    n: &BigUint,
+) -> Option<Vec<usize>> {
     let rows = matrix.len();
     let cols = matrix.first().map(|r| r.len()).unwrap_or(0);
     let m = cols; // number of unknowns
@@ -1133,8 +1206,12 @@ pub fn gaussian_eliminate_mod_n(
         pivot_rows[col] = row;
 
         // Normalise the pivot row.
+        // Left of `col` the pivot row is already zero (earlier pivot
+        // columns were eliminated from it, free columns were zero in
+        // every row still below the diagonal), so every sweep starts
+        // at `col`.
         let inv = mod_inverse(&matrix[row][col], n)?;
-        for c in 0..m {
+        for c in col..m {
             matrix[row][c] = (&matrix[row][c] * &inv) % n;
         }
         rhs[row] = (&rhs[row] * &inv) % n;
@@ -1148,7 +1225,7 @@ pub fn gaussian_eliminate_mod_n(
                 continue;
             }
             let factor = matrix[r][col].clone();
-            for c in 0..m {
+            for c in col..m {
                 let term = (&factor * &matrix[row][c]) % n;
                 matrix[r][c] = (&matrix[r][c] + n - term) % n;
             }
@@ -1159,22 +1236,119 @@ pub fn gaussian_eliminate_mod_n(
         col += 1;
     }
 
-    // Read off the solution.  Any column without a pivot is a free
-    // variable; for the index-calculus use case, we only succeed if
-    // the unknown we want has a pivot.
-    let mut out = vec![BigUint::zero(); m];
-    let mut any_free = false;
-    for c in 0..m {
-        if pivot_rows[c] == usize::MAX {
-            any_free = true;
+    Some(pivot_rows)
+}
+
+/// [`gaussian_eliminate_mod_n`] for a word-sized modulus: the same
+/// Gauss–Jordan elimination, pivot choice and in-place contract, on
+/// `u64` rows with `u128` products instead of `BigUint`s.  Each row
+/// update is a tight allocation-free loop, where the `BigUint` path
+/// allocates on every multiply and every reduction.
+///
+/// Inputs are reduced mod `n` on the way in, and the reduced matrix
+/// and right-hand side are written back so callers that inspect them
+/// afterwards see the same echelon form.
+fn gaussian_eliminate_mod_u64(
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
+    n: u64,
+) -> Option<Vec<usize>> {
+    let rows = matrix.len();
+    let m = matrix.first().map(|r| r.len()).unwrap_or(0);
+    let nb = BigUint::from(n);
+    let to_u64 = |v: &BigUint| -> u64 {
+        if v.bits() <= 64 {
+            v.to_u64_digits().first().copied().unwrap_or(0) % n
         } else {
-            out[c] = rhs[pivot_rows[c]].clone();
+            (v % &nb).to_u64_digits().first().copied().unwrap_or(0)
+        }
+    };
+    let mut a: Vec<u64> = Vec::with_capacity(rows * m);
+    for r in matrix.iter() {
+        a.extend(r.iter().take(m).map(to_u64));
+    }
+    let mut b: Vec<u64> = rhs.iter().map(to_u64).collect();
+    let mulmod = |x: u64, y: u64| ((x as u128 * y as u128) % n as u128) as u64;
+
+    let mut pivot_rows: Vec<usize> = vec![usize::MAX; m];
+    let mut failed = false;
+    let (mut row, mut col) = (0usize, 0usize);
+    while row < rows && col < m {
+        let Some(piv) = (row..rows).find(|&r| a[r * m + col] != 0) else {
+            col += 1;
+            continue;
+        };
+        if piv != row {
+            for c in col..m {
+                a.swap(row * m + c, piv * m + c);
+            }
+            b.swap(row, piv);
+            matrix.swap(row, piv);
+        }
+        pivot_rows[col] = row;
+        let Some(inv) = inv_mod_u64(a[row * m + col], n) else {
+            failed = true;
+            break;
+        };
+        for c in col..m {
+            a[row * m + c] = mulmod(a[row * m + c], inv);
+        }
+        b[row] = mulmod(b[row], inv);
+
+        let (before, rest) = a.split_at_mut(row * m);
+        let (prow, after) = rest.split_at_mut(m);
+        let prow = &prow[col..];
+        let brow = b[row];
+        let eliminate = |target: &mut [u64], br: &mut u64| {
+            let factor = target[col];
+            if factor == 0 {
+                return;
+            }
+            let neg = n - factor;
+            for (t, &p) in target[col..].iter_mut().zip(prow) {
+                *t = ((*t as u128 + neg as u128 * p as u128) % n as u128) as u64;
+            }
+            *br = ((*br as u128 + neg as u128 * brow as u128) % n as u128) as u64;
+        };
+        for (r, target) in before.chunks_exact_mut(m).enumerate() {
+            eliminate(target, &mut b[r]);
+        }
+        for (i, target) in after.chunks_exact_mut(m).enumerate() {
+            eliminate(target, &mut b[row + 1 + i]);
+        }
+        row += 1;
+        col += 1;
+    }
+
+    // Write the reduced system back, as the `BigUint` path leaves it.
+    // Rows were already swapped in `matrix` alongside `a`.
+    for (r, out) in matrix.iter_mut().enumerate() {
+        for (c, v) in out.iter_mut().take(m).enumerate() {
+            *v = BigUint::from(a[r * m + c]);
         }
     }
-    // Even if there are free vars, return the partial solution and let
-    // the caller decide whether it's enough.
-    let _ = any_free;
-    Some(out)
+    for (r, out) in rhs.iter_mut().enumerate() {
+        if r < b.len() {
+            *out = BigUint::from(b[r]);
+        }
+    }
+    (!failed).then_some(pivot_rows)
+}
+
+/// `a^{-1} mod n` by the extended Euclidean algorithm, `None` when
+/// `gcd(a, n) ≠ 1`.
+fn inv_mod_u64(a: u64, n: u64) -> Option<u64> {
+    let (mut old_r, mut r) = (a as i128, n as i128);
+    let (mut old_s, mut s) = (1i128, 0i128);
+    while r != 0 {
+        let q = old_r / r;
+        (old_r, r) = (r, old_r - q * r);
+        (old_s, s) = (s, old_s - q * s);
+    }
+    if old_r != 1 {
+        return None;
+    }
+    Some(old_s.rem_euclid(n as i128) as u64)
 }
 
 // ── End-to-end ECDLP solver via index calculus ─────────────────────────
@@ -1226,10 +1400,13 @@ pub fn ec_index_calculus_dlp(
         rhs.push(rel.coef_a.clone() % &curve.n);
     }
 
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
-    let x = solution[m].clone();
-    // Verify Q ≡ x·G.  If not (which can happen when the system is
-    // under-determined), bail.
+    // Only `x` must be pinned; unused factor-base columns may stay free.
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
+    let x = solution.values[m].clone();
+    // Verify Q ≡ x·G independently of the linear algebra.
     let a_fe = curve.a_fe();
     let candidate = g.scalar_mul(&x, &a_fe);
     if &candidate == q {
@@ -1521,7 +1698,7 @@ pub fn pollard_rho_ecdlp(
         let branch = match r {
             Point::Affine { x, .. } => (&x.value % BigUint::from(3u32))
                 .to_u32_digits()
-                .get(0)
+                .first()
                 .copied()
                 .unwrap_or(0),
             Point::Infinity => 0,
@@ -1703,6 +1880,62 @@ mod tests {
 
     /// **Semaev S₃ is symmetric** in its three variables (verify on a
     /// handful of random samples).
+    /// The word-sized elimination returns the same solution and leaves
+    /// the same reduced system behind as the `BigUint` path, on full-rank,
+    /// rank-deficient and overdetermined systems.
+    #[test]
+    fn u64_elimination_matches_biguint_path() {
+        let mut s = 0x9E37_79B9_7F4A_7C15u64;
+        let mut next = || {
+            s ^= s << 13;
+            s ^= s >> 7;
+            s ^= s << 17;
+            s
+        };
+        for &n in &[7u64, 65_537, 1_000_000_007, 0xFFFF_FFFF_FFFF_FFC5] {
+            for &(rows, cols, sparsity) in
+                &[(6usize, 6usize, 1u64), (12, 8, 3), (8, 8, 2), (5, 9, 1)]
+            {
+                let nb = BigUint::from(n);
+                let mut mat: Vec<Vec<BigUint>> = (0..rows)
+                    .map(|_| {
+                        (0..cols)
+                            .map(|_| {
+                                let v = next();
+                                if v % sparsity == 0 {
+                                    BigUint::from(v % n)
+                                } else {
+                                    BigUint::zero()
+                                }
+                            })
+                            .collect()
+                    })
+                    .collect();
+                // Make one row a combination of two others (rank drop).
+                if rows > 3 {
+                    let combo: Vec<BigUint> = (0..cols)
+                        .map(|c| (&mat[0][c] + &mat[1][c] * 3u32) % &nb)
+                        .collect();
+                    mat[rows - 1] = combo;
+                }
+                let rhs: Vec<BigUint> = (0..rows).map(|_| BigUint::from(next() % n)).collect();
+                let (mut m1, mut r1) = (mat.clone(), rhs.clone());
+                let (mut m2, mut r2) = (mat.clone(), rhs.clone());
+                let fast = gaussian_eliminate_mod_u64(&mut m1, &mut r1, n);
+                let slow = gaussian_eliminate_mod_biguint(&mut m2, &mut r2, &nb);
+                assert_eq!(fast, slow, "n={n} {rows}x{cols}");
+                if slow.is_some() {
+                    assert_eq!(m1, m2, "reduced matrix, n={n} {rows}x{cols}");
+                    assert_eq!(r1, r2, "reduced rhs, n={n} {rows}x{cols}");
+                }
+            }
+        }
+        // Non-prime modulus with a non-invertible pivot: both refuse.
+        let mut m = vec![vec![BigUint::from(2u32)]];
+        let mut r = vec![BigUint::from(1u32)];
+        assert!(gaussian_eliminate_mod_n(&mut m, &mut r, &BigUint::from(4u32)).is_none());
+    }
+
     #[test]
     fn s3_symmetric() {
         let curve = tiny_curve();
@@ -1823,6 +2056,123 @@ mod tests {
         let sol = gaussian_eliminate_mod_n(&mut m, &mut r, &n).expect("solvable");
         assert_eq!(sol[0], BigUint::from(2u32));
         assert_eq!(sol[1], BigUint::from(1u32));
+    }
+
+    /// Moduli exercising both elimination paths: `101` takes the `u64`
+    /// path, the Mersenne prime `2^89 − 1` the `BigUint` one.
+    fn both_path_moduli() -> [BigUint; 2] {
+        [
+            BigUint::from(101u32),
+            (BigUint::one() << 89usize) - BigUint::one(),
+        ]
+    }
+
+    fn dense_system(
+        n: &BigUint,
+        rows: &[&[(usize, u64)]],
+        rhs: &[u64],
+        cols: usize,
+    ) -> (Vec<Vec<BigUint>>, Vec<BigUint>) {
+        let m = rows
+            .iter()
+            .map(|r| {
+                let mut d = vec![BigUint::zero(); cols];
+                for &(c, v) in r.iter() {
+                    d[c] = BigUint::from(v) % n;
+                }
+                d
+            })
+            .collect();
+        (m, rhs.iter().map(|&v| BigUint::from(v) % n).collect())
+    }
+
+    /// Under-determined system from the hyperelliptic sparse-solver
+    /// tests: `x9` (and others) have no pivot, so the strict solver
+    /// must refuse rather than return a particular solution with the
+    /// free unknowns zeroed.
+    #[test]
+    fn gaussian_rejects_underdetermined_system() {
+        for n in both_path_moduli() {
+            let rows: [&[(usize, u64)]; 2] =
+                [&[(0, 48), (1, 46), (4, 78), (9, 65)], &[(8, 16), (9, 26)]];
+            let (mut m, mut r) = dense_system(&n, &rows, &[32, 28], 10);
+            assert_eq!(
+                gaussian_eliminate_mod_n(&mut m, &mut r, &n),
+                None,
+                "n = {n}"
+            );
+
+            let (mut m, mut r) = dense_system(&n, &rows, &[32, 28], 10);
+            let p = gaussian_eliminate_mod_n_particular(&mut m, &mut r, &n).expect("consistent");
+            assert_eq!(p.rank, 2);
+            assert!(
+                p.determined.iter().all(|&d| !d),
+                "n = {n}: {:?}",
+                p.determined
+            );
+        }
+    }
+
+    /// A pivoted column whose reduced row still touches a free column
+    /// is not determined; one isolated from free columns is.
+    #[test]
+    fn gaussian_particular_flags_only_pinned_columns() {
+        for n in both_path_moduli() {
+            // x0 + x1 = 5 ; x2 = 7  over three unknowns.
+            let rows: [&[(usize, u64)]; 2] = [&[(0, 1), (1, 1)], &[(2, 1)]];
+            let (mut m, mut r) = dense_system(&n, &rows, &[5, 7], 3);
+            let p = gaussian_eliminate_mod_n_particular(&mut m, &mut r, &n).expect("consistent");
+            assert_eq!(p.determined, vec![false, false, true], "n = {n}");
+            assert_eq!(p.values[2], BigUint::from(7u32));
+        }
+    }
+
+    /// `x0 = 1` and `x0 = 2` together: inconsistent on both paths.
+    #[test]
+    fn gaussian_rejects_inconsistent_system() {
+        for n in both_path_moduli() {
+            let rows: [&[(usize, u64)]; 2] = [&[(0, 1)], &[(0, 1)]];
+            let (mut m, mut r) = dense_system(&n, &rows, &[1, 2], 1);
+            assert_eq!(gaussian_eliminate_mod_n(&mut m, &mut r, &n), None);
+            let (mut m, mut r) = dense_system(&n, &rows, &[1, 2], 1);
+            assert_eq!(
+                gaussian_eliminate_mod_n_particular(&mut m, &mut r, &n),
+                None
+            );
+        }
+    }
+
+    /// Square full-rank system with a planted solution still solves,
+    /// identically on both paths; an extra dependent row is accepted.
+    #[test]
+    fn gaussian_solves_square_full_rank_system() {
+        let planted = [3u64, 14, 15, 92, 65];
+        let rows: [&[(usize, u64)]; 6] = [
+            &[(0, 2), (1, 7), (4, 1)],
+            &[(1, 5), (2, 9)],
+            &[(0, 1), (2, 4), (3, 3)],
+            &[(3, 8), (4, 6)],
+            &[(0, 11), (4, 13)],
+            // Sum of the first two rows: consistent and dependent.
+            &[(0, 2), (1, 12), (2, 9), (4, 1)],
+        ];
+        for n in both_path_moduli() {
+            let rhs: Vec<u64> = rows
+                .iter()
+                .map(|r| {
+                    let v = r.iter().fold(BigUint::zero(), |acc, &(c, a)| {
+                        acc + BigUint::from(a) * BigUint::from(planted[c])
+                    });
+                    (v % &n).to_u64_digits().first().copied().unwrap_or(0)
+                })
+                .collect();
+            for take in [5, 6] {
+                let (mut m, mut r) = dense_system(&n, &rows[..take], &rhs[..take], 5);
+                let sol = gaussian_eliminate_mod_n(&mut m, &mut r, &n).expect("full rank");
+                let want: Vec<BigUint> = planted.iter().map(|&v| BigUint::from(v)).collect();
+                assert_eq!(sol, want, "n = {n}, rows = {take}");
+            }
+        }
     }
 
     /// **End-to-end ECDLP** on a small curve: solve `Q = x·G` via the

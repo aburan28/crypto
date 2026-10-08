@@ -1,0 +1,80 @@
+{
+  "valid": true,
+  "rawSha256": "cf91f9ae23742aaff5bd5505bb3b0fbf1712e0ea336460eb77a0068788555587",
+  "sourceFreezeSha256": "21e7e44cd7be54c002adafd485130b59f70754b92e470a376324044777b5c3d4",
+  "gitHead": "8ff25658aef2c213624ce14b8838d8a8a40f7be8",
+  "frozenSourceFiles": 188,
+  "remoteDigestFiles": 68,
+  "sourceSha256": "b0480f07e9358f8289818f51170f4cadd786b75575fb117d948a7c9cadbfef18",
+  "linkedBinarySha256": "3f593545161082b8726169891f49a5c412df074d27fab8307e366a1387b16c63",
+  "compiler": "13.3.73",
+  "tile": 256,
+  "generatedProduct": true,
+  "clmad": true,
+  "batch": 16,
+  "workers": 385024,
+  "registers": 122,
+  "localBytes": 0,
+  "sharedBytes": 0,
+  "summaries": {
+    "benchmark": {
+      "medianM": 13283.756,
+      "minM": 13151.469,
+      "maxM": 13434.216
+    },
+    "collectionSummary": {
+      "medianM": 12813.626,
+      "minM": 12800.253,
+      "maxM": 12815.682
+    }
+  },
+  "samples": [
+    {
+      "phase": "benchmark",
+      "rateM": 13434.216,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "benchmark",
+      "rateM": 13283.756,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "benchmark",
+      "rateM": 13151.469,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "rateM": 12815.682,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "rateM": 12813.626,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "rateM": 12800.253,
+      "updates": 201863462912,
+      "dropped": 0
+    }
+  ],
+  "correctnessGatesPassed": true,
+  "ownerSession": 82922,
+  "ownerExitCode": 0,
+  "app": "ap-zdzPfoosyMILTexHenUy9v",
+  "limits": [
+    "Separate-allocation public-command audit, not an additional paired gain.",
+    "Corpus counts and sizes are retained; content equality comes from the separate controlled comparison.",
+    "Source and binary identities are reported before checks. This native artifact does not retain post-run hashes or full SASS; the controlled comparison supplies the complete native-code inspection for the unchanged CUDA source and selected configuration.",
+    "The remote aggregate excludes root packed_audit.py; its bytes are retained in the local committed-source manifest.",
+    "GPU state is a pre-validation snapshot, not a sustained clock trace."
+  ]
+}

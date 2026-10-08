@@ -22,7 +22,6 @@
 //! say `cargo run -- cryptopals 49` to watch the attack in action.
 
 // ── Set 1 — Basics (1-8) ─────────────────────────────────────────
-pub mod low_util;
 pub mod challenge1;
 pub mod challenge2;
 pub mod challenge3;
@@ -31,9 +30,9 @@ pub mod challenge5;
 pub mod challenge6;
 pub mod challenge7;
 pub mod challenge8;
+pub mod low_util;
 
 // ── Set 2 — Block crypto (9-16) ─────────────────────────────────
-pub mod challenge9;
 pub mod challenge10;
 pub mod challenge11;
 pub mod challenge12;
@@ -41,6 +40,7 @@ pub mod challenge13;
 pub mod challenge14;
 pub mod challenge15;
 pub mod challenge16;
+pub mod challenge9;
 
 // ── Set 3 — Stream/randomness (17-24) ────────────────────────────
 pub mod challenge17;
@@ -104,7 +104,6 @@ pub mod challenge56;
 
 // ── Set 8 — "Abstract Algebra" ────────────────────────────────────
 // Each challenge mirrors the corresponding text at toadstyle.org.
-pub mod set8_util;
 pub mod challenge57;
 pub mod challenge58;
 pub mod challenge59;
@@ -115,6 +114,7 @@ pub mod challenge63;
 pub mod challenge64;
 pub mod challenge65;
 pub mod challenge66;
+pub mod set8_util;
 
 /// Outcome of running one challenge.  Kept tiny: a one-line success
 /// statement plus a multi-line transcript that the CLI prints.

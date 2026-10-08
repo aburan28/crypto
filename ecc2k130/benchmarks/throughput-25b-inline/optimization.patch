@@ -1,0 +1,56 @@
+--- a/ecc2k130/include/packed131.h
++++ b/ecc2k130/include/packed131.h
+@@ -432,7 +432,25 @@
+     return fromPolynomialProduct131(h);
+ #endif
+ }
+-static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
++// Selectively inline the small native polynomial products, independently of
++// the much larger normal-basis routines. Bits select single (1) and pair (2).
++#ifndef ECC_PACKED_INLINE_POLY
++#define ECC_PACKED_INLINE_POLY 0
++#endif
++#if ECC_PACKED_INLINE_POLY < 0 || ECC_PACKED_INLINE_POLY > 3
++#error "ECC_PACKED_INLINE_POLY must be in [0, 3]"
++#endif
++#if ECC_PACKED_INLINE_POLY & 1
++#define ECC_POLY_SINGLE ECC_HD
++#else
++#define ECC_POLY_SINGLE ECC_BIG
++#endif
++#if ECC_PACKED_INLINE_POLY & 2
++#define ECC_POLY_PAIR ECC_HD
++#else
++#define ECC_POLY_PAIR ECC_BIG
++#endif
++static ECC_POLY_SINGLE P131 mulPolynomial131(P131 a, P131 b) {
+ // Native carryless products supersede the generated software multiplier.
+ #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
+     return generatedProduct131(a,b);
+@@ -448,7 +466,7 @@
+ #if ECC_PACKED_PAIR_ILP != 0 && ECC_PACKED_PAIR_ILP != 1
+ #error "ECC_PACKED_PAIR_ILP must be 0 or 1"
+ #endif
+-static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
++static ECC_POLY_PAIR PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
+ #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
+     P131 first=generatedProduct131(a,b);
+     return PolynomialPair{first,generatedProduct131(a,c)};
+--- a/ecc2k130/Makefile
++++ b/ecc2k130/Makefile
+@@ -61,6 +61,7 @@
+ PACKED_STATE_TILE ?= 0
+ PACKED_ADD_COMBINE ?= 0
+ PACKED_PAIR_ILP ?= 0
++PACKED_INLINE_POLY ?= 0
+ UNROLL_SLOTS ?= 1
+ PACKED_SLOT_PREFETCH ?= 0
+ PACKED_SLOT_PIPELINE ?= 0
+@@ -158,6 +159,7 @@
+        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
+        -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE) \
+        -DECC_PACKED_PAIR_ILP=$(PACKED_PAIR_ILP) \
++       -DECC_PACKED_INLINE_POLY=$(PACKED_INLINE_POLY) \
+        -DECC_UNROLL_SLOTS=$(UNROLL_SLOTS) \
+        -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
+        -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \

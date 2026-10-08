@@ -1,0 +1,94 @@
+{
+  "accounting_boundary": {
+    "all_stage23_descendants_inherit_one_cpu_affinity": true,
+    "covers_stage20_n31_n41_n59_backend_matrix": false,
+    "licensed_magma_executed": false,
+    "simultaneous_process_tree_memory_measured": false,
+    "single_core_elapsed_is_outer_wall_under_kernel_affinity": true,
+    "source_dependency_toolchain_or_license_acquisition_charged": false
+  },
+  "affinity": {
+    "child_effective_after": [
+      0
+    ],
+    "child_effective_before": [
+      0
+    ],
+    "inheritance_contract": "Linux process affinity is inherited by fork/exec descendants unless explicitly changed",
+    "initial_allowed_cpus": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "parent_effective_after": [
+      0
+    ],
+    "parent_effective_before": [
+      0
+    ],
+    "platform": "Linux",
+    "schema": "koblitz_stage25_affinity_receipt.v1",
+    "selected_cpu": 0,
+    "uname": [
+      "Linux",
+      "runnervmlun5p",
+      "6.17.0-1022-azure",
+      "#22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026",
+      "x86_64",
+      "x86_64"
+    ]
+  },
+  "full_cost_gate_passed": false,
+  "independent_external_reproduction_satisfied": false,
+  "independent_mathematical_payload_replay_completed": false,
+  "koblitz_index_calculus_sota": false,
+  "measurements": {
+    "affinity_wrapper_child_system_seconds": 3.025278,
+    "affinity_wrapper_child_user_seconds": 723.286305,
+    "affinity_wrapper_wall_seconds": 740.041191334,
+    "ic_total_core_seconds": 589.051224,
+    "online_ic_over_rho_core": 1662.0427635477158,
+    "outer_peak_rss_bytes": 1339957248,
+    "outer_system_seconds": 2.939197,
+    "outer_total_core_seconds": 725.6345610000001,
+    "outer_user_seconds": 722.695364,
+    "rho_total_core_seconds": 0.35441399999999995,
+    "setup_charged_ic_over_rho_core": 1664.4430270813234,
+    "single_core_elapsed_seconds": 739.0632245,
+    "stage23_child_total_core_seconds": 724.5959330000001,
+    "stage23_peak_process_rss_bytes": 1339957248,
+    "stage23_summed_process_wall_seconds": 737.4102493440001
+  },
+  "profile": "production",
+  "retained_mathematical_witness_replay_completed": true,
+  "schema": "koblitz_stage25_single_core_result.v1",
+  "scientific_measurement_admitted": false,
+  "source_commit": "4f0bcbd87dc3e4d7c9a26f5e8bec290d3430c04e",
+  "source_tree_sha256": "809eafb0fa907dc1c77239cb68622ae1341ce1ce0d35bb4d1c24cc972f02da0f",
+  "stage23": {
+    "completed_rows": 5,
+    "expected_rows": 5,
+    "outer_metrics": {
+      "bytes": 741,
+      "path": "/home/runner/work/_temp/stage25-single-core/stage23-run-outer/driver.metrics.json",
+      "sha256": "14f0e2b08e85261a689e181e49f2a758446c017b98baa15ee043f800986b92ce"
+    },
+    "run_seal": {
+      "bytes": 150740,
+      "path": "/home/runner/work/_temp/stage25-single-core/stage23-run/run-seal.json",
+      "sha256": "21a317423826f0f209ae976d43c91509fb8c6216d6f7c2e3304ac50dc94a73e7"
+    },
+    "run_summary": {
+      "bytes": 16215,
+      "path": "/home/runner/work/_temp/stage25-single-core/stage23-run/run-summary.json",
+      "sha256": "61e81d6dcf5eaa204ad4639eca34f7544c89cc4fde75d3f5278951e91337bd2d"
+    },
+    "verification_seal": {
+      "bytes": 676,
+      "path": "/home/runner/work/_temp/stage25-single-core/stage23-verification/verification-seal.json",
+      "sha256": "40ba92581a6c28be84d6c002a2678b2b5f40870dbb9ab08248019e6d6652cb96"
+    }
+  },
+  "status": "complete_single_cpu_affinity_control"
+}

@@ -1,0 +1,32 @@
+{
+  "accepted_controller_commit": "f9e7883f2c6ae85b7b300383381388f6b69ce676",
+  "archive": "results-20260930/evidence.tar.gz",
+  "archive_bytes": 37902366,
+  "archive_sha256": "9d166ca332e22d90738e62fbdcefd67ef2daa8d16425f162ad8ae3d0ff28962f",
+  "budget_extension_allowed": false,
+  "candidate_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0he2ed5ed7bb97",
+  "complete_ic_admitted": false,
+  "controller_exit_code": 1,
+  "execution_sha256": "5969837ddc69d25a3e44954f203077c0e6d682bbce2d1ac8eb0f9c3a10bb826b",
+  "final_rank": null,
+  "interpretation": "Native JSON deserialization failed before execute_job; no algorithmic yield or performance result.",
+  "native_error": {
+    "reason": "invalid type: null, expected u64 at line 1 column 364",
+    "schema_version": 1,
+    "status": "error"
+  },
+  "native_job_returncode": 2,
+  "native_pipeline_executions": 1,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "preexecution_commit": "a596007e8796c0f5bea3dee87bff5a7040daa927",
+  "promotion_eligible": false,
+  "resume_allowed": false,
+  "retry_allowed": false,
+  "run_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0he2ed5ed7bb97W1d07932114f4R0",
+  "schema_version": 1,
+  "status": "TERMINAL_NATIVE_INPUT_SCHEMA_FAILURE",
+  "transport_replay_passed": true,
+  "verified_target_count": null,
+  "workload_id": "1d07932114f4"
+}

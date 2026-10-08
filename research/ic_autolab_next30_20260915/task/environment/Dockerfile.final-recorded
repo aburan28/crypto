@@ -1,0 +1,13 @@
+FROM ic-autolab-fastlift:20260915
+LABEL ic.parent.image="sha256:1e61ca358612372559cf3ba52cc9a11500d030b33c5f0ee31a39c709110b1ad3"
+COPY baseline/ /opt/baseline/
+COPY baseline/ /opt/baseline-built/source/
+COPY baseline-source-manifest.json /opt/baseline-built/source-manifest.json
+COPY baseline-worker /opt/baseline-built/worker
+COPY evaluator/ /opt/evaluator/
+COPY previous-targets.json /opt/previous-targets.json
+COPY harness/ /opt/harness/
+COPY candidate.rs /app/src/cryptanalysis/koblitz_index_calculus.rs
+COPY candidate.json /app/candidate.json
+COPY NOTES.md /app/NOTES.md
+RUN chmod -R a+rX /opt/baseline /opt/baseline-built/source /opt/evaluator /opt/harness /app && chmod a+r /opt/previous-targets.json /opt/baseline-built/source-manifest.json && chmod 755 /opt/baseline-built/worker

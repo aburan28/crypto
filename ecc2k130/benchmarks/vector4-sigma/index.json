@@ -1,0 +1,131 @@
+{
+  "valid": true,
+  "evidenceClass": "Finite valid unqualified complete-walk screen; no confirmed speedup or slowdown",
+  "files": {
+    "candidate.patch": {
+      "sha256": "cd400135f0c9e6bfeb206ba2315d080acb5cfdbcbb14aa385f7850bb3420b072",
+      "bytes": 26377
+    },
+    "comparison-review.json": {
+      "sha256": "d127b49033c84af20304b4d578e2445faee8d72350f9f2ac438e981b65b1d811",
+      "bytes": 5361
+    },
+    "comparison.json.gz": {
+      "sha256": "6b611c1e01b278a6077614da98ffe326321621e73a372ca2f2e0b7c2b513199f",
+      "bytes": 317996,
+      "originalSha256": "ab570300f07c31577132c545ecd47b1181b1254122526e12c14947f3dc5a62df",
+      "originalBytes": 4481399,
+      "gzip": true
+    },
+    "compiler-independent-review.json": {
+      "sha256": "a703f24ad8623a8020733f62849560a20dbbcf3a8edf652b165fd0477c47e12c",
+      "bytes": 77508
+    },
+    "compiler-path-review.json": {
+      "sha256": "d3273a650a8a15f5d60450f0067060f9c8fa693d342113ce2eff4374565ef111",
+      "bytes": 14785
+    },
+    "compiler-supplement.json": {
+      "sha256": "4a8c4b3ff3fc4790534af359102f8f2400359dd92c81f40a6a9ba21b0c93871c",
+      "bytes": 2526
+    },
+    "compiler.json.gz": {
+      "sha256": "e62c75d837d856dda13703f184f6d296f52ec866ef85d2c34b2bb37b5aa8e8b4",
+      "bytes": 906656,
+      "originalSha256": "7a8b014039f649ccb16639be7c02fb4a537570f346f4b30449462ec38c60a71a",
+      "originalBytes": 10455016,
+      "gzip": true
+    },
+    "final-auditor.py": {
+      "sha256": "d14c750dc2613a297815691533cb4832683f2f3c300c0b0b508c0cd1d8584ff4",
+      "bytes": 21950
+    },
+    "host-model-review.json": {
+      "sha256": "f32eff50e4eeeca013d55e2722606da0e882b37e36c82ee90e86d6c6a9c5d29c",
+      "bytes": 1976
+    },
+    "host-model.json": {
+      "sha256": "a3b62cbc6d6b211138baae568e1c9ed85469d88d33c73005e16d6c6c09afd8bc",
+      "bytes": 10606
+    },
+    "layout-gate.py": {
+      "sha256": "5b8edbf0346c9d48f89680ca030b8b1d38ef90d2cbdd86959f8db2c818c937f7",
+      "bytes": 16588
+    },
+    "prebuild-review.json": {
+      "sha256": "e634aa9087e5354dc4974b3f10e9ef807b2c9da85485d1099e9eecf091fe9f57",
+      "bytes": 5781
+    },
+    "predispatch-review.json": {
+      "sha256": "3608fa937bb73648754042eb2a2ca294e4358a69c6fce17154127a21cfa849c1",
+      "bytes": 6149
+    },
+    "predispatch-reviewer-failure.json": {
+      "sha256": "8d8e1d3afa82aa5c106aedb49eec2d740cc682b4480a65acb426154263599c8c",
+      "bytes": 688
+    },
+    "reviewer-format-resolution.json": {
+      "sha256": "5815f17ca9fffa101a9f2a37a3f70f3263aaa1b7d7af42e76192d39ca9154662",
+      "bytes": 677
+    },
+    "runtime-driver-freeze.json": {
+      "sha256": "7bd95d57a210c336a37c0053d66c5c8cddd6f9417b5966bab2457172d3ce81a0",
+      "bytes": 446
+    },
+    "runtime-driver.py": {
+      "sha256": "e79952054f2dd5c7b2b372ec6bc1a806564c1d125fe53a8d44c56ecf2b19d840",
+      "bytes": 26982
+    },
+    "runtime-plan/build.py": {
+      "sha256": "f1ed79f028d90a75a7e92b1ac4cff61bcc2e573462bc321d2f7b7915445713be",
+      "bytes": 6585
+    },
+    "runtime-plan/checkpoint_gate.py": {
+      "sha256": "8b1d611f7e767268fa6f4f50d871dc467b5f5adfd159f5131219494e52c66bc2",
+      "bytes": 11637
+    },
+    "runtime-plan/expected.json": {
+      "sha256": "4de8010ceccabf0d82c89ed5cb2af944dd26d86949ec68ad33aee1b3e994aab7",
+      "bytes": 57336
+    },
+    "runtime-plan/gates.py": {
+      "sha256": "a5b863cf8c960340d8db22a573d9e1be227383546b97749edfa1877dd08419d3",
+      "bytes": 18995
+    },
+    "source-patch-manifest.json": {
+      "sha256": "22d08d03c4780dd5b3f2f95225129b57b6ff89f0de20db082a41d4d66d8b86f4",
+      "bytes": 33709
+    },
+    "terminal-handoff.json": {
+      "sha256": "1d00311a5818416b66bb39e10b6f3e584d611474bcc52fe6c111aad367e3504a",
+      "bytes": 3076
+    }
+  },
+  "sourceFiles": 160,
+  "sourceChanges": [
+    "Makefile",
+    "codegen/gensigma.py",
+    "include/packed131.h",
+    "include/packedengine.cuh",
+    "include/packedsigma131.h",
+    "src/testpackedcuda.cu",
+    "src/testsharedsigmacuda.cu"
+  ],
+  "screenBillionIterationsPerSecond": [
+    14.640971,
+    14.68274,
+    14.573526
+  ],
+  "thresholdBillionIterationsPerSecond": 14.714175855,
+  "qualified": false,
+  "timedRowsIncludingWarmups": 5,
+  "excludedWarmups": 2,
+  "updatesPerRow": 201863462912,
+  "confirmationRows": 0,
+  "timedCollectionRows": 0,
+  "gpuSubmissions": 1,
+  "goalBillionCompleteScalarUpdatesPerSecond": 26,
+  "goalAchieved": false,
+  "productionPatchApplied": false,
+  "archiveCompression": "Deterministic gzip preserves the raw uncompressed JSON bytes and original hashes."
+}

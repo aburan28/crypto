@@ -1,0 +1,64 @@
+name: Koblitz Stage 114 n53 single-core dense support
+
+on:
+  pull_request:
+    paths:
+      - "scripts/run_koblitz_stage114_single_core_dense.py"
+      - ".github/workflows/koblitz-stage114-single-core-dense.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate single-core dense-support controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage114_single_core_dense.py
+          python3 scripts/run_koblitz_stage114_single_core_dense.py self-test
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-single-core-dense:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage114_single_core_dense.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage114-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare selected and streamed dense layouts on one CPU
+        run: |
+          python3 scripts/run_koblitz_stage114_single_core_dense.py run \
+            --build "$RUNNER_TEMP/stage114-build" \
+            --output "$RUNNER_TEMP/stage114-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage114_single_core_dense.py verify \
+            --build "$RUNNER_TEMP/stage114-build" \
+            --output "$RUNNER_TEMP/stage114-run" \
+            > "$RUNNER_TEMP/stage114-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage114-single-core-dense-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage114-build
+            ${{ runner.temp }}/stage114-run
+            ${{ runner.temp }}/stage114-verification.json

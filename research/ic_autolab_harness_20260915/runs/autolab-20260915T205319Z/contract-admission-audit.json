@@ -1,0 +1,13 @@
+{
+  "same_original_baseline_config": true,
+  "same_original_source_manifest": true,
+  "candidate_source_manifest": "28bec3455867ad5598779e9a91cf6bd7692d9029690941886f34faed3224dc1c",
+  "candidate_matches_development": true,
+  "fresh_public_targets": true,
+  "confirmation_targets": 60,
+  "repetitions": 3,
+  "metric": "valgrind-3.22-amd64-Ir",
+  "goal_gate": 0.8,
+  "contract_sha256": "aa3a92555c5703a47efc874b8ca671a3ce70b0200a3706efe10a64c30a5364b2",
+  "measurement_gate_status": "pending final confirmation and replay"
+}

@@ -1,0 +1,7354 @@
+{
+  "audit": {
+    "spaces": 10,
+    "tiny_target_space_checks": 265,
+    "larger_target_checks": 164,
+    "fresh_uniform_targets": 60,
+    "identity_checks": 2048,
+    "exhaustive_identity_target_checks": 756,
+    "failures": 0,
+    "source_hashes_match": true,
+    "raw_sha256": "29bae54e06928cbfbc75e2cfa9716f0b11cabb9ffa5b4aed7cc08aa8faa60261",
+    "same_batch_hybrid_floor_exceeds_measured_s3_multiplications": true,
+    "trace_fiber_improvement_beyond_chart_exclusion": false,
+    "larger_impossible_trace_classes": 0
+  },
+  "spaces": [
+    {
+      "kind": "space_bounds",
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "basis": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "coefficients": [
+        36685,
+        36685
+      ],
+      "K_abscissas": 127,
+      "M_signed_points": 254,
+      "curve_order": 262926,
+      "order_factorization": {
+        "2": 1,
+        "3": 5,
+        "541": 1
+      },
+      "all_signed_triples": 2667000,
+      "infinity_triples": 14,
+      "target_x_collision_triples": 20,
+      "valid_signed_triples": 2666966,
+      "signed_mean": {
+        "numerator": 2666966,
+        "denominator": 262925,
+        "decimal": 10.143447751259865
+      },
+      "old_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        4868,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869
+      ],
+      "all_mass_by_trace": [
+        49738,
+        49308,
+        49288,
+        49288,
+        49550,
+        49550,
+        49568,
+        49568,
+        48882,
+        48882,
+        49617,
+        49617,
+        49421,
+        49421,
+        49342,
+        49342,
+        49652,
+        49652,
+        49563,
+        49563,
+        49249,
+        49249,
+        49508,
+        49508,
+        49616,
+        49616,
+        49206,
+        49206,
+        49067,
+        49067,
+        49177,
+        49177,
+        49436,
+        49436,
+        49641,
+        49641,
+        49587,
+        49587,
+        49338,
+        49338,
+        49416,
+        49416,
+        49200,
+        49200,
+        49682,
+        49682,
+        49085,
+        49085,
+        49108,
+        49108,
+        49195,
+        49195,
+        49583,
+        49583
+      ],
+      "target_x_collisions_by_trace": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "valid_mass_by_trace": [
+        49724,
+        49308,
+        49288,
+        49288,
+        49549,
+        49549,
+        49568,
+        49568,
+        48882,
+        48882,
+        49617,
+        49617,
+        49421,
+        49421,
+        49341,
+        49341,
+        49652,
+        49652,
+        49563,
+        49563,
+        49249,
+        49249,
+        49507,
+        49507,
+        49614,
+        49614,
+        49204,
+        49204,
+        49067,
+        49067,
+        49177,
+        49177,
+        49436,
+        49436,
+        49641,
+        49641,
+        49586,
+        49586,
+        49338,
+        49338,
+        49415,
+        49415,
+        49200,
+        49200,
+        49682,
+        49682,
+        49085,
+        49085,
+        49107,
+        49107,
+        49195,
+        49195,
+        49583,
+        49583
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            149175,
+            244004
+          ],
+          "cohort": "frozen-development",
+          "trace_class": 45,
+          "exact_projected_relations": 10,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            197029,
+            189760
+          ],
+          "cohort": "frozen-development",
+          "trace_class": 0,
+          "exact_projected_relations": 11,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            217260,
+            88267
+          ],
+          "cohort": "frozen-holdout",
+          "trace_class": 25,
+          "exact_projected_relations": 12,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            50510,
+            82631
+          ],
+          "cohort": "frozen-holdout",
+          "trace_class": 11,
+          "exact_projected_relations": 11,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            189278,
+            125535
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 3,
+          "exact_projected_relations": 7,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            149596,
+            90846
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 13,
+          "exact_projected_relations": 6,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            141277,
+            54357
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 26,
+          "exact_projected_relations": 8,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            9065,
+            232981
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 37,
+          "exact_projected_relations": 13,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            182941,
+            128491
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 33,
+          "exact_projected_relations": 10,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            183867,
+            205524
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 30,
+          "exact_projected_relations": 13,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            83977,
+            191075
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 13,
+          "exact_projected_relations": 9,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            187973,
+            153874
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 51,
+          "exact_projected_relations": 10,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            244475,
+            182640
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 50,
+          "exact_projected_relations": 7,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            261827,
+            23179
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 22,
+          "exact_projected_relations": 16,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            195228,
+            184910
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 39,
+          "exact_projected_relations": 12,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            130889,
+            208251
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 7,
+          "exact_projected_relations": 9,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            6065,
+            253266
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 20,
+          "exact_projected_relations": 14,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            243177,
+            21605
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 47,
+          "exact_projected_relations": 8,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        }
+      ],
+      "batch_multiplication_floor": 60071,
+      "batch_measured_multiplications": 146240,
+      "batch_measured_over_floor": {
+        "numerator": 146240,
+        "denominator": 60071,
+        "decimal": 2.4344525644653827
+      },
+      "same_batch_hybrid_multiplication_floor": 3641372,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 910343,
+        "denominator": 36560,
+        "decimal": 24.899972647702405
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 66782442,
+        "denominator": 1333483,
+        "decimal": 50.0812098841905
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          225458
+        ],
+        [
+          76,
+          35148
+        ],
+        [
+          76,
+          35072
+        ],
+        [
+          1537,
+          1613
+        ],
+        [
+          1537,
+          76
+        ],
+        [
+          1613,
+          135260
+        ],
+        [
+          1613,
+          136721
+        ],
+        [
+          8352,
+          227071
+        ],
+        [
+          8352,
+          218719
+        ],
+        [
+          8428,
+          180145
+        ],
+        [
+          8428,
+          171869
+        ],
+        [
+          35072,
+          1537
+        ],
+        [
+          35072,
+          36609
+        ],
+        [
+          35148,
+          81998
+        ],
+        [
+          35148,
+          116994
+        ],
+        [
+          36609,
+          9889
+        ],
+        [
+          36609,
+          43424
+        ],
+        [
+          81922,
+          262067
+        ],
+        [
+          81922,
+          180145
+        ],
+        [
+          83459,
+          45037
+        ],
+        [
+          83459,
+          125422
+        ],
+        [
+          125346,
+          226995
+        ],
+        [
+          125346,
+          171793
+        ],
+        [
+          126883,
+          217106
+        ],
+        [
+          126883,
+          180145
+        ],
+        [
+          126959,
+          135184
+        ],
+        [
+          126959,
+          262143
+        ],
+        [
+          135184,
+          125422
+        ],
+        [
+          135184,
+          260606
+        ],
+        [
+          145073,
+          225534
+        ],
+        [
+          145073,
+          83535
+        ],
+        [
+          145149,
+          218719
+        ],
+        [
+          145149,
+          90274
+        ],
+        [
+          170256,
+          218719
+        ],
+        [
+          170256,
+          118607
+        ],
+        [
+          180221,
+          262143
+        ],
+        [
+          180221,
+          81922
+        ],
+        [
+          217182,
+          43500
+        ],
+        [
+          217182,
+          260530
+        ],
+        [
+          225458,
+          0
+        ],
+        [
+          225458,
+          225458
+        ],
+        [
+          225534,
+          118531
+        ],
+        [
+          225534,
+          180221
+        ],
+        [
+          226995,
+          126959
+        ],
+        [
+          226995,
+          170332
+        ],
+        [
+          252254,
+          125422
+        ],
+        [
+          252254,
+          143536
+        ],
+        [
+          253791,
+          8352
+        ],
+        [
+          253791,
+          262143
+        ],
+        [
+          260530,
+          9965
+        ],
+        [
+          260530,
+          253791
+        ],
+        [
+          262143,
+          36685
+        ],
+        [
+          262143,
+          225458
+        ]
+      ],
+      "harness_seconds": 2.0892316959980235,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "basis": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ],
+      "coefficients": [
+        36685,
+        36685
+      ],
+      "K_abscissas": 256,
+      "M_signed_points": 512,
+      "curve_order": 262926,
+      "order_factorization": {
+        "2": 1,
+        "3": 5,
+        "541": 1
+      },
+      "all_signed_triples": 22108160,
+      "infinity_triples": 72,
+      "target_x_collision_triples": 252,
+      "valid_signed_triples": 22107836,
+      "signed_mean": {
+        "numerator": 22107836,
+        "denominator": 262925,
+        "decimal": 84.08419130930874
+      },
+      "old_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        4868,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869
+      ],
+      "all_mass_by_trace": [
+        410024,
+        409362,
+        409030,
+        409030,
+        408866,
+        408866,
+        409655,
+        409655,
+        409508,
+        409508,
+        409697,
+        409697,
+        409098,
+        409098,
+        409885,
+        409885,
+        409796,
+        409796,
+        409242,
+        409242,
+        409287,
+        409287,
+        409341,
+        409341,
+        409832,
+        409832,
+        409162,
+        409162,
+        408889,
+        408889,
+        409824,
+        409824,
+        408956,
+        408956,
+        410461,
+        410461,
+        409532,
+        409532,
+        409381,
+        409381,
+        409380,
+        409380,
+        409338,
+        409338,
+        409266,
+        409266,
+        409449,
+        409449,
+        408903,
+        408903,
+        408884,
+        408884,
+        409725,
+        409725
+      ],
+      "target_x_collisions_by_trace": [
+        2,
+        6,
+        2,
+        2,
+        6,
+        6,
+        0,
+        0,
+        2,
+        2,
+        6,
+        6,
+        6,
+        6,
+        3,
+        3,
+        7,
+        7,
+        6,
+        6,
+        2,
+        2,
+        3,
+        3,
+        5,
+        5,
+        6,
+        6,
+        7,
+        7,
+        4,
+        4,
+        4,
+        4,
+        2,
+        2,
+        7,
+        7,
+        6,
+        6,
+        4,
+        4,
+        5,
+        5,
+        6,
+        6,
+        4,
+        4,
+        5,
+        5,
+        9,
+        9,
+        5,
+        5
+      ],
+      "valid_mass_by_trace": [
+        409950,
+        409356,
+        409028,
+        409028,
+        408860,
+        408860,
+        409655,
+        409655,
+        409506,
+        409506,
+        409691,
+        409691,
+        409092,
+        409092,
+        409882,
+        409882,
+        409789,
+        409789,
+        409236,
+        409236,
+        409285,
+        409285,
+        409338,
+        409338,
+        409827,
+        409827,
+        409156,
+        409156,
+        408882,
+        408882,
+        409820,
+        409820,
+        408952,
+        408952,
+        410459,
+        410459,
+        409525,
+        409525,
+        409375,
+        409375,
+        409376,
+        409376,
+        409333,
+        409333,
+        409260,
+        409260,
+        409445,
+        409445,
+        408898,
+        408898,
+        408875,
+        408875,
+        409720,
+        409720
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            62411,
+            157403
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 49,
+          "exact_projected_relations": 94,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            70171,
+            147216
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 4,
+          "exact_projected_relations": 79,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            169333,
+            59414
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 11,
+          "exact_projected_relations": 78,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            215204,
+            208326
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 12,
+          "exact_projected_relations": 79,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            163956,
+            117516
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 11,
+          "exact_projected_relations": 84,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            223027,
+            1921
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 2,
+          "exact_projected_relations": 79,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            127947,
+            180966
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 1,
+          "exact_projected_relations": 107,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            187115,
+            204337
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 33,
+          "exact_projected_relations": 91,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            242944,
+            26155
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 49,
+          "exact_projected_relations": 78,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            215589,
+            237171
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 20,
+          "exact_projected_relations": 88,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            249276,
+            165395
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 42,
+          "exact_projected_relations": 79,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            73861,
+            244809
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 29,
+          "exact_projected_relations": 97,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            135014,
+            177836
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 23,
+          "exact_projected_relations": 96,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            153539,
+            12780
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 43,
+          "exact_projected_relations": 77,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            81734,
+            213590
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 53,
+          "exact_projected_relations": 88,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            166612,
+            134628
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 47,
+          "exact_projected_relations": 87,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        }
+      ],
+      "batch_multiplication_floor": 236672,
+      "batch_measured_multiplications": 501290,
+      "batch_measured_over_floor": {
+        "numerator": 250645,
+        "denominator": 118336,
+        "decimal": 2.1180790292049756
+      },
+      "same_batch_hybrid_multiplication_floor": 14622790,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 1462279,
+        "denominator": 50129,
+        "decimal": 29.170320572921863
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 67308288,
+        "denominator": 5526959,
+        "decimal": 12.178177547544681
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          225458
+        ],
+        [
+          76,
+          35148
+        ],
+        [
+          76,
+          35072
+        ],
+        [
+          1537,
+          1613
+        ],
+        [
+          1537,
+          76
+        ],
+        [
+          1613,
+          135260
+        ],
+        [
+          1613,
+          136721
+        ],
+        [
+          8352,
+          227071
+        ],
+        [
+          8352,
+          218719
+        ],
+        [
+          8428,
+          180145
+        ],
+        [
+          8428,
+          171869
+        ],
+        [
+          35072,
+          1537
+        ],
+        [
+          35072,
+          36609
+        ],
+        [
+          35148,
+          81998
+        ],
+        [
+          35148,
+          116994
+        ],
+        [
+          36609,
+          9889
+        ],
+        [
+          36609,
+          43424
+        ],
+        [
+          81922,
+          262067
+        ],
+        [
+          81922,
+          180145
+        ],
+        [
+          83459,
+          45037
+        ],
+        [
+          83459,
+          125422
+        ],
+        [
+          125346,
+          226995
+        ],
+        [
+          125346,
+          171793
+        ],
+        [
+          126883,
+          217106
+        ],
+        [
+          126883,
+          180145
+        ],
+        [
+          126959,
+          135184
+        ],
+        [
+          126959,
+          262143
+        ],
+        [
+          135184,
+          125422
+        ],
+        [
+          135184,
+          260606
+        ],
+        [
+          145073,
+          225534
+        ],
+        [
+          145073,
+          83535
+        ],
+        [
+          145149,
+          218719
+        ],
+        [
+          145149,
+          90274
+        ],
+        [
+          170256,
+          218719
+        ],
+        [
+          170256,
+          118607
+        ],
+        [
+          180221,
+          262143
+        ],
+        [
+          180221,
+          81922
+        ],
+        [
+          217182,
+          43500
+        ],
+        [
+          217182,
+          260530
+        ],
+        [
+          225458,
+          0
+        ],
+        [
+          225458,
+          225458
+        ],
+        [
+          225534,
+          118531
+        ],
+        [
+          225534,
+          180221
+        ],
+        [
+          226995,
+          126959
+        ],
+        [
+          226995,
+          170332
+        ],
+        [
+          252254,
+          125422
+        ],
+        [
+          252254,
+          143536
+        ],
+        [
+          253791,
+          8352
+        ],
+        [
+          253791,
+          262143
+        ],
+        [
+          260530,
+          9965
+        ],
+        [
+          260530,
+          253791
+        ],
+        [
+          262143,
+          36685
+        ],
+        [
+          262143,
+          225458
+        ]
+      ],
+      "harness_seconds": 3.9306987519994436,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "basis": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256,
+        512
+      ],
+      "coefficients": [
+        36685,
+        36685
+      ],
+      "K_abscissas": 534,
+      "M_signed_points": 1068,
+      "curve_order": 262926,
+      "order_factorization": {
+        "2": 1,
+        "3": 5,
+        "541": 1
+      },
+      "all_signed_triples": 201891872,
+      "infinity_triples": 734,
+      "target_x_collision_triples": 2246,
+      "valid_signed_triples": 201888892,
+      "signed_mean": {
+        "numerator": 201888892,
+        "denominator": 262925,
+        "decimal": 767.8573433488638
+      },
+      "old_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        4868,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869
+      ],
+      "all_mass_by_trace": [
+        3739350,
+        3740796,
+        3738805,
+        3738805,
+        3737728,
+        3737728,
+        3738558,
+        3738558,
+        3739118,
+        3739118,
+        3739598,
+        3739598,
+        3739015,
+        3739015,
+        3739755,
+        3739755,
+        3739105,
+        3739105,
+        3739383,
+        3739383,
+        3739259,
+        3739259,
+        3737526,
+        3737526,
+        3735812,
+        3735812,
+        3738866,
+        3738866,
+        3737458,
+        3737458,
+        3738829,
+        3738829,
+        3739191,
+        3739191,
+        3740129,
+        3740129,
+        3739574,
+        3739574,
+        3740175,
+        3740175,
+        3738505,
+        3738505,
+        3738943,
+        3738943,
+        3737812,
+        3737812,
+        3739886,
+        3739886,
+        3737247,
+        3737247,
+        3736673,
+        3736673,
+        3738913,
+        3738913
+      ],
+      "target_x_collisions_by_trace": [
+        42,
+        50,
+        33,
+        33,
+        40,
+        40,
+        23,
+        23,
+        31,
+        31,
+        45,
+        45,
+        44,
+        44,
+        30,
+        30,
+        36,
+        36,
+        32,
+        32,
+        27,
+        27,
+        58,
+        58,
+        47,
+        47,
+        43,
+        43,
+        50,
+        50,
+        26,
+        26,
+        46,
+        46,
+        32,
+        32,
+        45,
+        45,
+        49,
+        49,
+        35,
+        35,
+        56,
+        56,
+        58,
+        58,
+        48,
+        48,
+        49,
+        49,
+        60,
+        60,
+        34,
+        34
+      ],
+      "valid_mass_by_trace": [
+        3738574,
+        3740746,
+        3738772,
+        3738772,
+        3737688,
+        3737688,
+        3738535,
+        3738535,
+        3739087,
+        3739087,
+        3739553,
+        3739553,
+        3738971,
+        3738971,
+        3739725,
+        3739725,
+        3739069,
+        3739069,
+        3739351,
+        3739351,
+        3739232,
+        3739232,
+        3737468,
+        3737468,
+        3735765,
+        3735765,
+        3738823,
+        3738823,
+        3737408,
+        3737408,
+        3738803,
+        3738803,
+        3739145,
+        3739145,
+        3740097,
+        3740097,
+        3739529,
+        3739529,
+        3740126,
+        3740126,
+        3738470,
+        3738470,
+        3738887,
+        3738887,
+        3737754,
+        3737754,
+        3739838,
+        3739838,
+        3737198,
+        3737198,
+        3736613,
+        3736613,
+        3738879,
+        3738879
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            253907,
+            44776
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 15,
+          "exact_projected_relations": 726,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            222812,
+            127495
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 35,
+          "exact_projected_relations": 726,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            199866,
+            218060
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 39,
+          "exact_projected_relations": 753,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            153355,
+            171888
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 36,
+          "exact_projected_relations": 730,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            219692,
+            73665
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 30,
+          "exact_projected_relations": 701,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            221082,
+            163564
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 53,
+          "exact_projected_relations": 759,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            165768,
+            251677
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 49,
+          "exact_projected_relations": 741,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            259222,
+            39070
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 31,
+          "exact_projected_relations": 756,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            115405,
+            5462
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 13,
+          "exact_projected_relations": 747,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            188240,
+            235468
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 53,
+          "exact_projected_relations": 777,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            79567,
+            71685
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 31,
+          "exact_projected_relations": 814,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            208472,
+            23933
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 3,
+          "exact_projected_relations": 763,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            21489,
+            33496
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 39,
+          "exact_projected_relations": 775,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            195104,
+            211927
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 25,
+          "exact_projected_relations": 772,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            85868,
+            251219
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 52,
+          "exact_projected_relations": 787,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            98111,
+            177804
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 1,
+          "exact_projected_relations": 777,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        }
+      ],
+      "batch_multiplication_floor": 1013265,
+      "batch_measured_multiplications": 2365916,
+      "batch_measured_over_floor": {
+        "numerator": 2365916,
+        "denominator": 1013265,
+        "decimal": 2.334942981352361
+      },
+      "same_batch_hybrid_multiplication_floor": 58605596,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 2093057,
+        "denominator": 84497,
+        "decimal": 24.77078476158917
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 140400882,
+        "denominator": 50472223,
+        "decimal": 2.7817455553721104
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          225458
+        ],
+        [
+          76,
+          35148
+        ],
+        [
+          76,
+          35072
+        ],
+        [
+          1537,
+          1613
+        ],
+        [
+          1537,
+          76
+        ],
+        [
+          1613,
+          135260
+        ],
+        [
+          1613,
+          136721
+        ],
+        [
+          8352,
+          227071
+        ],
+        [
+          8352,
+          218719
+        ],
+        [
+          8428,
+          180145
+        ],
+        [
+          8428,
+          171869
+        ],
+        [
+          35072,
+          1537
+        ],
+        [
+          35072,
+          36609
+        ],
+        [
+          35148,
+          81998
+        ],
+        [
+          35148,
+          116994
+        ],
+        [
+          36609,
+          9889
+        ],
+        [
+          36609,
+          43424
+        ],
+        [
+          81922,
+          262067
+        ],
+        [
+          81922,
+          180145
+        ],
+        [
+          83459,
+          45037
+        ],
+        [
+          83459,
+          125422
+        ],
+        [
+          125346,
+          226995
+        ],
+        [
+          125346,
+          171793
+        ],
+        [
+          126883,
+          217106
+        ],
+        [
+          126883,
+          180145
+        ],
+        [
+          126959,
+          135184
+        ],
+        [
+          126959,
+          262143
+        ],
+        [
+          135184,
+          125422
+        ],
+        [
+          135184,
+          260606
+        ],
+        [
+          145073,
+          225534
+        ],
+        [
+          145073,
+          83535
+        ],
+        [
+          145149,
+          218719
+        ],
+        [
+          145149,
+          90274
+        ],
+        [
+          170256,
+          218719
+        ],
+        [
+          170256,
+          118607
+        ],
+        [
+          180221,
+          262143
+        ],
+        [
+          180221,
+          81922
+        ],
+        [
+          217182,
+          43500
+        ],
+        [
+          217182,
+          260530
+        ],
+        [
+          225458,
+          0
+        ],
+        [
+          225458,
+          225458
+        ],
+        [
+          225534,
+          118531
+        ],
+        [
+          225534,
+          180221
+        ],
+        [
+          226995,
+          126959
+        ],
+        [
+          226995,
+          170332
+        ],
+        [
+          252254,
+          125422
+        ],
+        [
+          252254,
+          143536
+        ],
+        [
+          253791,
+          8352
+        ],
+        [
+          253791,
+          262143
+        ],
+        [
+          260530,
+          9965
+        ],
+        [
+          260530,
+          253791
+        ],
+        [
+          262143,
+          36685
+        ],
+        [
+          262143,
+          225458
+        ]
+      ],
+      "harness_seconds": 10.515522607998719,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "basis": [
+        36685,
+        225458,
+        4625,
+        10624,
+        16454,
+        33184,
+        65610,
+        132113
+      ],
+      "coefficients": [
+        36685,
+        36685
+      ],
+      "K_abscissas": 74,
+      "M_signed_points": 148,
+      "curve_order": 262926,
+      "order_factorization": {
+        "2": 1,
+        "3": 5,
+        "541": 1
+      },
+      "all_signed_triples": 518592,
+      "infinity_triples": 0,
+      "target_x_collision_triples": 18,
+      "valid_signed_triples": 518574,
+      "signed_mean": {
+        "numerator": 518574,
+        "denominator": 262925,
+        "decimal": 1.9723267091375867
+      },
+      "old_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        4868,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869
+      ],
+      "all_mass_by_trace": [
+        6228,
+        12936,
+        12690,
+        12690,
+        12690,
+        12690,
+        6498,
+        6498,
+        12690,
+        12690,
+        12906,
+        12906,
+        12690,
+        12690,
+        6498,
+        6498,
+        6498,
+        6498,
+        12690,
+        12690,
+        12906,
+        12906,
+        12690,
+        12690,
+        6498,
+        6498,
+        6282,
+        6282,
+        12690,
+        12690,
+        12690,
+        12690,
+        6498,
+        6498,
+        12906,
+        12906,
+        6282,
+        6282,
+        12690,
+        12690,
+        6390,
+        6390,
+        6498,
+        6498,
+        6498,
+        6498,
+        6498,
+        6498,
+        6282,
+        6282,
+        6498,
+        6498,
+        13068,
+        13068
+      ],
+      "target_x_collisions_by_trace": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "valid_mass_by_trace": [
+        6228,
+        12936,
+        12690,
+        12690,
+        12690,
+        12690,
+        6498,
+        6498,
+        12690,
+        12690,
+        12903,
+        12903,
+        12690,
+        12690,
+        6498,
+        6498,
+        6498,
+        6498,
+        12690,
+        12690,
+        12903,
+        12903,
+        12690,
+        12690,
+        6498,
+        6498,
+        6282,
+        6282,
+        12690,
+        12690,
+        12690,
+        12690,
+        6498,
+        6498,
+        12903,
+        12903,
+        6282,
+        6282,
+        12690,
+        12690,
+        6390,
+        6390,
+        6498,
+        6498,
+        6498,
+        6498,
+        6498,
+        6498,
+        6282,
+        6282,
+        6498,
+        6498,
+        13068,
+        13068
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            261278,
+            90885
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 2,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            4928,
+            156397
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 11,
+          "exact_projected_relations": 3,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            246887,
+            233930
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 35,
+          "exact_projected_relations": 3,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            90635,
+            2343
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 12,
+          "exact_projected_relations": 3,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            15519,
+            79976
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 16,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            253865,
+            121382
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 8,
+          "exact_projected_relations": 2,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            246728,
+            157045
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 28,
+          "exact_projected_relations": 3,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            121706,
+            51563
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 29,
+          "exact_projected_relations": 4,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            247066,
+            80441
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 5,
+          "exact_projected_relations": 5,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            193019,
+            82393
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 23,
+          "exact_projected_relations": 5,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            175305,
+            153400
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 28,
+          "exact_projected_relations": 2,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            10255,
+            174292
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 6,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            82951,
+            50107
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 45,
+          "exact_projected_relations": 2,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            176576,
+            207889
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 37,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            249896,
+            68070
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 28,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            789,
+            139112
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 27,
+          "exact_projected_relations": 2,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        }
+      ],
+      "batch_multiplication_floor": 21275,
+      "batch_measured_multiplications": 68666,
+      "batch_measured_over_floor": {
+        "numerator": 68666,
+        "denominator": 21275,
+        "decimal": 3.2275440658049352
+      },
+      "same_batch_hybrid_multiplication_floor": 3641372,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 1820686,
+        "denominator": 34333,
+        "decimal": 53.03020417673958
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 12970868,
+        "denominator": 86429,
+        "decimal": 150.07541450207685
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          225458
+        ],
+        [
+          76,
+          35148
+        ],
+        [
+          76,
+          35072
+        ],
+        [
+          1537,
+          1613
+        ],
+        [
+          1537,
+          76
+        ],
+        [
+          1613,
+          135260
+        ],
+        [
+          1613,
+          136721
+        ],
+        [
+          8352,
+          227071
+        ],
+        [
+          8352,
+          218719
+        ],
+        [
+          8428,
+          180145
+        ],
+        [
+          8428,
+          171869
+        ],
+        [
+          35072,
+          1537
+        ],
+        [
+          35072,
+          36609
+        ],
+        [
+          35148,
+          81998
+        ],
+        [
+          35148,
+          116994
+        ],
+        [
+          36609,
+          9889
+        ],
+        [
+          36609,
+          43424
+        ],
+        [
+          81922,
+          262067
+        ],
+        [
+          81922,
+          180145
+        ],
+        [
+          83459,
+          45037
+        ],
+        [
+          83459,
+          125422
+        ],
+        [
+          125346,
+          226995
+        ],
+        [
+          125346,
+          171793
+        ],
+        [
+          126883,
+          217106
+        ],
+        [
+          126883,
+          180145
+        ],
+        [
+          126959,
+          135184
+        ],
+        [
+          126959,
+          262143
+        ],
+        [
+          135184,
+          125422
+        ],
+        [
+          135184,
+          260606
+        ],
+        [
+          145073,
+          225534
+        ],
+        [
+          145073,
+          83535
+        ],
+        [
+          145149,
+          218719
+        ],
+        [
+          145149,
+          90274
+        ],
+        [
+          170256,
+          218719
+        ],
+        [
+          170256,
+          118607
+        ],
+        [
+          180221,
+          262143
+        ],
+        [
+          180221,
+          81922
+        ],
+        [
+          217182,
+          43500
+        ],
+        [
+          217182,
+          260530
+        ],
+        [
+          225458,
+          0
+        ],
+        [
+          225458,
+          225458
+        ],
+        [
+          225534,
+          118531
+        ],
+        [
+          225534,
+          180221
+        ],
+        [
+          226995,
+          126959
+        ],
+        [
+          226995,
+          170332
+        ],
+        [
+          252254,
+          125422
+        ],
+        [
+          252254,
+          143536
+        ],
+        [
+          253791,
+          8352
+        ],
+        [
+          253791,
+          262143
+        ],
+        [
+          260530,
+          9965
+        ],
+        [
+          260530,
+          253791
+        ],
+        [
+          262143,
+          36685
+        ],
+        [
+          262143,
+          225458
+        ]
+      ],
+      "harness_seconds": 1.4773138860000472,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "basis": [
+        36685,
+        225458,
+        125422,
+        180145,
+        4625,
+        10624,
+        16454,
+        33184,
+        65610,
+        132113
+      ],
+      "coefficients": [
+        36685,
+        36685
+      ],
+      "K_abscissas": 488,
+      "M_signed_points": 976,
+      "curve_order": 262926,
+      "order_factorization": {
+        "2": 1,
+        "3": 5,
+        "541": 1
+      },
+      "all_signed_triples": 154001088,
+      "infinity_triples": 552,
+      "target_x_collision_triples": 1440,
+      "valid_signed_triples": 153999096,
+      "signed_mean": {
+        "numerator": 153999096,
+        "denominator": 262925,
+        "decimal": 585.7149225064181
+      },
+      "old_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_probability_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        4868,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869,
+        4869
+      ],
+      "all_mass_by_trace": [
+        2874294,
+        2825016,
+        2842641,
+        2842641,
+        2842641,
+        2842641,
+        2862297,
+        2862297,
+        2865237,
+        2865237,
+        2872836,
+        2872836,
+        2842641,
+        2842641,
+        2862297,
+        2862297,
+        2862297,
+        2862297,
+        2865237,
+        2865237,
+        2872836,
+        2872836,
+        2871102,
+        2871102,
+        2836536,
+        2836536,
+        2832084,
+        2832084,
+        2865237,
+        2865237,
+        2871102,
+        2871102,
+        2836536,
+        2836536,
+        2872836,
+        2872836,
+        2832084,
+        2832084,
+        2871102,
+        2871102,
+        2827941,
+        2827941,
+        2833131,
+        2833131,
+        2833131,
+        2833131,
+        2836536,
+        2836536,
+        2832084,
+        2832084,
+        2833131,
+        2833131,
+        2875356,
+        2875356
+      ],
+      "target_x_collisions_by_trace": [
+        108,
+        0,
+        18,
+        18,
+        18,
+        18,
+        39,
+        39,
+        36,
+        36,
+        36,
+        36,
+        18,
+        18,
+        39,
+        39,
+        39,
+        39,
+        36,
+        36,
+        36,
+        36,
+        36,
+        36,
+        27,
+        27,
+        9,
+        9,
+        36,
+        36,
+        36,
+        36,
+        27,
+        27,
+        36,
+        36,
+        9,
+        9,
+        36,
+        36,
+        18,
+        18,
+        12,
+        12,
+        12,
+        12,
+        27,
+        27,
+        9,
+        9,
+        12,
+        12,
+        9,
+        9
+      ],
+      "valid_mass_by_trace": [
+        2873634,
+        2825016,
+        2842623,
+        2842623,
+        2842623,
+        2842623,
+        2862258,
+        2862258,
+        2865201,
+        2865201,
+        2872800,
+        2872800,
+        2842623,
+        2842623,
+        2862258,
+        2862258,
+        2862258,
+        2862258,
+        2865201,
+        2865201,
+        2872800,
+        2872800,
+        2871066,
+        2871066,
+        2836509,
+        2836509,
+        2832075,
+        2832075,
+        2865201,
+        2865201,
+        2871066,
+        2871066,
+        2836509,
+        2836509,
+        2872800,
+        2872800,
+        2832075,
+        2832075,
+        2871066,
+        2871066,
+        2827923,
+        2827923,
+        2833119,
+        2833119,
+        2833119,
+        2833119,
+        2836509,
+        2836509,
+        2832075,
+        2832075,
+        2833119,
+        2833119,
+        2875347,
+        2875347
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            40195,
+            198008
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 39,
+          "exact_projected_relations": 614,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            82692,
+            224745
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 4,
+          "exact_projected_relations": 568,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            46523,
+            204191
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 29,
+          "exact_projected_relations": 579,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            252793,
+            23138
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 39,
+          "exact_projected_relations": 611,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            212954,
+            86357
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 36,
+          "exact_projected_relations": 568,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            51810,
+            450
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 9,
+          "exact_projected_relations": 580,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            83340,
+            110973
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 3,
+          "exact_projected_relations": 582,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            191382,
+            78594
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 18,
+          "exact_projected_relations": 628,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            57769,
+            63228
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 52,
+          "exact_projected_relations": 583,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            172167,
+            149472
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 27,
+          "exact_projected_relations": 573,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            40513,
+            225683
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 4,
+          "exact_projected_relations": 589,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            191976,
+            190733
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 29,
+          "exact_projected_relations": 671,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            94405,
+            125347
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 44,
+          "exact_projected_relations": 567,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            234350,
+            181102
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 8,
+          "exact_projected_relations": 590,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            172879,
+            227288
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 25,
+          "exact_projected_relations": 597,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            29890,
+            238127
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 2,
+          "exact_projected_relations": 540,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        }
+      ],
+      "batch_multiplication_floor": 847412,
+      "batch_measured_multiplications": 1951583,
+      "batch_measured_over_floor": {
+        "numerator": 1951583,
+        "denominator": 847412,
+        "decimal": 2.302991933085677
+      },
+      "same_batch_hybrid_multiplication_floor": 58605582,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 58605582,
+        "denominator": 1951583,
+        "decimal": 30.0297666048536
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 21384404,
+        "denominator": 6416629,
+        "decimal": 3.332653952721904
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          225458
+        ],
+        [
+          76,
+          35148
+        ],
+        [
+          76,
+          35072
+        ],
+        [
+          1537,
+          1613
+        ],
+        [
+          1537,
+          76
+        ],
+        [
+          1613,
+          135260
+        ],
+        [
+          1613,
+          136721
+        ],
+        [
+          8352,
+          227071
+        ],
+        [
+          8352,
+          218719
+        ],
+        [
+          8428,
+          180145
+        ],
+        [
+          8428,
+          171869
+        ],
+        [
+          35072,
+          1537
+        ],
+        [
+          35072,
+          36609
+        ],
+        [
+          35148,
+          81998
+        ],
+        [
+          35148,
+          116994
+        ],
+        [
+          36609,
+          9889
+        ],
+        [
+          36609,
+          43424
+        ],
+        [
+          81922,
+          262067
+        ],
+        [
+          81922,
+          180145
+        ],
+        [
+          83459,
+          45037
+        ],
+        [
+          83459,
+          125422
+        ],
+        [
+          125346,
+          226995
+        ],
+        [
+          125346,
+          171793
+        ],
+        [
+          126883,
+          217106
+        ],
+        [
+          126883,
+          180145
+        ],
+        [
+          126959,
+          135184
+        ],
+        [
+          126959,
+          262143
+        ],
+        [
+          135184,
+          125422
+        ],
+        [
+          135184,
+          260606
+        ],
+        [
+          145073,
+          225534
+        ],
+        [
+          145073,
+          83535
+        ],
+        [
+          145149,
+          218719
+        ],
+        [
+          145149,
+          90274
+        ],
+        [
+          170256,
+          218719
+        ],
+        [
+          170256,
+          118607
+        ],
+        [
+          180221,
+          262143
+        ],
+        [
+          180221,
+          81922
+        ],
+        [
+          217182,
+          43500
+        ],
+        [
+          217182,
+          260530
+        ],
+        [
+          225458,
+          0
+        ],
+        [
+          225458,
+          225458
+        ],
+        [
+          225534,
+          118531
+        ],
+        [
+          225534,
+          180221
+        ],
+        [
+          226995,
+          126959
+        ],
+        [
+          226995,
+          170332
+        ],
+        [
+          252254,
+          125422
+        ],
+        [
+          252254,
+          143536
+        ],
+        [
+          253791,
+          8352
+        ],
+        [
+          253791,
+          262143
+        ],
+        [
+          260530,
+          9965
+        ],
+        [
+          260530,
+          253791
+        ],
+        [
+          262143,
+          36685
+        ],
+        [
+          262143,
+          225458
+        ]
+      ],
+      "harness_seconds": 9.433547795997583,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "basis": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "coefficients": [
+        86833437,
+        86833437
+      ],
+      "K_abscissas": 140,
+      "M_signed_points": 280,
+      "curve_order": 1073781414,
+      "order_factorization": {
+        "2": 1,
+        "3": 3,
+        "61": 1,
+        "181": 1,
+        "1801": 1
+      },
+      "all_signed_triples": 3580640,
+      "infinity_triples": 0,
+      "target_x_collision_triples": 0,
+      "valid_signed_triples": 3580640,
+      "signed_mean": {
+        "numerator": 3580640,
+        "denominator": 1073781413,
+        "decimal": 0.003334607916145779
+      },
+      "old_probability_ceiling": {
+        "numerator": 3580640,
+        "denominator": 1073781413,
+        "decimal": 0.003334607916145779
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 3580640,
+        "denominator": 1073781413,
+        "decimal": 0.003334607916145779
+      },
+      "trace_probability_ceiling": {
+        "numerator": 3580640,
+        "denominator": 1073781413,
+        "decimal": 0.003334607916145779
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1073781413,
+        "denominator": 3580640,
+        "decimal": 299.88533139327046
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        19884840,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841
+      ],
+      "all_mass_by_trace": [
+        66416,
+        66134,
+        66401,
+        66401,
+        66108,
+        66108,
+        66108,
+        66108,
+        66451,
+        66451,
+        66269,
+        66269,
+        65987,
+        65987,
+        66279,
+        66279,
+        66168,
+        66168,
+        66334,
+        66334,
+        66414,
+        66414,
+        66276,
+        66276,
+        66618,
+        66618,
+        66242,
+        66242,
+        66170,
+        66170,
+        66525,
+        66525,
+        66147,
+        66147,
+        66409,
+        66409,
+        66308,
+        66308,
+        66361,
+        66361,
+        66173,
+        66173,
+        66394,
+        66394,
+        66128,
+        66128,
+        66622,
+        66622,
+        66507,
+        66507,
+        66198,
+        66198,
+        66448,
+        66448
+      ],
+      "target_x_collisions_by_trace": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "valid_mass_by_trace": [
+        66416,
+        66134,
+        66401,
+        66401,
+        66108,
+        66108,
+        66108,
+        66108,
+        66451,
+        66451,
+        66269,
+        66269,
+        65987,
+        65987,
+        66279,
+        66279,
+        66168,
+        66168,
+        66334,
+        66334,
+        66414,
+        66414,
+        66276,
+        66276,
+        66618,
+        66618,
+        66242,
+        66242,
+        66170,
+        66170,
+        66525,
+        66525,
+        66147,
+        66147,
+        66409,
+        66409,
+        66308,
+        66308,
+        66361,
+        66361,
+        66173,
+        66173,
+        66394,
+        66394,
+        66128,
+        66128,
+        66622,
+        66622,
+        66507,
+        66507,
+        66198,
+        66198,
+        66448,
+        66448
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            393035752,
+            682538491
+          ],
+          "cohort": "frozen-development",
+          "trace_class": 39,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            914328181,
+            169115234
+          ],
+          "cohort": "frozen-development",
+          "trace_class": 29,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            434809308,
+            316428527
+          ],
+          "cohort": "frozen-holdout",
+          "trace_class": 6,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            425875552,
+            398818980
+          ],
+          "cohort": "frozen-holdout",
+          "trace_class": 20,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            795320660,
+            155713076
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 42,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            630137481,
+            576673663
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 39,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            924226023,
+            4233253
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 10,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            942743201,
+            635957404
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 45,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            302119772,
+            116138878
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 15,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            636210308,
+            692930776
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 7,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            63039786,
+            493250498
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 27,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            81692298,
+            436140075
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 44,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            609023161,
+            555772492
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 36,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            56705049,
+            733015137
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 21,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            479523014,
+            552527874
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 53,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            1023423929,
+            308495400
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 48,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            367946816,
+            603258547
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 17,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            1028708017,
+            852742232
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 35,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        }
+      ],
+      "batch_multiplication_floor": 72590,
+      "batch_measured_multiplications": 207523,
+      "batch_measured_over_floor": {
+        "numerator": 207523,
+        "denominator": 72590,
+        "decimal": 2.858837305413969
+      },
+      "same_batch_hybrid_multiplication_floor": 3641372,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 3641372,
+        "denominator": 207523,
+        "decimal": 17.546835772420405
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 1073781411,
+        "denominator": 6394,
+        "decimal": 167935.78526743822
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          986908386
+        ],
+        [
+          1179746,
+          1056692215
+        ],
+        [
+          1179746,
+          1055512469
+        ],
+        [
+          2150416,
+          67633413
+        ],
+        [
+          2150416,
+          69783829
+        ],
+        [
+          17049608,
+          19200024
+        ],
+        [
+          17049608,
+          2150416
+        ],
+        [
+          19200024,
+          18229354
+        ],
+        [
+          19200024,
+          3330162
+        ],
+        [
+          67633413,
+          84683021
+        ],
+        [
+          67633413,
+          17049608
+        ],
+        [
+          68813159,
+          233635229
+        ],
+        [
+          68813159,
+          167181562
+        ],
+        [
+          69783829,
+          214435205
+        ],
+        [
+          69783829,
+          148952208
+        ],
+        [
+          84683021,
+          855976456
+        ],
+        [
+          84683021,
+          906560261
+        ],
+        [
+          146801792,
+          1071591407
+        ],
+        [
+          146801792,
+          924789615
+        ],
+        [
+          150131954,
+          1054541799
+        ],
+        [
+          150131954,
+          908710677
+        ],
+        [
+          163851400,
+          1055512469
+        ],
+        [
+          163851400,
+          925760285
+        ],
+        [
+          217765367,
+          840106594
+        ],
+        [
+          217765367,
+          1055512469
+        ],
+        [
+          234814975,
+          838926848
+        ],
+        [
+          234814975,
+          1073741823
+        ],
+        [
+          838926848,
+          167181562
+        ],
+        [
+          838926848,
+          1006108410
+        ],
+        [
+          841077264,
+          924789615
+        ],
+        [
+          841077264,
+          88013183
+        ],
+        [
+          857156202,
+          166001816
+        ],
+        [
+          857156202,
+          989058802
+        ],
+        [
+          859306618,
+          167181562
+        ],
+        [
+          859306618,
+          985728640
+        ],
+        [
+          926940031,
+          146801792
+        ],
+        [
+          926940031,
+          1073741823
+        ],
+        [
+          986908386,
+          0
+        ],
+        [
+          986908386,
+          986908386
+        ],
+        [
+          989058802,
+          231484813
+        ],
+        [
+          989058802,
+          926940031
+        ],
+        [
+          1003957994,
+          70963575
+        ],
+        [
+          1003957994,
+          1072562077
+        ],
+        [
+          1053362053,
+          1003957994
+        ],
+        [
+          1053362053,
+          85862767
+        ],
+        [
+          1054541799,
+          234814975
+        ],
+        [
+          1054541799,
+          858126872
+        ],
+        [
+          1070411661,
+          924789615
+        ],
+        [
+          1070411661,
+          147981538
+        ],
+        [
+          1072562077,
+          1073741823
+        ],
+        [
+          1072562077,
+          1179746
+        ],
+        [
+          1073741823,
+          86833437
+        ],
+        [
+          1073741823,
+          986908386
+        ]
+      ],
+      "harness_seconds": 6.120796043000155,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "basis": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ],
+      "coefficients": [
+        86833437,
+        86833437
+      ],
+      "K_abscissas": 263,
+      "M_signed_points": 526,
+      "curve_order": 1073781414,
+      "order_factorization": {
+        "2": 1,
+        "3": 3,
+        "61": 1,
+        "181": 1,
+        "1801": 1
+      },
+      "all_signed_triples": 23979288,
+      "infinity_triples": 0,
+      "target_x_collision_triples": 0,
+      "valid_signed_triples": 23979288,
+      "signed_mean": {
+        "numerator": 23979288,
+        "denominator": 1073781413,
+        "decimal": 0.022331628867559846
+      },
+      "old_probability_ceiling": {
+        "numerator": 23979288,
+        "denominator": 1073781413,
+        "decimal": 0.022331628867559846
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 23979288,
+        "denominator": 1073781413,
+        "decimal": 0.022331628867559846
+      },
+      "trace_probability_ceiling": {
+        "numerator": 23979288,
+        "denominator": 1073781413,
+        "decimal": 0.022331628867559846
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1073781413,
+        "denominator": 23979288,
+        "decimal": 44.77953694872008
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        19884840,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841
+      ],
+      "all_mass_by_trace": [
+        440656,
+        443946,
+        444818,
+        444818,
+        446347,
+        446347,
+        444526,
+        444526,
+        444135,
+        444135,
+        446217,
+        446217,
+        443196,
+        443196,
+        442368,
+        442368,
+        444995,
+        444995,
+        441806,
+        441806,
+        443551,
+        443551,
+        441647,
+        441647,
+        444936,
+        444936,
+        443135,
+        443135,
+        444134,
+        444134,
+        446899,
+        446899,
+        443340,
+        443340,
+        441728,
+        441728,
+        444460,
+        444460,
+        445017,
+        445017,
+        443836,
+        443836,
+        444027,
+        444027,
+        441309,
+        441309,
+        445433,
+        445433,
+        446942,
+        446942,
+        445056,
+        445056,
+        443485,
+        443485
+      ],
+      "target_x_collisions_by_trace": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "valid_mass_by_trace": [
+        440656,
+        443946,
+        444818,
+        444818,
+        446347,
+        446347,
+        444526,
+        444526,
+        444135,
+        444135,
+        446217,
+        446217,
+        443196,
+        443196,
+        442368,
+        442368,
+        444995,
+        444995,
+        441806,
+        441806,
+        443551,
+        443551,
+        441647,
+        441647,
+        444936,
+        444936,
+        443135,
+        443135,
+        444134,
+        444134,
+        446899,
+        446899,
+        443340,
+        443340,
+        441728,
+        441728,
+        444460,
+        444460,
+        445017,
+        445017,
+        443836,
+        443836,
+        444027,
+        444027,
+        441309,
+        441309,
+        445433,
+        445433,
+        446942,
+        446942,
+        445056,
+        445056,
+        443485,
+        443485
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            906928817,
+            534814305
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 31,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            927827162,
+            9785090
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 30,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            854233867,
+            720362036
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 38,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            189738700,
+            260837015
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 15,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            594294163,
+            120522882
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 2,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            1063940605,
+            396800677
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 29,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            738212103,
+            785689959
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 49,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            387355862,
+            420471361
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 45,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            1066552866,
+            110671113
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 51,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            123384918,
+            9842684
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 28,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            321852135,
+            595794502
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 35,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            852842105,
+            850264628
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 3,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            482026727,
+            777477290
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 6,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            637777487,
+            585425370
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 51,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        },
+        {
+          "target": [
+            214091259,
+            610930462
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 41,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261122,
+          "hybrid_complete_multiplication_floor": 1827854
+        },
+        {
+          "target": [
+            999324964,
+            399899666
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 28,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 261120,
+          "hybrid_complete_multiplication_floor": 1827840
+        }
+      ],
+      "batch_multiplication_floor": 249587,
+      "batch_measured_multiplications": 501965,
+      "batch_measured_over_floor": {
+        "numerator": 501965,
+        "denominator": 249587,
+        "decimal": 2.011182473446133
+      },
+      "same_batch_hybrid_multiplication_floor": 14622748,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 14622748,
+        "denominator": 501965,
+        "decimal": 29.131011126273744
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 357927137,
+        "denominator": 7598,
+        "decimal": 47108.07278231114
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          986908386
+        ],
+        [
+          1179746,
+          1056692215
+        ],
+        [
+          1179746,
+          1055512469
+        ],
+        [
+          2150416,
+          67633413
+        ],
+        [
+          2150416,
+          69783829
+        ],
+        [
+          17049608,
+          19200024
+        ],
+        [
+          17049608,
+          2150416
+        ],
+        [
+          19200024,
+          18229354
+        ],
+        [
+          19200024,
+          3330162
+        ],
+        [
+          67633413,
+          84683021
+        ],
+        [
+          67633413,
+          17049608
+        ],
+        [
+          68813159,
+          233635229
+        ],
+        [
+          68813159,
+          167181562
+        ],
+        [
+          69783829,
+          214435205
+        ],
+        [
+          69783829,
+          148952208
+        ],
+        [
+          84683021,
+          855976456
+        ],
+        [
+          84683021,
+          906560261
+        ],
+        [
+          146801792,
+          1071591407
+        ],
+        [
+          146801792,
+          924789615
+        ],
+        [
+          150131954,
+          1054541799
+        ],
+        [
+          150131954,
+          908710677
+        ],
+        [
+          163851400,
+          1055512469
+        ],
+        [
+          163851400,
+          925760285
+        ],
+        [
+          217765367,
+          840106594
+        ],
+        [
+          217765367,
+          1055512469
+        ],
+        [
+          234814975,
+          838926848
+        ],
+        [
+          234814975,
+          1073741823
+        ],
+        [
+          838926848,
+          167181562
+        ],
+        [
+          838926848,
+          1006108410
+        ],
+        [
+          841077264,
+          924789615
+        ],
+        [
+          841077264,
+          88013183
+        ],
+        [
+          857156202,
+          166001816
+        ],
+        [
+          857156202,
+          989058802
+        ],
+        [
+          859306618,
+          167181562
+        ],
+        [
+          859306618,
+          985728640
+        ],
+        [
+          926940031,
+          146801792
+        ],
+        [
+          926940031,
+          1073741823
+        ],
+        [
+          986908386,
+          0
+        ],
+        [
+          986908386,
+          986908386
+        ],
+        [
+          989058802,
+          231484813
+        ],
+        [
+          989058802,
+          926940031
+        ],
+        [
+          1003957994,
+          70963575
+        ],
+        [
+          1003957994,
+          1072562077
+        ],
+        [
+          1053362053,
+          1003957994
+        ],
+        [
+          1053362053,
+          85862767
+        ],
+        [
+          1054541799,
+          234814975
+        ],
+        [
+          1054541799,
+          858126872
+        ],
+        [
+          1070411661,
+          924789615
+        ],
+        [
+          1070411661,
+          147981538
+        ],
+        [
+          1072562077,
+          1073741823
+        ],
+        [
+          1072562077,
+          1179746
+        ],
+        [
+          1073741823,
+          86833437
+        ],
+        [
+          1073741823,
+          986908386
+        ]
+      ],
+      "harness_seconds": 10.036925944001268,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "basis": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256,
+        512
+      ],
+      "coefficients": [
+        86833437,
+        86833437
+      ],
+      "K_abscissas": 505,
+      "M_signed_points": 1010,
+      "curve_order": 1073781414,
+      "order_factorization": {
+        "2": 1,
+        "3": 3,
+        "61": 1,
+        "181": 1,
+        "1801": 1
+      },
+      "all_signed_triples": 170698080,
+      "infinity_triples": 2,
+      "target_x_collision_triples": 0,
+      "valid_signed_triples": 170698078,
+      "signed_mean": {
+        "numerator": 170698078,
+        "denominator": 1073781413,
+        "decimal": 0.15896911227313262
+      },
+      "old_probability_ceiling": {
+        "numerator": 170698080,
+        "denominator": 1073781413,
+        "decimal": 0.1589691141357091
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 170698078,
+        "denominator": 1073781413,
+        "decimal": 0.15896911227313262
+      },
+      "trace_probability_ceiling": {
+        "numerator": 170698078,
+        "denominator": 1073781413,
+        "decimal": 0.15896911227313262
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 85349039,
+        "denominator": 85349040,
+        "decimal": 0.9999999882834066
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1073781413,
+        "denominator": 170698078,
+        "decimal": 6.290530189800966
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        19884840,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841
+      ],
+      "all_mass_by_trace": [
+        3158270,
+        3160278,
+        3160025,
+        3160025,
+        3162035,
+        3162035,
+        3160538,
+        3160538,
+        3160330,
+        3160330,
+        3163029,
+        3163029,
+        3160222,
+        3160222,
+        3158558,
+        3158558,
+        3161834,
+        3161834,
+        3160575,
+        3160575,
+        3161349,
+        3161349,
+        3160594,
+        3160594,
+        3162752,
+        3162752,
+        3158209,
+        3158209,
+        3158829,
+        3158829,
+        3164006,
+        3164006,
+        3159418,
+        3159418,
+        3161280,
+        3161280,
+        3162968,
+        3162968,
+        3162469,
+        3162469,
+        3162180,
+        3162180,
+        3160250,
+        3160250,
+        3158812,
+        3158812,
+        3163711,
+        3163711,
+        3163575,
+        3163575,
+        3162025,
+        3162025,
+        3160193,
+        3160193
+      ],
+      "target_x_collisions_by_trace": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "valid_mass_by_trace": [
+        3158268,
+        3160278,
+        3160025,
+        3160025,
+        3162035,
+        3162035,
+        3160538,
+        3160538,
+        3160330,
+        3160330,
+        3163029,
+        3163029,
+        3160222,
+        3160222,
+        3158558,
+        3158558,
+        3161834,
+        3161834,
+        3160575,
+        3160575,
+        3161349,
+        3161349,
+        3160594,
+        3160594,
+        3162752,
+        3162752,
+        3158209,
+        3158209,
+        3158829,
+        3158829,
+        3164006,
+        3164006,
+        3159418,
+        3159418,
+        3161280,
+        3161280,
+        3162968,
+        3162968,
+        3162469,
+        3162469,
+        3162180,
+        3162180,
+        3160250,
+        3160250,
+        3158812,
+        3158812,
+        3163711,
+        3163711,
+        3163575,
+        3163575,
+        3162025,
+        3162025,
+        3160193,
+        3160193
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            631881338,
+            431727723
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 48,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            891463453,
+            339351128
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 2,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            435298032,
+            690963534
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 17,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            547118863,
+            287165700
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 51,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            319385657,
+            438265906
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 9,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            482423987,
+            61716624
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 41,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            499528551,
+            305457619
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 29,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            509994651,
+            738099984
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 17,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            591672516,
+            435095501
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 39,
+          "exact_projected_relations": 2,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            977029131,
+            497521476
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 21,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            572064006,
+            543912974
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 43,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            37571051,
+            973461753
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 21,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            357385963,
+            335897185
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 53,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            321844775,
+            908482254
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 28,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            863586105,
+            335650820
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 50,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            499094266,
+            65809281
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 15,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        }
+      ],
+      "batch_multiplication_floor": 906980,
+      "batch_measured_multiplications": 1391380,
+      "batch_measured_over_floor": {
+        "numerator": 69569,
+        "denominator": 45349,
+        "decimal": 1.5340801340713135
+      },
+      "same_batch_hybrid_multiplication_floor": 58605624,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 14651406,
+        "denominator": 347845,
+        "decimal": 42.12050194770659
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 23074877130,
+        "denominator": 1815937,
+        "decimal": 12706.870959730431
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          986908386
+        ],
+        [
+          1179746,
+          1056692215
+        ],
+        [
+          1179746,
+          1055512469
+        ],
+        [
+          2150416,
+          67633413
+        ],
+        [
+          2150416,
+          69783829
+        ],
+        [
+          17049608,
+          19200024
+        ],
+        [
+          17049608,
+          2150416
+        ],
+        [
+          19200024,
+          18229354
+        ],
+        [
+          19200024,
+          3330162
+        ],
+        [
+          67633413,
+          84683021
+        ],
+        [
+          67633413,
+          17049608
+        ],
+        [
+          68813159,
+          233635229
+        ],
+        [
+          68813159,
+          167181562
+        ],
+        [
+          69783829,
+          214435205
+        ],
+        [
+          69783829,
+          148952208
+        ],
+        [
+          84683021,
+          855976456
+        ],
+        [
+          84683021,
+          906560261
+        ],
+        [
+          146801792,
+          1071591407
+        ],
+        [
+          146801792,
+          924789615
+        ],
+        [
+          150131954,
+          1054541799
+        ],
+        [
+          150131954,
+          908710677
+        ],
+        [
+          163851400,
+          1055512469
+        ],
+        [
+          163851400,
+          925760285
+        ],
+        [
+          217765367,
+          840106594
+        ],
+        [
+          217765367,
+          1055512469
+        ],
+        [
+          234814975,
+          838926848
+        ],
+        [
+          234814975,
+          1073741823
+        ],
+        [
+          838926848,
+          167181562
+        ],
+        [
+          838926848,
+          1006108410
+        ],
+        [
+          841077264,
+          924789615
+        ],
+        [
+          841077264,
+          88013183
+        ],
+        [
+          857156202,
+          166001816
+        ],
+        [
+          857156202,
+          989058802
+        ],
+        [
+          859306618,
+          167181562
+        ],
+        [
+          859306618,
+          985728640
+        ],
+        [
+          926940031,
+          146801792
+        ],
+        [
+          926940031,
+          1073741823
+        ],
+        [
+          986908386,
+          0
+        ],
+        [
+          986908386,
+          986908386
+        ],
+        [
+          989058802,
+          231484813
+        ],
+        [
+          989058802,
+          926940031
+        ],
+        [
+          1003957994,
+          70963575
+        ],
+        [
+          1003957994,
+          1072562077
+        ],
+        [
+          1053362053,
+          1003957994
+        ],
+        [
+          1053362053,
+          85862767
+        ],
+        [
+          1054541799,
+          234814975
+        ],
+        [
+          1054541799,
+          858126872
+        ],
+        [
+          1070411661,
+          924789615
+        ],
+        [
+          1070411661,
+          147981538
+        ],
+        [
+          1072562077,
+          1073741823
+        ],
+        [
+          1072562077,
+          1179746
+        ],
+        [
+          1073741823,
+          86833437
+        ],
+        [
+          1073741823,
+          986908386
+        ]
+      ],
+      "harness_seconds": 22.255514276999747,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "basis": [
+        86833437,
+        986908386,
+        167181562,
+        924789615,
+        110818906,
+        174040469,
+        321730474,
+        576879094
+      ],
+      "coefficients": [
+        86833437,
+        86833437
+      ],
+      "K_abscissas": 152,
+      "M_signed_points": 304,
+      "curve_order": 1073781414,
+      "order_factorization": {
+        "2": 1,
+        "3": 3,
+        "61": 1,
+        "181": 1,
+        "1801": 1
+      },
+      "all_signed_triples": 4590400,
+      "infinity_triples": 0,
+      "target_x_collision_triples": 0,
+      "valid_signed_triples": 4590400,
+      "signed_mean": {
+        "numerator": 4590400,
+        "denominator": 1073781413,
+        "decimal": 0.004274985527245292
+      },
+      "old_probability_ceiling": {
+        "numerator": 4590400,
+        "denominator": 1073781413,
+        "decimal": 0.004274985527245292
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 4590400,
+        "denominator": 1073781413,
+        "decimal": 0.004274985527245292
+      },
+      "trace_probability_ceiling": {
+        "numerator": 4590400,
+        "denominator": 1073781413,
+        "decimal": 0.004274985527245292
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 1,
+        "denominator": 1,
+        "decimal": 1.0
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1073781413,
+        "denominator": 4590400,
+        "decimal": 233.9189205733705
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        19884840,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841
+      ],
+      "all_mass_by_trace": [
+        89640,
+        96800,
+        82375,
+        82375,
+        84875,
+        84875,
+        84875,
+        84875,
+        82455,
+        82455,
+        84875,
+        84875,
+        85670,
+        85670,
+        82455,
+        82455,
+        82455,
+        82455,
+        82375,
+        82375,
+        85155,
+        85155,
+        85670,
+        85670,
+        82230,
+        82230,
+        89240,
+        89240,
+        82375,
+        82375,
+        85670,
+        85670,
+        85155,
+        85155,
+        82230,
+        82230,
+        89240,
+        89240,
+        82305,
+        82305,
+        85485,
+        85485,
+        85485,
+        85485,
+        85155,
+        85155,
+        85485,
+        85485,
+        82230,
+        82230,
+        89240,
+        89240,
+        87220,
+        87220
+      ],
+      "target_x_collisions_by_trace": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "valid_mass_by_trace": [
+        89640,
+        96800,
+        82375,
+        82375,
+        84875,
+        84875,
+        84875,
+        84875,
+        82455,
+        82455,
+        84875,
+        84875,
+        85670,
+        85670,
+        82455,
+        82455,
+        82455,
+        82455,
+        82375,
+        82375,
+        85155,
+        85155,
+        85670,
+        85670,
+        82230,
+        82230,
+        89240,
+        89240,
+        82375,
+        82375,
+        85670,
+        85670,
+        85155,
+        85155,
+        82230,
+        82230,
+        89240,
+        89240,
+        82305,
+        82305,
+        85485,
+        85485,
+        85485,
+        85485,
+        85155,
+        85155,
+        85485,
+        85485,
+        82230,
+        82230,
+        89240,
+        89240,
+        87220,
+        87220
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            445015449,
+            912643679
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 24,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            900164254,
+            405751395
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 52,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            67375829,
+            673334804
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 2,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            456470847,
+            71691878
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 27,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            892510498,
+            744349201
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 25,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            320524707,
+            687177665
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 48,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            206009551,
+            1041289842
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 22,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            9347075,
+            652601390
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 1,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            823285698,
+            279576819
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 44,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            287337375,
+            543104815
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 17,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            699089663,
+            648013290
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 12,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            1010983456,
+            87078315
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 30,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        },
+        {
+          "target": [
+            1028497203,
+            469317573
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 37,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            658324447,
+            1063961451
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 37,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            103680650,
+            123525961
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 3,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65024,
+          "hybrid_complete_multiplication_floor": 455168
+        },
+        {
+          "target": [
+            814367227,
+            749319300
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 35,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 65026,
+          "hybrid_complete_multiplication_floor": 455182
+        }
+      ],
+      "batch_multiplication_floor": 85196,
+      "batch_measured_multiplications": 231566,
+      "batch_measured_over_floor": {
+        "numerator": 115783,
+        "denominator": 42598,
+        "decimal": 2.7180384055589464
+      },
+      "same_batch_hybrid_multiplication_floor": 3641414,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 1820707,
+        "denominator": 115783,
+        "decimal": 15.725166907058895
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 1073781411,
+        "denominator": 7550,
+        "decimal": 142222.7034437086
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          986908386
+        ],
+        [
+          1179746,
+          1056692215
+        ],
+        [
+          1179746,
+          1055512469
+        ],
+        [
+          2150416,
+          67633413
+        ],
+        [
+          2150416,
+          69783829
+        ],
+        [
+          17049608,
+          19200024
+        ],
+        [
+          17049608,
+          2150416
+        ],
+        [
+          19200024,
+          18229354
+        ],
+        [
+          19200024,
+          3330162
+        ],
+        [
+          67633413,
+          84683021
+        ],
+        [
+          67633413,
+          17049608
+        ],
+        [
+          68813159,
+          233635229
+        ],
+        [
+          68813159,
+          167181562
+        ],
+        [
+          69783829,
+          214435205
+        ],
+        [
+          69783829,
+          148952208
+        ],
+        [
+          84683021,
+          855976456
+        ],
+        [
+          84683021,
+          906560261
+        ],
+        [
+          146801792,
+          1071591407
+        ],
+        [
+          146801792,
+          924789615
+        ],
+        [
+          150131954,
+          1054541799
+        ],
+        [
+          150131954,
+          908710677
+        ],
+        [
+          163851400,
+          1055512469
+        ],
+        [
+          163851400,
+          925760285
+        ],
+        [
+          217765367,
+          840106594
+        ],
+        [
+          217765367,
+          1055512469
+        ],
+        [
+          234814975,
+          838926848
+        ],
+        [
+          234814975,
+          1073741823
+        ],
+        [
+          838926848,
+          167181562
+        ],
+        [
+          838926848,
+          1006108410
+        ],
+        [
+          841077264,
+          924789615
+        ],
+        [
+          841077264,
+          88013183
+        ],
+        [
+          857156202,
+          166001816
+        ],
+        [
+          857156202,
+          989058802
+        ],
+        [
+          859306618,
+          167181562
+        ],
+        [
+          859306618,
+          985728640
+        ],
+        [
+          926940031,
+          146801792
+        ],
+        [
+          926940031,
+          1073741823
+        ],
+        [
+          986908386,
+          0
+        ],
+        [
+          986908386,
+          986908386
+        ],
+        [
+          989058802,
+          231484813
+        ],
+        [
+          989058802,
+          926940031
+        ],
+        [
+          1003957994,
+          70963575
+        ],
+        [
+          1003957994,
+          1072562077
+        ],
+        [
+          1053362053,
+          1003957994
+        ],
+        [
+          1053362053,
+          85862767
+        ],
+        [
+          1054541799,
+          234814975
+        ],
+        [
+          1054541799,
+          858126872
+        ],
+        [
+          1070411661,
+          924789615
+        ],
+        [
+          1070411661,
+          147981538
+        ],
+        [
+          1072562077,
+          1073741823
+        ],
+        [
+          1072562077,
+          1179746
+        ],
+        [
+          1073741823,
+          86833437
+        ],
+        [
+          1073741823,
+          986908386
+        ]
+      ],
+      "harness_seconds": 6.496445036998921,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "kind": "space_bounds",
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "basis": [
+        86833437,
+        986908386,
+        167181562,
+        924789615,
+        232664559,
+        909890423,
+        110818906,
+        174040469,
+        321730474,
+        576879094
+      ],
+      "coefficients": [
+        86833437,
+        86833437
+      ],
+      "K_abscissas": 506,
+      "M_signed_points": 1012,
+      "curve_order": 1073781414,
+      "order_factorization": {
+        "2": 1,
+        "3": 3,
+        "61": 1,
+        "181": 1,
+        "1801": 1
+      },
+      "all_signed_triples": 171716160,
+      "infinity_triples": 410,
+      "target_x_collision_triples": 1212,
+      "valid_signed_triples": 171714538,
+      "signed_mean": {
+        "numerator": 171714538,
+        "denominator": 1073781413,
+        "decimal": 0.15991572951542607
+      },
+      "old_probability_ceiling": {
+        "numerator": 171716160,
+        "denominator": 1073781413,
+        "decimal": 0.15991724006494792
+      },
+      "corrected_probability_ceiling": {
+        "numerator": 171714538,
+        "denominator": 1073781413,
+        "decimal": 0.15991572951542607
+      },
+      "trace_probability_ceiling": {
+        "numerator": 171714538,
+        "denominator": 1073781413,
+        "decimal": 0.15991572951542607
+      },
+      "trace_over_old_ceiling": {
+        "numerator": 85857269,
+        "denominator": 85858080,
+        "decimal": 0.9999905541796416
+      },
+      "mean_uniform_attempts_lower_bound": {
+        "numerator": 1073781413,
+        "denominator": 171714538,
+        "decimal": 6.253293550485516
+      },
+      "quotient_order": 54,
+      "fiber_capacity": [
+        19884840,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841,
+        19884841
+      ],
+      "all_mass_by_trace": [
+        3132590,
+        3468480,
+        3084884,
+        3084884,
+        3140999,
+        3140999,
+        3140999,
+        3140999,
+        3171419,
+        3171419,
+        3140999,
+        3140999,
+        3217614,
+        3217614,
+        3171419,
+        3171419,
+        3171419,
+        3171419,
+        3084884,
+        3084884,
+        3207359,
+        3207359,
+        3217614,
+        3217614,
+        3152064,
+        3152064,
+        3296819,
+        3296819,
+        3084884,
+        3084884,
+        3217614,
+        3217614,
+        3207359,
+        3207359,
+        3152064,
+        3152064,
+        3296819,
+        3296819,
+        3214242,
+        3214242,
+        3089659,
+        3089659,
+        3089659,
+        3089659,
+        3207359,
+        3207359,
+        3089659,
+        3089659,
+        3152064,
+        3152064,
+        3296819,
+        3296819,
+        3260852,
+        3260852
+      ],
+      "target_x_collisions_by_trace": [
+        0,
+        0,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        24,
+        24,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        24,
+        24,
+        23,
+        23,
+        24,
+        24,
+        23,
+        23,
+        24,
+        24,
+        23,
+        23,
+        23,
+        23,
+        24,
+        24,
+        24,
+        24,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        24,
+        24,
+        24,
+        24
+      ],
+      "valid_mass_by_trace": [
+        3132180,
+        3468480,
+        3084861,
+        3084861,
+        3140976,
+        3140976,
+        3140976,
+        3140976,
+        3171396,
+        3171396,
+        3140976,
+        3140976,
+        3217590,
+        3217590,
+        3171396,
+        3171396,
+        3171396,
+        3171396,
+        3084861,
+        3084861,
+        3207336,
+        3207336,
+        3217590,
+        3217590,
+        3152041,
+        3152041,
+        3296795,
+        3296795,
+        3084861,
+        3084861,
+        3217590,
+        3217590,
+        3207336,
+        3207336,
+        3152041,
+        3152041,
+        3296795,
+        3296795,
+        3214218,
+        3214218,
+        3089636,
+        3089636,
+        3089636,
+        3089636,
+        3207336,
+        3207336,
+        3089636,
+        3089636,
+        3152041,
+        3152041,
+        3296795,
+        3296795,
+        3260828,
+        3260828
+      ],
+      "impossible_trace_classes": [],
+      "target_checks": [
+        {
+          "target": [
+            350322270,
+            958811743
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 11,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            184761333,
+            995279426
+          ],
+          "cohort": "fresh-holdout",
+          "trace_class": 43,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            683124103,
+            48321766
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 31,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            419077719,
+            699022119
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 12,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            439586350,
+            503853279
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 32,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            620907264,
+            130397080
+          ],
+          "cohort": "frozen-batch-uniform",
+          "trace_class": 43,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            180369182,
+            340181810
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 2,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            1070008372,
+            693451796
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 7,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            981591759,
+            192342244
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 10,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            400754086,
+            905473043
+          ],
+          "cohort": "frozen-batch-known_decomposable",
+          "trace_class": 21,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            151957775,
+            366460027
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 18,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            197372144,
+            850344740
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 42,
+          "exact_projected_relations": 1,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            346043627,
+            16893837
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 4,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        },
+        {
+          "target": [
+            626654617,
+            998866490
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 13,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            172987715,
+            985012432
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 12,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046530,
+          "hybrid_complete_multiplication_floor": 7325710
+        },
+        {
+          "target": [
+            137633776,
+            369078916
+          ],
+          "cohort": "fresh-bound-holdout",
+          "trace_class": 5,
+          "exact_projected_relations": 0,
+          "hybrid_complete_branches": 1046528,
+          "hybrid_complete_multiplication_floor": 7325696
+        }
+      ],
+      "batch_multiplication_floor": 910547,
+      "batch_measured_multiplications": 1395529,
+      "batch_measured_over_floor": {
+        "numerator": 1395529,
+        "denominator": 910547,
+        "decimal": 1.5326270911880442
+      },
+      "same_batch_hybrid_multiplication_floor": 58605610,
+      "hybrid_floor_over_measured_s3_multiplications": {
+        "numerator": 58605610,
+        "denominator": 1395529,
+        "decimal": 41.99526487804983
+      },
+      "uniform_query_multiplications_per_output_lower_bound": {
+        "numerator": 1086666787932,
+        "denominator": 85857269,
+        "decimal": 12656.666122608674
+      },
+      "quotient_points": [
+        null,
+        [
+          0,
+          986908386
+        ],
+        [
+          1179746,
+          1056692215
+        ],
+        [
+          1179746,
+          1055512469
+        ],
+        [
+          2150416,
+          67633413
+        ],
+        [
+          2150416,
+          69783829
+        ],
+        [
+          17049608,
+          19200024
+        ],
+        [
+          17049608,
+          2150416
+        ],
+        [
+          19200024,
+          18229354
+        ],
+        [
+          19200024,
+          3330162
+        ],
+        [
+          67633413,
+          84683021
+        ],
+        [
+          67633413,
+          17049608
+        ],
+        [
+          68813159,
+          233635229
+        ],
+        [
+          68813159,
+          167181562
+        ],
+        [
+          69783829,
+          214435205
+        ],
+        [
+          69783829,
+          148952208
+        ],
+        [
+          84683021,
+          855976456
+        ],
+        [
+          84683021,
+          906560261
+        ],
+        [
+          146801792,
+          1071591407
+        ],
+        [
+          146801792,
+          924789615
+        ],
+        [
+          150131954,
+          1054541799
+        ],
+        [
+          150131954,
+          908710677
+        ],
+        [
+          163851400,
+          1055512469
+        ],
+        [
+          163851400,
+          925760285
+        ],
+        [
+          217765367,
+          840106594
+        ],
+        [
+          217765367,
+          1055512469
+        ],
+        [
+          234814975,
+          838926848
+        ],
+        [
+          234814975,
+          1073741823
+        ],
+        [
+          838926848,
+          167181562
+        ],
+        [
+          838926848,
+          1006108410
+        ],
+        [
+          841077264,
+          924789615
+        ],
+        [
+          841077264,
+          88013183
+        ],
+        [
+          857156202,
+          166001816
+        ],
+        [
+          857156202,
+          989058802
+        ],
+        [
+          859306618,
+          167181562
+        ],
+        [
+          859306618,
+          985728640
+        ],
+        [
+          926940031,
+          146801792
+        ],
+        [
+          926940031,
+          1073741823
+        ],
+        [
+          986908386,
+          0
+        ],
+        [
+          986908386,
+          986908386
+        ],
+        [
+          989058802,
+          231484813
+        ],
+        [
+          989058802,
+          926940031
+        ],
+        [
+          1003957994,
+          70963575
+        ],
+        [
+          1003957994,
+          1072562077
+        ],
+        [
+          1053362053,
+          1003957994
+        ],
+        [
+          1053362053,
+          85862767
+        ],
+        [
+          1054541799,
+          234814975
+        ],
+        [
+          1054541799,
+          858126872
+        ],
+        [
+          1070411661,
+          924789615
+        ],
+        [
+          1070411661,
+          147981538
+        ],
+        [
+          1072562077,
+          1073741823
+        ],
+        [
+          1072562077,
+          1179746
+        ],
+        [
+          1073741823,
+          86833437
+        ],
+        [
+          1073741823,
+          986908386
+        ]
+      ],
+      "harness_seconds": 22.97625281799992,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    }
+  ],
+  "thresholds": [
+    {
+      "n": 18,
+      "curve_order": 262926,
+      "minimum_K_for_half_probability_ceiling": 48,
+      "necessary_binary_dimension": 6,
+      "minimum_current_s3_entries": 2256,
+      "minimum_current_s3_setup_multiplications": 7896,
+      "kind": "necessary counting threshold, not an achieved success rate"
+    },
+    {
+      "n": 30,
+      "curve_order": 1073781414,
+      "minimum_K_for_half_probability_ceiling": 740,
+      "necessary_binary_dimension": 10,
+      "minimum_current_s3_entries": 546860,
+      "minimum_current_s3_setup_multiplications": 1914010,
+      "kind": "necessary counting threshold, not an achieved success rate"
+    },
+    {
+      "n": 42,
+      "curve_order": 4398043035006,
+      "minimum_K_for_half_probability_ceiling": 11816,
+      "necessary_binary_dimension": 14,
+      "minimum_current_s3_entries": 139606040,
+      "minimum_current_s3_setup_multiplications": 488621140,
+      "kind": "necessary counting threshold, not an achieved success rate"
+    },
+    {
+      "n": 60,
+      "curve_order": 1152921505187041704,
+      "minimum_K_for_half_probability_ceiling": 756156,
+      "necessary_binary_dimension": 20,
+      "minimum_current_s3_entries": 571771140180,
+      "minimum_current_s3_setup_multiplications": 2001198990630,
+      "kind": "necessary counting threshold, not an achieved success rate"
+    },
+    {
+      "n": 90,
+      "curve_order": 1237940039285314797205006686,
+      "minimum_K_for_half_probability_ceiling": 774301844,
+      "necessary_binary_dimension": 30,
+      "minimum_current_s3_entries": 599543344847498492,
+      "minimum_current_s3_setup_multiplications": 2098401706966244722,
+      "kind": "necessary counting threshold, not an achieved success rate"
+    },
+    {
+      "n": 126,
+      "curve_order": 85070591730234615869705164292270564454,
+      "minimum_K_for_half_probability_ceiling": 3171540345417,
+      "necessary_binary_dimension": 42,
+      "minimum_current_s3_entries": 10058668162604612132558472,
+      "minimum_current_s3_setup_multiplications": 35205338569116142463954652,
+      "kind": "necessary counting threshold, not an achieved success rate"
+    }
+  ],
+  "pruning_targets": [
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "873783/910343",
+      "decimal": 0.9598393133137729,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "881095/910343",
+      "decimal": 0.9678714506510183,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "1412150/1462279",
+      "decimal": 0.9657185803803515,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "7110879/7311395",
+      "decimal": 0.9725748643042812,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "2008560/2093057",
+      "decimal": 0.9596298619674476,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "10127297/10465285",
+      "decimal": 0.9677038895739581,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "1786353/1820686",
+      "decimal": 0.9811428219912715,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "4483049/4551715",
+      "decimal": 0.9849142575930171,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "56653999/58605582",
+      "decimal": 0.9666997078878937,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "142610789/146513955",
+      "decimal": 0.973359766310315,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "3433849/3641372",
+      "decimal": 0.9430096677845603,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "4344192/4551715",
+      "decimal": 0.9544077342276482,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "14120783/14622748",
+      "decimal": 0.9656723209618329,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "3555294/3655687",
+      "decimal": 0.9725378567694664,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "14303561/14651406",
+      "decimal": 0.9762585925200625,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "7186565/7325703",
+      "decimal": 0.98100687401605,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "1704924/1820707",
+      "decimal": 0.9364076702072327,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "8640403/9103535",
+      "decimal": 0.9491261361657861,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "1",
+      "necessary_removed_branch_fraction": "57210081/58605610",
+      "decimal": 0.9761877915783148,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "target_fraction_of_s3_multiplications": "4/5",
+      "necessary_removed_branch_fraction": "143722967/146514025",
+      "decimal": 0.9809502332626518,
+      "assumptions": "surviving branches retain the current seven-multiplication floor; zero pruning/setup/recovery overhead, so optimistic; complete enumeration only"
+    }
+  ],
+  "classification": "accounting and conditional architecture bounds",
+  "common_operation_speedup": null,
+  "full_dlp_S": null,
+  "rho_ratio": null
+}

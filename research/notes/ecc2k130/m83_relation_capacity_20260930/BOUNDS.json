@@ -1,0 +1,186 @@
+{
+  "archived_m83_bases": [
+    {
+      "base_points": 332,
+      "denominator": 2417851639230796216685689,
+      "four_uniform_target_union_ceiling": "1.01814088E-17",
+      "four_uniform_target_union_ceiling_numerator": 24617136,
+      "observed_natural_hits": 0,
+      "observed_natural_rank": 0,
+      "one_uniform_target_ceiling": "2.54535220E-18",
+      "one_uniform_target_ceiling_numerator": 6154284,
+      "seed": 260938,
+      "summands": 3,
+      "unordered_tuples": 6154284
+    },
+    {
+      "base_points": 332,
+      "denominator": 2417851639230796216685689,
+      "four_uniform_target_union_ceiling": "8.52692988E-16",
+      "four_uniform_target_union_ceiling_numerator": 2061685140,
+      "observed_natural_hits": null,
+      "observed_natural_rank": null,
+      "one_uniform_target_ceiling": "2.13173247E-16",
+      "one_uniform_target_ceiling_numerator": 515421285,
+      "seed": 260938,
+      "summands": 4,
+      "unordered_tuples": 515421285
+    },
+    {
+      "base_points": 332,
+      "denominator": 2417851639230796216685689,
+      "four_uniform_target_union_ceiling": "8.48320132E-6",
+      "four_uniform_target_union_ceiling_numerator": 20511122211532155632,
+      "observed_natural_hits": null,
+      "observed_natural_rank": null,
+      "one_uniform_target_ceiling": "2.12080033E-6",
+      "one_uniform_target_ceiling_numerator": 5127780552883038908,
+      "seed": 260938,
+      "summands": 10,
+      "unordered_tuples": 5127780552883038908
+    },
+    {
+      "base_points": 498,
+      "denominator": 2417851639230796216685689,
+      "four_uniform_target_union_ceiling": "3.42593394E-17",
+      "four_uniform_target_union_ceiling_numerator": 82834000,
+      "observed_natural_hits": 0,
+      "observed_natural_rank": 0,
+      "one_uniform_target_ceiling": "8.56483486E-18",
+      "one_uniform_target_ceiling_numerator": 20708500,
+      "seed": 260939,
+      "summands": 3,
+      "unordered_tuples": 20708500
+    },
+    {
+      "base_points": 498,
+      "denominator": 2417851639230796216685689,
+      "four_uniform_target_union_ceiling": "4.29098226E-15",
+      "four_uniform_target_union_ceiling_numerator": 10374958500,
+      "observed_natural_hits": null,
+      "observed_natural_rank": null,
+      "one_uniform_target_ceiling": "1.07274557E-15",
+      "one_uniform_target_ceiling_numerator": 2593739625,
+      "seed": 260939,
+      "summands": 4,
+      "unordered_tuples": 2593739625
+    },
+    {
+      "base_points": 498,
+      "denominator": 2417851639230796216685689,
+      "four_uniform_target_union_ceiling": "4.67904284E-4",
+      "four_uniform_target_union_ceiling_numerator": 1131323139302916545700,
+      "observed_natural_hits": null,
+      "observed_natural_rank": null,
+      "one_uniform_target_ceiling": "1.16976071E-4",
+      "one_uniform_target_ceiling_numerator": 282830784825729136425,
+      "seed": 260939,
+      "summands": 10,
+      "unordered_tuples": 282830784825729136425
+    }
+  ],
+  "bound": "supported m-sums <= min(r, C(B+m-1,m)); four-target probability <= 4*support/r",
+  "common_operation_S": null,
+  "decision": "M83_M3_FIXED_BASES_UNDERPOWERED",
+  "derive_source_sha256": "2b3045a6334a7d20227320941307c4a14c138b30dcd282ef53a3de0af383e561",
+  "ecc2k130_speedup": null,
+  "full_dlp_cost": null,
+  "input_sha256": {
+    "challenge_source": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f",
+    "m83_results": "00a1e65642713dc04a71e158386e6d0048806fe87d73233766ea041afcc0e687",
+    "m83_summary": "ff5b525fd188fb30f13b1959eec823ae3a239424c8c493503382ccc751c00261"
+  },
+  "joint_eight_target_m3_union_ceiling": "4.44407482E-17",
+  "joint_eight_target_m3_union_ceiling_denominator": 2417851639230796216685689,
+  "joint_eight_target_m3_union_ceiling_numerator": 107451136,
+  "matched_rho_cost": null,
+  "planning_thresholds": [
+    {
+      "field_degree": 83,
+      "hypothetical_pair_bytes_at_16_each": 22087365996734080,
+      "hypothetical_pair_gib_at_16_each": "2.05704626E+7",
+      "one_target_counting_ceiling": "1.00000006E-2",
+      "smallest_base_for_1pct_counting_ceiling": 52544464,
+      "summands": 3,
+      "unordered_pair_entries": 1380460374795880,
+      "unordered_tuples_at_threshold": 24178517742603124533360
+    },
+    {
+      "field_degree": 83,
+      "hypothetical_pair_bytes_at_16_each": 6094106055120,
+      "hypothetical_pair_gib_at_16_each": "5.67557854E+3",
+      "one_target_counting_ceiling": "1.00000263E-2",
+      "smallest_base_for_1pct_counting_ceiling": 872790,
+      "summands": 4,
+      "unordered_pair_entries": 380881628445,
+      "unordered_tuples_at_threshold": 24178579957901776504410
+    },
+    {
+      "field_degree": 83,
+      "hypothetical_pair_bytes_at_16_each": 226887600,
+      "hypothetical_pair_gib_at_16_each": "2.11305544E-1",
+      "one_target_counting_ceiling": "1.00020521E-2",
+      "smallest_base_for_1pct_counting_ceiling": 5325,
+      "summands": 7,
+      "unordered_pair_entries": 14180475,
+      "unordered_tuples_at_threshold": 24183478137900712796100
+    },
+    {
+      "field_degree": 83,
+      "hypothetical_pair_bytes_at_16_each": 4873440,
+      "hypothetical_pair_gib_at_16_each": "4.53874469E-3",
+      "one_target_counting_ceiling": "1.00625416E-2",
+      "smallest_base_for_1pct_counting_ceiling": 780,
+      "summands": 10,
+      "unordered_pair_entries": 304590,
+      "unordered_tuples_at_threshold": 24329732687678464041996
+    },
+    {
+      "field_degree": 131,
+      "hypothetical_pair_bytes_at_16_each": 94864512884212441347138880,
+      "hypothetical_pair_gib_at_16_each": "8.83494624E+16",
+      "one_target_counting_ceiling": "1.00000000E-2",
+      "smallest_base_for_1pct_counting_ceiling": 3443553994135,
+      "summands": 3,
+      "unordered_pair_entries": 5929032055263277584196180,
+      "unordered_tuples_at_threshold": 6805647338422721879386831982525932220
+    },
+    {
+      "field_degree": 131,
+      "hypothetical_pair_bytes_at_16_each": 102242233454914546576,
+      "hypothetical_pair_gib_at_16_each": "9.52205001E+10",
+      "one_target_counting_ceiling": "1.00000000E-2",
+      "smallest_base_for_1pct_counting_ceiling": 3574951633,
+      "summands": 4,
+      "unordered_pair_entries": 6390139590932159161,
+      "unordered_tuples_at_threshold": 6805647339547917061535942703983070205
+    },
+    {
+      "field_degree": 131,
+      "hypothetical_pair_bytes_at_16_each": 3052115007136,
+      "hypothetical_pair_gib_at_16_each": "2.84250361E+3",
+      "one_target_counting_ceiling": "1.00000116E-2",
+      "smallest_base_for_1pct_counting_ceiling": 617668,
+      "summands": 7,
+      "unordered_pair_entries": 190757187946,
+      "unordered_tuples_at_threshold": 6805655220918432881603085637614588984
+    },
+    {
+      "field_degree": 131,
+      "hypothetical_pair_bytes_at_16_each": 3815011248,
+      "hypothetical_pair_gib_at_16_each": "3.55300610E+0",
+      "one_target_counting_ceiling": "1.00044242E-2",
+      "smallest_base_for_1pct_counting_ceiling": 21837,
+      "summands": 10,
+      "unordered_pair_entries": 238438203,
+      "unordered_tuples_at_threshold": 6808658294551513935729662565605085006
+    }
+  ],
+  "protocol": "m83_relation_capacity_20260930/PROTOCOL.md",
+  "schema_version": 1,
+  "subgroup_orders": {
+    "m131": 680564733841876926932320129493409985129,
+    "m83": 2417851639230796216685689
+  },
+  "target_law": "uniform subgroup target; four natural targets per archived seed"
+}

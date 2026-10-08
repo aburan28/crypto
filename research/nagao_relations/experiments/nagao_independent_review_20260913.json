@@ -1,0 +1,34 @@
+{
+  "schema": "nagao-independent-review-v1",
+  "review": "independent exhaustive full-factor-base signed-triple interpolation at GF(2^5)",
+  "command": [
+    "/workspace/scratch/41f49cc08ea1/nagao-venv/bin/python",
+    "ecc2k130/codegen/testnagaoreview.py",
+    "--out",
+    "/workspace/scratch/41f49cc08ea1/nagao-independent-review-repro.json"
+  ],
+  "python": "3.12.14",
+  "field_degree": 5,
+  "weight": 5,
+  "factor_base_abscissas": 21,
+  "source_sha256": {
+    "testnagaoreview.py": "76840372bc80ba9068cb88c4c3727a61b3f047a04b0a04953d59d63079012e57",
+    "nagaodecomp.py": "bb51628284100957ec22a8da294204943a08358ee46713d6d254d721143fc446",
+    "decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+    "field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+    "curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+    "indexcalc.py": "1be6ee84858db71349a034241b92d842e0c79ee6a0fabaefbc497d586ada71a7",
+    "ir.py": "48fce7b23c6603eda336645ff9c6c04226be9d2488bb2ca1679d32b3859f9343",
+    "build.py": "eeeb25eb6482b233c8d4ae56f5cc564d331897aaa4647ac2e83c6ccdbf8479a5"
+  },
+  "counts": {
+    "all_signed_triples": 10640,
+    "supported_triples": 9620,
+    "certificates": 9620,
+    "checked_ir_formulations": 19240,
+    "bad_sign_mutations_rejected": 9360
+  },
+  "elapsed_seconds": 6.667857225000262,
+  "limits": "exhaustive restricted toy correctness only; no solver-work or attack-cost measurement",
+  "valid": true
+}

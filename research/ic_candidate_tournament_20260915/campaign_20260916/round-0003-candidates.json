@@ -1,0 +1,96 @@
+[
+  {
+    "id": "incumbent",
+    "parent": "round-0002/batch16",
+    "hypothesis": "Retain frozen previous winner.",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    }
+  },
+  {
+    "id": "batch8",
+    "parent": "incumbent",
+    "hypothesis": "Reduce surplus verification by halving the batch.",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    }
+  },
+  {
+    "id": "serial_pairs",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/sources/serial_pairs",
+    "parent": "incumbent",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Avoid Rayon scheduling and spin work for a one-CPU pair table.",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay."
+  },
+  {
+    "id": "fast_verify",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/sources/fast_verify",
+    "parent": "incumbent",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Verify every relation and log with equivalent single-word arithmetic.",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay."
+  },
+  {
+    "id": "fast_cofactor",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/sources/fast_cofactor",
+    "parent": "incumbent",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Compute cofactor classes with equivalent single-word arithmetic.",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay."
+  },
+  {
+    "id": "combined",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/sources/combined",
+    "parent": "incumbent",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Measure the three source changes together, retaining every check.",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay."
+  },
+  {
+    "id": "combined_batch8",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/sources/combined_batch8",
+    "parent": "incumbent",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Measure the combined source with fewer surplus relations.",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay."
+  }
+]

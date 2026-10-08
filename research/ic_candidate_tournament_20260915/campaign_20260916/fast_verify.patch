@@ -1,0 +1,28 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6445,6 +6445,13 @@
+     /// nothing but the curve and the table itself.
+     pub fn verify(&self, kc: &KoblitzCurve) -> bool {
+         let g = kc.generator();
++        if let Some(fc) = FastCurve::new(&kc.curve) {
++            let g = fc.lift(g);
++            return self.columns.iter().all(|(point, log)| {
++                *point != BinaryPoint::Infinity && log < &kc.subgroup_order
++                    && fc.mul(g, log) == fc.lift(point)
++            });
++        }
+         self.columns.iter().all(|(point, log)| {
+             *point != BinaryPoint::Infinity && log < &kc.subgroup_order && &kc.mul(g, log) == point
+         })
+@@ -6904,6 +6911,11 @@
+     }
+     if rel.points.iter().any(|&i| i >= fb.points.len()) {
+         return false;
++    }
++    if let Some(fc) = FastCurve::new(&kc.curve) {
++        let sum = rel.points.iter().fold(FastPoint::INFINITY,
++            |sum, &i| fc.add(sum, fc.lift(&fb.points[i])));
++        return !sum.infinity && sum == fc.mul_u64(fc.lift(kc.generator()), rel.a);
+     }
+     let mut sum = BinaryPoint::Infinity;
+     for &i in &rel.points {

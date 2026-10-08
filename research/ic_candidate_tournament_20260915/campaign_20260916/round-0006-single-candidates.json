@@ -1,0 +1,89 @@
+[
+  {
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Retain the previous selected single-target implementation (round-0004 winner, folded_lift source, batch 4).",
+    "id": "incumbent",
+    "parent": "folded_lift_batch4",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0004"
+  },
+  {
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; or failure of the both-metric confirmation/replay gate against the incumbent.",
+    "hypothesis": "The 16-target panel winner's descent changes (fast log check, first probe before walk setup) also lower single-target cost.",
+    "id": "combined_descent",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0005-batch16",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0005-batch16/source_candidates/combined_descent/source"
+  },
+  {
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; or failure of the both-metric confirmation/replay gate against the incumbent.",
+    "hypothesis": "Serialising the same certificate through single-word decimal formatting and one buffered write removes reporting instructions without touching the algorithm.",
+    "id": "fast_report",
+    "parent": "combined_descent",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/fast_report"
+  },
+  {
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; or failure of the both-metric confirmation/replay gate against the incumbent. Parity additionally requires candidate/rho upper 95% limits and every cell at most 1.10 in both metrics.",
+    "hypothesis": "The same bounded algorithm (same base set, three summands, folded pair table, certified full-rank solve, walked descent) in single-word arithmetic with a Euclidean inverse, a normal-basis orbit key, a density-sized table and no thread pool reaches rho parity on complete cold single-target jobs.",
+    "id": "tiny",
+    "parent": "combined_descent",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/tiny"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 1
+    },
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; or failure of the both-metric confirmation/replay gate against the incumbent.",
+    "hypothesis": "With a cheap incremental rank check, one probe per batch avoids surplus probes after the columns are determined.",
+    "id": "tiny_batch1",
+    "parent": "tiny",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/tiny"
+  },
+  {
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; or failure of the both-metric confirmation/replay gate against the incumbent.",
+    "hypothesis": "Control for the density-sized table rule: building every folded row costs more setup on the dense small cells and changes nothing elsewhere.",
+    "id": "tiny_fulltable",
+    "parent": "tiny",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/tiny_fulltable"
+  }
+]

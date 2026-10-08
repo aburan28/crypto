@@ -1,0 +1,46 @@
+2026-10-04T14:35:40Z finished K1n17l2
+2026-10-04T14:35:42Z finished K1n17l3
+2026-10-04T14:35:47Z finished K1n17l4
+2026-10-04T14:40:35Z finished K1n17l5
+2026-10-04T16:00:24Z finished K1n19l6 rr
+2026-10-04T17:14:24Z finished K0n19l6 rr
+2026-10-04T22:50:48Z host restarted during K1n19l6 d3 x4 D=11; relaunched run.sh (resumes from the log)
+2026-10-04T22:50:48Z finished K1n17l2
+2026-10-04T22:50:49Z finished K1n17l3
+2026-10-04T22:50:49Z finished K1n17l4
+2026-10-04T22:50:50Z finished K1n17l5
+2026-10-04T22:50:50Z finished K1n19l6 rr
+2026-10-04T22:50:50Z finished K0n19l6 rr
+2026-10-05T00:05:50Z runner found dead during K1n19l6 d3 x4 D=11 (second interruption); relaunched run.sh
+2026-10-05T00:05:50Z finished K1n17l2
+2026-10-05T00:05:51Z finished K1n17l3
+2026-10-05T00:05:51Z finished K1n17l4
+2026-10-05T00:05:51Z finished K1n17l5
+2026-10-05T00:05:51Z finished K1n19l6 rr
+2026-10-05T00:05:52Z finished K0n19l6 rr
+2026-10-05T01:48:49Z parallel phase: K0n19l6 d3,d4 x4 handed to remote sessions session_012m2sxP92Xq9iCbpgApSiSg, session_017HMRAGLruUSoHuKF2A431o; control lane (1 thread) started beside the serial runner
+2026-10-05T01:48:49Z lane vm-1 start K1n19l6:0:ctrl (threads 1)
+2026-10-05T01:51:43Z lane vm-1 end K1n19l6:0:ctrl
+2026-10-05T01:51:43Z lane vm-1 start K1n19l6:1:ctrl (threads 1)
+2026-10-05T01:54:32Z lane vm-1 end K1n19l6:1:ctrl
+2026-10-05T01:54:32Z lane vm-1 start K1n19l6:2:ctrl (threads 1)
+2026-10-05T01:57:26Z lane vm-1 end K1n19l6:2:ctrl
+2026-10-05T01:57:26Z lane vm-1 start K1n19l6:3:ctrl (threads 1)
+2026-10-05T02:00:21Z lane vm-1 end K1n19l6:3:ctrl
+2026-10-05T02:00:21Z lane vm-1 start K0n19l6:0:ctrl (threads 1)
+2026-10-05T02:03:15Z lane vm-1 end K0n19l6:0:ctrl
+2026-10-05T02:03:15Z lane vm-1 start K0n19l6:2:ctrl (threads 1)
+2026-10-05T02:06:05Z lane vm-1 end K0n19l6:2:ctrl
+2026-10-05T02:06:05Z lane vm-1 start K0n19l6:3:ctrl (threads 1)
+2026-10-05T02:08:01Z finished K1n19l6 x4
+2026-10-05T02:08:03Z serial runner stopped after K1n19l6 d3 x4 (pgid 422); two 2-thread lanes take over
+2026-10-05T02:08:06Z lane vm-1 start K0n19l6:0:x4 (threads 2)
+2026-10-05T02:08:06Z lane vm-2 start K0n19l6:2:x4 (threads 2)
+2026-10-05T02:08:59Z lane vm-1 end K0n19l6:3:ctrl
+2026-10-05T02:08:59Z lane vm-1 start K0n19l6:4:ctrl (threads 1)
+2026-10-05T02:11:53Z lane vm-1 end K0n19l6:4:ctrl
+2026-10-05T02:11:53Z lanes (K1n19l6:0:ctrl K1n19l6:1:ctrl K1n19l6:2:ctrl K1n19l6:3:ctrl K0n19l6:0:ctrl K0n19l6:2:ctrl K0n19l6:3:ctrl K0n19l6:4:ctrl) all done
+2026-10-05T05:19:30Z lane vm-1 end K0n19l6:0:x4
+2026-10-05T05:22:11Z lane vm-2 end K0n19l6:2:x4
+2026-10-05T05:22:11Z lanes (K0n19l6:0:x4 K0n19l6:2:x4 K0n19l6:3:x4 K0n19l6:4:x4 K1n19l6:0:ctrl K1n19l6:1:ctrl K1n19l6:2:ctrl K1n19l6:3:ctrl K0n19l6:0:ctrl K0n19l6:2:ctrl K0n19l6:3:ctrl K0n19l6:4:ctrl) all done
+2026-10-05T05:22:35Z folded verbatim: runs/registered-remote-k0d3/K0n19l6.jsonl (11 lines, branch claude/dense-ladder-lane-k0d3 ab94da00c) and runs/registered-remote-k0d4/K0n19l6.jsonl (11 lines, claude/dense-ladder-lane-k0d4 a81b2995a)

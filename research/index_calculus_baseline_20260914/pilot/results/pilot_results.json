@@ -1,0 +1,312 @@
+{
+  "status": "measured_local_small_pilot",
+  "date": "2026-09-14",
+  "cpu": "AMD EPYC 9V74 80-Core Processor",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "compiler": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0",
+  "flags": "-O3 -Wall; no OpenMP",
+  "repeats": 3,
+  "solver_commit": "61c6ff3f49445af2729274819edb27b85a89efc1",
+  "corpus_commit": "a053971cb155fbab30eaed3e2d11df850b4f3fbb",
+  "scope": "Selected polynomial instances; not uniform random targets, full relation collection, or a complete ECDLP.",
+  "cases": [
+    {
+      "case": "n15l5-1-S",
+      "n": 15,
+      "l": 5,
+      "m": 3,
+      "anf_variables": 42,
+      "status": "SAT",
+      "median_wall_s": 0.001950282000052539,
+      "median_child_cpu_s": 0.0018380000000000002,
+      "conflicts": 22,
+      "runs": [
+        {
+          "wall_s": 0.001950282000052539,
+          "child_cpu_s": 0.0018380000000000002,
+          "status": "SAT",
+          "conflicts": 22,
+          "assignment": "000001101011010000001010001000000000000000"
+        },
+        {
+          "wall_s": 0.001990502999888122,
+          "child_cpu_s": 0.001889,
+          "status": "SAT",
+          "conflicts": 22,
+          "assignment": "000001101011010000001010001000000000000000"
+        },
+        {
+          "wall_s": 0.0018461650001881935,
+          "child_cpu_s": 0.0017380000000000002,
+          "status": "SAT",
+          "conflicts": 22,
+          "assignment": "000001101011010000001010001000000000000000"
+        }
+      ],
+      "all_anf_equations_verified": true,
+      "point_witness": {
+        "summands": [
+          [
+            0,
+            1
+          ],
+          [
+            11,
+            25629
+          ],
+          [
+            11,
+            25629
+          ]
+        ],
+        "sum": [
+          21190,
+          28564
+        ]
+      },
+      "exhaustive_s4_checks": 0,
+      "verification_s": 0.0003415129999666533,
+      "normalized_sha256": "9f6ee82e0ac601ba76e3abbc78fa28295e5529c96ce6c07865d9b7282f876223",
+      "config_sha256": "6d169b4c76fc8fe31fadef884d356cc34330ea55dea1c8a8057e0dec6ec940da"
+    },
+    {
+      "case": "n15l5-11-U",
+      "n": 15,
+      "l": 5,
+      "m": 3,
+      "anf_variables": 42,
+      "status": "UNSAT",
+      "median_wall_s": 0.035300297000048886,
+      "median_child_cpu_s": 0.03515200000000001,
+      "conflicts": 5593,
+      "runs": [
+        {
+          "wall_s": 0.0364622940001027,
+          "child_cpu_s": 0.03632099999999999,
+          "status": "UNSAT",
+          "conflicts": 5593,
+          "assignment": null
+        },
+        {
+          "wall_s": 0.03490728599990689,
+          "child_cpu_s": 0.03472999999999999,
+          "status": "UNSAT",
+          "conflicts": 5593,
+          "assignment": null
+        },
+        {
+          "wall_s": 0.035300297000048886,
+          "child_cpu_s": 0.03515200000000001,
+          "status": "UNSAT",
+          "conflicts": 5593,
+          "assignment": null
+        }
+      ],
+      "all_anf_equations_verified": false,
+      "point_witness": null,
+      "exhaustive_s4_checks": 5984,
+      "verification_s": 0.15863270099998772,
+      "normalized_sha256": "3ea7871d4d0a6615f952f6e6f9600017e9c2670d71cc123cf86969aa72d10c69",
+      "config_sha256": "6d169b4c76fc8fe31fadef884d356cc34330ea55dea1c8a8057e0dec6ec940da"
+    },
+    {
+      "case": "n17l6-1-S",
+      "n": 17,
+      "l": 6,
+      "m": 3,
+      "anf_variables": 51,
+      "status": "SAT",
+      "median_wall_s": 0.3030823710000732,
+      "median_child_cpu_s": 0.30269899999999994,
+      "conflicts": 35231,
+      "runs": [
+        {
+          "wall_s": 0.3030823710000732,
+          "child_cpu_s": 0.30269899999999994,
+          "status": "SAT",
+          "conflicts": 35231,
+          "assignment": "011011101100110100000011110100110000100100010010000"
+        },
+        {
+          "wall_s": 0.30493041899990203,
+          "child_cpu_s": 0.3046519999999999,
+          "status": "SAT",
+          "conflicts": 35231,
+          "assignment": "011011101100110100000011110100110000100100010010000"
+        },
+        {
+          "wall_s": 0.2976255680000577,
+          "child_cpu_s": 0.29717600000000005,
+          "status": "SAT",
+          "conflicts": 35231,
+          "assignment": "011011101100110100000011110100110000100100010010000"
+        }
+      ],
+      "all_anf_equations_verified": true,
+      "point_witness": {
+        "summands": [
+          [
+            54,
+            127677
+          ],
+          [
+            13,
+            39242
+          ],
+          [
+            11,
+            78573
+          ]
+        ],
+        "sum": [
+          50626,
+          129259
+        ]
+      },
+      "exhaustive_s4_checks": 0,
+      "verification_s": 0.0008484649997626548,
+      "normalized_sha256": "ad11204b38549b8e85825073a9540d2f35907d64496b47af753cf016c18dc7d7",
+      "config_sha256": "6d169b4c76fc8fe31fadef884d356cc34330ea55dea1c8a8057e0dec6ec940da"
+    },
+    {
+      "case": "n17l6-11-U",
+      "n": 17,
+      "l": 6,
+      "m": 3,
+      "anf_variables": 51,
+      "status": "UNSAT",
+      "median_wall_s": 0.38808562600024743,
+      "median_child_cpu_s": 0.38777200000000006,
+      "conflicts": 43976,
+      "runs": [
+        {
+          "wall_s": 0.38808562600024743,
+          "child_cpu_s": 0.38777200000000006,
+          "status": "UNSAT",
+          "conflicts": 43976,
+          "assignment": null
+        },
+        {
+          "wall_s": 0.38852058599968586,
+          "child_cpu_s": 0.3880170000000001,
+          "status": "UNSAT",
+          "conflicts": 43976,
+          "assignment": null
+        },
+        {
+          "wall_s": 0.3856989910000266,
+          "child_cpu_s": 0.3854450000000003,
+          "status": "UNSAT",
+          "conflicts": 43976,
+          "assignment": null
+        }
+      ],
+      "all_anf_equations_verified": false,
+      "point_witness": null,
+      "exhaustive_s4_checks": 45760,
+      "verification_s": 1.4513952199999949,
+      "normalized_sha256": "460440d62d0f40b71a1f7d1ca2fa2ca36cc7807a774dfd7bb5334ac87b3a90ad",
+      "config_sha256": "6d169b4c76fc8fe31fadef884d356cc34330ea55dea1c8a8057e0dec6ec940da"
+    },
+    {
+      "case": "n19l6-1-S",
+      "n": 19,
+      "l": 6,
+      "m": 3,
+      "anf_variables": 51,
+      "status": "SAT",
+      "median_wall_s": 0.017090938999899663,
+      "median_child_cpu_s": 0.016823999999999947,
+      "conflicts": 2793,
+      "runs": [
+        {
+          "wall_s": 0.017090938999899663,
+          "child_cpu_s": 0.016823999999999947,
+          "status": "SAT",
+          "conflicts": 2793,
+          "assignment": "000010001011010010011011000100101000000000101001100"
+        },
+        {
+          "wall_s": 0.0164497850000771,
+          "child_cpu_s": 0.016292000000000192,
+          "status": "SAT",
+          "conflicts": 2793,
+          "assignment": "000010001011010010011011000100101000000000101001100"
+        },
+        {
+          "wall_s": 0.017352152000057686,
+          "child_cpu_s": 0.01720499999999991,
+          "status": "SAT",
+          "conflicts": 2793,
+          "assignment": "000010001011010010011011000100101000000000101001100"
+        }
+      ],
+      "all_anf_equations_verified": true,
+      "point_witness": {
+        "summands": [
+          [
+            16,
+            429727
+          ],
+          [
+            52,
+            69105
+          ],
+          [
+            18,
+            1275
+          ]
+        ],
+        "sum": [
+          73190,
+          243656
+        ]
+      },
+      "exhaustive_s4_checks": 0,
+      "verification_s": 0.001204120999773295,
+      "normalized_sha256": "787d86992034e6c497ad930330d123c8e91e3a3c5b42188b75246db206e1e84d",
+      "config_sha256": "6d169b4c76fc8fe31fadef884d356cc34330ea55dea1c8a8057e0dec6ec940da"
+    },
+    {
+      "case": "n19l6-11-U",
+      "n": 19,
+      "l": 6,
+      "m": 3,
+      "anf_variables": 51,
+      "status": "UNSAT",
+      "median_wall_s": 0.4105210390002867,
+      "median_child_cpu_s": 0.4101809999999995,
+      "conflicts": 44050,
+      "runs": [
+        {
+          "wall_s": 0.3996940120000545,
+          "child_cpu_s": 0.39926500000000004,
+          "status": "UNSAT",
+          "conflicts": 44050,
+          "assignment": null
+        },
+        {
+          "wall_s": 0.41866925699969215,
+          "child_cpu_s": 0.41462499999999985,
+          "status": "UNSAT",
+          "conflicts": 44050,
+          "assignment": null
+        },
+        {
+          "wall_s": 0.4105210390002867,
+          "child_cpu_s": 0.4101809999999995,
+          "status": "UNSAT",
+          "conflicts": 44050,
+          "assignment": null
+        }
+      ],
+      "all_anf_equations_verified": false,
+      "point_witness": null,
+      "exhaustive_s4_checks": 45760,
+      "verification_s": 1.6294907370001965,
+      "normalized_sha256": "9a3db9dbe5960144f90b3a7917141d8fb862dec65536eff02a315b1bacbb7ea3",
+      "config_sha256": "6d169b4c76fc8fe31fadef884d356cc34330ea55dea1c8a8057e0dec6ec940da"
+    }
+  ],
+  "source_restoration_note": "Source byte fidelity restored after tool-created extra final newlines; whitespace only, no algorithm or configuration changes."
+}

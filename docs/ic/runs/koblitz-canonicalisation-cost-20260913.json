@@ -1,0 +1,39 @@
+{
+  "what": "The Frobenius-orbit canonicalisation priced on its own, and the bucket skew the canonical key causes, measured on the real table",
+  "date": "2026-09-13",
+  "relationship_to_other_runs": "Supporting measurements for the normal-basis key and the bucket-index fix that koblitz-orbit-fold-20260913.json records end to end. Those two ran on a different host; nothing here should be combined with them into a single figure.",
+  "canonicalisation_alone": {
+    "harness": "examples/koblitz_fold_cost.rs 61",
+    "degree": 61,
+    "points": 200000,
+    "ns": {
+      "squaring_chain_serial": 846.8,
+      "squaring_chain_8_in_flight": 733.7,
+      "shift_reduced_squaring_8_in_flight": 1299.3,
+      "normal_basis_one_at_a_time": 85.5
+    },
+    "speedup_against_best_squaring_variant": 8.58,
+    "what_it_settles": [
+      "The 8.6x is against this repository's own reducer - a bit-spread and eight table lookups - not against a slow one.",
+      "Interleaving buys the rotation nothing: the n-1 rotations are formed from the coordinate word directly and share no dependency chain. That is why the lookup path no longer keeps eight canonicalisations in flight.",
+      "Reducing the squaring by shifts instead of by table, which the trinomial at this degree permits, is worse than the table it replaces."
+    ]
+  },
+  "bucket_skew": {
+    "why_it_happens": "A canonical key is a minimum over n rotations, so it sits far below the middle of its range and its high bits are not uniform. Indexing buckets by those bits piles the table into a low slice of the index.",
+    "measured_on": "the real folded table at n = 61, 258632192 entries over 2^24 buckets",
+    "raw_key": {"mean_run_a_key_lands_in": 584.0, "buckets_used": 739718},
+    "hashed_key": {"mean_run_a_key_lands_in": 17.4, "buckets_used": 16769521, "hash": "a multiply-xorshift mixer, not pair_filter_hash itself - it stands in for what any avalanching hash does to this key, so the figure to read is 17.4 against 584.0 rather than 17.4 exactly"},
+    "buckets": 16777216,
+    "design": 15.4
+  },
+  "the_benchmark_that_missed_it": {
+    "what_was_measured": "200000 probes of the folded table, of which 20 hit; fixing the bucket index moved that number 362.7 -> 359.8 ns.",
+    "why_that_is_2.9_ns_and_not_a_refutation": "The presence filter is four bits an entry, 2^30 bits at this width, 11.3% occupancy - so seven probes in eight never reach a bucket, and the one that does reads a contiguous run of u32 the prefetcher handles, about four cache lines a probe amortised whatever the run length. The cost is on hits, which this stream had twenty of. A benchmark of misses would have certified the bug as absent.",
+    "the_correction": "koblitz-orbit-fold-20260913.json and the RESEARCH note carry the hit-path measurement, which is where the fix is worth its 374 -> 285 ns and more."
+  },
+  "not_claimed": [
+    "That these numbers combine with the end-to-end run. Different host, and the end-to-end run also carries the orbit tag and the row filter.",
+    "That an optimal normal basis is involved. Every F_2^n has a normal basis and the rotation property holds in all of them; optimality is about multiplication, which this never does."
+  ]
+}

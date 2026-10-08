@@ -1,0 +1,21 @@
+{
+  "python_tests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "rust_tests": {
+    "fixed": 2,
+    "framework": 16,
+    "progress": 4,
+    "failed": 0
+  },
+  "cargo_check": "passed",
+  "comparison": {
+    "matched_cases": 72,
+    "complete_runs": 216,
+    "target_verifications": 432,
+    "warm_replays": 72,
+    "disagreements": 0
+  },
+  "degree131": "parameter validation and bounded persistent progress; no full-size completion"
+}

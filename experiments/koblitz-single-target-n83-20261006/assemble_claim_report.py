@@ -2,6 +2,7 @@
 """Assemble the n=83 a=1 single-target online vs_rho claim (fail-closed)."""
 import csv
 import json
+import sys
 import statistics
 from pathlib import Path
 
@@ -175,7 +176,6 @@ def main():
             "not an asymptotic sub-rho claim",
             "not key recovery or deployed-curve security impact",
             "multi-target amortized results remain secondary",
-            "total operation-count comparison absent; S unknown",
         ],
         "evidence": [
             str(p.relative_to(HERE.parents[2]))
@@ -185,6 +185,11 @@ def main():
     }
     out = HERE / "claim_report_vs_rho.json"
     out.write_text(json.dumps(report, indent=1, sort_keys=True) + "\n")
+    # Operation-count accounting (probes vs rho steps, mean-target estimate,
+    # contention flags); see research/.../autolab/op_accounting.py.
+    sys.path.insert(0, str(HERE.parents[1] / "research/sat_factor_base_review_20260908/autolab"))
+    import op_accounting
+    op_accounting.apply_to_claim("n83", op_accounting.account_rung("n83"))
     with open(HERE / "single-target-results.csv", "w", newline="") as fh:
         writer = csv.DictWriter(
             fh,

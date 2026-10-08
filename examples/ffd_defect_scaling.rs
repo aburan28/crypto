@@ -24,7 +24,9 @@
 use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::descent_algebraic::{early_defect, rank_profile};
 use crypto_lib::cryptanalysis::descent_expansion::enumerate_irreducibles;
-use crypto_lib::cryptanalysis::descent_lowgamma::{descend_on_subspace, BasisFamily, FactorSubspace};
+use crypto_lib::cryptanalysis::descent_lowgamma::{
+    descend_on_subspace, BasisFamily, FactorSubspace,
+};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -112,15 +114,26 @@ fn main() {
     let sxx: f64 = pts.iter().map(|p| p.0 * p.0).sum();
     let sxy: f64 = pts.iter().map(|p| p.0 * p.1).sum();
     let denom = nfit * sxx - sx * sx;
-    let slope = if denom.abs() < 1e-12 { 0.0 } else { (nfit * sxy - sx * sy) / denom };
+    let slope = if denom.abs() < 1e-12 {
+        0.0
+    } else {
+        (nfit * sxy - sx * sy) / denom
+    };
     let decay_exp = -slope; // Δ ≈ a · N^{-decay_exp}
 
     // Report.
     println!("════════════════════════════════════════════════════════════════");
     println!("EXP-H — early-defect scaling Δ_low(2n') in the critical regime, seed={seed}");
-    println!("  {:>4} {:>14} {:>14} {:>10}", "2n'", "subfield Δ", "random Δ", "ratio");
+    println!(
+        "  {:>4} {:>14} {:>14} {:>10}",
+        "2n'", "subfield Δ", "random Δ", "ratio"
+    );
     for r in &rows {
-        let ratio = if r.random > 0.0 { r.subfield / r.random } else { f64::INFINITY };
+        let ratio = if r.random > 0.0 {
+            r.subfield / r.random
+        } else {
+            f64::INFINITY
+        };
         println!(
             "  {:>4} {:>14.5} {:>14.5} {:>10.1}",
             r.two_nsub, r.subfield, r.random, ratio
@@ -136,13 +149,24 @@ fn main() {
             "  Subfield stays bounded away: Δ {:.4} → {:.4} (ratio sub/rand {:.0} → {:.0}).",
             f.subfield,
             l.subfield,
-            if f.random > 0.0 { f.subfield / f.random } else { 0.0 },
-            if l.random > 0.0 { l.subfield / l.random } else { 0.0 },
+            if f.random > 0.0 {
+                f.subfield / f.random
+            } else {
+                0.0
+            },
+            if l.random > 0.0 {
+                l.subfield / l.random
+            } else {
+                0.0
+            },
         );
     }
 
     // Snapshot.
-    let ts = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+    let ts = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
     let cell = |r: &Row| {
         format!(
             "{{\"two_nsub\":{},\"subfield\":{:.6},\"random\":{:.6}}}",

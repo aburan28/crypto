@@ -1,0 +1,27 @@
+{
+  "cms_conflict_budget": 100000,
+  "cms_timeout_seconds": 60,
+  "descent_query_seed": 2026100102,
+  "export_nonce": 2026100103,
+  "export_timeout_seconds": 30,
+  "max_descent_queries": 8,
+  "question": "prepared-development-source-control",
+  "resources": {
+    "cpu_workers": 1,
+    "host_class": "physical-macos-arm64",
+    "memory_limit_bytes": null,
+    "target_count": 1,
+    "total_wall_limit_seconds": 900
+  },
+  "run_number": 2026100102,
+  "target_input": {
+    "input_law": "one-disclosed-public-point; fixture-construction-excluded",
+    "known_scalar_supplied": false,
+    "point": [
+      52411,
+      72106
+    ],
+    "point_was_previously_supplied": true,
+    "seed": null
+  }
+}

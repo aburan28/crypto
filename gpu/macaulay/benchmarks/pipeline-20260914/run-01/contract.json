@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "classification": "engineering_stage_diagnostic",
+  "parent_contract": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "wdsat_exception": "This is prime-field dense RREF transport scheduling, not the binary-field WDSat ANF solver. It uses the existing unchanged Montgomery reduction kernel and an independently CPU-oracle-checked matched matrix suite.",
+  "boundary": "Same matrices and arithmetic in serialized and overlapping runs; scheduling cannot lower the algebraic operation count or improve the generic-group floor.",
+  "success_target": "Every matrix, rank, pivot list and job ID must match the serial CPU oracle. Compare total stage elapsed time including allocation, CPU preparation, transfers, reduction, CPU checking, and teardown. Any missing/mismatched result rejects the comparison.",
+  "primary_total_common_operations": null,
+  "rho_ratio": null,
+  "floor_ratio": null,
+  "full_dlp_speedup": null,
+  "timing_scope": "Cold pipeline invocation. CPU oracle construction and process startup are outside total_s; process_wall_s separately includes both. GPU phases overlap CPU callbacks and one another; do not sum phase times.",
+  "variants": {
+    "serialized": 1,
+    "overlap": 2
+  },
+  "jobs": 65,
+  "batch": 16,
+  "min_gpu_batch": 4,
+  "repetitions": 3,
+  "training_seeds": [
+    1009,
+    2027,
+    3049
+  ],
+  "holdout_seeds": [
+    4001,
+    5003,
+    6007
+  ],
+  "shape": [
+    226,
+    286
+  ],
+  "prime": 2083,
+  "matrix_generator": "splitmix64(seed+1000*job_id); zero if id%11==0; full random if id%3==0 else deficit=min(4,rows-1); zero first column if id%7==0",
+  "run_order_seed": 20260914,
+  "timeout_seconds": 60
+}

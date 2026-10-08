@@ -1,0 +1,3567 @@
+{
+  "processes": 2004,
+  "checks": {
+    "native_targets": 912,
+    "complete_root_sets": 1920,
+    "oracle_attempts": 89682,
+    "matched_dlp_inputs": 720
+  },
+  "summaries": [
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 354963.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 368195.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 334082.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 339758.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 0,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 505811.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 0,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 531621.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 0,
+      "variant": "rho",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 308678.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 0,
+      "variant": "rho",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 319470.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "rho",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 402899.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 1,
+      "variant": "rho",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 394806.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 549034.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 545990.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 543399.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 546142.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 2,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 829946.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 2,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 820966.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 3,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 3,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 0,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": null,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 821346.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 959623.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1756061.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1957759.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 766000.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 719340.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "rho",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 512385.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 4,
+      "variant": "rho",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 507746.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 852243.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 891407.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1205417.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1324764.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 5,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1097409.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 5,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1004343.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1532199.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1540976.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 3421334.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 3695019.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1270423.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1309244.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "rho",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 574371.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 6,
+      "variant": "rho",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 574383.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1302395.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1402035.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 3899181.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 6075586.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1100308.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1099060.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "rho",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 854105.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 7,
+      "variant": "rho",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 895072.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1256286.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1457440.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 6014237.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 6229982.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 8,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1164769.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 8,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1247424.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1103153.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1150179.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 20293409.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 18579912.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 9,
+      "variant": "pair_table",
+      "revision": "candidate",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1313922.0,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    },
+    {
+      "case": 9,
+      "variant": "pair_table",
+      "revision": "reference",
+      "attempts": 24,
+      "verified": 24,
+      "statuses": {
+        "finished": 24
+      },
+      "cold_ns": 1213934.5,
+      "total_operations": null,
+      "S": null,
+      "rho_cost_ratio": null,
+      "floor_ratio": null,
+      "classification": "engineering runtime diagnostic"
+    }
+  ],
+  "comparisons": [
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.1837527405517205,
+        "ci95": [
+          0.9401823971238354,
+          1.5697363639502928
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.4217561666046736,
+        "ci95": [
+          0.9301596532885025,
+          2.019778652896211
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6931324249655295,
+        "ci95": [
+          0.4595292090553957,
+          1.0681147581193142
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2337544760910613,
+        "ci95": [
+          0.979395998674295,
+          1.8005073081671368
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.4404137392685272,
+        "ci95": [
+          0.7296676916293863,
+          2.691190278077196
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9172450157954986,
+        "ci95": [
+          0.5111621475361093,
+          1.6459325539989265
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2689353580652512,
+        "ci95": [
+          0.9944323361587656,
+          1.7091756537867482
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.237640318329853,
+        "ci95": [
+          0.865033933203248,
+          1.7543597569960951
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.603372543920613,
+        "ci95": [
+          0.41851514494807657,
+          0.8680095333657724
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2071755707626322,
+        "ci95": [
+          0.9701710446988203,
+          1.8075007154546412
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0638643337293574,
+        "ci95": [
+          0.57432060821259,
+          2.1282225340721586
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.67746108704253,
+        "ci95": [
+          0.367525717716662,
+          1.2674104553349221
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8036551780130234,
+        "ci95": [
+          0.4976806170285561,
+          1.2982069151088427
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.051204236586363,
+        "ci95": [
+          1.3199336185133974,
+          3.058347307168808
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6581724765483336,
+        "ci95": [
+          0.43070183745949614,
+          1.4146905135949128
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 0,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.570369655287034,
+        "ci95": [
+          0.8545929629033863,
+          2.7714943747940315
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 1,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.1867383011768915,
+        "ci95": [
+          0.8446440235889897,
+          1.6157482595153385
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.3884959544084492,
+        "ci95": [
+          1.0555926550117884,
+          1.8146161185992287
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.593590710318461,
+        "ci95": [
+          0.4511886833391005,
+          0.8088139905520103
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.4262166590530458,
+        "ci95": [
+          1.0125679430886831,
+          2.0088468852329466
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.4694054053912813,
+        "ci95": [
+          0.8768800570989855,
+          2.462311952373872
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.5082234977571607,
+        "ci95": [
+          0.3713267561855246,
+          0.651911969839905
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.292423149583337,
+        "ci95": [
+          1.0310193864660522,
+          1.668780140090712
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.3817144482711747,
+        "ci95": [
+          0.9333397898654336,
+          2.0206828591344768
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.5906915740031746,
+        "ci95": [
+          0.43140515827870973,
+          0.8157102186212843
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.4187613793298903,
+        "ci95": [
+          1.1091955755951162,
+          1.8147240178073027
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.6128239782621698,
+        "ci95": [
+          1.032985064787817,
+          2.5181401682624704
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.5578277039757802,
+        "ci95": [
+          0.37270943621939046,
+          0.784674062956803
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9341110040041203,
+        "ci95": [
+          0.5559073919917398,
+          1.5292453066739162
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.3391470423509864,
+        "ci95": [
+          1.4645118854562027,
+          3.587426156355193
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.1030705978963908,
+        "ci95": [
+          0.4306256712166335,
+          2.444181255028329
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 2,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.8912582985161235,
+        "ci95": [
+          1.3505425923182206,
+          4.56720342124518
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 24,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 3,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 12,
+      "runtime": null
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6196739347411397,
+        "ci95": [
+          0.5337118724280019,
+          0.7329840623340812
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.1652475097571935,
+        "ci95": [
+          0.7081141045426788,
+          1.750161840059569
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6604351979573702,
+        "ci95": [
+          0.4118313950441775,
+          1.0518980557598498
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6268456006021104,
+        "ci95": [
+          0.4903842959106508,
+          0.8262659090206572
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.1095947574197627,
+        "ci95": [
+          0.5354301585850988,
+          1.8943103886475605
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6220094495371299,
+        "ci95": [
+          0.28425252817365476,
+          1.3610987307635205
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9956736657109887,
+        "ci95": [
+          0.7569666268385581,
+          1.3671339176024477
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.3440779980584217,
+        "ci95": [
+          1.634879367250387,
+          3.3869343173991924
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.3285689123659359,
+        "ci95": [
+          0.6703456107716024,
+          2.7093967478467635
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0710460890789693,
+        "ci95": [
+          0.7504419040954302,
+          1.7651242760319485
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.5723312378561283,
+        "ci95": [
+          1.351933390353412,
+          4.8943890612249055
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.4419808011770956,
+        "ci95": [
+          0.558438784085641,
+          3.5167134061130403
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2358129881131332,
+        "ci95": [
+          0.64212004655212,
+          2.2905074306005786
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.7643631250441136,
+        "ci95": [
+          0.9886530744059708,
+          2.8906953169868905
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.3426446133000127,
+        "ci95": [
+          0.48826625991626377,
+          3.6920317982501962
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 4,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.7838872998560884,
+        "ci95": [
+          1.3917509037606184,
+          2.5575886104082524
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9122051969222024,
+        "ci95": [
+          0.7173166134961891,
+          1.1653242108546553
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2380211405652017,
+        "ci95": [
+          0.8349454515401259,
+          1.719633882047259
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.7133804229237197,
+        "ci95": [
+          0.46409782563076846,
+          0.9726518381359507
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8756666977527374,
+        "ci95": [
+          0.5674226081063706,
+          1.3764804075849328
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.195576196331841,
+        "ci95": [
+          0.6034311005955799,
+          1.9671821230683282
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0044950243854263,
+        "ci95": [
+          0.8907769274969348,
+          1.1635350584411517
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.7584279786005661,
+        "ci95": [
+          0.585525947086422,
+          0.9424795916262568
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.4369161843136893,
+        "ci95": [
+          0.830739324705531,
+          2.315959091735445
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8279889912087095,
+        "ci95": [
+          0.4839050524795931,
+          1.3329771458472865
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6774550957225315,
+        "ci95": [
+          0.46152505695013857,
+          0.994410595501009
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.5197519118203109,
+        "ci95": [
+          0.7467586210037592,
+          3.092894823734299
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2768598424821993,
+        "ci95": [
+          0.7646295334172266,
+          1.9012278540698222
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.108978530510583,
+        "ci95": [
+          0.7434085809081058,
+          1.8025081336745512
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.7354290933458665,
+        "ci95": [
+          0.9885189292726001,
+          3.0602697357583675
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9926668192644373,
+        "ci95": [
+          0.6887762774881518,
+          1.3717808723770324
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 5,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.190226100983748,
+        "ci95": [
+          0.6309394165560157,
+          2.1598356379739334
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8451076626797993,
+        "ci95": [
+          0.6181315814281846,
+          1.1470052228790162
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.003533906831608,
+        "ci95": [
+          2.2769444992452637,
+          3.780815917897249
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9740894167560008,
+        "ci95": [
+          0.6471971372164229,
+          1.4036994285401034
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.7671100539147921,
+        "ci95": [
+          0.5768197438124767,
+          0.9120379129575543
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.5061140263880297,
+        "ci95": [
+          1.6476789610380775,
+          3.8117908049890303
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0970170811363016,
+        "ci95": [
+          0.8537448836629808,
+          1.5311018673055257
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.850067028315101,
+        "ci95": [
+          0.6928407464261619,
+          1.0324668586979846
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 6.611195134471108,
+        "ci95": [
+          3.9178124282716977,
+          11.62679692278845
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.1441060471963977,
+        "ci95": [
+          1.015337822170095,
+          4.467444896990239
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8562079180668599,
+        "ci95": [
+          0.6330760117037981,
+          1.1579841684214434
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 7.084766498248529,
+        "ci95": [
+          3.5292245567943668,
+          16.703489933529184
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.1012594728750296,
+        "ci95": [
+          1.595844271056374,
+          7.671484402940171
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0613223162464644,
+        "ci95": [
+          0.9660056984027484,
+          1.1746225371172796
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.0834273067397073,
+        "ci95": [
+          2.0748825223101877,
+          4.77572471245199
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0539946368654867,
+        "ci95": [
+          0.909498591081445,
+          1.2865242880505583
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 6,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.284480405530396,
+        "ci95": [
+          1.6246595503639099,
+          3.9122038121945195
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9645390391324544,
+        "ci95": [
+          0.6428686760393231,
+          1.3543001742863499
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.00960383790003,
+        "ci95": [
+          0.6296672530269655,
+          1.508225824001502
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.942849372697075,
+        "ci95": [
+          0.6852614510094244,
+          1.328028398312526
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0895241210714461,
+        "ci95": [
+          0.8718811377351431,
+          1.5887043610653484
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.198206315216867,
+        "ci95": [
+          0.7757521627592184,
+          1.8507178487508784
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8585970473629623,
+        "ci95": [
+          0.5073370715098967,
+          1.7993992688020692
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9302070842827319,
+        "ci95": [
+          0.6935870603352264,
+          1.201531100480149
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.131651827058775,
+        "ci95": [
+          1.7301220973282136,
+          6.242730648214125
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.9245886849930796,
+        "ci95": [
+          1.6338994114595082,
+          5.316312735987831
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8039113016513282,
+        "ci95": [
+          0.526771424153824,
+          1.226857326136986
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.8889332079657777,
+        "ci95": [
+          1.1887204061648449,
+          12.722757527830064
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 2.786687507273611,
+        "ci95": [
+          1.0630326496712796,
+          7.305163454383238
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.243603942510846,
+        "ci95": [
+          0.8739042392806676,
+          1.7202587650760117
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.070800773841531,
+        "ci95": [
+          0.6480749446641617,
+          1.691056369696991
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.642387628845643,
+        "ci95": [
+          1.2659444618237623,
+          2.016458415341471
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 7,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.3955397574414656,
+        "ci95": [
+          0.9464367145411573,
+          2.1135190938549995
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.7706330594284048,
+        "ci95": [
+          0.5122759914523894,
+          1.1487356357216205
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9424206993779284,
+        "ci95": [
+          0.5702463092496403,
+          1.5434323287961522
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9317747991354635,
+        "ci95": [
+          0.6859391579185415,
+          1.161926240652303
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.7866894370362219,
+        "ci95": [
+          0.46969132472063,
+          1.3030221044069545
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2036146243555783,
+        "ci95": [
+          0.8034511178580539,
+          2.1640872578930175
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8858257146543141,
+        "ci95": [
+          0.49795009278113395,
+          1.3174219788263761
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9563706218955779,
+        "ci95": [
+          0.7598182914508201,
+          1.1726980398516444
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.2873463286267337,
+        "ci95": [
+          2.0143620661854738,
+          5.894592830491039
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.250211362151471,
+        "ci95": [
+          2.042389357707811,
+          5.164929764785363
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.022132533410359,
+        "ci95": [
+          0.8246564866612851,
+          1.3427602267131413
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 4.246255217733257,
+        "ci95": [
+          1.7606105488753023,
+          10.241153777957942
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 3.1251216018308754,
+        "ci95": [
+          2.1212141444178423,
+          5.090405722019656
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8236867012676532,
+        "ci95": [
+          0.4988191446470373,
+          1.3570869155158238
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0114254004855492,
+        "ci95": [
+          0.5695341435142478,
+          1.7090678548680212
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8777404579992001,
+        "ci95": [
+          0.4380807952287082,
+          1.9462854994233094
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 8,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.3587487972453798,
+        "ci95": [
+          0.8095842882880302,
+          2.2804275240071537
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.9443765576964719,
+        "ci95": [
+          0.6666643851781586,
+          1.4355853120813609
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8544918961149063,
+        "ci95": [
+          0.6918717071782926,
+          1.0569540521212195
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.7337709303075036,
+        "ci95": [
+          0.49093415605119034,
+          1.17922163644298
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6977712360200681,
+        "ci95": [
+          0.5439651320551004,
+          0.8950660053844315
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8421712867827422,
+        "ci95": [
+          0.637831241280679,
+          1.1481439583023891
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.6971916102039575,
+        "ci95": [
+          0.5126146925132085,
+          0.9482290469586223
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.004439329676986,
+        "ci95": [
+          0.96985141179925,
+          1.0402264118594469
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 8.508921066610583,
+        "ci95": [
+          2.8520047926117895,
+          21.926842478706195
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "split": "all",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 7.306797121596535,
+        "ci95": [
+          3.4096367333435422,
+          15.154074735798584
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.0500081975062028,
+        "ci95": [
+          1.019411376394222,
+          1.0789410384658504
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 11.148484453738376,
+        "ci95": [
+          2.2675401944000644,
+          31.35695032608358
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "split": "fresh",
+      "reference": "pair_table",
+      "missing": 0,
+      "runtime": {
+        "ratio": 9.229274317019998,
+        "ci95": [
+          2.03887955578731,
+          30.702846270877465
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.1072853936777958,
+        "ci95": [
+          0.6789329786162118,
+          1.7365279991962643
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "pair_table",
+      "split": "all",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.1645213251454536,
+        "ci95": [
+          0.6296464289017535,
+          2.006045624155549
+        ],
+        "seeds": 8,
+        "pairs": 24,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "reference",
+      "missing": 0,
+      "runtime": {
+        "ratio": 0.8061303210569566,
+        "ci95": [
+          0.4399992580602939,
+          1.302007442852475
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    },
+    {
+      "case": 9,
+      "variant": "pair_table",
+      "split": "fresh",
+      "reference": "rho",
+      "missing": 0,
+      "runtime": {
+        "ratio": 1.2079481084638586,
+        "ci95": [
+          0.8601731935430261,
+          1.9085123859918647
+        ],
+        "seeds": 4,
+        "pairs": 12,
+        "unit": "cold runtime ratio; paired seed-cluster bootstrap; shared-host diagnostic"
+      }
+    }
+  ],
+  "outcome": "runtime diagnostics; total calibrated costs unmeasured",
+  "witness_order_change": false
+}

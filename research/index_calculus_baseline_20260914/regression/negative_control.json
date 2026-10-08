@@ -1,0 +1,43 @@
+{
+  "case": "n19l6-19-U",
+  "field_degree": 19,
+  "field_modulus_integer": 524327,
+  "curve": "y^2+xy=x^3+x^2+1",
+  "x_witness": [
+    20,
+    34,
+    41
+  ],
+  "target_x": 171112,
+  "s4_value": 0,
+  "criterion": "For nonzero x, z=y/x obeys z^2+z=x+1+1/x^2. It has an F_(2^19) solution iff the absolute trace of the right hand side is zero.",
+  "trace_certificates": [
+    {
+      "x": 20,
+      "artin_schreier_rhs": 408500,
+      "absolute_trace_to_F2": 1,
+      "lift_count": 0
+    },
+    {
+      "x": 34,
+      "artin_schreier_rhs": 312049,
+      "absolute_trace_to_F2": 1,
+      "lift_count": 0
+    },
+    {
+      "x": 41,
+      "artin_schreier_rhs": 282101,
+      "absolute_trace_to_F2": 1,
+      "lift_count": 0
+    },
+    {
+      "x": 171112,
+      "artin_schreier_rhs": 302487,
+      "absolute_trace_to_F2": 1,
+      "lift_count": 0
+    }
+  ],
+  "polynomial_sat": true,
+  "point_relation": false,
+  "source": "Pinned corpus metadata and the solver outputs in both batches; independently checked with the pilot finite-field arithmetic."
+}

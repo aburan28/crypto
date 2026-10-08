@@ -1,0 +1,26 @@
+{
+  "name": "nb5",
+  "alpha": "0x4f7aaf673fb46bcf47e8ea0660052d037",
+  "lifting_orbits": 23,
+  "total_orbits": 65,
+  "support_size": 3013,
+  "unknowns": 23,
+  "pair_orbits_expected": 69276,
+  "pair_orbits_enumerated": 69276,
+  "complete": true,
+  "elapsed_seconds": 21.3,
+  "pairs_per_second": 3249.9,
+  "raw_candidates": 46,
+  "translate_candidates": 0,
+  "characteristic_equation_hits": 46,
+  "characteristic_equation_patterns": [
+    "2A + sigma^1 A + sigma^2 A = O",
+    "2A - sigma^1 A - sigma^3 A = O"
+  ],
+  "repeated_point_hits": 0,
+  "unresolved_key_collisions": 0,
+  "certified_relations": 0,
+  "relations": [],
+  "log2_expected_usable": -84.36,
+  "log2_expected_exact": -85.36
+}

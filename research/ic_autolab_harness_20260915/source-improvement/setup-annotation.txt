@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+Profile data file '/home/ubuntu/crypto/research/ic_autolab_harness_20260915/source-improvement/setup.callgrind' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 2407171 - 31372017
+Trigger: Client Request: factor_base_and_tables
+Profiled target:  /app/probes/20260915T200221-dcd557/worker (PID 10440, part 3)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       85
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                   
+--------------------------------------------------------------------------------
+142,035,610 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                   file:function
+--------------------------------------------------------------------------------
+94,335,579 (66.42%)  ???:rayon::slice::sort::recurse::<(u64, u32, u32), <(u64, u32, u32) as core::cmp::PartialOrd>::lt>'2 [/app/probes/20260915T200221-dcd557/worker]
+87,050,461 (61.29%)  ./csu/../csu/libc-start.c:__libc_start_main@@GLIBC_2.34 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+87,050,461 (61.29%)  ./csu/../sysdeps/nptl/libc_start_call_main.h:(below main) [/usr/lib/x86_64-linux-gnu/libc.so.6]
+87,050,461 (61.29%)  ???:(below main) [/app/probes/20260915T200221-dcd557/worker]
+87,050,461 (61.29%)  ???:0x000000000001f540 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+87,050,461 (61.29%)  ???:ic_tournament_worker::main [/app/probes/20260915T200221-dcd557/worker]
+87,050,461 (61.29%)  ???:ic_tournament_worker::run [/app/probes/20260915T200221-dcd557/worker]
+87,050,461 (61.29%)  ???:main [/app/probes/20260915T200221-dcd557/worker]
+87,050,461 (61.29%)  ???:std::rt::lang_start::<()>::{closure#0} [/app/probes/20260915T200221-dcd557/worker]
+87,050,461 (61.29%)  ???:std::rt::lang_start_internal [/app/probes/20260915T200221-dcd557/worker]
+87,050,461 (61.29%)  ???:std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()> [/app/probes/20260915T200221-dcd557/worker]
+70,653,616 (49.74%)  ???:rayon_core::join::join_context::<rayon_core::join::join::call<(), rayon::slice::sort::recurse<(u64, u32, u32), <(u64, u32, u32) as core::cmp::PartialOrd>::lt>::{closure#0}>::{closure#0}, rayon_core::join::join::call<(), rayon::slice::sort::recurse<(u64, u32, u32), <(u64, u32, u32) as core::cmp::PartialOrd>::lt>::{closure#1}>::{closure#0}, (), ()>::{closure#0}'2 [/app/probes/20260915T200221-dcd557/worker]
+68,544,695 (48.26%)  ???:rayon_core::join::join_context::<rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>::{closure#0}, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>::{closure#1}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>>::{closure#0}'2 [/app/probes/20260915T200221-dcd557/worker]
+68,543,563 (48.26%)  ???:rayon::iter::plumbing::bridge_producer_consumer::helper::<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>'2 [/app/probes/20260915T200221-dcd557/worker]
+56,289,476 (39.63%)  ???:<crypto_lib::binary_ecc::f2m::F2mElement>::square [/app/probes/20260915T200221-dcd557/worker]
+54,985,142 (38.71%)  ./nptl/./nptl/pthread_create.c:start_thread [/usr/lib/x86_64-linux-gnu/libc.so.6]
+54,984,379 (38.71%)  ???:<std::sys::thread::unix::Thread>::new::thread_start [/app/probes/20260915T200221-dcd557/worker]
+54,981,062 (38.71%)  ???:<std::thread::lifecycle::spawn_unchecked<<rayon_core::registry::DefaultSpawn as rayon_core::registry::ThreadSpawn>::spawn::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0} [/app/probes/20260915T200221-dcd557/worker]
+54,980,449 (38.71%)  ???:std::sys::backtrace::__rust_begin_short_backtrace::<<rayon_core::registry::DefaultSpawn as rayon_core::registry::ThreadSpawn>::spawn::{closure#0}, ()> [/app/probes/20260915T200221-dcd557/worker]
+54,980,432 (38.71%)  ???:<rayon_core::registry::ThreadBuilder>::run [/app/probes/20260915T200221-dcd557/worker]
+54,979,833 (38.71%)  ???:<rayon_core::registry::WorkerThread>::wait_until_cold [/app/probes/20260915T200221-dcd557/worker]
+50,897,962 (35.83%)  ???:<crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec>::materialize [/app/probes/20260915T200221-dcd557/worker]
+50,897,927 (35.83%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::build_subgroup_orbit_factor_base [/app/probes/20260915T200221-dcd557/worker]
+46,581,829 (32.80%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::build_explicit_frobenius_orbit_factor_base [/app/probes/20260915T200221-dcd557/worker]
+45,820,429 (32.26%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::finish_factor_base_domain [/app/probes/20260915T200221-dcd557/worker]
+43,997,632 (30.98%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::points_with_x [/app/probes/20260915T200221-dcd557/worker]
+40,760,023 (28.70%)  ???:<crypto_lib::binary_ecc::f2m::F2mElement>::flt_inverse [/app/probes/20260915T200221-dcd557/worker]
+34,274,078 (24.13%)  ???:rayon::iter::plumbing::bridge_producer_consumer::helper::<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>> [/app/probes/20260915T200221-dcd557/worker]
+34,273,270 (24.13%)  ???:<rayon_core::job::StackJob<rayon_core::latch::LatchRef<rayon_core::latch::LockLatch>, <rayon_core::registry::Registry>::in_worker_cold<rayon_core::join::join_context<rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>::{closure#0}, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>::{closure#1}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>>::{closure#0}, (alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>)>::{closure#0}::{closure#0}, (alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>)> as rayon_core::job::Job>::execute [/app/probes/20260915T200221-dcd557/worker]
+34,273,128 (24.13%)  ???:rayon_core::join::join_context::<rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>::{closure#0}, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<usize>, rayon::iter::flat_map_iter::FlatMapIterConsumer<rayon::iter::extend::ListVecConsumer, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>::{closure#1}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<(u64, u32, u32)>>>::{closure#0} [/app/probes/20260915T200221-dcd557/worker]
+34,267,771 (24.13%)  ???:<alloc::vec::Vec<(u64, u32, u32)> as alloc::vec::spec_extend::SpecExtend<(u64, u32, u32), core::iter::adapters::flatten::FlatMap<core::ops::range::Range<usize>, core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<alloc::vec::into_iter::IntoIter<crypto_lib::cryptanalysis::koblitz_fast::FastPoint>>, <crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}::{closure#0}>, &<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2}>>>::spec_extend [/app/probes/20260915T200221-dcd557/worker]
+30,655,335 (21.58%)  ???:<&<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_within::{closure#2} as core::ops::function::FnMut<(usize,)>>::call_mut [/app/probes/20260915T200221-dcd557/worker]
+30,400,464 (21.40%)  ???:<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::add_many [/app/probes/20260915T200221-dcd557/worker]
+30,129,570 (21.21%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::RelationCollector>::with_pair_table [/app/probes/20260915T200221-dcd557/worker]
+30,129,552 (21.21%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::RelationCollector>::with_pair [/app/probes/20260915T200221-dcd557/worker]
+29,491,683 (20.76%)  ???:<crypto_lib::binary_ecc::f2m::F2mElement>::square_k_times [/app/probes/20260915T200221-dcd557/worker]
+27,923,579 (19.66%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::FrobeniusFactorBase>::m_can_decompose [/app/probes/20260915T200221-dcd557/worker]
+27,877,024 (19.63%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::FrobeniusFactorBase>::distinct_cofactor_classes [/app/probes/20260915T200221-dcd557/worker]
+27,690,973 (19.50%)  ???:crypto_lib::binary_ecc::curve::scalar_mul [/app/probes/20260915T200221-dcd557/worker]
+25,243,775 (17.77%)  ???:crypto_lib::cryptanalysis::binary_semaev::solve_artin_schreier [/app/probes/20260915T200221-dcd557/worker]
+19,047,919 (13.41%)  ???:rayon::slice::sort::recurse::<(u64, u32, u32), <(u64, u32, u32) as core::cmp::PartialOrd>::lt> [/app/probes/20260915T200221-dcd557/worker]
+

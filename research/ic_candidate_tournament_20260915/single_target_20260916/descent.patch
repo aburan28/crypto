@@ -1,0 +1,91 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -7377,6 +7377,15 @@
+ }
+ 
+ impl<'a> IndividualLogSolver<'a> {
++    fn verify_log(&self, q: &BinaryPoint, d: &BigUint) -> bool {
++        if d >= &self.kc.subgroup_order { return false; }
++        if let Some((fc, g)) = &self.fast {
++            fc.mul(*g, d) == fc.lift(q)
++        } else {
++            self.kc.mul(self.kc.generator(), d) == *q
++        }
++    }
++
+     /// `None` when the table's columns do not match the base's signed
+     /// orbits, a column has no logarithm, or the strategy needs a pair
+     /// table and none was supplied.
+@@ -7495,7 +7504,7 @@
+         let numerator = (sum + r - ha) % r;
+         let hb = (&self.h * &b) % r;
+         let d = (numerator * mod_inverse(&hb, r)?) % r;
+-        (kc.mul(kc.generator(), &d) == *q).then_some(d)
++        (self.verify_log(q, &d)).then_some(d)
+     }
+ 
+     /// **Walk the probes instead of drawing them.**
+@@ -7529,10 +7538,23 @@
+         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x57_41_4c_4b_44_45_53_00);
+         let a0 = rng.gen_range(1..self.r_u64);
+         let b = rng.gen_range(1..self.r_u64);
++        if report.trials >= self.opts.max_trials { return Some(None); }
++        let initial = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
++        // Many targets descend at the first state. Pay for that probe before
++        // initializing the other 63 walks; keep the same coefficients/order.
++        report.trials += 1;
++        if initial.infinity {
++            if let Some(d) = solve_for_d(&BigUint::from(a0), &BigUint::from(b), &self.kc.subgroup_order) {
++                if self.kc.mul(self.kc.generator(), &d) == *q { return Some(Some(d)); }
++            }
++        } else if let Some(idxs) = pair.decompose_fast(initial, m) {
++            if let Some(d) = self.logarithm_from(q, &idxs, a0, b) { return Some(Some(d)); }
++        }
++        if report.trials >= self.opts.max_trials { return Some(None); }
+         let stride_point = fc.mul_u64(*g, stride);
+         let mut coefficients: Vec<(u64, u64)> = Vec::with_capacity(WALKS);
+         let mut states: Vec<FastPoint> = Vec::with_capacity(WALKS);
+-        let mut state = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
++        let mut state = initial;
+         let mut a = a0;
+         for _ in 0..WALKS {
+             coefficients.push((a, b));
+@@ -7543,8 +7565,11 @@
+         let step = vec![*g; WALKS];
+         let mut advanced = Vec::with_capacity(WALKS);
+         let mut scratch = BatchScratch::default();
++        let mut skip_first = true;
+         while report.trials < self.opts.max_trials {
+             for (state, (a, b)) in states.iter().zip(coefficients.iter()) {
++                if skip_first { skip_first = false; continue; }
++                if report.trials >= self.opts.max_trials { return Some(None); }
+                 report.trials += 1;
+                 if state.infinity {
+                     // [a]G + [b]Q = O already yields d.
+@@ -7574,7 +7599,7 @@
+     }
+ 
+     /// The logarithm of `q` to the base's generator, verified as
+-    /// `[d]G = Q` in the general arithmetic before it is returned.
++    /// `[d]G = Q` in the curve arithmetic before it is returned.
+     pub fn solve(&self, q: &BinaryPoint) -> Option<(BigUint, IndividualLogReport)> {
+         let kc = self.kc;
+         let r = &kc.subgroup_order;
+@@ -7607,7 +7632,7 @@
+                 Probe::Degenerate => {
+                     // Degenerate relation [a]G + [b]Q = O already yields d.
+                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+-                        if kc.mul(g, &d) == *q {
++                        if self.verify_log(q, &d) {
+                             report.log = Some(d.clone());
+                             return Some((d, report));
+                         }
+@@ -7640,7 +7665,7 @@
+                 continue;
+             };
+             let d = (numerator * hb_inv) % r;
+-            if kc.mul(g, &d) == *q {
++            if self.verify_log(q, &d) {
+                 report.log = Some(d.clone());
+                 return Some((d, report));
+             }

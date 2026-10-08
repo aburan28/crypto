@@ -1,0 +1,93 @@
+{
+  "inventory": [
+    {
+      "bytes": 2516,
+      "path": "direct-mitm-local.intent.json",
+      "sha256": "a9c80aeb638b9554ce84d59e6d8d0be0fa2ce2cc208febd3a7fdd1e660d6beb3"
+    },
+    {
+      "bytes": 736,
+      "path": "direct-mitm-local.metrics.json",
+      "sha256": "6e0e3b8e15d5cef81da3dd48b735f800d5d3b3e80754a1960c0933dd8f57138a"
+    },
+    {
+      "bytes": 0,
+      "path": "direct-mitm-local.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1286,
+      "path": "direct-mitm-local.stdout",
+      "sha256": "510b332ad4feedb48bc3e0a67b573fc5487e66c47cff3c3f5d36fe9942100cc3"
+    },
+    {
+      "bytes": 255940,
+      "path": "instance/instance.anf",
+      "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+    },
+    {
+      "bytes": 404158,
+      "path": "instance/instance.magma",
+      "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+    },
+    {
+      "bytes": 219207,
+      "path": "instance/instance.xor.cnf",
+      "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+    },
+    {
+      "bytes": 4343,
+      "path": "instance/manifest.json",
+      "sha256": "a35965082d502d755b21209c7e163ba19836eac08f22a1eb9a6ad80ac5d227c0"
+    },
+    {
+      "bytes": 2528,
+      "path": "native-xor-local.intent.json",
+      "sha256": "d17b2c3e8cf07ab592b287ec73cb42ffe9c14fb828d2256ead1e604135ed82d4"
+    },
+    {
+      "bytes": 740,
+      "path": "native-xor-local.metrics.json",
+      "sha256": "60ea4e5bbcaa6ec7c51bc55f5a94404e1a028fe6b6e77d6242c6db0d4ab7160a"
+    },
+    {
+      "bytes": 0,
+      "path": "native-xor-local.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2174,
+      "path": "native-xor-local.stdout",
+      "sha256": "5ca3b8f25e67162de093f48cf20cffd4476dc71283899bef0a645c60c9761a83"
+    },
+    {
+      "bytes": 2526,
+      "path": "source-verification-local.intent.json",
+      "sha256": "77c51dff491493445e420215e71bb94e156b346678a497d9dab03dd2c8a296e6"
+    },
+    {
+      "bytes": 731,
+      "path": "source-verification-local.metrics.json",
+      "sha256": "529c52f4a021b8b8226bd47bf63d26782556908d6ae409147886083755befc85"
+    },
+    {
+      "bytes": 0,
+      "path": "source-verification-local.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1129,
+      "path": "source-verification-local.stdout",
+      "sha256": "c355ae2f758532c0c7348f0ff4a1646bfcae5e530cf1558d7c97bff7e381d723"
+    },
+    {
+      "bytes": 6902,
+      "path": "summary.json",
+      "sha256": "6916a3c1acbedcb217a494f43af30cf77a83e5c38171c5b25a9163f28d96f493"
+    }
+  ],
+  "inventory_sha256": "f0e6b30f712953574da6a0a2d7371c8c240d2522f821c15e5b3f805805a7828e",
+  "schema": "koblitz_stage159_local_same_host_controls_seal.v1",
+  "seal_payload_sha256": "cdc6f50c421e420013524d9bbe6efeae0c9426bc3bc4d62e78af4c42c87de1bc",
+  "status": "controls_frozen"
+}

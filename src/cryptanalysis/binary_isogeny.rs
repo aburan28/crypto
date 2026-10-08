@@ -46,13 +46,11 @@ use std::collections::{HashMap, HashSet, VecDeque};
 /// `j(E)` for an ordinary binary curve `E: y² + xy = x³ + ax² + b`.
 ///
 /// Standard formula in characteristic 2: with `c₄ = 1`, `Δ = b`, we have
-/// `j(E) = c₄³ / Δ = 1 / b`.  `b = 0` would be a supersingular curve,
-/// which we never deal with here (the GHS trapdoor assumes ordinary `b`).
+/// `j(E) = c₄³ / Δ = 1 / b`.  `b = 0` is singular, not supersingular,
+/// and therefore has no elliptic-curve `j`-invariant. The GHS trapdoor path
+/// handles only nonsingular ordinary curves.
 pub fn j_invariant(curve: &ECurve) -> F2mElement {
-    assert!(
-        !curve.b.is_zero(),
-        "supersingular curve (b = 0) — j undefined"
-    );
+    assert!(!curve.b.is_zero(), "singular curve (b = 0) — j undefined");
     curve
         .b
         .flt_inverse(&curve.irr)
@@ -114,7 +112,7 @@ pub fn phi_l_mod2_in_x(l: u32, j_val: &F2mElement, m: u32, irr: &IrreduciblePoly
         cur = cur.mul(j_val, irr);
     }
 
-    for ((i, jdeg), _bit) in coeffs_bits.iter() {
+    for (i, jdeg) in coeffs_bits.keys() {
         let term = j_powers[*jdeg as usize].clone();
         let entry = by_x_deg.entry(*i).or_insert_with(|| F2mElement::zero(m));
         *entry = entry.add(&term);
@@ -233,7 +231,7 @@ fn cz_split(poly: &F2mPoly, m: u32, irr: &IrreduciblePoly, roots: &mut Vec<F2mEl
         let mut bits = Vec::new();
         let bound = m.min(20);
         for k in 0..bound {
-            if (attempt.wrapping_mul(0x9E3779B1).rotate_left(k as u32) >> 1) & 1 == 1 {
+            if (attempt.wrapping_mul(0x9E3779B1).rotate_left(k) >> 1) & 1 == 1 {
                 bits.push(k);
             }
         }

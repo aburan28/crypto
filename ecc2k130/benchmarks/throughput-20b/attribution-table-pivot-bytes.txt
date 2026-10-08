@@ -1,0 +1,38 @@
+kernel 4walk: regs 102; step loop 570-4920; slot loops ['600-2490', '3e70-4910']; callees 9
+where                                          kind              slots      alu   imad  quart  imnmx   clmad    mem
+mulPolynomialPair131                           callee x2         622.0    614.0    4.0    0.0    0.0   24.00    0.0
+mulPolynomial131                               callee x2         322.0    318.0    2.0    0.0    0.0   12.00    0.0
+mul131                                         callee x0.5       179.9    170.0    0.0    2.5    0.0    3.00    0.0
+packedtransform131.h:fromPolynomialProduct131  body              114.8    114.8    0.0    0.0    0.0    0.00    0.0
+packedkernels.cuh:walk                         body               89.2     83.2    3.0    0.0    0.0    0.00   17.0
+packeddirectreduce131.h:reducePolynomial131    body               75.0     73.0    1.0    0.0    0.0    0.00    0.0
+packedtablewalk.cuh:twCoordinate               body               46.0     42.0    2.0    0.0    0.0    0.00   10.0
+packedtablewalk.cuh:twPhase                    body               44.1     32.0    6.0    0.0    0.0    0.00   41.0
+device_atomic_functions.hpp:?                  body               43.8     20.0    0.0    6.0    0.0    0.00    3.0
+packedtablewalk.cuh:twByte                     body               32.0     32.0    0.0    0.0    0.0    0.00    0.0
+math_functions.hpp:?                           body               30.0      1.0    0.0    0.0   16.0    0.00    0.0
+packedkernels.cuh:weight                       body               21.9      2.0    0.0    5.0    0.0    0.00    0.0
+packedcompactstate.cuh:compactLoad131          body               19.2     11.1    4.0    0.0    0.0    0.00   16.0
+sigmaInvNetwork131#5                           callee x0.0625     17.5     16.4    0.6    0.0    0.0    0.00    0.0
+sigmaInvNetwork131#4                           callee x0.0625     17.2     16.1    0.6    0.0    0.0    0.00    0.0
+packed131.h:add131                             body               17.0     17.0    0.0    0.0    0.0    0.00    0.0
+sigmaInvNetwork131#3                           callee x0.0625     16.1     15.1    0.5    0.0    0.0    0.00    0.0
+sigmaWalkNetwork131#2                          callee x0.0625     15.5     14.4    0.6    0.0    0.0    0.00    3.6
+sigmaWalkNetwork131#1                          callee x0.0625     15.5     14.4    0.6    0.0    0.0    0.00    3.6
+packed131.h:reverse32                          body               13.2      0.0    0.0    3.3    0.0    0.00    0.0
+packedcompactstate.cuh:compactStore131         body               12.0      8.0    2.0    0.0    0.0    0.00   10.0
+packed131.h:spread32p                          body                8.4      8.4    0.0    0.0    0.0    6.25    0.0
+packedtransform131.h:toPolynomial131           body                5.1      5.1    0.0    0.0    0.0    0.00    0.0
+tablewalk.h:eccTag                             body                5.0      5.0    0.0    0.0    0.0    0.00    0.0
+tablewalk.h:eccTagFruitless                    body                5.0      5.0    0.0    0.0    0.0    0.00    0.0
+packed131.h:sqr131                             body                4.1      4.1    0.0    0.0    0.0    0.00    0.0
+packedcompactstate.cuh:compactLowByteOffset    body                4.0      0.0    2.0    0.0    0.0    0.00    0.0
+packedtablewalk.cuh:twParity                   body                4.0      0.0    0.0    1.0    0.0    0.00    0.0
+packed131.h:inv131                             body                3.9      3.9    0.0    0.0    0.0    0.00    0.0
+packedkernels.cuh:toLimbs                      body                3.0      3.0    0.0    0.0    0.0    0.00    0.0
+tablewalk.h:eccTagEps                          body                2.0      2.0    0.0    0.0    0.0    0.00    0.0
+tablewalk.h:eccHistPush                        body                2.0      2.0    0.0    0.0    0.0    0.00    0.0
+packed131.h:reverse131                         body                0.9      0.9    0.0    0.0    0.0    0.00    0.0
+packed131.h:sigma131                           body                0.3      0.3    0.0    0.0    0.0    0.00    0.0
+TOTAL per update                                                1811.7   1654.2   28.8   17.8   16.0   45.25  104.1
+kernel_cost.py-equivalent slots (IMNMX at 1.0): 1798.7

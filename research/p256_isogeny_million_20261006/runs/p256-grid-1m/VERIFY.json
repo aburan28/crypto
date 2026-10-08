@@ -1,0 +1,827 @@
+{
+  "schema": "p256.isogeny-grid-receipt/v1",
+  "status": "pass",
+  "source_commit": "316f546373db8f42ac894ef7d8b4232e57d87f8e",
+  "audit_points": 2,
+  "audit_seed_x": 7,
+  "elapsed_ms": 6601237,
+  "resources": {
+    "status": "measured_getrusage_self",
+    "user_cpu_micros": 23164371641,
+    "system_cpu_micros": 3878027,
+    "peak_rss_bytes": 1011425280
+  },
+  "uncompressed_bytes": 1773118481,
+  "summary": {
+    "record": "summary",
+    "schema": "p256.isogeny-grid-summary/v1",
+    "bound_records": 1000001,
+    "record_chain_sha256": "4de6e93e0d7a90ff53a26f8f1fd1cbd03ab55f701a25f8e49874cb8bead40302",
+    "unique_curves": 1000000,
+    "parent_edges": 999999,
+    "kernel_certificates": 999999,
+    "order_proved_prime": 1000000,
+    "non_singular": 1000000,
+    "generator_valid": 1000000,
+    "unique_j_invariants": 1000000,
+    "unique_canonical_models": 1000000,
+    "unique_icv1_identities": 1000000,
+    "unique_ec1_aliases": 1000000,
+    "unique_curve_uids": 1000000,
+    "unique_icv1_slugs": 999879,
+    "icv1_slug_collisions": [
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f6916903",
+        "first_index": 56408,
+        "repeated_index": 96591
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-65479983",
+        "first_index": 91312,
+        "repeated_index": 100165
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-2f19cc29",
+        "first_index": 4848,
+        "repeated_index": 141877
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-cf0c657f",
+        "first_index": 219725,
+        "repeated_index": 221360
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-5ab3c6e6",
+        "first_index": 7777,
+        "repeated_index": 249647
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-af1f0325",
+        "first_index": 152520,
+        "repeated_index": 252518
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-9c046ba9",
+        "first_index": 11595,
+        "repeated_index": 256848
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-20c1efa7",
+        "first_index": 53939,
+        "repeated_index": 275013
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a8c5b350",
+        "first_index": 252867,
+        "repeated_index": 276499
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-0d783354",
+        "first_index": 125232,
+        "repeated_index": 281040
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-e9b79159",
+        "first_index": 87549,
+        "repeated_index": 312199
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-95a3b1aa",
+        "first_index": 176285,
+        "repeated_index": 313354
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-16963fc3",
+        "first_index": 128951,
+        "repeated_index": 316607
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-fa72f154",
+        "first_index": 164977,
+        "repeated_index": 316704
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-2dc5e4ed",
+        "first_index": 309459,
+        "repeated_index": 317859
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a386c6cd",
+        "first_index": 329687,
+        "repeated_index": 339137
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-c7f3cf67",
+        "first_index": 45991,
+        "repeated_index": 351663
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-c0c8bfc1",
+        "first_index": 29764,
+        "repeated_index": 352055
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-b098c74e",
+        "first_index": 323463,
+        "repeated_index": 354395
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a080d26b",
+        "first_index": 37295,
+        "repeated_index": 360502
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f5e656af",
+        "first_index": 21473,
+        "repeated_index": 392312
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-33c78dbf",
+        "first_index": 240737,
+        "repeated_index": 396368
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-05db8538",
+        "first_index": 296460,
+        "repeated_index": 398785
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-3e97fe61",
+        "first_index": 152314,
+        "repeated_index": 413423
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-b34212a7",
+        "first_index": 219779,
+        "repeated_index": 418209
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-007e1791",
+        "first_index": 157627,
+        "repeated_index": 423048
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-e657ed0c",
+        "first_index": 395466,
+        "repeated_index": 431540
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-718c9a9a",
+        "first_index": 127156,
+        "repeated_index": 469834
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ab924065",
+        "first_index": 351383,
+        "repeated_index": 482702
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-2cbc6dc7",
+        "first_index": 80762,
+        "repeated_index": 484771
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-d1678f07",
+        "first_index": 55174,
+        "repeated_index": 491083
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-89259255",
+        "first_index": 220110,
+        "repeated_index": 504630
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-24012fe7",
+        "first_index": 343610,
+        "repeated_index": 506019
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-cf5835df",
+        "first_index": 242554,
+        "repeated_index": 528153
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-8d6ff384",
+        "first_index": 258241,
+        "repeated_index": 530099
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-323f5fc9",
+        "first_index": 66299,
+        "repeated_index": 530122
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ca228c09",
+        "first_index": 300484,
+        "repeated_index": 533296
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-cae5cffa",
+        "first_index": 132897,
+        "repeated_index": 538863
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-77592dc8",
+        "first_index": 60074,
+        "repeated_index": 554793
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-b876b231",
+        "first_index": 271727,
+        "repeated_index": 570560
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-020b1a8e",
+        "first_index": 168304,
+        "repeated_index": 575417
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a690b2e4",
+        "first_index": 406735,
+        "repeated_index": 585901
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-990479b0",
+        "first_index": 225124,
+        "repeated_index": 587441
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-e39b789a",
+        "first_index": 536597,
+        "repeated_index": 589063
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a0018a92",
+        "first_index": 308211,
+        "repeated_index": 589945
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-e0a74238",
+        "first_index": 513088,
+        "repeated_index": 594429
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-90deb617",
+        "first_index": 260169,
+        "repeated_index": 598554
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-5a3d0f22",
+        "first_index": 323703,
+        "repeated_index": 633617
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-6d88e779",
+        "first_index": 259150,
+        "repeated_index": 634132
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-71a37aeb",
+        "first_index": 487465,
+        "repeated_index": 634892
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-7419286b",
+        "first_index": 420601,
+        "repeated_index": 636464
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-0875323b",
+        "first_index": 451279,
+        "repeated_index": 638705
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-eb3e4276",
+        "first_index": 201306,
+        "repeated_index": 639420
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-59fcf364",
+        "first_index": 152725,
+        "repeated_index": 648025
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ea11fa2c",
+        "first_index": 449994,
+        "repeated_index": 648821
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-d0998b2b",
+        "first_index": 409272,
+        "repeated_index": 659512
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-1036f18f",
+        "first_index": 417974,
+        "repeated_index": 660817
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-6d74c3ed",
+        "first_index": 4986,
+        "repeated_index": 663175
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ca05cc19",
+        "first_index": 469790,
+        "repeated_index": 679103
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-7f678403",
+        "first_index": 498302,
+        "repeated_index": 681731
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-55194e03",
+        "first_index": 603136,
+        "repeated_index": 688500
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-8f7d0fb6",
+        "first_index": 603444,
+        "repeated_index": 703046
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-57ea2f19",
+        "first_index": 524859,
+        "repeated_index": 711395
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-fcd73b28",
+        "first_index": 370870,
+        "repeated_index": 711922
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a5c1b1b1",
+        "first_index": 298647,
+        "repeated_index": 715652
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-775aeee1",
+        "first_index": 75337,
+        "repeated_index": 718474
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-1a98e9f3",
+        "first_index": 495821,
+        "repeated_index": 722965
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-bdfc516e",
+        "first_index": 515686,
+        "repeated_index": 728387
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-260b6fae",
+        "first_index": 421601,
+        "repeated_index": 740280
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-09e75f19",
+        "first_index": 186573,
+        "repeated_index": 743326
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-8ecc626b",
+        "first_index": 655354,
+        "repeated_index": 744649
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a2971f29",
+        "first_index": 199870,
+        "repeated_index": 751329
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-4c49e46f",
+        "first_index": 245602,
+        "repeated_index": 753646
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f6e5a886",
+        "first_index": 232128,
+        "repeated_index": 760642
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-4dc7e07e",
+        "first_index": 459230,
+        "repeated_index": 761441
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-d6a5be83",
+        "first_index": 474503,
+        "repeated_index": 767189
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f197efac",
+        "first_index": 446946,
+        "repeated_index": 771355
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-8e2c7bd9",
+        "first_index": 83677,
+        "repeated_index": 775132
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-cbd8c700",
+        "first_index": 766165,
+        "repeated_index": 792053
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-2886bdc9",
+        "first_index": 651086,
+        "repeated_index": 801589
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-5bcf89ce",
+        "first_index": 661133,
+        "repeated_index": 804895
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-d2216aeb",
+        "first_index": 549158,
+        "repeated_index": 810816
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-19e2357a",
+        "first_index": 178057,
+        "repeated_index": 810962
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-101325a7",
+        "first_index": 328852,
+        "repeated_index": 811305
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-522941df",
+        "first_index": 252158,
+        "repeated_index": 813757
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f693804c",
+        "first_index": 787610,
+        "repeated_index": 818374
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-8b1079aa",
+        "first_index": 176875,
+        "repeated_index": 819163
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ec6e240e",
+        "first_index": 683546,
+        "repeated_index": 821598
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-b5ab3ee8",
+        "first_index": 72693,
+        "repeated_index": 824873
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-14ddf604",
+        "first_index": 311862,
+        "repeated_index": 830035
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-212e740e",
+        "first_index": 676818,
+        "repeated_index": 832446
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-331c0e21",
+        "first_index": 462033,
+        "repeated_index": 840741
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ab838ad0",
+        "first_index": 714064,
+        "repeated_index": 843170
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-1cd5b99e",
+        "first_index": 818697,
+        "repeated_index": 857351
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-d4b4fe22",
+        "first_index": 335605,
+        "repeated_index": 865744
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-257ef663",
+        "first_index": 586122,
+        "repeated_index": 867286
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-c60ed228",
+        "first_index": 86100,
+        "repeated_index": 871881
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-bc30d55c",
+        "first_index": 240812,
+        "repeated_index": 883005
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-0f9b7a84",
+        "first_index": 113110,
+        "repeated_index": 883776
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ca752668",
+        "first_index": 388265,
+        "repeated_index": 887840
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-b26d7fe1",
+        "first_index": 455180,
+        "repeated_index": 888469
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-51e8b451",
+        "first_index": 590398,
+        "repeated_index": 892280
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-323b47ce",
+        "first_index": 494650,
+        "repeated_index": 895364
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-979969f7",
+        "first_index": 608786,
+        "repeated_index": 895820
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-116637e9",
+        "first_index": 627794,
+        "repeated_index": 895947
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ff9e0286",
+        "first_index": 595651,
+        "repeated_index": 908920
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f707d0e9",
+        "first_index": 566588,
+        "repeated_index": 909359
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-ff1c43fb",
+        "first_index": 177967,
+        "repeated_index": 910309
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-74fac3d8",
+        "first_index": 559579,
+        "repeated_index": 916837
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-1a0231c1",
+        "first_index": 883855,
+        "repeated_index": 917124
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-32f68f48",
+        "first_index": 381109,
+        "repeated_index": 923123
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-6648e1bc",
+        "first_index": 609754,
+        "repeated_index": 938214
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-acbc5469",
+        "first_index": 109618,
+        "repeated_index": 946684
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-bc673698",
+        "first_index": 117922,
+        "repeated_index": 952757
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-46687f4c",
+        "first_index": 875361,
+        "repeated_index": 963128
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-db84a8a0",
+        "first_index": 540268,
+        "repeated_index": 965298
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f3addab3",
+        "first_index": 589029,
+        "repeated_index": 977584
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-b637e7ea",
+        "first_index": 356221,
+        "repeated_index": 984364
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-a285effe",
+        "first_index": 111351,
+        "repeated_index": 997498
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-f8083818",
+        "first_index": 205257,
+        "repeated_index": 998483
+      },
+      {
+        "slug": "icv1-fp256-t89188191154553853111372247798585809583-bfb28710",
+        "first_index": 905994,
+        "repeated_index": 999507
+      }
+    ],
+    "a_minus_3_models": 499948,
+    "qr_prefix_64_min": 14,
+    "qr_prefix_64_max": 51,
+    "qr_prefix_64_histogram": [
+      {
+        "value": 14,
+        "count": 6
+      },
+      {
+        "value": 15,
+        "count": 6
+      },
+      {
+        "value": 16,
+        "count": 25
+      },
+      {
+        "value": 17,
+        "count": 87
+      },
+      {
+        "value": 18,
+        "count": 198
+      },
+      {
+        "value": 19,
+        "count": 517
+      },
+      {
+        "value": 20,
+        "count": 1162
+      },
+      {
+        "value": 21,
+        "count": 2372
+      },
+      {
+        "value": 22,
+        "count": 4570
+      },
+      {
+        "value": 23,
+        "count": 8225
+      },
+      {
+        "value": 24,
+        "count": 14049
+      },
+      {
+        "value": 25,
+        "count": 22022
+      },
+      {
+        "value": 26,
+        "count": 33278
+      },
+      {
+        "value": 27,
+        "count": 46228
+      },
+      {
+        "value": 28,
+        "count": 60609
+      },
+      {
+        "value": 29,
+        "count": 75188
+      },
+      {
+        "value": 30,
+        "count": 87473
+      },
+      {
+        "value": 31,
+        "count": 95420
+      },
+      {
+        "value": 32,
+        "count": 98027
+      },
+      {
+        "value": 33,
+        "count": 95159
+      },
+      {
+        "value": 34,
+        "count": 87547
+      },
+      {
+        "value": 35,
+        "count": 74883
+      },
+      {
+        "value": 36,
+        "count": 60371
+      },
+      {
+        "value": 37,
+        "count": 46062
+      },
+      {
+        "value": 38,
+        "count": 33311
+      },
+      {
+        "value": 39,
+        "count": 22347
+      },
+      {
+        "value": 40,
+        "count": 13796
+      },
+      {
+        "value": 41,
+        "count": 8190
+      },
+      {
+        "value": 42,
+        "count": 4505
+      },
+      {
+        "value": 43,
+        "count": 2348
+      },
+      {
+        "value": 44,
+        "count": 1125
+      },
+      {
+        "value": 45,
+        "count": 534
+      },
+      {
+        "value": 46,
+        "count": 222
+      },
+      {
+        "value": 47,
+        "count": 95
+      },
+      {
+        "value": 48,
+        "count": 31
+      },
+      {
+        "value": 49,
+        "count": 7
+      },
+      {
+        "value": 50,
+        "count": 4
+      },
+      {
+        "value": 51,
+        "count": 1
+      }
+    ],
+    "primary_screen_hits": [],
+    "qr_52_comparability_hits": [],
+    "minimum_b_signed_bits": {
+      "value": 233,
+      "curve": {
+        "index": 4289,
+        "coordinate": {
+          "x": 293,
+          "y": 3
+        },
+        "icv1_slug": "icv1-fp256-t89188191154553853111372247798585809583-c58c6345",
+        "icv1_identity": "ICV1:fp-115792089210356248762697446949407573530086143415290314195533631308867097853951:89188191154553853111372247798585809583:115792089210356248762697446949407573529996955224135760342422259061068512044369:58464169096875402341784957221574500817178334384635576204259879798965510762446:unk:unk:r:c58c6345ab09",
+        "ec1_alias": "EC1P256Cfphdee17fc049ef",
+        "curve_uid": "urn:ec-record:1:sha256:dee17fc049efad0c45b6bab802bda8e261924dd87f6db2f908e89edda71cf7a0"
+      }
+    },
+    "minimum_a_signed_bits_without_a_minus_3": {
+      "value": 236,
+      "curve": {
+        "index": 143043,
+        "coordinate": {
+          "x": 186,
+          "y": 142
+        },
+        "icv1_slug": "icv1-fp256-t89188191154553853111372247798585809583-3b7c1fdd",
+        "icv1_identity": "ICV1:fp-115792089210356248762697446949407573530086143415290314195533631308867097853951:89188191154553853111372247798585809583:115792089210356248762697446949407573529996955224135760342422259061068512044369:106259451343617570088216644827436449248054797384647573654558832835866833591308:unk:unk:r:3b7c1fdd8b55",
+        "ec1_alias": "EC1P256Cfph5864c4b56e6d",
+        "curve_uid": "urn:ec-record:1:sha256:5864c4b56e6d6a6a3cdf862918904c8b70e87a4a3c9439d94a891f583bfc573a"
+      }
+    }
+  }
+}

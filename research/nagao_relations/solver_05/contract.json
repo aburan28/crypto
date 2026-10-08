@@ -1,0 +1,10 @@
+{
+  "hypothesis": "Replacing each conditioned branch by two Artin-Schreier solves improves complete eleven-bit decomposition on the exact solver_04 panel.",
+  "seconds_per_instance": 3,
+  "domain": "Same nonzero distinct x-subspace triples, exact target, and b nonzero as solver_04. All 48 mode/target slots reused; no target reselection.",
+  "method": "Enumerate h2 in V; solve b²+b=h2+r; enumerate z in V excluding 0,r,h2; solve H(z)=0 as a quadratic in a; check H divides L_V; then extract and verify points. No exhaustive a or b field scan.",
+  "validation": "Complete projected-set equality on all 43 affine targets at n5 d3, then exhaustive group oracle checks for each benchmark target. Any mismatch invalidates the implementation.",
+  "falsification": "Fail the reliable-eleven-bit criterion if any target/mode slot is unresolved at the shared all-phase three-second deadline. Twenty percent all-cost improvement at three sizes against strongest Semaev remains separate and unestablished.",
+  "accounting": "Every search, support, extraction, duplicate, and verification field API operation is counted; setup and failures included in all-phase timing. Inversions expand into primitives. SAT costs lack comparable operation instrumentation; no calibrated baseline ratio or full-DLP S claimed.",
+  "limitations": "Hybrid root-abscissa conditioning, not a pure two-variable SAT solver. Timing instrumented for field counts, so overhead differs from SAT controls. These targets are fresh relative to solver_02/03 but now development targets from solver_04. Soft deadline checked between yielded candidates; final work may overrun and is reported. Frozen historical data unchanged."
+}

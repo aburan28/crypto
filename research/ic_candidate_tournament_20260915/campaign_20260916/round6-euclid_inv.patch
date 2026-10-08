@@ -1,0 +1,73 @@
+--- a/src/cryptanalysis/semaev_decomp.rs
++++ b/src/cryptanalysis/semaev_decomp.rs
+@@ -268,12 +268,36 @@
+         a
+     }
+ 
++    /// `a^{-1}` by the binary extended Euclidean algorithm over `F_2[z]`
++    /// (Hankerson–Menezes–Vanstone, Algorithm 2.48). The invariants
++    /// `g1·a ≡ u` and `g2·a ≡ v (mod irr)` hold until `u = 1`; `irr`
++    /// carries its leading `z^n` bit, so `v` starts at the modulus itself.
++    pub fn inv(&self, a: u64) -> u64 {
++        if a == 0 {
++            return 0;
++        }
++        let (mut u, mut v) = (a, self.irr);
++        let (mut g1, mut g2) = (1u64, 0u64);
++        while u != 1 {
++            let mut j = v.leading_zeros() as i32 - u.leading_zeros() as i32;
++            if j < 0 {
++                std::mem::swap(&mut u, &mut v);
++                std::mem::swap(&mut g1, &mut g2);
++                j = -j;
++            }
++            u ^= v << j;
++            g1 ^= g2 << j;
++        }
++        g1
++    }
++
+     /// `a^{-1}` by Fermat: `a^(2^n − 2)`.  Zero maps to zero.
+     ///
+     /// Still `n` squarings and `n` multiplications — which is why the
+     /// code above it goes to some length to need only one per *row* of
+     /// the pair loop rather than one per polynomial division.
+-    pub fn inv(&self, a: u64) -> u64 {
++    /// Retained as the reference for the equivalence test of the inversion above.
++    pub fn inv_fermat(&self, a: u64) -> u64 {
+         if a == 0 {
+             return 0;
+         }
+@@ -873,3 +897,32 @@
+         }
+     }
+ }
++
++#[cfg(test)]
++mod tournament_inverse_equivalence {
++    use super::*;
++    use crate::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
++
++    #[test]
++    fn inverse_matches_fermat_and_multiplies_to_one() {
++        let mut checked = 0u64;
++        for (n, a) in [(5, 0), (7, 1), (13, 0), (17, 1), (19, 0), (19, 1), (23, 0), (31, 1)] {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let f = Gf2::new(&kc.curve.irreducible);
++            let mask = (1u64 << n) - 1;
++            let count = if n <= 13 { 1u64 << n } else { 1u64 << 16 };
++            for i in 0..count {
++                let x = if n <= 13 { i } else { (i.wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (i >> 7)) & mask };
++                let inv = f.inv(x);
++                assert_eq!(inv, f.inv_fermat(x), "degree {n}, a={a}, x={x}");
++                if x == 0 {
++                    assert_eq!(inv, 0);
++                } else {
++                    assert_eq!(f.mul(x, inv), 1, "degree {n}, a={a}, x={x}");
++                }
++                checked += 1;
++            }
++        }
++        assert!(checked > 100_000);
++    }
++}

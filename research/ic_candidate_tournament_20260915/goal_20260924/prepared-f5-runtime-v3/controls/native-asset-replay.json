@@ -1,0 +1,42 @@
+{
+  "accepted_worker_merge": "09c200be844bd0bc4546ab2bb0c8d9fb900eedb9",
+  "all_asset_bytes_equal_after_relocation": true,
+  "asset_archive_bytes": 12278251,
+  "asset_archive_sha256": "f28711697074edd65c6b3d37010d7e1986525348836d7b9b291fb5ec999e4400",
+  "asset_manifest_sha256": "5694767f9e789ffa640df2aef4df5c182da2d33a33f646cb724e185faab53e19",
+  "asset_roles": 8,
+  "corrected_worker_source_sha256": "8683bfd2ffebbada30397e5ced9825ee625f85c6838ca56ada6665f6a43c90ca",
+  "fresh_targets_generated": 0,
+  "full_goal_complete": false,
+  "immutable_old_input_gate_rejected": true,
+  "native": {
+    "build_identity": {
+      "build_sha256": "6e35e4b3497310831fd235f8cc0df280f2c3cb812c401a11aa151cdb6fab4ed3",
+      "schema_version": 1,
+      "source_manifest_sha256": "08c759415b2346d0d41c49ce2e958bf0c147a32796d0ac44f907ea7118095b4c",
+      "target_arch": "aarch64",
+      "target_os": "macos"
+    },
+    "build_record_sha256": "02188ab47ee633ae9f496219bebbd838fa87f071daa9561108d0f92b0b2ae3e8",
+    "host_class": "physical-macos-arm64",
+    "platform": {
+      "machine": "arm64",
+      "system": "Darwin"
+    },
+    "scope": "controlled local build and retained sources; no remote attestation or speedup",
+    "source_manifest_sha256": "08c759415b2346d0d41c49ce2e958bf0c147a32796d0ac44f907ea7118095b4c",
+    "worker_sha256": "5d113a46f67c982bfdb6b81dc49aec7203ca990bd5b7574b4c2feec4c5011624"
+  },
+  "native_build_identity_metadata_only": true,
+  "native_solver_executions": 0,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "promotion_eligible": false,
+  "protocol_commit": "43b76b342",
+  "registry_packages": 67,
+  "registry_source_files": 3011,
+  "root_source_files": 533,
+  "schema_version": 1,
+  "source_bound_scientific_runtime_executed": false,
+  "status": "PASS_CORRECTED_NATIVE_ASSET_RELOCATION_AND_ADMISSION"
+}

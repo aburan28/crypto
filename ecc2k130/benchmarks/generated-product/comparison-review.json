@@ -1,0 +1,267 @@
+{
+  "valid": true,
+  "terminalArtifactSha256": "87e658a3cdc685917c6451387735d09166f2a3c497bb611d7f160c6089ce26a4",
+  "artifact": "/private/tmp/packed-generated-cuda133-comparison.json",
+  "auditorSha256": "b057dc339e0a6fff8fa577ba09bc0d411337f070cbae123daa1440600dd3c2fb",
+  "reviewedDependencies": {
+    "/private/tmp/ecc2k-generated-cuda133-gpu.py": "c5de19335aa72a83a01cfe51c484147bd6bc00ee59e4418720c8cac89c27ea6e",
+    "/private/tmp/ecc2k-generated-cuda133-gpu-plan/gates.py": "3e082e0f87dedc92ae50cf680dfbb059924f095ad8c9da938d1e566be0a66e98",
+    "/private/tmp/ecc2k-generated-cuda133-gpu-plan/bindings.json": "d8973efb6cfa24dd2028b65b3e76ad2f33323446c08bf74a51cb68752411ef69",
+    "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/generated-cuda133-gpu-predispatch-review.json": "db32afb7564fbb43e0458eea6556238ac863115228de3f29462bdd4c50913343",
+    "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/generated-cuda133-gpu-launch-readback.json": "ab8d569dab1833da6d58a9bc326b198ea0a2ad8ae35b2fcb803bcddbd7620633"
+  },
+  "sourceFilesByMode": {
+    "control": 103,
+    "candidate": 105
+  },
+  "sourceSha256ByMode": {
+    "control": "8f72fc6c889868bffa260cdca981d17d59e7784f10141802a3f1adef2e6135dd",
+    "candidate": "198082fade1ba0fe0601c3501424df456bee2f22f427e52d084ab74c9adaa717"
+  },
+  "comparisonScope": "Combined generated-baseline arithmetic and CUDA13.3 compiler/linked runtime versus production native CUDA13.0; both execute in the same13.3 environment. This is not an isolated generator speedup.",
+  "modeFlags": {
+    "control": {
+      "BATCH": 32,
+      "THREADS": 256,
+      "MINBLOCKS": 2,
+      "STREAM_KARAT": 0,
+      "SMEM_SPILL": 0,
+      "PACKED_SINGLE_PRODUCT": 1,
+      "PACKED_CACHE_DENOM": 1,
+      "PACKED_BY_VALUE": 1,
+      "PACKED_PERM_SIGMA": 3,
+      "PACKED_POLY_CHAIN": 1,
+      "PACKED_UNROLL_INV": 1,
+      "PACKED_PAIR_PRODUCTS": 1,
+      "PACKED_POLY_STATE": 1,
+      "PACKED_DIRECT_REDUCE": 1
+    },
+    "candidate": {
+      "BATCH": 32,
+      "THREADS": 256,
+      "MINBLOCKS": 2,
+      "STREAM_KARAT": 0,
+      "SMEM_SPILL": 0,
+      "PACKED_SINGLE_PRODUCT": 1,
+      "PACKED_CACHE_DENOM": 1,
+      "PACKED_BY_VALUE": 1,
+      "PACKED_PERM_SIGMA": 3,
+      "PACKED_POLY_CHAIN": 1,
+      "PACKED_UNROLL_INV": 1,
+      "PACKED_PAIR_PRODUCTS": 1,
+      "PACKED_POLY_STATE": 1,
+      "PACKED_DIRECT_REDUCE": 1,
+      "PACKED_COMPOSED_NATIVE": 1
+    }
+  },
+  "binaries": {
+    "control": "c6f412b753972aeb1c96f6722d2d2fa9aa3184fa94b8bb118f283140e3e6065c",
+    "candidate": "b006e373f04c9969dd6e6cb1396b20c14553cd5a7e5e04afb86ee9e13b5c88ec"
+  },
+  "arithmeticBinaries": {
+    "control": "b65995b5365034afac585c42c540805d593e2bc5a55bdd75e6cda80fb9edda63",
+    "candidate": "fc068edc110eb624b1b00a282f5b653f9e4b9354c3e42b2bdd91833ac44b4941"
+  },
+  "toolchains": {
+    "control": "13.0.48",
+    "candidate": "13.3.73"
+  },
+  "gpu": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-a5a7fb41-e066-cb46-4ae8-57cd6fff999f",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-a5a7fb41-e066-cb46-4ae8-57cd6fff999f",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "34"
+    }
+  },
+  "compiledCode": {
+    "control": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 5288,
+          "encodingSha256": "1828f9d2be95739309e052e5077bb64513e354df3c510b088959e9b6c58dd7db",
+          "instructionTextSha256": "4406d2034eea9865ed741312146c531f24cc966b7edbae547acb8261aae72788"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3152,
+          "encodingSha256": "62db78c1a0e9d2b9ea3454010fc3e69fb7f05d4dd8895880ec98970e0bf2215f",
+          "instructionTextSha256": "29a1a86deecc91cc5b3451dbff82170b21038cd0f48c9470bfb2ef02689a68d0"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 128,
+          "stackBytes": 48,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 128,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "cde84f0c21a732f1df2da37155ed5bbfa42e157b0457b7dabbf0c184371deafe",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    },
+    "candidate": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 5816,
+          "encodingSha256": "572825ab1748edb5e9b72f61e04e96c42b56c45a5afc21165a61dacbefe45874",
+          "instructionTextSha256": "8984b8cccb395830a0c2d93cb7b54ff4b141a1db9e561dae0b53f99d21689212"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3464,
+          "encodingSha256": "5b7e26bffe4b3f699149ac12aa2eebb330d430c39e09ffbb4a8e5e2fa58e67da",
+          "instructionTextSha256": "5ed1e327745a88746e155a2a8deba3b925a7a7776740f2c5f51c46e29940b9f5"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 128,
+          "stackBytes": 16,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 128,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "d3c6a5a796b7ccbae736060f373fcb3d86cae0940bfb2f66b569ec0943ab6927",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    }
+  },
+  "layout": {
+    "small": {
+      "totalScalarSlots": 64,
+      "stateOnly": false,
+      "stateHashes": {
+        "whole": "02f544f7fa031933ba63adc1685f6bd10677fa8a04668732e04b94c0c5be774a",
+        "reports1": "7efbbbc6f30ef8a9bc8a58b0349d6de451afd264dab375d71a489da30a03d29a",
+        "reports2": "0a09fba97bd4a645daabea05a3cec05a46c34f3d4702558f28138dd7b126bb4d",
+        "guard": "f9be07631403a376209f8d31b5431a83662e36a557d0e1a2f77d74764e4a6299"
+      },
+      "reports": 256,
+      "sortedCorpusSha256": "c4b5b3b68cc0ffa091e0a8ddc71b5931c1cd534f65f7fd70037711cb6c9d6469"
+    },
+    "fullBlocks": {
+      "totalScalarSlots": 16384,
+      "stateOnly": true,
+      "stateHashes": {
+        "whole": "5efc3170b10391672942889e978155254fc779d1b4672ba9a97deef06fece3c5"
+      },
+      "reports": 0,
+      "sortedCorpusSha256": null
+    }
+  },
+  "exactUpdatesPerTimedSample": 201863462912,
+  "excludedWarmups": [
+    6922.087,
+    6935.286
+  ],
+  "screenRatesM": [
+    6859.268,
+    6920.38,
+    6857.502
+  ],
+  "controlDriftPercent": -0.02574618749405788,
+  "qualificationThresholdM": 6893.564339999999,
+  "qualified": true,
+  "outcome": "qualified screen; paired confirmation and DP34 collection complete",
+  "timedSamples": 17,
+  "confirmationMediansM": {
+    "control": 6860.749,
+    "candidate": 6924.275
+  },
+  "collectionMediansM": {
+    "control": 6764.85,
+    "candidate": 6819.016
+  },
+  "collectionCorpus": {
+    "bytes": 164768,
+    "records": 5149,
+    "sortedSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+  },
+  "errors": 0,
+  "timeouts": 0,
+  "droppedReports": 0,
+  "limits": [
+    "One terminal single-GPU combined source/emitter, compiler and linked-runtime panel; it cannot attribute a timing difference to the generator alone.",
+    "SASS encodings and resources independently recomputed from retained full-client dumps and compared to CPU artifacts; full binary SHA custody is recorded by the frozen build/runtime driver.",
+    "Temporary raw corpus/checkpoint bytes are not retained here; consistency is checked from source-bound gate results, per-run counts and hashes, not an independent rehash of those deleted files.",
+    "Rates are completed-client reported rates; exact scalar counters, synchronized timer source, phase separation and medians are independently checked. Per-sample elapsed timestamps are not present.",
+    "A screen pass alone is not treated as a confirmed speedup; final benchmark and collection medians are reported separately."
+  ],
+  "confirmationMedianChangePercent": 0.9259338885593937,
+  "collectionMedianChangePercent": 0.8006977242658531,
+  "confirmationPairedChangePercent": [
+    0.9091864459696897,
+    0.962503047418406,
+    0.8867952892259501
+  ],
+  "ownerConfirmedTerminal": {
+    "session": 63652,
+    "exitCode": 0,
+    "appId": "ap-7HhSLOlbl8FoxPoqdsgIZW"
+  },
+  "benchmarkRatesM": {
+    "control": [
+      6860.749,
+      6858.264,
+      6864.944
+    ],
+    "candidate": [
+      6923.126,
+      6924.275,
+      6925.822
+    ]
+  },
+  "collectionRatesM": {
+    "control": [
+      6765.436,
+      6764.85,
+      6763.079
+    ],
+    "candidate": [
+      6819.016,
+      6816.272,
+      6820.232
+    ]
+  },
+  "collectionPairedChangePercent": [
+    0.7919666966031524,
+    0.7601351101650389,
+    0.8450736713263352
+  ],
+  "warmupCount": 2,
+  "rankedScreenCount": 3,
+  "confirmationCount": 6,
+  "collectionCount": 6,
+  "totalTimedScalarUpdates": 3431678869504,
+  "confirmationScalarUpdates": 1211180777472,
+  "collectionScalarUpdates": 1211180777472,
+  "allSixCorpusHashesIdentical": true,
+  "allSixCorpusRecords": 5149,
+  "allSixCorpusBytes": 164768,
+  "finalModeBindingsVerified": true,
+  "finalHelperFileHashesVerified": true,
+  "timedReferenceVerification": 0,
+  "referenceCorrectnessGates": "Both arithmetic suites, both full client integration suites,64-slot reports/replay/reseed/guard and16384-slot normalized whole-state comparisons passed before timing.",
+  "decision": "The combined generated-baseline/CUDA13.3 preset shows a repeatable modest improvement in this controlled panel; do not attribute it to the generator alone.",
+  "activeGoalBillionPerSecond": 15,
+  "activeGoalAchieved": false
+}

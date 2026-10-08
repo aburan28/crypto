@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "parent": "../ic_candidate_tournament_20260915/OPERATIONS.md",
+  "baseline": "snapshot of current fixed Python implementation, including local changes",
+  "candidate": "opt-in cost-sensitive tree over prepared pair and SAT-with-pair-fallback policies",
+  "hypothesis": "Cheap query features predict which bounded exact policy obtains independent verified relations with lower elapsed cost.",
+  "scope": "CPU type-II ONB, same fixed base and summand count within each panel; prepared pair table and SAT circuit for routing diagnostics; full cold API invocation measured separately",
+  "arms": {
+    "pairs": {
+      "pairs_fraction": 1.0
+    },
+    "sat-short": {
+      "sat_fraction": 0.1,
+      "pairs_fraction": 0.9
+    },
+    "sat-medium": {
+      "sat_fraction": 0.5,
+      "pairs_fraction": 0.5
+    }
+  },
+  "query_seconds": 0.25,
+  "domain": "only observed curve/base/summand fingerprints and feature ranges; OOD uses pairs",
+  "split": "SHA256 of canonical signed Frobenius orbit, independent of generator and factor base; residues 0..2 train, 3 validation, 4 confirmation",
+  "tree": {
+    "max_depth": 3,
+    "min_leaf": 8,
+    "validation_loss_improvement_gate": 0.05
+  },
+  "training": "natural queries only; require both rank gains and failures; timeouts are unresolved, not unsatisfiable",
+  "cost": "wall ns are diagnostics; common_ops, S, rho and floor ratios null until a full-process Python adapter is calibrated",
+  "performance_admission": "not admitted to Rust CPU instruction tournament; no default promotion or performance claim",
+  "future_performance_gate": {
+    "full_instruction_improvement": 0.2,
+    "paired95_upper_ratio": 1.0,
+    "worst_cell_ratio": 1.1
+  },
+  "validation": "A/A deterministic algebra replay; matched baseline/candidate complete small DLPs, three repetitions, locked fresh holdouts, independent field/group and rank audit; retain failures",
+  "degree131": "parameter/OOD guard check only; no trained yield or completion extrapolation",
+  "falsification": "If held-out loss improves less than 5%, deploy a learned constant policy within the observed domain. No mixed outcomes means reject training."
+}

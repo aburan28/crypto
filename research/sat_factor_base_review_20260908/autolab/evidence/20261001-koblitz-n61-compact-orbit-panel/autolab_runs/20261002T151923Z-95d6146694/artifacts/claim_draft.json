@@ -1,0 +1,134 @@
+{
+  "K": 1000,
+  "autolab_run_id": "20261002T151923Z-95d6146694",
+  "beat_id": "koblitz.compact_orbit.n61_panel",
+  "claim_boundary": "Known-answer shared-log DLP on public synthetic a=0 n=61 fixtures, L=4096 per batch; every recovered log checked as [d]G = Q in-process and by the pure-Python replay.",
+  "claim_boundary_non_claims": [
+    "public synthetic known-answer fixtures only",
+    "no key recovery",
+    "no asymptotic sub-rho claim; both arms scale as sqrt(L*r/n) at optimal K",
+    "multi-target L=4096 batch: diagnostic, not the one-target primary comparison",
+    "comparator is the frozen KS v2 batched rho (koblitz_rho_batch_ks_v2_n61), superseded by strong rho R3 and not listed in measurement_schema.vs_rho.rho_reference_minimum",
+    "same-host replay; independent-host validation still required"
+  ],
+  "executable_or_source_hash": {
+    "git_head": "60fb2ae47fcca9352d8bae2b280fce77371e57f0",
+    "ic_binary_sha256": "7bdc21e169c79f15da396100b48cbaf28be9bc92599709ea6ef95c865e21d273",
+    "koblitz_orbit_dlp_fast.rs_sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "koblitz_rho_batch_ks_v2_n61.rs_sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "rho_binary_sha256": "198b9993c9490b34a9cd8e7d9e2d78b68a478f1123491ec0bb55719adcac7d46",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  },
+  "fixture_hash": {
+    "base_hash": "0e68233f43f894c9c16971703120e1983dc30d38337b4996d119bce0bab40ec0",
+    "disjoint": true,
+    "eval": {
+      "name": "n61-ks-growing-4096-v1",
+      "scalars_sha256": "8e310c4ac975b176dc02de0136dd53bfad787efea37e83aa5fc6c937d55fc8e7",
+      "targets": 4096
+    },
+    "tune": {
+      "name": "n61-ks-growing-tune-4096-v1",
+      "scalars_sha256": "a34efc4a48a570432ce99b453e7d3d7755e6d829a8b4d7cf04bc6dfa43060a41",
+      "targets": 4096
+    }
+  },
+  "host_id": {
+    "cpu": "Apple M4 Pro",
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "independent_replay_pointer": [
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T151923Z-95d6146694/artifacts/replay_ic.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T151923Z-95d6146694/artifacts/replay_rho_b0.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T151923Z-95d6146694/artifacts/replay_rho_b1.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T151923Z-95d6146694/artifacts/replay_rho_b2.json"
+  ],
+  "n_or_bits": {
+    "a": 0,
+    "n": 61,
+    "subgroup_order_bits": 47.21
+  },
+  "recovered_d_verified": {
+    "blocks": 3,
+    "ic_all_verified": true,
+    "ic_replay": {
+      "fail": 0,
+      "pass": 12288,
+      "records": 12288
+    },
+    "ic_replay_all_pass": true,
+    "rho_all_verified": true,
+    "rho_replay": {
+      "fail": 0,
+      "pass": 12288,
+      "records": 12288
+    },
+    "rho_replay_all_pass": true,
+    "same_target_points_all_blocks": true,
+    "scalars_match_corpus": true,
+    "targets_per_block": 4096,
+    "untimed_records_identical_across_blocks": {
+      "ic": true,
+      "rho": true
+    }
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "isolation": "none: unpinned shared host; per-run load, memory and swap recorded",
+    "memory": "no cap; K candidates skipped when the estimated IC RSS exceeded available memory",
+    "threads": 1
+  },
+  "result_class": "multi_target_batch_diagnostic",
+  "schema_version": 2,
+  "seeds": {
+    "batch_seed": 531310,
+    "ic_rank_seed": 7,
+    "rho_env": {
+      "KIC_RHO_DP_BITS": "4"
+    }
+  },
+  "stage": "end_to_end_dlp",
+  "stage_timers": {
+    "b0": {
+      "base_load": 38.049541999999995,
+      "index_build": 24310.795541,
+      "linear_algebra": 2.128667,
+      "normal_basis_and_selftest": 2.837792,
+      "process_total": 52326.567083,
+      "rank_stage": 5335.627542,
+      "setup_total": 24351.683250000002,
+      "target_median": 3.694583,
+      "targets_total": 22636.750125
+    },
+    "b1": {
+      "base_load": 38.479625000000006,
+      "index_build": 26342.912667,
+      "linear_algebra": 2.79575,
+      "normal_basis_and_selftest": 3.135792,
+      "process_total": 55256.275958000006,
+      "rank_stage": 5450.713166,
+      "setup_total": 26384.528416999998,
+      "target_median": 3.8080420000000004,
+      "targets_total": 23417.5225
+    },
+    "b2": {
+      "base_load": 38.345625,
+      "index_build": 24177.971041,
+      "linear_algebra": 2.199542,
+      "normal_basis_and_selftest": 2.773459,
+      "process_total": 53269.834209,
+      "rank_stage": 5466.107166000001,
+      "setup_total": 24219.090375,
+      "target_median": 3.823333,
+      "targets_total": 23581.995042
+    }
+  },
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "targets_per_block": 4096,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "verdict": "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+}

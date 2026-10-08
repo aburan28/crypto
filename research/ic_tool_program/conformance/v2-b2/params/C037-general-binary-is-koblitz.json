@@ -1,0 +1,60 @@
+{
+ "schema_version": 2,
+ "name": "C037: curve A under a change of variables, in the general form",
+ "field": {
+  "kind": "binary",
+  "degree": 31,
+  "modulus": "0x80000009"
+ },
+ "curve": {
+  "form": "general_weierstrass",
+  "a1": "0x7a25a5e4",
+  "a2": "0x60e20109",
+  "a3": "0x2269ebf",
+  "a4": "0x40d38439",
+  "a6": "0x95dce28"
+ },
+ "subgroup": {
+  "order": "1439393",
+  "cofactor": "1492",
+  "generator": {
+   "x": "0x590cf419",
+   "y": "0x4bf5ce6a"
+  }
+ },
+ "target": {
+  "known_log": "999106"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": {
+    "summands": 3,
+    "descent_summands": 2,
+    "collection_window": 16,
+    "collection_aim": true,
+    "solver": "pair_table",
+    "seed": 201,
+    "max_trials": 100000,
+    "collection": {
+     "unit_trials": 16,
+     "units": 1,
+     "max_units": 100000
+    },
+    "factor_base": {
+     "mode": "spec",
+     "spec": {
+      "kind": "subgroup_orbits",
+      "points": 496,
+      "seed": 201
+     }
+    }
+   }
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

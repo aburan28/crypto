@@ -1,0 +1,50 @@
+# Track B's local branches, bundled in stack-20261001.bundle
+# against main at 8b5fdd01972a2d8e004d5e590c186fc5c19bd5d8: IC tool programme: R04's results — the scan's stages priced (a stage diagnostic) (#1158)
+
+## branch tips
+b0-local a11870085b4d25df2c935bbd2efcfdeb78574465 ic B0: refuse what was wrong, with a conformance suite
+b0-port 216dbcd878c89bbb0033d165abec0ddc38965ae1 B0 declared: refuse what is wrong today, with conformance suite v1
+b1-local 4deec0de6cfad0c8f10a3d680768f3e14a165713 ic B1: count a subfield curve's points correctly past one word
+b3-local 65465f6862a7fd2d6ce70de0bd669c5be4380e74 B3 (work in progress): the wide rho charges its operations as ParallelRho does
+b3-int 911b24d7cb7f5572386268f12c88b79a21a2620f ic B3 (work in progress): rho-koblitz on two-word fields, and solve: rho
+b2-int 474659afd304dc0617b478127549e31aa9c01b27 ic B2 (work in progress): prime and extension fields, curve forms, importers, rho-bignum, estimates
+b2b-int 5c93e142483423e237f2fc7ebca77a1783c1ce06 ic B2b (work in progress): kic on curves over a subfield, kic alone, order certificates
+b7a-int 58cada36350b47b0b701027c9297994524aef14b ic B7a (work in progress): test the full table's stored entries
+b3b-int eaa842aaead128958d4aa1b7b83a0349df71aa63 ic B3b (work in progress): the index calculus on two-word binary fields, at F0
+
+## prerequisites: commits on main the bundle builds on
+46ae20143ad256a62bddcbdc0d53786d4e012f5d Merge pull request #937 from aburan28/codex/n131-m10-capacity-attempt-20260929
+c1a2e5f8dda5613bf797c4c38afc8b0b433ea348 Merge pull request #1114 from aburan28/codex/ecc2k130-pdp-difficulty-protocol-20261001
+ec50a79c7ace435250806213a5affe5849ce3ccc Merge pull request #1125: IC tool programme, Track B schema v2 designed, B1 declared
+4527046d4910211f9459ef4a11e526a434f9c50d IC tool programme: B2 declared (prime and extension fields, curve forms, importers, estimates; cases C032–C051) (#1140)
+2d488a8f18a5f27e5643aec02352a8f89d0f9418 IC tool programme: B7a amendment 1, F1 made exact before any run (#1149)
+e787f7659c9668d2fb29965f9a4ea5e3e419afd9 IC tool programme: B7a declared (the F1 sampled level at one-word sizes) (#1148)
+030c877513bf39ad593a706fc59a11b94330f056 IC tool programme: B3b declared (the index calculus on two-word binary fields, at F0) (#1151)
+
+## every commit in the bundle, oldest first
+84df93f8e887f52937bf64cf794a41da887032b5 2026-10-01 IC tool programme R02 declared: the AVX-512 batched addition for wide-tail fields
+76efcd1efcff1dfdd79a883327b686a8aa277d91 2026-10-01 Koblitz AVX-512 batched addition: carry H*t past z^63 for wide-tail fields
+6a62c23c081719fe9421c03ed2949464326c9358 2026-10-01 R02 amendment 1, before any R02 run: five rounds, with a precision rule
+7c356facfed281fa5ea818d661d5cdf1556a578f 2026-10-01 rustfmt the wide-tail kernel and its test
+fe1466c014bdec47ba3bddc8c41c60b3d501d65a 2026-10-01 R02 amendment 2, before any R02 run: callgrind the pipeline, not the pricer
+e84e8f77aac41fcec18d210e24e632bcc2200bd7 2026-10-01 R02 run.py: callgrind ic workflow on three rows, per amendment 2
+a11870085b4d25df2c935bbd2efcfdeb78574465 2026-10-01 ic B0: refuse what was wrong, with a conformance suite
+f3e13564ae5e0b46117e9dc28de07536e8510e06 2026-10-01 ic B0: refuse what was wrong, with a conformance suite
+216dbcd878c89bbb0033d165abec0ddc38965ae1 2026-10-01 B0 declared: refuse what is wrong today, with conformance suite v1
+1eb1aee5a4f6dbfcf211b87c2e601a950644c73b 2026-10-01 ic B1: schema v2, the checks for binary instances, and the Koblitz pipelines on imported instances
+e0881d24c94c13de622adae96dac912f3322f763 2026-10-01 B3 (work in progress): two-word binary fields and the wide signed-Frobenius rho
+65465f6862a7fd2d6ce70de0bd669c5be4380e74 2026-10-01 B3 (work in progress): the wide rho charges its operations as ParallelRho does
+4deec0de6cfad0c8f10a3d680768f3e14a165713 2026-10-01 ic B1: count a subfield curve's points correctly past one word
+2b7306bbeb101e74baf13d04d083d58e4d6eac8f 2026-10-01 B3 (work in progress): two-word binary fields and the wide signed-Frobenius rho
+7ffcacefb00781d81de8f8e7f3a233d45cb8b025 2026-10-01 B3 (work in progress): the wide rho charges its operations as ParallelRho does
+911b24d7cb7f5572386268f12c88b79a21a2620f 2026-10-01 ic B3 (work in progress): rho-koblitz on two-word fields, and solve: rho
+085ebf7a924e05b403253488332e57d8ba9bf8ef 2026-10-01 Merge remote-tracking branch 'origin/main' into b2-int
+474659afd304dc0617b478127549e31aa9c01b27 2026-10-01 ic B2 (work in progress): prime and extension fields, curve forms, importers, rho-bignum, estimates
+5c93e142483423e237f2fc7ebca77a1783c1ce06 2026-10-01 ic B2b (work in progress): kic on curves over a subfield, kic alone, order certificates
+eae4e61f05866fdc1861c3e0d9b1a788070ea666 2026-10-01 Merge remote-tracking branch 'origin/main' into b7a-int
+e224fdab1494df78caa659b315dacaedae130110 2026-10-01 ic B7a (work in progress): the F1 sampled level for kic and every rho
+faeac1c2af1960ff52ba6a0488ba2ddca0f85b33 2026-10-01 ic B7a (work in progress): partial tables for measurement 7
+886712f08af3aa699ac3172befc905c385d3f2a6 2026-10-01 Merge remote-tracking branch 'origin/main' into b7a-int
+58cada36350b47b0b701027c9297994524aef14b 2026-10-01 ic B7a (work in progress): test the full table's stored entries
+b9c0d4f25a2c9b6a4d7780a6f11bc2002e3108f6 2026-10-01 Merge remote-tracking branch 'origin/main' into b3b-int
+eaa842aaead128958d4aa1b7b83a0349df71aa63 2026-10-01 ic B3b (work in progress): the index calculus on two-word binary fields, at F0

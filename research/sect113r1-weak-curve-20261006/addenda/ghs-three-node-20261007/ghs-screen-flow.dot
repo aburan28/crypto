@@ -1,0 +1,70 @@
+digraph sect113r1_ghs_screen {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.25",
+    nodesep="0.35",
+    ranksep="0.45",
+    size="7.2,7.2",
+    ratio="compress",
+    fontname="DejaVu Sans",
+    fontsize=12,
+    label="sect113r1: additive three-node GHS/Hess structural screen (2026-10-07)",
+    labelloc="t"
+  ];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=9, margin="0.14,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=8, color="#49657a", fontcolor="#30475a"];
+
+  source [
+    fillcolor="#e8f2ff",
+    color="#3277b3",
+    label="source (standard name: sect113r1)\nicv1-f2m113-tm122610772499221213-97df4ac6\nEC1N113Csect113r1hf529f17bd191\nUID suffix d9fd94d97"
+  ];
+  endpoint_a [
+    fillcolor="#eef8ee",
+    color="#4a9654",
+    label="degree-5 codomain A\nicv1-f2m113-tm122610772499221213-fd54d0eb\nEC1N113Crbh921ab2cd913f\nUID suffix 4b97616c6"
+  ];
+  endpoint_b [
+    fillcolor="#f3edff",
+    color="#7653a6",
+    label="degree-5 codomain B\nicv1-f2m113-tm122610772499221213-5de3030f\nEC1N113Crbh2ee3581888f2\nUID suffix d19f19386"
+  ];
+
+  { rank=same; endpoint_a; endpoint_b; }
+
+  source -> endpoint_a [
+    dir=both,
+    label="degree 5\nexplicit forward map + dual\nprior same-implementation certificate",
+    color="#4a9654"
+  ];
+  source -> endpoint_b [
+    dir=both,
+    label="degree 5\nexplicit forward map + dual\nprior same-implementation certificate",
+    color="#7653a6"
+  ];
+
+  screen [
+    shape=record,
+    fillcolor="#fff4d6",
+    color="#c98900",
+    label="{Native GHS screen on each node|only tower: F_2 to F_(2^113)|magic number = 113|type I|genus = 2^112 - 1|cover degree = 2^113|genus bound 64: 0 candidates}"
+  ];
+  source -> screen [label="exact structural output", color="#3277b3"];
+  endpoint_a -> screen [label="exact structural output", color="#4a9654"];
+  endpoint_b -> screen [label="exact structural output", color="#7653a6"];
+
+  verdict [
+    fillcolor="#fdeeee",
+    color="#b94a48",
+    label="Bounded result\nNO LOW-GENUS GHS CANDIDATE\nat these three nodes"
+  ];
+  screen -> verdict [label="3/3 identical result tuples", penwidth=1.5];
+
+  obligations [
+    fillcolor="#f3f3f3",
+    color="#777777",
+    label="Still open\nindependent implementation replay\nmore isogeny-class nodes\nexplicit cover and Jacobian map\nsubgroup preservation and recovery\nend-to-end DLP cost"
+  ];
+  verdict -> obligations [style=dashed, label="does not discharge"];
+}

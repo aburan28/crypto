@@ -1,0 +1,2030 @@
+{
+  "continuation_runner_sha256": "f35de5428df64f16c5f7ae0ae7fc87ef92ad590506555612030add3eda21a89f",
+  "interpretation": "Nine of ten preregistered stage-control jobs independently audited as encoder dispatch; n31a0 F4 timed out at 60 seconds, so the all-cells pass gate failed. No job solved a DLP, and no competitive cost or speedup is admitted.",
+  "original_summary_sha256": "ff58ad86bebd13000347c5971f2c29da42374cd4ef1700cee4035be28e3e4a23",
+  "panel_sha256": "48db71af3c5f297b834f2476056201caec8378f96f6da6992d1aa8ecbe523685",
+  "progress_jsonl_sha256": "095c22139b74b18bd35ad441e3dd278903a3b9de42802677a7daecfbdb137d39",
+  "raw_stage_b": {
+    "n19a0": {
+      "f4": {
+        "audits": {
+          "base": {
+            "construction": {
+              "basis": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ],
+              "domain_abscissae": 64,
+              "family": "standard_subspace",
+              "nominal_dimension": 6
+            },
+            "inventory": {
+              "duplicate_nonidentity_images": 0,
+              "effective_columns": 27,
+              "geometric_order_sha256": "1c7d93960e8a7b37576e8e2805cecc4cf39e398109757d269425e50e4f597b5c",
+              "geometric_point_count": 65,
+              "geometric_set_sha256": "ff99680c4f9d8c5dba7354a9642672e7d6effe92a13c8174ff0f5f9fba50cda9",
+              "identity_images": 3,
+              "quotient": "sign-and-Frobenius",
+              "subgroup_map": "cofactor-multiplication",
+              "usable_point_count": 62,
+              "usable_set_sha256": "92d4de1cb734d59acf9d76e40979bd444f6a8c281eaaacd5bd1a17562a5f9c82"
+            },
+            "promotion_eligible": false,
+            "recipe": {
+              "dimension": 6,
+              "kind": "standard_subspace"
+            },
+            "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+            "schema_version": 1,
+            "scope": "independent factor-base construction and census"
+          },
+          "build": {
+            "build_sha256": "33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82",
+            "schema_version": 1,
+            "scope": "controlled local build and retained executable, not remote attestation",
+            "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+            "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+          },
+          "query": {
+            "checker_sha256": {
+              "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+              "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+              "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+            },
+            "collection_law": "sampled",
+            "collection_queries": 1,
+            "descent_law": "sampled",
+            "descent_queries": 0,
+            "job_sha256": "d06cfe18f33555a208ff3b9a51dc3344f93cc512705be37e955c935993ac48b5",
+            "promotion_eligible": false,
+            "query_sha256": "c81709835be8e90cc2109fd64a756afde0af7bb3d3bc1636cd418d7b6ad7ade7",
+            "schema_version": 1,
+            "scope": "query law and group replay only",
+            "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+          },
+          "stages": {
+            "base": {
+              "construction": {
+                "basis": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "domain_abscissae": 64,
+                "family": "standard_subspace",
+                "nominal_dimension": 6
+              },
+              "inventory": {
+                "duplicate_nonidentity_images": 0,
+                "effective_columns": 27,
+                "geometric_order_sha256": "1c7d93960e8a7b37576e8e2805cecc4cf39e398109757d269425e50e4f597b5c",
+                "geometric_point_count": 65,
+                "geometric_set_sha256": "ff99680c4f9d8c5dba7354a9642672e7d6effe92a13c8174ff0f5f9fba50cda9",
+                "identity_images": 3,
+                "quotient": "sign-and-Frobenius",
+                "subgroup_map": "cofactor-multiplication",
+                "usable_point_count": 62,
+                "usable_set_sha256": "92d4de1cb734d59acf9d76e40979bd444f6a8c281eaaacd5bd1a17562a5f9c82"
+              },
+              "promotion_eligible": false,
+              "recipe": {
+                "dimension": 6,
+                "kind": "standard_subspace"
+              },
+              "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+              "schema_version": 1,
+              "scope": "independent factor-base construction and census"
+            },
+            "certificate": null,
+            "dispatch": {
+              "collector": {
+                "collection_window": null,
+                "field_kernel": "pmull",
+                "pair_table": false,
+                "query_rule": "trial-keyed-sample",
+                "strategy": "Groebner"
+              },
+              "descent": null,
+              "frontend_calls": {
+                "groebner": 1
+              }
+            },
+            "matrix": {
+              "accepted_rows": 0,
+              "certified_logs": false,
+              "columns": 27,
+              "duplicate_relations": 0,
+              "matrix_sha256": "e3115f33d4130b37e04035e3aa6fcb22cfa513b961c74fe6d2f3ffde88fc7e56",
+              "rank": 0,
+              "rank_trajectory": [
+                {
+                  "novel_row": false,
+                  "query": 1,
+                  "rank": 0
+                }
+              ],
+              "solve_attempts": 0
+            },
+            "promotion_eligible": false,
+            "query_law": {
+              "checker_sha256": {
+                "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+                "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+                "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+              },
+              "collection_law": "sampled",
+              "collection_queries": 1,
+              "descent_law": "sampled",
+              "descent_queries": 0,
+              "job_sha256": "d06cfe18f33555a208ff3b9a51dc3344f93cc512705be37e955c935993ac48b5",
+              "promotion_eligible": false,
+              "query_sha256": "c81709835be8e90cc2109fd64a756afde0af7bb3d3bc1636cd418d7b6ad7ade7",
+              "schema_version": 1,
+              "scope": "query law and group replay only",
+              "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+            },
+            "schema_version": 1,
+            "scope": "base, query, dispatch, matrix and correctness; build/accounting required separately",
+            "status": "PASS"
+          }
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f4",
+            "summands": 3
+          },
+          "curve_a": 0,
+          "degree": 19,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "514601",
+              "140033"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n19a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 9078160875,
+          "dispatched": false,
+          "disposition": "PROCESS_FAILURE",
+          "exit_code": 2,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 78168064,
+          "solver": "f4"
+        },
+        "result": {
+          "audit_status": "PASS",
+          "cell": "n19a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 9078160875,
+          "dispatched": true,
+          "disposition": "BOUNDED_INCOMPLETE_REPORT",
+          "exit_code": 2,
+          "folded_columns": 27,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "pdp_outcome": "incomplete",
+          "pdp_stats": {
+            "eliminated": 0,
+            "exhausted": true,
+            "infeasible_branches": 1543,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 8739,
+            "reductions": 4096,
+            "splits": 1547,
+            "unsupported": false
+          },
+          "sampled_peak_rss_bytes": 78168064,
+          "solver": "f4",
+          "usable_base_points": 62,
+          "worker_status": "incomplete"
+        },
+        "stderr": "",
+        "stdout_raw": "{\"collection_reports\":[{\"attempts\":[{\"a\":99927,\"b\":0,\"pdp\":{\"outcome\":\"incomplete\",\"points\":null,\"stats\":{\"engine\":{\"MatrixF4\":{\"max_degree\":3}},\"family\":\"groebner\",\"stats\":{\"eliminated\":0,\"exhausted\":true,\"infeasible_branches\":1543,\"max_degree_built\":3,\"oversize\":0,\"propagations\":8739,\"reductions\":4096,\"splits\":1547,\"unsupported\":false}}},\"trial\":0}],\"elapsed_seconds\":8.4520675,\"relations\":0,\"summands_scanned\":0,\"trials\":1}],\"collector_dispatch\":{\"collection_window\":null,\"field_kernel\":\"pmull\",\"pair_table\":false,\"query_rule\":\"trial-keyed-sample\",\"strategy\":\"Groebner\"},\"columns\":27,\"descent_dispatch\":null,\"effective_config\":{\"batch_trials\":1,\"collection_window\":null,\"conflict_budget\":100000,\"factor_base\":null,\"factor_base_cube_root\":false,\"factor_base_orbits\":null,\"groebner_degree\":3,\"linear_algebra\":\"dense\",\"max_trials\":1,\"node_budget\":4096,\"rho_parallel_walks\":32,\"solver\":\"f4\",\"sparse\":{\"attempts\":3,\"filter\":{\"max_row_weight\":32,\"merge_max_weight\":8,\"remove_duplicates\":true,\"remove_singletons\":true,\"target_excess\":32},\"fold\":3,\"seed\":6003370125125045313,\"wiedemann\":{\"block_m\":4,\"block_n\":4,\"margin\":8}},\"summands\":3},\"effective_factor_base\":{\"dimension\":6,\"kind\":\"standard_subspace\"},\"factor_base\":[[\"0\",\"1\"],[\"1\",\"0\"],[\"1\",\"1\"],[\"3\",\"170824\"],[\"3\",\"170827\"],[\"5\",\"503254\"],[\"5\",\"503251\"],[\"6\",\"410868\"],[\"6\",\"410866\"],[\"7\",\"304365\"],[\"7\",\"304362\"],[\"8\",\"441754\"],[\"8\",\"441746\"],[\"11\",\"449018\"],[\"11\",\"449009\"],[\"13\",\"350463\"],[\"13\",\"350450\"],[\"17\",\"72371\"],[\"17\",\"72354\"],[\"20\",\"367119\"],[\"20\",\"367131\"],[\"21\",\"491136\"],[\"21\",\"491157\"],[\"23\",\"330234\"],[\"23\",\"330221\"],[\"26\",\"431850\"],[\"26\",\"431856\"],[\"31\",\"124410\"],[\"31\",\"124389\"],[\"32\",\"76219\"],[\"32\",\"76187\"],[\"34\",\"360603\"],[\"34\",\"360633\"],[\"36\",\"449220\"],[\"36\",\"449248\"],[\"37\",\"65928\"],[\"37\",\"65965\"],[\"38\",\"320828\"],[\"38\",\"320794\"],[\"39\",\"1083\"],[\"39\",\"1052\"],[\"41\",\"313863\"],[\"41\",\"313902\"],[\"43\",\"406764\"],[\"43\",\"406727\"],[\"44\",\"362559\"],[\"44\",\"362515\"],[\"47\",\"38469\"],[\"47\",\"38506\"],[\"48\",\"203765\"],[\"48\",\"203717\"],[\"49\",\"496306\"],[\"49\",\"496259\"],[\"53\",\"79501\"],[\"53\",\"79544\"],[\"55\",\"118544\"],[\"55\",\"118567\"],[\"56\",\"271694\"],[\"56\",\"271734\"],[\"59\",\"186073\"],[\"59\",\"186082\"],[\"62\",\"236998\"],[\"62\",\"237048\"],[\"63\",\"365124\"],[\"63\",\"365179\"]],\"fixture\":{\"cofactor\":\"4\",\"curve_a\":0,\"degree\":19,\"generator\":[\"385982\",\"301867\"],\"group_order\":\"523492\",\"irreducible\":{\"degree\":19,\"low_terms\":[0,1,2,5]},\"lambda\":\"41811\",\"subgroup_order\":\"130873\",\"target_scalar_constructed\":false,\"target_seeds\":[null],\"targets\":[[\"514601\",\"140033\"]]},\"generic_admission_schema\":1,\"generic_build\":{\"build_sha256\":\"33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82\",\"schema_version\":1,\"source_manifest_sha256\":\"c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7\",\"target_arch\":\"aarch64\",\"target_os\":\"macos\"},\"generic_phase_policy\":\"exclusive-owner-thread-v1\",\"generic_phase_timing\":{\"observed_wall_ns\":8453130250,\"online_phases_ns\":{\"recovery_check\":null,\"rho_solve\":null,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"online_wall_ns\":null,\"phases_ns\":{\"factor_base\":112417,\"matrix_build\":null,\"pdp\":8452057625,\"precompute\":381958,\"queries\":10250,\"recovery_check\":null,\"relation_check\":958,\"relation_la\":null,\"rho_solve\":null,\"setup\":567042,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"schema_version\":1},\"generic_runtime_policy\":\"default-environment-one-rayon-v1\",\"log_table_report\":{\"collection_seconds\":9.17e-7,\"columns\":27,\"duplicate_relations\":0,\"linear_algebra_seconds\":0.0,\"rejected_relations\":0,\"relations\":0,\"solve_attempts\":0,\"sparse\":false,\"sparse_report\":null,\"trials\":1,\"verified\":false},\"matrix_batches\":[{\"accepted_rows\":0,\"duplicate_relations\":0,\"queries\":1,\"rejected_relations\":0,\"solve_attempts\":0,\"sparse_report\":null,\"verified\":false}],\"mode\":\"ic\",\"online_timing_schema\":2,\"online_wall_ns\":null,\"outer_online_wall_ns\":null,\"query_schema_version\":1,\"rejected_relations\":0,\"relation_matrix\":{\"column_points\":[[\"696\",\"21728\"],[\"2456\",\"196697\"],[\"6550\",\"288439\"],[\"7362\",\"386178\"],[\"7658\",\"57780\"],[\"9136\",\"333522\"],[\"12134\",\"68686\"],[\"14242\",\"131176\"],[\"14474\",\"185075\"],[\"16272\",\"333232\"],[\"19044\",\"277296\"],[\"19900\",\"365014\"],[\"20312\",\"263003\"],[\"26106\",\"340441\"],[\"26938\",\"363043\"],[\"28554\",\"165395\"],[\"29554\",\"277271\"],[\"31562\",\"376781\"],[\"41534\",\"479521\"],[\"42760\",\"223740\"],[\"43162\",\"85171\"],[\"48964\",\"223052\"],[\"51440\",\"24111\"],[\"52410\",\"481059\"],[\"54210\",\"227872\"],[\"60054\",\"417037\"],[\"133241\",\"385104\"]],\"modulus\":\"130873\",\"rows\":[],\"solver\":\"dense-gauss\",\"sparse_options\":null},\"relations\":[],\"reusable_setup_excluded\":true,\"scalar_replay_included\":false,\"schema_version\":1,\"solve_attempts\":0,\"status\":\"incomplete\",\"summands\":3,\"target_input\":\"supplied_public_point\",\"trials\":1}\n",
+        "stdout_sha256": "35d2dd377dcf4935ad1b08d03e80060e25d297614c288de14c7965f0f5eaa3f9"
+      },
+      "f5": {
+        "audits": {
+          "base": {
+            "construction": {
+              "basis": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ],
+              "domain_abscissae": 64,
+              "family": "standard_subspace",
+              "nominal_dimension": 6
+            },
+            "inventory": {
+              "duplicate_nonidentity_images": 0,
+              "effective_columns": 27,
+              "geometric_order_sha256": "1c7d93960e8a7b37576e8e2805cecc4cf39e398109757d269425e50e4f597b5c",
+              "geometric_point_count": 65,
+              "geometric_set_sha256": "ff99680c4f9d8c5dba7354a9642672e7d6effe92a13c8174ff0f5f9fba50cda9",
+              "identity_images": 3,
+              "quotient": "sign-and-Frobenius",
+              "subgroup_map": "cofactor-multiplication",
+              "usable_point_count": 62,
+              "usable_set_sha256": "92d4de1cb734d59acf9d76e40979bd444f6a8c281eaaacd5bd1a17562a5f9c82"
+            },
+            "promotion_eligible": false,
+            "recipe": {
+              "dimension": 6,
+              "kind": "standard_subspace"
+            },
+            "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+            "schema_version": 1,
+            "scope": "independent factor-base construction and census"
+          },
+          "build": {
+            "build_sha256": "33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82",
+            "schema_version": 1,
+            "scope": "controlled local build and retained executable, not remote attestation",
+            "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+            "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+          },
+          "query": {
+            "checker_sha256": {
+              "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+              "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+              "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+            },
+            "collection_law": "sampled",
+            "collection_queries": 1,
+            "descent_law": "sampled",
+            "descent_queries": 0,
+            "job_sha256": "ecbe1c5b1978e175c73d74bb550e3d6fe73cef9255b17680128c293871ded891",
+            "promotion_eligible": false,
+            "query_sha256": "95d6f0d8a61d02f386acef5b372575e567bcefbe10bf79667dc28f831e547ea7",
+            "schema_version": 1,
+            "scope": "query law and group replay only",
+            "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+          },
+          "stages": {
+            "base": {
+              "construction": {
+                "basis": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "domain_abscissae": 64,
+                "family": "standard_subspace",
+                "nominal_dimension": 6
+              },
+              "inventory": {
+                "duplicate_nonidentity_images": 0,
+                "effective_columns": 27,
+                "geometric_order_sha256": "1c7d93960e8a7b37576e8e2805cecc4cf39e398109757d269425e50e4f597b5c",
+                "geometric_point_count": 65,
+                "geometric_set_sha256": "ff99680c4f9d8c5dba7354a9642672e7d6effe92a13c8174ff0f5f9fba50cda9",
+                "identity_images": 3,
+                "quotient": "sign-and-Frobenius",
+                "subgroup_map": "cofactor-multiplication",
+                "usable_point_count": 62,
+                "usable_set_sha256": "92d4de1cb734d59acf9d76e40979bd444f6a8c281eaaacd5bd1a17562a5f9c82"
+              },
+              "promotion_eligible": false,
+              "recipe": {
+                "dimension": 6,
+                "kind": "standard_subspace"
+              },
+              "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+              "schema_version": 1,
+              "scope": "independent factor-base construction and census"
+            },
+            "certificate": null,
+            "dispatch": {
+              "collector": {
+                "collection_window": null,
+                "field_kernel": "pmull",
+                "pair_table": false,
+                "query_rule": "trial-keyed-sample",
+                "strategy": "Groebner"
+              },
+              "descent": null,
+              "frontend_calls": {
+                "groebner": 1
+              }
+            },
+            "matrix": {
+              "accepted_rows": 0,
+              "certified_logs": false,
+              "columns": 27,
+              "duplicate_relations": 0,
+              "matrix_sha256": "e3115f33d4130b37e04035e3aa6fcb22cfa513b961c74fe6d2f3ffde88fc7e56",
+              "rank": 0,
+              "rank_trajectory": [
+                {
+                  "novel_row": false,
+                  "query": 1,
+                  "rank": 0
+                }
+              ],
+              "solve_attempts": 0
+            },
+            "promotion_eligible": false,
+            "query_law": {
+              "checker_sha256": {
+                "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+                "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+                "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+              },
+              "collection_law": "sampled",
+              "collection_queries": 1,
+              "descent_law": "sampled",
+              "descent_queries": 0,
+              "job_sha256": "ecbe1c5b1978e175c73d74bb550e3d6fe73cef9255b17680128c293871ded891",
+              "promotion_eligible": false,
+              "query_sha256": "95d6f0d8a61d02f386acef5b372575e567bcefbe10bf79667dc28f831e547ea7",
+              "schema_version": 1,
+              "scope": "query law and group replay only",
+              "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+            },
+            "schema_version": 1,
+            "scope": "base, query, dispatch, matrix and correctness; build/accounting required separately",
+            "status": "PASS"
+          }
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f5",
+            "summands": 3
+          },
+          "curve_a": 0,
+          "degree": 19,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "514601",
+              "140033"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n19a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 4815505458,
+          "dispatched": false,
+          "disposition": "PROCESS_FAILURE",
+          "exit_code": 2,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 56049664,
+          "solver": "f5"
+        },
+        "result": {
+          "audit_status": "PASS",
+          "cell": "n19a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 4815505458,
+          "dispatched": true,
+          "disposition": "BOUNDED_INCOMPLETE_REPORT",
+          "exit_code": 2,
+          "folded_columns": 27,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "pdp_outcome": "incomplete",
+          "pdp_stats": {
+            "eliminated": 0,
+            "exhausted": true,
+            "infeasible_branches": 1543,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 8739,
+            "reductions": 4096,
+            "splits": 1547,
+            "unsupported": false
+          },
+          "sampled_peak_rss_bytes": 56049664,
+          "solver": "f5",
+          "usable_base_points": 62,
+          "worker_status": "incomplete"
+        },
+        "stderr": "",
+        "stdout_raw": "{\"collection_reports\":[{\"attempts\":[{\"a\":99927,\"b\":0,\"pdp\":{\"outcome\":\"incomplete\",\"points\":null,\"stats\":{\"engine\":{\"MatrixF5\":{\"max_degree\":3}},\"family\":\"groebner\",\"stats\":{\"eliminated\":0,\"exhausted\":true,\"infeasible_branches\":1543,\"max_degree_built\":3,\"oversize\":0,\"propagations\":8739,\"reductions\":4096,\"splits\":1547,\"unsupported\":false}}},\"trial\":0}],\"elapsed_seconds\":4.742752959,\"relations\":0,\"summands_scanned\":0,\"trials\":1}],\"collector_dispatch\":{\"collection_window\":null,\"field_kernel\":\"pmull\",\"pair_table\":false,\"query_rule\":\"trial-keyed-sample\",\"strategy\":\"Groebner\"},\"columns\":27,\"descent_dispatch\":null,\"effective_config\":{\"batch_trials\":1,\"collection_window\":null,\"conflict_budget\":100000,\"factor_base\":null,\"factor_base_cube_root\":false,\"factor_base_orbits\":null,\"groebner_degree\":3,\"linear_algebra\":\"dense\",\"max_trials\":1,\"node_budget\":4096,\"rho_parallel_walks\":32,\"solver\":\"f5\",\"sparse\":{\"attempts\":3,\"filter\":{\"max_row_weight\":32,\"merge_max_weight\":8,\"remove_duplicates\":true,\"remove_singletons\":true,\"target_excess\":32},\"fold\":3,\"seed\":6003370125125045313,\"wiedemann\":{\"block_m\":4,\"block_n\":4,\"margin\":8}},\"summands\":3},\"effective_factor_base\":{\"dimension\":6,\"kind\":\"standard_subspace\"},\"factor_base\":[[\"0\",\"1\"],[\"1\",\"0\"],[\"1\",\"1\"],[\"3\",\"170824\"],[\"3\",\"170827\"],[\"5\",\"503254\"],[\"5\",\"503251\"],[\"6\",\"410868\"],[\"6\",\"410866\"],[\"7\",\"304365\"],[\"7\",\"304362\"],[\"8\",\"441754\"],[\"8\",\"441746\"],[\"11\",\"449018\"],[\"11\",\"449009\"],[\"13\",\"350463\"],[\"13\",\"350450\"],[\"17\",\"72371\"],[\"17\",\"72354\"],[\"20\",\"367119\"],[\"20\",\"367131\"],[\"21\",\"491136\"],[\"21\",\"491157\"],[\"23\",\"330234\"],[\"23\",\"330221\"],[\"26\",\"431850\"],[\"26\",\"431856\"],[\"31\",\"124410\"],[\"31\",\"124389\"],[\"32\",\"76219\"],[\"32\",\"76187\"],[\"34\",\"360603\"],[\"34\",\"360633\"],[\"36\",\"449220\"],[\"36\",\"449248\"],[\"37\",\"65928\"],[\"37\",\"65965\"],[\"38\",\"320828\"],[\"38\",\"320794\"],[\"39\",\"1083\"],[\"39\",\"1052\"],[\"41\",\"313863\"],[\"41\",\"313902\"],[\"43\",\"406764\"],[\"43\",\"406727\"],[\"44\",\"362559\"],[\"44\",\"362515\"],[\"47\",\"38469\"],[\"47\",\"38506\"],[\"48\",\"203765\"],[\"48\",\"203717\"],[\"49\",\"496306\"],[\"49\",\"496259\"],[\"53\",\"79501\"],[\"53\",\"79544\"],[\"55\",\"118544\"],[\"55\",\"118567\"],[\"56\",\"271694\"],[\"56\",\"271734\"],[\"59\",\"186073\"],[\"59\",\"186082\"],[\"62\",\"236998\"],[\"62\",\"237048\"],[\"63\",\"365124\"],[\"63\",\"365179\"]],\"fixture\":{\"cofactor\":\"4\",\"curve_a\":0,\"degree\":19,\"generator\":[\"385982\",\"301867\"],\"group_order\":\"523492\",\"irreducible\":{\"degree\":19,\"low_terms\":[0,1,2,5]},\"lambda\":\"41811\",\"subgroup_order\":\"130873\",\"target_scalar_constructed\":false,\"target_seeds\":[null],\"targets\":[[\"514601\",\"140033\"]]},\"generic_admission_schema\":1,\"generic_build\":{\"build_sha256\":\"33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82\",\"schema_version\":1,\"source_manifest_sha256\":\"c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7\",\"target_arch\":\"aarch64\",\"target_os\":\"macos\"},\"generic_phase_policy\":\"exclusive-owner-thread-v1\",\"generic_phase_timing\":{\"observed_wall_ns\":4743336750,\"online_phases_ns\":{\"recovery_check\":null,\"rho_solve\":null,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"online_wall_ns\":null,\"phases_ns\":{\"factor_base\":56666,\"matrix_build\":null,\"pdp\":4742749083,\"precompute\":261375,\"queries\":4250,\"recovery_check\":null,\"relation_check\":917,\"relation_la\":null,\"rho_solve\":null,\"setup\":264459,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"schema_version\":1},\"generic_runtime_policy\":\"default-environment-one-rayon-v1\",\"log_table_report\":{\"collection_seconds\":6.66e-7,\"columns\":27,\"duplicate_relations\":0,\"linear_algebra_seconds\":0.0,\"rejected_relations\":0,\"relations\":0,\"solve_attempts\":0,\"sparse\":false,\"sparse_report\":null,\"trials\":1,\"verified\":false},\"matrix_batches\":[{\"accepted_rows\":0,\"duplicate_relations\":0,\"queries\":1,\"rejected_relations\":0,\"solve_attempts\":0,\"sparse_report\":null,\"verified\":false}],\"mode\":\"ic\",\"online_timing_schema\":2,\"online_wall_ns\":null,\"outer_online_wall_ns\":null,\"query_schema_version\":1,\"rejected_relations\":0,\"relation_matrix\":{\"column_points\":[[\"696\",\"21728\"],[\"2456\",\"196697\"],[\"6550\",\"288439\"],[\"7362\",\"386178\"],[\"7658\",\"57780\"],[\"9136\",\"333522\"],[\"12134\",\"68686\"],[\"14242\",\"131176\"],[\"14474\",\"185075\"],[\"16272\",\"333232\"],[\"19044\",\"277296\"],[\"19900\",\"365014\"],[\"20312\",\"263003\"],[\"26106\",\"340441\"],[\"26938\",\"363043\"],[\"28554\",\"165395\"],[\"29554\",\"277271\"],[\"31562\",\"376781\"],[\"41534\",\"479521\"],[\"42760\",\"223740\"],[\"43162\",\"85171\"],[\"48964\",\"223052\"],[\"51440\",\"24111\"],[\"52410\",\"481059\"],[\"54210\",\"227872\"],[\"60054\",\"417037\"],[\"133241\",\"385104\"]],\"modulus\":\"130873\",\"rows\":[],\"solver\":\"dense-gauss\",\"sparse_options\":null},\"relations\":[],\"reusable_setup_excluded\":true,\"scalar_replay_included\":false,\"schema_version\":1,\"solve_attempts\":0,\"status\":\"incomplete\",\"summands\":3,\"target_input\":\"supplied_public_point\",\"trials\":1}\n",
+        "stdout_sha256": "7d38ae59bf487a4edce3786113d85d60a0fb1071fcccbb1746b57b6584b1a7ea"
+      }
+    },
+    "n23a0": {
+      "f4": {
+        "audits": {
+          "base": {
+            "construction": {
+              "basis": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ],
+              "domain_abscissae": 64,
+              "family": "standard_subspace",
+              "nominal_dimension": 6
+            },
+            "inventory": {
+              "duplicate_nonidentity_images": 0,
+              "effective_columns": 33,
+              "geometric_order_sha256": "f508cf35a843f32c82a907189aac1d8028e7dba78d63ea86d10d38b97a0ad3a0",
+              "geometric_point_count": 75,
+              "geometric_set_sha256": "3e701c2bf693fc787cb31a44b43b34c499bc58bdba213415463d097c6dbc294f",
+              "identity_images": 3,
+              "quotient": "sign-and-Frobenius",
+              "subgroup_map": "cofactor-multiplication",
+              "usable_point_count": 72,
+              "usable_set_sha256": "e0b5d96a3c5024a6864d05a3396f5004fefaaa11325b17a9fc27d503a3da142c"
+            },
+            "promotion_eligible": false,
+            "recipe": {
+              "dimension": 6,
+              "kind": "standard_subspace"
+            },
+            "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+            "schema_version": 1,
+            "scope": "independent factor-base construction and census"
+          },
+          "build": {
+            "build_sha256": "33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82",
+            "schema_version": 1,
+            "scope": "controlled local build and retained executable, not remote attestation",
+            "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+            "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+          },
+          "query": {
+            "checker_sha256": {
+              "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+              "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+              "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+            },
+            "collection_law": "sampled",
+            "collection_queries": 1,
+            "descent_law": "sampled",
+            "descent_queries": 0,
+            "job_sha256": "53e3b1930f3e6555217bfc9fd9d729c3e1039bf1d2af7a83bdeaa0cac11a3e9d",
+            "promotion_eligible": false,
+            "query_sha256": "87e4233cb214f290dce71cffc0465fb9d704ddb9447265feec879172c8bf977e",
+            "schema_version": 1,
+            "scope": "query law and group replay only",
+            "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+          },
+          "stages": {
+            "base": {
+              "construction": {
+                "basis": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "domain_abscissae": 64,
+                "family": "standard_subspace",
+                "nominal_dimension": 6
+              },
+              "inventory": {
+                "duplicate_nonidentity_images": 0,
+                "effective_columns": 33,
+                "geometric_order_sha256": "f508cf35a843f32c82a907189aac1d8028e7dba78d63ea86d10d38b97a0ad3a0",
+                "geometric_point_count": 75,
+                "geometric_set_sha256": "3e701c2bf693fc787cb31a44b43b34c499bc58bdba213415463d097c6dbc294f",
+                "identity_images": 3,
+                "quotient": "sign-and-Frobenius",
+                "subgroup_map": "cofactor-multiplication",
+                "usable_point_count": 72,
+                "usable_set_sha256": "e0b5d96a3c5024a6864d05a3396f5004fefaaa11325b17a9fc27d503a3da142c"
+              },
+              "promotion_eligible": false,
+              "recipe": {
+                "dimension": 6,
+                "kind": "standard_subspace"
+              },
+              "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+              "schema_version": 1,
+              "scope": "independent factor-base construction and census"
+            },
+            "certificate": null,
+            "dispatch": {
+              "collector": {
+                "collection_window": null,
+                "field_kernel": "pmull",
+                "pair_table": false,
+                "query_rule": "trial-keyed-sample",
+                "strategy": "Groebner"
+              },
+              "descent": null,
+              "frontend_calls": {
+                "groebner": 1
+              }
+            },
+            "matrix": {
+              "accepted_rows": 0,
+              "certified_logs": false,
+              "columns": 33,
+              "duplicate_relations": 0,
+              "matrix_sha256": "b63cdea4c0edc4826d6b6771d64b946c82f80e9ab037583df21cca1365e021a3",
+              "rank": 0,
+              "rank_trajectory": [
+                {
+                  "novel_row": false,
+                  "query": 1,
+                  "rank": 0
+                }
+              ],
+              "solve_attempts": 0
+            },
+            "promotion_eligible": false,
+            "query_law": {
+              "checker_sha256": {
+                "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+                "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+                "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+              },
+              "collection_law": "sampled",
+              "collection_queries": 1,
+              "descent_law": "sampled",
+              "descent_queries": 0,
+              "job_sha256": "53e3b1930f3e6555217bfc9fd9d729c3e1039bf1d2af7a83bdeaa0cac11a3e9d",
+              "promotion_eligible": false,
+              "query_sha256": "87e4233cb214f290dce71cffc0465fb9d704ddb9447265feec879172c8bf977e",
+              "schema_version": 1,
+              "scope": "query law and group replay only",
+              "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+            },
+            "schema_version": 1,
+            "scope": "base, query, dispatch, matrix and correctness; build/accounting required separately",
+            "status": "PASS"
+          }
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f4",
+            "summands": 3
+          },
+          "curve_a": 0,
+          "degree": 23,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "6139688",
+              "3569793"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n23a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 15407766208,
+          "dispatched": false,
+          "disposition": "PROCESS_FAILURE",
+          "exit_code": 2,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 103661568,
+          "solver": "f4"
+        },
+        "result": {
+          "audit_status": "PASS",
+          "cell": "n23a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 15407766208,
+          "dispatched": true,
+          "disposition": "BOUNDED_INCOMPLETE_REPORT",
+          "exit_code": 2,
+          "folded_columns": 33,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "pdp_outcome": "incomplete",
+          "pdp_stats": {
+            "eliminated": 0,
+            "exhausted": true,
+            "infeasible_branches": 1522,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 10345,
+            "reductions": 4096,
+            "splits": 1531,
+            "unsupported": false
+          },
+          "sampled_peak_rss_bytes": 103661568,
+          "solver": "f4",
+          "usable_base_points": 72,
+          "worker_status": "incomplete"
+        },
+        "stderr": "",
+        "stdout_raw": "{\"collection_reports\":[{\"attempts\":[{\"a\":1600269,\"b\":0,\"pdp\":{\"outcome\":\"incomplete\",\"points\":null,\"stats\":{\"engine\":{\"MatrixF4\":{\"max_degree\":3}},\"family\":\"groebner\",\"stats\":{\"eliminated\":0,\"exhausted\":true,\"infeasible_branches\":1522,\"max_degree_built\":3,\"oversize\":0,\"propagations\":10345,\"reductions\":4096,\"splits\":1531,\"unsupported\":false}}},\"trial\":0}],\"elapsed_seconds\":15.355922208,\"relations\":0,\"summands_scanned\":0,\"trials\":1}],\"collector_dispatch\":{\"collection_window\":null,\"field_kernel\":\"pmull\",\"pair_table\":false,\"query_rule\":\"trial-keyed-sample\",\"strategy\":\"Groebner\"},\"columns\":33,\"descent_dispatch\":null,\"effective_config\":{\"batch_trials\":1,\"collection_window\":null,\"conflict_budget\":100000,\"factor_base\":null,\"factor_base_cube_root\":false,\"factor_base_orbits\":null,\"groebner_degree\":3,\"linear_algebra\":\"dense\",\"max_trials\":1,\"node_budget\":4096,\"rho_parallel_walks\":32,\"solver\":\"f4\",\"sparse\":{\"attempts\":3,\"filter\":{\"max_row_weight\":32,\"merge_max_weight\":8,\"remove_duplicates\":true,\"remove_singletons\":true,\"target_excess\":32},\"fold\":3,\"seed\":6003370125125045313,\"wiedemann\":{\"block_m\":4,\"block_n\":4,\"margin\":8}},\"summands\":3},\"effective_factor_base\":{\"dimension\":6,\"kind\":\"standard_subspace\"},\"factor_base\":[[\"0\",\"1\"],[\"1\",\"0\"],[\"1\",\"1\"],[\"2\",\"8246208\"],[\"2\",\"8246210\"],[\"4\",\"8103848\"],[\"4\",\"8103852\"],[\"6\",\"3848760\"],[\"6\",\"3848766\"],[\"8\",\"3263024\"],[\"8\",\"3263032\"],[\"10\",\"2326205\"],[\"10\",\"2326199\"],[\"12\",\"4775769\"],[\"12\",\"4775765\"],[\"13\",\"3540316\"],[\"13\",\"3540305\"],[\"14\",\"5276429\"],[\"14\",\"5276419\"],[\"15\",\"7243940\"],[\"15\",\"7243947\"],[\"16\",\"7249538\"],[\"16\",\"7249554\"],[\"18\",\"1718960\"],[\"18\",\"1718946\"],[\"20\",\"2071752\"],[\"20\",\"2071772\"],[\"22\",\"5557402\"],[\"22\",\"5557388\"],[\"23\",\"6407566\"],[\"23\",\"6407577\"],[\"24\",\"2189171\"],[\"24\",\"2189163\"],[\"25\",\"4434749\"],[\"25\",\"4434724\"],[\"28\",\"1531664\"],[\"28\",\"1531660\"],[\"29\",\"2624552\"],[\"29\",\"2624565\"],[\"31\",\"7888464\"],[\"31\",\"7888463\"],[\"33\",\"1604477\"],[\"33\",\"1604444\"],[\"36\",\"1232245\"],[\"36\",\"1232209\"],[\"37\",\"1772411\"],[\"37\",\"1772382\"],[\"38\",\"1310223\"],[\"38\",\"1310249\"],[\"39\",\"6135691\"],[\"39\",\"6135724\"],[\"40\",\"876416\"],[\"40\",\"876456\"],[\"41\",\"8219487\"],[\"41\",\"8219510\"],[\"42\",\"996992\"],[\"42\",\"997034\"],[\"45\",\"5685847\"],[\"45\",\"5685882\"],[\"46\",\"1373091\"],[\"46\",\"1373069\"],[\"47\",\"2991008\"],[\"47\",\"2990991\"],[\"48\",\"5576454\"],[\"48\",\"5576502\"],[\"51\",\"2248737\"],[\"51\",\"2248722\"],[\"53\",\"2443667\"],[\"53\",\"2443686\"],[\"54\",\"5935083\"],[\"54\",\"5935069\"],[\"56\",\"579600\"],[\"56\",\"579624\"],[\"59\",\"6830917\"],[\"59\",\"6830974\"]],\"fixture\":{\"cofactor\":\"4\",\"curve_a\":0,\"degree\":23,\"generator\":[\"7502454\",\"6195881\"],\"group_order\":\"8383412\",\"irreducible\":{\"degree\":23,\"low_terms\":[0,5]},\"lambda\":\"93194\",\"subgroup_order\":\"2095853\",\"target_scalar_constructed\":false,\"target_seeds\":[null],\"targets\":[[\"6139688\",\"3569793\"]]},\"generic_admission_schema\":1,\"generic_build\":{\"build_sha256\":\"33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82\",\"schema_version\":1,\"source_manifest_sha256\":\"c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7\",\"target_arch\":\"aarch64\",\"target_os\":\"macos\"},\"generic_phase_policy\":\"exclusive-owner-thread-v1\",\"generic_phase_timing\":{\"observed_wall_ns\":15356626542,\"online_phases_ns\":{\"recovery_check\":null,\"rho_solve\":null,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"online_wall_ns\":null,\"phases_ns\":{\"factor_base\":63209,\"matrix_build\":null,\"pdp\":15355918208,\"precompute\":325500,\"queries\":4375,\"recovery_check\":null,\"relation_check\":1042,\"relation_la\":null,\"rho_solve\":null,\"setup\":314208,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"schema_version\":1},\"generic_runtime_policy\":\"default-environment-one-rayon-v1\",\"log_table_report\":{\"collection_seconds\":1e-6,\"columns\":33,\"duplicate_relations\":0,\"linear_algebra_seconds\":0.0,\"rejected_relations\":0,\"relations\":0,\"solve_attempts\":0,\"sparse\":false,\"sparse_report\":null,\"trials\":1,\"verified\":false},\"matrix_batches\":[{\"accepted_rows\":0,\"duplicate_relations\":0,\"queries\":1,\"rejected_relations\":0,\"solve_attempts\":0,\"sparse_report\":null,\"verified\":false}],\"mode\":\"ic\",\"online_timing_schema\":2,\"online_wall_ns\":null,\"outer_online_wall_ns\":null,\"query_schema_version\":1,\"rejected_relations\":0,\"relation_matrix\":{\"column_points\":[[\"4474\",\"5006600\"],[\"6132\",\"7294867\"],[\"8322\",\"3987138\"],[\"53816\",\"3495852\"],[\"53886\",\"3235548\"],[\"79108\",\"6961893\"],[\"81336\",\"4599721\"],[\"89050\",\"2006618\"],[\"123608\",\"438763\"],[\"149726\",\"5110491\"],[\"169800\",\"5584991\"],[\"199734\",\"3976712\"],[\"239220\",\"8159355\"],[\"241598\",\"4746904\"],[\"247046\",\"2473489\"],[\"300048\",\"216809\"],[\"359536\",\"8002864\"],[\"371432\",\"3777652\"],[\"372636\",\"5914427\"],[\"383142\",\"4264390\"],[\"425966\",\"3834021\"],[\"427066\",\"50008\"],[\"456404\",\"5263681\"],[\"487056\",\"581901\"],[\"527812\",\"5467136\"],[\"529218\",\"7851889\"],[\"544188\",\"1277153\"],[\"562142\",\"7362025\"],[\"881284\",\"1500186\"],[\"885580\",\"2253937\"],[\"895562\",\"7386348\"],[\"1003800\",\"1561300\"],[\"2416524\",\"6244724\"]],\"modulus\":\"2095853\",\"rows\":[],\"solver\":\"dense-gauss\",\"sparse_options\":null},\"relations\":[],\"reusable_setup_excluded\":true,\"scalar_replay_included\":false,\"schema_version\":1,\"solve_attempts\":0,\"status\":\"incomplete\",\"summands\":3,\"target_input\":\"supplied_public_point\",\"trials\":1}\n",
+        "stdout_sha256": "bd215838b36d757529f621f962a8cf816e113e66ca5d34158133bef109883845"
+      },
+      "f5": {
+        "audits": {
+          "base": {
+            "construction": {
+              "basis": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ],
+              "domain_abscissae": 64,
+              "family": "standard_subspace",
+              "nominal_dimension": 6
+            },
+            "inventory": {
+              "duplicate_nonidentity_images": 0,
+              "effective_columns": 33,
+              "geometric_order_sha256": "f508cf35a843f32c82a907189aac1d8028e7dba78d63ea86d10d38b97a0ad3a0",
+              "geometric_point_count": 75,
+              "geometric_set_sha256": "3e701c2bf693fc787cb31a44b43b34c499bc58bdba213415463d097c6dbc294f",
+              "identity_images": 3,
+              "quotient": "sign-and-Frobenius",
+              "subgroup_map": "cofactor-multiplication",
+              "usable_point_count": 72,
+              "usable_set_sha256": "e0b5d96a3c5024a6864d05a3396f5004fefaaa11325b17a9fc27d503a3da142c"
+            },
+            "promotion_eligible": false,
+            "recipe": {
+              "dimension": 6,
+              "kind": "standard_subspace"
+            },
+            "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+            "schema_version": 1,
+            "scope": "independent factor-base construction and census"
+          },
+          "build": {
+            "build_sha256": "33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82",
+            "schema_version": 1,
+            "scope": "controlled local build and retained executable, not remote attestation",
+            "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+            "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+          },
+          "query": {
+            "checker_sha256": {
+              "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+              "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+              "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+            },
+            "collection_law": "sampled",
+            "collection_queries": 1,
+            "descent_law": "sampled",
+            "descent_queries": 0,
+            "job_sha256": "85b7b04fa59b5bcf3ac49c603038ce879b21be199f251f26dae2b88c4be2a489",
+            "promotion_eligible": false,
+            "query_sha256": "65e7eacdaf5972eb22bb2f9775aa347558474a8fa41b7c45d0d5cb676f887fd2",
+            "schema_version": 1,
+            "scope": "query law and group replay only",
+            "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+          },
+          "stages": {
+            "base": {
+              "construction": {
+                "basis": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "domain_abscissae": 64,
+                "family": "standard_subspace",
+                "nominal_dimension": 6
+              },
+              "inventory": {
+                "duplicate_nonidentity_images": 0,
+                "effective_columns": 33,
+                "geometric_order_sha256": "f508cf35a843f32c82a907189aac1d8028e7dba78d63ea86d10d38b97a0ad3a0",
+                "geometric_point_count": 75,
+                "geometric_set_sha256": "3e701c2bf693fc787cb31a44b43b34c499bc58bdba213415463d097c6dbc294f",
+                "identity_images": 3,
+                "quotient": "sign-and-Frobenius",
+                "subgroup_map": "cofactor-multiplication",
+                "usable_point_count": 72,
+                "usable_set_sha256": "e0b5d96a3c5024a6864d05a3396f5004fefaaa11325b17a9fc27d503a3da142c"
+              },
+              "promotion_eligible": false,
+              "recipe": {
+                "dimension": 6,
+                "kind": "standard_subspace"
+              },
+              "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+              "schema_version": 1,
+              "scope": "independent factor-base construction and census"
+            },
+            "certificate": null,
+            "dispatch": {
+              "collector": {
+                "collection_window": null,
+                "field_kernel": "pmull",
+                "pair_table": false,
+                "query_rule": "trial-keyed-sample",
+                "strategy": "Groebner"
+              },
+              "descent": null,
+              "frontend_calls": {
+                "groebner": 1
+              }
+            },
+            "matrix": {
+              "accepted_rows": 0,
+              "certified_logs": false,
+              "columns": 33,
+              "duplicate_relations": 0,
+              "matrix_sha256": "b63cdea4c0edc4826d6b6771d64b946c82f80e9ab037583df21cca1365e021a3",
+              "rank": 0,
+              "rank_trajectory": [
+                {
+                  "novel_row": false,
+                  "query": 1,
+                  "rank": 0
+                }
+              ],
+              "solve_attempts": 0
+            },
+            "promotion_eligible": false,
+            "query_law": {
+              "checker_sha256": {
+                "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+                "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+                "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+              },
+              "collection_law": "sampled",
+              "collection_queries": 1,
+              "descent_law": "sampled",
+              "descent_queries": 0,
+              "job_sha256": "85b7b04fa59b5bcf3ac49c603038ce879b21be199f251f26dae2b88c4be2a489",
+              "promotion_eligible": false,
+              "query_sha256": "65e7eacdaf5972eb22bb2f9775aa347558474a8fa41b7c45d0d5cb676f887fd2",
+              "schema_version": 1,
+              "scope": "query law and group replay only",
+              "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+            },
+            "schema_version": 1,
+            "scope": "base, query, dispatch, matrix and correctness; build/accounting required separately",
+            "status": "PASS"
+          }
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f5",
+            "summands": 3
+          },
+          "curve_a": 0,
+          "degree": 23,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "6139688",
+              "3569793"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n23a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 8034395292,
+          "dispatched": false,
+          "disposition": "PROCESS_FAILURE",
+          "exit_code": 2,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 71794688,
+          "solver": "f5"
+        },
+        "result": {
+          "audit_status": "PASS",
+          "cell": "n23a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 8034395292,
+          "dispatched": true,
+          "disposition": "BOUNDED_INCOMPLETE_REPORT",
+          "exit_code": 2,
+          "folded_columns": 33,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "pdp_outcome": "incomplete",
+          "pdp_stats": {
+            "eliminated": 0,
+            "exhausted": true,
+            "infeasible_branches": 1522,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 10345,
+            "reductions": 4096,
+            "splits": 1531,
+            "unsupported": false
+          },
+          "sampled_peak_rss_bytes": 71794688,
+          "solver": "f5",
+          "usable_base_points": 72,
+          "worker_status": "incomplete"
+        },
+        "stderr": "",
+        "stdout_raw": "{\"collection_reports\":[{\"attempts\":[{\"a\":1600269,\"b\":0,\"pdp\":{\"outcome\":\"incomplete\",\"points\":null,\"stats\":{\"engine\":{\"MatrixF5\":{\"max_degree\":3}},\"family\":\"groebner\",\"stats\":{\"eliminated\":0,\"exhausted\":true,\"infeasible_branches\":1522,\"max_degree_built\":3,\"oversize\":0,\"propagations\":10345,\"reductions\":4096,\"splits\":1531,\"unsupported\":false}}},\"trial\":0}],\"elapsed_seconds\":7.984153,\"relations\":0,\"summands_scanned\":0,\"trials\":1}],\"collector_dispatch\":{\"collection_window\":null,\"field_kernel\":\"pmull\",\"pair_table\":false,\"query_rule\":\"trial-keyed-sample\",\"strategy\":\"Groebner\"},\"columns\":33,\"descent_dispatch\":null,\"effective_config\":{\"batch_trials\":1,\"collection_window\":null,\"conflict_budget\":100000,\"factor_base\":null,\"factor_base_cube_root\":false,\"factor_base_orbits\":null,\"groebner_degree\":3,\"linear_algebra\":\"dense\",\"max_trials\":1,\"node_budget\":4096,\"rho_parallel_walks\":32,\"solver\":\"f5\",\"sparse\":{\"attempts\":3,\"filter\":{\"max_row_weight\":32,\"merge_max_weight\":8,\"remove_duplicates\":true,\"remove_singletons\":true,\"target_excess\":32},\"fold\":3,\"seed\":6003370125125045313,\"wiedemann\":{\"block_m\":4,\"block_n\":4,\"margin\":8}},\"summands\":3},\"effective_factor_base\":{\"dimension\":6,\"kind\":\"standard_subspace\"},\"factor_base\":[[\"0\",\"1\"],[\"1\",\"0\"],[\"1\",\"1\"],[\"2\",\"8246208\"],[\"2\",\"8246210\"],[\"4\",\"8103848\"],[\"4\",\"8103852\"],[\"6\",\"3848760\"],[\"6\",\"3848766\"],[\"8\",\"3263024\"],[\"8\",\"3263032\"],[\"10\",\"2326205\"],[\"10\",\"2326199\"],[\"12\",\"4775769\"],[\"12\",\"4775765\"],[\"13\",\"3540316\"],[\"13\",\"3540305\"],[\"14\",\"5276429\"],[\"14\",\"5276419\"],[\"15\",\"7243940\"],[\"15\",\"7243947\"],[\"16\",\"7249538\"],[\"16\",\"7249554\"],[\"18\",\"1718960\"],[\"18\",\"1718946\"],[\"20\",\"2071752\"],[\"20\",\"2071772\"],[\"22\",\"5557402\"],[\"22\",\"5557388\"],[\"23\",\"6407566\"],[\"23\",\"6407577\"],[\"24\",\"2189171\"],[\"24\",\"2189163\"],[\"25\",\"4434749\"],[\"25\",\"4434724\"],[\"28\",\"1531664\"],[\"28\",\"1531660\"],[\"29\",\"2624552\"],[\"29\",\"2624565\"],[\"31\",\"7888464\"],[\"31\",\"7888463\"],[\"33\",\"1604477\"],[\"33\",\"1604444\"],[\"36\",\"1232245\"],[\"36\",\"1232209\"],[\"37\",\"1772411\"],[\"37\",\"1772382\"],[\"38\",\"1310223\"],[\"38\",\"1310249\"],[\"39\",\"6135691\"],[\"39\",\"6135724\"],[\"40\",\"876416\"],[\"40\",\"876456\"],[\"41\",\"8219487\"],[\"41\",\"8219510\"],[\"42\",\"996992\"],[\"42\",\"997034\"],[\"45\",\"5685847\"],[\"45\",\"5685882\"],[\"46\",\"1373091\"],[\"46\",\"1373069\"],[\"47\",\"2991008\"],[\"47\",\"2990991\"],[\"48\",\"5576454\"],[\"48\",\"5576502\"],[\"51\",\"2248737\"],[\"51\",\"2248722\"],[\"53\",\"2443667\"],[\"53\",\"2443686\"],[\"54\",\"5935083\"],[\"54\",\"5935069\"],[\"56\",\"579600\"],[\"56\",\"579624\"],[\"59\",\"6830917\"],[\"59\",\"6830974\"]],\"fixture\":{\"cofactor\":\"4\",\"curve_a\":0,\"degree\":23,\"generator\":[\"7502454\",\"6195881\"],\"group_order\":\"8383412\",\"irreducible\":{\"degree\":23,\"low_terms\":[0,5]},\"lambda\":\"93194\",\"subgroup_order\":\"2095853\",\"target_scalar_constructed\":false,\"target_seeds\":[null],\"targets\":[[\"6139688\",\"3569793\"]]},\"generic_admission_schema\":1,\"generic_build\":{\"build_sha256\":\"33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82\",\"schema_version\":1,\"source_manifest_sha256\":\"c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7\",\"target_arch\":\"aarch64\",\"target_os\":\"macos\"},\"generic_phase_policy\":\"exclusive-owner-thread-v1\",\"generic_phase_timing\":{\"observed_wall_ns\":7984826834,\"online_phases_ns\":{\"recovery_check\":null,\"rho_solve\":null,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"online_wall_ns\":null,\"phases_ns\":{\"factor_base\":61583,\"matrix_build\":null,\"pdp\":7984148959,\"precompute\":321583,\"queries\":4374,\"recovery_check\":null,\"relation_check\":917,\"relation_la\":null,\"rho_solve\":null,\"setup\":289418,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"schema_version\":1},\"generic_runtime_policy\":\"default-environment-one-rayon-v1\",\"log_table_report\":{\"collection_seconds\":7.5e-7,\"columns\":33,\"duplicate_relations\":0,\"linear_algebra_seconds\":0.0,\"rejected_relations\":0,\"relations\":0,\"solve_attempts\":0,\"sparse\":false,\"sparse_report\":null,\"trials\":1,\"verified\":false},\"matrix_batches\":[{\"accepted_rows\":0,\"duplicate_relations\":0,\"queries\":1,\"rejected_relations\":0,\"solve_attempts\":0,\"sparse_report\":null,\"verified\":false}],\"mode\":\"ic\",\"online_timing_schema\":2,\"online_wall_ns\":null,\"outer_online_wall_ns\":null,\"query_schema_version\":1,\"rejected_relations\":0,\"relation_matrix\":{\"column_points\":[[\"4474\",\"5006600\"],[\"6132\",\"7294867\"],[\"8322\",\"3987138\"],[\"53816\",\"3495852\"],[\"53886\",\"3235548\"],[\"79108\",\"6961893\"],[\"81336\",\"4599721\"],[\"89050\",\"2006618\"],[\"123608\",\"438763\"],[\"149726\",\"5110491\"],[\"169800\",\"5584991\"],[\"199734\",\"3976712\"],[\"239220\",\"8159355\"],[\"241598\",\"4746904\"],[\"247046\",\"2473489\"],[\"300048\",\"216809\"],[\"359536\",\"8002864\"],[\"371432\",\"3777652\"],[\"372636\",\"5914427\"],[\"383142\",\"4264390\"],[\"425966\",\"3834021\"],[\"427066\",\"50008\"],[\"456404\",\"5263681\"],[\"487056\",\"581901\"],[\"527812\",\"5467136\"],[\"529218\",\"7851889\"],[\"544188\",\"1277153\"],[\"562142\",\"7362025\"],[\"881284\",\"1500186\"],[\"885580\",\"2253937\"],[\"895562\",\"7386348\"],[\"1003800\",\"1561300\"],[\"2416524\",\"6244724\"]],\"modulus\":\"2095853\",\"rows\":[],\"solver\":\"dense-gauss\",\"sparse_options\":null},\"relations\":[],\"reusable_setup_excluded\":true,\"scalar_replay_included\":false,\"schema_version\":1,\"solve_attempts\":0,\"status\":\"incomplete\",\"summands\":3,\"target_input\":\"supplied_public_point\",\"trials\":1}\n",
+        "stdout_sha256": "22859e6ad50f954e8e11ab4f0725ba26016e754d457224cddb1d7410e867dac4"
+      }
+    },
+    "n23a1": {
+      "f4": {
+        "audits": {
+          "base": {
+            "construction": {
+              "basis": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ],
+              "domain_abscissae": 64,
+              "family": "standard_subspace",
+              "nominal_dimension": 6
+            },
+            "inventory": {
+              "duplicate_nonidentity_images": 0,
+              "effective_columns": 23,
+              "geometric_order_sha256": "0c8bbe885317d97fe7ddad93c758da2c4ae7c3fd83601128444a42e128aa5f0c",
+              "geometric_point_count": 53,
+              "geometric_set_sha256": "87f1dcb688f983c6adbc054f04c9cd922c84117a93e8c217d93390f281b71c5c",
+              "identity_images": 1,
+              "quotient": "sign-and-Frobenius",
+              "subgroup_map": "cofactor-multiplication",
+              "usable_point_count": 52,
+              "usable_set_sha256": "74b03977373b8499aa9c7955a27f0e6a81d42893cc89ef48a5a2c2a4868512ad"
+            },
+            "promotion_eligible": false,
+            "recipe": {
+              "dimension": 6,
+              "kind": "standard_subspace"
+            },
+            "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+            "schema_version": 1,
+            "scope": "independent factor-base construction and census"
+          },
+          "build": {
+            "build_sha256": "33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82",
+            "schema_version": 1,
+            "scope": "controlled local build and retained executable, not remote attestation",
+            "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+            "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+          },
+          "query": {
+            "checker_sha256": {
+              "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+              "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+              "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+            },
+            "collection_law": "sampled",
+            "collection_queries": 1,
+            "descent_law": "sampled",
+            "descent_queries": 0,
+            "job_sha256": "10c9971db21ca682ac32b30efe72e34ad18d98778f84c7611e25b81db362f035",
+            "promotion_eligible": false,
+            "query_sha256": "df71b75fe242d9db99e8a2a1ad283c2911693bec63ec144da3211273d073f04d",
+            "schema_version": 1,
+            "scope": "query law and group replay only",
+            "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+          },
+          "stages": {
+            "base": {
+              "construction": {
+                "basis": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "domain_abscissae": 64,
+                "family": "standard_subspace",
+                "nominal_dimension": 6
+              },
+              "inventory": {
+                "duplicate_nonidentity_images": 0,
+                "effective_columns": 23,
+                "geometric_order_sha256": "0c8bbe885317d97fe7ddad93c758da2c4ae7c3fd83601128444a42e128aa5f0c",
+                "geometric_point_count": 53,
+                "geometric_set_sha256": "87f1dcb688f983c6adbc054f04c9cd922c84117a93e8c217d93390f281b71c5c",
+                "identity_images": 1,
+                "quotient": "sign-and-Frobenius",
+                "subgroup_map": "cofactor-multiplication",
+                "usable_point_count": 52,
+                "usable_set_sha256": "74b03977373b8499aa9c7955a27f0e6a81d42893cc89ef48a5a2c2a4868512ad"
+              },
+              "promotion_eligible": false,
+              "recipe": {
+                "dimension": 6,
+                "kind": "standard_subspace"
+              },
+              "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+              "schema_version": 1,
+              "scope": "independent factor-base construction and census"
+            },
+            "certificate": null,
+            "dispatch": {
+              "collector": {
+                "collection_window": null,
+                "field_kernel": "pmull",
+                "pair_table": false,
+                "query_rule": "trial-keyed-sample",
+                "strategy": "Groebner"
+              },
+              "descent": null,
+              "frontend_calls": {
+                "groebner": 1
+              }
+            },
+            "matrix": {
+              "accepted_rows": 0,
+              "certified_logs": false,
+              "columns": 23,
+              "duplicate_relations": 0,
+              "matrix_sha256": "fc128dd161e825af06832d08f641859a3eba5dcb230ea3de117c4e49fad61c51",
+              "rank": 0,
+              "rank_trajectory": [
+                {
+                  "novel_row": false,
+                  "query": 1,
+                  "rank": 0
+                }
+              ],
+              "solve_attempts": 0
+            },
+            "promotion_eligible": false,
+            "query_law": {
+              "checker_sha256": {
+                "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+                "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+                "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+              },
+              "collection_law": "sampled",
+              "collection_queries": 1,
+              "descent_law": "sampled",
+              "descent_queries": 0,
+              "job_sha256": "10c9971db21ca682ac32b30efe72e34ad18d98778f84c7611e25b81db362f035",
+              "promotion_eligible": false,
+              "query_sha256": "df71b75fe242d9db99e8a2a1ad283c2911693bec63ec144da3211273d073f04d",
+              "schema_version": 1,
+              "scope": "query law and group replay only",
+              "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+            },
+            "schema_version": 1,
+            "scope": "base, query, dispatch, matrix and correctness; build/accounting required separately",
+            "status": "PASS"
+          }
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f4",
+            "summands": 3
+          },
+          "curve_a": 1,
+          "degree": 23,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "3529073",
+              "339834"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n23a1",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 15358891875,
+          "dispatched": false,
+          "disposition": "PROCESS_FAILURE",
+          "exit_code": 2,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 98746368,
+          "solver": "f4"
+        },
+        "result": {
+          "audit_status": "PASS",
+          "cell": "n23a1",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 15358891875,
+          "dispatched": true,
+          "disposition": "BOUNDED_INCOMPLETE_REPORT",
+          "exit_code": 2,
+          "folded_columns": 23,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "pdp_outcome": "incomplete",
+          "pdp_stats": {
+            "eliminated": 0,
+            "exhausted": true,
+            "infeasible_branches": 1529,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 10334,
+            "reductions": 4096,
+            "splits": 1536,
+            "unsupported": false
+          },
+          "sampled_peak_rss_bytes": 98746368,
+          "solver": "f4",
+          "usable_base_points": 52,
+          "worker_status": "incomplete"
+        },
+        "stderr": "",
+        "stdout_raw": "{\"collection_reports\":[{\"attempts\":[{\"a\":3204506,\"b\":0,\"pdp\":{\"outcome\":\"incomplete\",\"points\":null,\"stats\":{\"engine\":{\"MatrixF4\":{\"max_degree\":3}},\"family\":\"groebner\",\"stats\":{\"eliminated\":0,\"exhausted\":true,\"infeasible_branches\":1529,\"max_degree_built\":3,\"oversize\":0,\"propagations\":10334,\"reductions\":4096,\"splits\":1536,\"unsupported\":false}}},\"trial\":0}],\"elapsed_seconds\":15.306595958,\"relations\":0,\"summands_scanned\":0,\"trials\":1}],\"collector_dispatch\":{\"collection_window\":null,\"field_kernel\":\"pmull\",\"pair_table\":false,\"query_rule\":\"trial-keyed-sample\",\"strategy\":\"Groebner\"},\"columns\":23,\"descent_dispatch\":null,\"effective_config\":{\"batch_trials\":1,\"collection_window\":null,\"conflict_budget\":100000,\"factor_base\":null,\"factor_base_cube_root\":false,\"factor_base_orbits\":null,\"groebner_degree\":3,\"linear_algebra\":\"dense\",\"max_trials\":1,\"node_budget\":4096,\"rho_parallel_walks\":32,\"solver\":\"f4\",\"sparse\":{\"attempts\":3,\"filter\":{\"max_row_weight\":32,\"merge_max_weight\":8,\"remove_duplicates\":true,\"remove_singletons\":true,\"target_excess\":32},\"fold\":3,\"seed\":6003370125125045313,\"wiedemann\":{\"block_m\":4,\"block_n\":4,\"margin\":8}},\"summands\":3},\"effective_factor_base\":{\"dimension\":6,\"kind\":\"standard_subspace\"},\"factor_base\":[[\"0\",\"1\"],[\"3\",\"6186810\"],[\"3\",\"6186809\"],[\"5\",\"6465892\"],[\"5\",\"6465889\"],[\"7\",\"3504662\"],[\"7\",\"3504657\"],[\"9\",\"3530727\"],[\"9\",\"3530734\"],[\"11\",\"4984916\"],[\"11\",\"4984927\"],[\"17\",\"6819026\"],[\"17\",\"6819011\"],[\"19\",\"3696333\"],[\"19\",\"3696350\"],[\"21\",\"681532\"],[\"21\",\"681513\"],[\"26\",\"2520917\"],[\"26\",\"2520911\"],[\"27\",\"1186466\"],[\"27\",\"1186489\"],[\"30\",\"4371662\"],[\"30\",\"4371664\"],[\"32\",\"6930597\"],[\"32\",\"6930565\"],[\"34\",\"8131287\"],[\"34\",\"8131317\"],[\"35\",\"5417414\"],[\"35\",\"5417445\"],[\"43\",\"6826735\"],[\"43\",\"6826692\"],[\"44\",\"3988562\"],[\"44\",\"3988606\"],[\"49\",\"3863728\"],[\"49\",\"3863681\"],[\"50\",\"6677325\"],[\"50\",\"6677375\"],[\"52\",\"7451132\"],[\"52\",\"7451080\"],[\"55\",\"1618464\"],[\"55\",\"1618455\"],[\"57\",\"552015\"],[\"57\",\"552054\"],[\"58\",\"7883736\"],[\"58\",\"7883746\"],[\"60\",\"1893434\"],[\"60\",\"1893382\"],[\"61\",\"6101900\"],[\"61\",\"6101937\"],[\"62\",\"7230443\"],[\"62\",\"7230421\"],[\"63\",\"3495310\"],[\"63\",\"3495345\"]],\"fixture\":{\"cofactor\":\"2\",\"curve_a\":1,\"degree\":23,\"generator\":[\"2796197\",\"1282171\"],\"group_order\":\"8393806\",\"irreducible\":{\"degree\":23,\"low_terms\":[0,5]},\"lambda\":\"368914\",\"subgroup_order\":\"4196903\",\"target_scalar_constructed\":false,\"target_seeds\":[null],\"targets\":[[\"3529073\",\"339834\"]]},\"generic_admission_schema\":1,\"generic_build\":{\"build_sha256\":\"33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82\",\"schema_version\":1,\"source_manifest_sha256\":\"c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7\",\"target_arch\":\"aarch64\",\"target_os\":\"macos\"},\"generic_phase_policy\":\"exclusive-owner-thread-v1\",\"generic_phase_timing\":{\"observed_wall_ns\":15307110167,\"online_phases_ns\":{\"recovery_check\":null,\"rho_solve\":null,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"online_wall_ns\":null,\"phases_ns\":{\"factor_base\":53875,\"matrix_build\":null,\"pdp\":15306592125,\"precompute\":225000,\"queries\":4166,\"recovery_check\":null,\"relation_check\":2167,\"relation_la\":null,\"rho_solve\":null,\"setup\":232834,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"schema_version\":1},\"generic_runtime_policy\":\"default-environment-one-rayon-v1\",\"log_table_report\":{\"collection_seconds\":2.167e-6,\"columns\":23,\"duplicate_relations\":0,\"linear_algebra_seconds\":0.0,\"rejected_relations\":0,\"relations\":0,\"solve_attempts\":0,\"sparse\":false,\"sparse_report\":null,\"trials\":1,\"verified\":false},\"matrix_batches\":[{\"accepted_rows\":0,\"duplicate_relations\":0,\"queries\":1,\"rejected_relations\":0,\"solve_attempts\":0,\"sparse_report\":null,\"verified\":false}],\"mode\":\"ic\",\"online_timing_schema\":2,\"online_wall_ns\":null,\"outer_online_wall_ns\":null,\"query_schema_version\":1,\"rejected_relations\":0,\"relation_matrix\":{\"column_points\":[[\"16801\",\"3221236\"],[\"65423\",\"721990\"],[\"97237\",\"7644200\"],[\"126245\",\"581380\"],[\"131615\",\"1170305\"],[\"133217\",\"604770\"],[\"211751\",\"3944913\"],[\"289181\",\"2802382\"],[\"338539\",\"3713605\"],[\"368487\",\"5817246\"],[\"380255\",\"2794928\"],[\"399455\",\"1821037\"],[\"457311\",\"7585471\"],[\"474667\",\"3893556\"],[\"539251\",\"3609052\"],[\"570119\",\"190044\"],[\"638505\",\"1202452\"],[\"662847\",\"3637801\"],[\"777589\",\"6760664\"],[\"785437\",\"7850293\"],[\"1234873\",\"6861136\"],[\"1935251\",\"6779825\"],[\"2416351\",\"821413\"]],\"modulus\":\"4196903\",\"rows\":[],\"solver\":\"dense-gauss\",\"sparse_options\":null},\"relations\":[],\"reusable_setup_excluded\":true,\"scalar_replay_included\":false,\"schema_version\":1,\"solve_attempts\":0,\"status\":\"incomplete\",\"summands\":3,\"target_input\":\"supplied_public_point\",\"trials\":1}\n",
+        "stdout_sha256": "65b49849442ff2f469dccced48149ae2f3fcc53fc636e8a6641d8919e6725325"
+      },
+      "f5": {
+        "audits": {
+          "base": {
+            "construction": {
+              "basis": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ],
+              "domain_abscissae": 64,
+              "family": "standard_subspace",
+              "nominal_dimension": 6
+            },
+            "inventory": {
+              "duplicate_nonidentity_images": 0,
+              "effective_columns": 23,
+              "geometric_order_sha256": "0c8bbe885317d97fe7ddad93c758da2c4ae7c3fd83601128444a42e128aa5f0c",
+              "geometric_point_count": 53,
+              "geometric_set_sha256": "87f1dcb688f983c6adbc054f04c9cd922c84117a93e8c217d93390f281b71c5c",
+              "identity_images": 1,
+              "quotient": "sign-and-Frobenius",
+              "subgroup_map": "cofactor-multiplication",
+              "usable_point_count": 52,
+              "usable_set_sha256": "74b03977373b8499aa9c7955a27f0e6a81d42893cc89ef48a5a2c2a4868512ad"
+            },
+            "promotion_eligible": false,
+            "recipe": {
+              "dimension": 6,
+              "kind": "standard_subspace"
+            },
+            "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+            "schema_version": 1,
+            "scope": "independent factor-base construction and census"
+          },
+          "build": {
+            "build_sha256": "33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82",
+            "schema_version": 1,
+            "scope": "controlled local build and retained executable, not remote attestation",
+            "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+            "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+          },
+          "query": {
+            "checker_sha256": {
+              "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+              "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+              "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+            },
+            "collection_law": "sampled",
+            "collection_queries": 1,
+            "descent_law": "sampled",
+            "descent_queries": 0,
+            "job_sha256": "c7ea8db85be27f214ffa1981f09563277da3ff339aff7532a735b153c42de912",
+            "promotion_eligible": false,
+            "query_sha256": "be95509f2e654b360dff1aaf89ecf9afdcb5d8003ad05fcafd770d47ea306174",
+            "schema_version": 1,
+            "scope": "query law and group replay only",
+            "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+          },
+          "stages": {
+            "base": {
+              "construction": {
+                "basis": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "domain_abscissae": 64,
+                "family": "standard_subspace",
+                "nominal_dimension": 6
+              },
+              "inventory": {
+                "duplicate_nonidentity_images": 0,
+                "effective_columns": 23,
+                "geometric_order_sha256": "0c8bbe885317d97fe7ddad93c758da2c4ae7c3fd83601128444a42e128aa5f0c",
+                "geometric_point_count": 53,
+                "geometric_set_sha256": "87f1dcb688f983c6adbc054f04c9cd922c84117a93e8c217d93390f281b71c5c",
+                "identity_images": 1,
+                "quotient": "sign-and-Frobenius",
+                "subgroup_map": "cofactor-multiplication",
+                "usable_point_count": 52,
+                "usable_set_sha256": "74b03977373b8499aa9c7955a27f0e6a81d42893cc89ef48a5a2c2a4868512ad"
+              },
+              "promotion_eligible": false,
+              "recipe": {
+                "dimension": 6,
+                "kind": "standard_subspace"
+              },
+              "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+              "schema_version": 1,
+              "scope": "independent factor-base construction and census"
+            },
+            "certificate": null,
+            "dispatch": {
+              "collector": {
+                "collection_window": null,
+                "field_kernel": "pmull",
+                "pair_table": false,
+                "query_rule": "trial-keyed-sample",
+                "strategy": "Groebner"
+              },
+              "descent": null,
+              "frontend_calls": {
+                "groebner": 1
+              }
+            },
+            "matrix": {
+              "accepted_rows": 0,
+              "certified_logs": false,
+              "columns": 23,
+              "duplicate_relations": 0,
+              "matrix_sha256": "fc128dd161e825af06832d08f641859a3eba5dcb230ea3de117c4e49fad61c51",
+              "rank": 0,
+              "rank_trajectory": [
+                {
+                  "novel_row": false,
+                  "query": 1,
+                  "rank": 0
+                }
+              ],
+              "solve_attempts": 0
+            },
+            "promotion_eligible": false,
+            "query_law": {
+              "checker_sha256": {
+                "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+                "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+                "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+              },
+              "collection_law": "sampled",
+              "collection_queries": 1,
+              "descent_law": "sampled",
+              "descent_queries": 0,
+              "job_sha256": "c7ea8db85be27f214ffa1981f09563277da3ff339aff7532a735b153c42de912",
+              "promotion_eligible": false,
+              "query_sha256": "be95509f2e654b360dff1aaf89ecf9afdcb5d8003ad05fcafd770d47ea306174",
+              "schema_version": 1,
+              "scope": "query law and group replay only",
+              "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+            },
+            "schema_version": 1,
+            "scope": "base, query, dispatch, matrix and correctness; build/accounting required separately",
+            "status": "PASS"
+          }
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f5",
+            "summands": 3
+          },
+          "curve_a": 1,
+          "degree": 23,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "3529073",
+              "339834"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n23a1",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 8035080000,
+          "dispatched": false,
+          "disposition": "PROCESS_FAILURE",
+          "exit_code": 2,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 63160320,
+          "solver": "f5"
+        },
+        "result": {
+          "audit_status": "PASS",
+          "cell": "n23a1",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 8035080000,
+          "dispatched": true,
+          "disposition": "BOUNDED_INCOMPLETE_REPORT",
+          "exit_code": 2,
+          "folded_columns": 23,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "pdp_outcome": "incomplete",
+          "pdp_stats": {
+            "eliminated": 0,
+            "exhausted": true,
+            "infeasible_branches": 1529,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 10334,
+            "reductions": 4096,
+            "splits": 1536,
+            "unsupported": false
+          },
+          "sampled_peak_rss_bytes": 63160320,
+          "solver": "f5",
+          "usable_base_points": 52,
+          "worker_status": "incomplete"
+        },
+        "stderr": "",
+        "stdout_raw": "{\"collection_reports\":[{\"attempts\":[{\"a\":3204506,\"b\":0,\"pdp\":{\"outcome\":\"incomplete\",\"points\":null,\"stats\":{\"engine\":{\"MatrixF5\":{\"max_degree\":3}},\"family\":\"groebner\",\"stats\":{\"eliminated\":0,\"exhausted\":true,\"infeasible_branches\":1529,\"max_degree_built\":3,\"oversize\":0,\"propagations\":10334,\"reductions\":4096,\"splits\":1536,\"unsupported\":false}}},\"trial\":0}],\"elapsed_seconds\":7.986541792,\"relations\":0,\"summands_scanned\":0,\"trials\":1}],\"collector_dispatch\":{\"collection_window\":null,\"field_kernel\":\"pmull\",\"pair_table\":false,\"query_rule\":\"trial-keyed-sample\",\"strategy\":\"Groebner\"},\"columns\":23,\"descent_dispatch\":null,\"effective_config\":{\"batch_trials\":1,\"collection_window\":null,\"conflict_budget\":100000,\"factor_base\":null,\"factor_base_cube_root\":false,\"factor_base_orbits\":null,\"groebner_degree\":3,\"linear_algebra\":\"dense\",\"max_trials\":1,\"node_budget\":4096,\"rho_parallel_walks\":32,\"solver\":\"f5\",\"sparse\":{\"attempts\":3,\"filter\":{\"max_row_weight\":32,\"merge_max_weight\":8,\"remove_duplicates\":true,\"remove_singletons\":true,\"target_excess\":32},\"fold\":3,\"seed\":6003370125125045313,\"wiedemann\":{\"block_m\":4,\"block_n\":4,\"margin\":8}},\"summands\":3},\"effective_factor_base\":{\"dimension\":6,\"kind\":\"standard_subspace\"},\"factor_base\":[[\"0\",\"1\"],[\"3\",\"6186810\"],[\"3\",\"6186809\"],[\"5\",\"6465892\"],[\"5\",\"6465889\"],[\"7\",\"3504662\"],[\"7\",\"3504657\"],[\"9\",\"3530727\"],[\"9\",\"3530734\"],[\"11\",\"4984916\"],[\"11\",\"4984927\"],[\"17\",\"6819026\"],[\"17\",\"6819011\"],[\"19\",\"3696333\"],[\"19\",\"3696350\"],[\"21\",\"681532\"],[\"21\",\"681513\"],[\"26\",\"2520917\"],[\"26\",\"2520911\"],[\"27\",\"1186466\"],[\"27\",\"1186489\"],[\"30\",\"4371662\"],[\"30\",\"4371664\"],[\"32\",\"6930597\"],[\"32\",\"6930565\"],[\"34\",\"8131287\"],[\"34\",\"8131317\"],[\"35\",\"5417414\"],[\"35\",\"5417445\"],[\"43\",\"6826735\"],[\"43\",\"6826692\"],[\"44\",\"3988562\"],[\"44\",\"3988606\"],[\"49\",\"3863728\"],[\"49\",\"3863681\"],[\"50\",\"6677325\"],[\"50\",\"6677375\"],[\"52\",\"7451132\"],[\"52\",\"7451080\"],[\"55\",\"1618464\"],[\"55\",\"1618455\"],[\"57\",\"552015\"],[\"57\",\"552054\"],[\"58\",\"7883736\"],[\"58\",\"7883746\"],[\"60\",\"1893434\"],[\"60\",\"1893382\"],[\"61\",\"6101900\"],[\"61\",\"6101937\"],[\"62\",\"7230443\"],[\"62\",\"7230421\"],[\"63\",\"3495310\"],[\"63\",\"3495345\"]],\"fixture\":{\"cofactor\":\"2\",\"curve_a\":1,\"degree\":23,\"generator\":[\"2796197\",\"1282171\"],\"group_order\":\"8393806\",\"irreducible\":{\"degree\":23,\"low_terms\":[0,5]},\"lambda\":\"368914\",\"subgroup_order\":\"4196903\",\"target_scalar_constructed\":false,\"target_seeds\":[null],\"targets\":[[\"3529073\",\"339834\"]]},\"generic_admission_schema\":1,\"generic_build\":{\"build_sha256\":\"33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82\",\"schema_version\":1,\"source_manifest_sha256\":\"c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7\",\"target_arch\":\"aarch64\",\"target_os\":\"macos\"},\"generic_phase_policy\":\"exclusive-owner-thread-v1\",\"generic_phase_timing\":{\"observed_wall_ns\":7987049875,\"online_phases_ns\":{\"recovery_check\":null,\"rho_solve\":null,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"online_wall_ns\":null,\"phases_ns\":{\"factor_base\":58625,\"matrix_build\":null,\"pdp\":7986538125,\"precompute\":223166,\"queries\":4000,\"recovery_check\":null,\"relation_check\":959,\"relation_la\":null,\"rho_solve\":null,\"setup\":225000,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"schema_version\":1},\"generic_runtime_policy\":\"default-environment-one-rayon-v1\",\"log_table_report\":{\"collection_seconds\":8.75e-7,\"columns\":23,\"duplicate_relations\":0,\"linear_algebra_seconds\":0.0,\"rejected_relations\":0,\"relations\":0,\"solve_attempts\":0,\"sparse\":false,\"sparse_report\":null,\"trials\":1,\"verified\":false},\"matrix_batches\":[{\"accepted_rows\":0,\"duplicate_relations\":0,\"queries\":1,\"rejected_relations\":0,\"solve_attempts\":0,\"sparse_report\":null,\"verified\":false}],\"mode\":\"ic\",\"online_timing_schema\":2,\"online_wall_ns\":null,\"outer_online_wall_ns\":null,\"query_schema_version\":1,\"rejected_relations\":0,\"relation_matrix\":{\"column_points\":[[\"16801\",\"3221236\"],[\"65423\",\"721990\"],[\"97237\",\"7644200\"],[\"126245\",\"581380\"],[\"131615\",\"1170305\"],[\"133217\",\"604770\"],[\"211751\",\"3944913\"],[\"289181\",\"2802382\"],[\"338539\",\"3713605\"],[\"368487\",\"5817246\"],[\"380255\",\"2794928\"],[\"399455\",\"1821037\"],[\"457311\",\"7585471\"],[\"474667\",\"3893556\"],[\"539251\",\"3609052\"],[\"570119\",\"190044\"],[\"638505\",\"1202452\"],[\"662847\",\"3637801\"],[\"777589\",\"6760664\"],[\"785437\",\"7850293\"],[\"1234873\",\"6861136\"],[\"1935251\",\"6779825\"],[\"2416351\",\"821413\"]],\"modulus\":\"4196903\",\"rows\":[],\"solver\":\"dense-gauss\",\"sparse_options\":null},\"relations\":[],\"reusable_setup_excluded\":true,\"scalar_replay_included\":false,\"schema_version\":1,\"solve_attempts\":0,\"status\":\"incomplete\",\"summands\":3,\"target_input\":\"supplied_public_point\",\"trials\":1}\n",
+        "stdout_sha256": "7c8301b240a32599ffeec82ebffe1fbf0b5cf17b205a73e7d36f78cfe19ef85d"
+      }
+    },
+    "n31a0": {
+      "f4": {
+        "audits": {
+          "base": null,
+          "build": null,
+          "query": null,
+          "stages": null
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f4",
+            "summands": 3
+          },
+          "curve_a": 0,
+          "degree": 31,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "495203622",
+              "2062027115"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n31a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 60018643583,
+          "dispatched": false,
+          "disposition": "TIMEOUT",
+          "exit_code": -9,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 182763520,
+          "solver": "f4"
+        },
+        "result": {
+          "audit_status": "NOT_AVAILABLE",
+          "cell": "n31a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 60018643583,
+          "dispatched": false,
+          "disposition": "TIMEOUT",
+          "exit_code": -9,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "reason": "process did not exit with a report",
+          "sampled_peak_rss_bytes": 182763520,
+          "solver": "f4"
+        },
+        "stderr": "",
+        "stdout_raw": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "f5": {
+        "audits": {
+          "base": {
+            "construction": {
+              "basis": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ],
+              "domain_abscissae": 64,
+              "family": "standard_subspace",
+              "nominal_dimension": 6
+            },
+            "inventory": {
+              "duplicate_nonidentity_images": 0,
+              "effective_columns": 27,
+              "geometric_order_sha256": "64fcb4458f80d12e19ea35c16caa45cbfb1d7d215cfe1f7d182ca39e2c3c8e33",
+              "geometric_point_count": 69,
+              "geometric_set_sha256": "211cf303ff00c26ad80ac09161d2e66c96b14569fc651fb5d745a655a3583661",
+              "identity_images": 3,
+              "quotient": "sign-and-Frobenius",
+              "subgroup_map": "cofactor-multiplication",
+              "usable_point_count": 66,
+              "usable_set_sha256": "f0a799cd100cc1c370ba58fb4948f58b20600f251560d3b6a28ac3ccb390b974"
+            },
+            "promotion_eligible": false,
+            "recipe": {
+              "dimension": 6,
+              "kind": "standard_subspace"
+            },
+            "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+            "schema_version": 1,
+            "scope": "independent factor-base construction and census"
+          },
+          "build": {
+            "build_sha256": "33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82",
+            "schema_version": 1,
+            "scope": "controlled local build and retained executable, not remote attestation",
+            "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+            "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+          },
+          "query": {
+            "checker_sha256": {
+              "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+              "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+              "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+            },
+            "collection_law": "sampled",
+            "collection_queries": 1,
+            "descent_law": "sampled",
+            "descent_queries": 0,
+            "job_sha256": "80a2e825b7be66abeadebd86147acb798fb6cc6921bb44689ff95759dbd0c1a2",
+            "promotion_eligible": false,
+            "query_sha256": "56c32698778d1c8e79a8fe588658201c537db0b295c43973d1fa4e1c3270b6d9",
+            "schema_version": 1,
+            "scope": "query law and group replay only",
+            "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+          },
+          "stages": {
+            "base": {
+              "construction": {
+                "basis": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "domain_abscissae": 64,
+                "family": "standard_subspace",
+                "nominal_dimension": 6
+              },
+              "inventory": {
+                "duplicate_nonidentity_images": 0,
+                "effective_columns": 27,
+                "geometric_order_sha256": "64fcb4458f80d12e19ea35c16caa45cbfb1d7d215cfe1f7d182ca39e2c3c8e33",
+                "geometric_point_count": 69,
+                "geometric_set_sha256": "211cf303ff00c26ad80ac09161d2e66c96b14569fc651fb5d745a655a3583661",
+                "identity_images": 3,
+                "quotient": "sign-and-Frobenius",
+                "subgroup_map": "cofactor-multiplication",
+                "usable_point_count": 66,
+                "usable_set_sha256": "f0a799cd100cc1c370ba58fb4948f58b20600f251560d3b6a28ac3ccb390b974"
+              },
+              "promotion_eligible": false,
+              "recipe": {
+                "dimension": 6,
+                "kind": "standard_subspace"
+              },
+              "recipe_sha256": "683c9b72eb6e8cb03dd9185bf84757ef4bf126780027f96cb9b6faf6232e7818",
+              "schema_version": 1,
+              "scope": "independent factor-base construction and census"
+            },
+            "certificate": null,
+            "dispatch": {
+              "collector": {
+                "collection_window": null,
+                "field_kernel": "pmull",
+                "pair_table": false,
+                "query_rule": "trial-keyed-sample",
+                "strategy": "Groebner"
+              },
+              "descent": null,
+              "frontend_calls": {
+                "groebner": 1
+              }
+            },
+            "matrix": {
+              "accepted_rows": 0,
+              "certified_logs": false,
+              "columns": 27,
+              "duplicate_relations": 0,
+              "matrix_sha256": "0eacfd757392fbc06e81c30374b16814cd0fbf4233d2091d4de74e1019bce457",
+              "rank": 0,
+              "rank_trajectory": [
+                {
+                  "novel_row": false,
+                  "query": 1,
+                  "rank": 0
+                }
+              ],
+              "solve_attempts": 0
+            },
+            "promotion_eligible": false,
+            "query_law": {
+              "checker_sha256": {
+                "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+                "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+                "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+              },
+              "collection_law": "sampled",
+              "collection_queries": 1,
+              "descent_law": "sampled",
+              "descent_queries": 0,
+              "job_sha256": "80a2e825b7be66abeadebd86147acb798fb6cc6921bb44689ff95759dbd0c1a2",
+              "promotion_eligible": false,
+              "query_sha256": "56c32698778d1c8e79a8fe588658201c537db0b295c43973d1fa4e1c3270b6d9",
+              "schema_version": 1,
+              "scope": "query law and group replay only",
+              "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+            },
+            "schema_version": 1,
+            "scope": "base, query, dispatch, matrix and correctness; build/accounting required separately",
+            "status": "PASS"
+          }
+        },
+        "job": {
+          "algorithm_seed": 2026092918,
+          "config": {
+            "batch_trials": 1,
+            "groebner_degree": 3,
+            "linear_algebra": "dense",
+            "max_trials": 1,
+            "node_budget": 4096,
+            "solver": "f5",
+            "summands": 3
+          },
+          "curve_a": 0,
+          "degree": 31,
+          "exclusive_phases": true,
+          "factor_base": {
+            "dimension": 6,
+            "kind": "standard_subspace"
+          },
+          "mode": "ic",
+          "public_targets": [
+            [
+              "495203622",
+              "2062027115"
+            ]
+          ]
+        },
+        "process": {
+          "cell": "n31a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 25444659000,
+          "dispatched": false,
+          "disposition": "PROCESS_FAILURE",
+          "exit_code": 2,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "sampled_peak_rss_bytes": 132890624,
+          "solver": "f5"
+        },
+        "result": {
+          "audit_status": "PASS",
+          "cell": "n31a0",
+          "competitive_speedup": null,
+          "competitive_total": null,
+          "diagnostic_process_wall_ns": 25444659000,
+          "dispatched": true,
+          "disposition": "BOUNDED_INCOMPLETE_REPORT",
+          "exit_code": 2,
+          "folded_columns": 27,
+          "memory_policy": "poll-child-rss-and-kill-above-limit",
+          "pdp_outcome": "incomplete",
+          "pdp_stats": {
+            "eliminated": 0,
+            "exhausted": true,
+            "infeasible_branches": 1532,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 13504,
+            "reductions": 4096,
+            "splits": 1539,
+            "unsupported": false
+          },
+          "sampled_peak_rss_bytes": 132890624,
+          "solver": "f5",
+          "usable_base_points": 66,
+          "worker_status": "incomplete"
+        },
+        "stderr": "",
+        "stdout_raw": "{\"collection_reports\":[{\"attempts\":[{\"a\":1099035,\"b\":0,\"pdp\":{\"outcome\":\"incomplete\",\"points\":null,\"stats\":{\"engine\":{\"MatrixF5\":{\"max_degree\":3}},\"family\":\"groebner\",\"stats\":{\"eliminated\":0,\"exhausted\":true,\"infeasible_branches\":1532,\"max_degree_built\":3,\"oversize\":0,\"propagations\":13504,\"reductions\":4096,\"splits\":1539,\"unsupported\":false}}},\"trial\":0}],\"elapsed_seconds\":25.401771084,\"relations\":0,\"summands_scanned\":0,\"trials\":1}],\"collector_dispatch\":{\"collection_window\":null,\"field_kernel\":\"pmull\",\"pair_table\":false,\"query_rule\":\"trial-keyed-sample\",\"strategy\":\"Groebner\"},\"columns\":27,\"descent_dispatch\":null,\"effective_config\":{\"batch_trials\":1,\"collection_window\":null,\"conflict_budget\":100000,\"factor_base\":null,\"factor_base_cube_root\":false,\"factor_base_orbits\":null,\"groebner_degree\":3,\"linear_algebra\":\"dense\",\"max_trials\":1,\"node_budget\":4096,\"rho_parallel_walks\":32,\"solver\":\"f5\",\"sparse\":{\"attempts\":3,\"filter\":{\"max_row_weight\":32,\"merge_max_weight\":8,\"remove_duplicates\":true,\"remove_singletons\":true,\"target_excess\":32},\"fold\":3,\"seed\":6003370125125045313,\"wiedemann\":{\"block_m\":4,\"block_n\":4,\"margin\":8}},\"summands\":3},\"effective_factor_base\":{\"dimension\":6,\"kind\":\"standard_subspace\"},\"factor_base\":[[\"0\",\"1\"],[\"1\",\"0\"],[\"1\",\"1\"],[\"2\",\"2104573184\"],[\"2\",\"2104573186\"],[\"4\",\"2061662720\"],[\"4\",\"2061662724\"],[\"6\",\"1212182542\"],[\"6\",\"1212182536\"],[\"9\",\"1786245387\"],[\"9\",\"1786245378\"],[\"10\",\"137886901\"],[\"10\",\"137886911\"],[\"12\",\"526010572\"],[\"12\",\"526010560\"],[\"16\",\"1804200026\"],[\"16\",\"1804200010\"],[\"18\",\"1206634098\"],[\"18\",\"1206634080\"],[\"20\",\"830545990\"],[\"20\",\"830546002\"],[\"22\",\"1422471276\"],[\"22\",\"1422471290\"],[\"25\",\"1035920868\"],[\"25\",\"1035920893\"],[\"26\",\"7290663\"],[\"26\",\"7290685\"],[\"27\",\"119116620\"],[\"27\",\"119116631\"],[\"30\",\"178298982\"],[\"30\",\"178299000\"],[\"31\",\"517400248\"],[\"31\",\"517400231\"],[\"32\",\"277873307\"],[\"32\",\"277873339\"],[\"33\",\"408169586\"],[\"33\",\"408169555\"],[\"34\",\"740645276\"],[\"34\",\"740645310\"],[\"35\",\"469148787\"],[\"35\",\"469148752\"],[\"37\",\"424969166\"],[\"37\",\"424969195\"],[\"38\",\"1248849540\"],[\"38\",\"1248849570\"],[\"42\",\"1978670734\"],[\"42\",\"1978670756\"],[\"44\",\"550104256\"],[\"44\",\"550104300\"],[\"46\",\"697214150\"],[\"46\",\"697214184\"],[\"47\",\"1616543804\"],[\"47\",\"1616543763\"],[\"49\",\"843856271\"],[\"49\",\"843856318\"],[\"51\",\"1761327984\"],[\"51\",\"1761327939\"],[\"52\",\"542024538\"],[\"52\",\"542024558\"],[\"53\",\"1953070913\"],[\"53\",\"1953070964\"],[\"58\",\"1681632181\"],[\"58\",\"1681632143\"],[\"59\",\"1581189285\"],[\"59\",\"1581189278\"],[\"60\",\"2022283870\"],[\"60\",\"2022283874\"],[\"62\",\"396026765\"],[\"62\",\"396026803\"]],\"fixture\":{\"cofactor\":\"1492\",\"curve_a\":0,\"degree\":31,\"generator\":[\"218466422\",\"853131129\"],\"group_order\":\"2147574356\",\"irreducible\":{\"degree\":31,\"low_terms\":[0,3]},\"lambda\":\"45018\",\"subgroup_order\":\"1439393\",\"target_scalar_constructed\":false,\"target_seeds\":[null],\"targets\":[[\"495203622\",\"2062027115\"]]},\"generic_admission_schema\":1,\"generic_build\":{\"build_sha256\":\"33c0bb700e370e90be2aacb3605bf38d037a3a9e663ac3133b1450a857a0ac82\",\"schema_version\":1,\"source_manifest_sha256\":\"c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7\",\"target_arch\":\"aarch64\",\"target_os\":\"macos\"},\"generic_phase_policy\":\"exclusive-owner-thread-v1\",\"generic_phase_timing\":{\"observed_wall_ns\":25402570083,\"online_phases_ns\":{\"recovery_check\":null,\"rho_solve\":null,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"online_wall_ns\":null,\"phases_ns\":{\"factor_base\":70292,\"matrix_build\":null,\"pdp\":25401766750,\"precompute\":389542,\"queries\":4667,\"recovery_check\":null,\"relation_check\":1125,\"relation_la\":null,\"rho_solve\":null,\"setup\":337707,\"target_descent\":null,\"target_pdp\":null,\"target_query\":null,\"target_relation_check\":null},\"schema_version\":1},\"generic_runtime_policy\":\"default-environment-one-rayon-v1\",\"log_table_report\":{\"collection_seconds\":1.042e-6,\"columns\":27,\"duplicate_relations\":0,\"linear_algebra_seconds\":0.0,\"rejected_relations\":0,\"relations\":0,\"solve_attempts\":0,\"sparse\":false,\"sparse_report\":null,\"trials\":1,\"verified\":false},\"matrix_batches\":[{\"accepted_rows\":0,\"duplicate_relations\":0,\"queries\":1,\"rejected_relations\":0,\"solve_attempts\":0,\"sparse_report\":null,\"verified\":false}],\"mode\":\"ic\",\"online_timing_schema\":2,\"online_wall_ns\":null,\"outer_online_wall_ns\":null,\"query_schema_version\":1,\"rejected_relations\":0,\"relation_matrix\":{\"column_points\":[[\"86682\",\"354062782\"],[\"487924\",\"2000900122\"],[\"1928926\",\"1647216130\"],[\"6580474\",\"1133378421\"],[\"7253786\",\"37420807\"],[\"13253654\",\"1363171347\"],[\"15718430\",\"188363225\"],[\"34011868\",\"1501668129\"],[\"38191208\",\"2013344672\"],[\"42297554\",\"944736988\"],[\"42651752\",\"1560993481\"],[\"45462514\",\"674700704\"],[\"52944894\",\"364237555\"],[\"55242836\",\"417782913\"],[\"56278102\",\"1884521943\"],[\"58735068\",\"1905210407\"],[\"75233616\",\"1643284262\"],[\"81985330\",\"159770031\"],[\"121493688\",\"976926311\"],[\"132901564\",\"1256024869\"],[\"142500814\",\"1664849019\"],[\"145902108\",\"397083807\"],[\"214202370\",\"1393125217\"],[\"215370118\",\"1455730077\"],[\"225866442\",\"1174889978\"],[\"233297534\",\"118603308\"],[\"241659268\",\"1910725429\"]],\"modulus\":\"1439393\",\"rows\":[],\"solver\":\"dense-gauss\",\"sparse_options\":null},\"relations\":[],\"reusable_setup_excluded\":true,\"scalar_replay_included\":false,\"schema_version\":1,\"solve_attempts\":0,\"status\":\"incomplete\",\"summands\":3,\"target_input\":\"supplied_public_point\",\"trials\":1}\n",
+        "stdout_sha256": "b69b968859724b96c2d19ea6118ac88a00daf1a21d7bd046261b88826cc0b51d"
+      }
+    }
+  },
+  "schema_version": 1,
+  "scope": "Previously disclosed public points, one natural query per completed worker, local diagnostic only",
+  "stage_a_repair": {
+    "gate": "PASS",
+    "original_summary_sha256": "ff58ad86bebd13000347c5971f2c29da42374cd4ef1700cee4035be28e3e4a23",
+    "reason": "Original runner discarded valid incomplete reports at exit code 2.",
+    "stage_a_stdout_sha256": {
+      "f4": "2f24cd7914634665c03dbf53102276bbcc4a6790c491c193381b3a129509a550",
+      "f5": "bde8532abe74a1c073600413349db16d4c318fdefed181a1d3bf5b65dd34dc46"
+    }
+  },
+  "static_preflight": {
+    "impossible_algebraic_cells": 0,
+    "interpretation": "Static encoder check only; dispatch, natural yield, complete recovery and cost remain unmeasured.",
+    "layout": "m*ell+(m-2)*n",
+    "max_boolean_variables": 64,
+    "rows": [
+      {
+        "basis_length": 6,
+        "boolean_variables": 35,
+        "candidate": "f4",
+        "cell": "n17a1",
+        "max_boolean_variables": 64,
+        "solver": "f4",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 37,
+        "candidate": "f4",
+        "cell": "n19a0",
+        "max_boolean_variables": 64,
+        "solver": "f4",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 41,
+        "candidate": "f4",
+        "cell": "n23a0",
+        "max_boolean_variables": 64,
+        "solver": "f4",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 41,
+        "candidate": "f4",
+        "cell": "n23a1",
+        "max_boolean_variables": 64,
+        "solver": "f4",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 49,
+        "candidate": "f4",
+        "cell": "n31a0",
+        "max_boolean_variables": 64,
+        "solver": "f4",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 35,
+        "candidate": "f5",
+        "cell": "n17a1",
+        "max_boolean_variables": 64,
+        "solver": "f5",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 37,
+        "candidate": "f5",
+        "cell": "n19a0",
+        "max_boolean_variables": 64,
+        "solver": "f5",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 41,
+        "candidate": "f5",
+        "cell": "n23a0",
+        "max_boolean_variables": 64,
+        "solver": "f5",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 41,
+        "candidate": "f5",
+        "cell": "n23a1",
+        "max_boolean_variables": 64,
+        "solver": "f5",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      },
+      {
+        "basis_length": 6,
+        "boolean_variables": 49,
+        "candidate": "f5",
+        "cell": "n31a0",
+        "max_boolean_variables": 64,
+        "solver": "f5",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      }
+    ],
+    "schema_version": 1,
+    "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+    "source_objects": {
+      "examples/ic_tournament_worker.rs": "745247f3d89d46cdffb6d1f28778971caae7aa21",
+      "src/cryptanalysis/koblitz_factor_base_search.rs": "8aacd0b9c0c4b4e8702c97d631319afdaa4e22e6",
+      "src/cryptanalysis/koblitz_groebner.rs": "91ee5d6cfd99166697895aac62dbabb1f4d9778c",
+      "src/cryptanalysis/koblitz_index_calculus.rs": "16a102a9be61630da2d1c49bcabcc55eaf5ab2f0",
+      "src/cryptanalysis/polynomial_reuse.rs": "f79411c0f2309090b4ba7ddfd9b80bb202859796"
+    },
+    "status": "PASS_STATIC_LAYOUT_ONLY"
+  },
+  "summary": {
+    "original_summary_sha256": "ff58ad86bebd13000347c5971f2c29da42374cd4ef1700cee4035be28e3e4a23",
+    "panel_sha256": "48db71af3c5f297b834f2476056201caec8378f96f6da6992d1aa8ecbe523685",
+    "rows": [
+      {
+        "audit_status": "PASS",
+        "cell": "n17a1",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 1029433833,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 29,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "witness",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": false,
+          "infeasible_branches": 229,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 979,
+          "reductions": 610,
+          "splits": 236,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 43597824,
+        "solver": "f4",
+        "usable_base_points": 62,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n17a1",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 614853291,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 29,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "witness",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": false,
+          "infeasible_branches": 229,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 979,
+          "reductions": 610,
+          "splits": 236,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 32325632,
+        "solver": "f5",
+        "usable_base_points": 62,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n19a0",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 9078160875,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 27,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "incomplete",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": true,
+          "infeasible_branches": 1543,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 8739,
+          "reductions": 4096,
+          "splits": 1547,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 78168064,
+        "solver": "f4",
+        "usable_base_points": 62,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n19a0",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 4815505458,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 27,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "incomplete",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": true,
+          "infeasible_branches": 1543,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 8739,
+          "reductions": 4096,
+          "splits": 1547,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 56049664,
+        "solver": "f5",
+        "usable_base_points": 62,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n23a0",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 15407766208,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 33,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "incomplete",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": true,
+          "infeasible_branches": 1522,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 10345,
+          "reductions": 4096,
+          "splits": 1531,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 103661568,
+        "solver": "f4",
+        "usable_base_points": 72,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n23a0",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 8034395292,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 33,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "incomplete",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": true,
+          "infeasible_branches": 1522,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 10345,
+          "reductions": 4096,
+          "splits": 1531,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 71794688,
+        "solver": "f5",
+        "usable_base_points": 72,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n23a1",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 15358891875,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 23,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "incomplete",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": true,
+          "infeasible_branches": 1529,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 10334,
+          "reductions": 4096,
+          "splits": 1536,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 98746368,
+        "solver": "f4",
+        "usable_base_points": 52,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n23a1",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 8035080000,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 23,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "incomplete",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": true,
+          "infeasible_branches": 1529,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 10334,
+          "reductions": 4096,
+          "splits": 1536,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 63160320,
+        "solver": "f5",
+        "usable_base_points": 52,
+        "worker_status": "incomplete"
+      },
+      {
+        "audit_status": "NOT_AVAILABLE",
+        "cell": "n31a0",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 60018643583,
+        "dispatched": false,
+        "disposition": "TIMEOUT",
+        "exit_code": -9,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "reason": "process did not exit with a report",
+        "sampled_peak_rss_bytes": 182763520,
+        "solver": "f4"
+      },
+      {
+        "audit_status": "PASS",
+        "cell": "n31a0",
+        "competitive_speedup": null,
+        "competitive_total": null,
+        "diagnostic_process_wall_ns": 25444659000,
+        "dispatched": true,
+        "disposition": "BOUNDED_INCOMPLETE_REPORT",
+        "exit_code": 2,
+        "folded_columns": 27,
+        "memory_policy": "poll-child-rss-and-kill-above-limit",
+        "pdp_outcome": "incomplete",
+        "pdp_stats": {
+          "eliminated": 0,
+          "exhausted": true,
+          "infeasible_branches": 1532,
+          "max_degree_built": 3,
+          "oversize": 0,
+          "propagations": 13504,
+          "reductions": 4096,
+          "splits": 1539,
+          "unsupported": false
+        },
+        "sampled_peak_rss_bytes": 132890624,
+        "solver": "f5",
+        "usable_base_points": 66,
+        "worker_status": "incomplete"
+      }
+    ],
+    "schema_version": 1,
+    "scope": "disclosed-target one-query stage control; no competitive result",
+    "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+    "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+    "stage_b_opened": true,
+    "status": "FEASIBILITY_NOT_ESTABLISHED",
+    "worker_environment_policy": "PATH/HOME/TMPDIR/LANG/LC_ALL plus RAYON_NUM_THREADS=1",
+    "worker_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a"
+  },
+  "summary_sha256": "609956dd003e57c37593213003a4f8a2dde07acb7c990a93a9322e99b4d7c146"
+}

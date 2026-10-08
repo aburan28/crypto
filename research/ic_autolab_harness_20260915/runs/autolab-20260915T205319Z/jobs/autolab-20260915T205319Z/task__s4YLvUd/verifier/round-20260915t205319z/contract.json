@@ -1,0 +1,50 @@
+{
+  "bootstrap_draws": 2000,
+  "ci_level": 0.95,
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "confirmation_ratio": 0.8,
+  "created_unix": 1789505794.3462634,
+  "curve_diversity_limit": "One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.",
+  "equivalent_suite_reason": "Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; final suite has 60 inputs in pilot.",
+  "evaluator_sha256": {
+    "oracle.py": "1b426cce5d61f408b4e4b969dc2d0bd67e1b10681567cfeb38127596f3ca3949",
+    "tournament.py": "a173b15f2622a0573e900103b13d6d1d7f2678cc58afdb76920f4ac34a5ff40d"
+  },
+  "evidence_scope": "bounded public-hash ECDLP configuration tournament",
+  "family_wide_or_scaling_claim": false,
+  "host": {
+    "machine": "x86_64",
+    "node": "2084b3d106f4",
+    "processor": "x86_64",
+    "release": "6.17.0-1020-aws",
+    "system": "Linux",
+    "version": "#20~24.04.1-Ubuntu SMP Mon Jul 13 20:40:21 UTC 2026"
+  },
+  "limits": {
+    "cpu": 7,
+    "max_profiled_jobs": 1400,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 30.0,
+    "worker_threads": 1
+  },
+  "max_cell_ratio": 1.1,
+  "metric_class": "implementation_instruction_cost",
+  "native_timings": "paired native reruns retained; no runtime claim from profiled elapsed time",
+  "pinned_files": {
+    "calibration.json": "d63ed8f9e1d29df6beac7328adf4c5d038cdf7f08dc3be8bd7f3a61892651c2b",
+    "candidates.json": "c9f95333f48ec79048fa195ad1c149ba10662a3e1081d3480ccc703db2e49782",
+    "fixtures.json": "328da5a8e1e9c897f09129b1324ef64e9e050d7ee41b0700f1260296b2b28bda",
+    "source-manifest.json": "7ed4f9183b083c48798efb91d0a1809f888b53b3adc77fa0c72c3862de14ad50",
+    "source_candidates/autolab/source-manifest.json": "8eaf27ac9daad723b9157a6f0d23f5a21e94913bd7cf1cb2b67373b495a15835",
+    "source_candidates/autolab/worker": "3266bd98d8b9addd7c870dc3a9985c34100455f404f0823c45cb326ad91ba143",
+    "worker": "693c2456fbd885e223b5f51b1944bc3215679d82205ea603273e8ac581e8f63c"
+  },
+  "profile": "pilot",
+  "profiler_version": "valgrind-3.22.0",
+  "repetitions": 3,
+  "schema_version": 1,
+  "seed": 5965255163620561876,
+  "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55",
+  "target_count": 1,
+  "unit": "valgrind-3.22-amd64-Ir"
+}

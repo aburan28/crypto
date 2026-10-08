@@ -1,0 +1,32 @@
+{
+  "algorithm_seed": 2026093032,
+  "config": {
+    "batch_trials": 8,
+    "conflict_budget": 100000,
+    "groebner_degree": 3,
+    "linear_algebra": "dense",
+    "max_trials": 512,
+    "node_budget": 8192,
+    "solver": "f5",
+    "summands": 3
+  },
+  "question": "development-source-control",
+  "resources": {
+    "cpu_workers": 1,
+    "host_class": "physical-macos-arm64",
+    "memory_limit_bytes": null,
+    "target_count": 1,
+    "total_wall_limit_seconds": 7200
+  },
+  "run_number": 0,
+  "target_input": {
+    "input_law": "one-supplied-public-point; seed-is-provenance",
+    "known_scalar_supplied": false,
+    "point": [
+      52411,
+      72106
+    ],
+    "point_was_previously_supplied": true,
+    "seed": null
+  }
+}

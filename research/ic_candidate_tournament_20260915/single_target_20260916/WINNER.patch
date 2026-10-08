@@ -1,0 +1,594 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -786,6 +786,64 @@
+     }
+ }
+ 
++
++/// Exact odd-degree point lifting for factor-base construction. General callers,
++/// target generation and rho retain the independent general implementation.
++fn factor_base_points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
++    let fast = FastCurve::new(curve);
++    factor_base_points_with_x_cached(curve, x, fast.as_ref())
++}
++
++fn factor_base_points_with_x_cached(
++    curve: &BinaryCurve, x: &F2mElement, fast: Option<&FastCurve>,
++) -> Vec<BinaryPoint> {
++    if curve.m % 2 == 0 {
++        return points_with_x(curve, x);
++    }
++    let Some(fc) = fast else {
++        return points_with_x(curve, x);
++    };
++    let f = &fc.field;
++    let xw = f.from_element(x);
++    if xw == 0 {
++        return vec![fc.lower(FastPoint::affine(0, f.sqr_k(fc.b, curve.m - 1)))];
++    }
++    let inverse = f.inv(xw);
++    let rhs = xw ^ fc.a ^ f.mul(fc.b, f.sqr(inverse));
++    let mut acc = rhs;
++    let mut u = rhs;
++    for _ in 0..(curve.m - 1) / 2 {
++        acc = f.sqr(f.sqr(acc));
++        u ^= acc;
++    }
++    // Checking the equation also rejects trace-one right-hand sides.
++    if f.sqr(u) ^ u != rhs { return Vec::new(); }
++    let p = FastPoint::affine(xw, f.mul(xw, u));
++    vec![fc.lower(p), fc.lower(fc.neg(p))]
++}
++
++#[cfg(test)]
++mod tournament_lift_equivalence {
++    use super::*;
++    #[test]
++    fn fast_factor_base_lift_matches_general_including_order() {
++        let mut checked = 0;
++        for (n, a) in [(5,0), (7,1), (13,0), (17,1), (19,0), (19,1), (23,0), (31,1)] {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue; };
++            let mask = (1u64 << n) - 1;
++            let count = if n <= 13 { 1u64 << n } else { 512 };
++            for i in 0..count {
++                let raw = if n <= 13 { i } else { i.wrapping_mul(0x9e3779b97f4a7c15) & mask };
++                let x = F2mElement::from_biguint(&BigUint::from(raw), n);
++                assert_eq!(factor_base_points_with_x(&kc.curve, &x), points_with_x(&kc.curve, &x),
++                           "degree {n}, a={a}, x={raw}");
++                checked += 1;
++            }
++        }
++        assert!(checked > 8000);
++    }
++}
++
+ /// The scalar `λ` with `π(Q) = [λ]Q` for all `Q ∈ ⟨G⟩`.
+ ///
+ /// `π` satisfies its characteristic equation `π² − tπ + 2 = 0`, so on
+@@ -957,12 +1015,17 @@
+     /// operations. Multiplicity is irrelevant to exact-summand reachability
+     /// because decomposition permits repeated factor-base points.
+     pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
++        let fast = FastCurve::new(&kc.curve);
+         let mut classes = HashMap::new();
+         for orbit in &self.signed_orbits {
+             let Some(&representative) = orbit.first() else {
+                 continue;
+             };
+-            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
++            let mut current = if let Some(fc) = &fast {
++                fc.lower(fc.mul(fc.lift(&self.points[representative]), &kc.subgroup_order))
++            } else {
++                kc.mul(&self.points[representative], &kc.subgroup_order)
++            };
+             for _ in 0..kc.n {
+                 for candidate in [current.clone(), point_neg(&current)] {
+                     classes.entry(point_key(&candidate)).or_insert(candidate);
+@@ -1747,7 +1810,7 @@
+     // Each round adds a batch of orbits and rebuilds, so the loop stops at
+     // the first base that reaches `points` rather than overshooting by a
+     // whole batch's worth of Frobenius closure.
+-    let batch = 8usize;
++    let batch = 1usize;
+     let cap = 1u64 << kc.n;
+     let mut drawn = 0u64;
+     let budget = 1024u64 * points as u64;
+@@ -1772,7 +1835,7 @@
+                 ));
+             }
+             let x = F2mElement::from_biguint(&BigUint::from(rng.gen_range(1..cap)), kc.n);
+-            let Some(point) = points_with_x(&kc.curve, &x).into_iter().next() else {
++            let Some(point) = factor_base_points_with_x_cached(&kc.curve, &x, Some(&curve)).into_iter().next() else {
+                 continue;
+             };
+             // Multiply by the cofactor rather than rejecting: [h]P has
+@@ -1907,71 +1970,17 @@
+     subspace: Vec<F2mElement>,
+     domain: FactorBaseDomain,
+ ) -> Option<FrobeniusFactorBase> {
++    let fast = FastCurve::new(&kc.curve);
+     let mut points: Vec<BinaryPoint> = Vec::new();
+     for x in &subspace {
+-        for p in points_with_x(&kc.curve, x) {
++        for p in factor_base_points_with_x_cached(&kc.curve, x, fast.as_ref()) {
+             points.push(p);
+         }
+     }
+ 
+-    // Index points for the orbit walk and for relation lookups.
+-    let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
+-    for (i, p) in points.iter().enumerate() {
+-        index_of.insert(point_key(p), i);
+-    }
+-
+-    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
+-    let mut orbits: Vec<Vec<usize>> = Vec::new();
+-    for start in 0..points.len() {
+-        if orbit_of[start].0 != usize::MAX {
+-            continue;
+-        }
+-        let o = orbits.len();
+-        let mut cycle = Vec::new();
+-        let mut cur = points[start].clone();
+-        let mut k = 0u32;
+-        loop {
+-            let idx = *index_of.get(&point_key(&cur))?;
+-            if orbit_of[idx].0 != usize::MAX {
+-                break;
+-            }
+-            orbit_of[idx] = (o, k);
+-            cycle.push(idx);
+-            cur = kc.frobenius(&cur);
+-            k += 1;
+-        }
+-        orbits.push(cycle);
+-    }
+-
+-    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+-    let mut signed_orbits = Vec::new();
+-    for start in 0..points.len() {
+-        if signed_orbit_of[start].0 != usize::MAX {
+-            continue;
+-        }
+-        let signed_orbit = signed_orbits.len();
+-        let mut members = Vec::new();
+-        let mut current = points[start].clone();
+-        for k in 0..kc.n {
+-            for (negated, point) in [(false, current.clone()), (true, point_neg(&current))] {
+-                let index = *index_of.get(&point_key(&point))?;
+-                if signed_orbit_of[index].0 == usize::MAX {
+-                    signed_orbit_of[index] = (signed_orbit, k, negated);
+-                    members.push(index);
+-                } else if signed_orbit_of[index].0 != signed_orbit {
+-                    return None;
+-                }
+-            }
+-            current = kc.frobenius(&current);
+-        }
+-        if current != points[start] {
+-            return None;
+-        }
+-        signed_orbits.push(members);
+-    }
+-    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
+-        return None;
+-    }
++    let (orbits, orbit_of, signed_orbits, signed_orbit_of) =
++        factor_base_orbits_fast(kc, &points)
++            .or_else(|| factor_base_orbits_general(kc, &points))?;
+ 
+     Some(FrobeniusFactorBase {
+         domain,
+@@ -1986,6 +1995,158 @@
+         signed_orbits,
+         signed_orbit_of,
+     })
++}
++
++type FactorBaseOrbitTables = (
++    Vec<Vec<usize>>, Vec<(usize, u32)>, Vec<Vec<usize>>, Vec<(usize, u32, bool)>,
++);
++
++fn factor_base_orbits_general(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Option<FactorBaseOrbitTables> {
++    // Index points for the orbit walk and for relation lookups.
++    let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
++    for (i, p) in points.iter().enumerate() {
++        index_of.insert(point_key(p), i);
++    }
++
++    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
++    let mut orbits: Vec<Vec<usize>> = Vec::new();
++    for start in 0..points.len() {
++        if orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let o = orbits.len();
++        let mut cycle = Vec::new();
++        let mut cur = points[start].clone();
++        let mut k = 0u32;
++        loop {
++            let idx = *index_of.get(&point_key(&cur))?;
++            if orbit_of[idx].0 != usize::MAX {
++                break;
++            }
++            orbit_of[idx] = (o, k);
++            cycle.push(idx);
++            cur = kc.frobenius(&cur);
++            k += 1;
++        }
++        orbits.push(cycle);
++    }
++
++    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
++    let mut signed_orbits = Vec::new();
++    for start in 0..points.len() {
++        if signed_orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let signed_orbit = signed_orbits.len();
++        let mut members = Vec::new();
++        let mut current = points[start].clone();
++        for k in 0..kc.n {
++            for (negated, point) in [(false, current.clone()), (true, point_neg(&current))] {
++                let index = *index_of.get(&point_key(&point))?;
++                if signed_orbit_of[index].0 == usize::MAX {
++                    signed_orbit_of[index] = (signed_orbit, k, negated);
++                    members.push(index);
++                } else if signed_orbit_of[index].0 != signed_orbit {
++                    return None;
++                }
++            }
++            current = kc.frobenius(&current);
++        }
++        if current != points[start] {
++            return None;
++        }
++        signed_orbits.push(members);
++    }
++    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
++        return None;
++    }
++
++    Some((orbits, orbit_of, signed_orbits, signed_orbit_of))
++}
++
++fn factor_base_orbits_fast(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Option<FactorBaseOrbitTables> {
++    let fc = FastCurve::new(&kc.curve)?;
++    let points: Vec<_> = points.iter().map(|point| fc.lift(point)).collect();
++    // Index points for the orbit walk and for relation lookups.
++    let mut index_of: HashMap<u64, usize> = HashMap::new();
++    for (i, p) in points.iter().enumerate() {
++        index_of.insert(p.pack(), i);
++    }
++
++    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
++    let mut orbits: Vec<Vec<usize>> = Vec::new();
++    for start in 0..points.len() {
++        if orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let o = orbits.len();
++        let mut cycle = Vec::new();
++        let mut cur = points[start].clone();
++        let mut k = 0u32;
++        loop {
++            let idx = *index_of.get(&cur.pack())?;
++            if orbit_of[idx].0 != usize::MAX {
++                break;
++            }
++            orbit_of[idx] = (o, k);
++            cycle.push(idx);
++            cur = fc.frobenius_k(cur, kc.k);
++            k += 1;
++        }
++        orbits.push(cycle);
++    }
++
++    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
++    let mut signed_orbits = Vec::new();
++    for start in 0..points.len() {
++        if signed_orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let signed_orbit = signed_orbits.len();
++        let mut members = Vec::new();
++        let mut current = points[start].clone();
++        for k in 0..kc.n {
++            for (negated, point) in [(false, current.clone()), (true, fc.neg(current))] {
++                let index = *index_of.get(&point.pack())?;
++                if signed_orbit_of[index].0 == usize::MAX {
++                    signed_orbit_of[index] = (signed_orbit, k, negated);
++                    members.push(index);
++                } else if signed_orbit_of[index].0 != signed_orbit {
++                    return None;
++                }
++            }
++            current = fc.frobenius_k(current, kc.k);
++        }
++        if current.pack() != points[start].pack() {
++            return None;
++        }
++        signed_orbits.push(members);
++    }
++    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
++        return None;
++    }
++
++    Some((orbits, orbit_of, signed_orbits, signed_orbit_of))
++}
++
++#[cfg(test)]
++mod single_target_orbit_equivalence {
++    use super::*;
++    #[test]
++    fn packed_orbit_tables_preserve_order_and_rejection() {
++        for (n, a) in [(13, 0), (17, 1), (19, 0), (19, 1), (23, 0)] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            for seed in [7, 43, 97] {
++                let fb = build_subgroup_orbit_factor_base(&kc, seed, 6 * n as usize).unwrap();
++                assert_eq!(factor_base_orbits_fast(&kc, &fb.points),
++                           factor_base_orbits_general(&kc, &fb.points));
++                let broken = &fb.points[..fb.points.len()-1];
++                assert_eq!(factor_base_orbits_fast(&kc, broken),
++                           factor_base_orbits_general(&kc, broken));
++                assert!(factor_base_orbits_fast(&kc, broken).is_none());
++            }
++        }
++    }
+ }
+ 
+ /// Hashable identity of a point — the key of
+@@ -2315,7 +2476,7 @@
+     /// bytes per entry.  Returns `None` when the field is too wide to
+     /// pack a point into a `u64`.
+     pub fn build(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+-        Self::build_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
++        Self::build_folded_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
+     }
+ 
+     /// Bytes the entries of a table for this base would occupy.
+@@ -2408,8 +2569,8 @@
+         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+         let mut entries: Vec<(u64, u32, u32)> = (0..points.len())
+-            .into_par_iter()
+-            .flat_map_iter(|i| {
++            .into_iter()
++            .flat_map(|i| {
+                 let mut sums = Vec::with_capacity(points.len() - i);
+                 let mut scratch = BatchScratch::default();
+                 curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
+@@ -2418,7 +2579,7 @@
+                     .map(move |(offset, sum)| (sum.pack(), i as u32, (i + offset) as u32))
+             })
+             .collect();
+-        entries.par_sort_unstable();
++        entries.sort_unstable();
+         if entries.len() > u32::MAX as usize {
+             return None;
+         }
+@@ -2676,7 +2837,7 @@
+                 f(Self::canon_key_with(&curve, canon.as_ref(), p), orbit);
+             }
+         };
+-        (0..reps.len()).into_par_iter().for_each(|r| {
++        (0..reps.len()).into_iter().for_each(|r| {
+             each_row(r, &mut |key, _| {
+                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
+                 counts[bucket + 1].fetch_add(1, Ordering::Relaxed);
+@@ -2694,7 +2855,7 @@
+         let words = (1usize << filter_bits) / 64;
+         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+         let slots = rests.as_mut_ptr() as usize;
+-        (0..reps.len()).into_par_iter().for_each(|r| {
++        (0..reps.len()).into_iter().for_each(|r| {
+             each_row(r, &mut |key, orbit| {
+                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
+                 let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
+@@ -6445,6 +6606,13 @@
+     /// nothing but the curve and the table itself.
+     pub fn verify(&self, kc: &KoblitzCurve) -> bool {
+         let g = kc.generator();
++        if let Some(fc) = FastCurve::new(&kc.curve) {
++            let g = fc.lift(g);
++            return self.columns.iter().all(|(point, log)| {
++                *point != BinaryPoint::Infinity && log < &kc.subgroup_order
++                    && fc.mul(g, log) == fc.lift(point)
++            });
++        }
+         self.columns.iter().all(|(point, log)| {
+             *point != BinaryPoint::Infinity && log < &kc.subgroup_order && &kc.mul(g, log) == point
+         })
+@@ -6496,7 +6664,7 @@
+     kc: &KoblitzCurve,
+     fb: &FrobeniusFactorBase,
+     index_of: &HashMap<(BigUint, BigUint), usize>,
+-    field: &FieldStructure,
++    field: Option<&FieldStructure>,
+     pair: Option<&PairSumTable>,
+     opts: &KoblitzIcOptions,
+     target: &BinaryPoint,
+@@ -6511,7 +6679,7 @@
+                 kc,
+                 fb,
+                 index_of,
+-                field,
++                field.expect("algebraic strategy requires field structure"),
+                 target,
+                 opts.m,
+                 opts.engine,
+@@ -6524,7 +6692,7 @@
+                 kc,
+                 fb,
+                 index_of,
+-                field,
++                field.expect("algebraic strategy requires field structure"),
+                 target,
+                 opts.m,
+                 opts.max_models,
+@@ -6632,7 +6800,7 @@
+     fb: &'a FrobeniusFactorBase,
+     opts: &'a KoblitzIcOptions,
+     index_of: HashMap<(BigUint, BigUint), usize>,
+-    field: FieldStructure,
++    field: Option<FieldStructure>,
+     pair: PairSource<'a>,
+     /// Single-word curve and lifted generator when the field fits.
+     fast: Option<(FastCurve, FastPoint)>,
+@@ -6701,7 +6869,8 @@
+             fb,
+             opts,
+             index_of: fb.index_map(),
+-            field: FieldStructure::new(kc.n, &kc.curve.irreducible),
++            field: matches!(opts.strategy, DecompositionStrategy::Groebner | DecompositionStrategy::Sat)
++                .then(|| FieldStructure::new(kc.n, &kc.curve.irreducible)),
+             pair,
+             fast,
+             r_u64,
+@@ -6774,7 +6943,7 @@
+                         self.kc,
+                         self.fb,
+                         &self.index_of,
+-                        &self.field,
++                        self.field.as_ref(),
+                         self.pair_table(),
+                         self.opts,
+                         &target,
+@@ -6905,6 +7074,11 @@
+     if rel.points.iter().any(|&i| i >= fb.points.len()) {
+         return false;
+     }
++    if let Some(fc) = FastCurve::new(&kc.curve) {
++        let sum = rel.points.iter().fold(FastPoint::INFINITY,
++            |sum, &i| fc.add(sum, fc.lift(&fb.points[i])));
++        return !sum.infinity && sum == fc.mul_u64(fc.lift(kc.generator()), rel.a);
++    }
+     let mut sum = BinaryPoint::Infinity;
+     for &i in &rel.points {
+         sum = kc.add(&sum, &fb.points[i]);
+@@ -7301,7 +7475,7 @@
+     projected: ProjectedSignedOrbitMap,
+     column_log: Vec<BigUint>,
+     index_of: HashMap<(BigUint, BigUint), usize>,
+-    field: FieldStructure,
++    field: Option<FieldStructure>,
+     /// Single-word curve and lifted generator when the field fits.
+     fast: Option<(FastCurve, FastPoint)>,
+     h: BigUint,
+@@ -7309,6 +7483,15 @@
+ }
+ 
+ impl<'a> IndividualLogSolver<'a> {
++    fn verify_log(&self, q: &BinaryPoint, d: &BigUint) -> bool {
++        if d >= &self.kc.subgroup_order { return false; }
++        if let Some((fc, g)) = &self.fast {
++            fc.mul(*g, d) == fc.lift(q)
++        } else {
++            self.kc.mul(self.kc.generator(), d) == *q
++        }
++    }
++
+     /// `None` when the table's columns do not match the base's signed
+     /// orbits, a column has no logarithm, or the strategy needs a pair
+     /// table and none was supplied.
+@@ -7345,7 +7528,8 @@
+             projected,
+             column_log,
+             index_of: fb.index_map(),
+-            field: FieldStructure::new(kc.n, &kc.curve.irreducible),
++            field: matches!(opts.strategy, DecompositionStrategy::Groebner | DecompositionStrategy::Sat)
++                .then(|| FieldStructure::new(kc.n, &kc.curve.irreducible)),
+             fast,
+             h: &kc.cofactor % r,
+             r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
+@@ -7368,7 +7552,7 @@
+                     self.kc,
+                     self.fb,
+                     &self.index_of,
+-                    &self.field,
++                    self.field.as_ref(),
+                     self.pair,
+                     self.opts,
+                     &fc.lower(target),
+@@ -7388,7 +7572,7 @@
+             self.kc,
+             self.fb,
+             &self.index_of,
+-            &self.field,
++            self.field.as_ref(),
+             self.pair,
+             self.opts,
+             &target,
+@@ -7427,7 +7611,7 @@
+         let numerator = (sum + r - ha) % r;
+         let hb = (&self.h * &b) % r;
+         let d = (numerator * mod_inverse(&hb, r)?) % r;
+-        (kc.mul(kc.generator(), &d) == *q).then_some(d)
++        (self.verify_log(q, &d)).then_some(d)
+     }
+ 
+     /// **Walk the probes instead of drawing them.**
+@@ -7461,10 +7645,23 @@
+         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x57_41_4c_4b_44_45_53_00);
+         let a0 = rng.gen_range(1..self.r_u64);
+         let b = rng.gen_range(1..self.r_u64);
++        if report.trials >= self.opts.max_trials { return Some(None); }
++        let initial = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
++        // Many targets descend at the first state. Pay for that probe before
++        // initializing the other 63 walks; keep the same coefficients/order.
++        report.trials += 1;
++        if initial.infinity {
++            if let Some(d) = solve_for_d(&BigUint::from(a0), &BigUint::from(b), &self.kc.subgroup_order) {
++                if self.kc.mul(self.kc.generator(), &d) == *q { return Some(Some(d)); }
++            }
++        } else if let Some(idxs) = pair.decompose_fast(initial, m) {
++            if let Some(d) = self.logarithm_from(q, &idxs, a0, b) { return Some(Some(d)); }
++        }
++        if report.trials >= self.opts.max_trials { return Some(None); }
+         let stride_point = fc.mul_u64(*g, stride);
+         let mut coefficients: Vec<(u64, u64)> = Vec::with_capacity(WALKS);
+         let mut states: Vec<FastPoint> = Vec::with_capacity(WALKS);
+-        let mut state = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
++        let mut state = initial;
+         let mut a = a0;
+         for _ in 0..WALKS {
+             coefficients.push((a, b));
+@@ -7475,8 +7672,11 @@
+         let step = vec![*g; WALKS];
+         let mut advanced = Vec::with_capacity(WALKS);
+         let mut scratch = BatchScratch::default();
++        let mut skip_first = true;
+         while report.trials < self.opts.max_trials {
+             for (state, (a, b)) in states.iter().zip(coefficients.iter()) {
++                if skip_first { skip_first = false; continue; }
++                if report.trials >= self.opts.max_trials { return Some(None); }
+                 report.trials += 1;
+                 if state.infinity {
+                     // [a]G + [b]Q = O already yields d.
+@@ -7506,7 +7706,7 @@
+     }
+ 
+     /// The logarithm of `q` to the base's generator, verified as
+-    /// `[d]G = Q` in the general arithmetic before it is returned.
++    /// `[d]G = Q` in the curve arithmetic before it is returned.
+     pub fn solve(&self, q: &BinaryPoint) -> Option<(BigUint, IndividualLogReport)> {
+         let kc = self.kc;
+         let r = &kc.subgroup_order;
+@@ -7539,7 +7739,7 @@
+                 Probe::Degenerate => {
+                     // Degenerate relation [a]G + [b]Q = O already yields d.
+                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+-                        if kc.mul(g, &d) == *q {
++                        if self.verify_log(q, &d) {
+                             report.log = Some(d.clone());
+                             return Some((d, report));
+                         }
+@@ -7572,7 +7772,7 @@
+                 continue;
+             };
+             let d = (numerator * hb_inv) % r;
+-            if kc.mul(g, &d) == *q {
++            if self.verify_log(q, &d) {
+                 report.log = Some(d.clone());
+                 return Some((d, report));
+             }

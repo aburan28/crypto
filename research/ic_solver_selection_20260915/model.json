@@ -1,0 +1,121 @@
+{
+  "arms": {
+    "pairs": 0.0,
+    "sat-medium": 0.5,
+    "sat-short": 0.1
+  },
+  "domains": {
+    "1c25a1c35217298fb82bb68ca3000ad99c28223fa0517ef2fefe4b8f90580fe5": {
+      "direct_target": [
+        0,
+        1
+      ],
+      "rank_fraction": [
+        0.0,
+        0.25
+      ],
+      "x_frobenius_distance": [
+        8,
+        20
+      ],
+      "x_weight": [
+        8,
+        16
+      ]
+    },
+    "2799e14b5dbfcf22f68f3c6f38850325302db68753625adb9abac04c50f37a65": {
+      "direct_target": [
+        0,
+        1
+      ],
+      "rank_fraction": [
+        0.0,
+        0.5
+      ],
+      "x_frobenius_distance": [
+        2,
+        6
+      ],
+      "x_weight": [
+        2,
+        6
+      ]
+    },
+    "96090ec11fe66cd9e09d6e76ed7f52729d3b0f7c318b89421b62ca5b0fee7dc8": {
+      "direct_target": [
+        0,
+        1
+      ],
+      "rank_fraction": [
+        0.0,
+        0.5
+      ],
+      "x_frobenius_distance": [
+        2,
+        6
+      ],
+      "x_weight": [
+        2,
+        6
+      ]
+    },
+    "997eabafb68e6cb2ac45154906c065080e98daf3ed0701ceb41f5a03d9d36ed6": {
+      "direct_target": [
+        0,
+        1
+      ],
+      "rank_fraction": [
+        0.0,
+        0.875
+      ],
+      "x_frobenius_distance": [
+        4,
+        16
+      ],
+      "x_weight": [
+        6,
+        16
+      ]
+    }
+  },
+  "fallback": "pairs",
+  "features": [
+    "x_weight",
+    "x_frobenius_distance",
+    "rank_fraction",
+    "direct_target"
+  ],
+  "format": "fixed-ic-selector-v1",
+  "training": {
+    "best_static_arm": "pairs",
+    "dataset_sha256": "f294ec691b91b8959f7730ed815b26fd9bbbd091a4bf8305022c1ec4bfad01a2",
+    "natural_orbits": 116,
+    "natural_queries": 195,
+    "penalty_ns": 3341569.362962963,
+    "planted_excluded": 16
+  },
+  "tree": {
+    "arm": "pairs"
+  },
+  "validation": {
+    "candidate": {
+      "elapsed_ns": 132431756,
+      "ns_per_rank_gain": 4271992.129032258,
+      "penalized_loss_ns": 195921573.89629626,
+      "queries": 50,
+      "rank_gains": 31,
+      "verified": 31
+    },
+    "constant": {
+      "elapsed_ns": 132431756,
+      "ns_per_rank_gain": 4271992.129032258,
+      "penalized_loss_ns": 195921573.89629626,
+      "queries": 50,
+      "rank_gains": 31,
+      "verified": 31
+    },
+    "decision": "constant_no_routing_gain",
+    "gate": 0.05,
+    "tree_loss_improvement": 0.0
+  }
+}

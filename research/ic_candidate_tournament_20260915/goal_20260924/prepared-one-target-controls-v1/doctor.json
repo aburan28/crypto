@@ -1,0 +1,58 @@
+{
+  "source_root": "/Volumes/SSD990/crypto/worktrees/ic-f5-source-bound-result-v2-20260930",
+  "source_files": {
+    "Cargo.toml": true,
+    "Cargo.lock": true,
+    "examples/ic_tournament_worker.rs": true,
+    "src/cryptanalysis/koblitz_index_calculus.rs": true
+  },
+  "host": {
+    "system": "Darwin",
+    "node": "Adams-MacBook-Pro.local",
+    "release": "25.6.0",
+    "version": "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "native_build_ready": true,
+  "instruction_protocol_ready": false,
+  "valgrind": null,
+  "scientific_admission": "Prepared optimized schema-3 and source-bound generic-v1 workers have independent stage checks. Accepted generic/reference and observer development studies do not qualify F4/F5 or SAT: their registered complete-solve campaign requires frozen replay, natural-query audit, and the two-family gate.",
+  "baseline_quality": "Requires fresh rho sensitivity screen and arithmetic equivalence tests; no global-best certification.",
+  "native_scope": "Development diagnostic; no operation-count or hardware-independent speedup claim.",
+  "stages": {
+    "factor_base": [
+      "subgroup_orbits",
+      "factor",
+      "divisor",
+      "frobenius_union",
+      "pruned",
+      "two_torsion_saturated"
+    ],
+    "pdp": [
+      "pair_table",
+      "enumerate",
+      "f4",
+      "f5",
+      "inherited_f4",
+      "sat_xor",
+      "sat_cnf"
+    ],
+    "relation_processing": [
+      "verify",
+      "deduplicate",
+      "rank over subgroup scalar field"
+    ],
+    "linear_algebra": [
+      "dense",
+      "sparse filtering and block Wiedemann"
+    ],
+    "descent": [
+      "verified factor-base relation per target"
+    ],
+    "reference": [
+      "signed Frobenius rho, packed arithmetic, batched inversions"
+    ],
+    "external_adapters": "WDSat/GPU/other solvers require executable pinning, equivalent certificates and child/device accounting before admission."
+  }
+}

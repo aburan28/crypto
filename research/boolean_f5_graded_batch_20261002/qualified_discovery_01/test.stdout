@@ -1,0 +1,14 @@
+
+running 9 tests
+test campaign::tests::bootstrap_lower_is_deterministic ... ok
+test campaign::tests::cpu_sibling_ranges_are_parsed_exactly ... ok
+test campaign::tests::development_receipts_replay_against_native_reference ... ok
+test campaign::tests::fixed_fixture_recurrence_matches_prior_native_study ... ok
+test campaign::tests::resource_gate_rejects_contended_receipt ... ok
+test tests::candidate_matches_baseline_or_uses_exact_fallback ... ok
+test tests::combinadic_basis_matches_numeric_column_order ... ok
+test tests::development_n24_batch_timing ... ignored, development timing only; registered seeds must remain untouched
+test tests::fixed_quartic_projection_ignores_affine_tail ... ok
+
+test result: ok. 8 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.78s
+

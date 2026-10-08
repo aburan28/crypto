@@ -1,0 +1,77 @@
+{
+  "valid": true,
+  "rawSha256": "499287b3dff4a7315a0ae9343d254aaa157ace5fffd810d85e49838f51b29758",
+  "sourceFreezeSha256": "ac8815cb3d170fa333bd49f36945e018543db2f66119700af7ba2b2aed569b62",
+  "gitHead": "ddeaa5484a3285f1d981cab1072d2dd4e610e8f5",
+  "frozenSourceFiles": 139,
+  "remoteDigestFiles": 65,
+  "sourceSha256": "e4fc12d1774c9698c892c78d1fe19ed8e10387741b6a70c17fd28f46da1edb10",
+  "linkedBinarySha256": "dd7e9840f13e664f2ac373c94f9c744dfd1095aafe27981adf349f39824c3294",
+  "compiler": "13.3.73",
+  "tile": 256,
+  "generatedProduct": true,
+  "registers": 128,
+  "stackBytes": 0,
+  "sharedBytes": 0,
+  "summaries": {
+    "benchmark": {
+      "medianM": 7088.708,
+      "minM": 7071.418,
+      "maxM": 7132.367
+    },
+    "collectionSummary": {
+      "medianM": 6962.796,
+      "minM": 6962.669,
+      "maxM": 6963.781
+    }
+  },
+  "samples": [
+    {
+      "phase": "benchmark",
+      "rateM": 7132.367,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "benchmark",
+      "rateM": 7088.708,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "benchmark",
+      "rateM": 7071.418,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "rateM": 6962.796,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "rateM": 6962.669,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "rateM": 6963.781,
+      "updates": 201863462912,
+      "dropped": 0
+    }
+  ],
+  "correctnessGatesPassed": true,
+  "ownerSession": 31241,
+  "ownerExitCode": 0,
+  "app": "ap-Qub4UCuINqHaQw0VjKJxYe",
+  "limits": [
+    "Separate-allocation public-command audit, not an additional paired gain.",
+    "Corpus counts and sizes are retained; content equality comes from the separate controlled comparison.",
+    "Source and binary identities are reported before checks. This native artifact does not retain post-run hashes or full SASS.",
+    "The remote aggregate excludes root packed_audit.py; its bytes are retained in the local committed-source manifest.",
+    "GPU state is a pre-validation snapshot, not a sustained clock trace."
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "evidence": "calculated_model_not_measured",
+  "order": 1152921504606846976,
+  "signed_factor_base_M": 1048576,
+  "independent_columns_B": 524288,
+  "m": 3,
+  "rho_orbit": 2,
+  "rho_rate_steps_per_s": 1000000.0,
+  "lambda_heuristic": 0.16666666666666674,
+  "p_heuristic": 0.15351827510938598,
+  "p_counting_upper_bound_uniform_target": 0.16666714350412803,
+  "p_used": 0.15351827510938598,
+  "p_source": "heuristic",
+  "usable_fraction": 1.0,
+  "rows_target_not_rank_guarantee": 576717,
+  "expected_attempts": 3756666.7524701753,
+  "rho_expected_steps": 951578915.4135563,
+  "attempt_count_floor_first_relation_mode": 3460292.1000185967,
+  "count_floor_scope": "uniform independent targets; at most one fresh row per attempt",
+  "rho_expected_s": 951.5789154135564,
+  "other_attack_cost_s": 0.0,
+  "other_costs_already_exhaust_rho_budget": false,
+  "full_dlp_S": null,
+  "measured_rho_ratio": null,
+  "attempt_budget_s": 0.0002533040533307489,
+  "attempt_budget_rho_step_equivalents": 253.30405333074887,
+  "assumed_relation_matrix_row_weight": 3,
+  "assumed_matvec_factor": 2.0,
+  "stylized_relation_matrix_mod_r_coefficient_accumulations": 1814194814976.0,
+  "matrix_operations_are_not_GF2_operations": true,
+  "warnings": [
+    "Poisson success is a heuristic; record empirical success and rank.",
+    "Matrix update estimate is not automatically included in other_s; supply measured matrix time.",
+    "A coefficient accumulation can be an addition for coefficients +/-1; it is not always a full modular multiplication.",
+    "All rho rates must match the curve, quotient and hardware being compared."
+  ],
+  "macaulay_examples": [
+    {
+      "variables": 30,
+      "degree": 4,
+      "boolean": true,
+      "column_universe": 31931,
+      "hypothetical_square_bit_matrix_GiB": 0.11869575374294072,
+      "actual_F4_memory_prediction": false
+    },
+    {
+      "variables": 30,
+      "degree": 5,
+      "boolean": true,
+      "column_universe": 174437,
+      "hypothetical_square_bit_matrix_GiB": 3.5423164918320253,
+      "actual_F4_memory_prediction": false
+    },
+    {
+      "variables": 30,
+      "degree": 6,
+      "boolean": true,
+      "column_universe": 768212,
+      "hypothetical_square_bit_matrix_GiB": 68.70246456749737,
+      "actual_F4_memory_prediction": false
+    }
+  ]
+}

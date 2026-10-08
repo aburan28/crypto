@@ -1,0 +1,53 @@
+{
+ "schema_version": 1,
+ "name": "k1n59-cofactor-projected-standard-l14-full-public-59001-stage131",
+ "curve": {
+  "degree": 59,
+  "curve_a": 1
+ },
+ "summands": 3,
+ "descent_summands": 2,
+ "collection_window": 1024,
+ "solver": "pair_table",
+ "pair_table_tier": "compact",
+ "seed": 59031,
+ "max_trials": 100000000,
+ "linear_algebra": {
+  "mode": "sparse",
+  "sparse": {
+   "wiedemann": {
+    "block_m": 4,
+    "block_n": 4
+   },
+   "filter": {
+    "target_excess": 32,
+    "merge_max_weight": 8
+   }
+  }
+ },
+ "collection": {
+  "unit_trials": 100000,
+  "units": 48,
+  "max_units": 64
+ },
+ "baseline": {
+  "rho": true,
+  "rho_seed": 5929075965221491791,
+  "rho_max_iterations": 268435456
+ },
+ "factor_base": {
+  "mode": "spec",
+  "spec": {
+   "kind": "cofactor_projected",
+   "parent": {
+    "kind": "standard_subspace",
+    "dimension": 14
+   }
+  }
+ },
+ "targets": [
+  {
+   "public_hash_seed": 59001
+  }
+ ]
+}

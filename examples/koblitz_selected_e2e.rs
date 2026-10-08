@@ -65,6 +65,7 @@ fn main() {
     let sampler_seed = 0xe2e0_0000_0000_0000u64 ^ run_seed;
     let options = KoblitzIcOptions {
         m: 3,
+        descent_m: None,
         extra_relations: 2,
         max_trials: 64,
         seed: sampler_seed,

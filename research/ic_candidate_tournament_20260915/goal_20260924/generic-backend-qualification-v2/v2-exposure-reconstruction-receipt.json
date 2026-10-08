@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "status": "DETERMINISTIC_RECONSTRUCTION_AND_PREPARE_REPLAY_MATCH",
+  "censored_campaign_seed": 2026092902,
+  "frozen_execution_checkout": "765c3c5f19032bd852163805f257c56babef2040",
+  "workflow_run": "36580669479",
+  "method": "reconstruct_v2_exposures.py plus full tournament.py prepare --qualification --seed 2026092902 at the pinned worker/history/EXPOSED/lost-campaign path; stopped before measurement",
+  "registration_panel_sha256": "d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8",
+  "prior_censored_exposures_sha256": "a728677b199eac02800d8338204d5306f391ec5da757c910bec1e51955fe7b41",
+  "export_path": "lost-v2-campaign-exposures.json",
+  "export_sha256": "0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54",
+  "reconstructed_tournament_fixtures_sha256": "6592559cacee6d01d09041bc375fd38fe6182d102eb0a8cde7354c0698d08be9",
+  "independent_export_path": "independent-v2-prepare-replay-fixtures.json",
+  "independent_export_sha256": "e7af64f1afcda01c2db4238375d7467adc651fd6513acd5d9c7e7434eff95f6d",
+  "accepted_points": 25,
+  "accepted_points_equal": true,
+  "overlap_with_first_run_accepted_points": 0,
+  "second_local_reconstruction_byte_identical": true
+}

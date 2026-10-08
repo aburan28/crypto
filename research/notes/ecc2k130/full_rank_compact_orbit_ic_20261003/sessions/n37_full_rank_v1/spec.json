@@ -1,0 +1,36 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n37 compact-orbit full-rank continuation against early pin and strong rho",
+  "description": "Preregistered new-public-Q L0 operation-count gate. Same counted cold base and folded table in both IC arms; only incremental-Gauss completion differs. All IC and strong-rho native unpriced work remains a lower bound.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 37}],
+    "targets_per_curve": 8,
+    "target_seed": 202610030741,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "ic-early-pin", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000",
+      "oracle": "mitm-frobenius-counted:m=3",
+      "linalg": "incremental-gauss",
+      "targets": "walk",
+      "max_trials": "1000000"
+    }}},
+    {"name": "ic-full-rank", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000",
+      "oracle": "mitm-frobenius-counted:m=3",
+      "linalg": "incremental-gauss-full-rank",
+      "targets": "walk",
+      "max_trials": "1000000"
+    }}}
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610030742,
+    "isolation_required": "L0",
+    "timeout_seconds": 600
+  }
+}
