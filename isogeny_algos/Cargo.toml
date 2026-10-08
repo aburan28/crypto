@@ -1,0 +1,12 @@
+[package]
+name = "isogeny_algos"
+version = "0.1.0"
+edition = "2021"
+description = "Baseline implementations of isogeny-computation algorithms (Velu, Kohel, sqrt-Velu, Elkies/BMSS, Galbraith, GHS, Couveignes, Delfs-Galbraith) with a benchmark harness"
+
+# Standalone crate: keep it out of any parent workspace.
+[workspace]
+
+[profile.release]
+opt-level = 3
+debug = false
