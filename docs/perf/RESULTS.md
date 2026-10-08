@@ -349,7 +349,10 @@ PR #1242 (merge `6c046fbb`, base `cde09f88`, head `48529d3f`) was compared with 
 first parent by the same method as the four PRs above: callgrind `Ir`, one thread,
 133 kernels, every fingerprint equal (valid).  Its performance index is **1.106x**.
 It carries `gf2-fold-reduce` and this file; the instruction ratios agree with the
-merged-tree figures in the section above to within rounding.  Multiplying its
+merged-tree figures in the section above to within about 4% (largest on
+`pdp/enumerate_m2_n23` 1.92x there against 1.850x here, and
+`dlp/koblitz_signed_rho_k0_n41` 2.44x against 2.352x; the merged-tree figures use main
+at `441293ee` as the base, this section uses `cde09f88`).  Multiplying its
 per-kernel ratios into the earlier four gives the campaign index over five PRs,
 **2.107x**.
 
@@ -379,14 +382,20 @@ Largest kernel ratios in #1242 alone: `field_ec/koblitz_curve_mul_n53_1k` 9.01x,
 `dlp/koblitz_signed_rho_k0_n41` 2.35x, `pdp/mitm_m4_n31` 2.22x,
 `pdp/pair_table_build_n31_l10` 2.17x, `pdp/mitm_m3_n31` 2.09x,
 `pdp/enumerate_m3_n15` 2.04x; 23 of the 133 kernels carry a "faster" verdict and none
-carries "slower".  Two kernels read just under 1: `dlp/gaudry_schost_negation_demo32`
-0.989x and `dlp/rho_dp_zp_multi_q34_x3` 0.984x, both with a "neutral" verdict; they
-were not profiled, so they are not explained.
+carries "slower".  48 of the 133 kernels have a raw ratio below 1.0 (13 of them below
+0.999), all with a "neutral" verdict.  Only two read below 0.99:
+`dlp/gaudry_schost_negation_demo32` 0.9886x and `dlp/rho_dp_zp_multi_q34_x3` 0.9844x;
+the next are `fp_gb/sig_tower_kummer_m3_n9` 0.9931x and `fp_gb/sig_tower_kummer_m2_n12`
+0.9946x.  None of
+these was profiled, so they are not explained.
 
 Across the five PRs, the kernels that read below 0.99 in the product are the same three
 as before: `field_ec/ct_scalar_mul_p256_x16` 0.866x, `field_ec/ct_scalar_mul_secp256k1_x16`
-0.934x and `fp_gb/f4_pkm_kummer_m2_t5` 0.974x (see "Kernels below 0.99 in the campaign
-product" for the first two being an inlining artifact).  The largest product ratios are
+0.934x and `fp_gb/f4_pkm_kummer_m2_t5` 0.974x.  The section "Kernels below 0.99 in the
+campaign product" tabulates the four-PR figures (0.866x, 0.936x, 0.973x) and carries the
+evidence: the p256 flip was verified with callgrind as an inlining artifact, and the
+secp256k1 shift in #908 shows the same `add_mod`/`sub_mod` outlining in the profile
+taken for `ec-vartime-walks`.  The largest product ratios are
 `dlp/pohlig_hellman_smooth47` 239.26x, `pdp/build_system_m2_n23` 124.74x,
 `field_ec/ecdsa_verify_secp256k1_x4` 31.98x and `field_ec/point_scalar_mul_secp256k1_x8`
 31.95x; `pdp/enumerate_m3_n15` reaches 21.19x as the product of #908 and #1242.  Source:
