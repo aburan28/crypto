@@ -455,6 +455,11 @@ pub struct Solver {
     /// Maximum total conflicts before giving up. `u64::MAX` means
     /// no limit.
     pub conflict_budget: u64,
+    /// Wall-clock deadline; checked at every conflict alongside the
+    /// conflict budget, and `None` means no limit. A solve that reaches
+    /// it returns [`SolveResult::Unknown`], exactly as an exhausted
+    /// conflict budget does.
+    pub deadline: Option<std::time::Instant>,
     /// Set when `add_clause` detects UNSAT (empty clause or
     /// conflict-on-unit).  `solve()` short-circuits to UNSAT when set.
     is_unsat: bool,
@@ -614,6 +619,7 @@ impl Solver {
             conflicts_since_restart: 0,
             conflicts: 0,
             conflict_budget: u64::MAX,
+            deadline: None,
             is_unsat: false,
             xors: Vec::new(),
             epoch: 0,
@@ -1804,7 +1810,11 @@ impl Solver {
                 self.stats.conflict_level_sum += lvl;
                 self.stats.max_level = self.stats.max_level.max(lvl);
                 self.conflicts_since_restart += 1;
-                if self.conflicts >= self.conflict_budget {
+                if self.conflicts >= self.conflict_budget
+                    || self
+                        .deadline
+                        .is_some_and(|d| std::time::Instant::now() >= d)
+                {
                     return SolveResult::Unknown;
                 }
                 if self.trail_lim.is_empty() {

@@ -8126,7 +8126,7 @@ fn add_coordinate_domain(
 }
 
 /// Absolute trace F_(2^n) -> F_2 in the configured field representation.
-fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
+pub(crate) fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
     let mut t = F2mElement::zero(n);
     let mut power = x.clone();
     for _ in 0..n {
@@ -8150,6 +8150,10 @@ pub struct SatDecompositionOptions {
     pub trace_constraint: bool,
     /// Cumulative conflict cap across every model of one target.
     pub conflict_budget: u64,
+    /// Wall-clock cap across every model of one target; `None` is no
+    /// limit. Reaching it ends the attempt as exhausted, like the
+    /// conflict cap, so it can only lower the decided count.
+    pub wall_budget: Option<std::time::Duration>,
     /// Order the summands lexicographically by subspace code,
     /// `code(x_1) ≤ code(x_2) ≤ … ≤ code(x_m)`.  The summands are
     /// interchangeable, so if any decomposition exists a sorted one
@@ -8182,6 +8186,7 @@ impl Default for SatDecompositionOptions {
             restrict_to_factor_base: false,
             trace_constraint: true,
             conflict_budget: u64::MAX,
+            wall_budget: None,
             symmetry_breaking: false,
         }
     }
@@ -8347,6 +8352,7 @@ pub fn sat_decompose_with(
     // with `max_models` in the dozens that dominated the loop.
     let mut enc = encode_boolean_system_with(sys.n_vars, &equations, &[], options.encoding);
     enc.solver.conflict_budget = options.conflict_budget;
+    enc.solver.deadline = options.wall_budget.map(|d| std::time::Instant::now() + d);
     if options.symmetry_breaking {
         let ell = fb.subspace_basis.len();
         for i in 1..m {
@@ -8494,6 +8500,7 @@ fn sat_decompose_union_s4(
         options.encoding,
     );
     enc.solver.conflict_budget = options.conflict_budget;
+    enc.solver.deadline = options.wall_budget.map(|d| std::time::Instant::now() + d);
     let mut codes: Vec<u128> = fb
         .points
         .iter()

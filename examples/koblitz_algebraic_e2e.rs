@@ -313,6 +313,7 @@ fn main() {
             restrict_to_factor_base: true,
             trace_constraint: true,
             conflict_budget,
+            wall_budget: None,
             symmetry_breaking: false,
         },
         collapse_negation: true,

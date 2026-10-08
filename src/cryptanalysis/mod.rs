@@ -293,6 +293,7 @@ pub mod shor;
 pub mod sig_fp_tower;
 pub mod signal_ratchet;
 pub mod signature_corpus;
+pub mod smt_oracle;
 pub mod solinas_correlations;
 pub mod sparse_macaulay;
 pub mod statistical;
