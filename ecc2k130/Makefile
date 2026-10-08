@@ -21,6 +21,7 @@
 #   PACKED_TOP_HOIST  hoisted 3-bit product correction, bit-identical (default 0)
 #   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
 #   PACKED_FROM_REDUCED  5-word inverse of toPolynomial131 (default 0)
+#   PACKED_SIGMA_TABLE  fused-walk Frobenius steps from shared nibble tables (default 0)
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
@@ -104,6 +105,7 @@ PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
 PACKED_FROM_REDUCED ?= 0
+PACKED_SIGMA_TABLE ?= 0
 PACKED_CLMUL_FLAT ?= 0
 PACKED_PAIR_CLMUL ?= 0
 PACKED_ALU_SQR ?= 0
@@ -261,6 +263,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
        -DECC_PACKED_FROM_REDUCED=$(PACKED_FROM_REDUCED) \
+       -DECC_PACKED_SIGMA_TABLE=$(PACKED_SIGMA_TABLE) \
        -DECC_PACKED_CLMUL_FLAT=$(PACKED_CLMUL_FLAT) \
        -DECC_PACKED_PAIR_CLMUL=$(PACKED_PAIR_CLMUL) \
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
@@ -744,6 +747,13 @@ PRO6000_SIGMA_FUSED_KNOBS = BATCH=16 THREADS=256 MINBLOCKS=2 \
     PACKED_INLINE_POLY=3 SIGMA_FUSED=1 WITNESS=0 WALK_TABLE=0
 gpu-rtx-pro6000-sigma-fused:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+
+# The fused sigma walk with the Frobenius steps read from shared-memory nibble
+# tables (SIGMA-TABLE.md): 68 KB of shared memory per block, so one 512-thread
+# block per SM keeps the register budget and resident warps of the preset.
+PRO6000_SIGMA_TABLE_KNOBS = $(PRO6000_SIGMA_FUSED_KNOBS) THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1
+gpu-rtx-pro6000-sigma-table:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_TABLE_KNOBS)
 
 # Matched replay, A/A noise and five-pair confirmation; benchmark-only.
 bench-rtx-pro6000-sigma-fused:

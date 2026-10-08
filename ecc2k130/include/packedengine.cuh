@@ -37,8 +37,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #if ECC_PHASE_PROFILE
     double profWarpSteps = 0;
 #endif
+    uint32_t *sigmaTable = nullptr;
     PackedCudaEngine() { P = {}; }
     ~PackedCudaEngine() override {
+        cudaFree(sigmaTable);
 #if ECC_CYCLE_PROFILE
         if (P.cycleProfile) reportCycleProfile();
 #endif
@@ -74,7 +76,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
 #else
-    static size_t dynamicSharedBytes() { return 0; }
+    // The fused sigma walk's Frobenius nibble table, when compiled in.
+    static size_t dynamicSharedBytes() { return eccPacked131::SIGMA_SMEM_BYTES; }
     unsigned checkpointVersion() const override { return 2u + ECC_CKPT_BUMP; }
 #endif
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
@@ -285,6 +288,18 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     void setup(const Options &o, const u64 *px, const u64 *py, const u64 *qx, const u64 *qy) {
         prepareKernel();
+#if ECC_PACKED_SIGMA_TABLE
+        {
+            // Built from the host arithmetic the tests verify; every walk block
+            // stages this global copy into its shared memory.
+            std::vector<uint32_t> table(eccPacked131::SIGMA_TABLE_WORDS);
+            eccPacked131::buildSigmaTable(table.data());
+            CUDA_CHECK(cudaMalloc(&sigmaTable, table.size() * sizeof(uint32_t)));
+            CUDA_CHECK(cudaMemcpy(sigmaTable, table.data(), table.size() * sizeof(uint32_t), cudaMemcpyHostToDevice));
+            const uint32_t *device = sigmaTable;
+            CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::eccSigmaTableDevice, &device, sizeof(device)));
+        }
+#endif
         if (o.preferL1)
             CUDA_CHECK(cudaFuncSetCacheConfig(eccPacked131::walk, cudaFuncCachePreferL1));
         P.threads = o.threads; P.steps = o.steps; P.dpWeight = o.dpWeight;
@@ -370,6 +385,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
         printf("packed launch bounds: %d threads, %d min blocks\n", ECC_THREADS, ECC_MINBLOCKS);
+        printf("packed sigma table: %d (%zu dynamic shared bytes)\n", ECC_PACKED_SIGMA_TABLE,
+               size_t(eccPacked131::SIGMA_SMEM_BYTES));
 #if ECC_PACKED_SHARED_SIGMA
         int diagnosticDevice = -1, driverReservedShared = -1;
         CUDA_CHECK(cudaGetDevice(&diagnosticDevice));

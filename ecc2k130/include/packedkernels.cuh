@@ -376,6 +376,19 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_SIGMA_FUSED && ECC_PACKED_CHAINS != 1
 #error "ECC_SIGMA_FUSED requires one Montgomery chain"
 #endif
+#if ECC_PACKED_SIGMA_TABLE && !ECC_SIGMA_FUSED
+#error "ECC_PACKED_SIGMA_TABLE is implemented for the fused sigma walk only"
+#endif
+#if ECC_PACKED_SIGMA_TABLE
+// Dynamic shared memory for the Frobenius nibble table (SIGMA_TABLE_BYTES
+// plus 256 bytes of alignment slack); the engine sizes every walk launch and
+// publishes the global copy through this symbol.
+extern __shared__ __align__(256) uint32_t eccSigmaSmem[];
+static __device__ const uint32_t *eccSigmaTableDevice;
+static const size_t SIGMA_SMEM_BYTES = size_t(SIGMA_TABLE_BYTES) + 256;
+#else
+static const size_t SIGMA_SMEM_BYTES = 0;
+#endif
 #if ECC_TABLE_GLOBAL_HINTS && ECC_PACKED_CHAINS != 1
 #error "GPU-wide hints require one Montgomery chain"
 #endif
@@ -591,9 +604,9 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                                                  size_t id, int slot, int tid,
                                                  unsigned long long now, bool guard,
                                                  bool first, unsigned *denominators,
-                                                 P131 *prod) {
+                                                 P131 *prod, uint32_t sigmaBase) {
     const P131 x = fromPolynomial131(xp);
-#if !ECC_SIGMA_FUSED_LATE_Y
+#if !ECC_SIGMA_FUSED_LATE_Y && !ECC_PACKED_SIGMA_TABLE
     const P131 normalY = fromPolynomial131(yp);
 #endif
     const int hw = weight(x);
@@ -606,7 +619,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                 rec.seed = p.seed[id];
                 rec.iters = now - p.startIter[id];
                 toLimbs(x, rec.x);
-#if ECC_SIGMA_FUSED_LATE_Y
+#if ECC_SIGMA_FUSED_LATE_Y || ECC_PACKED_SIGMA_TABLE
                 const P131 reportY = fromPolynomial131(yp);
                 toLimbs(reportY, rec.y);
 #else
@@ -633,6 +646,12 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
     if (!p.dead[id])
         p.counts[eccScalarCountIndex(slot, j - 3, tid, p.threads)] += 1u;
 #endif
+#if ECC_PACKED_SIGMA_TABLE
+    // x + sigma^j(x) and y + sigma^j(y) straight from the polynomial
+    // coordinates: no normal-basis y, no swap network, no conversions back.
+    const P131 dp = sigmaPlusTable131(xp, j - 3, sigmaBase);
+    const P131 ep = sigmaPlusTable131(yp, j - 3, sigmaBase);
+#else
 #if ECC_SIGMA_FUSED_LATE_Y
     // Keep normal Y out of the report/guard branch's live range on the hot
     // DP-weight-zero path. A rare reported point converts once for the record
@@ -647,6 +666,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #endif
     const P131 dp = toPolynomial131(add131(x, sigmas.first));
     const P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+#endif
     if (!first) {
         const PolynomialPair pair = mulPolynomialPair131(*prod, ep, dp);
         store(p.pchain, slot, tid, p.threads, pair.first);
@@ -665,6 +685,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
+#if ECC_PACKED_SIGMA_TABLE
+    // Whole-block staging must precede the per-thread exit below.
+    const uint32_t sigmaBase = stageSigmaTable(eccSigmaTableDevice, eccSigmaSmem);
+#else
+    const uint32_t sigmaBase = 0;
+#endif
     if (tid >= p.threads) return;
     P131 prod;
     {
@@ -676,7 +702,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const size_t id = size_t(slot) * p.threads + tid;
             sigmaFusedSelect(p, load(p.x, slot, tid, p.threads),
                              load(p.y, slot, tid, p.threads), id, slot, tid,
-                             now, guard, slot == 0, denominators, &prod);
+                             now, guard, slot == 0, denominators, &prod, sigmaBase);
         }
     }
 #pragma unroll 1
@@ -714,7 +740,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             store(p.y, slot, tid, p.threads, ny);
             if (!last)
                 sigmaFusedSelect(p, nx, ny, id, slot, tid, now, guard, i == 0,
-                                 denominators, &next);
+                                 denominators, &next, sigmaBase);
         }
         if (!last) prod = next;
     }

@@ -21,6 +21,13 @@ corpora. Use `make gpu-rtx-pro6000-sigma-fused` for the native build and see
 [the result and receipts](benchmarks/sigma-fused/RESULTS.md). A matched B32/B64
 screen retains B16/T256/min2. The goal of 26 B/s remains unmet.
 
+On that fused schedule, reading the walk's Frobenius steps from
+[shared-memory nibble tables](SIGMA-TABLE.md) in polynomial coordinates
+(`PACKED_SIGMA_TABLE=1`, `make gpu-rtx-pro6000-sigma-table`, one 512-thread
+block per SM) measured **15.904710 B/s** against a 15.533439 B/s
+same-allocation control, paired median ratio 1.025148 over five pairs with
+identical sorted corpora; the headline A/A protocol has not yet been run on it.
+
 The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
 on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle
 hints across the batch first raised the path to 2.449169 B/s. Proving raw
