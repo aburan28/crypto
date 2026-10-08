@@ -436,6 +436,9 @@ impl<F: Field> Composer<F> {
         let cols = (0..n).map(|t| (0..s).map(|i| at(&pows[s - 1 - i], t)).collect()).collect();
         Composer { m, n, s, cols, giant }
     }
+    pub fn baby_steps(&self) -> usize {
+        self.s
+    }
     /// h(xi) mod g
     pub fn compose(&self, f: &F, h: &Poly<F>) -> Poly<F> {
         let h = rem(f, h, &self.m.m);
@@ -575,18 +578,41 @@ pub fn roots<F: Field>(f: &F, p: &Poly<F>, rng: &mut Rng) -> Vec<F::E> {
     out
 }
 
-/// Distinct-degree factorisation of a squarefree polynomial.
+/// Distinct-degree factorisation of a squarefree polynomial. Over fields of more than 2^24
+/// elements, x^(q^(k+1)) comes from x^(q^k) by composing with xi = x^q (`Composer`) instead
+/// of another exponentiation; the composer is rebuilt when a factor is split off. Small fields
+/// keep the short exponentiation.
 pub fn ddf<F: Field>(f: &F, p: &Poly<F>) -> Vec<(usize, Poly<F>)> {
     let mut out = vec![];
     let mut fp = monic(f, p);
     let mut h = x_poly(f);
     let mut k = 1usize;
+    let compose = f.q().bits() > 24;
+    let mut xi: Poly<F> = vec![];
+    let mut qm: Option<Composer<F>> = None;
     while deg(f, &fp) >= 2 * k as isize {
-        h = powmod_big(f, &h, &f.q(), &fp);
+        h = if !compose || k == 1 {
+            powmod_big(f, &h, &f.q(), &fp)
+        } else {
+            // sqrt(n) baby steps while few degrees have been tried (the loop usually ends early,
+            // once every factor is found); the full Q-matrix once k passes sqrt(n)
+            let n = fp.len() - 1;
+            let root = (n as f64).sqrt().ceil() as usize;
+            let s = if k > root { n.min(512) } else { root };
+            if qm.as_ref().is_some_and(|c| c.baby_steps() != s) {
+                qm = None;
+            }
+            qm.get_or_insert_with(|| Composer::with_baby_steps(f, &xi, &fp, s)).compose(f, &h)
+        };
+        if k == 1 {
+            xi = h.clone();
+        }
         let g = gcd(f, &fp, &sub(f, &h, &x_poly(f)));
         if deg(f, &g) > 0 {
             fp = monic(f, &divrem(f, &fp, &g).0);
             h = rem(f, &h, &fp);
+            xi = rem(f, &xi, &fp);
+            qm = None;
             out.push((k, g));
         }
         k += 1;
@@ -597,14 +623,29 @@ pub fn ddf<F: Field>(f: &F, p: &Poly<F>) -> Vec<(usize, Poly<F>)> {
     out
 }
 
-/// Equal-degree factorisation: split a product of degree-k irreducibles.
+/// Equal-degree factorisation: split a product of degree-k irreducibles. Over fields of at least
+/// 2^24 elements with k >= 2, the Frobenius images a^(q^i) in the norm a^(1 + q + ... +
+/// q^(k-1)) are compositions with xi = x^q mod g (Q-matrix, `Composer`) rather than k - 1
+/// exponentiations per attempt; xi is computed once and reduced into the recursive calls.
 pub fn edf<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<Poly<F>>) {
+    let xi = if k >= 2 && f.char() != 2 && f.q().bits() > 24 && deg(f, g) as usize > k {
+        Some(powmod_big(f, &x_poly(f), &f.q(), &monic(f, g)))
+    } else {
+        None
+    };
+    edf_with(f, g, k, rng, out, xi)
+}
+
+fn edf_with<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<Poly<F>>, xi: Option<Poly<F>>) {
     let d = deg(f, g);
     if d as usize == k {
         out.push(monic(f, g));
         return;
     }
     let half = f.q().sub_small(1).shr(1);
+    // k - 1 compositions per attempt: s = sqrt(k n) baby steps balances building against using
+    let s_bk = (((k * d as usize) as f64).sqrt().ceil() as usize).min(512);
+    let qm = xi.as_ref().map(|xi| Composer::with_baby_steps(f, xi, g, s_bk));
     loop {
         let a: Poly<F> = {
             let mut a: Poly<F> = (0..d as usize).map(|_| f.random(rng)).collect();
@@ -631,7 +672,10 @@ pub fn edf<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<
         let mut t = rem(f, &a, g);
         let mut s = t.clone();
         for _ in 1..k {
-            t = powmod_big(f, &t, &f.q(), g);
+            t = match &qm {
+                Some(c) => c.compose(f, &t),
+                None => powmod_big(f, &t, &f.q(), g),
+            };
             s = mulmod(f, &s, &t, g);
         }
         let b = powmod_big(f, &s, &half, g);
@@ -639,8 +683,11 @@ pub fn edf<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<
         let dd_deg = deg(f, &dd);
         if dd_deg > 0 && dd_deg < d {
             let (q, _) = divrem(f, g, &dd);
-            edf(f, &dd, k, rng, out);
-            edf(f, &monic(f, &q), k, rng, out);
+            let q = monic(f, &q);
+            let sub_xi = |m: &Poly<F>| xi.as_ref().map(|x| rem(f, x, m));
+            let (xd, xq) = (sub_xi(&dd), sub_xi(&q));
+            edf_with(f, &dd, k, rng, out, xd);
+            edf_with(f, &q, k, rng, out, xq);
             return;
         }
     }

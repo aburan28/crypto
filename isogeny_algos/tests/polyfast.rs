@@ -109,3 +109,44 @@ fn composer_matches_naive_and_frobenius_powers() {
     check(&Zp::new((1u64 << 61) - 1), 71);
     check(&FpM::<2>::from_dec("170141183460469231731687303715884105727"), 72);
 }
+
+/// Distinct-degree factorisation with composition Frobenius steps returns exactly what the
+/// exponentiation-per-degree version returns (random squarefree polynomials of degree 8..96,
+/// 61-bit and 127-bit fields).
+#[test]
+fn ddf_matches_exponentiation_ddf() {
+    fn naive<F: Field>(f: &F, p: &[F::E]) -> Vec<(usize, Vec<F::E>)> {
+        let mut out = vec![];
+        let mut fp = poly::monic(f, &p.to_vec());
+        let mut h = poly::x_poly(f);
+        let mut k = 1usize;
+        while poly::deg(f, &fp) >= 2 * k as isize {
+            h = poly::powmod_big(f, &h, &f.q(), &fp);
+            let g = poly::gcd(f, &fp, &poly::sub(f, &h, &poly::x_poly(f)));
+            if poly::deg(f, &g) > 0 {
+                fp = poly::monic(f, &poly::divrem(f, &fp, &g).0);
+                h = poly::rem(f, &h, &fp);
+                out.push((k, g));
+            }
+            k += 1;
+        }
+        if poly::deg(f, &fp) > 0 {
+            out.push((poly::deg(f, &fp) as usize, fp));
+        }
+        out
+    }
+    fn check<F: Field>(f: &F, seed: u64) {
+        let mut rng = Rng::new(seed);
+        for &n in &[8usize, 24, 60, 96] {
+            for _ in 0..2 {
+                let p = rand_poly(f, n + 1, &mut rng);
+                if poly::deg(f, &poly::gcd(f, &p, &poly::derivative(f, &p))) > 0 {
+                    continue;
+                }
+                assert_eq!(poly::ddf(f, &p), naive(f, &p), "n = {n}");
+            }
+        }
+    }
+    check(&Zp::new((1u64 << 61) - 1), 81);
+    check(&FpM::<2>::from_dec("170141183460469231731687303715884105727"), 82);
+}
