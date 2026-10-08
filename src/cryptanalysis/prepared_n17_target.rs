@@ -18,7 +18,7 @@ use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::time::Instant;
+use std::{collections::BTreeSet, time::Instant};
 
 // Reuse the audited independent arithmetic source unchanged. It does not call
 // the producer's curve/field operations. Both files must enter a future freeze.
@@ -31,6 +31,10 @@ mod oracle;
 
 const ORDER: u64 = 65587;
 const GENERATOR: [u64; 2] = [43693, 23339];
+
+#[path = "prepared_n17_target_sat.rs"]
+mod external_sat;
+pub use external_sat::{SatTargetBackend, SatTargetPlan};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -195,11 +199,13 @@ impl PreparedN17Target {
             .map(|&p| independent_point(&independent, p))
             .collect::<Result<Vec<_>, _>>()?;
         require(
-            geometry
-                .iter()
-                .filter(|&&p| independent.mul(p, 2).is_some())
-                .count()
-                == 62,
+            geometry.iter().copied().collect::<BTreeSet<_>>().len() == 63
+                && geometry
+                    .iter()
+                    .filter_map(|&p| independent.mul(p, 2))
+                    .collect::<BTreeSet<_>>()
+                    .len()
+                    == 62,
             "actual usable base count differs",
         )?;
         let opts = options(0, 1);
@@ -446,11 +452,11 @@ mod boundary_tests {
     };
     use std::sync::Mutex;
 
-    static CLOCK: Mutex<()> = Mutex::new(());
+    pub(super) static CLOCK: Mutex<()> = Mutex::new(());
 
     // Retained mathematics only. No old controller, capsule, worker or solver
     // is executed. These deliberately disclosed controls are never fresh data.
-    fn retained_math() -> Value {
+    pub(super) fn retained_math() -> Value {
         let old: Value = serde_json::from_str(include_str!(
             "../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/f5-preparation.json"
         )).unwrap();
