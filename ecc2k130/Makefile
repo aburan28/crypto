@@ -27,6 +27,8 @@
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
 #   PACKED_SQUARE_TABLE  lambda^2 with its reduced half from a shared table
 #                        (default 0; table walk only; ROOFLINE.md)
+#   SIGMA_SQUARE_TABLE  the same exact table for lambda^2 in the sigma-fused
+#                       walk only (default 0; benchmarks/sigma-square-table)
 #   PACKED_INV_POLY  inversion accumulator kept in the polynomial basis
 #                    (default 0; 2 = link product out of line; ROOFLINE.md)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
@@ -51,6 +53,8 @@
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
 #   PACKED_CHAINS  independent Montgomery chains per thread, 1 or 2 (default 1;
 #                  TWO-CHAINS.md; 2 needs TAG_DENOM and an even BATCH)
+#   SIGMA_FUSED_SHARED_SLOTS  full-word per-thread shared pchain/denominator
+#                    slots for the exact fused B16/T256/min2 preset: 0/2/3/4
 #   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
 #
@@ -101,6 +105,8 @@ PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
 SIGMA_FUSED ?= 0
 SIGMA_FUSED_LATE_Y ?= 0
+SIGMA_FUSED_SHARED_SLOTS ?= 0
+SIGMA_SQUARE_TABLE ?= 0
 PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
@@ -233,7 +239,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedsigmascratch.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -259,6 +265,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
        -DECC_SIGMA_FUSED=$(SIGMA_FUSED) \
        -DECC_SIGMA_FUSED_LATE_Y=$(SIGMA_FUSED_LATE_Y) \
+       -DECC_SIGMA_FUSED_SHARED_SLOTS=$(SIGMA_FUSED_SHARED_SLOTS) \
+       -DECC_SIGMA_SQUARE_TABLE=$(SIGMA_SQUARE_TABLE) \
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
@@ -521,6 +529,9 @@ test-packed-network:
 	./build/test-packed-network-direct
 	./build/test-packed-network-generated
 	./build/test-packed-network-add
+
+test-sigma-square-table-native:
+	CXX="$(CXX)" /bin/sh benchmarks/sigma-square-table/run-native.sh
 
 test-generated-product:
 	python3 codegen/genpackedproduct.py --check
@@ -1040,6 +1051,58 @@ test-sigma-fused-shared-scratch-model: build/sigma-fused-shared-scratch-model
 	./build/sigma-fused-shared-scratch-model > build/sigma-fused-shared-scratch-model.json
 	cmp build/sigma-fused-shared-scratch-model.json benchmarks/sigma-fused/shared-scratch/model.json
 
+build/test-sigma-fused-shared-scratch-native: benchmarks/sigma-fused/shared-scratch/test_native.cpp include/packedsigmascratch.h include/packedcompactstate.cuh include/packed131.h
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas $< -o $@
+
+build/sigma-fused-shared-scratch-summarize: benchmarks/sigma-fused/shared-scratch/summarize.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+build/sigma-fused-shared-scratch-source-audit: benchmarks/sigma-fused/shared-scratch/source_audit.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+build/sigma-fused-shared-scratch-compile-audit: benchmarks/sigma-fused/shared-scratch/compile_audit.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+build/sigma-fused-shared-scratch-log-check: benchmarks/sigma-fused/shared-scratch/log_check.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+test-sigma-fused-shared-scratch-native: build/test-sigma-fused-shared-scratch-native \
+                                      build/sigma-fused-shared-scratch-summarize \
+                                      build/sigma-fused-shared-scratch-source-audit \
+                                      build/sigma-fused-shared-scratch-compile-audit \
+                                      build/sigma-fused-shared-scratch-log-check
+	./build/test-sigma-fused-shared-scratch-native
+	./build/sigma-fused-shared-scratch-summarize --self-test
+	./build/sigma-fused-shared-scratch-source-audit --self-test
+	./build/sigma-fused-shared-scratch-source-audit .
+	./build/sigma-fused-shared-scratch-compile-audit --self-test
+	./build/sigma-fused-shared-scratch-log-check --self-test
+
+build/test-sigma-fused-shared-scratch-cuda-0: SIGMA_FUSED_SHARED_SLOTS = 0
+build/test-sigma-fused-shared-scratch-cuda-2: SIGMA_FUSED_SHARED_SLOTS = 2
+build/test-sigma-fused-shared-scratch-cuda-3: SIGMA_FUSED_SHARED_SLOTS = 3
+build/test-sigma-fused-shared-scratch-cuda-4: SIGMA_FUSED_SHARED_SLOTS = 4
+build/test-sigma-fused-shared-scratch-cuda-0 build/test-sigma-fused-shared-scratch-cuda-2 build/test-sigma-fused-shared-scratch-cuda-3 build/test-sigma-fused-shared-scratch-cuda-4: src/testsigmasharedscratchcuda.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo $< -o $@
+
+compile-sigma-fused-shared-scratch-cuda:
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-0 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-2 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-3 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-4 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+
+test-sigma-fused-shared-scratch-cuda: compile-sigma-fused-shared-scratch-cuda
+	./build/test-sigma-fused-shared-scratch-cuda-0
+	./build/test-sigma-fused-shared-scratch-cuda-2
+	./build/test-sigma-fused-shared-scratch-cuda-3
+	./build/test-sigma-fused-shared-scratch-cuda-4
+
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
@@ -1056,7 +1119,12 @@ clean:
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 	rm -f build/sigma-fused-shared-scratch-model build/sigma-fused-shared-scratch-model.json
+	rm -f build/test-sigma-fused-shared-scratch-native build/test-sigma-fused-shared-scratch-cuda-*
+	rm -f build/sigma-fused-shared-scratch-summarize build/sigma-fused-shared-scratch-source-audit build/sigma-fused-shared-scratch-compile-audit
+	rm -f build/sigma-fused-shared-scratch-log-check
 
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model test-sigma-fused-shared-scratch-native compile-sigma-fused-shared-scratch-cuda test-sigma-fused-shared-scratch-cuda
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-sigma-square-table-native test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
 .PHONY: path-cost all generate check-cli check-cycles test-status perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.

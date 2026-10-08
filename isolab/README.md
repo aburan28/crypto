@@ -324,7 +324,7 @@ there.
 | `isolab_submit` | a full `isolab.job/v1` document |
 | `isolab_status` | state, worker, phase, repeat, elapsed, log tail, and the decline reasons while a job waits |
 | `isolab_wait` | block up to 300 s for a terminal state |
-| `isolab_result` | the result; `section` selects `summary`, `fidelity`, `runs`, `host` or `full` |
+| `isolab_result` | the result; `section` selects `summary`, `fidelity`, `runs`, `host`, `placement` or `full` |
 | `isolab_logs` | stdout and stderr tails of a finished or running job |
 | `isolab_artifacts` / `isolab_fetch` | list a job's artifacts; download one or all to a local directory |
 | `isolab_jobs` | list by state, pool, worker or label |
@@ -406,7 +406,7 @@ isolab hub [--listen :4222] [--store DIR] [--token T] [--cluster-name N --routes
 isolab worker --cpus 4-15 [--slots N | --slot CPUS …] [--pool P …] [--label K=V …] [--backend podman] [--default-image IMG]
 isolab doctor [--apply] | isolab inventory | isolab images build base|sage|cuda | isolab images list
 isolab run [--image IMG] [--cpus N] [--memory-mb M] [--repeats R] [--policy strict] [--input PATH[:DEST]] -- CMD…
-isolab submit SPEC.json | isolab status JOB | isolab wait JOB | isolab result JOB [--section S]
+isolab submit SPEC.json | isolab status JOB | isolab wait JOB | isolab result JOB [--section summary|fidelity|runs|host|placement]
 isolab logs JOB | isolab fetch JOB [PATH] --dest DIR | isolab cancel JOB | isolab jobs | isolab workers
 isolab calibrate [--worker W] | isolab mcp | isolab schema
 ```

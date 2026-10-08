@@ -1,0 +1,39 @@
+{
+  "schema": "ecc2k130-sigma-square-table-independent-compile-review-v1",
+  "reviewStatus": "BLOCKED",
+  "reviewedBranchHead": "afc44e599ed26c2aed111636d3ccaaeea9bfdb52",
+  "reviewedProducerHead": "e70406038b50466a713a28d335908a8677fc73f6",
+  "reviewedArtifact": {
+    "githubRunId": 37044967938,
+    "githubJobId": 110964020023,
+    "artifactId": 11243409010,
+    "artifactZipSha256": "8d4044f1aef862396374c7961009584b3ad95451fdbf95bcbf9844dfd53669d3"
+  },
+  "passes": {
+    "artifactApiBindingAndTenFileHashes": true,
+    "compileAuditByteIdentical": true,
+    "nativeReplayAndManifest": true,
+    "defaultAndCombinationGuards": true,
+    "sharedLoadBeforePartialReturn": true,
+    "all20134CasesPerArm": true,
+    "tableAndBankAccounting": true,
+    "binaryAndSassBinding": true,
+    "walkResources": {
+      "control": {"registers": 126, "stackSpillLocalBytes": 0, "binarySharedBytes": 2816},
+      "candidate": {"registers": 126, "stackSpillLocalBytes": 0, "binarySharedBytes": 2816, "dynamicSharedBytes": 8320}
+    },
+    "sassDelta": {"staticInstructions": 144, "clmadLo": -3, "lds": 65, "barriers": 1}
+  },
+  "resourceBoundary": {
+    "candidateCompiledPlusDynamicSharedBytesPerBlock": 11136,
+    "twoBlockRawRegisters": 64512,
+    "twoBlockSharedBytes": 22272,
+    "assessment": "Statically plausible with effectively no register headroom; named-device occupancy API must report at least two blocks before correctness or timing is admitted."
+  },
+  "blocker": {
+    "protocolGate": 5,
+    "missingEvidence": "No-GPU native-sm120 compilation of testpackedcuda.cu, testpackedstatecuda.cu, and testsharedsigmacuda.cu under both SIGMA_SQUARE_TABLE=0 and =1.",
+    "requiredRepair": "Produce and independently bind all six probe objects before GPU dispatch."
+  },
+  "claimBoundary": "Core clients and static resources pass; GPU dispatch is blocked, device occupancy/runtime is pending, and no throughput or 26 B/s claim is supported."
+}
