@@ -1,0 +1,275 @@
+{
+  "schema": "p256.isogeny-grid-trait-census-result-manifest/v1",
+  "run_id": "p256-traits-1064k-20261008",
+  "date": "2026-10-08",
+  "status": "complete_verified_structural_census",
+  "result_class": "class-wide-conductor-obstruction-and-bounded-population-census-no-ecdlp-speedup",
+  "production_source_commit": "f343b90b19cae368afd4fac1db81302435bc8504",
+  "production_source_tree": "9a103389353e75ec6b4bb2861ef45d3d634c5984",
+  "registered_root": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "population": {
+    "input_curves": 1064000,
+    "unique_input_j_invariants": 1064000,
+    "output_curve_records": 1064000,
+    "incoming_edges": 1063999,
+    "degree_11_edges": 1062936,
+    "degree_13_edges": 1063,
+    "horizontal_edges": 1063999,
+    "ascending_edges": 0,
+    "descending_edges": 0,
+    "unknown_direction_edges": 0,
+    "endomorphism_conductor_one_curves": 1064000,
+    "unresolved_conductor_curves": 0,
+    "discrepancies": 0,
+    "ecdlp_speedup": null
+  },
+  "class_certificate": {
+    "field_p": "115792089210356248762697446949407573530086143415290314195533631308867097853951",
+    "group_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "trace": "89188191154553853111372247798585809583",
+    "frobenius_discriminant": "-455213823400003756884736869668539463648899917731097708475249543966132856781915",
+    "frobenius_discriminant_factors": [
+      "3",
+      "5",
+      "456597257999",
+      "1428624589419343516204097",
+      "46523541035814968339936406074986559003387"
+    ],
+    "frobenius_discriminant_factorization_status": "complete_proved",
+    "cm_field_discriminant_status": "proved_fundamental",
+    "frobenius_order_conductor": "1",
+    "endomorphism_order_conductor_all_fp_isogenous_curves": "1",
+    "conductor_gap": "none",
+    "degree_11": {
+      "splitting": "elkies_split",
+      "valuation": 0,
+      "volcano_depth": 0,
+      "direction": "horizontal"
+    },
+    "degree_13": {
+      "splitting": "elkies_split",
+      "valuation": 0,
+      "volcano_depth": 0,
+      "direction": "horizontal"
+    },
+    "prime_certificates": 10,
+    "factor_discovery_source": "FactorDB after protocol freeze",
+    "factor_acceptance": "native exact products plus deterministic-u64 Miller-Rabin and recursive Pocklington proofs"
+  },
+  "screen": {
+    "qr_prefix_64_minimum": 13,
+    "qr_prefix_64_maximum": 51,
+    "qr_prefix_64_mean": 31.996157894736843,
+    "qr_prefix_64_population_variance": 16.30270516303915,
+    "hits_at_least_52": 0,
+    "hits_at_least_54": 0,
+    "minimum_b_signed_bits": 233,
+    "minimum_general_model_a_signed_bits": 236,
+    "j_zero_curves": 0,
+    "j_1728_curves": 0
+  },
+  "maximum_path": {
+    "coordinate": [999, 1063],
+    "degree": "11^999*13^1063",
+    "bit_length": 7390,
+    "decimal_digits": 2225,
+    "single_large_degree_map_materialized": false
+  },
+  "verification": {
+    "generation_status": "pass",
+    "replay_status": "pass_independent_source_replay",
+    "output_record_chain_sha256": "9368fc972d7c93c7c2c425f63092464bdda504f87ea2f9a4011e8a4c48e950b1",
+    "uncompressed_bytes": 2983712323,
+    "focused_tests_passed": 5,
+    "focused_tests_failed": 0,
+    "clippy_warnings_denied": "pass",
+    "cairn_scan": "pass_zero_findings",
+    "cairn_hook_all": "pass",
+    "pdf_pages": 6,
+    "pdf_visual_inspection": "pass_page_by_page"
+  },
+  "execution": {
+    "generation": {
+      "wall_seconds": 210.541,
+      "user_cpu_seconds": 209.472538,
+      "system_cpu_seconds": 1.058918,
+      "peak_rss_bytes": 184426496
+    },
+    "independent_replay": {
+      "wall_seconds": 167.653,
+      "user_cpu_seconds": 166.935553,
+      "system_cpu_seconds": 0.710198,
+      "peak_rss_bytes": 184356864
+    },
+    "host": "Linux 6.18.44 x86_64",
+    "exposed_cpus": 5,
+    "memory_bytes": 18882699264,
+    "rustc": "1.98.0 (88d9e12ae 2026-08-18)",
+    "artifact_cap_bytes": 536870912,
+    "artifact_cap_used_percent": 87.30437234044075
+  },
+  "sources": [
+    {
+      "role": "immutable_million_grid",
+      "local_path": "/tmp/p256-isogeny-million-20261006/p256-grid-1m.jsonl.gz",
+      "stored_bytes": 527157501,
+      "stored_sha256": "87522b6de08e64804dcee17bba058eb91922d6b8dd9853cd32523f67a3d0cbdc",
+      "content_bytes": 1773118481,
+      "content_sha256": "2a1a27d06f48b22b85ce3c96ac4017f5af6a0256e9d1ad277e3fb1f516475454",
+      "record_chain_sha256": "4de6e93e0d7a90ff53a26f8f1fd1cbd03ab55f701a25f8e49874cb8bead40302"
+    },
+    {
+      "role": "immutable_continuation_strip",
+      "local_path": "/tmp/p256-j-strip-20261007/runs/p256-strip-y1000-h64/p256-strip-y1000-h64.jsonl.gz",
+      "stored_bytes": 33739337,
+      "stored_sha256": "90f22f7aadaef78cff5a72889e5539b2ae81459d57d7a84b37a9009e96a3f701",
+      "content_bytes": 114464825,
+      "content_sha256": "a24593f9d1d1c880b63f1da86d10e375981f72aaa358e1eae428e63b3d4714b1",
+      "record_chain_sha256": "7d542b93aec2f21d9237e86f9d079cee4f858b5650bc0995c2f85ca0857cf87d"
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "canonical_trait_census",
+      "publication": "local_only",
+      "local_path": "/tmp/p256-isogeny-traits-20261008/traits.jsonl.gz",
+      "encoding": "gzip",
+      "stored_bytes": 468711780,
+      "stored_sha256": "46230554061c4ea0bf859978a5ce3c18d8f0fd0500a92d1c2d9449a2297c1c35",
+      "content_bytes": 2983712323,
+      "content_sha256": "469664171037bd06d28479f920ad1213af4e2f702e63d86b27852976256353f3"
+    },
+    {
+      "role": "generation_receipt",
+      "publication": "git",
+      "path": "runs/p256-traits-1064k/GENERATE.json",
+      "bytes": 6466,
+      "sha256": "0e7eb6b809a4b81a4fe681e2a09ed1588c61223d1fa18190cb262ad42e4c5155"
+    },
+    {
+      "role": "independent_replay_receipt",
+      "publication": "git",
+      "path": "runs/p256-traits-1064k/VERIFY.json",
+      "bytes": 6491,
+      "sha256": "1f538b43b83208957ff13d46cb184f4baf0b24d24ab6aedabbb26e874226bdd3"
+    },
+    {
+      "role": "frozen_protocol",
+      "publication": "git",
+      "path": "PROTOCOL.md",
+      "bytes": 8214,
+      "sha256": "b5426841dcafe204952089e0ede224c6ee77a679081a822c861f6c29de98605a"
+    },
+    {
+      "role": "result_report_source",
+      "publication": "git",
+      "path": "RESULTS.md",
+      "bytes": 15301,
+      "sha256": "35be79d781a7a5cc5a22ac5ce97a9f98af043985b2027c2e1d7dcfcfceb86989"
+    },
+    {
+      "role": "result_report_pdf",
+      "publication": "git",
+      "path": "RESULTS.pdf",
+      "bytes": 484991,
+      "sha256": "d077564e3e46832ff2c6b8c6c6e3ae79455239ec015d3680d1c8fc1639f22453"
+    },
+    {
+      "role": "transfer_assessment",
+      "publication": "git",
+      "path": "TRANSFER_ASSESSMENT.json",
+      "bytes": 6054,
+      "sha256": "7b17cee096ad9249df3ba6720a51001a095f7cf7f2e8f59135d2d67109b8c672"
+    },
+    {
+      "role": "axes_diagram_source",
+      "publication": "git",
+      "path": "figures/axes-volcano.dot",
+      "bytes": 3330,
+      "sha256": "df304b8c30c067e3c551531d42ec70cc803ff9e97183fc32adfd54b6ab62aee3"
+    },
+    {
+      "role": "axes_diagram_svg",
+      "publication": "git",
+      "path": "figures/axes-volcano.svg",
+      "bytes": 16700,
+      "sha256": "886c017ecb6e40f24b2006e337e9d5eb185c3474fb9ef39fd2f7aeadd9a3dbe2"
+    },
+    {
+      "role": "axes_diagram_pdf_render",
+      "publication": "git",
+      "path": "figures/axes-volcano.png",
+      "bytes": 271595,
+      "sha256": "05e933217cf369730f5458d5467db77fc10e926cc8f539b373517341a9ca1e74"
+    },
+    {
+      "role": "trait_count_data",
+      "publication": "git",
+      "path": "figures/trait-counts.csv",
+      "bytes": 586,
+      "sha256": "f0d65d0151fc164f1b118db3aaf834be19a0d84781a1490565aef0a55caf8957"
+    },
+    {
+      "role": "trait_count_svg",
+      "publication": "git",
+      "path": "figures/trait-counts.svg",
+      "bytes": 3708,
+      "sha256": "07ed33870cc4f819bf1fd06160393739fefbec6bb9199035a55e43e086568992"
+    },
+    {
+      "role": "trait_count_pdf_render",
+      "publication": "git",
+      "path": "figures/trait-counts.png",
+      "bytes": 184211,
+      "sha256": "e4fc5e0b6f1bbd319ea533316d3eeb2b573636ac5c980093fff612e71ad080d6"
+    },
+    {
+      "role": "report_style_source",
+      "publication": "git",
+      "path": "figures/report.css",
+      "bytes": 1181,
+      "sha256": "cb4ddb489664fb5ea70b532c86a01423e1bf0e37a9747c0e3458bbe855e7dad5"
+    },
+    {
+      "role": "production_binary",
+      "publication": "local_only",
+      "local_path": "/tmp/crypto-pr.xIRzjS/target-p256-window/release/p256_isogeny_million",
+      "bytes": 5691464,
+      "sha256": "7e3668a7538a33576de168b2df54cadb0c7e0a58205cf93b98e19fd6a72d18c9"
+    }
+  ],
+  "retained_failures": [
+    {
+      "phase": "first_production_launcher",
+      "status": "failed_before_program_start_not_counted",
+      "exit_status": 127,
+      "error": "/usr/bin/time: No such file or directory",
+      "empty_receipt_path": "runs/p256-traits-1064k/ATTEMPT-01.json",
+      "empty_receipt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_path": "runs/p256-traits-1064k/ATTEMPT-01.stderr.log",
+      "stderr_sha256": "3e737f6a9117cec194b02103b357f8668fae9adb86a8a8cd0bf25efab8948548"
+    }
+  ],
+  "durable_storage": {
+    "status": "blocked_no_ambient_identity_or_destination",
+    "environment_observations_current": true,
+    "network_policy": "unrestricted_enforced",
+    "aws_outbound_identity_configured": false,
+    "secret_binding_configured": false,
+    "upload_attempted": false,
+    "chat_credentials_used": false
+  },
+  "cairn": {
+    "change_id": "p256-isogeny-trait-census",
+    "status": "accepted_and_archived",
+    "archive": "meta/changes/archive/2026-10-08-p256-isogeny-trait-census",
+    "network_submission_attempted": false
+  },
+  "limitations": {
+    "all_p256_isogenies_enumerated": false,
+    "two_pow_32_curves_enumerated": false,
+    "large_prime_degree_map_materialized": false,
+    "solver_benchmark_run": false,
+    "universal_trait_set_claimed": false
+  }
+}

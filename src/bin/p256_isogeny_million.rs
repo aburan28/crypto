@@ -7,8 +7,9 @@ use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
 use crypto_lib::cryptanalysis::isogeny_walk::million::{
-    audit_j_union_paths, generate_jsonl, generate_strip_jsonl, verify_jsonl, verify_strip_jsonl,
-    GridConfig, StripConfig, PRODUCTION_SIDE,
+    audit_j_union_paths, generate_jsonl, generate_strip_jsonl, generate_trait_census_jsonl,
+    verify_jsonl, verify_strip_jsonl, verify_trait_census_paths, GridConfig, StripConfig,
+    PRODUCTION_SIDE,
 };
 use crypto_lib::cryptanalysis::isogeny_walk::million_store::{
     self, fetch_object, publish_cache, stage_cache, DEFAULT_CHUNK_ROWS,
@@ -105,6 +106,25 @@ enum Command {
         /// Legacy or strip certificates, in deterministic accounting order.
         #[arg(required = true)]
         inputs: Vec<PathBuf>,
+    },
+    /// Derive a compact structural-trait sidecar from replayed certificates.
+    TraitCensus {
+        /// Legacy or strip source certificate; repeat in union order.
+        #[arg(long = "source", required = true)]
+        sources: Vec<PathBuf>,
+        /// Clean 40-hex source commit recorded in the census.
+        #[arg(long)]
+        source_commit: String,
+        #[arg(long)]
+        output: PathBuf,
+    },
+    /// Reopen the sources and byte-compare a complete census reconstruction.
+    VerifyTraitCensus {
+        #[arg(long)]
+        input: PathBuf,
+        /// Exact source certificate list used by `trait-census`.
+        #[arg(long = "source", required = true)]
+        sources: Vec<PathBuf>,
     },
     /// Derive deterministic row slices after generation and replay agree.
     StageCache {
@@ -379,6 +399,107 @@ fn audit_j_union(inputs: &[PathBuf]) -> Result<(), String> {
     Ok(())
 }
 
+fn encoded_digest(path: &Path) -> Result<million_store::EncodedDigest, String> {
+    if path.extension().and_then(|value| value.to_str()) == Some("gz") {
+        million_store::digest_gzip(path)
+    } else {
+        let digest = million_store::digest_file(path)?;
+        Ok(million_store::EncodedDigest {
+            encoding: "identity".into(),
+            stored_sha256: digest.sha256.clone(),
+            stored_bytes: digest.bytes,
+            content_sha256: digest.sha256,
+            content_bytes: digest.bytes,
+        })
+    }
+}
+
+fn trait_census(output: &Path, sources: &[PathBuf], source_commit: String) -> Result<(), String> {
+    if output.exists() {
+        return Err(format!("refusing to overwrite {}", output.display()));
+    }
+    if let Some(parent) = output.parent().filter(|path| !path.as_os_str().is_empty()) {
+        fs::create_dir_all(parent)
+            .map_err(|error| format!("create {}: {error}", parent.display()))?;
+    }
+    let partial = partial_path(output);
+    let file = OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(&partial)
+        .map_err(|error| format!("create {}: {error}", partial.display()))?;
+    let buffered = BufWriter::new(file);
+    let mut encoder = GzBuilder::new()
+        .mtime(0)
+        .operating_system(255)
+        .write(buffered, Compression::new(6));
+    let result = generate_trait_census_jsonl(&mut encoder, sources, source_commit);
+    let mut buffered = encoder
+        .finish()
+        .map_err(|error| format!("finish {}: {error}", partial.display()))?;
+    buffered
+        .flush()
+        .map_err(|error| format!("flush {}: {error}", partial.display()))?;
+    buffered
+        .get_ref()
+        .sync_all()
+        .map_err(|error| format!("sync {}: {error}", partial.display()))?;
+    let receipt = match result {
+        Ok(receipt) => receipt,
+        Err(error) => {
+            return Err(format!(
+                "{error}; preserved the incomplete trait census at {}",
+                partial.display()
+            ))
+        }
+    };
+    fs::rename(&partial, output).map_err(|error| {
+        format!(
+            "commit trait census {} -> {}: {error}",
+            partial.display(),
+            output.display()
+        )
+    })?;
+    let artifact = encoded_digest(output)?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&json!({
+            "receipt": receipt,
+            "artifact": {
+                "path": output,
+                "encoding": artifact.encoding,
+                "stored_sha256": artifact.stored_sha256,
+                "stored_bytes": artifact.stored_bytes,
+                "content_sha256": artifact.content_sha256,
+                "content_bytes": artifact.content_bytes,
+            }
+        }))
+        .map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
+fn verify_trait_census(input: &Path, sources: &[PathBuf]) -> Result<(), String> {
+    let receipt = verify_trait_census_paths(input, sources)?;
+    let artifact = encoded_digest(input)?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&json!({
+            "receipt": receipt,
+            "artifact": {
+                "path": input,
+                "encoding": artifact.encoding,
+                "stored_sha256": artifact.stored_sha256,
+                "stored_bytes": artifact.stored_bytes,
+                "content_sha256": artifact.content_sha256,
+                "content_bytes": artifact.content_bytes,
+            }
+        }))
+        .map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
 fn stage(
     input: &Path,
     generation_receipt: &Path,
@@ -583,6 +704,12 @@ fn run() -> Result<(), String> {
             batch_rows.unwrap_or_else(default_batch_rows),
         ),
         Command::AuditJUnion { inputs } => audit_j_union(&inputs),
+        Command::TraitCensus {
+            sources,
+            source_commit,
+            output,
+        } => trait_census(&output, &sources, source_commit),
+        Command::VerifyTraitCensus { input, sources } => verify_trait_census(&input, &sources),
         Command::StageCache {
             input,
             generation_receipt,

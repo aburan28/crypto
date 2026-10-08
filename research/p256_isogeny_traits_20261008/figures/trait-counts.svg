@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="710" viewBox="0 0 1200 710" role="img" aria-labelledby="title desc">
+  <title id="title">P-256 isogeny trait census counts</title>
+  <desc id="desc">Exact counts for volcano directions, endomorphism conductors, canonical model branches, special j invariants, and discrepancies across 1,064,000 curves.</desc>
+  <rect width="1200" height="710" fill="#ffffff"/>
+  <style>
+    text { font-family: Helvetica, Arial, sans-serif; fill: #243447; }
+    .title { font-size: 25px; font-weight: 700; }
+    .subtitle { font-size: 14px; fill: #52616f; }
+    .group { font-size: 16px; font-weight: 700; }
+    .label { font-size: 14px; }
+    .value { font-size: 13px; font-weight: 600; }
+    .track { fill: #edf2f6; stroke: #c8d3dc; }
+    .zero { fill: #ffffff; stroke: #9aa9b5; stroke-width: 2; }
+  </style>
+
+  <text x="45" y="46" class="title">Exact structural counts across 1,064,000 certified curves</text>
+  <text x="45" y="72" class="subtitle">Linear bars use the population of their group; zero categories remain visible as outlined markers.</text>
+
+  <text x="45" y="122" class="group">Volcano direction · 1,063,999 incoming edges</text>
+  <text x="45" y="157" class="label">horizontal</text>
+  <rect x="230" y="138" width="820" height="26" rx="5" class="track"/>
+  <rect x="230" y="138" width="820" height="26" rx="5" fill="#2a9d8f"/>
+  <text x="1065" y="157" class="value">1,063,999 · 100%</text>
+  <text x="45" y="191" class="label">ascending / descending / unknown</text>
+  <circle cx="242" cy="186" r="8" class="zero"/>
+  <text x="270" y="191" class="value">0 / 0 / 0</text>
+
+  <text x="45" y="249" class="group">Endomorphism conductor · 1,064,000 curves</text>
+  <text x="45" y="284" class="label">conductor = 1</text>
+  <rect x="230" y="265" width="820" height="26" rx="5" class="track"/>
+  <rect x="230" y="265" width="820" height="26" rx="5" fill="#4c78a8"/>
+  <text x="1065" y="284" class="value">1,064,000 · 100%</text>
+  <text x="45" y="318" class="label">unresolved</text>
+  <circle cx="242" cy="313" r="8" class="zero"/>
+  <text x="270" y="318" class="value">0</text>
+
+  <text x="45" y="376" class="group">Canonical model branch · 1,064,000 curves</text>
+  <text x="45" y="411" class="label">a = -3</text>
+  <rect x="230" y="392" width="820" height="26" rx="5" class="track"/>
+  <rect x="230" y="392" width="410.07" height="26" rx="5" fill="#72b7b2"/>
+  <text x="655" y="411" class="value">532,092 · 50.00865%</text>
+  <text x="45" y="448" class="label">general canonical</text>
+  <rect x="230" y="429" width="820" height="26" rx="5" class="track"/>
+  <rect x="230" y="429" width="409.93" height="26" rx="5" fill="#f2a65a"/>
+  <text x="655" y="448" class="value">531,907 · 49.99126%</text>
+  <text x="45" y="485" class="label">registered root</text>
+  <rect x="230" y="466" width="820" height="26" rx="5" class="track"/>
+  <rect x="230" y="466" width="2" height="26" fill="#6f4e7c"/>
+  <text x="250" y="485" class="value">1 · shown wider than scale</text>
+
+  <text x="45" y="543" class="group">Special values and discrepancies</text>
+  <text x="45" y="578" class="label">j = 0 / j = 1728</text>
+  <circle cx="242" cy="573" r="8" class="zero"/>
+  <text x="270" y="578" class="value">0 / 0</text>
+  <text x="45" y="615" class="label">recorded discrepancies</text>
+  <circle cx="242" cy="610" r="8" class="zero"/>
+  <text x="270" y="615" class="value">0</text>
+
+  <rect x="45" y="652" width="1105" height="35" rx="6" fill="#f7f9fc" stroke="#d2dce4"/>
+  <text x="598" y="675" text-anchor="middle" class="subtitle">Class-wide proof: fundamental Frobenius discriminant ⇒ f_pi = 1 ⇒ no conductor level below the surface.</text>
+</svg>

@@ -1,0 +1,274 @@
+{
+  "artifact": {
+    "content_bytes": 2983712323,
+    "content_sha256": "469664171037bd06d28479f920ad1213af4e2f702e63d86b27852976256353f3",
+    "encoding": "gzip",
+    "path": "/tmp/p256-isogeny-traits-20261008/traits.jsonl.gz",
+    "stored_bytes": 468711780,
+    "stored_sha256": "46230554061c4ea0bf859978a5ce3c18d8f0fd0500a92d1c2d9449a2297c1c35"
+  },
+  "receipt": {
+    "elapsed_ms": 210541,
+    "resources": {
+      "peak_rss_bytes": 184426496,
+      "status": "measured_getrusage_self",
+      "system_cpu_micros": 1058918,
+      "user_cpu_micros": 209472538
+    },
+    "schema": "p256.isogeny-grid-trait-census-receipt/v1",
+    "source_commit": "f343b90b19cae368afd4fac1db81302435bc8504",
+    "sources": [
+      {
+        "bound_records": 1000001,
+        "content_bytes": 1773118481,
+        "content_sha256": "2a1a27d06f48b22b85ce3c96ac4017f5af6a0256e9d1ad277e3fb1f516475454",
+        "curve_records": 1000000,
+        "record_chain_sha256": "4de6e93e0d7a90ff53a26f8f1fd1cbd03ab55f701a25f8e49874cb8bead40302",
+        "schema": "p256.isogeny-grid-certificate/v1",
+        "source_commit": "316f546373db8f42ac894ef7d8b4232e57d87f8e",
+        "source_index": 0,
+        "stored_bytes": 527157501,
+        "stored_sha256": "87522b6de08e64804dcee17bba058eb91922d6b8dd9853cd32523f67a3d0cbdc",
+        "target_curves": 1000000
+      },
+      {
+        "bound_records": 64002,
+        "content_bytes": 114464825,
+        "content_sha256": "a24593f9d1d1c880b63f1da86d10e375981f72aaa358e1eae428e63b3d4714b1",
+        "curve_records": 64000,
+        "record_chain_sha256": "7d542b93aec2f21d9237e86f9d079cee4f858b5650bc0995c2f85ca0857cf87d",
+        "schema": "p256.isogeny-grid-strip-certificate/v1",
+        "source_commit": "581aeff3d89b412e718207e05f4002808271f1ef",
+        "source_index": 1,
+        "stored_bytes": 33739337,
+        "stored_sha256": "90f22f7aadaef78cff5a72889e5539b2ae81459d57d7a84b37a9009e96a3f701",
+        "target_curves": 64000
+      }
+    ],
+    "status": "pass",
+    "summary": {
+      "a_minus_3_models": 532092,
+      "ascending_edges": 0,
+      "bound_records": 1064001,
+      "curves": 1064000,
+      "descending_edges": 0,
+      "discrepancies": [],
+      "ecdlp_speedup": null,
+      "edges": 1063999,
+      "endomorphism_conductor_one_curves": 1064000,
+      "general_canonical_models": 531907,
+      "horizontal_edges": 1063999,
+      "j_1728_curves": 0,
+      "j_zero_curves": 0,
+      "maximum_path_degree": {
+        "bit_length": 7390,
+        "coordinate": {
+          "x": 999,
+          "y": 1063
+        },
+        "decimal_digits": 2225
+      },
+      "minimum_a_signed_bits": 2,
+      "minimum_b_signed_bits": 233,
+      "qr_prefix_64_histogram": [
+        {
+          "count": 1,
+          "value": 13
+        },
+        {
+          "count": 7,
+          "value": 14
+        },
+        {
+          "count": 6,
+          "value": 15
+        },
+        {
+          "count": 25,
+          "value": 16
+        },
+        {
+          "count": 93,
+          "value": 17
+        },
+        {
+          "count": 215,
+          "value": 18
+        },
+        {
+          "count": 553,
+          "value": 19
+        },
+        {
+          "count": 1243,
+          "value": 20
+        },
+        {
+          "count": 2533,
+          "value": 21
+        },
+        {
+          "count": 4835,
+          "value": 22
+        },
+        {
+          "count": 8739,
+          "value": 23
+        },
+        {
+          "count": 14949,
+          "value": 24
+        },
+        {
+          "count": 23446,
+          "value": 25
+        },
+        {
+          "count": 35417,
+          "value": 26
+        },
+        {
+          "count": 49250,
+          "value": 27
+        },
+        {
+          "count": 64514,
+          "value": 28
+        },
+        {
+          "count": 80040,
+          "value": 29
+        },
+        {
+          "count": 92937,
+          "value": 30
+        },
+        {
+          "count": 101706,
+          "value": 31
+        },
+        {
+          "count": 104349,
+          "value": 32
+        },
+        {
+          "count": 101120,
+          "value": 33
+        },
+        {
+          "count": 92991,
+          "value": 34
+        },
+        {
+          "count": 79696,
+          "value": 35
+        },
+        {
+          "count": 64247,
+          "value": 36
+        },
+        {
+          "count": 49052,
+          "value": 37
+        },
+        {
+          "count": 35426,
+          "value": 38
+        },
+        {
+          "count": 23756,
+          "value": 39
+        },
+        {
+          "count": 14665,
+          "value": 40
+        },
+        {
+          "count": 8739,
+          "value": 41
+        },
+        {
+          "count": 4767,
+          "value": 42
+        },
+        {
+          "count": 2515,
+          "value": 43
+        },
+        {
+          "count": 1218,
+          "value": 44
+        },
+        {
+          "count": 564,
+          "value": 45
+        },
+        {
+          "count": 239,
+          "value": 46
+        },
+        {
+          "count": 101,
+          "value": 47
+        },
+        {
+          "count": 34,
+          "value": 48
+        },
+        {
+          "count": 7,
+          "value": 49
+        },
+        {
+          "count": 4,
+          "value": 50
+        },
+        {
+          "count": 1,
+          "value": 51
+        }
+      ],
+      "quadratic_characters": {
+        "a": {
+          "non_residue": 531907,
+          "residue": 532093,
+          "zero": 0
+        },
+        "b": {
+          "non_residue": 533126,
+          "residue": 530874,
+          "zero": 0
+        },
+        "c4": {
+          "non_residue": 531907,
+          "residue": 532093,
+          "zero": 0
+        },
+        "c6": {
+          "non_residue": 533126,
+          "residue": 530874,
+          "zero": 0
+        },
+        "j": {
+          "non_residue": 531907,
+          "residue": 532093,
+          "zero": 0
+        },
+        "model_denominator": {
+          "non_residue": 1064000,
+          "residue": 0,
+          "zero": 0
+        }
+      },
+      "record": "summary",
+      "record_chain_sha256": "9368fc972d7c93c7c2c425f63092464bdda504f87ea2f9a4011e8a4c48e950b1",
+      "registered_root_models": 1,
+      "row_degree_11_edges": 1062936,
+      "schema": "p256.isogeny-grid-trait-census-summary/v1",
+      "spine_degree_13_edges": 1063,
+      "unknown_direction_edges": 0,
+      "unresolved_conductor_curves": 0
+    },
+    "uncompressed_bytes": 2983712323
+  }
+}
