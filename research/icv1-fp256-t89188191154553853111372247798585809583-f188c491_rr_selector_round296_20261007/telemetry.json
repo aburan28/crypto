@@ -1,0 +1,63 @@
+{
+  "schema": "p256.dickson_rr_selector_telemetry/v1",
+  "targets": [
+    {
+      "arity": 3,
+      "columns": 5,
+      "kind": "planted",
+      "wall_ms": 0.977992,
+      "partial_field_operations": 28224
+    },
+    {
+      "arity": 3,
+      "columns": 5,
+      "kind": "unplanted",
+      "wall_ms": 0.560376,
+      "partial_field_operations": 22740
+    },
+    {
+      "arity": 5,
+      "columns": 8,
+      "kind": "planted",
+      "wall_ms": 12547.788364,
+      "partial_field_operations": 9994651362
+    },
+    {
+      "arity": 5,
+      "columns": 8,
+      "kind": "unplanted",
+      "wall_ms": 11743.746131,
+      "partial_field_operations": 9994651362
+    },
+    {
+      "arity": 7,
+      "columns": 11,
+      "kind": "planted",
+      "wall_ms": 20180.081851,
+      "partial_field_operations": 3487429437
+    },
+    {
+      "arity": 7,
+      "columns": 11,
+      "kind": "unplanted",
+      "wall_ms": 20283.651625000002,
+      "partial_field_operations": 3319714156
+    },
+    {
+      "arity": 9,
+      "columns": 14,
+      "kind": "planted",
+      "wall_ms": 39315.609025,
+      "partial_field_operations": 3455343388
+    },
+    {
+      "arity": 9,
+      "columns": 14,
+      "kind": "unplanted",
+      "wall_ms": 40073.26211,
+      "partial_field_operations": 3454854428
+    }
+  ],
+  "total_wall_ms": 144145.677474,
+  "time_fit_exponent_in_variables": null
+}
