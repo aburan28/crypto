@@ -7,7 +7,7 @@ an extension field of degree divisible by 3, and the route it serves is
 [JV12]'s, reproduced in the cover ledger on branch
 `research/jv-cover-end-to-end-20261007`
 (`research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md`,
-§§13, 17, 18).  Status: **RUN** 2026-10-07; results and the reading against every prediction are in `README.md`.  `p = 19` stopped at the wall limit (partial).
+§§13, 17, 18).  Status: **RUN** 2026-10-07; results and the reading against every prediction are in `README.md`.  `p = 19` stopped at the wall limit on the first attempt; a labelled second attempt completed and is reported.
 
 ## What is already known, and the gap
 

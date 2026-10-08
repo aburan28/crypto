@@ -11,8 +11,8 @@ speedup are **unset**; nothing here concerns a prime-field or deployed curve.
 1. **Depth-1 exclusion, exact at every size run.**  A class whose
    2-volcano has depth 1 (`v₂(f) = 1`, `f` the conductor of `Z[π]`) holds
    **no** weak curve.  That is half of all classes and 37% of all
-   full-2-torsion curves, with zero exceptions over 2,065
-   such classes and 1,929,837 curves (§3, A1).
+   full-2-torsion curves, with zero exceptions over 3,690
+   such classes and 4,871,062 curves at six sizes (§3, A1).
 2. **Depth ≥ 2 admission.**  Of the classes with `v₂(f) ≥ 2`, 86 to 95%
    hold a weak curve, rising with `p` (§3, A2).  The exceptions are not small classes: the
    random model gives them a chance of a few percent at most.
@@ -21,8 +21,8 @@ speedup are **unset**; nothing here concerns a prime-field or deployed curve.
    at height 3, at every size (§3, A3).  For `p ≡ ±3 (mod 8)` nothing sits
    above height 3; for `p ≡ ±1 (mod 8)` (`p = 7, 17`) heights 4 to 6 are the
    densest of all, 15 to 27 per `q`, as registered in advance for `p = 17`
-   (§3, A4, B1).  B2 (`p = 19`) is untested: that run hit the protocol's
-   wall limit.
+   (§3, A4, B1).  B2 (`p = 19`) passed on a labelled second attempt after
+   the first hit the protocol's wall limit.
 4. **The registered law W3 is falsified**: the triple
    `(v₂(f), D_K mod 8, |t| mod 16)` predicts but is not a function.  W4 as
    written fails at `p ≥ 11` because the deepest levels are empty for
@@ -56,7 +56,7 @@ exactly.  A 20-curve self-test agrees with brute-force point counting at
 | 11 | 3 | 295,261 | 2.99 | 0.588 | 606 | 303 of 303 empty | 271 of 302 (0.897) | 1.98 / 4.02 / 13.77 | 0 of 2,353 | 13 of 32 | 0, 605 of 605 |
 | 13 | 5 | 804,469 | 3.00 | 0.591 | 1,015 | 507 of 507 empty | 464 of 507 (0.915) | 2.03 / 3.96 / 13.45 | 0 of 6,372 | 14 of 35 | 0, 1,014 of 1,014 |
 | 17 | 1 | 4,022,929 | 3.00 | 0.608 | 2,313 | 1,156 of 1,156 empty | 1,099 of 1,156 (0.951) | 2.00 / 4.03 / 10.29 | 2,196/27,673, 321/3,442, 18/355 at heights 4, 5, 6 (23, 27, 15 × q); 0 of 24 at 7 | 8 of 39 | 0, 2,312 of 2,312 |
-| 19 | 3 | 7,840,981 | 3.00 | partial | partial | partial | partial | partial | partial (B2 untested) | partial | partial |
+| 19 (second attempt) | 3 | 7,840,981 | 3.00 | 0.609 | 3,250 | 1,625 of 1,625 empty | 1,545 of 1,624 (0.951) | 1.99 / 4.07 / 13.52 | 0 of 61,570 at heights 4 to 8 | 23 of 41 | 0, every class |
 
 Reading against the registration:
 
@@ -65,11 +65,11 @@ Reading against the registration:
 - **W3 is falsified** at `p = 7, 11, 13, 17`: 6 to 14 of the 24 to 39 triples contain both weak and non-weak classes.  The conflicts are lopsided (for example `(2, 4, 6)` at `p = 11`: 36 weak, 1 not) but a function they are not.
 - **W4 fails as written** at `p = 11, 13`: the height-1 fraction is `0.8×` the pooled fraction, not below `0.5×`, and the deepest level is empty.  The non-uniformity it reached for is A3.
 - **W5 passes**: zero second-BSGS mismatches at every size, and the maximum height equals `v₂(f)` in every class with a floor.
-- **A1 passes** on the held-out sizes `p = 13, 17` as registered, and on every size: 2,065 depth-1 classes and 1,929,837 curves with no weak curve.
+- **A1 passes** on the held-out sizes `p = 13, 17` as registered, and on every size: 3,690 depth-1 classes and 4,871,062 curves with no weak curve, the `p = 19` second attempt included.
 - **A2 passes**: `0.915` and `0.951` on the held-out sizes.
 - **A3 passes** on both held-out sizes, with `p = 17`'s height-3 value `10.29` at the bottom of its interval.
 - **B1 passes**: `p = 17` has weak curves at heights 4, 5, 6, the densest levels of the census.
-- **B2 is untested**: the first `p = 19` run was stopped at the protocol's 30-minute wall limit on a host at load average 411 from other sessions' jobs, after it had completed the enumeration (7,840,981 `j`, weak fraction `0.00831 = 3/q`, 1,963,180 components) but not the traces.  A second attempt, labelled `results_attempt2/`, was launched and is reported there if it finishes; it is not cited here.
+- **B2 passes, on the labelled second attempt**: the first `p = 19` run was stopped at the protocol's 30-minute wall limit on a host at load average 411 from other sessions' jobs, after it had completed the enumeration (7,840,981 `j`, weak fraction `0.00831 = 3/q`, 1,963,180 components) but not the traces; its log is `results/run_p19.log`.  The second attempt (`results_attempt2/`, 5,293 s under the same load) finished with zero second-BSGS mismatches, and no weak curve above height 3 in 61,570 curves at heights 4 to 8.  A1, A2 and A3 also pass at `p = 19`.  The row is labelled a second attempt because the protocol's stop rule fired on the first.
 
 Per-size tables (`v₂(f)`, `D_K mod 8`, classes, weak classes, nodes,
 weak nodes, weak fraction × `q`; then height, nodes, weak nodes, weak
@@ -137,7 +137,8 @@ divisible by 3.
 | `results/census_p{p}.jsonl` | one record per class: `t`, counts, `D`, `D_K`, `f`, `v₂(f)`, residues, by-height histogram |
 | `results/summary_p{p}.json` | the run's own summary line, with the W3 conflicts listed |
 | `results/TABLES.md` | the `tabulate` output for every size |
-| `results/run_p{p}.log` | stderr of the larger runs |
+| `results/run_p{p}.log` | stderr of the larger runs; `run_p19.log` is the stopped first attempt |
+| `results_attempt2/` | the `p = 19` second attempt: records, summary, log |
 
 Related: ledger §§13, 17, 18 on branch `research/jv-cover-end-to-end-20261007`
 (`research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md`),
