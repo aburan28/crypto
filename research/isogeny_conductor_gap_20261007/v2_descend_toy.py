@@ -112,13 +112,17 @@ def main():
     E1 = EllipticCurve(F, [1, match[0], 0, 0, a6])
     # transfer a generator: order of phi(G) equals order of G
     G = E.random_point()
-    GK = EK(G)
+    # explicit embedding F -> K: send the generator of F to a root of F's modulus in K
+    rt = F.modulus().change_ring(K).roots(multiplicities=False)[0]
+    emb = F.hom([rt], K)
+    GK = EK(emb(G[0]), emb(G[1]))
     G1 = phi(GK)
     oG = G.order()
     # order check without factoring #E(K): oG*G1 = O and (oG/p)*G1 != O for every prime p | oG
-    assert oG * G1 == EK(0), "phi(G) not killed by ord(G)"
+    O1 = Eprime(0)   # identity of the codomain, where phi(G) lives
+    assert oG * G1 == O1, "phi(G) not killed by ord(G)"
     for (p_, _) in ZZ(oG).factor():
-        assert (oG // p_) * G1 != EK(0), "phi(G) has smaller order than G"
+        assert (oG // p_) * G1 != O1, "phi(G) has smaller order than G"
     oG1 = oG
     # Galois orbit size of j1 under the 2-Frobenius
     orb = 1; y = j1 ** 2

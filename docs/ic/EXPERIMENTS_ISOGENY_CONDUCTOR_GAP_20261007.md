@@ -58,10 +58,17 @@ checks `j(E') ∈ F_q \ F_2`, descends to `E_1/F_q` by the minimal polynomial of
 `j'`, picks the twist of the right order, and checks that `φ(G)` keeps the
 order of `G` without factoring `#E(F_{q^21})`. Output: one JSON record.
 **Prediction:** PASS with Galois orbit size 23 for `j_1` and kernel search
-succeeding within a handful of tries. **Status:** launched through the checked
-Sage launcher; result file `v2_toy_n23_ell967_seed1.out` in the same
-directory (empty if the run had not finished when this was committed; rerun
-with the command in the script header).
+succeeding within a handful of tries. **Result (2026-10-07, Sage 10.10.rc0
+through the checked launcher, host load ≈ 400):** PASS.
+`v2_toy_n23_ell967_seed1.result.out`: trace 5197, `#K_0 = 8383412`,
+`π ≡ 181 mod 967`, kernel field degree 21, `v_967(#E(F_{q^21})) = 2`, kernel
+found on the first try, isogeny degree 967, `j(E_1) ∈ F_q \ F_2` with Galois
+orbit size 23, the `a_2 = 0` twist has order `#K_0` (the same twist the
+`n = 131` ground truth reports), `φ(G)` has the full order 8383412, 139.6 s of
+compute. Two earlier attempts failed on script bugs, not mathematics: a
+missing explicit embedding `F_q → F_{q^{21}}`, and a comparison of `φ(G)`
+against the identity of the wrong curve; both are fixed in the committed
+script.
 
 ## E1. Production-solver hardness panel across levels at the toy classes (new)
 
