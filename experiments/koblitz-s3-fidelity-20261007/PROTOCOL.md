@@ -211,3 +211,26 @@ time and the S3 stage cost do not substitute for that primary comparison.
 
 The protocol is versioned before the larger panel. The local N41 diagnostic
 preceded this freeze and is not part of the pilot or confirmation.
+
+## Modal diagnostic after the freeze, 2026-10-07
+
+The authenticated Modal profile ran the frozen 12 targets per curve twice,
+with `ABBA`/`BAAB` pairs and A/A controls. The second panel retains the exact
+solver output from all 146 invocations. Both panels recovered every scalar;
+the checked Sage launcher independently replayed all 24 distinct target
+points, 45,872 factor-base points, 5,880 relation witnesses, first target
+spans and matrix solves for the second panel. Raw runs, host probes, hashes,
+descriptive statistics, the Sage receipt and a separate VM perf diagnostic
+are under [`modal/`](modal/README.md).
+
+The measured geometric mean baseline/candidate online ratios were 1.0335
+(N41) and 1.1083 (N53) in the first panel, then 1.0542 and 1.0822 on the
+same targets in the exact-output replication. The A/A noise gate failed for
+N41 in the first panel and for both curves in the second. The Modal Function
+container lacked an auditable exclusive host CPU partition, physical SMT and
+NUMA topology, PSI, IRQ routing and usable `perf` counters; a separate Modal
+VM allowed whole-process `perf` counters but still lacked a host isolation
+receipt. All timing ratios remain **exploratory**. They do not establish a
+controlled S3 speedup or an N41/N53 interaction, and they do not update the
+confirmatory sample size. The 92-per-curve provisional budget remains a
+planning value until a qualifying host completes a clean pilot.
