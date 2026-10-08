@@ -3093,6 +3093,40 @@ static F4_SUPPORT_LOCAL_BITMAP_COLUMNS: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 static F4_SUPPORT_LOCAL_PROFILE_ENABLED: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
+static F4_INHERITED_BASIS_PROFILE_ENABLED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+mod inherited_basis_counters {
+    use std::sync::atomic::AtomicU64;
+    pub(super) static ROOT_CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROOT_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static SPECIALISE_CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static SPECIALISE_TOTAL_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static CHILD_PREP_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static BASIS_SPECIALISE_CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static BASIS_SPECIALISE_NS: AtomicU64 = AtomicU64::new(0);
+
+    pub(super) fn all() -> [&'static AtomicU64; 7] {
+        [
+            &ROOT_CALLS,
+            &ROOT_NS,
+            &SPECIALISE_CALLS,
+            &SPECIALISE_TOTAL_NS,
+            &CHILD_PREP_NS,
+            &BASIS_SPECIALISE_CALLS,
+            &BASIS_SPECIALISE_NS,
+        ]
+    }
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct InheritedBasisProfile {
+    pub root_calls: u64,
+    pub root_ns: u64,
+    pub specialise_calls: u64,
+    pub specialise_total_ns: u64,
+    pub child_prep_ns: u64,
+    pub basis_specialise_calls: u64,
+    pub basis_specialise_ns: u64,
+}
 mod support_local_counters {
     use std::sync::atomic::AtomicU64;
     pub(super) static CALLS: AtomicU64 = AtomicU64::new(0);
@@ -3248,6 +3282,30 @@ pub fn support_local_build_profile() -> SupportLocalBuildProfile {
         pack_ns: support_local_counters::PACK_NS.load(Relaxed),
         rows: support_local_counters::ROWS.load(Relaxed),
         columns: support_local_counters::COLUMNS.load(Relaxed),
+    }
+}
+
+/// Enable nested inherited-basis timers before a single-threaded solve.
+pub fn set_f4_inherited_basis_profile(enabled: bool) {
+    F4_INHERITED_BASIS_PROFILE_ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn inherited_basis_profile_reset() {
+    for counter in inherited_basis_counters::all() {
+        counter.store(0, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+pub fn inherited_basis_profile() -> InheritedBasisProfile {
+    use std::sync::atomic::Ordering::Relaxed;
+    InheritedBasisProfile {
+        root_calls: inherited_basis_counters::ROOT_CALLS.load(Relaxed),
+        root_ns: inherited_basis_counters::ROOT_NS.load(Relaxed),
+        specialise_calls: inherited_basis_counters::SPECIALISE_CALLS.load(Relaxed),
+        specialise_total_ns: inherited_basis_counters::SPECIALISE_TOTAL_NS.load(Relaxed),
+        child_prep_ns: inherited_basis_counters::CHILD_PREP_NS.load(Relaxed),
+        basis_specialise_calls: inherited_basis_counters::BASIS_SPECIALISE_CALLS.load(Relaxed),
+        basis_specialise_ns: inherited_basis_counters::BASIS_SPECIALISE_NS.load(Relaxed),
     }
 }
 
@@ -4834,11 +4892,29 @@ impl InheritedBases {
             return (Self::default(), std::rc::Rc::new(substituted));
         };
         let started = std::time::Instant::now();
+        let profile = F4_INHERITED_BASIS_PROFILE_ENABLED.load(std::sync::atomic::Ordering::Relaxed);
+        if profile {
+            inherited_basis_counters::SPECIALISE_CALLS
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        }
         let mut total = InheritCost::default();
+        let child_started = profile.then(std::time::Instant::now);
         let child = ChildSystem::from_owned(first.generator_degrees(), substituted);
+        if let Some(t) = child_started {
+            inherited_basis_counters::CHILD_PREP_NS.fetch_add(
+                t.elapsed().as_nanos() as u64,
+                std::sync::atomic::Ordering::Relaxed,
+            );
+        }
         if (policy.rebuild_on_drop && child.has_dropped())
             || (policy.linear_elimination && child.system().iter().any(is_linear_generator))
         {
+            if profile {
+                inherited_basis_counters::SPECIALISE_TOTAL_NS.fetch_add(
+                    started.elapsed().as_nanos() as u64,
+                    std::sync::atomic::Ordering::Relaxed,
+                );
+            }
             f4_profile_add(|p| p.build_ns += started.elapsed().as_nanos());
             return (Self::default(), child.system().clone());
         }
@@ -4846,7 +4922,16 @@ impl InheritedBases {
             .bases
             .iter()
             .map(|b| {
+                let basis_started = profile.then(std::time::Instant::now);
                 let (next, cost) = b.specialise_shared(var, value, &child);
+                if let Some(t) = basis_started {
+                    inherited_basis_counters::BASIS_SPECIALISE_CALLS
+                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    inherited_basis_counters::BASIS_SPECIALISE_NS.fetch_add(
+                        t.elapsed().as_nanos() as u64,
+                        std::sync::atomic::Ordering::Relaxed,
+                    );
+                }
                 total.reduce_word_ops += cost.reduce_word_ops;
                 total.specialise_word_ops += cost.specialise_word_ops;
                 next
@@ -4854,6 +4939,12 @@ impl InheritedBases {
             .collect();
         let word_ops = total.word_ops();
         charge_word_ops(word_ops);
+        if profile {
+            inherited_basis_counters::SPECIALISE_TOTAL_NS.fetch_add(
+                started.elapsed().as_nanos() as u64,
+                std::sync::atomic::Ordering::Relaxed,
+            );
+        }
         f4_profile_add(|p| {
             p.build_ns += started.elapsed().as_nanos();
             p.word_ops += word_ops;
@@ -4973,14 +5064,22 @@ fn reduce_inherited(
             Some(i) => i,
             None => {
                 let started = std::time::Instant::now();
+                let profile =
+                    F4_INHERITED_BASIS_PROFILE_ENABLED.load(std::sync::atomic::Ordering::Relaxed);
+                if profile {
+                    inherited_basis_counters::ROOT_CALLS
+                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                }
                 let rounds = if d == top { closure_rounds() } else { 0 };
-                match ReducedBasis::from_system_closed_with(
-                    system,
-                    n_vars,
-                    d,
-                    rounds,
-                    support_local,
-                ) {
+                let built =
+                    ReducedBasis::from_system_closed_with(system, n_vars, d, rounds, support_local);
+                if profile {
+                    inherited_basis_counters::ROOT_NS.fetch_add(
+                        started.elapsed().as_nanos() as u64,
+                        std::sync::atomic::Ordering::Relaxed,
+                    );
+                }
+                match built {
                     Some((basis, cost)) => {
                         let word_ops = cost.word_ops();
                         charge_word_ops(word_ops);
