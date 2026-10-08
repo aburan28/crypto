@@ -141,7 +141,9 @@ code until the obligation is written out.
   `D_π ≡ 1 (mod 4)`, and `−D_π = 3 · 5 · q₁ · q₂ · q₃` with
   `q₁ = 456597257999`, `q₂ = 1428624589419343516204097` and
   `q₃ = 46523541035814968339936406074986559003387`, three distinct primes
-  (`factorint`, about one minute).  So `D_π` is fundamental, `Z[π]` is
+  (`factorint`, about one minute; FactorDB holds the same factorisation
+  of `|D_π|` under id `1100000008921609430`, status `FF`, checked
+  2026-10-08).  So `D_π` is fundamental, `Z[π]` is
   the maximal order, and `End(E) = Z[π]` for every curve in the class.
   The walker's trial division stops below `q₁` and records the cofactor
   as `composite_unfactored`; this factorisation closes that.  Degrees 3
