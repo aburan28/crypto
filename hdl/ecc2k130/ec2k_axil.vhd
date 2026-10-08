@@ -227,6 +227,9 @@ architecture rtl of ec2k_axil is
   signal l_valid, hold   : std_logic_vector(0 to NENG - 1) := (others => '0');
   signal l_id            : id_arr_t(0 to NENG - 1);
   signal l_x, l_y        : gf_arr_t(0 to NENG - 1);
+  -- "this load is ours": the enable of the 270 kept-load flip-flops
+  signal l_take          : std_logic_vector(0 to NENG - 1);
+  attribute MAX_FANOUT of l_take : signal is "100";
   -- "this load is ours": the enable of the 270 kept-load flip-flops.
   -- dn_mine(i) travels with dn_ldv(i) and is decided a stage early, by
   -- the stage that forwards the load, so the enable is a register and
@@ -325,6 +328,7 @@ begin
 
     eng : entity work.ec2k_walker
       generic map (ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
+                   FLUSH_CLK => FLUSH_CLK, CNT_W => CNT_W, DP_WEIGHT => DP_WEIGHT)
                    FLUSH_CLK => FLUSH_CLK, CNT_W => CNT_W, CNT_LO_W => CNT_LO_W,
                    DP_WEIGHT => DP_WEIGHT)
       port map (
@@ -341,6 +345,7 @@ begin
     -- is free
     pend(i) <= e_dp_valid(i) and not e_dp_ack(i);
     ins(i)  <= hold(i) and pend(i) and up_slot_free(i);
+    l_take(i) <= '1' when dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i else '0';
     l_take(i) <= dn_mine(i);
     up_valid_n(i) <= '0' when rst_eng_r(i) = '1' else
                      '1' when ins(i) = '1' else up_valid(i + 1);
@@ -468,6 +473,8 @@ begin
 
       -- spine head.  Nothing moves until the reset sweep after RUN rose
       -- has passed the far end and everything it dropped has drained.
+      dn_ldv(0) <= '0';
+      dn_cr(0)  <= '0';
       dn_ldv(0)  <= '0';
       dn_mine(0) <= '0';
       dn_cr(0)   <= '0';

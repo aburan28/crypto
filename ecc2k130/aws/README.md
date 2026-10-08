@@ -211,16 +211,45 @@ CPU replay is a ~2^28-step scalar walk during which the GPU used to sit idle.
 1. **Quotas.** G7e counts against the vCPU quotas *All G and VT Spot Instance
    Requests* (L-3819A6DF) and *Running On-Demand G and VT instances*
    (L-DB2E81BA). A GPU costs 8 vCPUs on g7e.2xlarge and 24 on g7e.48xlarge.
-   128 spot GPUs on 2xlarge need 1,024 vCPUs of spot quota. The `adam` IAM user
-   cannot read quotas from the CLI (no `servicequotas:*`), so check and
-   request in the console: Service Quotas → Amazon EC2. New accounts start
-   near zero and increases take hours to days.
+   128 spot GPUs on 2xlarge need 1,024 vCPUs of spot quota.
+
+   ```bash
+   aws service-quotas get-service-quota --service-code ec2 --quota-code L-3819A6DF \
+       --query 'Quota.Value' --output text
+   ```
+
+   That is the *applied* value, and it is the one that binds: an approved
+   increase can read as the old value for a while after the support case
+   closes, and a fleet sized to the approved value fails every launch above
+   the applied one until it propagates. Quotas are per region, so a spot
+   quota in us-west-2 does nothing for us-east-1. New accounts start near
+   zero and increases take hours to days.
+
+   Capacity is a separate question from quota, and G7e runs out: a region
+   can refuse every g7e size, spot *and* on-demand, with
+   `InsufficientInstanceCapacity` while the quota sits unused. The standing
+   group below is the response — it keeps asking and fills when a pool
+   frees up — so check capacity with a single launch attempt before
+   concluding that a fleet is misconfigured.
 2. **IAM.** `infra.sh` creates a role and instance profile for the workers
    (S3 bucket read/write, SSM). The `adam` user could not list IAM or use
    DynamoDB in testing; if `iam:CreateRole` is also denied, run `infra.sh`
    once with an administrator profile (`AWS_PROFILE=admin ./infra.sh`) or
    create the role by hand with the policy printed in the script.
 
+   Where neither is possible, `WORKER_KEY_ID`/`WORKER_KEY_SECRET` put an
+   access key in the worker user-data and skip IAM altogether:
+
+   ```bash
+   WORKER_KEY_ID=AKIA... WORKER_KEY_SECRET=... SYNC=0 ./infra.sh
+   ```
+
+   The key is then readable by anyone who can read the launch template or
+   call `ec2:DescribeInstanceAttribute`, so use one scoped to the campaign
+   bucket and rotate it when the campaign ends. `SYNC=0` leaves
+   `s3://bucket/aws/` untouched, which is what a live campaign wants: the
+   copies there are what the running workers were started from, and the
+   next instance to boot downloads them.
    **Do not take the `WORKER_AWS_*` fallback to avoid this.** When the profile
    cannot be created, `infra.sh` could write static keys into user-data
    instead, and because `iam:CreateRole` was denied for weeks, that is what it
@@ -258,7 +287,15 @@ CPU replay is a ~2^28-step scalar walk during which the GPU used to sit idle.
    campaign's tooling authenticates with it.
 3. **Region.** G7e is offered in us-west-2, us-east-1 and us-east-2 (not
    eu-west-1). Spot pools differ by AZ by 2–3×; the fleet spreads over every
-   default subnet and lets `price-capacity-optimized` choose.
+   default subnet and lets `price-capacity-optimized` choose. Prefer the
+   bucket's own region: a worker elsewhere pays cross-region transfer on
+   every point it uploads.
+
+   The vCPU quota, not the GPU count, is what binds, and `g7e.2xlarge` is
+   the only size that spends 8 vCPUs per GPU (the 24xlarge spends 24). With
+   a spot quota of *v* vCPUs, cap the fleet at `v/8` GPUs and restrict
+   `TYPES` to `g7e.2xlarge`, or a single larger instance will consume the
+   quota for a fraction of the GPUs.
 4. **Docker on the build host.** The Deep Learning Base OSS Nvidia Driver GPU
    AMI (Ubuntu 24.04, driver 580, G7e supported) ships Docker, the NVIDIA
    container toolkit, the AWS CLI and Python 3, which is all the fleet needs.
@@ -345,6 +382,14 @@ ECC_BUCKET=ecc2k130-<account> ../../target/release/ecc2k-status --watch 60   # ~
 
 #    recreate to change the On-Demand base or disable fallback:
 #    ./fleet.sh down && ./fleet.sh up 64 --on-demand 8
+#
+#    Where CreateFleet is refused because the account has no
+#    AWSServiceRoleForEC2Fleet and the user cannot create one, the same verbs
+#    drive an Auto Scaling group instead, still counted in GPUs:
+#    BACKEND=asg TYPES=g7e.2xlarge,g7e.4xlarge MAX_SPOT_PER_GPU_HOUR=3 ./fleet.sh up 8
+#    Keep every type in TYPES at one GPU and the per-GPU cap stays meaningful;
+#    a cap under the on-demand price is what stops a thin spot pool from
+#    costing more than on-demand for the same GPU.
 #    ./fleet.sh down && ./fleet.sh up 64 --no-fallback
 
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
@@ -364,6 +409,12 @@ builds an F2 image of the VHDL engine and runs an F2 fleet whose workers are
 this `worker.py` with `ECC_CLIENT` pointing at the FPGA host program. Same
 bucket, same slots, same `dp/`; step 5 does not change.
 
+`campaign.json` lives in the bucket and is read by every worker at start.
+Change `restartHours`, `uploadEvery` or `verify` freely. Never change
+`workers`, `batch`, `blockThreads`, `minBlocks`, `curve` or `dpWeight` once
+any slot exists: the first four make every existing checkpoint unloadable
+(each slot would be retired and its in-flight work lost), the last two break
+the collision guarantee. Start a new bucket for a different geometry.
 `campaign.json` lives in the bucket and is read by every worker at start
 and again on the 60 s heartbeat. Change `restartHours`, `uploadEvery` or
 `verify` freely. Raise `maxIters` with `./rollout.sh max-iters N`, which

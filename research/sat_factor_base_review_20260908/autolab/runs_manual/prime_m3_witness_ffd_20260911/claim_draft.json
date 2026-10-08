@@ -1,0 +1,101 @@
+{
+  "schema_version": 2,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "beat_id": "prime.decomposition.m3_witness_ffd_ge14",
+  "stage": "decomposition",
+  "regime": "prime",
+  "claim_boundary": "Public synthetic planted Semaev m=3 on gbrl toy curve y^2=x^3+x+1 / F_1000003 with |E|~2^20.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not ledger promotion",
+    "not independent validation",
+    "not j=0 special curve"
+  ],
+  "created_at": "2026-09-11T15:56:27.369418+00:00",
+  "n_or_bits": 20,
+  "m_summands": 3,
+  "dimension_l_or_dim": 4,
+  "unknowns": 3,
+  "system_degree": "20",
+  "eq_var_ratio": 1.3333333333333333,
+  "oracle_class": "groebner",
+  "median_ms_per_target": 14.026625,
+  "largest_solvable": {
+    "fb_size": 4,
+    "group_order": 1000727,
+    "group_order_bits": 20,
+    "buchberger_steps": 98,
+    "gb_wall_ms": 14.026625,
+    "ffd": 8,
+    "witnesses_sum_in_group": true,
+    "recovered_planted_up_to_perm": true
+  },
+  "ffd_or_degree_of_regularity": {
+    "status": "measured",
+    "draws": 1,
+    "min": 8,
+    "max": 8,
+    "mean": 8.0,
+    "ffds": [
+      8
+    ],
+    "d_max": 16,
+    "definition": "smallest D>=2 with Macaulay rank < rows and rank < cols over F_p"
+  },
+  "seeds": {
+    "planted": "first_three_fb_points_sum"
+  },
+  "resource_caps": {},
+  "fixture_hash": "a0488aaaf6da3a6a7db73516b634d32acce0070a7a4c35b01374dd7b7b69ed5e",
+  "executable_or_source_hash": {
+    "source": "a0488aaaf6da3a6a7db73516b634d32acce0070a7a4c35b01374dd7b7b69ed5e"
+  },
+  "host_id": {
+    "node": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_m3_witness_ffd_20260911/m3_witness_ffd.json",
+    "research/gbrl/src/bin/m3_witness_ffd.rs",
+    "research/gbrl/src/ffd.rs"
+  ],
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_m3_witness_ffd_20260911/claim_draft.json",
+  "result": {
+    "algebraic_zeros_over_fb": 22,
+    "arith_ops": 3739,
+    "basis_len": 46,
+    "bits_gate_ge14": true,
+    "buchberger_steps": 98,
+    "claim_boundary": "Public synthetic planted m=3 on toy curve |E|~2^20; not key recovery; not ledger promotion.",
+    "curve": "y^2=x^3+x+1",
+    "eq_var_ratio": 1.3333333333333333,
+    "eqs": 4,
+    "fb_size": 4,
+    "ffd": 8,
+    "ffd_d_max": 16,
+    "ffd_status": "measured",
+    "ffd_wall_ms": 28.71275,
+    "field_p": 1000003,
+    "gb_done": true,
+    "gb_wall_ms": 14.026625,
+    "group_order": 1000727,
+    "group_order_bits": 20,
+    "group_verified_witnesses": 6,
+    "kind": "m3_witness_ffd",
+    "macaulay_last": {
+      "cols": 968,
+      "degree": 16,
+      "rank": 905,
+      "rows": 1365
+    },
+    "nvars": 3,
+    "planted_group_sum_ok": true,
+    "planted_vanishes_input": true,
+    "recovered_planted_up_to_perm": true,
+    "system_degree": 20,
+    "witnesses_sum_in_group": true
+  },
+  "verdict": "M3_WITNESS_FFD_PASS_GE14_BITS_NOT_PROMOTION"
+}

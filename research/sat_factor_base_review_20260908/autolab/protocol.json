@@ -1,6 +1,8 @@
 {
   "schema_version": "1.0",
   "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "objective": "Agent-facing control plane for single-target IC versus Pollard-rho measurements on one frozen public point, with fail-closed measurement-schema validation.",
+  "claim_hygiene": "Public synthetic / known-answer fixtures only. The default and headline vs_rho workload is exactly one previously unseen target, solved by both arms on the identical public point. Online time starts at the first target-dependent computation after reusable IC setup is ready, excludes launch, loading, and fixture construction, and ends after independently verified recovery. Never substitute a multi-target average, batch throughput, or shared-table amortization for this result. Multi-target work is secondary and requires a separate declared question after the one-target measurement. Never combine best component costs from different runs into a synthetic vs_rho win.",
   "objective": "Agent-facing control plane for pushing docs/ic/boundary_targets.json beat targets with fail-closed measurement-schema validation.",
   "claim_hygiene": "Primary IC-vs-rho comparisons use exactly one public target on the same point and resource envelope, with verified scalar recovery and target-online wall intervals. Current producers emit whole-process or operation-counted diagnostics only; those rows are not eligible for a single-target speedup claim. Multi-target evidence stays historical.",
   "ledger": {
@@ -18,11 +20,13 @@
     "direct": {
       "example": "koblitz_rank_fixture",
       "source": "examples/koblitz_rank_fixture.rs",
+      "usage": "<n> <a> <eta_numerator> <eta_denominator> <seed> [pair_mode] [target_mode] [query_mode] [online_target_fixtures]"
       "usage": "<n> <a> <eta_numerator> <eta_denominator> <seed> [pair_mode] [target_mode] [query_mode] [target_count (must be 1)]"
     },
     "rho": {
       "example": "koblitz_rho_fixture",
       "source": "examples/koblitz_rho_fixture.rs",
+      "usage": "<n> <a> <mode> <online_targets> [reference|packed] [target_seed]"
       "usage": "<n> <a> <mode> <target_count (must be 1)> [reference|packed] [seed]"
     }
   },
@@ -50,6 +54,14 @@
         "backend": "packed"
       },
       "resource_cap_bytes": 17179869184,
+      "note": "Confirms deps, lock, producers, and schema validation. Not a ledger promotion.",
+      "precompute_fixtures": 1,
+      "env": {
+        "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION": "1"
+      }
+    },
+    "koblitz.vs_rho.n37_wall": {
+      "label": "Supplementary: one-target whole-process wall measurement at n=37",
       "note": "Confirms deps, lock, producers, and schema validation. Not a ledger promotion. Historical diagnostics only; primary single-target online timing is not implemented by these producers.",
       "fixtures_default": 1,
       "primary_speedup_eligible": false,
@@ -65,7 +77,7 @@
       "label": "Legacy single-target diagnostic only: Priority #1a: whole-process wall-clock crossover at n=37",
       "regime": "koblitz",
       "stage": "vs_rho",
-      "priority": 1,
+      "priority": 8,
       "n": 37,
       "a": 0,
       "eta": [
@@ -85,6 +97,19 @@
       },
       "resource_cap_bytes": 17179869184,
       "acceptance_gates": [
+        "all stages charged in the same process series",
+        "independent validation",
+        "timing_class=whole_process_wall",
+        "automorphism_discount explicit (sqrt(2n) / A=2*n)",
+        "verdict field set",
+        "measurement_schema.vs_rho required fields present",
+        "one target only; whole-process wall is supplementary and cannot replace single_target_online"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target",
+      "note": "Whole-process wall beat: measures wall including target generation, so it cannot satisfy the charged same-target vs_rho measurement schema (schema v2). Launch manually for wall evidence; the always-run driver skips it."
+    },
+    "koblitz.vs_rho.n41_charged": {
+      "label": "Reproduction only: paired one-target online comparison at n=41 after reusable IC logs (record landed 2026-10-02)",
         "exactly one target per run",
         "label output legacy_diagnostic_only until online timers exist",
         "do not promote whole-process or operation-counted ratios as online speedups"
@@ -100,13 +125,14 @@
       "label": "Legacy single-target diagnostic only: Priority #1b: charged crossover at n=41 with >=20% margin",
       "regime": "koblitz",
       "stage": "vs_rho",
-      "priority": 1,
+      "priority": 7,
       "n": 41,
       "a": 0,
       "eta": [
         1,
         2
       ],
+      "timing_class_goal": "single_target_online",
       "timing_class_goal": "algorithmic_charged",
       "fixtures_default": 1,
       "direct": {
@@ -120,6 +146,71 @@
       },
       "resource_cap_bytes": 17179869184,
       "acceptance_gates": [
+        "exactly one unseen online target; precomputation target is setup only",
+        "IC and rho solve the same frozen public point and scalar fixture",
+        "IC online interval starts after reusable factor base, support index, and logs are ready",
+        "rho online interval starts at its first target-dependent walk and ends after verified scalar recovery",
+        "online phase costs and correctness replay are recorded for both arms",
+        "independent validation",
+        "timing_class=single_target_online",
+        "automorphism_discount explicit (sqrt(2n) / A=2*n)",
+        ">=20% margin vs rho for a win",
+        "measurement_schema.vs_rho required fields present"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target",
+      "precompute_fixtures": 1,
+      "pair_rho_to_direct_target": true,
+      "env": {
+        "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION": "1"
+      }
+    },
+    "koblitz.vs_rho.n53_charged": {
+      "label": "Reproduction only: paired one-target online comparison at n=53 after reusable IC logs (record landed 2026-10-02; explicit pair table rung, logged)",
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "priority": 7,
+      "n": 53,
+      "a": 0,
+      "eta": [
+        1,
+        10
+      ],
+      "timing_class_goal": "single_target_online",
+      "fixtures_default": 1,
+      "direct": {
+        "pair_mode": "signed_expanded",
+        "target_mode": "independent",
+        "query_mode": "pair_pair_guided_256"
+      },
+      "rho": {
+        "quotient_mode": "signed_frobenius",
+        "backend": "packed"
+      },
+      "resource_cap_bytes": 17179869184,
+      "acceptance_gates": [
+        "exactly one unseen online target; precomputation target is setup only",
+        "IC and rho solve the same frozen public point and scalar fixture",
+        "IC online interval starts after reusable factor base, support index, and logs are ready",
+        "rho online interval starts at its first target-dependent walk and ends after verified scalar recovery",
+        "online phase costs and correctness replay are recorded for both arms",
+        "independent validation",
+        "timing_class=single_target_online",
+        "automorphism_discount explicit (sqrt(2n) / A=2*n=106)",
+        ">=20% margin vs rho for a win",
+        "measurement_schema.vs_rho required fields present",
+        "guided rank accumulation must establish the reusable factor-log table (rank 221 at columns 220) in the precompute fixture"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target",
+      "precompute_fixtures": 1,
+      "pair_rho_to_direct_target": true,
+      "env": {
+        "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION": "1",
+        "KIC_INCREMENTAL_RANK_CROSSCHECK": "0"
+      },
+      "note": "Record landed 2026-10-02: 51.0x-55.7x online across two paired runs (20261002T214339Z-56e7fbb9d7, 20261002T214636Z-0fbed42339) with standalone Python GF(2^53) scalar replay PASS. Explicit pair table this rung (9.34 GB peak child RSS under the 16 GiB cap, excluded setup, logged). Next rung n=61 requires the compact-orbit domain without the pair table."
+    },
+    "koblitz.vs_rho.n53_probe": {
+      "label": "Beyond ceiling: single-target feasibility probe at n=53",
         "exactly one target per run",
         "label output legacy_diagnostic_only until online timers exist",
         "do not promote whole-process or operation-counted ratios as online speedups"
@@ -135,11 +226,12 @@
       "label": "Legacy single-target diagnostic only: Current boundary: selected n=53 online wall crossover with full-cost, core, and memory losses",
       "regime": "koblitz",
       "stage": "vs_rho",
-      "priority": 1,
+      "priority": 8,
       "n": 53,
       "a": 0,
       "eta": [
         1,
+        16
         128
       ],
       "timing_class_goal": "whole_process_wall",
@@ -367,6 +459,113 @@
         "both arms recover the same scalar; both certificates replay in oracle.py",
         "every workload's vs_rho claim passes claim-check; status stays PENDING_INDEPENDENT_VALIDATION"
       ],
+      "ledger_next_target": "regimes.koblitz.stages.factor_base.next_target",
+      "note": "Feasibility probe beat (pre-schema-v2 PENDING runs 20260911; claims superseded by koblitz.vs_rho.n53_charged, landed 2026-10-02). Launch manually for probes; the always-run driver skips it."
+    },
+    "koblitz.factor_base.n53": {
+      "label": "Priority #2: balanced/materialized factor base at n=53 under 16GiB resource gate",
+      "regime": "koblitz",
+      "stage": "factor_base",
+      "priority": 2,
+      "n": 53,
+      "a": 0,
+      "eta": [
+        1,
+        16
+      ],
+      "timing_class_goal": "construction_wall",
+      "fixtures_default": 1,
+      "fixtures_full": 1,
+      "direct": {
+        "pair_mode": "signed_quotient",
+        "target_mode": "independent",
+        "query_mode": "pointwise"
+      },
+      "resource_cap_bytes": 17179869184,
+      "env": {
+        "KIC_INCREMENTAL_RANK_CROSSCHECK": "0",
+        "KIC_SUMMARY_ONLY": "1"
+      },
+      "acceptance_gates": [
+        "KoblitzCurve::new(0,53) succeeds",
+        "Frobenius+negation closure verified",
+        "construction RSS and retained bytes logged",
+        "peak RSS under resource_cap_bytes",
+        "measurement_schema.factor_base required fields present",
+        "not a ledger promotion until independent validation"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.factor_base.next_target",
+      "note": "Direct-only beat (no rho). Manual PASS drafts already exist under runs_manual/n53_factor_base_*_20260911; control-plane launch reproduces the construction measure under SUMMARY_ONLY."
+    },
+    "koblitz.decomposition.n31_m2_dim16": {
+      "label": "Priority #3: n=31 dim~16 m=2 quadratic decomposition (FFD + median <=1h, disagreements=0)",
+      "regime": "koblitz",
+      "stage": "decomposition",
+      "priority": 3,
+      "n": 31,
+      "a": 0,
+      "m": 2,
+      "dim_goal": 16,
+      "unknowns_goal": 32,
+      "system_degree": "quadratic",
+      "timing_class_goal": "median_ms_per_target",
+      "fixtures_default": 1,
+      "fixtures_full": 8,
+      "producer": {
+        "example": "symmetrised_oracle_bench",
+        "args_template": "--only {a} {n} {m} --targets {fixtures} --no-sat --node-budget 50000"
+      },
+      "resource_cap_bytes": 17179869184,
+      "acceptance_gates": [
+        "KoblitzCurve::new(a,31) succeeds",
+        "target_dim ~16 via divisor_for_dimension",
+        "unknowns = m*ell (+ chaining) near 32 for m=2",
+        "FFD min/max/mean logged",
+        "median_ms_per_target logged",
+        "disagreements=0 vs enumeration gate",
+        "measurement_schema.decomposition required fields present",
+        "not a ledger promotion until independent validation"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.decomposition.next_target",
+      "note": "Manual/driver via examples/symmetrised_oracle_bench (paired_bench picks target_dim=ceil((n+1)/m)=16). Control-plane launch for decomposition not yet wired; claim drafts under runs_manual/n31_decomp_m2_dim16_*."
+    },
+    "binary.decomposition.l8_pairs_baseline": {
+      "label": "Priority #4 probe: pairs-and-solve baseline at l=8 (not a sub-2^(2l) win)",
+      "regime": "binary",
+      "stage": "decomposition",
+      "priority": 4,
+      "l": 8,
+      "n": 24,
+      "producer": {
+        "example": "semaev_decomp_bench",
+        "args": "8"
+      },
+      "acceptance_gates": [
+        "pairs wall at l=8 logged",
+        "FFD required for ledger beat \u2014 currently unmeasured",
+        "sub-2^(2l) requires oracle faster than pairs \u2014 not this baseline",
+        "not a ledger promotion"
+      ],
+      "ledger_next_target": "regimes.binary.stages.decomposition.next_target",
+      "note": "Manual PASS-or-FAIL drafts under runs_manual/binary_decomp_l8_20260911. Research note: SAT historically slower than pairs at l=8."
+    },
+    "prime.end_to_end_dlp.j0_16bit": {
+      "label": "Priority #5: j=0 known-answer IC at 16 bits agreeing with rho",
+      "regime": "prime",
+      "stage": "end_to_end_dlp",
+      "priority": 5,
+      "bits": 16,
+      "producer": {
+        "example": "j0_known_answer_bits",
+        "args": "16"
+      },
+      "acceptance_gates": [
+        "ic recovers d with [d]G=Q",
+        "agrees with rho on same instance",
+        "wall times logged",
+        "not ledger promotion until independent validation"
+      ],
+      "note": "Manual draft under runs_manual/prime_j0_e2e_16bit_20260911"
       "primary_speedup_eligible": true,
       "primary_speedup_blocker": "This beat's producers emit the single-target online interval and IC phase split, but the protocol-wide contract stays blocked: rows are PENDING_INDEPENDENT_VALIDATION until an independent-host replay.",
       "result_class": "single_target_online",
@@ -378,6 +577,48 @@
     "current_path": "runs/current.json"
   },
   "historical_note": "Earlier specialized runners (kic_autolab, beats_rho_autolab, direct_n37_autolab) left only __pycache__ bytecode under sibling autolab_* dirs. This control plane replaces them for boundary-ledger work and drives the still-present Rust producers.",
+  "agent_priorities": [
+    {
+      "rank": 1,
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "beat": "Extend the verified single-target online ladder to n=73, a=0 (prime degree; r=86020738150056119 ~ 2^56.3, cofactor 109796) on the same frozen public point contract with the compact-orbit u128 domain (no explicit pair table, peak RSS under the common cap). The n=71 compact-orbit u128 record (median 2864.1x online across three paired runs, deterministic 14554-probe relation, three Python-replayed runs) is the rung to beat. No new field code is needed \u2014 the landed u128 producers already admit n=73."
+    },
+    {
+      "rank": 2,
+      "regime": "koblitz",
+      "stage": "factor_base",
+      "beat": "Advance the representative-plus-Frobenius factor-base construction under its memory gate; report setup separately from one-target online cost."
+    },
+    {
+      "rank": 3,
+      "regime": "koblitz",
+      "stage": "decomposition",
+      "beat": "Measure the selected n=31 dim-16 m=2 decomposition policy on a frozen single target first; multi-target distribution work is secondary and cannot stand in for one-target online cost."
+    },
+    {
+      "rank": 4,
+      "regime": "binary",
+      "stage": "decomposition",
+      "beat": "sub-2^(2l) oracle at l=8 with FFD logged on a single frozen target."
+    },
+    {
+      "rank": 5,
+      "regime": "prime",
+      "stage": "end_to_end_dlp",
+      "beat": "Extend the j=0 known-answer IC ladder to >=20 bits with split stage timers; pair each one-target result on the identical public point with rho."
+    },
+    {
+      "rank": 6,
+      "regime": "binary_and_prime",
+      "stage": "relation_yield",
+      "beat": "Publish single-target query yield and rank distributions first; label any multi-target summaries as secondary."
+    }
+  ],
+  "how_to_beat": [
+    "Primary vs_rho workloads contain exactly one unseen target; IC and rho must solve the same frozen public point under the same resource envelope.",
+    "Start each online clock at the first target-dependent computation after reusable IC preparation; exclude process launch, input loading, target fixture generation, and target-independent setup. Independently verify the recovered scalar."
+  ]
   "primary_speedup_contract": {
     "target_count": 1,
     "status": "blocked_until_online_timers",

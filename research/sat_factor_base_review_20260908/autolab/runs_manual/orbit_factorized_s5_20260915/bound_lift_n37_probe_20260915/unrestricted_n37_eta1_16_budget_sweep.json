@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "kind": "unrestricted_n37_eta1_16_budget_sweep",
+  "updated_at": "2026-09-15T21:28:56Z",
+  "claim_boundary": "Public-synthetic unrestricted planted-target only. NOT ledger promotion.",
+  "arms": [
+    {
+      "budget": 50000,
+      "verdict": "UNKNOWN",
+      "conflicts": 50000,
+      "file": "unrestricted_n37_eta1_16_seed1_50k.json"
+    },
+    {
+      "budget": 200000,
+      "verdict": "UNKNOWN",
+      "conflicts": 200000,
+      "solve_ms": 1673034.431583,
+      "pair_table_entries": 0,
+      "variables": 116927,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "file": "unrestricted_n37_eta1_16_seed1_200k.json"
+    }
+  ],
+  "note": "Cliff remains open at 200k (~28min). n53 unrestricted pairthen@100k in flight. Draft only.",
+  "ledger_promotion": false
+}

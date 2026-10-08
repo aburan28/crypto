@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "candidate_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4",
+  "curve_id": "EC1N61Ckb1hd0e02e3be112",
+  "workload_id": "2c0fdc4f8660",
+  "target_count_per_invocation": 1,
+  "same_public_target_all_runs": true,
+  "target_not_in_prior_n61_panel": true,
+  "repetitions": 3,
+  "all_ic_verified": true,
+  "all_rho_verified": true,
+  "all_independent_replay_pass": true,
+  "IC_online_ms": {
+    "median": 89.65008300000001,
+    "range": [
+      75.088833,
+      99.56099999999999
+    ],
+    "observations": [
+      75.088833,
+      99.56099999999999,
+      89.65008300000001
+    ]
+  },
+  "rho_online_ms": {
+    "median": 3989.175416,
+    "range": [
+      2750.126167,
+      8832.519541
+    ],
+    "observations": [
+      3989.175416,
+      2750.126167,
+      8832.519541
+    ]
+  },
+  "paired_speedup_rho_over_IC": {
+    "median": 53.12608089141564,
+    "range": [
+      27.622524552786736,
+      98.52215687296128
+    ],
+    "observations": [
+      53.12608089141564,
+      27.622524552786736,
+      98.52215687296128
+    ]
+  },
+  "claim_boundary": "one fresh public synthetic n=61 target, 48-bit subgroup; toy-curve evidence only, not ECC2K-130 or production-key evidence",
+  "accounting": "IC online starts after target-independent base/index/log preparation and ends after recovered-scalar group check. Rho online starts after target-point construction and includes jump setup, walk, and in-process verification. Process launch, input loading, target generation, and target-independent IC preparation excluded. Total operation-count boundary not comparable; S is unknown."
+}

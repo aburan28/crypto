@@ -1,0 +1,22 @@
+
+thread 'main' (1346009) panicked at examples/koblitz_orbit_dlp_fast.rs:635:41:
+admitted Koblitz rung
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+        0.03 real         0.00 user         0.00 sys
+             6995968  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                 582  page reclaims
+                  40  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                   1  voluntary context switches
+                  95  involuntary context switches
+            42888852  instructions retired
+            27262640  cycles elapsed
+             2163048  peak memory footprint

@@ -1,0 +1,33 @@
+{
+ "beat_id": "prime.end_to_end_dlp.j0_20bit",
+ "created_at": "2026-10-05T23:03:35.741679+00:00",
+ "kind": "independent_replay",
+ "note": "Fresh deterministic targets (distinct seeds) on the same 20-bit j=0 curve; all runs recover, match the sidecar, and agree with rho",
+ "original": {
+  "ic_agrees_rho": true,
+  "ic_ms": 56810.750208000005,
+  "ic_ok": true,
+  "rho_ms": 74.27095899999999,
+  "rho_ok": true
+ },
+ "replays": [
+  {
+   "ic_agrees_rho": true,
+   "ic_ms": 85960.998292,
+   "ic_ok": true,
+   "rho_ms": 146.653125,
+   "rho_ok": true,
+   "seed": 20261006
+  },
+  {
+   "ic_agrees_rho": true,
+   "ic_ms": 83564.119291,
+   "ic_ok": true,
+   "rho_ms": 212.754208,
+   "rho_ok": true,
+   "seed": 20261007
+  }
+ ],
+ "schema_version": "1.0",
+ "status": "PASS"
+}
