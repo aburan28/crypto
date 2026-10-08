@@ -241,6 +241,35 @@ Coppersmith on the summation polynomials, at any size.**
    group; this repository's `quantum_estimator` already prices it. Not a
    classical lever.
 
+### 4.6 Also examined on 2026-10-08 and closed on paper
+
+- **Symmetric rewriting of `S₃` in `(e₁, e₂) = (x₁+x₂, x₁x₂)`.** Six
+  monomials instead of nine, bounds `(2B, B²)`. Level-1 reach improves from
+  `1/18` to `1/12`, but the asymptotic reach for the total-degree-2 triangle
+  with these bounds is `1/9 < 1/6`: the smaller monomial set is outweighed
+  by the `B²` bound on `e₂`. Not worth a run.
+- **Multiplicative-subgroup factor bases** (`x^B = 1`, `B | p−1`). The
+  membership polynomial becomes sparse, and `Π_{h∈H} S₃(h, X, z)` can be
+  built by cyclic-norm folding in `O(log B)` polynomial products — but the
+  output has degree `2B`, so every route (fold modulo `X^B − 1`, gcd, batched
+  evaluation of `Ψ(Z) = Π S₃(x_i, x_j, Z)` over many targets) costs `Õ(B)`
+  per target or returns to the `B²`-advice generic trade-off. No exponent
+  change; it needs `p − 1` to have a divisor near `p^{1/3}`, which the
+  deployed primes do not offer anyway.
+- **Global lifting (xedni-style).** Take `E/Q` with small coefficients, use
+  reductions of small-height rational points as the factor base so that
+  relations in `E(Q)` reduce to free relations mod `p`. All those logs are
+  spanned by `rank(E(Q))` unknowns, and the target still has to be written
+  as a bounded combination of the generators — an `r`-dimensional
+  bounded-coefficient DLP that is generic again. This is Silverman's xedni
+  calculus; Jacobson–Koblitz–Silverman–Stein–Teske (2000) showed it does not
+  beat rho.
+- **Embedding into an extension to buy a subfield.** `E(F_p) ⊂ E(F_{p^n})`
+  makes the subfield factor base `x ∈ F_p` algebraic, but Gaudry's cost
+  there is `Õ(p^{2−2/n})` against the original `√p`: `p` for `n = 2`,
+  `p^{4/3}` for `n = 3`. The embedding enlarges the problem faster than the
+  structure helps.
+
 ## 5. Decision
 
 Pursue (1) only with a concrete new lattice/embedding idea that changes the
