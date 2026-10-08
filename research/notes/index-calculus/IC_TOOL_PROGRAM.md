@@ -181,6 +181,12 @@ unchanged, as in §23. On top of them:
   - Results hold for that class. Arm64 and GPU are named as unmeasured.
   - Kernels use runtime feature detection with a portable fallback, and
     CI tests the fallback.
+  - **Each round names its class** in `icprog`'s spec (`requires`): the
+    reference class, and any feature its candidate's kernels detect
+    beyond it. `icprog run` refuses the round's timed steps on a host
+    outside its class, and `icprog host-class <round>` reports the class
+    against the host. The container can move between classes between
+    sessions, as it did on 2026-10-07 (§8).
 
 ## 6. The loop
 
@@ -217,7 +223,7 @@ A Track B round may change no speed at all. It must then show:
 ## 7. The baseline ledger
 
 Rows are baselines and columns are one unit. R01 filled v0 (2026-10-01),
-R03 v1 and R05 v2 (both 2026-10-01). A baseline's `S` comes from the round that made
+R03 v1 and R05 v2 (both 2026-10-01), and R07 v3 (2026-10-06). A baseline's `S` comes from the round that made
 it, beside its base's `S` in the same runs: runs hours apart on this host
 differ by several per cent, so only a paired ratio compares across
 rounds.
@@ -227,6 +233,7 @@ rounds.
 | v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
 | v1 | `30f6c153` on v0′ `c1a2e5f8` | engineering | 4.39, 4.45, 5.83, 8.16, 9.43, 15.61 (R03's runs; v0′ there: 4.45, 8.00, 5.90, 8.04, 9.17, 15.82) | 1.771 [1.694, 1.851] at `2^38.0`, holdouts 1.922 [1.756, 2.104]; 0.970–1.049 at the nine prime sizes | not re-measured | not re-measured | none yet | 61 | #1119, #1166 |
 | v2 | `edcb0bec` on v1 `30f6c153` | engineering | 4.47, 4.45, 5.28, 6.72, 8.13, 12.77 (R05's runs; v1 there: 4.80, 4.96, 5.88, 8.74, 10.12, 16.74) | 1.293 [1.270, 1.317], 1.238 [1.215, 1.262] and 1.303 [1.281, 1.324] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.276 [1.242, 1.311], 1.240 [1.208, 1.273] and 1.319 [1.298, 1.340]; 0.933–1.139 at the eight other sizes | not re-measured | not re-measured | none yet | 61 | #1164, #1187 |
+| v3 | `995ea207`, main's head | engineering | 3.12, 3.67, 4.38, 5.82, 5.48, 8.09 (R07's runs; v2 there: 4.12, 4.37, 5.11, 6.66, 8.11, 12.26) | 1.135 [1.104, 1.167], 1.483 [1.452, 1.514] and 1.526 [1.507, 1.546] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.170 [1.141, 1.201], 1.483 [1.445, 1.523] and 1.539 [1.521, 1.557]; 1.110–1.287 at the eight other sizes | IC 10.2–26.5× faster (rule v3) | IC 5.2–21.0× slower (rule v3) | none yet | 61 | #1395, #1414 |
 
 **Rounds that did not become baselines.** A rejected round keeps its
 numbers here and its code on record (§6, step 4). Its ratio is paired
@@ -399,6 +406,192 @@ predicted false-positive rate from 0.17–0.21 to 0.019–0.031
   main commit its base is built from. When main has moved under that
   base, a drift round like R07 runs before the next declared round.
 
+**R07 made v3 (2026-10-06).** Main's head, `995ea207`, is the
+programme's baseline, accepted on its pin and the round's own A/A bands,
+with no minimum gain
+([protocol](../../ic_tool_program/rounds/R07-main-head/PROTOCOL.md),
+[results](../../ic_tool_program/rounds/R07-main-head/README.md)).
+- **Main is faster than v2 at every size.** Cold time is 1.135 [1.104,
+  1.167], 1.483 [1.452, 1.514] and 1.526 [1.507, 1.546] times faster at
+  `2^44.3`, `2^44.5` and `2^47.2`; the fresh holdouts read 1.170, 1.483
+  and 1.539. The eight smaller sizes read 1.110–1.287. Every pinned output
+  is v0's.
+- **The wide-tail penalty is gone.** At `2^44.5` and `2^47.2` a scanned
+  summand falls from 1.85 and 1.80 units to 1.15 and 1.14, the 8-lane
+  kernel's cost at `2^44.3`: #1242's carry-less folds made the scalar
+  subtraction there about 2.4 times cheaper a product. `S` at `2^44.5` is
+  now below `S` at `2^44.3`.
+- **`2^44.3` gains least,** 1.135 cold and 1.049 in collection: its scan
+  runs the 8-lane kernel, which #1242 does not touch.
+- **Rho's online interval is faster too,** 1.110–1.818: main rewrote the
+  walk after v2 (#1334, #1360), and it shares the field arithmetic. The
+  rule's comparison at v3 ([`rule/v3`](../../ic_tool_program/rule/v3/PROTOCOL.md),
+  declared with R07's results) measures where that leaves the index
+  calculus against rho.
+- **Under callgrind,** on the portable paths, main runs 29% and 27% fewer
+  instructions at `2^44.3` and `2^47.2`, and both arms recover the same
+  logarithm, the cross-check's one decision.
+- **The class is engineering,** credited to main (#1242 and the rest of
+  the drift), not to a lever of the programme's.
+- **What runs next on v3:** the rule's comparison, then R06 (the scan's
+  key by GFNI and funnel shifts, declared with R07's results), and R02b's
+  go/no-go exploration under its amendment 3.
+
+**R06 declared on v3 (2026-10-06)**
+([protocol](../../ic_tool_program/rounds/R06-scan-key/PROTOCOL.md)),
+before any R06 timed run. It changes A11, the scan's canonical key, in
+both of its kernels, with the same keys by construction:
+- **the basis change by GFNI** (`vgf2p8affineqb` on byte-transposed
+  keys), 0.82–0.94 ns a key alone against the tables' 2.9–4.3 ns;
+- **the least rotation by funnel shifts** (`vpshldq`), 2.4–2.8 ns a key
+  alone against the chained loop's 5.4–7.1 ns.
+
+Both are detected at run time, and every other CPU runs today's code.
+The prediction is 1.08–1.15×, 1.07–1.13× and 1.15–1.22× cold at the
+three target sizes, and acceptance needs each interval above 1.03 on the
+suite rows and on fresh holdouts. It runs after the rule's comparison at
+v3.
+
+**R02b withdrawn on v3 (2026-10-06)**
+([record](../../ic_tool_program/explorations/R02b-go-no-go-20261006/README.md)).
+The go/no-go its amendment 3 declared ran after R07's last step: v3
+against v3 plus R02's kernel, which applied unchanged, on `M1`'s two rows
+at each target size, three rounds, isolated.
+- **Cold time read 0.962 and 0.918,** base over candidate, at `2^44.5`
+  and `2^47.2` (five clean pairs each). On v3 the kernel is slower than
+  the scalar path it replaces, and collection is 12% and 8% slower with
+  it.
+- **So R02b was withdrawn without running,** by its rule (below 1.05 at
+  both sizes; its amendment 4), and the kernel is retired. The withdrawal
+  is neither an acceptance nor a failed round on the scan (§11).
+
+**The scan's stages on v3 (2026-10-06)**
+([record](../../ic_tool_program/explorations/scan-stages-v3-20261006/README.md)),
+R04's probes on main's head, two rounds of `M1`'s rows. This is a stage
+diagnostic, not a speedup.
+- **The wide-tail premium is gone.** The subtraction costs 11.3 and
+  12.1 ns a summand at `2^44.5` and `2^47.2`, against R04's 32.5 and
+  33.3 on v0′.
+- **The scan is about 35 ns a summand at all three sizes,** in three
+  roughly equal parts: the subtraction (11–12 ns), the key (11–13 ns),
+  and the filter with the admitted keys (10–12 ns).
+- **The key is R06's target, and the subtraction the next lever's:**
+  a vectorised kernel on main's two-fold reduction.
+
+**The rule's comparison at v3 (2026-10-06)**
+([results](../../ic_tool_program/rule/v3/README.md)): ledger §23's
+single-target comparison on v3, with the same six sizes, 64 targets and
+four A/A repeats a size, against v3's own strong rho. It is accounting:
+it re-measures and changes no algorithm.
+- **408 of 408 rows checked,** every logarithm §23's, and the pin held.
+  No process was contended, failed or retried. The comparison's rho takes
+  0.50–0.62 of the strong walk's time a step, so the reference is
+  admissible.
+- **Online, the index calculus is 10.2–26.5× faster** than rho on the
+  same point (§23: 8.8–17.5×), or 4.55–13.3× with rho at the canonical
+  step.
+- **Cold, rho is still faster at every size:** the index calculus costs
+  5.2–21.0× rho's (§23: 2.0–31.6×).
+  - The ratio fell at the three largest sizes, where R05's filter and
+    main's folds made the set-up cheaper.
+  - It barely moved at `2^36.6` and `2^39.0`, where rho gained as much.
+  - At `2^38.0` it rose from 1.98 to 6.12×, because R03 removed the
+    curve construction that bound §23's figure.
+- **The gap still grows with the size,** as `r^0.18` [0.14, 0.21] over
+  the six sizes. §23's `r^0.30` included the construction-bound point, so
+  the two are not like for like.
+- **`S` is not compared with §23's.** Each process reports it in its own
+  batched addition, which is 2.3–3.2 times cheaper at v3. The ratios above
+  need no unit.
+
+**R08 declared (2026-10-07)**
+([protocol](../../ic_tool_program/rounds/R08-scan-fold/PROTOCOL.md)),
+before any R08 timed run, on v4, R06's candidate, if R06 accepts it. It
+changes the scan's subtraction, with the same field elements by
+construction:
+- **two carry-less folds a product,** eight lanes at once, for every tail
+  and degree;
+- **Montgomery's trick in two chains;**
+- **the negated base as coordinate slices,** each rest's abscissa
+  straight into the key;
+- **the build's rows** past their own orbit on the same kernel.
+
+Its exploration on R06's candidate
+([record](../../ic_tool_program/explorations/R08-fold-kernel-20261006/README.md))
+read 1.293, 1.223 and 1.362 in cold time at the three target sizes. The
+subtraction costs 4.7–4.9 ns a scanned summand, against 11.3–12.1 ns on
+v3. The prediction is 1.25–1.33×, 1.16–1.29× and 1.27–1.46×, and
+acceptance needs each interval above 1.05. It runs after R06's decision,
+on a host of R06's class.
+
+**The build and the scan's memory, explored (2026-10-06).** Three
+records, none of them a round:
+- **A2, huge pages on the pair tables, on v3**
+  ([record](../../ic_tool_program/explorations/A2-thp-advise-20261006/README.md)).
+  The advice halves the minor faults, and cold time does not move
+  (0.960–1.068, every interval across 1). The scan's misses are cache
+  misses, not TLB misses. A2 is set aside.
+- **A1, the build's partition streams and per-run filters**, first on v3
+  ([record](../../ic_tool_program/explorations/A1-build-partitions-20261006/README.md)),
+  then on the folding-kernel candidate
+  ([record](../../ic_tool_program/explorations/A1-build-on-fold-20261006/README.md)).
+  On v3 the build fell by 10–25%, and cold time did not move reliably. On
+  the candidate the build phase is 1.40–1.47× faster on every pair, and
+  cold time 1.07–1.12×.
+- **A13, each admitted key's run prefetched,** on the folding-kernel
+  candidate
+  ([record](../../ic_tool_program/explorations/A13-admitted-prefetch-20261006/README.md)).
+  Collection is 1.12–1.29× faster, and cold time 1.07–1.12×.
+
+A1 and A13 are portable, and each is to be declared on the baseline R08
+decides.
+
+**The host changed class (2026-10-07).** The rule's comparison at v3
+finished on the reference class on 2026-10-06. Before R06's first step,
+the container moved to a Cascade Lake host: AVX-512 F, BW, VL and VNNI,
+but no GFNI, VBMI, VBMI2 or VPCLMULQDQ.
+- **R06 and R08 cannot run there.** Their candidates would run the base's
+  code.
+- **R06 waits for a host of its class** (its amendment 1), and R08 runs
+  after it.
+- **`icprog` now enforces each round's class:** `icprog run` refuses a
+  round's timed steps on a host outside it, and `icprog host-class
+  <round>` reports the class against the host (§5).
+
+**This host's class, explored, and R09 declared (2026-10-08).** On the
+Cascade Lake host the scan's subtraction is the scalar product at every
+suite size, and the scan costs 38–41 ns a summand: 15.3–15.5 to subtract,
+12.0–13.7 to key, 10–12 for the filter and the admitted keys
+([record](../../ic_tool_program/explorations/slope-keys-cl-20261008/README.md)).
+These are stage diagnostics.
+- **Pipelining alone** (trial `t`'s filter words fetched during trial
+  `t + 1`'s keys) moved the scan 3–7% and cold time not reliably: the
+  fetches came earlier, not cheaper. A2's huge pages, re-checked here,
+  read 0.950 and 1.022.
+- **Keys from slopes** moved it 15–16%. In a normal basis
+  `coords(λ²) = rotl(coords(λ))`, so a rest's key is
+  `c + rotl(c) + d + e` with `c = coords(λ)`: the squaring, the
+  abscissa and its store go for every rejected summand, and only the
+  admitted ones are completed. The build keys its rows the same way.
+- **The final candidate** (that, the pipelining, eight inversion chains
+  and a cheaper rotation step) ran 1.119 [1.093, 1.146], 1.112 [1.060,
+  1.166] and 1.103 [1.071, 1.136] times faster in cold time at the three
+  target sizes, eight pairs each, every logarithm v3's.
+- **R09 is declared on it**
+  ([protocol](../../ic_tool_program/rounds/R09-slope-keys/PROTOCOL.md)),
+  predicted 1.09–1.15×, 1.06–1.17× and 1.07–1.14×, accepted if each
+  interval lies above 1.05 on the suite rows and on fresh holdouts.
+- **Its class is its own:** AVX-512F and PCLMULQDQ without VPCLMULQDQ
+  (`icprog host-class r09`; a `!` in a class now marks an excluded
+  feature). It runs now, on v3; R06 and R08 keep waiting for the
+  reference class, on v3's code. Where VPCLMULQDQ runs the eight-lane
+  kernel, the candidate leaves it in place.
+- **Main has moved under v3** (`4b02be35`), and the standing rule asks for
+  a drift round first. The drift is off the path a round times (the
+  scan, the build and `ic price`'s cold time are unchanged; the SAT
+  decomposition and the strong rho changed), so R09's protocol discloses
+  it and checks it with a pin of main's head instead.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
@@ -532,6 +725,32 @@ measurement; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
   corrected before any measurement: C098's document, at `n = 577`, is
   refused by schema v2's degree range (2..=571) before any gate.
 
+**B5 is split in two, and B5a is declared** (first 2026-10-01 in #1178,
+closed before anything ran because its generators were Python; declared
+again 2026-10-06 on native tools, before any B5a measurement;
+[protocol](../../ic_tool_program/rounds/B5a-extension-fields/PROTOCOL.md),
+[design](../../ic_tool_program/design/extension-fields.md)).
+- **B5a is extension fields `GF(p^k)`,** which the tool validates and
+  routes nowhere. Every valid instance gets a route:
+  - `rho-negation` for `q ≤ 2^62`;
+  - `rho-bignum` for any `q`;
+  - Gaudry's index calculus on `E(GF(p³))`, imported from the
+    residual-walk thread as `ic-gaudry-cubic`, for the modulus `t³ − c`
+    and a prime group order.
+- **Its instances:** eight, from `q ≈ 2^24` to `2^70`, found by
+  `icprog b5a instances` in arithmetic that shares nothing with the tool,
+  and B2's C050 document, which B5a's C103 supersedes. The native
+  generators write #1178's instance records and parameter files again,
+  byte for byte.
+- **ICV1 gains an extension kind first:** `docs/curves/ICV1.md`, its
+  reference implementation and the names check. No existing identity
+  changes. The registry names B5a's instances and C050's curve.
+- **Its arm on main** is B4's with B5a's code merged, checked at its level
+  (110 of 110 cases); B5a joins the chain after B4.
+- **B5b**, prime fields past one word (a multi-limb `rho-negation`), is
+  declared on its own later. The row above is done when both are
+  accepted.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an
@@ -586,10 +805,10 @@ from R03's `runs.tar.xz`, byte for byte.
 | the callgrind phase split, and R02b's control | `harness/callgrind_phases.py`, R02b's `analyse.py` | R02b's control | N2: `icprog callgrind-phases` reproduces R02's six phase splits and R01's two byte for byte; `icprog callgrind-control`, new code with no frozen output, reads R02's profiles as R02's README reports them |
 | a round's fresh holdouts | `suite/v1/make_suite.py`'s construction, for the rows a round draws | R07's holdouts | `icprog holdouts` reproduces suite v1's 88 S rows and R02b's and R05's holdouts, with their `SHA256SUMS`, byte for byte (`tests/icprog.rs`); it draws a round's set once and checks it after |
 | the single-target rule comparison and its claims | `research/ic_single_target_20260930/*.py` | the rule comparison at each new baseline | N3: `icprog rule claims` and `icprog rule analyse` reproduce §23's 408 claims, their replays, 396 manifests, `summary.json` and `analysis.json` byte for byte (only each replay's checker name differs: the replays are now `icprog`'s own arithmetic); `icprog rule` runs the rows (`manifest`, `pin`, `size`, `all`) and the reference check against the strong rho (`reference`) |
-| the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4 |
-| Track B's chain | `harness/bround.py` | Track B's measurements | N5 |
+| the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4: `icprog conformance` runs every case set (v1, v2 and each `v2-*`) with the scripts' selection rules (`step`, `until`, `supersedes`) and checks. No run of the scripts was ever committed, so there is no frozen report to reproduce. Instead, each rule is checked on a stub `ic` (`tests/icprog.rs`), and Track B's arm B4 on main passes all 95 cases through B4 |
+| Track B's chain | `harness/bround.py` | Track B's measurements | N5: `icprog bround` (`manifest`, `aa`, `conformance`, `pin`, `translate`, `timing`, `v2timing`, `chain`, `analyse`). The translation's reference, C009's generator ported, writes C009's frozen document again byte for byte. Its parts are checked against point counts, trial division and the library's modulus search at every one-word degree |
 | the fuzz generator and its replays | `fuzz/fuzz_v2.py` | B6, whose replays in "independent Python arithmetic" become independent native arithmetic by an amendment | N6 |
-| each step's harness | `rounds/B*/run.py`, `analyse.py`, `instances.py`, `sweep.py` | that step's measurement | with each step |
+| each step's harness | `rounds/B*/run.py`, `analyse.py`, `instances.py`, `sweep.py` | that step's measurement | with each step. The F0 runs first: `icprog f0` runs B3's gate rho, B3b's two-word instances and B4's three-word instances, and replays every arm's answer in a GF(2^n) arithmetic of its own (B4's `run.py` and `analyse.py`, ported). B7a's measurements 5–7 run on `icprog b7a` (its `run.py` and `analyse.py`, ported). B2's measurements 6–7 run on `icprog b2`, and B2b's sweep on `icprog b2b-sweep` (it writes C059 and C063 again byte for byte). B3b's premium, a stage diagnostic, runs on `icprog b3b-premium`. B5a's generators, `instances.py` and `make_cases.py` from #1178, are `icprog b5a instances` and `icprog b5a cases`: they write #1178's instance records and all 18 parameter files again byte for byte. Its measurement 5 runs on `icprog f0 --set b5a`, replayed in a GF(p^k) arithmetic of its own, and its measurement 6, which had no harness, on `icprog b5a calibrate` and `estimates` |
 
 **What is not ported.** Suite v1's construction
 (`suite/v1/make_suite.py`) stays as it is. Suite v1 and every holdout set

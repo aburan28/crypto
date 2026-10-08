@@ -1,0 +1,26 @@
+{
+  "identity_sha256": "e79c49b134eae51e1ab6c6216e31f4ac6cd5837a0382a735e44dd1d0221e4957",
+  "record": {
+    "cold_target_count": 1,
+    "common_memory_cap_bytes": null,
+    "curve_id": "EC1N73Ckb1h25afb0fafbdf",
+    "input_law": "One public point supplied directly; its validation-only scalar is not sent to IC and is used only for independent post-run replay.",
+    "online_cache_state": "Target-independent base, support index, and factor logs ready; this is the first and only query in the process.",
+    "resource_policy": "No finite process memory cap; run both arms sequentially on the same host and record each peak RSS.",
+    "seeds": {
+      "ic_rank_seed": 7,
+      "rho_walk_seed": 202610041
+    },
+    "subgroup_order": 86020738150056119,
+    "target_count": 1,
+    "target_generation": "Completed before the measurement and excluded from both online intervals.",
+    "target_points": [
+      [
+        "1852858978593996699777",
+        "7821257062942871962177"
+      ]
+    ],
+    "warm_target_count": 0
+  },
+  "workload_id": "e79c49b134ea"
+}
