@@ -19,7 +19,7 @@ import platform
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from . import protocol
 from .inventory import Paths, format_cpulist, kernel_version, parse_cpulist, read_int, read_text
@@ -223,10 +223,20 @@ def evict(cpus: set[int], keep: set[int], proc: str = "/proc") -> dict[int, set[
     return moved
 
 
-def restore_affinity(moved: dict[int, set[int]]) -> None:
+def restore_affinity(moved: dict[int, set[int]], cpus: set[int] | None = None) -> None:
+    """Give back the CPUs :func:`evict` took.
+
+    With ``cpus`` (the reserved set) only those CPUs are added back to each
+    thread's current affinity, which commutes with other slots evicting and
+    restoring their own disjoint CPUs at the same time; without it the saved
+    affinity is written back whole.
+    """
     for tid, affinity in moved.items():
         with contextlib.suppress(OSError):
-            os.sched_setaffinity(tid, affinity)
+            if cpus is None:
+                os.sched_setaffinity(tid, affinity)
+            else:
+                os.sched_setaffinity(tid, os.sched_getaffinity(tid) | (affinity & cpus))
 
 
 def remaining_on(cpus: set[int], keep: set[int], proc: str = "/proc") -> dict[str, Any]:
@@ -260,6 +270,7 @@ def move_irqs(reserved: set[int], housekeeping: set[int], proc: str = "/proc") -
     and ``irqaffinity`` are what remove the managed ones.
     """
     saved: dict[str, str] = {}
+    added: dict[str, list[int]] = {}
     failed: list[str] = []
     unmovable: list[str] = []
     moved = 0
@@ -286,24 +297,134 @@ def move_irqs(reserved: set[int], housekeeping: set[int], proc: str = "/proc") -
                 failed.append(f"irq{d.name}({name}): {err.strerror}")
         else:
             saved[d.name] = cur_text
+            added[d.name] = sorted(target - cur)
             moved += 1
-    default = irq_root / "default_smp_affinity"
-    default_saved = read_text(default)
-    if default_saved is not None:
-        mask = 0
-        for c in housekeeping:
-            mask |= 1 << c
-        err = _write(default, f"{mask:x}")
-        if err:
-            default_saved = None
-    return {"moved": moved, "failed": failed, "unmovable": unmovable, "saved": saved, "default_saved": default_saved}
+    return {"moved": moved, "failed": failed, "unmovable": unmovable, "saved": saved, "added": added,
+            "reserved": sorted(reserved)}
+
+
+def housekeeping_mask(housekeeping: set[int]) -> str:
+    mask = 0
+    for c in housekeeping:
+        mask |= 1 << c
+    return f"{mask:x}"
 
 
 def restore_irqs(state: dict[str, Any], proc: str = "/proc") -> None:
+    """Undo :func:`move_irqs` for this reservation's CPUs only.
+
+    Each IRQ gets back the reserved CPUs it had and loses the housekeeping
+    CPUs this reservation had to add, starting from whatever its affinity is
+    now; another slot doing the same for its own CPUs in either order ends
+    at the original mask.
+    """
+    reserved = set(state.get("reserved") or [])
     for irq, text in state.get("saved", {}).items():
-        _write(Path(proc) / "irq" / irq / "smp_affinity_list", text)
-    if state.get("default_saved") is not None:
-        _write(Path(proc) / "irq/default_smp_affinity", state["default_saved"])
+        f = Path(proc) / "irq" / irq / "smp_affinity_list"
+        try:
+            saved = set(parse_cpulist(text))
+            cur = set(parse_cpulist(read_text(f) or ""))
+        except ValueError:
+            _write(f, text)
+            continue
+        want = (cur - set(state.get("added", {}).get(irq, []))) | (saved & reserved)
+        _write(f, format_cpulist(want or saved))
+
+
+class HostSettings:
+    """Host-wide knobs several concurrent reservations may want changed at once.
+
+    The first holder saves the original value and writes the wanted one; the
+    last holder to leave writes the original back. State lives in a JSON
+    file guarded by its own flock, so slots in one worker and workers in
+    separate processes agree. Holders whose process is gone (a crashed
+    worker) are dropped, and the saved original survives them.
+    """
+
+    def __init__(self, path: str):
+        self.path = Path(path)
+
+    @contextlib.contextmanager
+    def _locked(self):
+        with open(str(self.path) + ".lock", "a+") as lk:
+            fcntl.flock(lk, fcntl.LOCK_EX)
+            try:
+                import json
+                try:
+                    state = json.loads(self.path.read_text())
+                except (OSError, ValueError):
+                    state = {}
+                yield state
+                tmp = self.path.with_suffix(".tmp")
+                tmp.write_text(json.dumps(state, sort_keys=True))
+                tmp.replace(self.path)
+            finally:
+                fcntl.flock(lk, fcntl.LOCK_UN)
+
+    @staticmethod
+    def _alive(holder: str) -> bool:
+        try:
+            os.kill(int(holder.split(":", 1)[0]), 0)
+            return True
+        except (ValueError, ProcessLookupError):
+            return False
+        except PermissionError:
+            return True
+
+    def acquire(self, key: str, file: str, value: str, holder: str) -> str | None:
+        """Hold ``file`` at ``value``; return an error string or None."""
+        with self._locked() as state:
+            ent = state.get(key)
+            if ent is not None:
+                ent["holders"] = [h for h in ent["holders"] if self._alive(h)]
+            if ent is None or (not ent["holders"] and ent.get("file") != file):
+                cur = read_text(Path(file))
+                if cur is None:
+                    return f"{file}: unreadable"
+                ent = {"file": file, "saved": cur, "holders": []}
+            err = _write(Path(file), value)
+            if err:
+                if not ent["holders"]:
+                    state.pop(key, None)
+                return err
+            ent["value"] = value
+            ent["holders"].append(holder)
+            state[key] = ent
+            return None
+
+    def release(self, key: str, holder: str) -> None:
+        with self._locked() as state:
+            ent = state.get(key)
+            if ent is None:
+                return
+            ent["holders"] = [h for h in ent["holders"] if h != holder and self._alive(h)]
+            if not ent["holders"]:
+                _write(Path(ent["file"]), ent["saved"])
+                state.pop(key, None)
+
+
+# -- locks -------------------------------------------------------------------
+
+def _flock(path: str, mode: int, deadline: float, what: str):
+    handle = open(path, "a+")
+    while True:
+        try:
+            fcntl.flock(handle, mode | fcntl.LOCK_NB)
+            return handle
+        except BlockingIOError:
+            if time.monotonic() >= deadline:
+                handle.close()
+                raise QuiesceError(f"{what} {path}")
+            time.sleep(0.5)
+
+
+def _drain_pending(drain: Path, max_age_s: float = 6 * 3600.0) -> bool:
+    """A job that needs the whole host is waiting; a marker whose waiter died, or a very old one, is ignored."""
+    try:
+        holder, ts = drain.read_text().split()[:2]
+    except (OSError, ValueError):
+        return False
+    return time.time() - float(ts) < max_age_s and HostSettings._alive(holder)
 
 
 # -- the reservation ---------------------------------------------------------
@@ -313,7 +434,9 @@ class Reservation:
                  housekeeping: list[int], memory_mb: int | None, pids: int,
                  paths: Paths = Paths(), cgroup_root: str = "/sys/fs/cgroup",
                  lab_cgroup: str = "isolab.lab", lock_path: str = DEFAULT_LOCK,
-                 lock_wait_s: float = 600.0, keep_pids: set[int] | None = None):
+                 lock_wait_s: float = 600.0, keep_pids: set[int] | None = None,
+                 slot_lock_path: str | None = None, exclusive: bool = True,
+                 co_tenants: Callable[[], dict[str, set[int]]] | None = None):
         self.job_id, self.placement, self.fidelity, self.caps = job_id, placement, fidelity, caps
         self.housekeeping = set(housekeeping)
         self.memory_mb, self.pids = memory_mb, pids
@@ -321,13 +444,21 @@ class Reservation:
         self.lab = self.cgroup_root / lab_cgroup
         self.job_cgroup: Path | None = None
         self.lock_path, self.lock_wait_s = lock_path, lock_wait_s
+        # slots: the host lock is shared between slots and exclusive for a job that
+        # must have the host to itself; each slot also holds its own lock
+        self.slot_lock_path = slot_lock_path
+        self.exclusive = exclusive or slot_lock_path is None
+        self.co_tenants = co_tenants or (lambda: {})
+        self.settings = HostSettings(lock_path + ".state")
+        self._holder = f"{os.getpid()}:{job_id}"
+        self._held: list[str] = []
+        self._slot_lock = None
         self.keep = set(keep_pids or set()) | {os.getpid()}
         self.mechanisms: dict[str, Any] = {}
         self._lock = None
         self._moved: dict[int, set[int]] = {}
         self._irqs: dict[str, Any] = {}
         self._gov_saved: dict[int, str] = {}
-        self._turbo_saved: str | None = None
         self.checks: list[Check] = []
 
     # ---- enter / exit
@@ -350,6 +481,10 @@ class Reservation:
                 m["threads_moved"] = 0
             if self.caps["irq_affinity"] and self.housekeeping:
                 self._irqs = move_irqs(reserved, self.housekeeping, self.paths.proc)
+                dflt = str(Path(self.paths.proc) / "irq/default_smp_affinity")
+                if Path(dflt).exists() and self.settings.acquire(
+                        "default_smp_affinity", dflt, housekeeping_mask(self.housekeeping), self._holder) is None:
+                    self._held.append("default_smp_affinity")
                 m["irqs_moved"] = self._irqs["moved"]
                 m["irqs_failed"] = self._irqs["failed"]
                 m["irqs_unmovable"] = self._irqs["unmovable"]
@@ -370,34 +505,59 @@ class Reservation:
         with contextlib.suppress(Exception):
             if self._irqs:
                 restore_irqs(self._irqs, self.paths.proc)
+        for key in self._held:
+            with contextlib.suppress(Exception):
+                self.settings.release(key, self._holder)
+        self._held = []
         with contextlib.suppress(Exception):
-            restore_affinity(self._moved)
+            restore_affinity(self._moved, set(self.placement.reserved))
         with contextlib.suppress(Exception):
             if self.job_cgroup is not None:
                 remove_cgroup(self.job_cgroup)
             if self.mechanisms.get("cgroup"):
                 remove_cgroup(self.lab)
-        if self._lock is not None:
-            with contextlib.suppress(OSError):
-                fcntl.flock(self._lock, fcntl.LOCK_UN)
-                self._lock.close()
-            self._lock = None
+        for attr in ("_slot_lock", "_lock"):
+            h = getattr(self, attr)
+            if h is not None:
+                with contextlib.suppress(OSError):
+                    fcntl.flock(h, fcntl.LOCK_UN)
+                    h.close()
+                setattr(self, attr, None)
 
     # ---- pieces
     def _acquire_lock(self) -> None:
-        handle = open(self.lock_path, "a+")
         deadline = time.monotonic() + self.lock_wait_s
-        while True:
+        drain = Path(self.lock_path + ".drain")
+        if self.exclusive:
+            if self.slot_lock_path is not None:
+                # tell slots not to start new jobs, so shared holders drain instead of starving us
+                with contextlib.suppress(OSError):
+                    drain.write_text(f"{self._holder} {time.time()}")
             try:
-                fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                break
-            except BlockingIOError:
+                self._lock = _flock(self.lock_path, fcntl.LOCK_EX, deadline, "another job holds")
+            finally:
+                if self.slot_lock_path is not None:
+                    with contextlib.suppress(OSError):
+                        if drain.read_text().split()[0] == self._holder:
+                            drain.unlink()
+        else:
+            while _drain_pending(drain):
                 if time.monotonic() >= deadline:
-                    handle.close()
-                    raise QuiesceError(f"another job holds {self.lock_path}")
+                    raise QuiesceError(f"a job needing the whole host is waiting for {self.lock_path}")
                 time.sleep(0.5)
-        self._lock = handle
+            self._lock = _flock(self.lock_path, fcntl.LOCK_SH, deadline, "a job with the whole host holds")
+        if self.slot_lock_path is not None:
+            try:
+                self._slot_lock = _flock(self.slot_lock_path, fcntl.LOCK_EX, deadline, "another job holds")
+            except QuiesceError:
+                fcntl.flock(self._lock, fcntl.LOCK_UN)
+                self._lock.close()
+                self._lock = None
+                raise
         self.mechanisms["lock"] = self.lock_path
+        self.mechanisms["host_exclusive"] = self.exclusive
+        if self.slot_lock_path is not None:
+            self.mechanisms["slot_lock"] = self.slot_lock_path
 
     def _cgroups(self) -> None:
         m = self.mechanisms
@@ -472,18 +632,15 @@ class Reservation:
             m["governor_set"] = True
         if self.fidelity.get("turbo") == "off" and self.caps.get("turbo_writable"):
             p = Path(self.caps["turbo_control"])
-            cur = read_text(p)
             want = "1" if p.name == "no_turbo" else "0"
-            if cur is not None and cur != want and _write(p, want) is None:
-                self._turbo_saved = cur
+            if self.settings.acquire("turbo", str(p), want, self._holder) is None:
+                self._held.append("turbo")
             m["turbo_set"] = read_text(p) == want
 
     def _restore_cpufreq(self) -> None:
         base = Path(self.paths.sys) / "devices/system/cpu"
         for c, gov in self._gov_saved.items():
             _write(base / f"cpu{c}/cpufreq/scaling_governor", gov)
-        if self._turbo_saved is not None:
-            _write(Path(self.caps["turbo_control"]), self._turbo_saved)
 
     # ---- checks
     def pre_checks(self, host: dict[str, Any]) -> list[Check]:
@@ -576,7 +733,8 @@ class Reservation:
                                  avail // 1024, self.memory_mb, detail="MiB available on the job's NUMA node(s): free + reclaimable cache"))
         out.append(Check("swap", "pre", "pass" if m.get("cgroup") and caps.get("memory_cgroup") else "info",
                          "job swap.max=0" if m.get("cgroup") else (host.get("memory") or {}).get("swap_total_kb")))
-        out.append(Check("exclusive_lock", "pre", "pass", self.lock_path))
+        out.append(Check("exclusive_lock", "pre", "pass" if self.exclusive else "info", self.lock_path,
+                         detail=None if self.exclusive else f"host shared with other slots; this slot holds {self.slot_lock_path}"))
         out.append(Check("isolation_tier", "pre",
                          "pass" if protocol.tier_at_least(m.get("tier", "D"), f.get("min_isolation_tier")) else "fail",
                          m.get("tier"), f.get("min_isolation_tier")))
@@ -609,7 +767,8 @@ class Reservation:
             retries = 1
         for attempt in range(1, retries + 1):
             s = Sampler(self.placement.reserved, period=min(sample_period, max(settle_s, 0.2)),
-                        paths=self.paths, exclude=lambda: set(), other_cpu_threshold=f["max_other_cpu"])
+                        paths=self.paths, exclude=lambda: set(), other_cpu_threshold=f["max_other_cpu"],
+                        co_tenants=self.co_tenants)
             s.start()
             time.sleep(settle_s)
             s.stop()
@@ -646,6 +805,10 @@ class Reservation:
                                  detail=f"% of the settle window with {kind} pressure; avg10 was {summ['psi_some_avg10_max'].get(kind)}"))
         else:
             out.append(Check("settle_psi_cpu", "pre", "unavailable", detail="no PSI"))
+        if summ.get("co_tenant_jobs"):
+            out.append(Check("settle_co_tenants", "pre", "info", round(summ["co_tenant_cpu_s"], 4),
+                             detail=f"jobs running in other slots of this host: {summ['co_tenant_jobs']}; "
+                                    "their CPU is not counted as other_cpu"))
         busy = summ.get("job_cpu_busy_pct")
         if busy is None:
             out.append(Check("settle_reserved_cpu_idle", "pre", "unavailable", detail="no per-cpu accounting"))
@@ -716,6 +879,10 @@ def post_checks(summ: dict[str, Any], counters: dict[str, Any] | None, cg: dict[
                              summ["throttle_events"], 0, detail=f"max temperature {summ['thermal_max_c']} C"))
         out.append(Check("network_bytes", "post", "info", summ.get("net_bytes")))
         out.append(Check("contended_samples", "post", "info", f"{summ['contended_samples']}/{summ['n_samples']}"))
+        if summ.get("co_tenant_jobs"):
+            out.append(Check("co_tenants", "post", "info", round(summ["co_tenant_cpu_s"], 4),
+                             detail=f"jobs running in other slots of this host during the run: {summ['co_tenant_jobs']}; "
+                                    "they share last-level cache, memory bandwidth and the power budget, so the grade is capped at B"))
     else:
         out.append(Check("samples", "post", "unavailable", detail="sampler produced nothing"))
     if counters:
@@ -746,11 +913,19 @@ def post_checks(summ: dict[str, Any], counters: dict[str, Any] | None, cg: dict[
     return out
 
 
-def grade(tier: str, any_contended_in_summary: bool) -> str:
+def grade(tier: str, any_contended_in_summary: bool, shared_host: bool = False) -> str:
+    """The verdict on a run: its tier, one step lower if the summary used contended repeats.
+
+    ``shared_host`` (another slot's job ran during a summarised repeat) caps
+    the grade at B: disjoint cores still share cache, memory bandwidth and
+    the package power budget, which is exactly what A promises is absent.
+    """
     if tier not in protocol.TIER_ORDER or tier == "none":
         return "none"
-    if not any_contended_in_summary:
-        return tier
     order = ["A", "B", "C", "D"]
     i = order.index(tier)
-    return order[min(i + 1, len(order) - 1)]
+    if any_contended_in_summary:
+        i = min(i + 1, len(order) - 1)
+    if shared_host:
+        i = max(i, 1)
+    return order[i]

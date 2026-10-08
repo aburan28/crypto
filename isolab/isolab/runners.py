@@ -86,6 +86,8 @@ class JobContext:
     aslr_off: bool = False
     userns: str | None = None
     env_base: dict[str, str] = field(default_factory=dict)
+    # pids of the processes this job's exec calls started, while they run (each leads its own session)
+    roots: set[int] = field(default_factory=set)
 
 
 def _translate(dirs: JobDirs, container: bool, path: str) -> str:
@@ -150,7 +152,8 @@ class Backend:
     # ---- shared process driving
     def _drive(self, popen_argv: list[str], cwd: Path | None, env: dict[str, str] | None, timeout: float,
                stdout: Path, stderr: Path, stop: StopFn, kill: Callable[[], None],
-               preexec=None, stdin_text: str | None = None) -> tuple[int | None, int | None, bool, str | None, float, dict]:
+               preexec=None, stdin_text: str | None = None,
+               roots: set[int] | None = None) -> tuple[int | None, int | None, bool, str | None, float, dict]:
         with open(stdout, "ab") as out, open(stderr, "ab") as err:
             stdin = subprocess.PIPE if stdin_text is not None else subprocess.DEVNULL
             t0 = time.perf_counter()
@@ -160,6 +163,8 @@ class Backend:
             except OSError as e:
                 err.write(f"isolab: cannot exec {popen_argv[0]!r}: {e}\n".encode())
                 return 127, None, False, None, 0.0, {}
+            if roots is not None:
+                roots.add(proc.pid)
             if stdin_text is not None and proc.stdin:
                 try:
                     proc.stdin.write(stdin_text.encode())
@@ -182,6 +187,8 @@ class Backend:
                     break
                 time.sleep(0.02 if elapsed < 2 else 0.1)
             wall = time.perf_counter() - t0
+            if roots is not None:
+                roots.discard(proc.pid)
         proc.returncode = 0
         code = os.waitstatus_to_exitcode(status)
         host_ru = {"user_s": ru.ru_utime, "sys_s": ru.ru_stime, "max_rss_kb": ru.ru_maxrss,
@@ -277,7 +284,7 @@ class DirectBackend(Backend):
                 kill_cgroup(cg)
 
         code, sig, timed_out, stopped, wall, host_ru = self._drive(
-            cmd, workdir, full_env, timeout, stdout, stderr, stop, kill, preexec, stdin_text)
+            cmd, workdir, full_env, timeout, stdout, stderr, stop, kill, preexec, stdin_text, ctx.roots)
         rec = _read_record(record)
         if rec is None and ctx.launcher is None:
             rec = {"wall_s": wall, **host_ru, "exit_code": code, "signal": sig or 0, "source": "host-wait4"}
@@ -432,7 +439,7 @@ class PodmanBackend(Backend):
             self.run([*self._base(), "kill", "--signal", "KILL", name], 30)
 
         code, sig, timed_out, stopped, wall, host_ru = self._drive(
-            cmd, None, None, timeout, stdout, stderr, stop, kill, None, stdin_text)
+            cmd, None, None, timeout, stdout, stderr, stop, kill, None, stdin_text, ctx.roots)
         rec = _read_record(record)
         return ExecOutcome(code, sig, timed_out, stopped, wall, rec, host_rusage=host_ru)
 
