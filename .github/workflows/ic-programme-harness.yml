@@ -20,6 +20,7 @@ on:
       - 'src/cryptanalysis/prepared_ordinary.rs'
       - 'src/cryptanalysis/prepared_n17_target.rs'
       - 'src/cryptanalysis/prepared_n17_target_sat.rs'
+      - 'src/cryptanalysis/prepared_n17_target_f5_tests.rs'
       - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'src/bin/isolated_bench.rs'
       - 'src/bin/isolated_bench/**'
@@ -38,6 +39,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-one-target-boundary-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-boundary-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-durable-target-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -59,6 +61,7 @@ on:
       - 'src/cryptanalysis/prepared_ordinary.rs'
       - 'src/cryptanalysis/prepared_n17_target.rs'
       - 'src/cryptanalysis/prepared_n17_target_sat.rs'
+      - 'src/cryptanalysis/prepared_n17_target_f5_tests.rs'
       - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'src/bin/isolated_bench.rs'
       - 'src/bin/isolated_bench/**'
@@ -70,6 +73,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-one-target-boundary-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-boundary-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-durable-target-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -133,6 +137,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_ordinary -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::boundary_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::external_sat::sat_boundary_tests -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::recording_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_control_archive -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1

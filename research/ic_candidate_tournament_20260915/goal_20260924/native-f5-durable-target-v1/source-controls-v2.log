@@ -1,0 +1,92 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/ic-native-f5-durable-target-20261004)
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2262:13
+     |
+2262 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 31.45s
+     Running unittests src/lib.rs (/Volumes/SSD990/llm/tmp/ic-native-preparation-build-cache-20261004/debug/deps/crypto_lib-b57414106b60f2c2)
+
+running 30 tests
+test cryptanalysis::prepared_n17_target::boundary_tests::checks_public_point_inside_interval_before_any_solver_call ... ok
+test cryptanalysis::prepared_n17_target::boundary_tests::plan_cannot_select_another_curve_backend_or_unbounded_search ... ok
+test cryptanalysis::prepared_n17_target::boundary_tests::reconstructs_exact_geometry_and_rejects_mutated_logs ... ok
+test cryptanalysis::prepared_n17_target::boundary_tests::rejects_corrupt_witness_scalar_and_missing_failed_attempts ... ok
+test cryptanalysis::prepared_n17_target::boundary_tests::retained_success_charges_independent_replay_and_preserves_failures ... ok
+test cryptanalysis::prepared_n17_target::boundary_tests::retains_budget_exhaustion_and_rejects_unexplained_early_stop ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::derives_all_projected_logs_from_columns_without_imported_projection ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::durable_start_completion_and_transport_failures_prevent_success ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::invalid_public_targets_never_call_backend_and_keep_failure_timing ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::lift_helper_rejects_a_different_group_query_without_source_unsat_claim ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::plan_rejects_unbounded_search_and_known_scalar_inputs ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::rejects_assignment_and_manifest_corruption_with_all_attempts_retained ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::retained_source_recovers_and_charges_independent_verification ... ok
+test cryptanalysis::prepared_n17_target::external_sat::sat_boundary_tests::timeouts_remain_rows_and_exhaustion_never_becomes_success ... ok
+test cryptanalysis::prepared_n17_target::json::tests::a_record_reads_and_writes_back_unchanged ... ok
+test cryptanalysis::prepared_n17_target::json::tests::floats_print_as_python_repr_does ... ok
+test cryptanalysis::prepared_n17_target::json::tests::non_bmp_characters_escape_as_surrogate_pairs ... ok
+test cryptanalysis::prepared_n17_target::json::tests::the_programmes_records_read_and_write_back_byte_for_byte ... ok
+test cryptanalysis::prepared_n17_target::oracle::tests::a_small_curves_group_law_closes ... ok
+test cryptanalysis::prepared_n17_target::oracle::tests::primality_and_irreducibility_agree_with_small_cases ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::budget_exhaustion_retains_every_unsuccessful_query ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::diagnostic_sampling_preserves_observed_and_unobserved_reports ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::failed_start_preserves_prefix_and_never_decomposes_that_query ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::failed_witness_completion_never_recovers_or_admits_the_scalar ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::internal_recording_entry_rejects_unbounded_or_different_dispatch ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::interrupted_stage_and_prefix_shape_are_checked ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::interrupted_transcript_cannot_smuggle_a_claimed_scalar ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::invalid_model_is_retained_and_stops_before_next_query ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::invalid_public_point_never_reaches_recording_or_solver ... ok
+test cryptanalysis::prepared_n17_target::recording_tests::records_start_probe_completion_before_recovery_and_preserves_seeded_law ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 3495 filtered out; finished in 0.31s
+

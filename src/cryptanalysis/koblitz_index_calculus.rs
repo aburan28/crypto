@@ -10408,6 +10408,22 @@ pub struct IndividualLogReport {
     pub attempts: Option<Vec<QueryAttempt>>,
 }
 
+// Evidence hooks for the separately bounded educational n17 target adapter.
+// Returning Ok asserts only callback completion, not native/runtime custody.
+pub(crate) trait IndividualLogObserver {
+    fn started(&mut self, trial: u64, a: u64, b: u64) -> Result<(), String>;
+    fn completed(&mut self, attempt: &QueryAttempt) -> Result<(), String>;
+}
+
+#[derive(Debug)]
+pub(crate) struct IndividualLogInterruption {
+    pub report: Box<IndividualLogReport>,
+    pub stage: &'static str,
+    pub trial: Option<u64>,
+    pub coefficients: Option<[u64; 2]>,
+    pub reason: String,
+}
+
 impl IndividualLogReport {
     /// Keep the current trial's query on an observed execution.  The
     /// attempt is built only then: an unobserved descent calls this once
@@ -10977,11 +10993,76 @@ impl<'a> IndividualLogSolver<'a> {
         self.solve_impl(q, true)
     }
 
+    /// Internal source entry for the exact n17 F5 adapter. The caller must
+    /// independently validate its public point and bind a frozen native worker.
+    pub(crate) fn solve_n17_durable(
+        &self,
+        q: &BinaryPoint,
+        observer: &mut dyn IndividualLogObserver,
+    ) -> Result<IndividualLogReport, IndividualLogInterruption> {
+        self.n17_durable_gate()?;
+        let _query = measurement::scope(Phase::TargetQuery);
+        let q_fast = self.fast.as_ref().map(|(fc, _)| fc.lift(q));
+        self.solve_sampled(q, true, Some(observer), &mut |a, b| {
+            self.probe(q, q_fast, a, b)
+        })
+    }
+
+    fn n17_durable_gate(&self) -> Result<(), IndividualLogInterruption> {
+        if self.kc.n != 17
+            || self.kc.a != 1
+            || self.r_u64 != 65587
+            || self.opts.m != 3
+            || self.opts.descent_m.is_some()
+            || self.opts.strategy != DecompositionStrategy::Groebner
+            || !matches!(self.opts.engine, SolverEngine::MatrixF5 { max_degree: 3 })
+            || self.opts.node_budget != 8192
+            || !(1..=8).contains(&self.opts.max_trials)
+            || self.opts.allow_direct_relation
+            || self.pair.is_some()
+            || self.fast.is_none()
+        {
+            return Err(IndividualLogInterruption {
+                report: Box::new(IndividualLogReport {
+                    attempts: Some(Vec::new()),
+                    ..Default::default()
+                }),
+                stage: "source_gate",
+                trial: None,
+                coefficients: None,
+                reason: "outside the bounded educational n17 F5 recording entry".into(),
+            });
+        }
+        Ok(())
+    }
+
+    // Scripted PDP data only: never selected by a non-test executable.
+    #[cfg(test)]
+    pub(crate) fn solve_n17_durable_control(
+        &self,
+        q: &BinaryPoint,
+        observer: &mut dyn IndividualLogObserver,
+        probe: &mut dyn FnMut(u64, u64) -> PdpAttempt,
+    ) -> Result<IndividualLogReport, IndividualLogInterruption> {
+        self.n17_durable_gate()?;
+        let _query = measurement::scope(Phase::TargetQuery);
+        self.solve_sampled(q, true, Some(observer), probe)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn solve_n17_diagnostic_control(
+        &self,
+        q: &BinaryPoint,
+        observe: bool,
+        probe: &mut dyn FnMut(u64, u64) -> PdpAttempt,
+    ) -> Result<IndividualLogReport, IndividualLogInterruption> {
+        self.n17_durable_gate()?;
+        let _query = measurement::scope(Phase::TargetQuery);
+        self.solve_sampled(q, observe, None, probe)
+    }
+
     fn solve_impl(&self, q: &BinaryPoint, observe: bool) -> IndividualLogReport {
         let _query = measurement::scope(Phase::TargetQuery);
-        let kc = self.kc;
-        let r = &kc.subgroup_order;
-        let g = kc.generator();
         let mut report = IndividualLogReport {
             attempts: observe.then(Vec::new),
             ..Default::default()
@@ -11000,14 +11081,67 @@ impl<'a> IndividualLogSolver<'a> {
             }
         }
         let q_fast = self.fast.as_ref().map(|(fc, _)| fc.lift(q));
+        self.solve_sampled(q, observe, None, &mut |a, b| self.probe(q, q_fast, a, b))
+            .expect("sampling without an observer cannot fail an evidence callback")
+    }
+
+    fn solve_sampled<F: FnMut(u64, u64) -> PdpAttempt + ?Sized>(
+        &self,
+        q: &BinaryPoint,
+        observe: bool,
+        mut observer: Option<&mut dyn IndividualLogObserver>,
+        probe: &mut F,
+    ) -> Result<IndividualLogReport, IndividualLogInterruption> {
+        let kc = self.kc;
+        let r = &kc.subgroup_order;
+        let g = kc.generator();
+        let mut report = IndividualLogReport {
+            attempts: (observe || observer.is_some()).then(Vec::new),
+            ..Default::default()
+        };
         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x44_45_53_43_45_4e_54_00);
         while report.trials < self.opts.max_trials {
             measurement::mark(Phase::TargetQuery);
             report.trials += 1;
             let a = rng.gen_range(1..self.r_u64);
             let b = rng.gen_range(1..self.r_u64);
-            let pdp = self.probe(q, q_fast, a, b);
+            let trial = (report.trials - 1) as u64;
+            if let Some(sink) = observer.as_deref_mut() {
+                if let Err(reason) = sink.started(trial, a, b) {
+                    return Err(IndividualLogInterruption {
+                        report: Box::new(report),
+                        stage: "start_record",
+                        trial: Some(trial),
+                        coefficients: Some([a, b]),
+                        reason,
+                    });
+                }
+            }
+            let pdp = probe(a, b);
             report.record(a, b, || pdp.clone());
+            if let Some(sink) = observer.as_deref_mut() {
+                measurement::mark(Phase::TargetRelationCheck);
+                if let Err(reason) =
+                    sink.completed(report.attempts.as_ref().unwrap().last().unwrap())
+                {
+                    return Err(IndividualLogInterruption {
+                        report: Box::new(report),
+                        stage: "completion_record",
+                        trial: Some(trial),
+                        coefficients: Some([a, b]),
+                        reason,
+                    });
+                }
+                if pdp.outcome == PdpOutcome::InvalidModel {
+                    return Err(IndividualLogInterruption {
+                        report: Box::new(report),
+                        stage: "invalid_model",
+                        trial: Some(trial),
+                        coefficients: Some([a, b]),
+                        reason: "invalid F5 model cannot qualify target recovery".into(),
+                    });
+                }
+            }
             let idxs = match pdp.points {
                 Some(idxs) => idxs,
                 None if pdp.outcome == PdpOutcome::Identity => {
@@ -11024,7 +11158,7 @@ impl<'a> IndividualLogSolver<'a> {
                                 b,
                                 points: Vec::new(),
                             });
-                            return report;
+                            return Ok(report);
                         }
                     }
                     continue;
@@ -11039,13 +11173,13 @@ impl<'a> IndividualLogSolver<'a> {
             if kc.mul(g, &d) == *q {
                 report.log = Some(d.clone());
                 report.relation = Some(DescentRelation { a, b, points: idxs });
-                return report;
+                return Ok(report);
             }
             // A non-matching d means this factor base cannot place Q in the
             // span its columns log (e.g. Q outside the reachable subgroup);
             // keep trying other relations before giving up.
         }
-        report
+        Ok(report)
     }
 }
 

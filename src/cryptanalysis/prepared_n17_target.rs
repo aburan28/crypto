@@ -9,8 +9,8 @@ use super::{
     koblitz_groebner::SolverEngine,
     koblitz_index_calculus::{
         DecompositionStrategy, FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase,
-        IndividualLogReport, IndividualLogSolver, KoblitzCurve, KoblitzIcOptions, LinearAlgebra,
-        PdpOutcome,
+        IndividualLogInterruption, IndividualLogObserver, IndividualLogReport, IndividualLogSolver,
+        KoblitzCurve, KoblitzIcOptions, LinearAlgebra, PdpOutcome, QueryAttempt,
     },
 };
 use crate::binary_ecc::{BinaryPoint, F2mElement};
@@ -35,6 +35,30 @@ const GENERATOR: [u64; 2] = [43693, 23339];
 #[path = "prepared_n17_target_sat.rs"]
 mod external_sat;
 pub use external_sat::{SatTargetBackend, SatTargetPlan};
+
+/// A new frozen worker must durably publish these records before returning.
+/// Callback success cannot establish native execution or evidence custody.
+pub trait F5TargetObserver {
+    fn started(&mut self, query: &Value) -> Result<(), String>;
+    fn completed(&mut self, attempt: &Value) -> Result<(), String>;
+}
+
+struct F5RecordBridge<'a, O> {
+    public: [u64; 2],
+    observer: &'a mut O,
+}
+impl<O: F5TargetObserver> IndividualLogObserver for F5RecordBridge<'_, O> {
+    fn started(&mut self, trial: u64, a: u64, b: u64) -> Result<(), String> {
+        self.observer.started(&json!({"trial":trial,"a":a,"b":b,
+            "target":self.public,"query_rule":"seeded-sample-aG-plus-bQ",
+            "decomposition_started":false}))
+    }
+    fn completed(&mut self, attempt: &QueryAttempt) -> Result<(), String> {
+        self.observer
+            .completed(&json!({"target":self.public,"attempt":attempt,
+            "record_kind":"completed-pdp-before-scalar-recovery"}))
+    }
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -62,6 +86,35 @@ fn require(ok: bool, why: &str) -> Result<(), String> {
     } else {
         Err(why.into())
     }
+}
+fn interruption_shape(stopped: &IndividualLogInterruption) -> Result<(), String> {
+    let r = &stopped.report;
+    let count = r
+        .attempts
+        .as_ref()
+        .ok_or("interruption lacks prefix")?
+        .len();
+    let chronology = if stopped.stage == "source_gate" {
+        stopped.trial.is_none() && stopped.coefficients.is_none() && r.trials == 0 && count == 0
+    } else {
+        stopped.trial.and_then(|t| usize::try_from(t).ok()) == r.trials.checked_sub(1)
+            && stopped
+                .coefficients
+                .is_some_and(|[a, b]| (1..ORDER).contains(&a) && (1..ORDER).contains(&b))
+            && match stopped.stage {
+                "start_record" => count.checked_add(1) == Some(r.trials),
+                "completion_record" | "invalid_model" => {
+                    count == r.trials
+                        && r.attempts
+                            .as_ref()
+                            .unwrap()
+                            .last()
+                            .is_some_and(|last| Some([last.a, last.b]) == stopped.coefficients)
+                }
+                _ => false,
+            }
+    };
+    require(chronology, "invalid interrupted stage or prefix chronology")
 }
 fn fixture() -> Value {
     json!({"degree":17,"curve_a":1,"subgroup_order":ORDER,"group_order":131174,
@@ -284,6 +337,37 @@ impl PreparedN17Target {
         })
     }
 
+    /// Same bounded F5 query law, with a start/completion callback per attempt.
+    /// This entry still requires a separately frozen one-use native executor.
+    pub fn solve_f5_recorded(
+        &self,
+        public: [u64; 2],
+        plan: &F5TargetPlan,
+        observer: &mut impl F5TargetObserver,
+    ) -> Result<Value, String> {
+        plan.validate()?;
+        let setup = Instant::now();
+        let opts = options(plan.algorithm_seed, plan.max_queries);
+        let solver = IndividualLogSolver::new(&self.curve, &self.base, &self.table, &opts, None)
+            .ok_or("prepared F5 recording dispatch unavailable")?;
+        let mut dispatch =
+            serde_json::to_value(solver.admission_dispatch()).map_err(|e| e.to_string())?;
+        dispatch["engine"] = json!(opts.engine.effective());
+        dispatch["node_budget"] = json!(opts.node_budget);
+        dispatch["collapse_negation"] = json!(opts.collapse_negation);
+        dispatch["collapse_projected_orbits"] = json!(opts.collapse_projected_orbits);
+        dispatch["attempt_record_contract"] = json!("start-and-completed-pdp-before-recovery-v1");
+        let solver_setup_ns = setup
+            .elapsed()
+            .as_nanos()
+            .try_into()
+            .map_err(|_| "duration overflow")?;
+        let mut bridge = F5RecordBridge { public, observer };
+        self.run_observed_result(public, plan, dispatch, solver_setup_ns, |q| {
+            solver.solve_n17_durable(q, &mut bridge)
+        })
+    }
+
     fn run_observed(
         &self,
         public: [u64; 2],
@@ -291,6 +375,17 @@ impl PreparedN17Target {
         dispatch: Value,
         solver_setup_ns: u64,
         solve: impl FnOnce(&BinaryPoint) -> IndividualLogReport,
+    ) -> Result<Value, String> {
+        self.run_observed_result(public, plan, dispatch, solver_setup_ns, |q| Ok(solve(q)))
+    }
+
+    fn run_observed_result(
+        &self,
+        public: [u64; 2],
+        plan: &F5TargetPlan,
+        dispatch: Value,
+        solver_setup_ns: u64,
+        solve: impl FnOnce(&BinaryPoint) -> Result<IndividualLogReport, IndividualLogInterruption>,
     ) -> Result<Value, String> {
         let session = Session::begin_strict().map_err(str::to_string)?;
         clock::begin_online(Phase::TargetQuery);
@@ -306,14 +401,30 @@ impl PreparedN17Target {
         let mut failure = None;
         let mut scalar = None;
         let mut certificate = None;
+        let mut interruption = None;
         match decoded {
             Err(e) => failure = Some(e),
             Ok(q) => {
-                let observed = solve(&point(public));
+                let (observed, interrupted) = match solve(&point(public)) {
+                    Ok(report) => (report, false),
+                    Err(stopped) => {
+                        let shape = interruption_shape(&stopped);
+                        let prefix_shape_valid = shape.is_ok();
+                        failure =
+                            Some(shape.err().unwrap_or_else(|| {
+                                format!("{}: {}", stopped.stage, stopped.reason)
+                            }));
+                        interruption = Some(json!({"stage":stopped.stage,"trial":stopped.trial,
+                            "coefficients":stopped.coefficients,
+                            "reason":stopped.reason,"prefix_shape_valid":prefix_shape_valid,
+                            "runtime_custody_admitted":false}));
+                        (*stopped.report, true)
+                    }
+                };
                 clock::mark(Phase::TargetRelationCheck);
-                match self.check_attempts(q, &observed, plan.max_queries) {
+                match self.check_attempt_prefix(q, &observed, plan.max_queries, interrupted) {
                     Err(e) => failure = Some(e),
-                    Ok(()) => {
+                    Ok(()) if !interrupted => {
                         clock::mark(Phase::RecoveryCheck);
                         if let Some(k) = observed.log.as_ref() {
                             match k.to_u64().filter(|&k| k < ORDER) {
@@ -335,6 +446,7 @@ impl PreparedN17Target {
                             failure = Some("query budget exhausted without scalar recovery".into());
                         }
                     }
+                    Ok(()) => {} // A partial transcript is never a successful solve.
                 }
                 report = Some(observed);
             }
@@ -370,7 +482,7 @@ impl PreparedN17Target {
             "actual_usable_base_points":62,"geometric_base_points":63,"effective_columns":29,
             "dispatch":dispatch,"reusable_validation_ns":self.reusable_validation_ns,
             "solver_setup_ns":solver_setup_ns,"report":report,"verified_scalar":scalar,
-            "independent_recovery_certificate":certificate,"failure":failure,"costs":costs,
+            "independent_recovery_certificate":certificate,"failure":failure,"interruption":interruption,"costs":costs,
             "exclusive_ic_online_phases_ns":exclusive_ic_online_phases_ns,
             "timing_class":"ordinary-host-diagnostic","candidate_id":null,"workload_id":null,"run_id":null,
             "source_bound_execution_admitted":false,"fresh_paired_qualification":false,
@@ -379,18 +491,21 @@ impl PreparedN17Target {
         )
     }
 
-    fn check_attempts(
+    fn check_attempt_prefix(
         &self,
         q: oracle::Point,
         report: &IndividualLogReport,
         cap: usize,
+        interrupted: bool,
     ) -> Result<(), String> {
         let attempts = report
             .attempts
             .as_ref()
             .ok_or("missing failed-query transcript")?;
         require(
-            report.trials <= cap && attempts.len() == report.trials,
+            report.trials <= cap
+                && (attempts.len() == report.trials
+                    || (interrupted && attempts.len().checked_add(1) == Some(report.trials))),
             "attempt chronology/cap differs",
         )?;
         for (i, attempt) in attempts.iter().enumerate() {
@@ -429,6 +544,12 @@ impl PreparedN17Target {
                 )?;
             }
         }
+        if interrupted {
+            return require(
+                report.log.is_none() && report.relation.is_none(),
+                "interrupted solve cannot retain a claimed scalar or recovery relation",
+            );
+        }
         match (&report.log, &report.relation) {
             (Some(_), Some(rel)) => require(
                 attempts.last().is_some_and(|last| {
@@ -443,6 +564,10 @@ impl PreparedN17Target {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "prepared_n17_target_f5_tests.rs"]
+mod recording_tests;
 
 #[cfg(test)]
 mod boundary_tests {
@@ -510,7 +635,7 @@ mod boundary_tests {
             "geometric_base":geometry,"attempts":attempts,
             "stop":"panel_complete","claimed_column_logs":logs})
     }
-    fn plan(cap: usize) -> F5TargetPlan {
+    pub(super) fn plan(cap: usize) -> F5TargetPlan {
         F5TargetPlan {
             schema_version: 1,
             question: "prepared-public-target-n17-f5-v1".into(),
@@ -534,7 +659,7 @@ mod boundary_tests {
             },
         }
     }
-    fn retained_report(state: &PreparedN17Target) -> IndividualLogReport {
+    pub(super) fn retained_report(state: &PreparedN17Target) -> IndividualLogReport {
         let old: Value = serde_json::from_str(include_str!(
             "../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/f5-preparation.json"
         )).unwrap();

@@ -78,6 +78,13 @@ preserves failed rows and excludes failed completion from success. This is a
 callback source contract: actual accepted CryptoMiniSat execution, source-bound
 target custody/audit and fresh comparison remain pending. Native UNSAT is a
 claim awaiting geometric proof, and valid nonlifting models remain unresolved.
+The [F5 per-attempt evidence contract](goal_20260924/native-f5-durable-target-v1/PROTOCOL.md)
+adds a bounded recording entry to the same F5 sampling loop. Every attempt has
+a start callback before decomposition and a completed-PDP callback before
+recovery. Failed record writes stop the loop and retain its partial transcript
+without a verified answer. Retained-data controls check ordering and unchanged
+seeded coefficients; a new frozen file-writing worker and interruption/custody
+audit remain required before native execution admission.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,
