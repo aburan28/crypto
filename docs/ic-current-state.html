@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 285 panels, one line each</summary>
+    <summary>Show all 286 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -471,6 +471,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-root-orbit-fb-round23-20261006">P-256 root-orbit bases: coordinate symmetry gives zero log transport</a> <span class="chip">negative</span><br>Sixteen new PGL2 images of exact multiplicative subgroups close globally in the coordinate field, but 34,099,472 exact [1..16]P_i images contain zero cross-column equalities. Every base retains one independent logarithm per column.</li>
       <li><a href="./#p256-negation-cross-colour-round24-20261006">P-256 signed S17: negation folding reaches ideal K=1 constant parity, not end-to-end parity</a> <span class="chip">accounting / negative</span><br>Both L=R and L=-R replay to valid 17-term target relations. The exact negation-quotient collision law puts the ideal known-log K=1 constant at 0.964× rho, but direct generation, storage and every geometric quotient still fail.</li>
       <li><a href="./#p256-scalar-orbit-round25-20261006">P-256 scalar orbit reaches one log class, then reduces to rho</a> <span class="chip">measurement / negative</span><br>An exhaustive divisor screen constructs a native 139,592-column FB1 with exact scalar transport and replays all 139,592 edges. The unknown-anchor oracle floor is 1.447× rho; a known anchor is generic rho/claw search, and coordinate membership has degree 139,592.</li>
+      <li><a href="./#p256-selector-coalescence-round26-20261006">P-256 scalar-orbit selector: one addition or coalescence, not both</a> <span class="chip">measurement / negative</span><br>All 279,184 neighbour deltas are distinct. Across 4,096 exact S17 collisions, left/right legal delta intersections are zero, so one-addition walks do not coalesce. The cheapest global orbit action is at least 238.191× rho.</li>
     </ol>
   </details>
 <!-- END panel-index -->

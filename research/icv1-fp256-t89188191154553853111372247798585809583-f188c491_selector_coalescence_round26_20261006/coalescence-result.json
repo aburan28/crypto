@@ -1,0 +1,245 @@
+{
+  "schema": "p256.scalar_orbit_selector_coalescence/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation",
+  "dependency": {
+    "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_orbit_round25_20261006/scalar-orbit-result.json",
+    "sha256": "dcb191f7d5d7a660e3ce13128b25ce1c017c7d89ec2d01a242ab536651647faf",
+    "factor_base_id": "FB1he6b6b6e25de6",
+    "columns": 139592,
+    "scalar_order": 279184,
+    "scalar": "379483656589291393959605088584129393463128953089898693989044430844151895048"
+  },
+  "delta_census": {
+    "signed_atoms": 279184,
+    "deltas_enumerated": 279184,
+    "distinct_deltas": 279184,
+    "duplicate_deltas": 0,
+    "antipodal_pairs_checked": 139592,
+    "antipodal_failures": 0,
+    "delta_coefficients_sha256": "9bef47854a134951a3970dc45b31af2153ffea5b37dca9562577310fde01f9a4",
+    "injective": true,
+    "antipodal_exact": true,
+    "identity": "D_j=[(m-1)m^j]H; D_j=D_k iff j=k; D_(j+B)=-D_j"
+  },
+  "local_controls": {
+    "trials": 4096,
+    "signed_atoms_per_trial": 17,
+    "distinct_column_failures": 0,
+    "scalar_relation_failures": 0,
+    "group_relation_failures": 0,
+    "delta_intersections": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "all_group_relations_replayed": true,
+    "transition_factors_through_group_sum": false,
+    "coalesces_after_valid_collision": false,
+    "operations": {
+      "scalar_multiplication_additions": 1572863,
+      "scalar_multiplication_doublings": 3133404,
+      "group_comparison_additions": 8192
+    }
+  },
+  "global_screen": {
+    "subgroup_elements_enumerated": 279184,
+    "identity_and_negation_excluded": 2,
+    "nontrivial_folded_actions": 139591,
+    "top_candidates": [
+      {
+        "exponent": 1,
+        "scalar": "379483656589291393959605088584129393463128953089898693989044430844151895048",
+        "bits": 248,
+        "weight": 96,
+        "binary_operations": 344,
+        "doubling_lower_bound": 247,
+        "folded_permutation_order": 139592
+      },
+      {
+        "exponent": 104489,
+        "scalar": "226915726138896434498413975474345644488419146819705299150519124338310909025",
+        "bits": 248,
+        "weight": 98,
+        "binary_operations": 346,
+        "doubling_lower_bound": 247,
+        "folded_permutation_order": 139592
+      },
+      {
+        "exponent": 26544,
+        "scalar": "1960589362423494748542891557812799222636319520950626651868812454031352022626",
+        "bits": 251,
+        "weight": 95,
+        "binary_operations": 346,
+        "doubling_lower_bound": 250,
+        "folded_permutation_order": 17449
+      },
+      {
+        "exponent": 32845,
+        "scalar": "11705011661851733357528103155378340724639334398540024692050443359632306043139",
+        "bits": 253,
+        "weight": 94,
+        "binary_operations": 347,
+        "doubling_lower_bound": 252,
+        "folded_permutation_order": 139592
+      },
+      {
+        "exponent": 42190,
+        "scalar": "14559489414027521837731253575728432101494198350886135116324356140285618323771",
+        "bits": 254,
+        "weight": 93,
+        "binary_operations": 347,
+        "doubling_lower_bound": 253,
+        "folded_permutation_order": 69796
+      },
+      {
+        "exponent": 206435,
+        "scalar": "629496485951217210857677959658838492567103494393118677373996914595060056649",
+        "bits": 249,
+        "weight": 99,
+        "binary_operations": 348,
+        "doubling_lower_bound": 248,
+        "folded_permutation_order": 139592
+      },
+      {
+        "exponent": 178009,
+        "scalar": "1102912923734241240107166820984650504419935270187857412554244904696557379036",
+        "bits": 250,
+        "weight": 98,
+        "binary_operations": 348,
+        "doubling_lower_bound": 249,
+        "folded_permutation_order": 139592
+      },
+      {
+        "exponent": 13638,
+        "scalar": "10863007021700785291054623442607579946114648657277086951814328117354779250369",
+        "bits": 253,
+        "weight": 96,
+        "binary_operations": 349,
+        "doubling_lower_bound": 252,
+        "folded_permutation_order": 69796
+      },
+      {
+        "exponent": 128487,
+        "scalar": "15559813981900523584357993414675488456024113393555628758536871628629405698",
+        "bits": 244,
+        "weight": 106,
+        "binary_operations": 350,
+        "doubling_lower_bound": 243,
+        "folded_permutation_order": 139592
+      },
+      {
+        "exponent": 245892,
+        "scalar": "34579125102997219025849448831203490049481084066057256853999671427295810677",
+        "bits": 245,
+        "weight": 105,
+        "binary_operations": 350,
+        "doubling_lower_bound": 244,
+        "folded_permutation_order": 34898
+      },
+      {
+        "exponent": 120406,
+        "scalar": "489407720384573614464764582238962513674275478817358947194133002225409770596",
+        "bits": 249,
+        "weight": 101,
+        "binary_operations": 350,
+        "doubling_lower_bound": 248,
+        "folded_permutation_order": 69796
+      },
+      {
+        "exponent": 132406,
+        "scalar": "524801095146827633490484564324697139352127161631038178952193313221537282266",
+        "bits": 249,
+        "weight": 101,
+        "binary_operations": 350,
+        "doubling_lower_bound": 248,
+        "folded_permutation_order": 69796
+      },
+      {
+        "exponent": 67806,
+        "scalar": "668408699505353767894542154011554655773064874721791929006445836835981134123",
+        "bits": 249,
+        "weight": 101,
+        "binary_operations": 350,
+        "doubling_lower_bound": 248,
+        "folded_permutation_order": 69796
+      },
+      {
+        "exponent": 164657,
+        "scalar": "687767025115482928952529053547490511510674740038524493201047955220591021381",
+        "bits": 249,
+        "weight": 101,
+        "binary_operations": 350,
+        "doubling_lower_bound": 248,
+        "folded_permutation_order": 139592
+      },
+      {
+        "exponent": 137162,
+        "scalar": "724640303854326682861533407031523783941875538151936708115681334122952098992",
+        "bits": 249,
+        "weight": 101,
+        "binary_operations": 350,
+        "doubling_lower_bound": 248,
+        "folded_permutation_order": 69796
+      },
+      {
+        "exponent": 96202,
+        "scalar": "766866899883180173373610922710052631384140655597999750507036000040457650825",
+        "bits": 249,
+        "weight": 101,
+        "binary_operations": 350,
+        "doubling_lower_bound": 248,
+        "folded_permutation_order": 69796
+      }
+    ],
+    "selected": {
+      "exponent": 1,
+      "scalar": "379483656589291393959605088584129393463128953089898693989044430844151895048",
+      "bits": 248,
+      "weight": 96,
+      "binary_operations": 344,
+      "doubling_lower_bound": 247,
+      "folded_permutation_order": 139592
+    },
+    "complete_column_permutation_verified": true,
+    "scalar_rotation_controls": 4096,
+    "scalar_rotation_failures": 0,
+    "group_rotation_failures": 0,
+    "all_rotation_controls_group_replayed": true,
+    "operations": {
+      "scalar_multiplication_additions": 1049470,
+      "scalar_multiplication_doublings": 2089282,
+      "group_comparison_additions": 4096
+    }
+  },
+  "parity_projection": {
+    "rho_s": 1.3,
+    "oracle_s": 1.2536374202692353,
+    "maximum_operations_per_sample_for_parity": 1.0369824472221065,
+    "local_update_group_operations": 1.0,
+    "local_oracle_ratio_to_rho": 0.964336477130181,
+    "local_coalesces": false,
+    "local_materialized_log2_bytes": 133.3261201489153,
+    "global_binary_operations_per_sample": 344,
+    "global_binary_ratio_to_rho": 331.73174813278223,
+    "global_doubling_lower_bound_per_sample": 247,
+    "global_doubling_lower_bound_ratio_to_rho": 238.1911098511547,
+    "unrestricted_translation_operations_per_sample": 1.0,
+    "unrestricted_translation_ratio_to_rho": 0.964336477130181,
+    "unrestricted_translation_classification": "Coalescing one-addition group translation drops fixed-cardinality S17 support and is ordinary Pollard rho with tracked coefficients."
+  },
+  "promotion_gates": {
+    "zero_false_positives": true,
+    "zero_false_negatives": true,
+    "exact_relation_and_rotation_replay": true,
+    "preserves_distinct_signed_s17": true,
+    "coalesces_after_every_valid_collision": false,
+    "operations_per_sample_at_most_1_037": false,
+    "structured_residual_degree_at_most_5": false,
+    "storage_below_2_50": false,
+    "complete_cost_below_rho": false,
+    "non_generic": false,
+    "promoted": false
+  },
+  "full_depth_unplanted_attempted": false,
+  "dominant_obstruction": "Hidden representation state: legal one-addition S17 deltas on the two colours are disjoint at a valid distinct-column collision, so the walks do not coalesce. Removing the hidden state gives generic rho; applying a global orbit permutation costs a large scalar multiplication.",
+  "decision": "No scalar-orbit selector passes. Local one-addition updates meet the arithmetic constant but cannot be made memoryless; global coalescing updates preserve the orbit but miss rho by orders of magnitude; unrestricted one-addition updates are Pollard rho and no longer fixed-cardinality S17."
+}
