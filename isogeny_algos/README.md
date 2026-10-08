@@ -108,8 +108,18 @@ python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
 | `results/p8-twopow.jsonl` | 2^216-isogeny chains over the SIKEp434 F_{p²} |
 | `results/p10-speed.jsonl` | speed pass: groups `nc_fields nc_atkin nc_suth find sea`, three alternating runs each of the build before it (`"build": "before"`, commit `5208c95a`) and after (`"after"`), tagged with `run` |
 | `results/p11-speed.jsonl` | second speed pass: groups `nc_atkin nc_suth find sea`, before = `51d4823c` (built with the current bench file, so the Sutherland record is the same 16-prime median), after = `04df8550`, three alternating runs |
+| `results/p12-speed.jsonl` | third speed pass (Φ_ℓ by Hecke/Newton): groups `phi sea`, before = `f5edcb01`, after = `85c847d5`, three alternating runs |
 
 Selected V3 measurements (medians unless stated; all records `verified: true`):
+
+* **Third speed pass** (`p12-speed.jsonl`, median of three alternating runs against `f5edcb01`): Φ_ℓ by
+  Hecke/Newton reads only the coefficients of S^m = (q j)^m it uses (baby and giant powers of S plus one dot
+  product per coefficient) and builds S = (E4 P⁸)³ from the partition series: 1.7–4.3× for ℓ = 11..127
+  (61-bit ℓ = 127 6.26 → 1.47 s; 127-bit ℓ = 61 1.45 → 0.47 s). The SEA precomputation of all Φ_ℓ, ℓ ≤ 89,
+  over the 127-bit field: 31.2 → 9.0 s; ℓ ≤ 61 at 40/61 bits 1.2 → 0.39 s. SEA per curve (Φ_ℓ given)
+  unchanged within noise (medians 0.96–1.05×). Correction: the message of commit `85c847d5` says the
+  earlier code took "about 4 s at ℓ = 89"; that was an estimate, not a measurement (the measured figure
+  before the change was ~30 s for all ℓ ≤ 89 together, now in this file as 31.2 s).
 
 * **Second speed pass** (`p11-speed.jsonl`, median of three alternating runs against `51d4823c`):
   Sutherland Φ_ℓ mod p, median over 16 primes ≈ 2¹⁶: ℓ = 3 / 5 / 7 160 µs / 1.71 ms / 11.0 ms → 92 µs /
@@ -168,7 +178,7 @@ Selected V3 measurements (medians unless stated; all records `verified: true`):
   1.2–2.2 ms (1.3–4.5 ms without cycles; 6–33 ms with the earlier linear walk; BSGS point counting
   175–204 ms); 40-bit 0.3–0.8 ms; 127-bit 0.26–0.90 s with cycles vs 0.28–5.0 s without (3 curves).
   Cycle bound 80 was slower at 61 bits (2.4–6.6 ms). Precomputing Φ_ℓ for ℓ ≤ 89 over the 127-bit
-  field took 34 s and is not included.
+  field took 34 s then (9.0 s after the third speed pass) and is not included.
 * **Theta model** (`p8-theta.jsonl`, 50-bit F_{p²}): (2,2) codomain 0.64 µs and image 0.17 µs vs Richelot
   codomain 1.81 µs and point image 13.0 µs on the same field; Kani (2ᵃ, 2ᵃ)-chain including the split
   test 26 µs (a = 8) to 77 µs (a = 16). With an endomorphism γ = u + v·i of E₀ as the auxiliary isogeny
@@ -219,8 +229,9 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
 * KLPT is for left O₀-ideals with ℓ = 2 and p ≡ 3 mod 4; e/log₂p ≈ 3.8 at 128 bits, above the ≈ 3.5 heuristic.
-* Hecke/Newton Φ_ℓ needs char > ℓ + 1; its cost grows quickly (ℓ = 127 in 6.1 s at 61 bits, ℓ ≤ 89 in 34 s
-  at 127 bits); SEA is therefore benchmarked with Φ_ℓ precomputed. The SEA stopping rule and cycle bound
+* Hecke/Newton Φ_ℓ needs char > ℓ + 1; its cost grows quickly (ℓ = 127 in 1.5 s at 61 bits, ℓ ≤ 89 in 9 s
+  at 127 bits, after the third speed pass; 6.1 s and 34 s before); SEA is therefore benchmarked with Φ_ℓ
+  precomputed. The SEA stopping rule and cycle bound
   are tuned on 13 curves; the per-curve spread is large.
 * Theta: formulas derived here from the duplication formula and validated against the Mumford-side code;
   the Rosenhain formula as remembered had t₁ and t₃ exchanged in μ and ν (the test caught it).
