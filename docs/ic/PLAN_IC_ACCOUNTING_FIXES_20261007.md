@@ -147,7 +147,16 @@ official N131 R2 setup query is live with rank 0/14.
 
 ## 2. Fix plan
 
-### Phase 0. Correct the documents (1 day, no compute)
+### Phase 0. Correct the documents (1 day, no compute) — **done 2026-10-08**
+
+0.1 and 0.2 landed in `RESEARCH_ECC2K130_IC_FEASIBILITY.md` (formula,
+crossover, counting convention, the `C_struct = 0.25` vs `C_fit ≈ 1.2–1.5`
+gap, and two 5-sum/4-sum count figures that followed from no formula) and
+`RESEARCH_KOBLITZ_INDEX_CALCULUS.md` (Couveignes–Lercier closed by Hasse).
+0.3 landed as a dated non-claims paragraph in `docs/ic/BOUNDARY_TARGETS.md`
+and an `accounting_non_claims_20261008` field on the Koblitz `vs_rho` block
+of `boundary_targets.json`; the per-rung `claim_report_vs_rho.json` files are
+frozen evidence and were left untouched, contrary to the original 0.3 text.
 
 | # | Change | File | Acceptance |
 |---|---|---|---|

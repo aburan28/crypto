@@ -160,6 +160,12 @@ and confirm it is trivial (`G ∈ 263E`). (3) For the cyclotomic-sparse base
 1/2 per `n`, so roughly half the toy rows have it. (2) Trivial pairing with
 `⟨G⟩`, as the theory says. (3) No: `x(T)` is a root of the 263-division
 polynomial and has no reason to be γ-sparse. **Cost:** an afternoon in Sage.
+**Result for (1), 2026-10-08 (pure arithmetic, no Sage):** among the rungs
+with `2n+1` prime and `≡ 7 mod 8` (type-II ONB with `γ ∈ F_{2^n}`), `2n+1`
+divides `f_n` for `n = 11, 35, 39, 63, 75, 95, 119, 131` and does not for
+`n = 15, 23, 51, 83, 99, 111, 135`: 8 of 15, a coincidence as predicted.
+Over all `n < 140` with `2n+1` prime it is 14 of 57. (2) and (3) remain to
+run.
 
 ## E5. Horizontal 2-isogeny cycles on the 262 floor curves (new)
 
@@ -174,6 +180,16 @@ decomposition and check it is consistent with the two Galois orbits A and B
 and the order-2 ramified class.
 **Prediction.** The class of 2 has order 131 or 262, giving two cycles of 131
 or one of 262; the Galois action by `τ` commutes with it. **Cost:** minutes.
+**Result, 2026-10-08 (structural, no walk needed):** with `h(O_K) = 1` and
+263 split, `Cl(Z + 263·O_K) ≅ (O_K/263)^×/(Z/263)^× ≅ F_263^×`, cyclic of
+order 262. The two primes above 2 are `(τ)` and `(τ̄)`; `τ` has eigenvalues
+`123, 139 mod 263`, so `(τ)` maps to `123/139 ≡ 69` of order **131**, and
+`(τ̄)` to its inverse. The horizontal 2-isogenies on the 263-level are
+therefore exactly the Frobenius twist `E ↦ E^{(2)}` and its dual, and the
+2-isogeny graph is **two 131-cycles that coincide with the two Galois
+orbits** (A and B of the report); the ramified prime 7, the order-2 class,
+swaps them. Prediction met; the walk in `Φ_2` is now only a consistency
+check.
 
 ## E6. Manifest import and component decision tool (new, mechanical)
 
