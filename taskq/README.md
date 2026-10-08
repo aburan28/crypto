@@ -268,8 +268,9 @@ The image is `deploy/Dockerfile`. The `taskq image` workflow publishes it to
 (Rust, Sage, CUDA) go in a derived image per hardware class, set per pool.
 CI lints and renders the chart in three configurations and builds the image.
 
-**On AWS**, `deploy/aws/provision.sh` stands up EKS, ElastiCache and an EFS
-results volume, then installs the chart. It also covers ElastiCache's
+**On AWS**, `deploy/aws/` is a Terraform root module. It creates a VPC, EKS
+with CPU and GPU node groups running the static CPU manager, ElastiCache, an
+EFS results volume, and the Helm release. It also covers ElastiCache's
 durability caveat and the MemoryDB alternative; see
 [`deploy/aws/README.md`](deploy/aws/README.md).
 

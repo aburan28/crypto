@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/tmp/crypto-pr.xIRzjS/target/release/isogeny_walk",
+    "verify",
+    "--curve",
+    "p256",
+    "--audit-points",
+    "2",
+    "--dir",
+    "/tmp/p256-isogeny-multigraph-64k-20261006/walk"
+  ],
+  "exit_status": 0,
+  "max_rss_kib": 5193516,
+  "schema": "isogeny-resource-accounting/v1",
+  "source_commit": "2b82949e5deb308995ab654b1a64d1c9168d9ef2",
+  "system_seconds": 3.719534,
+  "timed_out": false,
+  "user_seconds": 1860.185499,
+  "wall_seconds": 482.756105
+}

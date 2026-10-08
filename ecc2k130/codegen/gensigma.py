@@ -49,6 +49,38 @@ def route(perm):
     return [(1, first)] + middle + [(1, last)]
 
 
+# Route only live ports. An odd subproblem's unmatched input and output
+# both belong to the larger even-parity subnetwork. Padding wires are never
+# used; preserving them is checked along with every live basis vector.
+def routePartial(perm,capacity=256):
+    n=len(perm)
+    assert n<=capacity and sorted(perm)==list(range(n))
+    if capacity==2:return [(1,int(n==2 and perm[0]!=0))]
+    inv=[0]*n
+    for i,j in enumerate(perm):inv[j]=i
+    color=[-1]*n
+    endpoints=[n-1,inv[n-1]] if n%2 else []
+    for root in endpoints+list(range(n)):
+        if color[root]>=0:
+            if root in endpoints:assert color[root]==0,(n,root)
+            continue
+        color[root]=0;todo=[root]
+        while todo:
+            i=todo.pop();neighbors=[]
+            if (i^1)<n:neighbors.append(i^1)
+            if (perm[i]^1)<n:neighbors.append(inv[perm[i]^1])
+            for j in neighbors:
+                if color[j]<0:color[j]=color[i]^1;todo.append(j)
+                else:assert color[j]!=color[i],(n,i,j)
+    first=sum(color[i]<<i for i in range(0,n-1,2))
+    last=sum(color[inv[j]]<<j for j in range(0,n-1,2))
+    sub=[[None]*((n+1)//2),[None]*(n//2)]
+    for i,j in enumerate(perm):sub[color[i]][i//2]=j//2
+    a,b=routePartial(sub[0],capacity//2),routePartial(sub[1],capacity//2)
+    assert [d for d,_ in a]==[d for d,_ in b]
+    middle=[(2*d,interleave(ma,0)|interleave(mb,1)) for (d,ma),(_,mb) in zip(a,b)]
+    return [(1,first)]+middle+[(1,last)]
+
 def permutation(k):
     p = list(range(256))
     for i in range(131):
@@ -57,11 +89,39 @@ def permutation(k):
     return p
 
 
-def networks():
+# Relabel address bits before routing, then put masks back in field-bit order.
+# This stage order preserves the 131 live ports, including the final three.
+WALK_STAGE_ORDER = (1, 0, 2, 6, 4, 5, 3, 7)
+
+
+def routeOrderedPartial(perm, order):
+    if sorted(order) != list(range(8)):
+        raise ValueError('stage order must permute the eight address bits')
+    mapping = [sum(((i >> bit) & 1) << order[bit] for bit in range(8))
+               for i in range(256)]
+    if sorted(mapping[:131]) != list(range(131)):
+        raise ValueError('stage order must preserve the live ports')
+    inverse = [0] * 256
+    for i, j in enumerate(mapping):
+        inverse[j] = i
+    relabeled = [inverse[perm[mapping[i]]] for i in range(131)]
+    net = []
+    for distance, mask in routePartial(relabeled):
+        originalMask = sum(1 << mapping[i] for i in range(131) if (mask >> i) & 1)
+        net.append((1 << order[distance.bit_length() - 1], originalMask))
+    return net
+
+
+def networks(partial=False, stage_order=None):
+    if stage_order is not None and not partial:
+        raise ValueError('reordered routing requires partial networks')
     nets = []
     for k in range(131):
         p = permutation(k)
-        net = route(p)
+        net = (routeOrderedPartial(p, stage_order) if stage_order is not None
+               else routePartial(p[:131]) if partial else route(p))
+        if partial:
+            for d,mask in net:assert ((mask | (mask << d)) >> 131) == 0
         for i in range(256):
             x = 1 << i
             for d, mask in net:
@@ -73,7 +133,19 @@ def networks():
     return nets
 
 
-def emitGroup(nets, name, exponents, columns):
+def emitSwapSelect(value, distance):
+    # Swap address bit 3 or 4 in the word, then select both endpoints.
+    # The table already expands each lower-endpoint mask to both halves.
+    intrinsic = ('__byte_perm(%s, %s, 0x2301u)' % (value, value)
+                 if distance == 8 else '__funnelshift_r(%s, %s, 16)' % (value, value))
+    lower = 0x00ff00ff if distance == 8 else 0x0000ffff
+    return ['#ifdef __CUDA_ARCH__', '    t='+intrinsic+';', '#else',
+            '    t=((%s >> %d)&0x%08xu)|((%s << %d)&0x%08xu);' %
+            (value,distance,lower,value,distance,lower << distance), '#endif',
+            '    %s=(%s & ~mask)|(t & mask);' % (value,value)]
+
+
+def emitGroup(nets, name, exponents, columns, byte_select=False):
     chosen = [nets[k] for k in exponents]
     ops = []
     for stage in range(len(chosen[0])):
@@ -82,6 +154,9 @@ def emitGroup(nets, name, exponents, columns):
             masks = [(net[stage][1] >> (32*word)) & 0xffffffff for net in chosen]
             if any(masks):
                 ops.append((d, word, masks))
+    if byte_select:
+        ops = [(d, word, [mask | (mask << d) if d in (8,16) else mask for mask in row])
+               for d, word, row in ops]
     unique = list(dict.fromkeys(tuple(row) for _,_,row in ops))
     storage = 'ECC_SIGMA_INV_STORAGE' if name == 'sigmaInvNetwork131' else 'ECC_SIGMA_WALK_STORAGE'
     lines = [storage+' uint32_t %sMasks[%d][%d] = {' % (name,len(unique),columns)]
@@ -100,7 +175,9 @@ def emitGroup(nets, name, exponents, columns):
         lines += ['#ifdef __CUDA_ARCH__',
                   '    mask='+deviceLoad+';',
                   '#else', '    mask=%sMasks[%d][index];' % (name,idx), '#endif']
-        if d < 32:
+        if byte_select and d in (8,16):
+            lines += emitSwapSelect('v%d' % word, d)
+        elif d < 32:
             lines += ['    t=((v%d >> %d)^v%d)&mask;' % (word,d,word),
                       '    v%d^=t^(t << %d);' % (word,d)]
         else:
@@ -113,7 +190,7 @@ def emitGroup(nets, name, exponents, columns):
     return lines, len(ops)
 
 
-def emitWalkPair(nets):
+def emitWalkPair(nets, byte_select=False):
     # Keep the scalar emitter and its table unchanged. The paired network
     # uses precisely the same operation order and deduplicated mask indices.
     exponents = list(range(3,11))
@@ -125,6 +202,9 @@ def emitWalkPair(nets):
             masks = [(net[stage][1] >> (32*word)) & 0xffffffff for net in chosen]
             if any(masks):
                 ops.append((d, word, masks))
+    if byte_select:
+        ops = [(d, word, [mask | (mask << d) if d in (8,16) else mask for mask in row])
+               for d, word, row in ops]
     unique = list(dict.fromkeys(tuple(row) for _,_,row in ops))
     lines = ['#if ECC_PACKED_WEIGHTED_PREFIX == 2',
              'struct SigmaWalkPair131 { P131 first, second; };',
@@ -142,7 +222,9 @@ def emitWalkPair(nets):
                   '    mask=__ldg(&sigmaWalkNetwork131Masks[%d][index]);' % idx,
                   '#else', '    mask=sigmaWalkNetwork131Masks[%d][index];' % idx, '#endif']
         for value in ('a', 'b'):
-            if d < 32:
+            if byte_select and d in (8,16):
+                lines += emitSwapSelect('%s%d' % (value,word), d)
+            elif d < 32:
                 lines += ['    t=((%s%d >> %d)^%s%d)&mask;' % (value,word,d,value,word),
                           '    %s%d^=t^(t << %d);' % (value,word,d)]
             else:
@@ -156,16 +238,16 @@ def emitWalkPair(nets):
     return lines
 
 
-def emitSharedWalkPair(nets):
+def emitSharedWalkPair(nets, byte_select=False):
     # Reuse the same generated operations and deduplicated mask row indices.
     # The global helper above remains byte-identical and separately callable.
-    original = emitWalkPair(nets)
+    original = emitWalkPair(nets, byte_select)
     shared = original[2:-1]
     shared = [line.replace('sigmaWalkNetworkPair131(', 'sigmaWalkNetworkPairShared131(')
               for line in shared]
     shared = [re.sub(r'__ldg\(&sigmaWalkNetwork131Masks\[(\d+)\]\[index\]\)',
                      r'sigmaWalkShared131Masks[\1][index]', line) for line in shared]
-    walk, _ = emitGroup(nets, 'sigmaWalkNetwork131', list(range(3,11)), 8)
+    walk, _ = emitGroup(nets, 'sigmaWalkNetwork131', list(range(3,11)), 8, byte_select)
     rows = int(re.search(r'Masks\[(\d+)\]\[8\]', walk[0]).group(1))
     lines = ['#if ECC_PACKED_SHARED_SIGMA',
              '#ifdef __CUDACC__',
@@ -184,6 +266,8 @@ def emitSharedWalkPair(nets):
 
 def generate():
     nets = networks()
+    partial = networks(True)
+    ordered = networks(True, WALK_STAGE_ORDER)
     lines = ['// Generated by codegen/gensigma.py; included inside eccPacked131.',
              '#pragma once', '#ifdef __CUDACC__',
              '#define ECC_SIGMA_WALK_STORAGE static __device__ __align__(32) const',
@@ -192,7 +276,22 @@ def generate():
              '#define ECC_SIGMA_INV_STORAGE alignas(32) static const', '#endif']
     walk, nw = emitGroup(nets, 'sigmaWalkNetwork131', list(range(3,11)), 8)
     inv, ni = emitGroup(nets, 'sigmaInvNetwork131', [16,32,65], 4)
-    lines += walk + inv + emitWalkPair(nets) + emitSharedWalkPair(nets) + ['#undef ECC_SIGMA_WALK_STORAGE', '#undef ECC_SIGMA_INV_STORAGE']
+    partialWalk, _ = emitGroup(partial, 'sigmaWalkNetwork131', list(range(3,11)), 8)
+    partialInv, _ = emitGroup(partial, 'sigmaInvNetwork131', [16,32,65], 4)
+    def chosenWalk(network):
+        selected, _ = emitGroup(network, 'sigmaWalkNetwork131', list(range(3,11)), 8, True)
+        original, _ = emitGroup(network, 'sigmaWalkNetwork131', list(range(3,11)), 8)
+        return ['#if ECC_PACKED_BYTE_SIGMA'] + selected + ['#else'] + original + ['#endif']
+    def chosenPair(network):
+        return (['#if ECC_PACKED_BYTE_SIGMA'] + emitWalkPair(network, True) + emitSharedWalkPair(network, True)
+                + ['#else'] + emitWalkPair(network) + emitSharedWalkPair(network) + ['#endif'])
+    lines += ['#if !(ECC_PACKED_PARTIAL_SIGMA & 1)'] + chosenWalk(nets)
+    lines += ['#elif ECC_PACKED_SIGMA_ORDER == 1'] + chosenWalk(ordered) + ['#else'] + chosenWalk(partial) + ['#endif']
+    lines += ['#if !(ECC_PACKED_PARTIAL_SIGMA & 2)'] + inv + ['#else'] + partialInv + ['#endif']
+    lines += ['#if !(ECC_PACKED_PARTIAL_SIGMA & 1)'] + chosenPair(nets)
+    lines += ['#elif ECC_PACKED_SIGMA_ORDER == 1'] + chosenPair(ordered)
+    lines += ['#else'] + chosenPair(partial) + ['#endif']
+    lines += ['#undef ECC_SIGMA_WALK_STORAGE', '#undef ECC_SIGMA_INV_STORAGE']
     return '\n'.join(lines)+'\n', (nw,ni)
 
 
@@ -207,4 +306,4 @@ if __name__ == '__main__':
             raise SystemExit('Frobenius header does not match the generator')
     else:
         Path(args.out).write_text(generated)
-    print('PASS: all 256 basis vectors for all 131 Frobenius powers; word operations', n)
+    print('PASS: full, partial and reordered partial networks; all 256 basis vectors for all 131 powers; full word operations', n)

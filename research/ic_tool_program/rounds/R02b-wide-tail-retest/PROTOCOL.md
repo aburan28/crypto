@@ -286,3 +286,93 @@ nor `factorise_u64`, so it merges with both without interaction.
 **Unchanged:** the hypothesis, the rows, the callgrind control's rule,
 the prediction and the success rule. The cost grows by the A/A's 220
 processes, about an hour.
+
+## Amendment 3 (2026-10-05, after its pin and part of its A/A): suspended, because the base moved to main
+
+**What ran.** No comparison row ran, so no candidate timing exists. Both
+stopped run trees are archived in [`stopped/`](stopped/), checked by
+`SHA256SUMS`.
+- **Attempt 1, on `6.18.44-fc-v51`, 2026-10-02 from 02:34 UTC:**
+  - the manifest, and the pin, which held;
+  - one A/A pair, before a container rebuild ended the run.
+- **Attempt 2, on `6.18.44-fc-v70`, 2026-10-05 from 17:35 UTC:**
+  - a fresh manifest, and the pin, which held again;
+  - 52 of the A/A's 220 processes, one of them a retry of a run the
+    isolation tool marked contended;
+  - one container restart on the same host build, at 17:47, recorded in
+    `host-resumed.json` and `resumes.log`;
+  - stopped deliberately at 19:27 UTC.
+
+**Why it stopped.**
+- **Main's head has the Gf2 two-fold reduction** (#1242, merged
+  2026-10-02 as `809a7318`). It speeds the scalar subtraction this
+  kernel replaces.
+- **A diagnostic** ran one process per arm on `M1`'s first target, under
+  the benchmark lock but not isolated
+  ([R07's PROTOCOL.md](../R07-main-head/PROTOCOL.md), "The diagnostic").
+  It found:
+  - collection fell from 4276 to 2615 ms at
+    `icv1-f2m61-t158598901-ab42b6c5`, and from 790 to 509 ms at
+    `icv1-f2m59-tm943548413-98844ecc`;
+  - on main a scanned summand cost 35–38 ns at all three of the largest
+    sizes, the narrow 8-lane kernel's cost at
+    `icv1-f2m53-tm56619371-dac20a85`;
+  - the outputs were identical.
+- **So the lever R02b tests has largely moved under it.** R02b's base
+  rule names the newest accepted baseline, and R07 now measures main's
+  head as that baseline.
+
+**What happens next.**
+1. **R07 runs first.** R02b waits for R07's decision.
+2. **Then a go/no-go exploration on the newest baseline:**
+   - the base itself, against the base plus R02's
+     [`candidate.patch`](../R02-wide-tail-kernel/candidate.patch);
+   - if the patch no longer applies, it is ported, and the port is
+     disclosed with its diff;
+   - the tests are this protocol's;
+   - `M1`'s two rows at each target size, three rounds, ABAB,
+     isolated.
+3. **The rule.** If the cold-time ratio's geometric mean is below 1.05
+   at both target sizes:
+   - R02b is withdrawn without running;
+   - the kernel is retired, as a rejection would have retired it;
+   - the withdrawal counts as neither an acceptance nor a failed round
+     on the scan (plan §11).
+
+   Otherwise R02b runs as declared on that base, with a fresh manifest,
+   pin and A/A, and the exploration is disclosed.
+4. **The stopped trees** are never pooled with any later run.
+
+**Unchanged:** the hypothesis, the rows and holdouts, the callgrind
+control's rule, the prediction and the success rule.
+
+## Amendment 4 (2026-10-06, after the go/no-go exploration): withdrawn
+
+**The exploration amendment 3 declared ran on v3,** after R07 accepted
+main's head `995ea207` as the baseline
+([record](../../explorations/R02b-go-no-go-20261006/README.md)):
+- **the arms:** the base, against the base plus R02's `candidate.patch`,
+  which applied unchanged, so no port is disclosed;
+- **the tests:** this protocol's, 30 passed on the candidate's tree;
+- **the rows:** `M1`'s two rows at each target size, three rounds, the
+  order alternating, every process isolated.
+
+**The rule's figure, cold time base over candidate, on the clean pairs:**
+- **0.962** at `icv1-f2m59-tm943548413-98844ecc` (5 pairs, interval
+  [0.865, 1.069]);
+- **0.918** at `icv1-f2m61-t158598901-ab42b6c5` (5 pairs, interval
+  [0.858, 0.982]).
+
+On all six pairs the figures are 0.960 and 0.922. Every pair recovered the
+same logarithm in both arms.
+
+**So R02b is withdrawn without running.** The figure is below 1.05 at both
+target sizes; it is below 1, since on v3 the kernel is slower than the
+scalar path it replaces. As item 3 directs:
+- the kernel is retired, as a rejection would have retired it, and no
+  further test of it is declared;
+- the withdrawal counts as neither an acceptance nor a failed round on the
+  scan (plan §11);
+- the stopped trees stay in [`stopped/`](stopped/), never pooled.
+
+**Unchanged:** everything above, which stays on record as declared.

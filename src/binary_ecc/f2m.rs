@@ -565,8 +565,12 @@ impl F2mElement {
         Some(beta.square(irreducible))
     }
 
-    /// Internal: construct from a `&[u64]` raw word slice.
-    fn from_words(words: &[u64], m: u32) -> Self {
+    /// Internal to the crate: construct from a `&[u64]` raw word slice.
+    pub(crate) fn from_words(words: &[u64], m: u32) -> Self {
+    /// Construct from little-endian 64-bit words, the layout
+    /// [`F2mElement::raw_bits`] returns.  Words and bits beyond `m` are
+    /// dropped.
+    pub fn from_words(words: &[u64], m: u32) -> Self {
         let mut e = Self::zero(m);
         for (b, w) in e.bits.iter_mut().zip(words) {
             *b = *w;

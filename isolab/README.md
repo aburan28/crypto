@@ -110,7 +110,7 @@ isolation it did not verify.
 
 | confounder | mechanism | evidence recorded |
 |:--|:--|:--|
-| other processes on the job's cores | cgroup v2 cpuset **isolated partition** holding the job CPUs, which also removes them from the scheduler's load balancing; every other movable thread evicted with `sched_setaffinity`; one job per host under an exclusive lock | partition state as the kernel reports it, threads moved, user threads that refused to move, CPU seconds other processes used during the run, `cpu-migrations` on the job CPUs |
+| other processes on the job's cores | cgroup v2 cpuset **isolated partition** holding the job CPUs, which also removes them from the scheduler's load balancing; every other movable thread evicted with `sched_setaffinity`; one job per slot, and a `strict` job takes the whole host (see [Slots](#slots-several-jobs-on-one-host)) | partition state as the kernel reports it, threads moved, user threads that refused to move, CPU seconds other processes used during the run, `cpu-migrations` on the job CPUs |
 | interrupts landing on the job's cores | every IRQ's `smp_affinity_list` rewritten to the housekeeping CPUs, and `default_smp_affinity`; per-CPU and kernel-managed interrupts (local timer, IPIs, managed device queues) refuse the write and are listed as unmovable, which boot-time `isolcpus=managed_irq` and `irqaffinity` address | IRQs moved and unmovable; interrupts per second that actually landed on each reserved CPU during the run, failed above 1500/s |
 | SMT sibling sharing the core | `smt: isolate` allocates whole cores and keeps the sibling inside the partition but idle; `smt: off` requires SMT disabled on the host | siblings reserved idle; `smt/control` |
 | remote memory, NUMA balancing | job CPUs chosen from one node; `cpuset.mems` bound to that node; `numa_balancing` recorded, host-prep turns it off | node, mems, node free memory, memory peak |
@@ -186,7 +186,8 @@ to skip), hwloc and numactl. `isolab-sage` is the official `sagemath/sagemath`
 image with the same Python additions on top; that upstream image is published
 for x86-64 only, so it builds on an x86-64 worker and not on Arm. `isolab-cuda`
 is `nvidia/cuda` devel with Python and NumPy. Build them on a worker with
-`isolab images build base`; the worker lists what it has, with digests, and
+`isolab images build base` (behind a TLS-intercepting proxy, add
+`--ca-bundle PEM`; the Sage recipe hands it to `pip` as a build secret); the worker lists what it has, with digests, and
 every result pins the image digest it ran. A job may name any image the
 worker has; `placement.require_images` (default true) keeps a job off a
 worker that lacks it.
@@ -223,6 +224,37 @@ claim. `verify.builtin: taskq-certificate` runs taskq's independent
 discrete-log verifier on the worker host against the repeat's
 `certificate.json`, so a solver's claimed answer is checked by code that
 shares nothing with the solver.
+
+## Slots: several jobs on one host
+
+A worker runs one job at a time. A big host can run several at once by
+cutting its lab CPUs into **slots**:
+
+```sh
+isolab worker --cpus 4-63 --slots 4              # four slots of whole cores, in NUMA order
+isolab worker --slot 4-19 --slot 20-35 --slot 36-63   # or name each slot's cpus
+sudo deploy/install.sh --worker --cpus 4-63 --slots 4 ...
+```
+
+Each slot registers as its own worker (`HOST.s0`, `HOST.s1`, …, label
+`slot=sN`) with its own capacity, claims its own jobs, and builds its own
+isolated partition (`isolab.lab.sN`) and job cgroup on its own cores.
+Siblings of a core always stay in the same slot. What the slots share and
+how each part is kept honest:
+
+| shared thing | how slots keep out of each other's way | what the result records |
+|:--|:--|:--|
+| the host lock | each slot holds the host lock **shared** plus its own slot lock exclusively; a `strict` job takes the host lock **exclusively**, so it waits for running slots to finish, and while it waits no slot starts a new job | `isolation.host_exclusive`, `isolation.slot_lock`; the `exclusive_lock` check is `info` instead of `pass` when shared |
+| thread eviction and IRQ affinity | each slot moves threads and IRQs off *its* CPUs and on exit gives back only those CPUs, starting from the current mask, so two slots undo correctly in either order | as before |
+| `default_smp_affinity`, turbo | reference-counted in a small state file next to the lock: the first holder saves the original, the last one restores it; holders whose process died are dropped | as before |
+| other processes' CPU | a job running in another slot is a **co-tenant**: its CPU is not counted as `other_cpu`, so slots do not fail each other's settle and run checks | `co_tenant_cpu_s` and `co_tenant_jobs` per repeat; `settle_co_tenants` and `co_tenants` checks |
+| host-wide CPU pressure | before a slot's run, host-wide CPU PSI is recorded but not a gate (on a shared host it is mostly the other slots and their workers queueing on the housekeeping CPUs); the reserved CPUs are judged by the idle, other-CPU and IRQ checks, and during the run by the job cgroup's own pressure. Memory pressure still gates. A `strict` job keeps the host-wide gate | `settle_psi_cpu` as `info`, with the reason |
+| last-level cache, memory bandwidth, package power and frequency | not partitioned (no RDT yet) | `fidelity.shared_host` is true when a co-tenant ran during a summarised repeat, and the **grade is capped at B** |
+
+So: use slots for throughput (sweeps, many small jobs, builds), and
+`strict` for a number you want to quote as tier A. Separate worker
+processes with their own `--cpus` still work, but they serialise on the
+host lock exactly as one worker would.
 
 ## Protocol
 
@@ -292,7 +324,7 @@ there.
 | `isolab_submit` | a full `isolab.job/v1` document |
 | `isolab_status` | state, worker, phase, repeat, elapsed, log tail, and the decline reasons while a job waits |
 | `isolab_wait` | block up to 300 s for a terminal state |
-| `isolab_result` | the result; `section` selects `summary`, `fidelity`, `runs`, `host` or `full` |
+| `isolab_result` | the result; `section` selects `summary`, `fidelity`, `runs`, `host`, `placement` or `full` |
 | `isolab_logs` | stdout and stderr tails of a finished or running job |
 | `isolab_artifacts` / `isolab_fetch` | list a job's artifacts; download one or all to a local directory |
 | `isolab_jobs` | list by state, pool, worker or label |
@@ -371,10 +403,10 @@ for a second hub, `--hub --cluster-routes nats://first-host:6222`.
 
 ```sh
 isolab hub [--listen :4222] [--store DIR] [--token T] [--cluster-name N --routes URL,…]
-isolab worker --cpus 4-15 [--pool P …] [--label K=V …] [--backend podman] [--default-image IMG]
+isolab worker --cpus 4-15 [--slots N | --slot CPUS …] [--pool P …] [--label K=V …] [--backend podman] [--default-image IMG]
 isolab doctor [--apply] | isolab inventory | isolab images build base|sage|cuda | isolab images list
 isolab run [--image IMG] [--cpus N] [--memory-mb M] [--repeats R] [--policy strict] [--input PATH[:DEST]] -- CMD…
-isolab submit SPEC.json | isolab status JOB | isolab wait JOB | isolab result JOB [--section S]
+isolab submit SPEC.json | isolab status JOB | isolab wait JOB | isolab result JOB [--section summary|fidelity|runs|host|placement]
 isolab logs JOB | isolab fetch JOB [PATH] --dest DIR | isolab cancel JOB | isolab jobs | isolab workers
 isolab calibrate [--worker W] | isolab mcp | isolab schema
 ```
@@ -398,10 +430,6 @@ were exercised as `unavailable` and remain to be confirmed on bare metal.
 
 ## Not built yet
 
-* **Multi-job partitions on one host.** A worker runs one job at a time; a
-  64-core host with four 16-core jobs needs four workers, each with its own
-  `--cpus`. The partition code already takes a CPU set, so this is a worker
-  flag away.
 * **Intel RDT / resctrl** for last-level-cache and memory-bandwidth
   allocation. The presence of `resctrl` is recorded; nothing is allocated.
 * **GPU clock locking and MIG.** GPUs are inventoried, assigned exclusively

@@ -1,9 +1,15 @@
 """The worker daemon: inventory, heartbeat, claim, execute, complete.
 
-One job at a time per worker, by design: two measured jobs on one host
-measure each other. A big host runs several workers, each with its own
-``--cpus`` slice. SIGTERM stops the running child and hands the job back
-without counting an attempt, so a restart never records a result.
+One job at a time per worker. A big host can run several *slots*
+(``isolab worker --slots N`` or ``--slot CPULIST`` repeated): each slot is a
+worker of its own with a disjoint set of whole cores, its own cgroup
+partition and its own lock, and they share one host lock. Jobs in different
+slots run at the same time, each one's CPU is excluded from the other's
+contention checks and recorded as a co-tenant instead, and a co-tenanted
+result is graded B at best. A ``strict`` job takes the host lock exclusively,
+so it waits for the other slots to drain and none start until it is done.
+SIGTERM stops the running child and hands the job back without counting an
+attempt, so a restart never records a result.
 """
 from __future__ import annotations
 
@@ -31,6 +37,34 @@ from .planner import capacity, match_worker
 from .runners import make_backends, oci_runtimes
 
 log = logging.getLogger("isolab.worker")
+
+
+class SlotRegistry:
+    """The jobs running in this process's slots, so each can tell the others' CPU from contention."""
+
+    def __init__(self) -> None:
+        import threading
+        self._lock = threading.Lock()
+        self._jobs: dict[str, Any] = {}
+
+    def enter(self, job_id: str, pids_fn) -> None:
+        with self._lock:
+            self._jobs[job_id] = pids_fn
+
+    def leave(self, job_id: str) -> None:
+        with self._lock:
+            self._jobs.pop(job_id, None)
+
+    def others(self, job_id: str) -> dict[str, set[int]]:
+        with self._lock:
+            items = [(j, f) for j, f in self._jobs.items() if j != job_id]
+        out = {}
+        for j, f in items:
+            try:
+                out[j] = set(f())
+            except Exception:  # noqa: BLE001
+                out[j] = set()
+        return out
 
 
 def build_launcher(dest_dir: Path, static: bool = True) -> tuple[Path | None, dict[str, Any]]:
@@ -70,7 +104,9 @@ class Worker:
                  lab_cpus: list[int], state_dir: Path, backend: str = "auto", default_image: str | None = None,
                  oci_runtime: str | None = None, pull_policy: str = "missing", userns: str | None = None,
                  keep_job_dirs: bool = False, lock_path: str = DEFAULT_LOCK, cgroup_root: str = "/sys/fs/cgroup",
-                 paths: Paths = Paths(), block_s: float = 5.0, heartbeat_s: float = 10.0):
+                 paths: Paths = Paths(), block_s: float = 5.0, heartbeat_s: float = 10.0,
+                 slot: str | None = None, host_lab_cpus: list[int] | None = None,
+                 registry: SlotRegistry | None = None):
         self.fabric = fabric
         self.id = worker_id
         self.pools = pools or ["default"]
@@ -83,6 +119,8 @@ class Worker:
         self.pull_policy, self.userns, self.keep_job_dirs = pull_policy, userns, keep_job_dirs
         self.lock_path, self.cgroup_root, self.paths = lock_path, cgroup_root, paths
         self.block_s, self.heartbeat_s = block_s, heartbeat_s
+        # slots: every slot's housekeeping is the host minus all slots' cpus
+        self.slot, self.host_lab_cpus, self.registry = slot, sorted(host_lab_cpus or []), registry
         self._shutdown = asyncio.Event()
         self.current: str | None = None
         self.ctx: WorkerContext | None = None
@@ -105,7 +143,7 @@ class Worker:
         bad = sorted(set(self.lab_cpus) - set(online))
         if bad:
             raise SystemExit(f"--cpus names offline or absent cpus {bad}; online: {online}")
-        housekeeping = sorted(set(online) - set(self.lab_cpus)) or online
+        housekeeping = sorted(set(online) - set(self.lab_cpus) - set(self.host_lab_cpus)) or online
         if set(housekeeping) == set(online):
             log.warning("lab cpus cover every cpu; the worker and the OS will share them (tier C at best)")
         if hasattr(os, "sched_setaffinity") and set(housekeeping) != set(online):
@@ -113,7 +151,7 @@ class Worker:
                 os.sched_setaffinity(0, housekeeping)
             except OSError as err:
                 log.warning("cannot pin the worker to housekeeping cpus %s: %s", housekeeping, err)
-        launcher, linfo = build_launcher(state / "bin")
+        launcher, linfo = build_launcher(state / "bin")  # slots start one after another, so this never races
         if launcher is None:
             log.warning("launcher unavailable: %s; container backends are off, direct uses host wait4", linfo.get("error"))
         perf = perfstat.find_perf()
@@ -151,9 +189,12 @@ class Worker:
             default_backend=default_backend, default_image=self.default_image, oci_default=oci_default,
             launcher=str(launcher) if launcher else None, perf=perf, perf_probe=perf_probe,
             blob_cache=LocalBlobCache(state / "blobs"), fetch_blob=self._fetch_blob_sync,
-            put_artifact=self._put_artifact_sync, git_cache_dir=state / "git", jobs_dir=state / "jobs",
+            put_artifact=self._put_artifact_sync, git_cache_dir=state / "git",
+            jobs_dir=state / "jobs" / self.slot if self.slot else state / "jobs",
             paths=self.paths, cgroup_root=self.cgroup_root, lock_path=self.lock_path, pull_policy=self.pull_policy,
-            userns=self.userns, keep_job_dirs=self.keep_job_dirs, progress=self._progress_sync)
+            userns=self.userns, keep_job_dirs=self.keep_job_dirs, progress=self._progress_sync,
+            slot=self.slot, slot_lock_path=f"{self.lock_path}.{self.slot}" if self.slot else None,
+            lab_cgroup=f"isolab.lab.{self.slot}" if self.slot else "isolab.lab", registry=self.registry)
         log.info("worker %s: %s", self.id, inventory_summary(inv))
         log.info("lab cpus %s, housekeeping %s, backend %s (%s), tier up to %s, perf hw=%s",
                  self.lab_cpus, housekeeping, default_backend, oci_default, max_tier(caps), perf_probe.get("hw_events"))
@@ -179,7 +220,7 @@ class Worker:
             "cpufreq": inv["cpufreq"], "knobs": inv["knobs"], "virtualization": inv["virtualization"],
             "cmdline": inv["cmdline"], "cgroups": inv["cgroups"], "psi": inv["psi"], "tools": inv["tools"],
             "launcher": self.launcher_info, "calibration": self.calibration,
-            "busy": self.current, "started_at": self.started_at, "pid": os.getpid(),
+            "slot": self.slot, "busy": self.current, "started_at": self.started_at, "pid": os.getpid(),
         }
 
     # ---- sync bridges for the execution thread
@@ -384,13 +425,18 @@ class Worker:
             log.warning("%s: result refused: %s", job_id, err)
 
 
-def install_signal_handlers(worker: Worker) -> None:
+def install_signal_handlers(*workers: Worker) -> None:
+    """SIGTERM and SIGINT stop every given worker (a handler per signal, so slots share one)."""
     loop = asyncio.get_running_loop()
+
+    def stop_all(*_: Any) -> None:
+        for w in workers:
+            w.request_shutdown()
     for sig in (signal.SIGTERM, signal.SIGINT):
         try:
-            loop.add_signal_handler(sig, worker.request_shutdown)
+            loop.add_signal_handler(sig, stop_all)
         except NotImplementedError:
-            signal.signal(sig, worker.request_shutdown)
+            signal.signal(sig, stop_all)
 
 
 def default_worker_id() -> str:

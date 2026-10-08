@@ -76,7 +76,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Pull requests only. A publishing run runs these same steps inside the
+  # publish job, before anything is deployed, so it waits for one runner
+  # rather than two. Every job here queues for the same GitHub-hosted runners
+  # as the repository's PR checks, and on 2026-10-07 run 3682 held the
+  # serialized group from 14:08Z to 22:33Z: its test job waited 3h23m for a
+  # runner and its publish job 5h00m, for about two minutes of work, while
+  # every scheduled run behind it was superseded unrun. test_rho_status.py
+  # pins the two step lists to each other.
   test:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -96,7 +105,6 @@ jobs:
         run: node scripts/site/test_algorithm_lab.js
 
   publish:
-    needs: test
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     # 35 min so the index-only fallback plus a stretch of hour-chunk
@@ -112,6 +120,19 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
+      # The test job's steps, in the same order: a failure here stops the
+      # run before anything is deployed, as `needs: test` used to.
+      - name: Offline snapshot tests
+        run: python3 scripts/rho_status/test_rho_status.py
+      - name: Site build tests
+        run: python3 scripts/site/test_build.py
+      - name: Browser rho engine tests
+        run: node scripts/rho_gpu_emulate.mjs
+      - name: Check performance dashboard interactions
+        run: node scripts/site/test_performance_ui.js
+      - name: Check algorithm demonstrations
+        run: node scripts/site/test_algorithm_lab.js
 
       - name: Configure AWS
         # Not fatal. AWS credentials are needed to find the walker and to
