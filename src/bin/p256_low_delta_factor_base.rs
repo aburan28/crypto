@@ -549,7 +549,7 @@ fn toy_coefficients(prime: u64, columns: u64, rare: u64) -> Result<Vec<u64>, Str
             .iter()
             .map(|value| (value + anchor) % prime)
             .collect::<Vec<_>>();
-        if coefficients.iter().any(|value| *value == 0) {
+        if coefficients.contains(&0) {
             continue;
         }
         let signed = coefficients

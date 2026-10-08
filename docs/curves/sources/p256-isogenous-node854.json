@@ -1,0 +1,20 @@
+{
+  "schema": "icv1.curve-source/v1",
+  "source": {
+    "certificate": "research/p256_isogeny_walk_20261004/certificate.jsonl.gz",
+    "certificate_sha256": "4c4798fe791c8f603a248782a861f3488216af7476c814bff59f007f87c0d162",
+    "record": "edge index 853 target / walk node 854"
+  },
+  "curve": {
+    "p": "0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+    "a": "0xab647e56ede923d30f12aba81293492f0dc6e70eabd9236c039869221836b605",
+    "b": "0x7242fee49e9b6d375f61c7c561b7861f5e849a09c7e6179d57baf0c16579ceae",
+    "group_order": "0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551",
+    "subgroup_order": "0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551",
+    "cofactor": 1,
+    "generator": {
+      "x": "0x1",
+      "y": "0x9760c3071927c5d9f593ae904aca691e9df92cd2f31a70620c312b92ab26980b"
+    }
+  }
+}

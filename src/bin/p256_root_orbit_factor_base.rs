@@ -474,7 +474,10 @@ fn independent_replay(
         let Some(y) = sqrt_mod_p(&rhs, &curve.p) else {
             failures += 1;
             first_failure.get_or_insert_with(|| {
-                format!("orbit {} changed from residue to non-residue", row.orbit_index)
+                format!(
+                    "orbit {} changed from residue to non-residue",
+                    row.orbit_index
+                )
             });
             continue;
         };
@@ -527,7 +530,7 @@ fn build_rows(
         u = u.mul(&omega_fe);
         operations.orbit_field_multiplications += 1;
     }
-    if u != Fe::ONE || us[1..].iter().any(|value| *value == Fe::ONE) {
+    if u != Fe::ONE || us[1..].contains(&Fe::ONE) {
         return Err("subgroup generator did not have the declared exact order".into());
     }
 
