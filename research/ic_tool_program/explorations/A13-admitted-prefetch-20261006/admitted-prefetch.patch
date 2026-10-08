@@ -1,0 +1,56 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index a664f7e00..3f09e54ed 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -5196,6 +5196,38 @@ impl PairSumTable {
+         }
+     }
+ 
++    /// Prefetch the run an admitted key's lookup reads, once its bucket
++    /// entry is cached ([`Self::prefetch_bucket`]): the run's first and
++    /// last words, so a run straddling two lines arrives whole.  Without
++    /// it each admitted key waits on the run alone, one random access
++    /// into the largest table there is.
++    #[inline]
++    fn prefetch_run(&self, key: u64) {
++        let bucket = self.bucket_of(key);
++        let (Some(&lo), Some(&hi)) = (
++            self.bucket_start.get(bucket),
++            self.bucket_start.get(bucket + 1),
++        ) else {
++            return;
++        };
++        if lo >= hi {
++            return;
++        }
++        let (lo, last) = (lo as usize, hi as usize - 1);
++        if self.is_compact() {
++            if let (Some(first), Some(end)) = (self.rests.get(lo), self.rests.get(last)) {
++                prefetch((first as *const u32).cast::<u64>());
++                prefetch((end as *const u32).cast::<u64>());
++            }
++            if let Some(witness) = self.compact_witnesses.get(lo) {
++                prefetch((witness as *const u32).cast::<u64>());
++            }
++        } else if let (Some(first), Some(end)) = (self.entries.get(lo), self.entries.get(last)) {
++            prefetch((first as *const (u64, u32, u32)).cast::<u64>());
++            prefetch((end as *const (u64, u32, u32)).cast::<u64>());
++        }
++    }
++
+     /// The lookup half of [`Self::contains_pair`].
+     #[doc(hidden)]
+     pub fn contains_key(&self, key: u64) -> bool {
+@@ -5602,6 +5634,12 @@ impl PairSumTable {
+                 self.prefetch_bucket(keys[within]);
+                 admitted_offsets.push(within);
+             }
++            // The bucket entries arrived during the filter pass: read them
++            // and send for every admitted key's run before looking any up,
++            // so the runs' misses overlap instead of following one another.
++            for &within in &admitted_offsets {
++                self.prefetch_run(keys[within]);
++            }
+             for &within in &admitted_offsets {
+                 let offset = lo + within;
+                 let k = match scan {

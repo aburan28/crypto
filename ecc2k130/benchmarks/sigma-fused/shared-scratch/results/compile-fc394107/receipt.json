@@ -1,0 +1,40 @@
+{
+  "schema": "ecc2k130-sigma-fused-shared-scratch-compile-receipt-v1",
+  "sourceCommit": "fc3941078db32d1a81f2732fd3622c13866208e6",
+  "workflowRunId": 37053839217,
+  "workflowRunUrl": "https://github.com/aburan28/crypto/actions/runs/37053839217",
+  "jobId": 110993636426,
+  "artifactId": 11248485558,
+  "artifactName": "ecc2k130-sigma-shared-scratch-sm120",
+  "artifactExpiresAt": "2026-12-31T19:23:50Z",
+  "artifactZipBytes": 16620554,
+  "artifactZipSha256": "d11032c5be3a39de6e28ef738d9bf29df4ccae2dbc41fcc51d0928cdc0bee2fd",
+  "resultSha256": "6a304c442fc749864acf4cae9fce26c63b61829bd6a1c1788d5094b13d2ae6de",
+  "sourceManifestEntries": 21,
+  "sourceManifestSha256": "408e14265217d4dcc18647cd04ea6e43e859fcb429765281cce772fcc7b6df43",
+  "binaryManifestEntries": 8,
+  "binaryManifestSha256": "5f07b33651c655e9bc9f82c61cd4ba061df8dbb4cd70e7a5968edcb2b57db4ee",
+  "independentReplay": {
+    "resultByteIdentical": true,
+    "sourceHashesVerified": true,
+    "binaryHashesVerified": true
+  },
+  "resources": {
+    "registersPerThread": 126,
+    "stackBytes": 0,
+    "localBytes": 0,
+    "spillLoads": 0,
+    "spillStores": 0,
+    "functionStaticSharedBytes": [1792, 22272, 32512, 42752],
+    "compiledReservedSharedBytesPerBlock": 1024,
+    "compiledSharedExtentBytes": [2816, 23296, 33536, 43776],
+    "staticBlocksPerSm": 2
+  },
+  "claimBoundary": {
+    "compileOnly": true,
+    "gpuRun": false,
+    "actualOccupancyMeasured": false,
+    "throughputMeasured": false,
+    "logicalFieldTrafficIsDramTraffic": false
+  }
+}

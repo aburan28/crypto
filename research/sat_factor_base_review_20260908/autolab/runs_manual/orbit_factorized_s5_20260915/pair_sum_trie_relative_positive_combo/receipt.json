@@ -1,0 +1,68 @@
+{
+  "kind": "orbit_factorized_pair_sum_trie_plus_relative_positive_combo",
+  "schema_version": "1.0",
+  "updated_at": "2026-09-15T17:37:31Z",
+  "claim_boundary": "Public-synthetic Koblitz S5 only. Combo of pair_sum_trie intermediate domain + relative-frame positive pair-support + nogoods; pair_table=0. Planted-unit SAT certifies soundness. Unrestricted/natural UNKNOWN are censored ops observations. Not vs_rho; not ledger promotion; not key recovery.",
+  "arms": [
+    {
+      "label": "planted_units_n19",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/pair_sum_trie_relative_positive_combo/planted_units_n19.json",
+      "decomposition_verdict": "SAT",
+      "models_examined": 1,
+      "conflicts": 14,
+      "variables": 7415,
+      "ordinary_clauses": 74407,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "intermediate_domain_encoding": "pair_sum_trie",
+      "intermediate_domain_x_coordinates": 1330,
+      "planted_x_root_units": true,
+      "positive_enabled": true,
+      "positive_mode": "relative_frame",
+      "solve_ms": 43.484709
+    },
+    {
+      "label": "unrestricted_planted_target_n19_80k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/pair_sum_trie_relative_positive_combo/unrestricted_planted_target_n19_80k.json",
+      "decomposition_verdict": "UNKNOWN",
+      "models_examined": 0,
+      "conflicts": 80000,
+      "variables": 7415,
+      "ordinary_clauses": 74331,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "intermediate_domain_encoding": "pair_sum_trie",
+      "intermediate_domain_x_coordinates": 1330,
+      "planted_x_root_units": false,
+      "positive_enabled": true,
+      "positive_mode": "relative_frame",
+      "solve_ms": 27417.911084
+    },
+    {
+      "label": "natural_n19_60k_seed3",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/pair_sum_trie_relative_positive_combo/natural_n19_60k_seed3.json",
+      "decomposition_verdict": "UNKNOWN",
+      "models_examined": 0,
+      "conflicts": 60000,
+      "variables": 7415,
+      "ordinary_clauses": 74331,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "intermediate_domain_encoding": "pair_sum_trie",
+      "intermediate_domain_x_coordinates": 1330,
+      "planted_x_root_units": false,
+      "positive_enabled": true,
+      "positive_mode": "relative_frame",
+      "solve_ms": 21347.505209000003
+    }
+  ],
+  "findings": {
+    "sound_on_planted_units": "n19 planted x-root units SAT in 14 conflicts; valid=1 invalid_lifts=0 pair_table=0; domain=1330; relative_frame positive on.",
+    "unrestricted_cliff_open": "unrestricted planted-target n19 UNKNOWN 0 models @80k; natural seed3 UNKNOWN @60k. Combo does not close cliff."
+  },
+  "verdict": "COMBO_SOUND_CLIFF_OPEN",
+  "ledger_promotion": false
+}

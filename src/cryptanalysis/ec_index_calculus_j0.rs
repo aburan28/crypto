@@ -488,6 +488,235 @@ fn signed_mod(v: i64, n: &BigUint) -> BigUint {
     }
 }
 
+// ── Staged (split-timer) end-to-end driver ───────────────────────────
+
+/// Counted twin of [`find_relation_with_psi`]: identical search, but
+/// returns the number of random `(α, β)` trials consumed alongside the
+/// relation batch, so callers can publish trials-per-relation yield.
+pub fn find_relation_with_psi_counted(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    fb: &[OrbitEntry],
+    zeta: &FieldElement,
+    lambda: &BigUint,
+    max_trials: usize,
+) -> Option<(Vec<OrbitRelation>, usize)> {
+    let a_fe = curve.a_fe();
+    let b_fe = curve.fe(curve.b.clone());
+    let mut x_to_orbit: HashMap<BigUint, usize> = HashMap::new();
+    for (idx, entry) in fb.iter().enumerate() {
+        for shifted in &entry.orbit_x {
+            x_to_orbit.insert(shifted.clone(), idx);
+        }
+    }
+    for trial in 1..=max_trials {
+        let alpha = random_scalar(&curve.n);
+        let beta = random_scalar(&curve.n);
+        let ag = g.scalar_mul(&alpha, &a_fe);
+        let bq = q.scalar_mul(&beta, &a_fe);
+        let r = ag.add(&bq, &a_fe);
+        let xr = match &r {
+            Point::Affine { x, .. } => x.clone(),
+            Point::Infinity => continue,
+        };
+        for fb_i in fb {
+            let xi = match &fb_i.point {
+                Point::Affine { x, .. } => x.clone(),
+                Point::Infinity => continue,
+            };
+            let (qa, qb, qc) = semaev_s3_in_x3(&xr, &xi, &a_fe, &b_fe);
+            for x_candidate in solve_quadratic(&qa, &qb, &qc, &curve.p) {
+                let cx = canonical_orbit_x(&x_candidate.value, &zeta.value, &curve.p);
+                let j_idx = match x_to_orbit.get(&cx).copied() {
+                    Some(j) => j,
+                    None => continue,
+                };
+                if let Some((s_i, s_j)) = resolve_signs(&r, &fb_i.point, &fb[j_idx].point, &a_fe) {
+                    let mut entries: Vec<(usize, i64)> = Vec::new();
+                    if fb_i.idx == j_idx {
+                        let combined = s_i + s_j;
+                        if combined != 0 {
+                            entries.push((fb_i.idx, combined));
+                        }
+                    } else {
+                        entries.push((fb_i.idx, s_i));
+                        entries.push((j_idx, s_j));
+                    }
+                    if entries.is_empty() {
+                        continue;
+                    }
+                    let base = OrbitRelation {
+                        coef_a: alpha.clone(),
+                        coef_b: beta.clone(),
+                        entries: entries.clone(),
+                    };
+                    let mut batch = vec![base];
+                    let mut a_cur = alpha.clone();
+                    let mut b_cur = beta.clone();
+                    for _ in 0..2 {
+                        a_cur = (&a_cur * lambda) % &curve.n;
+                        b_cur = (&b_cur * lambda) % &curve.n;
+                        batch.push(OrbitRelation {
+                            coef_a: a_cur.clone(),
+                            coef_b: b_cur.clone(),
+                            entries: entries.clone(),
+                        });
+                    }
+                    return Some((batch, trial));
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Split-stage timing report for the j=0 orbit-reduced IC pipeline.
+///
+/// Every field is wall-clock milliseconds measured inside
+/// [`j0_index_calculus_dlp_staged`]; the relation counters let callers
+/// publish a trials-per-relation yield curve (relation yield stage
+/// evidence) from the same run.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct J0IcStageReport {
+    pub factor_base_ms: f64,
+    pub relations_ms: f64,
+    pub linear_algebra_ms: f64,
+    pub verify_ms: f64,
+    pub total_ms: f64,
+    pub orbit_count: usize,
+    pub relations_collected: usize,
+    pub relation_attempts_exhausted: usize,
+    pub trials_total: usize,
+    pub trials_per_relation_min: usize,
+    pub trials_per_relation_median: f64,
+    pub trials_per_relation_max: usize,
+}
+
+/// Staged twin of [`j0_index_calculus_dlp`]: same mathematics and the
+/// same raw-relation counting policy, but each stage is timed
+/// separately (factor base → relations → linear algebra → verify) and
+/// the relation-search trials are counted.
+///
+/// `max_relation_attempts` bounds how many `max_trials_per_relation`
+/// search calls a single raw relation may consume before the whole solve
+/// gives up (`None`); the single-attempt original returns `None`
+/// immediately where this one retries.
+pub fn j0_index_calculus_dlp_staged(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    target_orbits: usize,
+    extra_relations: usize,
+    max_trials_per_relation: usize,
+    max_relation_attempts: usize,
+) -> Option<(BigUint, J0IcStageReport)> {
+    use std::time::Instant;
+    let total_started = Instant::now();
+    if !is_j_invariant_zero(curve) {
+        return None;
+    }
+    let zeta_val = cube_root_of_unity(&curve.p)?;
+    let zeta = curve.fe(zeta_val.clone());
+    let lambda = psi_eigenvalue(curve, &zeta)?;
+
+    let fb_started = Instant::now();
+    let fb = build_orbit_factor_base(curve, &zeta_val, target_orbits);
+    let factor_base_ms = fb_started.elapsed().as_secs_f64() * 1e3;
+    if fb.is_empty() {
+        return None;
+    }
+    let m = fb.len();
+    let target_raw_relations = m + extra_relations;
+
+    let relations_started = Instant::now();
+    let mut raw_relations: Vec<OrbitRelation> = Vec::with_capacity(target_raw_relations);
+    let mut attempts_exhausted = 0usize;
+    let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target_raw_relations);
+    let mut trials_total = 0usize;
+    while raw_relations.len() < target_raw_relations {
+        let batch_and_trials = 'attempt: {
+            for _ in 0..max_relation_attempts {
+                if let Some(found) = find_relation_with_psi_counted(
+                    curve,
+                    g,
+                    q,
+                    &fb,
+                    &zeta,
+                    &lambda,
+                    max_trials_per_relation,
+                ) {
+                    break 'attempt Some(found);
+                }
+                attempts_exhausted += 1;
+            }
+            None
+        };
+        let Some((batch, trials)) = batch_and_trials else {
+            return None;
+        };
+        trials_total += trials;
+        trials_per_relation.push(trials);
+        if let Some(first) = batch.into_iter().next() {
+            raw_relations.push(first);
+        }
+    }
+    let relations_ms = relations_started.elapsed().as_secs_f64() * 1e3;
+
+    let rows = raw_relations;
+    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(rows.len());
+    let mut rhs: Vec<BigUint> = Vec::with_capacity(rows.len());
+    for rel in &rows {
+        let mut row = vec![BigUint::zero(); m + 1];
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod(mult, &curve.n);
+            row[j] = (&row[j] + &val) % &curve.n;
+        }
+        let neg_b = (&curve.n - &(&rel.coef_b % &curve.n)) % &curve.n;
+        row[m] = neg_b;
+        matrix.push(row);
+        rhs.push(rel.coef_a.clone() % &curve.n);
+    }
+    let la_started = Instant::now();
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
+    let x = solution[m].clone();
+
+    let verify_started = Instant::now();
+    let a_fe = curve.a_fe();
+    let candidate = g.scalar_mul(&x, &a_fe);
+    let verified = &candidate == q;
+    let verify_ms = verify_started.elapsed().as_secs_f64() * 1e3;
+    if !verified {
+        return None;
+    }
+    let mut sorted_trials = trials_per_relation.clone();
+    sorted_trials.sort_unstable();
+    let median = if sorted_trials.is_empty() {
+        0.0
+    } else if sorted_trials.len() % 2 == 1 {
+        sorted_trials[sorted_trials.len() / 2] as f64
+    } else {
+        (sorted_trials[sorted_trials.len() / 2 - 1] + sorted_trials[sorted_trials.len() / 2]) as f64
+            / 2.0
+    };
+    let report = J0IcStageReport {
+        factor_base_ms,
+        relations_ms,
+        linear_algebra_ms,
+        verify_ms,
+        total_ms: total_started.elapsed().as_secs_f64() * 1e3,
+        orbit_count: m,
+        relations_collected: rows.len(),
+        relation_attempts_exhausted: attempts_exhausted,
+        trials_total,
+        trials_per_relation_min: sorted_trials.first().copied().unwrap_or(0),
+        trials_per_relation_median: median,
+        trials_per_relation_max: sorted_trials.last().copied().unwrap_or(0),
+    };
+    Some((x, report))
+}
+
 // ── Eisenstein-smooth factor base for j=0 IC ─────────────────────────
 //
 // The third speculative direction from the j=0 cryptanalysis
@@ -651,6 +880,31 @@ pub fn eisenstein_smooth_ic_dlp(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Staged twin recovers the same log as the plain j=0 driver and
+    /// reports split stage timers with counted trials.
+    #[test]
+    fn staged_dlp_recovers_and_splits_stages() {
+        let curve = j0_curve();
+        let a_fe = curve.a_fe();
+        let g = curve.generator();
+        let q = g.scalar_mul(&num_bigint::BigUint::from(123u32), &a_fe);
+        let plain = j0_index_calculus_dlp(&curve, &g, &q, 6, 2, 5000);
+        let staged = j0_index_calculus_dlp_staged(&curve, &g, &q, 6, 2, 5000, 64);
+        let (staged_x, report) = staged.expect("staged j0 solve succeeds on the toy curve");
+        let plain_x = plain.expect("plain j0 solve succeeds on the toy curve");
+        assert_eq!(staged_x, plain_x);
+        assert_eq!(g.scalar_mul(&staged_x, &a_fe), q);
+        assert!(report.orbit_count > 0);
+        assert_eq!(report.relations_collected, report.orbit_count + 2);
+        assert!(report.factor_base_ms >= 0.0);
+        assert!(report.relations_ms >= 0.0);
+        assert!(report.linear_algebra_ms >= 0.0);
+        assert!(report.verify_ms >= 0.0);
+        assert!(report.total_ms >= report.relations_ms);
+        assert!(report.trials_total >= report.relations_collected);
+        assert!(report.relation_attempts_exhausted == 0);
+    }
 
     /// Toy j=0 curve `y² = x³ + 2 (mod 211)`, prime order 199.
     fn j0_curve() -> CurveParams {

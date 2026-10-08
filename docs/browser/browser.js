@@ -44,7 +44,25 @@
     return el("div", { class: "fact" }, [el("dt", { text: label }), dd]);
   }
   function fieldLabel(c) {
-    return c.field.characteristic === 2 ? "GF(2^" + c.field.degree + ")" : "GF(p), p of " + c.field.bits + " bits";
+    if (c.field.characteristic === 2) return "GF(2^" + c.field.degree + ")";
+    if (c.field.degree > 1) return "GF(p^" + c.field.degree + "), p of " + BigInt(c.field.p).toString(2).length + " bits";
+    return "GF(p), p of " + c.field.bits + " bits";
+  }
+  /* An extension's modulus t^k + c_{k-1}t^{k-1} + ... + c_0, from its low
+     coefficients [c_0, ..., c_{k-1}]. */
+  function extensionModulus(low) {
+    var terms = ["t^" + low.length];
+    for (var i = low.length - 1; i >= 0; i--) {
+      if (low[i] === "0") continue;
+      var power = i === 0 ? "" : (i === 1 ? "t" : "t^" + i);
+      terms.push((low[i] === "1" && i > 0 ? "" : low[i]) + power);
+    }
+    return terms.join(" + ");
+  }
+  function fieldFact(c) {
+    if (c.field.characteristic === 2) return "GF(2^" + c.field.degree + "), modulus " + fmt(c.field.modulus);
+    if (c.field.degree > 1) return "GF(p^" + c.field.degree + ") = GF(p)[t]/(" + extensionModulus(c.field.modulus) + "), p = " + c.field.p + "; coefficients listed over 1, t, …, t^" + (c.field.degree - 1);
+    return "GF(p), p = " + c.field.p + " (" + c.field.bits + " bits)";
   }
   function bestRatio(c) {
     var vals = (c.leaderboard || []).map(function (b) { return b.ratio_rho; }).filter(function (v) { return typeof v === "number"; });
@@ -275,7 +293,7 @@
     view.appendChild(chips);
     var facts = el("dl", { class: "facts" }, [
       fact("ICV1 identity", c.icv1, true),
-      fact("Field", c.field.characteristic === 2 ? "GF(2^" + c.field.degree + "), modulus " + fmt(c.field.modulus) : "GF(p), p = " + c.field.p + " (" + c.field.bits + " bits)", false),
+      fact("Field", fieldFact(c), false),
       fact("Coefficients", "a = " + fmt(c.a) + ", b = " + fmt(c.b), true),
       fact("Trace of Frobenius", c.trace),
       fact("Group order #E", c.order, true),

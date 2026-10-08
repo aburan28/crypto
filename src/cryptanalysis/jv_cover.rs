@@ -647,6 +647,16 @@ impl<'a> EllE<'a> {
             ops: Cell::new(0),
         }
     }
+    /// `y² = x³ + a₂x² + a₄x` from its coefficients (the model of a curve
+    /// with full 2-torsion after one root is moved to `0`; §17's walk).
+    pub fn from_a2_a4(f: &'a Fq3, a2: E6, a4: E6) -> EllE<'a> {
+        EllE {
+            f,
+            a2,
+            a4,
+            ops: Cell::new(0),
+        }
+    }
     pub fn ops(&self) -> u64 {
         self.ops.get()
     }

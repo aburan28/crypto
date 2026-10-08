@@ -1,0 +1,29 @@
+
+  n  vars   eqs |     D    rows      cols      rank  gen rank      fall
+──────────────────────────────────────────────────────────────────────────────
+  3     6     3 |     2       3        22         3         3        +0
+                 |     3      21        42        20        21        -1
+                 |     4      66        57        54        57        -3
+     → first fall degree (FFD) at D = 3
+
+  4     8     4 |     2       4        37         4         4        +0
+                 |     3      36        93        35        36        -1
+                 |     4     148       163       127       148       -21
+     → first fall degree (FFD) at D = 3
+
+  5    10     5 |     2       5        56         5         5        +0
+                 |     3      55       176        54        55        -1
+                 |     4     280       386       255       280       -25
+     → first fall degree (FFD) at D = 3
+
+  6    12     6 |     2       6        79         6         6        +0
+                 |     3      78       299        77        78        -1
+                 |     4     474       794       441       474       -33
+     → first fall degree (FFD) at D = 3
+
+  7    14     7 |     2       7       106         7         7        +0
+                 |     3     105       470       104       105        -1
+                 |     4     742      1471       700       742       -42
+     → first fall degree (FFD) at D = 3
+
+Summary: 5 of 5 systems showed a fall-signal in D ≤ 4.

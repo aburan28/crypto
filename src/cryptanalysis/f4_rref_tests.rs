@@ -636,9 +636,14 @@ fn fused_flat_packing_matches_materialized_rows() {
         let columns = macaulay_columns(&rows).unwrap();
         let layout = F4ColumnLayout::new(columns);
         let materialized_nested = pack_rows_with_layout(&rows, &layout, true).unwrap();
-        let fused_nested =
-            pack_polynomials_nested_fused(&polynomials, n_vars, degree, multiplier_mask, &layout)
-                .unwrap();
+        let fused_nested = pack_polynomials_nested_fused::<false>(
+            &polynomials,
+            n_vars,
+            degree,
+            multiplier_mask,
+            &layout,
+        )
+        .unwrap();
         assert_eq!(fused_nested, materialized_nested);
         let materialized = pack_rows_flat_with_layout(&rows, &layout, true).unwrap();
         let fused =
@@ -651,7 +656,7 @@ fn fused_flat_packing_matches_materialized_rows() {
         let mut missing_columns = layout.columns.clone();
         missing_columns.pop();
         let missing = F4ColumnLayout::new(missing_columns);
-        assert!(pack_polynomials_nested_fused(
+        assert!(pack_polynomials_nested_fused::<false>(
             &polynomials,
             n_vars,
             degree,
@@ -671,7 +676,7 @@ fn fused_flat_packing_matches_materialized_rows() {
         let mut extra_columns = layout.columns.clone();
         extra_columns.push(1u64 << 63);
         let extra = F4ColumnLayout::new(extra_columns);
-        assert!(pack_polynomials_nested_fused(
+        assert!(pack_polynomials_nested_fused::<false>(
             &polynomials,
             n_vars,
             degree,
@@ -730,7 +735,7 @@ fn paired_inherited_root_fused_packing_benchmark() {
                     .unwrap();
                     pack_rows_with_layout(&rows, &layout, true).unwrap()
                 } else {
-                    pack_polynomials_nested_fused(
+                    pack_polynomials_nested_fused::<false>(
                         black_box(&system.equations),
                         system.n_vars,
                         3,

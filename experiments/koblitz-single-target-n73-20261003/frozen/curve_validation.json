@@ -1,0 +1,49 @@
+{
+  "checks": {
+    "base_curve_parameters_match": true,
+    "cofactor_matches_frozen_next_target": true,
+    "curve_cardinality_computed_by_sage": true,
+    "curve_order_factorization_matches": true,
+    "curve_trace_matches_cardinality": true,
+    "exactly_one_target": true,
+    "field_polynomial_irreducible": true,
+    "frobenius_eigenvalue_has_order_73": true,
+    "frobenius_eigenvalue_matches_generator": true,
+    "frozen_target_file_matches_fixture": true,
+    "frozen_target_is_sidecar_scalar_times_G": true,
+    "frozen_target_on_curve": true,
+    "generator_has_subgroup_order": true,
+    "generator_on_curve": true
+  },
+  "curve": {
+    "a": 0,
+    "b": 1,
+    "cofactor": "109796",
+    "curve_order": "9444732965923561641724",
+    "field_modulus_low_terms": [
+      0,
+      2,
+      3,
+      4
+    ],
+    "frobenius_eigenvalue_mod_subgroup_order": "23307709893564868",
+    "frobenius_mu": -1,
+    "frobenius_order_on_subgroup": 73,
+    "n": 73,
+    "subgroup_order": "86020738150056119",
+    "trace": "-184271214331"
+  },
+  "kind": "n73_single_target_fixture_checked_sage_validation",
+  "scope": "Exact GF(2^73) field/curve, subgroup, frozen Q, scalar sidecar replay, and Frobenius eigenvalue validation; no producer or timing run.",
+  "sha256": {
+    "base": "a65776025e4b9ebc4a1e074f9304d834ac12cd533afc7d89a1d3ee72a2a766cc",
+    "sage_runtime_info": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+    "target_points": "f813c261330dfa7b0dfaeb010c7d14828f596b32b3b08b908dbbed1250beb83b"
+  },
+  "status": "PASS",
+  "target": [
+    "1852858978593996699777",
+    "7821257062942871962177"
+  ],
+  "target_count": 1
+}
