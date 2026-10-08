@@ -62,6 +62,14 @@ acceptance remain pending. A [validation-only offline build](goal_20260924/nativ
 now retains the complete source/dependency/binary archive and original receipts.
 Portable native data replay verifies every registered byte and launches no
 archived binary; it supplies build custody, not scientific runtime admission.
+The [new n17 prepared public-point boundary](goal_20260924/native-one-target-boundary-v1/PROTOCOL.md)
+reconstructs the native ordered geometry and complete column table, retains
+failed F5 probes and checks witnesses and the final scalar independently before
+the online clock closes. Its source controls replay disclosed transcripts only;
+they do not dispatch a solver or establish preparation custody, natural yield,
+fresh qualification or performance. The external CMS target adapter and a new
+source-frozen one-use complete-solver controller remain pending. An old control
+registration or historical log table never supplies those gates.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,
