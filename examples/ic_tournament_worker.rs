@@ -99,6 +99,8 @@ struct Config {
     groebner_degree: u32,
     #[serde(skip_serializing_if = "is_false")]
     direct_fused_pack: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    active_multipliers: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -118,6 +120,7 @@ impl Default for Config {
             factor_base: None,
             groebner_degree: 3,
             direct_fused_pack: false,
+            active_multipliers: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -199,6 +202,17 @@ fn target(c: &KoblitzCurve, seed: u64) -> Result<BinaryPoint, String> {
     Err("hash-to-curve exhausted".into())
 }
 
+fn undeclared_algorithm_env(name: &str, value: &std::ffi::OsStr, active_multipliers: bool) -> bool {
+    let reserved = name.starts_with("KIC_")
+        || name.starts_with("F4_")
+        || name.starts_with("SOLVER_")
+        || name.starts_with("IC_");
+    let declared = (name == "IC_ARTIFACT_CACHE" && value == "off")
+        || (name == "IC_F2_BACKEND" && value == "cpu")
+        || (name == "KIC_F4_ACTIVE_MULTIPLIERS" && value == "1" && active_multipliers);
+    reserved && !declared
+}
+
 fn run(job: &Job) -> Result<Value, String> {
     if job.prepared.is_some()
         && (job.mode != "ic"
@@ -223,15 +237,14 @@ fn run(job: &Job) -> Result<Value, String> {
     }
     for (name, value) in std::env::vars_os() {
         let name = name.to_string_lossy();
-        let declared_default = (name == "IC_ARTIFACT_CACHE" && value == "off")
-            || (name == "IC_F2_BACKEND" && value == "cpu");
-        if name.starts_with("KIC_")
-            || name.starts_with("F4_")
-            || name.starts_with("SOLVER_")
-            || (name.starts_with("IC_") && !declared_default)
-        {
+        if undeclared_algorithm_env(&name, &value, job.config.active_multipliers) {
             return Err(format!("undeclared algorithm environment override: {name}"));
         }
+    }
+    if job.config.active_multipliers
+        && std::env::var("KIC_F4_ACTIVE_MULTIPLIERS").as_deref() != Ok("1")
+    {
+        return Err("declared active-multiplier override is missing".into());
     }
     if rayon::current_num_threads() != 1 {
         return Err("exclusive phases require one Rayon thread".into());
@@ -247,7 +260,11 @@ fn run(job: &Job) -> Result<Value, String> {
     report["generic_phase_timing"] = json!(snapshot);
     report["generic_phase_policy"] = json!("exclusive-owner-thread-v1");
     report["generic_build"] = build_identity();
-    report["generic_runtime_policy"] = json!("default-environment-one-rayon-v1");
+    report["generic_runtime_policy"] = json!(if job.config.active_multipliers {
+        "declared-active-multipliers-one-rayon-v1"
+    } else {
+        "default-environment-one-rayon-v1"
+    });
     Ok(report)
 }
 
@@ -766,6 +783,36 @@ mod prepared_target_tests {
     use super::*;
 
     #[test]
+    fn measured_worker_accepts_only_declared_active_multiplier_override() {
+        use std::ffi::OsStr;
+        assert!(!undeclared_algorithm_env(
+            "KIC_F4_ACTIVE_MULTIPLIERS",
+            OsStr::new("1"),
+            true
+        ));
+        assert!(undeclared_algorithm_env(
+            "KIC_F4_ACTIVE_MULTIPLIERS",
+            OsStr::new("1"),
+            false
+        ));
+        assert!(undeclared_algorithm_env(
+            "KIC_F4_ACTIVE_MULTIPLIERS",
+            OsStr::new("0"),
+            true
+        ));
+        assert!(undeclared_algorithm_env(
+            "KIC_F4_SOLVER_LINEAR_TAIL",
+            OsStr::new("1"),
+            true
+        ));
+        assert!(!undeclared_algorithm_env(
+            "IC_ARTIFACT_CACHE",
+            OsStr::new("off"),
+            false
+        ));
+    }
+
+    #[test]
     fn default_direct_packing_does_not_change_generic_effective_config() {
         let mut config = Config::default();
         let default = serde_json::to_value(&config).unwrap();
@@ -773,6 +820,16 @@ mod prepared_target_tests {
         config.direct_fused_pack = true;
         let opted_in = serde_json::to_value(&config).unwrap();
         assert_eq!(opted_in.get("direct_fused_pack"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_active_multipliers_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("active_multipliers").is_none());
+        config.active_multipliers = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("active_multipliers"), Some(&json!(true)));
     }
 
     fn prepared_job(cap: u64) -> Job {

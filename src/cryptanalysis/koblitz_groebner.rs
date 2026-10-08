@@ -2742,6 +2742,36 @@ fn build_macaulay_with_multiplier_mask(
     reuse_layout: bool,
     criterion: RowCriterion,
 ) -> Option<BuiltMacaulay<Vec<Vec<u64>>>> {
+    // F6's decisive Macaulay calls enter this generic builder. On a
+    // verified cached layout, direct parity packing avoids materialising
+    // and sorting every Boolean product. The regular builder still owns
+    // cold layouts and all criterion-pruned rows.
+    if reuse_layout
+        && criterion == RowCriterion::None
+        && F4_DIRECT_FUSED_PACK.load(std::sync::atomic::Ordering::Relaxed)
+    {
+        let layout_key = (multiplier_mask, degree, false);
+        if let Some(layout) = cached_f4_layout(layout_key) {
+            if let Some(matrix) = pack_polynomials_nested_fused::<true>(
+                polys,
+                n_vars,
+                degree,
+                multiplier_mask,
+                &layout,
+            ) {
+                F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                return Some(BuiltMacaulay {
+                    columns: layout.columns.clone(),
+                    matrix,
+                    rows_pruned: 0,
+                    criterion_word_ops: 0,
+                });
+            }
+            F4_LAYOUTS.with(|layouts| {
+                layouts.borrow_mut().remove(&layout_key);
+            });
+        }
+    }
     build_macaulay_packed(
         polys,
         n_vars,
@@ -5320,6 +5350,82 @@ mod tests {
         assert!(
             pack_polynomials_nested_fused::<true>(&polys, n_vars, degree, mask, &extra).is_none()
         );
+    }
+
+    #[test]
+    fn generic_cached_direct_pack_matches_sorted_and_repairs_stale_layout() {
+        let n_vars = 4;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b0001),
+                    F2BoolMono::from_mask(0b0011),
+                    F2BoolMono::from_mask(0b0100),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b0001), F2BoolMono::from_mask(0b0011)],
+                n_vars,
+            ),
+        ];
+        let mask = all_variable_mask(n_vars);
+        let degree = 3;
+        let key = (mask, degree, false);
+        f4_layout_stats_reset();
+        set_f4_direct_fused_pack(false);
+        let cold = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        let sorted = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        set_f4_direct_fused_pack(true);
+        let direct = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        assert_eq!(cold.columns, sorted.columns);
+        assert_eq!(sorted.columns, direct.columns);
+        assert_eq!(cold.matrix, sorted.matrix);
+        assert_eq!(sorted.matrix, direct.matrix);
+        assert_eq!(sorted.rows_pruned, direct.rows_pruned);
+        assert_eq!(sorted.criterion_word_ops, direct.criterion_word_ops);
+
+        let stale = std::rc::Rc::new(F4ColumnLayout::new(cold.columns[1..].to_vec()));
+        F4_LAYOUTS.with(|layouts| {
+            layouts.borrow_mut().insert(key, stale);
+        });
+        let repaired = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        assert_eq!(cold.columns, repaired.columns);
+        assert_eq!(cold.matrix, repaired.matrix);
+        set_f4_direct_fused_pack(false);
+        f4_layout_stats_reset();
     }
 
     #[test]
