@@ -291,8 +291,11 @@ pub fn atkin_eigenvalue_tower(zp: &crate::field::Zp, e: &Curve<u64>, ell: u64, r
 
 /// `atkin_eigenvalue_tower` with the base-field Phi_l supplied (as cached by SEA). Phi_l has
 /// integer coefficients, so over F_{p^d} it is the F_p polynomial with its coefficients embedded:
-/// no modular-polynomial computation happens in the extension. Degrees d over which Phi_l(j, Y)
-/// has no root (gcd(Y^(p^d) - Y, Phi_l(j, Y)) = 1 over F_p) are skipped without building F_{p^d}.
+/// no modular-polynomial computation happens in the extension. The roots come from factoring
+/// Phi_l(j, Y) over F_p: for an irreducible factor f of degree d, F_{p^d} is built as
+/// F_p[z]/(f) and z is itself a root, so no root finding happens in the extension either (its
+/// conjugates z^(p^i) give the same eigenvalue). Should every such factor fail, the earlier
+/// route (a fixed F_{p^d} and Cantor-Zassenhaus there) is tried for each d that has roots.
 pub fn atkin_eigenvalue_tower_with(
     zp: &crate::field::Zp,
     phi0: &Phi<crate::field::Zp>,
@@ -302,29 +305,44 @@ pub fn atkin_eigenvalue_tower_with(
 ) -> Option<(u64, usize)> {
     use crate::fpr::{FpR, RMAX};
     let dmax = ATKIN_TOWER_MAX_DEGREE.min(RMAX);
-    // which extension degrees carry a root of Phi_l(j, Y): those divisible by some factor degree
     let g = poly::monic(zp, &phi0.y_poly(zp, jinv(zp, e)));
-    let y = poly::x_poly(zp);
-    let mut yk = y.clone();
-    let mut has_root = vec![false; dmax + 1];
-    for slot in has_root.iter_mut().skip(1) {
-        yk = poly::powmod_big(zp, &yk, &zp.q(), &g); // Y^(p^d) mod g, d = 1, 2, ...
-        let gg = poly::gcd(zp, &g, &poly::sub(zp, &yk, &y));
-        *slot = poly::deg(zp, &gg) > 0;
+    // the eigenvalue over F_{p^d}, from a root jt of Phi_l(j, Y) there
+    let try_root = |fr: &FpR, jt: crate::fpr::ER| -> Option<u64> {
+        let e_ext = Curve::new(fr.embed(e.a), fr.embed(e.b));
+        let phi = Phi { ell: phi0.ell, c: phi0.c.iter().map(|row| row.iter().map(|&x| fr.embed(x)).collect()).collect() };
+        let et = crate::find::elkies::elkies_codomain(fr, &phi, &e_ext, jt)?;
+        let iso = bmss::isogeny(fr, bmss::Method::FastElkiesPrime, &e_ext, &et, ell as usize, None)?;
+        elkies_eigenvalue(fr, &e_ext, &iso.ker, ell)
+    };
+    // squarefree part (repeated roots only for special j), then distinct-degree factorisation
+    let dg = poly::derivative(zp, &g);
+    let sq = poly::gcd(zp, &g, &dg);
+    let gs = if poly::deg(zp, &sq) > 0 { poly::monic(zp, &poly::divrem(zp, &g, &sq).0) } else { g.clone() };
+    let parts = poly::ddf(zp, &gs);
+    for (k, part) in &parts {
+        if *k < 2 || *k > dmax {
+            continue;
+        }
+        let mut facs = vec![];
+        poly::edf(zp, part, *k, rng, &mut facs);
+        for f in facs.iter().take(5) {
+            let fr = FpR::from_modulus(zp.p, f);
+            if let Some(lam) = try_root(&fr, fr.gen()) {
+                return Some((lam, *k));
+            }
+        }
     }
+    // fallback: roots by Cantor-Zassenhaus in a fixed F_{p^d}, for each d a factor degree divides
     for d in 2..=dmax {
-        if !has_root[d] {
+        if !parts.iter().any(|(k, _)| *k >= 2 && d % *k == 0) {
             continue;
         }
         let fr = FpR::new(zp.p, d);
         let e_ext = Curve::new(fr.embed(e.a), fr.embed(e.b));
-        let j_ext = jinv(&fr, &e_ext);
         let phi = Phi { ell: phi0.ell, c: phi0.c.iter().map(|row| row.iter().map(|&x| fr.embed(x)).collect()).collect() };
-        let roots = phi.neighbors(&fr, j_ext, rng);
+        let roots = phi.neighbors(&fr, jinv(&fr, &e_ext), rng);
         for &jt in roots.iter().take(5) {
-            let Some(et) = crate::find::elkies::elkies_codomain(&fr, &phi, &e_ext, jt) else { continue };
-            let Some(iso) = bmss::isogeny(&fr, bmss::Method::FastElkiesPrime, &e_ext, &et, ell as usize, None) else { continue };
-            if let Some(lam) = elkies_eigenvalue(&fr, &e_ext, &iso.ker, ell) {
+            if let Some(lam) = try_root(&fr, jt) {
                 return Some((lam, d));
             }
         }

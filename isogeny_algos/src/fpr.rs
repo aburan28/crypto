@@ -55,6 +55,27 @@ impl FpR {
         panic!("FpR: no irreducible of degree {r} found for p={p}");
     }
 
+    /// F_{p^r} = F_p[z]/(f) for a monic irreducible f of degree r >= 2 (coefficients low to
+    /// high), so that z is a root of f: a root of an F_p-polynomial without root finding in the
+    /// extension. Irreducibility is checked (Rabin), since the arithmetic is wrong without it.
+    pub fn from_modulus(p: u64, f: &[u64]) -> FpR {
+        let r = f.len() - 1;
+        assert!((2..=RMAX).contains(&r) && f[r] == 1, "FpR::from_modulus: monic, 2 <= degree <= {RMAX}");
+        let mut red = [0u64; RMAX];
+        for k in 0..r {
+            red[k] = (p - f[k] % p) % p; // z^r = -(f_0 + ... + f_(r-1) z^(r-1))
+        }
+        assert!(is_irreducible(&Zp::new(p), r, &red), "FpR::from_modulus: modulus is reducible");
+        Self::build(p, r, red)
+    }
+
+    /// The generator z of F_p[z]/(modulus).
+    pub fn gen(&self) -> ER {
+        let mut z = [0u64; RMAX];
+        z[1] = 1;
+        z
+    }
+
     fn build(p: u64, r: usize, red: ER) -> FpR {
         let nz: Vec<(usize, u64)> = (0..r).filter(|&k| red[k] % p != 0).map(|k| (k, red[k] % p)).collect();
         // worst case per accumulator entry: r products (2x for squaring) plus (r-1)*|nz| folds,
