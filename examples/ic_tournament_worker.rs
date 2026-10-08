@@ -99,6 +99,18 @@ struct Config {
     groebner_degree: u32,
     #[serde(skip_serializing_if = "is_false")]
     direct_fused_pack: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    active_multipliers: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    support_local_stream: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    support_local_bitmap_columns: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    support_local_profile: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    inherited_basis_profile: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    compact_refuted: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -118,6 +130,12 @@ impl Default for Config {
             factor_base: None,
             groebner_degree: 3,
             direct_fused_pack: false,
+            active_multipliers: false,
+            support_local_stream: false,
+            support_local_bitmap_columns: false,
+            support_local_profile: false,
+            inherited_basis_profile: false,
+            compact_refuted: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -199,6 +217,17 @@ fn target(c: &KoblitzCurve, seed: u64) -> Result<BinaryPoint, String> {
     Err("hash-to-curve exhausted".into())
 }
 
+fn undeclared_algorithm_env(name: &str, value: &std::ffi::OsStr, active_multipliers: bool) -> bool {
+    let reserved = name.starts_with("KIC_")
+        || name.starts_with("F4_")
+        || name.starts_with("SOLVER_")
+        || name.starts_with("IC_");
+    let declared = (name == "IC_ARTIFACT_CACHE" && value == "off")
+        || (name == "IC_F2_BACKEND" && value == "cpu")
+        || (name == "KIC_F4_ACTIVE_MULTIPLIERS" && value == "1" && active_multipliers);
+    reserved && !declared
+}
+
 fn run(job: &Job) -> Result<Value, String> {
     if job.prepared.is_some()
         && (job.mode != "ic"
@@ -223,15 +252,14 @@ fn run(job: &Job) -> Result<Value, String> {
     }
     for (name, value) in std::env::vars_os() {
         let name = name.to_string_lossy();
-        let declared_default = (name == "IC_ARTIFACT_CACHE" && value == "off")
-            || (name == "IC_F2_BACKEND" && value == "cpu");
-        if name.starts_with("KIC_")
-            || name.starts_with("F4_")
-            || name.starts_with("SOLVER_")
-            || (name.starts_with("IC_") && !declared_default)
-        {
+        if undeclared_algorithm_env(&name, &value, job.config.active_multipliers) {
             return Err(format!("undeclared algorithm environment override: {name}"));
         }
+    }
+    if job.config.active_multipliers
+        && std::env::var("KIC_F4_ACTIVE_MULTIPLIERS").as_deref() != Ok("1")
+    {
+        return Err("declared active-multiplier override is missing".into());
     }
     if rayon::current_num_threads() != 1 {
         return Err("exclusive phases require one Rayon thread".into());
@@ -247,7 +275,11 @@ fn run(job: &Job) -> Result<Value, String> {
     report["generic_phase_timing"] = json!(snapshot);
     report["generic_phase_policy"] = json!("exclusive-owner-thread-v1");
     report["generic_build"] = build_identity();
-    report["generic_runtime_policy"] = json!("default-environment-one-rayon-v1");
+    report["generic_runtime_policy"] = json!(if job.config.active_multipliers {
+        "declared-active-multipliers-one-rayon-v1"
+    } else {
+        "default-environment-one-rayon-v1"
+    });
     Ok(report)
 }
 
@@ -687,8 +719,23 @@ fn run_prepared_target(
     crypto_lib::cryptanalysis::koblitz_groebner::set_f4_direct_fused_pack(
         job.config.direct_fused_pack,
     );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_stream(
+        job.config.support_local_stream,
+    );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_bitmap_columns(
+        job.config.support_local_bitmap_columns,
+    );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_profile(
+        job.config.support_local_profile,
+    );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_inherited_basis_profile(
+        job.config.inherited_basis_profile,
+    );
+    crypto_lib::cryptanalysis::inherited_f4::set_compact_refuted_basis(job.config.compact_refuted);
     let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
+    crypto_lib::cryptanalysis::koblitz_groebner::support_local_build_profile_reset();
+    crypto_lib::cryptanalysis::koblitz_groebner::inherited_basis_profile_reset();
     measurement::begin_online(Phase::TargetQuery);
     let online_start = Instant::now();
     let answer = solver.solve_observed(q);
@@ -697,6 +744,10 @@ fn run_prepared_target(
     let online_ns = online_start.elapsed().as_nanos();
     measurement::end_online();
     let f4_stage_profile = crypto_lib::cryptanalysis::koblitz_groebner::f4_profile();
+    let support_local_build_profile =
+        crypto_lib::cryptanalysis::koblitz_groebner::support_local_build_profile();
+    let inherited_basis_profile =
+        crypto_lib::cryptanalysis::koblitz_groebner::inherited_basis_profile();
     let layout_after = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     let verified = replay == Some(true);
     Ok(
@@ -714,6 +765,8 @@ fn run_prepared_target(
             "trials":answer.trials,"relation":answer.relation,"attempts":answer.attempts}],
         "online_timing_schema":1,"online_wall_ns":online_ns,
         "f4_stage_profile":f4_stage_profile,
+        "support_local_build_profile":support_local_build_profile,
+        "inherited_basis_profile":inherited_basis_profile,
         "f4_layout_hits_online":layout_after.0-layout_before.0,
         "f4_layout_misses_online":layout_after.1-layout_before.1,
         "target_input":"supplied_public_point","reusable_setup_excluded":true,
@@ -766,6 +819,36 @@ mod prepared_target_tests {
     use super::*;
 
     #[test]
+    fn measured_worker_accepts_only_declared_active_multiplier_override() {
+        use std::ffi::OsStr;
+        assert!(!undeclared_algorithm_env(
+            "KIC_F4_ACTIVE_MULTIPLIERS",
+            OsStr::new("1"),
+            true
+        ));
+        assert!(undeclared_algorithm_env(
+            "KIC_F4_ACTIVE_MULTIPLIERS",
+            OsStr::new("1"),
+            false
+        ));
+        assert!(undeclared_algorithm_env(
+            "KIC_F4_ACTIVE_MULTIPLIERS",
+            OsStr::new("0"),
+            true
+        ));
+        assert!(undeclared_algorithm_env(
+            "KIC_F4_SOLVER_LINEAR_TAIL",
+            OsStr::new("1"),
+            true
+        ));
+        assert!(!undeclared_algorithm_env(
+            "IC_ARTIFACT_CACHE",
+            OsStr::new("off"),
+            false
+        ));
+    }
+
+    #[test]
     fn default_direct_packing_does_not_change_generic_effective_config() {
         let mut config = Config::default();
         let default = serde_json::to_value(&config).unwrap();
@@ -773,6 +856,69 @@ mod prepared_target_tests {
         config.direct_fused_pack = true;
         let opted_in = serde_json::to_value(&config).unwrap();
         assert_eq!(opted_in.get("direct_fused_pack"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_active_multipliers_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("active_multipliers").is_none());
+        config.active_multipliers = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("active_multipliers"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_support_local_stream_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("support_local_stream").is_none());
+        config.support_local_stream = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("support_local_stream"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_bitmap_columns_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("support_local_bitmap_columns").is_none());
+        config.support_local_bitmap_columns = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(
+            opted_in.get("support_local_bitmap_columns"),
+            Some(&json!(true))
+        );
+    }
+
+    #[test]
+    fn default_support_local_profile_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("support_local_profile").is_none());
+        config.support_local_profile = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("support_local_profile"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_inherited_basis_profile_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("inherited_basis_profile").is_none());
+        config.inherited_basis_profile = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("inherited_basis_profile"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_compact_refuted_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("compact_refuted").is_none());
+        config.compact_refuted = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("compact_refuted"), Some(&json!(true)));
     }
 
     fn prepared_job(cap: u64) -> Job {
@@ -843,6 +989,36 @@ mod prepared_target_tests {
         assert_eq!(
             report["online_wall_ns"].as_u64(),
             Some(phases.values().filter_map(Value::as_u64).sum())
+        );
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process"]
+    fn inherited_basis_profile_preserves_prepared_f6_result() {
+        let mut job = prepared_job(8);
+        job.config.solver = "f6_ic".into();
+        let plain = run(&job).unwrap();
+        job.config.inherited_basis_profile = true;
+        let profiled = run(&job).unwrap();
+        assert_eq!(plain["status"], profiled["status"]);
+        assert_eq!(
+            plain["solutions"][0]["recovered"],
+            profiled["solutions"][0]["recovered"]
+        );
+        assert_eq!(plain["scalar_verified"], profiled["scalar_verified"]);
+        assert_eq!(
+            plain["f4_stage_profile"]["calls"],
+            profiled["f4_stage_profile"]["calls"]
+        );
+        assert_eq!(
+            plain["f4_stage_profile"]["word_ops"],
+            profiled["f4_stage_profile"]["word_ops"]
+        );
+        assert!(
+            profiled["inherited_basis_profile"]["root_calls"]
+                .as_u64()
+                .unwrap()
+                > 0
         );
     }
 
