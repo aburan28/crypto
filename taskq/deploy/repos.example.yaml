@@ -1,0 +1,5 @@
+# Worker repo allowlist: alias -> clone URL (or a local path in development).
+# A spec names an alias; anything not listed here is refused as infra_error.
+crypto: https://github.com/aburan28/crypto.git
+crypto-autoresearcher: https://github.com/aburan28/crypto-autoresearcher.git
+cryptanalysis: https://github.com/aburan28/cryptanalysis.git

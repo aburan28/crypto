@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_orbit_dlp_fast",
+    "construct:61:0:1480",
+    "/Volumes/SSD990/ic-n61c/research/sat_factor_base_review_20260908/autolab/runs/20261001T212647Z-c0875d45ed/inputs/scalars_n61-ks-growing-65536-v1.txt",
+    "7",
+    "/Volumes/SSD990/ic-n61c/research/sat_factor_base_review_20260908/autolab/runs/20261001T212647Z-c0875d45ed/logs/ic_n61_b0.jsonl"
+  ],
+  "conditions_after": {
+    "at": "2026-10-01T22:25:57.702178+00:00",
+    "available_memory_bytes": 21131739136,
+    "loadavg": [
+      31.41357421875,
+      49.78662109375,
+      122.72119140625
+    ],
+    "swap": "total = 10240.00M  used = 9303.56M  free = 936.44M  (encrypted)"
+  },
+  "conditions_before": {
+    "at": "2026-10-01T22:21:20.162977+00:00",
+    "available_memory_bytes": 20668448768,
+    "loadavg": [
+      42.37939453125,
+      83.26611328125,
+      159.677734375
+    ],
+    "swap": "total = 10240.00M  used = 9375.56M  free = 864.44M  (encrypted)"
+  },
+  "cycles_elapsed": 1021431217849,
+  "exit_code": 0,
+  "instructions_retired": 2224696038998,
+  "involuntary_context_switches": 216188,
+  "max_rss_bytes": 11822661632,
+  "page_faults": 1,
+  "page_reclaims": 1292259,
+  "peak_memory_footprint_bytes": 11899413144,
+  "pinned_cpu": null,
+  "swaps": 0,
+  "sys_s": 27.939833,
+  "user_s": 238.333725,
+  "voluntary_context_switches": 149,
+  "wall_s": 277.5618220000001
+}

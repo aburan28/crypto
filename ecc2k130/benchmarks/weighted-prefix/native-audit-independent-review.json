@@ -1,0 +1,293 @@
+{
+  "artifact": {
+    "path": "/private/tmp/ecc2k-weighted-prefix-public-src-20260912/build/rtx-pro6000-audit.json",
+    "remoteArtifact": "/data/packed-audit/1789189127773516091.json",
+    "sha256": "1f1d35da5bf6eaf9b546c3c6c6b3f88159316794109c26143b588b07560d3235"
+  },
+  "binary": {
+    "buildWalkStackAndSpillsZero": true,
+    "byteIdentityClaimed": false,
+    "controlledSha256": "019c32aa432843300145a5ff4c6cef9369464b1dab20cae31de295c91c9885d4",
+    "publicPreRunSha256": "152e73e75f48fcb1c0572aea625faa06cedc026763e3c325938a853ca54692af",
+    "runtimeLocalBytes": 0,
+    "runtimeRegisters": 100,
+    "runtimeSharedBytes": 0
+  },
+  "configuration": {
+    "batch": 16,
+    "blockThreads": 256,
+    "compileFlagsEqualControlledWeighted2": true,
+    "compilerVersion": "13.3.73",
+    "cudaImageVersion": "13.3.1",
+    "driverVersion": "580.95.05",
+    "flags": {
+      "BATCH": 16,
+      "MINBLOCKS": 2,
+      "PACKED_BY_VALUE": 1,
+      "PACKED_CACHE_DENOM": 1,
+      "PACKED_CLMAD": 1,
+      "PACKED_DIRECT_REDUCE": 1,
+      "PACKED_GENERATED_PRODUCT": 1,
+      "PACKED_PAIR_PRODUCTS": 1,
+      "PACKED_PERM_SIGMA": 3,
+      "PACKED_POLY_CHAIN": 1,
+      "PACKED_POLY_STATE": 1,
+      "PACKED_SINGLE_PRODUCT": 1,
+      "PACKED_STATE_TILE": 256,
+      "PACKED_UNROLL_INV": 1,
+      "PACKED_WEIGHTED_PREFIX": 2,
+      "SMEM_SPILL": 0,
+      "STREAM_KARAT": 0,
+      "THREADS": 256
+    },
+    "gpuName": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpuUuid": "GPU-46390ff9-4c38-7e34-5379-6bbb5bc6e9a7",
+    "inventoryGpuCount": 1,
+    "launches": 32,
+    "minBlocks": 2,
+    "nativeBuildTarget": "sm_120",
+    "scalarWalks": 6160384,
+    "stateTile": 256,
+    "steps": 1024,
+    "weightedPrefix": 2,
+    "workers": 385024
+  },
+  "findings": [],
+  "gates": {
+    "arithmeticAndRuntimeModeMarkersUniqueAndCorrect": true,
+    "arithmeticPassLines": [
+      "PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases",
+      "PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs",
+      "PASS: 18194 GPU polynomial products, including all 17161 basis pairs",
+      "PASS: 18194 GPU paired polynomial products against independent multiplication",
+      "PASS: 1157 GPU polynomial squares against independent multiplication and long division",
+      "PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing"
+    ],
+    "deviceArithmeticReturnCode": 0,
+    "finalReseedSynchronizationPresentBeforeFinalTimer": true,
+    "integrationPassLines": [
+      "PASS: DP replay across launch boundaries, restart and checkpoint resume",
+      "PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved",
+      "PASS: overdue walks restart without false distinguished-point reports"
+    ],
+    "integrationReturnCode": 0,
+    "scope": "Recorded CUDA arithmetic and small full-client/checkpoint validation reviewed; no independent GPU rerun."
+  },
+  "goal": {
+    "achieved": false,
+    "anyRecordedSampleMeetsTarget": false,
+    "benchmarkMedianMeetsTarget": false,
+    "collectionMedianMeetsTarget": false,
+    "targetBillionsPerSecond": 15
+  },
+  "kind": "independent read-only completed public Make audit evidence review",
+  "limitations": [
+    "Public result is an absolute audit on a separate allocation. It has no same-allocation control and does not establish an additional gain over the earlier matched comparison.",
+    "All three consecutive samples per phase are retained. No dedicated discarded warmup or per-sample power/clock telemetry is retained; benchmark rates decline across these repetitions.",
+    "Timed runs use --verify 0. Recorded prior GPU arithmetic and small client replay/checkpoint gates establish bounded correctness coverage, not replay of every timed scalar update.",
+    "Timed collection retains corpus sizes and record counts but not corpus bytes or content hashes. Public corpus content equivalence cannot be independently established from this artifact.",
+    "Public identity records a pre-run binary hash and a 68-file remote aggregate. It lacks post-run source/binary hashes, arithmetic executable hashes, and compiled SASS/cubin artifacts; controlled and public binary hashes differ. Binding established here is source/configuration equality, not binary equality.",
+    "The 68-file remote aggregate excludes root packed_audit.py and documentation; these are instead bound by the 197-file local freeze and verified Git commit. No remote all-file manifest is retained.",
+    "Runtime logs and native build invocation identify the packed path, but no independent public-run cubin/SASS inspection or retained JIT-environment record was available.",
+    "Rates come from the completed-run printed summaries. Their timer includes final device synchronization but excludes initial setup, CUDA compilation, and post-summary process teardown.",
+    "This read-only review does not establish a hardware ceiling, broader sustained deployment rate, private-key recovery, or cryptanalytic breakthrough."
+  ],
+  "matchedComparisonRetained": {
+    "benchmark": {
+      "candidateMedianBillionsPerSecond": 13.323276,
+      "controlMedianBillionsPerSecond": 13.110335,
+      "ratioOfMediansImprovementPercent": 1.6242224168947716
+    },
+    "collection": {
+      "candidateMedianBillionsPerSecond": 13.054029,
+      "controlMedianBillionsPerSecond": 12.851526,
+      "ratioOfMediansImprovementPercent": 1.5757117092553896
+    }
+  },
+  "previousUploadFailure": {
+    "app": "ap-bb66UtkGGgoZNv6Jdtzkrp",
+    "cause": "Live audit.log inside mounted source changed during image upload.",
+    "gpuMeasurementReached": false,
+    "logSha256": "03c01f65aa4ef87db0ffd550e32a4b795f87c7554e3362e0e034d1f492c5473c",
+    "ownerSession": 46383,
+    "retryLogOutsideSource": true,
+    "retryUsesSameFrozenSource": true
+  },
+  "reviewMethod": "Independently parsed raw JSON and logs, recomputed sample accounting and statistics, compared frozen files with Git commit and controlled source. Did not execute or import the prewritten auditor, rerun kernels, or alter source.",
+  "run": {
+    "app": "ap-jow0MazGR4XiC4nthDz1sN",
+    "completionIndependentlySeenInLog": true,
+    "logPath": "/private/tmp/ecc2k-weighted-prefix-public-run-20260912.log",
+    "logSha256": "547239a798e12ef1eedf2a2f1ef74bb4b76f39ae53666e434b38bca7db54f883",
+    "ownerReportedExitCode": 0,
+    "ownerSession": 13703
+  },
+  "samples": [
+    {
+      "dropped": 0,
+      "index": 0,
+      "phase": "benchmark",
+      "progressLaunchCounts": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        32
+      ],
+      "rateMillionsPerSecond": 13868.451,
+      "reports": 0,
+      "scalarUpdates": 201863462912,
+      "verifiedDuringTiming": 0
+    },
+    {
+      "dropped": 0,
+      "index": 1,
+      "phase": "benchmark",
+      "progressLaunchCounts": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        32
+      ],
+      "rateMillionsPerSecond": 13761.732,
+      "reports": 0,
+      "scalarUpdates": 201863462912,
+      "verifiedDuringTiming": 0
+    },
+    {
+      "dropped": 0,
+      "index": 2,
+      "phase": "benchmark",
+      "progressLaunchCounts": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        32
+      ],
+      "rateMillionsPerSecond": 13669.981,
+      "reports": 0,
+      "scalarUpdates": 201863462912,
+      "verifiedDuringTiming": 0
+    },
+    {
+      "corpusBytes": 164768,
+      "corpusRecords": 5149,
+      "dropped": 0,
+      "index": 0,
+      "phase": "collection",
+      "progressLaunchCounts": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        32
+      ],
+      "rateMillionsPerSecond": 13327.483,
+      "reports": 5149,
+      "scalarUpdates": 201863462912,
+      "verifiedDuringTiming": 0
+    },
+    {
+      "corpusBytes": 164768,
+      "corpusRecords": 5149,
+      "dropped": 0,
+      "index": 1,
+      "phase": "collection",
+      "progressLaunchCounts": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        32
+      ],
+      "rateMillionsPerSecond": 13284.582,
+      "reports": 5149,
+      "scalarUpdates": 201863462912,
+      "verifiedDuringTiming": 0
+    },
+    {
+      "corpusBytes": 164768,
+      "corpusRecords": 5149,
+      "dropped": 0,
+      "index": 2,
+      "phase": "collection",
+      "progressLaunchCounts": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        32
+      ],
+      "rateMillionsPerSecond": 13269.334,
+      "reports": 5149,
+      "scalarUpdates": 201863462912,
+      "verifiedDuringTiming": 0
+    }
+  ],
+  "scalarUpdatesPerSample": 201863462912,
+  "scope": "Finite complete scalar walk throughput and supplied correctness/provenance evidence; no target solving or cryptanalytic conclusion.",
+  "source": {
+    "all32IncludeSrcGeneratedFilesEqualControlled": true,
+    "allFrozenFilesEqualCommitTree": true,
+    "allFrozenFilesRehashed": true,
+    "commit": "bf10b66025a04aadf1db84fe0554c3e0092fbd39",
+    "controlledArtifactSha256": "1ad29dc750ce1b1a634e3f850d34e5a9bb1a67e40db8a0aea619e6fb6c08b8c2",
+    "controlledManifestFileCount": 157,
+    "controlledManifestRehashed": true,
+    "freezePath": "/private/tmp/ecc2k-weighted-prefix-public-freeze-20260912.json",
+    "freezeSha256": "de3e40f26b950fd83253da59b560db5368bfef6f50dd4c3360e1a1e2eaa8b7ab",
+    "frozenFileCount": 197,
+    "recomputedRemoteAggregateMatches": true,
+    "remoteAggregateFileCount": 68,
+    "remoteAggregateSha256": "a11bb868fa0128e073b57d1431bfe90cb83543ac14b6f65a983e534a96036f70",
+    "selectedMatchingFiles": {
+      "codegen/gensigma.py": "7e85e7a0b0ffe7eb2544e0aac9b5321e9f0f961d3304d8a6afce6d6aac651fce",
+      "codegen/testpackedclient.py": "f728e53148da7282bdc1b4ea4c5754eb7d95fccb028fb1feb3602ebe840da653",
+      "include/packed131.h": "17ca3b08d05dd7458a9eefffe8992c2fe17a7e1e1f74e3660fb9ae64fb7a3bf3",
+      "include/packedengine.cuh": "49bd45beff150a2f25689330ce9a17e9c00eae3418a30d14515b9e5921ec9297",
+      "include/packedkernels.cuh": "4b377843513b192e316ddc2f8b4d41adde4ac98d631e248b2e24921d6ecc56da",
+      "include/packedsigma131.h": "318567aa80945fc342265ca9e621f10f2da9b4efe4b48d4924576b197fdc9caa",
+      "src/main.cu": "1aacf9eba08a76d825434d081caa998ca4d615065b21006b1c8d33b940ffd2ab",
+      "src/testpackedcuda.cu": "e5d09cd9260e92d5afc8b58328ed98e080b19e122f0a24323164497ef8124598"
+    }
+  },
+  "statistics": {
+    "benchmark": {
+      "maxBillionsPerSecond": 13.868450999999999,
+      "medianBillionsPerSecond": 13.761732,
+      "minBillionsPerSecond": 13.669981,
+      "sampleRatesBillionsPerSecond": [
+        13.868450999999999,
+        13.761732,
+        13.669981
+      ]
+    },
+    "collectionSummary": {
+      "maxBillionsPerSecond": 13.327483,
+      "medianBillionsPerSecond": 13.284582,
+      "minBillionsPerSecond": 13.269334,
+      "sampleRatesBillionsPerSecond": [
+        13.327483,
+        13.284582,
+        13.269334
+      ]
+    }
+  },
+  "timedSampleCount": 6,
+  "totalScalarUpdatesAcrossSixSamples": 1211180777472,
+  "valid": true
+}

@@ -1,0 +1,8 @@
+{
+  "status": "rejected",
+  "evidence": "panels",
+  "source": "candidate",
+  "failure": "independent PB checker rejected useful-rank label in n23-s3",
+  "cause": "benchmark rank loop iterated a stale list after row reduction reassigned the row",
+  "resolution": "retain original panels and source; correct rank iteration; rerun same frozen query plan before training"
+}

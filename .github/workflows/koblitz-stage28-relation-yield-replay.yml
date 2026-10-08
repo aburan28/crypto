@@ -1,0 +1,38 @@
+name: Koblitz Stage 28 relation-yield replay
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_stage21_independent_replay.rs"
+      - "scripts/verify_koblitz_stage28_relation_yield_replay.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-28-independent-relation-yield-replay-20260911/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE28_RELATION_YIELD_REPLAY.md"
+      - ".github/workflows/koblitz-stage28-relation-yield-replay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build from the frozen dependency lock
+        run: |
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          cargo build --release --locked --example koblitz_stage21_independent_replay
+      - name: Verify and independently replay all pairs
+        run: |
+          python3 scripts/verify_koblitz_stage28_relation_yield_replay.py
+          python3 scripts/process_meter.py \
+            --cwd "$GITHUB_WORKSPACE" \
+            --timeout 600 \
+            --stdout "$RUNNER_TEMP/stage28-replay.json" \
+            --stderr "$RUNNER_TEMP/stage28-replay.stderr" \
+            --metrics "$RUNNER_TEMP/stage28-replay.metrics.json" \
+            -- target/release/examples/koblitz_stage21_independent_replay \
+            research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-28-independent-relation-yield-replay-20260911/input-yield-result.json
+          cmp "$RUNNER_TEMP/stage28-replay.json" research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-28-independent-relation-yield-replay-20260911/replay.json

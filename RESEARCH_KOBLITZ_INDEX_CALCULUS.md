@@ -889,8 +889,14 @@ vs 3.64–3.81 s across 4 interleaved rounds (~1.37×), and end-to-end
 
 ## Open problems from the talk (unimplemented)
 
-- Couveignes–Lercier invariant factor bases via isogenies between
-  algebraic tori and elliptic curves — a second, denser family.
+- ~~Couveignes–Lercier invariant factor bases via isogenies between
+  algebraic tori and elliptic curves — a second, denser family.~~
+  **Closed 2026-10-07 for this curve family.**  Their Galois-invariant
+  bases of `F_{q^n}/F_q` need `n | q − 1` (Kummer), `n = p`
+  (Artin–Schreier), `n | q + 1` (torus), or `n | #E(F_q)` for an
+  auxiliary curve `E/F_q` (elliptic periods).  Koblitz rungs have
+  `q = 2` and prime `n`, and Hasse caps `#E(F_2)` at 5, so every rung
+  with `n ≥ 7` (in particular ECC2K-130, `n = 131`) is excluded.
 - Exploiting the block/homogeneous structure of the resulting
   polynomial systems in the Gröbner step.  The systems are now actually
   built (`koblitz_groebner`), so this is measurable rather than

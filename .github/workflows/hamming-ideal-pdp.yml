@@ -1,0 +1,36 @@
+name: Hamming-ideal PDP oracle (self-test and replay)
+# The standalone crate under research/hamming_ideal_pdp_20260930 encodes a
+# weight-bounded factor base with the Hamming ideals of La Scala, Marchesin
+# and Tiwari and solves point decompositions with a truncated Boolean F4
+# inside MultiSolve. This job checks the F4 verdicts against brute force,
+# replays the n = 7 cell for two encodings and compares the recorded call
+# counts, and re-derives the summary table from the frozen raw results.
+on:
+  pull_request:
+    paths:
+      - 'research/hamming_ideal_pdp_20260930/**'
+      - '.github/workflows/hamming-ideal-pdp.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  selftest-and-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: research/hamming_ideal_pdp_20260930
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        run: cargo build --release --manifest-path hamming_pdp/Cargo.toml
+      - name: F4 verdicts against brute force (900 random systems)
+        run: |
+          for s in 1 7 13; do hamming_pdp/target/release/hamming_pdp --selftest $s; done
+      - name: Replay the n = 7 cell (SUB and FC, four targets) and compare with the frozen run
+        run: python3 replay_check.py --n 7 --encodings SUB,FC --targets 4
+      - name: Summary table re-derives from the frozen raw results
+        run: |
+          python3 analyse.py --tag main > /tmp/summary.txt
+          git diff --exit-code -- results/main/summary.json

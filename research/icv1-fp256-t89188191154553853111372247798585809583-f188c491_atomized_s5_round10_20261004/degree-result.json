@@ -1,0 +1,3756 @@
+{
+  "schema": "p256.dickson_atomized_s5_degree/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "prime": 1151,
+  "a": 1148,
+  "b": 241,
+  "round9_sha256": "44f8412ff1c4dec61d0fd05bc2d66f8788e14da4063239e7431e6410da67565a",
+  "max_degree": 8,
+  "budget_seconds_per_atom": 20,
+  "terminal_results": [
+    {
+      "terminal": 0,
+      "target": [
+        441,
+        24
+      ],
+      "parent_cells": 8,
+      "atomized_subcomponents": 8,
+      "signed_tuples": 128,
+      "cells": [
+        {
+          "boundaries": [
+            25,
+            25,
+            384,
+            1110
+          ],
+          "expected_positive": true,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                409,
+                320
+              ],
+              "reference": {
+                "affine": true,
+                "identity": false,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": false,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 1323
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "affine-affine"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            767,
+            1110
+          ],
+          "expected_positive": true,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": true,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                725,
+                320
+              ],
+              "reference": {
+                "affine": false,
+                "identity": true,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "left-identity"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            1110,
+            384
+          ],
+          "expected_positive": true,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                320,
+                409
+              ],
+              "reference": {
+                "affine": true,
+                "identity": false,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": false,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 1323
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "affine-affine"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            1110,
+            767
+          ],
+          "expected_positive": true,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": true,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                320,
+                725
+              ],
+              "reference": {
+                "affine": false,
+                "identity": true,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "left-identity"
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            25
+          ],
+          "expected_positive": false,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                519,
+                519
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 837
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 4,
+            "index_lookups": 2,
+            "field_multiplications": 105,
+            "left_identity": true,
+            "right_identity": true,
+            "identity_index_checks": 2,
+            "witness_chart": null
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            41
+          ],
+          "expected_positive": false,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                519,
+                1061
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": null
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            262
+          ],
+          "expected_positive": false,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                519,
+                372
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": null
+          }
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            342
+          ],
+          "expected_positive": false,
+          "atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                519,
+                519,
+                519,
+                583
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 2,
+            "join_solves": 1,
+            "roots_returned": 5,
+            "index_lookups": 2,
+            "field_multiplications": 120,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": null
+          }
+        }
+      ]
+    },
+    {
+      "terminal": 369,
+      "target": [
+        722,
+        28
+      ],
+      "parent_cells": 8,
+      "atomized_subcomponents": 96,
+      "signed_tuples": 1536,
+      "cells": [
+        {
+          "boundaries": [
+            94,
+            94,
+            288,
+            614
+          ],
+          "expected_positive": true,
+          "atoms": 8,
+          "signed_tuples": 128,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                574,
+                935
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                577,
+                935
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                574,
+                935
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                577,
+                935
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                574,
+                935
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                577,
+                935
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                574,
+                935
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                577,
+                935
+              ],
+              "reference": {
+                "affine": true,
+                "identity": false,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": false,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 1323
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "affine-affine"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            288,
+            1057
+          ],
+          "expected_positive": true,
+          "atoms": 16,
+          "signed_tuples": 256,
+          "affine_positive": false,
+          "identity_positive": true,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                574,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                574,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": true,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                577,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                577,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                574,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                574,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                577,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                577,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                574,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                574,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                577,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                577,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                574,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                574,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": true,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                577,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                577,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 22,
+            "index_lookups": 8,
+            "field_multiplications": 510,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "left-identity"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            614,
+            288
+          ],
+          "expected_positive": true,
+          "atoms": 8,
+          "signed_tuples": 128,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                935,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                935,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                935,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                935,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                935,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                935,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                935,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                935,
+                577
+              ],
+              "reference": {
+                "affine": true,
+                "identity": false,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": false,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 1323
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "affine-affine"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            863,
+            1057
+          ],
+          "expected_positive": true,
+          "atoms": 16,
+          "signed_tuples": 256,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                273,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                273,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                878,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                878,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                273,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                273,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2040
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                878,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                878,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                273,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                273,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2040
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                878,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                878,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                273,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                273,
+                681
+              ],
+              "reference": {
+                "affine": true,
+                "identity": false,
+                "full": true,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": false,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 1256
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                878,
+                470
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                878,
+                681
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": true,
+            "correct": true,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 22,
+            "index_lookups": 8,
+            "field_multiplications": 510,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": "affine-affine"
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            94
+          ],
+          "expected_positive": false,
+          "atoms": 16,
+          "signed_tuples": 256,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                163,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 837
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                163,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 750
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                988,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 750
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                988,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 837
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                163,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 656
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                163,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 60,
+                "field_ops": 1790
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                988,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 60,
+                "field_ops": 1790
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                988,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 656
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                163,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 656
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                163,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 60,
+                "field_ops": 1790
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                988,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 60,
+                "field_ops": 1790
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                988,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 656
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                163,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 837
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                163,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 750
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                988,
+                163
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 30,
+                "field_ops": 750
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                988,
+                988
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 837
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 20,
+            "index_lookups": 8,
+            "field_multiplications": 480,
+            "left_identity": true,
+            "right_identity": true,
+            "identity_index_checks": 2,
+            "witness_chart": null
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            166
+          ],
+          "expected_positive": false,
+          "atoms": 8,
+          "signed_tuples": 128,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                163,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                988,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                163,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                988,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                163,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                988,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                163,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                988,
+                390
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": null
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            288
+          ],
+          "expected_positive": false,
+          "atoms": 16,
+          "signed_tuples": 256,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                163,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                163,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                988,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                988,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                163,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                163,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                988,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                988,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                163,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                163,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                988,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                988,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                163,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                163,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                988,
+                574
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                988,
+                577
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 8,
+            "join_solves": 4,
+            "roots_returned": 22,
+            "index_lookups": 8,
+            "field_multiplications": 510,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": null
+          }
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            507
+          ],
+          "expected_positive": false,
+          "atoms": 8,
+          "signed_tuples": 128,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "atom_runs": [
+            {
+              "x": [
+                163,
+                163,
+                163,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                163,
+                988,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                163,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                163,
+                988,
+                988,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                163,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                163,
+                988,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 3,
+                "max_cols_to_solution": 67,
+                "field_ops": 2108
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                163,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            },
+            {
+              "x": [
+                988,
+                988,
+                988,
+                462
+              ],
+              "reference": {
+                "affine": false,
+                "identity": false,
+                "full": false,
+                "signed_tuples": 16
+              },
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "identity_chart_correct": true,
+              "affine_f4": {
+                "arm": "atomized-affine",
+                "variables": 15,
+                "equations": 16,
+                "input_max_degree": 2,
+                "inconsistent": true,
+                "complete": true,
+                "correct": true,
+                "timed_out": false,
+                "pairs_above_bound": 0,
+                "solving_degree_max": 2,
+                "max_cols_to_solution": 32,
+                "field_ops": 857
+              }
+            }
+          ],
+          "staged": {
+            "positive": false,
+            "correct": true,
+            "pair_image_solves": 6,
+            "join_solves": 4,
+            "roots_returned": 18,
+            "index_lookups": 8,
+            "field_multiplications": 420,
+            "left_identity": true,
+            "right_identity": false,
+            "identity_index_checks": 1,
+            "witness_chart": null
+          }
+        }
+      ]
+    }
+  ]
+}

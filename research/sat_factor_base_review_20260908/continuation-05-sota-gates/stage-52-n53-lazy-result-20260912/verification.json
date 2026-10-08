@@ -1,0 +1,198 @@
+{
+  "exact_relation_hash_equality": true,
+  "factor_base_logs_known_by_construction": false,
+  "factor_base_selection_uses_scalar_labels": false,
+  "fixture_scalar_used_by_collector": false,
+  "full_cost_gate_passed": false,
+  "hosted": {
+    "archive": {
+      "bytes": 2046284,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage52-n53-lazy-evidence-34711534312.tar.gz",
+      "sha256": "ad4029174cbdad6bfb333ac8a737cb66c337e4b391d20024bcd7f32d85a208b5"
+    },
+    "artifact": {
+      "digest": "sha256:a948751620c24650231d6b9813a00136e530a461ef9b4aef6cf340a52e10a620",
+      "expires_at": "2026-12-11T18:32:59Z",
+      "id": 10303597397,
+      "name": "koblitz-stage48-n53-width-34711534312",
+      "size_in_bytes": 2066118
+    },
+    "baseline": {
+      "admitted_relations": 189,
+      "all_relations_group_verified": true,
+      "charged_total_ms": 27081.809848,
+      "collection_ms": 19836.219396,
+      "factor_base_points": 9964,
+      "full_rank_at_relation": 157,
+      "linear_solution_verified": true,
+      "matrix_columns": 95,
+      "orbit_columns": 94,
+      "published_fixture_scalar": 476811900269,
+      "published_q": [
+        2565091273463387,
+        5885236316843894
+      ],
+      "query_batch_inversions": 112140,
+      "query_exact_table_misses": 662192,
+      "query_mode": "pair_pair_parallel_1024",
+      "query_parallel_chunks": 112140,
+      "query_parallel_threads": 4,
+      "query_parallel_waves": 28035,
+      "query_x_filter_rejections": 84212325,
+      "recovered_fixture_scalar": 476811900269,
+      "setup_ms": 7245.590241000001,
+      "support_queries": 84875264,
+      "target_trials": 189
+    },
+    "build_seal_sha256": "28c22f66be56855979786f42ab5ef85fff55b8048037f09dfa882305e16a0cc0",
+    "candidate": {
+      "admitted_relations": 189,
+      "all_relations_group_verified": true,
+      "charged_total_ms": 25129.947006000002,
+      "collection_ms": 17875.363718,
+      "factor_base_points": 9964,
+      "full_rank_at_relation": 157,
+      "linear_solution_verified": true,
+      "matrix_columns": 95,
+      "orbit_columns": 94,
+      "published_fixture_scalar": 476811900269,
+      "published_q": [
+        2565091273463387,
+        5885236316843894
+      ],
+      "query_batch_inversions": 28308,
+      "query_exact_table_misses": 666810,
+      "query_mode": "pair_pair_parallel_4096",
+      "query_parallel_chunks": 28308,
+      "query_parallel_threads": 4,
+      "query_parallel_waves": 7077,
+      "query_x_filter_rejections": 85030447,
+      "recovered_fixture_scalar": 476811900269,
+      "setup_ms": 7254.583036999999,
+      "support_queries": 85699806,
+      "target_trials": 189
+    },
+    "comparison": {
+      "baseline_over_rho_wall_ratio": 5.546775377394931,
+      "candidate_collection_speedup": 1.1096959876696368,
+      "candidate_direct_core_seconds_ratio": 0.9563189074461959,
+      "candidate_direct_wall_speedup": 1.0736409000410199,
+      "candidate_over_rho_wall_ratio": 5.16632272222771,
+      "candidate_whole_process_crossover": false,
+      "fresh_build_plus_candidate_over_rho_wall_ratio": 22.668682825815015
+    },
+    "processes": {
+      "baseline": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1391972352,
+        "single_core_seconds": 63.847327,
+        "system_seconds": 3.434271,
+        "total_core_seconds": 63.847327,
+        "user_seconds": 60.413056,
+        "wall_seconds": 28.35286647299999
+      },
+      "candidate": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1392087040,
+        "single_core_seconds": 61.058406000000005,
+        "system_seconds": 0.856571,
+        "total_core_seconds": 61.058406000000005,
+        "user_seconds": 60.201835,
+        "wall_seconds": 26.408146775999995
+      },
+      "rho": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 35221504,
+        "single_core_seconds": 5.111119,
+        "system_seconds": 0.009998,
+        "total_core_seconds": 5.111119,
+        "user_seconds": 5.101121,
+        "wall_seconds": 5.111594493000013
+      }
+    },
+    "resources": {
+      "build_outer": {
+        "average_parallelism": 3.3837560040730454,
+        "process_tree_rss_samples": 1868,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 1718161408,
+        "total_core_seconds": 302.727621,
+        "wall_seconds": 89.46496752
+      },
+      "charged_sequential_wall_seconds_available": 149.479893844,
+      "charged_total_core_seconds_available": 455.588094,
+      "maximum_sampled_process_tree_rss_bytes": 1718161408,
+      "science_outer": {
+        "average_parallelism": 2.5470409173671023,
+        "process_tree_rss_samples": 1832,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 1431134208,
+        "total_core_seconds": 152.860473,
+        "wall_seconds": 60.014926324
+      }
+    },
+    "run_seal_sha256": "021d84ba9fb53e6cd2e3008c9e82122b42e3ebba35a6fd297d9e15670adbd2fc",
+    "source_commit": "5e3997e9751cd0b370d482875cced796e682887f",
+    "verification": {
+      "baseline_over_rho_wall_ratio": 5.546775377394931,
+      "baseline_wall_seconds": 28.35286647299999,
+      "candidate_collection_speedup": 1.1096959876696368,
+      "candidate_direct_core_seconds_ratio": 0.9563189074461959,
+      "candidate_direct_wall_speedup": 1.0736409000410199,
+      "candidate_over_rho_wall_ratio": 5.16632272222771,
+      "candidate_wall_seconds": 26.408146775999995,
+      "candidate_whole_process_crossover": false,
+      "charged_sequential_wall_seconds_available": 149.479893844,
+      "charged_total_core_seconds_available": 455.588094,
+      "fresh_build_plus_candidate_over_rho_wall_ratio": 22.668682825815015,
+      "full_cost_gate_passed": false,
+      "independent_external_reproduction_satisfied": false,
+      "inventory_sha256": "1c8f85ac8241f7bf4d5024cf139a658434450da552dec6cbff49469a17f987c6",
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "maximum_sampled_process_tree_rss_bytes": 1718161408,
+      "published_fixture_scalar": 476811900269,
+      "published_q": [
+        2565091273463387,
+        5885236316843894
+      ],
+      "relations": 189,
+      "rho_wall_seconds": 5.111594493000013,
+      "schema": "koblitz_stage48_verification.v1",
+      "source_commit": "5e3997e9751cd0b370d482875cced796e682887f",
+      "status": "n53_parallel_width_same_target_verified"
+    },
+    "workflow": {
+      "head_sha": "5e3997e9751cd0b370d482875cced796e682887f",
+      "production_job_id": 103601089662,
+      "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34711534312/job/103601089662",
+      "production_job_wall_seconds": 162.0,
+      "run_id": 34711534312,
+      "url": "https://github.com/aburan28/crypto/actions/runs/34711534312",
+      "workflow_wall_seconds": 176.0
+    }
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "predecessor_stage49": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-49-n53-width-results-20260912/verification.json",
+    "sha256": "0f1f94a8e1443407edc8c73be110415fbd33966713975472bef1239206baebd4"
+  },
+  "preferred_query_mode": "pair_pair_parallel_4096",
+  "prior_support_table_allocated_bytes": 1409286144,
+  "remaining_blockers": [
+    "preferred n=53 direct remains 5.166323 times same-target rho wall",
+    "fresh build plus preferred direct remains 22.668683 times rho wall",
+    "unknown-scalar n=53, licensed same-instance Magma, and unaffiliated review remain absent",
+    "lazy label loading changes finite constants, not the asymptotic exponent"
+  ],
+  "same_public_target": true,
+  "sat_conflicts": null,
+  "schema": "koblitz_stage52_lazy_result.v1",
+  "source_commit": "5e3997e9751cd0b370d482875cced796e682887f",
+  "status": "hosted_n53_lazy_label_result_verified",
+  "support_table_allocated_bytes": 1275068416,
+  "support_table_bytes_saved": 134217728,
+  "target_subgroup_enumerated_for_factor_base": false
+}

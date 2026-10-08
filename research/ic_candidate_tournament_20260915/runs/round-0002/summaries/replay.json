@@ -1,0 +1,51 @@
+{
+  "comparisons": [
+    {
+      "candidate": "batch16",
+      "candidate_over_baseline": 0.6069784911623156,
+      "ci95": [
+        0.5920493667813089,
+        0.6237873482741558
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.7666313214202541,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5881094227554567,
+        "n17a1": 0.590517657716508,
+        "n19a0": 0.6310166457518362,
+        "n19a1": 0.6068857138531513,
+        "n23a0": 0.6194806599670324
+      },
+      "speedup": 1.647504836761315
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 562.280873090509,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 0.046565581691865345,
+    "ci95": [
+      0.04270034830583979,
+      0.05050227852783438
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.15413838982386502,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.04314253875932816,
+      "n17a1": 0.0405534443089299,
+      "n19a0": 0.05112087043236979,
+      "n19a1": 0.04776967015791617,
+      "n23a0": 0.051243789215684475
+    },
+    "speedup": 21.4750887601323
+  },
+  "runs": 540,
+  "stage": "replay",
+  "verified_runs": 540
+}

@@ -1,0 +1,18 @@
+{
+  "binary_relative": "source_candidates/combined_batch8/worker",
+  "config": {
+    "batch_trials": 8,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+  "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay.",
+  "hypothesis": "Measure the combined source with fewer surplus relations.",
+  "id": "combined_batch8",
+  "parent": "incumbent",
+  "source_directory": "source_candidates/combined_batch8/source",
+  "source_manifest_relative": "source_candidates/combined_batch8/source-manifest.json",
+  "source_manifest_sha256": "57525c45130ca71ddfff7df7b617bdd2dcd2ba1523c695e47b074b333e62750d"
+}

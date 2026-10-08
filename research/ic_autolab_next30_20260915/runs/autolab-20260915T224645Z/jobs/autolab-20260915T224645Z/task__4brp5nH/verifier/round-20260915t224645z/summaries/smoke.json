@@ -1,0 +1,49 @@
+{
+  "comparisons": [
+    {
+      "candidate": "autolab",
+      "candidate_over_baseline": 0.5285833586592587,
+      "ci95": [
+        0.5227908101918499,
+        0.5352120463076613
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.7241577804385227,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 4,
+      "per_cell": {
+        "n13a0": 0.5385267310531592,
+        "n17a1": 0.5253899037882128,
+        "n19a0": 0.5302632691331551,
+        "n23a0": 0.5203234646434979
+      },
+      "speedup": 1.891849192029958
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 25.85028943105135,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 0.10415381026634286,
+    "ci95": [
+      0.09280137223682748,
+      0.11235513126569373
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 4,
+    "native_wall_candidate_over_baseline": 0.2913164867887054,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 4,
+    "per_cell": {
+      "n13a0": 0.11125902447218929,
+      "n17a1": 0.08735627662938207,
+      "n19a0": 0.1134620367347075,
+      "n23a0": 0.10671383112917195
+    },
+    "speedup": 9.601184992107278
+  },
+  "runs": 36,
+  "stage": "smoke",
+  "verified_runs": 36
+}

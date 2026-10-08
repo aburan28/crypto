@@ -1,0 +1,81 @@
+{
+  "arithmetic_operation_speedup": null,
+  "beats_rho": false,
+  "classification": "accounting",
+  "confirmation": {
+    "candidate": "autolab",
+    "candidate_over_baseline": 0.8840796410458215,
+    "ci95": [
+      0.8561278728934172,
+      0.9084755440588737
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.8817201627440108,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.8355430464799293,
+      "n17a1": 0.8976946857562524,
+      "n19a0": 0.8928755175651415,
+      "n19a1": 0.8788605750019288,
+      "n23a0": 0.9175897775919861
+    },
+    "speedup": 1.1311198149717039
+  },
+  "family_wide_or_complexity_claim": false,
+  "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+  "instruction_speedup": null,
+  "provisional_challenger": "autolab",
+  "reasons": [
+    "No challenger passed every confirmation and replay threshold."
+  ],
+  "replay": {
+    "candidate": "autolab",
+    "candidate_over_baseline": 0.8840760083623131,
+    "ci95": [
+      0.8561235710798316,
+      0.9084722435359942
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.884172310312816,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.8355344501360984,
+      "n17a1": 0.897691254901963,
+      "n19a0": 0.8928750131008465,
+      "n19a1": 0.8788574183238779,
+      "n23a0": 0.9175876873043362
+    },
+    "speedup": 1.1311244627624581
+  },
+  "rho_comparison": {
+    "candidate": "rho",
+    "candidate_over_baseline": 0.07608741479970892,
+    "ci95": [
+      0.06983936982636958,
+      0.08226642217945004
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.19293946260859918,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.06903615368982476,
+      "n17a1": 0.06746005798921494,
+      "n19a0": 0.08332223805433508,
+      "n19a1": 0.07989275345188915,
+      "n23a0": 0.0822569361930382
+    },
+    "speedup": 13.142777982829108
+  },
+  "rho_over_winner": 0.07608741479970892,
+  "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+  "scope": "bounded public-hash ECDLP configuration tournament",
+  "status": "retained",
+  "unit": "valgrind-3.22-amd64-Ir",
+  "winner": "incumbent"
+}

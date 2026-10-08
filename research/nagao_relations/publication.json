@@ -1,0 +1,30 @@
+{
+  "schema": "nagao-publication-map-v1",
+  "explanation": "GitHub publication used the connected app because terminal Git had no credentials. Each published snapshot has exactly the same tree as its corresponding local commit. Frozen run records retain their original local commit identifiers. The original commit objects below can be restored with git hash-object -w -t commit after fetching the corresponding trees.",
+  "snapshots": [
+    {
+      "local_commit": "93a09e57ea6b5ccd47223da1531d716dda805246",
+      "published_commit": "f5723fe48964ff8500b27721903af2116a6e95ac",
+      "tree_sha": "6629a4016ed4f44ccb3abb19d10ca9e3cc300f6a",
+      "local_commit_object": "tree 6629a4016ed4f44ccb3abb19d10ca9e3cc300f6a\nparent a729acc73799148df87d37352f94d6e889acd5df\nauthor Codex <codex@openai.com> 1789297011 -0700\ncommitter Codex <codex@openai.com> 1789297011 -0700\n\nFreeze Nagao relation-encoding correctness contract\n"
+    },
+    {
+      "local_commit": "0cf9eaf837d50f8ee23bcddc2645906847e24228",
+      "published_commit": "6834d5c7e44c639b423cb6bdf879933c939528a8",
+      "tree_sha": "9fa6b0a3e453886d291d5fbb3c3a56a7725417dc",
+      "local_commit_object": "tree 9fa6b0a3e453886d291d5fbb3c3a56a7725417dc\nparent 93a09e57ea6b5ccd47223da1531d716dda805246\nauthor Codex <codex@openai.com> 1789297379 -0700\ncommitter Codex <codex@openai.com> 1789297379 -0700\n\nImplement Nagao incidence, norm and support-divisibility prototypes\n"
+    },
+    {
+      "local_commit": "187f05a1f2dc48f3e4394d96001b49b8f0f336b0",
+      "published_commit": "78da29fb253df403ac65b4b266ff4e7a1a13b6eb",
+      "tree_sha": "6059385974bf5fa159a6a86be9a7ac42a14430a0",
+      "local_commit_object": "tree 6059385974bf5fa159a6a86be9a7ac42a14430a0\nparent 0cf9eaf837d50f8ee23bcddc2645906847e24228\nauthor Codex <codex@openai.com> 1789297582 -0700\ncommitter Codex <codex@openai.com> 1789297582 -0700\n\nDocument Nagao correctness evidence and retain incomplete comparisons\n"
+    },
+    {
+      "local_commit": "19f7dc03b78959c65852107efec65f7635d43a26",
+      "published_commit": "68a039f11b49dff4724bfc6883eaa2be8fb634f5",
+      "tree_sha": "c221221dffc7e1013d7a21fb9c13cf7c4649b12f",
+      "local_commit_object": "tree c221221dffc7e1013d7a21fb9c13cf7c4649b12f\nparent 187f05a1f2dc48f3e4394d96001b49b8f0f336b0\nauthor Codex <codex@openai.com> 1789297882 -0700\ncommitter Codex <codex@openai.com> 1789297882 -0700\n\nKeep Nagao research notes and evidence under research/\n"
+    }
+  ]
+}

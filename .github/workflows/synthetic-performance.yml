@@ -1,0 +1,29 @@
+name: synthetic performance studies
+on:
+  pull_request:
+    paths:
+      - "research/synthetic_performance/**"
+      - ".github/workflows/synthetic-performance.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Correctness, censoring, and real child failure tests
+        run: python -m unittest discover -s research/synthetic_performance -v
+      - name: Synthetic smoke run (no performance threshold in shared CI)
+        run: python research/synthetic_performance/study.py --output /tmp/synthetic-study-smoke --trials 8 --arithmetic-trials 4 --count 256
+      - name: Verify receipts and regenerate report
+        run: python research/synthetic_performance/report.py /tmp/synthetic-study-smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: synthetic-study-smoke
+          path: /tmp/synthetic-study-smoke

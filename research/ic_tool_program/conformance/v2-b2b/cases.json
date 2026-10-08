@@ -1,0 +1,738 @@
+{
+ "suite": "ic tool programme conformance suite v2, B2b's cases",
+ "design": "research/ic_tool_program/design/schema-v2.md §3.3, §4.2, §4.4, §5.1-§5.3; research/ic_tool_program/rounds/B2b-subfield-kic-certificates/PROTOCOL.md",
+ "includes": "../v1 (B0), ../v2 (B1), ../v2-b2 (B2), ../v2-b3 (B3); ../run.py runs every step's cases",
+ "rules": [
+  "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is ../v2/params/.",
+  "B2b's expectations are its protocol's, made exact here: the codes, the exit statuses, the pipelines, and the report keys B2b adds (operation ic_single_target, ic.pipeline, speedup_eligible, the disclosure rho-frobenius-unused, the check certificate-invalid when it passes)."
+ ],
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2-b2b/make_cases.py",
+  "sha256": "559ead2655e28cda99cb182d00b1ea7903a1f49a49fe75c1eec89d3141cd522d"
+ },
+ "cases": [
+  {
+   "id": "C059-subfield-curve-paired",
+   "step": "B2b",
+   "checks": "B2b: kic on a curve over GF(4) (k = 2, e = 11), paired with rho-negation on the same point; the report says rho leaves the q-power Frobenius unused and that the pair is not speedup-eligible",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C059-subfield-curve-paired.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "result.known_answer": true,
+     "result.scalar": "1251672",
+     "all_verified": true,
+     "route.ic.pipeline": "kic",
+     "route.rho.pipeline": "rho-negation",
+     "speedup_eligible": false
+    },
+    "json_contains": {
+     "disclosures": [
+      {
+       "code": "curve-subfield",
+       "value": {
+        "degree": 2
+       }
+      },
+      {
+       "code": "rho-frobenius-unused"
+      }
+     ],
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": false,
+       "gate": "subfield-curve-unsupported"
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C060-subfield-curve-no-recipe",
+   "step": "B2b",
+   "checks": "design §5.3: recipe auto has no rule for kic on a curve over a subfield with k > 1",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C059-subfield-curve-paired.json",
+     "set": {
+      "method.index_calculus.recipe": "auto"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "no-recipe",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C061-subfield-curve-kic-alone",
+   "step": "B2b",
+   "checks": "B2b: solve index_calculus runs kic alone; its counts and certificate are the paired run's",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C059-subfield-curve-paired.json",
+     "set": {
+      "method": {
+       "solve": "index_calculus",
+       "index_calculus": {
+        "pipeline": "kic",
+        "recipe": {
+         "summands": 3,
+         "descent_summands": 2,
+         "collection_window": 16,
+         "collection_aim": true,
+         "solver": "pair_table",
+         "seed": 201,
+         "max_trials": 100000,
+         "collection": {
+          "unit_trials": 16,
+          "units": 1,
+          "max_units": 100000
+         },
+         "factor_base": {
+          "mode": "spec",
+          "spec": {
+           "kind": "subgroup_orbits",
+           "points": 528,
+           "seed": 201
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "paired.json": {
+     "copy": "{here}/C059-subfield-curve-paired.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "operation": "ic_single_target",
+     "ic.pipeline": "kic",
+     "result.scalar": "1251672",
+     "result.verified": true,
+     "result.known_answer": true,
+     "speedup_eligible": false
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/paired.json",
+      "--json",
+      "--out",
+      "{tmp}/paired-report.json",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/paired-report.json",
+     "paths": [
+      "counts",
+      "certificates.ic.scalar",
+      "certificates.ic.target",
+      "certificates.ic.curve"
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C062-curve-a-kic-alone",
+   "step": "B2b",
+   "checks": "B2b: kic alone on a Koblitz curve gives the paired price's index calculus, count for count",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C010-curve-a-other-generator.json",
+     "set": {
+      "method": {
+       "solve": "index_calculus",
+       "index_calculus": {
+        "pipeline": "kic",
+        "recipe": {
+         "summands": 3,
+         "descent_summands": 2,
+         "collection_window": 16,
+         "collection_aim": true,
+         "solver": "pair_table",
+         "seed": 201,
+         "max_trials": 100000,
+         "collection": {
+          "unit_trials": 16,
+          "units": 1,
+          "max_units": 100000
+         },
+         "factor_base": {
+          "mode": "spec",
+          "spec": {
+           "kind": "subgroup_orbits",
+           "points": 496,
+           "seed": 201
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "paired.json": {
+     "copy": "{cases}/C010-curve-a-other-generator.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "operation": "ic_single_target",
+     "ic.pipeline": "kic",
+     "result.scalar": "673310",
+     "result.verified": true,
+     "speedup_eligible": false
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/paired.json",
+      "--json",
+      "--out",
+      "{tmp}/paired-report.json",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/paired-report.json",
+     "paths": [
+      "counts",
+      "certificates.ic.scalar",
+      "certificates.ic.target",
+      "certificates.ic.curve"
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C063-subfield-curve-routed",
+   "step": "B2b",
+   "checks": "design §5.2: with a recipe, auto routes the index calculus to kic on a curve over GF(8) (k = 3, n = 33 odd), and rho to rho-negation",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C063-subfield-curve-routed.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "result.scalar": "201750077",
+     "all_verified": true,
+     "route.ic.pipeline": "kic",
+     "route.rho.pipeline": "rho-negation",
+     "speedup_eligible": false
+    },
+    "json_contains": {
+     "disclosures": [
+      {
+       "code": "curve-subfield",
+       "value": {
+        "degree": 3
+       }
+      },
+      {
+       "code": "rho-frobenius-unused"
+      }
+     ],
+     "route.considered": [
+      {
+       "pipeline": "ic-binary-s4",
+       "admitted": false,
+       "gate": "recipe-not-taken"
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": false,
+       "gate": "subfield-curve-unsupported"
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C064-subfield-too-large",
+   "step": "B2b",
+   "checks": "design §5.2: kic takes a curve over GF(2^k) for k <= 8 only",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C064-subfield-too-large.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "subfield-too-large",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C065-subfield-even-extension",
+   "step": "B2b",
+   "checks": "design §5.2: kic needs e = n/k odd",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C065-subfield-even-extension.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "even-extension-degree",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C066-challenge-order-certified",
+   "step": "B2b",
+   "checks": "design §3.3: a Pocklington certificate makes r's primality exact at 2^129",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/ecc2k130-challenge.json",
+     "set": {
+      "subgroup.order_certificate": {
+       "kind": "pocklington",
+       "factors": [
+        {
+         "prime": "2",
+         "exponent": 3,
+         "witness": "13"
+        },
+        {
+         "prime": "3",
+         "exponent": 1,
+         "witness": "3"
+        },
+        {
+         "prime": "11",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "109",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "131",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "263",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "32326729",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "21234899465981031419669",
+         "exponent": 1,
+         "witness": "2"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "checks": [
+      {
+       "code": "certificate-invalid",
+       "status": "pass",
+       "exact": true
+      },
+      {
+       "code": "order-composite",
+       "status": "pass",
+       "exact": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C067-challenge-certificate-invalid",
+   "step": "B2b",
+   "checks": "design §4.4: a certificate whose factored part is below sqrt(r) does not verify",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/ecc2k130-challenge.json",
+     "set": {
+      "subgroup.order_certificate": {
+       "kind": "pocklington",
+       "factors": [
+        {
+         "prime": "2",
+         "exponent": 3,
+         "witness": "13"
+        },
+        {
+         "prime": "3",
+         "exponent": 1,
+         "witness": "3"
+        },
+        {
+         "prime": "11",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "109",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "131",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "263",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "32326729",
+         "exponent": 1,
+         "witness": "2"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 2,
+    "json_paths": {
+     "refusal.code": "certificate-invalid",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C068-prime-field-certified",
+   "step": "B2b",
+   "checks": "design §4.2: a nested Pocklington certificate makes p's primality exact at 2^200",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C068-prime-field-certified.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "checks": [
+      {
+       "code": "certificate-invalid",
+       "status": "pass",
+       "exact": true
+      },
+      {
+       "code": "p-composite",
+       "status": "pass",
+       "exact": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C069-prime-field-certificate-invalid",
+   "step": "B2b",
+   "checks": "design §4.4: a nested certificate that fails at its second level does not verify",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C068-prime-field-certified.json",
+     "set": {
+      "field.p_certificate": {
+       "kind": "pocklington",
+       "factors": [
+        {
+         "prime": "2",
+         "exponent": 1,
+         "witness": "2"
+        },
+        {
+         "prime": "1383907110551755571579200746626419851532932013",
+         "exponent": 1,
+         "witness": "2",
+         "certificate": {
+          "kind": "pocklington",
+          "factors": [
+           {
+            "prime": "2",
+            "exponent": 1,
+            "witness": "4"
+           },
+           {
+            "prime": "981414014223442289715349",
+            "exponent": 1,
+            "witness": "2"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 2,
+    "json_paths": {
+     "refusal.code": "certificate-invalid",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C070-subfield-curve-estimates",
+   "step": "B2b",
+   "checks": "design §5.2 step 5: F2 estimates kic on a curve over a subfield and its rho-negation pair",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C059-subfield-curve-paired.json",
+     "set": {
+      "method.fidelity": "F2"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "estimated",
+     "estimate.ic.pipeline": "kic",
+     "estimate.rho.pipeline": "rho-negation"
+    }
+   },
+   "timeout_s": 300
+  }
+ ]
+}

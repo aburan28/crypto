@@ -1,0 +1,203 @@
+{
+  "valid": true,
+  "status": "Completed weighted-prefix/paired-Frobenius full-walk receipt passed retained-artifact audit",
+  "rawSha256": "1ad29dc750ce1b1a634e3f850d34e5a9bb1a67e40db8a0aea619e6fb6c08b8c2",
+  "auditorSha256": "c16cc406431317fe250df99a74898d9e57dcce6fc82567001d8b368a293bf6da",
+  "weightedPrefixModes": {
+    "control": 0,
+    "weighted1": 1,
+    "weighted2": 2
+  },
+  "canonicalInputsOnly": true,
+  "rootPredispatchReviewSha256": "cc6fa30fff442f585a1fdc521e5fb1ee9ad44e9cb8e18663d5c521a0cbc23eb9",
+  "predispatchReviewSha256": "ec0cf18f446463930528f61407f03a9e51bb2bdac87759b70bc460b4a509f8af",
+  "driverFreezeSha256": "539a9ef45f759e886c6d8529561ec5e03229504136f62af0cac8950a7be051af",
+  "prebuildSha256": "2e0a6c92653787f800481babfaac6b7a611573f46e61513ae0257faae5098718",
+  "sourceManifestHashes": {
+    "control": "70c11810b7019e20adfe64680a4d37e867b2f4f4be32d52d9e110f3c858613a1",
+    "weighted1": "70c11810b7019e20adfe64680a4d37e867b2f4f4be32d52d9e110f3c858613a1",
+    "weighted2": "70c11810b7019e20adfe64680a4d37e867b2f4f4be32d52d9e110f3c858613a1"
+  },
+  "sourceFilesPerMode": 157,
+  "binaries": {
+    "control": "e31d6a797053b4c71c0cbd0a2712859975375ac136b29a75157c4ccb772fa8ea",
+    "weighted1": "4140c89b41850b1959b9a48213ed987e5c0417a8bb9c8208eeb8554b52fa399e",
+    "weighted2": "019c32aa432843300145a5ff4c6cef9369464b1dab20cae31de295c91c9885d4"
+  },
+  "arithmeticBinaries": {
+    "control": "f3f8024358a6f1832d71c855edf8b8212b10c520c364d2b4e7cb75acc0826999",
+    "weighted1": "439f1b85592643c3bead2fa80fd59f9a8d3d81e114db6d68894ea844ad531a35",
+    "weighted2": "dc70d832e1096b67d9ae9d24a537ede3356e982afaffbe24fe593fc382f55466"
+  },
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-b88137d3-58f9-a717-be74-0cac8d443e80",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-b88137d3-58f9-a717-be74-0cac8d443e80",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "51"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-b88137d3-58f9-a717-be74-0cac8d443e80",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-b88137d3-58f9-a717-be74-0cac8d443e80",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2400 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "68"
+    }
+  },
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "sourceAndNativeCodeBindingsPassed": true,
+  "allCorrectnessGatesPassed": true,
+  "allRequiredCommandsCompletedWithExpectedStatus": true,
+  "gpuPairedFrobeniusPairsPerMode": 6240,
+  "gpuPairedFrobeniusOutputsPerMode": 12480,
+  "arithmeticModeLineAndAllSixPassLinesRequired": true,
+  "checkpointChildren": 36,
+  "expectedCheckpointRejections": 3,
+  "warmupsExcluded": 3,
+  "timedRows": 19,
+  "scalarUpdatesEveryTimedRow": 201863462912,
+  "scalarWalks": 6160384,
+  "stepsPerWalk": 32768,
+  "batches": {
+    "control": 16,
+    "weighted1": 16,
+    "weighted2": 16
+  },
+  "workers": {
+    "control": 385024,
+    "weighted1": 385024,
+    "weighted2": 385024
+  },
+  "screenQualified": true,
+  "screenWinner": "weighted2",
+  "screenRatesM": [
+    {
+      "mode": "control",
+      "rate": 13235.674
+    },
+    {
+      "mode": "weighted1",
+      "rate": 12875.351
+    },
+    {
+      "mode": "weighted2",
+      "rate": 13363.97
+    },
+    {
+      "mode": "control",
+      "rate": 13135.683
+    }
+  ],
+  "controlDriftPercent": -0.7554658720062113,
+  "qualificationThresholdM": 13301.852369999999,
+  "statistics": {
+    "confirmation": {
+      "control": {
+        "ratesM": [
+          13109.104,
+          13110.335,
+          13113.692
+        ],
+        "medianM": 13110.335,
+        "minimumM": 13109.104,
+        "maximumM": 13113.692
+      },
+      "weighted2": {
+        "ratesM": [
+          13338.98,
+          13323.276,
+          13318.348
+        ],
+        "medianM": 13323.276,
+        "minimumM": 13318.348,
+        "maximumM": 13338.98
+      }
+    },
+    "collection": {
+      "control": {
+        "ratesM": [
+          12851.526,
+          12856.025,
+          12847.556
+        ],
+        "medianM": 12851.526,
+        "minimumM": 12847.556,
+        "maximumM": 12856.025
+      },
+      "weighted2": {
+        "ratesM": [
+          13050.171,
+          13054.029,
+          13055.579
+        ],
+        "medianM": 13054.029,
+        "minimumM": 13050.171,
+        "maximumM": 13055.579
+      }
+    }
+  },
+  "pairedComparisons": {
+    "confirmation": {
+      "ratios": [
+        1.0175355996870572,
+        1.0162422241689477,
+        1.0156062838748996
+      ],
+      "medianPairedRatio": 1.0162422241689477,
+      "ratioOfMedians": 1.0162422241689477
+    },
+    "collection": {
+      "ratios": [
+        1.0154569192794693,
+        1.0154016501990313,
+        1.0161916398729844
+      ],
+      "medianPairedRatio": 1.0154569192794693,
+      "ratioOfMedians": 1.015757117092554
+    }
+  },
+  "corpusIdentity": {
+    "records": 5149,
+    "bytes": 164768,
+    "sortedSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b",
+    "matchingCorpora": 6
+  },
+  "goalEvaluation": {
+    "targetBillionScalarUpdatesPerSecond": 15,
+    "candidateMode": "weighted2",
+    "candidateBenchmarkMedianB": 13.323276,
+    "candidateCollectionMedianB": 13.054029,
+    "benchmarkMedianAtLeast15B": false,
+    "allThreeBenchmarkSamplesAtLeast15B": false,
+    "collectionMedianAtLeast15B": false
+  },
+  "findings": [],
+  "limits": [
+    "No job, compiler or numerical test rerun by this audit; it inspects only the owner-supplied terminal artifact.",
+    "Complete scalar rates apply to this fixed oneGPU public walk workload. Warmups/screen peaks are excluded from repeated goal evaluation; benchmark and DP34 medians remain separate.",
+    "Weighted-prefix/Frobenius mode is the varied configuration. B16, minBlocks2, T256, TILE256 and CLMAD1 are fixed. Field products per scalar remain5+5/B. Helper grouping, mask loads and instruction schedules can differ.",
+    "Weighted-prefix equivalence is validated for canonical131-bit fields with denominator tags cleared before arithmetic, including the existing whole-batch zero-denominator convention. Arbitrary noncanonical field inputs are outside this proof.",
+    "Checkpoint v2 intentionally rejects different batch/worker headers even at equal payload length; same-geometry and same-batch cross-mode resume are checked separately.",
+    "Temporary checkpoint and DP payload bytes are not retained; this audit verifies their recorded hashes, sizes, counts and bound executable helpers rather than independently rehashing those transient payloads.",
+    "API occupancy predictions and endpoint GPU telemetry do not prove achieved occupancy, cache hits, continuous clocks or a universal hardware ceiling."
+  ]
+}

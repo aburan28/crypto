@@ -124,8 +124,8 @@ pub fn pmac<C: BlockCipher128>(cipher: &C, message: &[u8]) -> [u8; 16] {
     let mut sigma = [0u8; 16];
     let mut offset = [0u8; 16];
 
-    let last_complete = !message.is_empty() && message.len() % BLOCK == 0;
-    let full_blocks_to_xor_inline = if last_complete { m - 1 } else { m - 1 };
+    let last_complete = !message.is_empty() && message.len().is_multiple_of(BLOCK);
+    let full_blocks_to_xor_inline = m - 1;
 
     for i in 1..=full_blocks_to_xor_inline {
         xor16(&mut offset, &l_table[ntz(i as u64) as usize]);
@@ -237,12 +237,10 @@ mod tests {
     #[test]
     fn pmac_four_block_message() {
         let key = AesKey::new(&h("2b7e151628aed2a6abf7158809cf4f3c")).unwrap();
-        let msg = h(
-            "6bc1bee22e409f96e93d7e117393172a\
+        let msg = h("6bc1bee22e409f96e93d7e117393172a\
              ae2d8a571e03ac9c9eb76fac45af8e51\
              30c81c46a35ce411e5fbc1191a0a52ef\
-             f69f2445df4f9b17ad2b417be66c3710",
-        );
+             f69f2445df4f9b17ad2b417be66c3710");
         let tag = pmac(&key, &msg);
         // Determinism + sensitivity.
         assert_eq!(tag, pmac(&key, &msg));

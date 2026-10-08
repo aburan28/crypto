@@ -1,0 +1,50 @@
+name: ECC2K-130 base-window input freeze
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-base-window-input-freeze.yml'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/FROZEN.json'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/INPUT_RECEIPT.json'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/fixtures/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ecc2k130-base-window-input-freeze.yml'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/FROZEN.json'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/INPUT_RECEIPT.json'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/fixtures/**'
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/ecc2k130-base-window-source-lock.yml
+            /examples/koblitz_base_window.rs
+            /research/notes/ecc2k130/base_window_screen_20261001/*
+            /research/notes/ecc2k130/base_window_screen_20261001/fixtures/*
+            /research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            /research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/check_pairing.py
+            /research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            /tools/isolated_bench.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Replay every source pin, prior corpus and public Q
+        run: |
+          python3 research/notes/ecc2k130/base_window_screen_20261001/verify_inputs.py \
+            --out "$RUNNER_TEMP/INPUT_RECEIPT.json"
+          cmp "$RUNNER_TEMP/INPUT_RECEIPT.json" \
+            research/notes/ecc2k130/base_window_screen_20261001/INPUT_RECEIPT.json

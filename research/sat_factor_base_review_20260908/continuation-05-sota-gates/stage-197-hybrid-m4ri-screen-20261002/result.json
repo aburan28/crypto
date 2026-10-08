@@ -1,0 +1,73 @@
+{
+  "schema": "koblitz_stage197_final.v1",
+  "candidate_commit": "f24dd7c8454f2ca500983f1d76396bf0a67e220d",
+  "finalizer_commit": "f24dd7c8454f2ca500983f1d76396bf0a67e220d",
+  "decision_status": "CONTINUE_TO_CONFIRMATION",
+  "candidate_selected": false,
+  "runtime_default": "selected build-serial inner phases, unconditional Rayon BlockTables construction with fresh per-run word buffers, parallel row reduction, and the twelve-worker fixed-X1 outer batch",
+  "claim_boundary": "One opened n=59 decomposition target and a shape-selective elimination screen. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "screen": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "hybrid_over_current": {
+          "wall": 0.7646994877539064,
+          "core": 0.8841279379859873,
+          "rss": 0.8312160441084009
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 0.7646994877539064,
+      "core": 0.8841279379859873,
+      "rss": 0.8312160441084009
+    },
+    "passed_performance_gate": true,
+    "status": "CONTINUE_TO_CONFIRMATION"
+  },
+  "measured_stage_charge": {
+    "components": 12,
+    "wall_seconds_sum": 265.834500667,
+    "total_core_seconds_sum": 1101.5642549999998,
+    "peak_rss_bytes_max": 5246697472,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 670,
+    "wall_seconds_sum": 25072.527086039,
+    "total_core_seconds_sum": 66321.843992,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "development compilation and tests before the exact native build",
+    "final result write and final verification after a charged composition control"
+  ],
+  "artifacts": {
+    "candidate_patch": {
+      "path": "candidate-hybrid-m4ri-4096.patch",
+      "bytes": 2833,
+      "sha256": "97b73ec79b866a6853dd92fd47e75d0750425c5052a8a75b593cc6086eacb5d1"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 4308,
+      "sha256": "b90531294f5e45d1f25050d2fb87728962b407350e1be61fb0aa0bada8900ef9"
+    },
+    "screen_result": {
+      "path": "development/screen/result.json",
+      "bytes": 25989,
+      "sha256": "90213ae0d2867121fcc9c0fd743f0cbc4273b9ddc9357fad1358364969938af4"
+    },
+    "screen_verification": {
+      "path": "development/screen/verification.json",
+      "bytes": 190,
+      "sha256": "d6714bab6981a9b28f99d3be2119bae547c1d577d7dd67a3a03889e784f3fa41"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

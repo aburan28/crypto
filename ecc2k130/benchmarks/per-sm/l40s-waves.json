@@ -1,0 +1,95 @@
+{
+  "kind": "per-SM occupancy wave sweep",
+  "modal": "L40S",
+  "gpu": "NVIDIA L40S",
+  "cc": "89",
+  "valid": true,
+  "sms": 142,
+  "automaticThreads": 72704,
+  "residentBlocks": 2,
+  "blockThreads": 256,
+  "registers": 94,
+  "packedClmad": true,
+  "packedTopClmad": false,
+  "pipeM": 85.0,
+  "referencePerSmM": 80.40314893617023,
+  "rows": [
+    {
+      "wave": 1,
+      "workers": 72704,
+      "medianM": 8618.576,
+      "medianB": 8.618576,
+      "minRateM": 8536.256,
+      "maxRateM": 8715.942,
+      "ratesM": [
+        8715.942,
+        8618.576,
+        8536.256
+      ],
+      "perSmM": 60.69419718309859,
+      "ratioToPipe": 0.7140493786246893,
+      "ratioToFour": 1.1152492573373722,
+      "ratioToRefSm": 0.7548733847635991,
+      "class": "engineering"
+    },
+    {
+      "wave": 4,
+      "workers": 290816,
+      "medianM": 7727.937,
+      "medianB": 7.727937,
+      "minRateM": 7715.84,
+      "maxRateM": 7886.831,
+      "ratesM": [
+        7886.831,
+        7727.937,
+        7715.84
+      ],
+      "perSmM": 54.42209154929577,
+      "ratioToPipe": 0.6402599005799503,
+      "ratioToFour": 1.0,
+      "ratioToRefSm": 0.676865175921156,
+      "class": "engineering"
+    },
+    {
+      "wave": 6,
+      "workers": 436224,
+      "medianM": 7464.325,
+      "medianB": 7.464325,
+      "minRateM": 7380.45,
+      "maxRateM": 7542.768,
+      "ratesM": [
+        7542.768,
+        7380.45,
+        7464.325
+      ],
+      "perSmM": 52.565669014084506,
+      "ratioToPipe": 0.6184196354598177,
+      "ratioToFour": 0.9658884382727241,
+      "ratioToRefSm": 0.6537762476916781,
+      "class": "engineering"
+    },
+    {
+      "wave": 8,
+      "workers": 581632,
+      "medianM": 7268.352,
+      "medianB": 7.268352,
+      "minRateM": 7221.557,
+      "maxRateM": 7313.062,
+      "ratesM": [
+        7313.062,
+        7221.557,
+        7268.352
+      ],
+      "perSmM": 51.18557746478873,
+      "ratioToPipe": 0.602183264291632,
+      "ratioToFour": 0.9405294064897268,
+      "ratioToRefSm": 0.6366116021826894,
+      "class": "engineering"
+    }
+  ],
+  "bestWave": 1,
+  "bestPerSmM": 60.69419718309859,
+  "fourBeaten": true,
+  "parsedFrom": "modal-log",
+  "modalApp": "ap-aNsvFhZH5TKB6fETEVUfLP"
+}

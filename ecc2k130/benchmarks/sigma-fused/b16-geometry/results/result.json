@@ -1,0 +1,14 @@
+{
+  "correctness_preflight": true,
+  "aa_max_absolute_drift": 0.00083294762622765361,
+  "aa_noise_gate": true,
+  "ab_ratios": [1.005953969845129, 1.0057812287675474, 1.0070886858486801, 1.0070231209919789, 1.0060301615919236],
+  "ab_median_ratio": 1.0060301615919236,
+  "ab_min_ratio": 1.0057812287675474,
+  "t256_median_million_per_second": 15578.687,
+  "t512_median_million_per_second": 15672.629000000001,
+  "selection_threshold_ratio": 1.01,
+  "select_t512": false,
+  "goal_26b_met": false,
+  "decision": "RETAIN_T256"
+}

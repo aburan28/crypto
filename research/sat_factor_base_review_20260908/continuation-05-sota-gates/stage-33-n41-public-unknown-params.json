@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "name": "k0n41-public-unknown-scalar-stage33",
+  "curve": {
+    "degree": 41,
+    "curve_a": 0
+  },
+  "summands": 3,
+  "solver": "pair_table",
+  "seed": 41031,
+  "max_trials": 200000,
+  "linear_algebra": {
+    "mode": "sparse",
+    "sparse": {
+      "wiedemann": {
+        "block_m": 4,
+        "block_n": 4
+      },
+      "filter": {
+        "target_excess": 32,
+        "merge_max_weight": 8
+      }
+    }
+  },
+  "collection": {
+    "unit_trials": 2048,
+    "units": 4,
+    "max_units": 64
+  },
+  "baseline": {
+    "rho": true,
+    "rho_seed": 5929075965221491791,
+    "rho_max_iterations": 268435456
+  },
+  "factor_base": {
+    "mode": "search",
+    "family": "union",
+    "min_dimension": 6,
+    "max_dimension": 6,
+    "max_abscissae": 4096,
+    "union_min_seed": 6,
+    "union_max_seed": 6,
+    "union_samples": 0,
+    "targets": 1024,
+    "exhaustive_cap": 4096,
+    "extra_relations": 2,
+    "prune": false,
+    "saturate": true
+  },
+  "targets": [
+    {
+      "public_hash_seed": 41001
+    },
+    {
+      "public_hash_seed": 41002
+    },
+    {
+      "public_hash_seed": 41003
+    },
+    {
+      "public_hash_seed": 41004
+    },
+    {
+      "public_hash_seed": 41005
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "child_effective_after": [
+    0
+  ],
+  "child_effective_before": [
+    0
+  ],
+  "inheritance_contract": "Linux process affinity is inherited by fork/exec descendants unless explicitly changed",
+  "initial_allowed_cpus": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "parent_effective_after": [
+    0
+  ],
+  "parent_effective_before": [
+    0
+  ],
+  "platform": "Linux",
+  "schema": "koblitz_stage25_affinity_receipt.v1",
+  "selected_cpu": 0,
+  "uname": [
+    "Linux",
+    "runnervmlun5p",
+    "6.17.0-1022-azure",
+    "#22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026",
+    "x86_64",
+    "x86_64"
+  ]
+}

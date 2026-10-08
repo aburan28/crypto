@@ -1,0 +1,119 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "hypothesis": "Last promoted single-target implementation; default base recipe unchanged.",
+    "id": "incumbent",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "1568ce30061d48aab917aab08d864653b1b70b009a9bec9f1d307b56a0b788bf"
+  },
+  {
+    "binary_relative": "source_candidates/cold_context/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "hypothesis": "Reuse immutable reduction tables during all base lifts; original support.",
+    "id": "cold_context",
+    "source_directory": "source_candidates/cold_context/source",
+    "source_manifest_relative": "source_candidates/cold_context/source-manifest.json",
+    "source_manifest_sha256": "7d91df7dbc11a1a160ead3ceadadee0503286c0525470b208d78c1acffc3b610"
+  },
+  {
+    "binary_relative": "source_candidates/orbits1/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "e7451c72ad5bc1bf84e44fbcf0cee35770f5cb1ec1c7bb731da34e970752c779",
+    "hypothesis": "Pay for 1 sampled signed orbit(s) before complete single-target recovery.",
+    "id": "orbits1",
+    "source_directory": "source_candidates/orbits1/source",
+    "source_manifest_relative": "source_candidates/orbits1/source-manifest.json",
+    "source_manifest_sha256": "96cd5e5b5802e2247a80445073c1691e105344bccea6c9819743f1f3c2aaa17f"
+  },
+  {
+    "binary_relative": "source_candidates/orbits1/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 2,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "3fc2bf1d89e97d9ac30177ded0f3b61337fa15b5b249dd1bad7f4cf4c40f32b3",
+    "hypothesis": "Pay for 2 sampled signed orbit(s) before complete single-target recovery.",
+    "id": "orbits2",
+    "source_directory": "source_candidates/orbits1/source",
+    "source_manifest_relative": "source_candidates/orbits1/source-manifest.json",
+    "source_manifest_sha256": "96cd5e5b5802e2247a80445073c1691e105344bccea6c9819743f1f3c2aaa17f"
+  },
+  {
+    "binary_relative": "source_candidates/orbits1/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 3,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "74ebda50751f5985d41faeecb871f983dc0261811227c40f4d40e766c589e69b",
+    "hypothesis": "Pay for 3 sampled signed orbit(s) before complete single-target recovery.",
+    "id": "orbits3",
+    "source_directory": "source_candidates/orbits1/source",
+    "source_manifest_relative": "source_candidates/orbits1/source-manifest.json",
+    "source_manifest_sha256": "96cd5e5b5802e2247a80445073c1691e105344bccea6c9819743f1f3c2aaa17f"
+  },
+  {
+    "binary_relative": "source_candidates/orbits1/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "7db4413034bdaf0eaee5557862aa0c112656e37d80e5fff1cf5941516dd63d38",
+    "hypothesis": "Pay for 4 sampled signed orbit(s) before complete single-target recovery.",
+    "id": "orbits4",
+    "source_directory": "source_candidates/orbits1/source",
+    "source_manifest_relative": "source_candidates/orbits1/source-manifest.json",
+    "source_manifest_sha256": "96cd5e5b5802e2247a80445073c1691e105344bccea6c9819743f1f3c2aaa17f"
+  },
+  {
+    "binary_relative": "source_candidates/orbits1/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_cube_root": true,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "58e0a219d4f270789d05533b447307b24704d491cdd45775c05ca7b3c1f997c0",
+    "hypothesis": "Predeclared cube-root size rule balances folded setup and collection costs.",
+    "id": "cube_root",
+    "source_directory": "source_candidates/orbits1/source",
+    "source_manifest_relative": "source_candidates/orbits1/source-manifest.json",
+    "source_manifest_sha256": "96cd5e5b5802e2247a80445073c1691e105344bccea6c9819743f1f3c2aaa17f"
+  }
+]

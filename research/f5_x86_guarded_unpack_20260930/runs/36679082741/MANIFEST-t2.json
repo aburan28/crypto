@@ -1,0 +1,199 @@
+{
+  "archive": "segments-t2.tar.gz",
+  "archive_bytes": 67390,
+  "archive_sha256": "cf076e92c1fdf5923eccf4d7cde7755e605635213d9d91c9e851dbb5f0a569ef",
+  "artifact_name": "f5-x86-guarded-unpack-segments-t2-b7225cd0962ce3d8b73973a3a32414cd42248e00",
+  "extract_command": "tar -xzf segments-t2.tar.gz",
+  "file_count": 22,
+  "files": [
+    {
+      "bytes": 147,
+      "path": "segment-cpu-choice-t2.json",
+      "sha256": "2858d155e5230a50e0b8816a5811feb3865e50272feda617cfbc2d541049c4c6"
+    },
+    {
+      "bytes": 1659,
+      "path": "segments-t2/INDEX.json",
+      "sha256": "57cc7858d0149e4c2ca2b8e83a2f80dd130cf838106bb40f9fa77e8224e01355"
+    },
+    {
+      "bytes": 219,
+      "path": "segments-t2/frozen/attempt1/STATUS.json",
+      "sha256": "7061053678638a2bc35fe644953ac1a6e2f189a62f5af1b298e166e2ce63e399"
+    },
+    {
+      "bytes": 2705,
+      "path": "segments-t2/frozen/attempt1/isolation.jsonl",
+      "sha256": "0ff220edef0fe11b65e1425af2df67831cd40e4820cc6bf701210e9ba397398a"
+    },
+    {
+      "bytes": 214809,
+      "path": "segments-t2/frozen/attempt1/paired.json",
+      "sha256": "6b891ccee395408a63837a083c530b51dc21e6c413cbabcf8a570910e9a0d700"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/frozen/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2461,
+      "path": "segments-t2/frozen/attempt1/stdout.txt",
+      "sha256": "5b5958e34ddb94ab1d280581d7308cf8acfb32b1cb8115bebf1805137dd68c1f"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t2/holdout_a/attempt1/STATUS.json",
+      "sha256": "23eaa7f29584f84202882a1ef6eaec18542d44f37429b2eb0f96999f9845e387"
+    },
+    {
+      "bytes": 2795,
+      "path": "segments-t2/holdout_a/attempt1/isolation.jsonl",
+      "sha256": "09da604635fba12d6f2620f031b3d6ebd0185afe5963a72303f702ec954885d5"
+    },
+    {
+      "bytes": 214864,
+      "path": "segments-t2/holdout_a/attempt1/paired.json",
+      "sha256": "b9db1637aa6889ada189a43ed7134d7833dcc12c0ffb7e42899fececd0880368"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/holdout_a/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2466,
+      "path": "segments-t2/holdout_a/attempt1/stdout.txt",
+      "sha256": "0bfeea941203de39f5f897b946a1376a907bf4daf2266bbec4a21b4165bd2a60"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t2/holdout_b/attempt1/STATUS.json",
+      "sha256": "abbabefbb6396fe048b68139faa1996f1ed151351c75aa941064c971b6d1cbb2"
+    },
+    {
+      "bytes": 2821,
+      "path": "segments-t2/holdout_b/attempt1/isolation.jsonl",
+      "sha256": "c45e9e8ad77ada6b9f382d3f5227c638fbc5e23724702b6263703dcb39916c79"
+    },
+    {
+      "bytes": 214469,
+      "path": "segments-t2/holdout_b/attempt1/paired.json",
+      "sha256": "965fcf688ada0b9369f897d5fdaaee7fd1488a30fba9870111589f77da432943"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/holdout_b/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2467,
+      "path": "segments-t2/holdout_b/attempt1/stdout.txt",
+      "sha256": "93e1ea5a85078c8870caf4e7df01347ad5e9eedb731621e0f8b83b6781c1da69"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t2/holdout_c/attempt1/STATUS.json",
+      "sha256": "e42311073c215d1d50018a645d45b926867a7ec2a1724639acea972c97e386c5"
+    },
+    {
+      "bytes": 2792,
+      "path": "segments-t2/holdout_c/attempt1/isolation.jsonl",
+      "sha256": "45c6dfdb75c708fa87eea06cee89eda3329ae3492e5f51cad434b05d3ec41fec"
+    },
+    {
+      "bytes": 214687,
+      "path": "segments-t2/holdout_c/attempt1/paired.json",
+      "sha256": "d5b06e4cee6249a2c9f0a56c9a20a31cac7ca8f896d467b094758b5e696c462e"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/holdout_c/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2457,
+      "path": "segments-t2/holdout_c/attempt1/stdout.txt",
+      "sha256": "7a358fdc0f06ddcc6636021d1fca5e49e53adfd341bb1adf34dc95cac88abd73"
+    }
+  ],
+  "head_sha": "1d8f231759e2decd323c79fd3a6c62dccedaa398",
+  "index": {
+    "seeds": {
+      "frozen": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "frozen",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_a": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_a",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_b": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_b",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_c": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_c",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      }
+    },
+    "status": "qualified",
+    "threads": 2
+  },
+  "merge_sha": "b7225cd0962ce3d8b73973a3a32414cd42248e00",
+  "run_id": 36679082741,
+  "run_url": "https://github.com/aburan28/crypto/actions/runs/36679082741",
+  "threads": 2
+}

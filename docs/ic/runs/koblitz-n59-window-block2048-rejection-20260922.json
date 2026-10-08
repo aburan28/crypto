@@ -1,0 +1,230 @@
+{
+  "candidate": {
+    "baseline_internal_block": 1024,
+    "candidate_internal_block": 2048,
+    "mathematical_output_changed": false
+  },
+  "claim_boundary": "Finite same-target rejected block-size trade. Doubling the selected 1024-entry window block regresses both relation-unit wall and CPU, so Stage 149 remains selected. No SOTA claim.",
+  "date": "2026-09-22",
+  "decision": {
+    "full_workflow_followup": false,
+    "reason": "candidate median relation-unit wall regresses 5.39 percent and unit CPU 0.95 percent",
+    "selected_stage149_unchanged": true,
+    "status": "rejected_wall_and_cpu_regression"
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "collection_m": 3,
+    "collection_window": 1024,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "uniform_summands_scanned": 102400000,
+    "uniform_trials": 100000,
+    "uniform_units": 1
+  },
+  "operation": "koblitz_n59_window_block2048_rejection",
+  "panel": {
+    "comparison": {
+      "pair_table_build_cpu_seconds": {
+        "baseline_median": 139.720237,
+        "candidate_median": 137.046976,
+        "candidate_over_baseline": 0.9808670450508898,
+        "change_fraction": -0.019132954949110176
+      },
+      "pair_table_build_wall_seconds": {
+        "baseline_median": 15.954154396,
+        "candidate_median": 15.9379575835,
+        "candidate_over_baseline": 0.998984790287346,
+        "change_fraction": -0.0010152097126539862
+      },
+      "relation_unit_cpu_seconds": {
+        "baseline_median": 22.704947500000017,
+        "candidate_median": 22.920353000000006,
+        "candidate_over_baseline": 1.0094871613334488,
+        "change_fraction": 0.009487161333448952
+      },
+      "relation_unit_wall_seconds": {
+        "baseline_median": 2.5129550624999997,
+        "candidate_median": 2.6484885625,
+        "candidate_over_baseline": 1.053933913113896,
+        "change_fraction": 0.053933913113896045
+      },
+      "relations": {
+        "baseline_median": 2157.0,
+        "candidate_median": 2157.0,
+        "candidate_over_baseline": 1.0,
+        "change_fraction": 0.0
+      },
+      "whole_cpu_seconds": {
+        "baseline_median": 168.47890999999998,
+        "candidate_median": 165.91448100000002,
+        "candidate_over_baseline": 0.9847789316775616,
+        "change_fraction": -0.015221068322438467
+      },
+      "whole_wall_seconds": {
+        "baseline_median": 21.724944187,
+        "candidate_median": 21.8932474585,
+        "candidate_over_baseline": 1.0077470059325038,
+        "change_fraction": 0.007747005932503712
+      }
+    },
+    "exact_relation_equality": true,
+    "medians": {
+      "baseline": {
+        "pair_table_build_cpu_seconds": 139.720237,
+        "pair_table_build_wall_seconds": 15.954154396,
+        "relation_unit_cpu_seconds": 22.704947500000017,
+        "relation_unit_wall_seconds": 2.5129550624999997,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 168.47890999999998,
+        "whole_wall_seconds": 21.724944187
+      },
+      "candidate": {
+        "pair_table_build_cpu_seconds": 137.046976,
+        "pair_table_build_wall_seconds": 15.9379575835,
+        "relation_unit_cpu_seconds": 22.920353000000006,
+        "relation_unit_wall_seconds": 2.6484885625,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 165.91448100000002,
+        "whole_wall_seconds": 21.8932474585
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+    "runs": [
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a1",
+        "pair_table_build_cpu_seconds": 141.508793,
+        "pair_table_build_wall_seconds": 16.3710385,
+        "peak_rss_bytes": 9838264320,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.09563600000004,
+        "relation_unit_wall_seconds": 2.488221875,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 170.665441,
+        "whole_wall_seconds": 22.112574958
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "c5367b5d8fe1e3471f887948b0b04e0854a6fd645d19dc0f837b2bd8f96bb545",
+        "label": "b1",
+        "pair_table_build_cpu_seconds": 135.879436,
+        "pair_table_build_wall_seconds": 15.732210667,
+        "peak_rss_bytes": 10075799552,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.504839000000004,
+        "relation_unit_wall_seconds": 2.720141458,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 164.360872,
+        "whole_wall_seconds": 21.692249667
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a2",
+        "pair_table_build_cpu_seconds": 137.931681,
+        "pair_table_build_wall_seconds": 15.537270292,
+        "peak_rss_bytes": 10084302848,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.314258999999993,
+        "relation_unit_wall_seconds": 2.53768825,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 166.292379,
+        "whole_wall_seconds": 21.337313416
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "c5367b5d8fe1e3471f887948b0b04e0854a6fd645d19dc0f837b2bd8f96bb545",
+        "label": "b2",
+        "pair_table_build_cpu_seconds": 138.214516,
+        "pair_table_build_wall_seconds": 16.1437045,
+        "peak_rss_bytes": 10076995584,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.335867000000007,
+        "relation_unit_wall_seconds": 2.576835667,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 167.46809000000002,
+        "whole_wall_seconds": 22.09424525
+      }
+    ]
+  },
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json",
+    "sha256": "f837bf3ca5be26da1431c759e00309e2ac637445da2256d92a9719574a84c288"
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-window-block512-rejection-20260922.json",
+    "sha256": "718d2eac67b17b1fec1494d8625bc790184ad9d17db73500cc1e9aca20b180da"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10084302848,
+    "retained_processes": 4,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 170.665441,
+        "label": "a1",
+        "peak_rss_bytes": 9838264320,
+        "status": "stopped",
+        "wall_seconds": 22.112574958
+      },
+      {
+        "core_seconds": 164.360872,
+        "label": "b1",
+        "peak_rss_bytes": 10075799552,
+        "status": "stopped",
+        "wall_seconds": 21.692249667
+      },
+      {
+        "core_seconds": 166.292379,
+        "label": "a2",
+        "peak_rss_bytes": 10084302848,
+        "status": "stopped",
+        "wall_seconds": 21.337313416
+      },
+      {
+        "core_seconds": 167.46809000000002,
+        "label": "b2",
+        "peak_rss_bytes": 10076995584,
+        "status": "stopped",
+        "wall_seconds": 22.09424525
+      }
+    ],
+    "retained_sequential_wall_seconds": 87.236383291,
+    "retained_total_core_seconds": 668.786782,
+    "scope": "four complete one-unit stop-after-collect workflows; compilation excluded"
+  },
+  "schema_version": 1,
+  "software": {
+    "baseline_binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+    "candidate_binary_blake3": "c5367b5d8fe1e3471f887948b0b04e0854a6fd645d19dc0f837b2bd8f96bb545",
+    "selected_source_stack_head": "5a0174cb"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-window-block2048-rejected-20260922.patch",
+    "sha256": "237a116db126a4b034656369206353154bf36d70ae3d4e5d7299b01056bb53cd",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "validation": [
+    "all four arms emit exactly 2157 relations with one canonical hash",
+    "candidate passes exact windowed-witness test",
+    "source-pinned binaries distinguish candidate and Stage-149 baseline",
+    "rejected patch applies cleanly to Stage-151 selected source"
+  ]
+}

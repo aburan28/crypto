@@ -1,0 +1,151 @@
+{
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "curve": "y^2 + xy = x^3 + x^2 + 1",
+  "curve_a": 1,
+  "direct_meet_in_the_middle": {
+    "reason": "run koblitz_pdp_backend direct-mitm under a separate process meter",
+    "status": "not_run_in_export_process"
+  },
+  "ell": 9,
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+      "bytes": 219207,
+      "cnf_clauses": 6495,
+      "path": "instance.xor.cnf",
+      "variables": 2000,
+      "xor_rows": 110
+    },
+    "magma_boolean_f4": {
+      "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+      "bytes": 404158,
+      "path": "instance.magma"
+    },
+    "wdsat_anf": {
+      "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+      "bytes": 255940,
+      "path": "instance.anf"
+    }
+  },
+  "factor_base_basis_bitmasks": [
+    "1",
+    "2",
+    "4",
+    "8",
+    "16",
+    "32",
+    "64",
+    "128",
+    "256"
+  ],
+  "factor_base_geometry": {
+    "curve_points": 483,
+    "distinct_curve_points": 483,
+    "minimum_required": 3
+  },
+  "factor_base_predicate": {
+    "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+    "enumerates_target_subgroup": false,
+    "kind": "polynomial_subspace",
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+  "irreducible_low_terms": [
+    0,
+    2,
+    4,
+    7
+  ],
+  "kind": "binary_koblitz_pdp_cross_solver_instance",
+  "m": 3,
+  "n": 59,
+  "native_sat": {
+    "conflict_budget": 100000,
+    "reason": "run koblitz_pdp_backend native-sat under a separate process meter",
+    "status": "not_run_in_export_process"
+  },
+  "representation": "symmetrised_s4",
+  "scope": "standalone blinded explicit-target point-decomposition problem; not a completed index-calculus attack",
+  "seed": 207239054604238230,
+  "source_equations": 110,
+  "source_instance": {
+    "id_blake3": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "identity": {
+      "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+      "curve_a": 1,
+      "ell": 9,
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "cnf_clauses": 6495,
+          "path": "instance.xor.cnf",
+          "variables": 2000,
+          "xor_rows": 110
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma"
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf"
+        }
+      },
+      "factor_base_basis_bitmasks": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256"
+      ],
+      "factor_base_predicate": {
+        "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+        "enumerates_target_subgroup": false,
+        "kind": "polynomial_subspace",
+        "uses_discrete_log_labels": false
+      },
+      "irreducible_low_terms": [
+        0,
+        2,
+        4,
+        7
+      ],
+      "m": 3,
+      "n": 59,
+      "representation": "symmetrised_s4",
+      "schema": "koblitz_pdp_source_identity.v2",
+      "seed": 207239054604238230,
+      "source_equations": 110,
+      "source_variables": 78,
+      "target": {
+        "x": "342002423881678665",
+        "y": "482559600513111561"
+      },
+      "target_mode": "explicit_affine"
+    },
+    "schema": "koblitz_pdp_source_instance.v2"
+  },
+  "source_max_degree": 3,
+  "source_max_monomials_per_equation": 516,
+  "source_variables": 78,
+  "target": {
+    "x": "342002423881678665",
+    "y": "482559600513111561"
+  },
+  "target_mode": "explicit_affine",
+  "timing_ns": {
+    "explicit_target_validation": 43875,
+    "factor_base_predicate_construction": 1722666,
+    "native_encoding_and_solve": null,
+    "source_system_construction": 34916333,
+    "whole_process_internal": 84117834
+  }
+}
+

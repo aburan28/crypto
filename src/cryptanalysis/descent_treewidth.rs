@@ -33,8 +33,8 @@
 //!
 //! - H. Bodlaender et al., *On exact algorithms for treewidth*, ESA 2006
 //!   (the subset DP used here).
-//! - `RESEARCH_FFD_WORKFLOW.md` iteration 3 (the spectral refutation that
-//!   motivates this) and `RESEARCH_FFD_PROOF_COMPLEXITY.md` §3.
+//! - `research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md` iteration 3 (the spectral refutation that
+//!   motivates this) and `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §3.
 
 use crate::cryptanalysis::ffd_harness::{quad_monomial_index, F2BoolPoly};
 
@@ -291,14 +291,20 @@ mod tests {
     #[test]
     fn descended_primal_graph_is_complete() {
         use crate::binary_ecc::F2mElement;
-        use crate::cryptanalysis::descent_lowgamma::{descend_on_subspace, BasisFamily, FactorSubspace};
         use crate::cryptanalysis::descent_expansion::enumerate_irreducibles;
+        use crate::cryptanalysis::descent_lowgamma::{
+            descend_on_subspace, BasisFamily, FactorSubspace,
+        };
         let n = 8;
         let n_sub = 4;
         let irr = enumerate_irreducibles(n, 1).into_iter().next().unwrap();
         let b = F2mElement::from_bit_positions(&[0, 3], n);
         let x3 = F2mElement::from_bit_positions(&[1], n);
-        for fam in [BasisFamily::Subfield, BasisFamily::Coordinate, BasisFamily::Random] {
+        for fam in [
+            BasisFamily::Subfield,
+            BasisFamily::Coordinate,
+            BasisFamily::Random,
+        ] {
             let v = FactorSubspace::build(fam, n, n_sub, &irr, 0x77).unwrap();
             let eqs = descend_on_subspace(n, &v, &irr, &b, &x3);
             let nv = 2 * n_sub;

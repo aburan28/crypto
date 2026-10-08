@@ -1,0 +1,38 @@
+{
+  "accepted_failure_retention_merge": "e5f2431a76217da4c7accb0f46ff5c0ff8f3df20",
+  "accepted_protocol_merge": "2352f10d9fb82aaee6657892e4df70f6613acba7",
+  "accepted_runner_merge": "8fe6bbd176f47148013621c4d0c12e67b772a216",
+  "accepted_source_commit": "e5f2431a76217da4c7accb0f46ff5c0ff8f3df20",
+  "binding": {
+    "asset_archive_sha256": "a1fd5bd49c80076f3b64fd5cb51d891b278afde765b4d3e39853692ac318bd96",
+    "asset_manifest_sha256": "e0c7a5edd01a6c64da810f2cf72a80b1b570d9031f96e8463cf1aaed2159e0f0",
+    "callable": "run",
+    "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+    "module": "static_sat_pipeline_v3",
+    "python_archive_sha256": "1f24a5ca7b3493275811f58eafb9885facd27ebe93e9b600ed6999df6bbccbdf",
+    "python_manifest_sha256": "a9c8f6542815770cadbba0674e43da192a6e8152285d35428b214948f4665582"
+  },
+  "execution_directory": "/Volumes/SSD990/llm/tmp/ic-static-sat-v3-full-development-20260930-execution0",
+  "execution_sha256": "4e6547c03cfe1fa54ae9a994c160e5d4afa987659dc72880c651885a0e9e8fa9",
+  "executions": 1,
+  "mathematical_seal": {
+    "candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97e",
+    "candidate_sha256": "037d51f59f1cd91079b7a579dd6db85983b2f810f17d1fe077fa7bbe142fbe00",
+    "method_sha256": "fca11adca4d22263ce6bb98719566bf0aff6b504110cb7d9f8020aa76f3da43b",
+    "panel_sha256": "21d183fc5bec5b4d27d65c81d3cbfe36a304bde9d4062245401b1d163275d44d",
+    "registration_stage": "before-execution",
+    "run_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97eWdf5c09464bedR0",
+    "schema_version": 3,
+    "source_sha256": "a242ada4b057f546368d3896b52522a22b84e46f5d2ed18e251bb9aa3afe87b8",
+    "workload_id": "df5c09464bed",
+    "workload_sha256": "c0928b26523ef92930682e8af2fd59746b7ec4f5a564ecb15bc48a4ee1ad45db"
+  },
+  "online_speedup": null,
+  "promotion_eligible": false,
+  "question": "development-source-control",
+  "registration_directory": "/Volumes/SSD990/llm/tmp/ic-static-sat-v3-full-development-20260930-registration0",
+  "registration_json_sha256": "78ad6662d4f03490091d27a37302da609177ae8127552b87d0f1f000fc39b7a7",
+  "schema_version": 3,
+  "status": "REGISTERED_NOT_DISPATCHED",
+  "timing_scope": "uncalibrated physical macOS ARM64 correctness diagnostic"
+}

@@ -1,0 +1,15 @@
+--- a/src/cryptanalysis/gaudry_cubic.rs
++++ b/src/cryptanalysis/gaudry_cubic.rs
+@@ -1439,8 +1439,11 @@
+     let f = &inst.curve.field;
+     let mut muls = 0u64;
+     stats.solves += 1;
++    // Measure the actual specialization work, including target powers.
++    // This also remains accurate if its evaluation strategy changes.
++    let before_specialization = f.muls();
+     let comps = pre.weil_restrict(f, x_r);
+-    muls += pre.terms.len() as u64 * 15;
++    muls += f.muls() - before_specialization;
+ 
+     let mut border_retry_seen = false;
+     for degree in [10u8, 11, 12, 13] {

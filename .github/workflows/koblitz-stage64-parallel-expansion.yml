@@ -1,0 +1,65 @@
+name: Koblitz Stage 64 n53 parallel expansion
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage64_parallel_expansion.py"
+      - ".github/workflows/koblitz-stage64-parallel-expansion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate ordered-parallel expansion controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage64_parallel_expansion.py
+          python3 scripts/run_koblitz_stage64_parallel_expansion.py self-test
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-parallel-expansion:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage64_parallel_expansion.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage64-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare serial expansion, ordered-parallel expansion, and rho
+        run: |
+          python3 scripts/run_koblitz_stage64_parallel_expansion.py run \
+            --build "$RUNNER_TEMP/stage64-build" \
+            --output "$RUNNER_TEMP/stage64-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage64_parallel_expansion.py verify \
+            --build "$RUNNER_TEMP/stage64-build" \
+            --output "$RUNNER_TEMP/stage64-run" \
+            > "$RUNNER_TEMP/stage64-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage64-parallel-expansion-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage64-build
+            ${{ runner.temp }}/stage64-run
+            ${{ runner.temp }}/stage64-verification.json

@@ -1,0 +1,119 @@
+{
+ "arms": [
+  "incumbent",
+  "rho",
+  "sized",
+  "sized_aa",
+  "inc_new"
+ ],
+ "binaries": {
+  "round": {
+   "path": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0025/worker",
+   "sha256": "1ca7f379335a72df7faa39354ad6d48e2647da34e7e41d5dd5f96788ae190eda"
+  },
+  "sized": {
+   "path": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0025/sized/worker",
+   "sha256": "45f4171996ec1efe3ac1774ddbac46b5747d5c986dc1bcb89771b41ef2aefef2"
+  }
+ },
+ "cases": [
+  "n13a0-000",
+  "n13a0-001",
+  "n13a0-002",
+  "n13a0-003",
+  "n13a0-004",
+  "n13a0-005",
+  "n13a0-006",
+  "n13a0-007",
+  "n13a0-008",
+  "n13a0-009",
+  "n13a0-010",
+  "n13a0-011",
+  "n17a1-000",
+  "n17a1-001",
+  "n17a1-002",
+  "n17a1-003",
+  "n17a1-004",
+  "n17a1-005",
+  "n17a1-006",
+  "n17a1-007",
+  "n17a1-008",
+  "n17a1-009",
+  "n17a1-010",
+  "n17a1-011",
+  "n19a0-000",
+  "n19a0-001",
+  "n19a0-002",
+  "n19a0-003",
+  "n19a0-004",
+  "n19a0-005",
+  "n19a0-006",
+  "n19a0-007",
+  "n19a0-008",
+  "n19a0-009",
+  "n19a0-010",
+  "n19a0-011",
+  "n19a1-000",
+  "n19a1-001",
+  "n19a1-002",
+  "n19a1-003",
+  "n19a1-004",
+  "n19a1-005",
+  "n19a1-006",
+  "n19a1-007",
+  "n19a1-008",
+  "n19a1-009",
+  "n19a1-010",
+  "n19a1-011",
+  "n23a0-000",
+  "n23a0-001",
+  "n23a0-002",
+  "n23a0-003",
+  "n23a0-004",
+  "n23a0-005",
+  "n23a0-006",
+  "n23a0-007",
+  "n23a0-008",
+  "n23a0-009",
+  "n23a0-010",
+  "n23a0-011"
+ ],
+ "cells": [
+  "n13a0",
+  "n17a1",
+  "n19a0",
+  "n19a1",
+  "n23a0"
+ ],
+ "cpu": 3,
+ "order": "per round, per case, Williams row (round + case index) mod 10",
+ "rounds": 20,
+ "spec": {
+  "inc_new": [
+   "sized",
+   "incumbent",
+   "exact"
+  ],
+  "incumbent": [
+   "round",
+   "incumbent",
+   "exact"
+  ],
+  "rho": [
+   "round",
+   "rho",
+   "exact"
+  ],
+  "sized": [
+   "sized",
+   "rho",
+   "recovered"
+  ],
+  "sized_aa": [
+   "sized",
+   "rho",
+   "recovered"
+  ]
+ },
+ "warmup": "one untimed run of every arm on the first case of each cell"
+}

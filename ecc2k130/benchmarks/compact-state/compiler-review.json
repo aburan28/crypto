@@ -1,0 +1,133 @@
+{
+  "valid": true,
+  "scope": "CPU-only CUDA compiler/source/native-code audit; no device run or timing",
+  "rawSha256": "f8e4852045e50b6edbf71742326ac5003fe3eaf2502f0188387258513266e625",
+  "driverFreezeSha256": "e274582652294913dffd8af9f90dce4f631268d5809b91b96b846394a538e2ce",
+  "hostReceiptSha256": "b4cf0f933b2c9aacad237960f5cb3a5ecd392e539fc9c4bc090027994e49d0a6",
+  "hostSourceManifestSha256": "8807022f1ab1c64b69c6ce2b21f3dd9991322b066d04c6239a9d3b3f7198dda1",
+  "sourceFiles": 158,
+  "uploadedSourceFiles": 32,
+  "compileAttempts": 2,
+  "ownerSession": 61073,
+  "ownerExitCode": 0,
+  "app": "ap-41GBxFpYGF7zdUJAhtBhBU",
+  "compiler": "13.3.73",
+  "architecture": "sm_120",
+  "controlCubinMatchesWeighted2": true,
+  "rows": {
+    "compact0": {
+      "cubinSha256": "3f13927e27c3c7ede49ff83c88e0a3722f2d063f06d2092e1531751935441395",
+      "resources": {
+        "walk": {
+          "REG": 100,
+          "STACK": 0,
+          "SHARED": 0,
+          "LOCAL": 0
+        },
+        "init": {
+          "REG": 98,
+          "STACK": 0,
+          "SHARED": 0,
+          "LOCAL": 0
+        }
+      },
+      "callerMemoryOpcodes": {
+        "walk": {
+          "LDG.E": 41,
+          "LDG.E.64": 3,
+          "STG.E.64": 8,
+          "STG.E": 27
+        },
+        "init": {
+          "LDG.E": 1,
+          "LDG.E.64": 1,
+          "STG.E": 11,
+          "STG.E.64": 2
+        }
+      },
+      "callerNonNop": {
+        "walk": 1667,
+        "init": 1222
+      },
+      "functionBindings": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "normalizedSha256": "36ac348c7937ecf8e2f2310bcd1ead052797a8abdf5c59eade071b0e0d1d748e",
+          "callTargetsResolved": true,
+          "helperCount": 9
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "normalizedSha256": "a2a6fb93564c1ea869e6969da05fe72dfeafa045fafb4e6151f7fd0d5832f3e0",
+          "callTargetsResolved": true,
+          "helperCount": 7
+        }
+      }
+    },
+    "compact1": {
+      "cubinSha256": "bc7ac573730f8e012eeccfc72c1a897743acec63ab3d362c69f0fa63bdf393b4",
+      "resources": {
+        "walk": {
+          "REG": 108,
+          "STACK": 0,
+          "SHARED": 0,
+          "LOCAL": 0
+        },
+        "init": {
+          "REG": 98,
+          "STACK": 0,
+          "SHARED": 0,
+          "LOCAL": 0
+        }
+      },
+      "callerMemoryOpcodes": {
+        "walk": {
+          "LDG.E.U8": 8,
+          "LDG.E.128": 8,
+          "LDG.E": 1,
+          "LDG.E.64": 3,
+          "STG.E.64": 8,
+          "STG.E": 2,
+          "STG.E.128": 5,
+          "STG.E.U8": 5
+        },
+        "init": {
+          "LDG.E": 1,
+          "LDG.E.64": 1,
+          "STG.E.128": 2,
+          "STG.E.U8": 2,
+          "STG.E.64": 2,
+          "STG.E": 1
+        }
+      },
+      "callerNonNop": {
+        "walk": 1614,
+        "init": 1220
+      },
+      "functionBindings": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "normalizedSha256": "018822ee693ab773b859bca99e9ec2c434ff64ca330a1fb26311cb747b88cef8",
+          "callTargetsResolved": true,
+          "helperCount": 9
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "normalizedSha256": "9ed80cb3d810ddc0f23dbbf2b7578e17201861c30287edd80c2be9924c4b6929",
+          "callTargetsResolved": true,
+          "helperCount": 7
+        }
+      }
+    }
+  },
+  "gpuAllocated": false,
+  "executableRun": false,
+  "remaining": [
+    "Device accessor test, arithmetic and complete client checks.",
+    "Real cross-layout checkpoint and normalized-state checks.",
+    "Matched complete-walk benchmark and point collection."
+  ],
+  "limits": [
+    "Instruction counts are static inventory; loops, predicates and calls determine dynamic visits.",
+    "Vector128 and byte widths are observed in compiled native code; device correctness remains untested.",
+    "Direct byte stores agree with source byte ownership. No device race/memory checker has run.",
+    "Identical arithmetic source can receive different register assignments and instruction schedules.",
+    "Compression, register counts and compiler success do not establish a throughput gain or15B/s."
+  ]
+}

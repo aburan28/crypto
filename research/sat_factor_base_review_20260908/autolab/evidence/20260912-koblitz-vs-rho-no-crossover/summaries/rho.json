@@ -1,0 +1,28 @@
+{
+  "all_targets_verified": true,
+  "arm": "rho",
+  "charged_ms_per_target": 12.821725665039061,
+  "charged_total_ms": 13129.447080999998,
+  "command": [
+    "/Volumes/SSD990/crypto-ecc2k-status-wt/target/release/examples/koblitz_rho_fixture",
+    "37",
+    "0",
+    "signed_frobenius",
+    "1024",
+    "packed",
+    "14412094330580221154"
+  ],
+  "fixtures": 1024,
+  "per_target_totals": {
+    "rows": 1024,
+    "totals": {
+      "setup_ms": 4071.292132000002,
+      "total_ms": 13129.447080999998,
+      "validation_ms": 1312.2248399999987,
+      "walk_ms": 7745.930109000008,
+      "walk_steps": 2230922.0
+    }
+  },
+  "targets_verified": 1024,
+  "whole_process_wall_ms": 13160.28237499998
+}

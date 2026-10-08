@@ -1,0 +1,48 @@
+{
+  "beat_id": "koblitz.compact_orbit.n61_single_target",
+  "chosen_K": 400,
+  "claim_check": "PASS",
+  "claim_check_counts": {
+    "fail": 0,
+    "pass": 64
+  },
+  "cold_ratio": {
+    "max": 1737.399843760899,
+    "median": 116.72384721729296,
+    "median_95ci_bootstrap": [
+      96.03469170068239,
+      153.72462203178068
+    ],
+    "min": 26.831140083070313
+  },
+  "created_at": "2026-10-01T20:06:14.892964+00:00",
+  "git_head": "34f70a32bbbf4988169e965fba0ddcffcc707208",
+  "k_candidates": [
+    300,
+    400,
+    500,
+    600,
+    700,
+    800
+  ],
+  "launch_mode": "single_target_panel",
+  "online_speedup": {
+    "max": 1374.2596801129419,
+    "median": 9.933367430975881,
+    "median_95ci_bootstrap": [
+      4.568183889935712,
+      14.36575317437825
+    ],
+    "min": 0.16766204355858172
+  },
+  "phase": "done",
+  "pinned_cpu": null,
+  "run_id": "20261001T200614Z-d687d78737",
+  "schema_version": "1.0",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "tune_workloads": 4,
+  "updated_at": "2026-10-01T21:23:53.669806+00:00",
+  "workloads": 64,
+  "workloads_done": 64
+}

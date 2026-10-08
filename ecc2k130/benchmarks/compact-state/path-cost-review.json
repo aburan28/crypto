@@ -1,0 +1,223 @@
+{
+  "valid": true,
+  "scope": "Read-only static selected live/non-reporting/unguarded steady worker-step analysis of retained compact0/1 CUDA code. No new compile, source edit, GPU request, job poll, live log or private-target action.",
+  "rawPath": "/private/tmp/ecc2k-compact-state-cpu-20260912/compile-result.json",
+  "rawSha256": "f8e4852045e50b6edbf71742326ac5003fe3eaf2502f0188387258513266e625",
+  "rootCpuReviewSha256": "720902d4cf8a2a5e294898b4359a6d700b9247e1402f4141ca16d5d1b8d5bee4",
+  "pathScriptSha256": "1d1d6481bd92625c86467e6235a6f632a780000949b36121bfa540b55b8c16e8",
+  "pathArtifactSha256": "75ca29e57109ad882eafa63e9ba166c43978df84dbcf243af068595d874ac726",
+  "reviewScriptSha256": "149f3ca4db8baf6b7032f62b11efe7fea3fe508f2fced919830f20d068b50704",
+  "priorPathSha256": "06036ef45d7f3b3c58a861f2251238243d9d9da8f64244969852649d6edbf20a",
+  "priorScriptSha256": "fd1bba5ba54278e9794bdbaa53903cf154b2ba1a2598dc847e649f8765d15d3e",
+  "oldCompact0MatchesPriorWp2Exactly": true,
+  "batch": 16,
+  "weightedPrefixMode": 2,
+  "branchInventory": {
+    "compact0": {
+      "branchDecisions": 142,
+      "addressVisits": {
+        "0x8b0": 16,
+        "0x8d0": 16,
+        "0xf70": 16,
+        "0x1fc0": 16,
+        "0x2270": 16,
+        "0x2130": 15,
+        "0x5870": 16,
+        "0x5960": 15,
+        "0x6820": 16
+      },
+      "addressTaken": {
+        "0x8d0": 16,
+        "0xf70": 16,
+        "0x1fc0": 1,
+        "0x2270": 15,
+        "0x2130": 15,
+        "0x5960": 15,
+        "0x6820": 15,
+        "0x5870": 1
+      },
+      "outerStepBranch": "0x6830",
+      "outerBranchCountedButNotTakenByModel": true,
+      "start": "0x1a0"
+    },
+    "compact1": {
+      "branchDecisions": 142,
+      "addressVisits": {
+        "0x800": 16,
+        "0x820": 16,
+        "0xe60": 16,
+        "0x1e50": 16,
+        "0x2090": 16,
+        "0x1fa0": 15,
+        "0x5620": 16,
+        "0x56c0": 15,
+        "0x64d0": 16
+      },
+      "addressTaken": {
+        "0x820": 16,
+        "0xe60": 16,
+        "0x1e50": 1,
+        "0x2090": 15,
+        "0x1fa0": 15,
+        "0x56c0": 15,
+        "0x64d0": 15,
+        "0x5620": 1
+      },
+      "outerStepBranch": "0x64e0",
+      "outerBranchCountedButNotTakenByModel": true,
+      "start": "0x1d0"
+    }
+  },
+  "rows": {
+    "compact0": {
+      "cubinSha256": "3f13927e27c3c7ede49ff83c88e0a3722f2d063f06d2092e1531751935441395",
+      "perB16WorkerStep": {
+        "nonNop": 35872,
+        "fieldStateAndFlagLogicalLoadBytes": 1984,
+        "maskTableLogicalLoadBytes": 4032,
+        "totalLogicalLoadBytes": 6016,
+        "fieldStateLogicalStoreBytes": 1280,
+        "CLMAD": 510,
+        "callerGlobalLoadInstructions": 496,
+        "callerGlobalStoreInstructions": 320,
+        "maskGlobalLoadInstructions": 1008,
+        "allGlobalMemoryInstructions": 1824,
+        "localBytes": 0
+      },
+      "perScalarUpdate": {
+        "nonNop": 2242.0,
+        "fieldStateAndFlagLogicalLoadBytes": 124.0,
+        "maskTableLogicalLoadBytes": 252.0,
+        "totalLogicalLoadBytes": 376.0,
+        "fieldStateLogicalStoreBytes": 80.0,
+        "CLMAD": 31.875,
+        "callerGlobalLoadInstructions": 31.0,
+        "callerGlobalStoreInstructions": 20.0,
+        "maskGlobalLoadInstructions": 63.0,
+        "allGlobalMemoryInstructions": 114.0,
+        "localBytes": 0.0
+      },
+      "callerVisitsPerWorkerStep": 10978,
+      "helperVisitsPerWorkerStep": 24894,
+      "callerGlobalMemoryOpcodesPerWorkerStep": {
+        "LDG.E": 496,
+        "STG.E": 320
+      },
+      "maskGlobalOpcodesPerWorkerStep": {
+        "LDG.E.CONSTANT": 1008
+      },
+      "fieldProductsPerWorkerStep": 85,
+      "fieldProductsPerScalar": 5.3125,
+      "fieldCalls": {
+        "ordinaryPolynomial": 17,
+        "pairedPolynomial": 30,
+        "normalInverseProducts": 8
+      },
+      "sigmaCalls": {
+        "pairedWalk": 16,
+        "inverseScalar4": 1,
+        "inverseScalar8": 1,
+        "inverse16": 1,
+        "inverse32": 1,
+        "inverse65": 1
+      },
+      "reachableHelperBodyCounts": {
+        "16mulPolynomial131ENS0_4P131ES1_": 172,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 251,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 267,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 272,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 297,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 297,
+        "20mulPolynomialPair131ENS0_4P131ES1_S1_": 323,
+        "23sigmaWalkNetworkPair131ENS0_4P131ES1_i": 505,
+        "6mul131ENS0_4P131ES1_": 352
+      }
+    },
+    "compact1": {
+      "cubinSha256": "bc7ac573730f8e012eeccfc72c1a897743acec63ab3d362c69f0fa63bdf393b4",
+      "perB16WorkerStep": {
+        "nonNop": 35084,
+        "fieldStateAndFlagLogicalLoadBytes": 1696,
+        "maskTableLogicalLoadBytes": 4032,
+        "totalLogicalLoadBytes": 5728,
+        "fieldStateLogicalStoreBytes": 1088,
+        "CLMAD": 510,
+        "callerGlobalLoadInstructions": 208,
+        "callerGlobalStoreInstructions": 128,
+        "maskGlobalLoadInstructions": 1008,
+        "allGlobalMemoryInstructions": 1344,
+        "localBytes": 0
+      },
+      "perScalarUpdate": {
+        "nonNop": 2192.75,
+        "fieldStateAndFlagLogicalLoadBytes": 106.0,
+        "maskTableLogicalLoadBytes": 252.0,
+        "totalLogicalLoadBytes": 358.0,
+        "fieldStateLogicalStoreBytes": 68.0,
+        "CLMAD": 31.875,
+        "callerGlobalLoadInstructions": 13.0,
+        "callerGlobalStoreInstructions": 8.0,
+        "maskGlobalLoadInstructions": 63.0,
+        "allGlobalMemoryInstructions": 84.0,
+        "localBytes": 0.0
+      },
+      "callerVisitsPerWorkerStep": 10305,
+      "helperVisitsPerWorkerStep": 24779,
+      "callerGlobalMemoryOpcodesPerWorkerStep": {
+        "LDG.E.U8": 96,
+        "LDG.E.128": 96,
+        "LDG.E": 16,
+        "STG.E.128": 64,
+        "STG.E.U8": 64
+      },
+      "maskGlobalOpcodesPerWorkerStep": {
+        "LDG.E.CONSTANT": 1008
+      },
+      "fieldProductsPerWorkerStep": 85,
+      "fieldProductsPerScalar": 5.3125,
+      "fieldCalls": {
+        "ordinaryPolynomial": 17,
+        "pairedPolynomial": 30,
+        "normalInverseProducts": 8
+      },
+      "sigmaCalls": {
+        "pairedWalk": 16,
+        "inverseScalar4": 1,
+        "inverseScalar8": 1,
+        "inverse16": 1,
+        "inverse32": 1,
+        "inverse65": 1
+      },
+      "reachableHelperBodyCounts": {
+        "16mulPolynomial131ENS0_4P131ES1_": 167,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 251,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 267,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 272,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 297,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 297,
+        "20mulPolynomialPair131ENS0_4P131ES1_S1_": 322,
+        "23sigmaWalkNetworkPair131ENS0_4P131ES1_i": 505,
+        "6mul131ENS0_4P131ES1_": 352
+      }
+    }
+  },
+  "instructionVisitDeltaPerScalar": -49.25,
+  "instructionVisitReductionPercent": 2.1966993755575377,
+  "callerDeltaPerScalar": -42.0625,
+  "helperDeltaPerScalar": -7.1875,
+  "independentMemoryFieldReview": {
+    "path": "/private/tmp/ecc2k-compact-native-independent-review-20260912/review.json",
+    "sha256": "11ce4dae50514479adfdc88b0b3ac05c8a3e8fe000d3ff57e48a2b1727cc3518"
+  },
+  "findings": [],
+  "limits": [
+    "These are static instruction visits on explicit branch choices, not cycles, executed hardware traces, throughput gains or ceilings.",
+    "All16 forward and reverse slots, slot0 special cases and reachable helper instructions through RET are included. Unreachable post-return trap/padding is excluded.",
+    "The launch prologue, final EXIT, DP/report and overdue-guard paths, reseeding, checkpoint/host/driver work are outside this steady-step scope, matching the prior WP2 model.",
+    "The loop-end branch instruction is counted once per worker-step; the model stops there rather than simulating the next outer iteration.",
+    "Global-byte inventories count actual LDG/STG operand widths and active predicates. LDC/LDCU/parameter/constant-memory instructions still contribute to total instruction visits but are not assigned to these global-buffer byte totals.",
+    "Logical byte counts and per-instruction requests do not identify DRAM transfers, cache hits/misses, coalescer merging, achieved occupancy, issue/latency limits or speed.",
+    "Registers108 versus100 and unchanged zero stack/local/shared/spills are retained compiler context, not runtime occupancy measurements.",
+    "The owner GPU comparison and any measured rates are separate evidence and were not read or audited here."
+  ]
+}

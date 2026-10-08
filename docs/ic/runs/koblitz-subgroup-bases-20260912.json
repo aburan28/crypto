@@ -1,0 +1,237 @@
+{
+ "schema_version": 1,
+ "operation": "koblitz_index_calculus_subgroup_base_series",
+ "date": "2026-09-12",
+ "what_this_is": "The same four Koblitz rungs as koblitz-scaling-20260911.json, run with factor bases drawn from the prime-order subgroup instead of a subspace union. One series per rung, 32 synthetic known-answer targets each, with the in-process signed-Frobenius rho baseline; every rung solved all 32 and the baseline recovered and verified all 32.",
+ "what_this_is_not": [
+  "Not an independent replay: one build, one host.",
+  "Not a single-instance result. The whole-process verdict at degree 41 compares one precompute plus 32 descents against 32 rho walks. For ONE target rho is still about 24x faster there, because the precompute is paid whole.",
+  "Not a statement about the algebraic oracles. Groebner, SAT and the Semaev systems are written over a subspace and cannot use these bases; this applies to the pair-table oracle only.",
+  "Not asymptotic. The work per target is still Theta(r/|F|^2) with |F| capped by memory; this moves the constant, not the exponent.",
+  "Not a claim about deployed curves: these subgroups are 21 to 40 bits.",
+  "Not a promoted ledger row. Promotion needs the autolab flow and a second author."
+ ],
+ "claim_boundary": "synthetic_known_answer",
+ "why_the_base_changes_anything": "A relation and a descent both ask for a target of <G> to be a sum of m base points. Points outside <G> can only sum into it when their cofactor parts cancel, and a subspace union is further correlated, so its sums concentrate away from the targets. Measured at degree 41 over 3000 random targets with m = 3: the subspace union decomposes 1 target in 273, a Frobenius-closed base of random abscissae 1 in 67, and a base drawn from the subgroup 1 in 28 \u2014 which is the |F|^3/(3! r) rate a random base would give. Column counts are the same to within a few percent, so the linear algebra does not pay for it.",
+ "selection_is_logarithm_free": "A base point is [h]P for a random curve point P, h the cofactor. That lands in the subgroup for every P, needs no rejection, and reveals nothing about the logarithm of [h]P.",
+ "parameters": "docs/ic/params/k0n{31,37,39,41}-subgroup.json",
+ "software": {
+  "commit": "cb351405970dadf8be334141c8f628baa8e77cec",
+  "profile": "release"
+ },
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "series": [
+  {
+   "degree": 31,
+   "subgroup_order": "1439393",
+   "targets": 32,
+   "factor_base": {
+    "family": "subgroup_orbits",
+    "points": 2480,
+    "signed_orbits": 40,
+    "projected_columns": 40
+   },
+   "relations": {
+    "collected": 416,
+    "collect_seconds": 0.245,
+    "units_extended": 9
+   },
+   "linear_algebra": {
+    "logs_stage_seconds": 1.079,
+    "solve_seconds": 0.000385,
+    "core_dimension": 2
+   },
+   "ic": {
+    "descent_seconds_per_target": 0.001303,
+    "descent_trials_per_target": 1,
+    "precompute_seconds": 1.5,
+    "verified": 32
+   },
+   "rho": {
+    "seconds_per_target": 0.001237,
+    "steps_per_target": 171,
+    "verified": 32
+   },
+   "ratio": {
+    "charged": 0.9493,
+    "amortised": 0.0257
+   },
+   "verdict": {
+    "amortised_crossover": false,
+    "charged_crossover": false,
+    "charged_margin": -0.05342251918047447,
+    "whole_process_crossover": false
+   },
+   "workflow_seconds": 3.116
+  },
+  {
+   "degree": 37,
+   "subgroup_order": "230603167",
+   "targets": 32,
+   "factor_base": {
+    "family": "subgroup_orbits",
+    "points": 4144,
+    "signed_orbits": 56,
+    "projected_columns": 56
+   },
+   "relations": {
+    "collected": 128,
+    "collect_seconds": 0.833,
+    "units_extended": 0
+   },
+   "linear_algebra": {
+    "logs_stage_seconds": 1.623,
+    "solve_seconds": 0.000361,
+    "core_dimension": 14
+   },
+   "ic": {
+    "descent_seconds_per_target": 0.002867,
+    "descent_trials_per_target": 1,
+    "precompute_seconds": 3.049,
+    "verified": 32
+   },
+   "rho": {
+    "seconds_per_target": 0.00576,
+    "steps_per_target": 2259,
+    "verified": 32
+   },
+   "ratio": {
+    "charged": 2.0092,
+    "amortised": 0.0587
+   },
+   "verdict": {
+    "amortised_crossover": false,
+    "charged_crossover": true,
+    "charged_margin": 0.5022868064836987,
+    "whole_process_crossover": false
+   },
+   "workflow_seconds": 6.436
+  },
+  {
+   "degree": 39,
+   "subgroup_order": "68616367",
+   "targets": 32,
+   "factor_base": {
+    "family": "subgroup_orbits",
+    "points": 5616,
+    "signed_orbits": 72,
+    "projected_columns": 72
+   },
+   "relations": {
+    "collected": 272,
+    "collect_seconds": 1.192,
+    "units_extended": 4
+   },
+   "linear_algebra": {
+    "logs_stage_seconds": 3.579,
+    "solve_seconds": 0.000519,
+    "core_dimension": 13
+   },
+   "ic": {
+    "descent_seconds_per_target": 0.00268,
+    "descent_trials_per_target": 1,
+    "precompute_seconds": 5.821,
+    "verified": 32
+   },
+   "rho": {
+    "seconds_per_target": 0.00365,
+    "steps_per_target": 1072,
+    "verified": 32
+   },
+   "ratio": {
+    "charged": 1.3618,
+    "amortised": 0.0198
+   },
+   "verdict": {
+    "amortised_crossover": false,
+    "charged_crossover": true,
+    "charged_margin": 0.2656565906159185,
+    "whole_process_crossover": false
+   },
+   "workflow_seconds": 12.563
+  },
+  {
+   "degree": 41,
+   "subgroup_order": "549756390943",
+   "targets": 32,
+   "factor_base": {
+    "family": "subgroup_orbits",
+    "points": 5248,
+    "signed_orbits": 64,
+    "projected_columns": 64
+   },
+   "relations": {
+    "collected": 124,
+    "collect_seconds": 1.533,
+    "units_extended": 0
+   },
+   "linear_algebra": {
+    "logs_stage_seconds": 0.516,
+    "solve_seconds": 0.000448,
+    "core_dimension": 17
+   },
+   "ic": {
+    "descent_seconds_per_target": 0.014351,
+    "descent_trials_per_target": 21,
+    "precompute_seconds": 2.973,
+    "verified": 32
+   },
+   "rho": {
+    "seconds_per_target": 0.119546,
+    "steps_per_target": 126425,
+    "verified": 32
+   },
+   "ratio": {
+    "charged": 8.3301,
+    "amortised": 1.1147
+   },
+   "verdict": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "charged_margin": 0.8799537084564014,
+    "whole_process_crossover": true
+   },
+   "workflow_seconds": 8.083
+  }
+ ],
+ "summary": {
+  "charged_ratio_rho_over_ic": {
+   "31": 0.9493,
+   "37": 2.0092,
+   "39": 1.3618,
+   "41": 8.3301
+  },
+  "descent_ms_per_target": {
+   "31": 1.3,
+   "37": 2.9,
+   "39": 2.7,
+   "41": 14.4
+  },
+  "crossovers": {
+   "31": {
+    "amortised_crossover": false,
+    "charged_crossover": false,
+    "whole_process_crossover": false
+   },
+   "37": {
+    "amortised_crossover": false,
+    "charged_crossover": true,
+    "whole_process_crossover": false
+   },
+   "39": {
+    "amortised_crossover": false,
+    "charged_crossover": true,
+    "whole_process_crossover": false
+   },
+   "41": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "whole_process_crossover": true
+   }
+  }
+ }
+}

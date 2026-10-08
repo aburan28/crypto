@@ -1,6 +1,7 @@
 #include "../include/curveparams.h"
 #include "../include/packed131.h"
 #include <cstdio>
+#include <vector>
 using R = Ref<CfgF131>;
 using P = eccPacked131::P131;
 static unsigned long long state = 0x131ab123456789ULL;
@@ -46,7 +47,34 @@ static bool reductionChecks() {
     printf("PASS: %d host polynomial reductions against long division, including ignored upper-word bits and canonical outputs\n",2*cases);
     return true;
 }
+static bool sigmaTableChecks() {
+    // The table is built from the normal-basis arithmetic; this checks that
+    // its nibble decomposition reproduces x + sigma^j(x) on polynomial
+    // coordinates for every basis vector, dense cases and random inputs.
+    std::vector<uint32_t> table(eccPacked131::SIGMA_TABLE_WORDS);
+    eccPacked131::buildSigmaTable(table.data());
+    std::vector<P> inputs;
+    for (int bit=0;bit<131;bit++) { P a{}; a.v[bit/32]=1u<<(bit%32); inputs.push_back(a); }
+    inputs.push_back(P{}); inputs.push_back(P{{~0u,~0u,~0u,~0u,7u}});
+    for (int i=0;i<512;i++) {
+        P a; for (int w=0;w<5;w++) a.v[w]=uint32_t(randomWord()); a.v[4]&=7u; inputs.push_back(a);
+    }
+    int cases=0;
+    for (int q=0;q<8;q++) for (const P &xp:inputs) {
+        const P a=eccPacked131::fromPolynomial131(xp);
+        const P want=eccPacked131::toPolynomial131(eccPacked131::add131(a,eccPacked131::sigma131(a,q+3)));
+        const P got=eccPacked131::sigmaPlusTable131(table.data(),xp,q);
+        if (!same(got,want) || unpack(eccPacked131::fromPolynomial131(got))!=
+                R::add(unpack(a),R::sigma(unpack(a),q+3))) {
+            printf("sigma table mismatch at map %d, case %d\n",q,cases);return false;
+        }
+        ++cases;
+    }
+    printf("PASS: %d host Frobenius table lookups against the network and the independent reference\n",cases);
+    return true;
+}
 int main() {
+    if (!sigmaTableChecks()) return 1;
     printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
     if (!reductionChecks()) return 1;
     // Check every pair of unit coefficients, including the top-three-bit
@@ -90,6 +118,26 @@ int main() {
             unpack(eccPacked131::inv131(pa))!=R::inv(a)) {
             printf("packed field mismatch at case %d\n",test);return 1;
         }
+        // The two-chain kernel's paired routines must be bit-identical to the
+        // single ones on each of their two inputs.
+        {
+            const P pc=pack(c);
+            P m1,m2,i1,i2;
+            eccPacked131::mul131x2(pa,pb,pc,pa,&m1,&m2);
+            eccPacked131::inv131x2(pa,pc,&i1,&i2);
+            if (!same(m1,eccPacked131::mul131(pa,pb)) || !same(m2,eccPacked131::mul131(pc,pa)) ||
+                !same(i1,eccPacked131::inv131(pa)) || !same(i2,eccPacked131::inv131(pc)) ||
+                unpack(i2)!=R::inv(c)) {
+                printf("paired mul131x2/inv131x2 mismatch at case %d\n",test);return 1;
+            }
+            for (int j:{0,1,2,4,8,16,32,65}) {
+                P sa=pa,sc=pc;
+                eccPacked131::sigma131x2(&sa,&sc,j);
+                if (!same(sa,eccPacked131::sigma131(pa,j)) || !same(sc,eccPacked131::sigma131(pc,j))) {
+                    printf("paired sigma131x2 mismatch at case %d, power %d\n",test,j);return 1;
+                }
+            }
+        }
         const int powers[]={0,1,2,3,4,5,6,7,8,9,10,16,32,65,130,131};
         for (int j:powers) if (unpack(eccPacked131::sigma131(pa,j))!=R::sigma(a,j)) {
             printf("packed Frobenius mismatch at case %d, power %d\n",test,j);return 1;
@@ -107,5 +155,45 @@ int main() {
             !same(eccPacked131::mulPolynomial131(a,polynomialEdges[1]),a) ||
             !same(pair.first,polynomialEdges[0]) || !same(pair.second,a)) return 1;
     }
-    puts("PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference");
+    // The table square (ECC_PACKED_SQUARE_TABLE) must be the spread-then-reduce
+    // square bit for bit: every basis coefficient, the edges, and random inputs.
+    {
+        static uint32_t tab[eccPacked131::SQ_TAB_WORDS];
+        eccPacked131::fillSquareTable131(tab);
+        int cases=0;
+        for (int test=0;test<131+3+20000;test++) {
+            P a{};
+            if (test<131) a.v[test/32]=1u<<(test%32);
+            else if (test<134) a=polynomialEdges[test-131];
+            else { for (int i=0;i<5;i++) a.v[i]=unsigned(randomWord()); a.v[4]&=7u; }
+            const P want=eccPacked131::squarePolynomial131(a);
+            const P got=eccPacked131::squarePolynomialTable131(a,tab);
+            if (!same(got,want) || unpack(eccPacked131::fromPolynomial131(got))!=R::sqr(unpack(eccPacked131::fromPolynomial131(a)))) {
+                printf("table square mismatch at case %d\n",test);return 1;
+            }
+            cases++;
+        }
+        printf("PASS: %d table squares bit-identical to the spread-then-reduce square\n",cases);
+    }
+    // The polynomial-basis inverse (ECC_PACKED_INV_POLY) must be the walk's
+    // conversion-sandwiched inv131 bit for bit, and an inverse.
+    {
+        int cases=0;
+        for (int test=0;test<131+2+2000;test++) {
+            P a{};
+            if (test<131) a.v[test/32]=1u<<(test%32);
+            else if (test==131) a=polynomialEdges[1];
+            else if (test==132) a=polynomialEdges[2];
+            else { for (int i=0;i<5;i++) a.v[i]=unsigned(randomWord()); a.v[4]&=7u; }
+            const P want=eccPacked131::toPolynomial131(eccPacked131::inv131(eccPacked131::fromPolynomial131(a)));
+            const P got=eccPacked131::invPoly131(a);
+            const auto an=unpack(eccPacked131::fromPolynomial131(a));
+            if (!same(got,want) || unpack(eccPacked131::fromPolynomial131(got))!=R::inv(an)) {
+                printf("polynomial-basis inverse mismatch at case %d\n",test);return 1;
+            }
+            cases++;
+        }
+        printf("PASS: %d polynomial-basis inverses bit-identical to toPolynomial131(inv131(fromPolynomial131(a)))\n",cases);
+    }
+    puts("PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference; paired mul131x2/inv131x2/sigma131x2 bit-identical to the single routines");
 }

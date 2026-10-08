@@ -1,6 +1,6 @@
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_index_calculus_dlp, koblitz_index_calculus_dlp_with_progress, DecompositionStrategy,
-    KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, KoblitzRelationAttemptDisposition,
 };
 use num_bigint::BigUint;
 
@@ -61,7 +61,7 @@ fn progress_covers_the_matrix_path_and_preserves_the_result() {
     }
 }
 #[test]
-fn incomplete_collection_never_announces_a_solve_or_verification() {
+fn incomplete_collection_records_terminal_rank_without_solve_or_verification() {
     let curve = KoblitzCurve::new(0, 9).unwrap();
     let target = curve.mul(curve.generator(), &BigUint::from(53u32));
     let options = KoblitzIcOptions {
@@ -75,17 +75,32 @@ fn incomplete_collection_never_announces_a_solve_or_verification() {
         })
         .unwrap();
     assert!(report.log.is_none());
+    assert_eq!(report.rank_checks, 1);
+    assert_eq!(report.linear_solve_attempts, 1);
+    assert_eq!(report.terminal_matrix_rank, 0);
     assert!(matches!(
         events.last(),
-        Some(KoblitzIcEvent::RelationCollectionFinished {
+        Some(KoblitzIcEvent::LinearAlgebraIncomplete)
+    ));
+    assert!(events.iter().any(|event| matches!(
+        event,
+        KoblitzIcEvent::RelationCollectionFinished {
             collected: 0,
             trials: 0
-        })
-    ));
+        }
+    )));
+    assert!(events.iter().any(|event| matches!(
+        event,
+        KoblitzIcEvent::MatrixRank {
+            rows: 0,
+            rank: 0,
+            candidate_produced: false,
+            ..
+        }
+    )));
     assert!(!events.iter().any(|e| matches!(
         e,
-        KoblitzIcEvent::LinearAlgebraStarted { .. }
-            | KoblitzIcEvent::LinearAlgebraFinished
+        KoblitzIcEvent::LinearAlgebraFinished
             | KoblitzIcEvent::VerificationStarted
             | KoblitzIcEvent::VerificationFinished { .. }
     )));
@@ -162,8 +177,28 @@ fn direct_relation_reports_a_skip_without_claiming_a_matrix_solve() {
         event,
         KoblitzIcEvent::LinearAlgebraStarted { .. } | KoblitzIcEvent::LinearAlgebraFinished
     )));
-    assert!(matches!(
-        events.last(),
-        Some(KoblitzIcEvent::VerificationFinished { verified: true })
-    ));
+    let verified = events
+        .iter()
+        .position(|event| {
+            matches!(
+                event,
+                KoblitzIcEvent::VerificationFinished { verified: true }
+            )
+        })
+        .unwrap();
+    let completed = events
+        .iter()
+        .position(|event| {
+            matches!(
+                event,
+                KoblitzIcEvent::RelationAttemptFinished {
+                    trial: 1,
+                    disposition: KoblitzRelationAttemptDisposition::DirectSolved,
+                    ..
+                }
+            )
+        })
+        .unwrap();
+    assert!(verified < completed);
+    assert_eq!(completed, events.len() - 1);
 }

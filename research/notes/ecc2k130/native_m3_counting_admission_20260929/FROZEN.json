@@ -1,0 +1,20 @@
+{
+  "domain": "ECC2K130-NATIVE-M3-COUNTING-ADMISSION-20260929-v1",
+  "parent_main_commit": "ce79b74645c8e564ec361918dfb72bd990cc56d6",
+  "protocol_commit": "bfa61af45cab9c05e10c85117369e9fb3005fb22",
+  "source_commit": "1b590c23b588523388c1761d905cd603db8ae20f",
+  "sha256": {
+    "research/ecc2k130_leaf_native_m3_gate_20260926/admission.py": "2a03a30c337d5dfb4d0d30ddff102293db6c8461ea1520138ef268ea5c8f0ece",
+    "research/notes/ecc2k130/m10_export_capacity_20260925/inputs/balanced_m10_result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "research/notes/ecc2k130/native_m3_chain_20260929/chain.py": "03b3e97b74e35a100ab60a7c5be0cea09108405e185cccda74c6942a94b21944",
+    "research/notes/ecc2k130/native_m3_counting_admission_20260929/PROTOCOL.md": "6b9ec7d2b8c3cc888dfca226d87523329d2d3dfcefeecd25dc771e80f09aeeb6",
+    "research/notes/ecc2k130/native_m3_counting_admission_20260929/compute.py": "1efbf81a30ae787a116c7a2f378a221a1a3b0d599c74aeb08f77f240525e4bd9",
+    "research/notes/ecc2k130/native_m3_counting_admission_20260929/verify.py": "8f8e16aaa274431f5c8c5d87f86dc51e1b0acff7167fc88981d85b63564eba7f"
+  },
+  "subgroup_order": "680564733841876926932320129493409985129",
+  "physical_f0_points": 7977,
+  "ordered_slot_dimensions": [44, 44, 43],
+  "illustrative_target_probes": 1000000,
+  "rows_per_probe_max": 1,
+  "support_ceiling_thresholds": ["1/100", "1/2"]
+}

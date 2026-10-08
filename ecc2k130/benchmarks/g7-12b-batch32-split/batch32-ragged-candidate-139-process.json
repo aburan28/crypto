@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-split-batch32",
+    "--packed",
+    "--threads",
+    "252",
+    "--steps",
+    "64",
+    "--launches",
+    "4",
+    "--run-id",
+    "139",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/batch32-ragged-candidate-139.ckpt",
+    "--dp-weight",
+    "52",
+    "--verify",
+    "16",
+    "--dp-file",
+    "/home/ubuntu/crypto/ecc2k130/build/batch32-ragged-candidate-139.dp"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 3.5726038470020285,
+  "log": "batch32-ragged-candidate-139.log",
+  "log_sha256": "cebfbc67e38f49e982a03b2bd4540c2663d59ed263403ad7d4d9187121464f2b",
+  "binary_sha256": "38d5aba095270e826fb70857a59ffdab11dea3670a6e548a3c48dc962a951823"
+}

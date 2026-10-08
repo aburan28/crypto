@@ -1,0 +1,26 @@
+{
+  "goal": "28 billion completed scalar walk updates per second on one RTX PRO 6000 Blackwell Server Edition",
+  "class": "engineering",
+  "historicalReferenceBPerSecond": {"benchmark": 14.637530, "dp34": 14.106673},
+  "algorithmicBoundary": "Generic-group square-root scaling: Omega(sqrt(n / 262)) with the same automorphism quotient; unchanged by kernel tuning.",
+  "fieldProductsPerScalarUpdate": 5.3125,
+  "fieldProductRatioToControl": 1.0,
+  "endToEndDlpSpeedup": null,
+  "scope": "Pollard walk kernel and DP collection. This is not an index-calculus solver or a full-DLP speedup claim; the WDSat solver regression is inapplicable.",
+  "profilers": ["Nsight Systems", "Nsight Compute"],
+  "profilerDurationsUsedAsThroughput": false,
+  "geometryScreen": {
+    "workers": [385024, 192512, 96256],
+    "batch": 16,
+    "stepsPerLaunch": 1024,
+    "launches": [32, 64, 128],
+    "completedUpdatesPerSample": 201863462912,
+    "repeats": 3,
+    "dpWeights": [0, 34],
+    "screenOnly": true,
+    "caveat": "Grid sizes use different seed panels; this ranks configurations but does not establish a matched-corpus gain. First rows are retained without claiming thermal steady state."
+  },
+  "promotion": "Fresh paired confirmation after screening, at least five pairs, a 95% paired confidence interval excluding no improvement, all correctness gates and equal verified workloads. To meet the 28B goal require >=28B/s unprofiled benchmark median on the target GPU and no DP34 regression.",
+  "otherHardware": "Record G7 RTX PRO 4500 separately; do not scale its rate into a claimed RTX PRO 6000 measurement.",
+  "cloudLimit": "One active benchmark GPU, 45-minute workload timeout, 50-minute controller deadline, independent 55-minute shutdown."
+}

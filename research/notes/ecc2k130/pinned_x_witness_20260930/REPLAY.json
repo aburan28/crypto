@@ -1,0 +1,35 @@
+{
+  "archive_members_rehashed": 61,
+  "archive_sha256": "ae77d16f351ddde2a6aad2cfef53654d7a4990e71ebe4133114a89cccbb12cdd",
+  "cell": "n37_L1024",
+  "example_new_witness": {
+    "pinned_matches_selected": false,
+    "pinned_pair_x": [
+      52233795630,
+      118401155494
+    ],
+    "pinned_witness_signs": [
+      1,
+      0,
+      1,
+      0
+    ],
+    "selected_pair_x": [
+      21388718391,
+      109549077023
+    ]
+  },
+  "fixture_sha256": "7c937ab6511dfe09ace2ef0291b5a107aece15e37aee52bd8834f67642df4da2",
+  "full_rank_traces_replayed": 15,
+  "old_frozen_status": "FAIL",
+  "selected_pinned_mismatches": 15,
+  "selected_targets_replayed": 30,
+  "status": "PASS_CORRECTNESS_ONLY",
+  "tamper_rejected": [
+    "out_of_field_pin",
+    "in_field_wrong_root",
+    "wrong_recovered_scalar",
+    "wrong_point_index"
+  ],
+  "timing_eligible": false
+}

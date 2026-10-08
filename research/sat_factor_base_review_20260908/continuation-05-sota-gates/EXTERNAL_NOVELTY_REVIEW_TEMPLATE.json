@@ -8,6 +8,23 @@
     "conflicts": []
   },
   "review_date": null,
+  "evidence_instructions_file": "EXTERNAL_REVIEW_EVIDENCE.md",
+  "reproduction_evidence": [],
+  "coverage_gaps": [],
+  "gate_evidence_ids": {
+    "1_full_resource_accounting": [],
+    "2_matched_solver_and_ggmp_comparison": [],
+    "3_required_metrics": [],
+    "4_n31_n41_larger_pdp": [],
+    "5_unknown_scalar_without_constructed_logs": [],
+    "6_automorphism_rho_full_cost": [],
+    "7_independent_reproduction_and_novelty": []
+  },
+  "literature_matching": {
+    "sources_and_parameter_comparisons": [],
+    "curve_and_base_size_confounders": [],
+    "sampling_and_cluster_limitations": []
+  },
   "artifact_binding": {
     "repository_commit": null,
     "stage13_archive_commit": "5dbe54dd468e914b5872d10d06e7c44d01b0a236",
@@ -46,6 +63,13 @@
       "content_sha256": null,
       "sections_or_pages_used": [],
       "relevance": "GGMP Frobenius-invariant and linearized-polynomial factor bases, orbit rewriting, and n=31 Magma comparison"
+    },
+    {
+      "url": "https://www.codit2025-virtual-event.com/web/content/1168?download=true&unique=08332185a80db65206de10342978b5b2225887bb",
+      "version_or_retrieval_date": null,
+      "content_sha256": null,
+      "sections_or_pages_used": [],
+      "relevance": "Blomme, Cherif, Ionica and Dequen, 2025: ANF-Based Satisfiability for Weil-Descent Cryptographic Attacks (SATIC); prior ANF/SAT methods for Semaev and Weil-descent systems"
     }
   ],
   "contribution_assessments": [

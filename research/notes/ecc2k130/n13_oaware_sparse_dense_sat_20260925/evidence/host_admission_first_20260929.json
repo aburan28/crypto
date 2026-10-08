@@ -1,0 +1,30 @@
+{
+  "competing_solvers": [
+    {
+      "name": "cryptominisat5",
+      "pid": 31686
+    }
+  ],
+  "decision": "HELD",
+  "disk_free_bytes": 5385490432,
+  "freeze_sha256": "ada0ecb94236cd3430653cb6203eb80782a731b4b508f5d427d879a43b00f717",
+  "frozen_preflight": true,
+  "limits": {
+    "load_1_max": 2.0,
+    "load_5_max": 3.0,
+    "min_free_bytes": 4294967296
+  },
+  "load_1_5_15": [
+    6.13623046875,
+    6.3359375,
+    9.62158203125
+  ],
+  "logical_cpus": 14,
+  "process_tree_monitor": true,
+  "psutil": "7.2.2",
+  "python": "3.12.8",
+  "runner": "/Users/adamburan/.local/share/uv/python/cpython-3.12.8-macos-aarch64-none/bin/python3.12",
+  "schema": "n13-paired-host-admission-v1",
+  "source_commit": "3fa70fc1b30425a78654c20f46342faca7f01772",
+  "utc": "2026-09-29T08:35:24.408226+00:00"
+}

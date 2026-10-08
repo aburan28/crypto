@@ -1,0 +1,51 @@
++ cd /work/ecc
++ cat
++ docker run --rm --gpus all -v /work/ecc:/src -w /src nvidia/cuda:13.3.1-devel-ubuntu24.04 bash /src/verifyjob2.sh
++ grep -v '^==$\|^== CUDA\|Copyright\|license\|LICENSE\|NGC\|^$\|CUDA Version'
+==========
+==========
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+=== verify table: 300 device reports re-walked by the host reference
+packed table walk: 1 (8 branches, 48508 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 48, 16 steps per launch
+  finished: 6.335 M it/s, 264288 distinguished points (300 verified against the reference, 0 dropped)
+exit: 0
+=== verify alusq: 300 device reports re-walked by the host reference
+packed table walk: 1 (8 branches, 48508 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 48, 16 steps per launch
+  finished: 6.340 M it/s, 264288 distinguished points (300 verified against the reference, 0 dropped)
+exit: 0
+=== verify legacy: 300 device reports re-walked by the host reference
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 48, 16 steps per launch
+  finished: 5.924 M it/s, 264606 distinguished points (300 verified against the reference, 0 dropped)
+exit: 0
+=== bench legacy rep 4
+  finished: 14347.139 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2415 MHz, 516.13 W, 41
+=== bench table rep 4
+  finished: 16628.982 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2407 MHz, 558.19 W, 41
+=== bench alusq rep 4
+  finished: 16482.439 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2407 MHz, 555.08 W, 47
+=== bench legacy rep 5
+  finished: 14433.841 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2422 MHz, 518.05 W, 49
+=== bench table rep 5
+  finished: 16550.264 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2400 MHz, 556.81 W, 47
+=== bench alusq rep 5
+  finished: 16419.310 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2392 MHz, 553.81 W, 47
+=== bench legacy rep 6
+  finished: 14408.255 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2422 MHz, 525.88 W, 49
+=== bench table rep 6
+  finished: 16515.912 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2385 MHz, 560.27 W, 55
+=== bench alusq rep 6
+  finished: 16407.864 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2377 MHz, 553.12 W, 52
++ echo JOB_DONE
+JOB_DONE

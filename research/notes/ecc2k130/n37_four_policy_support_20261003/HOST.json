@@ -1,0 +1,14 @@
+{
+  "schema": "n37-four-policy-host-v1",
+  "platform": "macOS Darwin 25.6.0 arm64",
+  "machine": "MacBook Pro Mac16,7",
+  "chip": "Apple M4 Pro",
+  "cpu_cores": 14,
+  "memory": "48 GB",
+  "rustc": "1.93.1 (01f6ddf75 2026-02-11), aarch64-apple-darwin",
+  "cargo": "1.93.1",
+  "build": "release --locked",
+  "isolation": "L0; no core affinity or quiet-host certification",
+  "wall_time_admitted": false,
+  "measurement_scope": "support construction and independent arithmetic replay only"
+}

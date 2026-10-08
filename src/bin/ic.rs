@@ -1,10 +1,26 @@
 //! Research CLI: read-only curve inspection and bounded known-answer experiments.
+#[path = "ic/bench.rs"]
+mod bench;
+#[path = "ic/boundary.rs"]
+mod boundary;
+#[path = "ic/corpus.rs"]
+mod corpus;
+#[path = "ic/descent.rs"]
+mod descent;
 #[path = "ic/experiment.rs"]
 mod experiment;
 #[path = "ic/fixed.rs"]
 mod fixed;
+#[path = "ic/large_prime.rs"]
+mod large_prime;
 #[path = "ic/params.rs"]
 mod params;
+#[path = "ic/price.rs"]
+mod price;
+#[path = "ic/rho.rs"]
+mod rho;
+#[path = "ic/workflow.rs"]
+mod workflow;
 
 use clap::{Args, Parser, Subcommand};
 use serde_json::{json, Value};
@@ -13,6 +29,7 @@ use std::{
     io::{Read, Write},
     path::PathBuf,
     process::ExitCode,
+    sync::OnceLock,
 };
 
 #[derive(Parser)]
@@ -59,6 +76,27 @@ enum Action {
     Solve(experiment::SolveArgs),
     /// Persist and resume index calculus on fixed K_0 parameters through degree 131.
     Fixed(fixed::FixedArgs),
+    /// Run or resume a staged select → collect → logs → solve pipeline from a parameter file (or act as a collection worker).
+    Workflow(workflow::WorkflowArgs),
+    /// Persist and resume index calculus on fixed K_0 parameters through degree 131.
+    Fixed(fixed::FixedArgs),
+    /// Price every index-calculus variant of the prime, generic-binary and Koblitz regimes in one unit against the generic floor and a counted Pollard rho, with fitted exponents.
+    Boundary(boundary::BoundaryArgs),
+    /// Write a benchmark corpus of Weil-descended Semaev S4 instances (Magma, DIMACS+XOR, CNF, ANF) with certified labels and planted witnesses.
+    Corpus(corpus::CorpusArgs),
+    /// Measure the degree a Weil-descent system actually reaches, against the degree a semi-regular system of the same shape would, with the operation count, wall time and peak footprint beside it.
+    Descent(descent::DescentArgs),
+    /// Run index-calculus configurations end to end and compare them: plug a factor base, a target source, a decomposition oracle, a polynomial solver and a relation matrix together, and see every stage's cost in one unit.
+    Bench(bench::BenchArgs),
+    /// Price every decomposition oracle on R and on R − P + Q pairwise: does a solver charge the same for a swapped target?
+    Swap(boundary::SwapArgs),
+    /// Run the counted Pollard-rho references paired (the frozen plain walk, the tuned walk, the negation-map walk that is the matched reference), or re-price a frozen boundary or bench report against the matched one.
+    Rho(rho::RhoArgs),
+    /// Price the workflow's pipeline phase by phase: the same calls in memory on one thread, each phase on its own clock, converted at one batched addition measured in the same process, beside batch rho on the same targets with its step priced.
+    Price(price::PriceArgs),
+    /// Import the ECBench binary-curve battery and run bounded exact
+    /// n−1 index calculus with the zero/single/double-large-prime variation.
+    LargePrime(large_prime::LargePrimeArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -103,6 +141,16 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
         Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
         Some(Action::Fixed(args)) => fixed::run(args.clone()),
+        Some(Action::Workflow(args)) => workflow::run(args.clone(), cli.json),
+        Some(Action::Fixed(args)) => fixed::run(args.clone()),
+        Some(Action::Boundary(args)) => boundary::run(args.clone(), cli.json),
+        Some(Action::Corpus(args)) => corpus::run(args.clone()),
+        Some(Action::Descent(args)) => descent::run(args.clone(), cli.json),
+        Some(Action::Bench(args)) => bench::run(args.clone(), cli.json),
+        Some(Action::Swap(args)) => boundary::swap(args.clone(), cli.json),
+        Some(Action::Rho(args)) => rho::run(args.clone(), cli.json),
+        Some(Action::Price(args)) => price::run(args.clone(), cli.json),
+        Some(Action::LargePrime(args)) => large_prime::run(args.clone()),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -116,7 +164,33 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         }
     }
 }
-fn binary_hash() -> Option<String> {
+/// Provenance, captured **at start-up** and cached.
+///
+/// Both of these used to be read when the report was assembled, which on a
+/// run of any length is the wrong moment: a rebuild during the run replaces
+/// the executable, so `current_exe` no longer opens (the hash came out
+/// `null`), and a commit made during the run is the one `git rev-parse`
+/// answers with — so a report could name a commit whose code never ran.
+/// Reading both before any work makes the pair describe the binary that
+/// produced the numbers.
+static BINARY_HASH: OnceLock<Option<String>> = OnceLock::new();
+static GIT_COMMIT: OnceLock<Option<String>> = OnceLock::new();
+
+/// Hash of the executable that is producing this report.
+pub fn binary_hash() -> Option<String> {
+    BINARY_HASH.get_or_init(compute_binary_hash).clone()
+}
+
+/// The source commit embedded when this executable was built.
+pub fn git_commit() -> Option<String> {
+    GIT_COMMIT.get_or_init(compute_git_commit).clone()
+}
+
+fn compute_git_commit() -> Option<String> {
+    crypto_lib::build_provenance::git_commit().map(str::to_owned)
+}
+
+fn compute_binary_hash() -> Option<String> {
     let mut file = File::open(std::env::current_exe().ok()?).ok()?;
     let mut hasher = blake3::Hasher::new();
     let mut buffer = [0u8; 65536];
@@ -129,6 +203,31 @@ fn binary_hash() -> Option<String> {
     }
     Some(hasher.finalize().to_hex().to_string())
 }
+/// One line for the `linear_algebra` object of a logs report.
+fn linear_algebra_summary(la: &Value) -> String {
+    let mut line = format!(
+        "{} ({} attempts, {:.3}s)",
+        la["mode"].as_str().unwrap_or("?"),
+        la["attempts"],
+        la["seconds"].as_f64().unwrap_or(0.0)
+    );
+    if let Some(s) = la.get("sparse").filter(|v| !v.is_null()) {
+        let f = &s["filter"];
+        line.push_str(&format!(
+            "; filtered {} rows × {} columns to a core of {} ({} singletons, {} excess rows, {} merged)",
+            f["rows_in"], f["columns_in"], s["core_dimension"], f["singletons_removed"],
+            f["excess_rows_removed"], f["merged_columns"]
+        ));
+        if let Some(w) = s.get("wiedemann").filter(|v| !v.is_null()) {
+            line.push_str(&format!(
+                "; block Wiedemann {}×{}, {} Krylov terms, {} products",
+                w["block_m"], w["block_n"], w["sequence_length"], w["products"]
+            ));
+        }
+    }
+    line
+}
+
 fn display(report: &Value) {
     match report["operation"].as_str() {
         Some("inspect") => {
@@ -208,7 +307,11 @@ fn display(report: &Value) {
                         .map_or("∞".to_string(), |v| format!("{v:.1}"))
                 );
             }
-            for v in report["validation"]["runs"].as_array().into_iter().flatten() {
+            for v in report["validation"]["runs"]
+                .as_array()
+                .into_iter()
+                .flatten()
+            {
                 println!(
                     "  validated #{}: eligible {}; median process seconds {}",
                     v["rank"], v["eligible"], v["median_process_seconds"]
@@ -230,6 +333,9 @@ fn display(report: &Value) {
                 report["counts"]["trials"],
                 report["counts"]["relations"]
             );
+            if let Some(la) = report.get("linear_algebra").filter(|v| !v.is_null()) {
+                println!("Linear algebra: {}", linear_algebra_summary(la));
+            }
             if let Some(path) = report["out"].as_str() {
                 println!("Database saved: {path}");
             } else if let Some(reason) = report["reason"].as_str() {
@@ -239,16 +345,136 @@ fn display(report: &Value) {
         Some("solve") => {
             println!(
                 "Solve: {}; database columns {} (re-verified)",
-                report["status"],
-                report["database"]["columns"]
+                report["status"], report["database"]["columns"]
             );
             if let Some(result) = report.get("result") {
                 println!(
                     "Expected: {}; recovered: {}; verified: {}; descent trials: {}",
-                    result["expected"], result["recovered"], result["verified"],
+                    result["expected"],
+                    result["recovered"],
+                    result["verified"],
                     report["counts"]["descent_trials"]
                 );
             }
+        }
+        Some("workflow") => {
+            println!(
+                "Workflow: {}; run {}{}; {}",
+                report["status"],
+                report["run_number"],
+                if report["resumed"] == true {
+                    " (resumed)"
+                } else {
+                    ""
+                },
+                report["run_directory"].as_str().unwrap_or("?")
+            );
+            for st in report["stages"].as_array().into_iter().flatten() {
+                println!(
+                    "  {:<6} {:<8} {}",
+                    st["stage"].as_str().unwrap_or("?"),
+                    st["status"].as_str().unwrap_or("?"),
+                    if st["ran"] == true { "ran" } else { "reused" }
+                );
+                if let Some(u) = st.get("units").filter(|v| !v.is_null()) {
+                    println!(
+                        "         units: {} present ({} ran now, {} ignored); {} relations from {} probes",
+                        u["present"], u["ran_now"], u["ignored"], st["relations_total"], st["trials_total"]
+                    );
+                }
+                if let Some(la) = st.get("linear_algebra").filter(|v| !v.is_null()) {
+                    println!("         linear algebra: {}", linear_algebra_summary(la));
+                }
+                if let Some(v) = st.get("vs_rho").filter(|v| !v.is_null()) {
+                    println!(
+                        "         vs rho: descent {:.4}s/target, amortised {:.4}s/target, rho {:.4}s/target ({} of {} rho-verified); charged ratio {:.1}x, amortised {:.2}x; charged crossover {}",
+                        v["ic"]["descent_seconds_per_target"].as_f64().unwrap_or(0.0),
+                        v["ic"]["amortised_seconds_per_target"].as_f64().unwrap_or(0.0),
+                        v["rho"]["seconds_per_target"].as_f64().unwrap_or(0.0),
+                        v["rho"]["verified"], v["targets"],
+                        v["ratio"]["charged"].as_f64().unwrap_or(0.0),
+                        v["ratio"]["amortised"].as_f64().unwrap_or(0.0),
+                        v["verdict"]["charged_crossover"]
+                    );
+                }
+            }
+            if let Some(sol) = report.get("solutions").filter(|v| !v.is_null()) {
+                println!(
+                    "Solutions: {} verified of {}",
+                    sol["verified"], sol["count"]
+                );
+            }
+            if let Some(f) = report["failure"].as_str() {
+                println!("Failure: {f}");
+            }
+        }
+        Some("boundary") => {
+            println!(
+                "Boundary ledger: {}; {} instances, all verified: {}; {:.1} s",
+                report["status"],
+                report["ledger"]["instances"]
+                    .as_array()
+                    .map_or(0, |a| a.len()),
+                report["all_verified"],
+                report["elapsed_seconds"].as_f64().unwrap_or(0.0)
+            );
+            println!("Unit: {}", report["ledger"]["unit"].as_str().unwrap_or("?"));
+            println!();
+            println!("{}", report["markdown"].as_str().unwrap_or(""));
+            if let Some(o) = report.get("oracle_pricing").filter(|v| !v.is_null()) {
+                println!(
+                    "Oracle pricing: {} cells, all oracles agree: {}",
+                    o["cells"].as_array().map_or(0, |a| a.len()),
+                    o["all_agree"]
+                );
+                println!("{}", o["markdown"].as_str().unwrap_or(""));
+            }
+        }
+        Some("corpus") => {
+            println!(
+                "Corpus: {} instances (n = {}, l = {}); {} files written",
+                report["instances"].as_array().map_or(0, |a| a.len()),
+                report["config"]["n"],
+                report["config"]["l"],
+                report["written"].as_array().map_or(0, |a| a.len())
+            );
+            for inst in report["instances"].as_array().into_iter().flatten() {
+                println!(
+                    "  {:<16} sat={:<5} xor: {} vars {} clauses {} rows; cnf: {} vars {} clauses; anf: {} eqs",
+                    inst["name"].as_str().unwrap_or("?"),
+                    inst["satisfiable"],
+                    inst["dimacs_xor"]["variables"],
+                    inst["dimacs_xor"]["clauses"],
+                    inst["dimacs_xor"]["xor_rows"],
+                    inst["dimacs_cnf"]["variables"],
+                    inst["dimacs_cnf"]["clauses"],
+                    inst["anf"]["equations"]
+                );
+            }
+        }
+        Some("rho") => {
+            println!(
+                "Rho references: {}; {} instances, all verified: {}",
+                report["status"],
+                report["instances"].as_array().map_or(0, |a| a.len()),
+                report["all_verified"]
+            );
+        }
+        Some("rho-batch") => {
+            println!(
+                "Batch rho: {}; {} curves, all verified: {}",
+                report["status"],
+                report["curves"].as_array().map_or(0, |a| a.len()),
+                report["all_verified"]
+            );
+        }
+        Some("rho-reprice") => {
+            println!(
+                "Re-priced {}: {}; the frozen walk reproduced on every recorded seed: {}",
+                report["source"].as_str().unwrap_or("?"),
+                report["status"],
+                report["identity"]["all_reproduced"]
+            );
         }
         Some("error") => {
             eprintln!(
@@ -261,11 +487,38 @@ fn display(report: &Value) {
                 println!("{name}");
             }
         }
+        Some("large-prime") => {
+            println!(
+                "Large-prime IC: {}; imported {} families",
+                report["status"],
+                report["battery"].as_array().map_or(0, |v| v.len())
+            );
+            if let Some(run) = report.get("run").filter(|v| !v.is_null()) {
+                println!(
+                    "  {}: recovered {}; expected {}; fast {}; independent {}",
+                    run["family"],
+                    run["report"]["recovered"],
+                    run["expected"],
+                    run["report"]["verified_fast"],
+                    run["report"]["verified_independent"]
+                );
+                println!(
+                    "  trials {}; accepted {}; LP histogram {}",
+                    run["report"]["counters"]["trials"],
+                    run["report"]["counters"]["accepted_relations"],
+                    run["report"]["counters"]["relation_histogram"]
+                );
+            }
+        }
         _ => println!("{}", serde_json::to_string_pretty(report).unwrap()),
     }
 }
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    // Before any work: the binary that is about to run, and the commit it
+    // was built from.  See `BINARY_HASH`.
+    let _ = binary_hash();
+    let _ = git_commit();
     if let Some(path) = &cli.out {
         if std::fs::symlink_metadata(path).is_ok() {
             eprintln!("ic: output already exists: {}", path.display());
@@ -281,7 +534,9 @@ fn main() -> ExitCode {
     // Generated parameter documents remain directly importable under their strict schema.
     if report.get("operation").is_some() {
         report["software"] = json!({"version":env!("CARGO_PKG_VERSION"),"os":std::env::consts::OS,
-            "arch":std::env::consts::ARCH,"binary_blake3":binary_hash()});
+            "arch":std::env::consts::ARCH,"binary_blake3":binary_hash(),"git_commit":git_commit(),
+            "git_dirty":crypto_lib::build_provenance::git_dirty(),
+            "git_commit_source":crypto_lib::build_provenance::source()});
     }
     let success = matches!(
         report["status"].as_str(),

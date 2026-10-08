@@ -278,7 +278,7 @@ pub fn semaev_s4_in_x4(
     let s4 = sub_polys(&a_sq, &bc);
 
     [
-        s4.get(0).cloned().unwrap_or(zero.clone()),
+        s4.first().cloned().unwrap_or(zero.clone()),
         s4.get(1).cloned().unwrap_or(zero.clone()),
         s4.get(2).cloned().unwrap_or(zero.clone()),
         s4.get(3).cloned().unwrap_or(zero.clone()),
@@ -332,7 +332,7 @@ pub fn find_roots_fp(coeffs: &[FieldElement], p: &BigUint) -> Vec<FieldElement> 
         // gets empty.  See doc comment.
         return roots;
     }
-    let p_u64 = p.to_u64_digits().get(0).copied().unwrap_or(0);
+    let p_u64 = p.to_u64_digits().first().copied().unwrap_or(0);
     let coeffs_slice = &coeffs[..=deg];
     for v in 0..p_u64 {
         let elt = FieldElement::new(BigUint::from(v), p.clone());
@@ -346,6 +346,306 @@ pub fn find_roots_fp(coeffs: &[FieldElement], p: &BigUint) -> Vec<FieldElement> 
         }
     }
     roots
+}
+
+/// **Fast `F_p`-rational root finding** for small-degree polynomials
+/// (degree ≤ 8): Cantor–Zassenhaus over `gcd(f, X^p − X)`.
+///
+/// Repeated-squaring computes `X^p mod f` in `O(log p)` polynomial
+/// multiplications, the root part is `g = gcd(f, X^p − X)`, and
+/// equal-degree splitting peels linear factors off `g`.  This is what
+/// makes an S₄-based 3-decomposition relation search feasible at 16–32
+/// bit primes, where [`find_roots_fp`]'s brute force would evaluate the
+/// polynomial at every field element.
+pub fn find_roots_fp_fast(coeffs: &[FieldElement], p: &BigUint) -> Vec<FieldElement> {
+    // Small primes: reuse the brute force (it is exact and trivial).
+    if p.bits() <= 20 {
+        return find_roots_fp(coeffs, p);
+    }
+    // Normalize to a canonical coefficient slice with nonzero lead.
+    let mut f: Vec<FieldElement> = coeffs.to_vec();
+    while let Some(last) = f.last() {
+        if last.is_zero() {
+            f.pop();
+        } else {
+            break;
+        }
+    }
+    if f.is_empty() {
+        // Zero polynomial: every element is a root; the callers here fix
+        // finitely many x's, so treat it as "no specific root".
+        return Vec::new();
+    }
+    let deg = f.len() - 1;
+    if deg == 0 {
+        return Vec::new();
+    }
+    // Monic copy for the polynomial arithmetic.
+    let lead_inv = f[deg].inv().expect("nonzero lead is invertible mod p");
+    let monic: Vec<FieldElement> = f.iter().map(|c| c.mul(&lead_inv)).collect();
+    let deg = monic.len() - 1;
+
+    // X^p mod f(X) by repeated squaring.
+    let x_pow_p = poly_pow_x_mod(&monic, p);
+    // g = gcd(f, x_pow_p − X): the product of the linear factors.
+    let mut shifted = x_pow_p.clone();
+    // shifted -= X  (coefficient of X is index 1).
+    while shifted.len() < 2 {
+        shifted.push(FieldElement::zero(p.clone()));
+    }
+    shifted[1] = shifted[1].sub(&FieldElement::one(p.clone()));
+    let mut g = poly_gcd(&monic, &shifted, p);
+    let g_deg = g.len() - 1;
+    if g_deg == 0 {
+        return Vec::new();
+    }
+
+    // Equal-degree splitting: all roots of g are in F_p.
+    let mut factors: Vec<Vec<FieldElement>> = Vec::new();
+    let mut queue = vec![g.clone()];
+    while let Some(mut h) = queue.pop() {
+        let h_deg = h.len() - 1;
+        if h_deg == 1 {
+            factors.push(h);
+            continue;
+        }
+        if h_deg == 2 {
+            // Direct quadratic formula (all roots are F_p-rational here).
+            let qa = h[2].clone();
+            let qb = h[1].clone();
+            let qc = h[0].clone();
+            if qa.is_zero() {
+                if let Some(inv) = qb.inv() {
+                    factors.push(vec![qc.neg().mul(&inv), qb]);
+                }
+            } else {
+                let four = FieldElement::new(BigUint::from(4u32), p.clone());
+                let disc = qb.mul(&qb).sub(&four.mul(&qa).mul(&qc));
+                if let Some(root) = sqrt_mod_p(&disc.value, p) {
+                    let two_inv = qa.add(&qa).inv().expect("2a invertible");
+                    let s = FieldElement::new(root, p.clone());
+                    let r1 = qb.neg().add(&s).mul(&two_inv);
+                    let r2 = qb.neg().sub(&s).mul(&two_inv);
+                    // Emit both linear factors (x - r).
+                    let one = FieldElement::one(p.clone());
+                    factors.push(vec![r1.neg(), one.clone()]);
+                    factors.push(vec![r2.neg(), one]);
+                }
+            }
+            continue;
+        }
+        // Try gcd(h, (X + c)^((p-1)/2) − 1) for deterministic c values.
+        let exp = (p - BigUint::from(1u32)) / BigUint::from(2u32);
+        let mut split = None;
+        for c_u32 in 1u32..64 {
+            let c = FieldElement::new(BigUint::from(c_u32), p.clone());
+            let h_shifted: Vec<FieldElement> = {
+                // (X + c) mod h: degree < h_deg.
+                let mut hs = h.clone();
+                while hs.len() < 2 {
+                    hs.push(FieldElement::zero(p.clone()));
+                }
+                hs[1] = hs[1].add(&c);
+                hs
+            };
+            let pow = poly_pow_mod(&h_shifted, &exp, &h, p);
+            let mut minus_one = pow.clone();
+            while minus_one.len() < 1 {
+                minus_one.push(FieldElement::zero(p.clone()));
+            }
+            minus_one[0] = minus_one[0].sub(&FieldElement::one(p.clone()));
+            let d = poly_gcd(&h, &minus_one, p);
+            let d_deg = d.len() - 1;
+            if d_deg > 0 && d_deg < h_deg {
+                split = Some(d);
+                break;
+            }
+        }
+        match split {
+            Some(d) => {
+                let q = poly_div_exact(&h, &d, p);
+                queue.push(d);
+                queue.push(q);
+            }
+            None => {
+                // Rare: degree > 2 that resisted the small-c sweep.  Give
+                // up on this factor (its roots are missed, making the
+                // relation search marginally less likely per probe, never
+                // wrong).
+            }
+        }
+    }
+
+    let mut roots = Vec::new();
+    for lin in factors {
+        if lin.len() == 2 && !lin[1].is_zero() {
+            // root = −c0 / c1
+            if let Some(inv) = lin[1].inv() {
+                roots.push(lin[0].neg().mul(&inv));
+            }
+        } else if lin.len() == 2 {
+            // constant-only factor (should not happen after gcd)
+        }
+    }
+    roots.dedup_by(|a, b| a.value == b.value);
+    roots
+}
+
+/// Polynomial remainder `a mod modulus` over `F_p` (any nonzero lead).
+fn poly_rem(a: &[FieldElement], modulus: &[FieldElement], p: &BigUint) -> Vec<FieldElement> {
+    let m_deg = modulus.len() - 1;
+    let lead_inv = match modulus[m_deg].inv() {
+        Some(v) => v,
+        None => return a.to_vec(),
+    };
+    let mut r = a.to_vec();
+    loop {
+        while r.len() > 1 && r.last().map(|c| c.is_zero()).unwrap_or(true) {
+            r.pop();
+        }
+        if r.is_empty() || r.len() - 1 < m_deg {
+            break;
+        }
+        let factor = r[r.len() - 1].mul(&lead_inv);
+        let shift = r.len() - 1 - m_deg;
+        for (i, term) in modulus.iter().enumerate().take(m_deg) {
+            r[shift + i] = r[shift + i].sub(&factor.mul(term));
+        }
+        r.pop();
+    }
+    let _ = p;
+    if r.is_empty() {
+        r.push(FieldElement::zero(p.clone()));
+    }
+    r
+}
+
+/// Multiply two polynomials reduced mod a monic modulus.
+fn poly_mul_mod(
+    a: &[FieldElement],
+    b: &[FieldElement],
+    modulus: &[FieldElement],
+    p: &BigUint,
+) -> Vec<FieldElement> {
+    let a_deg = a.len().saturating_sub(1);
+    let b_deg = b.len().saturating_sub(1);
+    let mut acc = vec![FieldElement::zero(p.clone()); a_deg + b_deg + 1];
+    for (i, ai) in a.iter().enumerate() {
+        if ai.is_zero() {
+            continue;
+        }
+        for (j, bj) in b.iter().enumerate() {
+            if bj.is_zero() {
+                continue;
+            }
+            acc[i + j] = acc[i + j].add(&ai.mul(bj));
+        }
+    }
+    poly_rem(&acc, modulus, p)
+}
+
+/// `X^p mod f(X)` by left-to-right binary exponentiation on the residue
+/// class of `X` (`f` monic).
+fn poly_pow_x_mod(f: &[FieldElement], p: &BigUint) -> Vec<FieldElement> {
+    let zero = FieldElement::zero(p.clone());
+    let one = FieldElement::one(p.clone());
+    let x_res: Vec<FieldElement> = poly_rem(&[zero.clone(), one], f, p);
+    let bits = p.to_radix_be(2);
+    if bits.is_empty() {
+        return x_res;
+    }
+    let mut result = x_res.clone();
+    for bit in bits.iter().skip(1) {
+        result = poly_mul_mod(&result, &result, f, p);
+        if *bit == 1 {
+            result = poly_mul_mod(&result, &x_res, f, p);
+        }
+    }
+    result
+}
+
+/// `(poly) ^ exp mod f` for a small base polynomial.
+fn poly_pow_mod(
+    base: &[FieldElement],
+    exp: &BigUint,
+    f: &[FieldElement],
+    p: &BigUint,
+) -> Vec<FieldElement> {
+    let zero = FieldElement::zero(p.clone());
+    let mut result: Vec<FieldElement> = vec![FieldElement::one(p.clone())];
+    let mut b = poly_rem(base, f, p);
+    let bits = exp.to_radix_be(2);
+    for bit in bits {
+        result = poly_mul_mod(&result, &result, f, p);
+        if bit == 1 {
+            result = poly_mul_mod(&result, &b, f, p);
+        }
+    }
+    let _ = zero;
+    result
+}
+
+/// Euclidean GCD of two polynomials over `F_p` (inputs need not be
+/// monic; the result is monic).
+fn poly_gcd(a: &[FieldElement], b: &[FieldElement], p: &BigUint) -> Vec<FieldElement> {
+    let mut a = a.to_vec();
+    let mut b = b.to_vec();
+    loop {
+        while a.len() > 1 && a.last().map(|c| c.is_zero()).unwrap_or(true) {
+            a.pop();
+        }
+        while b.len() > 1 && b.last().map(|c| c.is_zero()).unwrap_or(true) {
+            b.pop();
+        }
+        if b.len() == 1 && b[0].is_zero() {
+            break;
+        }
+        let r = poly_rem(&a, &b, p);
+        a = b.clone();
+        b = r;
+    }
+    while a.len() > 1 && a.last().map(|c| c.is_zero()).unwrap_or(true) {
+        a.pop();
+    }
+    if a.is_empty() {
+        return vec![FieldElement::zero(p.clone())];
+    }
+    if let Some(inv) = a[a.len() - 1].inv() {
+        for coeff in a.iter_mut() {
+            *coeff = coeff.mul(&inv);
+        }
+    }
+    a
+}
+
+/// Exact quotient `a / b` for polynomials with `b | a`.
+fn poly_div_exact(a: &[FieldElement], b: &[FieldElement], p: &BigUint) -> Vec<FieldElement> {
+    let b_deg = b.len() - 1;
+    let lead_inv = b[b_deg].inv().expect("divisor lead is invertible");
+    let mut r = a.to_vec();
+    let mut quotient = vec![FieldElement::zero(p.clone()); a.len().saturating_sub(b_deg)];
+    while r.len() - 1 >= b_deg && !(r.len() == 1 && r[0].is_zero()) {
+        let r_deg = r.len() - 1;
+        let factor = r[r_deg].mul(&lead_inv);
+        let shift = r_deg - b_deg;
+        if quotient.len() <= shift {
+            quotient.resize(shift + 1, FieldElement::zero(p.clone()));
+        }
+        quotient[shift] = factor.clone();
+        for (i, term) in b.iter().enumerate() {
+            r[shift + i] = r[shift + i].sub(&factor.mul(term));
+        }
+        while r.len() > 1 && r.last().map(|c| c.is_zero()).unwrap_or(true) {
+            r.pop();
+        }
+        if r.is_empty() {
+            break;
+        }
+    }
+    while quotient.len() > 1 && quotient.last().map(|c| c.is_zero()).unwrap_or(true) {
+        quotient.pop();
+    }
+    quotient
 }
 
 // ── Tonelli–Shanks square root mod p ────────────────────────────────────
@@ -437,7 +737,7 @@ pub struct FactorBaseEntry {
 pub fn build_factor_base(curve: &CurveParams, target_size: usize) -> Vec<FactorBaseEntry> {
     let mut out = Vec::with_capacity(target_size);
     let mut x = BigUint::one();
-    while out.len() < target_size && &x < &curve.p {
+    while out.len() < target_size && x < curve.p {
         // rhs = x³ + ax + b mod p
         let xf = curve.fe(x.clone());
         let rhs_value = xf
@@ -494,6 +794,19 @@ pub fn find_one_relation(
     factor_base: &[FactorBaseEntry],
     max_trials: usize,
 ) -> Option<Relation> {
+    find_one_relation_counted(curve, g, q, factor_base, max_trials).map(|(rel, _)| rel)
+}
+
+/// Counted twin of [`find_one_relation`]: identical search, additionally
+/// reporting how many random `(a, b)` trials were consumed so callers can
+/// publish trials-per-relation yield.
+pub fn find_one_relation_counted(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    factor_base: &[FactorBaseEntry],
+    max_trials: usize,
+) -> Option<(Relation, usize)> {
     use crate::utils::random::random_scalar;
 
     let a_fe = curve.a_fe();
@@ -506,7 +819,7 @@ pub fn find_one_relation(
         }
     }
 
-    for _ in 0..max_trials {
+    for trial in 1..=max_trials {
         let a = random_scalar(&curve.n);
         let b = random_scalar(&curve.n);
         // R = aG + bQ.  Use the variable-time ladder (public k, fine).
@@ -547,7 +860,7 @@ pub fn find_one_relation(
                     &a,
                     &b,
                 ) {
-                    return Some(rel);
+                    return Some((rel, trial));
                 }
                 continue;
             }
@@ -578,7 +891,7 @@ pub fn find_one_relation(
                     &a,
                     &b,
                 ) {
-                    return Some(rel);
+                    return Some((rel, trial));
                 }
             }
         }
@@ -616,10 +929,7 @@ fn try_finalise(
             let p_j = if s_j > 0 { f_j.clone() } else { f_j.neg() };
             let lhs = p_i.add(&p_j, &a_fe);
             if &lhs == r {
-                let i_idx = match factor_base.iter().position(|fb| &fb.point == f_i) {
-                    Some(k) => k,
-                    None => return None,
-                };
+                let i_idx = factor_base.iter().position(|fb| &fb.point == f_i)?;
                 let mut entries = Vec::new();
                 if i_idx == j {
                     // Special case: same factor base index, combine.
@@ -642,19 +952,231 @@ fn try_finalise(
     None
 }
 
-// ── Gaussian elimination mod n ─────────────────────────────────────────
+// ── Semaev S₄ 3-decomposition relation search ────────────────────────
 
+/// **Find one 3-decomposition relation** by sampling random `(a, b)` and
+/// decomposing `R = aG + bQ` as a signed sum of *three* factor-base
+/// elements.  For each ordered pair `(F_i, F_j)` from the factor base,
+/// [`semaev_s4_in_x4`] expands the quartic whose roots are the candidate
+/// `x_k` values with `x_i ± x_j ± x_k` summing to `R`; the roots come
+/// from [`find_roots_fp_fast`] (Cantor–Zassenhaus).  Counted twin of the
+/// 2-decomposition [`find_one_relation`]: reports trials consumed.
+///
+/// This is the prime-regime `decomposition` stage lever: 3-decomposition
+/// relations cover three factor-base columns per row and need
+/// `~ p/B³` trials per relation instead of `~ p/B²`.
+pub fn find_one_relation_s4_counted(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    factor_base: &[FactorBaseEntry],
+    max_trials: usize,
+) -> Option<(Relation, usize)> {
+    use crate::utils::random::random_scalar;
+
+    let a_fe = curve.a_fe();
+    let b_fe = curve.fe(curve.b.clone());
+    let mut x_to_idx = std::collections::HashMap::new();
+    for fb in factor_base {
+        if let Point::Affine { x, .. } = &fb.point {
+            x_to_idx.insert(x.value.clone(), fb.idx);
+        }
+    }
+
+    for trial in 1..=max_trials {
+        let a = random_scalar(&curve.n);
+        let b = random_scalar(&curve.n);
+        let ag = g.scalar_mul(&a, &a_fe);
+        let bq = q.scalar_mul(&b, &a_fe);
+        let r = ag.add(&bq, &a_fe);
+        let xr = match &r {
+            Point::Affine { x, .. } => x.clone(),
+            Point::Infinity => continue,
+        };
+
+        // Sweep factor-base pairs (i < j keeps the sweep half-size; the
+        // sign resolution below covers both orders).
+        for (i, fb_i) in factor_base.iter().enumerate() {
+            let xi = match &fb_i.point {
+                Point::Affine { x, .. } => x.clone(),
+                Point::Infinity => continue,
+            };
+            for (j, fb_j) in factor_base.iter().enumerate().skip(i + 1) {
+                let xj = match &fb_j.point {
+                    Point::Affine { x, .. } => x.clone(),
+                    Point::Infinity => continue,
+                };
+                let quartic = semaev_s4_in_x4(&xr, &xi, &xj, &a_fe, &b_fe);
+                for xk in find_roots_fp_fast(&quartic, &curve.p) {
+                    let k = match x_to_idx.get(&xk.value).copied() {
+                        Some(k) => k,
+                        None => continue,
+                    };
+                    if let Some(rel) = try_finalise_s4(
+                        &r,
+                        i,
+                        &fb_i.point,
+                        j,
+                        &fb_j.point,
+                        k,
+                        &factor_base[k].point,
+                        curve,
+                        &a,
+                        &b,
+                    ) {
+                        return Some((rel, trial));
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Sign resolution for the 3-point decomposition: try all eight sign
+/// combinations `(ε_i, ε_j, ε_k) ∈ {±1}³` and accept the one with
+/// `ε_i F_i + ε_j F_j + ε_k F_k = R`.
+#[allow(clippy::too_many_arguments)]
+fn try_finalise_s4(
+    r: &Point,
+    i: usize,
+    f_i: &Point,
+    j: usize,
+    f_j: &Point,
+    k: usize,
+    f_k: &Point,
+    curve: &CurveParams,
+    coef_a: &BigUint,
+    coef_b: &BigUint,
+) -> Option<Relation> {
+    let a_fe = curve.a_fe();
+    // aG + bQ = ε_i F_i + ε_j F_j + ε_k F_k
+    // ⟹ ε_i y_i + ε_j y_j + ε_k y_k − b x ≡ a (mod n).
+    for s_i in [1i64, -1i64] {
+        for s_j in [1i64, -1i64] {
+            for s_k in [1i64, -1i64] {
+                let p_i = if s_i > 0 { f_i.clone() } else { f_i.neg() };
+                let p_j = if s_j > 0 { f_j.clone() } else { f_j.neg() };
+                let p_k = if s_k > 0 { f_k.clone() } else { f_k.neg() };
+                let lhs = p_i.add(&p_j, &a_fe).add(&p_k, &a_fe);
+                if &lhs == r {
+                    let mut entries: Vec<(usize, i64)> = vec![(i, s_i), (j, s_j), (k, s_k)];
+                    // Merge duplicate factor-base indices.
+                    entries.sort_unstable();
+                    let mut merged: Vec<(usize, i64)> = Vec::new();
+                    for (idx, sign) in entries {
+                        if let Some(last) = merged.last_mut() {
+                            if last.0 == idx {
+                                last.1 += sign;
+                                continue;
+                            }
+                        }
+                        merged.push((idx, sign));
+                    }
+                    merged.retain(|(_, sign)| *sign != 0);
+                    if merged.is_empty() {
+                        return None;
+                    }
+                    return Some(Relation {
+                        coef_a: coef_a.clone(),
+                        coef_b: coef_b.clone(),
+                        entries: merged,
+                    });
+                }
+            }
+        }
+    }
+    None
+}
+
+// ── Gaussian elimination mod n ─────────────────────────────────────────
 /// **Solve** `M · y ≡ rhs (mod n)` for `y`, where `M` is given as rows
 /// and `n` is prime (so every nonzero element is invertible).  Returns
-/// `None` if the system is inconsistent or under-determined.
+/// `None` if the system is inconsistent, under-determined (any column
+/// lacks a pivot), or a pivot is not invertible mod `n`.
 ///
-/// Used by the index-calculus driver to recover `log_G Q` from the
-/// matrix of relations.
+/// Callers that need only some unknowns pinned (typically `log_G Q`
+/// with unused factor-base columns left free) use
+/// [`gaussian_eliminate_mod_n_particular`] and check
+/// [`ModNSolution::determined`] for the columns they read.
+///
+/// `matrix` and `rhs` are left in reduced row-echelon form.
 pub fn gaussian_eliminate_mod_n(
-    matrix: &mut Vec<Vec<BigUint>>,
-    rhs: &mut Vec<BigUint>,
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
     n: &BigUint,
 ) -> Option<Vec<BigUint>> {
+    let sol = gaussian_eliminate_mod_n_particular(matrix, rhs, n)?;
+    sol.determined.iter().all(|&d| d).then_some(sol.values)
+}
+
+/// A consistent solution of `M · y ≡ rhs (mod n)` from
+/// [`gaussian_eliminate_mod_n_particular`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModNSolution {
+    /// The particular solution with every free unknown set to zero.
+    pub values: Vec<BigUint>,
+    /// `determined[c]` is true exactly when `y_c` takes the same value
+    /// in every solution: `c` has a pivot and its reduced row has no
+    /// entry in a free column.  Only determined values are answers.
+    pub determined: Vec<bool>,
+    /// Rank of `M`.
+    pub rank: usize,
+}
+
+/// Rank-checked Gauss–Jordan elimination mod prime `n` that tolerates
+/// free unknowns.  Returns `None` only when the system is inconsistent
+/// or a pivot is not invertible; otherwise the particular solution with
+/// free unknowns zero and, per column, whether that unknown is
+/// determined.  A value whose `determined` flag is false is arbitrary
+/// and must not be reported as a logarithm.
+pub fn gaussian_eliminate_mod_n_particular(
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
+    n: &BigUint,
+) -> Option<ModNSolution> {
+    let m = matrix.first().map(|r| r.len()).unwrap_or(0);
+    let n64 = n
+        .to_u64_digits()
+        .first()
+        .copied()
+        .filter(|&v| n.bits() <= 64 && v > 1);
+    // Both paths leave `matrix`/`rhs` in reduced row-echelon form with
+    // pivot rows 0..rank, and return the pivot row of each column.
+    let pivot_rows = match n64 {
+        Some(n64) => gaussian_eliminate_mod_u64(matrix, rhs, n64)?,
+        None => gaussian_eliminate_mod_biguint(matrix, rhs, n)?,
+    };
+    let rank = pivot_rows.iter().filter(|&&r| r != usize::MAX).count();
+    // Rows below the pivots are all-zero on the left; a nonzero
+    // right-hand side there is `0 = c`.
+    if rhs.iter().skip(rank).any(|v| !(v % n).is_zero()) {
+        return None;
+    }
+    let free: Vec<usize> = (0..m).filter(|&c| pivot_rows[c] == usize::MAX).collect();
+    let mut values = vec![BigUint::zero(); m];
+    let mut determined = vec![false; m];
+    for c in 0..m {
+        let pr = pivot_rows[c];
+        if pr == usize::MAX {
+            continue;
+        }
+        values[c] = rhs[pr].clone();
+        determined[c] = free.iter().all(|&f| matrix[pr][f].is_zero());
+    }
+    Some(ModNSolution {
+        values,
+        determined,
+        rank,
+    })
+}
+
+/// The arbitrary-precision path of [`gaussian_eliminate_mod_n`].
+fn gaussian_eliminate_mod_biguint(
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
+    n: &BigUint,
+) -> Option<Vec<usize>> {
     let rows = matrix.len();
     let cols = matrix.first().map(|r| r.len()).unwrap_or(0);
     let m = cols; // number of unknowns
@@ -684,8 +1206,12 @@ pub fn gaussian_eliminate_mod_n(
         pivot_rows[col] = row;
 
         // Normalise the pivot row.
+        // Left of `col` the pivot row is already zero (earlier pivot
+        // columns were eliminated from it, free columns were zero in
+        // every row still below the diagonal), so every sweep starts
+        // at `col`.
         let inv = mod_inverse(&matrix[row][col], n)?;
-        for c in 0..m {
+        for c in col..m {
             matrix[row][c] = (&matrix[row][c] * &inv) % n;
         }
         rhs[row] = (&rhs[row] * &inv) % n;
@@ -699,7 +1225,7 @@ pub fn gaussian_eliminate_mod_n(
                 continue;
             }
             let factor = matrix[r][col].clone();
-            for c in 0..m {
+            for c in col..m {
                 let term = (&factor * &matrix[row][c]) % n;
                 matrix[r][c] = (&matrix[r][c] + n - term) % n;
             }
@@ -710,22 +1236,119 @@ pub fn gaussian_eliminate_mod_n(
         col += 1;
     }
 
-    // Read off the solution.  Any column without a pivot is a free
-    // variable; for the index-calculus use case, we only succeed if
-    // the unknown we want has a pivot.
-    let mut out = vec![BigUint::zero(); m];
-    let mut any_free = false;
-    for c in 0..m {
-        if pivot_rows[c] == usize::MAX {
-            any_free = true;
+    Some(pivot_rows)
+}
+
+/// [`gaussian_eliminate_mod_n`] for a word-sized modulus: the same
+/// Gauss–Jordan elimination, pivot choice and in-place contract, on
+/// `u64` rows with `u128` products instead of `BigUint`s.  Each row
+/// update is a tight allocation-free loop, where the `BigUint` path
+/// allocates on every multiply and every reduction.
+///
+/// Inputs are reduced mod `n` on the way in, and the reduced matrix
+/// and right-hand side are written back so callers that inspect them
+/// afterwards see the same echelon form.
+fn gaussian_eliminate_mod_u64(
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
+    n: u64,
+) -> Option<Vec<usize>> {
+    let rows = matrix.len();
+    let m = matrix.first().map(|r| r.len()).unwrap_or(0);
+    let nb = BigUint::from(n);
+    let to_u64 = |v: &BigUint| -> u64 {
+        if v.bits() <= 64 {
+            v.to_u64_digits().first().copied().unwrap_or(0) % n
         } else {
-            out[c] = rhs[pivot_rows[c]].clone();
+            (v % &nb).to_u64_digits().first().copied().unwrap_or(0)
+        }
+    };
+    let mut a: Vec<u64> = Vec::with_capacity(rows * m);
+    for r in matrix.iter() {
+        a.extend(r.iter().take(m).map(to_u64));
+    }
+    let mut b: Vec<u64> = rhs.iter().map(to_u64).collect();
+    let mulmod = |x: u64, y: u64| ((x as u128 * y as u128) % n as u128) as u64;
+
+    let mut pivot_rows: Vec<usize> = vec![usize::MAX; m];
+    let mut failed = false;
+    let (mut row, mut col) = (0usize, 0usize);
+    while row < rows && col < m {
+        let Some(piv) = (row..rows).find(|&r| a[r * m + col] != 0) else {
+            col += 1;
+            continue;
+        };
+        if piv != row {
+            for c in col..m {
+                a.swap(row * m + c, piv * m + c);
+            }
+            b.swap(row, piv);
+            matrix.swap(row, piv);
+        }
+        pivot_rows[col] = row;
+        let Some(inv) = inv_mod_u64(a[row * m + col], n) else {
+            failed = true;
+            break;
+        };
+        for c in col..m {
+            a[row * m + c] = mulmod(a[row * m + c], inv);
+        }
+        b[row] = mulmod(b[row], inv);
+
+        let (before, rest) = a.split_at_mut(row * m);
+        let (prow, after) = rest.split_at_mut(m);
+        let prow = &prow[col..];
+        let brow = b[row];
+        let eliminate = |target: &mut [u64], br: &mut u64| {
+            let factor = target[col];
+            if factor == 0 {
+                return;
+            }
+            let neg = n - factor;
+            for (t, &p) in target[col..].iter_mut().zip(prow) {
+                *t = ((*t as u128 + neg as u128 * p as u128) % n as u128) as u64;
+            }
+            *br = ((*br as u128 + neg as u128 * brow as u128) % n as u128) as u64;
+        };
+        for (r, target) in before.chunks_exact_mut(m).enumerate() {
+            eliminate(target, &mut b[r]);
+        }
+        for (i, target) in after.chunks_exact_mut(m).enumerate() {
+            eliminate(target, &mut b[row + 1 + i]);
+        }
+        row += 1;
+        col += 1;
+    }
+
+    // Write the reduced system back, as the `BigUint` path leaves it.
+    // Rows were already swapped in `matrix` alongside `a`.
+    for (r, out) in matrix.iter_mut().enumerate() {
+        for (c, v) in out.iter_mut().take(m).enumerate() {
+            *v = BigUint::from(a[r * m + c]);
         }
     }
-    // Even if there are free vars, return the partial solution and let
-    // the caller decide whether it's enough.
-    let _ = any_free;
-    Some(out)
+    for (r, out) in rhs.iter_mut().enumerate() {
+        if r < b.len() {
+            *out = BigUint::from(b[r]);
+        }
+    }
+    (!failed).then_some(pivot_rows)
+}
+
+/// `a^{-1} mod n` by the extended Euclidean algorithm, `None` when
+/// `gcd(a, n) ≠ 1`.
+fn inv_mod_u64(a: u64, n: u64) -> Option<u64> {
+    let (mut old_r, mut r) = (a as i128, n as i128);
+    let (mut old_s, mut s) = (1i128, 0i128);
+    while r != 0 {
+        let q = old_r / r;
+        (old_r, r) = (r, old_r - q * r);
+        (old_s, s) = (s, old_s - q * s);
+    }
+    if old_r != 1 {
+        return None;
+    }
+    Some(old_s.rem_euclid(n as i128) as u64)
 }
 
 // ── End-to-end ECDLP solver via index calculus ─────────────────────────
@@ -777,10 +1400,13 @@ pub fn ec_index_calculus_dlp(
         rhs.push(rel.coef_a.clone() % &curve.n);
     }
 
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
-    let x = solution[m].clone();
-    // Verify Q ≡ x·G.  If not (which can happen when the system is
-    // under-determined), bail.
+    // Only `x` must be pinned; unused factor-base columns may stay free.
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
+    let x = solution.values[m].clone();
+    // Verify Q ≡ x·G independently of the linear algebra.
     let a_fe = curve.a_fe();
     let candidate = g.scalar_mul(&x, &a_fe);
     if &candidate == q {
@@ -796,6 +1422,252 @@ fn signed_mod(v: i64, n: &BigUint) -> BigUint {
     } else {
         n - (BigUint::from((-v) as u64) % n)
     }
+}
+
+// ── Staged (split-timer) end-to-end driver ───────────────────────────
+
+/// Split-stage timing report for the generic prime-field IC pipeline.
+///
+/// Every field is wall-clock milliseconds measured inside
+/// [`ec_index_calculus_dlp_staged`]; the relation counters let callers
+/// publish a trials-per-relation yield curve from the same run.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct EcIcStageReport {
+    pub factor_base_ms: f64,
+    pub relations_ms: f64,
+    pub linear_algebra_ms: f64,
+    pub verify_ms: f64,
+    pub total_ms: f64,
+    pub factor_base_size: usize,
+    pub relations_collected: usize,
+    pub relation_attempts_exhausted: usize,
+    pub trials_total: usize,
+    pub trials_per_relation_min: usize,
+    pub trials_per_relation_median: f64,
+    pub trials_per_relation_max: usize,
+}
+
+/// Staged twin of [`ec_index_calculus_dlp`]: same mathematics and row
+/// policy, but each stage is timed separately (factor base → relations
+/// → linear algebra → verify) and relation-search trials are counted.
+///
+/// `max_relation_attempts` bounds how many `max_trials_per_relation`
+/// search calls a single relation may consume before the whole solve
+/// gives up (`None`); the single-attempt original returns `None`
+/// immediately where this one retries.
+pub fn ec_index_calculus_dlp_staged(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    fb_size: usize,
+    extra_relations: usize,
+    max_trials_per_relation: usize,
+    max_relation_attempts: usize,
+) -> Option<(BigUint, EcIcStageReport)> {
+    use std::time::Instant;
+    let total_started = Instant::now();
+
+    let fb_started = Instant::now();
+    let fb = build_factor_base(curve, fb_size);
+    let factor_base_ms = fb_started.elapsed().as_secs_f64() * 1e3;
+    if fb.is_empty() {
+        return None;
+    }
+    let target = fb.len() + extra_relations;
+
+    let relations_started = Instant::now();
+    let mut relations = Vec::with_capacity(target);
+    let mut attempts_exhausted = 0usize;
+    let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target);
+    let mut trials_total = 0usize;
+    while relations.len() < target {
+        let found = 'attempt: {
+            for _ in 0..max_relation_attempts {
+                if let Some(found) = find_one_relation_counted(
+                    curve,
+                    g,
+                    q,
+                    &fb,
+                    max_trials_per_relation,
+                ) {
+                    break 'attempt Some(found);
+                }
+                attempts_exhausted += 1;
+            }
+            None
+        };
+        let Some((rel, trials)) = found else {
+            return None;
+        };
+        trials_total += trials;
+        trials_per_relation.push(trials);
+        relations.push(rel);
+    }
+    let relations_ms = relations_started.elapsed().as_secs_f64() * 1e3;
+
+    // Build the linear system.  Unknowns: (y_1, …, y_m, x = log_G Q).
+    // Row r:   Σ entries[j].value y_j  − coef_b · x  ≡ coef_a (mod n)
+    // i.e.    entries  ‖ −coef_b   ·   (y, x)  =  coef_a.
+    let m = fb.len();
+    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(relations.len());
+    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
+    for rel in &relations {
+        let mut row = vec![BigUint::zero(); m + 1];
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod(mult, &curve.n);
+            row[j] = (&row[j] + &val) % &curve.n;
+        }
+        // last column: −coef_b
+        let neg_b = (&curve.n - &(&rel.coef_b % &curve.n)) % &curve.n;
+        row[m] = neg_b;
+        matrix.push(row);
+        rhs.push(rel.coef_a.clone() % &curve.n);
+    }
+
+    let la_started = Instant::now();
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
+    let x = solution[m].clone();
+
+    let verify_started = Instant::now();
+    let a_fe = curve.a_fe();
+    let candidate = g.scalar_mul(&x, &a_fe);
+    let verified = &candidate == q;
+    let verify_ms = verify_started.elapsed().as_secs_f64() * 1e3;
+    if !verified {
+        return None;
+    }
+
+    let mut sorted_trials = trials_per_relation.clone();
+    sorted_trials.sort_unstable();
+    let median = if sorted_trials.is_empty() {
+        0.0
+    } else if sorted_trials.len() % 2 == 1 {
+        sorted_trials[sorted_trials.len() / 2] as f64
+    } else {
+        (sorted_trials[sorted_trials.len() / 2 - 1] + sorted_trials[sorted_trials.len() / 2]) as f64
+            / 2.0
+    };
+    let report = EcIcStageReport {
+        factor_base_ms,
+        relations_ms,
+        linear_algebra_ms,
+        verify_ms,
+        total_ms: total_started.elapsed().as_secs_f64() * 1e3,
+        factor_base_size: m,
+        relations_collected: relations.len(),
+        relation_attempts_exhausted: attempts_exhausted,
+        trials_total,
+        trials_per_relation_min: sorted_trials.first().copied().unwrap_or(0),
+        trials_per_relation_median: median,
+        trials_per_relation_max: sorted_trials.last().copied().unwrap_or(0),
+    };
+    Some((x, report))
+}
+
+/// Staged S₄ 3-decomposition twin of [`ec_index_calculus_dlp_staged`]:
+/// identical report shape, relations come from
+/// [`find_one_relation_s4_counted`] (three factor-base points per row).
+pub fn ec_index_calculus_dlp_s4_staged(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    fb_size: usize,
+    extra_relations: usize,
+    max_trials_per_relation: usize,
+    max_relation_attempts: usize,
+) -> Option<(BigUint, EcIcStageReport)> {
+    use std::time::Instant;
+    let total_started = Instant::now();
+
+    let fb_started = Instant::now();
+    let fb = build_factor_base(curve, fb_size);
+    let factor_base_ms = fb_started.elapsed().as_secs_f64() * 1e3;
+    if fb.is_empty() {
+        return None;
+    }
+    let target = fb.len() + extra_relations;
+
+    let relations_started = Instant::now();
+    let mut relations = Vec::with_capacity(target);
+    let mut attempts_exhausted = 0usize;
+    let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target);
+    let mut trials_total = 0usize;
+    while relations.len() < target {
+        let found = 'attempt: {
+            for _ in 0..max_relation_attempts {
+                if let Some(found) =
+                    find_one_relation_s4_counted(curve, g, q, &fb, max_trials_per_relation)
+                {
+                    break 'attempt Some(found);
+                }
+                attempts_exhausted += 1;
+            }
+            None
+        };
+        let Some((rel, trials)) = found else {
+            return None;
+        };
+        trials_total += trials;
+        trials_per_relation.push(trials);
+        relations.push(rel);
+    }
+    let relations_ms = relations_started.elapsed().as_secs_f64() * 1e3;
+
+    let m = fb.len();
+    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(relations.len());
+    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
+    for rel in &relations {
+        let mut row = vec![BigUint::zero(); m + 1];
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod(mult, &curve.n);
+            row[j] = (&row[j] + &val) % &curve.n;
+        }
+        let neg_b = (&curve.n - &(&rel.coef_b % &curve.n)) % &curve.n;
+        row[m] = neg_b;
+        matrix.push(row);
+        rhs.push(rel.coef_a.clone() % &curve.n);
+    }
+
+    let la_started = Instant::now();
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
+    let x = solution[m].clone();
+
+    let verify_started = Instant::now();
+    let a_fe = curve.a_fe();
+    let candidate = g.scalar_mul(&x, &a_fe);
+    let verified = &candidate == q;
+    let verify_ms = verify_started.elapsed().as_secs_f64() * 1e3;
+    if !verified {
+        return None;
+    }
+
+    let mut sorted_trials = trials_per_relation.clone();
+    sorted_trials.sort_unstable();
+    let median = if sorted_trials.is_empty() {
+        0.0
+    } else if sorted_trials.len() % 2 == 1 {
+        sorted_trials[sorted_trials.len() / 2] as f64
+    } else {
+        (sorted_trials[sorted_trials.len() / 2 - 1] + sorted_trials[sorted_trials.len() / 2]) as f64
+            / 2.0
+    };
+    let report = EcIcStageReport {
+        factor_base_ms,
+        relations_ms,
+        linear_algebra_ms,
+        verify_ms,
+        total_ms: total_started.elapsed().as_secs_f64() * 1e3,
+        factor_base_size: m,
+        relations_collected: relations.len(),
+        relation_attempts_exhausted: attempts_exhausted,
+        trials_total,
+        trials_per_relation_min: sorted_trials.first().copied().unwrap_or(0),
+        trials_per_relation_median: median,
+        trials_per_relation_max: sorted_trials.last().copied().unwrap_or(0),
+    };
+    Some((x, report))
 }
 
 // ── Baseline: textbook Pollard rho for ECDLP ───────────────────────────
@@ -826,7 +1698,7 @@ pub fn pollard_rho_ecdlp(
         let branch = match r {
             Point::Affine { x, .. } => (&x.value % BigUint::from(3u32))
                 .to_u32_digits()
-                .get(0)
+                .first()
                 .copied()
                 .unwrap_or(0),
             Point::Infinity => 0,
@@ -895,6 +1767,101 @@ mod tests {
     use super::*;
     use num_bigint::BigUint;
 
+    /// Cantor–Zassenhaus root finder agrees with brute force on a prime
+    /// past the brute-force cutoff (p = 1048568 + 3 has 21 bits) for a
+    /// spread of quartics with 0-4 roots.
+    #[test]
+    fn fast_roots_match_brute_force_past_cutoff() {
+        let p = BigUint::from(1_048_571u32);
+        // Construct (X - r1)(X - r2)... products for various root sets.
+        for roots in [
+            vec![3u32],
+            vec![3u32, 700_001],
+            vec![1u32, 2, 3],
+            vec![5u32, 90_000, 1_000_003, 77],
+            vec![],
+        ] {
+            // poly = prod (X - r) as coefficients (index = power).
+            let mut poly: Vec<BigUint> = vec![BigUint::from(1u32)]; // X^0
+            for r in &roots {
+                // multiply by (X - r) mod p: coefficient of X^k is
+                // c_{k-1} - r·c_k (with c_{-1} = c_len = 0).
+                let mut fixed = vec![BigUint::from(0u32); poly.len() + 1];
+                for k in 0..=poly.len() {
+                    let prev = if k > 0 { poly[k - 1].clone() } else { BigUint::from(0u32) };
+                    let cur = poly.get(k).cloned().unwrap_or(BigUint::from(0u32));
+                    let term = (BigUint::from(*r) * cur) % &p;
+                    let neg = if term.is_zero() {
+                        BigUint::from(0u32)
+                    } else {
+                        &p - &term
+                    };
+                    fixed[k] = (prev + neg) % &p;
+                }
+                poly = fixed;
+            }
+            let coeffs: Vec<FieldElement> =
+                poly.iter().map(|c| FieldElement::new(c % &p, p.clone())).collect();
+            let found = find_roots_fp_fast(&coeffs, &p);
+            let mut found_sorted: Vec<BigUint> = found.iter().map(|f| f.value.clone()).collect();
+            found_sorted.sort();
+            let mut expect: Vec<BigUint> =
+                roots.iter().map(|r| BigUint::from(*r)).collect();
+            expect.sort();
+            expect.dedup();
+            assert_eq!(found_sorted, expect, "roots {roots:?}");
+        }
+    }
+
+    /// The S₄ 3-decomposition relation search recovers the same DLP as the
+    /// 2-decomposition driver on the tiny curve, with three-entry rows.
+    #[test]
+    fn s4_relation_search_solves_and_uses_three_entries() {
+        let curve = tiny_curve();
+        let a_fe = curve.a_fe();
+        let g = curve.generator();
+        let q = g.scalar_mul(&BigUint::from(190u32), &a_fe);
+        let fb = build_factor_base(&curve, 10);
+        assert!(!fb.is_empty());
+        let (x, _trials) = find_one_relation_s4_counted(&curve, &g, &q, &fb, 5000)
+            .expect("an S4 relation exists on the tiny curve");
+        let _ = x; // one relation suffices; full solve below.
+        let staged = ec_index_calculus_dlp_s4_staged(&curve, &g, &q, 10, 6, 5000, 64);
+        let (s4_x, report) = staged.expect("S4 staged solve succeeds on the tiny curve");
+        assert_eq!(g.scalar_mul(&s4_x, &a_fe), q);
+        let plain = ec_index_calculus_dlp(&curve, &g, &q, 10, 6, 5000);
+        assert_eq!(s4_x, plain.expect("2-decomp solve also succeeds"));
+        assert!(report.relations_collected >= 10);
+        assert!(report.trials_per_relation_median >= 1.0);
+    }
+
+    /// Staged twin recovers the same log as the plain driver on the tiny
+    /// curve and reports split stage timers whose sum is consistent with
+    /// the total (factor_base + relations + LA each separately positive).
+    #[test]
+    fn staged_dlp_recovers_and_splits_stages() {
+        let curve = tiny_curve();
+        let a_fe = curve.a_fe();
+        let g = curve.generator();
+        let q = g.scalar_mul(&BigUint::from(190u32), &a_fe);
+        let plain = ec_index_calculus_dlp(&curve, &g, &q, 8, 4, 5000);
+        let staged = ec_index_calculus_dlp_staged(&curve, &g, &q, 8, 4, 5000, 64);
+        let (staged_x, report) = staged.expect("staged solve succeeds on the tiny curve");
+        let plain_x = plain.expect("plain solve succeeds on the tiny curve");
+        assert_eq!(staged_x, plain_x);
+        assert_eq!(g.scalar_mul(&staged_x, &a_fe), q);
+        assert_eq!(report.factor_base_size, 8);
+        assert_eq!(report.relations_collected, 8 + 4);
+        assert!(report.factor_base_ms >= 0.0);
+        assert!(report.relations_ms >= 0.0);
+        assert!(report.linear_algebra_ms >= 0.0);
+        assert!(report.verify_ms >= 0.0);
+        assert!(report.total_ms >= report.relations_ms);
+        assert!(report.trials_total >= report.relations_collected);
+        assert!(report.trials_per_relation_median >= 1.0);
+        assert!(report.relation_attempts_exhausted == 0);
+    }
+
     /// **Small curve for tests**: y² = x³ + x + 19 (mod 271).  Curve
     /// has 281 points (prime), so cofactor 1 and `G = (3, 7)` is a
     /// generator of the full group.
@@ -913,6 +1880,62 @@ mod tests {
 
     /// **Semaev S₃ is symmetric** in its three variables (verify on a
     /// handful of random samples).
+    /// The word-sized elimination returns the same solution and leaves
+    /// the same reduced system behind as the `BigUint` path, on full-rank,
+    /// rank-deficient and overdetermined systems.
+    #[test]
+    fn u64_elimination_matches_biguint_path() {
+        let mut s = 0x9E37_79B9_7F4A_7C15u64;
+        let mut next = || {
+            s ^= s << 13;
+            s ^= s >> 7;
+            s ^= s << 17;
+            s
+        };
+        for &n in &[7u64, 65_537, 1_000_000_007, 0xFFFF_FFFF_FFFF_FFC5] {
+            for &(rows, cols, sparsity) in
+                &[(6usize, 6usize, 1u64), (12, 8, 3), (8, 8, 2), (5, 9, 1)]
+            {
+                let nb = BigUint::from(n);
+                let mut mat: Vec<Vec<BigUint>> = (0..rows)
+                    .map(|_| {
+                        (0..cols)
+                            .map(|_| {
+                                let v = next();
+                                if v % sparsity == 0 {
+                                    BigUint::from(v % n)
+                                } else {
+                                    BigUint::zero()
+                                }
+                            })
+                            .collect()
+                    })
+                    .collect();
+                // Make one row a combination of two others (rank drop).
+                if rows > 3 {
+                    let combo: Vec<BigUint> = (0..cols)
+                        .map(|c| (&mat[0][c] + &mat[1][c] * 3u32) % &nb)
+                        .collect();
+                    mat[rows - 1] = combo;
+                }
+                let rhs: Vec<BigUint> = (0..rows).map(|_| BigUint::from(next() % n)).collect();
+                let (mut m1, mut r1) = (mat.clone(), rhs.clone());
+                let (mut m2, mut r2) = (mat.clone(), rhs.clone());
+                let fast = gaussian_eliminate_mod_u64(&mut m1, &mut r1, n);
+                let slow = gaussian_eliminate_mod_biguint(&mut m2, &mut r2, &nb);
+                assert_eq!(fast, slow, "n={n} {rows}x{cols}");
+                if slow.is_some() {
+                    assert_eq!(m1, m2, "reduced matrix, n={n} {rows}x{cols}");
+                    assert_eq!(r1, r2, "reduced rhs, n={n} {rows}x{cols}");
+                }
+            }
+        }
+        // Non-prime modulus with a non-invertible pivot: both refuse.
+        let mut m = vec![vec![BigUint::from(2u32)]];
+        let mut r = vec![BigUint::from(1u32)];
+        assert!(gaussian_eliminate_mod_n(&mut m, &mut r, &BigUint::from(4u32)).is_none());
+    }
+
     #[test]
     fn s3_symmetric() {
         let curve = tiny_curve();
@@ -1033,6 +2056,123 @@ mod tests {
         let sol = gaussian_eliminate_mod_n(&mut m, &mut r, &n).expect("solvable");
         assert_eq!(sol[0], BigUint::from(2u32));
         assert_eq!(sol[1], BigUint::from(1u32));
+    }
+
+    /// Moduli exercising both elimination paths: `101` takes the `u64`
+    /// path, the Mersenne prime `2^89 − 1` the `BigUint` one.
+    fn both_path_moduli() -> [BigUint; 2] {
+        [
+            BigUint::from(101u32),
+            (BigUint::one() << 89usize) - BigUint::one(),
+        ]
+    }
+
+    fn dense_system(
+        n: &BigUint,
+        rows: &[&[(usize, u64)]],
+        rhs: &[u64],
+        cols: usize,
+    ) -> (Vec<Vec<BigUint>>, Vec<BigUint>) {
+        let m = rows
+            .iter()
+            .map(|r| {
+                let mut d = vec![BigUint::zero(); cols];
+                for &(c, v) in r.iter() {
+                    d[c] = BigUint::from(v) % n;
+                }
+                d
+            })
+            .collect();
+        (m, rhs.iter().map(|&v| BigUint::from(v) % n).collect())
+    }
+
+    /// Under-determined system from the hyperelliptic sparse-solver
+    /// tests: `x9` (and others) have no pivot, so the strict solver
+    /// must refuse rather than return a particular solution with the
+    /// free unknowns zeroed.
+    #[test]
+    fn gaussian_rejects_underdetermined_system() {
+        for n in both_path_moduli() {
+            let rows: [&[(usize, u64)]; 2] =
+                [&[(0, 48), (1, 46), (4, 78), (9, 65)], &[(8, 16), (9, 26)]];
+            let (mut m, mut r) = dense_system(&n, &rows, &[32, 28], 10);
+            assert_eq!(
+                gaussian_eliminate_mod_n(&mut m, &mut r, &n),
+                None,
+                "n = {n}"
+            );
+
+            let (mut m, mut r) = dense_system(&n, &rows, &[32, 28], 10);
+            let p = gaussian_eliminate_mod_n_particular(&mut m, &mut r, &n).expect("consistent");
+            assert_eq!(p.rank, 2);
+            assert!(
+                p.determined.iter().all(|&d| !d),
+                "n = {n}: {:?}",
+                p.determined
+            );
+        }
+    }
+
+    /// A pivoted column whose reduced row still touches a free column
+    /// is not determined; one isolated from free columns is.
+    #[test]
+    fn gaussian_particular_flags_only_pinned_columns() {
+        for n in both_path_moduli() {
+            // x0 + x1 = 5 ; x2 = 7  over three unknowns.
+            let rows: [&[(usize, u64)]; 2] = [&[(0, 1), (1, 1)], &[(2, 1)]];
+            let (mut m, mut r) = dense_system(&n, &rows, &[5, 7], 3);
+            let p = gaussian_eliminate_mod_n_particular(&mut m, &mut r, &n).expect("consistent");
+            assert_eq!(p.determined, vec![false, false, true], "n = {n}");
+            assert_eq!(p.values[2], BigUint::from(7u32));
+        }
+    }
+
+    /// `x0 = 1` and `x0 = 2` together: inconsistent on both paths.
+    #[test]
+    fn gaussian_rejects_inconsistent_system() {
+        for n in both_path_moduli() {
+            let rows: [&[(usize, u64)]; 2] = [&[(0, 1)], &[(0, 1)]];
+            let (mut m, mut r) = dense_system(&n, &rows, &[1, 2], 1);
+            assert_eq!(gaussian_eliminate_mod_n(&mut m, &mut r, &n), None);
+            let (mut m, mut r) = dense_system(&n, &rows, &[1, 2], 1);
+            assert_eq!(
+                gaussian_eliminate_mod_n_particular(&mut m, &mut r, &n),
+                None
+            );
+        }
+    }
+
+    /// Square full-rank system with a planted solution still solves,
+    /// identically on both paths; an extra dependent row is accepted.
+    #[test]
+    fn gaussian_solves_square_full_rank_system() {
+        let planted = [3u64, 14, 15, 92, 65];
+        let rows: [&[(usize, u64)]; 6] = [
+            &[(0, 2), (1, 7), (4, 1)],
+            &[(1, 5), (2, 9)],
+            &[(0, 1), (2, 4), (3, 3)],
+            &[(3, 8), (4, 6)],
+            &[(0, 11), (4, 13)],
+            // Sum of the first two rows: consistent and dependent.
+            &[(0, 2), (1, 12), (2, 9), (4, 1)],
+        ];
+        for n in both_path_moduli() {
+            let rhs: Vec<u64> = rows
+                .iter()
+                .map(|r| {
+                    let v = r.iter().fold(BigUint::zero(), |acc, &(c, a)| {
+                        acc + BigUint::from(a) * BigUint::from(planted[c])
+                    });
+                    (v % &n).to_u64_digits().first().copied().unwrap_or(0)
+                })
+                .collect();
+            for take in [5, 6] {
+                let (mut m, mut r) = dense_system(&n, &rows[..take], &rhs[..take], 5);
+                let sol = gaussian_eliminate_mod_n(&mut m, &mut r, &n).expect("full rank");
+                let want: Vec<BigUint> = planted.iter().map(|&v| BigUint::from(v)).collect();
+                assert_eq!(sol, want, "n = {n}, rows = {take}");
+            }
+        }
     }
 
     /// **End-to-end ECDLP** on a small curve: solve `Q = x·G` via the

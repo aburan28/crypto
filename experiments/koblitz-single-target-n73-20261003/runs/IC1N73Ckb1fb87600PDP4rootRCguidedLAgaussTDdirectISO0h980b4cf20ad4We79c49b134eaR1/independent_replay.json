@@ -1,0 +1,104 @@
+{
+  "candidate_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4",
+  "checks": {
+    "G_on_curve": true,
+    "Q_on_curve": true,
+    "fixture_order_factorization_matches": true,
+    "fixture_trace_matches_order": true,
+    "ic_in_process_verification_passed": true,
+    "ic_online_phase_sum_matches": true,
+    "ic_peak_rss_within_declared_cap": true,
+    "ic_process_succeeded": true,
+    "ic_recovers_fixture_scalar": true,
+    "ic_uses_frozen_Q": true,
+    "known_answer_not_sent_to_ic": true,
+    "known_answer_not_sent_to_rho": true,
+    "no_edge_selectors": true,
+    "no_explicit_pair_table": true,
+    "one_ic_online_target": true,
+    "one_rho_online_target": true,
+    "rho_fixture_generation_excluded": true,
+    "rho_in_process_verification_passed": true,
+    "rho_online_phase_sum_matches": true,
+    "rho_peak_rss_within_declared_cap": true,
+    "rho_process_succeeded": true,
+    "rho_recovers_fixture_scalar": true,
+    "rho_used_supplied_public_point": true,
+    "rho_uses_frozen_G": true,
+    "rho_uses_frozen_Q": true,
+    "scalar_replay_equals_Q": true,
+    "subgroup_order_replay_is_infinity": true
+  },
+  "curve": {
+    "a": 0,
+    "b": 1,
+    "cofactor": "109796",
+    "curve_order": "9444732965923561641724",
+    "curve_trace_over_f2n": "-184271214331",
+    "field_modulus_low_terms": [
+      0,
+      2,
+      3,
+      4
+    ],
+    "frobenius_eigenvalue_mod_subgroup_order": "23307709893564868",
+    "n": 73,
+    "subgroup_order": "86020738150056119"
+  },
+  "environment": {
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "inputs_sha256": {
+    "fixture": "43b93188f74dfa0e00c18e3f6966e4c8af2065e4df7620ace1cb581127add988",
+    "ic": "3762698fca7a290baa65e07610fa3608287f7991ae958e1ffe5c6da37fc913ff",
+    "ic_execution": "4c77b47590ef8f48fec089edfe8c29d330111adb3baa9a830287a980bcd68800",
+    "ic_summary": "ee9d026c2f95ba16934d1b597bee00a06f77a08823de56c5a7082808de04bf8e",
+    "rho": "8c2c10ad0baa91077b40348e1630e8aeb3f733fca6e7049a9aa6de6d5f542dd1",
+    "rho_execution": "84866f311e1d37e1ef4b1d3dfb505c6cad774fc73c3f9b52e1c15799f63b1a5d",
+    "target_points": "f813c261330dfa7b0dfaeb010c7d14828f596b32b3b08b908dbbed1250beb83b"
+  },
+  "kind": "independent_n73_single_target_replay",
+  "public_input": {
+    "G": [
+      "4735344536444938487862",
+      "4753051995279452466153"
+    ],
+    "Q": [
+      "1852858978593996699777",
+      "7821257062942871962177"
+    ],
+    "recovered_scalar": "12345678901234567",
+    "target_count": 1
+  },
+  "resource_policy": {
+    "claim": "same host, sequential arms; peak RSS measured; no finite cap",
+    "finite_memory_cap_bytes_per_arm": null,
+    "peak_rss_source": "wait4(2) per-process ru_maxrss; IC summary may be null when host process inspection is restricted"
+  },
+  "run_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR1",
+  "scope": "Standalone standard-library GF(2^73) curve replay, same-point pairing, one-target accounting, phase sums, and resource checks; does not independently remeasure producer runtimes.",
+  "status": "PASS",
+  "timing_ms": {
+    "ic_online": 249.023875,
+    "ic_peak_rss_bytes": 5630296064,
+    "ic_phase_sum": 249.02362499999998,
+    "ic_phases": {
+      "target_PDP": 248.89108499999998,
+      "target_descent": 0.000916,
+      "target_query": 0.0,
+      "target_recovery_check": 0.12125000000000001,
+      "target_relation_check": 0.010374
+    },
+    "online_speedup": 184.8588383342762,
+    "rho_online": 46034.26425,
+    "rho_peak_rss_bytes": 2187935744,
+    "rho_phase_sum": 46034.26425,
+    "rho_phases": {
+      "scalar_recovery_check": 7.96275,
+      "target_specific_jump_setup": 7.6499999999999995,
+      "target_walk": 46018.6515
+    }
+  },
+  "workload_id": "e79c49b134ea"
+}

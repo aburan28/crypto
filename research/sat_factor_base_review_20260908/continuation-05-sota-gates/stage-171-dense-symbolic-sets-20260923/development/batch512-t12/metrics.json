@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/Volumes/SSD990/kic-f4-stage171-target/release/examples/koblitz_pdp_backend",
+    "native-f4",
+    "manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 15.630245542008197,
+    "user_seconds": 158.701552,
+    "system_seconds": 2.225582,
+    "total_core_seconds": 160.927134,
+    "single_core_seconds": 160.927134,
+    "peak_rss_bytes": 3348725760,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

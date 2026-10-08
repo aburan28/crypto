@@ -1,0 +1,705 @@
+{
+  "contract_sha256": "6bc79767971a5b368ceac024a82837e5ea9e6bd14de76d3daac9b36fb4a8b6e5",
+  "profiles": [
+    {
+      "profile": "binary5",
+      "curve_order": 44,
+      "subgroup_order": 11,
+      "targets": [
+        {
+          "target": [
+            2,
+            18
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            11,
+            24
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            15,
+            5
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            24,
+            20
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            11,
+            19
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            8,
+            1
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            9,
+            3
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            28,
+            14
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            29,
+            9
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            31,
+            0
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            6,
+            10
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            21,
+            9
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            18,
+            3
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            27,
+            3
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            4,
+            6
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            2,
+            16
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            16,
+            8
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            1,
+            4
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            14,
+            5
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            29,
+            20
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            27,
+            24
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            4,
+            2
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            5,
+            17
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            23,
+            6
+          ],
+          "stratum": "holdout"
+        }
+      ]
+    },
+    {
+      "profile": "binary9",
+      "curve_order": 508,
+      "subgroup_order": 127,
+      "targets": [
+        {
+          "target": [
+            19,
+            348
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            84,
+            422
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            250,
+            193
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            116,
+            306
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            118,
+            259
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            483,
+            12
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            81,
+            195
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            183,
+            320
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            230,
+            327
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            82,
+            145
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            155,
+            242
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            293,
+            475
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            376,
+            11
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            367,
+            34
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            343,
+            99
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            488,
+            129
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            490,
+            121
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            480,
+            465
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            180,
+            44
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            395,
+            468
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            224,
+            157
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            198,
+            176
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            137,
+            327
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            434,
+            167
+          ],
+          "stratum": "holdout"
+        }
+      ]
+    },
+    {
+      "profile": "subfield8-k0",
+      "curve_order": 508,
+      "subgroup_order": 127,
+      "targets": [
+        {
+          "target": [
+            19,
+            348
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            84,
+            422
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            250,
+            193
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            116,
+            306
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            118,
+            259
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            483,
+            12
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            81,
+            195
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            183,
+            320
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            230,
+            327
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            82,
+            145
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            155,
+            242
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            293,
+            475
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            376,
+            11
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            367,
+            34
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            343,
+            99
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            488,
+            129
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            490,
+            121
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            480,
+            465
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            180,
+            44
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            395,
+            468
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            224,
+            157
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            198,
+            176
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            137,
+            327
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            434,
+            167
+          ],
+          "stratum": "holdout"
+        }
+      ]
+    },
+    {
+      "profile": "subfield8-b22",
+      "curve_order": 468,
+      "subgroup_order": 13,
+      "targets": [
+        {
+          "target": [
+            153,
+            113
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            379,
+            145
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            208,
+            220
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            238,
+            325
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            164,
+            412
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            98,
+            333
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            10,
+            397
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            204,
+            507
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            440,
+            77
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            113,
+            495
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            489,
+            489
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            109,
+            219
+          ],
+          "stratum": "development"
+        },
+        {
+          "target": [
+            169,
+            318
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            342,
+            245
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            164,
+            312
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            305,
+            228
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            193,
+            489
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            432,
+            356
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            20,
+            491
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            386,
+            349
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            511,
+            296
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            54,
+            451
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            152,
+            482
+          ],
+          "stratum": "holdout"
+        },
+        {
+          "target": [
+            268,
+            173
+          ],
+          "stratum": "holdout"
+        }
+      ]
+    }
+  ]
+}

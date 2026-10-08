@@ -1,0 +1,117 @@
+# External-engine refutation-degree ladder: readout
+
+## Per draw (reading; Singular wall seconds summed over the draw's degree runs; in-tree reading where shared)
+
+| cell | arm | draw | n_vars | reading | wall s | in-tree |
+|:--|:--|--:|--:|:--|--:|:--|
+| K0n19l6 | ctrl | 0 | 0 | ≥8 | 174 |  |
+| K0n19l6 | ctrl | 2 | 0 | ≥8 | 170 |  |
+| K0n19l6 | ctrl | 3 | 0 | ≥8 | 174 |  |
+| K0n19l6 | ctrl | 4 | 0 | ≥8 | 173 |  |
+| K0n19l6 | rr | 0 | 0 | 8 | 1118 |  |
+| K0n19l6 | rr | 2 | 0 | 8 | 1153 |  |
+| K0n19l6 | rr | 3 | 0 | 8 | 1039 |  |
+| K0n19l6 | rr | 4 | 0 | 8 | 1129 |  |
+| K0n19l6 | x4 | 0 | 0 | 11 | 11486 |  |
+| K0n19l6 | x4 | 2 | 0 | 11 | 11646 |  |
+| K0n19l6 | x4 | 3 | 0 | 11 | 5118 |  |
+| K0n19l6 | x4 | 4 | 0 | 11 | 5081 |  |
+| K1n17l2 | ctrl | 0 | 0 | ≥8 | 0 | 5 |
+| K1n17l2 | ctrl | 1 | 0 | ≥8 | 0 | 5 |
+| K1n17l2 | ctrl | 2 | 0 | ≥8 | 0 | ≥8 |
+| K1n17l2 | ctrl | 3 | 0 | ≥8 | 0 | 5 |
+| K1n17l2 | rr | 0 | 0 | 4 | 0 | 4 |
+| K1n17l2 | rr | 1 | 0 | triv | 0 | 4 |
+| K1n17l2 | rr | 2 | 0 | 4 | 0 | 4 |
+| K1n17l2 | rr | 3 | 0 | 4 | 0 | 4 |
+| K1n17l2 | x4 | 0 | 0 | 5 | 0 | 6 |
+| K1n17l2 | x4 | 1 | 0 | 5 | 0 | 6 |
+| K1n17l2 | x4 | 2 | 0 | 5 | 0 | 6 |
+| K1n17l2 | x4 | 3 | 0 | 6 | 0 | 6 |
+| K1n17l3 | ctrl | 0 | 0 | ≥8 | 0 | ≥8 |
+| K1n17l3 | ctrl | 1 | 0 | ≥8 | 0 | 6 |
+| K1n17l3 | ctrl | 2 | 0 | ≥8 | 0 | ≥8 |
+| K1n17l3 | ctrl | 3 | 0 | ≥8 | 0 | 6 |
+| K1n17l3 | rr | 0 | 0 | 5 | 0 | 5 |
+| K1n17l3 | rr | 1 | 0 | 5 | 0 | 5 |
+| K1n17l3 | rr | 2 | 0 | 5 | 0 | 5 |
+| K1n17l3 | rr | 3 | 0 | 5 | 0 | 5 |
+| K1n17l3 | x4 | 0 | 0 | 8 | 0 | 8 |
+| K1n17l3 | x4 | 1 | 0 | 8 | 0 | 8 |
+| K1n17l3 | x4 | 2 | 0 | 8 | 0 | 8 |
+| K1n17l3 | x4 | 3 | 0 | 8 | 0 | 8 |
+| K1n17l4 | ctrl | 0 | 0 | ≥8 | 1 | ≥8 |
+| K1n17l4 | ctrl | 1 | 0 | ≥8 | 1 | 7 |
+| K1n17l4 | ctrl | 2 | 0 | ≥8 | 1 | ≥8 |
+| K1n17l4 | ctrl | 3 | 0 | ≥8 | 1 | ≥8 |
+| K1n17l4 | rr | 0 | 0 | 6 | 0 | 6 |
+| K1n17l4 | rr | 1 | 0 | 6 | 0 | 6 |
+| K1n17l4 | rr | 2 | 0 | 6 | 0 | 6 |
+| K1n17l4 | rr | 3 | 0 | 6 | 0 | 6 |
+| K1n17l4 | x4 | 0 | 0 | 9 | 0 | 9 |
+| K1n17l4 | x4 | 1 | 0 | 9 | 0 | 9 |
+| K1n17l4 | x4 | 2 | 0 | 9 | 0 | 9 |
+| K1n17l4 | x4 | 3 | 0 | 9 | 0 | 9 |
+| K1n17l5 | ctrl | 0 | 0 | ≥8 | 10 |  |
+| K1n17l5 | ctrl | 1 | 0 | ≥8 | 10 |  |
+| K1n17l5 | ctrl | 2 | 0 | ≥8 | 10 |  |
+| K1n17l5 | ctrl | 3 | 0 | ≥8 | 10 |  |
+| K1n17l5 | rr | 0 | 0 | 8 | 39 | ≥8 |
+| K1n17l5 | rr | 1 | 0 | triv | 0 | 4 |
+| K1n17l5 | rr | 2 | 0 | 8 | 45 | ≥8 |
+| K1n17l5 | rr | 3 | 0 | 8 | 79 | ≥8 |
+| K1n17l5 | x4 | 0 | 0 | 10 | 21 | ≥10 |
+| K1n17l5 | x4 | 1 | 0 | 10 | 19 | ≥10 |
+| K1n17l5 | x4 | 2 | 0 | 10 | 19 | ≥10 |
+| K1n17l5 | x4 | 3 | 0 | 10 | 25 | ≥10 |
+| K1n19l6 | ctrl | 0 | 0 | ≥8 | 173 | ≥7 |
+| K1n19l6 | ctrl | 1 | 0 | ≥8 | 169 | ≥7 |
+| K1n19l6 | ctrl | 2 | 0 | ≥8 | 174 |  |
+| K1n19l6 | ctrl | 3 | 0 | ≥8 | 174 |  |
+| K1n19l6 | rr | 0 | 0 | 8 | 1033 | ≥7 |
+| K1n19l6 | rr | 1 | 0 | 8 | 1097 | ≥7 |
+| K1n19l6 | rr | 2 | 0 | 8 | 1009 |  |
+| K1n19l6 | rr | 3 | 0 | 8 | 1651 |  |
+| K1n19l6 | x4 | 0 | 0 | 11 | 7578 | ≥10 |
+| K1n19l6 | x4 | 1 | 0 | 11 | 6690 | ≥10 |
+| K1n19l6 | x4 | 2 | 0 | 11 | 5606 |  |
+| K1n19l6 | x4 | 3 | 0 | 11 | 7671 |  |
+
+## Per cell
+
+| cell | arm | readings | median | x4 − 7 |
+|:--|:--|:--|:--|:--|
+| K0n19l6 | ctrl | ≥8 ≥8 ≥8 ≥8 | ≥8 |  |
+| K0n19l6 | rr | 8 8 8 8 | 8 |  |
+| K0n19l6 | x4 | 11 11 11 11 | 11 | 4 |
+| K1n17l2 | ctrl | ≥8 ≥8 ≥8 ≥8 | ≥8 |  |
+| K1n17l2 | rr | 4 triv 4 4 | 4 |  |
+| K1n17l2 | x4 | 5 5 5 6 | 5 | -2 |
+| K1n17l3 | ctrl | ≥8 ≥8 ≥8 ≥8 | ≥8 |  |
+| K1n17l3 | rr | 5 5 5 5 | 5 |  |
+| K1n17l3 | x4 | 8 8 8 8 | 8 | 1 |
+| K1n17l4 | ctrl | ≥8 ≥8 ≥8 ≥8 | ≥8 |  |
+| K1n17l4 | rr | 6 6 6 6 | 6 |  |
+| K1n17l4 | x4 | 9 9 9 9 | 9 | 2 |
+| K1n17l5 | ctrl | ≥8 ≥8 ≥8 ≥8 | ≥8 |  |
+| K1n17l5 | rr | 8 triv 8 8 | 8 |  |
+| K1n17l5 | x4 | 10 10 10 10 | 10 | 3 |
+| K1n19l6 | ctrl | ≥8 ≥8 ≥8 ≥8 | ≥8 |  |
+| K1n19l6 | rr | 8 8 8 8 | 8 |  |
+| K1n19l6 | x4 | 11 11 11 11 | 11 | 4 |
+
+## Slopes (OLS of exact cell medians against ℓ, per curve and arm)
+
+- rr on K1: slope 1.100 over 5 cells [(2.0, 4.0), (3.0, 5.0), (4.0, 6.0), (5.0, 8.0), (6.0, 8.0)]
+- x4 on K1: slope 1.400 over 5 cells [(2.0, 5.0), (3.0, 8.0), (4.0, 9.0), (5.0, 10.0), (6.0, 11.0)]
+
+## Paired rr − x4 on draws exact on both arms
+
+22 draws: mean -2.64, min -3, max -1
+
+## Calibration against the in-tree ladder (shared draws, both exact)
+
+agree on 20 draws; differ on 3:
+- K1n17l2 x4 d0: external 5, in-tree 6
+- K1n17l2 x4 d1: external 5, in-tree 6
+- K1n17l2 x4 d2: external 5, in-tree 6

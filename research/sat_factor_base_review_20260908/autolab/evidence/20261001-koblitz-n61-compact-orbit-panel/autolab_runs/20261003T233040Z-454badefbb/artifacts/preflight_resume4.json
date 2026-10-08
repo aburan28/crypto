@@ -1,0 +1,126 @@
+{
+  "agent_priorities": [
+    {
+      "beat": "Compact-orbit W64 n41/n53 L=1024 blocked-root-prefilter repeat passed full-rank and independent replay, A/A and isolation gates. Same-K complete CPU filter/off ratios 0.8528/0.8924 are engineering gains, but filter/rho remains 1.3282/1.4727; common S, n83/n131 transfer and selected-panel or native-PDP promotion are unset. Next high-arity gate: independently reviewed, label-gated m10 capacity PR #937; if it passes, freeze natural-target solver/yield and equal-useful-size original/native/transported/pullback PDP with rank and full cost, retaining matched automorphism-aware rho.",
+      "rank": 1,
+      "regime": "koblitz",
+      "stage": "vs_rho"
+    },
+    {
+      "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
+      "rank": 2,
+      "regime": "koblitz",
+      "stage": "factor_base"
+    },
+    {
+      "beat": "Reduce the selected n=53 median direct/rho core ratio from 2.2616 to <=1 and the 17.6367x fresh-build ratio while preserving the 0.8392 wall median and scalar-blind completion",
+      "note": "Constraint withdrawn by the 2026-09-30 erratum: the 0.8392 wall median is against a rho 44-60x slower than a strong single-target rho; the operative reference is the strong rho (see strong_rho_single_target_n53).",
+      "rank": 3,
+      "regime": "koblitz",
+      "stage": "vs_rho"
+    },
+    {
+      "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged",
+      "rank": 4,
+      "regime": "koblitz",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve, FFD logged",
+      "rank": 5,
+      "regime": "binary",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "j=0 known-answer IC at 16 bits agreeing with rho",
+      "rank": 6,
+      "regime": "prime",
+      "stage": "end_to_end_dlp"
+    },
+    {
+      "beat": "Filled 2026-09-21 by the boundary ledger (operation-counted relation_yield and rank on the prime and binary ladders); the open item is the CI-bearing yield curve against the subgroup-tightened ceiling at n=27 / 24 bits",
+      "rank": 7,
+      "regime": "binary_and_prime",
+      "stage": "relation_yield"
+    },
+    {
+      "beat": "backfill FFD/DoR on any algebraic decomposition claim that currently cites only wall-clock or conflict counts",
+      "rank": 8,
+      "regime": "all",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "Iterate against research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (ic boundary): in any regime, S/S_rho < 1 at r >= 2^20 with every phase counted, or a fitted total exponent below the reference's over >= 4 sizes, or yield/ceiling > 1.5 on a base outside every proper subgroup",
+      "rank": 9,
+      "regime": "all",
+      "stage": "vs_rho"
+    }
+  ],
+  "checks": [
+    {
+      "detail": "schema_version=2",
+      "name": "ledger_schema_v2",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/cargo",
+      "name": "cargo",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/rustc",
+      "name": "rustc",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/cryptominisat5",
+      "name": "cryptominisat5_optional",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/ic-auto1/examples/koblitz_rank_fixture.rs",
+      "name": "producer_source_direct",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/ic-auto1/examples/koblitz_rho_fixture.rs",
+      "name": "producer_source_rho",
+      "ok": true
+    },
+    {
+      "detail": "e8a2ca704f1bfec50a811a0305b775614c1af1f8",
+      "name": "git_head",
+      "ok": true
+    },
+    {
+      "detail": "0 dirty paths",
+      "name": "git_status_recorded",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/ic-auto1/examples/koblitz_orbit_dlp_fast.rs",
+      "name": "panel_producer_source_ic",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/ic-auto1/examples/koblitz_rho_batch_ks_v2_n61.rs",
+      "name": "panel_producer_source_rho",
+      "ok": true
+    }
+  ],
+  "claim_boundary": "preflight only; not a fixed-arm cost, relation, rank, memory, rho, or crossover result",
+  "created_at": "2026-10-05T18:28:48.465970+00:00",
+  "host": {
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.6"
+  },
+  "kind": "local_autolab_preflight",
+  "ledger_sha256": "ac0dddcfbe8e8ff61b3cc8832b19e43384cc82d518d8f2fc415e523c2afc8b06",
+  "ok": true,
+  "protocol_sha256": "5174fbe817de13c3c3b43ef8b98783f1f920824f73f0613b46228514d0a21977",
+  "schema_version": "1.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

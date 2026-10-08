@@ -1,0 +1,46 @@
+{
+  "additional_executions_authorized": false,
+  "archive_bytes": 25476819,
+  "archive_sha256": "12ea04c458036c0ca56c588d151ae317ada2cbc661124344be472bbecc94804b",
+  "candidate_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h5cc365241aec",
+  "execution_sha256": "5c0a1473b7d2637a7e97666db68262d038c628f937f3b0ea0338fd83f949f98d",
+  "fresh_paired_qualification": false,
+  "full_objective_complete": false,
+  "headline_online_admissible": false,
+  "native_executions": 1,
+  "negative_queries_independently_checked": 2,
+  "online_phases_ns": {
+    "target_descent": 11875,
+    "target_pdp": 11955937581,
+    "target_query": 11293,
+    "target_recovery_check": 8917,
+    "target_relation_check": 251
+  },
+  "online_speedup": null,
+  "online_wall_ns": 11955969917,
+  "ordinary_queries_executed": 0,
+  "preregistration_applicable_ci": [
+    {
+      "conclusion": "success",
+      "id": 36890344161
+    },
+    {
+      "conclusion": "success",
+      "id": 36890344091
+    }
+  ],
+  "preregistration_head": "b3fe186b22b4ef092d782865018d05161dc975ad",
+  "preregistration_merge": "45b2b9adc3405309ba07d005d9d141f89c4a2afb",
+  "preregistration_pr": "https://github.com/aburan28/crypto/pull/1159",
+  "promotion_eligible": false,
+  "restoration_members": 269,
+  "restoration_native_solvers_executed": 0,
+  "restored_admission_identical": true,
+  "run_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h5cc365241aecW8b3d9065d872R2026100104",
+  "scalar_verified": true,
+  "schema_version": 1,
+  "source_bound_execution_admitted": true,
+  "status": "CONSUMED_CLOSED_COMPLETE_DISCLOSED_CONTROL",
+  "target_attempt_count": 3,
+  "workload_id": "8b3d9065d872"
+}

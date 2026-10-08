@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-source-bound-result-v2-20260930/research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/diagnose_controls.py", line 112, in <module>
+    result = diagnose(args.root, args.out)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-source-bound-result-v2-20260930/research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/diagnose_controls.py", line 46, in diagnose
+    require(curve.n == 17 and len(base) == 63 and inputs['fixture']['field']['n'] == 17,
+                                                  ~~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'field'

@@ -1,0 +1,69 @@
+{
+  "choice": {
+    "classification": "SELECTED",
+    "feature": "signed_y_weight",
+    "sign": 1,
+    "training_rows": 3072,
+    "training_spearman": {
+      "frobenius_x_min_weight": -0.002242890351,
+      "signed_y_weight": 0.010547147434,
+      "x_weight": -0.006680109606
+    }
+  },
+  "config_sha256": "5a9d3951976482146b268fddf46ea78ddbf12b305129a62f2df6bc23021bbc52",
+  "cpu_seconds": 9.193263,
+  "decision": "NO_TRANSFER_WORTHY_PREDICTOR",
+  "evaluation": {
+    "n41_L1024": {
+      "all_median_probes": 1639.5,
+      "permutation_count": 2000,
+      "permutation_p": 0.7701149425287356,
+      "permutation_scores_sha256": "7017641de1280a315fc1414145c4ec905c972469239b0c85d2c539ea98f6eb04",
+      "permutation_seed": 2026100141,
+      "rows": 2048,
+      "selected": 512,
+      "selected_median_probes": 1661.0,
+      "selected_quartile_median_probes_ratio": 1.013113754193,
+      "signed_spearman": -0.016233881895
+    },
+    "n53_L1024": {
+      "all_median_probes": 13390.0,
+      "permutation_count": 2000,
+      "permutation_p": 0.6466766616691654,
+      "permutation_scores_sha256": "235776bf95d12a823b7415973e4aac78906b37638ee4e58cf5ea0c534498887b",
+      "permutation_seed": 2026100153,
+      "rows": 5120,
+      "selected": 1280,
+      "selected_median_probes": 13735.5,
+      "selected_quartile_median_probes_ratio": 1.025802837939,
+      "signed_spearman": -0.005156678549
+    }
+  },
+  "evidence_sha256": {
+    "input_check.json": "bf2612e05cb6ac9e86ec4741ea751900aafb33e60733e51a914a169ceb13fa1b",
+    "input_check.stdout.txt": "a060cbecf788af95177cd6f631ffdc52bfae4cde3ddb57cab309e258855a818e",
+    "n41_L1024_evaluation.jsonl": "853d97feada5f57dc1983a8190f477c84fac22e711958ff1258dfb3ce54a7914",
+    "n41_L1024_permutations.json": "807d2777921829fb3613084a858f460624143db8d62e7d738c5647ab6129353e",
+    "n53_L1024_evaluation.jsonl": "0948559b0f8b9d153789833e5d0b1126bc220e1b61bff921763e6cd52c974c3e",
+    "n53_L1024_permutations.json": "fbcf111d93b67988f71abd4d0046207d7b0f8c7155b0207233299337cc74f8e7",
+    "source_check.json": "42d27ad6c520cb021c455708727cd2d53ad28efea504d6d0c15aec7d49e02269",
+    "source_check.stdout.txt": "0522067fba07b754f7c74296ad443bba06af65e5bcf98d85a83a43620b6ae69a",
+    "train_choice.json": "c8cf3fca870e2000ea293670c0c951b6477b0699e95d1cc0b73e47ebb8582308",
+    "training.jsonl": "81f3aa42c12c0d196e36eed5f82e06e23605bcb9f5eee62593604a2fd7e04f0b"
+  },
+  "feature_meter": {
+    "cpu_seconds": 2.7204090000000196,
+    "evaluations": 10240,
+    "field_squarings": 481280
+  },
+  "host": "Adams-MacBook-Pro.local",
+  "limit_seconds": 120,
+  "manifest_sha256": "350779eb61b5c9b14f065f4f2b3563166de0aaa6ed1da91f3d5308a8fc6fac97",
+  "memory_limit_bytes": 536870912,
+  "peak_rss_bytes": 73072640,
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "schema": "ecc2k130-pdp-difficulty-producer-v1",
+  "source_sha256": "a8dfcf77154ce196476c2c9d0bf7fac0f322a93d4e966dc709c1bcc553176ac1",
+  "status": "PASS",
+  "wall_seconds": 13.873264458001358
+}

@@ -1,0 +1,51 @@
+name: CryptoPro-B CM map correctness
+
+on:
+  pull_request:
+    paths:
+      - 'examples/cryptopro_b_cm_map_checks.rs'
+      - 'research/cryptopro_b_cm_map_checks_20261005/**'
+      - 'src/hash/sha256.rs'
+      - 'Cargo.toml'
+      - '.github/workflows/cryptopro-b-cm-map-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'examples/cryptopro_b_cm_map_checks.rs'
+      - 'research/cryptopro_b_cm_map_checks_20261005/**'
+      - 'src/hash/sha256.rs'
+      - 'Cargo.toml'
+      - '.github/workflows/cryptopro-b-cm-map-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Prepare native replay
+        run: |
+          mkdir -p "$RUNNER_TEMP/cryptopro-b-cm"
+          rustfmt --edition 2021 examples/cryptopro_b_cm_map_checks.rs
+          cp examples/cryptopro_b_cm_map_checks.rs "$RUNNER_TEMP/cryptopro-b-cm/cryptopro_b_cm_map_checks.rs"
+      - name: Positive replay and rejection controls
+        run: cargo test --release --example cryptopro_b_cm_map_checks
+      - name: Native forward-map report
+        run: |
+          cargo run --release --example cryptopro_b_cm_map_checks > "$RUNNER_TEMP/cryptopro-b-cm/cryptopro_b_cm_native.json"
+          sha256sum "$RUNNER_TEMP/cryptopro-b-cm/cryptopro_b_cm_native.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cryptopro-b-cm-native-replay
+          path: ${{ runner.temp }}/cryptopro-b-cm/
+          if-no-files-found: error

@@ -1,0 +1,87 @@
+name: Koblitz Stage 27 direct MITM matrix
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/run_koblitz_stage27_direct_mitm.py"
+      - "scripts/test_koblitz_stage27_direct_mitm.py"
+      - "scripts/score_koblitz_stage27_direct_mitm.py"
+      - "scripts/test_koblitz_stage27_score.py"
+      - "scripts/verify_koblitz_stage27_result.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE27_DIRECT_MITM_RESULTS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-27-direct-mitm-result-20260911/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-27-direct-mitm-workflow-34633920325.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-27-direct-mitm-artifacts-34633920325.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage27-terminal-evidence-successor-01-20260911.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage27-terminal-evidence-successor-01-20260911.tar.gz.sha256"
+      - ".github/workflows/koblitz-stage27-direct-mitm.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate-controls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate controls and retained evidence
+        run: |
+          python3 scripts/test_koblitz_stage27_direct_mitm.py -v
+          python3 scripts/test_koblitz_stage27_score.py -v
+          if test -f research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage27-terminal-evidence-successor-01-20260911.tar.gz; then
+            python3 scripts/verify_koblitz_stage27_result.py
+          fi
+
+  direct-mitm-cell:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-controls
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        cell:
+          - n31-l5-m3-standard-a1-f0
+          - n31-l5-m3-ggmp-a0-f0
+          - n41-l5-m3-standard-a1-f0
+          - n59-l9-m3-standard-a1-f0
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the exact charged Stage-26 backend
+        uses: actions/download-artifact@v4
+        with:
+          name: koblitz-stage26-tools-34632018379
+          path: ${{ runner.temp }}/stage26-tools
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 34632018379
+      - name: Authenticate backend and extract packet
+        run: |
+          echo "667fc00681e114acaaf662a8c00c214354e1a08e236a6974fb08e52504711ea0  $RUNNER_TEMP/stage26-tools/koblitz_pdp_backend" | sha256sum --check
+          sha256sum --check research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz.sha256
+          mkdir "$RUNNER_TEMP/stage27-packet"
+          tar -xzf research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz -C "$RUNNER_TEMP/stage27-packet"
+      - name: Run exact direct MITM cell on one CPU
+        run: |
+          chmod 755 "$RUNNER_TEMP/stage26-tools/koblitz_pdp_backend"
+          python3 scripts/run_koblitz_stage27_direct_mitm.py run \
+            --packet "$RUNNER_TEMP/stage27-packet/koblitz-stage26-affinity-inputs-successor-05-20260911" \
+            --cell "${{ matrix.cell }}" \
+            --output "$RUNNER_TEMP/stage27-${{ matrix.cell }}" \
+            --backend "$RUNNER_TEMP/stage26-tools/koblitz_pdp_backend"
+          python3 scripts/run_koblitz_stage27_direct_mitm.py verify \
+            --output "$RUNNER_TEMP/stage27-${{ matrix.cell }}" \
+            > "$RUNNER_TEMP/stage27-${{ matrix.cell }}-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage27-${{ matrix.cell }}-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage27-${{ matrix.cell }}
+            ${{ runner.temp }}/stage27-${{ matrix.cell }}-verification.json

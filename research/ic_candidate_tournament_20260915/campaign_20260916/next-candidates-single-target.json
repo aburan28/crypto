@@ -1,0 +1,119 @@
+[
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Retain the previous selected complete algorithm.",
+    "id": "incumbent",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 2
+    },
+    "config": {
+      "batch_trials": 2,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Fails the unchanged complete-workload confirmation gate.",
+    "hypothesis": "Test the next collection/rank-check tradeoff around the selected batch.",
+    "id": "batch2",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 8
+    },
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Fails the unchanged complete-workload confirmation gate.",
+    "hypothesis": "Test the next collection/rank-check tradeoff around the selected batch.",
+    "id": "batch8",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 256
+    },
+    "config": {
+      "batch_trials": 256,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Fails the unchanged complete-workload confirmation gate.",
+    "hypothesis": "Test the next collection/rank-check tradeoff around the selected batch.",
+    "id": "batch256",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Fails the unchanged complete-workload confirmation gate.",
+    "hypothesis": "Test linear-algebra setup against the selected collection policy.",
+    "id": "dense",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+  },
+  {
+    "changed_parameters": {
+      "collection_window": 4
+    },
+    "config": {
+      "batch_trials": 1,
+      "collection_window": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Fails the unchanged complete-workload confirmation gate.",
+    "hypothesis": "Test a new walked-probe scan window with all failed attempts charged.",
+    "id": "window4",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+  },
+  {
+    "changed_parameters": {
+      "collection_window": 16
+    },
+    "config": {
+      "batch_trials": 1,
+      "collection_window": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Fails the unchanged complete-workload confirmation gate.",
+    "hypothesis": "Test a new walked-probe scan window with all failed attempts charged.",
+    "id": "window16",
+    "parent": "incumbent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+  }
+]

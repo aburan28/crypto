@@ -1,0 +1,41 @@
+{
+  "6": {
+    "audit": {
+      "source_files": 450,
+      "status": "VERIFIED",
+      "trial_receipts": 1584
+    },
+    "restore": {
+      "archive": "round-0006b-single.tar.zst",
+      "bytes": 283581208,
+      "files": 35055,
+      "status": "RESTORED"
+    }
+  },
+  "7": {
+    "audit": {
+      "source_files": 450,
+      "status": "VERIFIED",
+      "trial_receipts": 1560
+    },
+    "restore": {
+      "archive": "round-0007-single-policy.tar.zst",
+      "bytes": 258717170,
+      "files": 42978,
+      "status": "RESTORED"
+    }
+  },
+  "8": {
+    "audit": {
+      "source_files": 450,
+      "status": "VERIFIED",
+      "trial_receipts": 1536
+    },
+    "restore": {
+      "archive": "round-0008-single-implementation.tar.zst",
+      "bytes": 253917884,
+      "files": 45387,
+      "status": "RESTORED"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "recorded_unix": 1789505647.261466,
+  "cgroup": {
+    "cpu.stat": "usage_usec 470350549\nuser_usec 454911126\nsystem_usec 15439422\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 3229\nnr_throttled 807\nthrottled_usec 898862\nnr_bursts 0\nburst_usec 0\n",
+    "memory.peak": "1601720320\n",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+  },
+  "external_model_cost_usd": 0,
+  "note": "These two source-development probes used no model API calls; host test compilation is separate preparation overhead."
+}

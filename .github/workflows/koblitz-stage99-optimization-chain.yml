@@ -1,0 +1,26 @@
+name: Koblitz Stage 99 optimization chain archive
+
+on:
+  pull_request:
+    paths:
+      - "scripts/verify_koblitz_stage99_optimization_chain.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-99-optimization-chain-20260913/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage9*-evidence-*.tar.gz*"
+      - ".github/workflows/koblitz-stage99-optimization-chain.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-optimization-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay archived Stage 94 through 98 results
+        run: |
+          python3 -m py_compile scripts/verify_koblitz_stage99_optimization_chain.py
+          python3 scripts/verify_koblitz_stage99_optimization_chain.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-99-optimization-chain-20260913
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"

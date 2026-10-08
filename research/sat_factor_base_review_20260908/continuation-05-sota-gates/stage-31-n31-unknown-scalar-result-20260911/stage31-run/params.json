@@ -1,0 +1,66 @@
+{
+  "baseline": {
+    "rho": true,
+    "rho_max_iterations": 268435456,
+    "rho_seed": 5931241263826122831
+  },
+  "collection": {
+    "max_units": 64,
+    "unit_trials": 4096,
+    "units": 4
+  },
+  "curve": {
+    "curve_a": 0,
+    "degree": 31
+  },
+  "factor_base": {
+    "mode": "spec",
+    "spec": {
+      "kind": "two_torsion_saturated",
+      "parent": {
+        "indices": [
+          0,
+          1,
+          5
+        ],
+        "kind": "divisor"
+      }
+    }
+  },
+  "linear_algebra": {
+    "mode": "sparse",
+    "sparse": {
+      "filter": {
+        "merge_max_weight": 8,
+        "target_excess": 32
+      },
+      "wiedemann": {
+        "block_m": 4,
+        "block_n": 4
+      }
+    }
+  },
+  "max_trials": 200000,
+  "name": "k0n31-public-unknown-scalar-stage31",
+  "schema_version": 1,
+  "seed": 31031,
+  "solver": "pair_table",
+  "summands": 3,
+  "targets": [
+    {
+      "public_hash_seed": 31001
+    },
+    {
+      "public_hash_seed": 31002
+    },
+    {
+      "public_hash_seed": 31003
+    },
+    {
+      "public_hash_seed": 31004
+    },
+    {
+      "public_hash_seed": 31005
+    }
+  ]
+}

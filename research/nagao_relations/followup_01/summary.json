@@ -1,0 +1,295 @@
+{
+  "provenance": {
+    "command": [
+      "/workspace/scratch/41f49cc08ea1/nagao-venv/bin/python",
+      "research/nagao_relations/followup_01/run.py"
+    ],
+    "git_commit": "ba6f10c503ddf576b7af8ebc0c407e7640a36b08",
+    "git_status": "?? research/nagao_relations/followup_01/stderr.log\n?? research/nagao_relations/followup_01/stdout.log\n",
+    "python": "3.12.14",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "pycryptosat": "5.14.7",
+    "source_sha256": {
+      "research/nagao_relations/followup_01/run.py": "220aac864bc299f95de7250869b993544fc266468aeb2db2710d45610da2efb5",
+      "research/nagao_relations/followup_01/contract.json": "3f144169cb3b05a920d5f64e70666c6b8b4e5e73193bc439b99ae388222c2d70",
+      "ecc2k130/codegen/nagaocompare.py": "57b27ec7098196d07734568c2b2bc76a7532fd2ac753a835c2f8cd3104a7fa5a",
+      "ecc2k130/codegen/nagaodecomp.py": "bb51628284100957ec22a8da294204943a08358ee46713d6d254d721143fc446",
+      "ecc2k130/codegen/nagaoannihilator.py": "7cf9d7f9fc6f2d7f9154e32a8dacd16429a50d9e2a745a84aa2335fb513b1b73",
+      "ecc2k130/codegen/decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+      "ecc2k130/codegen/field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+      "ecc2k130/codegen/curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+      "ecc2k130/codegen/indexcalc.py": "1be6ee84858db71349a034241b92d842e0c79ee6a0fabaefbc497d586ada71a7",
+      "ecc2k130/codegen/ir.py": "48fce7b23c6603eda336645ff9c6c04226be9d2488bb2ca1679d32b3859f9343",
+      "ecc2k130/codegen/build.py": "eeeb25eb6482b233c8d4ae56f5cc564d331897aaa4647ac2e83c6ccdbf8479a5",
+      "ecc2k130/codegen/cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879"
+    }
+  },
+  "coefficient_panels": [
+    {
+      "fieldDegree": 5,
+      "subspaceDimension": 4,
+      "targetCount": 43,
+      "factorBasePoints": 20,
+      "verifiedSolutions": 864,
+      "targetHits": 43,
+      "allSolutionSetsEqual": true,
+      "nagaoOperations": {
+        "phases": {
+          "setup": {
+            "additions": 356,
+            "multiplications": 523,
+            "squarings": 255,
+            "inversionCalls": 31,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1134
+          },
+          "candidateConstruction": {
+            "additions": 591976,
+            "multiplications": 506664,
+            "squarings": 170624,
+            "inversionCalls": 0,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1269264
+          },
+          "membership": {
+            "additions": 1255226,
+            "multiplications": 1255226,
+            "squarings": 438700,
+            "inversionCalls": 0,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 2949152
+          },
+          "rootExtraction": {
+            "additions": 60480,
+            "multiplications": 68256,
+            "squarings": 2592,
+            "inversionCalls": 864,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 131328
+          },
+          "verification": {
+            "additions": 17214,
+            "multiplications": 31126,
+            "squarings": 0,
+            "inversionCalls": 1728,
+            "curveAdditionCalls": 1728,
+            "curveDoublingCalls": 22,
+            "fieldOperations": 48340
+          }
+        },
+        "totals": {
+          "additions": 1925252,
+          "multiplications": 1861795,
+          "squarings": 612171,
+          "inversionCalls": 2623,
+          "curveAdditionCalls": 1728,
+          "curveDoublingCalls": 22,
+          "fieldOperations": 4399218
+        }
+      },
+      "oracleOperations": {
+        "phases": {
+          "setup": {
+            "additions": 160,
+            "multiplications": 240,
+            "squarings": 115,
+            "inversionCalls": 15,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 515
+          },
+          "oracleSearch": {
+            "additions": 488400,
+            "multiplications": 842712,
+            "squarings": 0,
+            "inversionCalls": 70152,
+            "curveAdditionCalls": 71040,
+            "curveDoublingCalls": 888,
+            "fieldOperations": 1331112
+          },
+          "oracleVerification": {
+            "additions": 17214,
+            "multiplications": 31126,
+            "squarings": 0,
+            "inversionCalls": 1728,
+            "curveAdditionCalls": 1728,
+            "curveDoublingCalls": 22,
+            "fieldOperations": 48340
+          }
+        },
+        "totals": {
+          "additions": 505774,
+          "multiplications": 874078,
+          "squarings": 115,
+          "inversionCalls": 71895,
+          "curveAdditionCalls": 72768,
+          "curveDoublingCalls": 910,
+          "fieldOperations": 1379967
+        }
+      }
+    },
+    {
+      "fieldDegree": 5,
+      "subspaceDimension": 5,
+      "targetCount": 8,
+      "factorBasePoints": 42,
+      "verifiedSolutions": 1780,
+      "targetHits": 8,
+      "allSolutionSetsEqual": true,
+      "nagaoOperations": {
+        "phases": {
+          "setup": {
+            "additions": 46,
+            "multiplications": 62,
+            "squarings": 25,
+            "inversionCalls": 0,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 133
+          },
+          "candidateConstruction": {
+            "additions": 110112,
+            "multiplications": 94240,
+            "squarings": 31744,
+            "inversionCalls": 0,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 236096
+          },
+          "membership": {
+            "additions": 296728,
+            "multiplications": 296728,
+            "squarings": 103564,
+            "inversionCalls": 0,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 697020
+          },
+          "rootExtraction": {
+            "additions": 238520,
+            "multiplications": 254540,
+            "squarings": 5340,
+            "inversionCalls": 1780,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 498400
+          },
+          "verification": {
+            "additions": 35531,
+            "multiplications": 64103,
+            "squarings": 0,
+            "inversionCalls": 3560,
+            "curveAdditionCalls": 3560,
+            "curveDoublingCalls": 23,
+            "fieldOperations": 99634
+          }
+        },
+        "totals": {
+          "additions": 680937,
+          "multiplications": 709673,
+          "squarings": 140673,
+          "inversionCalls": 5340,
+          "curveAdditionCalls": 3560,
+          "curveDoublingCalls": 23,
+          "fieldOperations": 1531283
+        }
+      },
+      "oracleOperations": {
+        "phases": {
+          "setup": {
+            "additions": 333,
+            "multiplications": 499,
+            "squarings": 239,
+            "inversionCalls": 31,
+            "curveAdditionCalls": 0,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1071
+          },
+          "oracleSearch": {
+            "additions": 1003640,
+            "multiplications": 1731460,
+            "squarings": 0,
+            "inversionCalls": 144140,
+            "curveAdditionCalls": 145920,
+            "curveDoublingCalls": 1780,
+            "fieldOperations": 2735100
+          },
+          "oracleVerification": {
+            "additions": 35531,
+            "multiplications": 64103,
+            "squarings": 0,
+            "inversionCalls": 3560,
+            "curveAdditionCalls": 3560,
+            "curveDoublingCalls": 23,
+            "fieldOperations": 99634
+          }
+        },
+        "totals": {
+          "additions": 1039504,
+          "multiplications": 1796062,
+          "squarings": 239,
+          "inversionCalls": 147731,
+          "curveAdditionCalls": 149480,
+          "curveDoublingCalls": 1803,
+          "fieldOperations": 2835805
+        }
+      }
+    }
+  ],
+  "sat_panels": [
+    {
+      "n": 9,
+      "weight": 2,
+      "variant": "chained-s3",
+      "attempted": 8,
+      "complete": 0,
+      "correct_completed": 0,
+      "errors": 0,
+      "projected_solutions_completed": 0,
+      "projected_solutions_partial": 128,
+      "diagnostic_seconds": 40.73209765899628
+    },
+    {
+      "n": 9,
+      "weight": 2,
+      "variant": "rr-norm",
+      "attempted": 8,
+      "complete": 8,
+      "correct_completed": 8,
+      "errors": 0,
+      "projected_solutions_completed": 363,
+      "projected_solutions_partial": 0,
+      "diagnostic_seconds": 26.135316945996237
+    },
+    {
+      "n": 11,
+      "weight": 2,
+      "variant": "chained-s3",
+      "attempted": 8,
+      "complete": 0,
+      "correct_completed": 0,
+      "errors": 0,
+      "projected_solutions_completed": 0,
+      "projected_solutions_partial": 4,
+      "diagnostic_seconds": 40.31739456499781
+    },
+    {
+      "n": 11,
+      "weight": 2,
+      "variant": "rr-norm",
+      "attempted": 8,
+      "complete": 0,
+      "correct_completed": 0,
+      "errors": 0,
+      "projected_solutions_completed": 0,
+      "projected_solutions_partial": 9,
+      "diagnostic_seconds": 40.22607899999639
+    }
+  ],
+  "errors": [],
+  "limits": "Timeout means incomplete, not UNSAT or a mathematical rejection; no speedup/exponent claim from diagnostic wall times"
+}

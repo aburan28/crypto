@@ -1,0 +1,65 @@
+name: Koblitz Stage 48 n53 parallel width
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage48_n53_width.py"
+      - ".github/workflows/koblitz-stage48-n53-width.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate width comparison controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage48_n53_width.py
+          python3 scripts/run_koblitz_stage48_n53_width.py self-test
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-parallel-width:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage48_n53_width.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage48-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Run 1,024, 4,096, and rho on the same n53 target
+        run: |
+          python3 scripts/run_koblitz_stage48_n53_width.py run \
+            --build "$RUNNER_TEMP/stage48-build" \
+            --output "$RUNNER_TEMP/stage48-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage48_n53_width.py verify \
+            --build "$RUNNER_TEMP/stage48-build" \
+            --output "$RUNNER_TEMP/stage48-run" \
+            > "$RUNNER_TEMP/stage48-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage48-n53-width-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage48-build
+            ${{ runner.temp }}/stage48-run
+            ${{ runner.temp }}/stage48-verification.json

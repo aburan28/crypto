@@ -1,0 +1,222 @@
+"""Development-only diversity retention and measured-combination proposals.
+
+This module never sees confirmation/replay measurements and cannot promote an
+algorithm. Complete implementations, not sums of the best stage times, compete.
+"""
+import copy
+import itertools
+import json
+import math
+
+from oracle import require
+
+
+AXES = ('factor_base', 'solver', 'linear_algebra', 'batch_trials', 'collection_window')
+
+
+def family(arm):
+    cfg = arm['config']
+    base = cfg.get('factor_base', {})
+    return (arm.get('adapter'), json.dumps(base, sort_keys=True, separators=(',', ':')),
+            cfg.get('solver', 'pair_table'), cfg.get('linear_algebra', 'sparse'),
+            cfg.get('row_kernel', 'full'), cfg.get('orbit_batch', 8),
+            cfg.get('orbit_target'), cfg.get('pair_table',
+                'full' if cfg.get('full_pair_table') else 'heuristic'),
+            cfg.get('batch_trials', 1), cfg.get('collection_window'))
+
+
+def mechanism_family(arm):
+    """Coarse family for exploration; batch and kernel variants share a slot."""
+    cfg = arm['config']
+    base = cfg.get('factor_base', {})
+    return (arm.get('adapter'), base.get('kind'), cfg.get('solver', 'pair_table'),
+            cfg.get('linear_algebra', 'sparse'))
+
+
+def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
+    """Keep total-cost leaders, cell specialists, and a reproducible outsider.
+
+    Only complete eligible development rows enter. Unselected candidates stay
+    in the archive. Width limits evaluation, never the evidence retained.
+    """
+    import random
+    require(width >= 2 and 0 <= exploration < width, 'invalid portfolio budget')
+    by_id = {a['id']: a for a in arms}
+    require(len(by_id) == len(arms), 'duplicate candidate registrations')
+    eligible = []
+    for row in comparisons:
+        if not row.get('eligible') or row['candidate'] not in by_id:
+            continue
+        vector = [row['candidate_over_baseline'], row['native_wall_candidate_over_baseline']]
+        vector += list(row['per_cell'].values()) + list(row['native_wall_per_cell'].values())
+        require(vector and all(math.isfinite(v) and v > 0 for v in vector), 'invalid portfolio cost')
+        eligible.append(row)
+    require(len({row['candidate'] for row in eligible}) == len(eligible),
+            'duplicate candidate comparison rows')
+    eligible.sort(key=lambda r: (r['candidate_over_baseline'], r['candidate']))
+    if not eligible:
+        return []
+    online = any(row.get('online') is not None for row in eligible)
+    keys = sorted(eligible[0]['per_cell'])
+    require(all(sorted(r['per_cell']) == keys and sorted(r['native_wall_per_cell']) == keys
+                for r in eligible), 'unmatched portfolio cells')
+    if online:
+        require(all(r.get('online') is not None and sorted(r['online']['per_cell']) == keys
+                    and all(math.isfinite(v) and v > 0 for v in
+                        [r['online']['candidate_over_baseline'], *r['online']['per_cell'].values()])
+                    for r in eligible), 'missing or invalid online portfolio cost')
+    def vector(r):
+        values = [r['candidate_over_baseline'], r['native_wall_candidate_over_baseline']] + [
+            r[k][cell] for k in ('per_cell', 'native_wall_per_cell') for cell in keys]
+        if online:
+            values += [r['online']['candidate_over_baseline']] + [r['online']['per_cell'][cell] for cell in keys]
+        return values
+    def dominates(a, b):
+        av, bv = vector(a), vector(b)
+        return all(x <= y for x, y in zip(av, bv)) and any(x < y for x, y in zip(av, bv))
+    frontier = [r for r in eligible if not any(dominates(s, r) for s in eligible)]
+    selected = []
+    limit = min(width - exploration, len(eligible))
+    def add(row, reason):
+        if len(selected) < limit and row['candidate'] not in {s['candidate'] for s in selected}:
+            selected.append({'candidate': row['candidate'], 'reason': reason})
+    if online:
+        add(min(eligible, key=lambda r:(r['online']['candidate_over_baseline'], r['candidate'])),
+            'single-target online-time leader')
+    add(eligible[0], 'complete instruction-cost leader')
+    add(min(eligible, key=lambda r: (r['native_wall_candidate_over_baseline'], r['candidate'])),
+        'complete native-time leader')
+    # At least one standout cell specialist gets a chance before the remaining
+    # slots fill with distinct families. Compare only within one metric/cell;
+    # the qualified baselines differ for online and cold costs in v2.
+    metrics = [('cold instructions', lambda r, cell: r['per_cell'][cell]),
+               ('cold native', lambda r, cell: r['native_wall_per_cell'][cell])]
+    if online:
+        metrics.insert(0, ('single-target online', lambda r, cell: r['online']['per_cell'][cell]))
+    specialists = []
+    for metric, cost in metrics:
+        for cell in keys:
+            winner = min(eligible, key=lambda r: (cost(r, cell), r['candidate']))
+            if winner['candidate'] in {s['candidate'] for s in selected}:
+                continue
+            retained_ids = {s['candidate'] for s in selected}
+            best_retained = min(cost(row, cell) for row in eligible
+                                if row['candidate'] in retained_ids)
+            advantage = best_retained / cost(winner, cell)
+            if advantage > 1:
+                specialists.append((-advantage, metric, cell, winner['candidate'], winner))
+    if specialists:
+        _, metric, cell, _, winner = min(specialists)
+        add(winner, f'cell specialist: {metric} {cell}')
+    # Use the remaining competitive slots for non-dominated distinct families.
+    for row in frontier:
+        known = {family(by_id[s['candidate']]) for s in selected}
+        if family(by_id[row['candidate']]) not in known:
+            add(row, 'non-dominated implementation family')
+    for row in frontier + eligible:
+        add(row, 'Pareto frontier' if row in frontier else 'development reserve')
+    remaining = [r for r in eligible if r['candidate'] not in {s['candidate'] for s in selected}]
+    groups = {}
+    for row in remaining:
+        groups.setdefault(mechanism_family(by_id[row['candidate']]), []).append(row)
+    represented = {mechanism_family(by_id[item['candidate']]) for item in selected}
+    outsider_families = [key for key in groups if key not in represented]
+    other_families = [key for key in groups if key in represented]
+    rng = random.Random(seed)
+    rng.shuffle(outsider_families)
+    rng.shuffle(other_families)
+    slots = min(exploration, width-len(selected))
+    chosen = 0
+    # Sample families, not rows: registering many near-identical variants must
+    # not multiply that family's chance of taking the exploration budget.
+    for key in outsider_families + other_families:
+        if chosen == slots:
+            break
+        best = min(groups[key], key=lambda row: (
+            row['online']['candidate_over_baseline'] if online else
+            row['candidate_over_baseline'], row['candidate']))
+        selected.append({'candidate': best['candidate'],
+                         'reason': 'predeclared exploration slot'})
+        remaining.remove(best)
+        chosen += 1
+    if chosen < slots:
+        rng.shuffle(remaining)
+        selected.extend({'candidate': row['candidate'],
+                         'reason': 'predeclared exploration slot'}
+                        for row in remaining[:slots-chosen])
+    return selected
+
+
+def factorial_candidates(base, *, panel='implementation', max_candidates=16):
+    """Predeclare interactions before measuring; every tuple is a real job."""
+    require(2 <= max_candidates <= 16, 'candidate budget must be 2..16')
+    out = [{'id': 'incumbent', 'parent': None, 'hypothesis': 'Unmodified declared baseline.',
+            'config': copy.deepcopy(base)}]
+    if panel == 'implementation':
+        axes = {'batch_trials': [1, 8, 64], 'linear_algebra': ['sparse', 'dense'],
+                'collection_window': [None, 8]}
+    elif panel == 'algebra':
+        axes = {'solver': ['pair_table', 'enumerate', 'f4', 'f5', 'inherited_f4', 'sat_xor', 'sat_cnf'],
+                'linear_algebra': ['sparse', 'dense']}
+    elif panel == 'factor-base':
+        axes = {'factor_base': [
+            {'kind': 'subgroup_orbits', 'seed': 43, 'points': 52},
+            {'kind': 'subgroup_orbits', 'seed': 71, 'points': 78},
+            {'kind': 'subgroup_orbits', 'seed': 97, 'points': 104},
+            {'kind': 'factor', 'index': 0},
+            {'kind': 'frobenius_union', 'seed_masks': [1, 2, 4, 8]},
+            {'kind': 'frobenius_union', 'seed_masks': [1, 2, 8]},
+        ], 'linear_algebra': ['sparse', 'dense']}
+    else:
+        raise ValueError('unknown panel')
+    for values in itertools.product(*axes.values()):
+        cfg = dict(copy.deepcopy(base), **dict(zip(axes, values)))
+        if cfg.get('collection_window') is None:
+            cfg.pop('collection_window', None)
+        if panel == 'factor-base':
+            cfg.pop('factor_base_orbits', None)
+            cfg.pop('factor_base_cube_root', None)
+        if any(cfg == a['config'] for a in out):
+            continue
+        changed = {k: v for k, v in cfg.items() if base.get(k) != v}
+        out.append({'id': f'{panel.replace("-", "_")}_{len(out):02d}', 'parent': 'incumbent',
+                    'hypothesis': 'Measure complete-pipeline interaction: ' + ', '.join(changed),
+                    'changed_parameters': changed, 'config': cfg,
+                    'falsification': 'Incorrect certificate, incomplete workload or no total-cost improvement.'})
+        if len(out) == max_candidates:
+            break
+    return out
+
+
+def recombine(arms, retained_ids, *, max_candidates=16):
+    """Pair disjoint configuration deltas, including individually slower parents.
+
+    Source edits cannot be merged as JSON: those combinations need an explicitly
+    built source candidate. Conflicting parameter edits are left separate.
+    """
+    require(2 <= max_candidates <= 16, 'candidate budget must be 2..16')
+    incumbent = next(a for a in arms if a['id'] == 'incumbent')
+    baseline = incumbent['config']
+    parents = [a for a in arms if a['id'] in retained_ids and a['id'] != 'incumbent']
+    require(len(parents) == len(set(retained_ids)-{'incumbent'}), 'unknown retained parent')
+    out = [copy.deepcopy(incumbent)]
+    for a, b in itertools.combinations(parents, 2):
+        # Require the same executable/source; never discard a source mutation.
+        if any(a.get(k) != incumbent.get(k) or b.get(k) != incumbent.get(k)
+               for k in ('source_root', 'source_manifest_sha256', 'binary_relative')):
+            continue
+        if not set(baseline) <= set(a['config']) or not set(baseline) <= set(b['config']):
+            continue
+        da = {k:v for k,v in a['config'].items() if baseline.get(k) != v}
+        db = {k:v for k,v in b['config'].items() if baseline.get(k) != v}
+        if not da or not db or set(da) & set(db):
+            continue
+        cfg = dict(copy.deepcopy(baseline), **da, **db)
+        if any(cfg == x['config'] for x in arms+out):
+            continue
+        out.append({'id': f'combination_{len(out):02d}', 'parents': [a['id'], b['id']],
+                    'config': cfg, 'hypothesis': 'Test interaction of retained mechanisms in a complete run.',
+                    'falsification': 'No gain on fresh development fixtures; confirmation remains unused.'})
+        if len(out) == max_candidates:
+            break
+    return out

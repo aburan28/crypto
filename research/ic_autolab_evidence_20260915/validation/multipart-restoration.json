@@ -1,0 +1,27 @@
+{
+  "status": "VERIFIED",
+  "archive": {
+    "archive": "development.evidence.tar.xz",
+    "files": 21572,
+    "status": "VERIFIED",
+    "parts": 2
+  },
+  "original_archive_sha256": "9beb2034de8b4f9bcef18cec5d97a27d020e74d21c25daeae8c00b0547afcdb2",
+  "parts": [
+    {
+      "file": "development.evidence.tar.xz.part1",
+      "bytes": 21707008,
+      "sha256": "8710eeb0bdc8a8dfd5eb87e1f73dc90b64d590ab3025c05c83c4496db4982e2f"
+    },
+    {
+      "file": "development.evidence.tar.xz.part2",
+      "bytes": 21707008,
+      "sha256": "0d0ae4b306c0200505387d7210babe084f3714f2d31e92bf84cb53cb9aaeb46b"
+    }
+  ],
+  "seconds": 36.131571522011654,
+  "evidence_restoration_tests": 10,
+  "bundles_manifest_sha256": "090c5ed7589577d74243496ea91f37994cbc78f6b66a154c9e9fef0f2726c636",
+  "arithmetic_source_unchanged": true,
+  "measured_payload_unchanged": true
+}

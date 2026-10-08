@@ -1,0 +1,96 @@
+{
+  "schema": "koblitz_stage23_terminal_evidence_protocol.v1",
+  "status": "implementation_protocol",
+  "recorded_at": "2026-09-10",
+  "input_requirements": {
+    "run_seal_schema": "koblitz_unknown_scalar_run_seal.v1",
+    "run_seal_status": "outputs_frozen",
+    "terminal_run_only": true,
+    "retained_run_exact_file_grammar_required": true,
+    "outer_exact_files": [
+      "driver.metrics.json",
+      "driver.stdout",
+      "driver.stderr"
+    ],
+    "project_verification_exact_files": [
+      "verification.json",
+      "verification-seal.json"
+    ],
+    "outer_process_receipts_required": true,
+    "project_verification_seal_required": true,
+    "links_and_non_regular_files_forbidden": true,
+    "duplicate_json_keys_forbidden": true,
+    "descriptor_file_stability_fields": [
+      "mode",
+      "nlink",
+      "device",
+      "inode",
+      "size",
+      "mtime_ns",
+      "ctime_ns",
+      "bytes_read"
+    ],
+    "directory_metadata_and_entry_snapshot_stability_required": true,
+    "final_full_inventory_must_equal_initial_authenticated_inventory": true
+  },
+  "compaction": {
+    "retained_partition": "Every path in the original run-seal inventory outside build-target/, plus the original run-seal bytes.",
+    "omitted_partition": "Every and only path below build-target/ in the original run-seal inventory.",
+    "exact_build_target_file": "forbidden; build-target must be a directory and only its descendants are omitted",
+    "binary_cross_binding": "Each retained run binary must have the same sealed byte count and SHA-256 as build-target/release/examples/NAME.",
+    "other_original_bytes_preserved": [
+      "all retained run and task bytes",
+      "all run input bytes",
+      "both copied Stage-23 binary byte strings",
+      "the complete outer receipt tree",
+      "the complete project-verification tree"
+    ]
+  },
+  "path_portability": {
+    "method": "typed archive path map",
+    "global_string_replacement_forbidden": true,
+    "typed_roots": [
+      "sealed_run",
+      "outer_process_receipts",
+      "project_verification",
+      "committed_source_tree"
+    ],
+    "path_traversal_forbidden": true,
+    "signed_extra_files_forbidden": true
+  },
+  "trusted_verification": {
+    "first_entrypoint": "independently obtained verifier from a reviewed checkout",
+    "trusted_verifier_git_commit_must_be_pinned": true,
+    "trusted_verifier_sha256_must_be_obtained_separately": true,
+    "bundled_verifier_is_evidence_only": true,
+    "bundled_source_or_verifier_execution_forbidden": true,
+    "bundle_self_check_is_independent_authentication": false
+  },
+  "source_closure": {
+    "project_source": "complete bound Git commit tree",
+    "commit_object_archived": true,
+    "root_tree_recomputed_from_every_archived_blob": true,
+    "committed_tree_listing_sha256_recomputed": true,
+    "workspace_cargo_lock": "ignored and untracked at the bound commit; archived separately and required byte-equal to the tracked frozen Stage-20 lock",
+    "workspace_cargo_lock_must_not_be_claimed_tracked": true,
+    "external_dependency_sources_archived": false,
+    "external_dependency_versions_bound_by": "tracked frozen Cargo.lock"
+  },
+  "project_reconstruction": {
+    "exact_task_prefix_required": true,
+    "exact_intents_commands_watchdogs_environments_and_inputs_required": true,
+    "raw_metrics_and_receipts_reopened": true,
+    "parsed_stdout_must_equal_result": true,
+    "rows_resources_ratios_and_panel_state_recomputed": true,
+    "original_project_verification_recomputed": true
+  },
+  "claim_boundary": {
+    "project_custody_reconstruction_only": true,
+    "independent_relation_and_rho_mathematical_replay_completed": false,
+    "scientific_measurement_admitted": false,
+    "external_portable_verification_satisfied": false,
+    "independent_external_reproduction_satisfied": false,
+    "full_cost_gate_passed": false,
+    "koblitz_index_calculus_sota": false
+  }
+}

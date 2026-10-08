@@ -1,0 +1,61 @@
++ cd /work
++ curl -sf -o src.tgz 'https://ecc2k130-590183823895.s3.amazonaws.com/bench/iterfn-20260916/src.tgz?AWSAccessKeyId=REDACTED&Signature=REDACTED&Expires=REDACTED'
++ rm -rf ecc
++ mkdir ecc
++ tar xzf src.tgz -C ecc
++ cat
++ docker run --rm --gpus all -v /work/ecc:/src -w /src nvidia/cuda:13.3.1-devel-ubuntu24.04 bash /src/gpujob.sh
++ grep -v '^==$\|^== CUDA\|Copyright\|license\|LICENSE\|NGC\|^$\|CUDA Version'
+==========
+==========
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+NVIDIA RTX PRO 4500 Blackwell Server Edition, 2415 MHz, 165.00 W
+=== unit test: device table-walk primitives (LUT selection)
+table walk device probe: 4096 points, cycle rule fired on 1536
+  phase mismatches 0, pivot 0, sign 0, tag 0, addend words 0
+  branches 8, shared bytes 48508
+PASS
+=== build legacy
+=== build table
+=== build table-alusq
+=== verify table: 300 device reports re-walked by the host reference
+device: NVIDIA RTX PRO 4500 Blackwell Server Edition, 82 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 1 (8 branches, 48508 shared bytes)
+  finished: 2.236 M it/s, 331227 distinguished points (300 verified against the reference, 0 dropped)
+=== verify alusq: 300 device reports re-walked by the host reference
+device: NVIDIA RTX PRO 4500 Blackwell Server Edition, 82 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 1 (8 branches, 48508 shared bytes)
+  finished: 2.235 M it/s, 331227 distinguished points (300 verified against the reference, 0 dropped)
+=== verify legacy: 300 device reports re-walked by the host reference
+device: NVIDIA RTX PRO 4500 Blackwell Server Edition, 82 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 0 (0 branches, 0 shared bytes)
+  finished: 2.033 M it/s, 331611 distinguished points (300 verified against the reference, 0 dropped)
+=== bench legacy rep 1
+  finished: 5150.835 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1965 MHz, 153.94 W, 45
+=== bench table rep 1
+  finished: 5593.211 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1830 MHz, 154.08 W, 47
+=== bench alusq rep 1
+  finished: 5567.730 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1830 MHz, 153.51 W, 50
+=== bench legacy rep 2
+  finished: 5106.530 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1950 MHz, 153.81 W, 53
+=== bench table rep 2
+  finished: 5552.470 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1822 MHz, 165.62 W, 56
+=== bench alusq rep 2
+  finished: 5521.633 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1822 MHz, 151.99 W, 56
+=== bench legacy rep 3
+  finished: 5069.176 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1920 MHz, 158.84 W, 60
+=== bench table rep 3
+  finished: 5510.157 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1807 MHz, 152.81 W, 58
+=== bench alusq rep 3
+  finished: 5491.350 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+1987 MHz, 151.89 W, 59
++ echo JOB_DONE
+JOB_DONE

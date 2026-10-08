@@ -1,0 +1,16 @@
+{
+  "id": "coefficient-pullback-cold-dlp-smoke-v1",
+  "scope": "Cold complete ECDLP correctness and cost-vector smoke test; tiny groups only; no calibrated normalized-operation speedup claim.",
+  "panels": [{"n":5,"d":3,"curve_order":44,"subgroup_order":11},{"n":9,"d":4,"curve_order":508,"subgroup_order":127}],
+  "seeds": [91, 137, 211],
+  "variants": ["quadratic-image", "coefficient-pullback", "rho"],
+  "target_attempt_cap": 128,
+  "decomposition_seconds": 3,
+  "run_seconds": 60,
+  "domain": "Same distinct nonzero raw x-subspace factor support as the stage experiment. Project whole verified relations by the cofactor into the prime subgroup. Equal/negated projected factor columns are identified; projected identity is known zero.",
+  "collection": "R=s*A for a verified full-order A; after cofactor projection, row rhs is s mod N relative to G=h*A. Secrets are never supplied to decomposition.",
+  "individual": "R=Q+t*A; projected relation gives L=h*k+t mod N, hence k=(L-t)/h mod N. Verify [k]G=Q.",
+  "accounting": "Cold wall timer includes field/curve setup, enumeration and generator checks, factor-base setup, unsuccessful attempts, both solver and adapter verification, scalar elimination, and final recovery. Field API operations are split from scalar modular add/multiply/invert calls; conversions and total normalized S remain unmeasured.",
+  "rho": "Independent three-partition Floyd walk on the identical prime subgroup; randomized restarts and final scalar check. No factor-base precomputation. Small-group measurements are smoke controls, not extrapolation.",
+  "acceptance": "Every completed scalar must match the planted test scalar and satisfy [k]G=Q. Preserve missing completions and exceptions. No end-to-end claim from timing or an incomplete operation vector."
+}

@@ -1,0 +1,95 @@
+{
+  "basis_expected": {
+    "balanced": {
+      "basis_sha256": "c99ce17de8936f69056554d1790953cd9cd5408dd72b88d3250cd9332bdd7929",
+      "combined_coordinate_rank": 130,
+      "fixed_mask_count": 60,
+      "fixed_mask_x_sha256": "046f1a8741f72246666440b11cd20859e0f9e7413248c75e92f9fc823806fc7c",
+      "slot_dimensions": [
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+      ]
+    },
+    "unequal": {
+      "basis_sha256": "8ec3895b87677af57bd5e99495319c0885d9c7636b4f924771104dcb5be30dbf",
+      "combined_coordinate_rank": 131,
+      "fixed_mask_count": 60,
+      "fixed_mask_x_sha256": "73d0a4b2511a7c1e5e6602c150a51bcf26976c7e29e1ef27de992676f0b4d7cb",
+      "slot_dimensions": [
+        14,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+      ]
+    }
+  },
+  "caps": {
+    "dag_nodes": 2000000,
+    "dimacs_bytes": 268435456,
+    "per_arm_address_space_and_rss_bytes": 2147483648,
+    "per_arm_external_wall_seconds": 600
+  },
+  "dispatch_workflow_path": ".github/workflows/ecc2k130-m10-capacity-once.yml",
+  "dispatch_workflow_sha256": "ed0e254df95cf006e906f9bcd4efe5a561bc0e49d4b0d5eecc434098dcebe506",
+  "freeze_utc": "2026-09-25T19:22:52.391152+00:00",
+  "input_sha256": {
+    "research/notes/ecc2k130/rotated_arity_screen_20260925/evidence/raw/m10/producer/result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py": "d3f0f6e1515282a25efb4eb6a5f68ad754f1d9be68e4a741f17a748d9a58d782",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/bounded.py": "4aec662e171996654383f9364ace3240bf3164927ff97cab96234a9da1c050ba",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/export.py": "77159083a897f65b91d0f762ef425eda2df73460a91b997e754351c7c331e8fe",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py": "a277fb1b2f9b58ca8cc7cb33713950015f8c0446651b1d4e8657650819bcd419"
+  },
+  "prerequisite_pr_heads": {
+    "784": "c8ece3bc7ac4959945632704c7ecaa9c1f1a69cf",
+    "802": "a7d392229800683636adab7a1a88a670fab74508",
+    "804": "708e3c884c1707affbd186288639b67972047d2c"
+  },
+  "release_main_head": "01a3dbc04014e87ed12e7b9797b67e0a8ad144e9",
+  "release_main_head_role": "pre_release_main_ancestor",
+  "schema": "ecc2k130-m10-capacity-frozen-v1",
+  "scope": "representation_size_only_no_solver_or_PDP",
+  "source_base_head": "708e3c884c1707affbd186288639b67972047d2c",
+  "source_sha256": {
+    "INPUT.json": "2f27dd1b5af73811bcaddb1c125ddca209f26bf6656c93d83e9cadc4e386f70a",
+    "PROTOCOL.md": "c71939e512407ecf12c4af694319c4e94f82048c793a37911e37f3efdc5a0f02",
+    "basis_verify.py": "d8f8c09f778261483325f76aeb11524db46113f52c706066173847c032986703",
+    "capacity.py": "ef6b27752992ce44c663b2f0a825efac9a4bec009cf20868ee8a85948c64cd23",
+    "ci_replay.py": "ef5ecba0627a0241c4cf9df9b11fb76e6ebb724bfde3a46c3164aee4034d455c",
+    "dispatch_gate.py": "7e49f8f243e4a9d17c8916752a04a64c66cbd025b853f937753f2d8d97bf1dd6",
+    "inputs/balanced_m10_result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "inputs/unequal_m10_result.json": "65bc8e10ea1c058a0dddb3a6b8cc2c4de016b3b454b3850baf72552bf557820e",
+    "produce.py": "9319235d43550857164ff25ce2acb62e0878a24a0388574228ff27e4b6eb7cb8",
+    "run.py": "e8886a47a41670dcabcb0938ebdf70561d08b60b9a017d24b27aa953638024df",
+    "selftest.py": "d646da156b1dc5631e0b0aaf03e390dc4f3d351021fc14c987ce80529193ebcf",
+    "test_dispatch_gate.py": "9213c94a230c8236a40a822ca59eb2945a6d8d60836a96b8b69746c3622c37e8",
+    "verify.py": "a1b282c163c6a935ae3c8a2752bf83ba04b3d9801012769afaaad87b882d3037"
+  },
+  "toy_expected": {
+    "checked_branches": [
+      "double",
+      "generic",
+      "inverse",
+      "copy"
+    ],
+    "dag_nodes": 638,
+    "generic_cnf_bytes": 28906,
+    "primary_bits": 32,
+    "target_O_cnf_bytes": 28947,
+    "toy_factor_slots": 3,
+    "toy_field_degree": 3
+  }
+}

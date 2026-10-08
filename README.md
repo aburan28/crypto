@@ -24,11 +24,26 @@ companion as much as a working library.
 > - **Toy McEliece parameters** (m=6, n=32, t=3) — far below any security
 >   level.
 >
-> See [`SECURITY.md`](./SECURITY.md) for the full list of structural
+> See [`SECURITY.md`](SECURITY.md) for the full list of structural
 > limitations and recommended audited alternatives (`aws-lc-rs`, `ring`,
 > RustCrypto, dalek, etc.).
 
 ---
+
+## Repository layout
+
+| path | what lives there |
+|:--|:--|
+| `src/`, `tests/`, `examples/` | the Rust library, its tests and runnable examples |
+| `research/notes/` | every research note, grouped by theme; start at [`research/notes/README.md`](research/notes/README.md) |
+| `research/<topic>_<date>/` | frozen experiment directories (harness, contract, results) that the notes cite |
+| `experiments/`, `figures/` | older frozen run outputs and plots referenced by the notes |
+| `isolab/` | standalone experiment execution environment: NATS hub, Linux workers with enforced measurement fidelity, MCP server; see [`isolab/README.md`](isolab/README.md) |
+| `docs/` | published pages (`index-calculus-scoreboard.html`, `algorithm-lab.html`, the ECC2K-130 status site), guides and primers in `docs/guides/`, the roadmap in `docs/DEFERRED.md` |
+| `ecc2k130/`, `gpu/`, `hdl/` | the ECC2K-130 rho campaign: fleet tooling, GPU kernels, FPGA cost models |
+| `sage/`, `scripts/`, `secp256k1_cm_audit/`, `cd_attack/`, `quantum_circuit_secp256k1/` | Sage/PARI/Python companions to specific notes |
+| `paper/` | manuscript sources |
+| `AGENTS.md` | the reporting convention (boundary, table, ratio) every research thread follows |
 
 ## Quick tour
 
@@ -79,6 +94,33 @@ and explicitly bounded conclusions.
 See [the ic guide](docs/ic/README.md) for the parameter schema, capabilities,
 limits, resource accounting, and report semantics. The original crypto
 command remains the default for cargo run.
+
+The [EC index-calculus baseline](research/index_calculus_baseline_20260914/README.md)
+adds counting bounds, an operation-accounting contract, and a certified WDSat control
+with frozen measurements and reproducible commands.
+
+## Isogeny walks
+
+`isogeny_walk` walks a prime-field curve's isogeny class (P-256, P-224,
+P-192 or a custom curve).
+
+- **Certified.** Every isogeny is certified by an explicit kernel
+  polynomial, and every curve is recorded with its ICV1/EC1 identity and
+  traits.
+- **Stored.** Runs can be stored in S3, write-once and hash-checked.
+
+    cargo build --release --bin isogeny_walk
+    ./target/release/isogeny_walk walk --curve p256 --max-ell 61 --max-curves 2000 --out runs/p256
+    ./target/release/isogeny_walk verify --curve p256 --dir runs/p256
+    ./target/release/isogeny_walk walk --curve p256 --max-ell 61 --max-curves 20000 \
+        --store s3://crypto-autoresearcher/isogeny-walk --prune-local --out runs/p256-20k
+
+See [the isogeny-walk guide](docs/isogeny-walk/README.md) for:
+- every command;
+- S3 setup and IAM;
+- offline use;
+- sizing;
+- what the tool does and does not establish.
 
 ## Algorithm coverage
 
@@ -326,6 +368,65 @@ The same machinery powers every other attack's test output — run any
 | `pqc::bike`                  | BIKE (QC-MDPC code-based)                | NIST round-3                       |
 | `pqc::csidh`                 | CSIDH (isogeny-based) — group action     | Castryck–Lange–Martindale–Panny–Renes 2018 |
 | `pqc::x_wing`                | X-Wing hybrid (X25519 + ML-KEM)          | draft-connolly-cfrg-xwing-kem      |
+| `pqc::fast::ml_kem`          | ML-KEM-512/768/1024, speed-oriented      | Differentially tested against `pqc::ml_kem` |
+| `pqc::fast::ml_dsa`          | ML-DSA-65, speed-oriented                | Differentially tested against `pqc::ml_dsa` |
+| `pqc::fast::keccak`          | Unrolled Keccak-f[1600] and its sponges  | 2.4x the reference SHA3-256        |
+| `pqc::fast::isogeny`         | SQIsign-scale F_p² and 2-power isogenies | p = 3·2³²⁴ − 1, 326 bits; a 2³²⁴-isogeny in 1.8 ms |
+
+Every scheme in the table is reachable from the command line:
+
+```bash
+# What is here, and what parameters each one runs at
+crypto pqc list
+
+# Run one scheme end to end (keygen, use, and a negative check), or all 25
+crypto pqc run --scheme ml-kem-768
+crypto pqc run --scheme all
+
+# The guided tour, with commentary
+crypto pqc
+
+# The speed-oriented implementations: self-tests, benchmarks, a real
+# 2^324-isogeny walk
+crypto pqc-fast selftest
+crypto pqc-fast bench
+crypto pqc-fast isogeny --op chain
+```
+
+`pqc run` is a check, not a demo: a KEM must agree on the shared secret *and*
+give a different one for a tampered ciphertext; a signature must verify its own
+output *and* reject a tampered one. Measured costs for the `fast` modules are in
+[`docs/pqc-speed.md`](docs/pqc-speed.md).
+
+### Cryptanalysis of ML-KEM and ML-DSA
+
+Lattice-attack estimates at real parameters, working sieves, and the
+implementation attacks that actually recover keys. Full write-up in
+[`docs/mlwe-cryptanalysis.md`](docs/mlwe-cryptanalysis.md).
+
+| Module                          | What it does                                                            |
+|---------------------------------|-------------------------------------------------------------------------|
+| `cryptanalysis::mlwe::cost`     | BKZ profiles (GSA, q-ary z-shape, simulator) and five SVP cost models   |
+| `cryptanalysis::mlwe::primal`   | Primal uSVP, two independent conditions; the ML-DSA MSIS forgery side   |
+| `cryptanalysis::mlwe::dual`     | Dual, MATZOV-style dual, Ducas–Pulles and Pouly–Shen regime diagnostics |
+| `cryptanalysis::mlwe::hybrid`   | Guessing hybrids — and why they do not pay at these parameters          |
+| `cryptanalysis::mlwe::sieve`    | Gauss, Nguyen–Vidick and bucketed sieves; progressive BKZ               |
+| `cryptanalysis::ml_kem_pco`     | **Full ML-KEM key recovery** from decapsulation leakage, in 8 queries   |
+| `cryptanalysis::ml_dsa_leakage` | **Full ML-DSA-65 `s1` recovery** from 4 leaky signatures, then a forgery |
+| `cryptanalysis::ml_dsa_fault`   | **Full `s1` recovery** from one faulted signature; three faults         |
+
+```bash
+crypto mlwe margins                  # every set against its NIST category floor
+crypto mlwe estimate --scheme ml-kem-768 --model gate-count --tours
+crypto mlwe kem-pco --param 512      # recover an ML-KEM key and decapsulate with it
+crypto mlwe dsa-leak --per-poly 64   # recover ML-DSA s1 and forge
+crypto mlwe dsa-fault --fault all    # three faults on the rejection loop
+```
+
+Two things the estimators are arranged to prevent, both of which produced wrong
+numbers before they were caught: quoting a dual cost without its
+contradictory-regime diagnostic, and pairing one attack's cost model with
+another's success condition. The doc explains both.
 
 ### Zero-knowledge / commitments
 
@@ -392,12 +493,13 @@ that makes adding new attacks cheap.
 | Module                                       | Attack                                                  |
 |----------------------------------------------|---------------------------------------------------------|
 | `cryptanalysis::pollard_rho`                 | Pollard ρ for DLP / ECDLP, multi-shard, distinguished-points |
-| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip transports — [design](./docs/POLLARD_COLLAB_DESIGN.md) |
+| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip + [cairn](https://github.com/aburan28/cairn) piecework transports — [design](docs/POLLARD_COLLAB_DESIGN.md) |
 | `cryptanalysis::preprocessing_rho`           | Bernstein-Lange precomputation rho                       |
 | `cryptanalysis::ml_rho_walks`                | Pollard ρ walks under learned partition functions       |
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
 | `cryptanalysis::ec_index_calculus`           | Semaev S₃ index calculus on prime-field curves          |
 | `cryptanalysis::residual_walk`               | Partial-decomposition residual walks: rho-style collision search over factor-base decompositions, measured against plain rho |
+| `cryptanalysis::gaudry_cubic`                | Gaudry-style index calculus on E(F_{p³}) with the subspace factor base {x ∈ F_p}: Weil-restricted S₃ pair test, meet-in-the-middle triple oracle, Gaudry's O(1) three-unknown S₄ solve (symmetrised Weil restriction, Macaulay matrix with row selection, eigenvalues of the multiplication matrix), sparse Wiedemann linear algebra with singleton filtering, the double-large-prime variation, rho reference |
 | `cryptanalysis::ec_index_calculus_j0`        | ζ-orbit-reduced IC on j=0 curves + Eisenstein-smooth FB |
 | `cryptanalysis::koblitz_index_calculus`      | Frobenius-invariant-factor-base IC on Koblitz curves (GGMP) |
 | `cryptanalysis::koblitz_groebner`            | Semaev S₃ Weil restriction + matrix-F4 decomposition oracle |
@@ -407,6 +509,8 @@ that makes adding new attacks cheap.
 | `cryptanalysis::coordinate_search`           | Algorithmic search for point coordinates that shrink the decomposition system (symmetry detection, linearising frames, interpolated summation polynomials) |
 | `cryptanalysis::koblitz_symmetrised`         | The symmetrised (Artin–Schreier frame) Koblitz decomposition systems in the F4 and SAT oracles, with a paired, enumeration-gated benchmark |
 | `cryptanalysis::coordinate_quotients`        | Invariants of any finite group of point maps by orbit sums: relation subgroup by experiment, minimal-degree relation, exact collapse |
+| `cryptanalysis::f4_fp`                        | Degree-bounded F4 over a small prime field: normal strategy, symbolic preprocessing, parallel dense row reduction mod `p`, cooperative deadline, solving by root finding and substitution — the engine that times the coordinate-descent systems at `m = 3` |
+| `cryptanalysis::coordinate_descent`          | Fixed-target quotient systems over `F_{p^k}` descended to `F_p` (Gaudry's setting) and timed on the F_p Gröbner engine; `Chart` puts frames on the `y`-line, where 3-torsion translations of `j = 0` curves are Möbius maps (`examples/three_torsion.rs`) |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |
@@ -454,6 +558,7 @@ then runs index calculus on the higher-genus Jacobian.
 | `cryptanalysis::ghs_descent`          | Frey-Rück / GHS cover-curve construction                 |
 | `cryptanalysis::ghs_full_attack`      | End-to-end orchestrator producing structured `AttackReport` |
 | `cryptanalysis::ec_trapdoor`          | EC trapdoor / weak-curve detection                       |
+| `cryptanalysis::ghs_screen`           | Exact all-factorisation GHS structural screen and cover towers |
 | `cryptanalysis::binary_isogeny`       | Vélu-style isogeny computation in characteristic 2       |
 | `binary_ecc::hyperelliptic`           | Genus-`g` hyperelliptic curve arithmetic over F_{2^m}    |
 | `binary_ecc::poly_f2m`                | Polynomial arithmetic over F_{2^m}                        |
@@ -461,7 +566,9 @@ then runs index calculus on the higher-genus Jacobian.
 
 End-to-end m=1 ECDLP recovery runs on F_{2^6}; m=2 type-II symbolic descent
 demonstrated on F_{2^6} with (n=3, ℓ=2).  See `examples/ghs_attack_demo.rs`
-for three runnable scenarios.
+for three runnable scenarios. The native [`ghs_screen`](docs/GHS_SCREEN.md)
+CLI validates a polynomial-basis field and reports every GHS tower without
+fixed-width genus truncation.
 
 ### Auto-attack framework + CLI
 
@@ -554,7 +661,7 @@ cargo test --lib --release bench_demo -- --ignored --nocapture
 cargo run --release -- cryptanalysis bench
 ```
 
-Live measurements: see [`docs/RESEARCH_BENCH_LOG.md`](./docs/RESEARCH_BENCH_LOG.md).
+Live measurements: see [`research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`](research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md).
 
 Headline empirical findings (most recent):
 
@@ -567,11 +674,14 @@ Headline empirical findings (most recent):
 | j=0 twist enumeration               | α = 1.000    | 1.035    | 0.999 | ✓ matches      |
 | Boomerang decay (ToySpn r=1..4)     | ~8 bits/round| 5.05     | 0.990 | empirical signature |
 
-See also [`docs/ECDLP_ATTACK_MATRIX.md`](./docs/ECDLP_ATTACK_MATRIX.md) for the
-attack/curve-family applicability matrix, and
-[`docs/ic/BOUNDARY_TARGETS.md`](./docs/ic/BOUNDARY_TARGETS.md) for the
+See also [`docs/ECDLP_ATTACK_MATRIX.md`](docs/ECDLP_ATTACK_MATRIX.md) for the
+attack/curve-family applicability matrix,
+[`docs/ic/BOUNDARY_TARGETS.md`](docs/ic/BOUNDARY_TARGETS.md) for the
 per-stage index-calculus records agents should try to beat (binary / Koblitz /
-prime).
+prime), and [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md)
+for the operation-counted boundary ledger of all three regimes (`ic boundary`),
+which supersedes the wall-clock exponents in the table above as the reference
+for index calculus.
 
 ---
 
@@ -685,9 +795,25 @@ crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
 crypto cryptanalysis rho-collab status --mailbox /tmp/collab
 ```
 
-Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).  A proposal for running the same search as a paid `piecework` objective on
-[cairn](https://github.com/aburan28/cairn), where each distinguished point is a
-verified artifact, is [aburan28/cairn#143](https://github.com/aburan28/cairn/pull/143).
+Or get paid for it: a [cairn](https://github.com/aburan28/cairn) node
+([download](https://github.com/aburan28/cairn/releases/latest), or
+`curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh`)
+can post the same search as a `piecework` objective, where each distinguished
+point is a verified artifact paid from a pool
+([design](https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md),
+built in [aburan28/cairn#144](https://github.com/aburan28/cairn/pull/144)).
+`--cairn` commits and reveals every point as a claim and reads the objective's
+log back as the shared DP table, so a collision with anyone else's point is
+seen here and, with `--answer-objective`, `k` is claimed too:
+
+```bash
+crypto cryptanalysis rho-collab work --job nums-50-rho.json --node carol \
+    --cairn http://127.0.0.1:8080 --objective sha256:… --answer-objective sha256:… \
+    --identity carol.json          # or --submitter carol for an unsigned nickname
+crypto cryptanalysis rho-collab status --job nums-50-rho.json --cairn http://127.0.0.1:8080 --objective sha256:…
+```
+
+Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](docs/POLLARD_COLLAB_DESIGN.md).
 
 ### Index calculus (ECDLP, prime fields)
 
@@ -726,11 +852,14 @@ src/
 │   ├── boomerang.rs           — Generic distinguisher + rectangle + sandwich + trail search
 │   ├── ghs_descent.rs         — Binary-curve Weil descent (cover construction)
 │   ├── ghs_full_attack.rs     — GHS attack orchestrator
+│   ├── ghs_screen.rs          — Exact all-factorisation GHS screener
 │   ├── binary_isogeny.rs      — Char-2 Vélu isogenies
 │   ├── ec_trapdoor.rs         — Weak-curve / trapdoor detection
 │   ├── cipher_registry.rs     — Named-cipher catalog
 │   ├── auto_attack.rs         — Auto-discovery + dispatch
 │   ├── research_bench.rs      — Falsifiable-hypothesis bench
+│   ├── ecdlp_variants/        — The Galbraith-Wang-Zhang BSGS and Gaudry-Schost table
+│   ├── bsgs_fast.rs           — Same BSGS, single-word Montgomery + flat table + rayon
 │   └── …45+ other attack modules
 ├── examples/
 │   └── ghs_attack_demo.rs     — Three runnable GHS scenarios
@@ -738,7 +867,7 @@ src/
 ├── ecc_safety.rs              — ECC parameter-safety auditor
 └── utils/                     — Modular arithmetic, encoding, randomness
 
-gpu/ecc/                       — CUDA kernels: 256-bit prime field, EC points, batched Pollard rho
+gpu/ecc/                       — CUDA kernels: 256-bit prime field, EC points, batched Pollard rho, parallel BSGS
 gpu/ecc2k/                     — CUDA kernels: F(2^m) Koblitz curves, Frobenius-class rho (ECC2K-95)
 gpu/btcpuzzle/                 — CUDA kernels: Pollard kangaroo for interval ECDLP (Bitcoin puzzle series)
 hdl/sha1/                      — VHDL: pipelined SHA-1 core + collision search
@@ -762,6 +891,7 @@ cd gpu/ecc && ./ptx_stats.sh --setup && ./ptx_stats.sh
 
 # on a machine with a GPU
 cd gpu/ecc && make bench && ./bench selftest && ./bench rho
+cd gpu/ecc && ./bench bsgs --wbits 44      # baby-step giant-step, table on the device
 
 # Koblitz curves over F(2^m): ECC2K-95 plus two solvable toy curves
 cd gpu/ecc2k && make test
@@ -777,8 +907,21 @@ cd hdl/ecc && make
 cd hdl/ecc2k130 && make
 ```
 
-`gpu/ecc/` covers batch scalar multiplication and a distinguished-point
-r-adding rho walk with the negation map and fruitless-cycle escape.
+`gpu/ecc/` covers batch scalar multiplication, a distinguished-point
+r-adding rho walk with the negation map and fruitless-cycle escape, and a
+parallel baby-step giant-step engine for full-group and interval logs: both
+phases run as independent chains sharing one inversion per thread, the baby
+table is an x-keyed lock-free hash table in device memory, and every hit is
+verified on the host. Measured on the toy curve at `S ≈ 1.07` against rho's
+`0.85`, in exchange for `16 · √n` bytes of table — and `0.56` per target
+once a batch shares one table.
+
+The same engine is ported to the CPU as
+[`src/cryptanalysis/bsgs_fast.rs`](./src/cryptanalysis/bsgs_fast.rs):
+single-word Montgomery arithmetic, the same flat x-keyed table, chains on
+`rayon`. It is **6.3× to 10.9×** the crate's general `BigUint` baby-step
+giant-step on the same curves and runs at 37–49 Msteps/s on four threads
+(`cargo run --release --example bsgs_fast_bench`).
 `hdl/ecc/` implements the same walk's datapath: a 256-bit modular
 multiplier at one multiply per clock, and a point adder that interleaves
 independent walks to keep it saturated at three clocks per addition.
@@ -803,13 +946,41 @@ count and at 0.21× a negation-only walk.
 in a range — with Pollard kangaroo, which costs about 2√W for a range of
 width W instead of the 2^128 a full-group search would. That is the shape of
 the Bitcoin puzzle challenges, and of biased-nonce and small-range key
-problems generally.
+problems generally. It runs across several GPUs the way the deployed
+kangaroo solvers do: one process, one host thread per device, disjoint herds,
+one distinguished-point table (`--gpu 0,1,2`).
 
 ---
 
 ## Documentation
 
-- [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
+**Published site:** <https://aburan28.github.io/crypto/> — the
+[index-calculus scoreboard](https://aburan28.github.io/crypto/scoreboard/) and
+the live [ECC2K-130 campaign status](https://aburan28.github.io/crypto/status/).
+Assembled from this repository by `scripts/site/build.py`; see
+[`scripts/site/README.md`](scripts/site/README.md).
+
+**Contributing compute to ECC2K-130:** the walk is a Pollard rho over disjoint
+seed spaces, so any machine walking its own `--run-id` adds points to the same
+search. Run the client in [`ecc2k130/`](ecc2k130/README.md#contribute-compute),
+or **[download cairn](https://github.com/aburan28/cairn/releases/latest)**
+(`curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh`)
+for the paid path. cairn posts this search as
+[`objective-ecc2k130-orbit-batch`](https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/objective-ecc2k130-orbit-batch.json),
+paying per novel **orbit** rather than per point, because Frobenius and
+negation give one point 262 names. What is not ready is on this side: a point
+here cannot carry `(a, b)` without a 129-bit modular multiplication per step,
+so the claim needs the eight branch counters that make a trail checkable in
+about 227 group operations. The kernel does not carry them yet and should:
+the campaign's packed backend already has the branch index as a scalar, so a
+counter is two instructions (+0.09%, ~36 GPU-hours across the campaign) and
+makes every orbit claimable. For points already collected without counters,
+`ecc2k130/build/witness` replays a trail and emits the checked artifact.
+
+- [`SECURITY.md`](SECURITY.md) — structural limitations + recommended alternatives.
+- [`AGENTS.md`](AGENTS.md) — how cryptanalysis progress is reported here: state a boundary, put every variant in one table in one unit, and classify each change by whether the ratio to that boundary moved.
+- [`docs/index-calculus-scoreboard.html`](docs/index-calculus-scoreboard.html) — one-page visual scoreboard of the ECDLP cost ledger: every index-calculus variant against Pollard rho and the generic-group floor, the solve-constant ledger, and the fitted exponents. Open it in a browser, or read the published copy at [/scoreboard/](https://aburan28.github.io/crypto/scoreboard/).
+- [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) — the three regimes of index calculus (generic prime field, generic binary field, Koblitz) run end to end on the same planted logarithms and priced phase by phase in one unit — group-addition equivalents per `√r`, exact native counts with host-measured conversions — against the generic floor `√(π/2A)` and a counted Pollard rho on the same instance; the decomposition oracles (enumeration, meet in the middle, `S₄` pairs-and-solve, matrix-F4, CDCL SAT) priced per target with each system's first fall degree; fitted exponents per phase; and the boundaries the next rounds iterate against (`ic boundary`, `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`). Its §10 is the second round: an engineering ledger (pair tables folded by negation and, on Koblitz curves, by the Frobenius; walk-drawn targets; two-summand rows; a base sized to the folded table; the exact class-aware counting ceiling) with every first-round row kept as its before mark and a saved baseline/candidate comparison (`docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`). §10.2 records the defect that round caught: a run that decomposes one group element twice is pinned by that collision rather than by its relations, which ends about a quarter of unguarded two-summand runs and 82% of those whose walk segments share a jump table, so both target sources are now guarded and 22 of the first round's rows were corrected. Its §11 is the third round: the walk's *restarts* — which Round 2 paid for with sixteen fresh jumps, thirty-two scalar multiplications each, and which now cost one group operation — balanced prime and binary bases, and a derived shape law for the whole family, `S_family = 0.75·(#E·t/k)^{2/3}/(t·√r)` with `t` the table fold and `k` the column fold, which is `Θ(r^{1/6})` on a prime-order curve and so bounds what any amount of base-size tuning can win (`docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`). The companion `ic corpus` writes Trimoska-style Weil-descended `S₄` instances with certified labels for Magma, XOR-aware SAT solvers and ANF tools (`docs/ic/corpus/`).
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
 - [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`); optimisation ledger, frozen baseline and tuned scoreboards (`experiments/20_residual_walk_{baseline,tuned}.json`, `scripts/residual_walk_scoreboard.py`); round 3 on the count factor: signed-pair seeding and `j = 0` automorphism folding (`experiments/20_residual_walk_{seeded,structure}.json`).
@@ -828,6 +999,39 @@ problems generally.
 - [`hdl/ecc2k130/README.md`](./hdl/ecc2k130/README.md) — FPGA ECC2K-130 engine: normal-basis multiplier, step unit, walker.
 - [`docs/ecc_fpga_cost_model.md`](./docs/ecc_fpga_cost_model.md) — ECDLP: FPGA vs GPU cost model.
 - [`docs/sha1_fpga_cost_model.md`](./docs/sha1_fpga_cost_model.md) — SHA-1 collisions: FPGA vs GPU cost model.
+- [`research/notes/cm-isogeny/RESEARCH_P256.md`](research/notes/cm-isogeny/RESEARCH_P256.md) — P-256 specific structural studies.
+- [`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`](research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`); optimisation ledger, frozen baseline and tuned scoreboards (`experiments/20_residual_walk_{baseline,tuned}.json`, `scripts/residual_walk_scoreboard.py`); round 3 on the count factor: signed-pair seeding and `j = 0` automorphism folding (`experiments/20_residual_walk_{seeded,structure}.json`); the S₃/S₄ decomposition oracles and Gaudry's subspace setting on E(F_{p³}) (`experiments/20_residual_walk_{oracle,s4,mitm3}.json`, `experiments/21_gaudry_cubic.json`); Gaudry's O(1) three-unknown S₄ solve and its measured constant `C₃` (`experiments/21_gaudry_cubic_groebner.json`), the `C₃` optimisation ledger (`experiments/21_gaudry_cubic_c3.json`, §11.5–11.6), and the linear algebra: dense vs sparse Wiedemann with filtering, and the double-large-prime variation measured at `n^{4/9}` (`experiments/21_gaudry_cubic_la.json`, §11.7).
+- [`research/notes/index-calculus/RESEARCH_GLV_INDEX_CALCULUS.md`](research/notes/index-calculus/RESEARCH_GLV_INDEX_CALCULUS.md) — GLV / `C₃` levers on the `E(F_{p³})` subspace harness at `j = 0`: the `⟨ψ⟩` orbit quotient of the factor base with orientation `λ^k` (columns, relations, residuals, NNZ, Wiedemann all `÷ 3`, count on its fold-aware floor; `experiments/22_glv_quotient.json`, six seeds with 48 rho walks per size in `22_glv_quotient_seeds6.json`), canonical residual/decomposition generation (zero saved on the uniform stream, `95 %` of a pair sieve's rows `ψ`-trivial; `22_glv_canonical.json`), the `Z/3`-graded Macaulay matrix and block-aware F4 on the `ψ`-homogeneous orbit system (`22_glv_graded.json`), and the `C₃`-invariant, Veronese (20 cubic invariants) and function-first `L(4O)` PDP formulations against the symmetrised Semaev `S₄` solve (`22_glv_invariant.json`, `22_glv_veronese.json`); tables by `scripts/glv_gaudry_tables.py`.
+- [`research/notes/index-calculus/RESEARCH_RHO_PARITY_PROGRAMME.md`](research/notes/index-calculus/RESEARCH_RHO_PARITY_PROGRAMME.md) — the rho-parity ledger: every measured index-calculus route on the `E(F_{p^k})` subspace harness, its fitted exponents and the numeric condition parity would need (`k = 3` plain bottoms at `26–177×` rho and never crosses; double large primes `2^237`; `k = 4` full `2^151`), and the one route whose distance to parity is a constant, Joux–Vitse three-point decompositions at `k = 4`, built and measured end to end: `6,945×` rho flat from `2^32` to `2^40`, one three-point test costing `1.6·10⁵` `F_p` multiplications (`107×` the value the residual-walk note had borrowed), every logarithm verified and `85,277` residuals cross-checked against an independent oracle; `k = 5` with torsion symmetries registered as the next stage (`experiments/26_jv_quartic_{cprime,dlp}.json`, tables by `scripts/parity_ledger.py`).  Its closing section (§8, 2026-10-04) states the boundary: on every generic curve of the harness no route reaches parity below `2^{150}`; the one route that closes is the cover on a weak class over `F_{p⁶}`, where the crossover with rho is now *measured* at `p ≈ 370–430` (`ℓ ≈ 2^{49–50}`) and the walk that reaches the class is priced above rho below `p ≈ 8,000`, so walk plus attack stays above rho at every size the harness reaches.
+- [`research/notes/index-calculus/RESEARCH_K5_TORSION_JOUX_VITSE.md`](research/notes/index-calculus/RESEARCH_K5_TORSION_JOUX_VITSE.md) — the `k = 5` stage the parity programme registered, built and measured: `F_{p⁵}`, prime-order Weierstrass and Edwards curves over it, the symmetrised `S₅` in four points (plain: `495` monomials of degree `8`; with the 2-torsion symmetry of Faugère–Gaudry–Huot–Renault in the Edwards `y`-coordinate: `70 + 35` monomials of degrees `4` and `3` plus a product variable), the F4 four-point test cross-checked against a pair-table oracle; one test costs `C″ = 3.0·10¹⁰` `F_p` multiplications plain and `7.3·10⁷` with the symmetry (`416×`), flat in `p`, putting the route's parity crossing at `2^302` and `2^233` (extrapolated on `n^{2/5}` and `n^{1/2}`, in the order of the group the logarithm lives in; the Edwards residual rate `1/(192p)` counted exactly by a census, correcting the first round's `1/(24p)` and its `2^203`), against `2^135–2^168` registered — the route is falsified as a machine-size parity programme.  The second round built the 4-torsion variant the first had registered as a `4–10×` lever and retracted it: the rational point of order four swaps the coordinates and halves no degree (the involution that would needs `√d ∈ F_p`), and saturating the residual over its four translates doubles the rate for `2.01×` the test, a wash measured at four sizes; the one lever left, a trace-driven elimination, is priced (`experiments/27_jv_quintic{,_edwards}_csecond.json`, `experiments/28_jv_quintic_edwards4_csecond.json`, `experiments/28_jv_quintic_edwards_rate_census.json`, `scripts/parity_ledger.py` section D).
+- [`research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md`](research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md) — the Joux–Vitse cover-and-decomposition route on `E(F_{p⁶})` (curves `y² = h(x)(x − α)(x − σα)` with a genus-3 GHS cover over `F_{p²}`), registered before it was built (six predictions with falsification lines) and then measured: `F_{p²}`, `F_{p⁶}`, a Cantor Jacobian, the cover and the transfer homomorphism, a Nagao six-point test (six quadrics in six unknowns, F4 and a zero-dimensional solver) cross-checked against a meet-in-the-middle oracle, and the method end to end against rho on the same group; one test costs `5.2·10⁶` `F_p` multiplications (`c_add = 331`), flat in `p`, and `S / rho` falls as `p^{−1.92 ± 0.12}` from `~2,100×` (`2^{32}`) to `8–10×` (`2^{58}`), extrapolating to parity near `2^{67}` on the weak class — a reproduction of a published route (accounting and engineering, no advance), with the isogeny walk to a weak curve not priced, and four defects found and kept as superseded runs (`experiments/30_jv_cover_*.json`, `scripts/parity_ledger.py` section E).  §13 prices the isogeny walk the route needs on a generic curve of order divisible by `4`: the weak class is exactly the curves with full 2-torsion one of whose cross-ratios has norm one down to `F_{p²}` (`3/q` of them, measured), a 2,3-isogeny step costs `3–7·10⁵` multiplications, and a walk of `q/3` steps is above rho below `p ≈ 8,000`; the reachable 2,3-isogeny components were too small to sample a class, so the cited `≈ q` steps stay cited (`experiments/34_jv_isogeny_walk*.json`, ledger section G; accounting).  §10 then stops F4 at the Bézout staircase (`64` standard monomials, at which point the partial basis is already a Gröbner basis): `3.2·10⁶` per test, `S / rho` `5–6×` at `2^{58}` and parity extrapolated near `2^{65}`, the same relations from the same residuals, a `1.61×` constant and nothing on the exponent — engineering (`experiments/31_jv_cover_stop_*.json`, ledger section E.2).  §11 registers and then builds the sieving variant of the relation phase ([JV12] §3.2; `src/cryptanalysis/jv_sieve.rs`): relations read off a sieve over the factor base's abscissae instead of Nagao tests, `C_rel = 3–6·10⁶` per relation at `m = 9` (`720·C_cov / C_rel = 566`), and `S / rho` measured at `3.2–8.5×` (`p = 251`), `1.05×` and `0.11×` (`503`), `0.039–0.069×` (`1009`) and `0.012–0.014×` (`p = 1511`, `2^{61.4}`), so the crossover with rho on the weak class is *measured* at `p ≈ 430` (`ℓ ≈ 2^{50}`) where §6 extrapolated one at `2^{67}`; the descent (two Nagao tests) is `46–86 %` of the cost from `p = 503` up, all ten logarithms above `p = 101` were recovered, and the class stays reproduction of a published route (`experiments/32_jv_cover_sieve_dlp_*.json`, ledger section F).  §12 then has F4 replay a trace recorded once per size (Joux–Vitse's F4 variant: the pair rows every new pivot is a combination of, replayed on every later system of the same shape, a diverging replay finishing as a full run): `1.6·10⁶` per test (`2.0×` on the test, `3.2×` against §6), `S / rho` `3.0×` and `2.4×` at `2^{58}`, exponent `−1.96 ± 0.11`, parity extrapolated near `2^{62}`, and `1.3–1.8×` on the sieve route's descent; three defects found by the oracle and the planted residuals and kept under their own names — engineering (`experiments/33_jv_cover_trace_*.json`, ledger sections E.3 and F.2).  §16 runs the sieved route on twenty primes (ten near `500`, ten near `1,000`, one instance each, all solved: `0.04–0.67×` and `0.008–0.032×` rho, the spread the instance's factor base and not the prime, the crossover from the band means `p ≈ 333`), extends the size to the 64-bit arithmetic's limit (`p = 1,777` and `1,823`, `ℓ ≈ 2^{63}`, `0.003–0.005×`), and states why the construction's other members were not built: `n = 2` is a subfield curve, `k = 1` is the ordinary genus-3 index calculus the hyperelliptic panels measure, `k ≥ 3` needs nine-point decompositions, and even characteristic is a build of its own (`experiments/37_jv_cover_sieve_primes_*.json`, `38_jv_cover_*.json`, ledger section F.4).
+- [`research/notes/code-based/RESEARCH_TII_MCELIECE.md`](research/notes/code-based/RESEARCH_TII_MCELIECE.md) — TII McEliece key-recovery challenges: attack ideas + imported keys (`research/tii_mceliece/`).
+- [`research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md`](research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md) — algorithmic search for exotic point coordinates that make decomposition relations cheaper (prime, binary, Koblitz).
+- [`research/nagao_relations/`](research/nagao_relations/README.md) — implemented Riemann–Roch incidence and norm alternatives to summation polynomials, plus function-coefficient search using exact subspace support divisibility; exhaustive toy correctness controls, with no ECDLP speedup claim.
+- [`research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md`](research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md) — exhaustive search of the ECC2K-130 isogeny class for a curve whose Gröbner solving degree is lower: the class structure derived exactly (`Σ_{f|c} h(O_f) = 2^65.06`, conductor `263 · 146505763881528721`), the 263 vertices a computable isogeny reaches, and the proof that the curve coefficient enters the descended Semaev system *below* the leading form — so the degree of regularity is constant on the whole class (`experiments/isogeny_class_search.json`).
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_EXTENSION.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_EXTENSION.md) — whether base-changing ECC2K-130 to `F_2^(131e)` buys a cheaper attack: the target group and its automorphisms are invariant under base change, and because 131 is prime every subfield and every Frobenius-stable subspace of `F_2^(131e)` is either too large to enumerate (`2^131` factor base, `2^70.19×` rho) or too small to generate (contained in the subgroup `E(F_2^e)`, so no relation exists), with nothing in between at any `e` (`experiments/ecc2k130_extension_field_boundary.json`).
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md) — whether ECC2K-130 maps to a hyperelliptic curve of another genus: covers over `F_2^131` exist in every genus and all cost at least `2^131` (`2^70.19×` rho), while over `F_2` the GHS genus is `1`, `2^129` or `2^130` for *every* curve over `F_2^131` (2 is a primitive root mod 131), and at genus 1 the transfer is exactly the zero map on `⟨G⟩`. The genus that would pay sits in the window `[130, 290…300]`, `2^120.77` away from every GHS descent (corrected 2026-10-06: not from every construction); `⟨G⟩` is `A(F_2)` for a simple 130-dimensional `A` with `#A(F_2) = r` exactly, so any correspondence over `F_2` needs genus `≥ 130` (`experiments/ecc2k130_hyperelliptic_cover_boundary.json`).
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md) — whether a curve carrying the ECC2K-130 subgroup can be produced, by four routes in native Rust (`cryptanalysis::curve_construction`): the reduction of the modular curve `X_H(3²·7²·263²)` carries `A` explicitly at genus `508,799,809 ≈ 2^28.92`, a hundred bits below GHS but `2^20.69` above the window; every geometrically cyclic degree-131 cover of a curve of genus ≤ 1 needs genus `≥ 1300`; exhaustive toys over `F_2` find `A_n` is never itself a Jacobian at `n = 3, 5`, while genus-3 curves carry it at `n = 3`; the Klein quartic is the `n = 3` instance and the non-GHS counterexample that corrects the hyperelliptic note (`research/notes/ecc2k130/curve_construction_20261006/`).
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md) — whether an ECC2K-130 point decomposes into a sum of factor-base points, answered in three parts: they **exist** (the yield law `C(|F|,m)/#E` confirmed to within `1.09×` over twelve toy cells, one small-base outlier at `0.57×` aside; `dim V ≥ 45` suffices at `m = 3`), they are **admissible** (the cofactor-4 class histogram measured on the challenge curve admits every `m ≥ 2`, with class parity `= Tr(x(P))` on every sample, and certified `m = 2, 3, 4` witnesses at full size with `S₄ = 0`; a base inside `ker Tr` sits in the index-2 subgroup `2E`, so its sums are spread over `#E/2` and yield **twice** what the law says — measured exhaustively as `0.50×#E` against `1.00×#E` at `n = 13, 17, 19`, worth exactly one bit; and a whole-base yes/no detector **localises its own witness** by swapping a candidate summand for a class-matched base point, measured over eight rungs with zero sub-base queries and both failure modes tracking the `Θ(m/|F|)` collision law, so deciding and localising are the same problem), and they cannot be **found** — `relations × targets × oracle = m·2^131` independently of `dim V`, so the best implicit-base variant is `2^132.58 = 2^71.77×` rho and the best Frobenius-stable one `2^124.99 = 2^64.18×` rho on a materialised base; no table budget from `2^30` to `2^70` entries beats plain BSGS on the same memory, and the oracle would have to beat exhaustive search over its own candidate set by `2^(70.19 + log₂ m)` (`experiments/ecc2k130_point_decomposition.json`).
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md) — the Riemann-Roch (Nagao) decomposition solvers run on the **real** ECC2K-130 curve against matched Semaev controls, one factor base, one arity, one budget: at `d = 6` the two RR solvers resolve **32/32** slots and both controls **0/32**; 128 trials, zero errors, **28 independently verified three-summand relations** on the challenge curve, every complete planted run recovering its planted triple; `quadratic-image` is the strongest at full size (`0.827x` the counted field operations of `quadratic-optimized` on the same candidate sequence). It prices an **oracle**, not an attack: at `d in {6,7}` a uniform target decomposes with probability at most `5.4e-36`, against `d = 45` for existence, so no yield, `S` or rho ratio is claimed. Then the null-object control lands: brute-force **pair enumeration** exhausts the same `d = 6` instances in **0.494x** the counted field operations and returns identical solution sets, and the method-ceiling measurement to `d = 8` shows the RR encoding visiting about `|F|^2` candidates where pair enumeration visits `|F|^2/2` — same `Theta(|F|^2)` order, constant near two, in the wrong direction. The correct reading is therefore *the better of two algebraic encodings under one SAT solver*, not a good oracle; and the one route that genuinely exploits the `F_2`-subspace structure rather than re-indexing a search — Weil descent of `S_4` in the V-basis, never run at `n = 131` before — yields a **linear NO-certificate** (poly(`d`), no search) that is available only for `d <= 6`, because the `S_4` value set saturates `F_2^131` at `d = 7` while decompositions start at `d = 45`, measured at `d = 45` itself; the falsification target needs a different exponent and nine rounds produced constants. Batching is priced too and cuts the same way
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md) — six follow-on experiments with boundaries derived in advance: a scale-model ladder of prime `n` with `2` primitive (the ECC2K-130 obstruction, `n = 11…67`, `Λ = ops/2^n` predicted flat at `m`), the dimension-flatness sweep, the **target-agnosticism** split (there is only *one* free-oracle floor: a whole-base yes/no detector localises its own witness by swapping a candidate summand for a class-matched base point and re-querying, so it is under rho from `m = 4` monotonically, reaching `2^35.86` with no table; only an oracle artificially restricted to a fixed family of targets pays for a witness, and no proposed detector has that shape), guarded large primes, the Poisson yield test, and orbit-union bases — the artefact holds their derived boundaries, and a seven-bit accounting correction to the note above found while stating what E6 would have to measure (`experiments/ecc2k130_decomposition_targets.json`). **All six have now been run**: see the entry below.
+- [`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md`](research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md) — the six experiments above, **run against the boundaries frozen before them**; **no falsifier fired**. `Λ = ops/2^n` on the ladder at `n = 13, 19` with every planted logarithm recovered (slope `1.037` under the full-rank stopping rule; **`0.976 ± 0.024`** under the relation budget the law actually charges, fitted on three rungs `n = 13, 19, 23` — `1.1` standard errors *above* the `0.95` falsifier, where the two-rung fit it supersedes read `0.944 ± 0.028`, *below* it, so the third rung reversed the sign. **There is no fourth rung:** `n = 29` and `n = 37` were never rungs — their prime subgroups are a small part of the curve, cofactors `33 412` and `596` — and censused over `11 ≤ n ≤ 61` only `13, 19, 23, 41` have the ECC2K-130 shape, with `41` costing `6.6 × 10¹²` oracle operations. E1's four-rung falsifier is unfireable on this curve family, which is a fact about the family rather than the tooling; `n = 11` is separately *excluded* because its 23-torsion has rank two); `λ` swept `6 600×` at `n = 19` moves `Λ` by `2.4×`, so the factor-base dimension is measured not to be a lever, and the model's predicted rise above saturation does not occur; large-prime pairing satisfies its guard and at `m = 2` its relations are *differences*, so they cannot span (**the `5–11×` redundancy is withdrawn**, class accounting: it divided rank by however many relations the harness collected, a statistic that spans `52×` across cells and reads `0.0069` on a small base run long; measured at the rank ceiling the cost is `3×`, stable to `2.0×`, and it tracks `2/ln|F|` — the same coupon-collector error as the retraction below, in a second guise); the yield is Poisson to `0.90–1.10` over eight exhaustively-counted cells once `±P` degeneracies are removed (the raw over-dispersion of `1.44–2.98` is entirely those); and the Frobenius orbit collapse delivers **exactly `n`** with independent relations, confirming §6.1; and a real solver's price per oracle call is flat in the descent target to `6.3%` in F4 word operations across seven targets, which is the premise §3.2's swap localisation rests on (a **stage diagnostic** under `AGENTS.md` §8 — one oracle call on one rung, no speedup claimed; `experiments/ecc2k130_e3_solver_panel.json`). **Retracted, class accounting:** this note previously reported that "relations needed to reach full rank run `2.0×` `|F|`" because harvested relations are correlated. Both halves are withdrawn — the excess is the coupon collector `ln|F|/m`, so it grows with the base rather than being a constant; `first_hit`, which shares no target between relations, shows the same excess; and full rank is not what a descent needs. At the `|F|` relations the law budgets, every descent landed and `Λ = 3.103` against a predicted `m = 3`. The `2^124.99` headline is unchanged: `cost_cell` always priced `ρ = 1`, so the retraction removes a caveat rather than buying a bit (`experiments/ecc2k130_decomposition_runs.json`).
+- [`research/notes/index-calculus/RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md`](research/notes/index-calculus/RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md) — structured factor bases over GF(p): four open fronts (factor-base no-go, Weil descent, last-fall degree, initial-minors conjecture).
+- [`research/notes/ecdlp-general/RESEARCH_SRS_CHEON_CENSUS.md`](research/notes/ecdlp-general/RESEARCH_SRS_CHEON_CENSUS.md) — Cheon's attack priced on the powers-of-tau setups actually deployed, with each setup's size read from its own specification: EIP-4844 mainnet gives away **5.74 bits** against rho (floor `2^121.51`), Zcash Sapling 10.82, Filecoin 13.82, Aztec Ignition 13.12, the Perpetual Powers of Tau **14.32** (floor `2^112.30`). The loss is `½·log₂ d − 0.17` with `d` within 11% of the published exponent on every row, so the leak size, not the curve, sets it. Cross-checked against the public analysis (ethresear.ch #6692): its power-of-two divisors leave half the admissible `d` unused, and the largest admissible divisor makes each attack ≈0.5 bit cheaper (accounting). Floors, not measurements at size; no setup broken; nothing touches the plain ECDLP (`research/srs_auxiliary_census_20260927/`).
+- [`research/notes/ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md`](research/notes/ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) — where exploitable structure can come from, and an admissibility test for candidate handles. Shoup forces any subexponential attack to consume *representation-level* structure, and every attack that has done so shares one architecture: **transfer the problem into a different algebraic category carrying a non-generic algorithm**, licensed by a specific published object — a subfield for Weil descent/Diem (abelian variety, dim `n`), a **torsion-point image** for the SIDH break (Kani 1997, dim 2/4/8), a small **embedding degree** for MOV/Frey-Rück (`F_{q^k}^*`), **trace 1** for SSSA (`(Z_p,+)`, polynomial time), a biased nonce for HNP (a lattice), and leaked **auxiliary inputs** `[α^d]G` for Cheon (a subgroup of `F_p^*`, measured at exponent `0.23` against rho's `0.50` in `RESEARCH_TORSION_AUXILIARY_INPUTS.md`). Five requirements tabulated (R1 consumable object, R2 homomorphism out of the group, R3 algorithm with no generic-group analogue, R4 payload not already poly-time, R5 available at cryptographic parameters), and **murmurations fail all five**, decisively at R4: their payload is the Frobenius trace, which SEA computes in polynomial time and which sits in the parameter set. **Revision 2 records the note's own falsifier F4 firing** (§9.1): the first version demanded a target of dimension >= 2, which MOV and SSSA violate outright; the test was repaired, the murmuration verdict untouched. §9.3 sweeps the repository's measured threads — §9.6 corrects it, since the lattice-HNP folder was skipped and already held measured key recoveries on eight standard curves — with no further counterexample, six in-category threads unanimous at *constants, never exponents*, and R5 split into **R5a** (regime gap, the `S₄` certificate at `d <= 6` against `d = 45`) and **R5b** (the target is worse: ECC2K-130 covers exist in every genus and all cost `>= 2^131`).
+- [`docs/DEFERRED.md`](docs/DEFERRED.md) — known gaps + deferred work.
+- [`docs/ECDLP_ATTACK_MATRIX.md`](docs/ECDLP_ATTACK_MATRIX.md) — ECDLP attack taxonomy.
+- [`docs/ic/BOUNDARY_TARGETS.md`](docs/ic/BOUNDARY_TARGETS.md) — index-calculus per-stage boundary ledger (beat targets for agents).
+- [`research/sat_factor_base_review_20260908/autolab/`](research/sat_factor_base_review_20260908/autolab) — agent autolab runner wired to the IC boundary ledger.
+- [`research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`](research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md) — live empirical bench measurements.
+- [`gpu/ecc/README.md`](gpu/ecc/README.md) — GPU elliptic-curve kernels.
+- [`gpu/ecc/OPTIMIZATION_BLACKWELL.md`](gpu/ecc/OPTIMIZATION_BLACKWELL.md) — Blackwell tuning: cost model + measured occupancy.
+- [`gpu/ecc2k/README.md`](gpu/ecc2k/README.md) — Koblitz / ECC2K-95 kernels and the Frobenius-class walk.
+- [`gpu/btcpuzzle/README.md`](gpu/btcpuzzle/README.md) — Pollard kangaroo for interval ECDLP.
+- [`hdl/ecc/README.md`](hdl/ecc/README.md) — FPGA secp256k1 datapath.
+- [`hdl/ecc2k130/README.md`](hdl/ecc2k130/README.md) — FPGA ECC2K-130 engine: normal-basis multiplier, step unit, walker.
+- [`docs/ecc_fpga_cost_model.md`](docs/ecc_fpga_cost_model.md) — ECDLP: FPGA vs GPU cost model.
+- [`docs/sha1_fpga_cost_model.md`](docs/sha1_fpga_cost_model.md) — SHA-1 collisions: FPGA vs GPU cost model.
 
 ---
 
@@ -885,3 +1089,10 @@ problems generally.
   with rational coefficients*, Math. Ann. 261 (1982).
 - **Fried, Gaudry, Heninger, Thomé**, *A kilobit hidden SNFS discrete
   logarithm computation*, EUROCRYPT 2017.
+
+## Verified Boolean solver comparisons
+
+See [the Gröbner comparison protocol](groebner_compare/README.md) for the bounded
+Boolean worker runner, independent basis certificates, learn/apply fallback
+accounting, and immutable diagnostic receipts. These are solver-stage controls;
+no full-DLP speedup or research-state transition is implied.

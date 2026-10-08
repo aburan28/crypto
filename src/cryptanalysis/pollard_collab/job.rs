@@ -26,6 +26,7 @@ use num_bigint::BigUint;
 use num_traits::{One, Zero};
 use serde::{Deserialize, Serialize};
 
+use crate::cryptanalysis::ecdlp_variants::masked_is_zero;
 use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
@@ -200,9 +201,23 @@ pub struct JobContext {
     pub branches: Vec<Branch>,
     pub dp_mask: BigUint,
     pub step_cap: u64,
+    /// `⌊p/2⌋`: under the negation map a walk keeps the `±`
+    /// representative with `y ≤ ⌊p/2⌋`.  Derived from `p` in
+    /// [`new`](Self::new), like `branches` and `dp_mask`: a caller that
+    /// changes `p` must build a new context rather than edit this one.
+    pub half_p: BigUint,
 }
 
 impl JobContext {
+    /// Validate `spec` and expand it into the curve context, the branch
+    /// table and the DP mask.
+    ///
+    /// The field modulus `p` is taken to be prime, as [`FieldElement`]
+    /// requires, and is not tested.  Over a composite `p` there is no
+    /// group law: the table and the walks then follow
+    /// [`FieldElement::inv_vartime`]'s Euclidean inverses, and differ from
+    /// what [`FieldElement::inv`]'s `a^(p−2)`, not an inverse there, would
+    /// give.
     pub fn new(spec: JobSpec) -> Result<Self, String> {
         if spec.version != PROTOCOL_VERSION {
             return Err(format!(
@@ -248,7 +263,7 @@ impl JobContext {
         if !curve.is_on_curve(&q) {
             return Err("target is not on the curve".into());
         }
-        if g.scalar_mul(&n, &a) != Point::Infinity {
+        if g.scalar_mul_vartime(&n, &a) != Point::Infinity {
             return Err("n·P ≠ ∞: order is wrong".into());
         }
         let job_id = spec.job_id();
@@ -256,7 +271,9 @@ impl JobContext {
         for j in 0..spec.num_branches as u64 {
             let u = derive_scalar(&job_id, "branch-u", j, &n);
             let v = derive_scalar(&job_id, "branch-v", j, &n);
-            let point = g.scalar_mul(&u, &a).add(&q.scalar_mul(&v, &a), &a);
+            let point = g
+                .scalar_mul_vartime(&u, &a)
+                .add_vartime(&q.scalar_mul_vartime(&v, &a), &a);
             branches.push(Branch { u, v, point });
         }
         let dp_mask = (BigUint::one() << spec.dp_bits) - BigUint::one();
@@ -265,6 +282,7 @@ impl JobContext {
         } else {
             spec.max_steps_per_walker
         };
+        let half_p = &p >> 1;
         Ok(Self {
             spec,
             job_id,
@@ -277,6 +295,7 @@ impl JobContext {
             branches,
             dp_mask,
             step_cap,
+            half_p,
         })
     }
 
@@ -286,8 +305,8 @@ impl JobContext {
         let b = derive_scalar(&self.job_id, "walker-b", i, &self.n);
         let r = self
             .g
-            .scalar_mul(&a, &self.a)
-            .add(&self.q.scalar_mul(&b, &self.a), &self.a);
+            .scalar_mul_vartime(&a, &self.a)
+            .add_vartime(&self.q.scalar_mul_vartime(&b, &self.a), &self.a);
         (a, b, r)
     }
 
@@ -301,8 +320,8 @@ impl JobContext {
     /// `a·P + b·Q` — used to verify a claimed distinguished point.
     pub fn combine(&self, a: &BigUint, b: &BigUint) -> Point {
         self.g
-            .scalar_mul(a, &self.a)
-            .add(&self.q.scalar_mul(b, &self.a), &self.a)
+            .scalar_mul_vartime(a, &self.a)
+            .add_vartime(&self.q.scalar_mul_vartime(b, &self.a), &self.a)
     }
 
     /// Is `pt` on the job's curve?
@@ -324,7 +343,7 @@ impl JobContext {
     /// Distinguished-point predicate: low `dp_bits` of `x` are zero.
     pub fn is_dp(&self, pt: &Point) -> bool {
         match pt {
-            Point::Affine { x, .. } => (&x.value & &self.dp_mask).is_zero(),
+            Point::Affine { x, .. } => masked_is_zero(&x.value, &self.dp_mask),
             Point::Infinity => false,
         }
     }
@@ -569,5 +588,26 @@ mod tests {
         // √(π·98893/2) ≈ 394
         assert!((ctx.expected_steps() - 394.1).abs() < 2.0);
         assert!(biguint_to_f64(&(BigUint::one() << 100)) > 1e30);
+    }
+
+    /// A job whose "field prime" is composite, 1009 · 2003, is refused
+    /// with the error the constant-time arithmetic gave it, not a panic:
+    /// the order check's ladder ends on a `Z` divisible by 1009, which
+    /// has no Euclidean inverse, and the variable-time arithmetic then
+    /// takes `inv`'s value as that arithmetic did.
+    #[test]
+    fn composite_modulus_job_is_refused_as_before() {
+        let (_, spec, _) = mid_job();
+        let mut bad = spec.clone();
+        bad.p = "1ed6a3".into(); // 1009 · 2003
+        bad.a = "2".into();
+        bad.b = "1ed64d".into(); // puts (5, 7) on the curve
+        bad.generator = HexPoint {
+            x: "5".into(),
+            y: "7".into(),
+        };
+        bad.target = bad.generator.clone();
+        bad.order = "3fb".into(); // 1019, the order of (5, 7) mod 1009
+        assert_eq!(bad.build().unwrap_err(), "n·P ≠ ∞: order is wrong");
     }
 }

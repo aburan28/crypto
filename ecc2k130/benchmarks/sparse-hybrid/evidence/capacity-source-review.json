@@ -1,0 +1,228 @@
+{
+  "valid": true,
+  "status": "Source review passed; native compiler gate pending",
+  "sourceHashes": {
+    "bench.cu": "92d60c77acb0e69aa99bbb2a605f9269f7357c3ec0cada624bfabb614e9f39ba",
+    "probe.cu": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9"
+  },
+  "reviewScope": "Read-only source review and integer count calculations; no compile, GPU launch, benchmark, or numerical fixture rerun",
+  "geometry": {
+    "threadsPerBlock": 128,
+    "blocks": 1504,
+    "workers": 192512,
+    "warps": 6016,
+    "rounds": 1024
+  },
+  "bounds": {
+    "maxCoefficient": 1065024,
+    "maxSeedWithWorkerCap": 33554432,
+    "maxAccumulatedValue": 1124139008,
+    "signed32Limit": 2147483648,
+    "nonnegativePartialSumsAlsoBounded": true
+  },
+  "countsPerLaunch": {
+    "dense4": {
+      "chains": 4,
+      "rawCoreEquivalents": 24641536,
+      "denseMatrixInstructions": 73924608,
+      "sparseMatrixInstructions": 0,
+      "outputsChecked": 3080192
+    },
+    "hybrid4": {
+      "chains": 4,
+      "rawCoreEquivalents": 24641536,
+      "denseMatrixInstructions": 24641536,
+      "sparseMatrixInstructions": 24641536,
+      "outputsChecked": 3080192
+    },
+    "dense8": {
+      "chains": 8,
+      "rawCoreEquivalents": 49283072,
+      "denseMatrixInstructions": 147849216,
+      "sparseMatrixInstructions": 0,
+      "outputsChecked": 6160384
+    },
+    "hybrid8": {
+      "chains": 8,
+      "rawCoreEquivalents": 49283072,
+      "denseMatrixInstructions": 49283072,
+      "sparseMatrixInstructions": 49283072,
+      "outputsChecked": 6160384
+    }
+  },
+  "sampleSequence": [
+    {
+      "phase": "warmup",
+      "mode": "dense4",
+      "repeat": 0
+    },
+    {
+      "phase": "warmup",
+      "mode": "dense4",
+      "repeat": 1
+    },
+    {
+      "phase": "warmup",
+      "mode": "hybrid4",
+      "repeat": 0
+    },
+    {
+      "phase": "warmup",
+      "mode": "hybrid4",
+      "repeat": 1
+    },
+    {
+      "phase": "warmup",
+      "mode": "dense8",
+      "repeat": 0
+    },
+    {
+      "phase": "warmup",
+      "mode": "dense8",
+      "repeat": 1
+    },
+    {
+      "phase": "warmup",
+      "mode": "hybrid8",
+      "repeat": 0
+    },
+    {
+      "phase": "warmup",
+      "mode": "hybrid8",
+      "repeat": 1
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense4",
+      "repeat": 0
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid4",
+      "repeat": 0
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid4",
+      "repeat": 1
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense4",
+      "repeat": 1
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense4",
+      "repeat": 2
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid4",
+      "repeat": 2
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid4",
+      "repeat": 3
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense4",
+      "repeat": 3
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense4",
+      "repeat": 4
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid4",
+      "repeat": 4
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense8",
+      "repeat": 0
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid8",
+      "repeat": 0
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid8",
+      "repeat": 1
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense8",
+      "repeat": 1
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense8",
+      "repeat": 2
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid8",
+      "repeat": 2
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid8",
+      "repeat": 3
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense8",
+      "repeat": 3
+    },
+    {
+      "phase": "measurement",
+      "mode": "dense8",
+      "repeat": 4
+    },
+    {
+      "phase": "measurement",
+      "mode": "hybrid8",
+      "repeat": 4
+    }
+  ],
+  "checks": {
+    "unchangedValidatedInclude": true,
+    "full16512CaseGateBeforeBench": true,
+    "fullWarpParticipation": true,
+    "uniformRoundCount": true,
+    "independentCInitialSeedsAndFeedback": true,
+    "allFourOutputsPerChainObserved": true,
+    "allWarmupOutputsChecked": true,
+    "allMeasuredOutputsChecked": true,
+    "oracle": "uint64_t initial component seed plus 1024 times independently computed integer convolution coefficient",
+    "allOnesAndZeroWarpIncluded": true,
+    "distinctDenseInputsPerOtherWarp": true,
+    "positiveFiniteEventAndMinimum005ms": true,
+    "eventScope": "CUDA start before launch; stop after launch; stop synchronized before elapsed-time query. Device fragment loads, C initialization, loop, and output stores are inside. Host packing, D2H copies, and full CPU output checks are outside.",
+    "occupancyLabel": "CUDA API predicted blocks/SM; no actual residency claim",
+    "localSharedRejectedAtRuntime": true,
+    "summaryRequiresAll28Samples": true
+  },
+  "pendingNativeGates": [
+    "Exact 3*Chains dense or Chains dense plus Chains sparse MMA instructions inside the executed round-loop backedge.",
+    "All counted MMA instructions unpredicated; no hoisting or elimination; exactly 1024 iterations at the benchmark launch.",
+    "Each four-register C group feeds the next operation and its next-round counterpart, with separate chains and all final outputs stored.",
+    "Scalarized C arrays; zero compiler spill/local/shared usage; record actual registers and API occupancy prediction."
+  ],
+  "findings": [],
+  "limits": [
+    "Source semantics do not by themselves establish emitted instruction counts or scalarization; no GPU admission is implied before the native-code gate.",
+    "Every launch is separated by a complete CPU output check and D2H readback. Timing therefore measures per-launch rates under this cadence, not uninterrupted sustained device capacity.",
+    "Dense/hybrid repetitions are paired within each chain-count panel. Four- versus eight-chain panels execute at different times and are not interleaved controls for clock or thermal drift.",
+    "MMA feedback sums integer-convolution matrices. Raw-core equivalents count executions of the validated arithmetic sequence, not independently materialized raw128 products on every round.",
+    "Host preparation and checking, raw-product parity reconstruction, field high-three-bit terms, reduction, inversion, and full-walk work are outside the timed kernel.",
+    "The 0.05ms floor excludes very short events but does not guarantee low timing variance. All sample distributions must be retained and interpreted."
+  ]
+}

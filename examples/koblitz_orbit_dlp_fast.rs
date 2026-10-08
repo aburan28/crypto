@@ -5,6 +5,11 @@
 //! regular-root index once (no pair table, no edge selectors), then
 //!   1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
 //!   2. target stage: decomposes each published target and recovers its log.
+//! regular-root index once (no pair table, no edge selectors), then:
+//!
+//! 1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
+//! 2. target stage: decomposes each published target and recovers its log.
+//!
 //! Every stage is timed in this one process.
 //!
 //! Frobenius is a bit rotation in a normal basis, so a demanded partner
@@ -30,6 +35,7 @@ struct Linear {
 impl Linear {
     fn from_images(images: &[u64]) -> Self {
         let chunks = (images.len() + 7) / 8;
+        let chunks = images.len().div_ceil(8);
         let mut tables = vec![[0u64; 256]; chunks];
         for (chunk, table) in tables.iter_mut().enumerate() {
             for byte in 1usize..256 {
@@ -222,6 +228,9 @@ fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
     let bits = 32 - e.leading_zeros();
     for i in (0..bits - 1).rev() {
         let raised = basis.to_poly.apply(basis.rotate(basis.to_normal.apply(c), k));
+        let raised = basis
+            .to_poly
+            .apply(basis.rotate(basis.to_normal.apply(c), k));
         c = gf.mul(c, raised);
         k *= 2;
         if (e >> i) & 1 == 1 {
@@ -333,11 +342,18 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
         for right in 0..reps.len() {
             for relative in 0..n {
                 if let Some(roots) = solver.roots(gf, basis, shifted[left][0], shifted[right][relative]) {
+                if let Some(roots) =
+                    solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
+                {
                     states.push(State {
                         left: left as u16,
                         right: right as u16,
                         relative: relative as u16,
                         normal_roots: [basis.to_normal.apply(roots[0]), basis.to_normal.apply(roots[1])],
+                        normal_roots: [
+                            basis.to_normal.apply(roots[0]),
+                            basis.to_normal.apply(roots[1]),
+                        ],
                     });
                 }
             }
@@ -351,6 +367,17 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
         }
     }
     Index { states, table, shifted }
+            table.insert_if_absent(
+                canonical,
+                pack(state.left, state.right, state.relative, shift),
+            );
+        }
+    }
+    Index {
+        states,
+        table,
+        shifted,
+    }
 }
 
 struct Relation {
@@ -375,6 +402,16 @@ struct Base {
 
 fn lift(fast: &FastBinaryCurve, base: &Base, codes: &[u64; 4], target: FastPoint) -> Option<[usize; 4]> {
     let choices: Vec<&Vec<usize>> = codes.iter().map(|code| base.by_x.get(code)).collect::<Option<_>>()?;
+fn lift(
+    fast: &FastBinaryCurve,
+    base: &Base,
+    codes: &[u64; 4],
+    target: FastPoint,
+) -> Option<[usize; 4]> {
+    let choices: Vec<&Vec<usize>> = codes
+        .iter()
+        .map(|code| base.by_x.get(code))
+        .collect::<Option<_>>()?;
     for &a in choices[0] {
         for &b in choices[1] {
             let ab = fast.add(base.points[a], base.points[b]);
@@ -411,6 +448,8 @@ fn extract(
         for shift in 0..n {
             let left_x = index.shifted[state.left as usize][shift as usize];
             let right_x = index.shifted[state.right as usize][(shift as usize + state.relative as usize) % n as usize];
+            let right_x = index.shifted[state.right as usize]
+                [(shift as usize + state.relative as usize) % n as usize];
             for &normal_root in &state.normal_roots {
                 let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
                 let Some(partners) = solver.roots(gf, basis, absolute, target_x) else {
@@ -419,6 +458,8 @@ fn extract(
                 for partner in partners {
                     probes += 1;
                     let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+                    let (canonical, partner_shift) =
+                        basis.canonical(basis.to_normal.apply(partner));
                     let Some(value) = index.table.get(canonical) else {
                         continue;
                     };
@@ -433,6 +474,12 @@ fn extract(
                     ];
                     if let Some(point_indices) = lift(fast, base, &codes, target) {
                         return Some(Relation { point_indices, x_codes: codes, intermediates: [absolute, partner], probes });
+                        return Some(Relation {
+                            point_indices,
+                            x_codes: codes,
+                            intermediates: [absolute, partner],
+                            probes,
+                        });
                     }
                 }
             }
@@ -453,6 +500,12 @@ fn construct_base(
     columns: usize,
     r: u64,
 ) -> (Vec<FastPoint>, Vec<(usize, u64)>, Vec<Option<[u64; 2]>>, u64) {
+) -> (
+    Vec<FastPoint>,
+    Vec<(usize, u64)>,
+    Vec<Option<[u64; 2]>>,
+    u64,
+) {
     let gf = &fast.gf;
     let n = fast.n as usize;
     let lambda = curve.lambda.to_u64().unwrap();
@@ -902,6 +955,161 @@ mod wide {
         KnownAnswerScalar(u64),
     }
 
+    /// Deterministic rank-stage scalar / start derivation for the parallel
+    /// guided rank: each column `j` uses `mix(rank_seed, j, attempt)`, so
+    /// the set of extractions is independent of thread scheduling.  The
+    /// resulting factor-log table is the unique full-rank solution either
+    /// way, so the published target row is unchanged.
+    fn rank_mix(seed: u64, column: u64, attempt: u64) -> u64 {
+        let mut z = seed
+            ^ column.wrapping_mul(0x9E37_79B9_7F4A_7C15)
+            ^ attempt.wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        z ^ (z >> 31)
+    }
+
+    /// Order-preserving parallel target extraction: workers scan disjoint
+    /// blocks of the same rotated state order the sequential scan uses, each
+    /// stopping at its block's first hit; the merge picks the smallest
+    /// global position.  The published relation (point indices, x-codes,
+    /// intermediates) is therefore identical to the sequential first hit —
+    /// only the wall time and the per-block probe diagnostic differ.
+    /// Returns the relation and the summed relation-check nanoseconds.
+    fn extract128_parallel(
+        gf: &Gf2_128,
+        fast: &FastBinaryCurve128,
+        basis: &NormalBasis128,
+        solver: &S3Solver128,
+        index: &Index128,
+        base: &Base128,
+        target: FastPoint128,
+        start: usize,
+        threads: usize,
+    ) -> (Option<Relation128>, u128) {
+        let n_states = index.states.len();
+        if threads <= 1 || n_states == 0 {
+            let mut relation_check_ns = 0u128;
+            let relation = extract128(
+                gf,
+                fast,
+                basis,
+                solver,
+                index,
+                base,
+                target,
+                start,
+                &mut relation_check_ns,
+            );
+            return (relation, relation_check_ns);
+        }
+        let (target_x, _) = match target {
+            Some((x, _)) => (x, ()),
+            None => return (None, 0),
+        };
+        let n_u32 = gf.n;
+        let n = n_u32 as usize;
+        let chunk = (n_states + threads - 1) / threads;
+        let (sender, receiver) = std::sync::mpsc::channel::<(usize, Relation128, u128)>();
+        std::thread::scope(|scope| {
+            let mut handles = Vec::with_capacity(threads);
+            for thread in 0..threads {
+                let sender = sender.clone();
+                let gf = gf;
+                let fast = fast;
+                let basis = basis;
+                let solver = solver;
+                let index = index;
+                let base = base;
+                handles.push(scope.spawn(move || {
+                    let pos_lo = thread * chunk;
+                    let pos_hi = ((thread + 1) * chunk).min(n_states);
+                    if pos_lo >= pos_hi {
+                        return;
+                    }
+                    // Rotated position p maps to absolute state
+                    // (start + p) mod n_states; scan in order.
+                    let state_lo = (start + pos_lo) % n_states;
+                    let length = pos_hi - pos_lo;
+                    let mut relation_check_ns = 0u128;
+                    let mut probes = 0u64;
+                    let mut offset = 0usize;
+                    'scan: while offset < length {
+                        let state = &index.states[(state_lo + offset) % n_states];
+                        for shift in 0..n_u32 {
+                            let left_x = index.shifted[state.left as usize][shift as usize];
+                            let right_x = index.shifted[state.right as usize]
+                                [(shift as usize + state.relative as usize) % n];
+                            for &normal_root in &state.normal_roots {
+                                let absolute =
+                                    basis.to_poly.apply(basis.rotate(normal_root, shift));
+                                let Some(partners) =
+                                    solver.roots(gf, basis, absolute, target_x)
+                                else {
+                                    continue;
+                                };
+                                for partner in partners {
+                                    probes += 1;
+                                    let (canonical, partner_shift) =
+                                        basis.canonical(basis.to_normal.apply(partner));
+                                    let Some(value) = index.table.get(canonical) else {
+                                        continue;
+                                    };
+                                    let (left2, right2, relative2, stored_shift) = unpack(value);
+                                    let left_shift2 =
+                                        ((stored_shift + n_u32 - partner_shift) % n_u32) as usize;
+                                    let right_shift2 = (left_shift2 + relative2 as usize) % n;
+                                    let codes = [
+                                        left_x,
+                                        right_x,
+                                        index.shifted[left2][left_shift2],
+                                        index.shifted[right2][right_shift2],
+                                    ];
+                                    if let Some(point_indices) = lift128(
+                                        fast,
+                                        base,
+                                        &codes,
+                                        target,
+                                        &mut relation_check_ns,
+                                    ) {
+                                        let position = pos_lo + offset;
+                                        sender
+                                            .send((
+                                                position,
+                                                Relation128 {
+                                                    point_indices,
+                                                    x_codes: codes,
+                                                    intermediates: [absolute, partner],
+                                                    probes,
+                                                },
+                                                relation_check_ns,
+                                            ))
+                                            .expect("target receiver is alive");
+                                        break 'scan;
+                                    }
+                                }
+                            }
+                        }
+                        offset += 1;
+                    }
+                }));
+            }
+            drop(sender);
+            let mut best: Option<(usize, Relation128, u128)> = None;
+            let mut check_ns_total = 0u128;
+            for (position, relation, check_ns) in receiver {
+                check_ns_total += check_ns;
+                if best.as_ref().map_or(true, |(pos, _, _)| position < *pos) {
+                    best = Some((position, relation, check_ns));
+                }
+            }
+            for handle in handles {
+                handle.join().expect("target worker thread");
+            }
+            (best.map(|(_, relation, _)| relation), check_ns_total)
+        })
+    }
+
     // serde_json's default Number representation cannot emit arbitrary
     // u128 field elements.  Keep the wide-only wire format lossless by
     // encoding every field coordinate as a decimal string; the legacy
@@ -998,6 +1206,7 @@ mod wide {
         base: &Base128,
         codes: &[u128; 4],
         target: FastPoint128,
+        relation_check_ns: &mut u128,
     ) -> Option<[usize; 4]> {
         let choices: Vec<&Vec<usize>> = codes.iter().map(|code| base.by_x.get(code)).collect::<Option<_>>()?;
         for &a in choices[0] {
@@ -1006,7 +1215,10 @@ mod wide {
                 for &c in choices[2] {
                     let abc = fast.add(ab, base.points[c]);
                     for &d in choices[3] {
-                        if fast.add(abc, base.points[d]) == target {
+                        let check_started = Instant::now();
+                        let matches = fast.add(abc, base.points[d]) == target;
+                        *relation_check_ns += check_started.elapsed().as_nanos();
+                        if matches {
                             return Some([a, b, c, d]);
                         }
                     }
@@ -1025,6 +1237,7 @@ mod wide {
         base: &Base128,
         target: FastPoint128,
         start: usize,
+        relation_check_ns: &mut u128,
     ) -> Option<Relation128> {
         let (target_x, _) = target?;
         let n = gf.n;
@@ -1054,7 +1267,13 @@ mod wide {
                             index.shifted[left2][left_shift2],
                             index.shifted[right2][right_shift2],
                         ];
-                        if let Some(point_indices) = lift128(fast, base, &codes, target) {
+                        if let Some(point_indices) = lift128(
+                            fast,
+                            base,
+                            &codes,
+                            target,
+                            relation_check_ns,
+                        ) {
                             return Some(Relation128 { point_indices, x_codes: codes, intermediates: [absolute, partner], probes });
                         }
                     }
@@ -1271,24 +1490,129 @@ mod wide {
         let mut rank_relations = 0u64;
         let mut rank_probes = 0u64;
         let mut rank_rows_without_gain = 0u64;
-        while echelon.rank < base.columns {
-            rank_seed = rank_seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
-            let scalar = (rank_seed >> 11) % (r - 1) + 1;
-            let column = (0..base.columns).find(|&c| echelon.pivots[c].is_none()).unwrap();
-            let rep: FastPoint128 = representatives[column].map(|[x, y]| (x, y));
-            let point = fast.add(fast.scalar_mul(generator, &BigUint::from(scalar)), FastBinaryCurve128::neg(rep));
-            rank_attempts += 1;
-            match extract128(&gf, &fast, &basis, &solver, &index, &base, point, (rank_seed >> 20) as usize) {
-                Some(relation) => {
+        let mut rank_unused_relation_check_ns = 0u128;
+        let rank_threads: usize = std::env::var("KIC_RANK_THREADS")
+            .ok()
+            .and_then(|value| value.trim().parse::<usize>().ok())
+            .filter(|&threads| threads > 0)
+            .unwrap_or(1);
+        let rank_policy_parallel = rank_threads > 1;
+        if rank_policy_parallel {
+            // Parallel guided rank: every column is anchored by its own
+            // relation with a scheduling-independent scalar, so the row set
+            // (and therefore the solved logs, the unique full-rank
+            // solution) does not depend on thread interleaving.  Rows may
+            // arrive covering already-pivoted columns; those count as
+            // rows without gain, exactly as sequential duplicates would.
+            let (sender, receiver) =
+                std::sync::mpsc::channel::<(usize, u64, Relation128, u64, u128, u64)>();
+            std::thread::scope(|scope| {
+                let mut handles = Vec::with_capacity(rank_threads);
+                for thread in 0..rank_threads {
+                    let sender = sender.clone();
+                    let gf = &gf;
+                    let fast = &fast;
+                    let basis = &basis;
+                    let solver = &solver;
+                    let index = &index;
+                    let base = &base;
+                    let generator = &generator;
+                    let representatives = &representatives;
+                    handles.push(scope.spawn(move || {
+                        let mut thread_attempts = 0u64;
+                        let mut thread_relation_check_ns = 0u128;
+                        for column in (thread..base.columns).step_by(rank_threads) {
+                            let rep: FastPoint128 = representatives[column].map(|[x, y]| (x, y));
+                            let mut attempt = 0u64;
+                            loop {
+                                let mixed = rank_mix(rank_seed, column as u64, attempt);
+                                let scalar = mixed % (r - 1) + 1;
+                                let start = (mixed >> 20) as usize;
+                                let point = fast.add(
+                                    fast.scalar_mul(*generator, &BigUint::from(scalar)),
+                                    FastBinaryCurve128::neg(rep),
+                                );
+                                thread_attempts += 1;
+                                match extract128(
+                                    gf,
+                                    fast,
+                                    basis,
+                                    solver,
+                                    index,
+                                    base,
+                                    point,
+                                    start,
+                                    &mut thread_relation_check_ns,
+                                ) {
+                                    Some(relation) => {
+                                        let probes = relation.probes;
+                                        sender
+                                            .send((
+                                                column,
+                                                scalar,
+                                                relation,
+                                                probes,
+                                                thread_relation_check_ns,
+                                                thread_attempts,
+                                            ))
+                                            .expect("rank receiver is alive");
+                                        thread_relation_check_ns = 0;
+                                        thread_attempts = 0;
+                                        break;
+                                    }
+                                    None => attempt += 1,
+                                }
+                            }
+                        }
+                    }));
+                }
+                drop(sender);
+                for (column, scalar, relation, probes, relation_check_ns, attempts) in receiver {
+                    rank_attempts += attempts;
                     rank_relations += 1;
-                    rank_probes += relation.probes;
+                    rank_probes += probes;
+                    rank_unused_relation_check_ns += relation_check_ns;
                     let mut row = relation_row128(&base, &relation, scalar, r);
                     row[column] = (row[column] + 1) % r;
                     if !echelon.insert(row) {
                         rank_rows_without_gain += 1;
                     }
                 }
-                None => rank_failures += 1,
+                for handle in handles {
+                    handle.join().expect("rank worker thread");
+                }
+            });
+        } else {
+            while echelon.rank < base.columns {
+                rank_seed = rank_seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                let scalar = (rank_seed >> 11) % (r - 1) + 1;
+                let column = (0..base.columns).find(|&c| echelon.pivots[c].is_none()).unwrap();
+                let rep: FastPoint128 = representatives[column].map(|[x, y]| (x, y));
+                let point = fast.add(fast.scalar_mul(generator, &BigUint::from(scalar)), FastBinaryCurve128::neg(rep));
+                rank_attempts += 1;
+                let mut unused_relation_check_ns = 0u128;
+                match extract128(
+                    &gf,
+                    &fast,
+                    &basis,
+                    &solver,
+                    &index,
+                    &base,
+                    point,
+                    (rank_seed >> 20) as usize,
+                    &mut unused_relation_check_ns,
+                ) {
+                    Some(relation) => {
+                        rank_relations += 1;
+                        rank_probes += relation.probes;
+                        let mut row = relation_row128(&base, &relation, scalar, r);
+                        row[column] = (row[column] + 1) % r;
+                        if !echelon.insert(row) {
+                            rank_rows_without_gain += 1;
+                        }
+                    }
+                    None => rank_failures += 1,
+                }
             }
         }
         let rank_ms = rank_started.elapsed().as_secs_f64() * 1000.0;
@@ -1297,6 +1621,11 @@ mod wide {
         let la_ms = la_started.elapsed().as_secs_f64() * 1000.0;
 
         let targets_started = Instant::now();
+        let target_threads: usize = std::env::var("KIC_TARGET_THREADS")
+            .ok()
+            .and_then(|value| value.trim().parse::<usize>().ok())
+            .filter(|&threads| threads > 0)
+            .unwrap_or(1);
         let mut solved = 0usize;
         let mut failed = 0usize;
         let mut target_query_ms = Vec::with_capacity(target_inputs.len());
@@ -1320,8 +1649,20 @@ mod wide {
             let start = query_hash as usize;
             let target_query_stage_ms = query_hash_started.elapsed().as_secs_f64() * 1000.0;
             let target_pdp_started = Instant::now();
-            let relation = extract128(&gf, &fast, &basis, &solver, &index, &base, target, start);
-            let target_pdp_and_relation_check_ms = target_pdp_started.elapsed().as_secs_f64() * 1000.0;
+            let (relation, target_relation_check_ns) = extract128_parallel(
+                &gf,
+                &fast,
+                &basis,
+                &solver,
+                &index,
+                &base,
+                target,
+                start,
+                target_threads,
+            );
+            let target_decomposition_total_ms = target_pdp_started.elapsed().as_secs_f64() * 1000.0;
+            let target_relation_check_ms = target_relation_check_ns as f64 / 1_000_000.0;
+            let target_pdp_ms = (target_decomposition_total_ms - target_relation_check_ms).max(0.0);
             let target_descent_started = Instant::now();
             let recovered = relation.as_ref().map(|relation| {
                 relation.point_indices.iter().fold(0u64, |acc, &index| {
@@ -1358,10 +1699,11 @@ mod wide {
                 "group_verified":verified,
                 "target_generation_ms_excluded":target_generation_ms,
                 "target_query_ms":target_query_stage_ms,
-                "target_pdp_and_relation_check_ms":target_pdp_and_relation_check_ms,
+                "target_pdp_ms":target_pdp_ms,
+                "target_relation_check_ms":target_relation_check_ms,
                 "target_descent_ms":target_descent_ms,
                 "target_recovery_check_ms":target_recovery_check_ms,
-                "target_phase_sum_ms":target_query_stage_ms + target_pdp_and_relation_check_ms + target_descent_ms + target_recovery_check_ms,
+                "target_phase_sum_ms":target_query_stage_ms + target_pdp_ms + target_relation_check_ms + target_descent_ms + target_recovery_check_ms,
                 "target_ms":elapsed,
             });
             writeln!(out, "{record}").unwrap();
@@ -1399,14 +1741,19 @@ mod wide {
             "rank_relations":rank_relations,
             "rank_failures":rank_failures,
             "rank_rows_without_gain":rank_rows_without_gain,
-            "rank_policy":"guided: decompose [a]G - R_j for the first pivotless column j",
+            "rank_policy": if rank_policy_parallel {
+                "guided parallel: every column anchors [a]G - R_j with a scheduling-independent scalar; logs are the unique full-rank solution"
+            } else {
+                "guided: decompose [a]G - R_j for the first pivotless column j"
+            },
             "rank_probes_mean":if rank_relations > 0 { rank_probes as f64 / rank_relations as f64 } else { 0.0 },
             "rank":echelon.rank,
             "targets":target_inputs.len(),
             "targets_solved":solved,
             "targets_failed":failed,
             "peak_rss_bytes":super::peak_rss_bytes(),
-            "threads":1,
+            "threads":rank_threads,
+            "target_threads":target_threads,
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
         println!("{summary}");
@@ -1462,6 +1809,13 @@ mod wide {
     }
 }
 
+    let kib: u64 = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .parse()
+        .ok()?;
+    Some(kib * 1024)
+}
+
 fn main() {
     let arguments: Vec<String> = std::env::args().collect();
     assert_eq!(
@@ -1492,6 +1846,17 @@ fn main() {
         assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
         (parts[0].parse().unwrap(), parts[1].parse().unwrap(), parts[2].parse().unwrap())
     });
+    let process_started = Instant::now();
+    let constructed: Option<(u32, u8, usize)> =
+        arguments[1].strip_prefix("construct:").map(|spec| {
+            let parts: Vec<&str> = spec.split(':').collect();
+            assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
+            (
+                parts[0].parse().unwrap(),
+                parts[1].parse().unwrap(),
+                parts[2].parse().unwrap(),
+            )
+        });
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n":n, "a":a}),
         None => {
@@ -1512,6 +1877,8 @@ fn main() {
             let line = line.trim();
             if line.starts_with('[') {
                 let [x, y]: [u64; 2] = serde_json::from_str(line).expect("target point must be [x,y]");
+                let [x, y]: [u64; 2] =
+                    serde_json::from_str(line).expect("target point must be [x,y]");
                 TargetInput::PublicPoint(Some((x, y)))
             } else {
                 TargetInput::KnownAnswerScalar(line.parse().unwrap())
@@ -1531,6 +1898,13 @@ fn main() {
         assert_eq!(
             low_terms,
             curve.curve.irreducible.low_terms.iter().map(|&t| t as u64).collect::<Vec<_>>(),
+            curve
+                .curve
+                .irreducible
+                .low_terms
+                .iter()
+                .map(|&t| t as u64)
+                .collect::<Vec<_>>(),
             "base header field must match the constructed curve"
         );
     }
@@ -1559,6 +1933,26 @@ fn main() {
                 )
             }
         };
+    let (points, labels, representatives): (
+        Vec<FastPoint>,
+        Vec<(usize, u64)>,
+        Vec<Option<[u64; 2]>>,
+    ) = match constructed {
+        Some((_, _, columns)) => {
+            let (points, labels, reps, scanned) = construct_base(&fast, &curve, b, columns, r);
+            scanned_x = Some(scanned);
+            (points, labels, reps)
+        }
+        None => {
+            let coordinates: Vec<Option<[u64; 2]>> =
+                serde_json::from_value(header["factor_base_point_coordinates"].clone()).unwrap();
+            (
+                coordinates.iter().map(|c| c.map(|[x, y]| (x, y))).collect(),
+                serde_json::from_value(header["factor_base_point_labels"].clone()).unwrap(),
+                serde_json::from_value(header["factor_base_representatives"].clone()).unwrap(),
+            )
+        }
+    };
     let base_hash = match constructed {
         Some(_) => {
             let mut hasher = blake3::Hasher::new();
@@ -1581,6 +1975,16 @@ fn main() {
     }
     let base = Base { points, labels, by_x, columns: representatives.len() };
     let reps: Vec<u64> = representatives.iter().map(|p| p.expect("affine representative")[0]).collect();
+    let base = Base {
+        points,
+        labels,
+        by_x,
+        columns: representatives.len(),
+    };
+    let reps: Vec<u64> = representatives
+        .iter()
+        .map(|p| p.expect("affine representative")[0])
+        .collect();
     let base_load_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
 
     let basis_started = Instant::now();
@@ -1589,6 +1993,12 @@ fn main() {
     for probe in 1..2048u64 {
         let x = probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask;
         assert_eq!(basis.to_poly.apply(basis.rotate(basis.to_normal.apply(x), 1)), gf.sqr(x));
+        assert_eq!(
+            basis
+                .to_poly
+                .apply(basis.rotate(basis.to_normal.apply(x), 1)),
+            gf.sqr(x)
+        );
         let y = (probe * 0x9E37_79B9) & basis.mask;
         assert_eq!(solver.roots(&gf, &basis, x, y), s3_x_roots(&gf, b, x, y));
     }
@@ -1602,6 +2012,31 @@ fn main() {
     // Rank stage: rows sum(coefficient * L_column) = a for random [a]G.
     let rank_started = Instant::now();
     let mut echelon = Echelon { r, columns: base.columns, pivots: vec![None; base.columns], rank: 0 };
+    // The optional trace lets a separate implementation replay every attempted
+    // group relation, rank transition, and final base-log solution.
+    let rank_started = Instant::now();
+    let mut rank_trace = std::env::var("KIC_DUMP_RANK")
+        .ok()
+        .map(|path| std::fs::File::create(path).expect("create rank trace"));
+    if let Some(trace) = rank_trace.as_mut() {
+        writeln!(
+            trace,
+            "{}",
+            json!({
+                "kind":"compact_orbit_rank_header", "schema_version":1,
+                "n":n, "a":a, "subgroup_order":r, "base_hash":base_hash,
+                "generator":generator.map(|(x, y)| [x, y]),
+                "orbit_columns":base.columns, "factor_base_points":base.points.len(),
+            })
+        )
+        .unwrap();
+    }
+    let mut echelon = Echelon {
+        r,
+        columns: base.columns,
+        pivots: vec![None; base.columns],
+        rank: 0,
+    };
     let mut rank_attempts = 0u64;
     let mut rank_failures = 0u64;
     let mut rank_relations = 0u64;
@@ -1617,6 +2052,30 @@ fn main() {
         let point = fast.add(fast.scalar_mul(generator, &BigUint::from(scalar)), FastBinaryCurve::neg(rep));
         rank_attempts += 1;
         match extract(&gf, &fast, &basis, &solver, &index, &base, point, (rank_seed >> 20) as usize) {
+        rank_seed = rank_seed
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
+        let scalar = (rank_seed >> 11) % (r - 1) + 1;
+        let column = (0..base.columns)
+            .find(|&c| echelon.pivots[c].is_none())
+            .unwrap();
+        let rep: FastPoint = representatives[column].map(|[x, y]| (x, y));
+        let point = fast.add(
+            fast.scalar_mul(generator, &BigUint::from(scalar)),
+            FastBinaryCurve::neg(rep),
+        );
+        rank_attempts += 1;
+        let rank_before = echelon.rank;
+        match extract(
+            &gf,
+            &fast,
+            &basis,
+            &solver,
+            &index,
+            &base,
+            point,
+            (rank_seed >> 20) as usize,
+        ) {
             Some(relation) => {
                 rank_relations += 1;
                 rank_probes += relation.probes;
@@ -1627,11 +2086,62 @@ fn main() {
                 }
             }
             None => rank_failures += 1,
+                let gained = echelon.insert(row.clone());
+                if !gained {
+                    rank_rows_without_gain += 1;
+                }
+                if let Some(trace) = rank_trace.as_mut() {
+                    writeln!(
+                        trace,
+                        "{}",
+                        json!({
+                            "kind":"compact_orbit_rank_attempt", "attempt_index":rank_attempts - 1,
+                            "found":true, "scalar":scalar, "pivotless_column":column,
+                            "target":point.map(|(x, y)| [x, y]),
+                            "point_indices":relation.point_indices, "x_codes":relation.x_codes,
+                            "pinned_intermediates":relation.intermediates,
+                            "probes":relation.probes, "row":row,
+                            "rank_before":rank_before, "rank_after":echelon.rank, "gained":gained,
+                        })
+                    )
+                    .unwrap();
+                }
+            }
+            None => {
+                rank_failures += 1;
+                if let Some(trace) = rank_trace.as_mut() {
+                    writeln!(
+                        trace,
+                        "{}",
+                        json!({
+                            "kind":"compact_orbit_rank_attempt", "attempt_index":rank_attempts - 1,
+                            "found":false, "scalar":scalar, "pivotless_column":column,
+                            "target":point.map(|(x, y)| [x, y]),
+                            "rank_before":rank_before, "rank_after":echelon.rank,
+                        })
+                    )
+                    .unwrap();
+                }
+            }
         }
     }
     let rank_ms = rank_started.elapsed().as_secs_f64() * 1000.0;
     let la_started = Instant::now();
     let logs = echelon.solve();
+    if let Some(trace) = rank_trace.as_mut() {
+        writeln!(
+            trace,
+            "{}",
+            json!({
+                "kind":"compact_orbit_rank_solution", "rank":echelon.rank,
+                "attempts":rank_attempts, "relations":rank_relations,
+                "failures":rank_failures, "rows_without_gain":rank_rows_without_gain,
+                "logs":logs,
+            })
+        )
+        .unwrap();
+        trace.flush().unwrap();
+    }
     let la_ms = la_started.elapsed().as_secs_f64() * 1000.0;
 
     let targets_started = Instant::now();
@@ -1675,6 +2185,8 @@ fn main() {
         let target_recovery_check_started = Instant::now();
         let verified = recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
         let target_recovery_check_ms = target_recovery_check_started.elapsed().as_secs_f64() * 1000.0;
+        let target_recovery_check_ms =
+            target_recovery_check_started.elapsed().as_secs_f64() * 1000.0;
         let elapsed = query_started.elapsed().as_secs_f64() * 1000.0;
         target_query_ms.push(elapsed);
         if verified == Some(true) {

@@ -1,0 +1,620 @@
+{
+  "aa": [
+    {
+      "cell": "n17a1",
+      "fixture": {
+        "cofactor": "2",
+        "curve_a": 1,
+        "degree": 17,
+        "generator": [
+          "43693",
+          "23339"
+        ],
+        "group_order": "131174",
+        "irreducible": {
+          "degree": 17,
+          "low_terms": [
+            0,
+            3
+          ]
+        },
+        "lambda": "17184",
+        "subgroup_order": "65587",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          3581826271685122510
+        ],
+        "targets": [
+          [
+            "103499",
+            "47389"
+          ]
+        ]
+      },
+      "fixture_sha256": "f4e75c5265125fe32b1e5e0cf3d2a23131d9f6d56de27d8c6346f7ab49d7b2a0",
+      "id": "n17a1-000",
+      "job": {
+        "algorithm_seed": 11344497041446230444,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 1,
+        "degree": 17,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 102,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "103499",
+            "47389"
+          ]
+        ],
+        "target_seeds": [
+          3581826271685122510
+        ]
+      }
+    },
+    {
+      "cell": "n19a0",
+      "fixture": {
+        "cofactor": "4",
+        "curve_a": 0,
+        "degree": 19,
+        "generator": [
+          "385982",
+          "301867"
+        ],
+        "group_order": "523492",
+        "irreducible": {
+          "degree": 19,
+          "low_terms": [
+            0,
+            1,
+            2,
+            5
+          ]
+        },
+        "lambda": "41811",
+        "subgroup_order": "130873",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          10920782246857519276
+        ],
+        "targets": [
+          [
+            "496513",
+            "285835"
+          ]
+        ]
+      },
+      "fixture_sha256": "5613ed59b6a018bcbe41a0dac33852655b3c2d52784c6af2ccb2cecde31641f7",
+      "id": "n19a0-000",
+      "job": {
+        "algorithm_seed": 7128551942454239931,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 0,
+        "degree": 19,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 114,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "496513",
+            "285835"
+          ]
+        ],
+        "target_seeds": [
+          10920782246857519276
+        ]
+      }
+    },
+    {
+      "cell": "n23a0",
+      "fixture": {
+        "cofactor": "4",
+        "curve_a": 0,
+        "degree": 23,
+        "generator": [
+          "7502454",
+          "6195881"
+        ],
+        "group_order": "8383412",
+        "irreducible": {
+          "degree": 23,
+          "low_terms": [
+            0,
+            5
+          ]
+        },
+        "lambda": "93194",
+        "subgroup_order": "2095853",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          346222973823374174
+        ],
+        "targets": [
+          [
+            "4501886",
+            "415776"
+          ]
+        ]
+      },
+      "fixture_sha256": "43fa12f32c71b1a8da17a0a16239331ac2472844c6135426668198ae83e4c0a8",
+      "id": "n23a0-000",
+      "job": {
+        "algorithm_seed": 2765558845151316143,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 0,
+        "degree": 23,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 138,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "4501886",
+            "415776"
+          ]
+        ],
+        "target_seeds": [
+          346222973823374174
+        ]
+      }
+    },
+    {
+      "cell": "n23a1",
+      "fixture": {
+        "cofactor": "2",
+        "curve_a": 1,
+        "degree": 23,
+        "generator": [
+          "2796197",
+          "1282171"
+        ],
+        "group_order": "8393806",
+        "irreducible": {
+          "degree": 23,
+          "low_terms": [
+            0,
+            5
+          ]
+        },
+        "lambda": "368914",
+        "subgroup_order": "4196903",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          6411539313834815074
+        ],
+        "targets": [
+          [
+            "7373731",
+            "7475905"
+          ]
+        ]
+      },
+      "fixture_sha256": "323c138ce4f50d672b26232d577ff9d9c07c571c47658c22553b56475f62522d",
+      "id": "n23a1-000",
+      "job": {
+        "algorithm_seed": 14198491532331027336,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 1,
+        "degree": 23,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 138,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "7373731",
+            "7475905"
+          ]
+        ],
+        "target_seeds": [
+          6411539313834815074
+        ]
+      }
+    },
+    {
+      "cell": "n31a0",
+      "fixture": {
+        "cofactor": "1492",
+        "curve_a": 0,
+        "degree": 31,
+        "generator": [
+          "218466422",
+          "853131129"
+        ],
+        "group_order": "2147574356",
+        "irreducible": {
+          "degree": 31,
+          "low_terms": [
+            0,
+            3
+          ]
+        },
+        "lambda": "45018",
+        "subgroup_order": "1439393",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          6692836489041253759
+        ],
+        "targets": [
+          [
+            "2042348536",
+            "214219801"
+          ]
+        ]
+      },
+      "fixture_sha256": "63ccbbb65a55aa0e544ff55f35bd3e2988137fe399f228aaeb8ac4b7858f57c1",
+      "id": "n31a0-000",
+      "job": {
+        "algorithm_seed": 15065848849738748981,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 0,
+        "degree": 31,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 186,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "2042348536",
+            "214219801"
+          ]
+        ],
+        "target_seeds": [
+          6692836489041253759
+        ]
+      }
+    }
+  ],
+  "smoke": [
+    {
+      "cell": "n17a1",
+      "fixture": {
+        "cofactor": "2",
+        "curve_a": 1,
+        "degree": 17,
+        "generator": [
+          "43693",
+          "23339"
+        ],
+        "group_order": "131174",
+        "irreducible": {
+          "degree": 17,
+          "low_terms": [
+            0,
+            3
+          ]
+        },
+        "lambda": "17184",
+        "subgroup_order": "65587",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          16068619870798808125
+        ],
+        "targets": [
+          [
+            "119755",
+            "127783"
+          ]
+        ]
+      },
+      "fixture_sha256": "66a78d375e220e85fe31cbce1025be17072303a6db1ca7a20c140af4f96935d6",
+      "id": "n17a1-000",
+      "job": {
+        "algorithm_seed": 9454751671712717113,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 1,
+        "degree": 17,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 102,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "119755",
+            "127783"
+          ]
+        ],
+        "target_seeds": [
+          16068619870798808125
+        ]
+      }
+    },
+    {
+      "cell": "n19a0",
+      "fixture": {
+        "cofactor": "4",
+        "curve_a": 0,
+        "degree": 19,
+        "generator": [
+          "385982",
+          "301867"
+        ],
+        "group_order": "523492",
+        "irreducible": {
+          "degree": 19,
+          "low_terms": [
+            0,
+            1,
+            2,
+            5
+          ]
+        },
+        "lambda": "41811",
+        "subgroup_order": "130873",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          12132133067719500594
+        ],
+        "targets": [
+          [
+            "496085",
+            "219195"
+          ]
+        ]
+      },
+      "fixture_sha256": "cbe1a4b29dc3aa4188daa88aea3077674fe8eefd3a0ffacf83aeaa33fd102118",
+      "id": "n19a0-000",
+      "job": {
+        "algorithm_seed": 6408416330534800471,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 0,
+        "degree": 19,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 114,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "496085",
+            "219195"
+          ]
+        ],
+        "target_seeds": [
+          12132133067719500594
+        ]
+      }
+    },
+    {
+      "cell": "n23a0",
+      "fixture": {
+        "cofactor": "4",
+        "curve_a": 0,
+        "degree": 23,
+        "generator": [
+          "7502454",
+          "6195881"
+        ],
+        "group_order": "8383412",
+        "irreducible": {
+          "degree": 23,
+          "low_terms": [
+            0,
+            5
+          ]
+        },
+        "lambda": "93194",
+        "subgroup_order": "2095853",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          9657500856817004470
+        ],
+        "targets": [
+          [
+            "156464",
+            "3162330"
+          ]
+        ]
+      },
+      "fixture_sha256": "eca22f6c736b56da74bdc279f9318cfd536fe432e0dee13ca9d056db6393e1b8",
+      "id": "n23a0-000",
+      "job": {
+        "algorithm_seed": 12299113799011744433,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 0,
+        "degree": 23,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 138,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "156464",
+            "3162330"
+          ]
+        ],
+        "target_seeds": [
+          9657500856817004470
+        ]
+      }
+    },
+    {
+      "cell": "n23a1",
+      "fixture": {
+        "cofactor": "2",
+        "curve_a": 1,
+        "degree": 23,
+        "generator": [
+          "2796197",
+          "1282171"
+        ],
+        "group_order": "8393806",
+        "irreducible": {
+          "degree": 23,
+          "low_terms": [
+            0,
+            5
+          ]
+        },
+        "lambda": "368914",
+        "subgroup_order": "4196903",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          15920326278556573862
+        ],
+        "targets": [
+          [
+            "4742263",
+            "5454882"
+          ]
+        ]
+      },
+      "fixture_sha256": "541affa804215bfd375bb1e9b6634628bfd9763856bd392a82acd2f0d301f01f",
+      "id": "n23a1-000",
+      "job": {
+        "algorithm_seed": 12502096109087199747,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 1,
+        "degree": 23,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 138,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "4742263",
+            "5454882"
+          ]
+        ],
+        "target_seeds": [
+          15920326278556573862
+        ]
+      }
+    },
+    {
+      "cell": "n31a0",
+      "fixture": {
+        "cofactor": "1492",
+        "curve_a": 0,
+        "degree": 31,
+        "generator": [
+          "218466422",
+          "853131129"
+        ],
+        "group_order": "2147574356",
+        "irreducible": {
+          "degree": 31,
+          "low_terms": [
+            0,
+            3
+          ]
+        },
+        "lambda": "45018",
+        "subgroup_order": "1439393",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          12059700687748647259
+        ],
+        "targets": [
+          [
+            "710159216",
+            "2696993"
+          ]
+        ]
+      },
+      "fixture_sha256": "9dedb0a73c1d53e4c6073eb963780e614100e0ad48a047a58bd3b0d0425abb8e",
+      "id": "n31a0-000",
+      "job": {
+        "algorithm_seed": 2721619315407562597,
+        "config": {
+          "batch_trials": 1,
+          "linear_algebra": "tiny_gauss",
+          "max_trials": 65536,
+          "solver": "pair_table",
+          "summands": 3
+        },
+        "curve_a": 0,
+        "degree": 31,
+        "factor_base": {
+          "kind": "subgroup_orbits",
+          "points": 186,
+          "seed": 43
+        },
+        "mode": "fixture",
+        "public_targets": [
+          [
+            "710159216",
+            "2696993"
+          ]
+        ],
+        "target_seeds": [
+          12059700687748647259
+        ]
+      }
+    }
+  ]
+}

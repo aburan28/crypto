@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Turn experiments/20_residual_walk_panel.json into the markdown tables
-used by RESEARCH_RESIDUAL_WALKS.md.
+used by research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md.
 
     python3 scripts/summarize_residual_walk_panel.py experiments/20_residual_walk_panel.json
 """

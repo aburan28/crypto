@@ -5,7 +5,7 @@ the best *measured* result in this repository, the next target that counts as a
 push, and the acceptance gates. Do not combine best-of-breed component costs
 from different runs into a synthetic win.
 
-**Machine-readable twin:** [`boundary_targets.json`](./boundary_targets.json)
+**Machine-readable twin:** [`boundary_targets.json`](boundary_targets.json)
 (`schema_version` 2). Update both files in the same PR when a record moves.
 
 **Claim hygiene.** Every positive result must state its claim boundary
@@ -17,6 +17,14 @@ fixture generation, and target-independent setup. Multi-target averages, batch
 throughput, and shared-table amortization are secondary and need a separate
 declared question after the one-target result. No user keys, production
 secrets, or undeclared scalars.
+
+**Operation counts and host isolation (2026-10-07).** A wall ratio mixes the
+algorithmic comparison with each arm's implementation speed, so every
+`vs_rho` report also carries `operation_accounting`: both arms' online
+operation counts, their units, how the units compare, and their ratio
+(claim-check verifies it). Runs that shared the host with unrelated processes
+are flagged `host_contended` and are exploratory; a contended run must not be
+the promoted statistic. Promotion scripts run claim-check and refuse on FAIL.
 
 ---
 
@@ -47,7 +55,34 @@ it inapplicable (state why).
 | `relation_yield` | `n` (or `bits`); base id / hash; `eta` or coverage policy; `pr_decomposition` or hit-rate with CI; `trials_per_relation`; target mix (`natural` / `planted_sat` / `proven_unsat` counts) |
 | `rank` | `n` (or `bits`); `K` (orbit columns); `relations_collected`; `relations_needed` (usually `K` or `K+1`); `surplus`; `matrix_dims` `{rows,cols}`; `sparse_or_dense`; `rank_accumulation` (terminal rank + whether recomputed per row); `la_wall_ms` and/or `la_charged_ms` |
 | `end_to_end_dlp` | `n` (or `bits`); recovered `d` with `[d]G = Q`; stage timers (`factor_base`→`relations`→`la`→`verify`); `claim_boundary` (`synthetic_known_answer` / …) |
-| `vs_rho` | One target count; identical IC/rho public point; verified IC and rho scalars; target-specific online intervals and phase costs; `online_speedup = rho_online_ms / IC_online_ms`; `n` (or `bits`); `timing_class`; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); same resource envelope; `verdict`; `claim_boundary`; independent-replay pointer. Whole-process wall, batch throughput, and amortized tables are secondary only. |
+| `vs_rho` | One target count; identical IC/rho public point; verified IC and rho scalars; target-specific online intervals and phase costs; `online_speedup = rho_online_ms / IC_online_ms`; `n` (or `bits`); `timing_class`; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); same resource envelope; `verdict`; `claim_boundary`; independent-replay pointer; **`operation_accounting`** (`ic_online_operations`, `rho_online_operations`, `operation_units`, `unit_assumption`, `ops_speedup_online = rho / IC operations`). Whole-process wall, batch throughput, and amortized tables are secondary only. |
+| `vs_rho` | `n` (or `bits`); `timing_class` ∈ {`algorithmic_charged`, `projection_matched`, `whole_process_wall`}; IC cost; ρ cost; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); all material stages charged in the **same** process series; `verdict`; `claim_boundary`; independent-replay pointer; **ρ health**: recovered-and-verified count (must equal the target count) and measured steps against `√(πr/2)/√A` |
+
+**A ρ baseline that does not finish is not a win.** Every `vs_rho` row
+must report how many targets its ρ side actually recovered and verified,
+and how its step count compares with `√(πr/2)/√A`. A baseline that
+exhausts its iteration budget, or runs orders of magnitude above that
+bound, makes every ratio in the row meaningless — see the
+negation-map fruitless-cycle failure recorded in
+[`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md)
+("The ρ baseline was failing, not losing"), which produced a spurious
+charged crossover at `n = 41` until the walk was fixed.
+
+**A ρ baseline that is slow per step is not a reference either (2026-10-01).**
+Every Koblitz `vs_rho` comparison must measure against a strong ρ: for one target,
+`koblitz_rho_fixture <n> <a> signed_frobenius 1 strong …` (the library
+`koblitz_strong_rho` walk: distinguished points, normal-basis signed-Frobenius
+canonical form, library `Gf2`, lockstep lanes with batched inversion); for batches,
+`koblitz_rho_batch_ks_strong` rung 3 or the normal-basis backend of
+`koblitz_rho_batch_ks_v3`. A different ρ is admissible only with a measured per-step
+cost (instructions or ns per step on the same target) no worse than the strong one.
+`koblitz_rho_fixture`'s `packed` and `reference` backends, `koblitz_rho_batch_ks` and
+`koblitz_rho_batch_ks_matched_arith` are **not** admissible references: the measured
+ones cost 8-60× the strong walk (2026-09-29 and 2026-09-30 errata below), and
+`reference` shares `packed`'s every-step table and O(n) scan (not measured). The weak fixture
+backends now print a note to stderr saying so; they are kept only so archived stage
+runs reproduce. Fix and validation:
+[`RESEARCH_FIXED_REFERENCE_RHO_20261001.md`](../../research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md).
 
 Global provenance on every beat report: fixture hash, executable / source
 hash, host id, resource caps, seeds, and an explicit non-claim list.
@@ -78,11 +113,13 @@ same process series. Faster planted decompositions alone never promote to
 
 1. Freeze a public fixture (curve, seeds, base hash, resource caps).
 2. Run via
-   [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
-   (`boundary_autolab.py plan|preflight|launch|claim-check`); write a JSON
-   report under `research/` or `docs/ic/runs/` with hashes of executable,
-   inputs, and outputs **and** every required measurement-schema field for
-   that stage.
+   [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab)
+   (`boundary_autolab.py plan|preflight|launch|claim-check`), or for an
+   operation-counted whole-process row via `ic boundary --oracles --out <file>`
+   (see [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) §9);
+   write a JSON report under `research/` or `docs/ic/runs/` with hashes of
+   executable, inputs, and outputs **and** every required measurement-schema
+   field for that stage.
 3. Pass the row's **acceptance gates**.
 4. Open a PR that:
    - updates the row's `current` block in this file and in
@@ -104,12 +141,12 @@ subspace factor bases (`semaev_decomp`, `semaev_sat`, `pq_descent`,
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Linearized / subspace bases; `ic` dim ≤ 12; structure checks through `n = 36`; mostly **materialized** | Implicit (non-materialized) base at `n ≥ 41` with membership predicate only; log construction time + retained bytes | Predicate agrees with exhaustive membership on ≥ 2¹⁶ holdout; retained bytes logged | `docs/ic/README.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md` |
-| `decomposition` | SAT decides `n = 19`, `ℓ = 6`; pairs-and-solve validated at `n = 21`, `ℓ = 7`; usable wall-clock to ~`ℓ = 12` still `O(2^{2ℓ})`. Full-field Weil `S₃` FFD harness: **FFD = 3** on `n ∈ {3..7}` (`RESEARCH_FFD_MEASUREMENT.md`). Subspace oracle FFD **not yet logged as a frontier metric** on the SAT / pairs ladder | Sub-`2^{2ℓ}` oracle at fixed `ℓ = 8` (≤ 64 targets), median ≤ half pairs-and-solve; **report FFD / DoR** (min/max/mean over ≥ 16 draws) + eq/var + unknowns | Zero disagreements vs exhaustive / group check; budget/host recorded; **FFD fields present** | `RESEARCH_SAT_SEMAEV.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md`; `RESEARCH_FFD_MEASUREMENT.md` |
-| `relation_yield` | Measured on small corpus instances; not yet a distributional frontier | Yield curve η ↦ hit-rate for one frozen base at `n = 21` with 256 natural targets; publish trials-per-relation | 95% CI width ≤ 0.05 on hit-rate; policy hash frozen | *(open — first publication beats the "absent" record)* |
-| `rank` | Toy matrices only; no published sparse dims / LA cost | Full orbit-reduced rank at `n = 21` with surplus ≤ 2K+64; report `{rows,cols}`, sparse/dense, LA wall | Rank recomputed after every relation; terminal rank = required | *(open)* |
-| `end_to_end_dlp` | Toy known-answer only (framework / small degrees); claim = synthetic | Known-answer DLP at `n = 19` with stage times | `[d]G = Q`; incomplete stages fail closed | `docs/ic/` synthetic runs |
-| `vs_rho` | **Not achieved** | Charged single-instance cost < automorphism-aware ρ at any eligible `n ≥ 15`; state discount explicitly | All stages charged; independent replay; timing class named | — |
+| `factor_base` | Linearized / subspace bases; `ic` dim ≤ 12; structure checks through `n = 36`; mostly **materialized** | Implicit (non-materialized) base at `n ≥ 41` with membership predicate only; log construction time + retained bytes | Predicate agrees with exhaustive membership on ≥ 2¹⁶ holdout; retained bytes logged | `docs/ic/README.md`; `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md` |
+| `decomposition` | SAT decides `n = 19`, `ℓ = 6`; pairs-and-solve validated at `n = 21`, `ℓ = 7`; usable wall-clock to ~`ℓ = 12` still `O(2^{2ℓ})`. Full-field Weil `S₃` FFD harness: **FFD = 3** on `n ∈ {3..7}` (`research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md`). Subspace oracle FFD **not yet logged as a frontier metric** on the SAT / pairs ladder | Sub-`2^{2ℓ}` oracle at fixed `ℓ = 8` (≤ 64 targets), median ≤ half pairs-and-solve; **report FFD / DoR** (min/max/mean over ≥ 16 draws) + eq/var + unknowns | Zero disagreements vs exhaustive / group check; budget/host recorded; **FFD fields present** | `research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`; `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`; `research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md` |
+| `relation_yield` | **Operation-counted yield on the frozen `char2` ladder** (2026-09-21, `ic boundary`): 5 instances to `r = 2^24.4`, relations per trial against the counting ceiling `C(F+m−1,m)/#E` for every variant, natural targets only; `yield/ceiling` 0.89–0.96 on the odd-degree rungs and 1.48–1.74 on `n = 18, 24`; **Round 2 (2026-09-21)** computes the exact ceiling from the base's cofactor classes instead of arguing it, which puts those rungs at 0.77–1.03 against a measured index of 1.92–2.21, and adds two-summand rows (`yield/ceiling` 1.06–1.14 at `n = 27`); trials grow as `r^0.37` (`R²` 0.96) | Yield at `n = 27` against the subgroup-tightened ceiling (divide by the order of the subgroup containing every `m`-sum) with 256 natural targets and a 95% CI on the hit-rate | Tightened ceiling stated; 95% CI width ≤ 0.05 on hit-rate; policy hash frozen | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.3, §3.5 |
+| `rank` | Relation-matrix LA priced per instance on the `char2` ladder (2026-09-21): dense incremental Gauss–Jordan over `Z/rZ`, rank recomputed after every row, stop when the target column is pinned, zero surplus; at `n = 27`: 245 rows × 264 columns, rank 245, 120,500 multiply-subtracts = 943 GAE, `S_LA = 0.20` (under 0.1% of the total); LA grows as `r^0.71` (`R²` 0.96). **Round 2:** the two-summand rows close through cycles in the factor-base graph rather than full rank — 118 rows over 264 columns at `n = 27` — with `S_LA` under 0.002 | Rank at `n ≥ 31` (`K > 500`) with dims and LA cost; sparse or structured elimination once dense LA exceeds 1% of the total | Rank recomputed after every relation; terminal rank = required; dims and cost logged | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §4 |
+| `end_to_end_dlp` | Known-answer DLP recovered and verified `[d]G = Q` by every variant on every instance of the `char2` ladder, largest `n = 27` (`r = 2^24.4`), every phase counted in one unit (2026-09-21); **Round 2** adds the negation-folded table, walked targets and two-summand rows on the same instances, every logarithm verified and no row pinned by a repeated target; claim = synthetic known-answer | Known-answer DLP at `n ≥ 31` with every phase counted in `S`; `vs rho` and `vs floor` reported | `[d]G = Q`; every phase inside the count; incomplete stages fail closed | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2 |
+| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ on the same instance (2026-09-21): best variant meet in the middle `m = 3` at 8.3× ρ (`n = 15`) and 89× at `n = 27` (`r = 2^24.4`, `S = 206` vs ρ 2.31); `S₄` pairs-and-solve 155×–45,471×; total exponent `r^0.62` (`R²` 0.99) against ρ's ½. **Round 2 (2026-09-21):** the negation-folded table with walked targets and two summands reaches `S = 71.2` at `n = 27`, **30.8× ρ** (1.25–2.89× the first round per instance), fitted `r^0.48` (`R²` 0.98, 5 sizes) against a reference fitting 0.30 — still no crossover. **Round 3 (2026-09-21):** a base at the family optimum and a restart costing one group operation instead of thirty-two scalar multiplications reach `S = 50.7` at `n = 27`, **21.9× ρ**, fitted `r^0.57` (`R²` 0.97, 5 sizes); the family's own optimum here is `S = 41.6`, so the row is within `1.22×` of the least any member of this family can cost at any base size, and that optimum is `Θ(r^{1/6})` where the reference is flat — no crossover exists in this family at any size; ρ health: every run recovered and verified, walk 1.1–1.6× `√(πr/2)`; the reference walk uses `A = 1`, floor stated at `A = 2`. **Round 4 (2026-09-21)** pins the unit: non-addition counters now convert at ratios frozen in `docs/ic/calibration.json` rather than at factors measured on the host each run, which had drifted a median of 1.08 and up to 3.70 between runs. Rerun under the pinned unit all 537 rows are identical in every native counter and the correction reaches ±9.5%, concentrated on rows that are almost entirely converted work; the figures above are unchanged to four significant figures **Round 5 (2026-09-22)** draws the walk's sixteen restart offsets on first use instead of at setup; 110 of Round 4's 204 walk rows had bought all sixteen and taken none. The offsets come off their own random stream and are taken in a fixed cycle, so the eager and lazy arms walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, zero rows whose saving differs from the offsets they stopped drawing, and the same on a holdout seed and an eight-repeat headline. The saving matches `(48·log₂r − 48)/√r` to within 1–9%, so it is large below 2^15 (best ratio 0.58) and at most 7% above 2^20. Class engineering. The same round measures what re-seeding alone does: moving the offsets to a private stream changes no cost, yet moved 204 of 537 rows — every walk row and only walk rows — with a median of 1.0000 and a range of 0.54 to 1.83, so a single walk row at three repeats is not resolvable to better than that. Accordingly the `n = 27` best row now reads `S = 36.9`, **16.0× ρ**, where Round 4 read 50.7 and 21.9×. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain | Charged single-instance cost < automorphism-aware ρ at any eligible `n ≥ 15`; state discount explicitly | All stages charged; independent replay; timing class named | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4 |
 
 **Hard caps (implementation, not mathematics):** Weil truth-table descent
 `m' ≤ 8` (S₃) / `m' ≤ 5` (S₄) in `pq_descent`; higher-genus GHS smooth model
@@ -134,7 +171,7 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 | `relation_yield` | At n=53, rank-guided eta 1/10 produced one verified four-sum relation for every requested public target; 1,244 target trials yielded 1,244 relations in the 1,024-target batch. Post-precomputation cost: 7.49 ms median, 27.38 ms p95 | Freeze and measure the same policy at growing n with target/probe tails and support density | Public-natural fixture domain; exact group checks; trials, probes, timing distribution, and policy hash retained | `autolab_n53_eta_sweep_20260912/results.json` |
 | `rank` | **n=53 minimum-rank accumulation**: guided eta 1/10 reached rank 221 in exactly 221 rows on every measured selection/holdout fixture; one factor-log table then served 1,023 targets with one row each; full transcript independently replayed | Growing-n shared-log rank/yield panel with the same guidance policy | Preserved rows or independent replay; matrix dimensions and LA time explicit; relation LA kept distinct from FFD | `runs/shared_factor_logs_n53_eta_1_10_full_batch4/`; `runs/shared_factor_logs_independent_replay.json` |
 | `end_to_end_dlp` | **1,024 public-synthetic n=53 known-answer targets** recovered with one retained factor-log table; all `[d]G = Q`, relation equations, and factor logs verified with zero replay discrepancies | Repeat at a second n≥53 rung or independent host under the same staged accounting | Public synthetic only; every target group-verified; support → rank → recover → verify timers present | `runs/shared_factor_logs_n53_eta_1_10_batch1024/`; independent replay |
-| `vs_rho` | **Fourth primary single-target online rung at n=71 on `u128` words:** one previously unseen public target point solved online by IC (`koblitz_orbit_dlp_fast` wide path: 600 signed-Frobenius orbit columns, 85,200 base points, **zero pair-table entries, zero edge selectors**, ~5.6 GB peak RSS) and rho (`koblitz_rho_fixture` wide packed backend, A=142, ~2.1 GB) on the identical frozen public point (Q, scalar 2718281828459045 validation-only sidecar); online clocks start after reusable base/S3-root-index/guided rank-600 log preparation (~39–48 s excluded) and after Q construction for rho. **Median 2,864.1× across three paired observations** (IC 10.2–14.5 ms vs rho 18.2–70.7 s; range 1,532.8×–4,893.5×); deterministic 14,554-probe relation on all runs; both arms verified every run; standalone Python GF(2⁷¹) replay PASS 15/15 on all three. 52-bit subgroup (`r = 5513228015079457`); field `x^71+x^5+x^3+x+1`. Constant-factor only — S unknown | n=73 (a=0) one-target online IC vs rho on the same frozen public point contract with the compact-orbit `u128` domain — **no new field code needed** (landed producers already admit n=73; subgroup `r = 86020738150056119` ~ 2^56.3, cofactor 109,796) | Exactly one unseen target; identical point + resources in both arms; online intervals exclude launch/loading/fixture generation/reusable setup; compact-orbit domain only (no explicit pair table); guided precompute establishes the reusable table; independent scalar replay; verified answer with speedup ≥ 1.20; multi-target amortized rows stay secondary | `experiments/koblitz-single-target-n71-20261002/` (claim_report_vs_rho.json claim-check PASS, LEDGER_RECORD.md, replays, ledger-freeze, ledger-R1..R3 raw runs) |
+| `vs_rho` | **Sixth primary single-target online rung at n=83, a=1 (2026-10-06; first a=1 arm, first parallel-rank rung):** one previously unseen public target point solved online by IC (`koblitz_orbit_dlp_fast` wide path, a=1: 600 signed-Frobenius orbit columns, 99,600 base points, **zero pair-table entries**, ~5.75 GB peak RSS) and rho (`koblitz_rho_fixture` wide packed backend, A=166) on the identical frozen public point (Q, scalar 3141592653589793 validation-only sidecar). **Median 8.2× across three paired observations** (IC 5.6–7.9 s vs rho 43–71 s; range 5.5×–12.7×); deterministic 8,845,441-probe relation on all runs; both arms verified every run; standalone Python GF(2⁸³) replay PASS on all three. 52.9-bit subgroup (`r = 8569786107849059`, cofactor 1128547018); field `x^83+x^7+x^4+x^2+1`. Precompute used the **parallel guided rank** (`KIC_RANK_THREADS=12`, logs identical to the sequential path): 4.8 min wall (mean 2.48M probes/relation) vs the 5.1 h sequential n=73 rank. Margin smaller than n=73 because this rung's subgroup (2^52.9) is smaller than n=73's (2^56.3) — rho is easier here; online walls also conservative (unrelated host load). Constant-factor only; in operations (one probe = one rho step, uncalibrated) 1.0× on this frozen target and 3.7× on a mean target, and all three runs were host-contended — see §"Operation accounting" below. Prior rungs retained in history: n=73 (median 1,189.7×), n=71 (2,864.1×), n=61, n=53, n=41 | A rho-projection-class rung at n=97 a=0 (r ~ 2^95, cofactor 4; online rho ~ 2^44 steps is not wall-runnable) or the u128-ceiling a=1 rungs (n=107/109/113/127, r ~ 2^107–2^115, cofactors 2/7114). ECC2K-130 itself (n=131, a=0, same curve family, `#E = 4·680564733841876926932320129493409985129`) needs u256 words, an implicit S3 index, and 130-bit sparse LA — see `RESEARCH_ECC2K130_IC_FEASIBILITY.md` | Exactly one unseen target; identical point + resources in both arms; online intervals exclude launch/loading/fixture generation/reusable setup; compact-orbit domain only; guided precompute (sequential or verified-parallel) establishes the reusable table; independent scalar replay; verified answer with speedup ≥ 1.20; multi-target amortized rows stay secondary | `experiments/koblitz-single-target-n83-20261006/` (claim_report_vs_rho.json, frozen fixture, R1–R3 raw runs + replays); `experiments/koblitz-single-target-n73-20261003/`; `runs_manual/koblitz_parallel_rank_n73_20261005/` |
 
 Primary ledger verdict (single-target, achieved 2026-10-02): **`N71_U128_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (median 2,864.1×, range 1,532.8×–4,893.5×, three paired runs, Python replay PASS 15/15 each, zero pair-table entries) — fourth rung of the primary single-target ladder and the first past the old u64-packing ceiling (enabled by the `u128` field extension; every `n ≤ 63` fixture verified byte-identical after). Third rung **`N61_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (fresh 124.85×, frozen median 53.13×, four Python-replayed runs, zero pair-table entries) is history. The n=53 and n=41 direct-producer rungs have paired-target evidence, but their published numeric online ratios are under the timing audit below. The prior multi-target verdict **`N53_PUBLIC_SYNTHETIC_SHARED_LOG_1024_PROCESS_WALL_CROSSOVER`** (compact-orbit shared-log DLP `koblitz_orbit_dlp_fast`, 86,112/86,112 independently replayed) is retained as historical secondary evidence only.
 
@@ -155,12 +192,236 @@ scope and claim limit.
 finite public-synthetic single-target online comparison on one frozen binary
 curve (52-bit subgroup) after reusable compact-orbit IC preparation on `u128`
 words (no explicit pair table at any stage). It is a constant-factor win only
-— it does not establish an asymptotic exponent below Pollard rho (the total
-operation-count boundary is not comparable; S unknown), an external/private
-target capability, production key recovery, or deployed-curve security impact.
-It is **not ECC2K-130 evidence** (n=131 is a different curve and field degree).
-The retained multi-target shared-log results remain secondary evidence and are
-not promoted by this record.
+— it does not establish an asymptotic exponent below Pollard rho, an
+external/private target capability, production key recovery, or deployed-curve
+security impact. It is **not ECC2K-130 evidence** (n=131 is a different curve
+and field degree). The retained multi-target shared-log results remain
+secondary evidence and are not promoted by this record. No rung is compared
+against Pollard rho with precomputation (Bernstein–Lange distinguished-point
+tables) at equal precompute and memory.
+
+### Operation accounting (2026-10-07)
+
+Generated by `research/sat_factor_base_review_20260908/autolab/op_accounting.py`
+from the retained run rows; the full block is `operation_accounting` in each
+rung's `claim_report_vs_rho.json`. One IC probe and one rho walk step each
+count as one operation; that is **not yet calibrated** on a common backend.
+"ops ×" is rho operations / IC operations (above 1: IC used fewer). The
+expected rho walk is `sqrt(πr/(4n))` on signed-Frobenius classes; the rank
+mean (probes per guided-rank relation, each a random subgroup point)
+estimates the online probes of a random target. "Luck" is rank mean /
+frozen-target probes.
+
+| rung | IC probes, frozen target | IC probes, rank mean | luck | rho steps, expected | ops ×, frozen target | ops ×, mean target | ops ×, rank precompute charged | wall ×, median | wall ×, uncontended | IC/rho ops per second |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| n=61 | 227,437 | 63,993 | 0.28 | 1.45M | 6.4 | 22.6 | 0.038 | 75.8 (R1–R4) | 75.8 | 8.9 |
+| n=71 | 14,554 | 2.24M | 154 | 7.81M | 537 | 3.5 | 0.0058 | 2,864 | 2,864 | 7.4 |
+| n=73 | 457,561 | 61.3M | 134 | 30.4M | 66.5 | 0.50 | 0.00083 | 1,190 | 184.9 (R1) | 13.1 |
+| n=83 | 8,845,441 | 2.45M | 0.28 | 9.01M | 1.02 | 3.7 | 0.0061 | 8.2 | none (R1–R3 contended) | 9.2 |
+
+Readings:
+
+- The IC probe loop runs 7–13× more operations per second than the rho
+  fixture, so the wall ratios overstate the operation ratios by that factor.
+- Every rung froze one target, and the IC scan is deterministic per target.
+  The n=71 and n=73 targets were 154× and 134× luckier than the rank mean;
+  on a mean target n=73 is 0.5× (rho ahead).
+- n=73 R2/R3 and all three n=83 runs shared the host with unrelated
+  processes (each rung's README). n=73's uncontended R1 is 184.9× wall.
+- With the rank precompute charged, IC spends 26–1,200× more operations
+  than one rho solve on every rung.
+- **Schema gap:** the n=73 and n=83 claim reports fail
+  `boundary_autolab.py claim-check --stage vs_rho` (12–13 required fields
+  and 4 provenance fields missing: they use `paired_runs` and medians
+  rather than the single-target field names). Their promotion scripts never
+  ran claim-check; they now do and refuse on FAIL. n=61 and n=71 PASS.
+- Plan and open steps: `docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md`
+  (calibration microbench, rho arm on the batched backend, ≥30-target
+  distributions, and the precomputed-rho arm).
+| `factor_base` | Algebraic point-defined `n = 53` base: 9,964 points, 94 signed-Frobenius orbit columns, and 24,805,379 exact support entries. Four direct-routed shards build the 738,197,504-byte table in a 1.379006 s median while preserving the 95-relation solve; selection uses no scalar labels or target-subgroup enumeration | Reduce retained support below 512 MiB without regressing the exact 95-relation solve or selected online crossover | Same base/support cardinality; terminal rank 95; construction wall/core/RSS + retained bytes logged | `stage-108-routing-selection-archive-20260913/verification.json` |
+| `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns. **Priced per target (2026-09-21, `ic boundary --oracles`):** every oracle on the same Semaev systems at `n = 9…23`, F₄ word XORs exact, SAT conflicts, `disagreements = 0`; FFD 2 (`m = 2`) / 3 (`m = 3`) on every profiled cell; `n = 23, m = 2` (22 unknowns): F₄ 6.8e7 XORs found / 2.3e8 refuted = 2.0e5 GAE per target, SAT 2.9e4 / 1.9e5 conflicts = 1.3e7 GAE; `n = 15, m = 3` (30 unknowns): F₄ 2.4e6 GAE, SAT no answer at 200,000 conflicts; the pair-table probe costs 0.5–25 GAE on the same targets. Re-run on the merged tree with the lift-checked tally (`docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json`): identical verdicts, FFD and SAT conflicts, zero S₄ lift failures; matrix-F4 word XORs 1.4–2.7× lower after main's sparse elimination (#405), `n = 23, m = 2` now 3.2e7 / 1.06e8 XORs = 8.8e4 GAE per target | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`; `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §5 |
+| `relation_yield` | Exact coverage / yield controls at `n = 19`; fixture collectors at `n = 37` | Distributional yield for frozen `(n, η, base)` at `n = 23` with 256 natural + 64 planted + 64 proven-UNSAT; trials-per-relation | Preregistered covariates; no silent arm omission | `TASK-KIC-SAT-RHO-CROSSOVER-20260909` |
+| `rank` | Rank-aware `n = 53` collection reaches augmented rank 95 with exactly 95 rows and zero surplus; current final solve is 0.542 ms after 48,531,878 support queries; relation-matrix LA, not GB FFD | Unaffiliated replay of the 95-row transcript and a distribution across public targets | Preserved transcript; matrix dimensions and LA wall logged; terminal rank unchanged; no log labels used by targeting | `stage-89-current-selected-panel-20260912/verification.json` |
+| `end_to_end_dlp` | Selected public hash-derived unknown-scalar recovery through `n = 53`: 95 verified relations, 40,136,342 queries, relation-derived factor-base logs, direct/rho agreement, and `[d]G=Q`; no expected scalar constructed or supplied. Direct is 4.307977 s versus 4.362556 s rho, ratio 0.987489 | Repeat n=53 on independent public seeds and obtain unaffiliated reproduction | Target scalar not constructed; factor-base logs group-certified; all stages retained | `stage-108-routing-selection-archive-20260913/verification.json` |
+| `vs_rho` | `n = 41` retains an online charged crossover with full-cost loss. The selected direct-routed four-shard `n = 53` panel wins 5/5 on an identified EPYC 9V74: ratios 0.8471x, 0.8589x, 0.8392x, 0.8291x, and 0.8389x; median 0.8392x. Median direct is 3.630 s / 9.740 core-s / 1,055,776,768 B RSS versus 4.308 s / 4.307 core-s rho. Fresh build plus direct remains 17.637x; current single-core evidence predates sharding. **Operation-counted, whole process (2026-09-21, `ic boundary`):** the signed-orbit fold at `n = 41` (`r = 2^39`, cofactor 4) is `S = 58.8`, 300× the counted signed-Frobenius ρ (`S = 0.20`) and 425× the floor with factor base, pair table, targets, oracle, elimination and verification all inside the count; `n = 23`: 210× (abscissa-column control 227×); total exponent 0.54 (`R²` 0.71 over 10 rungs; 0.51, `R²` 0.98 over the cofactor ≤ 4 rungs) against ρ's ½. **Round 2 (2026-09-21):** folding the pair table by ⟨σ, −1⟩ takes the `n = 41` table from 6,249,999 entries to 152,439 and the factor-base phase from `S = 16.9` to 0.24; with walked targets, two summands and a base sized to the folded table the best row is `S = 5.12`, **26.2× ρ** (3–49× the first round per instance), fitted `r^0.43` (`R²` 0.82, 4 rungs) — still no crossover. **Round 3 (2026-09-21):** the same rows with a restart costing one group operation give `S = 5.92` at `n = 41`, **30.3× ρ**, which did not move against Round 2 (matched eight-repeat headline: 0.927, 95% interval 0.849–1.012). The derived family optimum here is `S = 4.18`, **30.1× the asymptotic signed-Frobenius ρ**, so the row is within `1.42×` of its family's floor and that floor is itself thirty times the reference; extrapolating the law, `GF(2^163)` would be about `10^7×` and `GF(2^283)` about `10^13×`. **Round 4 (2026-09-21)** pins the unit: non-addition counters now convert at ratios frozen in `docs/ic/calibration.json` rather than at factors measured on the host each run, which had drifted a median of 1.08 and up to 3.70 between runs. Rerun under the pinned unit all 537 rows are identical in every native counter and the correction reaches ±9.5%, concentrated on rows that are almost entirely converted work; the figures above are unchanged to four significant figures **Round 5 (2026-09-22)** draws the walk's sixteen restart offsets on first use instead of at setup; 110 of Round 4's 204 walk rows had bought all sixteen and taken none. The offsets come off their own random stream and are taken in a fixed cycle, so the eager and lazy arms walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, zero rows whose saving differs from the offsets they stopped drawing, and the same on a holdout seed and an eight-repeat headline. The saving matches `(48·log₂r − 48)/√r` to within 1–9%, so it is large below 2^15 (best ratio 0.58) and at most 7% above 2^20. Class engineering. The same round measures what re-seeding alone does: moving the offsets to a private stream changes no cost, yet moved 204 of 537 rows — every walk row and only walk rows — with a median of 1.0000 and a range of 0.54 to 1.83, so a single walk row at three repeats is not resolvable to better than that. Accordingly `n = 41` now reads `S = 5.11`, **26.1× ρ**, where Round 4 read 5.93 and 30.3×; the round also closes the small-rung losses Round 3 had incurred, `icv1-f2m11-t67-05f5aa36` going from 0.597 to **1.001** and `icv1-f2m13-t181-515ee569` from 0.650 to **1.000** against Round 2. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain | Reduce retained memory below 512 MiB, median direct/rho core ratio from 2.262x to at most 1, refresh selected CPU-0, and obtain independent replay | All stages charged; same target; independent external validation; timing class + `A=2n` discount explicit; fixed-protocol wall and core panels | Stages 39, 40, 92, and 108 sealed results; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.4, §3.6 |
+
+**Explicit non-claims for the current `vs_rho` record:** not Semaev-SAT, not
+asymptotic sub-ρ, not key recovery, not deployed-curve security impact, not a
+full-cost/core crossover, and not a state-of-the-art result.
+
+### Compact S3 swap quotient, 2026-09-29 — engineering, no rho crossover
+
+The [frozen swap-quotient panel](../../research/notes/ecc2k130/compact_swap_quotient_20260929/RESULT.md)
+keeps one of each ordered S3 pair/Frobenius mate. Nine balanced cold blocks on
+new point-only n=41 and n=53 L=1,024 corpora completed all 162 baseline,
+quotient and strong-rho processes; the hosted independent verifier replayed
+144 full-rank compact traces and all 165,888 arm-target outputs. A second-machine
+raw replay returned byte-identical PASS receipts for both cells. At the exploratory best tested K, quotient CPU is
+2.119× rho at n=41 and 2.562× at n=53, with paired 95% intervals
+2.062–2.193 and 2.540–2.590. Same-K quotient CPU falls 8–34%, retained states
+roughly halve, and root-table entry counts remain equal. The n=53 K=550
+quotient's median index/target phases are 4.243/3.882 s against rho's
+4.188 s complete wall. The next gate is a frozen joint index/query cost
+experiment: count all S3 calls, no-root returns, exceptional inversions,
+table probes and lifts, then test batch inversion with early-stop waste charged.
+This is a matched-host complete-process timing diagnostic; common calibrated
+operation-counted S, an n=83 confidence result and GF(2^131) transfer remain
+unset. It does not alter the selected-panel `vs_rho` verdict above.
+
+### Compact S3 inversion batching, 2026-09-29 — engineering, no rho crossover
+
+The [frozen v2 full-process panel](../../research/notes/ecc2k130/compact_s3_batch_20260929/RESULT.md)
+uses one compiled swap-quotient producer at scalar W=1 and Montgomery W=16/64,
+with two A/A scalar controls at each K and 32-walk normal-basis rho on the
+same 1,024 point-only public Q. Seed 622936 was committed after the lint-only
+source amendment and is disjoint from 5,123 earlier points per n, including
+the excluded seed-622935 pilot. Nine balanced blocks per arm completed 162/162
+children, 144 full-rank compact traces and 165,888 verified arm-target
+outputs. All four A/A noise gates pass. The second-host replay is documented
+in the result and its portability note.
+
+Every batch/scalar paired 95% CPU interval excludes one on the improving side,
+saving 16–26% complete cold CPU at fixed K. Yet the best observed W64 cells
+remain **1.535× rho at n=41 K255** (95% interval 1.518–1.554) and **1.582×
+rho at n=53 K440** (1.559–1.613). The n=53 W64 arm spends median 2.336 s
+building the index, 2.542 s on rank and 5.084 s on targets, versus rho's
+6.335 s complete CPU. It makes 27,632,196 rank-plus-target root-table
+lookups and 42,477,310 slot probes for 1,464 full-point lift attempts. A
+no-false-negative blocked Bloom or xor prefilter is the next bounded
+hypothesis, but its construction, memory and lookup hashes must be charged
+cold against W64 and rho. These host-specific timing diagnostics do not set
+common calibrated S, an n=83 result, GF(2^131) transfer or a descendant-native
+PDP verdict, and they do not alter the selected-panel `vs_rho` row above.
+
+### Compact S3 blocked root prefilter, 2026-09-30 — engineering gain, no rho crossover
+
+The [preregistered prefilter panel](../../research/notes/ecc2k130/compact_s3_prefilter_20260930/RESULT.md)
+tests the W64 binary with a 512-bit blocked Bloom filter over every canonical
+root key, alongside two same-binary off controls and the matched normal-basis
+rho on 1,024 new point-only public Q at n=41/K255 and n=53/K440. The first
+hosted panel and separate macOS raw replay independently verified all 30
+full-rank compact traces and 40,960 target logs. The filter preserved every
+first witness and scalar and skipped 3.154/3.187 million root-table keys at
+n=41 and 27.985/28.244 million at n=53, using 4/16 MiB additional storage.
+The first-run CPU ratios to rho, 1.4567 and 1.5218, are diagnostic because
+n41's off-B/off-A interval excluded one and n53 had two contention samples.
+A single same-source/Q, both-size repeat was committed before inspection.
+Both repeat cells satisfy the A/A and isolation gates and independently
+replay all 30 full-rank traces and 40,960 logs. Filter/off complete CPU ratios
+are **0.8528** (95% interval 0.8390–0.8636) at n41 and **0.8924**
+(0.8805–0.9134) at n53: a fixed-K engineering gain. Filter/rho ratios remain
+**1.3282** (1.2980–1.3556) and **1.4727** (1.4231–1.5292), so no matched-rho
+crossover. Common operation-counted S, n83 and GF(2^131) transfer, and
+descendant-native PDP benefit remain unset.
+The separate degree-263 all-line certificate records the changed descending
+endomorphism order but no native PDP yield. The next high-arity gate is the
+independently reviewed, label-gated m10 capacity PR #937; only if it passes
+should a frozen natural-target solver/yield and equal-useful-size original,
+native, transported and pullback comparison follow.
+
+### Compact whole-process instruction ledger, 2026-09-30 — common work unit, no CPU crossover
+
+The [frozen six-cell Callgrind ledger](../../research/notes/ecc2k130/compact_ir_ledger_20260930/RESULT.md)
+ran the exact blocked-prefilter source and matched 32-walk normal-basis rho v3
+on the same public Q at n=37/41/53, L=1/1024. All 16 child processes, nine
+compact full-rank traces and 8,200 target logarithms passed hosted and
+separate macOS group-law replay; the n37/L1 instruction-repeat control passed.
+Complete guest-instruction IC/rho ratios for unfiltered compact are 2.5231,
+0.5165, 9.2716, 0.6221, 13.2293 and 0.7773 in that cell order. The n41/n53
+batch blocked arms are 0.6351/0.7889 of rho in Ir but remain 1.3282/1.4727
+of rho in the separately eligible same-source/Q native CPU repeat. The filter
+raises Ir by 2.10%/1.49% over off while lowering native CPU by 14.7%/10.8%.
+This is an all-phase instruction/accounting result and a quantitative no-go
+for **the tested W64 n41/n53 batch cold CPU cells** against strong rho; Ir alone
+is not a group-addition or cycle unit and does not establish a method speedup.
+
+The older point-panel native CPU references for n37/L1, n37/L1024, n41/L1
+and n53/L1 used a different rho/source snapshot. The separate four-cell
+protocol committed before inspection of the Ir results has now run once
+([cold-gap result](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)).
+Its current-source complete CPU ratios to the same-Q rho are **3.7362**
+(3.6901–3.7803), **1.7064** (1.6933–1.7146), **17.0499** (16.0731–18.1962)
+and **27.4483** (27.1951–27.6616). All four A/A and isolation gates passed.
+None is below one, so those cells also have no matched-rho cold CPU crossover. The K+L rank/recovery attempt floor is exactly
+met in all compact arms, but no instruction lower bound, calibrated generic
+S, disjoint target confirmation, n83 confidence, GF(2^131) transfer, or native
+leaf m≥3 PDP result follows. The degree-263 map/ring certificate and the
+review/label-gated m10 capacity PR #937 remain separate prerequisites.
+and n53/L1 used a different rho/source snapshot. The preregistered
+[four-cell current-source cold panel](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)
+now closes those cells: all 105 processes, 70 compact full-rank traces and
+15,450 target logarithms passed hosted and separate macOS replay. Eligible
+off/rho CPU medians [paired 95% intervals] are 3.7362 [3.6901, 3.7803],
+1.7064 [1.6933, 1.7146], 17.0499 [16.0731, 18.1962] and 27.4483
+[27.1951, 27.6616] in that order. Every A/A and isolation gate passed.
+The n37 batch Ir advantage (0.5165 of rho) therefore does not survive native
+CPU either; all six tested current-source W64 n/L cells lack a matched-rho
+cold CPU crossover. Short-arm wall time is coarsened by 0.2-second runner
+polling and is ineligible as a speed claim. The K+L rank/recovery attempt floor
+is exactly met in all compact arms, but no instruction lower bound, calibrated
+generic S, disjoint target confirmation, n83 confidence, GF(2^131) transfer,
+or native leaf m≥3 PDP result follows. The degree-263 map/ring certificate
+and review/label-gated m10 capacity PR #937 remain separate prerequisites.
+
+### Degree-263 leaf m10 physical support, 2026-09-30 — count transfer fails, no PDP
+
+The [frozen leaf census](../../research/notes/ecc2k130/leaf_m10_support_20260930/RESULT.md)
+ran once as Actions run 36707051160. Source low slots are 7,977 physical
+points ten times and the high slot is 16,125. Leaf `[1,0]` low slots are
+8,063–8,339 and its high slot is 16,259. Leaf `[1,4]` low slots are
+8,087–8,323 and its high slot is 16,323. Balanced projected-sign unions are
+39,880 / 40,875 / 40,994 and unequal unions are 43,954 / 44,932 / 45,075.
+Each arm's union equals the sum of its slot class counts. `N/q` remains a
+counting ceiling. `PDP_yield`, full ECDLP cost, `S`, matched rho, and
+method crossover stay unset. The census does not discharge review-gated
+m10 capacity PR #937, and it is not an equal-useful-size PDP comparison.
+
+### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
+
+Separate measurement, separate base family, not a competing record. The
+`koblitz.vs_rho.*` autolab beats use a `signed_expanded` / `pair_pair_16`
+construction rather than the `two_torsion_saturated` base behind the row above.
+On that family, index calculus is behind ρ at every rung measured — `n = 13`,
+37, 41 and 53. Full writeup and committed bundles:
+[`evidence/20260912-koblitz-vs-rho-no-crossover/`](../../research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover).
+
+At `n = 37` over 1024 targets, charged ms/target, with ρ verifying 1024/1024:
+
+| arm | charged ms/target | ρ/IC |
+|---|---|---|
+| ρ | **12.82** | 1.000 |
+| `partition_walk` | 14.78 | 0.868 |
+| `coefficient_walk` | 15.33 | 0.836 |
+| `independent` | 20.27 | 0.633 |
+
+Three things this turned up that apply to any future `vs_rho` claim:
+
+- **Read charged cost off the batch summary.** The direct producer's per-target
+  `charged_total_ms` re-adds the shared support-table `setup_ms` for *every*
+  target, so summing it across a batch double-counts the base once per target.
+  At `n = 37` that reports 34.08 ms/target where
+  `full_algorithm_charged_total_ms` gives 20.27 for the same run, and it makes
+  setup amortization look like the bottleneck when setup is under 0.02
+  ms/target.
+- **Sweep the target mode.** All three beats pin `target_mode=independent`, the
+  most expensive of the three and 37% above `partition_walk`, so a stage read
+  off one beat understates the method.
+- **The direct arm's largest charged component is an assertion.** 7.78 of
+  `partition_walk`'s 14.78 ms/target is `solution_validation_ms`, which
+  re-derives every factor-base discrete log by scalar multiplication and
+  replays every relation under `assert_eq!` to confirm what the linear solve
+  already produced. Cutting it is the obvious lever, but ρ spends 1.28
+  ms/target on its own validation; dropping one side only would turn a 1.15x
+  loss into a 1.65x "win" by accounting alone.
+
+**The two `n = 41` results are not reconciled.** The row above reports an online
+charged crossover at IC/ρ 0.286 over 5 targets; the autolab beat measures
+per-target collection at 821.7 ms against ρ's 247.5 ms, 3.3x the other way.
+Different base families, target counts, and cost boundaries — the row's own
+amortized ratio is 5.03x and its full available wall is 110.79x, so the 0.286
+excludes base construction rather than disputing it. Neither `n = 41` number
+should be quoted without its configuration.
+
 ---
 
 ## Regime C — Prime fields
@@ -172,11 +433,17 @@ not promoted by this record.
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
 | `factor_base` | Small-x and ζ-orbit bases on toy primes; Eisenstein-smooth FB implemented; sizes from bench ladder | Orbit-reduced base on a **16-bit** j=0 prime-order curve with certified orbit count; construction time + retained bytes | No duplicate orbits; size vs theory within 5% | `docs/RESEARCH_BENCH_LOG.md`; `ec_index_calculus_j0` |
-| `decomposition` | 2-decomp via S₃ through bench sizes; S₄/Gröbner not a scaling win. **FFD not published** on the current 2-decomp bench frontier (must be filled on the next algebraic push) | One verified 3-decomposition relation family on a ≥14-bit prime with GB cost + **FFD / DoR logged**; record unknowns, system degree, eq/var, median ms | Witnesses sum in the group; timing + **FFD** logged | `ec_index_calculus.rs` |
-| `relation_yield` | Enough relations for toys ≤ 14 bits (j=0) / 12 bits (generic) | Publish trials-per-relation vs bitlength for 10–16 bits on a frozen curve ladder | ≥3 bitlengths; R² reported | `docs/RESEARCH_BENCH_LOG.md` |
+| `decomposition` | **First S₄ 3-decomposition relation family past toys (2026-10-06):** `R = aG + bQ` into **three** factor-base points on the a=−3 deployed shape (16-bit P-256 class) via the S₄ quartic + **Cantor–Zassenhaus root finding** (`find_roots_fp_fast`, new); measured **trials/relation = 1.0** (~13 expected hits/trial at fb=120 — the p/B³ density confirmed), 128 relations, staged timers, verified + ρ-agreeing. FFD **inapplicable with reason** (direct univariate root finding; no GB/SAT system — schema-allowed). Per-relation wall 3.3 s is dominated by the B²/2 quartic sweep at fixed B, so 2-decomp stays faster at these sizes; the density is the input for the larger-B design | Cut the S₄ per-relation cost (batch the pair sweep / share X^p mod f across quartics / vectorize CZ) and extend ≥20 bits; or pair the 3-decomp density with larger B where p/B³ beats 2-decomp total cost | Witnesses sum in the group; trials-per-relation + per-relation wall logged; FFD status explicit; no "3-decomp wins" claim unless the wall shows it | `runs_manual/prime_a3_s4_ladder_20261006/`; `examples/a3_s4_ladder.rs`; `ec_index_calculus.rs` |
+| `relation_yield` | **First prime yield curves (2026-10-05):** j=0 staged ladder 16/20 bits (median 14 → 171.5 trials/relation) and the new generic **a=−3 (P-256/CryptoPro-B shape) ladder** at 16/20/24 bits, fb=120 fixed (median 2 → 28 → 379/506; ≈×16 per +4 bits); all runs verified + ρ-agreeing | Extend both curves to 24–32 bits with fixed policy; per-size CI on trials-per-relation | ≥3 bitlengths; frozen policy; ≥3 seeds per size with median and max | `runs_manual/prime_j0_e2e_20bit_20261005/`; `runs_manual/prime_a3_ladder_20261005/` |
 | `rank` | Dense GE mod n on toy matrices; dims unpublished as a frontier | Sparse LA for ≥ 2⁸ factor-base columns on a 16-bit instance; report dims + LA cost | Correctness vs dense GE on a subsample | — |
-| `end_to_end_dlp` | **j=0 known-answer IC at 16 bits** — recovers d with `[d]G = Q` and agrees with ρ on the same instance; three independent replay receipts (2026-09-11 both-runs, 2026-09-15 3-seed, 2026-09-15 3-shot redraw), zero discrepancies; IC wall ≈1.5–2.1 s ≫ ρ ms, so **no vs_rho crossover**; 14-bit control retained | Extend the known-answer ladder to ≥ 20 bits and split stage timers (FB → relations → LA → verify) | Agrees with ρ; wall logged; split stage timers; independent recomputation for any promotion past 16 bits | `runs_manual/prime_j0_e2e_16bit_20260911/`; `runs_manual/prime_j0_e2e_16bit_20260915/`; `docs/RESEARCH_BENCH_LOG.md` |
-| `vs_rho` | **Not achieved** — IC slower than ρ at all measured sizes; dense 3-sum non-scaling wall ~**80 bits** | Any prime-order instance ≥ 16 bits where charged IC < ρ (same host accounting) | Artifact cost model + independent replay; no verifier gaming | `research/ecdlp_autolab/paper.md` |
+| `end_to_end_dlp` | **j=0 known-answer IC at 20 bits (2026-10-05)** — staged driver splits FB → relations → LA → verify; 3 deterministic seeds all recover, match the sidecar, and agree with ρ on the identical public point (replay PASS); IC wall 18.7–64.9 s ≫ ρ 150 ms — **no vs_rho crossover**. Same session: **first a=−3 deployed-shape ladder** (prime order, a=p−3, no CM/automorphisms; p≡3 mod 4 P-256 class and p≡1 mod 4 CryptoPro-B class) at 16/20/24 bits, all verified and ρ-agreeing; IC/ρ gap 19× → 403× over 16→24 bits. Prior 16-bit j=0 rung retained in history | Extend j=0 to ≥24 bits and the a=−3 ladder to 28–32 bits with the same split timers; measure where 2-decomp yield forces S₄ 3-decomposition search | [d]G = Q verified; split stage timers; ρ agreement on identical point; ≥3 seeds or second host past 20 bits | `runs_manual/prime_j0_e2e_20bit_20261005/`; `runs_manual/prime_a3_ladder_20261005/`; `examples/j0_stage_ladder.rs`; `examples/a3_stage_ladder.rs` |
+| `vs_rho` | **Not achieved** — IC slower than ρ at all measured sizes (16–24 bit a=−3 ladder: gap *widens* 19× → 403×); dense 3-sum non-scaling wall ~**80 bits** | Any prime-order instance ≥ 16 bits where charged IC < ρ (same host accounting) | Artifact cost model + independent replay; no verifier gaming | `research/ecdlp_autolab/paper.md`; `runs_manual/prime_a3_ladder_20261005/` |
+| `factor_base` | Small-x and ζ-orbit bases on toy primes; Eisenstein-smooth FB implemented; sizes from bench ladder | Orbit-reduced base on a **16-bit** j=0 prime-order curve with certified orbit count; construction time + retained bytes | No duplicate orbits; size vs theory within 5% | `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`; `ec_index_calculus_j0` |
+| `decomposition` | 2-decomp via S₃ through bench sizes; S₄/Gröbner not a scaling win. **FFD not published** on the current 2-decomp bench frontier (must be filled on the next algebraic push) | One verified 3-decomposition relation family on a ≥14-bit prime with GB cost + **FFD / DoR logged**; record unknowns, system degree, eq/var, median ms | Witnesses sum in the group; timing + **FFD** logged | `ec_index_calculus.rs` |
+| `relation_yield` | **Operation-counted yield on the frozen prime ladder** (2026-09-21, `ic boundary`): 8 instances, 10–24 bits, relations per trial against `C(F+m−1,m)/#E` for every variant, natural targets; `yield/ceiling` 0.75–1.25 (`m = 2`) and 0.75–1.00 (`m = 3`); trials grow as `r^0.57` (`m = 2`) and `r^0.33` (`m = 3`), `R² ≥ 0.99`. **Round 2 (2026-09-21)** carries the exact class-aware ceiling beside the uniform one (identical on these prime-order curves) and guards against decomposing one group element twice, which moved 22 of the first round's 63 rows by 0.88–1.59× in `S` | Trials-per-relation on a j=0 ζ-orbit base, 10–24 bits, against the orbit-corrected ceiling | ≥4 bitlengths; R² reported; ceiling stated for the orbit-reduced base | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.2 |
+| `rank` | Relation-matrix LA priced per instance on the prime ladder (2026-09-21): dense incremental Gauss–Jordan over `Z/rZ`, rank recomputed after every row, stop when the target column is pinned; at 24 bits (`K = 256`): 232 rows × 257 columns, rank 232, 108,300 multiply-subtracts = 1,696 GAE, `S_LA = 0.51` (0.9% of the `m = 3` total); LA grows as `r^0.62` (`R²` 0.96). **Round 2:** the two-summand walk closes on 65 rows over 257 columns through factor-base cycles, `S_LA` 0.004 | Sparse or structured LA at `K ≥ 1,024` columns (≥ 28 bits); dims and cost published | Correct vs dense GE on a subsample; dims and cost logged | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §4 |
+| `end_to_end_dlp` | Known-answer DLP recovered and verified `[d]G = Q` by every variant on every instance of the prime ladder, largest **23.4 bits** (generated prime-order curve), every phase counted in one unit (2026-09-21); **Round 2** adds the negation-folded table and walked targets on the same instances, every logarithm verified and no row pinned by a repeated target; j=0 orbit IC **14-bit** (bench, wall-clock); synthetic known-answer | Generic curve at ≥ 28 bits, or a j=0 ζ-orbit pipeline at ≥ 24 bits, in the same counted harness | `[d]G = Q`; every phase counted; agrees with the counted ρ on the same instance | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2; `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md` |
+| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ (2026-09-21): best variant meet in the middle `m = 3` at 1.17× ρ at 11.9 bits (where ρ's setup dominates) and 14.5× at 23.4 bits (`S = 56.8` vs ρ 3.93, 64× the floor); Semaev `S₃` roots 1,107×; total exponents 0.60 (`m = 3`), 0.66, 0.85, 0.91 against ρ's ½. **Round 2 (2026-09-21):** the negation-folded table with walked targets and two summands reaches `S = 24.2` at 23.4 bits, **6.2× ρ** (1.26–2.35× the first round per instance), fitted `r^0.53` (`R²` 0.98, 8 sizes) against a reference fitting 0.27 — still no crossover. **Round 3 (2026-09-21):** the `⌈bits/3⌉` rule gave 512 signed points where the derived family optimum `F = (c·#E·t/k)^{1/3}` puts it at 222; moving there reaches `S = 14.3` at 23.4 bits, **3.63× ρ**, within `1.28×` of the family optimum `S = 11.2`. Since that optimum is `0.75·r^{1/6}` on a prime-order curve and the reference is flat, the two cross only at `r ≈ 22`: this family has no crossover to find at any size, and the result is a boundary rather than a measurement; ρ health: every run recovered and verified, walk 1.2–3.4× `√(πr/2)`; dense 3-sum non-scaling wall ~**80 bits** (earlier record). **Round 4 (2026-09-21)** pins the unit: non-addition counters now convert at ratios frozen in `docs/ic/calibration.json` rather than at factors measured on the host each run, which had drifted a median of 1.08 and up to 3.70 between runs. Rerun under the pinned unit all 537 rows are identical in every native counter and the correction reaches ±9.5%, concentrated on rows that are almost entirely converted work; the figures above are unchanged to four significant figures **Round 5 (2026-09-22)** draws the walk's sixteen restart offsets on first use instead of at setup; 110 of Round 4's 204 walk rows had bought all sixteen and taken none. The offsets come off their own random stream and are taken in a fixed cycle, so the eager and lazy arms walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, zero rows whose saving differs from the offsets they stopped drawing, and the same on a holdout seed and an eight-repeat headline. The saving matches `(48·log₂r − 48)/√r` to within 1–9%, so it is large below 2^15 (best ratio 0.58) and at most 7% above 2^20. Class engineering. The same round measures what re-seeding alone does: moving the offsets to a private stream changes no cost, yet moved 204 of 537 rows — every walk row and only walk rows — with a median of 1.0000 and a range of 0.54 to 1.83, so a single walk row at three repeats is not resolvable to better than that. Accordingly the 23.4-bit best row now reads `S = 14.0`, **3.55× ρ**, where Round 4 read 14.3 and 3.63×; the round also closes the small-rung loss Round 3 had incurred, `icv1-fp10-t5-192cb216`'s `m = 3` walk going from 0.656 to **1.000** against Round 2. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain | Any prime-order instance ≥ 16 bits where charged IC < ρ (same accounting) | Artifact cost model + independent replay; no verifier gaming | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4; `research/ecdlp_autolab/paper.md` |
 
 **Asymptotic reminder:** 2-decomp IC on prime fields is `O(p^{3/2})` vs ρ's
 `O(p^{1/2})`. A `vs_rho` win requires a genuinely better decomposition regime
@@ -184,27 +451,263 @@ not promoted by this record.
 
 ---
 
+## Compact-orbit shared-log DLP (2026-09-24, not a selected-panel promotion)
+
+`examples/koblitz_orbit_dlp_fast.rs` is a pair-table-free compact-orbit producer:
+one Frobenius-quotiented S3 index, normal-basis one-probe lookup, rank-guided
+relations, and K grown with batch size L. Against the historical Kuhn–Struik batched
+rho (`d=4`, before the later backend and normal-basis corrections) it wins all
+15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
+all 3 n=41 blocks at L=1,024 (0.34), and all 3 n=61 blocks at L=1,024 / 4,096 /
+16,384 (K=600/800/1,400, wall 0.14–0.63; 64,512/64,512 replayed).
+Constant-factor: both arms ~√(L·r/n) at optimal K. Status
+`PENDING_INDEPENDENT_VALIDATION` — do **not** promote the selected-panel
+`vs_rho` row from this arm alone.
+
+**2026-09-30 n=61 L=65,536 restart (same historical v2 comparator; multi-target
+batch diagnostic, not isolated).** The panel PR #830 left aborted was rerun with
+resumable stages. K is memory-capped at 1,400: K=1,800 was censored at more than
+twice K=1,400's tune wall while swapping, and K=2,200 was skipped because its
+estimated 27.8 GB did not fit beside another agent's 21 GB job. Three paired
+blocks gave compact/rho wall ratios of **1.968 / 0.343 / 0.352** (median 0.352).
+Block 0 is a compact loss: its 11.6 GB IC index swapped, with 521 s of system
+time. User-CPU ratios were 0.379 / 0.328 / 0.331 and retired-instruction ratios
+0.201 / 0.135 / 0.135. 196,608/196,608 IC logs and the 65,536 block-0 rho logs
+were independently replayed.
+`end_to_end_dlp` claim-check PASS; `vs_rho` claim-check FAIL by design (the
+schema requires one target). At fixed K the lead over v2 narrows from
+L=16,384 (instructions 0.109 → 0.135). The walls are not AGENTS.md §10 evidence,
+because `tools/isolated_bench.py` does not run on macOS. Nothing here touches the
+strong-rho verdict (2.30× at n=61 L=1,024). Evidence:
+[`growing_n_n61_L65536_20260930/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/RESULT.md).
+
+**2026-09-29 point-only full-rank check:** fresh held-out n=37/41/53 L=1 and
+L=1,024 public points, five cold paired blocks per cell, independent rank and
+target replay on Linux and a second machine. With the corrected x86 PCLMUL /
+Itoh–Tsujii rho, median IC/rho CPU ratios are 1.545/0.789 at n37,
+2.727/0.309 at n41 and 2.283/0.252 at n53 (single/batch). The original
+software-rho batch ratios 0.154/0.099/0.086 were accounting artifacts; a
+same-runner backend A/B reproduced the rho acceleration with identical Q,
+scalars, walks and charges. All selected rank stages reached the K-equation
+floor in exactly K attempts, but n53 still averaged ~85,007 rank probes per
+equation at L=1. The n53 batch used ~1.28 GiB peak RSS. This is a wall/CPU
+diagnostic only: common-unit S and full-operation attack-speed ratios remain
+unset; the selected-panel `vs_rho` row is not promoted. Evidence:
+[`compact_orbit_point_panel_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md).
+
+**2026-09-29 stronger-rho follow-up:** a disjoint point-only four-arm panel
+compared compact orbit, corrected rho v2, 32-walk batch-inversion rho, and the
+same batched rho with normal-basis signed-Frobenius canonicalization. All six
+n=37/41/53 × L=1/1,024 cells passed five cold blocks and independent
+second-machine replay. On the same new L=1,024 Q, compact/v2 paired CPU ratios
+were 0.782/0.391/0.344, but compact/normal-rho ratios were **2.081/2.989/3.086**
+(95% intervals 2.073–2.090 / 2.877–3.116 / 3.021–3.131). The earlier batch
+timing lead is a weaker-comparator result. At n41 and n53 the current compact
+S3 index build alone exceeds the full stronger-rho process in every block;
+rank-attempt yield is already at its K-equation counting floor. Common-unit S,
+algorithmic `vs_rho` and n=131 transfer remain unset, so the selected-panel
+row is not promoted. Evidence:
+[`compact_orbit_strong_rho_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_strong_rho_20260929/RESULT.md).
+
+**2026-09-29 held-out K/base-size gate:** a new disjoint point-only n41/n53
+L=1,024 corpus tested four frozen K choices per size against the same stronger
+rho. All 40 compact full-rank runs and 10 rho runs solved and independently
+replayed every target. The lowest complete CPU costs in the tested eager-index
+grid were n41 K=192 at **2.443× rho** (95% paired interval 2.422–2.478) and
+n53 K=440 at **2.616× rho** (2.565–2.727). The n41 K=192 choice improves the
+prior K=255's CPU cost by a direct paired ratio of 0.979 (0.974–0.990), but
+this selection is exploratory until tested on another Q corpus. Smaller K
+reduces K²·n index construction and increases rank/target probes; at both
+grid minima the target phase alone exceeds the complete matched rho wall
+median. This is a no-go for the tested eager-index K grid on these Q, not for
+an untested index policy or a descendant oracle. Common-unit S and n=131
+transfer remain unset. Evidence and raw archives:
+[`compact_k_boundary_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_k_boundary_20260929/RESULT.md).
+
+**Next beat:** freeze a joint S3 index/query policy that preserves full-rank,
+full-log recovery on held-out Q and measures both construction and probes at
+equal useful workload; build a complete calibrated common operation unit for
+IC and normal-basis batched rho. A swap/Frobenius quotient of ordered S3
+states is an untested candidate and needs a reachability proof and exceptional-
+case tests before performance claims. Precomputed starts alone are deprioritized:
+in the earlier n53/L=1,024 rho, 20,134,104 direct walk additions dominated at
+most 279,360 scalar-multiplication additions (<1.4%). Then run the n=83
+confidence gate as resources permit. The n=61 L=65,536 batch-size probe ran on
+2026-09-30, against the historical v2 rho only (see above). Do not use 32-target panels as a substitute. Historical evidence:
+[`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
+
+**2026-09-29 ERRATUM to the matched-arithmetic recheck below (PR #955): its
+verdict "the lead survives, IC/rho = 0.2403" is superseded and must not be
+quoted.** That rho was neither hardware-matched (on x86-64 its field multiply
+was a software bit-loop while IC used `pclmulqdq`) nor best-effort (its orbit
+canonicalization was still a Θ(n) polynomial-basis scan with a `u128 %` per
+position and it inverted once per step). Re-measured as a ladder of stronger
+references on the identical n=53, L=1,024, K=440 targets, whole-process retired
+instructions (callgrind), IC = 89,190,346,806: PR #955's rho 371.1 B (IC/rho
+0.240); + library `Gf2` field 281.0 B (0.317); + normal-coordinate
+canonicalization 68.9 B (**1.294**); + 32 lockstep walks with `Gf2::batch_inv`
+46.4 B (**1.923**). Every rung verified 1,024/1,024 targets and replayed
+independently in pure Python; rungs 0–1 walk PR #955's trajectory bit for bit.
+By the pre-registered rule the lead **dies** at this cell (IC/rho ≥ 1.0), in
+agreement with the same-day wall/CPU results above (PRs #940, #943, #944), and
+an independently written strong rho (`koblitz_rho_batch_ks_v3.rs`, PR #943)
+reproduces the strongest rung's walk on all 1,024 targets step for step. The
+arithmetic-asymmetry finding of PR #955 stands; its verdict does not. Class:
+`accounting` for the hardware-matched rung, `engineering` for the two stronger
+rungs. Ladder and evidence:
+[`RESEARCH_STRONG_RHO_LADDER_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_LADDER_20260929.md),
+[`strong_rho_ladder_20260929_run/`](../../research/notes/index-calculus/strong_rho_ladder_20260929_run/).
+
+**2026-09-29 strong-rho size and batch sweep (whole-process retired instructions,
+callgrind; class: measured ratio-to-boundary trend, not an advance).** IC as merged
+against `koblitz_rho_batch_ks_strong` R3, K as chosen in PR #830, every target of
+every cell verified and the rho records replayed independently. IC/rho at L =
+1,024: **0.794 (n = 37), 1.520 (n = 41), 1.923 (n = 53), 2.297 (n = 61)**; at n = 53:
+**1.923, 1.604, 1.500** for L = 1,024 / 4,096 / 16,384 (IC then holds 4.94 GiB against
+rho's 0.58 GiB, at 4.5× rho's wall time). The registered slope test gives
+`log₂(IC/rho)` on `log₂ r` = **+0.078 ± 0.003 (95 % interval 0.067–0.089)**: IC's cost
+grows faster than the reference's, and dropping any single size leaves it at
++0.072…+0.079. **Read this carefully:** the pre-registered rule, applied literally,
+prints "survives as a scaling result" because clause (i) ("some cell < 0.8") is met by
+the single smallest cell, n = 37 at 0.794 (0.6 B-instruction runs dominated by fixed
+costs, inside the ~10 % build-to-build scale, with IC slower in wall time there). That
+clause was badly designed (any one cell could satisfy it) and is recorded as
+written, not corrected; no cell with n ≥ 41 is below 1.5 and clause (ii), the
+actual scaling test, fails in the unfavourable direction. Extrapolation, marked as
+such: were the fitted slope to persist, IC/rho would grow about 7× by r ≈ 2^83 and
+about 89× by r ≈ 2^130. Exploratory (unregistered): IC needs 1.418× as many probes
+as rho needs canonicalizations at n = 53, L = 1,024, but 0.935× and 0.946× at L =
+4,096 and 16,384 — its instruction total still exceeds the reference there because of
+the K² index build. The n = 61, L = 65,536 probe listed below is not expected to
+change this (n = 61 is at 2.30 at L = 1,024). Note, evidence and per-cell
+archives:
+[`RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md),
+[`strong_rho_sweep_20260929_run/`](../../research/notes/index-calculus/strong_rho_sweep_20260929_run/).
+
+**2026-09-30 cachegrind check of the memory-bound hypothesis at n = 41 (class:
+measurement of an explanation; moves no boundary target and does not touch the
+instruction verdict).** PR #955 and the ladder note left "IC's index runs at a lower IPC
+because it is memory-bound" untested. At n = 41, L = 1,024, K = 255, IC runs at IPC 0.89
+against rho R3's 2.06. Pre-registered protocol, simulator (cachegrind, LL 2 / 8 / 32 MiB),
+pointer-chase host calibration, native huge-page contrast. **Registered verdict:
+UNDETERMINED** (the noise gate, max/min ≤ 0.10 over five repetitions, is unreachable on
+this VM: 0.28 over fifteen); a second registered attempt (R2) is **UNRESOLVED (gate)**
+(chase-control speedup 1.24 against the required 1.3). Deterministic facts: IC has 12.15
+D1 misses per 1,000 instructions against rho's 6.63 and 1.21 against 0.147 last-level
+misses per 1,000 at 2 MiB (8.2×; 13.5× at 32 MiB), nearly independent of simulated
+cache size, concentrated in the inlined index build and probe loop. The simulator can
+explain between 0.08 and 1.9 of the per-instruction time gap (no overlap information);
+the antagonist contention test has no power on this VM (positive control did not
+slow); huge pages cut IC's user time by 13-15 % and rho's by 0-3 %, a translation share
+of 0.257 (A2, no interval) and 0.219 (R2, 95 % interval 0.153-0.322, validity gate
+failed): **about a fifth to a quarter of the gap is address translation, and roughly
+three quarters is unexplained.** Not tested at n = 53 (1.36 GiB index). Whatever the
+answer, IC retires 1.52× rho's instructions at this cell, so no cache-level fix makes
+it faster than the reference here; wins must cut probes and index work. Protocol,
+amendments (A1, A2), R2, results and raw outputs:
+[`RESEARCH_CACHEGRIND_N41_20260929.md`](../../research/notes/index-calculus/RESEARCH_CACHEGRIND_N41_20260929.md),
+[`cachegrind_n41_20260929_run/`](../../research/notes/index-calculus/cachegrind_n41_20260929_run/).
+
+**2026-09-30 ERRATUM to the selected-panel wall crossover at n = 53 (`vs_rho`,
+`end_to_end_dlp`; class `accounting`): the ratios 0.8392 (panel), 0.9056 (stage 106) and
+0.9875 (stage 107) must not be quoted as evidence that the direct arm beats rho.** Their
+rho is `koblitz_rho_fixture … packed`, which is not a distinguished-point rho
+(`distinguished_bits` 0: every step stored in and looked up from a hash map) and canonicalizes by an
+O(n) polynomial-basis scan. Against a strong single-target rho (the strong-ladder R3 run at
+one fixture, 32 walks sharing a distinguished-point table, explicit scalar 476811900269 so
+it attacks the panel's exact target), pre-registered, nine blocks on a 4-vCPU Xeon VM:
+direct 5.80 s wall / 14.82 core-s / 1.03 GB; panel rho 5.67 s / 5.60 core-s; **strong rho
+0.132 s / 0.130 core-s / 21 MB on ONE core**. Wall ratio direct/strong **44.0 (95 % interval
+39.4-45.4)**; CPU 114×; whole-process instructions 27.07 G (direct), 46.91 G (panel rho),
+1.093 G (strong rho), i.e. **25× and 43×**. Over 16 walk seeds the panel rho's median wall is
+7.74 s against the strong rho's 0.130 s (**59.5×, interval 33.5-127.2**); the strong rho's slowest
+walk (0.316 s) is still 18× faster than direct's median. Registered verdict: **the wall win
+DIES**; the panel's rho is a **strawman**. On this host direct is near parity with the panel
+rho (1.02), so the EPYC 9V74 0.839 did not reproduce (the ledger's own stage-107 EPYC 7763
+run was 0.987). Priority #3's "preserve the 0.8392x wall median" is withdrawn; the operative
+reference is the strong rho. The direct arm's completion criteria were met in every run, so
+this concerns the reference, not the relations. Not tested: n = 41 (the same rho family is the
+reference there), n = 61, other targets, other hosts. Protocol, results and raw outputs:
+[`RESEARCH_SINGLE_TARGET_STRONG_RHO_N53_20260930.md`](../../research/notes/index-calculus/RESEARCH_SINGLE_TARGET_STRONG_RHO_N53_20260930.md),
+[`single_target_rho_n53_20260930_run/`](../../research/notes/index-calculus/single_target_rho_n53_20260930_run/).
+
+**[SUPERSEDED by the erratum above] Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
+`vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
+signed-Frobenius canonicalization by real field squaring and inverts by
+Fermat's square-and-multiply — an unmatched baseline against the IC arm's own
+normal-basis rotation / Itoh–Tsujii inversion. A new
+`examples/koblitz_rho_batch_ks_matched_arith.rs` gives rho that exact same
+rotation/inversion machinery (four correctness gates: `Gf2` agrees with the
+raw field arithmetic, rotation reproduces chained squaring, canonicalization
+output is bit-identical to the original, `raw_inverse` is a genuine inverse —
+all passing) and reruns the frozen n=53, L=1,024, K=440, batch_seed=531310,
+dp_bits=4 cell. Wall clock: matched rho is **7.071× faster than the
+unmodified rho** (215.240 s → 30.442 s) and now within 1.1% of IC's 30.772 s
+(0.989×) — near parity, wall-clock only. Operation count (valgrind
+`--tool=callgrind` retired instructions, whole process, both binaries, same
+host): matched rho 371,102,176,689 vs IC 89,164,459,930, i.e. **IC costs
+0.2403× matched rho's instructions** (equivalently matched rho costs 4.162×
+IC's) — decisively the same direction as the original 0.246 wall-clock
+figure, on a real total-operation unit this time. All 1,024 targets verified
+correct on every one of four runs (unmodified-KS corpus, matched-arith
+native, matched-arith under callgrind, IC native and under callgrind);
+`total_walk_steps` is bit-identical (19,103,507) between the unmodified and
+matched-arithmetic KS runs, confirming the rewrite changed cost, not the walk.
+Per the pre-registered rule (IC/rho, this repo's usual challenger/reference
+convention — the task dispatching this check had transcribed the ratio
+direction backwards, corrected in the note below against the original
+wording): 0.2403 < 0.8, so **the lead survives** at this one cell, on the
+operation-count metric. This is one rerun on one host, still
+`PENDING_INDEPENDENT_VALIDATION`, and does not by itself promote the
+selected-panel `vs_rho` row. Full numbers, host manifest, and raw
+JSON/callgrind output are in
+[`RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md`](../../research/notes/index-calculus/RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md)
+and
+[`matched_rho_orbit_dlp_20260928_run/`](../../research/notes/index-calculus/matched_rho_orbit_dlp_20260928_run/).
+
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz vs_rho → extend the verified single-target online ladder to n=73 (a=0, prime degree; r=86020738150056119 ~ 2^56.3, cofactor 109,796) on the same frozen public point contract with the compact-orbit `u128` domain** (no explicit pair table, peak RSS under the common cap). No new field code is needed — the landed `u128` producers already admit n=73. One unseen public target point online in each arm; exclude process launch, fixture generation, and reusable IC setup from both online clocks. *(n=71 achieved 2026-10-02: median 2,864.1× online across three paired runs on one frozen target, deterministic 14,554-probe relation, three Python-replayed runs, zero pair-table entries — first rung past the u64 ceiling via the `u128` extension. n=61: fresh 124.85×, frozen median 53.13×. n=53: 51.0×–55.7×. n=41 first rung: 17.7×–18.8×.)*
+1. **Koblitz vs_rho → next rung past n=83 a=1 (landed 2026-10-06: median 8.2× online, three paired runs, deterministic 8,845,441-probe relation, Python replay PASS, first a=1 arm, first parallel-rank rung): a rho-projection-class rung at n=97 a=0 (r ~ 2^95, cofactor 4; online rho ~ 2^44 steps is not wall-runnable — pair measured IC online against a measured rho step-rate projection) or the u128-ceiling a=1 rungs (n=107/109/113/127, r ~ 2^107–2^115, cofactors 2/7114).** *(Ladder: n=73 median 1,189.7×; n=71 2,864.1×; n=61 124.85× fresh; n=53 51.0×–55.7×; n=41 17.7×–18.8×.)* ECC2K-130 itself (n=131, a=0, same curve family) needs u256 words + implicit S3 index + 130-bit sparse LA — and 4-sum total-work parity with rho is *not* reachable there (see `RESEARCH_ECC2K130_IC_FEASIBILITY.md`; the 5-sum relation shape is the top unexplored lever).
 2. **Koblitz factor base → use the representative-plus-Frobenius domain without the 9.74 GB pair table; report setup separately from one-target online time.**
 3. **Koblitz decomposition → measure the selected block-6 M4RI n=31 dim-16 m=2 policy on a frozen single target before advancing the quadratic cell. Multi-target distributions are secondary.**
 4. **Binary decomposition → first sub-`2^{2ℓ}` oracle at `ℓ = 8` on a frozen single target with FFD logged.**
-5. **Prime end-to-end DLP → extend the j=0 known-answer IC ladder to ≥ 20 bits with split stage timers and an identical-point one-target rho reference** *(16-bit achieved 2026-09-21: IC agrees with ρ and truth, independently replayed 3× with zero discrepancies — no vs_rho crossover)*.
+5. **Prime end-to-end DLP → extend the j=0 staged ladder past 20 bits (landed 2026-10-05 with split timers, 3-seed replay PASS, rho agreement) and push the a=−3 deployed-shape ladder past 24 bits** *(first a=−3 ladder at 16/20/24 bits, both p mod 4 classes, all verified + rho-agreeing — no vs_rho crossover anywhere; gap widens 19× → 403× over 16→24 bits)*.
 6. Fill missing binary/prime one-target yield and rank evidence and backfill FFD/DoR where only wall or conflicts are cited.
+1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels. Instruction-count constraints from the strong-rho ladder and sweep (2026-09-29): IC must become at least 1.9× cheaper at n = 53, L = 1,024 (2.3× at n = 61) to tie the strongest rho built, its cost ratio to that rho rises with n (+0.078 per doubling of r) and falls only slowly with L (1.50 at L = 16,384), and IC and rho are bound by the same per-operation primitive (least-rotation canonical form and basis change), so faster primitives help both; a candidate must reduce the *number* of probes-plus-index work, not their unit cost. The n = 61, L = 65,536 probe ran on 2026-09-30 against the historical v2 rho only: memory-capped K = 1,400, unisolated host, median wall ratio 0.352 with one loss in three blocks, instruction ratio 0.135. A strong-rho run at that L remains deprioritised.
+2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
+3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.** **[Constraint withdrawn by the 2026-09-30 erratum above: the 0.8392x wall median is against a rho 44-60x slower than a strong single-target rho; against the strong rho the direct arm is 44x slower in wall on four cores, so the operative gate is the strong rho, not that median.]**
+   On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
+   at 1.15x (`partition_walk`, 14.78 ms/target against ρ's 12.82); start there
+   with `solution_validation_ms`, 53% of the direct arm's charged cost.
+4. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
+5. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
+6. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**
+7. ~~Fill missing `relation_yield` / `rank` publications (binary + prime)~~ —
+   filled 2026-09-21 by the boundary ledger (operation-counted, every phase);
+   the open item is the CI-bearing yield curve against the subgroup-tightened
+   ceiling at `n = 27` / 24 bits.
+8. **Backfill FFD / DoR** on any algebraic decomposition claim that currently
+   cites only wall-clock or conflict counts.
+9. **All regimes → iterate against [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md)
+   (`ic boundary`):** `S / S_ρ < 1` at `r ≥ 2^20` with every phase counted, or a
+   fitted total exponent below the reference's over ≥ 4 sizes, or
+   `yield/ceiling > 1.5` on a base outside every proper subgroup, against the
+   subgroup-tightened ceiling of that note's §3.5.
 
 ---
 
 ## Related documents
 
-- [`docs/ic/README.md`](./README.md) — `ic` runner, fixtures, comparison limits
-- [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
-- [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians
-- [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../RESEARCH_KOBLITZ_INDEX_CALCULUS.md) — orbits, `|F|/K`, `√(2n)` ρ discount
-- [`RESEARCH_FFD_MEASUREMENT.md`](../../RESEARCH_FFD_MEASUREMENT.md) — full-field Semaev FFD harness
-- [`RESEARCH_SAT_SEMAEV.md`](../../RESEARCH_SAT_SEMAEV.md)
-- [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
-- [`docs/RESEARCH_BENCH_LOG.md`](../RESEARCH_BENCH_LOG.md)
+- [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) — the operation-counted ledger (`ic boundary`): three regimes, one unit, every phase priced against the generic floor and a counted ρ; frozen runs under `docs/ic/runs/`, §10 the Round-2 engineering ledger and the collision correction it records
+- [`docs/ic/LEADERBOARD.md`](LEADERBOARD.md) and [`docs/ic-leaderboard.html`](../ic-leaderboard.html) — every priced curve, its best recipe, phase split and ratio to the matched reference; curves named by ICV1 slug ([`docs/curves/ICV1.md`](../curves/ICV1.md))
+- [`docs/ic/README.md`](README.md) — `ic` runner, fixtures, comparison limits
+- [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
+- [`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians
+- [`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md) — orbits, `|F|/K`, `√(2n)` ρ discount
+- [`research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md`](../../research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md) — full-field Semaev FFD harness
+- [`research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`](../../research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md)
+- [`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`](../../research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md)
+- [`research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`](../../research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md)
 - [`docs/ECDLP_ATTACK_MATRIX.md`](../ECDLP_ATTACK_MATRIX.md)
 - `research/sat_factor_base_review_20260908/TASK-KIC-SAT-RHO-CROSSOVER-20260909.md`
 

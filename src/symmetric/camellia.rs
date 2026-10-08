@@ -633,24 +633,16 @@ mod tests {
     /// Cipher `67673138549669730857065648eabe43`.
     #[test]
     fn camellia128_rfc_vector() {
-        let key: [u8; 16] = hex("0123456789abcdeffedcba9876543210")
-            .try_into()
-            .unwrap();
-        let mut block: [u8; 16] = hex("0123456789abcdeffedcba9876543210")
-            .try_into()
-            .unwrap();
-        let expected: [u8; 16] = hex("67673138549669730857065648eabe43")
-            .try_into()
-            .unwrap();
+        let key: [u8; 16] = hex("0123456789abcdeffedcba9876543210").try_into().unwrap();
+        let mut block: [u8; 16] = hex("0123456789abcdeffedcba9876543210").try_into().unwrap();
+        let expected: [u8; 16] = hex("67673138549669730857065648eabe43").try_into().unwrap();
 
         let c = Camellia128::new(&key);
         c.encrypt_block(&mut block);
         assert_eq!(block, expected);
 
         c.decrypt_block(&mut block);
-        let pt: [u8; 16] = hex("0123456789abcdeffedcba9876543210")
-            .try_into()
-            .unwrap();
+        let pt: [u8; 16] = hex("0123456789abcdeffedcba9876543210").try_into().unwrap();
         assert_eq!(block, pt);
     }
 
@@ -663,21 +655,15 @@ mod tests {
         let key: [u8; 24] = hex("0123456789abcdeffedcba98765432100011223344556677")
             .try_into()
             .unwrap();
-        let mut block: [u8; 16] = hex("0123456789abcdeffedcba9876543210")
-            .try_into()
-            .unwrap();
-        let expected: [u8; 16] = hex("b4993401b3e996f84ee5cee7d79b09b9")
-            .try_into()
-            .unwrap();
+        let mut block: [u8; 16] = hex("0123456789abcdeffedcba9876543210").try_into().unwrap();
+        let expected: [u8; 16] = hex("b4993401b3e996f84ee5cee7d79b09b9").try_into().unwrap();
 
         let c = Camellia192::new(&key);
         c.encrypt_block(&mut block);
         assert_eq!(block, expected);
 
         c.decrypt_block(&mut block);
-        let pt: [u8; 16] = hex("0123456789abcdeffedcba9876543210")
-            .try_into()
-            .unwrap();
+        let pt: [u8; 16] = hex("0123456789abcdeffedcba9876543210").try_into().unwrap();
         assert_eq!(block, pt);
     }
 
@@ -687,25 +673,18 @@ mod tests {
     /// Cipher `9acc237dff16d76c20ef7c919e3a7509`.
     #[test]
     fn camellia256_rfc_vector() {
-        let key: [u8; 32] =
-            hex("0123456789abcdeffedcba987654321000112233445566778899aabbccddeeff")
-                .try_into()
-                .unwrap();
-        let mut block: [u8; 16] = hex("0123456789abcdeffedcba9876543210")
+        let key: [u8; 32] = hex("0123456789abcdeffedcba987654321000112233445566778899aabbccddeeff")
             .try_into()
             .unwrap();
-        let expected: [u8; 16] = hex("9acc237dff16d76c20ef7c919e3a7509")
-            .try_into()
-            .unwrap();
+        let mut block: [u8; 16] = hex("0123456789abcdeffedcba9876543210").try_into().unwrap();
+        let expected: [u8; 16] = hex("9acc237dff16d76c20ef7c919e3a7509").try_into().unwrap();
 
         let c = Camellia256::new(&key);
         c.encrypt_block(&mut block);
         assert_eq!(block, expected);
 
         c.decrypt_block(&mut block);
-        let pt: [u8; 16] = hex("0123456789abcdeffedcba9876543210")
-            .try_into()
-            .unwrap();
+        let pt: [u8; 16] = hex("0123456789abcdeffedcba9876543210").try_into().unwrap();
         assert_eq!(block, pt);
     }
 

@@ -62,7 +62,7 @@ use crate::cryptanalysis::j0_twists::enumerate_twists;
 use crate::ecc::curve::CurveParams;
 use crate::utils::random::random_scalar;
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 use std::ops::Range;
 use std::time::Instant;
 
@@ -507,6 +507,88 @@ impl Hypothesis for Ic2DecompEcdlp {
             },
         }
     }
+}
+
+/// A ladder of **a = −3 prime-order bench curves** (`y² = x³ − 3x + b`,
+/// `h = 1`) modelling the deployed **P-256** and **GOST CryptoPro-B**
+/// curve shape.  Both deployed curves use `a = p − 3` and have generic
+/// j-invariant (no CM, no automorphisms beyond ±1), so they are the
+/// generic prime-field index-calculus case; this ladder provides the
+/// smallest members of that family at growing bitlength.
+///
+/// `p256class` picks `p ≡ 3 (mod 4)` (P-256's shape),
+/// `cryptoproclass` picks `p ≡ 1 (mod 4)` (CryptoPro-B's shape); in
+/// both, `b` is the smallest value making the group order prime and `G`
+/// the smallest-x generator (found by `examples/find_a3_bench_curves`,
+/// deterministic brute force over public parameters only).
+pub fn bench_curves_a_minus_3() -> Vec<(u32, CurveParams)> {
+    let a3 = |bits: u32, name: &'static str, p: u64, b: u64, gx: u64, gy: u64, n: u64| {
+        (
+            bits,
+            CurveParams {
+                name,
+                p: BigUint::from(p),
+                a: BigUint::from(p - 3),
+                b: BigUint::from(b),
+                gx: BigUint::from(gx),
+                gy: BigUint::from(gy),
+                n: BigUint::from(n),
+                h: 1,
+            },
+        )
+    };
+    vec![
+        // 16-bit P-256-class control rung (p = 65519 ≡ 3 mod 4).
+        a3(
+            16,
+            "a3-bench-16bit-p256class",
+            65_519,
+            76,
+            2,
+            40_463,
+            65_447,
+        ),
+        // 20-bit P-256-class rung (p = 1048571 ≡ 3 mod 4).
+        a3(
+            20,
+            "a3-bench-20bit-p256class",
+            1_048_571,
+            44,
+            2,
+            317_355,
+            1_048_189,
+        ),
+        // 20-bit CryptoPro-B-class rung (p = 1048573 ≡ 1 mod 4).
+        a3(
+            20,
+            "a3-bench-20bit-cryptoproclass",
+            1_048_573,
+            28,
+            1,
+            373_403,
+            1_046_807,
+        ),
+        // 24-bit P-256-class rung (p = 16777199 ≡ 3 mod 4).
+        a3(
+            24,
+            "a3-bench-24bit-p256class",
+            16_777_199,
+            31,
+            2,
+            5_412_647,
+            16_782_299,
+        ),
+        // 24-bit CryptoPro-B-class rung (p = 16777213 ≡ 1 mod 4).
+        a3(
+            24,
+            "a3-bench-24bit-cryptoproclass",
+            16_777_213,
+            13,
+            4,
+            6_655_615,
+            16_784_527,
+        ),
+    ]
 }
 
 /// A small set of **j-invariant 0** curves (a = 0) spanning a range
@@ -1110,7 +1192,7 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
             h_name, theo, measured, verdict,
         ));
     }
-    out.push_str("\n");
+    out.push('\n');
     out.push_str(
         "**Direction #1** (Weil descent on twists of j=0): stage 1 \
          implemented — twist enumeration + smoothness detection.  Full \
@@ -1137,6 +1219,7 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num_traits::One;
 
     /// Synthetic data with a known exponent should be recovered by
     /// log-log regression.
@@ -1359,7 +1442,7 @@ mod tests {
         let n_pairs = 1usize << 20;
         let samples: Vec<BoomerangDecaySample> = (1..=6)
             .map(|r| {
-                let count = ((n_pairs as f64) * 2f64.powi(-(2 * r as i32))) as u64;
+                let count = ((n_pairs as f64) * 2f64.powi(-(2 * r))) as u64;
                 BoomerangDecaySample {
                     rounds: r as u32,
                     elapsed_ms: 1,

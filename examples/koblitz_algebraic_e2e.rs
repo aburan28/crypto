@@ -293,12 +293,17 @@ fn main() {
 
     let options = KoblitzIcOptions {
         m,
+        descent_m: None,
+        collection_window: None,
         factor_index: factor_indices[0],
         extra_relations: 2,
         max_trials,
         seed,
         strategy: DecompositionStrategy::Sat,
         engine: SolverEngine::default(),
+        f6_ic: false,
+        f6_pair_index: false,
+        weil_charts: None,
         node_budget: 0,
         max_models: 64,
         sat_macaulay_degree: None,
@@ -315,6 +320,10 @@ fn main() {
         relation_batch_size: 1,
         allow_direct_relation: false,
         collapse_projected_orbits: true,
+        crossbred: None,
+        wdsat_binary: None,
+        wdsat_timeout_ms: 5_000,
+        linear_algebra: crypto_lib::cryptanalysis::koblitz_index_calculus::LinearAlgebra::Dense,
     };
     let solve_start = Instant::now();
     let report =

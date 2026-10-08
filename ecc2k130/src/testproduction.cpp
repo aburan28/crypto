@@ -1,0 +1,234 @@
+// Test the REAL host search/persistence code under deterministic I/O faults.
+// Fault switches exist only in this translation unit, never the client binary.
+#include <cstdio>
+#include <cerrno>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <map>
+#include <string>
+#include <vector>
+static bool failWrite = false, failSync = false;
+static size_t checkedFwrite(const void *p, size_t s, size_t n, FILE *f) {
+    if (failWrite) { errno = ENOSPC; return 0; }
+    return fwrite(p, s, n, f);
+}
+static int checkedFsync(int fd) {
+    if (failSync) { errno = EIO; return -1; }
+    return fsync(fd);
+}
+#ifndef ECC_NO_CUDA
+#define ECC_NO_CUDA
+#endif
+#define main clientMain
+#define fwrite checkedFwrite
+#define fsync checkedFsync
+#include "main.cu"
+#undef fsync
+#undef fwrite
+#undef main
+
+static void require(bool ok, const char *message) {
+    if (!ok) { fprintf(stderr, "FAIL: %s\n", message); exit(1); }
+}
+
+static Solver<CfgF41> fixtureSolver() {
+    Solver<CfgF41> s;
+    s.setup(eccF41::PX, eccF41::PY, eccF41::QX, eccF41::QY,
+            eccF41::ELL_DEC, eccF41::S_DEC, eccF41::DP_WEIGHT, 100000);
+    return s;
+}
+
+struct FaultEngine {
+    DpRecord rec{};
+    unsigned count = 1;
+    int saves = 0, reseeds = 0;
+    bool syncFault = false;
+    void launch(u64) { if (syncFault) failSync = true; }
+    unsigned fetch(std::vector<DpRecord> &out) { out.assign(1, rec); return count; }
+    bool needsReseed() const { return false; }
+    void reseed(u64) { ++reseeds; }
+    void synchronize() {}
+    bool restore(const char *, u64 *it, unsigned) { *it = 0; return true; }
+    bool save(const char *, u64, unsigned) { ++saves; return true; }
+    u64 walksPerLaunch() const { return 1; }
+};
+
+// The fixture needs a cross-run collision on the fixture instance: a walk of
+// run 2 and a walk of run 1 that end on the same distinguished point.  Its
+// seeds depend on the iteration function, so a change to it (WALK-CONSTANT.md
+// section 11 changed the table walk's cycle rule) needs a new pair; any pair
+// serves.  `test-production --find-fixture` prints the first it meets,
+// walking i = 0, 1, 2, ... of runs 2 and 1 in turn with the host reference.
+// The table walk's pair below came from it; the sigma walk's predates it.
+static int findFixture() {
+    using R = Ref<CfgF41>;
+    auto sol = fixtureSolver();
+    std::map<std::vector<u64>, u64> seen[3];
+    for (u64 i = 0; i < (1ull << 20); ++i) {
+        for (unsigned run : {2u, 1u}) {
+            const u64 seed = eccSeedFor(run, i);
+            const auto W = sol.rewalk(seed);
+            if (!W.ok) continue;
+            const auto c = R::canonical(W.endPoint.x);
+            const std::vector<u64> key(c.v, c.v + 3);
+            const unsigned other = run == 2 ? 1 : 2;
+            auto hit = seen[other].find(key);
+            if (hit != seen[other].end()) {
+                const u64 a = run == 2 ? seed : hit->second, b = run == 2 ? hit->second : seed;
+                const auto A = sol.rewalk(a), B = sol.rewalk(b);
+                U192 k; std::string why;
+                if (!sol.solve(A, B, &k, &why)) continue;   // a same-scalar merge; keep walking
+                printf("const u64 a = 0x%016llxull, b = 0x%016llxull;   // walks %llu and %llu, k = %s\n",
+                       (unsigned long long)a, (unsigned long long)b, (unsigned long long)((a >> 16) & 0xFFFFFFFFull),
+                       (unsigned long long)((b >> 16) & 0xFFFFFFFFull), u192_to_dec(k).c_str());
+                return 0;
+            }
+            seen[run].emplace(key, seed);
+        }
+    }
+    fprintf(stderr, "no cross-run collision found\n");
+    return 1;
+}
+
+int main(int argc, char **argv) {
+    using R = Ref<CfgF41>;
+    if (argc == 2 && std::string(argv[1]) == "--find-fixture") return findFixture();
+    require(Options().maxIters == (1ull << 32), "standalone guard enabled by default");
+    auto sol = fixtureSolver();
+    // A known cross-run collision on the fixture instance.  The seeds depend
+    // on the iteration function, the discrete log they resolve to does not.
+#if ECC_WALK_TABLE
+    const u64 a = 0x0002000001c30000ull, b = 0x0001000002740000ull;   // v3: walks 451 and 628
+#else
+    const u64 a = 0x0002000048880000ull, b = 0x000100004cf60000ull;
+#endif
+    const auto A = sol.rewalk(a), B = sol.rewalk(b);
+    require(A.ok && B.ok, "fixture endpoints reachable");
+    const auto key = R::canonical(A.endPoint.x);
+    require(key == R::canonical(B.endPoint.x), "fixture same orbit");
+    U192 k; std::string why;
+    require(sol.solve(A, B, &k, &why), "fixture scalar independently verified");
+    require(u192_to_dec(k) == "369250562913", "fixture known discrete log");
+    if (argc == 2 && std::string(argv[1]) == "--fixture") {
+        printf("{\"curve\":41,\"weight\":%d,\"k\":\"%s\",\"seedA\":%llu,\"seedB\":%llu,"
+               "\"key\":[%llu,%llu,%llu],\"iterations\":[%llu,%llu]}\n",
+               sol.dpWeight, u192_to_dec(k).c_str(), a, b, key.v[0], key.v[1], key.v[2], A.iters, B.iters);
+        return 0;
+    }
+    char pattern[] = "/tmp/ecc-production-XXXXXX";
+    char *root = mkdtemp(pattern);
+    require(root != nullptr, "temporary test directory");
+    for (int mode = 0; mode < 4; ++mode) {
+        Options o;
+        o.steps = 1; o.launches = 1; o.verify = 0;
+        o.dpFile = std::string(root) + "/case-" + std::to_string(mode) + ".bin";
+        o.ckptFile = std::string(root) + "/fake.ck";
+        FaultEngine engine;
+        engine.rec.seed = a;
+        engine.rec.iters = A.iters;
+        memcpy(engine.rec.x, A.endPoint.x.v, sizeof engine.rec.x);
+        memcpy(engine.rec.y, A.endPoint.y.v, sizeof engine.rec.y);
+        engine.count = mode == 0 ? 2 : 1;
+        failWrite = mode == 1;
+        engine.syncFault = mode == 2;
+        auto fresh = fixtureSolver();
+        const int rc = runSearch<CfgF41>(o, engine, fresh, nullptr);
+        failWrite = failSync = false;
+        require(rc == (mode == 0 ? 7 : mode < 3 ? 8 : 0), "fault exit code");
+        require(engine.saves == (mode == 3 ? 1 : 0), "no checkpoint after lost/uncommitted reports");
+        require(mode != 0 || engine.reseeds == 0, "no reseed after report overflow");
+    }
+    // New table data must not be confused with older table or sigma data.
+    // Exercise the real reader in a child because malformed headers fail closed.
+    auto headerCase = [&](const char *magic, unsigned version, unsigned stride, int want) {
+        FILE *f = tmpfile(); require(f != nullptr, "temporary corpus");
+        DpFileHeader h{}; memcpy(h.magic, magic, 8); h.version=version; h.recordBytes=stride;
+        require(fwrite(&h,sizeof h,1,f)==1,"write test header"); fflush(f); rewind(f);
+        fflush(stdout); const pid_t pid=fork(); require(pid>=0,"fork header reader");
+        if(pid==0){ dpFileIsV2(f); _exit(0); }
+        int status=0; require(waitpid(pid,&status,0)==pid,"wait header reader");
+        require(WIFEXITED(status) && WEXITSTATUS(status)==want,"corpus format isolation");
+        fclose(f);
+    };
+    headerCase(DP_MAGIC_TABLE3,3,sizeof(DpFileRecord),ECC_WALK_TABLE?0:2);
+    headerCase(DP_MAGIC_V2,2,sizeof(DpFileRecordV2),ECC_WALK_TABLE?2:0);
+    headerCase(DP_MAGIC_TABLE3,3,1,8);
+    headerCase("legacy!!",0,0,ECC_WALK_TABLE?2:0);
+#if ECC_WALK_TABLE
+    require(RefEngine<CfgF41>::CKPT_VERSION == 34u, "new table checkpoint version");
+    {
+        Options o; o.threads=1; o.steps=1; o.dpWeight=sol.dpWeight; o.dpCap=16;
+        RefEngine<CfgF41> before, after; before.sol=&sol; after.sol=&sol;
+        before.setup(o,nullptr,nullptr,nullptr,nullptr);
+        after.setup(o,nullptr,nullptr,nullptr,nullptr);
+        before.launch(0);
+        const std::string ck=std::string(root)+"/table-v3.ck";
+        require(before.save(ck.c_str(),1,o.runId),"save table-v3 checkpoint");
+        u64 it=0; require(after.restore(ck.c_str(),&it,o.runId) && it==1,"restore table-v3 checkpoint");
+        std::vector<u64> a,b;before.pack(a);after.pack(b);
+        require(a==b,"table history survives resume");
+        FILE *f=fopen(ck.c_str(),"r+b");require(f!=nullptr,"open checkpoint header");
+        const unsigned oldVersion=2;
+        require(fseek(f,8,SEEK_SET)==0 && fwrite(&oldVersion,sizeof oldVersion,1,f)==1,"write old checkpoint version");
+        fclose(f); require(!after.restore(ck.c_str(),&it,o.runId),"reject pre-v3 table checkpoint");
+    }
+
+#endif
+    // maxIters is a guard, not walk state: a checkpoint written under one
+    // guard restores under a larger one, the walk goes on exactly as it
+    // would have, and only the old guard would have cut it (aws/rollout.py
+    // max-iters relies on this).  Scaled down: 2 and 4 guard periods.
+    {
+        Options o; o.threads = 1; o.steps = ECC_GUARD_PERIOD; o.dpWeight = 0; o.dpCap = 65536; o.runId = 3;
+        o.maxIters = 2 * ECC_GUARD_PERIOD;
+        HostEngine<CfgF41> before, after;
+        before.setup(o, eccF41::PX, eccF41::PY, eccF41::QX, eccF41::QY);
+        before.launch(0);
+        const std::string ck = std::string(root) + "/max-iters.ck";
+        require(before.save(ck.c_str(), ECC_GUARD_PERIOD, o.runId), "checkpoint under the smaller guard");
+        o.maxIters = 4 * ECC_GUARD_PERIOD;
+        after.setup(o, eccF41::PX, eccF41::PY, eccF41::QX, eccF41::QY);
+        u64 it = 0;
+        require(after.restore(ck.c_str(), &it, o.runId) && it == ECC_GUARD_PERIOD,
+                "a checkpoint restores under a larger maxIters");
+        auto same = [&]() {
+            return before.x == after.x && before.y == after.y && before.dead == after.dead &&
+                   before.counts == after.counts && before.seed == after.seed &&
+                   before.startIter == after.startIter;
+        };
+        before.launch(ECC_GUARD_PERIOD);
+        after.launch(ECC_GUARD_PERIOD);
+        require(same(), "below both guards the restored walk is the original walk");
+        before.launch(2 * ECC_GUARD_PERIOD);
+        after.launch(2 * ECC_GUARD_PERIOD);
+        std::vector<DpRecord> reports;
+        require(before.fetch(reports) == 0 && after.fetch(reports) == 0, "no distinguished point at weight 0");
+        bool allCut = true, noneCut = true;
+        for (size_t i = 0; i < before.dead.size(); ++i) {
+            allCut &= before.dead[i] == ~HostEngine<CfgF41>::W(0);
+            noneCut &= after.dead[i] == HostEngine<CfgF41>::W(0);
+        }
+        require(allCut && noneCut && before.needsReseed() && !after.needsReseed(),
+                "the old guard cuts every trail at its bound, the raised one none");
+    }
+    // The baseline bitsliced cycle guard used to emit non-DPs. It must only
+    // request a restart, just as the packed backend does.
+    {
+        Options o; o.threads = 1; o.steps = 1; o.dpWeight = 0;
+        o.maxIters = 1; o.dpCap = 65536;
+        HostEngine<CfgF41> eng;
+        eng.setup(o, eccF41::PX, eccF41::PY, eccF41::QX, eccF41::QY);
+        eng.launch(ECC_GUARD_PERIOD);
+        std::vector<DpRecord> records;
+        require(eng.fetch(records) == 0, "overdue walks are not distinguished points");
+        require(eng.needsReseed(), "overdue walks request reseeding");
+        eng.reseed(ECC_GUARD_PERIOD + 1);
+        for (auto dead : eng.dead) require(dead == 0, "overdue walks revived");
+        // A 16-bit restart counter must not bleed into another walk's seed.
+        eng.seed[0] |= 0xffffull;
+        eng.P.dpWeight = CfgF41::M;
+        eng.launch(ECC_GUARD_PERIOD + 1);
+        require(eng.fetch(records) == ECC_SEED_EXHAUSTED, "seed counter wrap rejected");
+    }
+    printf("PASS: deterministic collision fixture, overflow/write/fsync fault isolation, maxIters raise, cycle guard\n");
+}
