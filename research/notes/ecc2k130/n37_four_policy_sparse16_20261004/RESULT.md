@@ -97,6 +97,17 @@ the check leaves the old evidence and result unchanged.
 
 ```sh
 cp research/notes/ecc2k130/n37_four_policy_sparse16_20261004/SOURCE_Cargo.toml Cargo.toml
+historical source lock. Later commits also changed locked sources (for
+example `src/hash/sha256.rs`) and files the library compiles in
+(`docs/curves/registry.json`, `docs/ecbench/schema.sql`), so the replay
+restores the whole measured source tree from that commit, which matches every
+entry of `SOURCE_LOCK.sha256`. This leaves the old evidence and result
+unchanged.
+
+```sh
+measured=7039ab0b2940ac55809da62c91361b8082625716
+rm -rf src
+git checkout "$measured" -- Cargo.toml src examples/n37_four_policy_sparse16_prepare.rs examples/n37_four_policy_sparse16_inputs_replay.rs examples/n37_four_policy_sparse16_pdp.rs examples/n37_four_policy_sparse16_pdp_replay.rs examples/support/n37_policy_common.rs docs/curves/registry.json docs/ecbench/schema.sql docs/ic/calibration.json docs/ic/boundary_targets.json
 cp research/notes/ecc2k130/n37_four_policy_sparse16_20261004/Cargo.lock Cargo.lock
 sha256sum --check research/notes/ecc2k130/n37_four_policy_sparse16_20261004/SOURCE_LOCK.sha256
 cargo build --release --locked --example n37_four_policy_sparse16_inputs_replay --example n37_four_policy_sparse16_pdp_replay

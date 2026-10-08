@@ -143,7 +143,7 @@ assert.equal(sharedIndependentCheck.status, 'PASS');
 const sharedIndependentCheckPin = {path:sharedIndependentCheckPath, sha256:sharedIndependentCheckSha};
 const rankColumnsPath = 'research/ecbench_n37_rank_columns_20261004/RESULT.json';
 const rankColumnsBytes = readFileSync(resolve(ROOT, rankColumnsPath));
-const rankColumnsSha = '9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb';
+const rankColumnsSha = 'f7b950edc74978cbdf2dbc3da54c73bde6c05c0827fbe29ff8bd33659168afa1';
 assert.equal(sha(rankColumnsBytes), rankColumnsSha, 'n37 column decision changed; review its evidence before refreshing the dashboard.');
 const rankColumns = JSON.parse(rankColumnsBytes);
 assert.equal(rankColumns.status, 'independently_replayed_l0_bounded_diagnostic');

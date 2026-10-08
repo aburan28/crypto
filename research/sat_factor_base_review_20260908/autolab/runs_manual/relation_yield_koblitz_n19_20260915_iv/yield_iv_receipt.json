@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "kind": "relation_yield_koblitz_n19_factor_base_census_iv",
+  "updated_at": "2026-09-15T17:49:23Z",
+  "claim_boundary": "Public-synthetic Koblitz n=19 factor-base yield census (pair-table coverage oracle over 128 random subgroup targets). Distributional probe only. Not key recovery; not asymptotic yield law; not ledger promotion.",
+  "config": {
+    "n": 19,
+    "a": 1,
+    "targets": 128,
+    "identities_measured": 24
+  },
+  "coverage_summary": {
+    "mean": 0.3404947916666667,
+    "max": 1.0,
+    "min": 0.0,
+    "sd": 0.4203950015516884,
+    "n_identities": 24,
+    "n_complete_coverage": 5
+  },
+  "top_identities": [
+    {
+      "coverage": 1.0,
+      "identity": {
+        "seed_basis": [
+          241511,
+          473913,
+          109139
+        ],
+        "seed_dimension": 3,
+        "seed_index": 2,
+        "type": "frobenius_union"
+      },
+      "points": 229,
+      "orbits": 13,
+      "pair_table_entries": 24739
+    },
+    {
+      "coverage": 1.0,
+      "identity": {
+        "seed_basis": [
+          174944,
+          378963,
+          346918,
+          244674
+        ],
+        "seed_dimension": 4,
+        "seed_index": 2,
+        "type": "frobenius_union"
+      },
+      "points": 343,
+      "orbits": 19,
+      "pair_table_entries": 54645
+    },
+    {
+      "coverage": 1.0,
+      "identity": {
+        "seed_basis": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "seed_dimension": 5,
+        "seed_index": 0,
+        "type": "frobenius_union"
+      },
+      "points": 571,
+      "orbits": 31,
+      "pair_table_entries": 137561
+    },
+    {
+      "coverage": 1.0,
+      "identity": {
+        "seed_basis": [
+          97449,
+          2,
+          263373,
+          447109,
+          378409
+        ],
+        "seed_dimension": 5,
+        "seed_index": 1,
+        "type": "frobenius_union"
+      },
+      "points": 533,
+      "orbits": 29,
+      "pair_table_entries": 125705
+    },
+    {
+      "coverage": 1.0,
+      "identity": {
+        "seed_basis": [
+          51391,
+          444949,
+          201653,
+          310208,
+          422239
+        ],
+        "seed_dimension": 5,
+        "seed_index": 2,
+        "type": "frobenius_union"
+      },
+      "points": 457,
+      "orbits": 25,
+      "pair_table_entries": 94127
+    }
+  ],
+  "also_ran": {
+    "eta_sweep_rank_fixture": "yield_eta_sweep.json (coverage fields null under SUMMARY_ONLY; census is the real probe)"
+  },
+  "comparison_to_20260911_draft": {
+    "prior_targets": 256,
+    "prior_note": "2026-09-11 m2 mean~0.095 max~0.309 on charged pair table over 256 targets",
+    "this_targets": 128,
+    "this_mean": 0.3404947916666667,
+    "this_max": 1.0,
+    "note": "Different identity generator (frobenius_union/divisor census) \u2014 MATCH_WITHIN_FAMILY as distributional existence of nontrivial coverage; not identical metric replay."
+  },
+  "verdict": "DISTRIBUTIONAL_COVERAGE_OBSERVED",
+  "ledger_promotion": false
+}

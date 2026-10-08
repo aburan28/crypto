@@ -1,0 +1,14 @@
+==9343== Callgrind, a call-graph generating cache profiler
+==9343== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==9343== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==9343== Command: /tmp/claude-0/-home-user/7f658e4a-7634-5acc-b973-cdb225b38f41/scratchpad/arms2/ic-candidate price --params research/ic_single_target_20260930/runs/k0n61/T01.params.json --repeats 1 --repeats-fast 1 --price-rounds 1 --json --out research/strong_rho_canon_20261008/runs/m3/callgrind/icv1-f2m61-t158598901-ab42b6c5-portable-candidate.price.json
+==9343== 
+==9343== For interactive control, run 'callgrind_control -h'.
+==9343== brk segment overflow in thread #2: can't grow to 0x4862000
+==9343== (see section Limitations in user manual)
+==9343== NOTE: further instances of this message will not be shown
+==9343== 
+==9343== Events    : Ir
+==9343== Collected : 46030572942
+==9343== 
+==9343== I   refs:      46,030,572,942

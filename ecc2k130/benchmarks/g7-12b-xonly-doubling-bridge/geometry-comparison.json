@@ -1,0 +1,53 @@
+{
+  "status": "nonpromotable-common-kernel-geometry-diagnostic",
+  "checkpoint_mismatches": {
+    "b16": 0,
+    "b24": 0,
+    "b32": 0
+  },
+  "rows": [
+    {
+      "variant": "b16",
+      "rates_billion_per_second": [
+        11.762277,
+        11.512901,
+        11.466948
+      ],
+      "median_billion_per_second": 11.512901,
+      "paired_geomean_vs_b16": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "b24",
+      "rates_billion_per_second": [
+        11.218293,
+        11.140197,
+        11.090638
+      ],
+      "median_billion_per_second": 11.140197,
+      "paired_geomean_vs_b16": 0.9628324555495816,
+      "paired_95_ci": [
+        0.9433955135091476,
+        0.9826698602914735
+      ]
+    },
+    {
+      "variant": "b32",
+      "rates_billion_per_second": [
+        10.968471,
+        10.934243,
+        10.871156000000001
+      ],
+      "median_billion_per_second": 10.934243,
+      "paired_geomean_vs_b16": 0.9433992098700525,
+      "paired_95_ci": [
+        0.9200433786209805,
+        0.967347942351839
+      ]
+    }
+  ],
+  "decision": "retain b16 for bridge integration"
+}

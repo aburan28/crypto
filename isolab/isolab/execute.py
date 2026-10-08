@@ -73,6 +73,11 @@ class WorkerContext:
     keep_job_dirs: bool = False
     progress: Callable[[dict[str, Any]], None] = lambda p: None
     live: dict[str, Any] = field(default_factory=dict)
+    # slots: set when this worker is one of several sharing a host (see worker.SlotRegistry)
+    slot: str | None = None
+    slot_lock_path: str | None = None
+    lab_cgroup: str = "isolab.lab"
+    registry: Any = None
 
 
 class _Phases:
@@ -359,8 +364,11 @@ def execute(spec: dict[str, Any], job_id: str, attempt: int, ctx: WorkerContext,
         placement.gpus = gpu_ids
 
         ctx.progress({"phase": "reserve", "cpus": placement.cpus})
+        co_tenants = (lambda: ctx.registry.others(job_id)) if ctx.registry is not None else None
         with Reservation(job_id, placement, fid, ctx.caps, ctx.housekeeping, resources["memory_mb"], resources["pids"],
-                         paths=ctx.paths, cgroup_root=ctx.cgroup_root, lock_path=ctx.lock_path) as res:
+                         paths=ctx.paths, cgroup_root=ctx.cgroup_root, lock_path=ctx.lock_path,
+                         lab_cgroup=ctx.lab_cgroup, slot_lock_path=ctx.slot_lock_path,
+                         exclusive=fid["policy"] == "strict", co_tenants=co_tenants) as res:
             with ph.phase("reserve"):
                 pre = res.pre_checks(ctx.inventory)
                 try:
@@ -385,6 +393,8 @@ def execute(spec: dict[str, Any], job_id: str, attempt: int, ctx: WorkerContext,
                               user=spec["runtime"]["user"], extra_args=spec["runtime"]["extra_args"], gpus=gpu_ids,
                               launcher=ctx.launcher, aslr_off=fid.get("aslr") == "off", userns=ctx.userns,
                               env_base=protocol.host_env_passthrough() if not backend.container else {})
+            if ctx.registry is not None:
+                ctx.registry.enter(job_id, _exclude_fn(jctx))
             ctx.progress({"phase": "start"})
             with ph.phase("start"):
                 try:
@@ -420,6 +430,8 @@ def execute(spec: dict[str, Any], job_id: str, attempt: int, ctx: WorkerContext,
             finally:
                 with ph.phase("stop"):
                     backend.stop(jctx)
+                if ctx.registry is not None:
+                    ctx.registry.leave(job_id)
         # reservation released: the host is free while we hash and upload
         ctx.progress({"phase": "collect"})
         with ph.phase("collect"):
@@ -437,15 +449,19 @@ def execute(spec: dict[str, Any], job_id: str, attempt: int, ctx: WorkerContext,
         violations: set[str] = {c["name"] for c in fidelity["checks"] if c["status"] == "fail"}
         used = set((body["summary"] or {}).get("used_indices") or [])
         any_contended_used = False
+        shared_used = False
         for r in body["runs"]:
             for c in r.get("checks") or []:
                 if c["status"] == "fail":
                     violations.add(f"run{r['index']}:{c['name']}")
             if r["index"] in used and r.get("contended"):
                 any_contended_used = True
+            if r["index"] in used and ((r.get("conditions") or {}).get("co_tenant_jobs")):
+                shared_used = True
         fidelity["violations"] = sorted(violations)
         fidelity["contended"] = any(r.get("contended") for r in body["runs"] if not r["warmup"])
-        fidelity["grade"] = grade(fidelity.get("tier") or "D", any_contended_used)
+        fidelity["shared_host"] = shared_used
+        fidelity["grade"] = grade(fidelity.get("tier") or "D", any_contended_used, shared_used)
     finally:
         if not ctx.keep_job_dirs:
             shutil.rmtree(dirs.root, ignore_errors=True)
@@ -515,7 +531,8 @@ def _measure(spec, job_id, attempt, ctx, backend, jctx, res, dirs, body, ph, sto
             perf_prefix = perfstat.argv_prefix(ctx.perf, measure["perf_events"], jctx.cpus, str(perf_out)) if perf_ok else None
             exclude = _exclude_fn(jctx)
             sampler = Sampler(res.placement.reserved, period=measure["sample_period_s"], paths=ctx.paths,
-                              exclude=exclude, cgroup=jctx.cgroup_dir, other_cpu_threshold=fid["max_other_cpu"])
+                              exclude=exclude, cgroup=jctx.cgroup_dir, other_cpu_threshold=fid["max_other_cpu"],
+                              co_tenants=res.co_tenants)
             sampler.start()
             out = backend.exec(jctx, cmd["argv"], cmd["cwd"], env, limits["timeout_s"], dirs.logs / "stdout.log",
                                dirs.logs / "stderr.log", stop, cmd.get("stdin"), meta / "launch.json", perf_prefix)
@@ -567,7 +584,14 @@ def _exclude_fn(jctx: JobContext):
         pids = cgroup_procs(cg) if cg is not None else set()
         if not pids:
             snap = cpu_snapshot()
-            pids = descendants(os.getpid(), snap)
+            roots = set(jctx.roots)
+            if roots:
+                # only this job's processes: other slots of this worker are descendants of the worker too
+                pids = set(roots)
+                for r in roots:
+                    pids |= descendants(r, snap)
+            else:
+                pids = descendants(os.getpid(), snap)
         return pids
     return exclude
 
