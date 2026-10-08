@@ -1,0 +1,21 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/examples/koblitz_f4_stage199",
+    "verify-final",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/development/composition-after-charge.json",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/development/verification-dry-run.json"
+  ],
+  "environment": {},
+  "pid": 81651,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 60,
+  "wall_seconds": 0.021373917,
+  "user_seconds": 0.001882,
+  "system_seconds": 0.004141,
+  "total_core_seconds": 0.006023,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 2981888
+}

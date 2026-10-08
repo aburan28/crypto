@@ -1,5 +1,35 @@
 # Curves
 
+[CM Jacobian certificates](JACOBIAN_CERTIFICATES.md) check principal
+polarizations on elliptic squares using exact Hermitian arithmetic and all
+ideal classes. The [versioned JSON](jacobian-certificates.json) and
+[SQLite import](jacobian-certificates.sql) support lookup by full curve UID
+when bound, and by order or certificate UID when unbound. Geometric
+endomorphism hypotheses remain explicitly conditional.
+
+[Automatic hyperelliptic cover checks](COVERS.md) attach replayable
+same-field cover certificates to each supported catalog model in
+[`covers.json`](covers.json). Each curve page in the lab browser displays
+the verified genus, map degree and field assumptions. Descent and DLP
+advantage remain unmeasured.
+
+The [hyperelliptic infrastructure guide](HYPERELLIPTIC_INFRASTRUCTURE.md)
+documents the standalone construction, verification, arithmetic, and catalog
+commands; the one-infinity arithmetic boundary; bounded binary transfer; and
+the additive evidence schema. In particular, the prime even-sextic cover does
+not use the odd-degree one-infinity Jacobian implementation.
+
+[IC curve records and cross-repo links](ic/README.md), including
+[typed links](ic/curve-links/README.md), retain the exact EC1 representations,
+optional trait statuses, and the factor-base/isogeny storage contract beside
+this ICV1 model registry.
+
+Curves isogenous to a registered prime-field curve are found and recorded
+by the native isogeny walker, `src/bin/isogeny_walk.rs`
+([`ic/README.md`](ic/README.md#walking-an-isogeny-class)): it writes each
+curve in the `ic/curves.yaml` format with its ICV1 slug, EC1 identity and
+traits, and each kernel-certified edge as an `IW1` route.
+
 Every curve this repository names is named by its **ICV1 slug**
 ([`ICV1.md`](ICV1.md), `AGENTS.md` §11).  Each curve in the registry also
 carries the **EC1 identity** of each exact representation the repository
@@ -14,6 +44,8 @@ registry equals the one a thread's `curve_ids.json` carries; the builder fails i
 | [`registry.json`](registry.json) | every curve named anywhere in the repository: slug, ICV1, parameters, every legacy spelling that denotes it, and its EC1 representations |
 | [`sources/specs.txt`](sources/specs.txt) | the constructor calls whose curves no tracked record states in full |
 | [`sources/generated.json`](sources/generated.json) | those curves rebuilt: model, subgroup, generator, legacy handle, ICV1 computed in Rust |
+| [`TRAITS.md`](TRAITS.md) | size-independent traits of every registered curve (CM field, conductor, subfield of definition, volcano depths, cofactors, embedding degree) and how to group curves or find similar ones with `curve_traits` |
+| [`traits.json`](traits.json) | those traits, one record per registry curve, each value with its status; built by `cargo run --release --bin curve_traits -- build` |
 
 ## Two identities, and which to use
 

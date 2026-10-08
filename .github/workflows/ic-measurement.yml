@@ -1,0 +1,130 @@
+name: ic measurement standard
+# ICMS v1 (docs/ic/measurement/README.md): the index-calculus measurement
+# standard's own checks.  The unit tests, spec validation, the session audit
+# and page freshness run on every change to the standard; the smoke job builds
+# `ic`, runs a real two-arm session plus an A/A arm, and requires every run to
+# complete and verify, so a change that breaks the path from spec to record
+# fails here rather than in someone's measurement.  A hosted runner is a
+# shared VM and its steps do not run as root, so the session cannot move
+# other users' threads off its CPUs: its records earn L0 and the comparison
+# refuses wall time by design.  The smoke job checks the machinery, never the
+# numbers.
+on:
+  pull_request:
+    paths:
+      - "tools/icms/**"
+      - "tools/isolated_bench.py"
+      - "docs/ic/measurement/**"
+      - "docs/ic-measurement.html"
+      - "scripts/build_ic_measurement.py"
+      - "src/bin/ic.rs"
+      - "src/bin/ic/**"
+      - "src/cryptanalysis/ic_framework/**"
+      - ".github/workflows/ic-measurement.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ic-measurement-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
+jobs:
+  standard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the one dependency
+        run: python -m pip install pyyaml==6.0.2
+      - name: Committed sessions are evidence and are never edited
+        if: github.event_name == 'pull_request'
+        run: |
+          changed=$(git diff --name-only --diff-filter=MDRT "origin/${{ github.base_ref }}...HEAD" -- docs/ic/measurement/sessions)
+          if [ -n "$changed" ]; then
+            echo "these committed session files were modified, renamed or deleted; add a new session instead:" >&2
+            echo "$changed" >&2
+            exit 1
+          fi
+      - name: Unit tests (no resource leaks)
+        run: python -W error::ResourceWarning -m unittest discover -s tools/icms/tests -v
+      - name: Every committed spec validates and its adapter accepts it
+        run: python tools/icms validate docs/ic/measurement/specs/*.yaml
+      - name: Every committed session and comparison still audits
+        run: python tools/icms audit-sessions docs/ic/measurement/sessions
+      - name: The published page is the generator's output
+        run: python scripts/build_ic_measurement.py --check
+
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: standard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the one dependency
+        run: python -m pip install pyyaml==6.0.2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-e2e-benchmark
+      - name: Build ic
+        run: cargo build --release --bin ic
+      - name: Run a session (d7, d8, d7 again as the A/A arm)
+        # --allow-busy: a hosted runner is never quiet; the records say so and
+        # earn the level they earn.  CPU 0's core is never reserved.
+        run: |
+          python tools/icms run \
+            docs/ic/measurement/specs/k23-subspace-d7-mitm2.yaml \
+            docs/ic/measurement/specs/k23-subspace-d8-mitm2.yaml \
+            docs/ic/measurement/specs/k23-subspace-d7-mitm2.yaml \
+            --cpus auto --allow-busy --label ci-smoke \
+            --out /tmp/icms-smoke
+      - name: Every measured run completed and verified
+        run: |
+          python - <<'EOF'
+          import json, sys
+          bad = []
+          for line in open("/tmp/icms-smoke/records.jsonl"):
+              r = json.loads(line)
+              o = r["outcome"]
+              if not (o["status"] == "complete" and o.get("verified")):
+                  bad.append((r["execution_index"], o))
+          for b in bad:
+              print("not complete:", b, file=sys.stderr)
+          sys.exit(1 if bad else 0)
+          EOF
+      - name: Compare d8 against d7, declaring the one dimension that differs
+        run: |
+          python tools/icms compare /tmp/icms-smoke --a 0 --b 1 \
+            --declare factor_base.params.dimension \
+            --out /tmp/icms-smoke/comparisons/d8-vs-d7.json
+          python -c "import json,sys; c=json.load(open('/tmp/icms-smoke/comparisons/d8-vs-d7.json')); sys.exit(0 if c['ops']['admitted'] and c['ops']['deterministic'] else 1)"
+          python tools/icms summarize /tmp/icms-smoke | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: An undeclared difference is refused (exit status 3)
+        run: |
+          set +e
+          python tools/icms compare /tmp/icms-smoke --a 0 --b 1 >/tmp/undeclared.txt 2>&1
+          status=$?
+          set -e
+          if [ "$status" -ne 3 ]; then
+            echo "compare exited $status on an undeclared spec difference; expected 3 (refused)" >&2
+            cat /tmp/undeclared.txt >&2
+            exit 1
+          fi
+      - name: The smoke session audits like a committed one
+        run: python tools/icms audit-sessions /tmp/icms-smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: icms-smoke-session
+          path: /tmp/icms-smoke
+          if-no-files-found: ignore

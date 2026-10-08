@@ -67,24 +67,7 @@ verify() {
 verify ref || fail=1
 verify popc || fail=1
 
-python3 - "$R" <<'PY' | tee "$R/dp-identity.txt" || fail=1
-import hashlib, os, sys
-r = sys.argv[1]
-ref = None
-bad = 0
-for name in ("ref", "popc"):
-    path = os.path.join(r, "dp-%s.bin" % name)
-    if not os.path.exists(path):
-        print("%-8s missing" % name); bad = 1; continue
-    data = open(path, "rb").read()
-    recs = sorted(data[i:i+32] for i in range(0, len(data) - len(data) % 32, 32))
-    digest = hashlib.sha256(b"".join(recs)).hexdigest()
-    if ref is None: ref = digest
-    if digest != ref: bad = 1
-    print("%-8s %8d records  sha256 %s  %s" % (
-        name, len(recs), digest[:16], "IDENTICAL to ref" if digest == ref else "DIFFERS from ref"))
-sys.exit(bad)
-PY
+python3 benchmarks/dp_identity.py "$R" ref popc | tee "$R/dp-identity.txt" || fail=1
 
 bench() {
   local b=$1 i=$2

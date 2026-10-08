@@ -1,0 +1,5 @@
+The first invocation of run.sh exited before any timed worker process.
+The source and binary hash checks passed. Sandbox sysctl denied CPU-model
+inspection, and set -e stopped the script after creating host.txt.
+The runner now retains this host-inspection failure and proceeds with an
+explicit unisolated-host label. No measurement was discarded.

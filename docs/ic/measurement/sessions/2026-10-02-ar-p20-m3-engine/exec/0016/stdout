@@ -1,0 +1,59 @@
+{
+  "curve": {
+    "p": 775987,
+    "a": 229261,
+    "b": 239101,
+    "order": 775513
+  },
+  "P": [
+    715285,
+    479610
+  ],
+  "Q": [
+    334089,
+    346701
+  ],
+  "index_calculus": {
+    "k": 575044,
+    "verified": true,
+    "m": 3,
+    "engine": "mitm",
+    "accelerated": false,
+    "factor_base": {
+      "kind": "small_x",
+      "size": 67,
+      "bound": 135
+    },
+    "relations": 61,
+    "rank": 60,
+    "attempts": 160,
+    "s3_solves": 9935,
+    "membership_tests": 15314,
+    "group_ops": 9546,
+    "target_ops": 9270,
+    "la_ops": 1683,
+    "la_pivot": "min_fill",
+    "msolve_calls": 0,
+    "msolve_seconds": 0.0,
+    "censored_attempts": 0,
+    "table_arity": 2,
+    "table_entries": 4489,
+    "table_s3_solves": 2278,
+    "seconds_factor_base": 0.00022393000000420216,
+    "seconds_table": 0.004810315999975501,
+    "seconds_relations": 0.04339984500023775,
+    "seconds_linalg": 0.0008550279997621146,
+    "seconds_total": 0.049289118999979564,
+    "harvest": null,
+    "correct": true
+  },
+  "rho": {
+    "k": 575044,
+    "verified": true,
+    "walk_ops": 410,
+    "setup_ops": 1209,
+    "group_ops": 1619,
+    "walks": 1,
+    "seconds": 0.0015965660000460957
+  }
+}

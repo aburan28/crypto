@@ -1,0 +1,851 @@
+{
+ "a": {
+  "arm": 0,
+  "label": "icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl native parity",
+  "spec_id": "ICS1h24cd9a6da726"
+ },
+ "aa": false,
+ "aa_noise": [
+  {
+   "arms": [
+    0,
+    2
+   ],
+   "estimate": {
+    "ci95": [
+     0.7209368730003428,
+     1.6675218332479929
+    ],
+    "excludes_1": false,
+    "max_ratio": 1.6675218332479929,
+    "median_ratio": 1.0223483606474335,
+    "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+    "min_ratio": 0.7209368730003428,
+    "n_pairs": 5
+   },
+   "spec_id": "ICS1h24cd9a6da726"
+  }
+ ],
+ "b": {
+  "arm": 1,
+  "label": "icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl cnf parity",
+  "spec_id": "ICS1hb99fc3ab702d"
+ },
+ "confounds": [],
+ "declared_variables": [
+  {
+   "a": "native",
+   "b": "cnf",
+   "field": "decomposition.solver.options.sat_xor_encoding"
+  }
+ ],
+ "env_class_id": "ENV1h7292c40d7f20",
+ "forbidden": [],
+ "ops": {
+  "a_median": 238623.3644128004,
+  "a_spread": [
+   188664.79490144295,
+   346027.0082608225
+  ],
+  "admitted": true,
+  "b_median": 91466359.93564157,
+  "b_spread": [
+   84604324.54147778,
+   94391200.67210546
+  ],
+  "completed": {
+   "a": "5/5",
+   "b": "5/5"
+  },
+  "deterministic": false,
+  "label": "host-dependent: some cost in this unit was priced from wall time on this host (see units.<unit>.host_dependent_because); valid on this env_class only",
+  "lower_bound": false,
+  "ratio_b_over_a": 383.3084834786407,
+  "speedup_a_over_b": 0.0026088647736796657,
+  "unit": "crypto.S.gae_pinned",
+  "window": "cold_end_to_end"
+ },
+ "outcomes": {
+  "a": [
+   "complete",
+   "complete",
+   "complete",
+   "complete",
+   "complete"
+  ],
+  "b": [
+   "complete",
+   "complete",
+   "complete",
+   "complete",
+   "complete"
+  ]
+ },
+ "records_sha256": "783c12c4c586a031affcfbd7c38aa3426fd79cc55388ee6948b32cbaa8fd703e",
+ "refusals": [],
+ "request": {
+  "a": 0,
+  "b": 1,
+  "declared": [
+   "decomposition.solver.options.sat_xor_encoding"
+  ]
+ },
+ "schema": "icms.comparison/v1",
+ "session_id": "ICSESS1h7f8b05c0b164",
+ "structure": {
+  "a": {
+   "decomposition.arity": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "decomposition.hit_rate": {
+    "max": 0.015012510425354461,
+    "median": 0.015012510425354461,
+    "min": 0.015012510425354461,
+    "n": 5
+   },
+   "decomposition.native.canonicalisations": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.direct_relations_skipped": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.frobfold_mismatches": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.inversions": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.lift_failures": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.lookups": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.relations": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "decomposition.native.repeated_targets_skipped": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "decomposition.native.s4_hits": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.s4_pairs": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.solver_budget_exceeded": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.solver_calls": {
+    "max": 1191.0,
+    "median": 1191.0,
+    "min": 1191.0,
+    "n": 5
+   },
+   "decomposition.native.solver_ops": {
+    "max": 2299.0,
+    "median": 2299.0,
+    "min": 2299.0,
+    "n": 5
+   },
+   "decomposition.native.sqrt_solves": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.target_guard_probes": {
+    "max": 1199.0,
+    "median": 1199.0,
+    "min": 1199.0,
+    "n": 5
+   },
+   "decomposition.native.trials": {
+    "max": 1199.0,
+    "median": 1199.0,
+    "min": 1199.0,
+    "n": 5
+   },
+   "decomposition.native.unliftable_systems": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.walk_jumps": {
+    "max": 24.0,
+    "median": 24.0,
+    "min": 24.0,
+    "n": 5
+   },
+   "decomposition.native.walk_pool_offsets": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "decomposition.native.walk_pool_ops": {
+    "max": 347.0,
+    "median": 347.0,
+    "min": 347.0,
+    "n": 5
+   },
+   "decomposition.native.walk_pool_restarts": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "decomposition.native.walk_restarts": {
+    "max": 9.0,
+    "median": 9.0,
+    "min": 9.0,
+    "n": 5
+   },
+   "decomposition.native.walk_steps": {
+    "max": 1190.0,
+    "median": 1190.0,
+    "min": 1190.0,
+    "n": 5
+   },
+   "decomposition.relations_found": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "decomposition.targets_tried": {
+    "max": 1199.0,
+    "median": 1199.0,
+    "min": 1199.0,
+    "n": 5
+   },
+   "factor_base.abscissae_with_points": {
+    "max": 31.0,
+    "median": 31.0,
+    "min": 31.0,
+    "n": 5
+   },
+   "factor_base.columns": {
+    "max": 31.0,
+    "median": 31.0,
+    "min": 31.0,
+    "n": 5
+   },
+   "factor_base.nominal_dimension": {
+    "max": 6.0,
+    "median": 6.0,
+    "min": 6.0,
+    "n": 5
+   },
+   "factor_base.orbit_representatives": {
+    "max": 31.0,
+    "median": 31.0,
+    "min": 31.0,
+    "n": 5
+   },
+   "factor_base.points_per_column": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "factor_base.signed_points": {
+    "max": 62.0,
+    "median": 62.0,
+    "min": 62.0,
+    "n": 5
+   },
+   "linear_algebra.dependent": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "linear_algebra.rank": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "linear_algebra.rows": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "linear_algebra.work": {
+    "max": 152.0,
+    "median": 152.0,
+    "min": 152.0,
+    "n": 5
+   },
+   "solver.budget_exceeded": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "solver.calls": {
+    "max": 1191.0,
+    "median": 1191.0,
+    "min": 1191.0,
+    "n": 5
+   },
+   "solver.conflicts": {
+    "max": 2299.0,
+    "median": 2299.0,
+    "min": 2299.0,
+    "n": 5
+   },
+   "solver.decisions": {
+    "max": 1859.0,
+    "median": 1859.0,
+    "min": 1859.0,
+    "n": 5
+   },
+   "solver.extra.decisions": {
+    "max": 1859.0,
+    "median": 1859.0,
+    "min": 1859.0,
+    "n": 5
+   },
+   "solver.extra.learnt_clauses": {
+    "max": 573.0,
+    "median": 573.0,
+    "min": 573.0,
+    "n": 5
+   },
+   "solver.extra.native_xor_encoding": {
+    "max": 1191.0,
+    "median": 1191.0,
+    "min": 1191.0,
+    "n": 5
+   },
+   "solver.extra.native_xor_rows": {
+    "max": 20243.0,
+    "median": 20243.0,
+    "min": 20243.0,
+    "n": 5
+   },
+   "solver.extra.original_clauses": {
+    "max": 128628.0,
+    "median": 128628.0,
+    "min": 128628.0,
+    "n": 5
+   },
+   "solver.extra.propagations": {
+    "max": 47363.0,
+    "median": 47363.0,
+    "min": 47363.0,
+    "n": 5
+   },
+   "solver.extra.restarts": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "solver.extra.xor_propagations": {
+    "max": 10208.0,
+    "median": 10208.0,
+    "min": 10208.0,
+    "n": 5
+   },
+   "solver.ops": {
+    "max": 2299.0,
+    "median": 2299.0,
+    "min": 2299.0,
+    "n": 5
+   },
+   "solver.propagations": {
+    "max": 47363.0,
+    "median": 47363.0,
+    "min": 47363.0,
+    "n": 5
+   },
+   "solver.restarts": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "solver.wall_ns": {
+    "max": 61250807.0,
+    "median": 42780793.0,
+    "min": 33610880.0,
+    "n": 5
+   },
+   "system.cnf_clauses": {
+    "max": 108.0,
+    "median": 108.0,
+    "min": 108.0,
+    "n": 5
+   },
+   "system.max_degree": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "system.n_equations": {
+    "max": 17.0,
+    "median": 17.0,
+    "min": 17.0,
+    "n": 5
+   },
+   "system.n_vars": {
+    "max": 12.0,
+    "median": 12.0,
+    "min": 12.0,
+    "n": 5
+   },
+   "system.native.cnf_clauses_total": {
+    "max": 128628.0,
+    "median": 128628.0,
+    "min": 128628.0,
+    "n": 5
+   },
+   "system.native.xor_rows_total": {
+    "max": 20243.0,
+    "median": 20243.0,
+    "min": 20243.0,
+    "n": 5
+   },
+   "system.semi_regular_degree": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   }
+  },
+  "b": {
+   "decomposition.arity": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "decomposition.hit_rate": {
+    "max": 0.015012510425354461,
+    "median": 0.015012510425354461,
+    "min": 0.015012510425354461,
+    "n": 5
+   },
+   "decomposition.native.canonicalisations": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.direct_relations_skipped": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.frobfold_mismatches": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.inversions": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.lift_failures": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.lookups": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.relations": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "decomposition.native.repeated_targets_skipped": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "decomposition.native.s4_hits": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.s4_pairs": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.solver_budget_exceeded": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.solver_calls": {
+    "max": 1191.0,
+    "median": 1191.0,
+    "min": 1191.0,
+    "n": 5
+   },
+   "decomposition.native.solver_ops": {
+    "max": 1328807.0,
+    "median": 1328807.0,
+    "min": 1328807.0,
+    "n": 5
+   },
+   "decomposition.native.sqrt_solves": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.target_guard_probes": {
+    "max": 1199.0,
+    "median": 1199.0,
+    "min": 1199.0,
+    "n": 5
+   },
+   "decomposition.native.trials": {
+    "max": 1199.0,
+    "median": 1199.0,
+    "min": 1199.0,
+    "n": 5
+   },
+   "decomposition.native.unliftable_systems": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.walk_jumps": {
+    "max": 24.0,
+    "median": 24.0,
+    "min": 24.0,
+    "n": 5
+   },
+   "decomposition.native.walk_pool_offsets": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "decomposition.native.walk_pool_ops": {
+    "max": 347.0,
+    "median": 347.0,
+    "min": 347.0,
+    "n": 5
+   },
+   "decomposition.native.walk_pool_restarts": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "decomposition.native.walk_restarts": {
+    "max": 9.0,
+    "median": 9.0,
+    "min": 9.0,
+    "n": 5
+   },
+   "decomposition.native.walk_steps": {
+    "max": 1190.0,
+    "median": 1190.0,
+    "min": 1190.0,
+    "n": 5
+   },
+   "decomposition.relations_found": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "decomposition.targets_tried": {
+    "max": 1199.0,
+    "median": 1199.0,
+    "min": 1199.0,
+    "n": 5
+   },
+   "factor_base.abscissae_with_points": {
+    "max": 31.0,
+    "median": 31.0,
+    "min": 31.0,
+    "n": 5
+   },
+   "factor_base.columns": {
+    "max": 31.0,
+    "median": 31.0,
+    "min": 31.0,
+    "n": 5
+   },
+   "factor_base.nominal_dimension": {
+    "max": 6.0,
+    "median": 6.0,
+    "min": 6.0,
+    "n": 5
+   },
+   "factor_base.orbit_representatives": {
+    "max": 31.0,
+    "median": 31.0,
+    "min": 31.0,
+    "n": 5
+   },
+   "factor_base.points_per_column": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "factor_base.signed_points": {
+    "max": 62.0,
+    "median": 62.0,
+    "min": 62.0,
+    "n": 5
+   },
+   "linear_algebra.dependent": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "linear_algebra.rank": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "linear_algebra.rows": {
+    "max": 18.0,
+    "median": 18.0,
+    "min": 18.0,
+    "n": 5
+   },
+   "linear_algebra.work": {
+    "max": 152.0,
+    "median": 152.0,
+    "min": 152.0,
+    "n": 5
+   },
+   "solver.budget_exceeded": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "solver.calls": {
+    "max": 1191.0,
+    "median": 1191.0,
+    "min": 1191.0,
+    "n": 5
+   },
+   "solver.conflicts": {
+    "max": 1328807.0,
+    "median": 1328807.0,
+    "min": 1328807.0,
+    "n": 5
+   },
+   "solver.decisions": {
+    "max": 1422784.0,
+    "median": 1422784.0,
+    "min": 1422784.0,
+    "n": 5
+   },
+   "solver.extra.decisions": {
+    "max": 1422784.0,
+    "median": 1422784.0,
+    "min": 1422784.0,
+    "n": 5
+   },
+   "solver.extra.learnt_clauses": {
+    "max": 1318999.0,
+    "median": 1318999.0,
+    "min": 1318999.0,
+    "n": 5
+   },
+   "solver.extra.native_xor_encoding": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "solver.extra.native_xor_rows": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "solver.extra.original_clauses": {
+    "max": 2520389.0,
+    "median": 2520389.0,
+    "min": 2520389.0,
+    "n": 5
+   },
+   "solver.extra.propagations": {
+    "max": 93906907.0,
+    "median": 93906907.0,
+    "min": 93906907.0,
+    "n": 5
+   },
+   "solver.extra.restarts": {
+    "max": 8047.0,
+    "median": 8047.0,
+    "min": 8047.0,
+    "n": 5
+   },
+   "solver.extra.xor_propagations": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "solver.ops": {
+    "max": 1328807.0,
+    "median": 1328807.0,
+    "min": 1328807.0,
+    "n": 5
+   },
+   "solver.propagations": {
+    "max": 93906907.0,
+    "median": 93906907.0,
+    "min": 93906907.0,
+    "n": 5
+   },
+   "solver.restarts": {
+    "max": 8047.0,
+    "median": 8047.0,
+    "min": 8047.0,
+    "n": 5
+   },
+   "solver.wall_ns": {
+    "max": 17185335541.0,
+    "median": 16775759590.0,
+    "min": 16284193686.0,
+    "n": 5
+   },
+   "system.max_degree": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "system.n_equations": {
+    "max": 17.0,
+    "median": 17.0,
+    "min": 17.0,
+    "n": 5
+   },
+   "system.n_vars": {
+    "max": 12.0,
+    "median": 12.0,
+    "min": 12.0,
+    "n": 5
+   },
+   "system.native.cnf_clauses_total": {
+    "max": 2520389.0,
+    "median": 2520389.0,
+    "min": 2520389.0,
+    "n": 5
+   },
+   "system.native.xor_rows_total": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "system.semi_regular_degree": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "system.xor_rows": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   }
+  }
+ },
+ "wall": {
+  "admitted": false,
+  "contended_runs": 7,
+  "estimate": {
+   "ci95": [
+    187.14208683015485,
+    321.06510743042145
+   ],
+   "excludes_1": true,
+   "max_ratio": 321.06510743042145,
+   "median_ratio": 247.06073469075332,
+   "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+   "min_ratio": 187.14208683015485,
+   "n_pairs": 5
+  },
+  "pairs": 5,
+  "refusals": [
+   {
+    "blocking": [
+     "bare_metal",
+     "fixed_frequency",
+     "kernel_isolation",
+     "steal"
+    ],
+    "count": 7,
+    "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+   }
+  ],
+  "window": "cold_end_to_end"
+ }
+}

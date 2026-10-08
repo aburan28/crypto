@@ -1415,12 +1415,7 @@ pub struct YieldExplanation {
 
 /// Measure the case-2 / case-3 relationship over **every** curve and **every**
 /// target above the factor-base subspace.
-pub fn yield_explanation(
-    n: u32,
-    l: u32,
-    d_max: u32,
-    irr: &IrreduciblePoly,
-) -> YieldExplanation {
+pub fn yield_explanation(n: u32, l: u32, d_max: u32, irr: &IrreduciblePoly) -> YieldExplanation {
     let base = 1u64 << l;
     let max_t = (1u64 << n) - base;
     let targets: Vec<F2mElement> = (0..max_t).map(|i| f2m_from_u64(base + i, n)).collect();
@@ -1728,7 +1723,10 @@ mod tests {
             aut
         );
 
-        assert!(log2_class > aut, "class 2^{log2_class:.2} vs aut rho 2^{aut:.2}");
+        assert!(
+            log2_class > aut,
+            "class 2^{log2_class:.2} vs aut rho 2^{aut:.2}"
+        );
         assert!(
             log2_class > plain,
             "class 2^{log2_class:.2} vs plain rho 2^{plain:.2}"

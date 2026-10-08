@@ -1,0 +1,56 @@
+name: n37 target-blind folded rank replay
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/ic_framework/**'
+      - 'examples/n37_shared_rank_folded.rs'
+      - 'examples/n37_shared_rank_replay.rs'
+      - 'research/notes/ecc2k130/shared_rank_folded_table_20261003/**'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl'
+      - '.github/workflows/n37-shared-rank-folded.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build against the archived dependency lock
+        run: |
+          cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
+          cargo build --release --locked --example n37_shared_rank_folded --example n37_shared_rank_replay
+      - name: Check source parity and the small target-blind rank control
+        run: |
+          cargo test --locked --lib compact_orbit_scan_matches_archived_n37_source42
+          cargo test --locked --lib small_koblitz_rank_is_target_blind_and_point_checked
+      - name: Independently replay both preserved rank transcripts
+        run: |
+          evidence=research/notes/ecc2k130/shared_rank_folded_table_20261003
+          target/release/examples/n37_shared_rank_replay "$evidence/RAW.json" /tmp/n37-shared-rank-replay-A.json
+          target/release/examples/n37_shared_rank_replay "$evidence/RAW_B.json" /tmp/n37-shared-rank-replay-B.json
+          cmp /tmp/n37-shared-rank-replay-A.json "$evidence/REPLAY.json"
+          cmp /tmp/n37-shared-rank-replay-B.json "$evidence/REPLAY_B.json"
+      - name: Regenerate deterministic non-timing evidence
+        run: |
+          evidence=research/notes/ecc2k130/shared_rank_folded_table_20261003
+          target/release/examples/n37_shared_rank_folded /tmp/n37-shared-rank-regenerated.json
+          target/release/examples/n37_shared_rank_replay /tmp/n37-shared-rank-regenerated.json /tmp/n37-shared-rank-regenerated-replay.json
+          jq -e '.status == "PASS" and .rank == 42 and .column_logs_verified == 42' /tmp/n37-shared-rank-regenerated-replay.json
+          jq -S 'del(.base.wall_ns,.table.wall_ns,.rank_search.wall_ns,.linear_algebra.wall_ns,.verification.wall_ns)' "$evidence/RAW.json" > /tmp/n37-shared-rank-frozen-normalized.json
+          jq -S 'del(.base.wall_ns,.table.wall_ns,.rank_search.wall_ns,.linear_algebra.wall_ns,.verification.wall_ns)' /tmp/n37-shared-rank-regenerated.json > /tmp/n37-shared-rank-regenerated-normalized.json
+          cmp /tmp/n37-shared-rank-frozen-normalized.json /tmp/n37-shared-rank-regenerated-normalized.json
+      - name: Reject a corrupt relation and an altered table ledger
+        run: |
+          evidence=research/notes/ecc2k130/shared_rank_folded_table_20261003
+          jq '.relations[0].witness[0] = 298' "$evidence/RAW.json" > /tmp/n37-shared-rank-bad-witness.json
+          if target/release/examples/n37_shared_rank_replay /tmp/n37-shared-rank-bad-witness.json /tmp/n37-shared-rank-bad-witness-receipt.json; then exit 1; fi
+          jq -e '.status == "FAIL" and .reason == "witness or matrix row differs at trial 0"' /tmp/n37-shared-rank-bad-witness-receipt.json
+          jq '.table.group_ops.adds += 1' "$evidence/RAW.json" > /tmp/n37-shared-rank-bad-ledger.json
+          if target/release/examples/n37_shared_rank_replay /tmp/n37-shared-rank-bad-ledger.json /tmp/n37-shared-rank-bad-ledger-receipt.json; then exit 1; fi
+          jq -e '.status == "FAIL" and .reason == "frozen folded-table ledger differs"' /tmp/n37-shared-rank-bad-ledger-receipt.json

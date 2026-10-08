@@ -6,16 +6,37 @@ and no manual trigger to remember: `.github/workflows/release.yml` runs on
 
 ## What gets built
 
-| Artifact | Built by | Runner |
+| Artifact | Contents / build | Runner |
 | --- | --- | --- |
-| `crypto-<tag>-x86_64-unknown-linux-gnu.tar.gz` | `cargo build --release --bins` | ubuntu |
-| `crypto-<tag>-x86_64-unknown-linux-musl.tar.gz` | same, static via `musl-tools` | ubuntu |
-| `crypto-<tag>-aarch64-apple-darwin.tar.gz` | same | macos |
-| `crypto-<tag>-x86_64-pc-windows-msvc.zip` | same | windows |
+| `crypto-<tag>-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic`, `ecbench`, `curve_cover_check`, `hyperelliptic-cover`; `cargo build --release --bins` | ubuntu |
+| `crypto-<tag>-x86_64-unknown-linux-musl.tar.gz` | same five executables, static via `musl-tools` | ubuntu |
+| `crypto-<tag>-aarch64-apple-darwin.tar.gz` | same five executables | macos |
+| `crypto-<tag>-x86_64-pc-windows-msvc.zip` | same five executables, with `.exe` suffixes | windows |
 | `ecc2k130-cpu-<tag>-x86_64-linux.tar.gz` | `make -C ecc2k130 cpu` | ubuntu |
 | `ecc2k130-cuda-<tag>-x86_64-linux.tar.gz` | `make -C ecc2k130 gpu` | ubuntu + nvcc |
 
 Each release also carries `SHA256SUMS`; verify with `sha256sum -c SHA256SUMS`.
+
+## Using the packaged cover tools
+
+Download the archive for your platform from the
+[latest release](https://github.com/aburan28/crypto/releases/latest), verify
+it against `SHA256SUMS`, and unpack it. The cover tools are ordinary
+executables; neither command requires `cargo run` or a Rust toolchain:
+
+```sh
+./hyperelliptic-cover --help
+./curve_cover_check --help
+```
+
+Both catalog tools require caller-supplied data. `curve_cover_check` reads and
+writes catalog files supplied with `--registry PATH` and `--output PATH`, and
+`hyperelliptic-cover catalog-export` requires `--registry PATH` (with optional
+`--output PATH`). Registries and generated catalogs are not bundled in the
+executable archive. The other `hyperelliptic-cover` subcommands accept an
+explicit supported model shape and perform no registry lookup. Consult each
+command's `--help` for the interface in that release. The release job starts
+both tools on every native target before it archives them.
 
 ## Versioning
 
@@ -53,9 +74,10 @@ those before.
 
 ## If a release fails
 
-Pull requests touching `release.yml`, `Cargo.toml` or `ecc2k130/Makefile`
-build every artifact as a dry run and stop short of publishing, so the
-macOS and Windows legs are proven before a merge can turn a release red.
+Pull requests touching `release.yml`, `Cargo.toml`, Rust sources under `src/`
+or `ecc2k130/Makefile` build every artifact as a dry run and stop short of
+publishing, so the macOS and Windows legs are proven before a merge can turn a
+release red.
 
 The `release` job requires all four build jobs, so a failure publishes
 nothing rather than a partial set. The matrix is `fail-fast: false`, so one

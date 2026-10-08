@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/home/runner/work/crypto/crypto/target/release/examples/koblitz_rho_batch_ks_v2_n61",
+    "61",
+    "0",
+    "signed_frobenius",
+    "1024",
+    "531310"
+  ],
+  "conditions_after": {
+    "at": "2026-10-01T19:24:55.405074+00:00",
+    "available_memory_bytes": 15758921728,
+    "loadavg": [
+      1.0,
+      1.107421875,
+      0.841796875
+    ]
+  },
+  "conditions_before": {
+    "at": "2026-10-01T19:21:51.493354+00:00",
+    "available_memory_bytes": 15730253824,
+    "loadavg": [
+      1.00341796875,
+      1.21142578125,
+      0.79931640625
+    ]
+  },
+  "exit_code": 0,
+  "involuntary_context_switches": 1163,
+  "max_rss_bytes": 311959552,
+  "pinned_cpu": 3,
+  "sys_s": 0.069995,
+  "user_s": 183.823253,
+  "voluntary_context_switches": 1,
+  "wall_s": 183.9115398849999
+}

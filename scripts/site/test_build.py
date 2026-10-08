@@ -48,6 +48,8 @@ class BuildTests(unittest.TestCase):
             "assets/rho-gpu-host.js",
             "assets/rho-gpu.wgsl",
             "scoreboard/index.html",
+            "scoreboard/ic-current-state.html",
+            "scoreboard/ic-measurement.html",
             "scoreboard/algorithm-lab.html",
             "scoreboard/algorithm-lab/core.js",
             "scoreboard/algorithm-lab/ui.js",
@@ -59,6 +61,10 @@ class BuildTests(unittest.TestCase):
             "scoreboard/performance-gains/summary.svg",
             "scoreboard/performance-gains/data.json",
             "scoreboard/performance-gains/comparisons.csv",
+            "browser/index.html",
+            "browser/browser.js",
+            "browser/browser.css",
+            "browser/data.json",
             "status/index.html",
             "status/style.css",
             "status/walk-forest.svg",
@@ -98,6 +104,105 @@ class BuildTests(unittest.TestCase):
         # is only ever a republish of it.
         source = read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html"), "rb")
         self.assertEqual(read(os.path.join(self.out, "scoreboard", "index.html"), "rb"), source)
+
+    def test_progress_chart_data_file_is_canonical_and_fully_plotted(self):
+        # AGENTS.md §7a: docs/ic/progress-timeline.json is the one source of
+        # the progress chart. The copy embedded in the scoreboard must be the
+        # same data, every point must have a row in the "every plotted point"
+        # table, and the file's `updated` date is never older than its
+        # newest point.
+        import json
+
+        page = read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html"))
+        timeline = json.loads(read(os.path.join(ROOT, "docs", "ic", "progress-timeline.json")))
+        embedded = re.search(r'<script type="application/json" id="progress-data">(.*?)</script>', page, re.S)
+        self.assertIsNotNone(embedded, "the scoreboard embeds no progress-data script")
+        self.assertEqual(json.loads(embedded.group(1)), timeline, "embedded progress chart data differs from docs/ic/progress-timeline.json")
+
+        table = re.search(r"<summary>Every plotted point as a table</summary>(.*?)</details>", page, re.S)
+        self.assertIsNotNone(table, "the progress panel has no plotted-point table")
+        rows = table.group(1)
+        newest = None
+        for series in timeline["series"]:
+            for point in series["points"]:
+                newest = max(newest or point["date"], point["date"])
+                anchor = re.escape(point["anchor"])
+                self.assertRegex(rows, rf'<tr><td>{point["date"]}</td>.*?href="{anchor}".*?</tr>', f"no table row for the {point['date']} point anchored at {point['anchor']} in series {series['id']}")
+        self.assertGreaterEqual(timeline["updated"], newest, "progress-timeline.json `updated` is older than its newest point")
+
+    def test_scoreboard_panels_close_and_sit_at_the_top_level(self):
+        # An unclosed <section> once swallowed every later panel into one
+        # collapsed panel. Every tag must close in order, and no panel may
+        # sit inside another: the collapse script only toggles top-level ones.
+        from html.parser import HTMLParser
+
+        void = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+                "link", "meta", "param", "source", "track", "wbr"}
+
+        class Walker(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.stack = []
+                self.errors = []
+                self.nested = []
+                self.panels = 0
+
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                classes = (attrs.get("class") or "").split()
+                panel = "panel" in classes or (
+                    tag == "section" and bool(attrs.get("id") or attrs.get("aria-labelledby")))
+                if panel and not any(t in ("header", "aside") or "notes" in c
+                                     for t, c, _ in self.stack):
+                    self.panels += 1
+                    outer = [i for t, c, i in self.stack if i is not None]
+                    if outer:
+                        self.nested.append((attrs.get("id"), outer))
+                if tag not in void:
+                    self.stack.append((tag, classes, attrs.get("id") if panel else None))
+
+            def handle_endtag(self, tag):
+                if tag in void:
+                    return
+                if self.stack and self.stack[-1][0] == tag:
+                    self.stack.pop()
+                    return
+                self.errors.append("line %d: </%s> closes %r" % (
+                    self.getpos()[0], tag, [t for t, _, _ in self.stack[-3:]]))
+                for i in range(len(self.stack) - 1, -1, -1):
+                    if self.stack[i][0] == tag:
+                        del self.stack[i:]
+                        return
+
+        walker = Walker()
+        walker.feed(read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html")))
+        self.assertEqual(walker.errors, [])
+        self.assertEqual([t for t, _, _ in walker.stack], [])
+        self.assertEqual(walker.nested, [])
+        self.assertGreater(walker.panels, 200)
+
+    def test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all(self):
+        # Every panel carries a one-line summary under its title and an id, and
+        # the current-state page's panel index is the generated listing of them
+        # (scripts/site/panel_index.py), so it cannot drift from the ledger.
+        import panel_index
+
+        items = panel_index.panels(read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html")))
+        self.assertGreater(len(items), 200)
+        self.assertEqual([p["title"] for p in items if not p["id"]], [])
+        self.assertEqual([p["id"] for p in items if not p["summary"]], [])
+        ids = [p["id"] for p in items]
+        self.assertEqual(sorted(set(ids)), sorted(ids))
+        page = read(os.path.join(ROOT, "docs", "ic-current-state.html"))
+        self.assertEqual(panel_index.splice(page, panel_index.render(items)), page)
+
+    def test_measurement_standard_page_is_a_copy_of_the_generated_file(self):
+        # scripts/build_ic_measurement.py writes the canonical file; the site
+        # republishes it byte for byte, like the scoreboard.
+        self.assertEqual(
+            read(os.path.join(self.out, "scoreboard", "ic-measurement.html")),
+            read(os.path.join(ROOT, "docs", "ic-measurement.html")),
+        )
 
     def test_dashboard_fetches_resolve_next_to_the_published_page(self):
         page = read(os.path.join(self.out, "status", "index.html"))
@@ -644,7 +749,7 @@ class BuildTests(unittest.TestCase):
 
     def test_internal_links_resolve(self):
         missing = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html", "browser/index.html"):
             page = read(os.path.join(self.out, rel))
             base = os.path.dirname(rel)
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -674,7 +779,7 @@ class BuildTests(unittest.TestCase):
         # generic link check above catches it, but only by filename, so this
         # names the cause and the fix. See scripts/site/README.md.
         relative = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-measurement.html"):
             page = read(os.path.join(self.out, rel))
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
                 if re.match(r"(?:\.\./)*research/", href):
@@ -687,7 +792,7 @@ class BuildTests(unittest.TestCase):
         )
 
     def test_every_page_declares_title_viewport_and_description(self):
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html", "browser/index.html"):
             page = read(os.path.join(self.out, rel))
             self.assertRegex(page, r"<title>[^<]+</title>", rel)
             self.assertIn('name="viewport"', page, rel)
@@ -695,10 +800,67 @@ class BuildTests(unittest.TestCase):
 
     def test_sitemap_and_robots_point_at_the_published_urls(self):
         sitemap = read(os.path.join(self.out, "sitemap.xml"))
-        for path in ("/", "/scoreboard/", "/status/", "/status/how.html"):
+        for path in ("/", "/browser/", "/scoreboard/", "/status/", "/status/how.html"):
             self.assertIn("<loc>%s%s</loc>" % (BASE_URL, path), sitemap)
         self.assertIn("<lastmod>2026-01-01</lastmod>", sitemap)
         self.assertIn("Sitemap: %s/sitemap.xml" % BASE_URL, read(os.path.join(self.out, "robots.txt")))
+
+    def test_lab_browser_index_is_current_and_self_consistent(self):
+        # AGENTS.md §7c: docs/browser/data.json is generated from the curve
+        # registry, the leaderboard data, every committed ecbench session and
+        # every tournament round, and is never edited by hand.  It must match
+        # a fresh build, and every cross-reference inside it must resolve.
+        import importlib.util
+        import json
+
+        spec = importlib.util.spec_from_file_location("build_lab_browser", os.path.join(ROOT, "scripts", "build_lab_browser.py"))
+        builder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(builder)
+        fresh = builder.build()
+        committed = read(os.path.join(ROOT, "docs", "browser", "data.json"))
+        # Mention statistics are volatile (see builder.comparable); the rest
+        # must match a fresh build exactly.
+        self.assertEqual(builder.comparable(json.loads(committed)), builder.comparable(fresh), "docs/browser/data.json is stale; run python3 scripts/build_lab_browser.py")
+
+        data = json.loads(committed)
+        registry = json.loads(read(os.path.join(ROOT, "docs", "curves", "registry.json")))
+        slugs = {c["slug"] for c in data["curves"]}
+        self.assertEqual(slugs, {c["slug"] for c in registry["curves"]}, "every registered curve and no other")
+        methods = {m["method_id"] for m in data["methods"]}
+        fbs = {f["fb_id"] for f in data["factor_bases"]}
+        sessions = {s["session_id"] for s in data["sessions"]}
+        rounds = {r["round"] for r in data["rounds"]}
+        for c in data["curves"]:
+            for e in c["ecbench"]:
+                self.assertIn(e["session_id"], sessions, c["slug"])
+                self.assertIn(e["method_id"], methods, c["slug"])
+            for fb in c["factor_bases"]:
+                self.assertIn(fb, fbs, c["slug"])
+            for t in c["tournament_cells"]:
+                self.assertIn(t["round"], rounds, c["slug"])
+        for f in data["factor_bases"]:
+            self.assertTrue(f["curve"] is None or f["curve"] in slugs, f["fb_id"])
+            self.assertRegex(f["points_sha256"] or "", r"^[a-f0-9]{64}$", f["fb_id"])
+        for k in data["candidates"]:
+            self.assertTrue(k["slug"] is None or k["slug"] in slugs, k["candidate_id"])
+            for path in k["where"]:
+                self.assertTrue(os.path.exists(os.path.join(ROOT, path)), path)
+        for r in data["rounds"]:
+            self.assertTrue(os.path.isdir(os.path.join(ROOT, r["dir"])), r["round"])
+        for s in data["sessions"]:
+            self.assertTrue(os.path.exists(os.path.join(ROOT, s["dir"], "records.jsonl")), s["session_id"])
+        for path, digest in data["sources"].items():
+            self.assertTrue(os.path.exists(os.path.join(ROOT, path)), path)
+            self.assertRegex(digest, r"^[a-f0-9]{64}$", path)
+
+    def test_lab_browser_renders_with_dom_nodes_only(self):
+        # The browser builds every row from data.json; like the dashboards it
+        # must never pass fetched data through innerHTML.
+        script = read(os.path.join(ROOT, "docs", "browser", "browser.js"))
+        self.assertNotIn("innerHTML", script)
+        self.assertNotIn("outerHTML", script)
+        self.assertNotIn("insertAdjacentHTML", script)
+        self.assertIn('fetch("./data.json"', script)
 
     def test_build_is_idempotent(self):
         again = build(self.out, ROOT, lastmod="2026-01-01")
@@ -719,7 +881,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_site_sources_trigger_the_workflow(self):
         workflow = read(os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml"))
-        for path in ('"docs/site/**"', '"scripts/site/**"', '"docs/index-calculus-scoreboard.html"'):
+        for path in ('"docs/site/**"', '"scripts/site/**"', '"docs/index-calculus-scoreboard.html"', '"docs/browser/**"', '"scripts/build_lab_browser.py"'):
             # Once for pull_request, once for push.
             self.assertEqual(workflow.count(path), 2, path)
 

@@ -1,0 +1,38 @@
+{
+ "schema_version": 2,
+ "name": "C089-T001: icv1-f2m137-t574016314927011818501-11ceb4d6, a public target for B4's measurement 5",
+ "field": {
+  "kind": "binary",
+  "degree": 137,
+  "modulus": "0x20000000000000000000000000000000813"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "191818802977",
+  "cofactor": "908276817285794761685834637436",
+  "generator": {
+   "x": "0x881361a255947f50118bf88cf12b11a68c",
+   "y": "0xaeb41ca3dbd74e119050b7064eef7fd329"
+  }
+ },
+ "target": {
+  "point": {
+   "x": "0x454decf6967699c5eb5e982e140cc3456e",
+   "y": "0xa1476f18dcb44e370fb12fbb34b880ec4a"
+  }
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

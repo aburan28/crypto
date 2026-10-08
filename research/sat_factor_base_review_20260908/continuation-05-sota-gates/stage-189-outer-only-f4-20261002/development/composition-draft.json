@@ -1,0 +1,73 @@
+{
+  "schema": "koblitz_stage189_final.v1",
+  "candidate_commit": "af1e622d362b4f5f6c602b95055c01d880c1a457",
+  "finalizer_commit": "5dd3e630f60c1891006b6588911f9d1ee79625fc",
+  "decision_status": "REJECTED_SCREEN",
+  "candidate_selected": false,
+  "runtime_default": "adaptive inner Rayon sections within each F4 call plus the parallel fixed-X1 outer batch",
+  "claim_boundary": "One opened n=59 decomposition target and a solver-scheduling experiment. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "screen": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "outer_only_over_current": {
+          "wall": 1.003837316128029,
+          "core": 0.9533930620770616,
+          "rss": 0.9466588278289332
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 1.003837316128029,
+      "core": 0.9533930620770616,
+      "rss": 0.9466588278289332
+    },
+    "passed_performance_gate": false,
+    "status": "REJECTED_SCREEN"
+  },
+  "measured_stage_charge": {
+    "components": 10,
+    "wall_seconds_sum": 282.578480709,
+    "total_core_seconds_sum": 1258.1108909999998,
+    "peak_rss_bytes_max": 5223251968,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 539,
+    "wall_seconds_sum": 22990.185632542,
+    "total_core_seconds_sum": 56916.079575,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "development compilation and tests before the exact native build",
+    "final result write and final verification after a charged composition control"
+  ],
+  "artifacts": {
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 5322,
+      "sha256": "d1d9f8aae1cd8fe88ca94eb49b838d5f63a6c5e6d23e0cca03b59969d74ff300"
+    },
+    "rejected_patch": {
+      "path": "rejected-outer-only-schedule.patch",
+      "bytes": 11196,
+      "sha256": "2fc375782fa8e6305c218d41aa5b942c38879df85b36359ad2ef240f55b63666"
+    },
+    "screen_result": {
+      "path": "development/screen/result.json",
+      "bytes": 19721,
+      "sha256": "1b542616e67ae082d93ae783affa48ef40ef33d75ce664ec5dc9faa686424f9d"
+    },
+    "screen_verification": {
+      "path": "development/screen/verification.json",
+      "bytes": 190,
+      "sha256": "def767fdac2c4cb6acd824678a139fbcdcff2b5564b3d6544809ad471c91e890"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

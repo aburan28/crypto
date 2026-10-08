@@ -1,0 +1,39 @@
+{
+  "metrics": {
+    "bytes": 846,
+    "path": "metrics.json",
+    "sha256": "2eecb4c3b320eadec45aa055aa157a4423a6e7584c35cc9eb6e4e65b600ab8bb"
+  },
+  "process": {
+    "command": [
+      "target/release/examples/koblitz_stage193_sat_comparators",
+      "verify",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/composition-correction-after-charge.json",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/verification-correction-draft.json"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 6078464,
+    "pid": 87538,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.003501,
+    "timed_out": false,
+    "total_core_seconds": 0.015836,
+    "user_seconds": 0.012335,
+    "wall_seconds": 0.020604875,
+    "watchdog_seconds": 60
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,423 @@
+{
+  "schema": "isogeny-walk-summary/v1",
+  "tool": "src/bin/isogeny_walk.rs",
+  "root": {
+    "name": "P-192",
+    "icv1_slug": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+    "curve_id": "EC1P192Cp192h5531c4a08bdb",
+    "curve_uid": "urn:ec-record:1:sha256:5531c4a08bdb64b6e86a6e30e9a08aa57edef7af15ac5f6d4d2a83a53bf2f646"
+  },
+  "config": {
+    "primes": [5, 11, 13, 23, 31, 37, 43],
+    "max_curves": 100000,
+    "max_depth": 2,
+    "seed": 1,
+    "audit_points": 1,
+    "skipped_primes": [
+      {
+        "ell": 3,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 7,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 17,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 19,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 29,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 41,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 47,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 53,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 59,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 61,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      }
+    ],
+    "threads": 14
+  },
+  "rules": {
+    "canonical_model": "icwalk-canon/v1: the registered model when the curve is the walk's root; else an a=-3 model with the least b when one exists over F_p; else y^2=x^3+3j(1728-j)c^2*x+2j(1728-j)^2c^3 with c the least of {1, least non-residue} that gives an F_p-isomorphic model",
+    "generator": "icwalk-gen/v1: [cofactor]P for the point P with the least x >= 0 whose y is nonzero (the smaller y as an integer) and whose multiple is not the identity",
+    "edge_direction": "d/u/h when both endpoint levels are proved (depth 0: all level 0; depth 1: ell+1 rational ell-isogenies = surface, one = floor); x otherwise"
+  },
+  "class": {
+    "trace": "31607402316713927207482677199",
+    "frobenius_discriminant": "-24109379060336110122544161233113975664949272517896865359515",
+    "frobenius_discriminant_trial_factors": [
+      [5, 1],
+      [11, 1],
+      [31, 1]
+    ],
+    "frobenius_discriminant_trial_bound": 1048576,
+    "frobenius_discriminant_cofactor": "14140398275856956083603613626459809774163796198179979683",
+    "frobenius_discriminant_cofactor_status": "probable_prime",
+    "frobenius_discriminant_fundamental_if_cofactor_prime": true,
+    "order_probable_prime": true,
+    "twist_order": "6277101735386680763835789423239273818400622627597807638479",
+    "twist_order_trial_factors": [
+      [23, 1]
+    ],
+    "twist_order_cofactor": "272917466755942641905903887966924948626114027286861201673",
+    "twist_order_cofactor_status": "composite_unfactored",
+    "embedding_degree": null,
+    "embedding_degree_searched_to": 1000,
+    "ell": [
+      {
+        "ell": 5,
+        "splitting": "divides_discriminant",
+        "v_ell_discriminant": 1,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 1
+      },
+      {
+        "ell": 11,
+        "splitting": "divides_discriminant",
+        "v_ell_discriminant": 1,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 1
+      },
+      {
+        "ell": 13,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 23,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 31,
+        "splitting": "divides_discriminant",
+        "v_ell_discriminant": 1,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 1
+      },
+      {
+        "ell": 37,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 43,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      }
+    ]
+  },
+  "modular_polynomials": [
+    {
+      "ell": 5,
+      "build_ms": 0,
+      "vanishing_checks_passed": 19
+    },
+    {
+      "ell": 11,
+      "build_ms": 6,
+      "vanishing_checks_passed": 64
+    },
+    {
+      "ell": 13,
+      "build_ms": 9,
+      "vanishing_checks_passed": 87
+    },
+    {
+      "ell": 23,
+      "build_ms": 110,
+      "vanishing_checks_passed": 262
+    },
+    {
+      "ell": 31,
+      "build_ms": 450,
+      "vanishing_checks_passed": 474
+    },
+    {
+      "ell": 37,
+      "build_ms": 1001,
+      "vanishing_checks_passed": 675
+    },
+    {
+      "ell": 43,
+      "build_ms": 2025,
+      "vanishing_checks_passed": 912
+    }
+  ],
+  "counts": {
+    "curves": 71,
+    "curves_expanded": 12,
+    "max_depth_reached": 2,
+    "edges_verified": 132,
+    "edges_beyond_cap": 0,
+    "failures": 0,
+    "order_proved_prime": 71,
+    "order_consistent_unproved": 0,
+    "order_refuted": 0,
+    "a_minus_3_models": 29,
+    "qr_prefix_64_min": 22,
+    "qr_prefix_64_max": 40
+  },
+  "qr_prefix_64_histogram": [
+    [22, 1],
+    [26, 2],
+    [27, 4],
+    [28, 7],
+    [29, 7],
+    [30, 8],
+    [31, 7],
+    [32, 6],
+    [33, 6],
+    [34, 8],
+    [35, 3],
+    [36, 2],
+    [37, 2],
+    [38, 6],
+    [39, 1],
+    [40, 1]
+  ],
+  "proved_levels": [
+    {
+      "ell": 5,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 71]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 11,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 71]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 13,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 71]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 23,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 71]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 31,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 71]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 37,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 71]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 43,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 71]
+      ],
+      "curves_unresolved": 0
+    }
+  ],
+  "roots_per_expanded_curve": [
+    {
+      "ell": 5,
+      "roots": 1,
+      "curves": 12
+    },
+    {
+      "ell": 11,
+      "roots": 1,
+      "curves": 12
+    },
+    {
+      "ell": 13,
+      "roots": 2,
+      "curves": 12
+    },
+    {
+      "ell": 23,
+      "roots": 2,
+      "curves": 12
+    },
+    {
+      "ell": 31,
+      "roots": 1,
+      "curves": 12
+    },
+    {
+      "ell": 37,
+      "roots": 2,
+      "curves": 12
+    },
+    {
+      "ell": 43,
+      "roots": 2,
+      "curves": 12
+    }
+  ],
+  "failures": [],
+  "class_audits": {
+    "scope": "depend only on p and #E, so they hold for every curve in the class; run once on the root",
+    "ecc_safety": {
+      "order_size": {
+        "verdict": "fail",
+        "detail": "generator order is 192 bits; minimum is 200 bits — ECDLP solvable in O(2^96) via Pollard-rho / BSGS"
+      },
+      "order_smoothness": {
+        "verdict": "pass"
+      },
+      "effective_security": {
+        "verdict": "pass"
+      },
+      "generator_on_curve": {
+        "verdict": "pass"
+      },
+      "non_singular": {
+        "verdict": "pass"
+      },
+      "non_supersingular": {
+        "verdict": "pass"
+      },
+      "non_anomalous": {
+        "verdict": "pass"
+      },
+      "multi_target_margin": {
+        "verdict": "pass"
+      },
+      "no_weil_descent": {
+        "verdict": "pass"
+      },
+      "orbit_brittleness": {
+        "verdict": "pass"
+      },
+      "all_pass": false
+    },
+    "structural": {
+      "cm_discriminant_abs_bits": 194,
+      "cm_discriminant_trial_factors": [
+        [5, 1],
+        [11, 1],
+        [31, 1]
+      ],
+      "cm_discriminant_residue_bits": 184,
+      "cm_discriminant_residue_is_prime": true,
+      "twist_order": "6277101735386680763835789423239273818400622627597807638479",
+      "twist_trial_factors": [
+        [23, 1]
+      ],
+      "twist_residue_bits": 188,
+      "twist_residue_is_prime": false,
+      "max_twist_leak_bits": "5.000000",
+      "extension_orders": [
+        {
+          "k": 2,
+          "order": "39402006196394479212279040100143613804848155091990814277100152406347135342858211927990189375270077485114569064752799"
+        },
+        {
+          "k": 3,
+          "order": "247330401473104534060502521019647190032950832928325019242296878650644028065840513929062342401194847883724338750385565108903736448959610692595460240136001184893824312863341604"
+        },
+        {
+          "k": 4,
+          "order": "1552518092300708935148979488462502555238636254646207830263498029997357369250642409065385235928795348697166565028091603602336430264200036124839898982842099474860141966656815261807188364617228162452488691158837103007982081461030749115"
+        },
+        {
+          "k": 6,
+          "order": "61172327492847069472032393719205726808057197862523409505499342572377882961446976258061263843348278208115180404813203339823021016717952646091476672378580879277744554214321662883325192473804254142663503464936681270423385682685646213060668122121010994817767128340796000118909362775729330068952001311650391066116345343137623001029987852157033434520304"
+        }
+      ],
+      "phase10_target_parity": [0, 1],
+      "phase10_blocked": true,
+      "trial_bound": 1048576
+    },
+    "pkm": {
+      "solinas_weight": 3,
+      "near_power_of_two": true,
+      "trace_small_factors": [
+        [89, 1],
+        [179, 1],
+        [383, 1]
+      ],
+      "n_minus_1_small_factors": [
+        [2, 4],
+        [5, 1],
+        [2389, 1]
+      ],
+      "embedding_degree_within_cap": null,
+      "embedding_cap": 16,
+      "divisor_sets": "not run: field above 20 bits",
+      "scores": {
+        "special_prime": "0.250000",
+        "trace_factors": "0.768421",
+        "order_neighbourhood": "0.911458",
+        "embedding_window": "1.000000",
+        "overall": "0.646873"
+      }
+    },
+    "invariance_check": {
+      "audits": "ecc_safety and pkm re-run on walked curves' own models and generators",
+      "curves_sampled": 8,
+      "identical_to_root": true,
+      "differences": []
+    }
+  },
+  "timing_practicality_note": {
+    "walk_ms": 274,
+    "audit_ms": 1
+  },
+  "outputs": {
+    "curves.yaml": "6c37bcc8090afca141643f1f13b649fd8e83b75bb5d55c997fcd8ce39a613bb4",
+    "isogeny_routes.json": "719846b30348a718d4369c189be74b2d7e52b8de9eb7f0be7f591768183eeba6"
+  }
+}

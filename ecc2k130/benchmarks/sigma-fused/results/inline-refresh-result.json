@@ -1,0 +1,222 @@
+{
+  "schema": "ecc2k130-sigma-inline-refresh-v1",
+  "valid": true,
+  "class": "engineering stage diagnostic",
+  "decision": "promote",
+  "claimBoundary": "Complete scalar sigma-walk throughput on one Modal RTX PRO 6000; no search, solver or full-ECDLP speedup claim",
+  "modes": {
+    "control": {
+      "packedInlinePoly": 0
+    },
+    "candidate": {
+      "name": "inline3",
+      "packedInlinePoly": 3
+    }
+  },
+  "fixed": {
+    "batch": 16,
+    "blockThreads": 256,
+    "minBlocks": 2,
+    "stateTile": 256,
+    "compactState": 1,
+    "sharedSigma": 1,
+    "nativeCarrylessMultiply": 1,
+    "workers": 385024,
+    "scalarWalks": 6160384,
+    "runId": 7,
+    "steps": 1024,
+    "launches": 32,
+    "updatesPerRankedRow": 201863462912,
+    "compiler": "CUDA 13.3.73 sm_120",
+    "warmupsExcluded": 2,
+    "alternatingPairs": 5
+  },
+  "correctness": {
+    "arithmetic": true,
+    "storage": true,
+    "sharedSigma": true,
+    "checkpointCrossBinary": true,
+    "referenceReplaysPerArm": 300,
+    "replayMismatchCount": 0,
+    "droppedCount": 0,
+    "formatAwareSortedDpIdentity": true,
+    "deterministicSpreadReplayAvailable": false
+  },
+  "timing": {
+    "unit": "million complete scalar updates per second",
+    "controlMedianMps": 14534.256000000,
+    "candidateMedianMps": 14941.312000000,
+    "medianPairedRatio": 1.028820146252,
+    "minimumPairedRatio": 1.025383551591,
+    "maximumPairedRatio": 1.029011822526,
+    "geometricMeanPairedRatio": 1.028007671956,
+    "pairedLogRatio95CI": [
+      1.026123155917,
+      1.029895648983
+    ],
+    "allPairsFavorCandidate": true,
+    "candidateRatioTo26BObjective": 0.574665846154,
+    "objective26BAchieved": false
+  },
+  "admission": {
+    "requiresAllPairsAboveOne": true,
+    "requiresPaired95CILowerAboveOne": true
+  },
+  "provenance": {
+    "sourceRev": "9f2086cc791bdf1e42fe9f83e0e6d0b520815c37",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-85cc08d8-b26d-7c50-1b69-72ea66d6787a, 580.95.05, P0, 2430 MHz, 12481 MHz, 600.00 W, 97887 MiB, 12.0",
+    "sourceManifestSha256": "6c05ecee64e8cfc0492b43bbdc7eae15ddbb46d1bfa913e9e784d9bd7049a933",
+    "binaryManifestSha256": "6174e3cbb02915f23d8f951d83477c8447831a93ea736f9bd65f2ed9f48eaf97",
+    "codeManifestSha256": "0687fea6befde10acb084849c46227b07a96aa754a788d86baa648aa6ebc6a7b",
+    "dpIdentitySha256": "7081d97b3c7e86413ec440d0874fc3b1617520d5b556ef636b2c34870ebd8ae4",
+    "samplesSha256": "ce4974f1b045cbc5369bef8b058dd180c87d19c552da9030c76aba9e04d3ae04",
+    "rawFiles": {
+      "source": "source-files.sha256",
+      "binaries": "binary-sha256.txt",
+      "code": "code-sha256.txt",
+      "resources": [
+        "resources-control.txt",
+        "resources-inline3.txt"
+      ],
+      "sass": [
+        "sass-control.txt.gz",
+        "sass-inline3.txt.gz"
+      ],
+      "samples": "samples.tsv"
+    }
+  },
+  "samples": [
+    {
+      "phase": "warmup",
+      "pair": 0,
+      "order": 1,
+      "variant": "control",
+      "rateMps": 14839.194,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "c08b5c2a60e1bca59acea02a272f7dfc9c784926b31864b3089770fa54e0ae9f",
+      "gpuState": "2377, 503.12, 50"
+    },
+    {
+      "phase": "warmup",
+      "pair": 0,
+      "order": 2,
+      "variant": "inline3",
+      "rateMps": 15134.070,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "eac9fdd2d3ab8ecbac9ddac7efbf52e73f4b7a2d7816b56a48f014ea7a431f8f",
+      "gpuState": "2392, 493.95, 55"
+    },
+    {
+      "phase": "ranked",
+      "pair": 1,
+      "order": 1,
+      "variant": "control",
+      "rateMps": 14635.580,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "f08c5c70c0f8faa82aafe8167d999bb6b82d3e941f3ff5c8cede5786ff701bad",
+      "gpuState": "2310, 521.38, 59"
+    },
+    {
+      "phase": "ranked",
+      "pair": 1,
+      "order": 2,
+      "variant": "inline3",
+      "rateMps": 15007.083,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "b998a93327b1b38d446e0dce2db78ecb293d46525469cc698f170eb42a32a1a6",
+      "gpuState": "2280, 519.91, 61"
+    },
+    {
+      "phase": "ranked",
+      "pair": 2,
+      "order": 1,
+      "variant": "inline3",
+      "rateMps": 14972.113,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "c6cbaac9a691b9b5af392677ace2d68c734a62bac9d03a03c4ce00d2eb118d0c",
+      "gpuState": "2347, 485.71, 61"
+    },
+    {
+      "phase": "ranked",
+      "pair": 2,
+      "order": 2,
+      "variant": "control",
+      "rateMps": 14552.702,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "528f5f396513e71817a1f57940d4a4e1217acff74c11b40956116660d1b8ef86",
+      "gpuState": "2370, 496.55, 62"
+    },
+    {
+      "phase": "ranked",
+      "pair": 3,
+      "order": 1,
+      "variant": "control",
+      "rateMps": 14534.256,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "a0a45852928f1174447ca9130752dc3109393825aeee7b06fd8dc91b86f1aed3",
+      "gpuState": "2400, 485.92, 63"
+    },
+    {
+      "phase": "ranked",
+      "pair": 3,
+      "order": 2,
+      "variant": "inline3",
+      "rateMps": 14941.312,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "3ef2b14751e2aa6f01bdadb99219a51fbd48794c28c12d0f09b1f294c787c29a",
+      "gpuState": "2310, 527.41, 63"
+    },
+    {
+      "phase": "ranked",
+      "pair": 4,
+      "order": 1,
+      "variant": "inline3",
+      "rateMps": 14936.047,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "c1c25fc6522b0dd295f675aee3b9d196e2fea328400581eb0d40a962762ba923",
+      "gpuState": "2370, 529.93, 63"
+    },
+    {
+      "phase": "ranked",
+      "pair": 4,
+      "order": 2,
+      "variant": "control",
+      "rateMps": 14517.639,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "fd23a56207659cecfc1d81ce2ced4beb732a24fb676bf16b3291e44fa80a75cf",
+      "gpuState": "2332, 486.45, 63"
+    },
+    {
+      "phase": "ranked",
+      "pair": 5,
+      "order": 1,
+      "variant": "control",
+      "rateMps": 14510.774,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "a7e1336528ed334f2d6e706ea47b1751690b5494d933e0a3d9c9637b5ec8f199",
+      "gpuState": "2280, 517.49, 63"
+    },
+    {
+      "phase": "ranked",
+      "pair": 5,
+      "order": 2,
+      "variant": "inline3",
+      "rateMps": 14931.758,
+      "iterations": 201863462912,
+      "dropped": 0,
+      "logSha256": "3d17d72a31599a7a8b60aa8b3ac4ccbb75c1fe8d34e3da3d9c1ff557daf87d6b",
+      "gpuState": "2317, 509.54, 63"
+    }
+  ]
+}

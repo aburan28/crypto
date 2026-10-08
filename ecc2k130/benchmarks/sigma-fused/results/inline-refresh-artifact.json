@@ -1,0 +1,21 @@
+{
+  "archiveBytes": 12187638,
+  "archiveSha256": "bba5b4bc46a22a6d297114fb96933e8b143526cace83b58908414525df7b0fd2",
+  "measuredSourceCommit": "9f2086cc791bdf1e42fe9f83e0e6d0b520815c37",
+  "evidenceCommit": "5434e208953527d2f37e14bde9f6c470542922cf",
+  "provider": "modal",
+  "volume": "ecc2k130-jobs",
+  "token": "594e18cedb0048d6aafba591eba51b11",
+  "functionCallId": "fc-01M3X644GHB1Y0HFTJ3YY5083Q",
+  "retrievalCommand": "modal run modal_job.py --fetch-token 594e18cedb0048d6aafba591eba51b11 --out /tmp/ecc2k-sigma-inline-refresh-retrieved",
+  "launchSha256": "fdebf172d616657ad2537e90c5b3970ac8492760cfaca976d27dad3febcc91be",
+  "resultSha256": "d54fd6e32d8dc55a080993909fd5c2568197ea03109e66964527839f06c3b335",
+  "nativeReplay": {
+    "comparatorSourceSha256": "50f153077b603a525793b08d1a1c56855c36a31248ca3a34e039f66fb2b84339",
+    "framing": "v1_headerless",
+    "recordsPerArm": 29779,
+    "sortedIdentity": true,
+    "canonicalSortedPayloadSha256": "17e29b9695e175f306b0c76136b7331601596c98b4a9e1c27311f03c6b4a635d"
+  },
+  "exitCode": 0
+}

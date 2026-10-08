@@ -1,0 +1,39 @@
+{
+  "a": 1,
+  "candidates": [],
+  "cofactor": "22894",
+  "complete_factor_degrees": [
+    1,
+    58
+  ],
+  "factor_degrees": [
+    1
+  ],
+  "factor_enumeration_degree_cap": 24,
+  "forbidden_inputs": {
+    "discrete_log_labels_constructed": false,
+    "relation_yield_used": false,
+    "solver_timing_used": false,
+    "target_constructed": false,
+    "target_subgroup_enumerated": false
+  },
+  "group_order": "576460753246971902",
+  "m": 3,
+  "n": 59,
+  "requested_dimension": 58,
+  "requested_divisor_exists": true,
+  "schema": "koblitz_public_factor_base_discovery.v1",
+  "selected": null,
+  "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+  "sizing_gate": {
+    "m_times_dimension": 174,
+    "n": 59,
+    "passes": true
+  },
+  "status": "unavailable_factor_enumeration_degree_cap",
+  "subgroup_order": "25179555920633",
+  "timing_ns": {
+    "curve_and_subgroup_construction": 39631917,
+    "end_to_end": 39647791
+  }
+}

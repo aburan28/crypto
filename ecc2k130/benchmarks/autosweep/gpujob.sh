@@ -165,20 +165,7 @@ verify() {
   return "$status"
 }
 for b in "${FINAL[@]}"; do verify "$b" || fail=1; done
-python3 - "$R" "${FINAL[@]}" <<'PY' | tee "$R/dp-identity.txt" || fail=1
-import hashlib, os, sys
-r = sys.argv[1]; ref = None; bad = 0
-for name in sys.argv[2:]:
-    path = os.path.join(r, "dp-%s.bin" % name)
-    if not os.path.exists(path): print("%-20s missing" % name); bad = 1; continue
-    data = open(path, "rb").read()
-    recs = sorted(data[i:i+32] for i in range(0, len(data) - len(data) % 32, 32))
-    digest = hashlib.sha256(b"".join(recs)).hexdigest()
-    if ref is None: ref = digest
-    if digest != ref: bad = 1
-    print("%-20s %8d records  sha256 %s  %s" % (name, len(recs), digest[:16], "IDENTICAL to base" if digest == ref else "DIFFERS from base"))
-sys.exit(bad)
-PY
+python3 benchmarks/dp_identity.py "$R" "${FINAL[@]}" | tee "$R/dp-identity.txt" || fail=1
 
 echo "##### phase 4: final alternating bench"
 for rep in $(seq 1 "$REPS"); do
