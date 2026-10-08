@@ -177,6 +177,46 @@ epoch to reveal the persisted commitment.  Cairn carries a
 authority, and the receipt is not an ECDLP result or a claim that Cairn replayed
 the million curve certificates.
 
+### Continuing the compact grid by global rows
+
+Do not increase `--side` merely to continue the frozen million prefix. That
+would regenerate and recount the complete square. A strip records a disjoint
+half-open interval of global degree-13 spine rows while keeping the same
+degree-11 row width:
+
+```bash
+$M --threads 4 generate-strip --width 1000 --y-start 1000 --height 64 \
+  --source-commit "$C" --output runs/p256-strip-y1000-h64.jsonl.gz \
+  > runs/STRIP_GENERATE.json
+$M --threads 4 verify-strip --input runs/p256-strip-y1000-h64.jsonl.gz \
+  --audit-points 2 --audit-seed-x 7 > runs/STRIP_VERIFY.json
+
+# This checks both record chains and every full-width j value. It rejects an
+# overlap instead of silently subtracting duplicates.
+$M audit-j-union runs/p256-grid-1m.jsonl.gz \
+  runs/p256-strip-y1000-h64.jsonl.gz > runs/J_UNION.json
+```
+
+For a nonzero `--y-start`, the certificate binds one preceding spine curve as
+context and does not count it. The first emitted spine curve still carries its
+explicit degree-13 kernel certificate; every horizontal curve carries its
+degree-11 certificate. `verify-strip` independently reconstructs the boundary
+from P-256 before replaying the emitted interval. `audit-j-union` is an exact
+identity-accounting gate over already replayed certificates, not a substitute
+for mathematical replay.
+
+Adjacent row coordinates do not by themselves prove distinct curves. Report
+cumulative coverage only after the union audit returns a unique count equal to
+the sum of its inputs. A coordinate collision is retained as a discrepancy and
+is never replaced adaptively. The frozen continuation protocol is
+[`research/p256_j_windows_20261007/PROTOCOL.md`](../../research/p256_j_windows_20261007/PROTOCOL.md).
+
+The executed 64-row continuation passed generation, independent replay and an
+exact union audit: the prior million plus 64,000 new curves yielded 1,064,000
+distinct full-width j-invariants. The
+[result report](../../research/p256_j_windows_20261007/RESULTS.md) preserves
+the receipts, transfer boundary, visuals and the still-unset ECDLP speedup.
+
 ## Sizing
 
 Measured on a 14-core Apple M4 Pro, unisolated.  Treat these as estimates

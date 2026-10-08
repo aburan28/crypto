@@ -7,7 +7,8 @@ use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
 use crypto_lib::cryptanalysis::isogeny_walk::million::{
-    generate_jsonl, verify_jsonl, GridConfig, PRODUCTION_SIDE,
+    audit_j_union_paths, generate_jsonl, generate_strip_jsonl, verify_jsonl, verify_strip_jsonl,
+    GridConfig, StripConfig, PRODUCTION_SIDE,
 };
 use crypto_lib::cryptanalysis::isogeny_walk::million_store::{
     self, fetch_object, publish_cache, stage_cache, DEFAULT_CHUNK_ROWS,
@@ -48,6 +49,29 @@ enum Command {
         #[arg(long)]
         output: PathBuf,
     },
+    /// Generate a disjoint global-row continuation of the P-256 grid.
+    GenerateStrip {
+        /// Complete degree-11 row width; production continuation uses 1,000.
+        #[arg(long, default_value_t = PRODUCTION_SIDE)]
+        width: u32,
+        /// First global degree-13 spine row included in this certificate.
+        #[arg(long)]
+        y_start: u32,
+        /// Number of complete rows included in this certificate.
+        #[arg(long)]
+        height: u32,
+        /// Rows computed in parallel before their deterministic ordered write.
+        #[arg(long)]
+        batch_rows: Option<usize>,
+        /// Deterministic points per construction-time order audit.
+        #[arg(long, default_value_t = 1)]
+        audit_points: usize,
+        /// Clean 40-hex source commit recorded in the certificate.
+        #[arg(long)]
+        source_commit: String,
+        #[arg(long)]
+        output: PathBuf,
+    },
     /// Replay every identity, detector, grid choice, kernel, and isomorphism.
     Verify {
         #[arg(long)]
@@ -61,6 +85,26 @@ enum Command {
         /// Complete rows held for parallel replay at once.
         #[arg(long)]
         batch_rows: Option<usize>,
+    },
+    /// Independently replay a global-row strip certificate.
+    VerifyStrip {
+        #[arg(long)]
+        input: PathBuf,
+        /// Deterministic points per independent order audit.
+        #[arg(long, default_value_t = 2)]
+        audit_points: usize,
+        /// Independent replay starts its order-audit points at this x.
+        #[arg(long, default_value_t = 7)]
+        audit_seed_x: u64,
+        /// Complete rows held for parallel replay at once.
+        #[arg(long)]
+        batch_rows: Option<usize>,
+    },
+    /// Check certificate integrity and exact j uniqueness across all inputs.
+    AuditJUnion {
+        /// Legacy or strip certificates, in deterministic accounting order.
+        #[arg(required = true)]
+        inputs: Vec<PathBuf>,
     },
     /// Derive deterministic row slices after generation and replay agree.
     StageCache {
@@ -222,6 +266,112 @@ fn verify(
     } else {
         verify_jsonl(BufReader::new(file), audit_points, audit_seed_x, batch_rows)?
     };
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&receipt).map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn generate_strip(
+    output: &Path,
+    width: u32,
+    y_start: u32,
+    height: u32,
+    batch_rows: usize,
+    audit_points: usize,
+    source_commit: String,
+) -> Result<(), String> {
+    if output.exists() {
+        return Err(format!("refusing to overwrite {}", output.display()));
+    }
+    if let Some(parent) = output.parent().filter(|path| !path.as_os_str().is_empty()) {
+        fs::create_dir_all(parent)
+            .map_err(|error| format!("create {}: {error}", parent.display()))?;
+    }
+    let partial = partial_path(output);
+    let file = OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(&partial)
+        .map_err(|error| format!("create {}: {error}", partial.display()))?;
+    let buffered = BufWriter::new(file);
+    let mut encoder = GzBuilder::new()
+        .mtime(0)
+        .operating_system(255)
+        .write(buffered, Compression::new(6));
+    let result = generate_strip_jsonl(
+        &mut encoder,
+        &StripConfig {
+            width,
+            y_start,
+            height,
+            batch_rows,
+            audit_points,
+            audit_seed_x: 0,
+            source_commit,
+        },
+    );
+    let mut buffered = encoder
+        .finish()
+        .map_err(|error| format!("finish {}: {error}", partial.display()))?;
+    buffered
+        .flush()
+        .map_err(|error| format!("flush {}: {error}", partial.display()))?;
+    buffered
+        .get_ref()
+        .sync_all()
+        .map_err(|error| format!("sync {}: {error}", partial.display()))?;
+    let receipt = match result {
+        Ok(receipt) => receipt,
+        Err(error) => {
+            return Err(format!(
+                "{error}; preserved the incomplete strip attempt at {}",
+                partial.display()
+            ))
+        }
+    };
+    fs::rename(&partial, output).map_err(|error| {
+        format!(
+            "commit strip certificate {} -> {}: {error}",
+            partial.display(),
+            output.display()
+        )
+    })?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&receipt).map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
+fn verify_strip(
+    input: &Path,
+    audit_points: usize,
+    audit_seed_x: u64,
+    batch_rows: usize,
+) -> Result<(), String> {
+    let file = File::open(input).map_err(|error| format!("open {}: {error}", input.display()))?;
+    let receipt = if input.extension().and_then(|value| value.to_str()) == Some("gz") {
+        verify_strip_jsonl(
+            BufReader::new(GzDecoder::new(file)),
+            audit_points,
+            audit_seed_x,
+            batch_rows,
+        )?
+    } else {
+        verify_strip_jsonl(BufReader::new(file), audit_points, audit_seed_x, batch_rows)?
+    };
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&receipt).map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
+fn audit_j_union(inputs: &[PathBuf]) -> Result<(), String> {
+    let receipt = audit_j_union_paths(inputs)?;
     println!(
         "{}",
         serde_json::to_string_pretty(&receipt).map_err(|error| error.to_string())?
@@ -393,6 +543,23 @@ fn run() -> Result<(), String> {
             audit_points,
             source_commit,
         ),
+        Command::GenerateStrip {
+            width,
+            y_start,
+            height,
+            batch_rows,
+            audit_points,
+            source_commit,
+            output,
+        } => generate_strip(
+            &output,
+            width,
+            y_start,
+            height,
+            batch_rows.unwrap_or_else(default_batch_rows),
+            audit_points,
+            source_commit,
+        ),
         Command::Verify {
             input,
             audit_points,
@@ -404,6 +571,18 @@ fn run() -> Result<(), String> {
             audit_seed_x,
             batch_rows.unwrap_or_else(default_batch_rows),
         ),
+        Command::VerifyStrip {
+            input,
+            audit_points,
+            audit_seed_x,
+            batch_rows,
+        } => verify_strip(
+            &input,
+            audit_points,
+            audit_seed_x,
+            batch_rows.unwrap_or_else(default_batch_rows),
+        ),
+        Command::AuditJUnion { inputs } => audit_j_union(&inputs),
         Command::StageCache {
             input,
             generation_receipt,
