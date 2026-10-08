@@ -4,7 +4,8 @@ use clap::{Args, ValueEnum};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions, SearchReport,
 };
-use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
+use crypto_lib::cryptanalysis::koblitz_index_calculus::is_irreducible_f2;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress,
     order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
@@ -129,6 +130,16 @@ pub struct RunArgs {
     /// projection merge, and a fixed-surplus collection before one solve.
     #[arg(long)]
     pub control: bool,
+    /// Coefficient b of an isogenous model y² + xy = x³ + a x² + b, as a
+    /// bitmask in the field modulus (hex 0x… or decimal).  Selects the
+    /// no-Frobenius path (b ∉ F_2: a floor curve of the volcano); the
+    /// class order is certified on sampled points.
+    #[arg(long, conflicts_with = "factor_base")]
+    pub model_b: Option<String>,
+    /// Field modulus as a bitmask including the x^n term (hex or decimal);
+    /// default: the same sparse search as the Koblitz constructor.
+    #[arg(long, requires = "model_b")]
+    pub field_modulus: Option<String>,
 }
 impl Default for RunArgs {
     fn default() -> Self {
@@ -145,6 +156,8 @@ impl Default for RunArgs {
             solver: Solver::Groebner,
             batch: 0,
             control: false,
+            model_b: None,
+            field_modulus: None,
         }
     }
 }
@@ -501,6 +514,61 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
         "scope":"per-target individual logarithm: one relation over a reused, re-verified factor-base logarithm database",
         "limitations":["No imported target was used.","This run does not establish scaling or challenge readiness."]}))
 }
+fn parse_bitmask(s: &str) -> Result<BigUint, String> {
+    let t = s.trim();
+    let parsed = match t.strip_prefix("0x").or_else(|| t.strip_prefix("0X")) {
+        Some(h) => BigUint::parse_bytes(h.as_bytes(), 16),
+        None => BigUint::parse_bytes(t.as_bytes(), 10),
+    };
+    parsed.ok_or_else(|| format!("not a bitmask: {s}"))
+}
+/// The curve for `ic run`: the Koblitz model, or with `--model-b` an
+/// isogenous model of the same class (no Frobenius endomorphism).
+fn curve_for_run(args: &RunArgs) -> Result<KoblitzCurve, String> {
+    let Some(model_b) = &args.model_b else {
+        return curve(args.degree, args.curve_a);
+    };
+    let (n, a) = (args.degree, args.curve_a);
+    if n < 3 || n > MAX_N || n % 2 == 0 || a > 1 {
+        return Err("unsupported synthetic curve parameters".into());
+    }
+    let modulus = match &args.field_modulus {
+        None => None,
+        Some(text) => {
+            if n > 63 {
+                return Err("an explicit field modulus is limited to degree ≤ 63".into());
+            }
+            let v = parse_bitmask(text)?;
+            if v.bits() != n as u64 + 1 {
+                return Err(format!("field modulus must have degree exactly {n}"));
+            }
+            let word = v.to_u64_digits()[0];
+            if !is_irreducible_f2(word) {
+                return Err("field modulus is reducible".into());
+            }
+            let low_terms: Vec<u32> = (0..n).filter(|i| (word >> i) & 1 == 1).collect();
+            Some(IrreduciblePoly { degree: n, low_terms })
+        }
+    };
+    let b_val = parse_bitmask(model_b)?;
+    if b_val.bits() > n as u64 {
+        return Err(format!("model b must be a bitmask below 2^{n}"));
+    }
+    let b = F2mElement::from_biguint(&b_val, n);
+    KoblitzCurve::isogenous_model(a, n, b, modulus).ok_or_else(|| {
+        format!(
+            "b does not define a curve of the class of K_{a} / GF(2^{n}): the order certificate failed"
+        )
+    })
+}
+fn model_json(c: &KoblitzCurve) -> Value {
+    json!({
+        "b": params::hex(&c.curve.b.to_biguint()),
+        "a2": c.a,
+        "frobenius_endomorphism": c.frobenius_is_endomorphism,
+        "field_modulus_low_terms": c.curve.irreducible.low_terms,
+    })
+}
 fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
     // Keep this guard even for internal callers, independently of Clap.
     if n < 3 || n > MAX_N || n % 2 == 0 || a > 1 {
@@ -641,7 +709,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         );
         let _ = std::io::stdout().flush();
     }
-    let c = curve(args.degree, args.curve_a)?;
+    let c = curve_for_run(&args)?;
     let k = known(&c, &args)?;
     let supplied = parameters(&c, &k, args.seed);
     let target = c.mul(c.generator(), &k);
@@ -706,7 +774,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         Ok(fb) => fb,
         Err(reason) => {
             return Ok(
-                json!({"schema_version":1,"operation":"run","status":"incomplete","evidence_scope":"synthetic_known_answer",
+                json!({"schema_version":1,"operation":"run","model":model_json(&c),"status":"incomplete","evidence_scope":"synthetic_known_answer",
                 "reason":format!("factor-base construction failed: {reason}"),"arguments":args,"parameters":supplied,
                 "factor_base":{"spec":spec},"stages":stages,"elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}),
             );
@@ -779,7 +847,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         "collapse_projected_orbits":!args.control,"early_solve":!args.control,"batch":batch});
     let Some(r) = report else {
         return Ok(
-            json!({"schema_version":1,"operation":"run","status":"incomplete","evidence_scope":"synthetic_known_answer",
+            json!({"schema_version":1,"operation":"run","model":model_json(&c),"status":"incomplete","evidence_scope":"synthetic_known_answer",
             "reason":"factor-base construction or pipeline operation did not complete; no result asserted",
             "arguments":args,"parameters":supplied,"factor_base":factor_base,"mode":mode,"stages":stages,
             "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}),
@@ -794,7 +862,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
             .is_some_and(|d| c.mul(c.generator(), d) == target)
         && !r.direct_relation;
     Ok(
-        json!({"schema_version":1,"operation":"run","status":if verified{"complete"}else{"incomplete"},
+        json!({"schema_version":1,"operation":"run","model":model_json(&c),"status":if verified{"complete"}else{"incomplete"},
         "evidence_scope":"synthetic_known_answer","arguments":args,"parameters":supplied,"factor_base":factor_base,"mode":mode,"stages":stages,
         "result":{"expected":k.to_string(),"recovered":r.log.as_ref().map(ToString::to_string),"verified":verified},
         "counts":{"factor_base_points":r.factor_base_size,"columns":r.orbit_count,"relations":r.relations,
