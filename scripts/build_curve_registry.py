@@ -93,6 +93,36 @@ PRIME_STANDARDS = {
         (0x188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012,
          0x07192B95FFC8DA78631011ED6B24CDD573F977A11E794811)),
 }
+# Standard random binary curves carried by the source tree.  Keep these
+# separate from KOBLITZ_STANDARDS: sect113r1 is a general binary Weierstrass
+# curve, not a Koblitz curve.  The identity pins make a basis, encoding or
+# subgroup change fail the registry build instead of silently renaming it.
+BINARY_STANDARDS = {
+    "sect113r1": {
+        "m": 113,
+        "modulus": (1 << 113) | (1 << 9) | 1,
+        "a": 0x003088250CA6E7C7FE649CE85820F7,
+        "b": 0x00E8BEE4D3E2260744188BE0E9C723,
+        "subgroup_order": 0x0100000000000000D9CCEC8A39E56F,
+        "cofactor": 2,
+        "generator": (
+            0x009D73616F35F4AB1407D73562C10F,
+            0x00A52830277958EE84D1315ED31886,
+        ),
+        "source": "src/binary_ecc/curve.rs",
+        "icv1": (
+            "ICV1:f2m-113-99967757:-122610772499221213:"
+            "10384593717069655379671765157661406:"
+            "0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb"
+        ),
+        "ec1": "EC1N113Csect113r1hf529f17bd191",
+        "curve_uid": (
+            "urn:ec-record:1:sha256:"
+            "f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97"
+        ),
+        "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3",
+    },
+}
 # Where the source tree constructs each prime standard, when not curve.rs.
 PRIME_STANDARD_SOURCES = {"P-224": "src/ecc/curve_zoo.rs", "P-192": "src/ecc/curve_zoo.rs"}
 # Binary standards whose generator the source tree carries, in the basis of
@@ -549,6 +579,26 @@ def harvest_standards(reg: Registry) -> None:
         reg.add(ident, "prime", {"p": str(p), "a": str(a), "b": str(b)},
                 src, [], standard=name)
         reg.represent(ident, *prime_record(p, a, b, n * h, n, h, g), src)
+    for name, spec in BINARY_STANDARDS.items():
+        m, f, a, b = (spec[k] for k in ("m", "modulus", "a", "b"))
+        r, h, g = (spec[k] for k in ("subgroup_order", "cofactor", "generator"))
+        order = r * h
+        ident = cid.binary_id(m, f, a, b, order)
+        field, curve = binary_record(m, f, a, b, order, r, h, g)
+        representation = ec1.curve_identity(field, curve, name)
+        assert ident["icv1"] == spec["icv1"], name
+        assert representation["curve_id"] == spec["ec1"], name
+        assert representation["curve_uid"] == spec["curve_uid"], name
+        assert representation["field_sha256"] == spec["field_sha256"], name
+        reg.add(
+            ident,
+            "binary",
+            {"m": m, "modulus": cid._hex(f), "a": cid._hex(a), "b": cid._hex(b)},
+            spec["source"],
+            [],
+            standard=name,
+        )
+        reg.represent(ident, field, curve, spec["source"])
 
 
 def unresolved_text(reg: Registry) -> list[str]:

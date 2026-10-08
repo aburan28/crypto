@@ -92,6 +92,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
+   "sha256": "2342a3d22dd3a947dfc8ac2a791e2f42061dad4e7b723db6bd0abe7b851b64a6"
    "sha256": "d11d19fcb65175b8a8ad363b2c15ea87ccc733331d5c20b36cb0954901108c92"
   }
  },
@@ -7244,6 +7245,52 @@
    "legacy": [
     "random-binary-n27-b227199e"
    ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+   "family": "binary",
+   "field": "GF(2^113)",
+   "coefficients": "a = 0x3088250ca6e7c7fe649ce85820f7, b = 0x162b1a595685a1387c82647bf44cf",
+   "order_bits": 114,
+   "standard": [],
+   "ec1": [
+    "EC1N113Crbh2ee3581888f2"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+   "family": "binary",
+   "field": "GF(2^113)",
+   "coefficients": "a = 0x3088250ca6e7c7fe649ce85820f7, b = 0xe8bee4d3e2260744188be0e9c723",
+   "order_bits": 114,
+   "standard": [
+    "sect113r1"
+   ],
+   "ec1": [
+    "EC1N113Csect113r1hf529f17bd191"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "sect113r1"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+   "family": "binary",
+   "field": "GF(2^113)",
+   "coefficients": "a = 0x3088250ca6e7c7fe649ce85820f7, b = 0x109267245489e254e8f14002629a1",
+   "order_bits": 114,
+   "standard": [],
+   "ec1": [
+    "EC1N113Crbh921ab2cd913f"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false
   },
   {
