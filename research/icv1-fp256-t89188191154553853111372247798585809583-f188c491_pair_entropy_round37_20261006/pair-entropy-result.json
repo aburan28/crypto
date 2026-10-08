@@ -1,0 +1,2046 @@
+{
+  "schema": "p256-pair-entropy-v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "family": "round-33 cutoff-conditioned optimistic signed-pair cache",
+  "dependencies": [
+    {
+      "round": 33,
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_biased_restart_round33_20261006/biased-restart-result.json",
+      "sha256": "9931bccbd9e2821f4498f465ce65f83efb400e7fb3740a239bdb40d3275ffbd8",
+      "schema": "p256.biased_restart_selector/v1"
+    },
+    {
+      "round": 36,
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_mont_affine_round36_20261006/mont-affine-result.json",
+      "sha256": "f145231c098da83878e890d340f8ae921598519b0f2626bcc7c4cd8f9446d015",
+      "schema": "p256-mont-affine-table-v1"
+    }
+  ],
+  "frozen_model": {
+    "columns": 131458,
+    "arity": 17,
+    "cutoff": 219,
+    "lookups_per_segment": 8,
+    "pair_entries": 34562148612,
+    "entry_bytes": 64,
+    "corrected_base_ratio_to_rho": 0.998569034150286,
+    "local_oracle_ratio_to_rho": 0.964336477130181,
+    "mean_capacity": 224.36124930751055,
+    "allowed_cold_constructions_per_segment": 0.33441050842298764,
+    "capacity_counts": [
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6935,
+      6628
+    ],
+    "retained_unsigned_tuples": "4299882272811428257776224473756934611512306612347523812324992780973981"
+  },
+  "class_rows": [
+    {
+      "density_rank": 1,
+      "capacity_left": 18,
+      "capacity_right": 18,
+      "unordered_column_pairs": 21961878,
+      "signed_entries": 87847512,
+      "retained_completions_per_fixed_pair": "528275577732110801596527286612429203957448861998719991924689367",
+      "signed_entry_presence_probability": 3.071453729515157e-8,
+      "signed_entry_presence_log2": -24.956503109380602
+    },
+    {
+      "density_rank": 2,
+      "capacity_left": 17,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "463617149392618067308921005619444644659198018896634934385897057",
+      "signed_entry_presence_probability": 2.6955223421122144e-8,
+      "signed_entry_presence_log2": -25.144859891555146
+    },
+    {
+      "density_rank": 3,
+      "capacity_left": 17,
+      "capacity_right": 17,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "405838074184890378437222518998037558794178799680613143834325742",
+      "signed_entry_presence_probability": 2.359588288911093e-8,
+      "signed_entry_presence_log2": -25.33688960517397
+    },
+    {
+      "density_rank": 4,
+      "capacity_left": 16,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "405836755871558262655205620256039653687172175649495202110301072",
+      "signed_entry_presence_probability": 2.359580624088846e-8,
+      "signed_entry_presence_log2": -25.336894291592806
+    },
+    {
+      "density_rank": 5,
+      "capacity_left": 16,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "354343421869471740329618530589622667573892211329600029370686519",
+      "signed_entry_presence_probability": 2.060192578469063e-8,
+      "signed_entry_presence_log2": -25.53264555809012
+    },
+    {
+      "density_rank": 6,
+      "capacity_left": 15,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "354341071920119357448114644526000696516910888244117488737836900",
+      "signed_entry_presence_probability": 2.060178915598761e-8,
+      "signed_entry_presence_log2": -25.532655125846453
+    },
+    {
+      "density_rank": 7,
+      "capacity_left": 16,
+      "capacity_right": 16,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "308574899456999768454463741538181365159106601854948962595584509",
+      "signed_entry_presence_probability": 1.7940892324433432e-8,
+      "signed_entry_presence_log2": -25.73217311187294
+    },
+    {
+      "density_rank": 8,
+      "capacity_left": 15,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "308573860591390839615614745567148206261900877437644381338076553",
+      "signed_entry_presence_probability": 1.7940831923616446e-8,
+      "signed_entry_presence_log2": -25.732177968939368
+    },
+    {
+      "density_rank": 9,
+      "capacity_left": 14,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "308570739976068468150154137517141720301914479855188796430610932",
+      "signed_entry_presence_probability": 1.7940650487525618e-8,
+      "signed_entry_presence_log2": -25.732192559024888
+    },
+    {
+      "density_rank": 10,
+      "capacity_left": 15,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "268005977063651845903337053951941186387911011160459430348789969",
+      "signed_entry_presence_probability": 1.5582169467654938e-8,
+      "signed_entry_presence_log2": -25.935528648784413
+    },
+    {
+      "density_rank": 11,
+      "capacity_left": 14,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "268004151508375932340412956501924030093197458421117276633335094",
+      "signed_entry_presence_probability": 1.558206332781435e-8,
+      "signed_entry_presence_log2": -25.93553847591044
+    },
+    {
+      "density_rank": 12,
+      "capacity_left": 13,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "268000491845138656394259282850622627223800843233399664816806170",
+      "signed_entry_presence_probability": 1.5581850550870407e-8,
+      "signed_entry_presence_log2": -25.93555817640397
+    },
+    {
+      "density_rank": 13,
+      "capacity_left": 15,
+      "capacity_right": 15,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "232146158494860213885728418664494932436171657478510262813934454",
+      "signed_entry_presence_probability": 1.349723921296304e-8,
+      "signed_entry_presence_log2": -26.142760417088514
+    },
+    {
+      "density_rank": 14,
+      "capacity_left": 14,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "232145363245764308372369963445384342747879088683087096203584483",
+      "signed_entry_presence_probability": 1.3497192976284601e-8,
+      "signed_entry_presence_log2": -26.14276535925038
+    },
+    {
+      "density_rank": 15,
+      "capacity_left": 13,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "232142973071487862044358217706481233675076897840680522993014307",
+      "signed_entry_presence_probability": 1.3497054008859168e-8,
+      "signed_entry_presence_log2": -26.142780213349894
+    },
+    {
+      "density_rank": 16,
+      "capacity_left": 12,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "232138974738499379828891530942891950810861023382704159368458131",
+      "signed_entry_presence_probability": 1.3496821541274313e-8,
+      "signed_entry_presence_log2": -26.142805061936844
+    },
+    {
+      "density_rank": 17,
+      "capacity_left": 14,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "200536621964421270937605166544485619927334766816705118964256188",
+      "signed_entry_presence_probability": 1.1659425144755342e-8,
+      "signed_entry_presence_log2": -26.353928099313084
+    },
+    {
+      "density_rank": 18,
+      "capacity_left": 13,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "200535244418569204323509073614218715856131614709799575810653730",
+      "signed_entry_presence_probability": 1.1659345052687427e-8,
+      "signed_entry_presence_log2": -26.35393800964954
+    },
+    {
+      "density_rank": 19,
+      "capacity_left": 12,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "200532480409839835337084920564984698056621323188485695153223431",
+      "signed_entry_presence_probability": 1.1659184350105706e-8,
+      "signed_entry_presence_log2": -26.353957894678626
+    },
+    {
+      "density_rank": 20,
+      "capacity_left": 11,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "200528312186202896051462582194327138216002347646081503238901075",
+      "signed_entry_presence_probability": 1.1658942004887135e-8,
+      "signed_entry_presence_log2": -26.353987882529253
+    },
+    {
+      "density_rank": 21,
+      "capacity_left": 14,
+      "capacity_right": 14,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "172752978035864778584854508852961003890878041654658337356793287",
+      "signed_entry_presence_probability": 1.0044052783037723e-8,
+      "signed_entry_presence_log2": -26.569083243773235
+    },
+    {
+      "density_rank": 22,
+      "capacity_left": 13,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "172752386812080485861716756010644890238142196673974211417310097",
+      "signed_entry_presence_probability": 1.0044018408620773e-8,
+      "signed_entry_presence_log2": -26.569088181211022
+    },
+    {
+      "density_rank": 23,
+      "capacity_left": 12,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "172750608733308464780058371427746309846324614931832537273606981",
+      "signed_entry_presence_probability": 1.0043915029117616e-8,
+      "signed_entry_presence_log2": -26.569103030433517
+    },
+    {
+      "density_rank": 24,
+      "capacity_left": 11,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "172747630611644244222384828874188727809987975574041063123282558",
+      "signed_entry_presence_probability": 1.004374187776862e-8,
+      "signed_entry_presence_log2": -26.569127901885043
+    },
+    {
+      "density_rank": 25,
+      "capacity_left": 10,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "172743430581761100264969886618859923372719286049608855839960886",
+      "signed_entry_presence_probability": 1.0043497683299059e-8,
+      "signed_entry_presence_log2": -26.56916297869579
+    },
+    {
+      "density_rank": 26,
+      "capacity_left": 13,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "148401403364147737738157434236116850913966808486369087635603910",
+      "signed_entry_presence_probability": 8.628224794810324e-9,
+      "signed_entry_presence_log2": -26.788289089850743
+    },
+    {
+      "density_rank": 27,
+      "capacity_left": 12,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "148400393990832572445883565213446535215703506794119101435016940",
+      "signed_entry_presence_probability": 8.628166108708522e-9,
+      "signed_entry_presence_log2": -26.788298902580244
+    },
+    {
+      "density_rank": 28,
+      "capacity_left": 11,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "148398366704357198253773913541262109307181572967700351660148161",
+      "signed_entry_presence_probability": 8.62804823998871e-9,
+      "signed_entry_presence_log2": -26.788318611261893
+    },
+    {
+      "density_rank": 29,
+      "capacity_left": 10,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "148395304480410668295797099508232482967732966998827617822699196",
+      "signed_entry_presence_probability": 8.627870198838264e-9,
+      "signed_entry_presence_log2": -26.78834838181114
+    },
+    {
+      "density_rank": 30,
+      "capacity_left": 9,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "148391181921168524246227113842715459461240160514110772986932581",
+      "signed_entry_presence_probability": 8.627630508599056e-9,
+      "signed_entry_presence_log2": -26.788388461774666
+    },
+    {
+      "density_rank": 31,
+      "capacity_left": 13,
+      "capacity_right": 13,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "127120163315162554800836565869746040431979438611319524761315300",
+      "signed_entry_presence_probability": 7.390909520881284e-9,
+      "signed_entry_presence_log2": -27.01160094150593
+    },
+    {
+      "density_rank": 32,
+      "capacity_left": 12,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "127119736614892622377922133959858771669886937296887044249367101",
+      "signed_entry_presence_probability": 7.390884712046828e-9,
+      "signed_entry_presence_log2": -27.011605784163304
+    },
+    {
+      "density_rank": 33,
+      "capacity_left": 11,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "127118452437466095454087115546899748473056390428161437229442542",
+      "signed_entry_presence_probability": 7.390810048524373e-9,
+      "signed_entry_presence_log2": -27.01162035849938
+    },
+    {
+      "density_rank": 34,
+      "capacity_left": 10,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "127116298574247482048017258331959052848190786940986861217129983",
+      "signed_entry_presence_probability": 7.3906848204900945e-9,
+      "signed_entry_presence_log2": -27.011644803369894
+    },
+    {
+      "density_rank": 35,
+      "capacity_left": 9,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "127113254748401481687776319275756038724847440192204708640277707",
+      "signed_entry_presence_probability": 7.390507849025942e-9,
+      "signed_entry_presence_log2": -27.01167934941221
+    },
+    {
+      "density_rank": 36,
+      "capacity_left": 8,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "127109292721833590514525531170152646977749835165506801732044239",
+      "signed_entry_presence_probability": 7.390277492337288e-9,
+      "signed_entry_presence_log2": -27.01172431785532
+    },
+    {
+      "density_rank": 37,
+      "capacity_left": 12,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "108576202583901013046620739843022439961614722862593909286038201",
+      "signed_entry_presence_probability": 6.312742750565455e-9,
+      "signed_entry_presence_log2": -27.239085892691374
+    },
+    {
+      "density_rank": 38,
+      "capacity_left": 11,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "108575484773053222331062390015104556527335305300620970248648405",
+      "signed_entry_presence_probability": 6.312701016234009e-9,
+      "signed_entry_presence_log2": -27.23909543056016
+    },
+    {
+      "density_rank": 39,
+      "capacity_left": 10,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "108574041491652673052655561616570273445454115686585481654991326",
+      "signed_entry_presence_probability": 6.312617102227243e-9,
+      "signed_entry_presence_log2": -27.239114608266462
+    },
+    {
+      "density_rank": 40,
+      "capacity_left": 9,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "108571857450638295466508134487495818352910318641185232264246351",
+      "signed_entry_presence_probability": 6.3124901196219165e-9,
+      "signed_entry_presence_log2": -27.239143629354643
+    },
+    {
+      "density_rank": 41,
+      "capacity_left": 8,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "108568909792757436783209715278497173748170384150612662117827334",
+      "signed_entry_presence_probability": 6.31231873947161e-9,
+      "signed_entry_presence_log2": -27.23918279815248
+    },
+    {
+      "density_rank": 42,
+      "capacity_left": 7,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "108565168185465501497586820325877849652623027796391238335355504",
+      "signed_entry_presence_probability": 6.312101198208005e-9,
+      "signed_entry_presence_log2": -27.239232518567956
+    },
+    {
+      "density_rank": 43,
+      "capacity_left": 12,
+      "capacity_right": 12,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "92465707461689764258194941413097108741459613712104780448907835",
+      "signed_entry_presence_probability": 5.3760604125349766e-9,
+      "signed_entry_presence_log2": -27.47080350374628
+    },
+    {
+      "density_rank": 44,
+      "capacity_left": 11,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "92465408681337541603075487314282187324333029483887543780325315",
+      "signed_entry_presence_probability": 5.376043041108664e-9,
+      "signed_entry_presence_log2": -27.47080816547051
+    },
+    {
+      "density_rank": 45,
+      "capacity_left": 10,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "92464508787780912129043996442615136233362542268781518945945558",
+      "signed_entry_presence_probability": 5.375990720283375e-9,
+      "signed_entry_presence_log2": -27.47082220616213
+    },
+    {
+      "density_rank": 46,
+      "capacity_left": 9,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "92462997133127636543242632485718020303565150355552673025209403",
+      "signed_entry_presence_probability": 5.375902830978659e-9,
+      "signed_entry_presence_log2": -27.47084579223345
+    },
+    {
+      "density_rank": 47,
+      "capacity_left": 8,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "92460856003192453761748379840306168559989310012875384664603322",
+      "signed_entry_presence_probability": 5.3757783432718255e-9,
+      "signed_entry_presence_log2": -27.470879200552467
+    },
+    {
+      "density_rank": 48,
+      "capacity_left": 7,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "92458060666910251710346764307212542740532016747067105647599559",
+      "signed_entry_presence_probability": 5.375615819270885e-9,
+      "signed_entry_presence_log2": -27.470922817699538
+    },
+    {
+      "density_rank": 49,
+      "capacity_left": 6,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "92454579447411512034192541599122610293332655971230172930243194",
+      "signed_entry_presence_probability": 5.3754134172469536e-9,
+      "signed_entry_presence_log2": -27.470977138897965
+    },
+    {
+      "density_rank": 50,
+      "capacity_left": 11,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "78511111291669539962529668042002988183430563599918112050373305",
+      "signed_entry_presence_probability": 4.564724468626902e-9,
+      "signed_entry_presence_log2": -27.706825073676505
+    },
+    {
+      "density_rank": 51,
+      "capacity_left": 10,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "78510616209753344835482946093294047514615974546756567964243349",
+      "signed_entry_presence_probability": 4.564695684006488e-9,
+      "signed_entry_presence_log2": -27.70683417117195
+    },
+    {
+      "density_rank": 52,
+      "capacity_left": 9,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "78509619544246101296804318200158650400141066615584411036449638",
+      "signed_entry_presence_probability": 4.564637736750958e-9,
+      "signed_entry_presence_log2": -27.706852485809904
+    },
+    {
+      "density_rank": 53,
+      "capacity_left": 8,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "78508108301275700602842915891303106874988285915624022667182630",
+      "signed_entry_presence_probability": 4.564549871381948e-9,
+      "signed_entry_presence_log2": -27.70688025672175
+    },
+    {
+      "density_rank": 54,
+      "capacity_left": 7,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "78506063014330243437256098824691652825093292508295094801296135",
+      "signed_entry_presence_probability": 4.564430956094523e-9,
+      "signed_entry_presence_log2": -27.70691784218692
+    },
+    {
+      "density_rank": 55,
+      "capacity_left": 6,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "78503457775087830759171002170385082594933839910624070737100508",
+      "signed_entry_presence_probability": 4.564279484549658e-9,
+      "signed_entry_presence_log2": -27.70696571910186
+    },
+    {
+      "density_rank": 56,
+      "capacity_left": 5,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "78500260277277221755927544607355247835904060949737862562038850",
+      "signed_entry_presence_probability": 4.564093578424342e-9,
+      "signed_entry_presence_log2": -27.70702448222279
+    },
+    {
+      "density_rank": 57,
+      "capacity_left": 11,
+      "capacity_right": 11,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "66460951628801378972027486934813128103897652414059580906455118",
+      "signed_entry_presence_probability": 3.864114608965018e-9,
+      "signed_entry_presence_log2": -27.947214969094826
+    },
+    {
+      "density_rank": 58,
+      "capacity_left": 10,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "66460748817282850435266945014445143654766682166204692296414698",
+      "signed_entry_presence_probability": 3.864102817274824e-9,
+      "signed_entry_presence_log2": -27.947219371614068
+    },
+    {
+      "density_rank": 59,
+      "capacity_left": 9,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "66460137443104018190299476869486553340674327101060506281837468",
+      "signed_entry_presence_probability": 3.864067271291233e-9,
+      "signed_entry_presence_log2": -27.94723264306479
+    },
+    {
+      "density_rank": 60,
+      "capacity_left": 8,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "66459108687880480941122765937796129071052987465710993780048004",
+      "signed_entry_presence_probability": 3.864007458303443e-9,
+      "signed_entry_presence_log2": -27.94725497512132
+    },
+    {
+      "density_rank": 61,
+      "capacity_left": 7,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "66457647856235173250853478824776879625186387509598576680040661",
+      "signed_entry_presence_probability": 3.863922523905673e-9,
+      "signed_entry_presence_log2": -27.947286687218803
+    },
+    {
+      "density_rank": 62,
+      "capacity_left": 6,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "66455734379782148500719896115650309205161690696030183148106903",
+      "signed_entry_presence_probability": 3.8638112722287875e-9,
+      "signed_entry_presence_log2": -27.94732822649714
+    },
+    {
+      "density_rank": 63,
+      "capacity_left": 5,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "66453341824861623490535088698547816406831608266341923836143670",
+      "signed_entry_presence_probability": 3.8636721663900276e-9,
+      "signed_entry_presence_log2": -27.94738016767705
+    },
+    {
+      "density_rank": 64,
+      "capacity_left": 4,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "66450437906139734009648143636747502328008689568326944505021307",
+      "signed_entry_presence_probability": 3.863503329283704e-9,
+      "signed_entry_presence_log2": -27.94744321282367
+    },
+    {
+      "density_rank": 65,
+      "capacity_left": 10,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "56087248492710385671583883962856899588715154454461092014514620",
+      "signed_entry_presence_probability": 3.2609758206262692e-9,
+      "signed_entry_presence_log2": -28.192049110106844
+    },
+    {
+      "density_rank": 66,
+      "capacity_left": 9,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "56086917616453817521752741036559280334229878824465464366522784",
+      "signed_entry_presence_probability": 3.2609565831079156e-9,
+      "signed_entry_presence_log2": -28.192057621042135
+    },
+    {
+      "density_rank": 67,
+      "capacity_left": 8,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "56086250609884941606208475535351836968635625256927573164098249",
+      "signed_entry_presence_probability": 3.260917802594488e-9,
+      "signed_entry_presence_log2": -28.192074778212326
+    },
+    {
+      "density_rank": 68,
+      "capacity_left": 7,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "56085236958941178056704792737384088891904613845442461104719154",
+      "signed_entry_presence_probability": 3.260858867786541e-9,
+      "signed_entry_presence_log2": -28.192100852381824
+    },
+    {
+      "density_rank": 69,
+      "capacity_left": 6,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "56083860878269755125218226871697094230382804153056071201596317",
+      "signed_entry_presence_probability": 3.2607788609058805e-9,
+      "signed_entry_presence_log2": -28.192136250094723
+    },
+    {
+      "density_rank": 70,
+      "capacity_left": 5,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "56082101295840935493380147039098435470288396009973290038852520",
+      "signed_entry_presence_probability": 3.260676556800955e-9,
+      "signed_entry_presence_log2": -28.19218151410878
+    },
+    {
+      "density_rank": 71,
+      "capacity_left": 4,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "56079931835278899591631486459902944871062221429748128417732124",
+      "signed_entry_presence_probability": 3.2605504219195562e-9,
+      "signed_entry_presence_log2": -28.192237323903008
+    },
+    {
+      "density_rank": 72,
+      "capacity_left": 3,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "56077320798297054652807675807524973524784001379691498836072663",
+      "signed_entry_presence_probability": 3.2603986132875882e-9,
+      "signed_entry_presence_log2": -28.19230449619936
+    },
+    {
+      "density_rank": 73,
+      "capacity_left": 10,
+      "capacity_right": 10,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "47184880369783324920411320518315253599938466254287822860473392",
+      "signed_entry_presence_probability": 2.743382107699662e-9,
+      "signed_entry_presence_log2": -28.441397274275253
+    },
+    {
+      "density_rank": 74,
+      "capacity_left": 9,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "47184747044809100573281889693336310547467792225474473103825883",
+      "signed_entry_presence_probability": 2.7433743560354443e-9,
+      "signed_entry_presence_log2": -28.44140135074105
+    },
+    {
+      "density_rank": 75,
+      "capacity_left": 8,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "47184344749462643518877538385652077448075432883550177146544151",
+      "signed_entry_presence_probability": 2.7433509661307366e-9,
+      "signed_entry_presence_log2": -28.44141365115616
+    },
+    {
+      "density_rank": 76,
+      "capacity_left": 7,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "47183666516669049114623435228161031022269695378772235907080775",
+      "signed_entry_presence_probability": 2.7433115329119554e-9,
+      "signed_entry_presence_log2": -28.441434388757276
+    },
+    {
+      "density_rank": 77,
+      "capacity_left": 6,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "47182700715588201557758742734075536847804082757563419053785917",
+      "signed_entry_presence_probability": 2.743255380148951e-9,
+      "signed_entry_presence_log2": -28.441463919541828
+    },
+    {
+      "density_rank": 78,
+      "capacity_left": 5,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "47181431024076299814721972942277514132061716885039632601825810",
+      "signed_entry_presence_probability": 2.743181558853893e-9,
+      "signed_entry_presence_log2": -28.44150274314173
+    },
+    {
+      "density_rank": 79,
+      "capacity_left": 4,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "47179836392188101246475124685401232875617793324063915652678398",
+      "signed_entry_presence_probability": 2.7430888451592484e-9,
+      "signed_entry_presence_log2": -28.44155150398567
+    },
+    {
+      "density_rank": 80,
+      "capacity_left": 3,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "47177890998746205881131641532734994814798526289603721311361305",
+      "signed_entry_presence_probability": 2.7429757377926702e-9,
+      "signed_entry_presence_log2": -28.441610992689974
+    },
+    {
+      "density_rank": 81,
+      "capacity_left": 2,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "47175564203540130039477036197095422269768595677774614734679369",
+      "signed_entry_presence_probability": 2.742840455297799e-9,
+      "signed_entry_presence_log2": -28.441682147602073
+    },
+    {
+      "density_rank": 82,
+      "capacity_left": 9,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39569296647527224612467655963365294680697861320755213334322807",
+      "signed_entry_presence_probability": 2.300603489642479e-9,
+      "signed_entry_presence_log2": -28.695340498333707
+    },
+    {
+      "density_rank": 83,
+      "capacity_left": 8,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39569082605612953776285349087525700765170234557895253169028146",
+      "signed_entry_presence_probability": 2.300591045004423e-9,
+      "signed_entry_presence_log2": -28.695348302314816
+    },
+    {
+      "density_rank": 84,
+      "capacity_left": 7,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39568650465274753824383154870192442820946840455509428858479521",
+      "signed_entry_presence_probability": 2.3005659198782693e-9,
+      "signed_entry_presence_log2": -28.695364058306268
+    },
+    {
+      "density_rank": 85,
+      "capacity_left": 6,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39567992097735239963296321594825168050814762199682179585853536",
+      "signed_entry_presence_probability": 2.3005276416477425e-9,
+      "signed_entry_presence_log2": -28.695388062953256
+    },
+    {
+      "density_rank": 86,
+      "capacity_left": 5,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39567095270981544772861464434439128590689156386811758009169027",
+      "signed_entry_presence_probability": 2.3004754991298318e-9,
+      "signed_entry_presence_log2": -28.695420762671
+    },
+    {
+      "density_rank": 87,
+      "capacity_left": 4,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39565943604679323779664406011306930849115840775366765677601583",
+      "signed_entry_presence_probability": 2.3004085399534434e-9,
+      "signed_entry_presence_log2": -28.695462755327583
+    },
+    {
+      "density_rank": 88,
+      "capacity_left": 3,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39564516512592423595444903586069494320587075681591326011178145",
+      "signed_entry_presence_probability": 2.300325567211612e-9,
+      "signed_entry_presence_log2": -28.695514792398363
+    },
+    {
+      "density_rank": 89,
+      "capacity_left": 2,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "39562789134648641410675943055176933586632621450832355323258009",
+      "signed_entry_presence_probability": 2.3002251355117315e-9,
+      "signed_entry_presence_log2": -28.695577781516295
+    },
+    {
+      "density_rank": 90,
+      "capacity_left": 1,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "39560732261287285756652974446279643142132401922406503666045034",
+      "signed_entry_presence_probability": 2.300105546577032e-9,
+      "signed_entry_presence_log2": -28.695652789325514
+    },
+    {
+      "density_rank": 91,
+      "capacity_left": 9,
+      "capacity_right": 9,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "33075598946725859005277455328945214668473419093642850834726477",
+      "signed_entry_presence_probability": 1.9230525888967975e-9,
+      "signed_entry_presence_log2": -28.953954638004646
+    },
+    {
+      "density_rank": 92,
+      "capacity_left": 8,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33075514169048166411769454449653841011368277258368402265412095",
+      "signed_entry_presence_probability": 1.923047659827098e-9,
+      "signed_entry_presence_log2": -28.953958335851272
+    },
+    {
+      "density_rank": 93,
+      "capacity_left": 7,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33075258084071993968919570116159207711233515928936805862468659",
+      "signed_entry_presence_probability": 1.923032770758054e-9,
+      "signed_entry_presence_log2": -28.953969505865242
+    },
+    {
+      "density_rank": 94,
+      "capacity_left": 6,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33074825426573147611817763520286521832702216525123213449678900",
+      "signed_entry_presence_probability": 1.9230076155635976e-9,
+      "signed_entry_presence_log2": -28.953988377884592
+    },
+    {
+      "density_rank": 95,
+      "capacity_left": 5,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33074207390107737236344476857144208730045048301793473114347168",
+      "signed_entry_presence_probability": 1.9229716822271595e-9,
+      "signed_entry_presence_log2": -28.954015336348103
+    },
+    {
+      "density_rank": 96,
+      "capacity_left": 4,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33073391581266504751676894271646931633646419744739054997742469",
+      "signed_entry_presence_probability": 1.922924250181962e-9,
+      "signed_entry_presence_log2": -28.954050922322136
+    },
+    {
+      "density_rank": 97,
+      "capacity_left": 3,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33072361957343799094186430703151877448198936108435009934132972",
+      "signed_entry_presence_probability": 1.922864386687023e-9,
+      "signed_entry_presence_log2": -28.9540958362659
+    },
+    {
+      "density_rank": 98,
+      "capacity_left": 2,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33071098749119083499588463732783698716419027501659765270022395",
+      "signed_entry_presence_probability": 1.922790942337587e-9,
+      "signed_entry_presence_log2": -28.95415094146367
+    },
+    {
+      "density_rank": 99,
+      "capacity_left": 1,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "33069578370912461668387488138412906730022600651592464148500574",
+      "signed_entry_presence_probability": 1.92270254583565e-9,
+      "signed_entry_presence_log2": -28.95421726803288
+    },
+    {
+      "density_rank": 100,
+      "capacity_left": 0,
+      "capacity_right": 18,
+      "unordered_column_pairs": 45965180,
+      "signed_entries": 183860720,
+      "retained_completions_per_fixed_pair": "33067773320523054173307074415162474317541445067280330731829177",
+      "signed_entry_presence_probability": 1.9225975981722675e-9,
+      "signed_entry_presence_log2": -28.954296017398537
+    },
+    {
+      "density_rank": 101,
+      "capacity_left": 8,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27556553911582530294633197947719036302322157282002685778271191",
+      "signed_entry_presence_probability": 1.6021690922694144e-9,
+      "signed_entry_presence_log2": -29.21732643676088
+    },
+    {
+      "density_rank": 102,
+      "capacity_left": 7,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27556420066869625748293442383055503183747641429507819947363960",
+      "signed_entry_presence_probability": 1.6021613103870037e-9,
+      "signed_entry_presence_log2": -29.217333444080197
+    },
+    {
+      "density_rank": 103,
+      "capacity_left": 6,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27556149379233144136193337595229026270413854587409290115943331",
+      "signed_entry_presence_probability": 1.602145572302836e-9,
+      "signed_entry_presence_log2": -29.217347615791468
+    },
+    {
+      "density_rank": 104,
+      "capacity_left": 5,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27555735831677266191935819021980821665892917973089012082387316",
+      "signed_entry_presence_probability": 1.6021215281819952e-9,
+      "signed_entry_presence_log2": -29.21736926712877
+    },
+    {
+      "density_rank": 105,
+      "capacity_left": 4,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27555170347699041778743592409962348685549131998368873718983714",
+      "signed_entry_presence_probability": 1.6020886503063728e-9,
+      "signed_entry_presence_log2": -29.21739887364362
+    },
+    {
+      "density_rank": 106,
+      "capacity_left": 3,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27554440731270878494996416218924656444820931003247567609830824",
+      "signed_entry_presence_probability": 1.6020462295851838e-9,
+      "signed_entry_presence_log2": -29.217437074385092
+    },
+    {
+      "density_rank": 107,
+      "capacity_left": 2,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27553531588800596792760792059121269522798857992327536809496762",
+      "signed_entry_presence_probability": 1.601993371017635e-9,
+      "signed_entry_presence_log2": -29.217484676039746
+    },
+    {
+      "density_rank": 108,
+      "capacity_left": 1,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27552424234757343392186608532026594958213256635689666054827394",
+      "signed_entry_presence_probability": 1.6019289882059089e-9,
+      "signed_entry_presence_log2": -29.21754265794617
+    },
+    {
+      "density_rank": 109,
+      "capacity_left": 0,
+      "capacity_right": 17,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "27551096583058837828994909349297903903840518044125766605390952",
+      "signed_entry_presence_probability": 1.6018517970402983e-9,
+      "signed_entry_presence_log2": -29.217612177878593
+    },
+    {
+      "density_rank": 110,
+      "capacity_left": 8,
+      "capacity_right": 8,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "22881527273853651292915020158878668217056624545329121149996108",
+      "signed_entry_presence_probability": 1.3303577762195817e-9,
+      "signed_entry_presence_log2": -29.485538568737095
+    },
+    {
+      "density_rank": 111,
+      "capacity_left": 7,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22881475205946630692639207768244176328142914944492880146361611",
+      "signed_entry_presence_probability": 1.330354748932803e-9,
+      "signed_entry_presence_log2": -29.485541851655924
+    },
+    {
+      "density_rank": 112,
+      "capacity_left": 6,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22881317735269983426380546198640324562622233228957403739411783",
+      "signed_entry_presence_probability": 1.330345593410241e-9,
+      "signed_entry_presence_log2": -29.485551780340327
+    },
+    {
+      "density_rank": 113,
+      "capacity_left": 5,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22881051050211260227978526618215486674664348805416481139554839",
+      "signed_entry_presence_probability": 1.3303300880404539e-9,
+      "signed_entry_presence_log2": -29.48556859525712
+    },
+    {
+      "density_rank": 114,
+      "capacity_left": 4,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22880668762443040051095931407099542858974735492382210052711987",
+      "signed_entry_presence_probability": 1.3303078613988876e-9,
+      "signed_entry_presence_log2": -29.485592699450304
+    },
+    {
+      "density_rank": 115,
+      "capacity_left": 3,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22880161854089088383142614849997238477542178000228707266169412",
+      "signed_entry_presence_probability": 1.3302783891760575e-9,
+      "signed_entry_presence_log2": -29.485624661901976
+    },
+    {
+      "density_rank": 116,
+      "capacity_left": 2,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22879518605008461948855146962043800944095855624759336292847057",
+      "signed_entry_presence_probability": 1.3302409899497639e-9,
+      "signed_entry_presence_log2": -29.48566522216155
+    },
+    {
+      "density_rank": 117,
+      "capacity_left": 1,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22878724501446982235199526939467107372435477949477141092027891",
+      "signed_entry_presence_probability": 1.3301948198739866e-9,
+      "signed_entry_presence_log2": -29.485715296167562
+    },
+    {
+      "density_rank": 118,
+      "capacity_left": 0,
+      "capacity_right": 16,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "22877762127659330130385813247142171879150630673971957711614241",
+      "signed_entry_presence_probability": 1.33013886637767e-9,
+      "signed_entry_presence_log2": -29.4857759831649
+    },
+    {
+      "density_rank": 119,
+      "capacity_left": 7,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18934767864845530636659942138598550865601899035196843003661133",
+      "signed_entry_presence_probability": 1.1008887373831081e-9,
+      "signed_entry_presence_log2": -29.758684185389907
+    },
+    {
+      "density_rank": 120,
+      "capacity_left": 6,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18934687088285768392435305390832932309438379666195070204341073",
+      "signed_entry_presence_probability": 1.100884040942913e-9,
+      "signed_entry_presence_log2": -29.758690340004083
+    },
+    {
+      "density_rank": 121,
+      "capacity_left": 5,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18934523411787780354752930001411119253784843348555278944872127",
+      "signed_entry_presence_probability": 1.1008745246069063e-9,
+      "signed_entry_presence_log2": -29.75870281109967
+    },
+    {
+      "density_rank": 122,
+      "capacity_left": 4,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18934272567090576385522287993301367611305390722499176382867187",
+      "signed_entry_presence_probability": 1.1008599402135853e-9,
+      "signed_entry_presence_log2": -29.75872192406016
+    },
+    {
+      "density_rank": 123,
+      "capacity_left": 3,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18933928098330701037639048642211860708792049914540294626257130",
+      "signed_entry_presence_probability": 1.1008399124117746e-9,
+      "signed_entry_presence_log2": -29.758748171062283
+    },
+    {
+      "density_rank": 124,
+      "capacity_left": 2,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18933481298683604102682542739620672439451387112699880678546288",
+      "signed_entry_presence_probability": 1.1008139349768852e-9,
+      "signed_entry_presence_log2": -29.758782215938627
+    },
+    {
+      "density_rank": 125,
+      "capacity_left": 1,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18932921127234057521949803928034105669616946724495817095962863",
+      "signed_entry_presence_probability": 1.1007813659776656e-9,
+      "signed_entry_presence_log2": -29.758824900562495
+    },
+    {
+      "density_rank": 126,
+      "capacity_left": 0,
+      "capacity_right": 15,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "18932234107236078121054300607237499587094567516804415763721400",
+      "signed_entry_presence_probability": 1.1007414218609208e-9,
+      "signed_entry_presence_log2": -29.758877252670285
+    },
+    {
+      "density_rank": 127,
+      "capacity_left": 7,
+      "capacity_right": 7,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "15614304537966161629708948491650484248167027291097193302178823",
+      "signed_entry_presence_probability": 9.078332584066847e-10,
+      "signed_entry_presence_log2": -30.036853606599713
+    },
+    {
+      "density_rank": 128,
+      "capacity_left": 6,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "15614273704393216661609373857471117361781231755334969900316258",
+      "signed_entry_presence_probability": 9.078314657080137e-10,
+      "signed_entry_presence_log2": -30.03685645549296
+    },
+    {
+      "density_rank": 129,
+      "capacity_left": 5,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "15614180325647262230932053471289258653620827945044981854371238",
+      "signed_entry_presence_probability": 9.078260365625144e-10,
+      "signed_entry_presence_log2": -30.03686508333304
+    },
+    {
+      "density_rank": 130,
+      "capacity_left": 4,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "15614021757179632752279457305434852038237273845446372020912228",
+      "signed_entry_presence_probability": 9.07816817213148e-10,
+      "signed_entry_presence_log2": -30.036879734573052
+    },
+    {
+      "density_rank": 131,
+      "capacity_left": 3,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "15613793556628536903489821878034399623399162446295184840282925",
+      "signed_entry_presence_probability": 9.078035493759947e-10,
+      "signed_entry_presence_log2": -30.036900819865128
+    },
+    {
+      "density_rank": 132,
+      "capacity_left": 2,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "15613489432035156795908581440522908579849499139589062913763641",
+      "signed_entry_presence_probability": 9.077858672294798e-10,
+      "signed_entry_presence_log2": -30.03692892087173
+    },
+    {
+      "density_rank": 133,
+      "capacity_left": 1,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "15613101170123728670721123519713399617000016938154572463652128",
+      "signed_entry_presence_probability": 9.077632932444963e-10,
+      "signed_entry_presence_log2": -30.0369647969327
+    },
+    {
+      "density_rank": 134,
+      "capacity_left": 0,
+      "capacity_right": 14,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "15612618545430690841812466953161934136035871326268060179221022",
+      "signed_entry_presence_probability": 9.07735232901072e-10,
+      "signed_entry_presence_log2": -30.037009393518954
+    },
+    {
+      "density_rank": 135,
+      "capacity_left": 6,
+      "capacity_right": 7,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "12830476024221794817480244586718764302625963531680996384306657",
+      "signed_entry_presence_probability": 7.459783320900514e-10,
+      "signed_entry_presence_log2": -30.32014722273657
+    },
+    {
+      "density_rank": 136,
+      "capacity_left": 5,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "12830429063590972430563982964801378309212726316246089152196175",
+      "signed_entry_presence_probability": 7.45975601746065e-10,
+      "signed_entry_presence_log2": -30.320152503132487
+    },
+    {
+      "density_rank": 137,
+      "capacity_left": 4,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "12830333701196965854486446899714197464861400311918588074219244",
+      "signed_entry_presence_probability": 7.45970057269033e-10,
+      "signed_entry_presence_log2": -30.320163226029088
+    },
+    {
+      "density_rank": 138,
+      "capacity_left": 3,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "12830187034965190058345057171335436490799098490720021635433682",
+      "signed_entry_presence_probability": 7.459615299290694e-10,
+      "signed_entry_presence_log2": -30.320179717872524
+    },
+    {
+      "density_rank": 139,
+      "capacity_left": 2,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "12829984662417584510615528163477602380295120671352233076871769",
+      "signed_entry_presence_probability": 7.459497637611393e-10,
+      "signed_entry_presence_log2": -30.32020247390661
+    },
+    {
+      "density_rank": 140,
+      "capacity_left": 1,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "12829720621879528562584564272433871681603467257703781429989953",
+      "signed_entry_presence_probability": 7.459344121467635e-10,
+      "signed_entry_presence_log2": -30.320232164814637
+    },
+    {
+      "density_rank": 141,
+      "capacity_left": 0,
+      "capacity_right": 13,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "12829387314840715178791128876053404328877760752853073261745137",
+      "signed_entry_presence_probability": 7.459150332999913e-10,
+      "signed_entry_presence_log2": -30.320269645495042
+    },
+    {
+      "density_rank": 142,
+      "capacity_left": 6,
+      "capacity_right": 6,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "10504867661635428791740698840844930303567975026276611433894442",
+      "signed_entry_presence_probability": 6.107648416364049e-10,
+      "signed_entry_presence_log2": -30.608663932345756
+    },
+    {
+      "density_rank": 143,
+      "capacity_left": 5,
+      "capacity_right": 7,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "10504850092624839543121482076065530609707818782622612555467863",
+      "signed_entry_presence_probability": 6.107638201543344e-10,
+      "signed_entry_presence_log2": -30.608666345202963
+    },
+    {
+      "density_rank": 144,
+      "capacity_left": 4,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "10504796802602965019883777629164844467134063201846101975371474",
+      "signed_entry_presence_probability": 6.107607218124209e-10,
+      "signed_entry_presence_log2": -30.60867366386478
+    },
+    {
+      "density_rank": 145,
+      "capacity_left": 3,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "10504706033415459789685624681517531126158724086203613549467610",
+      "signed_entry_presence_probability": 6.107554443895902e-10,
+      "signed_entry_presence_log2": -30.60868612986721
+    },
+    {
+      "density_rank": 146,
+      "capacity_left": 2,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "10504574824242764311220974792025493748700318562191460613951856",
+      "signed_entry_presence_probability": 6.107478157404568e-10,
+      "signed_entry_presence_log2": -30.60870414998166
+    },
+    {
+      "density_rank": 147,
+      "capacity_left": 1,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "10504398965937048629794715057296982851464988159365138639697401",
+      "signed_entry_presence_probability": 6.107375911404237e-10,
+      "signed_entry_presence_log2": -30.60872830250887
+    },
+    {
+      "density_rank": 148,
+      "capacity_left": 0,
+      "capacity_right": 12,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "10504172937460379167725340274949294527244042337703576734159974",
+      "signed_entry_presence_probability": 6.107244495901249e-10,
+      "signed_entry_presence_log2": -30.60875934604328
+    },
+    {
+      "density_rank": 149,
+      "capacity_left": 5,
+      "capacity_right": 6,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "8569064241418395901910197143684271405721350823160800569146770",
+      "signed_entry_presence_probability": 4.982150497236527e-10,
+      "signed_entry_presence_log2": -30.902512346737378
+    },
+    {
+      "density_rank": 150,
+      "capacity_left": 4,
+      "capacity_right": 7,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "8569038000699254795607248735068300813009082886843968413180224",
+      "signed_entry_presence_probability": 4.982135240586766e-10,
+      "signed_entry_presence_log2": -30.902516764654234
+    },
+    {
+      "density_rank": 151,
+      "capacity_left": 3,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "8568984582440243639911011421880445814151614976529712621980976",
+      "signed_entry_presence_probability": 4.982104182609116e-10,
+      "signed_entry_presence_log2": -30.90252575825393
+    },
+    {
+      "density_rank": 152,
+      "capacity_left": 2,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "8568902096329178562595957023802907066965924133014016768329166",
+      "signed_entry_presence_probability": 4.982056224254775e-10,
+      "signed_entry_presence_log2": -30.902539645882623
+    },
+    {
+      "density_rank": 153,
+      "capacity_left": 1,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "8568787665275345057086468350335984324742998588520334973895203",
+      "signed_entry_presence_probability": 4.981989692750787e-10,
+      "signed_entry_presence_log2": -30.902558912086665
+    },
+    {
+      "density_rank": 154,
+      "capacity_left": 0,
+      "capacity_right": 11,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "8568637375618222953301933896898171553753481611018456514082362",
+      "signed_entry_presence_probability": 4.981902312650829e-10,
+      "signed_entry_presence_log2": -30.902584216021477
+    },
+    {
+      "density_rank": 155,
+      "capacity_left": 5,
+      "capacity_right": 5,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "6963675656430046173907130061691247365742695393337932170543208",
+      "signed_entry_presence_probability": 4.048759486080608e-10,
+      "signed_entry_presence_log2": -31.201801005672756
+    },
+    {
+      "density_rank": 156,
+      "capacity_left": 4,
+      "capacity_right": 6,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "6963666047501752126651778495695156270266992890535693277834468",
+      "signed_entry_presence_probability": 4.0487538993414344e-10,
+      "signed_entry_presence_log2": -31.20180299639769
+    },
+    {
+      "density_rank": 157,
+      "capacity_left": 3,
+      "capacity_right": 7,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "6963636850166275782622290973996330946888481278157021166938095",
+      "signed_entry_presence_probability": 4.0487369236816233e-10,
+      "signed_entry_presence_log2": -31.201809045357983
+    },
+    {
+      "density_rank": 158,
+      "capacity_left": 2,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "6963586945338138092403529493815910108082037692496087173962236",
+      "signed_entry_presence_probability": 4.048707908452268e-10,
+      "signed_entry_presence_log2": -31.20181938445343
+    },
+    {
+      "density_rank": 159,
+      "capacity_left": 1,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "6963514443102834340146387868092436763455760975280680603440911",
+      "signed_entry_presence_probability": 4.0486657548357833e-10,
+      "signed_entry_presence_log2": -31.20183440532711
+    },
+    {
+      "density_rank": 160,
+      "capacity_left": 0,
+      "capacity_right": 10,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "6963416645584829065375138882540087558267336815733998281231281",
+      "signed_entry_presence_probability": 4.048608894256935e-10,
+      "signed_entry_presence_log2": -31.201854667076567
+    },
+    {
+      "density_rank": 161,
+      "capacity_left": 4,
+      "capacity_right": 5,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "5637291283366146087608146141806056146827539401294414887987517",
+      "signed_entry_presence_probability": 3.2775846672659415e-10,
+      "signed_entry_presence_log2": -31.506647899939335
+    },
+    {
+      "density_rank": 162,
+      "capacity_left": 3,
+      "capacity_right": 6,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "5637277227638996866229365295707598511303567806499090224625192",
+      "signed_entry_presence_probability": 3.277576495107812e-10,
+      "signed_entry_presence_log2": -31.506651497084153
+    },
+    {
+      "density_rank": 163,
+      "capacity_left": 2,
+      "capacity_right": 7,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "5637248533564797130370941606238508227938120887184282343545886",
+      "signed_entry_presence_probability": 3.2775598120497767e-10,
+      "signed_entry_presence_log2": -31.50665884050585
+    },
+    {
+      "density_rank": 164,
+      "capacity_left": 1,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "5637204022872914263116719055874538607003772052685088608656054",
+      "signed_entry_presence_probability": 3.277533933032016e-10,
+      "signed_entry_presence_log2": -31.506670231809174
+    },
+    {
+      "density_rank": 165,
+      "capacity_left": 0,
+      "capacity_right": 9,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "5637141895562804762352862061962695850896898266051850348833149",
+      "signed_entry_presence_probability": 3.2774978115139326e-10,
+      "signed_entry_presence_log2": -31.506686131758112
+    },
+    {
+      "density_rank": 166,
+      "capacity_left": 4,
+      "capacity_right": 4,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "4545621565372272303585721158353079959500374309886848062188468",
+      "signed_entry_presence_probability": 2.6428755934288463e-10,
+      "signed_entry_presence_log2": -31.817172433454296
+    },
+    {
+      "density_rank": 167,
+      "capacity_left": 3,
+      "capacity_right": 5,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "4545616535777435263429446074396215986437618116156724782047856",
+      "signed_entry_presence_probability": 2.64287266916574e-10,
+      "signed_entry_presence_log2": -31.81717402975426
+    },
+    {
+      "density_rank": 168,
+      "capacity_left": 2,
+      "capacity_right": 6,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "4545601221864077145981480927357832617611423295948311352794116",
+      "signed_entry_presence_probability": 2.642863765483972e-10,
+      "signed_entry_presence_log2": -31.817178890116743
+    },
+    {
+      "density_rank": 169,
+      "capacity_left": 1,
+      "capacity_right": 7,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "4545574942629288457640760999981870535896290077019828655844564",
+      "signed_entry_presence_probability": 2.642848486440779e-10,
+      "signed_entry_presence_log2": -31.817187230714488
+    },
+    {
+      "density_rank": 170,
+      "capacity_left": 0,
+      "capacity_right": 8,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "4545536544326027702600805578701253525011940407266440537425984",
+      "signed_entry_presence_probability": 2.642826161234631e-10,
+      "signed_entry_presence_log2": -31.81719941779233
+    },
+    {
+      "density_rank": 171,
+      "capacity_left": 3,
+      "capacity_right": 4,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "3650633078508352548845394412053549427509321996151954250650659",
+      "signed_entry_presence_probability": 2.122519203369624e-10,
+      "signed_entry_presence_log2": -32.1335033423364
+    },
+    {
+      "density_rank": 172,
+      "capacity_left": 2,
+      "capacity_right": 5,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "3650625884365514119555365383208842021946626522627914251781709",
+      "signed_entry_presence_probability": 2.1225150206139215e-10,
+      "signed_entry_presence_log2": -32.13350618539518
+    },
+    {
+      "density_rank": 173,
+      "capacity_left": 1,
+      "capacity_right": 6,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "3650611150039165865677485908988768271905938406799993886493682",
+      "signed_entry_presence_probability": 2.1225064539105715e-10,
+      "signed_entry_presence_log2": -32.133512008282295
+    },
+    {
+      "density_rank": 174,
+      "capacity_left": 0,
+      "capacity_right": 7,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "3650588173906824410175920170819441524237264623533991180722705",
+      "signed_entry_presence_probability": 2.1224930953283573e-10,
+      "signed_entry_presence_log2": -32.133521088311674
+    },
+    {
+      "density_rank": 175,
+      "capacity_left": 3,
+      "capacity_right": 3,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "2919816488067110084668609925402854210555310028821272233398014",
+      "signed_entry_presence_probability": 1.6976142036081966e-10,
+      "signed_entry_presence_log2": -32.45577231670872
+    },
+    {
+      "density_rank": 176,
+      "capacity_left": 2,
+      "capacity_right": 4,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "2919813977408715394041183188771375230615162936191021000623245",
+      "signed_entry_presence_probability": 1.6976127438831184e-10,
+      "signed_entry_presence_log2": -32.45577355723736
+    },
+    {
+      "density_rank": 177,
+      "capacity_left": 1,
+      "capacity_right": 5,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "2919806314965676045959393823107926602456577805018303712514591",
+      "signed_entry_presence_probability": 1.697608288852403e-10,
+      "signed_entry_presence_log2": -32.45577734329468
+    },
+    {
+      "density_rank": 178,
+      "capacity_left": 0,
+      "capacity_right": 6,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "2919793105349829031043802147831976857235230005375608255482737",
+      "signed_entry_presence_probability": 1.6976006086329172e-10,
+      "signed_entry_presence_log2": -32.455783870265414
+    },
+    {
+      "density_rank": 179,
+      "capacity_left": 2,
+      "capacity_right": 3,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "2325481665572645682990466717912639886782935356913626690445022",
+      "signed_entry_presence_probability": 1.3520612414651972e-10,
+      "signed_entry_presence_log2": -32.784120449060374
+    },
+    {
+      "density_rank": 180,
+      "capacity_left": 1,
+      "capacity_right": 4,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "2325478160671633838821730702372229716798288184263102788499832",
+      "signed_entry_presence_probability": 1.3520592036762594e-10,
+      "signed_entry_presence_log2": -32.78412262345168
+    },
+    {
+      "density_rank": 181,
+      "capacity_left": 0,
+      "capacity_right": 5,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "2325470955060483297239708285523900735523407851553474194310484",
+      "signed_entry_presence_probability": 1.3520550142527514e-10,
+      "signed_entry_presence_log2": -32.78412709372182
+    },
+    {
+      "density_rank": 182,
+      "capacity_left": 2,
+      "capacity_right": 2,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "1844150795927383281970674855734524426736644837786862586499832",
+      "signed_entry_presence_probability": 1.0722100507193692e-10,
+      "signed_entry_presence_log2": -33.118693385012755
+    },
+    {
+      "density_rank": 183,
+      "capacity_left": 1,
+      "capacity_right": 3,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "1844149605851257697832638501279846283680568784693641828620392",
+      "signed_entry_presence_probability": 1.0722093587957012e-10,
+      "signed_entry_presence_log2": -33.118694316019855
+    },
+    {
+      "density_rank": 184,
+      "capacity_left": 0,
+      "capacity_right": 4,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "1844145963703322104477837726815223525097703301865306290927267",
+      "signed_entry_presence_probability": 1.0722072412098555e-10,
+      "signed_entry_presence_log2": -33.118697165308184
+    },
+    {
+      "density_rank": 185,
+      "capacity_left": 1,
+      "capacity_right": 2,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "1455993119458868651915040384816175698280483000401504883682562",
+      "signed_entry_presence_probability": 8.465308042648364e-11,
+      "signed_entry_presence_log2": -33.459646476701465
+    },
+    {
+      "density_rank": 186,
+      "capacity_left": 0,
+      "capacity_right": 3,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "1455991501767280231376385051721273916790309375638174207156507",
+      "signed_entry_presence_probability": 8.465298637207205e-11,
+      "signed_entry_presence_log2": -33.45964807961902
+    },
+    {
+      "density_rank": 187,
+      "capacity_left": 1,
+      "capacity_right": 1,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "1144334409458296580103470099964178540545899051877105073304807",
+      "signed_entry_presence_probability": 6.653289188253093e-11,
+      "signed_entry_presence_log2": -33.80714130127927
+    },
+    {
+      "density_rank": 188,
+      "capacity_left": 0,
+      "capacity_right": 2,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "1144333876610449002452758570858610861347008087128569325109757",
+      "signed_entry_presence_probability": 6.653286090215673e-11,
+      "signed_entry_presence_log2": -33.80714197305591
+    },
+    {
+      "density_rank": 189,
+      "capacity_left": 0,
+      "capacity_right": 1,
+      "unordered_column_pairs": 48094225,
+      "signed_entries": 192376900,
+      "retained_completions_per_fixed_pair": "895211385028579925871068849938119715612778756529661677785687",
+      "signed_entry_presence_probability": 5.204859855635397e-11,
+      "signed_entry_presence_log2": -34.16134972525104
+    },
+    {
+      "density_rank": 190,
+      "capacity_left": 0,
+      "capacity_right": 0,
+      "unordered_column_pairs": 24043645,
+      "signed_entries": 96174580,
+      "retained_completions_per_fixed_pair": "696984462613260398538320084604669380665569226087888783815387",
+      "signed_entry_presence_probability": 4.052346194571189e-11,
+      "signed_entry_presence_log2": -34.52245161398123
+    }
+  ],
+  "frontier": [
+    {
+      "label": "affine-2-mib",
+      "signed_entries": 32768,
+      "bytes": 2097152,
+      "bytes_log2": 21.0,
+      "expected_cached_signed_pairs_present": 0.0010064539580875267,
+      "optimistic_hot_hits_upper": 0.0010064539580875267,
+      "cold_constructions_lower": 7.998993546041913,
+      "projected_ratio_to_rho_lower": 1.0327972844838273,
+      "within_parity_budget": false
+    },
+    {
+      "label": "affine-64-mib",
+      "signed_entries": 1048576,
+      "bytes": 67108864,
+      "bytes_log2": 26.0,
+      "expected_cached_signed_pairs_present": 0.03220652665880085,
+      "optimistic_hot_hits_upper": 0.03220652665880085,
+      "cold_constructions_lower": 7.9677934733411995,
+      "projected_ratio_to_rho_lower": 1.0326637772003575,
+      "within_parity_budget": false
+    },
+    {
+      "label": "affine-256-mib",
+      "signed_entries": 4194304,
+      "bytes": 268435456,
+      "bytes_log2": 28.0,
+      "expected_cached_signed_pairs_present": 0.1288261066352034,
+      "optimistic_hot_hits_upper": 0.1288261066352034,
+      "cold_constructions_lower": 7.871173893364797,
+      "projected_ratio_to_rho_lower": 1.0322503352902574,
+      "within_parity_budget": false
+    },
+    {
+      "label": "parity-threshold",
+      "signed_entries": 272190818,
+      "bytes": 17420212352,
+      "bytes_log2": 34.02004315933796,
+      "expected_cached_signed_pairs_present": 7.665589512318578,
+      "optimistic_hot_hits_upper": 7.665589512318578,
+      "cold_constructions_lower": 0.33441048768142156,
+      "projected_ratio_to_rho_lower": 0.9999999999112454,
+      "within_parity_budget": true
+    },
+    {
+      "label": "complete-table",
+      "signed_entries": 34562148612,
+      "bytes": 2211977511168,
+      "bytes_log2": 41.00847385663899,
+      "expected_cached_signed_pairs_present": 135.99999999999997,
+      "optimistic_hot_hits_upper": 8.0,
+      "cold_constructions_lower": 0.0,
+      "projected_ratio_to_rho_lower": 0.998569034150286,
+      "within_parity_budget": true
+    }
+  ],
+  "threshold_signed_entries": 272190818,
+  "threshold_bytes": 17420212352,
+  "threshold_fraction_of_full_table": 0.007875402106959728,
+  "exact_controls": {
+    "retained_count_matches_round33": true,
+    "full_population_matches_round33": true,
+    "full_expected_pair_normalization": 135.99999999999997,
+    "full_expected_pair_normalization_exact": true,
+    "density_monotonicity_failures": 0,
+    "population_failures": 0,
+    "toy_cells": 2,
+    "toy_fixed_pairs_checked": 43,
+    "toy_count_failures": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "ordered_class_rows_sha256": "97c1524e0528fb2a196d418382fd25838331f44db4088d49797dce4a4e2e3ab5",
+    "frontier_sha256": "0ca2c6224a29961da1a84a20fb3572706025301bf8524b91a2087f03c8e2d505"
+  },
+  "semantic_evidence_sha256": "60a9284e34c5a39e01bb422badd1a92489f961bed5dda353c6e8d3c59f0f9fab",
+  "gates": {
+    "exact_counts": true,
+    "admissible_depth_at_or_below_rho": false,
+    "measured_complete_time_at_or_below_rho": false,
+    "proved_p256_usable_relation_probability": false,
+    "structured_residual_degree_at_most_5": false,
+    "relation_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "materialized_storage_below_2_50": true,
+    "non_generic_end_to_end": false,
+    "promoted": false
+  },
+  "full_depth_unplanted_attempted": false,
+  "interpretation": "No registered affine depth can cover enough cutoff-conditioned signed pairs even when cached pairs are chosen by an adaptive global oracle and hot access is free.",
+  "decision": "reject capacity-only hot tiering at the registered depths; do not benchmark or attempt a full-depth relation"
+}
