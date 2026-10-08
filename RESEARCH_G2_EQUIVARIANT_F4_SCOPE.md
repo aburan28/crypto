@@ -183,12 +183,12 @@ extends the measurement; `l = 3`, degree 3, same process for both sides:
 | 13 | 12 | 71 | 276 | 26 404 × 54 752 | 2 092 × 4 210 | 1 655 | χ₁×12: 1 612 | 0.1 | 20 999 | 3.9 | 39× | ✓ |
 | 17 | 8 | 91 | 462 | 53 242 × 115 792 | 3 194 × 6 810 | 2 571 | χ₁×8: 2 528, χ₃×8: 2 528 | 0.4 | 43 019 | 37.9 | **105×** | ✓ |
 | 19 | 18 | 101 | 573 | 71 677 × 158 558 | 3 835 × 8 344 | 3 107 | χ₁×18: 3 064 | 0.7 | 58 259 | 78.3 | **105×** | ✓ |
-G2_N23_ROW
+| 23 | 11 | 121 | 831 | 120 379 × 273 262 | 5 297 × 11 880 | 4 335 | χ₁×11: 4 292, χ₅×11: 4 292 | 1.8 | 98 759 | 232.5 | **128×** | ✓ |
 
 Reading: the identity `rank(M) = rank(M₀) + Σ|orbit|·rank(N_j)` holds at every
 size, the block dimensions are `≈ 1/n` of the symmetric matrix (and 3–6×
 below the gauge-fixed matrix), and the time ratio climbs with `n` — 31×,
-39×, 105×, 105× — exactly the direction the cost model predicts, with the
+39×, 105×, 105×, 128× — exactly the direction the cost model predicts, with the
 `F₂` control being plain dense elimination of the symmetric matrix in the
 same process. The block side (`0.4–0.7 s` including assembly) is still
 naive dense elimination over `F_{2^d}` with table arithmetic; nothing has
