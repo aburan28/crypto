@@ -1746,7 +1746,7 @@ pub fn run_end_to_end(
 
     // ── attack: walk back to a weak curve (charged)
     f.reset_muls();
-    let cap = cap_mult * (p as u64) * (p as u64);
+    let cap = cap_mult * p * p;
     let walk = walk_to_weak_record(&ctx, challenge, jumps, cap, trace, &mut rng);
     rep.walk_muls = f.muls();
     let Some((weak, path)) = walk else {
@@ -1956,37 +1956,66 @@ pub struct ExactCensus {
 }
 
 pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
+    use rayon::prelude::*;
     let start = Instant::now();
     let f = Fq3::new(p);
     let q = p * p;
     let q3 = (p as i128).pow(6);
-    let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7);
-    f.reset_muls();
     let w = E2([f.f.w % p, 0]);
+    let e2 = |k: u64| E2([k % p, k / p]);
+    // Enumerate every weak representative in parallel over a0, each task with
+    // its own field context (Fq3 holds a non-Sync counter).  `a1 ∈ {1, w}`
+    // covers the generic representatives; `a1 = 0` with `a2 ∈ {1, w}` the
+    // ones whose first non-zero imaginary part is in a2.
+    let both: Vec<(E2, bool)> = [(E2::ONE, false), (w, false)]
+        .into_iter()
+        .chain([(E2::ONE, true), (w, true)])
+        .collect();
+    // (a1_or_a2 value, is_a2_branch)
+    let partials: Vec<(HashMap<i128, u64>, u64, u64)> = both
+        .par_iter()
+        .flat_map_iter(|&(val, is_a2)| (0..q).map(move |a0| (val, is_a2, a0)))
+        .map(|(val, is_a2, a0)| {
+            let f = Fq3::new(p);
+            let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7 ^ a0.wrapping_mul(0x9E3779B1));
+            let mut local: HashMap<i128, u64> = HashMap::new();
+            let mut reps = 0u64;
+            let a0e = e2(a0);
+            if is_a2 {
+                // a1 = 0, a2 = val: one curve per a0
+                let alpha = E6([a0e, E2::ZERO, val]);
+                let c = Curve2 {
+                    e: [E6::ZERO, alpha, f.sigma(&alpha)],
+                };
+                let t = q3 + 1 - curve_order(&f, &c, &mut rng) as i128;
+                *local.entry(t).or_insert(0) += 1;
+                reps += 1;
+            } else {
+                for a2 in 0..q {
+                    let alpha = E6([a0e, val, e2(a2)]);
+                    let c = Curve2 {
+                        e: [E6::ZERO, alpha, f.sigma(&alpha)],
+                    };
+                    let t = q3 + 1 - curve_order(&f, &c, &mut rng) as i128;
+                    *local.entry(t).or_insert(0) += 1;
+                    reps += 1;
+                }
+            }
+            (local, reps, f.muls())
+        })
+        .collect();
     let mut weak_t: HashMap<i128, u64> = HashMap::new();
     let mut reps = 0u64;
-    let all_q: Vec<E2> = (0..p * p).map(|k| E2([k % p, k / p])).collect();
-    let mut tally = |alpha: E6, rng: &mut StdRng| {
-        let c = Curve2 {
-            e: [E6::ZERO, alpha, f.sigma(&alpha)],
-        };
-        debug_assert!(c.weak_by_norms(&f));
-        let t = q3 + 1 - curve_order(&f, &c, rng) as i128;
-        *weak_t.entry(t).or_insert(0) += 1;
-        reps += 1;
-    };
-    for &a1 in &[E2::ONE, w] {
-        for &a0 in &all_q {
-            for &a2 in &all_q {
-                tally(E6([a0, a1, a2]), &mut rng);
-            }
+    let mut census_muls = 0u64;
+    for (local, r, m) in partials {
+        reps += r;
+        census_muls += m;
+        for (t, c) in local {
+            *weak_t.entry(t).or_insert(0) += c;
         }
     }
-    for &a2 in &[E2::ONE, w] {
-        for &a0 in &all_q {
-            tally(E6([a0, E2::ZERO, a2]), &mut rng);
-        }
-    }
+    let f = Fq3::new(p);
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7);
     let mut rand_t: HashMap<i128, u64> = HashMap::new();
     let mut in_weak = 0u64;
     for _ in 0..n {
@@ -2009,7 +2038,7 @@ pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
         random_distinct: rand_t.len() as u64,
         random_in_weak_classes: in_weak as f64 / n.max(1) as f64,
         top_weak: top,
-        muls: f.muls(),
+        muls: census_muls + f.muls(),
         wall_ms: start.elapsed().as_secs_f64() * 1e3,
     }
 }
