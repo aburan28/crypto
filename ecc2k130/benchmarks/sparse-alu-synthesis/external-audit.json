@@ -1,0 +1,49 @@
+{
+  "schema": "ecc2k130-sparse-alu-synthesis-external-audit-v2",
+  "auditStatus": "PASS",
+  "scope": "Independent read-only audit of the native checker, matrix formulation, circuit counts, B16 accounting and claim boundary. No GPU was launched.",
+  "integrity": {
+    "manifestVerified": true,
+    "freshStrictBuildReproducedResultByteForByte": true,
+    "resultSha256": "6db9b5a73f1962936a3a00b12d1e3ed0952f4bb123f67fac640ad4bb15a183c0"
+  },
+  "recomputedDiagonalTerms": {
+    "sparseToNormal": 754,
+    "L3": 489,
+    "sparseToBeta": 751,
+    "betaToSparse": 755
+  },
+  "recomputedFrozenModelOracle": {
+    "formula": "754 + 2*489 + (751+755)/16",
+    "mapOpsPerUpdate": 1826.125,
+    "target26SourceOpAllowance": 1124.529230769231,
+    "oracleOverTargetBudget": 1.623905285827,
+    "modelAdmissionPass": false
+  },
+  "recomputedComparableB16": {
+    "oracleMaps": 1826.125,
+    "sparseReducers": 476.625,
+    "aluSquareSpread": 75.0,
+    "candidateTotal": 2377.75,
+    "referenceTotal": 2276.25,
+    "candidateOverReference": 1.044590884130,
+    "comparisonPass": false
+  },
+  "reviewFindings": {
+    "matrixAndDiagonalFormulationCorrect": true,
+    "ranksAnd59CompositionIdentitiesChecked": true,
+    "selectorModelNeededForDecision": false,
+    "greedyCseCorrectlyLabelledCandidateHeuristic": true,
+    "universalGf2LowerBoundClaimed": false,
+    "hardwareLowerBoundClaimed": false,
+    "sourceOpModelCalibratedAgainstReference": true,
+    "oneWordShiftAbstractionExplicit": true,
+    "gpuCandidateJustified": false
+  },
+  "limitations": [
+    "The one-operation-per-lane-cycle throughput conversion is a conditional model; the reference subledger predicts 12.844705 B/s while the fused kernel measured 15.436677 B/s.",
+    "The one-word-shift circuit count is optimistic for 131-bit cross-word shifts.",
+    "The conclusion rejects the enumerated constructions under the frozen model, not every fused or synthesized GF(2) circuit."
+  ],
+  "conclusion": "No count or accounting blocker found. The free-shift, free-selection, cheapest-map oracle fails the frozen 26 B/s source-operation screen, and its complete comparable source ledger is worse than the beta reference. The negative decision is valid for the enumerated circuit families under this conditional model."
+}

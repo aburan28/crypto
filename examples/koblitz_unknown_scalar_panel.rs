@@ -521,6 +521,8 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         seed,
         strategy: DecompositionStrategy::Sat,
         engine: SolverEngine::default(),
+        f6_ic: false,
+        f6_pair_index: false,
         // Caller-owned precomputation that this panel does not use; the field
         // was added to KoblitzIcOptions without updating this initializer.
         weil_charts: None,
@@ -544,7 +546,6 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         wdsat_binary: None,
         wdsat_timeout_ms: 5_000,
         linear_algebra: LinearAlgebra::Dense,
-        weil_charts: None,
     };
     let solve_started = Instant::now();
     let report = koblitz_index_calculus_dlp_with_factor_base_and_progress(

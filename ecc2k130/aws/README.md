@@ -211,16 +211,45 @@ CPU replay is a ~2^28-step scalar walk during which the GPU used to sit idle.
 1. **Quotas.** G7e counts against the vCPU quotas *All G and VT Spot Instance
    Requests* (L-3819A6DF) and *Running On-Demand G and VT instances*
    (L-DB2E81BA). A GPU costs 8 vCPUs on g7e.2xlarge and 24 on g7e.48xlarge.
-   128 spot GPUs on 2xlarge need 1,024 vCPUs of spot quota. The `adam` IAM user
-   cannot read quotas from the CLI (no `servicequotas:*`), so check and
-   request in the console: Service Quotas → Amazon EC2. New accounts start
-   near zero and increases take hours to days.
+   128 spot GPUs on 2xlarge need 1,024 vCPUs of spot quota.
+
+   ```bash
+   aws service-quotas get-service-quota --service-code ec2 --quota-code L-3819A6DF \
+       --query 'Quota.Value' --output text
+   ```
+
+   That is the *applied* value, and it is the one that binds: an approved
+   increase can read as the old value for a while after the support case
+   closes, and a fleet sized to the approved value fails every launch above
+   the applied one until it propagates. Quotas are per region, so a spot
+   quota in us-west-2 does nothing for us-east-1. New accounts start near
+   zero and increases take hours to days.
+
+   Capacity is a separate question from quota, and G7e runs out: a region
+   can refuse every g7e size, spot *and* on-demand, with
+   `InsufficientInstanceCapacity` while the quota sits unused. The standing
+   group below is the response — it keeps asking and fills when a pool
+   frees up — so check capacity with a single launch attempt before
+   concluding that a fleet is misconfigured.
 2. **IAM.** `infra.sh` creates a role and instance profile for the workers
    (S3 bucket read/write, SSM). The `adam` user could not list IAM or use
    DynamoDB in testing; if `iam:CreateRole` is also denied, run `infra.sh`
    once with an administrator profile (`AWS_PROFILE=admin ./infra.sh`) or
    create the role by hand with the policy printed in the script.
 
+   Where neither is possible, `WORKER_KEY_ID`/`WORKER_KEY_SECRET` put an
+   access key in the worker user-data and skip IAM altogether:
+
+   ```bash
+   WORKER_KEY_ID=AKIA... WORKER_KEY_SECRET=... SYNC=0 ./infra.sh
+   ```
+
+   The key is then readable by anyone who can read the launch template or
+   call `ec2:DescribeInstanceAttribute`, so use one scoped to the campaign
+   bucket and rotate it when the campaign ends. `SYNC=0` leaves
+   `s3://bucket/aws/` untouched, which is what a live campaign wants: the
+   copies there are what the running workers were started from, and the
+   next instance to boot downloads them.
    **Do not take the `WORKER_AWS_*` fallback to avoid this.** When the profile
    cannot be created, `infra.sh` could write static keys into user-data
    instead, and because `iam:CreateRole` was denied for weeks, that is what it
@@ -258,7 +287,15 @@ CPU replay is a ~2^28-step scalar walk during which the GPU used to sit idle.
    campaign's tooling authenticates with it.
 3. **Region.** G7e is offered in us-west-2, us-east-1 and us-east-2 (not
    eu-west-1). Spot pools differ by AZ by 2–3×; the fleet spreads over every
-   default subnet and lets `price-capacity-optimized` choose.
+   default subnet and lets `price-capacity-optimized` choose. Prefer the
+   bucket's own region: a worker elsewhere pays cross-region transfer on
+   every point it uploads.
+
+   The vCPU quota, not the GPU count, is what binds, and `g7e.2xlarge` is
+   the only size that spends 8 vCPUs per GPU (the 24xlarge spends 24). With
+   a spot quota of *v* vCPUs, cap the fleet at `v/8` GPUs and restrict
+   `TYPES` to `g7e.2xlarge`, or a single larger instance will consume the
+   quota for a fraction of the GPUs.
 4. **Docker on the build host.** The Deep Learning Base OSS Nvidia Driver GPU
    AMI (Ubuntu 24.04, driver 580, G7e supported) ships Docker, the NVIDIA
    container toolkit, the AWS CLI and Python 3, which is all the fleet needs.
@@ -330,7 +367,8 @@ TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 #    us-west-1 is g4dn-only; needs the fat 75+89+120 client (CLMAD=1)
 #    cheapest SKU and research-credit route: RESEARCH-CREDITS.md
 #    (GCP L4 spot is cheaper than Modal; leftover AWS g6 is cheaper than both)
-ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
+cargo build --release --bin ecc2k-status   # once
+ECC_BUCKET=ecc2k130-<account> ../../target/release/ecc2k-status --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
 #    masks) and checks that they report the preset's arithmetic before any
@@ -344,11 +382,23 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GP
 
 #    recreate to change the On-Demand base or disable fallback:
 #    ./fleet.sh down && ./fleet.sh up 64 --on-demand 8
+#
+#    Where CreateFleet is refused because the account has no
+#    AWSServiceRoleForEC2Fleet and the user cannot create one, the same verbs
+#    drive an Auto Scaling group instead, still counted in GPUs:
+#    BACKEND=asg TYPES=g7e.2xlarge,g7e.4xlarge MAX_SPOT_PER_GPU_HOUR=3 ./fleet.sh up 8
+#    Keep every type in TYPES at one GPU and the per-GPU cap stays meaningful;
+#    a cap under the on-demand price is what stops a thin spot pool from
+#    costing more than on-demand for the same GPU.
 #    ./fleet.sh down && ./fleet.sh up 64 --no-fallback
 
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campaign campaign.json --client ../ecc2k130-cpu
 #    prints collisions and, if one solves, writes solution.json locally and to the bucket
+#    The Rust port takes the same arguments and writes the same bytes; CI's
+#    merge-parity job holds the two together until merge.py is retired:
+cargo build --release --bin ecc2k-merge    # from the repository root
+../../target/release/ecc2k-merge --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campaign campaign.json --client ../ecc2k130-cpu
 
 # 6. done
 ./fleet.sh down                  # workers checkpoint on the way out
@@ -359,6 +409,12 @@ builds an F2 image of the VHDL engine and runs an F2 fleet whose workers are
 this `worker.py` with `ECC_CLIENT` pointing at the FPGA host program. Same
 bucket, same slots, same `dp/`; step 5 does not change.
 
+`campaign.json` lives in the bucket and is read by every worker at start.
+Change `restartHours`, `uploadEvery` or `verify` freely. Never change
+`workers`, `batch`, `blockThreads`, `minBlocks`, `curve` or `dpWeight` once
+any slot exists: the first four make every existing checkpoint unloadable
+(each slot would be retired and its in-flight work lost), the last two break
+the collision guarantee. Start a new bucket for a different geometry.
 `campaign.json` lives in the bucket and is read by every worker at start
 and again on the 60 s heartbeat. Change `restartHours`, `uploadEvery` or
 `verify` freely. Raise `maxIters` with `./rollout.sh max-iters N`, which
@@ -492,9 +548,30 @@ every boot after it.
   republishes the ingest host's `status.json` from the status bucket
   instead of leaving Pages on the last successful hop. It does not open
   RDS to the internet.
-* `status.py` sums live workers' rates, each slot's checkpointed iterations ×
+* **A cairn node's dashboard.** With `ECC_CAIRN_NODE` and
+  `ECC_CAIRN_OBJECTIVE` set (or `cairnNode` / `cairnObjective` in
+  `campaign.json`), each supervisor also posts a heartbeat to that node's
+  `POST /progress` on its 60 s tick -- iterations and rate from the client's
+  progress line, points found, uploaded and spooled, the GPU's name and walk
+  count -- and the node's reader shows the fleet at `/ui/task?id=<objective>`
+  beside what its log has actually paid each worker (`docs/serving.md` in
+  cairn). `ECC_CAIRN_WORKER` is the name on that page: set it to the
+  pseudonym the orbits are submitted under so the settled and reported halves
+  share a row (default `slot-NNNNN`). A heartbeat is not a record and pays
+  nothing; a node that is down or refuses costs one bounded request a minute
+  and a log line, never the lease (`test_worker_cairn.py`).
+* `ecc2k-status` (the Rust port of `status.py`, `cargo build --release --bin
+  ecc2k-status`) sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
-  fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
+  fraction of 2^60.9. It also prints each slot's **steps per walk**, its
+  iterations over its points: every point ends a walk, so this is the mean walk
+  length, 2^28.41 at the campaign's weight 32. A slot with 50,000 points that
+  is more than 2× from that is flagged off weight (`!` in the column), the rule
+  the ingest host applies; `?` marks a slot whose walks are assumed. The
+  pooled figure covers the slots that report their walks, and with off-weight
+  slots present a second figure leaves them out. The JSON carries the same as
+  `stepsPerWalk*` and `offWeightSlots`.
+  The walk count is not a campaign constant: a checkpoint
   holds the per-walk iteration base, and Ada slots omit `--threads` so the
   client sizes the grid (`usesCampaignWorkers`), which makes their base climb
   by the ratio of the two grids — about 26× on an L4-sized grid — for the same
@@ -540,7 +617,11 @@ every boot after it.
 
 The public dashboard reads Postgres (`rho-dp`), not S3, so something has to
 copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does that work; how it is
-deployed is a separate question.
+deployed is a separate question. A Phase A Rust port of the offline half
+(decode, keys, envelope, coverage, weight-32 cutoff) lives in
+[`../dp-ingest/`](../dp-ingest/); `make -C ecc2k130 test-dp-ingest` holds it.
+The live daemon stays Python until Postgres/S3 parity lands — see
+[`research/ecc2k130_dp_ingest_rust_20261007/PROTOCOL.md`](../../research/ecc2k130_dp_ingest_rust_20261007/PROTOCOL.md).
 
 **General path (any host).** From a machine with AWS credentials and a route
 to Postgres, run:
@@ -552,6 +633,16 @@ cd ecc2k130/aws
 ./ingest.sh once             # one pass, then exit
 ./ingest.sh pending          # backlog report, writes nothing
 ```
+
+On macOS, `./launchd/install-macos.sh` keeps that loop up under launchd.
+It copies `dp_ingest.py` and `ingest.sh` into
+`~/Library/Application Support/ECC2K130/ingest`, writes the LaunchAgent
+`com.adamburan.ecc2k130-dp-ingest`, and bootstraps it. The agent starts at
+login and is restarted if it exits. Each start sets `INGEST_ENSURE_ACCESS=1`
+and `AWS_PROFILE` (default `ecc2k130`), and unsets any
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, or `AWS_SESSION_TOKEN` so a
+stale token cannot override that profile. The agent runs those copies;
+run the installer again after a new `dp_ingest.py` lands.
 
 Or from the Modal tree: `./run.sh ingest` (same script; sets
 `INGEST_ENSURE_ACCESS=1` to add this host's egress /32 before connecting).
@@ -695,8 +786,7 @@ mechanism here and a vacuum per deploy is not a cost this table can carry.
 With both in place, measured at 137 M rows on the host deployed at 21:05Z: the
 vacuum took 42 s, the per-object aggregate fell from ~3 min to 46 s, and the
 snapshot from over six minutes to **142.8 s** (`published status.json in
-142.8s`, which is why that line carries a duration). It is still O(corpus)
-for this program's own `publishStatus`. The Pages snapshot no longer is:
+142.8s`, which is why that line carries a duration). The Pages snapshot is no longer O(corpus):
 `scripts/rho_status/snapshot.py` backfills `rho_dp_hour` / `rho_dp_recent`
 once and installs a statement-level insert trigger on
 `distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
@@ -704,6 +794,75 @@ the buckets current without a code deploy on this host. Later Pages runs
 read the rollup. This program's `--status-every` (default 180 s) still buys
 room for the count query until an ingest-host deploy starts reading the
 same tables.
+
+**Neither is the count here, and waiting to fix that cost a day.** The 142.8 s
+was measured with a visibility map that had just been vacuumed, and `VACUUM`
+marks only the pages that exist when it runs. Every row added afterwards costs
+the heap fetch the index-only scan was meant to avoid, so the same query grew
+far faster than the corpus: 143 s at 137 M rows on 2026-09-17, then **1,663 s at
+14:15Z, 2,010 s at 15:20Z and 2,916 s at 17:38Z** on 2026-09-18 at 188 M. The
+loop is pass, publish, pass, so those are minutes in which the store is not
+ingesting; the 16:49Z-to-18:05Z gap in the log is one of them. `campaignTotals`
+therefore read the same rollup the Pages job does, which is O(hours), and kept
+the scan only for a store whose rollup is missing or not yet backfilled. The
+ingest's own counters (`dp_ingest_totals`, `dp_ingest_hourly`) have since become
+the first source; `campaignSnapshot` falls back to `campaignTotals` only when
+those counters are missing or unreadable. Which one answered is in the log line
+and in the document's `source` and `totals_source`, because this repository has
+already paid once for a figure whose origin was ambiguous.
+The ingest connects as the `rho/dp-rds` role while those tables belong to the
+walker role — the reason the trigger needs `SECURITY DEFINER` — so a refused
+`SELECT` is an expected answer and not an error: it falls back and says so.
+Granting that role `SELECT` on `rho_dp_hour`, `rho_dp_recent` and `rho_dp_meta`
+is what keeps it on the fast path.
+
+**A backfill that locks the table it reports on is worse than no backfill.**
+The rollup's first backfill was one statement holding `SHARE` on
+`distinguished_points`. At 187 M rows it does not finish inside its 800 s
+timeout, and `SHARE` conflicts with the `ROW EXCLUSIVE` an `INSERT` takes, so
+from about 16:00Z on 2026-09-18 every 15-minute Pages run queued behind this
+ingest, held this ingest behind itself for the rest of the attempt, timed out,
+rolled back, and left `ready` false for the next run to repeat. The page stayed
+on its 11:25Z snapshot throughout — the backfill meant to unstick it was also
+what kept the store from moving. The fleet never stopped: S3 had fresh objects
+the whole time. It is chunked by hour now (#450, #454), one committed
+transaction per hour under `REPEATABLE READ` with a 15 s `lock_timeout` and no
+lock on the table, resumable from `backfill_through`, and the page publishes an
+index-only fallback count before the backfill rather than after it — so a rollup
+that is still filling costs the page accuracy on the hourly series, not its
+existence.
+
+`scripts/rho_status/test_rollup_postgres.py` runs that against a real server,
+because none of it is a claim about the text of the SQL: that an hour rebuilt
+over the trigger's own work counts each row once, that a spent budget leaves a
+cursor the next call finishes, that the published document matches the table's
+own histogram, that the fallback count and the rollup agree, and the one that
+matters — the backfill completes while another session holds `ROW EXCLUSIVE`,
+where the first shape waits out its timeout. It skips where there is no
+Postgres, so it is a no-op in CI and a real check on any host that can reach
+one.
+
+**The page reading `IDLE_OR_STALE` with no new points is not always a bug in
+any of the above.** Since 19:02Z on 2026-09-18 it is the truth: spot reclaimed
+every worker, and `RunInstances` is refused account-wide — `Blocked … not
+recognized as a valid account`, an account-verification hold that no IAM
+permission overrides — so nothing can replace them. Status, Support reply
+draft, and the owner unblock checklist live in
+[`ACCOUNT-HOLD.md`](ACCOUNT-HOLD.md) (still blocked as of 2026-10-05). The
+document says which kind of stop it is without needing this paragraph:
+`walking_slots: 0`, `workers: 0`, `iterations_per_second: 0.0` and
+`outstanding_objects: 0` beside an 11-hour `lag_seconds` is a fleet that
+stopped with an ingest that is caught up, where a stopped ingest shows a
+rising `outstanding_objects` and a fresh `newest_object_at`. Both ASGs still
+hold their launch template and an available AMI, and they track `$Latest`, so
+recovery once the hold clears is capacity only:
+
+```
+aws autoscaling update-auto-scaling-group --region us-west-2 \
+  --auto-scaling-group-name ecc2k130-g7 --min-size 0 --max-size 8 --desired-capacity 8
+```
+
+They are at `min=max=desired=0`, which is why `max-size` is in that line.
 
 While a snapshot runs, this program used to stop ingesting — the loop was
 pass, publish, pass — so a slow `pending()` aggregate or a long drain froze

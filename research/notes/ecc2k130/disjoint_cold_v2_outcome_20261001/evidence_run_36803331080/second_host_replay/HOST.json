@@ -1,0 +1,57 @@
+{
+  "cases": {
+    "n37_L1": {
+      "hosted_status": "PASS",
+      "independent_match": true,
+      "receipt_sha256": "484eb3bb0ebc9f32274970dbc697ef733b69582eb03b555c47568bf48f1d2760",
+      "status": "PASS"
+    },
+    "n37_L1024": {
+      "hosted_status": "PASS",
+      "independent_match": true,
+      "receipt_sha256": "3a4a39eceba2013da8d07b24c4816efb6db6100d814adee9ecc00da7f8b846c7",
+      "status": "PASS"
+    },
+    "n41_L1": {
+      "hosted_status": "PASS",
+      "independent_match": true,
+      "receipt_sha256": "dd2624b6f785732eecbdb96fd048c3322fe459e0c646ae96daff2ade3434dd14",
+      "status": "PASS"
+    },
+    "n41_L1024": {
+      "hosted_status": "PASS",
+      "independent_match": true,
+      "receipt_sha256": "373a0fec6126c03c0b555979fca113d7c968c0965f2f3c9cb47bd91d6c482ad0",
+      "status": "PASS"
+    },
+    "n53_L1": {
+      "hosted_status": "PASS",
+      "independent_match": true,
+      "receipt_sha256": "31f9af4792662c18df4c2054589087c1afb7cf36d9dc2836a29fb74b44fe29d7",
+      "status": "PASS"
+    },
+    "n53_L1024": {
+      "hosted_status": "PASS",
+      "independent_match": true,
+      "receipt_sha256": "ef3c5596ef5edaafddeb320051d2cb15fbb7a2fdbeb7cc9c68c0aad1f548a836",
+      "status": "PASS"
+    }
+  },
+  "git_head": "39cb72e8073cdab3ef709f1b39148c5c15662980",
+  "input_freeze_sha256": "da958a3f1117dd1b88703fed2055c5c9f64255516e1e920f35d193bf53c6a88d",
+  "machine": "arm64",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "receipts_sha256": {
+    "n37_L1": "484eb3bb0ebc9f32274970dbc697ef733b69582eb03b555c47568bf48f1d2760",
+    "n37_L1024": "3a4a39eceba2013da8d07b24c4816efb6db6100d814adee9ecc00da7f8b846c7",
+    "n41_L1": "dd2624b6f785732eecbdb96fd048c3322fe459e0c646ae96daff2ade3434dd14",
+    "n41_L1024": "373a0fec6126c03c0b555979fca113d7c968c0965f2f3c9cb47bd91d6c482ad0",
+    "n53_L1": "31f9af4792662c18df4c2054589087c1afb7cf36d9dc2836a29fb74b44fe29d7",
+    "n53_L1024": "ef3c5596ef5edaafddeb320051d2cb15fbb7a2fdbeb7cc9c68c0aad1f548a836"
+  },
+  "run_url": "https://github.com/aburan28/crypto/actions/runs/36803331080",
+  "schema": "ecc2k130-disjoint-cold-v2-second-host-v1",
+  "source_head": "38c173072e16f580237447c93b085634275ba048",
+  "verifier_sha256": "e4d26ff33f81e4e7e64f1d8f2dc33e7a02313ebbe04f491231028eb29e69b68f"
+}

@@ -21,7 +21,7 @@ def executed_policy(config, panel=None):
     if panel is None:
         require(not (names & config.keys()), 'candidate policy requested from an archived worker')
         return None
-    require(panel in ('round1-v1', 'round2-v1'), 'unknown candidate policy adapter')
+    require(panel in ('round1-v1', 'round2-v1', 'round3-v1'), 'unknown candidate policy adapter')
     require(type(config.get('orbit_batch', 8)) is int and config.get('orbit_batch', 8) in (1, 2, 4, 8),
             'invalid orbit batch')
     require(config.get('orbit_target') is None or (type(config.get('orbit_target')) is int and
@@ -35,7 +35,7 @@ def executed_policy(config, panel=None):
                       full_pair_table=config.get('full_pair_table', False))
         require(type(policy['full_pair_table']) is bool, 'invalid row/table policy')
         return policy
-    require('full_pair_table' not in config, 'round2 policies use pair_table modes')
+    require('full_pair_table' not in config, 'round2/round3 policies use pair_table modes')
     policy = dict(orbit_batch=config.get('orbit_batch', 8), orbit_target=config.get('orbit_target'),
                   row_kernel=config.get('row_kernel', 'full'),
                   pair_table=config.get('pair_table', 'heuristic'))

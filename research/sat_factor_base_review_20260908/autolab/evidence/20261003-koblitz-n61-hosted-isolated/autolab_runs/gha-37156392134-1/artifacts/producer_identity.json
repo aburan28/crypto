@@ -1,0 +1,16 @@
+{
+  "K": 500,
+  "compared": "every record field except timers (*_ms, *_ns, *_event), the IC's new relation_checks counter and rho's producer_version",
+  "exit_codes": {
+    "frozen_ic": 0,
+    "frozen_rho": 0,
+    "ic": 0,
+    "rho": 0
+  },
+  "ic_setup_summary_identical": true,
+  "ic_untimed_records_identical": true,
+  "identical": true,
+  "known_scalar": 123456789012345,
+  "rho_seed": 610000,
+  "rho_untimed_records_identical": true
+}

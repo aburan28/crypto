@@ -1,12 +1,13 @@
 # Conditional preregistration: paired n13 O-aware sparse versus dense SAT
 
-Status: protocol/source draft only, **no sparse solver or paired outcome**.
-The study cannot freeze inputs or start timed children until [PR #786](https://github.com/aburan28/crypto/pull/786)
-merges its independently validated sparse sequential-one-hot/allowed-output
-CNF, all #786 artifact/source hashes are pinned here, and a new hash-only
-draft-PR CI passes. [PR #785](https://github.com/aburan28/crypto/pull/785)
-is a historical single-encoding baseline, not the paired reference for this
-comparison.
+Status: **HELD**, frozen source/input gate only; no paired solver outcome.
+The independently validated sparse sequential-one-hot/allowed-output CNF
+merged in [PR #786](https://github.com/aburan28/crypto/pull/786). This
+successor to [PR #787](https://github.com/aburan28/crypto/pull/787) pins its
+merged evidence and runner before any timed child. Independent review and
+hash-only CI are required before the separately archived measured attempt.
+[PR #785](https://github.com/aburan28/crypto/pull/785) is a historical
+single-encoding baseline, not the paired reference for this comparison.
 
 ## Identical decision problems and model semantics
 
@@ -21,7 +22,10 @@ drift. Both files encode *the same* signed-rational-factor point-target
 question, including O-prefix branches; no WDSat same-base m! ordering is
 permitted for the distinct rotated slots.
 
-The cold exporter and runner use an exact pinned Python 3.12.8 executable and psutil 7.2.2. The three engines are the exact #785 SHA-pinned installed CryptoMiniSat 5.14.7,
+Before any child, the runner must prove process-tree enumeration is permitted on
+the execution host; an inaccessible monitor fails closed and archives the
+refusal. The `preflight` mode records this gate without launching any
+solver or producer. The cold exporter and runner use an exact pinned Python 3.12.8 executable and psutil 7.2.2. The three engines are the exact #785 SHA-pinned installed CryptoMiniSat 5.14.7,
 Kissat 4.0.4 and CaDiCaL 3.0.1 binaries with identical CLI flags, single
 thread and exit/model parser. Run two tiny SAT/UNSAT interface smokes per
 engine before this panel; archive failures. For SAT, decode the five chosen
@@ -42,8 +46,10 @@ base/schema bytes against the merged archives before querying. Charge the
 **full four-panel** producer wall to n13 for each representation; this is a
 conservative equal **panel scope**, though dense and sparse perform different work. Keep the two opposite-order
 pairs separately; do not choose a favorable export measurement post hoc.
-Each exporter has 180 s wall and 512 MiB sampled process-tree RSS caps.
-Preserve stdout/stderr, exact command, source/hash, UTC, wall/CPU/RSS and
+Each exporter has a 180 s wall budget and a 512 MiB sampled process-tree
+RSS threshold. The 20 ms sampler kills the process group when it observes an
+overrun; an unobserved memory spike or up to one polling interval of wall
+overrun is possible, so this is not an OS-enforced memory limit. Preserve stdout/stderr, exact command, source/hash, UTC, wall/CPU/RSS and
 failed partial outputs. Semantics audits in #781/#786 remain prior certified
 source gates; fresh byte identity makes their verdict applicable to the
 new base. A separate audit-inclusive cost may add independent verifier
@@ -66,8 +72,12 @@ CPU, RSS, parse/point-check wall, UTC and source/input digests. OS page cache
 is not forcibly flushed; balanced adjacent order limits but does not erase
 cache and thermal effects. Source/preflight, both base loads, all query-file
 constructions, children and verification are measured rather than free.
-The aggregate hard ceiling is 4×180 + 192×15 = 3,600 s of child caps,
-plus bounded setup/replay; stop at 3,900 s and retain a censored panel.
+The nominal sum of child wall budgets is 4×180 + 192×15 = 3,600 s,
+excluding polling/teardown, preflight, setup and verification. A separate
+3,900 s parent-wall alarm covers preflight through the panel result, kills
+an active child process group on interruption, and retains a failed/censored
+receipt and partial raw outputs. Archive replay happens afterward and has
+its own CI budget.
 
 For each engine and representation report (1) solver-child wall/CPU alone,
 (2) query construction plus child plus point verification, and (3) two
@@ -95,10 +105,11 @@ observation, not a 95% population speedup claim. n131 exporter width,
 relation rank/yield, full ECDLP S, matched rho and a Certicom logarithm
 remain unset.
 
-Open a draft PR with this protocol and runner, then pin merged #786
+The successor draft PR pins merged #785/#786/#787 commit ancestry,
 source/artifact hashes, binaries, targets, exact commands and caps in
-`FROZEN.json`; pass hash-only CI **before** any smoke or producer. Coordinate
-a quiet local host window, retain every failed attempt under a unique
-path, then commit raw archive, independent replay, analysis, scoreboard
-and decision in this same PR. Exact-head CI/review and guarded merge are
-the final gate.
+`FROZEN.json` and passes hash-only CI before any smoke or producer. It leaves
+the measured decision HELD. After independent review, coordinate a quiet
+local host window, retain every failed attempt under a unique path, and
+commit raw archive, independent replay, analysis, scoreboard and decision
+in a linked outcome PR. Exact-head CI/review and guarded merge remain the
+final evidence gate.

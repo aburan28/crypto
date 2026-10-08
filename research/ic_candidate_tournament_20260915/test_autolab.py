@@ -67,6 +67,63 @@ class PortfolioTests(unittest.TestCase):
         self.assertNotIn('timeout', [r['candidate'] for r in chosen])
         self.assertEqual(chosen, retain(rows, arms, width=3, exploration=1, seed=12))
 
+    def test_exploration_is_balanced_across_unrepresented_families(self):
+        from portfolio import mechanism_family
+        arms = [{'id': name, 'config': dict(BASE_CONFIG, solver=solver,
+                                           batch_trials=batch)}
+                for name, solver, batch in (
+                    ('leader', 'pair_table', 1), ('clone1', 'pair_table', 2),
+                    ('clone2', 'pair_table', 4), ('clone3', 'pair_table', 8),
+                    ('f4', 'f4', 1), ('f5', 'f5', 1))]
+        rows = [self.row(name, cost, {'c': cost}) for name, cost in (
+            ('leader', .5), ('clone1', .6), ('clone2', .7),
+            ('clone3', .8), ('f4', 2), ('f5', 3))]
+        chosen = retain(rows, arms, width=3, exploration=2, seed=12)
+        self.assertEqual(chosen[0]['candidate'], 'leader')
+        self.assertEqual(len(chosen), 3)
+        self.assertEqual({mechanism_family(next(a for a in arms
+                                  if a['id'] == item['candidate']))
+                          for item in chosen},
+                         {mechanism_family(arms[0]), mechanism_family(arms[4]),
+                          mechanism_family(arms[5])})
+        self.assertEqual(chosen, retain(rows, arms, width=3,
+                                        exploration=2, seed=12))
+
+    def test_cell_specialist_and_pair_table_family_both_survive(self):
+        from portfolio import family
+        arms = [
+            {'id':'leader', 'config':dict(BASE_CONFIG, pair_table='heuristic', orbit_target=4)},
+            {'id':'half', 'config':dict(BASE_CONFIG, pair_table='half', orbit_target=4)},
+            {'id':'specialist', 'config':dict(BASE_CONFIG, pair_table='heuristic', orbit_target=4)},
+        ]
+        self.assertNotEqual(family(arms[0]), family(arms[1]))
+        self.assertNotEqual(family(arms[0]), family(dict(arms[0], config=dict(
+            arms[0]['config'], factor_base={'kind':'frobenius_union', 'seed_masks':[1, 2, 8]}))))
+        rows = [self.row('leader', .8, {'small':.8, 'large':.8}),
+                self.row('half', .9, {'small':.7, 'large':1.1}),
+                self.row('specialist', 1.0, {'small':.6, 'large':1.4})]
+        self.assertEqual(retain(rows, arms, width=3, exploration=0), [
+            {'candidate':'leader', 'reason':'complete instruction-cost leader'},
+            {'candidate':'specialist', 'reason':'cell specialist: cold instructions small'},
+            {'candidate':'half', 'reason':'non-dominated implementation family'}])
+
+    def test_online_cell_specialist_is_not_lost_to_cold_diversity(self):
+        arms = [{'id': name, 'config': dict(BASE_CONFIG, row_kernel=kernel)}
+                for name, kernel in (('online', 'full'), ('cold', 'word'),
+                                     ('large_cell', 'bounded'))]
+        rows = [
+            dict(self.row('online', .8, {'small':.8, 'large':.8}),
+                 online=dict(candidate_over_baseline=.8, per_cell={'small':.8, 'large':1.0})),
+            dict(self.row('cold', .7, {'small':.7, 'large':.7}),
+                 online=dict(candidate_over_baseline=1.0, per_cell={'small':1.0, 'large':1.0})),
+            dict(self.row('large_cell', .9, {'small':.9, 'large':.9}),
+                 online=dict(candidate_over_baseline=1.1, per_cell={'small':1.5, 'large':.6})),
+        ]
+        selected = retain(rows, arms, width=3, exploration=0)
+        self.assertEqual([item['candidate'] for item in selected],
+                         ['online', 'cold', 'large_cell'])
+        self.assertEqual(selected[-1]['reason'], 'cell specialist: single-target online large')
+
     def test_combinations_include_individually_losing_parents(self):
         arms = [dict(id='incumbent',config=BASE_CONFIG),
                 dict(id='batch',config=dict(BASE_CONFIG,batch_trials=1)),
@@ -96,6 +153,8 @@ class PortfolioTests(unittest.TestCase):
             retain([self.row('a',float('nan'),{'c':1})],arms)
         with self.assertRaises(InvalidEvidence):
             retain([self.row('a',1,{'c':1}),self.row('b',1,{'other':1})],arms)
+        with self.assertRaisesRegex(InvalidEvidence, 'duplicate candidate comparison'):
+            retain([self.row('a',1,{'c':1}),self.row('a',1,{'c':1})],arms)
 
 
 class NativeEvidenceTests(unittest.TestCase):
@@ -144,6 +203,52 @@ class NativeEvidenceTests(unittest.TestCase):
         rows[1]['certificate']['factor_base_sha256'] = 'changed'
         with self.assertRaises(InvalidEvidence):
             summarize(contract, rows)
+
+    def test_same_jobs_with_different_completion_orders_verify_equal(self):
+        # Verify rebuilds receipts in case/arm/repetition order. The screen
+        # writes the summary from shuffled completion order. Those lists must
+        # compare equal, including single_target_online run IDs.
+        contract = {'scientific_admission': True, 'comparison_kind': 'fixed-support',
+                    'repetitions': 2,
+                    'cases': [{'id': 'c0', 'job': {'degree': 13, 'curve_a': 0},
+                               'fixture': {'targets': [['1', '2']]}},
+                              {'id': 'c1', 'job': {'degree': 17, 'curve_a': 1},
+                               'fixture': {'targets': [['3', '4']]}}],
+                    'arms': [{'id': 'incumbent', 'mode': 'ic'},
+                             {'id': 'rho_w1', 'mode': 'rho'}]}
+        rows = []
+        for case in contract['cases']:
+            for arm in contract['arms']:
+                for repetition in range(contract['repetitions']):
+                    identity = 'IC1hinc' if arm['mode'] == 'ic' else 'RHO1hrho'
+                    number = repetition + (0 if arm['mode'] == 'ic' else 8)
+                    measurement = {'workload_id': 'W'+case['id'],
+                                   'run_id': f"{identity}W{case['id']}R{number}",
+                                   'native_timing': {'online': {'wall_ns': 1_000_000 + number}},
+                                   'certificate': {'ok': True}}
+                    if arm['mode'] == 'ic':
+                        measurement['candidate_id'] = identity
+                    else:
+                        measurement['reference_id'] = identity
+                        measurement['rho_context'] = {'requested_walks': 1}
+                    rows.append(dict(case=case['id'], arm=arm['id'], repetition=repetition,
+                                     status='VERIFIED',
+                                     process={'whole_process_wall_seconds': 0.001},
+                                     certificate={'rank': 3 if arm['mode'] == 'ic' else None,
+                                                  'signed_base_size': 55 if arm['mode'] == 'ic' else None,
+                                                  'factor_base_sha256': 'base' if arm['mode'] == 'ic' else None},
+                                     measurement=measurement))
+        completed = list(reversed(rows))
+        self.assertNotEqual([r['measurement']['run_id'] for r in rows],
+                            [r['measurement']['run_id'] for r in completed])
+        scheduled = summarize(contract, rows)
+        executed = summarize(contract, completed)
+        self.assertEqual(scheduled, executed)
+        self.assertTrue(scheduled['all_jobs_verified'])
+        self.assertFalse(scheduled['promotion_eligible'])
+        for pair in scheduled['single_target_online']:
+            self.assertEqual(pair['run_ids'], sorted(pair['run_ids']))
+            self.assertEqual(len(pair['run_ids']), 4)
 
     def test_trial_replay_rejects_corruption_and_wrong_job(self):
         from oracle import verify

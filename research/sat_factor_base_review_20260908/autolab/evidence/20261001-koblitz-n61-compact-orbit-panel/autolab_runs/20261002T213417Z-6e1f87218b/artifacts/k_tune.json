@@ -1,0 +1,279 @@
+{
+  "chosen_K": 1000,
+  "k_source": "tuned",
+  "panel_targets": 16384,
+  "rows": [
+    {
+      "K": 1000,
+      "available_memory_bytes": 14334115840,
+      "estimated_ic_rss_bytes": 5826076160,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "0e68233f43f894c9c16971703120e1983dc30d38337b4996d119bce0bab40ec0",
+        "base_scanned_x": 2135,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 122000,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 1000,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 5781127168,
+        "rank": 1000,
+        "rank_attempts": 1000,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 21368.48,
+        "rank_relations": 1000,
+        "rank_rows_without_gain": 0,
+        "regular_states": 61000000,
+        "root_table_entries": 60995686,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 40.579333000000005,
+          "index_build": 28070.464334,
+          "linear_algebra": 2.13875,
+          "normal_basis_and_selftest": 2.855667,
+          "process_total": 40474.142792,
+          "rank_stage": 6027.095499999999,
+          "setup_total": 28113.899708,
+          "target_median": 4.28725,
+          "targets_total": 6330.851667
+        }
+      },
+      "run": {
+        "command": [
+          "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:1000",
+          "/Volumes/SSD990/ic-n61c/research/sat_factor_base_review_20260908/autolab/runs/20261002T213417Z-6e1f87218b/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-02T21:34:59.617832+00:00",
+          "available_memory_bytes": 20455833600,
+          "loadavg": [
+            14.38330078125,
+            13.29150390625,
+            12.93505859375
+          ],
+          "swap": "total = 0.00M  used = 0.00M  free = 0.00M  (encrypted)"
+        },
+        "conditions_before": {
+          "at": "2026-10-02T21:34:18.802483+00:00",
+          "available_memory_bytes": 14326890496,
+          "loadavg": [
+            17.2119140625,
+            13.625,
+            13.0341796875
+          ],
+          "swap": "total = 0.00M  used = 0.00M  free = 0.00M  (encrypted)"
+        },
+        "cycles_elapsed": 151730120728,
+        "exit_code": 0,
+        "instructions_retired": 355844097092,
+        "involuntary_context_switches": 64705,
+        "max_rss_bytes": 5781209088,
+        "page_faults": 1,
+        "page_reclaims": 706663,
+        "peak_memory_footprint_bytes": 5788422560,
+        "pinned_cpu": null,
+        "swaps": 0,
+        "sys_s": 1.8865429999999999,
+        "user_s": 37.406146,
+        "voluntary_context_switches": 3,
+        "wall_s": 40.804175792
+      },
+      "state": "ok"
+    },
+    {
+      "K": 1200,
+      "available_memory_bytes": 20461518848,
+      "estimated_ic_rss_bytes": 10765203456,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "e759538e64e9f87171e4b9709b27ab28a00061eb965736177bc4664b20b72e7a",
+        "base_scanned_x": 2551,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 146400,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 1200,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 8915337216,
+        "rank": 1200,
+        "rank_attempts": 1200,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 14613.339166666667,
+        "rank_relations": 1200,
+        "rank_rows_without_gain": 0,
+        "regular_states": 87840000,
+        "root_table_entries": 87833550,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 47.43925,
+          "index_build": 47637.69983400001,
+          "linear_algebra": 3.2798749999999997,
+          "normal_basis_and_selftest": 2.8188340000000003,
+          "process_total": 57414.898,
+          "rank_stage": 5467.063875,
+          "setup_total": 47687.958083,
+          "target_median": 2.889833,
+          "targets_total": 4256.328375
+        }
+      },
+      "run": {
+        "command": [
+          "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:1200",
+          "/Volumes/SSD990/ic-n61c/research/sat_factor_base_review_20260908/autolab/runs/20261002T213417Z-6e1f87218b/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-02T21:35:57.307561+00:00",
+          "available_memory_bytes": 19952861184,
+          "loadavg": [
+            11.31005859375,
+            12.599609375,
+            12.69775390625
+          ],
+          "swap": "total = 0.00M  used = 0.00M  free = 0.00M  (encrypted)"
+        },
+        "conditions_before": {
+          "at": "2026-10-02T21:34:59.634674+00:00",
+          "available_memory_bytes": 20465205248,
+          "loadavg": [
+            14.38330078125,
+            13.29150390625,
+            12.93505859375
+          ],
+          "swap": "total = 0.00M  used = 0.00M  free = 0.00M  (encrypted)"
+        },
+        "cycles_elapsed": 209046752521,
+        "exit_code": 0,
+        "instructions_retired": 454823034194,
+        "involuntary_context_switches": 113352,
+        "max_rss_bytes": 10432200704,
+        "page_faults": 1,
+        "page_reclaims": 1672157,
+        "peak_memory_footprint_bytes": 10736377728,
+        "pinned_cpu": null,
+        "swaps": 0,
+        "sys_s": 5.342697,
+        "user_s": 49.248939,
+        "voluntary_context_switches": 6,
+        "wall_s": 57.665229542
+      },
+      "state": "ok"
+    },
+    {
+      "K": 1400,
+      "available_memory_bytes": 19950714880,
+      "estimated_ic_rss_bytes": 11526483456,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "0e6a3ccca740800d13e7b9c5686706b5f57a362868cfa1aa0ebe7c9e9065e5bf",
+        "base_scanned_x": 2971,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 170800,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 1400,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 9318612992,
+        "rank": 1400,
+        "rank_attempts": 1400,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 11237.993571428571,
+        "rank_relations": 1400,
+        "rank_rows_without_gain": 0,
+        "regular_states": 119560000,
+        "root_table_entries": 119550442,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 55.474833000000004,
+          "index_build": 64376.577208,
+          "linear_algebra": 4.294542,
+          "normal_basis_and_selftest": 2.803083,
+          "process_total": 72863.303625,
+          "rank_stage": 5326.244541,
+          "setup_total": 64434.855208,
+          "target_median": 2.024541,
+          "targets_total": 3097.593667
+        }
+      },
+      "run": {
+        "command": [
+          "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:1400",
+          "/Volumes/SSD990/ic-n61c/research/sat_factor_base_review_20260908/autolab/runs/20261002T213417Z-6e1f87218b/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-02T21:37:10.483256+00:00",
+          "available_memory_bytes": 21642117120,
+          "loadavg": [
+            11.9267578125,
+            12.58056640625,
+            12.68359375
+          ],
+          "swap": "total = 0.00M  used = 0.00M  free = 0.00M  (encrypted)"
+        },
+        "conditions_before": {
+          "at": "2026-10-02T21:35:57.325190+00:00",
+          "available_memory_bytes": 19939196928,
+          "loadavg": [
+            11.31005859375,
+            12.599609375,
+            12.69775390625
+          ],
+          "swap": "total = 0.00M  used = 0.00M  free = 0.00M  (encrypted)"
+        },
+        "cycles_elapsed": 265028280766,
+        "exit_code": 0,
+        "instructions_retired": 580009683940,
+        "involuntary_context_switches": 136147,
+        "max_rss_bytes": 11481415680,
+        "page_faults": 1,
+        "page_reclaims": 1181909,
+        "peak_memory_footprint_bytes": 11504755112,
+        "pinned_cpu": null,
+        "swaps": 0,
+        "sys_s": 6.13309,
+        "user_s": 63.541589,
+        "voluntary_context_switches": 12,
+        "wall_s": 73.12161462499999
+      },
+      "state": "ok"
+    }
+  ],
+  "selection": "lowest wall_s",
+  "tune_corpus": {
+    "name": "n61-ks-growing-tune-1024-v1",
+    "scalars_sha256": "8ec0c0438ba46a1b6e598dec2732c8103af07ce585a2f65ea78f102181c77abf",
+    "targets": 1024
+  },
+  "tune_eval_disjoint": true,
+  "tune_targets": 1024
+}

@@ -1,6 +1,6 @@
 # ECC2K-130 n131 m10 complete-chain representation-capacity preflight
 
-Status: **frozen implementation proposal; no n131 complete-chain outcome**. This draft is stacked on the held #804 DIMACS gate, which depends on #802. The unequal input is copied byte-for-byte from held #784; balanced #778 is merged. `FROZEN.json` has `release_main_head: null`. The measured producer must not run until #802, #804, and #784 are merged, this branch is rebased on a fixed main head, the hashes and caps are frozen again, CI passes on that exact head, and the exact-head implementation receives independent review. A failed prerequisite or cap produces a STOP/censored receipt, never a result inferred from silence.
+Status: **review-gated attempt pending; no n131 complete-chain outcome**. The #802 full-point DAG, #804 DIMACS gate, and #784 unequal-input prerequisites have merged, and #935 merged the nonmeasuring release preflight. This attempt retains the frozen main ancestor `01a3dbc04014e87ed12e7b9797b67e0a8ad144e9`, all original representation and resource caps, and the pinned dependency and producer bytes. The measured producer must not run until this exact attempt head passes CI and receives independent pre-outcome implementation review. A failed prerequisite or cap produces a STOP/censored receipt, never a result inferred from silence.
 
 ## Question and scope
 
@@ -28,9 +28,11 @@ Decision labels are `BOTH_WITHIN_FROZEN_CAPS` only if both complete DAGs and tar
 
 ## Release and commands
 
-The present PR runs only Python syntax, frozen hashes, independent basis replay, and n3 toy comparison in CI. `run.py` fails closed while `release_main_head` is null. After the prerequisite merges and independent review, make a new frozen commit pinning the exact merged `origin/main`, all source/input hashes, and unchanged or explicitly reviewed caps. The measured runner requires authenticated `gh pr view` read access; verify each merge commit is an ancestor of that exact main head. Do not rely on an unauthenticated hosted CI environment for the measured gate.
+The release PR runs only Python syntax, frozen hashes, independent basis replay, and the n3 toy comparison in CI. `release_main_head` names the **pre-release main ancestor**, not the eventual run checkout. The measured runner requires authenticated `gh pr view` read access. It checks that all three actual prerequisite merge commits precede the frozen ancestor; that the frozen ancestor precedes both the observed main and clean run checkout; and that every pinned dependency blob is identical at the observed main and run checkout. Unrelated later main merges therefore do not invalidate a reviewed source, while relevant source drift fails closed. Its receipt records the frozen ancestor, observed main, and exact run checkout separately. The independent replay rechecks those ancestries and the historical run-checkout blobs. An unauthenticated hosted CI environment is not a substitute for the measured gate.
 
-After that separate release commit and review, the authorized commands are:
+The [#831 Linux preparation](https://github.com/aburan28/crypto/pull/831) passed hard memory-cap probes after #804's macOS launch refusal. The separately frozen, label-gated Ubuntu 24.04 workflow `ecc2k130-m10-capacity-once.yml` therefore provides the measured host path. The #935-specific launch became inert when that preparatory PR merged; this follow-on branch is the live attempt. Its admission job requires an exact-head approval from a non-author collaborator, a live unchanged PR head, and zero prior non-skipped capacity jobs on this branch. It rechecks admission on the capacity host immediately before dispatch. Every admission refusal, STOP, cap censor, or completed attempt is uploaded as raw evidence; an Actions artifact alone is temporary and must be committed in a linked outcome PR. Applying the label before review can produce only a refusal receipt, not a capacity child.
+
+After exact-head CI and independent pre-outcome implementation review, the authorized commands are:
 
     python3 research/notes/ecc2k130/m10_export_capacity_20260925/ci_replay.py
     python3 research/notes/ecc2k130/m10_export_capacity_20260925/run.py --out /private/tmp/ecc2k130-m10-capacity-producer

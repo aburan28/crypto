@@ -266,10 +266,12 @@ def verify(output: Path) -> dict[str, Any]:
     # Stage 128 is now an immutable historical snapshot.  The gate status it
     # pinned by hash moved on 2026-09-22 when the gate-6 online wall crossing
     # was re-measured against a batched signed-Frobenius rho and did not hold,
+    # and again when Stage 159 added the native-F4 single-target supplement,
     # so recomposing here would compare two points in time.  Stage 129
-    # recomposes the current evidence and chains to this seal
-    # (compose_koblitz_stage129_gate_audit.py); this verify checks the seal and
-    # the frozen audit only, as Stage 109's, 124's, 125's, 126's and 127's do.
+    # (compose_koblitz_stage129_gate_audit.py) and Stage 159
+    # (compose_koblitz_stage159_gate_audit.py) each chain to this seal; this
+    # verify checks the seal and the frozen audit only, as Stage 109's, 124's,
+    # 125's, 126's and 127's do.
     seal = load(output / "result-seal.json", "Stage-128 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")

@@ -255,6 +255,62 @@ the measurement the switch waits on ([WALK-CONSTANT.md](WALK-CONSTANT.md)
 [CHEAPER-SELECTION.md](CHEAPER-SELECTION.md) prices the remaining forward-pass
 lever (phase via popc planes, `TABLE_PHASE_POPC`) against the earlier 0.90
 floor of that 22.3 B/s ceiling.
+The current confirmed sigma path reaches **15.436677 B complete scalar
+updates/s** on one RTX PRO 6000: the fused reverse/next-prefix schedule improves
+its same-allocation control by 2.826% across five alternating pairs. The
+arithmetic, walk and odd-launch replay gates pass with identical complete
+corpora. Use `make gpu-rtx-pro6000-sigma-fused` for the native build and see
+[the result and receipts](benchmarks/sigma-fused/RESULTS.md). A matched B32/B64
+screen retains B16/T256/min2. The goal of 26 B/s remains unmet.
+
+On that fused schedule, reading the walk's Frobenius steps from
+[shared-memory nibble tables](SIGMA-TABLE.md) in polynomial coordinates
+(`PACKED_SIGMA_TABLE=1`, `make gpu-rtx-pro6000-sigma-table`, one 512-thread
+block per SM) measures **15.884369 B/s** under the fused headline protocol
+against a 15.513653 B/s same-session control: A/B paired median ratio
+1.023930 over five pairs, A/A drift 0.099%, identical sorted corpora,
+verdict promote as compatible engineering
+([SIGMA-TABLE.md](SIGMA-TABLE.md), receipts in
+[benchmarks/sigma-table/headline](benchmarks/sigma-table/headline/)). The
+26 B/s goal remains unmet.
+
+The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
+on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle
+hints across the batch first raised the path to 2.449169 B/s. Proving raw
+two-cycles after their first affine step then measured 3.592601–3.593206 B/s
+against 2.449482–2.450247 B/s, with a median paired ratio of 1.466604. Finally,
+compacting hinted owners across each block measured 5.015825–5.019737 B/s
+against 3.558739–3.563098 B/s, a median paired ratio of 1.408969. Every arm
+replayed 300/300 reports with zero drops and produced the same sorted
+multiset of 1,480,278 `ECC2KDT3` records. The selected B16/T512 geometry beat
+B32 in every long confirmation and B64 in the screen. See the frozen
+[reconvergence result](benchmarks/batch-hints/result.json), its
+[independent audit](benchmarks/batch-hints/independent-audit.json), the
+[geometry follow-up](benchmarks/hint-geometry/result.json), and the
+[two-cycle result](benchmarks/batch-hints-fast2/result.json). The selected
+block queue is recorded in [its result](benchmarks/block-hints/result.json)
+and [independent audit](benchmarks/block-hints/independent-audit.json).
+On that selected block-v3 schedule, the shared polynomial-square table and
+out-of-line polynomial inversion measured **5.095344–5.107611 B/s**, including
+**5.097573** and **5.100950 B/s**, against 5.064024–5.069412 B/s controls.
+All five paired ratios cleared 1.005, with median **1.006625**, while a matched
+control/control panel had median 1.000047 and stayed within the frozen noise
+bounds. The table preset now selects `PACKED_SQUARE_TABLE=1` and
+`PACKED_INV_POLY=2`. This is a bounded 0.66% same-walk engineering gain; it
+remains `Partial` against the older 1.040 roofline threshold and is not a
+full-solve improvement. See the [five-pair result](benchmarks/block-both2-confirm5/result.json),
+[artifact manifest](benchmarks/block-both2-confirm5/artifact-manifest.json) and
+[independent audit](benchmarks/block-both2-confirm5/independent-audit.json).
+
+The earlier **20.078 B/s** table result in
+[ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) used the superseded v2 cycle
+rule and does not transfer to v3. A fresh seven-arm v3 run put its reference at
+1.040338 B/s and its best arithmetic arm at 1.050842 B/s. Its retained static
+roofline model is also stale on the new cold call: the CLMAD self-check fails,
+although the direct hardware probe remains usable. The default sigma walk is
+still faster. The 26 B/s one-GPU objective remains unachieved. Older table-walk
+optimization notes below retain the revision and rule under which they were
+measured.
 [TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× the 22.3
 ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
 SM-clocks 30 B/s allows; at the unit's 2.0 they fill 15.0, so the verdict
@@ -1074,15 +1130,38 @@ launch (`modal_app.py`), at upload (`modal_sync.py`) and on the page
    seed: dropped by `ON CONFLICT`, correctly not a collision, and invisible.
    Runs 1-4 did this against slots 0-3 on 2026-09-19/20; 813k of run 3's 912k
    records were byte-identical to slot 2's, and 100% of its seeds had already
-   been walked. Campaign run ids therefore come from **8000-9999**, which no
-   AWS slot can reach (`90000 + r` must stay a five-digit slot), and
-   `modal_sync.py` refuses an id for which the bucket holds a checkpoint or a
+   been walked. Modal GPU IDs use **8000-8999** and CPU sidecars use
+   **9000-9999** (`90000 + r` stays a five-digit slot). The
+   shared [seed registry](SEED-IDENTITY.md) enforces permanent ownership across
+   providers and storage prefixes. `modal_sync.py` also refuses an id for
+   which the bucket holds a checkpoint or a
    dp object of slot `r - 1`.
 2. **The cutoff is the campaign's.** See above. `modal_sync.py` reads the
    ratio of a run's checkpointed iterations to its records and refuses a run
    that is not near `2^28.41` per point once it has 50k records; the ingest
    host flags the same ratio per slot on the dashboard (`off_weight_slots`),
    and counts the records it dropped as re-reports (`duplicate_records`).
+
+`modal_sync.py` recovers each run's uploaded byte offset from its immutable
+S3 objects on every pass. The local JSON state is only a cache: losing `/tmp`,
+moving the uploader to another host, or failing to publish a checkpoint after
+a successful point upload must not send an already-uploaded prefix again.
+Recovery lists every page, requires contiguous whole-record coverage, and
+checks the object-name hashes against the downloaded volume corpus. A gap,
+changed prefix, or volume snapshot older than S3 stops that run's sync before
+any points or checkpoint are published. Wait for a fresh volume snapshot or
+investigate the mismatch; do not reset the offset to bypass it. Reconciliation
+reads and hashes the covered corpus (including historical overlaps), so its
+cost grows with that corpus. Run one uploader per run: this recovery is not
+a distributed writer lease, and concurrent uploaders can still race between
+listing and uploading.
+
+The dashboard's `Re-reported points, 24 h` is a rolling count of duplicate
+ingest records, not a count of wasted GPU iterations. It includes repeat
+uploads as well as retraced walks, and can remain high after the source of
+duplicates has stopped. Check its change between fresh snapshots alongside
+new distinct points. Preserve the old objects and checkpoints when stopping
+a faulty producer; resetting the counter does not repair that producer.
 
 The procedure, once:
 
@@ -1094,9 +1173,9 @@ RUNID=8000 COUNT=4 PASSES=0 ./run.sh fleet       # run ids 8000-8003, until stop
 
 `run.sh` refuses `CURVE=131` without a `RUNID` in range; `fleet` takes it as
 the base of `COUNT` consecutive ids, and every pass launches the same ids so
-the checkpoints resume. Two operators must not both start from the same
-`next-run-id` answer at the same moment; the volume is the only arbiter, and
-it is read, not locked.
+the checkpoints resume. The suggestion checks the volume and permanent registry. If two operators
+choose the same answer, conditional seed acquisition admits one; the other
+launch is refused. GPU-only launches cannot use the CPU sidecar range.
 
 `fleet` deploys the app and drives it with `modal_campaign.py`, and that is
 the shape a campaign needs. `search` and `fanout` run inside an *ephemeral*

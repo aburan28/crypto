@@ -1037,6 +1037,144 @@ pair arm's lead over the triple arm reverses between `n31a0` and `n37a0`,
 while both stay above rho. Classification **accounting**: no algorithm got
 worse; the baseline it was counted against changed.
 
+## Round 0025: a lean rho, and the pair/triple switch
+
+[ROUND25-lean-rho-switch.md](ROUND25-lean-rho-switch.md) is the
+pre-registration; [report](../runs/round-0025/REPORT.md). Seed 2026092525,
+round 0024's twelve cells and allocation, 4,656 trials on `evaluator-r25`.
+The audit verified all 4,656 receipts and 453 source files.
+
+**The round's rho is the lean rho**: the matched rho's exact walk, run in the
+IC arm's own single-word arithmetic
+([notes](round25-rho-lean-notes.md)). The incumbent is round 0024's pair arm.
+The challenger `switch` prices the pair collector and the counted triple table
+by their own sizing models before drawing a base point, and runs the cheaper
+([notes](round25-switch-notes.md)). It is scored by an additive checker
+amendment that lets a report declare fewer summands than configured.
+
+**Result: `retained`, as registered.**
+
+- All three arms recover the same logarithm in every one of the 1,560
+  (stage, case, repetition) groups, and the A/A stage passed.
+- The switch chose the pair collector on every fixture of the eight panel
+  cells and the triple table on every fixture of the four crossover cells.
+  Each report declared the summand count it used.
+- The switch passes the incumbent gate on both final stages: 0.771
+  [0.601, 0.957] of the incumbent in instructions and 0.780 [0.614, 0.954]
+  natively. It fails `rho_gate`.
+
+| cell | pair / rho, instr | native | switch / rho, instr | native | switch / pair, instr |
+|:--|--:|--:|--:|--:|--:|
+| `n13a0` | 1.426 | 0.920 | 1.439 | 0.893 | 1.009 |
+| `n17a1` | 1.378 | 0.943 | 1.387 | 0.917 | 1.007 |
+| `n19a0` | 1.356 | 0.889 | 1.364 | 0.885 | 1.006 |
+| `n19a1` | 1.381 | 0.910 | 1.391 | 0.935 | 1.007 |
+| `n23a0` | 1.859 | 1.138 | 1.872 | 1.096 | 1.007 |
+| `n23a1` | 2.538 | 1.154 | 2.558 | 1.153 | 1.008 |
+| `n29a1` | 1.716 | 1.052 | 1.720 | 0.995 | 1.003 |
+| `n31a0` | 1.744 | 1.048 | 1.754 | 1.102 | 1.006 |
+| `n37a0` | 5.846 | 2.953 | 3.239 | 1.779 | 0.554 |
+| `n43a1` | 13.52 | 9.653 | 4.351 | 3.379 | 0.322 |
+| `n59a0` | 2.091 | 1.661 | 1.348 | 1.198 | 0.645 |
+| `n61a1` | 13.68 | 10.92 | 5.009 | 3.938 | 0.366 |
+
+The table shows confirmation. Replay agrees to the third decimal in
+instructions and within 0.1 natively. Over the panel, the pair arm reads
+2.646 [1.742, 4.323] of rho in instructions and the switch 2.040
+[1.610, 2.688].
+
+### Against a rho in the IC arm's own arithmetic, no IC arm wins in instructions at any cell
+
+Prediction 4, and the re-reading of round 0024 fixed before the run, both
+hold. **In instructions, both IC arms are above the lean rho at every one of
+the twelve cells on both stages.** They cost 1.36–2.56× rho on the panel,
+2.1–13.7× at the crossover cells for the pair arm, and 1.35–5.0× there for the
+switch. That covers the six small cells where round 0024's pair arm was below
+the matched rho. The rho was not faster because it walked differently: it
+walked the matched rho's exact walk, and was faster because of the arithmetic
+it ran in. This is an additive correction, scoped to this seed, and no
+earlier record changes.
+
+### Native time says something different at the smallest cells, and it was not predicted
+
+Native time was reported, not predicted. At `n13a0`, `n17a1`, `n19a0` and
+`n19a1`, both IC arms are **below** the lean rho in native wall time:
+0.87–0.98 on both stages, while above it by 1.36–1.44× in instructions.
+`n29a1` is near one natively (0.975–1.052). At `n23a0`, `n23a1`, `n31a0` and
+every crossover cell, both metrics agree that rho wins. This round does not
+measure why the two metrics part at the smallest jobs. The strict
+gate requires both metrics, and it is not met.
+
+**Follow-up, 2026-09-29.** This note was added after the round. The paragraph
+above is unchanged.
+
+- **Contention was a possible cause.** The round's confirmation stage
+  overlapped a build on the same container. The native column was also
+  measured without the isolation that AGENTS.md §10 now requires.
+- **An isolated re-timing reproduced the reading.** It was pre-registered and
+  ran on a reserved CPU
+  ([walltime_isolation_20260929](walltime_isolation_20260929/RESULTS.md)).
+  The incumbent/rho ratios were 0.872, 0.921, 0.912 and 0.940 at the four
+  cells, against an A/A band of [0.949, 1.051].
+- **The cause is throughput, not contention.** Over the worker-timed span,
+  the IC arm executes 1.65–2.03× more instructions per second than rho. So
+  instructions overstate rho's lead in time by about that factor, between
+  these two arms on this host.
+- **The round's decision stands.**
+
+### Predictions: all five confirmed
+
+- **1** Correctness, as above.
+- **2** The switch's choices, as above, on every fixture.
+- **3** `switch`/`incumbent` is 1.0025–1.009 on the panel, inside
+  [1.000, 1.015]. At the crossover cells it is 0.554, 0.322, 0.645 and 0.366,
+  each inside its band.
+- **4** Both arms are above rho in instructions at every cell, with the panel
+  inside [1.1, 3.5] and the crossover cells above 1.2.
+- **5** `retained`, `beats_rho_strict` and `rho_parity` false.
+
+The unpredicted part is the native-time reading above, and whether the switch
+would pass the incumbent gate. It passed.
+
+### Where the three directions stand
+
+- **Leaner rho: done.** It is the baseline any further round must carry.
+- **Pair/triple switch: done.** It takes the better collector at every cell for
+  under 1%, and it is still 1.35–5.0× above rho.
+- **A different decomposition:**
+  [DECOMPOSITION-SURVEY.md](DECOMPOSITION-SURVEY.md) closes generic table
+  decompositions as to the exponent. The one open family, algebraic `m ≥ 4`,
+  is in a pre-registered exponent audit,
+  `research/ic_m4_exponent_audit_20260928/`, reported there. Its registered
+  verdict is **closed for the frozen engine at `n ≤ 19`**. The Semaev solve
+  cost grows at 0.985 bits per unit `n`, band [0.983, 1.018], against the
+  bar of 0.25, and both nulls passed. See
+  [its results](../../ic_m4_exponent_audit_20260928/RESULTS.md). That closes
+  `m = 4` for that engine only. The next rung is `m = 5`.
+
+Classification **accounting**.
+
+## Stop decision, 2026-09-29
+
+The line this file records is stopped: collector rounds against rho, the `m = 4`
+algebraic route at `n ≤ 19`, and an `m = 5` audit. The evidence, the scope and the reopen
+conditions are in [DECISION-20260929-stop.md](DECISION-20260929-stop.md).
+
+Two isolated re-timings came after round 0025:
+
+- **[walltime_isolation_20260929](walltime_isolation_20260929/RESULTS.md).** Round 0025's
+  small-cell time lead is real, and it comes from the IC arm running more instructions per
+  second.
+- **[walltime_strong_rho_20260929](walltime_strong_rho_20260929/RESULTS.md).** The lead
+  survives main's strongest rho, at 0.74–0.84 in-process, and is gone by `n = 23`.
+
+A third re-timing followed, on 2026-09-30:
+
+- **[sized_cache_rho_20260930](sized_cache_rho_20260930/RESULTS.md).** Sizing rho's
+  recent-point cache to its walk removes the IC arm's small-cell time lead: IC is 0.98–1.03 of
+  the sized rho on wall time at the four small cells, and 1.043 [1.015, 1.074] slower at
+  `n23a0`. It is engineering, in rho's favour. Instruction counts are unchanged.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.

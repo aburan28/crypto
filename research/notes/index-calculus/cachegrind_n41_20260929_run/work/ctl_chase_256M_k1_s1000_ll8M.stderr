@@ -1,0 +1,28 @@
+==2620== Cachegrind, a high-precision tracing profiler
+==2620== Copyright (C) 2002-2017, and GNU GPL'd, by Nicholas Nethercote et al.
+==2620== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==2620== Command: /tmp/claude-0/-home-user/85b8ff6b-4815-5d55-ad65-d7c1cf044744/scratchpad/mem_calib chase 268435456 1 1000 1 0
+==2620== 
+--2620-- warning: L3 cache found, using its data for the LL simulation.
+--2620-- warning: specified LL cache: line_size 64  assoc 11  total_size 34,603,008
+--2620-- warning: simulated LL cache: line_size 64  assoc 17  total_size 35,651,584
+==2620== 
+==2620== I refs:        411,288,184
+==2620== I1  misses:          1,553
+==2620== LLi misses:          1,547
+==2620== I1  miss rate:        0.00%
+==2620== LLi miss rate:        0.00%
+==2620== 
+==2620== D refs:        302,058,299  ( 16,830,760 rd   + 285,227,539 wr)
+==2620== D1  misses:     13,313,591  (  4,662,403 rd   +   8,651,188 wr)
+==2620== LLd misses:      9,765,480  (  1,114,313 rd   +   8,651,167 wr)
+==2620== D1  miss rate:         4.4% (       27.7%     +         3.0%  )
+==2620== LLd miss rate:         3.2% (        6.6%     +         3.0%  )
+==2620== 
+==2620== LL refs:        13,315,144  (  4,663,956 rd   +   8,651,188 wr)
+==2620== LL misses:       9,767,027  (  1,115,860 rd   +   8,651,167 wr)
+==2620== LL miss rate:          1.4% (        0.3%     +         3.0%  )
+==2620== 
+==2620== Branches:      278,973,207  (278,972,781 cond +         426 ind)
+==2620== Mispredicts:         5,779  (      5,572 cond +         207 ind)
+==2620== Mispred rate:          0.0% (        0.0%     +        48.6%   )

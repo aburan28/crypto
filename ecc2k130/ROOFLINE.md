@@ -29,10 +29,13 @@ Answer:
   table for the polynomial square of λ (`PACKED_SQUARE_TABLE=1`). The other is
   a polynomial-basis Itoh–Tsujii inversion (`PACKED_INV_POLY=1`, or `=2` to
   keep one out-of-line copy of its product). Together they remove 86–87 ALU
-  lane-instructions per update. **Predicted** +7.0%, to about 21.5 B/s; **not
-  yet measured**: no GPU was reachable from the session that built them. [benchmarks/roofline/gpujob.sh](benchmarks/roofline/gpujob.sh)
-  measures them in one run, together with the two pipe rates the model
-  leaves open (§4).
+  lane-instructions per update. The historical model predicted +7.0%, to about
+  21.5 B/s. On the later exact block-v3 schedule, a five-pair retest measured
+  **5.095344–5.107611 B/s** (including **5.097573** and **5.100950**) against
+  5.064024–5.069412 B/s controls: paired median **1.006625**. That is a narrow
+  engineering gain and `Partial` under this note's 1.040 target, not validation
+  of the old +7.0% model. See
+  [benchmarks/block-both2-confirm5](benchmarks/block-both2-confirm5/).
 
 Every number below is either a receipt already in the tree, cited, or a
 count from the tools this note adds. Predictions are labelled as such.
@@ -305,7 +308,7 @@ or accounting.
 | + `PACKED_INV_POLY=1` | 20.53 **predicted** (M4); 20.40 (M5) | 0.749 | 1.022 / 1.016 | 2,133 host cases bit-identical; GPU pending | engineering, unmeasured |
 | + `PACKED_INV_POLY=2` | 20.53 **predicted** (M4); 20.45 (M5) | 0.749 | 1.023 / 1.018 | as above | engineering, unmeasured |
 | + both (table + `INV_POLY=1`) | 21.50 **predicted** (M4); 21.47 (M5) | 0.784 | 1.071 / 1.069 | as above | engineering, unmeasured |
-| **+ both2 (table + `INV_POLY=2`)** | 21.48 **predicted** (M4); 21.51 (M5) | 0.784 | 1.070 / 1.071 | as above | engineering, unmeasured |
+| **+ both2 (table + `INV_POLY=2`)** | 21.48 **predicted** (M4); 21.51 (M5) | 0.784 | 1.070 / 1.071 | host checks; later block-v3 replay/corpus gate passed | engineering; historical-v2 arm unmeasured, block-v3 retest 1.006625 (§7) |
 | fused2: both2 in the one-pass kernel (`TABLE_FUSED=1`), exploratory | 21.74 **predicted** (M4); 22.00 (M5) | 0.793 | 1.083 / 1.096 | as above | engineering, unmeasured; the fused kernel alone measured +0.2% against a +1.0% M4 prediction (AUTOSWEEP §4) |
 | "22.3 B/s carry-less floor" (README, TWO-CHAINS §1) | — | — | — | refuted by a measured arm, §3 | **accounting** correction |
 | 30 B/s objective | — | 1.095 | 1.494 | — | above the ceiling on one card |
@@ -367,6 +370,14 @@ now for its smaller code and register count at equal predicted work;
   path, the extra registers, and, for `=1`, instruction-cache pressure from
   a 39% larger kernel. The `invpoly` / `invpoly2` pair isolates that last
   one.
+
+Outcome on the selected block-v3 schedule: all five later A/B ratios were at
+least 1.005 and their median was 1.006625; a matched same-binary A/A panel had
+median 1.000047 and stayed within its frozen noise limits. That separately
+registered follow-up selects both2 for the block-v3 engineering preset. It
+does **not** meet the 1.040 primary condition above, so the roofline hypothesis
+receives the preregistered `Partial` classification and its predicted 1.07
+ratio is not borne out by this measurement.
 
 For the pipes (`pipes.cu`):
 

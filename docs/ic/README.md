@@ -7,6 +7,8 @@ accepts explicit K_0 curve parameters and points through degree 131, with durabl
 pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
 The older inspection command uses imported points for mathematical validation.
 
+**Technique inventory:** [ECDLP_RESEARCH_TECHNIQUES.md](ECDLP_RESEARCH_TECHNIQUES.md) maps factor-base, relation, filtering, sparse-linear-algebra, and individual-logarithm research techniques to their native modules and labels each as integrated, experimental, component, or backlog.
+
 **Agent scoreboard:** per-stage records and next targets to beat live in
 [`BOUNDARY_TARGETS.md`](BOUNDARY_TARGETS.md) and
 [`boundary_targets.json`](boundary_targets.json) (binary, Koblitz, prime;
@@ -201,7 +203,7 @@ Expected trials is half the collection cost. A trial is paid whether or not
 it succeeds, so collection spends `trials × (cost per trial)`, and the
 second factor is the one that varies: coverage saturates at 100% as the
 subspace grows while the Weil-restricted summation system keeps `m·ℓ`
-Boolean unknowns. At `K_1/2^15` the two orders disagree by `22.41×` over
+Boolean unknowns. At `icv1-f2m15-t275-b7f03703` the two orders disagree by `22.41×` over
 twelve verified logarithms — see
 [`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).
 
@@ -292,16 +294,33 @@ default): its columns are canonical cofactor projections `R_o ∈ ⟨G⟩`, so
 each column logarithm is a genuine, self-certifying discrete log.
 
 The precomputation reaches whatever the factor base and summand count
-support. On `K_0/2^31` over a search-selected dimension-11 base
+support. On `icv1-f2m31-tm90707-c95f16f5` over a search-selected dimension-11 base
 (`--summands 3`, 35 columns) it completes in about 15 s; each subsequent
 target then needs one or two relations. The `logs` trial budget
 (`--max-trials`, default 200000) bounds the search for a full-rank
 relation set; a base whose coverage cannot determine every column
 reports `incomplete` rather than emitting an unverified database.
 
-### Linear algebra: relation filtering and block Wiedemann
+## Primary one-target comparison
+
+For an IC-versus-rho speedup claim, the measured workload is one previously
+unseen public target point, and both algorithms solve that exact point. The IC
+clock starts at the first target-dependent step after reusable curve, base,
+index, and factor-log preparation is ready. The rho clock starts at its first
+target-dependent walk step. Both clocks stop after scalar recovery and
+independent verification. Exclude process launch, input loading, target
+fixture generation, and target-independent preparation from these online
+times; report setup separately when useful. Do not replace this result with
+batch throughput, a multi-target average, or shared-table amortization. Those
+are secondary measurements for a separately stated question.
+
+The `--batch` execution knob in the option list describes internal target scheduling. It
+does not change the primary workload definition: submit exactly one target
+when measuring the one-target online comparison.
+### Linear algebra: filtering, block Wiedemann, and block Lanczos
 
     ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra sparse --block-size 4
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31-lanczos.json --linear-algebra sparse --sparse-solver block-lanczos --block-size 4 --spmv sharded --spmv-shards 8
     ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra dense
 
 Each relation has at most `m` nonzero entries, so the relation matrix is
@@ -317,12 +336,20 @@ sparse in exactly the way a number-field-sieve matrix is. By default
    recorded, so the eliminated logarithms are reconstructed exactly from
    the core solution (back-substitution, then propagation through the
    original rows, then a small dense residual if anything is left).
-2. **Block Wiedemann** — the reduced core is made square by folding its
+2. **Black-box core solve** — block Wiedemann (the default) makes the
+   reduced core square by folding its
    excess rows into random earlier rows, homogenised to `M (x, 1)ᵀ = 0`,
    and a kernel vector is read off the Krylov sequence `X Mⁱ Y` of
    `block_size × block_size` blocks through a matrix Berlekamp–Massey
    step (a shifted minimal approximant basis). Only sparse
-   matrix-times-block products touch the matrix, in parallel over rows.
+   matrix-times-block products touch the matrix. `--sparse-solver
+   block-lanczos` instead runs finite-field block Lanczos on the symmetric
+   congruence `A^T D A`; it retries on breakdown and still verifies `A x = b`.
+   Products select `auto`, `serial`, `rayon`, deterministic `sharded`, or
+   `worker` execution with `--spmv`. A worker speaks the CPU-verified `SPMV1`
+   contract in `gpu/spmv`; set `IC_SPMV_WORKER` to the host, CUDA, or cluster
+   launcher executable. Worker failure emits a warning and falls back to the
+   serial CPU product.
 
 The sparse path never attempts a solve before every column occurs in
 some row, and the solution is checked against every relation before
@@ -331,7 +358,8 @@ keeps the reference behaviour: full big-integer elimination after every
 new relation. Both paths certify the same database (the `ic` tests
 compare them); the report's `linear_algebra` object records the mode,
 the attempts, the time, and for the sparse path the filtering counts
-and the Wiedemann run (`core_dimension`, `sequence_length`, products).
+and the configured solver/SpMV backend plus the selected Wiedemann or Lanczos
+run (`core_dimension`, iterations or sequence length, and products).
 
 ## Running the pipeline as a resumable workflow
 
@@ -427,10 +455,13 @@ relations loaded, rejected and deduplicated and which units were used.
 
 A parameter file (schema_version 1):
 
-    {"schema_version":1,"name":"k0n31","curve":{"degree":31,"curve_a":0},
+    {"schema_version":1,"name":"icv1-f2m31-tm90707-c95f16f5","curve":{"degree":31,"curve_a":0},
      "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
      "linear_algebra":{"mode":"sparse",
-                       "sparse":{"wiedemann":{"block_m":4,"block_n":4},
+                       "sparse":{"solver":"block-wiedemann",
+                                 "spmv":{"backend":"auto","shards":0},
+                                 "wiedemann":{"block_m":4,"block_n":4},
+                                 "lanczos":{"block_size":4,"margin":8},
                                  "filter":{"target_excess":32,"merge_max_weight":8}}},
      "collection":{"unit_trials":4096,"units":4,"max_units":64},
      "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
@@ -450,8 +481,8 @@ without child validation). Each target is a synthetic known-answer
 instance: `known_log` names the scalar, `random_seed` draws one
 reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
 or `sat`. `linear_algebra` is optional: `mode` is `sparse` (default;
-filtering + block Wiedemann, with every knob of the sparse solver under
-`sparse`) or `dense`. `collection` sizes the work units (above). The
+filtering plus block Wiedemann or block Lanczos, with every solver and SpMV
+knob under `sparse`) or `dense`. `collection` sizes the work units (above). The
 report lists every stage with whether it ran or was reused — the collect
 stage with its units, the logs stage with its verification counts and
 linear-algebra statistics — and every solution with its expected and
@@ -610,7 +641,7 @@ fitted entirely inside DRAM, and the law's whole purpose is to push the
 table out of it.
 
 `docs/ic/params/k0n61-subgroup-wide.json` is the largest rung this family
-offers: `K_0/F_{2^61}`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
+offers: `icv1-f2m61-t158598901-ab42b6c5`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
 a 36112-point compact base. It solves 32 of 32 with a 53.1 ms descent
 against ρ's 3.248 s — charged 61.2, amortised 1.29, and all three
 verdicts true at 32 targets.
@@ -668,6 +699,10 @@ and whole-process CPU from 12.269 to 11.213 core-seconds (0.914x).  The
 charged trade is memory: median peak RSS rose from 93.9 MB to 125.9 MB
 (1.331x).  A full hash cache was rejected at 2.519x RSS, and a five-byte
 filter variant was rejected after slowing the relation unit by 3.1%.
+A one-worker non-atomic builder cut pair-build wall to 0.957x but
+moved full IC only to 0.988x; duplicating the counting and scatter paths
+was rejected for that small end-to-end gain.  The statically dispatched
+follow-up did not improve it.
 The same exact binaries over five matched one-worker pairs cut the
 single-core pair build from 2.585 to 1.256 s (0.486x), full IC wall from
 8.449 to 7.095 s (0.841x), and whole-process CPU from 10.791 to 9.424
@@ -681,6 +716,52 @@ with native `PRFM PLDL1KEEP` reduced the one-core relation unit from
 core-seconds (0.995x), with 5/5 identical relation hashes and essentially
 flat RSS.  Other architectures retain their existing prefetch or no-op
 paths.
+The next successor interleaves eight independent normal-basis rotation
+chains instead of canonicalizing one point at a time.  Over five matched
+one-worker pairs, relation-unit wall fell from 3.901 to 3.566 s (0.915x),
+full IC from 7.090 to 6.757 s (0.953x), and whole-process CPU from 9.414
+to 9.084 core-seconds (0.964x), all winning 5/5 with flat memory.  At
+the default thread count, relation-unit CPU fell from 4.397 to 4.133
+core-seconds (0.939x) and full-process CPU to 0.985x.  The exact current
+one-core replay used 6.744 s for IC against 1.602 s for rho, leaving IC
+4.21 times slower.  Sixteen lanes were rejected after regressing both
+one-core and default-thread relation time.
+Applying the same lanes inside table construction cut one-core pair-build
+CPU to 0.897x but slowed the following relation unit to 1.025x; the
+one-core IC gain was only 0.993x and default-thread process CPU was
+neutral.  That variant was rejected and the scalar table-build path
+retained.
+The workflow also used to rebuild the same public cofactor-projected
+signed-Frobenius predicate in selection, logs, and solve.  A bound
+`ProjectedFactorBase` now constructs and charges it once in selection,
+then reuses exact clones; it carries no logarithm labels.  Over five
+matched one-worker pairs, logs fell from 0.925 to 0.155 s (0.167x), solve
+from 0.790 to 0.019 s (0.024x), full IC from 6.834 to 6.086 s (0.889x),
+and whole-process CPU from 9.157 to 7.634 core-seconds (0.832x), with
+selection unchanged and RSS slightly lower.  At default threads, full IC
+fell from 1.066 to 0.971 s and whole-process CPU to 0.842x.  The exact
+one-core replay used 6.005 s for IC against 1.576 s for rho, leaving IC
+3.81 times slower; the exact default-thread replay used 0.969 s for IC
+against 1.571 s for rho.
+Predicate construction now also uses the factor base's existing signed
+Frobenius coordinates: because `[h](±π^kP) = ±π^k([h]P)`, it performs
+344 representative cofactor multiplications instead of one for all
+36,464 points, then derives every member exactly.  The current native
+receipt also charges 1,896,128 derived-coordinate squarings, 18,232
+negations and 72,928 canonical-orbit coordinate squarings.  Across five
+matched one-worker pairs, selection fell from 0.953 to 0.206 s (0.216x),
+full IC from 6.003 to 5.343 s (0.888x), and whole-process CPU from 7.557
+to 6.909 core-seconds (0.913x), all winning 5/5.  At default threads,
+full IC fell from 0.965 to 0.888 s (0.915x), whole-process CPU to 0.906x,
+and RSS was lower in 5/5 runs.  Median one-core IC remains about 3.37
+times slower than rho; default-thread rho/IC improves to 1.778.
+Making each complete eight-point canonicalization chunk explicitly
+fixed-width, with only the final remainder scalar, reduced the one-core
+relation unit from 3.567 to 3.517 s (0.985x), full IC to 0.988x and
+whole-process CPU to 0.990x over five matched pairs.  At default threads,
+relation-unit wall fell to 0.968x, unit CPU to 0.979x and full IC to
+0.987x; median RSS rose 1.8%.  Every relation-unit and IC comparison won
+5/5 with the same relation hash and scalar.
 
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
@@ -705,8 +786,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 179 processes, 683.360 sequential wall-seconds,
-2,045.455 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 318 processes, 1,395.641 sequential wall-seconds,
+3,192.182 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
 Before the cached builder, five fresh scalar-blind repeats with
@@ -911,6 +992,12 @@ configurations from a JSON file and prints one table.
         --oracle descent-algebraic:m=2 --solver buchberger-f2
     ./target/release/ic bench --sweep docs/ic/sweeps/solver-engines.json
 
+A plug-in is written `name:key=value,key=value`. The `,` ends a
+parameter, so a parameter that takes several values separates them with
+`;`: `--factor-base 'koblitz-orbit:divisor=1;2'` selects factors 1 and 2
+(quote it, since a bare `;` ends a shell command). `divisor=1,2` is
+refused with an error that names the `;`.
+
 [`FRAMEWORK.md`](FRAMEWORK.md) is the manual: the unit, the report
 columns, the stage contracts, a worked example of adding a solver (the
 plug point for F4, F5, XL, SAT), the sweep schema and the reporting
@@ -1057,11 +1144,12 @@ to child runs launched by compare.
 
 Selection time includes process startup, curve and factor-base
 construction, relation collection, matrix solving, verification, and
-report emission. Child completion is polled every 10 ms; very small
-timing differences should not be interpreted as meaningful. The report
-also includes the total comparison time, so selection and unsuccessful
-candidate costs remain visible. A selected candidate is a bounded
-observation, not a global optimum, scaling claim, or challenge result.
+report emission. This is an engineering-selection diagnostic and is not the
+primary one-target online metric above. Child completion is polled every 10
+ms; very small timing differences should not be interpreted as meaningful.
+The report also includes the total comparison time, so selection and
+unsuccessful candidate costs remain visible. A selected candidate is a
+bounded observation, not a global optimum, scaling claim, or challenge result.
 
 ## Reports and resource accounting
 

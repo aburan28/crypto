@@ -1,0 +1,1643 @@
+{
+  "curves": [
+    {
+      "a": 2574,
+      "b": 2980,
+      "cofactor": 1,
+      "generator": {
+        "x": 2663,
+        "y": 644
+      },
+      "generator_call": "find_prime_order_curve(12, 59297)",
+      "group_order": 3583,
+      "icv1": "ICV1:fp-3529:-53:3583:561:unk:unk:r:6c9ff4bb58cb",
+      "name": "generated-12bit-3529",
+      "p": 3529,
+      "slug": "icv1-fp12-tm53-6c9ff4bb",
+      "subgroup_order": 3583
+    },
+    {
+      "a": 7150,
+      "b": 684,
+      "cofactor": 1,
+      "generator": {
+        "x": 13717,
+        "y": 4514
+      },
+      "generator_call": "find_prime_order_curve(14, 59297)",
+      "group_order": 14533,
+      "icv1": "ICV1:fp-14389:-143:14533:7345:unk:unk:r:dec4cf6b8cf5",
+      "name": "generated-14bit-14389",
+      "p": 14389,
+      "slug": "icv1-fp14-tm143-dec4cf6b",
+      "subgroup_order": 14533
+    },
+    {
+      "a": 4589,
+      "b": 186,
+      "cofactor": 1,
+      "generator": {
+        "x": 43982,
+        "y": 22687
+      },
+      "generator_call": "find_prime_order_curve(16, 59297)",
+      "group_order": 53117,
+      "icv1": "ICV1:fp-53411:295:53117:36611:unk:unk:r:8d3c316511e3",
+      "name": "generated-16bit-53411",
+      "p": 53411,
+      "slug": "icv1-fp16-t295-8d3c3165",
+      "subgroup_order": 53117
+    },
+    {
+      "a": 188885,
+      "b": 173081,
+      "cofactor": 1,
+      "generator": {
+        "x": 174945,
+        "y": 10250
+      },
+      "generator_call": "find_prime_order_curve(18, 59297)",
+      "group_order": 212437,
+      "icv1": "ICV1:fp-212099:-337:212437:4738:unk:unk:r:d28d5e094103",
+      "name": "generated-18bit-212099",
+      "p": 212099,
+      "slug": "icv1-fp18-tm337-d28d5e09",
+      "subgroup_order": 212437
+    },
+    {
+      "a": 51142,
+      "b": 548946,
+      "cofactor": 1,
+      "generator": {
+        "x": 271792,
+        "y": 48157
+      },
+      "generator_call": "find_prime_order_curve(20, 59297)",
+      "group_order": 562427,
+      "icv1": "ICV1:fp-563153:727:562427:476305:unk:unk:r:cd198a38cd5f",
+      "name": "generated-20bit-563153",
+      "p": 563153,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "subgroup_order": 562427
+    },
+    {
+      "a": 620112,
+      "b": 1810598,
+      "cofactor": 1,
+      "generator": {
+        "x": 1448421,
+        "y": 2354232
+      },
+      "generator_call": "find_prime_order_curve(22, 59297)",
+      "group_order": 2435809,
+      "icv1": "ICV1:fp-2434423:-1385:2435809:1765340:unk:unk:r:475dcb5fda59",
+      "name": "generated-22bit-2434423",
+      "p": 2434423,
+      "slug": "icv1-fp22-tm1385-475dcb5f",
+      "subgroup_order": 2435809
+    },
+    {
+      "a": 8820674,
+      "b": 11008593,
+      "cofactor": 1,
+      "generator": {
+        "x": 10566184,
+        "y": 339081
+      },
+      "generator_call": "find_prime_order_curve(24, 59297)",
+      "group_order": 16482251,
+      "icv1": "ICV1:fp-16483309:1059:16482251:3896869:unk:unk:r:6df599dfaebd",
+      "name": "generated-24bit-16483309",
+      "p": 16483309,
+      "slug": "icv1-fp24-t1059-6df599df",
+      "subgroup_order": 16482251
+    },
+    {
+      "a": 26623966,
+      "b": 14210560,
+      "cofactor": 1,
+      "generator": {
+        "x": 40895024,
+        "y": 26279521
+      },
+      "generator_call": "find_prime_order_curve(26, 59297)",
+      "group_order": 42653927,
+      "icv1": "ICV1:fp-42652151:-1775:42653927:38191413:unk:unk:r:7e8fb6df0943",
+      "name": "generated-26bit-42652151",
+      "p": 42652151,
+      "slug": "icv1-fp26-tm1775-7e8fb6df",
+      "subgroup_order": 42653927
+    },
+    {
+      "a": 2309743,
+      "b": 2364262,
+      "cofactor": 1,
+      "generator": {
+        "x": 3329127,
+        "y": 945885
+      },
+      "generator_call": "find_prime_order_curve(22, 827675)",
+      "group_order": 3911069,
+      "icv1": "ICV1:fp-3914087:3019:3911069:3437178:unk:unk:r:0c6101dea80d",
+      "name": "generated-22bit-3914087",
+      "p": 3914087,
+      "slug": "icv1-fp22-t3019-0c6101de",
+      "subgroup_order": 3911069
+    },
+    {
+      "a": 10159782,
+      "b": 6800760,
+      "cofactor": 1,
+      "generator": {
+        "x": 5114115,
+        "y": 5025781
+      },
+      "generator_call": "find_prime_order_curve(24, 827675)",
+      "group_order": 11919637,
+      "icv1": "ICV1:fp-11921101:1465:11919637:4315753:unk:unk:r:0b7163ca05f4",
+      "name": "generated-24bit-11921101",
+      "p": 11921101,
+      "slug": "icv1-fp24-t1465-0b7163ca",
+      "subgroup_order": 11919637
+    },
+    {
+      "a": 13006379,
+      "b": 18418303,
+      "cofactor": 1,
+      "generator": {
+        "x": 18549027,
+        "y": 2599419
+      },
+      "generator_call": "find_prime_order_curve(26, 827675)",
+      "group_order": 38322941,
+      "icv1": "ICV1:fp-38313677:-9263:38322941:24868434:unk:unk:r:8a1449436748",
+      "name": "generated-26bit-38313677",
+      "p": 38313677,
+      "slug": "icv1-fp26-tm9263-8a144943",
+      "subgroup_order": 38322941
+    },
+    {
+      "a": "0x1",
+      "b": "0x168f",
+      "cofactor": 6,
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x11d3",
+        "y": "0x1fb"
+      },
+      "generator_call": "random_binary_instance(13, 59297, 8)",
+      "group_order": 8202,
+      "icv1": "ICV1:f2m-13-752c6463:-9:8202:0x1333:unk:unk:r:6863a8382a36",
+      "koblitz": false,
+      "name": "random-binary-n13-b168f",
+      "slug": "icv1-f2m13-tm9-6863a838",
+      "subgroup_order": 1367
+    },
+    {
+      "a": "0x1",
+      "b": "0x157a",
+      "cofactor": 2,
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x3c9f",
+        "y": "0x3027"
+      },
+      "generator_call": "random_binary_instance(15, 59297, 8)",
+      "group_order": 32834,
+      "icv1": "ICV1:f2m-15-2d490b65:-65:32834:0x5353:unk:unk:r:372372773e98",
+      "koblitz": false,
+      "name": "random-binary-n15-b157a",
+      "slug": "icv1-f2m15-tm65-37237277",
+      "subgroup_order": 16417
+    },
+    {
+      "a": "0x1",
+      "b": "0x10103",
+      "cofactor": 6,
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0xcdd1",
+        "y": "0x15f1a"
+      },
+      "generator_call": "random_binary_instance(17, 59297, 8)",
+      "group_order": 130542,
+      "icv1": "ICV1:f2m-17-237ceae1:531:130542:0x1361d:unk:unk:r:2048fb7c422b",
+      "koblitz": false,
+      "name": "random-binary-n17-b10103",
+      "slug": "icv1-f2m17-t531-2048fb7c",
+      "subgroup_order": 21757
+    },
+    {
+      "a": "0x1",
+      "b": "0x770f7",
+      "cofactor": 2,
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x718ae",
+        "y": "0x3cbed"
+      },
+      "generator_call": "random_binary_instance(19, 59297, 8)",
+      "group_order": 524938,
+      "icv1": "ICV1:f2m-19-87f45376:-649:524938:0x334b3:unk:unk:r:a9133fe6c2db",
+      "koblitz": false,
+      "name": "random-binary-n19-b770f7",
+      "slug": "icv1-f2m19-tm649-a9133fe6",
+      "subgroup_order": 262469
+    },
+    {
+      "a": "0x0",
+      "b": "0x968e",
+      "cofactor": 8,
+      "field": {
+        "degree": 21,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          2
+        ]
+      },
+      "generator": {
+        "x": "0x127fcc",
+        "y": "0x9343a"
+      },
+      "generator_call": "random_binary_instance(21, 59297, 8)",
+      "group_order": 2098648,
+      "icv1": "ICV1:f2m-21-a6f878a4:-1495:2098648:0x479:unk:unk:r:8bd9aa74cf6d",
+      "koblitz": false,
+      "name": "random-binary-n21-b968e",
+      "slug": "icv1-f2m21-tm1495-8bd9aa74",
+      "subgroup_order": 262331
+    },
+    {
+      "a": "0x1",
+      "b": "0x480f9a",
+      "cofactor": 2,
+      "field": {
+        "degree": 23,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x158421",
+        "y": "0x48d17f"
+      },
+      "generator_call": "random_binary_instance(23, 59297, 8)",
+      "group_order": 8392738,
+      "icv1": "ICV1:f2m-23-c07a6b8c:-4129:8392738:0x915f0:unk:unk:r:45500fceb478",
+      "koblitz": false,
+      "name": "random-binary-n23-b480f9a",
+      "slug": "icv1-f2m23-tm4129-45500fce",
+      "subgroup_order": 4196369
+    },
+    {
+      "a": "0x1",
+      "b": "0x1a9b772",
+      "cofactor": 6,
+      "field": {
+        "degree": 25,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0x537247",
+        "y": "0x108c3be"
+      },
+      "generator_call": "random_binary_instance(25, 59297, 8)",
+      "group_order": 33554922,
+      "icv1": "ICV1:f2m-25-38eb3fef:-489:33554922:0x13fd27c:unk:unk:r:c50a8fb91a06",
+      "koblitz": false,
+      "name": "random-binary-n25-b1a9b772",
+      "slug": "icv1-f2m25-tm489-c50a8fb9",
+      "subgroup_order": 5592487
+    },
+    {
+      "a": "0x1",
+      "b": "0x227199e",
+      "cofactor": 2,
+      "field": {
+        "degree": 27,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x24b7b16",
+        "y": "0x78db45d"
+      },
+      "generator_call": "random_binary_instance(27, 59297, 8)",
+      "group_order": 134238022,
+      "icv1": "ICV1:f2m-27-070a37b6:-20293:134238022:0x61af38f:unk:unk:r:ca4ad8afd38c",
+      "koblitz": false,
+      "name": "random-binary-n27-b227199e",
+      "slug": "icv1-f2m27-tm20293-ca4ad8af",
+      "subgroup_order": 67119011
+    },
+    {
+      "a": "0x1",
+      "b": "0xa3f",
+      "cofactor": 2,
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x28c",
+        "y": "0x205"
+      },
+      "generator_call": "random_binary_instance(13, 827675, 8)",
+      "group_order": 8114,
+      "icv1": "ICV1:f2m-13-752c6463:79:8114:0x1962:unk:unk:r:00b3392ae60c",
+      "koblitz": false,
+      "name": "random-binary-n13-ba3f",
+      "slug": "icv1-f2m13-t79-00b3392a",
+      "subgroup_order": 4057
+    },
+    {
+      "a": "0x0",
+      "b": "0x2493",
+      "cofactor": 4,
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x60aa",
+        "y": "0x3d9f"
+      },
+      "generator_call": "random_binary_instance(15, 827675, 8)",
+      "group_order": 32764,
+      "icv1": "ICV1:f2m-15-2d490b65:5:32764:0x74e9:unk:unk:r:d9fb183ed6fb",
+      "koblitz": false,
+      "name": "random-binary-n15-b2493",
+      "slug": "icv1-f2m15-t5-d9fb183e",
+      "subgroup_order": 8191
+    },
+    {
+      "a": "0x1",
+      "b": "0xbe86",
+      "cofactor": 2,
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0x13de9",
+        "y": "0x3c3d"
+      },
+      "generator_call": "random_binary_instance(17, 827675, 8)",
+      "group_order": 131258,
+      "icv1": "ICV1:f2m-17-237ceae1:-185:131258:0xb189:unk:unk:r:c9e2dceb7f74",
+      "koblitz": false,
+      "name": "random-binary-n17-bbe86",
+      "slug": "icv1-f2m17-tm185-c9e2dceb",
+      "subgroup_order": 65629
+    },
+    {
+      "a": "0x1",
+      "b": "0x5f57e",
+      "cofactor": 2,
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x66a48",
+        "y": "0x67e19"
+      },
+      "generator_call": "random_binary_instance(19, 827675, 8)",
+      "group_order": 524642,
+      "icv1": "ICV1:f2m-19-87f45376:-353:524642:0x24715:unk:unk:r:a68ceb24da8f",
+      "koblitz": false,
+      "name": "random-binary-n19-b5f57e",
+      "slug": "icv1-f2m19-tm353-a68ceb24",
+      "subgroup_order": 262321
+    },
+    {
+      "a": "0x0",
+      "b": "0x10cc7b",
+      "cofactor": 4,
+      "field": {
+        "degree": 21,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          2
+        ]
+      },
+      "generator": {
+        "x": "0xbe835",
+        "y": "0x737cb"
+      },
+      "generator_call": "random_binary_instance(21, 827675, 8)",
+      "group_order": 2094308,
+      "icv1": "ICV1:f2m-21-a6f878a4:2845:2094308:0x1df045:unk:unk:r:e2683765c597",
+      "koblitz": false,
+      "name": "random-binary-n21-b10cc7b",
+      "slug": "icv1-f2m21-t2845-e2683765",
+      "subgroup_order": 523577
+    },
+    {
+      "a": "0x1",
+      "b": "0x3a296b",
+      "cofactor": 2,
+      "field": {
+        "degree": 23,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x198ebf",
+        "y": "0x69a9f5"
+      },
+      "generator_call": "random_binary_instance(23, 827675, 8)",
+      "group_order": 8390566,
+      "icv1": "ICV1:f2m-23-c07a6b8c:-1957:8390566:0x429b7e:unk:unk:r:8891f5a2009b",
+      "koblitz": false,
+      "name": "random-binary-n23-b3a296b",
+      "slug": "icv1-f2m23-tm1957-8891f5a2",
+      "subgroup_order": 4195283
+    },
+    {
+      "a": "0x1",
+      "b": "0x1448ace",
+      "cofactor": 2,
+      "field": {
+        "degree": 25,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0x114a927",
+        "y": "0x154f626"
+      },
+      "generator_call": "random_binary_instance(25, 827675, 8)",
+      "group_order": 33549658,
+      "icv1": "ICV1:f2m-25-38eb3fef:4775:33549658:0xafe3a1:unk:unk:r:4830dca7e156",
+      "koblitz": false,
+      "name": "random-binary-n25-b1448ace",
+      "slug": "icv1-f2m25-t4775-4830dca7",
+      "subgroup_order": 16774829
+    },
+    {
+      "a": "0x1",
+      "b": "0x3bfa9c2",
+      "cofactor": 6,
+      "field": {
+        "degree": 27,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x14490af",
+        "y": "0x5e8649"
+      },
+      "generator_call": "random_binary_instance(27, 827675, 8)",
+      "group_order": 134196918,
+      "icv1": "ICV1:f2m-27-070a37b6:20811:134196918:0x264118e:unk:unk:r:3d0fd5a19928",
+      "koblitz": false,
+      "name": "random-binary-n27-b3bfa9c2",
+      "slug": "icv1-f2m27-t20811-3d0fd5a1",
+      "subgroup_order": 22366153
+    },
+    {
+      "a": "0x1",
+      "b": "0x1503",
+      "cofactor": 2,
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x1a82",
+        "y": "0x2bb"
+      },
+      "generator_call": "random_binary_instance(13, 20260922, 8)",
+      "group_order": 8182,
+      "icv1": "ICV1:f2m-13-752c6463:11:8182:0x154d:unk:unk:r:f036dc01ecc2",
+      "koblitz": false,
+      "name": "random-binary-n13-b1503",
+      "slug": "icv1-f2m13-t11-f036dc01",
+      "subgroup_order": 4091
+    },
+    {
+      "a": "0x0",
+      "b": "0x1c1b",
+      "cofactor": 4,
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x1f97",
+        "y": "0x1787"
+      },
+      "generator_call": "random_binary_instance(13, 20260923, 8)",
+      "group_order": 8276,
+      "icv1": "ICV1:f2m-13-752c6463:-83:8276:0xdfe:unk:unk:r:b76daa24117e",
+      "koblitz": false,
+      "name": "random-binary-n13-b1c1b",
+      "slug": "icv1-f2m13-tm83-b76daa24",
+      "subgroup_order": 2069
+    },
+    {
+      "a": "0x1",
+      "b": "0x16da",
+      "cofactor": 2,
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x1c01",
+        "y": "0x1161"
+      },
+      "generator_call": "random_binary_instance(13, 20260924, 8)",
+      "group_order": 8182,
+      "icv1": "ICV1:f2m-13-752c6463:11:8182:0x9be:unk:unk:r:f12dc95f2ff0",
+      "koblitz": false,
+      "name": "random-binary-n13-b16da",
+      "slug": "icv1-f2m13-t11-f12dc95f",
+      "subgroup_order": 4091
+    },
+    {
+      "a": "0x1",
+      "b": "0x3ecf",
+      "cofactor": 6,
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x1d71",
+        "y": "0x66d"
+      },
+      "generator_call": "random_binary_instance(15, 20260922, 8)",
+      "group_order": 33006,
+      "icv1": "ICV1:f2m-15-2d490b65:-237:33006:0x6924:unk:unk:r:34b47a4ad861",
+      "koblitz": false,
+      "name": "random-binary-n15-b3ecf",
+      "slug": "icv1-f2m15-tm237-34b47a4a",
+      "subgroup_order": 5501
+    },
+    {
+      "a": "0x1",
+      "b": "0x702a",
+      "cofactor": 2,
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x475f",
+        "y": "0x1f8a"
+      },
+      "generator_call": "random_binary_instance(15, 20260923, 8)",
+      "group_order": 32954,
+      "icv1": "ICV1:f2m-15-2d490b65:-185:32954:0x251a:unk:unk:r:565c166931f1",
+      "koblitz": false,
+      "name": "random-binary-n15-b702a",
+      "slug": "icv1-f2m15-tm185-565c1669",
+      "subgroup_order": 16477
+    },
+    {
+      "a": "0x1",
+      "b": "0x3c06",
+      "cofactor": 2,
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x1bcb",
+        "y": "0x5425"
+      },
+      "generator_call": "random_binary_instance(15, 20260924, 8)",
+      "group_order": 32986,
+      "icv1": "ICV1:f2m-15-2d490b65:-217:32986:0x1d10:unk:unk:r:f2f901c1afa3",
+      "koblitz": false,
+      "name": "random-binary-n15-b3c06",
+      "slug": "icv1-f2m15-tm217-f2f901c1",
+      "subgroup_order": 16493
+    },
+    {
+      "a": "0x1",
+      "b": "0x1ad26",
+      "cofactor": 2,
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0x81c1",
+        "y": "0x1e19c"
+      },
+      "generator_call": "random_binary_instance(17, 20260922, 8)",
+      "group_order": 130618,
+      "icv1": "ICV1:f2m-17-237ceae1:455:130618:0x2628:unk:unk:r:60048e6dde7f",
+      "koblitz": false,
+      "name": "random-binary-n17-b1ad26",
+      "slug": "icv1-f2m17-t455-60048e6d",
+      "subgroup_order": 65309
+    },
+    {
+      "a": "0x0",
+      "b": "0x3a",
+      "cofactor": "4",
+      "field": {
+        "degree": 6,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0xd",
+        "y": "0x37"
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 6, 0, 2)",
+      "group_order": "76",
+      "icv1": "ICV1:f2m-6-1bc6e4b9:-11:76:0x3b:unk:unk:r:a69b70b889dd",
+      "koblitz": false,
+      "modulus": "0x43",
+      "name": "E_{0,2}/GF(2^2) over GF(2^6)",
+      "slug": "icv1-f2m6-tm11-a69b70b8",
+      "subgroup_order": "19"
+    },
+    {
+      "a": "0x0",
+      "b": "0xec",
+      "cofactor": "4",
+      "field": {
+        "degree": 10,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0x33d",
+        "y": "0x32b"
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 10, 0, 2)",
+      "group_order": "964",
+      "icv1": "ICV1:f2m-10-2268b575:61:964:0xed:unk:unk:r:31ce0e65c96c",
+      "koblitz": false,
+      "modulus": "0x409",
+      "name": "E_{0,2}/GF(2^2) over GF(2^10)",
+      "slug": "icv1-f2m10-t61-31ce0e65",
+      "subgroup_order": "241"
+    },
+    {
+      "a": "0x0",
+      "b": "0x13f2",
+      "cofactor": "4",
+      "field": {
+        "degree": 14,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x30bd",
+        "y": "0x1ea9"
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 14, 0, 2)",
+      "group_order": "16636",
+      "icv1": "ICV1:f2m-14-33503c25:-251:16636:0x13f3:unk:unk:r:b69e8b8b61b7",
+      "koblitz": false,
+      "modulus": "0x4021",
+      "name": "E_{0,2}/GF(2^2) over GF(2^14)",
+      "slug": "icv1-f2m14-tm251-b69e8b8b",
+      "subgroup_order": "4159"
+    },
+    {
+      "a": "0x9208",
+      "b": "0x1",
+      "cofactor": "74",
+      "field": {
+        "degree": 18,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0xc4c9",
+        "y": "0x3692b"
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 18, 2, 1)",
+      "group_order": "261146",
+      "icv1": "ICV1:f2m-18-5c53157a:999:261146:0x1:unk:unk:r:407512834cc0",
+      "koblitz": false,
+      "modulus": "0x40009",
+      "name": "E_{2,1}/GF(2^2) over GF(2^18)",
+      "slug": "icv1-f2m18-t999-40751283",
+      "subgroup_order": "3529"
+    },
+    {
+      "a": 1,
+      "b": 15,
+      "cofactor": 1,
+      "generator": {
+        "x": 2,
+        "y": 822
+      },
+      "generator_call": "roster_prime_instance(10)",
+      "group_order": 823,
+      "icv1": "ICV1:fp-827:5:823:463:unk:unk:r:192cb216d592",
+      "name": "bench-10bit",
+      "p": 827,
+      "slug": "icv1-fp10-t5-192cb216",
+      "subgroup_order": 823
+    },
+    {
+      "a": 1,
+      "b": 3,
+      "cofactor": 1,
+      "generator": {
+        "x": 6,
+        "y": 15
+      },
+      "generator_call": "roster_prime_instance(12)",
+      "group_order": 3889,
+      "icv1": "ICV1:fp-3907:19:3889:3239:unk:unk:r:d4a315df72ed",
+      "name": "bench-12bit",
+      "p": 3907,
+      "slug": "icv1-fp12-t19-d4a315df",
+      "subgroup_order": 3889
+    },
+    {
+      "a": 1,
+      "b": 12,
+      "cofactor": 1,
+      "generator": {
+        "x": 6,
+        "y": 15647
+      },
+      "generator_call": "roster_prime_instance(14)",
+      "group_order": 16231,
+      "icv1": "ICV1:fp-16187:-43:16231:12429:unk:unk:r:158b69140d4b",
+      "name": "bench-14bit",
+      "p": 16187,
+      "slug": "icv1-fp14-tm43-158b6914",
+      "subgroup_order": 16231
+    },
+    {
+      "a": 1,
+      "b": 16,
+      "cofactor": 1,
+      "generator": {
+        "x": 1,
+        "y": 15165
+      },
+      "generator_call": "roster_prime_instance(16)",
+      "group_order": 65003,
+      "icv1": "ICV1:fp-65353:351:65003:20412:unk:unk:r:d433f24edf51",
+      "name": "bench-16bit",
+      "p": 65353,
+      "slug": "icv1-fp16-t351-d433f24e",
+      "subgroup_order": 65003
+    },
+    {
+      "a": 3,
+      "b": 2,
+      "cofactor": 1,
+      "generator": {
+        "x": 2,
+        "y": 4
+      },
+      "generator_call": "roster_prime_instance(18)",
+      "group_order": 261673,
+      "icv1": "ICV1:fp-261847:175:261673:864:unk:unk:r:45770ebcfcb2",
+      "name": "bench-18bit",
+      "p": 261847,
+      "slug": "icv1-fp18-t175-45770ebc",
+      "subgroup_order": 261673
+    },
+    {
+      "a": 1,
+      "b": 11,
+      "cofactor": 1,
+      "generator": {
+        "x": 1,
+        "y": 123004
+      },
+      "generator_call": "roster_prime_instance(20)",
+      "group_order": 1046999,
+      "icv1": "ICV1:fp-1048291:1293:1046999:326892:unk:unk:r:3c2999ba43b0",
+      "name": "bench-20bit",
+      "p": 1048291,
+      "slug": "icv1-fp20-t1293-3c2999ba",
+      "subgroup_order": 1046999
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "4",
+      "field": {
+        "degree": 7,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x26",
+        "y": "0x5"
+      },
+      "generator_call": "KoblitzCurve::new(0, 7)",
+      "group_order": "116",
+      "icv1": "ICV1:f2m-7-e1a6f45a:13:116:0x1:-7:unk:r:616700ddc6fe",
+      "koblitz": true,
+      "name": "K_0 / GF(2^7)",
+      "slug": "icv1-f2m7-t13-616700dd",
+      "subgroup_order": "29"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "4",
+      "field": {
+        "degree": 9,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x160",
+        "y": "0x1d2"
+      },
+      "generator_call": "KoblitzCurve::new(0, 9)",
+      "group_order": "508",
+      "icv1": "ICV1:f2m-9-37f297a3:5:508:0x1:-7:unk:r:81e744bec1a8",
+      "koblitz": true,
+      "name": "K_0 / GF(2^9)",
+      "slug": "icv1-f2m9-t5-81e744be",
+      "subgroup_order": "127"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "4",
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x12b9",
+        "y": "0x1bc4"
+      },
+      "generator_call": "KoblitzCurve::new(0, 13)",
+      "group_order": "8012",
+      "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
+      "koblitz": true,
+      "name": "K_0 / GF(2^13)",
+      "slug": "icv1-f2m13-t181-515ee569",
+      "subgroup_order": "2003"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "44",
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x6ea0",
+        "y": "0x43c5"
+      },
+      "generator_call": "KoblitzCurve::new(0, 15)",
+      "group_order": "33044",
+      "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
+      "koblitz": true,
+      "name": "K_0 / GF(2^15)",
+      "slug": "icv1-f2m15-tm275-2d22ff5d",
+      "subgroup_order": "751"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "4",
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x5e3be",
+        "y": "0x49b2b"
+      },
+      "generator_call": "KoblitzCurve::new(0, 19)",
+      "group_order": "523492",
+      "icv1": "ICV1:f2m-19-87f45376:797:523492:0x1:-7:unk:r:b6cf2467887c",
+      "koblitz": true,
+      "name": "K_0 / GF(2^19)",
+      "slug": "icv1-f2m19-t797-b6cf2467",
+      "subgroup_order": "130873"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "4",
+      "field": {
+        "degree": 23,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x727a76",
+        "y": "0x5e8aa9"
+      },
+      "generator_call": "KoblitzCurve::new(0, 23)",
+      "group_order": "8383412",
+      "icv1": "ICV1:f2m-23-c07a6b8c:5197:8383412:0x1:-7:unk:r:69e76b739aa7",
+      "koblitz": true,
+      "name": "K_0 / GF(2^23)",
+      "slug": "icv1-f2m23-t5197-69e76b73",
+      "subgroup_order": "2095853"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "1492",
+      "field": {
+        "degree": 31,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0xd058876",
+        "y": "0x32d9bf79"
+      },
+      "generator_call": "KoblitzCurve::new(0, 31)",
+      "group_order": "2147574356",
+      "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+      "koblitz": true,
+      "name": "K_0 / GF(2^31)",
+      "slug": "icv1-f2m31-tm90707-c95f16f5",
+      "subgroup_order": "1439393"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "596",
+      "field": {
+        "degree": 37,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          4,
+          6
+        ]
+      },
+      "generator": {
+        "x": "0x17262ad4f3",
+        "y": "0x82fe10673"
+      },
+      "generator_call": "KoblitzCurve::new(0, 37)",
+      "group_order": "137439487532",
+      "icv1": "ICV1:f2m-37-754d41e3:-534059:137439487532:0x1:-7:unk:r:32aad96be451",
+      "koblitz": true,
+      "name": "K_0 / GF(2^37)",
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "subgroup_order": "230603167"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "8012",
+      "field": {
+        "degree": 39,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x7dd9e5744b",
+        "y": "0x118374b301"
+      },
+      "generator_call": "KoblitzCurve::new(0, 39)",
+      "group_order": "549754332404",
+      "icv1": "ICV1:f2m-39-bc3344bd:1481485:549754332404:0x1:-7:unk:r:829ef1d1b36b",
+      "koblitz": true,
+      "name": "K_0 / GF(2^39)",
+      "slug": "icv1-f2m39-t1481485-829ef1d1",
+      "subgroup_order": "68616367"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "4",
+      "field": {
+        "degree": 41,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0x1deeba21c88",
+        "y": "0x17ccbb7d40e"
+      },
+      "generator_call": "KoblitzCurve::new(0, 41)",
+      "group_order": "2199025563772",
+      "icv1": "ICV1:f2m-41-39c74c32:-2308219:2199025563772:0x1:-7:unk:r:7f48b14a43b8",
+      "koblitz": true,
+      "name": "K_0 / GF(2^41)",
+      "slug": "icv1-f2m41-tm2308219-7f48b14a",
+      "subgroup_order": "549756390943"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "428",
+      "field": {
+        "degree": 53,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          6
+        ]
+      },
+      "generator": {
+        "x": "0xb447205ea953",
+        "y": "0x1c2c3312123e9e"
+      },
+      "generator_call": "KoblitzCurve::new(0, 53)",
+      "group_order": "9007199311360364",
+      "icv1": "ICV1:f2m-53-8e1a71e5:-56619371:9007199311360364:0x1:-7:unk:r:dac20a8570a8",
+      "koblitz": true,
+      "name": "K_0 / GF(2^53)",
+      "slug": "icv1-f2m53-tm56619371-dac20a85",
+      "subgroup_order": "21044858204113"
+    },
+    {
+      "a": "0x0",
+      "b": "0x1",
+      "cofactor": "14156",
+      "field": {
+        "degree": 61,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x5cc1d6ba365013e",
+        "y": "0x171d9a59a2d31eb9"
+      },
+      "generator_call": "KoblitzCurve::new(0, 61)",
+      "group_order": "2305843009055095052",
+      "icv1": "ICV1:f2m-61-78c443be:158598901:2305843009055095052:0x1:-7:unk:r:ab42b6c597c6",
+      "koblitz": true,
+      "name": "K_0 / GF(2^61)",
+      "slug": "icv1-f2m61-t158598901-ab42b6c5",
+      "subgroup_order": "162888033982417"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "2",
+      "field": {
+        "degree": 7,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x65",
+        "y": "0x59"
+      },
+      "generator_call": "KoblitzCurve::new(1, 7)",
+      "group_order": "142",
+      "icv1": "ICV1:f2m-7-e1a6f45a:-13:142:0x1:-7:unk:r:ac10a42c978c",
+      "koblitz": true,
+      "name": "K_1 / GF(2^7)",
+      "slug": "icv1-f2m7-tm13-ac10a42c",
+      "subgroup_order": "71"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "14",
+      "field": {
+        "degree": 9,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x87",
+        "y": "0x7b"
+      },
+      "generator_call": "KoblitzCurve::new(1, 9)",
+      "group_order": "518",
+      "icv1": "ICV1:f2m-9-37f297a3:-5:518:0x1:-7:unk:r:4a3ea18341c5",
+      "koblitz": true,
+      "name": "K_1 / GF(2^9)",
+      "slug": "icv1-f2m9-tm5-4a3ea183",
+      "subgroup_order": "37"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "2",
+      "field": {
+        "degree": 11,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          2
+        ]
+      },
+      "generator": {
+        "x": "0x742",
+        "y": "0x710"
+      },
+      "generator_call": "KoblitzCurve::new(1, 11)",
+      "group_order": "1982",
+      "icv1": "ICV1:f2m-11-79b256b0:67:1982:0x1:-7:unk:r:05f5aa361fec",
+      "koblitz": true,
+      "name": "K_1 / GF(2^11)",
+      "slug": "icv1-f2m11-t67-05f5aa36",
+      "subgroup_order": "991"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "154",
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator": {
+        "x": "0x3b0b",
+        "y": "0x50d"
+      },
+      "generator_call": "KoblitzCurve::new(1, 15)",
+      "group_order": "32494",
+      "icv1": "ICV1:f2m-15-2d490b65:275:32494:0x1:-7:unk:r:b7f03703e5d7",
+      "koblitz": true,
+      "name": "K_1 / GF(2^15)",
+      "slug": "icv1-f2m15-t275-b7f03703",
+      "subgroup_order": "211"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "2",
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": "0xaaad",
+        "y": "0x5b2b"
+      },
+      "generator_call": "KoblitzCurve::new(1, 17)",
+      "group_order": "131174",
+      "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
+      "koblitz": true,
+      "name": "K_1 / GF(2^17)",
+      "slug": "icv1-f2m17-tm101-00378d4e",
+      "subgroup_order": "65587"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "2",
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x6001e",
+        "y": "0x798a"
+      },
+      "generator_call": "KoblitzCurve::new(1, 19)",
+      "group_order": "525086",
+      "icv1": "ICV1:f2m-19-87f45376:-797:525086:0x1:-7:unk:r:9c54981b5d8c",
+      "koblitz": true,
+      "name": "K_1 / GF(2^19)",
+      "slug": "icv1-f2m19-tm797-9c54981b",
+      "subgroup_order": "262543"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "2",
+      "field": {
+        "degree": 23,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x2aaaa5",
+        "y": "0x13907b"
+      },
+      "generator_call": "KoblitzCurve::new(1, 23)",
+      "group_order": "8393806",
+      "icv1": "ICV1:f2m-23-c07a6b8c:-5197:8393806:0x1:-7:unk:r:1f85e9e1acf0",
+      "koblitz": true,
+      "name": "K_1 / GF(2^23)",
+      "slug": "icv1-f2m23-tm5197-1f85e9e1",
+      "subgroup_order": "4196903"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "12646",
+      "field": {
+        "degree": 29,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          2
+        ]
+      },
+      "generator": {
+        "x": "0x79c715f",
+        "y": "0x89bf3ae"
+      },
+      "generator_call": "KoblitzCurve::new(1, 29)",
+      "group_order": "536911222",
+      "icv1": "ICV1:f2m-29-1a13acc8:-40309:536911222:0x1:-7:unk:r:30c52b963005",
+      "koblitz": true,
+      "name": "K_1 / GF(2^29)",
+      "slug": "icv1-f2m29-tm40309-30c52b96",
+      "subgroup_order": "42457"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "1894",
+      "field": {
+        "degree": 43,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3,
+          4,
+          6
+        ]
+      },
+      "generator": {
+        "x": "0x371c50fe7d2",
+        "y": "0x147f513d084"
+      },
+      "generator_call": "KoblitzCurve::new(1, 43)",
+      "group_order": "8796094020926",
+      "icv1": "ICV1:f2m-43-ac4bb7a2:-998717:8796094020926:0x1:-7:unk:r:e2e742b068ef",
+      "koblitz": true,
+      "name": "K_1 / GF(2^43)",
+      "slug": "icv1-f2m43-tm998717-e2e742b0",
+      "subgroup_order": "4644189029"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "1202278",
+      "field": {
+        "degree": 45,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator": {
+        "x": "0x1dc4dbb29c25",
+        "y": "0x5ad648fbe9f"
+      },
+      "generator_call": "KoblitzCurve::new(1, 45)",
+      "group_order": "35184378325558",
+      "icv1": "ICV1:f2m-45-512796ce:-6236725:35184378325558:0x1:-7:unk:r:4093929493b9",
+      "koblitz": true,
+      "name": "K_1 / GF(2^45)",
+      "slug": "icv1-f2m45-tm6236725-40939294",
+      "subgroup_order": "29264761"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "1318",
+      "field": {
+        "degree": 47,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator": {
+        "x": "0x6adb56a256c5",
+        "y": "0x4338047135e3"
+      },
+      "generator_call": "KoblitzCurve::new(1, 47)",
+      "group_order": "140737465650286",
+      "icv1": "ICV1:f2m-47-6034b035:22705043:140737465650286:0x1:-7:unk:r:f4e4462320d9",
+      "koblitz": true,
+      "name": "K_1 / GF(2^47)",
+      "slug": "icv1-f2m47-t22705043-f4e44623",
+      "subgroup_order": "106781081677"
+    },
+    {
+      "a": "0x1",
+      "b": "0x1",
+      "cofactor": "22894",
+      "field": {
+        "degree": 59,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          2,
+          4,
+          7
+        ]
+      },
+      "generator": {
+        "x": "0x4637772649759e9",
+        "y": "0x23c2d5da728b130"
+      },
+      "generator_call": "KoblitzCurve::new(1, 59)",
+      "group_order": "576460753246971902",
+      "icv1": "ICV1:f2m-59-eeb35974:-943548413:576460753246971902:0x1:-7:unk:r:98844eccbb36",
+      "koblitz": true,
+      "name": "K_1 / GF(2^59)",
+      "slug": "icv1-f2m59-tm943548413-98844ecc",
+      "subgroup_order": "25179555920633"
+    }
+  ],
+  "specs": [
+    "prime:12:59297",
+    "prime:14:59297",
+    "prime:16:59297",
+    "prime:18:59297",
+    "prime:20:59297",
+    "prime:22:59297",
+    "prime:24:59297",
+    "prime:26:59297",
+    "prime:22:827675",
+    "prime:24:827675",
+    "prime:26:827675",
+    "char2:13:59297:8",
+    "char2:15:59297:8",
+    "char2:17:59297:8",
+    "char2:19:59297:8",
+    "char2:21:59297:8",
+    "char2:23:59297:8",
+    "char2:25:59297:8",
+    "char2:27:59297:8",
+    "char2:13:827675:8",
+    "char2:15:827675:8",
+    "char2:17:827675:8",
+    "char2:19:827675:8",
+    "char2:21:827675:8",
+    "char2:23:827675:8",
+    "char2:25:827675:8",
+    "char2:27:827675:8",
+    "char2:13:20260922:8",
+    "char2:13:20260923:8",
+    "char2:13:20260924:8",
+    "char2:15:20260922:8",
+    "char2:15:20260923:8",
+    "char2:15:20260924:8",
+    "char2:17:20260922:8",
+    "subfield:2:6:0:2",
+    "subfield:2:10:0:2",
+    "subfield:2:14:0:2",
+    "subfield:2:18:2:1",
+    "roster:8",
+    "roster:10",
+    "roster:12",
+    "roster:14",
+    "roster:16",
+    "roster:18",
+    "roster:20",
+    "koblitz:0:7",
+    "koblitz:0:9",
+    "koblitz:0:11",
+    "koblitz:0:13",
+    "koblitz:0:15",
+    "koblitz:0:17",
+    "koblitz:0:19",
+    "koblitz:0:23",
+    "koblitz:0:31",
+    "koblitz:0:37",
+    "koblitz:0:39",
+    "koblitz:0:41",
+    "koblitz:0:53",
+    "koblitz:0:61",
+    "koblitz:1:7",
+    "koblitz:1:9",
+    "koblitz:1:11",
+    "koblitz:1:13",
+    "koblitz:1:15",
+    "koblitz:1:17",
+    "koblitz:1:19",
+    "koblitz:1:21",
+    "koblitz:1:23",
+    "koblitz:1:29",
+    "koblitz:1:31",
+    "koblitz:1:43",
+    "koblitz:1:45",
+    "koblitz:1:47",
+    "koblitz:1:59"
+  ],
+  "unbuilt": [
+    {
+      "spec": "roster:8",
+      "why": "roster:8: no curve"
+    },
+    {
+      "spec": "koblitz:0:11",
+      "why": "koblitz:0:11: no curve"
+    },
+    {
+      "spec": "koblitz:0:17",
+      "why": "koblitz:0:17: no curve"
+    },
+    {
+      "spec": "koblitz:1:13",
+      "why": "koblitz:1:13: no curve"
+    },
+    {
+      "spec": "koblitz:1:21",
+      "why": "koblitz:1:21: no curve"
+    },
+    {
+      "spec": "koblitz:1:31",
+      "why": "koblitz:1:31: no curve"
+    }
+  ],
+  "what_this_is": "Curves the repository's constructors build, rebuilt by examples/curve_id_generated.rs: each one's exact representation, the handle it was reported under before ICV1, and its ICV1 identity computed in Rust."
+}

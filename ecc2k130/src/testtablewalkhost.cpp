@@ -47,7 +47,7 @@ int main() {
 #define ECC_TABLE_PROBE_POINTS 4096
 #endif
     const int N = ECC_TABLE_PROBE_POINTS;
-    int badK = 0, badPivot = 0, badEps = 0, badTag = 0, badAdd = 0, ruleFired = 0;
+    int badK = 0, badPivot = 0, badEps = 0, badTag = 0, badBatchTag = 0, badAdd = 0, ruleFired = 0;
     for (int i = 0; i < N; ++i) {
         R::Point pt = R::startPoint(0x5eed0000ull + 7919ull * i, sol.basis, sol.target, 0, sol.ell, sol.spow);
         if (i < 2) {
@@ -78,6 +78,16 @@ int main() {
         const int eps = twCoordinate(yp, pivot, shared.data() + TW_ROW_OFF);
         unsigned long long h2 = hist;
         const unsigned tag = twSelect(xn, yp, hw, &h2, shared.data(), shared.data(), 34);
+        // The split-forward batched-hint schedule first pushes every raw tag,
+        // then resolves hinted slots and replaces only the newest history tag.
+        // Slots are independent, so doing this for the whole batch in another
+        // loop is exactly this transformation applied in any order.
+        unsigned long long h3 = eccHistPush(hist, rawTag);
+        unsigned stagedTag = rawTag;
+        if (eccTagFruitless(rawTag, hist, 131)) {
+            stagedTag = twCycleTag(xn, yp, rawTag, shared.data(), shared.data(), 34);
+            h3 = (h3 & ~0xffffull) | stagedTag;
+        }
         P131 d, e;
         twAddend(tag, xp, yp, shared.data(), &d, &e);
 
@@ -98,12 +108,14 @@ int main() {
         badPivot += pivot != rp;
         badEps += eps != reps;
         badTag += tag != rtag;
+        badBatchTag += stagedTag != tag || h3 != h2;
         for (int w = 0; w < 5; ++w) badAdd += (d.v[w] != rd.v[w]) || (e.v[w] != re.v[w]);
     }
     std::printf("table walk host probe: %d points, cycle rule fired on %d\n", N, ruleFired);
-    std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
+    std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, batched tag/history %d, addend words %d\n",
+                badK, badPivot, badEps, badTag, badBatchTag, badAdd);
     std::printf("  branches %d, pivot bytes %d, shared bytes %zu\n", TW_H, ECC_TABLE_PIVOT_BYTES, TW_SHARED_BYTES);
-    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired > 0;   // hints need not be real cycles
+    const bool ok = !badK && !badPivot && !badEps && !badTag && !badBatchTag && !badAdd && ruleFired > 0;   // hints need not be real cycles
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;
 }

@@ -25,6 +25,16 @@
 #define ECC_GUARD_PERIOD 4096
 #endif
 
+#ifndef ECC_CYCLE_PROFILE
+#define ECC_CYCLE_PROFILE 0
+#endif
+#if ECC_CYCLE_PROFILE && (!defined(ECC_WALK_TABLE) || !ECC_WALK_TABLE)
+#error "ECC_CYCLE_PROFILE requires ECC_WALK_TABLE"
+#endif
+#if ECC_CYCLE_PROFILE
+struct EccCycleProfile;
+#endif
+
 // aws/campaign.json "maxIters".  The guard is checked only every
 // ECC_GUARD_PERIOD steps, so a walk can report a trail up to
 // ECC_GUARD_PERIOD - 1 steps longer; a tool replaying campaign trails has to
@@ -58,10 +68,14 @@ struct WalkParams {
     const unsigned long long *replaySeeds = nullptr;
     unsigned long long replayCount = 0;
     CurveConsts consts;
-    // Table walk only (tablewalk.h): the last four step tags of every lane,
-    // and the flat constant buffer packedtablewalk.cuh copies to shared memory.
+    // The table walk uses both fields: the last four tags of every lane and
+    // its flat constant buffer.  The sigma-square-table arm leaves hist null
+    // and reuses twConsts for its ABI-compatible 8,320-byte square table.
     unsigned long long *hist;
     const unsigned *twConsts;
+#if ECC_CYCLE_PROFILE
+    EccCycleProfile *cycleProfile;
+#endif
 };
 
 ECC_HD unsigned eccAtomicInc(unsigned *p) {

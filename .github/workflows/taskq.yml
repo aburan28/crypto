@@ -1,0 +1,79 @@
+name: taskq
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'taskq/**'
+      - '.github/workflows/taskq.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'taskq/**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    services:
+      redis:
+        image: redis:7.4
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 2s
+          --health-timeout 2s --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: pip install -e './taskq[mcp,test]'
+      - name: Test
+        env:
+          TASKQ_TEST_REDIS_URL: redis://127.0.0.1:6379/0
+        run: python -m pytest -q taskq/tests
+      - uses: azure/setup-helm@v4
+      - name: Helm chart renders and lints
+        run: |
+          helm lint taskq/deploy/helm/taskq
+          helm template t taskq/deploy/helm/taskq > /dev/null
+          helm template t taskq/deploy/helm/taskq --set keda.enabled=true --set mcp.enabled=true > /dev/null
+          helm template t taskq/deploy/helm/taskq --set redis.enabled=false --set redis.externalUrlSecret.name=ext > /dev/null
+      - name: Worker image builds
+        run: docker build -f taskq/deploy/Dockerfile taskq
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: taskq/deploy/aws
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Format
+        run: terraform fmt -check -recursive
+      - name: Validate
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+      - name: Plan against mocked providers
+        # No AWS account: the providers are mocked, but the provider still
+        # reads credentials at configure time.
+        env:
+          AWS_ACCESS_KEY_ID: mock
+          AWS_SECRET_ACCESS_KEY: mock
+        run: terraform test
+      - name: State bootstrap validates and plans
+        env:
+          AWS_ACCESS_KEY_ID: mock
+          AWS_SECRET_ACCESS_KEY: mock
+        working-directory: taskq/deploy/aws/bootstrap
+        run: |
+          terraform init -input=false
+          terraform validate
+          terraform test

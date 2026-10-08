@@ -1,0 +1,324 @@
+{
+ "suite": "ic tool programme conformance suite v2, B7a's cases",
+ "design": "research/ic_tool_program/design/f1-sampled.md (with amendment 1); research/ic_tool_program/rounds/B7a-f1-sampled/PROTOCOL.md",
+ "includes": "../v1 (B0), ../v2 (B1), ../v2-b2 (B2), ../v2-b2b (B2b), ../v2-b3 (B3); ../run.py runs every step's cases",
+ "rules": [
+  "The rules of ../v2/cases.json hold. {here} is this directory's params/, which is empty: every case copies an earlier step's frozen document. {cases} is ../v2/params/.",
+  "An F1 figure varies from run to run, so the expectations are the report's codes and shape: status, fidelity, the label, the phases' kinds and the completeness flags."
+ ],
+ "sources_sha256": {
+  "{cases}/C010-curve-a-other-generator.json": "c7f973fe005b741451c834ae5047eb2fbbc378e212a6a0b52359339ef2abbaa3",
+  "{cases}/gate-m83-T001.json": "56fba3bce09ccd67458da38d52d0403ada586b9c3d1ab41fb3abcd400d428a2a",
+  "{here}/../../v2-b2/params/C047-secp256k1-over-budget.json": "9a4bfcb377eb5dc873a2eea10beaca1d2b8029931ff8c936d342ac9397bb470f",
+  "{here}/../../v2-b2/params/C038-generic-binary-n23.json": "e73b955e319a87926f71b27a8b53754e049c130f028cae6ce0d6656f497fff5e",
+  "{here}/../../v2-b2b/params/C059-subfield-curve-paired.json": "d199157aa93b0004c692f3a0686e3c6791cda350b07e16683eb3c1c1acce9214"
+ },
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2-b7a/make_cases.py",
+  "sha256": "dc23d46fc941539cd9b23cdfbd431949fc4138bfdab465df96d5fdb65d8ae807"
+ },
+ "cases": [
+  {
+   "id": "C071-curve-a-paired-f1",
+   "step": "B7a",
+   "checks": "B7a: kic and rho-koblitz extrapolated from samples on curve A; the yield counted, the costs sampled",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C010-curve-a-other-generator.json",
+     "set": {
+      "method.fidelity": "F1"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "extrapolated",
+     "fidelity": "F1",
+     "label": "an extrapolation from samples (F1); not a measurement; it does not discharge the m = 83 gate",
+     "speedup_eligible": false,
+     "phases.ic.collect.how": "counted_and_sampled",
+     "extrapolated.ic.complete": true,
+     "extrapolated.rho.complete": true,
+     "route.ic.pipeline": "kic",
+     "route.rho.pipeline": "rho-koblitz"
+    }
+   },
+   "timeout_s": 600
+  },
+  {
+   "id": "C072-curve-a-rho-f1",
+   "step": "B7a",
+   "checks": "B7a: rho alone at F1, its step cost measured and its expected steps counted",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C010-curve-a-other-generator.json",
+     "set": {
+      "method": {
+       "solve": "rho",
+       "fidelity": "F1",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 7
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "extrapolated",
+     "fidelity": "F1",
+     "label": "an extrapolation from samples (F1); not a measurement; it does not discharge the m = 83 gate",
+     "speedup_eligible": false,
+     "rho.pipeline": "rho-koblitz",
+     "extrapolated.rho.complete": true
+    }
+   },
+   "timeout_s": 600
+  },
+  {
+   "id": "C073-curve-a-kic-alone-f1",
+   "step": "B7a",
+   "checks": "B7a: kic alone at F1",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C010-curve-a-other-generator.json",
+     "set": {
+      "method": {
+       "solve": "index_calculus",
+       "fidelity": "F1",
+       "index_calculus": {
+        "pipeline": "kic",
+        "recipe": {
+         "summands": 3,
+         "descent_summands": 2,
+         "collection_window": 16,
+         "collection_aim": true,
+         "solver": "pair_table",
+         "seed": 201,
+         "max_trials": 100000,
+         "collection": {
+          "unit_trials": 16,
+          "units": 1,
+          "max_units": 100000
+         },
+         "factor_base": {
+          "mode": "spec",
+          "spec": {
+           "kind": "subgroup_orbits",
+           "points": 496,
+           "seed": 201
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "extrapolated",
+     "fidelity": "F1",
+     "label": "an extrapolation from samples (F1); not a measurement; it does not discharge the m = 83 gate",
+     "speedup_eligible": false,
+     "operation": "ic_single_target",
+     "extrapolated.ic.complete": true
+    }
+   },
+   "timeout_s": 600
+  },
+  {
+   "id": "C074-gate-rho-f1",
+   "step": "B7a",
+   "checks": "B7a: rho-koblitz at F1 on the m = 83 gate's field (an extrapolation, never the gate)",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json",
+     "set": {
+      "method": {
+       "solve": "rho",
+       "fidelity": "F1",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "extrapolated",
+     "fidelity": "F1",
+     "label": "an extrapolation from samples (F1); not a measurement; it does not discharge the m = 83 gate",
+     "speedup_eligible": false,
+     "rho.pipeline": "rho-koblitz",
+     "extrapolated.rho.complete": true
+    }
+   },
+   "timeout_s": 600
+  },
+  {
+   "id": "C075-secp256k1-rho-f1",
+   "step": "B7a",
+   "checks": "B7a: rho-bignum at F1 on secp256k1, where F0 is over any budget",
+   "files": {
+    "params.json": {
+     "copy": "{here}/../../v2-b2/params/C047-secp256k1-over-budget.json",
+     "set": {
+      "method.fidelity": "F1"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "extrapolated",
+     "fidelity": "F1",
+     "label": "an extrapolation from samples (F1); not a measurement; it does not discharge the m = 83 gate",
+     "speedup_eligible": false,
+     "rho.pipeline": "rho-bignum",
+     "extrapolated.rho.complete": true
+    }
+   },
+   "timeout_s": 600
+  },
+  {
+   "id": "C076-imported-ic-has-no-f1",
+   "step": "B7a",
+   "checks": "B7a: ic-binary-s4 has no F1 model",
+   "files": {
+    "params.json": {
+     "copy": "{here}/../../v2-b2/params/C038-generic-binary-n23.json",
+     "set": {
+      "method.fidelity": "F1"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "no-f1-model",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 600
+  },
+  {
+   "id": "C077-subfield-curve-f1",
+   "step": "B7a",
+   "checks": "B7a: kic on a curve over GF(4), and rho-negation, at F1",
+   "files": {
+    "params.json": {
+     "copy": "{here}/../../v2-b2b/params/C059-subfield-curve-paired.json",
+     "set": {
+      "method.fidelity": "F1"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "extrapolated",
+     "fidelity": "F1",
+     "label": "an extrapolation from samples (F1); not a measurement; it does not discharge the m = 83 gate",
+     "speedup_eligible": false,
+     "route.ic.pipeline": "kic",
+     "route.rho.pipeline": "rho-negation",
+     "extrapolated.ic.complete": true,
+     "extrapolated.rho.complete": true
+    }
+   },
+   "timeout_s": 600
+  }
+ ]
+}

@@ -37,6 +37,7 @@ def rows(online_reference=.8):
             item = copy.deepcopy(row)
             item['arm'] = 'ic_online'
             item['certificate']['factor_base_sha256'] = 'ic_online'
+            item['measurement']['candidate_id'] = 'ic_online'
             item['measurement']['native_timing']['online']['wall_ns'] = int(1000000 * online_reference)
             result.append(item)
     return result
@@ -239,6 +240,36 @@ class VersionedCampaignTests(unittest.TestCase):
         for path in EXPOSED:
             self.assertTrue(path.is_file(), path.name)
         self.assertEqual(2026092550 + 2, 2026092552)
+
+    def test_final_registered_panel_uses_distinct_mechanism_combinations(self):
+        from producer.evidence import executed_policy
+        from run_improvement_v3 import registry, PANEL, PANEL_SHA256, EXPOSED
+        from tournament import digest
+        panel = json.loads(PANEL.read_text())
+        rows = registry(panel, Path('/candidate/source'))
+        self.assertEqual(digest(PANEL), PANEL_SHA256)
+        self.assertEqual(panel['round'], 3)
+        self.assertEqual(panel['candidate_panel'], 'round3-v1')
+        self.assertEqual(len(rows), 11)
+        self.assertEqual(rules.scheduled_slot_bound(len(rows)), 3480)
+        self.assertEqual(len({json.dumps(row['config'], sort_keys=True) for row in rows}), 11)
+        for prior in (HERE/'goal_20260924/improvement/round1.json',
+                      HERE/'goal_20260924/improvement-v2/round2.json'):
+            earlier = json.loads(prior.read_text())
+            exact = {json.dumps(a['config'], sort_keys=True) for a in earlier['candidates'][1:]}
+            self.assertFalse(exact & {json.dumps(a['config'], sort_keys=True) for a in rows[1:]})
+        policies = {row['id']: executed_policy(row['config'], panel['candidate_panel'])
+                    for row in rows[1:]}
+        self.assertEqual(policies['stop4_word_half'],
+                         dict(orbit_batch=1, orbit_target=4, row_kernel='word', pair_table='half'))
+        self.assertEqual(policies['stop6_bounded_half']['row_kernel'], 'bounded')
+        self.assertEqual(policies['word_cover']['pair_table'], 'cover')
+        self.assertEqual(rows[-1]['config']['batch_trials'], 2)
+        self.assertEqual(len(EXPOSED), 7)
+        for path in EXPOSED:
+            self.assertTrue(path.is_file(), path.name)
+            self.assertEqual(digest(path), panel['exposed_fixture_sha256'][
+                str(path.relative_to(HERE.parents[1]))])
 
 
 if __name__ == '__main__':

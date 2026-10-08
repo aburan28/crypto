@@ -1,5 +1,10 @@
 //! Native-XOR balanced-S5 SAT control over point-defined Koblitz bases.
 //!
+//! Four factor-base points are constrained to sum to one published synthetic
+//! target through three balanced S3 links.  All SAT models are lifted through
+//! the original curve group; no unknown, external, or production point is used.
+
+#![recursion_limit = "256"]
 //! Four factor-base points are constrained through three balanced S3 links.
 //! SAT controls use published synthetic targets; the optional compact batch
 //! accepts public subgroup points without their scalar labels. All extracted
@@ -121,6 +126,10 @@ fn signed_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPoint> {
 }
 
 fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
+    // Single-word field for the hot arithmetic below (per-x lifts and the
+    // cofactor/subgroup/label scalar multiplications).  Every swap is
+    // covered by lib bit-exactness tests; the collected sets, sort orders,
+    // keys, and labels are unchanged, so the emitted base is identical.
     point_defined_base_with_selection(curve, columns, false)
 }
 
@@ -154,6 +163,7 @@ fn point_defined_base_with_selection(
     let mut seen_orbits = HashSet::new();
     let mut orbits = Vec::new();
     let mut scanned_x = 0u64;
+    for raw_x in 0..(1u64 << curve.n) {
     // Reproduce the certified rank fixture's seeded abscissa schedule for
     // n > 32.  Ascending x remains the default selection rule.
     let exhaustive = !legacy_rank_fixture_lcg || curve.n <= 32;
@@ -224,6 +234,8 @@ fn point_defined_base_with_selection(
         }
     }
     let mut points: Vec<_> = orbits.into_iter().flatten().collect();
+    points.sort_by_cached_key(point_key);
+    points.dedup_by_key(|point| point_key(point));
     // The certified header retains members grouped by sorted orbit.  Its
     // point indices therefore differ from the current global-point order.
     if legacy_rank_fixture_lcg {
@@ -2910,6 +2922,14 @@ fn lazy_relative_support_update(
 fn assigned_one_hot(assignment: &[Option<bool>], offset: usize, count: usize) -> Option<usize> {
     let mut found = None;
     for index in 0..count {
+        match assignment.get(offset + index).copied().flatten() {
+            Some(true) => {
+                if found.is_some() {
+                    return None;
+                }
+                found = Some(index);
+            }
+            Some(false) | None => {}
         if let Some(true) = assignment.get(offset + index).copied().flatten() {
             if found.is_some() {
                 return None;
@@ -2971,6 +2991,53 @@ struct CompactOrbitExtractionIndex {
     regular_keys: Vec<(usize, usize, usize)>,
     by_canonical: HashMap<u64, u64>,
     index_entries: usize,
+    scan_policy: RegularScanPolicy,
+}
+
+/// Both policies visit the same lex-sorted regular states in cyclic order.
+/// Only the starting position changes, using public target coordinates.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RegularScanPolicy {
+    Lex,
+    TargetCyclicV1,
+}
+
+impl RegularScanPolicy {
+    fn from_env() -> Self {
+        match std::env::var("KIC_ORBIT_REGULAR_SCAN_POLICY").as_deref() {
+            Ok("target_cyclic_v1") => Self::TargetCyclicV1,
+            Ok("lex") | Err(_) => Self::Lex,
+            Ok(other) => panic!("unsupported KIC_ORBIT_REGULAR_SCAN_POLICY={other}"),
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Lex => "lex",
+            Self::TargetCyclicV1 => "target_cyclic_v1",
+        }
+    }
+
+    fn start(self, target: &BinaryPoint, width: usize, keys: usize) -> usize {
+        if self == Self::Lex || keys == 0 {
+            return 0;
+        }
+        let [x, y] = affine_coordinates(target).expect("finite compact-orbit target");
+        // Fixed SplitMix64 avalanche with separated x, y, width, and policy
+        // domains. This is a scheduling rule, not a secret-keyed hash.
+        let mixed = splitmix64(x ^ 0x6b69_632d_7835_3321)
+            ^ splitmix64(y ^ 0x6b69_632d_7935_3321)
+            ^ splitmix64((width as u64) ^ 0x6b69_632d_6e35_3321);
+        (splitmix64(mixed ^ 0x7461_7267_6574_7631) % keys as u64) as usize
+    }
+}
+
+fn splitmix64(mut value: u64) -> u64 {
+    value ^= value >> 30;
+    value = value.wrapping_mul(0xbf58_476d_1ce4_e5b9);
+    value ^= value >> 27;
+    value = value.wrapping_mul(0x94d0_49bb_1331_11eb);
+    value ^ (value >> 31)
 }
 
 impl CompactOrbitExtractionIndex {
@@ -2980,6 +3047,7 @@ impl CompactOrbitExtractionIndex {
         regular_keys: Vec<(usize, usize, usize)>,
         representative_x_codes: &[u64],
         gf: &Gf2,
+        scan_policy: RegularScanPolicy,
     ) -> Self {
         let width = curve.n as usize;
         let mut shifted = vec![vec![0u64; width]; representative_x_codes.len()];
@@ -3016,6 +3084,7 @@ impl CompactOrbitExtractionIndex {
             regular_keys,
             by_canonical,
             index_entries,
+            scan_policy,
         }
     }
 }
@@ -3038,6 +3107,18 @@ fn extract_orbit_relation(
     let started = Instant::now();
     let index =
         CompactOrbitExtractionIndex::new(curve, regular, regular_keys, representative_x_codes, gf);
+    let result = extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
+    scan_policy: RegularScanPolicy,
+) -> (Option<ExtractedOrbitRelation>, usize, f64) {
+    let started = Instant::now();
+    let index = CompactOrbitExtractionIndex::new(
+        curve,
+        regular,
+        regular_keys,
+        representative_x_codes,
+        gf,
+        scan_policy,
+    );
     let (result, _) =
         extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
     let elapsed = started.elapsed().as_secs_f64() * 1000.0;
@@ -3050,6 +3131,8 @@ struct CompactOrbitQueryStats {
     partner_roots: u64,
     indexed_partner_hits: u64,
     group_lift_attempts: u64,
+    regular_scan_start: usize,
+    regular_keys_visited: usize,
 }
 
 fn extract_orbit_relation_with_index(
@@ -3060,6 +3143,15 @@ fn extract_orbit_relation_with_index(
     index: &CompactOrbitExtractionIndex,
     gf: &Gf2,
     b: u64,
+) -> Option<ExtractedOrbitRelation> {
+    let started = Instant::now();
+    let width = curve.n as usize;
+    let target_x = match target {
+        BinaryPoint::Affine { x, .. } => x.raw_bits().first().copied().unwrap_or(0),
+        BinaryPoint::Infinity => return None,
+    };
+    let mut trials = 0u64;
+    for &(left, right, relative) in &index.regular_keys {
 ) -> (Option<ExtractedOrbitRelation>, CompactOrbitQueryStats) {
     let started = Instant::now();
     let mut stats = CompactOrbitQueryStats::default();
@@ -3069,7 +3161,15 @@ fn extract_orbit_relation_with_index(
         BinaryPoint::Infinity => return (None, stats),
     };
     let mut trials = 0u64;
-    for &(left, right, relative) in &index.regular_keys {
+    let regular_scan_start = index
+        .scan_policy
+        .start(target, width, index.regular_keys.len());
+    stats.regular_scan_start = regular_scan_start;
+    for &(left, right, relative) in index.regular_keys[regular_scan_start..]
+        .iter()
+        .chain(&index.regular_keys[..regular_scan_start])
+    {
+        stats.regular_keys_visited += 1;
         let roots = &regular[&(left, right, relative)];
         for left_shift in 0..width {
             let right_shift = (left_shift + relative) % width;
@@ -3099,6 +3199,26 @@ fn extract_orbit_relation_with_index(
                         index.shifted[second_left][second_left_shift],
                         index.shifted[second_right][second_right_shift],
                     ];
+                    if lift_x_tuple(curve, base, &codes, target).is_some() {
+                        return Some(ExtractedOrbitRelation {
+                            codes,
+                            first: (left, right, left_shift, right_shift),
+                            second: (
+                                second_left,
+                                second_right,
+                                second_left_shift,
+                                second_right_shift,
+                            ),
+                            intermediates: [absolute, partner],
+                            trials,
+                            extract_ms: started.elapsed().as_secs_f64() * 1000.0,
+                        });
+                    }
+                }
+            }
+        }
+    }
+    None
                     stats.group_lift_attempts += 1;
                     if lift_x_tuple(curve, base, &codes, target).is_some() {
                         return (
@@ -5057,6 +5177,7 @@ fn main() {
         let (base, base_hash, source_hash) = point_defined_base_from_jsonl(&curve, columns, path);
         (base, Some(base_hash), Some(source_hash))
     } else {
+        (point_defined_base(&curve, columns), None, None)
         let constructed = if factor_base_selection_mode == "legacy_rank_fixture_lcg_v1" {
             point_defined_base_with_selection(&curve, columns, true)
         } else {
@@ -5806,6 +5927,13 @@ fn main() {
     let lazy_relative_support = algebra_encoding == "orbit_factorized"
         && std::env::var("KIC_ORBIT_LAZY_RELATIVE_SUPPORT").as_deref() == Ok("1");
     let compact_batch_only = std::env::var("KIC_ORBIT_BATCH_ONLY").as_deref() == Ok("1");
+    let disable_compact_extract =
+        std::env::var("KIC_ORBIT_DISABLE_COMPACT_EXTRACT").as_deref() == Ok("1");
+    let regular_scan_policy = RegularScanPolicy::from_env();
+    assert!(
+        lazy_relative_support || regular_scan_policy == RegularScanPolicy::Lex,
+        "target_cyclic_v1 requires compact lazy relative support"
+    );
     assert!(
         lazy_relative_support
             || (std::env::var_os("KIC_ORBIT_TARGET_SCALARS").is_none()
@@ -5830,6 +5958,7 @@ fn main() {
     let mut compact_relation: Option<ExtractedOrbitRelation> = None;
     let mut compact_batch_relations: Vec<(u64, ExtractedOrbitRelation)> = Vec::new();
     let mut compact_batch_failures: Vec<u64> = Vec::new();
+    let mut compact_batch_targets_requested = 0usize;
     let mut compact_batch_query_observations = Vec::new();
     let mut compact_batch_targets_requested = 0usize;
     let mut compact_point_batch_relations: Vec<([u64; 2], ExtractedOrbitRelation)> = Vec::new();
@@ -5887,10 +6016,15 @@ fn main() {
                 regular_keys,
                 &codes,
                 &lazy_relative_field.gf,
+                regular_scan_policy,
             );
             compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
             compact_index_entries = index.index_entries;
             let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
+            for scalar in scalars {
+                let target = curve.mul(curve.generator(), &BigUint::from(scalar));
+                let query_started = Instant::now();
+                let relation = extract_orbit_relation_with_index(
             let loop_started = Instant::now();
             for scalar in scalars {
                 let target = curve.mul(curve.generator(), &BigUint::from(scalar));
@@ -5913,7 +6047,9 @@ fn main() {
                     "s3_calls":stats.s3_calls,
                     "partner_roots":stats.partner_roots,
                     "indexed_partner_hits":stats.indexed_partner_hits,
-                    "group_lift_attempts":stats.group_lift_attempts
+                    "group_lift_attempts":stats.group_lift_attempts,
+                    "regular_scan_start":stats.regular_scan_start,
+                    "regular_keys_visited":stats.regular_keys_visited
                 }));
                 if let Some(relation) = relation {
                     let lifted = lift_x_tuple(&curve, &base, &relation.codes, &target);
@@ -5923,6 +6059,7 @@ fn main() {
                     compact_batch_failures.push(scalar);
                 }
             }
+        } else if !disable_compact_extract {
             compact_batch_loop_ms = loop_started.elapsed().as_secs_f64() * 1000.0;
         } else if let Ok(list_path) = std::env::var("KIC_ORBIT_TARGET_POINTS_JSONL") {
             let targets: Vec<[u64; 2]> = std::fs::read_to_string(&list_path)
@@ -5940,6 +6077,7 @@ fn main() {
                 regular_keys,
                 &codes,
                 &lazy_relative_field.gf,
+                regular_scan_policy,
             );
             compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
             compact_index_entries = index.index_entries;
@@ -5986,7 +6124,9 @@ fn main() {
                     "s3_calls":stats.s3_calls,
                     "partner_roots":stats.partner_roots,
                     "indexed_partner_hits":stats.indexed_partner_hits,
-                    "group_lift_attempts":stats.group_lift_attempts
+                    "group_lift_attempts":stats.group_lift_attempts,
+                    "regular_scan_start":stats.regular_scan_start,
+                    "regular_keys_visited":stats.regular_keys_visited
                 }));
                 if let Some(relation) = relation {
                     assert!(
@@ -6009,6 +6149,7 @@ fn main() {
                 &codes,
                 &lazy_relative_field.gf,
                 curve.curve.b.raw_bits().first().copied().unwrap_or(0),
+                regular_scan_policy,
             );
             compact_relation = extracted;
             compact_index_entries = entries;
@@ -6419,6 +6560,17 @@ fn main() {
             force_binary(&mut encoding.solver, offset, lazy_width, value as usize);
         }
     }
+    let outcome = loop {
+        let solve_result = if compact_batch_only {
+            SolveResult::Unknown
+        } else if compact_relation.is_some() {
+            encoding.solver.solve()
+        } else if s3_root_theory || lazy_relative_support {
+            encoding
+                .solver
+                .solve_with_lazy_clauses(&trigger_variables, &mut theory)
+        } else {
+            encoding.solver.solve()
     let mut sat_solver_invocations = 0usize;
     let mut sat_solver_ms = 0.0f64;
     let outcome = loop {
@@ -6530,6 +6682,8 @@ fn main() {
             result => break result,
         }
     };
+    phase_restart_shots_used += 1;
+    drop(theory);
     if !compact_batch_only {
         phase_restart_shots_used += 1;
     }
@@ -6597,6 +6751,7 @@ fn main() {
             "schema_version":"1.0",
             "task_id":task_id,
             "kind":"balanced_s5_native_xor_observation",
+            "evidence_class":if outcome==SolveResult::Unknown {"censored_operational_observation"} else {"measured_solver_observation"},
             "evidence_class":if compact_batch_targets_requested > 0 || compact_point_batch_targets_requested > 0 {
                 "measured_compact_batch_extraction"
             } else if outcome==SolveResult::Unknown {
@@ -6647,7 +6802,10 @@ fn main() {
                 "forced_intermediate_bits":lazy_relative_forced_bits
             },
             "compact_orbit_extraction":{
+                "enabled":lazy_relative_support && !disable_compact_extract,
+                "disabled_for_unpinned_search":disable_compact_extract,
                 "enabled":lazy_relative_support,
+                "regular_scan_policy":regular_scan_policy.name(),
                 "pair_table_entries":0,
                 "edge_selectors":0,
                 "group_valid":compact_relation.is_some(),
@@ -6660,6 +6818,9 @@ fn main() {
             "compact_orbit_batch":if compact_batch_targets_requested > 0 {
                 Some(json!({
                     "targets_requested":compact_batch_targets_requested,
+                    "targets_extracted":compact_batch_relations.len(),
+                    "failed_target_scalars":compact_batch_failures,
+                    "regular_scan_policy":regular_scan_policy.name(),
                     "targets_extracted":compact_batch_relations.len(),
                     "failed_target_scalars":compact_batch_failures,
                     "query_observations":compact_batch_query_observations,
@@ -6676,6 +6837,11 @@ fn main() {
                     "regular_state_scan_ms":lazy_relative_scan_ms,
                     "root_index_build_ms":compact_batch_index_build_ms,
                     "query_ms_sum":compact_batch_query_ms,
+                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms,
+                    "sat_verification_included":false,
+                    // The batch loop checks each group lift, but does not
+                    // run SAT on every extracted relation. `solve_ms` spans
+                    // extraction too and must not be added a second time.
                     "batch_loop_wall_ms":compact_batch_loop_ms,
                     "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_loop_ms,
                     "charged_total_scope":"base, regular scan, root index, and full target loop; process start/curve setup/encoding excluded",
@@ -6687,6 +6853,7 @@ fn main() {
             "compact_orbit_point_batch":if compact_point_batch_targets_requested > 0 {
                 Some(json!({
                     "targets_requested":compact_point_batch_targets_requested,
+                    "regular_scan_policy":regular_scan_policy.name(),
                     "targets_extracted":compact_point_batch_relations.len(),
                     "failed_target_points":compact_point_batch_failures,
                     "query_observations":compact_point_batch_query_observations,
@@ -6770,6 +6937,7 @@ fn main() {
             "factor_base_input_blake3":&factor_base_input_blake3,
             "encoding_ms":encoding_ms,
             "solve_ms":solve_ms,
+            "scope":"public synthetic balanced-S5 correctness control; no external point or key recovery"
             "solve_ms_scope":"legacy whole solve phase including compact scan and extraction; not isolated SAT time",
             "sat_solver_invocations":sat_solver_invocations,
             "sat_solver_ms":sat_solver_ms,
@@ -6938,6 +7106,7 @@ mod tests {
             expected_order.clone(),
             &representatives,
             &gf,
+            RegularScanPolicy::Lex,
         );
         let second = CompactOrbitExtractionIndex::new(
             &curve,
@@ -6945,6 +7114,7 @@ mod tests {
             expected_order.clone(),
             &representatives,
             &gf,
+            RegularScanPolicy::Lex,
         );
         assert_eq!(first.regular_keys, expected_order);
         assert_eq!(second.regular_keys, expected_order);
@@ -6954,6 +7124,91 @@ mod tests {
             pack_pair_witness(0, 1, 1, 0),
             "the first sorted state wins a colliding-root tie"
         );
+    }
+
+    #[test]
+    fn target_cyclic_start_has_stable_public_vectors() {
+        let point = |x, y| BinaryPoint::Affine {
+            x: F2mElement::from_biguint(&BigUint::from(x), 7),
+            y: F2mElement::from_biguint(&BigUint::from(y), 7),
+        };
+        assert_eq!(RegularScanPolicy::Lex.start(&point(1u64, 2u64), 7, 17), 0);
+        assert_eq!(
+            RegularScanPolicy::TargetCyclicV1.start(&point(1u64, 2u64), 7, 17),
+            8
+        );
+        assert_eq!(
+            RegularScanPolicy::TargetCyclicV1.start(&point(1u64, 3u64), 7, 17),
+            15
+        );
+        assert_eq!(
+            RegularScanPolicy::TargetCyclicV1.start(&point(1u64, 2u64), 7, 0),
+            0
+        );
+        let start = RegularScanPolicy::TargetCyclicV1.start(&point(1u64, 2u64), 7, 17);
+        let visited: BTreeSet<_> = (0..17).map(|offset| (start + offset) % 17).collect();
+        assert_eq!(visited, (0..17).collect());
+    }
+
+    #[test]
+    fn rotated_regular_scan_preserves_group_valid_support_at_n11() {
+        let curve = KoblitzCurve::new(1, 11).unwrap();
+        let base = point_defined_base(&curve, 3);
+        let codes: Vec<u64> = base
+            .representatives
+            .iter()
+            .map(|point| affine_coordinates(point).unwrap()[0])
+            .collect();
+        let (states, _) = scan_regular_relative_states(&curve, &codes);
+        let mut keys: Vec<_> = states
+            .iter()
+            .map(|&(left, right, relative, _)| (left, right, relative))
+            .collect();
+        keys.sort_unstable();
+        assert!(keys.len() > 1);
+        let map: HashMap<_, _> = states
+            .into_iter()
+            .map(|(left, right, relative, roots)| ((left, right, relative), roots))
+            .collect();
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let lex = CompactOrbitExtractionIndex::new(
+            &curve,
+            &map,
+            keys.clone(),
+            &codes,
+            &gf,
+            RegularScanPolicy::Lex,
+        );
+        let cyclic = CompactOrbitExtractionIndex::new(
+            &curve,
+            &map,
+            keys,
+            &codes,
+            &gf,
+            RegularScanPolicy::TargetCyclicV1,
+        );
+        let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
+        let mut hits = 0;
+        let mut nonzero_starts = 0;
+        for scalar in 1..=8u64 {
+            let target = curve.mul(curve.generator(), &BigUint::from(scalar));
+            let (left, left_stats) =
+                extract_orbit_relation_with_index(&curve, &base, &target, &map, &lex, &gf, b);
+            let (right, right_stats) =
+                extract_orbit_relation_with_index(&curve, &base, &target, &map, &cyclic, &gf, b);
+            assert_eq!(left.is_some(), right.is_some());
+            assert_eq!(left_stats.regular_scan_start, 0);
+            assert!(right_stats.regular_scan_start < cyclic.regular_keys.len());
+            assert!(left_stats.regular_keys_visited <= lex.regular_keys.len());
+            assert!(right_stats.regular_keys_visited <= cyclic.regular_keys.len());
+            nonzero_starts += usize::from(right_stats.regular_scan_start != 0);
+            for relation in [left, right].into_iter().flatten() {
+                assert!(lift_x_tuple(&curve, &base, &relation.codes, &target).is_some());
+                hits += 1;
+            }
+        }
+        assert!(hits > 0);
+        assert!(nonzero_starts > 0);
     }
 
     #[test]

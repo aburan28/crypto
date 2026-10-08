@@ -1,0 +1,45 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "calibration follow-up: kangaroo on the largest prime curve, 64 fresh targets",
+  "description": "Preregistered in ../PROTOCOL-2.md. Fresh targets (target_seed 20261003) for the cell whose round-1 prediction failed.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 42652151,
+        "a": 26623966,
+        "b": 14210560,
+        "group_order": 42653927,
+        "r": 42653927,
+        "gx": 40895024,
+        "gy": 26279521
+      }
+    ],
+    "targets_per_curve": 64,
+    "target_seed": 20261003
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "kangaroo",
+      "role": "candidate",
+      "method": {
+        "id": "kangaroo.vow"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261003,
+    "isolation_required": "L2",
+    "timeout_seconds": 600
+  }
+}

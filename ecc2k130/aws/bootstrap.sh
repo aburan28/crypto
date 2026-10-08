@@ -168,6 +168,7 @@ if [ -n "$HOST_BIN" ]; then
 fi
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
+aws s3 cp "s3://$BUCKET/aws/seed_registry.py" seed_registry.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
 chmod +x ecc2k130 $FIXTURES 2>/dev/null
 export LD_LIBRARY_PATH=$ROOT/lib
@@ -226,6 +227,8 @@ done
 echo "fixtures report the audited preset arithmetic"
 ./ecc2k130 --curve 131 --test 2>&1 | tail -n 12 || true
 
+# WORKER_CRED_ENV is set by the user-data preamble infra.sh prepends when no
+# instance profile is available: without it the units have no credential.
 # Pin family from the instance, not from a later IMDS/PATH miss inside systemd.
 ECC_INSTANCE_TYPE=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" \
     http://169.254.169.254/latest/meta-data/instance-type || true)
@@ -237,6 +240,7 @@ AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
+${WORKER_CRED_ENV:-}
 ECC_INSTANCE_TYPE=$ECC_INSTANCE_TYPE
 ECC_DEVICE_NAME=$ECC_DEVICE_NAME
 EOF

@@ -1,0 +1,238 @@
+{
+  "all_cells_second_host_replayed": true,
+  "all_hosted_cells_pass": true,
+  "cells": {
+    "n37_L1": {
+      "deterministic_control": {
+        "off": 3.5688140250136335e-05,
+        "rho": 7.23724154227306e-07
+      },
+      "host_machine": "x86_64",
+      "rows": [
+        {
+          "K": 7,
+          "L": 1,
+          "S_Ir": 2754.8836215618758,
+          "arm": "off",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 44081152,
+          "complete_Ir": 41834626,
+          "n": 37,
+          "same_Q_Ir_ratio_to_rho": 2.523060776605472,
+          "verified_logs": 1
+        },
+        {
+          "K": null,
+          "L": 1,
+          "S_Ir": 1091.8815936207047,
+          "arm": "rho",
+          "attempt_floor_ratio": null,
+          "callgrind_peak_rss_bytes": 38256640,
+          "complete_Ir": 16580903,
+          "n": 37,
+          "same_Q_Ir_ratio_to_rho": 1.0,
+          "verified_logs": 1
+        }
+      ],
+      "second_host_replayed": true,
+      "status": "PASS",
+      "valgrind": "valgrind-3.22.0"
+    },
+    "n37_L1024": {
+      "deterministic_control": null,
+      "host_machine": "x86_64",
+      "rows": [
+        {
+          "K": 42,
+          "L": 1024,
+          "S_Ir": 30.458263668630508,
+          "arm": "off",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 51691520,
+          "complete_Ir": 473628396,
+          "n": 37,
+          "same_Q_Ir_ratio_to_rho": 0.5164640278265998,
+          "verified_logs": 1024
+        },
+        {
+          "K": null,
+          "L": 1024,
+          "S_Ir": 58.97460815771802,
+          "arm": "rho",
+          "attempt_floor_ratio": null,
+          "callgrind_peak_rss_bytes": 45195264,
+          "complete_Ir": 917059796,
+          "n": 37,
+          "same_Q_Ir_ratio_to_rho": 1.0,
+          "verified_logs": 1024
+        }
+      ],
+      "second_host_replayed": true,
+      "status": "PASS",
+      "valgrind": "valgrind-3.22.0"
+    },
+    "n41_L1": {
+      "deterministic_control": null,
+      "host_machine": "x86_64",
+      "rows": [
+        {
+          "K": 85,
+          "L": 1,
+          "S_Ir": 3814.89914260494,
+          "arm": "off",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 73908224,
+          "complete_Ir": 2828578292,
+          "n": 41,
+          "same_Q_Ir_ratio_to_rho": 9.271592102015305,
+          "verified_logs": 1
+        },
+        {
+          "K": null,
+          "L": 1,
+          "S_Ir": 411.46106306550314,
+          "arm": "rho",
+          "attempt_floor_ratio": null,
+          "callgrind_peak_rss_bytes": 41971712,
+          "complete_Ir": 305080105,
+          "n": 41,
+          "same_Q_Ir_ratio_to_rho": 1.0,
+          "verified_logs": 1
+        }
+      ],
+      "second_host_replayed": true,
+      "status": "PASS",
+      "valgrind": "valgrind-3.22.0"
+    },
+    "n41_L1024": {
+      "deterministic_control": null,
+      "host_machine": "x86_64",
+      "rows": [
+        {
+          "K": 255,
+          "L": 1024,
+          "S_Ir": 9.034009015432902,
+          "arm": "off",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 224661504,
+          "complete_Ir": 6859076074,
+          "n": 41,
+          "same_Q_Ir_ratio_to_rho": 0.6220572142843719,
+          "verified_logs": 1024
+        },
+        {
+          "K": 255,
+          "L": 1024,
+          "S_Ir": 9.224079189293908,
+          "arm": "blocked",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 229527552,
+          "complete_Ir": 7003386953,
+          "n": 41,
+          "same_Q_Ir_ratio_to_rho": 0.6351449279083612,
+          "verified_logs": 1024
+        },
+        {
+          "K": null,
+          "L": 1024,
+          "S_Ir": 14.522794379654968,
+          "arm": "rho",
+          "attempt_floor_ratio": null,
+          "callgrind_peak_rss_bytes": 76054528,
+          "complete_Ir": 11026439235,
+          "n": 41,
+          "same_Q_Ir_ratio_to_rho": 1.0,
+          "verified_logs": 1024
+        }
+      ],
+      "second_host_replayed": true,
+      "status": "PASS",
+      "valgrind": "valgrind-3.22.0"
+    },
+    "n53_L1": {
+      "deterministic_control": null,
+      "host_machine": "x86_64",
+      "rows": [
+        {
+          "K": 220,
+          "L": 1,
+          "S_Ir": 6730.965441800731,
+          "arm": "off",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 225906688,
+          "complete_Ir": 30878085311,
+          "n": 53,
+          "same_Q_Ir_ratio_to_rho": 13.22930449812205,
+          "verified_logs": 1
+        },
+        {
+          "K": null,
+          "L": 1,
+          "S_Ir": 508.7920867462245,
+          "arm": "rho",
+          "attempt_floor_ratio": null,
+          "callgrind_peak_rss_bytes": 43786240,
+          "complete_Ir": 2334067170,
+          "n": 53,
+          "same_Q_Ir_ratio_to_rho": 1.0,
+          "verified_logs": 1
+        }
+      ],
+      "second_host_replayed": true,
+      "status": "PASS",
+      "valgrind": "valgrind-3.22.0"
+    },
+    "n53_L1024": {
+      "deterministic_control": null,
+      "host_machine": "x86_64",
+      "rows": [
+        {
+          "K": 440,
+          "L": 1024,
+          "S_Ir": 10.743922801687567,
+          "arm": "off",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 730128384,
+          "complete_Ir": 50470294364,
+          "n": 53,
+          "same_Q_Ir_ratio_to_rho": 0.7773421635201454,
+          "verified_logs": 1024
+        },
+        {
+          "K": 440,
+          "L": 1024,
+          "S_Ir": 10.904077656600965,
+          "arm": "blocked",
+          "attempt_floor_ratio": 1.0,
+          "callgrind_peak_rss_bytes": 747040768,
+          "complete_Ir": 51222632483,
+          "n": 53,
+          "same_Q_Ir_ratio_to_rho": 0.7889296556973119,
+          "verified_logs": 1024
+        },
+        {
+          "K": null,
+          "L": 1024,
+          "S_Ir": 13.821356033274181,
+          "arm": "rho",
+          "attempt_floor_ratio": null,
+          "callgrind_peak_rss_bytes": 186814464,
+          "complete_Ir": 64926742344,
+          "n": 53,
+          "same_Q_Ir_ratio_to_rho": 1.0,
+          "verified_logs": 1024
+        }
+      ],
+      "second_host_replayed": true,
+      "status": "PASS",
+      "valgrind": "valgrind-3.22.0"
+    }
+  },
+  "config_sha256": "a0f9e475bfdd4621ef5cb85b9b0a43af2a4260e1771c47a15cf0644e45506945",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36685674084",
+  "manifest_sha256": "ac124a37a3cfb2805944d437234d07e190c11b3e91bedcf89190b421f8099ae3",
+  "method_crossover": null,
+  "method_crossover_note": "This instruction panel has no disjoint confirmation CPU gate or n131 transfer; Ir is not group-addition equivalent.",
+  "schema": "ecc2k130-compact-ir-analysis-v1",
+  "source_head": "ee2364968ae42a59db30e7cd10069dc73de1c29e"
+}

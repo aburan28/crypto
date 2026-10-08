@@ -1,0 +1,51 @@
+{
+  "kind": "n31_m2_dim16_third_seed_ffd_stability",
+  "schema_version": "1.0",
+  "updated_at": "2026-09-15T17:43:30Z",
+  "claim_boundary": "Public-synthetic Koblitz decomposition oracle only. Third-seed redraw for FFD/gate stability. Not ledger promotion; not vs_rho; not key recovery.",
+  "config": {
+    "a": 0,
+    "n": 31,
+    "m": 2,
+    "dim_V": 16,
+    "targets": 4,
+    "seed": 424242,
+    "node_budget": 200000,
+    "sat": false
+  },
+  "observed": {
+    "F_x": 68327,
+    "F_u": 69441,
+    "wall_s": 302.5,
+    "x_chained_f4": {
+      "found": 4,
+      "refuted": 0,
+      "inconclusive": 0,
+      "effort": 4409,
+      "ffd": 3,
+      "gate": "ok"
+    },
+    "sym_f4": {
+      "found": 1,
+      "refuted": 3,
+      "inconclusive": 0,
+      "effort": 4095,
+      "ffd": 4,
+      "gate": "ok"
+    },
+    "divisor_indices": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "comparison_to_prior_seeds": {
+    "seed_0x5EED_note": "baseline panel had mixed verdicts; FFD x=3 sym=4 previously",
+    "seed_66142_note": "second-seed redraw: FFD stable (x=3,sym=4), gate ok, 0 inconclusive",
+    "seed_424242": "FFD stable (x=3,sym=4), gate ok, 0 inconclusive; x-arm found all 4 targets"
+  },
+  "verdict": "FFD_STABLE_GATE_OK_ZERO_INCONCLUSIVE",
+  "ledger_promotion": false,
+  "stdout_path": "research/sat_factor_base_review_20260908/autolab/runs_manual/n31_decomp_m2_dim16_20260915_distro/third_seed_424242_targets4.stdout.txt"
+}

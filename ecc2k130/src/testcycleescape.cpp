@@ -12,12 +12,17 @@ static void require(bool ok,const char *why) {
     if(!ok){std::fprintf(stderr,"FAIL: %s\n",why);std::exit(1);}
 }
 struct GraphOps {
-    const unsigned *tags; int n; bool closes; int dp = -1;
+    const unsigned *tags; int n; bool closes; int dp = -1; int *nextCalls = nullptr;
     bool distinguished(int p) const {return p==dp;}
     unsigned tag(int p) const {return tags[p%n];}
     bool next(int p,unsigned t,int *q)const {
+        if(nextCalls)++*nextCalls;
         require(t==tag(p),"probe uses raw steps");
         *q=closes?(p+1)%n:p+1;return true;
+    }
+    bool oppositeCloses(int start,int after,unsigned t)const {
+        require(t==tag(after),"fast two-cycle uses the next raw tag");
+        return closes&&((after+1)%n)==start;
     }
     bool equal(int a,int b)const{return a==b;}
     bool less(int a,int b)const{return a<b;}
@@ -51,6 +56,15 @@ static void graphCase(const std::vector<unsigned>&tags) {
 }
 static P131 pack(const unsigned long long *p){P131 x;for(int i=0;i<5;++i)x.v[i]=uint32_t(p[i/2]>>(32*(i&1)));return x;}
 int main(){
+#if ECC_CYCLE_FAST2
+    {
+        const unsigned tags[2]={eccTag(0,0,0),eccTag(0,0,1)};
+        int calls=0;GraphOps fast{tags,2,true,-1,&calls};
+        require(eccCycleAnchorTag(0,tags[0],fast,131,8)!=tags[0],
+                "fast raw two-cycle exits at its least eligible anchor");
+        require(calls==1,"fast raw two-cycle needs one affine step");
+    }
+#endif
     for(int n=2;n<=8;n+=2){
         std::vector<unsigned> tags;
         for(int i=0;i<n/2;++i)tags.push_back(eccTag(i,7*i,0));

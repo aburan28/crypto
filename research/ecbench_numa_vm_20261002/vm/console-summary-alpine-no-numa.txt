@@ -1,0 +1,41 @@
+=== ECBENCH-VM-BEGIN
+cmdline: console=ttyS0 rdinit=/init psi=1 isolcpus=6,7 panic=-1 quiet
+uname: Linux (none) 6.6.134-0-virt #1-Alpine SMP PREEMPT_DYNAMIC 2026-04-11 17:03:51 x86_64 GNU/Linux
+cat: can't open '/sys/devices/system/node/node*/cpulist': No such file or directory
+grep: /sys/devices/system/node/node*/meminfo: No such file or directory
+/sys/devices/system/node/node* cpus= 
+cpu0 siblings=0
+cpu1 siblings=1
+cpu6 siblings=6
+cpu7 siblings=7
+isolated=6-7 pressure=cpu io irq memory 
+env class   ECBENV1h9830b1e29833
+cpu         QEMU TCG CPU version 2.5+ (6 logical, Some(8) cores, 1 NUMA nodes)
+features    adx aes avx avx2 bmi1 bmi2 fma pclmulqdq popcnt sha sse4.2 vaes
+os          linux x86_64 6.6.134-0-virt
+virtual     Some(true)
+binary      76347bead5a1da3ed0bb90456da9423eb65cf475753754845a80584ece9befbb
+commit      ? (dirty: None)
+=== RUN-AUTO
+session ECBS1hf5df2d1a5644 complete -> /out/auto (64 records: {"verified": 64})
+run-auto exit 0
+audit OK: 64 records, 64 verified, 4 replays reproduced, 0 problems
+verify-auto exit 0
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1hf5df2d1a5644 | rho-neg | rho.negation | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 1.319 | [0.969, 1.744] | 0.886 | 1.488 | 1.488 | 1.000 | yes | L1×6 |
+| ECBS1hf5df2d1a5644 | rho-neg | rho.negation | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 1.758 | [1.368, 2.129] | 0.886 | 1.983 | 8.178 | 1.000 | yes | L1×6 |
+| ECBS1hf5df2d1a5644 | bsgs-neg | bsgs.negation | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 0.937 | [0.767, 1.108] | 1.000 | 0.937 | 1.058 | 0.711 | yes | L1×6 |
+| ECBS1hf5df2d1a5644 | bsgs-neg | bsgs.negation | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 0.964 | [0.715, 1.214] | 1.000 | 0.964 | 4.487 | 0.549 | yes | L1×6 |
+| ECBS1hf5df2d1a5644 | kangaroo | kangaroo.vow | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 1.947 | [1.519, 2.376] | 2.000 | 0.974 | 2.197 | 1.477 | yes | L1×6 |
+| ECBS1hf5df2d1a5644 | kangaroo | kangaroo.vow | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 1.607 | [1.324, 1.890] | 2.000 | 0.803 | 7.476 | 0.914 | yes | L1×6 |
+| ECBS1hf5df2d1a5644 | rho-neg-aa | rho.negation | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 1.319 | [0.969, 1.744] | 0.886 | 1.488 | 1.488 | 1.000 | yes | L1×6 |
+| ECBS1hf5df2d1a5644 | rho-neg-aa | rho.negation | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 1.758 | [1.368, 2.129] | 0.886 | 1.983 | 8.178 | 1.000 | yes | L1×6 |
+=== RUN-NODE0
+session ECBS1h212549f95cd8 complete -> /out/node0 (64 records: {"verified": 64})
+run-node0 exit 0
+audit OK: 64 records, 64 verified, 4 replays reproduced, 0 problems
+verify-node0 exit 0
+=== RUN-LONE-SIBLING (must be refused)
+session ECBS1h50574aab0c02 complete -> /out/lone (64 records: {"verified": 64})
+run-lone exit 0

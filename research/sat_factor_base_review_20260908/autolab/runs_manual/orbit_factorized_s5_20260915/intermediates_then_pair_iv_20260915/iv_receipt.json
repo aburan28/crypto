@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "kind": "intermediates_then_pair_multi_seed_iv",
+  "updated_at": "2026-09-15T18:23:17Z",
+  "claim_boundary": "Public-synthetic orbit_factorized S5 only. Stack: intermediates_then_pair_then_pair + pair_sum_trie + relative-positive + nogoods; pair_table=0. Multi-seed IV of draft cliff break. All SAT arms report valid_x=1 invalid_lifts=0 under internal lift checks. Hit-rate is budget-dependent: some n19 seeds need >120k. n23 unrestricted seed1 SAT@168284 (replay identical); seeds 2/3 UNKNOWN@300k. DRAFT search observation. NOT vs_rho; NOT ledger promotion; NOT key recovery; NOT CMS short proof.",
+  "encoding": {
+    "branch_order": "intermediates_then_pair_then_pair",
+    "intermediate_domain": "pair_sum_trie",
+    "positive_mode": "relative",
+    "nogoods": true,
+    "pair_table_entries": 0
+  },
+  "arms": [
+    {
+      "label": "n19_natural_seed1_prior",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_branch/natural_n19_seed1_100k.json",
+      "verdict": "SAT",
+      "conflicts": 47160,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 6465.4566669999995
+    },
+    {
+      "label": "n19_unrestricted_seed3_prior",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_branch/unrestricted_n19_seed3.json",
+      "verdict": "SAT",
+      "conflicts": 17323,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 2315.034208
+    },
+    {
+      "label": "n19_unrestricted_seed2_prior",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_branch/unrestricted_n19_seed2.json",
+      "verdict": "SAT",
+      "conflicts": 74896,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 10774.559666
+    },
+    {
+      "label": "n19_unrestricted_seed1_prior",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_branch/unrestricted_n19_seed.json",
+      "missing": true
+    },
+    {
+      "label": "n19_unrestricted_seed4_120k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_seed4.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 120000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "solve_ms": 18232.256583000002
+    },
+    {
+      "label": "n19_unrestricted_seed5_120k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_seed5.json",
+      "verdict": "SAT",
+      "conflicts": 40511,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 5856.427125
+    },
+    {
+      "label": "n19_unrestricted_seed7_120k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_seed7.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 120000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "solve_ms": 17888.139584
+    },
+    {
+      "label": "n19_unrestricted_seed11_120k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_seed11.json",
+      "verdict": "SAT",
+      "conflicts": 6291,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 816.7955000000001
+    },
+    {
+      "label": "n19_natural_seed2_120k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/natural_seed2.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 120000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "solve_ms": 18064.871041
+    },
+    {
+      "label": "n19_natural_seed3_120k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/natural_seed3.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 120000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "solve_ms": 17749.869167
+    },
+    {
+      "label": "n19_unrestricted_seed4_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_seed4_300k.json",
+      "verdict": "SAT",
+      "conflicts": 30227,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 4087.63175
+    },
+    {
+      "label": "n19_unrestricted_seed7_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_seed7_300k.json",
+      "verdict": "SAT",
+      "conflicts": 52292,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 7007.591166
+    },
+    {
+      "label": "n19_natural_seed2_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/natural_seed2_300k.json",
+      "verdict": "SAT",
+      "conflicts": 267320,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 45280.968333
+    },
+    {
+      "label": "n19_natural_seed3_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/natural_seed3_300k.json",
+      "verdict": "SAT",
+      "conflicts": 92189,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 13213.062417
+    },
+    {
+      "label": "n19_unrestricted_seed1_dump",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_seed1_dump.json",
+      "verdict": "SAT",
+      "conflicts": 44260,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 6117.455042
+    },
+    {
+      "label": "n23_unrestricted_seed1_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_n23_300k.json",
+      "verdict": "SAT",
+      "conflicts": 168284,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 73337.433833
+    },
+    {
+      "label": "n23_unrestricted_seed1_replay",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_n23_seed1_replay.json",
+      "verdict": "SAT",
+      "conflicts": 168284,
+      "models": 1,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "solve_ms": 72325.700375
+    },
+    {
+      "label": "n23_unrestricted_seed2_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_n23_seed2.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 300000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "solve_ms": 132591.862
+    },
+    {
+      "label": "n23_unrestricted_seed3_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/unrestricted_n23_seed3.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 300000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "solve_ms": 132046.054541
+    },
+    {
+      "label": "n23_natural_seed1_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/natural_n23_seed1_300k.json",
+      "missing": true
+    },
+    {
+      "label": "n23_natural_seed1_300k",
+      "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_iv_20260915/natural_n23_seed1_300k.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 300000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "solve_ms": 133022.295791
+    }
+  ],
+  "summary": {
+    "n19_sat_arms": 10,
+    "n19_unknown_arms": 4,
+    "n23_sat_arms": 2,
+    "n23_unknown_arms": 3,
+    "n19_note": "At 300k, previously-UNKNOWN seeds 4/7 and natural 2/3 all SAT group-valid.",
+    "n23_note": "seed1 planted-target SAT reproducible @168284 conflicts; seeds 2/3 UNKNOWN @300k; natural seed1 UNKNOWN @300k \u2014 partial hit-rate draft at n23."
+  },
+  "verdict": "N19_BUDGET_ROBUST_N23_SEED1_DRAFT_SAT",
+  "ledger_promotion": false
+}

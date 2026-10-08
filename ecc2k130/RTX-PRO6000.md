@@ -1,5 +1,19 @@
 # RTX PRO 6000 benchmark and audit preset
 
+The current confirmed sigma benchmark reaches **15.436677 B/s** with inline
+polynomial products and the fused reverse/next-prefix schedule. Use
+`make gpu-rtx-pro6000-sigma-fused` for that exact native build or
+`make bench-rtx-pro6000-sigma-fused FUSED_BENCH_OUT=/tmp/my-new-run` for the
+matched benchmark protocol. Five positive pairs measured 1.028257x over its
+15.015004 B/s control, with maximum A/A drift 0.0861%, 300/300 replay per arm
+and identical 1,709,477-record v1 corpora. The geometry follow-up retains
+B16/T256/min2: larger batches lose by 10–30%. See
+[fused results](benchmarks/sigma-fused/RESULTS.md) and
+[geometry results](benchmarks/sigma-fused/GEOMETRY-RESULTS.md).
+
+The 26 B/s one-GPU objective remains unmet. The existing public Modal presets
+below retain their historical build identity and audits.
+
 Run from the `ecc2k130` directory with Modal installed and authenticated:
 
 ```bash
@@ -92,7 +106,69 @@ on another allocation and does not estimate an additional code-change gain.
 The active 26 B/s single-GPU target remains unachieved, and
 [THROUGHPUT-30B.md](THROUGHPUT-30B.md) prices what it would take.
 
-## Table-walk comparison (iteration function, off by default)
+## Current table-v3 schedule
+
+Cycle escape v3 invalidated the older table-walk timing because a history hint
+now calls a bounded exact point probe. On current main, a five-repetition
+seven-arm run measured a 1.040338 B/s reference; its best exploratory arm was
+1.050842 B/s. Every arm replayed 300/300 reports with zero drops, and all seven
+sorted 1,480,278-record v3 corpora were identical. The run also showed that the
+old static roofline branch model fails its CLMAD self-check on v3, so its
+predicted per-pipe ratios are not current evidence.
+
+The selected repair uses the historical B16/T512 one-block geometry and two
+same-walk scheduling options:
+
+- `TABLE_SPLIT_FORWARD=1` completes reporting and selection before the prefix
+  product is live, removing the control kernel's reported spill traffic.
+- `TABLE_BATCH_HINTS=1` records hinted slots and resolves one per lane after the
+  warp reconverges, instead of serializing a different sparse cold call at each
+  batch position.
+
+The first option alone measured about +1.0% in three long pairs. Adding
+reconvergence measured **2.449169 B/s** versus **1.052232 B/s** control, a
+median paired ratio of **2.327850**. A fixed-population geometry sweep retained
+B16: B32 was 0.7% slower in every 64-launch pair, while B64 was much slower in
+the screen.
+
+The exact `CYCLE_FAST2=1` shortcut then recognizes a raw two-cycle after one
+ordinary step when the next tag selects the inverse addend and the closing
+denominator is nonzero. It preserves the DP stop, cyclic eligibility and anchor
+order, and otherwise resumes the unchanged v3 probe. Three long pairs measured
+**3.592794 B/s** versus **2.450018 B/s**, a median paired ratio of **1.466604**.
+Every measured mode replayed 300/300 reports, dropped none and produced the same
+sorted v3 corpus. `TABLE_BLOCK_HINTS=1` also compacts pending owners across a
+512-entry block queue. Three long pairs
+measured **5.019275 B/s** versus **3.559925 B/s**, a median paired ratio of
+**1.408969**, with the same replay/corpus gate. The global knobs remain
+default-off; the RTX table preset selects split-forward, reconvergence, fast2
+and queue 512.
+
+On that selected schedule, the shared square table plus out-of-line polynomial
+inversion measured **5.095344–5.107611 B/s**, including **5.097573** and
+**5.100950 B/s**, against 5.064024–5.069412 B/s controls in five alternating
+pairs. All five ratios cleared 1.005 and their median was **1.006625**. A
+matched control/control panel stayed within the preregistered noise bounds,
+with median 1.000047. Replay and the full 1,480,278-record v3 corpus remained
+identical. The RTX table preset therefore selects `PACKED_SQUARE_TABLE=1` and
+`PACKED_INV_POLY=2`. This is a narrow same-walk engineering selection and
+remains `Partial` against ROOFLINE.md's older 1.040 primary threshold.
+
+This repairs a
+correctness-current path but remains below the sigma preset and far below 26 B/s.
+
+Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.json),
+[`benchmarks/batch-hints/independent-audit.json`](benchmarks/batch-hints/independent-audit.json),
+and [`benchmarks/hint-geometry/result.json`](benchmarks/hint-geometry/result.json).
+The fast2 result is
+[`benchmarks/batch-hints-fast2/result.json`](benchmarks/batch-hints-fast2/result.json).
+The block result and independent audit are
+[`benchmarks/block-hints/result.json`](benchmarks/block-hints/result.json) and
+[`benchmarks/block-hints/independent-audit.json`](benchmarks/block-hints/independent-audit.json).
+The arithmetic confirmation, immutable-artifact manifest and independent audit
+are under [`benchmarks/block-both2-confirm5/`](benchmarks/block-both2-confirm5/).
+
+## Historical table-walk comparison (superseded cycle rule)
 
 [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) §6 and
 [`benchmarks/table-walk/comparison.json`](benchmarks/table-walk/comparison.json)

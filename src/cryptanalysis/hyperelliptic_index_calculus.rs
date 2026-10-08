@@ -32,7 +32,7 @@
 //!    Collect `m + extra` such rows and solve mod the prime order `N`
 //!    of `D_1`.  Each row has at most `g + 1` non-zeros whatever `m`
 //!    is, so the default solve is sparse (`LinearAlgebra::Sparse`);
-//!    dense elimination ([`gaussian_eliminate_mod_n`]) is kept as the
+//!    dense elimination ([`gaussian_eliminate_mod_n_particular`]) is kept as the
 //!    reference it has to beat.
 //! 3. **Read off** `log_{D_1} D_2` and verify `D_2 = k·D_1` before
 //!    returning it.  An unverified `k` is never returned.
@@ -76,13 +76,14 @@
 //!   Jacobians and refuses a composite answer.
 
 use std::collections::HashMap;
+use std::time::Instant;
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{RngCore, SeedableRng};
 
-use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n_particular, sqrt_mod_p};
 use crate::prime_hyperelliptic::{FpPoly, HyperellipticCurveP, MumfordDivisorP};
 use crate::utils::mod_inverse;
 
@@ -378,6 +379,63 @@ fn poly_powmod(base: &FpPoly, e: &BigUint, m: &FpPoly, ops: &mut usize) -> FpPol
 /// equals `gcd(u, x^p − x)`, which is the product of its distinct
 /// *linear* factors.  Comparing degrees is enough, both being monic
 /// divisors of `u` and one dividing the other.
+/// `Res(a, b)` over `F_p`, by the Euclidean formula
+/// `Res(a,b) = (−1)^{deg a · deg b} · lc(b)^{deg a − deg r} · Res(b, r)`
+/// with `r = a mod b`.
+fn resultant(a: &FpPoly, b: &FpPoly, ops: &mut usize) -> BigUint {
+    let p = &a.p;
+    if b.is_zero() {
+        return BigUint::zero();
+    }
+    let (da, db) = (a.degree().unwrap_or(0), b.degree().unwrap_or(0));
+    if db == 0 {
+        *ops += da;
+        return b.lead().modpow(&BigUint::from(da as u64), p);
+    }
+    let r = a.rem(b);
+    *ops += (da.saturating_sub(db) + 1) * (db + 1);
+    let dr = if r.is_zero() {
+        0
+    } else {
+        r.degree().unwrap_or(0)
+    };
+    let mut value = resultant(b, &r, ops);
+    if r.is_zero() {
+        return BigUint::zero();
+    }
+    let factor = b.lead().modpow(&BigUint::from((da - dr) as u64), p);
+    *ops += da - dr + 1;
+    value = (value * factor) % p;
+    if (da * db) % 2 == 1 {
+        value = (p - value) % p;
+    }
+    value
+}
+
+/// Discriminant of a monic `u`: `(−1)^{n(n−1)/2} · Res(u, u')`.
+fn discriminant(u: &FpPoly, p: &BigUint, ops: &mut usize) -> BigUint {
+    let n = u.degree().unwrap_or(0);
+    let du = derivative(u, p);
+    if du.is_zero() {
+        return BigUint::zero();
+    }
+    let res = resultant(u, &du, ops);
+    if (n * (n - 1) / 2) % 2 == 1 {
+        (p - res) % p
+    } else {
+        res
+    }
+}
+
+/// Is `a` a square in `F_p`?  One Euler exponentiation.
+fn is_square_mod(a: &BigUint, p: &BigUint, ops: &mut usize) -> bool {
+    if a.is_zero() {
+        return true;
+    }
+    *ops += (p.bits() as usize * 3) / 2;
+    a.modpow(&((p - BigUint::one()) >> 1), p) == BigUint::one()
+}
+
 fn split_by_gcd(u: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<(BigUint, usize)>> {
     let deg = u.degree()?;
     if deg == 0 {
@@ -391,6 +449,26 @@ fn split_by_gcd(u: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<(BigUint
     // squarings to learn what one exponentiation already says.
     if deg <= 2 {
         return split_low_degree(u, p, ops);
+    }
+
+    // Discriminant pre-filter.  Frobenius acts on the roots of a
+    // squarefree `u` as a permutation whose cycle type is the
+    // factorisation type, and `disc(u)` is a square exactly when that
+    // permutation is even.  Splitting completely is the identity
+    // permutation, which is even — so a **non-square discriminant
+    // proves `u` does not split**, for one resultant on a degree-`≤ g`
+    // polynomial and one Euler exponentiation.
+    //
+    // It rejects exactly half of all candidates: the odd types are
+    // `(2,1)` at degree 3 (density 1/2) and `(2,1,1) + (4)` at degree 4
+    // (1/4 + 1/4).  That is half the candidates never reaching the
+    // `x^p mod u` that dominates this oracle.
+    //
+    // `disc = 0` means repeated roots, which says nothing either way —
+    // the radical path below handles it.
+    let disc = discriminant(u, p, ops);
+    if !disc.is_zero() && !is_square_mod(&disc, p, ops) {
+        return None;
     }
 
     let du = derivative(u, p);
@@ -570,6 +648,86 @@ pub fn decompose_over_factor_base_counted(
     decompose_counted_with(curve, d, fb, ops, &SmoothnessTest::default())
 }
 
+/// Why a candidate divisor did or did not yield a relation.
+///
+/// The three cases used to be squeezed into an `Option`, which meant the
+/// caller re-ran the whole oracle on every failure just to learn which
+/// kind of failure it was.  At genus 4 more than nine candidates in ten
+/// fail, so that probe was about half of all the oracle's work —
+/// counted, and wasted.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Decomposition {
+    /// Splits over degree-1 places, all of them in the factor base.
+    Smooth(Vec<(usize, i64)>),
+    /// Splits over degree-1 places, all but **one** of them in the
+    /// factor base — a partial relation for the large-prime variation.
+    /// `coef` is the off-base place's coefficient against its canonical
+    /// representative `(x, y ≤ (p−1)/2)`, as for factor-base entries.
+    OneLargePrime {
+        entries: Vec<(usize, i64)>,
+        x: BigUint,
+        coef: i64,
+    },
+    /// Splits over degree-1 places, but meets two or more places the
+    /// (truncated) factor base does not hold.
+    SmoothOffBase,
+    /// Does not split into degree-1 places.
+    NotSmooth,
+}
+
+/// As [`decompose_over_factor_base_counted`], choosing the oracle and
+/// reporting which of the three outcomes occurred.
+pub fn classify_counted_with(
+    curve: &HyperellipticCurveP,
+    d: &MumfordDivisorP,
+    fb: &HecFactorBase,
+    ops: &mut usize,
+    test: &SmoothnessTest,
+) -> Decomposition {
+    let p = &curve.p;
+    let half = (p - BigUint::one()) >> 1;
+    let roots = match split_counted_with(&d.u, p, ops, test) {
+        Some(r) => r,
+        None => return Decomposition::NotSmooth,
+    };
+
+    let mut acc: HashMap<usize, i64> = HashMap::new();
+    // At most one place outside a truncated base is kept; `u` has
+    // distinct roots per place (a reduced divisor never holds both `P`
+    // and `−P`), so one `x` is one place.
+    let mut off: Option<(BigUint, i64)> = None;
+    for (x, mult) in roots {
+        *ops += d.v.degree().unwrap_or(0);
+        let y = d.v.eval(&x);
+        debug_assert!(curve.is_on_curve(&x, &y));
+        let sign: i64 = if y.is_zero() || y <= half { 1 } else { -1 };
+        let idx = match fb.index_of_x(&x) {
+            Some(i) => i,
+            // Smooth, but this place is outside a truncated base.
+            None => {
+                if off.is_some() {
+                    return Decomposition::SmoothOffBase;
+                }
+                off = Some((x, sign * mult as i64));
+                continue;
+            }
+        };
+        debug_assert_eq!(fb.entries[idx].y, if sign > 0 { y.clone() } else { p - &y });
+        *acc.entry(idx).or_insert(0) += sign * mult as i64;
+    }
+
+    let mut out: Vec<(usize, i64)> = acc.into_iter().filter(|&(_, c)| c != 0).collect();
+    out.sort_unstable_by_key(|&(i, _)| i);
+    match off {
+        None => Decomposition::Smooth(out),
+        Some((x, coef)) => Decomposition::OneLargePrime {
+            entries: out,
+            x,
+            coef,
+        },
+    }
+}
+
 /// As [`decompose_over_factor_base_counted`], choosing the oracle.
 pub fn decompose_counted_with(
     curve: &HyperellipticCurveP,
@@ -637,8 +795,13 @@ pub struct HecIndexCalculusReport {
     pub factor_base_size: usize,
     pub trials: usize,
     pub smooth_trials: usize,
-    /// Smooth, but met a place outside a truncated factor base.
+    /// Smooth, but met a place outside a truncated factor base and was
+    /// not kept — two or more such places, or large primes off.
     pub discarded_off_base: usize,
+    /// Partial relations (one off-base place) kept for combination.
+    pub partial_relations: usize,
+    /// Full relations made by combining two partials.
+    pub combined_relations: usize,
     pub relations: usize,
     pub jacobian_ops: usize,
     /// Of those, the walk's step precomputation — a fixed cost that
@@ -646,6 +809,38 @@ pub struct HecIndexCalculusReport {
     /// rho's branch precomputation does.  Split out for the same
     /// reason: the per-trial price is the thing the walk changed.
     pub precompute_ops: usize,
+    /// Wall-clock nanoseconds spent on the relation search's group
+    /// operations, excluding the oracle.
+    ///
+    /// Divided by `jacobian_ops` this gives the cost of one group
+    /// operation **in situ** — in the run itself, with its allocation
+    /// and cache behaviour — which is what the oracle and the solve must
+    /// be converted by.  A tight calibration loop under-measures it: it
+    /// repeats one addition on cache-resident operands, so converting a
+    /// measured oracle time by it overstates the oracle instead.  Both
+    /// errors were live in this file at different times, in opposite
+    /// directions, and only wall clock caught either.
+    pub walk_wall_ns: u64,
+    /// Wall-clock nanoseconds spent in the linear algebra.
+    pub solve_wall_ns: u64,
+    /// Wall-clock nanoseconds spent storing and combining large-prime
+    /// partials.  Bookkeeping multiplies little mod `N` but is not free,
+    /// and uncharged bookkeeping is how round six under-priced the solve
+    /// by an order of magnitude, so it is timed and converted like the
+    /// oracle.
+    pub partial_wall_ns: u64,
+    /// Wall-clock nanoseconds spent inside the smoothness oracle.
+    ///
+    /// The `smoothness_field_ops` count below is a hand-derived charge —
+    /// coefficient multiplications — and it turned out to understate the
+    /// oracle's real cost by roughly an order of magnitude: cutting that
+    /// count by 60% cut wall clock by 1.5x, where a faithful charge
+    /// would have predicted a few percent.  The charge misses what the
+    /// implementation actually does per multiplication (allocation, the
+    /// division loop inside `rem`, clones).  This field is measured
+    /// instead, so a caller can convert the oracle at the same measured
+    /// rate it converts everything else.
+    pub smoothness_wall_ns: u64,
     /// `F_p` multiplications spent in the smoothness oracle (root
     /// finding and the decomposition's evaluations).  Reported in field
     /// operations, not group operations — the caller converts, because
@@ -810,6 +1005,12 @@ pub struct HecIndexCalculusParams {
     pub linear_algebra: LinearAlgebra,
     /// How smoothness is decided; see [`SmoothnessTest`].
     pub smoothness: SmoothnessTest,
+    /// Single large primes (Thériault): with a truncated factor base,
+    /// keep a candidate that has exactly one place outside it, and
+    /// combine two such partials that share the place into one full
+    /// relation.  Off by default; it does nothing with the full base,
+    /// which has no outside places.
+    pub large_primes: bool,
 }
 
 impl Default for HecIndexCalculusParams {
@@ -822,6 +1023,7 @@ impl Default for HecIndexCalculusParams {
             search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         }
     }
 }
@@ -952,10 +1154,14 @@ pub fn collect_relations(
 
     let mut current: Option<Position> = None;
     let mut since_restart = 0usize;
+    // Large-prime partials, keyed by the off-base place's `x`: the first
+    // partial seen at each place, which every later one combines with.
+    let mut partials: HashMap<Vec<u32>, (HecRelation, i64)> = HashMap::new();
 
     while relations.len() < wanted && report.trials < params.max_trials {
         report.trials += 1;
 
+        let step_started = Instant::now();
         let mut pos = match current.take() {
             Some(pos) if walking => {
                 // One step of the walk: one group operation.
@@ -1063,6 +1269,8 @@ pub fn collect_relations(
             }
         }
 
+        report.walk_wall_ns += step_started.elapsed().as_nanos() as u64;
+
         let (a, b, r) = (pos.a.clone(), pos.b.clone(), pos.r.clone());
         let taken = pos.taken.clone();
         if walking {
@@ -1081,10 +1289,14 @@ pub fn collect_relations(
             continue;
         }
         let mut field_ops = 0usize;
-        let decomposed = decompose_counted_with(curve, &r, fb, &mut field_ops, &params.smoothness);
+        // One oracle call per candidate.  The three outcomes come back
+        // from that call rather than from re-running it on failure.
+        let oracle_started = Instant::now();
+        let classified = classify_counted_with(curve, &r, fb, &mut field_ops, &params.smoothness);
+        report.smoothness_wall_ns += oracle_started.elapsed().as_nanos() as u64;
         report.smoothness_field_ops += field_ops;
-        match decomposed {
-            Some(entries) => {
+        match classified {
+            Decomposition::Smooth(entries) => {
                 report.smooth_trials += 1;
                 relations.push(HecRelation {
                     coef_a: a,
@@ -1092,23 +1304,80 @@ pub fn collect_relations(
                     entries: subtract_steps(entries, &taken),
                 });
             }
-            None => {
-                // Distinguish "not smooth" from "smooth off base" so a
-                // truncated base can be tuned on evidence.
-                let mut probe_ops = 0usize;
-                let smooth = split_counted_with(&r.u, &curve.p, &mut probe_ops, &params.smoothness)
-                    .is_some();
-                // The probe re-runs the oracle, so it is charged too.
-                report.smoothness_field_ops += probe_ops;
-                if smooth {
-                    report.smooth_trials += 1;
-                    report.discarded_off_base += 1;
+            Decomposition::OneLargePrime { entries, x, coef } if params.large_primes => {
+                report.smooth_trials += 1;
+                let started = Instant::now();
+                let rel = HecRelation {
+                    coef_a: a,
+                    coef_b: b,
+                    entries: subtract_steps(entries, &taken),
+                };
+                match partials.get(&x.to_u32_digits()) {
+                    None => {
+                        report.partial_relations += 1;
+                        partials.insert(x.to_u32_digits(), (rel, coef));
+                    }
+                    Some((first, first_coef)) => {
+                        report.partial_relations += 1;
+                        if let Some(full) = combine_partials(first, *first_coef, &rel, coef, n) {
+                            report.combined_relations += 1;
+                            relations.push(full);
+                        }
+                    }
                 }
+                report.partial_wall_ns += started.elapsed().as_nanos() as u64;
             }
+            Decomposition::OneLargePrime { .. } | Decomposition::SmoothOffBase => {
+                report.smooth_trials += 1;
+                report.discarded_off_base += 1;
+            }
+            Decomposition::NotSmooth => {}
         }
     }
     report.relations = relations.len();
     relations
+}
+
+/// `e₂·r₁ − e₁·r₂` for two partials `r₁ = … + e₁·P` and `r₂ = … + e₂·P`
+/// sharing the off-base place `P`: the combination eliminates `log P`
+/// and leaves a relation over the factor base alone.
+///
+/// Returns `None` when the combination is the zero relation — the same
+/// partial reached twice — which says nothing and would only cost a row.
+fn combine_partials(
+    r1: &HecRelation,
+    e1: i64,
+    r2: &HecRelation,
+    e2: i64,
+    n: &BigUint,
+) -> Option<HecRelation> {
+    let scale = |v: &BigUint, k: i64| -> BigUint {
+        let t = (v * BigUint::from(k.unsigned_abs())) % n;
+        if k < 0 {
+            (n - t) % n
+        } else {
+            t
+        }
+    };
+    let coef_a = (scale(&r1.coef_a, e2) + scale(&r2.coef_a, -e1)) % n;
+    let coef_b = (scale(&r1.coef_b, e2) + scale(&r2.coef_b, -e1)) % n;
+    let mut acc: HashMap<usize, i64> = HashMap::new();
+    for &(j, c) in &r1.entries {
+        *acc.entry(j).or_insert(0) += e2 * c;
+    }
+    for &(j, c) in &r2.entries {
+        *acc.entry(j).or_insert(0) -= e1 * c;
+    }
+    let mut entries: Vec<(usize, i64)> = acc.into_iter().filter(|&(_, c)| c != 0).collect();
+    entries.sort_unstable_by_key(|&(j, _)| j);
+    if entries.is_empty() && coef_a.is_zero() && coef_b.is_zero() {
+        return None;
+    }
+    Some(HecRelation {
+        coef_a,
+        coef_b,
+        entries,
+    })
 }
 
 // ── End-to-end DLP ─────────────────────────────────────────────────────
@@ -1149,7 +1418,10 @@ pub fn hec_index_calculus_dlp(
         if collected.len() < m + 1 {
             return (None, report);
         }
-        if let Some(candidate) = solve_for_logarithm(curve, &collected, m, n, params, &mut report) {
+        let solve_started = Instant::now();
+        let solved = solve_for_logarithm(curve, &collected, m, n, params, &mut report);
+        report.solve_wall_ns += solve_started.elapsed().as_nanos() as u64;
+        if let Some(candidate) = solved {
             if &d1.scalar_mul(&candidate, curve) == d2 {
                 k = Some(candidate);
                 break;
@@ -1186,89 +1458,114 @@ fn sparse_solve_for_k(
     n: &BigUint,
 ) -> Option<(BigUint, usize)> {
     let mut ops = 0usize;
-    // column -> rows still carrying it (may contain stale entries; they
-    // are filtered on use, which is cheaper than eager deletion).
-    let mut col_rows: HashMap<usize, Vec<usize>> = HashMap::new();
+    // Rows stay sorted by column throughout: `solve_for_logarithm` builds
+    // them sorted and the merge below preserves the order, so membership
+    // is a binary search rather than a scan.
+    //
+    // `col_count[j]` is exact — the number of live rows carrying column
+    // `j` — so choosing a pivot column is a scan of `m` integers.  The
+    // previous version recomputed every column's live rows on every
+    // pivot, re-testing membership by a linear search of each row; that
+    // work multiplies nothing mod `N`, so it never appeared in the counted
+    // mul-mods, and it was most of the solve's wall time.
+    //
+    // `holders[j]` may still hold stale rows (eliminated, or cancelled out
+    // of `j`), filtered when `j` is pivoted on, but a row is only pushed
+    // when it *gains* `j`, so the lists no longer fill with duplicates.
+    let mut col_count = vec![0usize; m + 1];
+    let mut holders: Vec<Vec<usize>> = vec![Vec::new(); m + 1];
     for (i, row) in rows.iter().enumerate() {
-        for (j, _) in row {
-            col_rows.entry(*j).or_default().push(i);
+        for &(j, _) in row {
+            col_count[j] += 1;
+            holders[j].push(i);
         }
     }
     let mut eliminated = vec![false; rows.len()];
+    let has = |row: &[(usize, BigUint)], col: usize| row.binary_search_by_key(&col, |&(j, _)| j);
 
-    loop {
-        // Markowitz-lite: the factor-base column with the fewest live
-        // rows, and within it the shortest row — this is what keeps
-        // fill-in from turning the sparse solve back into a dense one.
-        let mut best: Option<(usize, usize, usize)> = None; // (count, col, row)
-        for (&col, holders) in col_rows.iter() {
-            if col == m {
-                continue;
-            }
-            let live: Vec<usize> = holders
-                .iter()
-                .copied()
-                .filter(|&i| !eliminated[i] && rows[i].iter().any(|(j, _)| *j == col))
-                .collect();
-            if live.is_empty() {
-                continue;
-            }
-            let count = live.len();
-            let row = *live
-                .iter()
-                .min_by_key(|&&i| rows[i].len())
-                .expect("live is non-empty");
-            if best.map(|(c, _, _)| count < c).unwrap_or(true) {
-                best = Some((count, col, row));
-            }
-        }
-        let (_, col, pivot) = match best {
-            Some(v) => v,
-            None => break, // nothing left but the k column
-        };
+    // Markowitz-lite: the factor-base column with the fewest live rows,
+    // and within it the shortest row — this is what keeps fill-in from
+    // turning the sparse solve back into a dense one.  Ties go to the
+    // lowest column, so the elimination order — and with it the mul-mod
+    // count — is deterministic; the `HashMap` iteration it replaces was
+    // not.  The loop ends when nothing is left but the k column.
+    while let Some(col) = (0..m)
+        .filter(|&j| col_count[j] > 0)
+        .min_by_key(|&j| col_count[j])
+    {
+        let mut live = std::mem::take(&mut holders[col]);
+        live.retain(|&i| !eliminated[i] && has(&rows[i], col).is_ok());
+        // A row that cancels out of `col` and later fills back into it is
+        // pushed again while its stale entry is still here, so the list
+        // can name a row twice.  Visiting it twice would find `col`
+        // already gone on the second visit.
+        live.sort_unstable();
+        live.dedup();
+        debug_assert_eq!(live.len(), col_count[col]);
+        let pivot = *live.iter().min_by_key(|&&i| rows[i].len())?;
 
         // Normalise the pivot row.
-        let pivot_val = rows[pivot]
-            .iter()
-            .find(|(j, _)| *j == col)
-            .map(|(_, v)| v.clone())?;
-        let inv = mod_inverse(&pivot_val, n)?;
+        let at = has(&rows[pivot], col).ok()?;
+        let inv = mod_inverse(&rows[pivot][at].1, n)?;
         for (_, v) in rows[pivot].iter_mut() {
             *v = (&*v * &inv) % n;
             ops += 1;
         }
         rhs[pivot] = (&rhs[pivot] * &inv) % n;
         ops += 1;
-        let pivot_row = rows[pivot].clone();
-        let pivot_rhs = rhs[pivot].clone();
         eliminated[pivot] = true;
+        let pivot_row = std::mem::take(&mut rows[pivot]);
+        let pivot_rhs = rhs[pivot].clone();
+        for &(j, _) in &pivot_row {
+            col_count[j] -= 1;
+        }
 
-        // Eliminate `col` from every other live row carrying it.
-        let holders = col_rows.get(&col).cloned().unwrap_or_default();
-        for i in holders {
-            if i == pivot || eliminated[i] {
+        // Eliminate `col` from every other live row carrying it:
+        // row_i ← row_i − factor·pivot_row, as one merge of two sorted
+        // rows.
+        for i in live {
+            if i == pivot {
                 continue;
             }
-            let factor = match rows[i].iter().find(|(j, _)| *j == col) {
-                Some((_, v)) => v.clone(),
-                None => continue,
-            };
-            let mut merged: HashMap<usize, BigUint> = rows[i].iter().cloned().collect();
-            for (j, v) in &pivot_row {
-                let term = (&factor * v) % n;
+            let old = std::mem::take(&mut rows[i]);
+            let factor = old[has(&old, col).ok()?].1.clone();
+            let mut merged: Vec<(usize, BigUint)> = Vec::with_capacity(old.len() + pivot_row.len());
+            let (mut a, mut b) = (0, 0);
+            while a < old.len() || b < pivot_row.len() {
+                let ja = old.get(a).map_or(usize::MAX, |e| e.0);
+                let jb = pivot_row.get(b).map_or(usize::MAX, |e| e.0);
+                if ja < jb {
+                    merged.push(old[a].clone());
+                    a += 1;
+                    continue;
+                }
+                let term = (&factor * &pivot_row[b].1) % n;
                 ops += 1;
-                let e = merged.entry(*j).or_insert_with(BigUint::zero);
-                *e = (&*e + n - &term) % n;
+                let v = if ja == jb {
+                    let v = (&old[a].1 + n - &term) % n;
+                    a += 1;
+                    v
+                } else {
+                    // Fill-in: a column the row did not carry before.
+                    (n - &term) % n
+                };
+                if !v.is_zero() {
+                    if ja != jb {
+                        holders[jb].push(i);
+                    }
+                    merged.push((jb, v));
+                }
+                b += 1;
+            }
+            for &(j, _) in &old {
+                col_count[j] -= 1;
+            }
+            for &(j, _) in &merged {
+                col_count[j] += 1;
             }
             rhs[i] = (&rhs[i] + n - &((&factor * &pivot_rhs) % n)) % n;
             ops += 1;
-            let mut sparse: Vec<(usize, BigUint)> =
-                merged.into_iter().filter(|(_, v)| !v.is_zero()).collect();
-            sparse.sort_unstable_by_key(|&(j, _)| j);
-            for (j, _) in &sparse {
-                col_rows.entry(*j).or_default().push(i);
-            }
-            rows[i] = sparse;
+            rows[i] = merged;
         }
     }
 
@@ -1334,8 +1631,11 @@ fn solve_for_logarithm(
                 matrix.push(dense);
             }
             report.solve_row_ops = rows.len() * (m + 1) * (m + 1);
-            let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, n)?;
-            solution[m].clone()
+            let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, n)?;
+            if !solution.determined[m] {
+                return None;
+            }
+            solution.values[m].clone()
         }
     };
 
@@ -1663,6 +1963,7 @@ mod tests {
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         assert_eq!(found, Some(k), "report: {report:?}");
@@ -1814,6 +2115,7 @@ mod tests {
                     search: RelationSearch::walk(),
                     linear_algebra: LinearAlgebra::Sparse,
                     smoothness: SmoothnessTest::Gcd,
+                    large_primes: false,
                 };
                 let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
                 assert_eq!(found, Some(k), "genus-3 report: {report:?}");
@@ -1836,7 +2138,13 @@ mod tests {
         // deg u = 3 is what genus 3 produces and what the closed forms
         // do not cover, so the CZ path is the one carrying the fast
         // oracle there.  Exhaustive over monic cubics for two primes.
-        for p_u in [11u64, 23] {
+        // Both residue classes mod 4.  The discriminant pre-filter
+        // carries a sign `(−1)^{n(n−1)/2}`, and whether −1 is itself a
+        // square depends on `p mod 4` — so a wrong sign would reject
+        // split polynomials at `p ≡ 3 (mod 4)` and pass at
+        // `p ≡ 1 (mod 4)`, or the reverse.  Testing one class only would
+        // miss it.
+        for p_u in [11u64, 13, 23, 29] {
             let p = BigUint::from(p_u);
             for a2 in 0..p_u {
                 for a1 in 0..p_u {
@@ -1856,6 +2164,93 @@ mod tests {
                             split_by_gcd(&u, &p, &mut o2),
                             "p={p_u} u=x^3+{a2}x^2+{a1}x+{a0}"
                         );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn gcd_oracle_agrees_with_the_scan_on_every_monic_quartic() {
+        // Degree 4 is what genus 4 produces, and it is where the
+        // discriminant pre-filter has to be right about a different set
+        // of cycle types than the cubic case: the odd ones are (2,1,1)
+        // and (4).  Exhaustive over monic quartics at two primes, one in
+        // each class mod 4.
+        for p_u in [11u64, 13] {
+            let p = BigUint::from(p_u);
+            let mut split_count = 0usize;
+            let mut rejected = 0usize;
+            for a3 in 0..p_u {
+                for a2 in 0..p_u {
+                    for a1 in 0..p_u {
+                        for a0 in 0..p_u {
+                            let u = FpPoly::from_coeffs(
+                                vec![
+                                    BigUint::from(a0),
+                                    BigUint::from(a1),
+                                    BigUint::from(a2),
+                                    BigUint::from(a3),
+                                    BigUint::one(),
+                                ],
+                                p.clone(),
+                            );
+                            let (mut o1, mut o2) = (0usize, 0usize);
+                            let scan = split_by_scan(&u, &p, &mut o1);
+                            let gcd = split_by_gcd(&u, &p, &mut o2);
+                            assert_eq!(scan, gcd, "p={p_u} u=x^4+{a3}x^3+{a2}x^2+{a1}x+{a0}");
+                            if scan.is_some() {
+                                split_count += 1;
+                            } else {
+                                rejected += 1;
+                            }
+                        }
+                    }
+                }
+            }
+            // Sanity on the population itself: completely split monic
+            // quartics should be about 1/4! of them.
+            let total = (split_count + rejected) as f64;
+            let rate = split_count as f64 / total;
+            assert!(
+                rate > 0.02 && rate < 0.08,
+                "p={p_u}: split rate {rate:.3} is nowhere near 1/24"
+            );
+        }
+    }
+
+    #[test]
+    fn the_discriminant_filter_never_rejects_a_split_polynomial() {
+        // The filter is the one part of the oracle that returns "not
+        // smooth" without looking for roots at all, so it is the one
+        // that can silently throw away relations.  Build polynomials
+        // that split by construction and require every one to survive
+        // it.
+        for p_u in [11u64, 13, 41, 61] {
+            let p = BigUint::from(p_u);
+            for r0 in 0..p_u.min(9) {
+                for r1 in 0..p_u.min(9) {
+                    for r2 in 0..p_u.min(9) {
+                        for r3 in 0..p_u.min(5) {
+                            let lin = |r: u64| {
+                                FpPoly::from_coeffs(
+                                    vec![(&p - BigUint::from(r)) % &p, BigUint::one()],
+                                    p.clone(),
+                                )
+                            };
+                            for u in [
+                                lin(r0).mul(&lin(r1)).mul(&lin(r2)),
+                                lin(r0).mul(&lin(r1)).mul(&lin(r2)).mul(&lin(r3)),
+                            ] {
+                                let mut ops = 0usize;
+                                let disc = discriminant(&u, &p, &mut ops);
+                                assert!(
+                                    disc.is_zero() || is_square_mod(&disc, &p, &mut ops),
+                                    "p={p_u}: split poly {:?} has non-square discriminant {disc}",
+                                    u.coeffs
+                                );
+                            }
+                        }
                     }
                 }
             }
@@ -1906,6 +2301,7 @@ mod tests {
             search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let fast = HecIndexCalculusParams {
             smoothness: SmoothnessTest::Gcd,
@@ -1972,6 +2368,7 @@ mod tests {
                 search: RelationSearch::factor_base_walk(),
                 linear_algebra: LinearAlgebra::Sparse,
                 smoothness: SmoothnessTest::Gcd,
+                large_primes: false,
             };
             let mut report = HecIndexCalculusReport::default();
             let n = &_l;
@@ -2011,6 +2408,7 @@ mod tests {
                 search: RelationSearch::factor_base_walk(),
                 linear_algebra: LinearAlgebra::Sparse,
                 smoothness: SmoothnessTest::Gcd,
+                large_primes: false,
             };
             let (got, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
             assert_eq!(got.as_ref(), Some(&k), "seed {seed}: {report:?}");
@@ -2028,6 +2426,7 @@ mod tests {
             search: RelationSearch::walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         };
         let fbw = HecIndexCalculusParams {
             search: RelationSearch::factor_base_walk(),
@@ -2059,6 +2458,7 @@ mod tests {
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         };
         let (rnd_k, rnd) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &base);
         let walked = HecIndexCalculusParams {
@@ -2098,6 +2498,7 @@ mod tests {
             search: RelationSearch::walk(),
             linear_algebra: LinearAlgebra::Dense,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let sparse = HecIndexCalculusParams {
             linear_algebra: LinearAlgebra::Sparse,
@@ -2118,6 +2519,225 @@ mod tests {
         );
     }
 
+    /// Rank of `rows` (dense, over `F_n`, `n < 2^32`), by plain Gaussian
+    /// elimination — an oracle written independently of both solvers.
+    fn rank_mod(mut rows: Vec<Vec<u64>>, n: u64) -> usize {
+        let cols = rows.first().map_or(0, |r| r.len());
+        let inv = |a: u64| {
+            // Fermat: n is prime.
+            let (mut base, mut e, mut acc) = (a % n, n - 2, 1u64);
+            while e > 0 {
+                if e & 1 == 1 {
+                    acc = ((acc as u128 * base as u128) % n as u128) as u64;
+                }
+                base = ((base as u128 * base as u128) % n as u128) as u64;
+                e >>= 1;
+            }
+            acc
+        };
+        let mut rank = 0;
+        for c in 0..cols {
+            let Some(p) = (rank..rows.len()).find(|&r| rows[r][c] != 0) else {
+                continue;
+            };
+            rows.swap(rank, p);
+            let iv = inv(rows[rank][c]);
+            for r in 0..rows.len() {
+                if r != rank && rows[r][c] != 0 {
+                    let f = ((rows[r][c] as u128 * iv as u128) % n as u128) as u64;
+                    for cc in 0..cols {
+                        let t = ((f as u128 * rows[rank][cc] as u128) % n as u128) as u64;
+                        rows[r][cc] = (rows[r][cc] + n - t) % n;
+                    }
+                }
+            }
+            rank += 1;
+        }
+        rank
+    }
+
+    /// The sparse solver on planted random systems, many more of them
+    /// than a DLP run produces, against an independent rank oracle: `k`
+    /// is determined exactly when `e_k` lies in the row space, i.e. when
+    /// appending `e_k` does not raise the rank.  The solver must answer
+    /// exactly then, and with the planted `k`.  Small `N` is included
+    /// because that is where eliminations cancel to zero and a merge that
+    /// mishandles a cancelled or filled-in column would show; `N = 3, 5, 7`
+    /// make a row cancel out of a column and fill back into it often
+    /// enough to catch a row visited twice, which larger `N` never did.
+    ///
+    /// Dense elimination is *not* the oracle here: on an under-determined
+    /// system `gaussian_eliminate_mod_n` returns a particular solution
+    /// with the free unknowns at zero rather than `None`, so "dense
+    /// answered" does not mean "`k` is determined".  The DLP driver is
+    /// protected by its `[k]D₁ = D₂` check; this test would not be.
+    #[test]
+    fn sparse_solve_matches_dense_on_planted_systems() {
+        let mut rng = StdRng::seed_from_u64(0x5a_0e5e);
+        let mut answered = 0;
+        for &n_u64 in &[3u64, 5, 7, 101, 1009, 1_000_003, 16_790_591] {
+            let n = BigUint::from(n_u64);
+            for trial in 0..200 {
+                let m = 5 + (rng.next_u64() % 40) as usize;
+                // Half the systems are short of rows, so `k` is often
+                // undetermined and the solver must decline.
+                let rows_wanted = if trial % 2 == 0 {
+                    m + 1 + (rng.next_u64() % 6) as usize
+                } else {
+                    (rng.next_u64() as usize % (m + 1)) + 1
+                };
+                let y: Vec<BigUint> = (0..=m).map(|_| rand_below(&mut rng, &n)).collect();
+                let mut rows = Vec::new();
+                let mut rhs = Vec::new();
+                for _ in 0..rows_wanted {
+                    let weight = 1 + (rng.next_u64() % 4) as usize;
+                    let mut cols: Vec<usize> = (0..weight)
+                        .map(|_| (rng.next_u64() % m as u64) as usize)
+                        .collect();
+                    cols.push(m);
+                    cols.sort_unstable();
+                    cols.dedup();
+                    let row: Vec<(usize, BigUint)> = cols
+                        .into_iter()
+                        .map(|j| {
+                            let v = BigUint::from(1 + rng.next_u64() % (n_u64 - 1));
+                            (j, v)
+                        })
+                        .collect();
+                    let b = row
+                        .iter()
+                        .fold(BigUint::zero(), |acc, (j, v)| (acc + v * &y[*j]) % &n);
+                    rows.push(row);
+                    rhs.push(b);
+                }
+
+                let dense: Vec<Vec<u64>> = rows
+                    .iter()
+                    .map(|row| {
+                        let mut d = vec![0u64; m + 1];
+                        for (j, v) in row {
+                            d[*j] = v.to_u64_digits().first().copied().unwrap_or(0);
+                        }
+                        d
+                    })
+                    .collect();
+                let mut with_ek = dense.clone();
+                let mut ek = vec![0u64; m + 1];
+                ek[m] = 1;
+                with_ek.push(ek);
+                let determined = rank_mod(with_ek, n_u64) == rank_mod(dense, n_u64);
+
+                let sparse_k = sparse_solve_for_k(rows, rhs, m, &n).map(|(k, _)| k);
+                let at = format!("n={n_u64} m={m} trial={trial}");
+                if determined {
+                    assert_eq!(sparse_k.as_ref(), Some(&y[m]), "declined or wrong: {at}");
+                    answered += 1;
+                } else {
+                    assert_eq!(sparse_k, None, "answered an undetermined k: {at}");
+                }
+            }
+        }
+        // Guard against a test that passes by never answering.
+        assert!(answered >= 400, "only {answered} systems answered");
+    }
+
+    /// Every relation collected from a halved factor base with large
+    /// primes on — the combined ones included — is a true identity in
+    /// the Jacobian.  A wrong sign or scale in the combination would
+    /// still often solve (the retry loop and the final `[k]D₁ = D₂`
+    /// check hide a few bad rows), so the rows are checked directly.
+    #[test]
+    fn large_prime_relations_are_jacobian_identities() {
+        for (g, (curve, d1, d2, l, _k)) in [(2, toy_instance(61)), (3, genus3_instance(31))] {
+            let full = build_factor_base(&curve, usize::MAX).len();
+            let fb = build_factor_base(&curve, full / 2);
+            let params = HecIndexCalculusParams {
+                fb_size: full / 2,
+                large_primes: true,
+                seed: 11,
+                ..HecIndexCalculusParams::default()
+            };
+            let mut report = HecIndexCalculusReport::default();
+            let rels = collect_relations(
+                &curve,
+                &d1,
+                &d2,
+                &l,
+                &fb,
+                fb.len() + 9,
+                &params,
+                &mut report,
+            );
+            assert!(
+                report.combined_relations > 0,
+                "genus {g}: nothing combined: {report:?}"
+            );
+            for (i, rel) in rels.iter().enumerate() {
+                assert!(
+                    relation_holds(&curve, &fb, &d1, &d2, rel),
+                    "genus {g}: relation {i} of {} is not an identity: {rel:?}",
+                    rels.len()
+                );
+            }
+        }
+    }
+
+    /// A halved factor base with large primes still recovers `k`, and
+    /// relies on combined relations to do it.
+    #[test]
+    fn large_primes_solve_with_a_reduced_base() {
+        let (curve, d1, d2, l, k) = toy_instance(61);
+        let full = build_factor_base(&curve, usize::MAX).len();
+        for seed in 0..5 {
+            let params = HecIndexCalculusParams {
+                fb_size: full / 2,
+                large_primes: true,
+                seed,
+                ..HecIndexCalculusParams::default()
+            };
+            let (got, rep) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
+            assert_eq!(got.as_ref(), Some(&k), "seed {seed}: {rep:?}");
+            assert!(rep.combined_relations > 0, "seed {seed}: {rep:?}");
+        }
+    }
+
+    /// With the full factor base there are no off-base places, so large
+    /// primes must change nothing at all: same relations, same counted
+    /// work, same `k`.
+    #[test]
+    fn large_primes_are_inert_on_the_full_base() {
+        let (curve, d1, d2, l, k) = toy_instance(61);
+        let off = HecIndexCalculusParams {
+            seed: 3,
+            ..HecIndexCalculusParams::default()
+        };
+        let on = HecIndexCalculusParams {
+            large_primes: true,
+            ..off.clone()
+        };
+        let (k_off, r_off) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &off);
+        let (k_on, r_on) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &on);
+        assert_eq!(k_off.as_ref(), Some(&k));
+        assert_eq!(k_on, k_off);
+        assert_eq!(
+            (
+                r_on.trials,
+                r_on.relations,
+                r_on.jacobian_ops,
+                r_on.smoothness_field_ops,
+                r_on.solve_row_ops
+            ),
+            (
+                r_off.trials,
+                r_off.relations,
+                r_off.jacobian_ops,
+                r_off.smoothness_field_ops,
+                r_off.solve_row_ops
+            )
+        );
+        assert_eq!((r_on.partial_relations, r_on.combined_relations), (0, 0));
+    }
+
     #[test]
     fn the_smoothness_oracle_is_charged() {
         let (curve, d1, d2, l, _k) = toy_instance(41);
@@ -2129,6 +2749,7 @@ mod tests {
             search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         };
         let (_k, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         // Every trial runs the oracle, so its field-operation count can
@@ -2166,6 +2787,7 @@ mod tests {
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         // A reduced base trades trials for solve size; either it got

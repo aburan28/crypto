@@ -5,6 +5,7 @@ algorithm. Complete implementations, not sums of the best stage times, compete.
 """
 import copy
 import itertools
+import json
 import math
 
 from oracle import require
@@ -16,9 +17,20 @@ AXES = ('factor_base', 'solver', 'linear_algebra', 'batch_trials', 'collection_w
 def family(arm):
     cfg = arm['config']
     base = cfg.get('factor_base', {})
-    return (base.get('kind', 'subgroup_orbits'), cfg.get('solver', 'pair_table'),
-            cfg.get('linear_algebra', 'sparse'), cfg.get('row_kernel', 'full'),
-            cfg.get('orbit_batch', 8))
+    return (arm.get('adapter'), json.dumps(base, sort_keys=True, separators=(',', ':')),
+            cfg.get('solver', 'pair_table'), cfg.get('linear_algebra', 'sparse'),
+            cfg.get('row_kernel', 'full'), cfg.get('orbit_batch', 8),
+            cfg.get('orbit_target'), cfg.get('pair_table',
+                'full' if cfg.get('full_pair_table') else 'heuristic'),
+            cfg.get('batch_trials', 1), cfg.get('collection_window'))
+
+
+def mechanism_family(arm):
+    """Coarse family for exploration; batch and kernel variants share a slot."""
+    cfg = arm['config']
+    base = cfg.get('factor_base', {})
+    return (arm.get('adapter'), base.get('kind'), cfg.get('solver', 'pair_table'),
+            cfg.get('linear_algebra', 'sparse'))
 
 
 def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
@@ -30,6 +42,7 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     import random
     require(width >= 2 and 0 <= exploration < width, 'invalid portfolio budget')
     by_id = {a['id']: a for a in arms}
+    require(len(by_id) == len(arms), 'duplicate candidate registrations')
     eligible = []
     for row in comparisons:
         if not row.get('eligible') or row['candidate'] not in by_id:
@@ -38,6 +51,8 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
         vector += list(row['per_cell'].values()) + list(row['native_wall_per_cell'].values())
         require(vector and all(math.isfinite(v) and v > 0 for v in vector), 'invalid portfolio cost')
         eligible.append(row)
+    require(len({row['candidate'] for row in eligible}) == len(eligible),
+            'duplicate candidate comparison rows')
     eligible.sort(key=lambda r: (r['candidate_over_baseline'], r['candidate']))
     if not eligible:
         return []
@@ -71,20 +86,64 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     add(eligible[0], 'complete instruction-cost leader')
     add(min(eligible, key=lambda r: (r['native_wall_candidate_over_baseline'], r['candidate'])),
         'complete native-time leader')
-    # Reserve diversity before filling with close variants of the leader.
+    # At least one standout cell specialist gets a chance before the remaining
+    # slots fill with distinct families. Compare only within one metric/cell;
+    # the qualified baselines differ for online and cold costs in v2.
+    metrics = [('cold instructions', lambda r, cell: r['per_cell'][cell]),
+               ('cold native', lambda r, cell: r['native_wall_per_cell'][cell])]
+    if online:
+        metrics.insert(0, ('single-target online', lambda r, cell: r['online']['per_cell'][cell]))
+    specialists = []
+    for metric, cost in metrics:
+        for cell in keys:
+            winner = min(eligible, key=lambda r: (cost(r, cell), r['candidate']))
+            if winner['candidate'] in {s['candidate'] for s in selected}:
+                continue
+            retained_ids = {s['candidate'] for s in selected}
+            best_retained = min(cost(row, cell) for row in eligible
+                                if row['candidate'] in retained_ids)
+            advantage = best_retained / cost(winner, cell)
+            if advantage > 1:
+                specialists.append((-advantage, metric, cell, winner['candidate'], winner))
+    if specialists:
+        _, metric, cell, _, winner = min(specialists)
+        add(winner, f'cell specialist: {metric} {cell}')
+    # Use the remaining competitive slots for non-dominated distinct families.
     for row in frontier:
         known = {family(by_id[s['candidate']]) for s in selected}
         if family(by_id[row['candidate']]) not in known:
             add(row, 'non-dominated implementation family')
-    for cell in keys:
-        add(min(eligible, key=lambda r: (r['per_cell'][cell], r['candidate'])),
-            'cell specialist: ' + cell)
     for row in frontier + eligible:
         add(row, 'Pareto frontier' if row in frontier else 'development reserve')
     remaining = [r for r in eligible if r['candidate'] not in {s['candidate'] for s in selected}]
-    random.Random(seed).shuffle(remaining)
-    selected.extend({'candidate': r['candidate'], 'reason': 'predeclared exploration slot'}
-                    for r in remaining[:min(exploration, width-len(selected))])
+    groups = {}
+    for row in remaining:
+        groups.setdefault(mechanism_family(by_id[row['candidate']]), []).append(row)
+    represented = {mechanism_family(by_id[item['candidate']]) for item in selected}
+    outsider_families = [key for key in groups if key not in represented]
+    other_families = [key for key in groups if key in represented]
+    rng = random.Random(seed)
+    rng.shuffle(outsider_families)
+    rng.shuffle(other_families)
+    slots = min(exploration, width-len(selected))
+    chosen = 0
+    # Sample families, not rows: registering many near-identical variants must
+    # not multiply that family's chance of taking the exploration budget.
+    for key in outsider_families + other_families:
+        if chosen == slots:
+            break
+        best = min(groups[key], key=lambda row: (
+            row['online']['candidate_over_baseline'] if online else
+            row['candidate_over_baseline'], row['candidate']))
+        selected.append({'candidate': best['candidate'],
+                         'reason': 'predeclared exploration slot'})
+        remaining.remove(best)
+        chosen += 1
+    if chosen < slots:
+        rng.shuffle(remaining)
+        selected.extend({'candidate': row['candidate'],
+                         'reason': 'predeclared exploration slot'}
+                        for row in remaining[:slots-chosen])
     return selected
 
 

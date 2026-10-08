@@ -657,6 +657,106 @@ dense-finish path its four draws took 96–104 min each. All four are **≥7**.
     The size of the growth is unmeasured, because the values are lower
     bounds.
 
+## Result 9: the size of the growth — `ℓ = 5` refutes at exactly 7
+
+`research/dreg_degree7_ell5_20260930/` holds everything. It was
+pre-registered before any `ℓ = 5` degree-7 matrix was built, and amended
+twice before the affected outcomes.
+
+It builds degree 7 on the committed `≥7` draws, replayed with `--d-min 7`.
+
+| `S` | `ℓ = 3` | `ℓ = 4` | `ℓ = 5` | semi-regular `D_reg` at `ℓ = 5` |
+|--:|---|---|---|--:|
+| −5 | 5 5 5 5 | 7 7 6 7 | **`(10, 5)`: 7 7 7 7** | 7 |
+| −4 | 6 6 6 6 | 6 7 6 7 | `(11, 5)`: ≥7 ×4 (degree 7 not run: 18–19 GB) | 7 |
+| −2 | 6 6 6 6 | — | `(13, 5)`: ≥7 ×4 (degree 7 not run: 47–50 GB) | 7 |
+| 0 | 6 6 6 6 | — | `(15, 5)`: ≥7 ×4 (not attempted) | 8 |
+
+- **ℓ = 5 is one degree above 6.** Every `(10, 5)` draw's degree-7 row
+  space contains `1`, so the degree is exactly 7. The FFD is 3.
+  - The prediction was 7, at low confidence.
+  - Q5, `(13, 5)`, is not testable here, which is a memory limit.
+- **The growth is steady, not a jump.**
+  - At `S = −5` the rungs read 5, then 7 (with one draw at 6), then 7 over
+    `ℓ = 3, 4, 5`.
+  - Against the plateau of 6 that `ℓ = 3, 4` hold at `S ≥ −2`, `ℓ = 5` sits
+    one degree higher.
+  - Over the whole program the refutation degree runs 5, 6, 6–7, 7 for
+    `ℓ = 2`–5, while the FFD stays at 3.
+- **The semi-regular reference predicted it.**
+  - It gives 7 for `(10, 5)`. Across the 14 cells with exact values it now
+    matches in 10, and is within one in all 14 (`semireg.py`).
+  - The data therefore do not separate "levels off at 7" from "follows
+    `D_reg`", which grows about linearly in the unknowns. `(15, 5)`, where
+    `D_reg` is 8, is the cell that does.
+- **Engineering, identity-checked (332 rows, 0 mismatches).** Two changes
+  were needed to fit degree 7 in 16 GB:
+  - a dense switch placed by memory budget (`KIC_SPARSE_DENSE_BUDGET_MB`);
+  - F5-criterion rows (`KIC_SPARSE_F5=1`), which drop 20% of the rows and
+    as many band-7 survivors.
+  - Band 7 turned out rank-deficient: only 60–65% of its columns hold a
+    pivot. That is what put `(11, 5)` and `(13, 5)` out of reach.
+- **Scope.** `m = 3`, `n = 10` (GF(2^10), with proper intermediate
+  subfields GF(2²) and GF(2⁵), none chosen), four draws. This is a
+  stage diagnostic.
+- **For ECC2K-130.**
+  `research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md` prices the
+  route at `n = 131` under a constant degree and under `D_reg`. Every
+  figure there is an extrapolation.
+
+## Result 10: the `m = 4` chain — one degree above `m = 3`, flat in `n`, rising with `ℓ`
+
+`research/dreg_m4_chain_20261006/` holds everything. It was pre-registered
+before any `m = 4` cell ran; its `ℓ = 3` amendment was registered before
+those cells ran.
+
+`m = 4` is the smallest decomposition whose free-oracle floor at
+ECC2K-130 is below rho. Every degree before this one was `m = 3`'s.
+
+| `ℓ` | `m = 4` cells (`N`) | measured | semi-regular `D_reg` | `m = 3` at the same `ℓ` |
+|--:|---|---|---|---|
+| 1 | (4,1) (5,1) (6,1) (12–16) | 5 in every draw | 5 5 5 | — |
+| 2 | (5,2) (6,2) (7,2) (8,2) (18–24) | **6 in every draw** | 6 7 7 7 | 5 in every draw (11–18) |
+| 3 | (9,3) (10,3) (30, 32) | **≥7 in all eight draws** (degree 6 built in full; degree 7 out of reach) | 8, 9 | 5 at S = −5, else 6 |
+
+- **Q7, as registered: `m = 4` refutes above `m = 3` at the same `ℓ`.**
+  Every `ℓ = 2` cell reads 6, where `m = 3` reads 5. The prediction held.
+- **Q8, as registered: `m = 4` tracks its reference.** Every cell is within
+  one of `D_reg`.
+  - It is equal in four of the seven registered cells.
+  - It is one below at `(6, 2)`–`(8, 2)`, where my exact predictions of 7
+    missed.
+- **Q10, amendment 1: rises with `ℓ`.** Both `ℓ = 3` cells read ≥7 on
+  every draw, as predicted.
+- **The degree is flat in `n` at fixed `ℓ`, for both `m`.**
+  - `m = 4` at `ℓ = 2` reads 6 from 18 to 24 unknowns, and `m = 3` at
+    `ℓ = 2` reads 5 from 11 to 18.
+  - The reference rises with `N` meanwhile. So it fits within one here but
+    overstates the growth in `n`.
+  - On this evidence the degree is set by `m` and `ℓ`. Two small-`ℓ` fits:
+    - **`m = 3`: `⌈ℓ/2⌉ + 4`.** It matches every exactly measured cell
+      except `(4, 3)` and `(7, 4)` at surplus −5, and the two `(8, 4)`
+      draws at −4 that read 7.
+    - **`m = 4`: `ℓ + 4`.** It matches every cell, and the `ℓ = 3` bounds
+      are consistent with it.
+  - They are fits to three or four rungs, not laws.
+- **The FFD is 3** (two draws at 2).
+- **Cost.** The `ℓ ≤ 2` draws resolve in seconds. The `ℓ = 3` draws took
+  6–7 min at `(9, 3)` and about 17 min at `(10, 3)`, with peaks of 2.9 and
+  5.4 GB. Those are practicality notes on the four-core container.
+- **Harness.** It is native, per `AGENTS.md`'s no-Python rule:
+  - `chained_solution_count` is tested against an exhaustive evaluation at
+    `m = 4`;
+  - `dreg_ladder --m`, with the `m = 3` identity check at 328 rows and 0
+    mismatches;
+  - `examples/dreg_score` for scoring, comparison, the reference and matrix
+    shapes;
+  - `examples/descent_degree_cost`, the native `n = 131` cost model, which
+    reproduces the committed Python table exactly.
+- **For ECC2K-130**:
+  `research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md` §5. Every
+  figure there is an extrapolation.
+
 ## Reproducing
 
 ```sh
@@ -726,7 +826,22 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   **Done:** Result 6, confounded.  It did not take seconds: its degree-7
   draws take 35 min to 2 h.
 - **`ℓ = 5` at `S ≥ −2` was the whole open question.** **Answered** (Results 7 and 8): `(13, 5)` at `S = −2` and `(15, 5)` at `S = 0` are both ≥7 on all four draws.
-- **Next: the size of the growth.** The exact `ℓ = 5` degree needs degree 7 at 25–30 unknowns. The dense finish's dense block would be several to tens of GB there. That needs either a machine with more memory or a finish that goes dense only below the top two bands.
+- *Done (Result 9):* **the size of the growth.** `(10, 5)` refutes at
+  exactly 7, one degree above 6. It needed a memory-budgeted dense switch
+  and F5-criterion rows.
+- *Done (Result 10):* **`m = 4`**, the decomposition size ECC2K-130's
+  floor needs. It reads `ℓ + 4` at `ℓ ≤ 2`, one above `m = 3`, and ≥7 at
+  `ℓ = 3`.
+- **Next: `m = 4` at `ℓ = 3` and degree 7**, which tells whether its slope
+  stays at one per `ℓ`. `(9, 3)`'s degree-7 matrix is about 2.1M × 2.8M,
+  so it needs a large host, like `(15, 5)` below.
+- **Next: `(15, 5)` at degree 7**, the cell where the semi-regular
+  reference (8) and a degree levelled off at 7 disagree.
+  - At `(10, 5)`'s F5 fraction and band-7 rank ratio, its block after
+    band 7 is about 110–120 GB, and `(13, 5)`'s is 47–50 GB.
+  - So it needs a host of about 128 GB, or a finish that does not pack
+    every survivor at once.
+  - Register it before running.
 - *Superseded note:* **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
   ladder's `(13, 5)` or `(15, 5)`, at 28 or 30 unknowns.  Neither the frozen
   binary nor current `main` reaches it on the four-core container, so it

@@ -1,0 +1,30 @@
+{
+  "schema_version": 3,
+  "pilot": "generic-algebraic-disclosed-layout-pilot-20260929",
+  "status": "REREGISTERED_AFTER_PREALGORITHM_WORKER_REJECTION",
+  "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "exposed_fixture_file": "goal_20260924/generic-backend-qualification-v2/lost-campaign-exposures.json",
+  "exposed_fixture_sha256": "a728677b199eac02800d8338204d5306f391ec5da757c910bec1e51955fe7b41",
+  "fixture_stage": "smoke",
+  "stage_a_cells": ["n17a1"],
+  "stage_b_cells": ["n19a0", "n23a0", "n23a1", "n31a0"],
+  "stage_b_condition": "both stage-A processes exit within the cap, pass independent base and query replay, and report one algebraic attempt with unsupported=false",
+  "solvers": ["f4", "f5"],
+  "factor_base": {"kind": "standard_subspace", "dimension": 6},
+  "algorithm_seed": 2026092918,
+  "config": {
+    "linear_algebra": "dense",
+    "summands": 3,
+    "batch_trials": 1,
+    "max_trials": 1,
+    "groebner_degree": 3,
+    "node_budget": 4096
+  },
+  "timeout_seconds": 60,
+  "memory_bytes": 8589934592,
+  "memory_policy": "poll-child-rss-and-kill-above-limit",
+  "memory_poll_ms": 100,
+  "worker_threads": 1,
+  "question": "Can the pinned F4 and F5 implementations execute one naturally sampled PDP attempt over a dimension-six algebraic base without an unsupported encoder result?",
+  "scope": "disclosed-target stage feasibility only; no rate, complete-solve, cost, speedup, or promotion claim"
+}

@@ -4,11 +4,12 @@ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
 use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
-use crypto_lib::cryptanalysis::koblitz_groebner::SolverEngine;
+use crypto_lib::cryptanalysis::koblitz_groebner::{FieldStructure, SolverEngine};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_signed_frobenius_rho_with_preparation, point_key, points_with_x, DecompositionStrategy,
-    FactorBaseLogSolver, IndividualLogSolver, KoblitzCurve, KoblitzIcOptions,
-    KoblitzSignedRhoOptions, LinearAlgebra, PairSumTable, RelationCollector, RelationWorkUnit,
+    FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase, IndividualLogSolver,
+    KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, LinearAlgebra, PairSumTable,
+    RelationCollector, RelationWorkUnit,
 };
 use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use crypto_lib::cryptanalysis::semaev_sat::XorEncoding;
@@ -55,6 +56,31 @@ struct Job {
     /// Opt-in until independent generic scientific admission is complete.
     #[serde(default)]
     exclusive_phases: bool,
+    /// Target-independent state supplied by the separately sealed preparation
+    /// adapter. This bounded mode never samples ordinary relation queries.
+    #[serde(default)]
+    prepared: Option<PreparedTable>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PreparedTable {
+    mathematical_state_sha256: String,
+    factor_base: Vec<[String; 2]>,
+    columns: Vec<PreparedColumn>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PreparedColumn {
+    point: [String; 2],
+    log: String,
+}
+
+const PREPARED_N17_STATE: &str = "edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107";
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -71,6 +97,8 @@ struct Config {
     factor_base_cube_root: bool,
     factor_base: Option<FactorBaseSpec>,
     groebner_degree: u32,
+    #[serde(skip_serializing_if = "is_false")]
+    direct_fused_pack: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -89,6 +117,7 @@ impl Default for Config {
             factor_base_cube_root: false,
             factor_base: None,
             groebner_degree: 3,
+            direct_fused_pack: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -171,6 +200,21 @@ fn target(c: &KoblitzCurve, seed: u64) -> Result<BinaryPoint, String> {
 }
 
 fn run(job: &Job) -> Result<Value, String> {
+    if job.prepared.is_some()
+        && (job.mode != "ic"
+            || !job.exclusive_phases
+            || job.degree != 17
+            || job.curve_a != 1
+            || !matches!(
+                job.config.solver.as_str(),
+                "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair"
+            )
+            || job.config.summands != 3
+            || job.config.groebner_degree != 3
+            || job.config.linear_algebra != "dense")
+    {
+        return Err("prepared mode is limited to exclusive n17a1 F4/F5/F6-IC".into());
+    }
     if !job.exclusive_phases {
         return run_inner(job);
     }
@@ -357,7 +401,7 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     let strategy = match cfg.solver.as_str() {
         "pair_table" => DecompositionStrategy::PairTable,
         "enumerate" => DecompositionStrategy::Enumerate,
-        "f4" | "f5" | "inherited_f4" => DecompositionStrategy::Groebner,
+        "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair" => DecompositionStrategy::Groebner,
         "sat_xor" | "sat_cnf" => DecompositionStrategy::Sat,
         _ => return Err("unsupported decomposition backend".into()),
     };
@@ -375,13 +419,15 @@ fn run_inner(job: &Job) -> Result<Value, String> {
         node_budget: cfg.node_budget,
         collection_window: cfg.collection_window,
         allow_direct_relation: false,
+        f6_ic: matches!(cfg.solver.as_str(), "f6_ic" | "f6_ic_pair"),
+        f6_pair_index: cfg.solver == "f6_ic_pair",
         ..KoblitzIcOptions::default()
     };
     opts.engine = match cfg.solver.as_str() {
         "f5" => SolverEngine::MatrixF5 {
             max_degree: cfg.groebner_degree,
         },
-        "inherited_f4" => SolverEngine::InheritedF4 {
+        "inherited_f4" | "f6_ic" | "f6_ic_pair" => SolverEngine::InheritedF4 {
             max_degree: cfg.groebner_degree,
         },
         _ => SolverEngine::MatrixF4 {
@@ -451,6 +497,9 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     } else {
         None
     };
+    if let Some(prepared) = &job.prepared {
+        return run_prepared_target(job, prepared, &c, &fb, &opts, &targets[0], metadata, start);
+    }
     let collector = RelationCollector::with_pair_table(&c, &fb, &opts, pair.as_ref())
         .ok_or("unsupported decomposition")?;
     let mut system = FactorBaseLogSolver::new(&c, &fb, &opts).ok_or("no projected columns")?;
@@ -558,6 +607,121 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     )
 }
 
+/// Import and verify all reusable data before the first target-dependent
+/// computation. The Python adapter independently reconstructs the ordinary
+/// relation matrix and binds the external certificate; this native check
+/// additionally verifies exact geometry, column coverage and each scalar log.
+fn run_prepared_target(
+    job: &Job,
+    prepared: &PreparedTable,
+    c: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    q: &BinaryPoint,
+    metadata: Value,
+    start: Instant,
+) -> Result<Value, String> {
+    let geometry = prepared
+        .factor_base
+        .iter()
+        .map(|p| json!(p))
+        .collect::<Vec<_>>();
+    if prepared.mathematical_state_sha256 != PREPARED_N17_STATE
+        || geometry != fb.points.iter().map(point).collect::<Vec<_>>()
+        || fb.points.len() != 63
+        || prepared.columns.len() != 29
+    {
+        return Err("prepared mathematical state or ordered geometry differs".into());
+    }
+    measurement::mark(Phase::RelationCheck);
+    let expected_columns = FactorBaseLogSolver::new(c, fb, opts)
+        .ok_or("prepared projected base has no columns")?
+        .matrix_snapshot()
+        .column_points;
+    let supplied_columns = prepared
+        .columns
+        .iter()
+        .map(|item| (item.point[0].clone(), item.point[1].clone()))
+        .collect::<Vec<_>>();
+    if expected_columns != supplied_columns {
+        return Err("prepared column coverage or order differs from projected base".into());
+    }
+    let columns = prepared
+        .columns
+        .iter()
+        .map(|item| {
+            if item.log.is_empty()
+                || !item.log.bytes().all(|b| b.is_ascii_digit())
+                || (item.log.len() > 1 && item.log.starts_with('0'))
+            {
+                return Err("noncanonical prepared scalar log".into());
+            }
+            Ok((
+                public_point(c, &item.point)?,
+                item.log
+                    .parse::<BigUint>()
+                    .map_err(|_| "invalid prepared scalar log")?,
+            ))
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    let table = FactorBaseLogTable { columns };
+    if !table.verify(c) {
+        return Err("prepared column logarithm fails scalar replay".into());
+    }
+    measurement::mark(Phase::Precompute);
+    // Initialize the reusable coefficient template without reading Q or
+    // solving a query. Zero is a fixed symbolic specialization, not a group
+    // target; actual query specialization and Macaulay work stay online.
+    let field = FieldStructure::new(c.n, &c.curve.irreducible);
+    crypto_lib::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &F2mElement::zero(c.n),
+        &c.curve.b,
+        opts.m,
+        &field,
+    )
+    .ok_or("prepared target-independent Semaev template is unsupported")?;
+    let solver = IndividualLogSolver::new(c, fb, &table, opts, None)
+        .ok_or("prepared column coverage differs from the projected base")?;
+    let dispatch = solver.admission_dispatch();
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_direct_fused_pack(
+        job.config.direct_fused_pack,
+    );
+    let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
+    crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
+    measurement::begin_online(Phase::TargetQuery);
+    let online_start = Instant::now();
+    let answer = solver.solve_observed(q);
+    measurement::mark(Phase::RecoveryCheck);
+    let replay = scalar_replay(c, q, answer.log.as_ref());
+    let online_ns = online_start.elapsed().as_nanos();
+    measurement::end_online();
+    let f4_stage_profile = crypto_lib::cryptanalysis::koblitz_groebner::f4_profile();
+    let layout_after = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
+    let verified = replay == Some(true);
+    Ok(
+        json!({"schema_version":1,"query_schema_version":1,"mode":"ic",
+        "status":if verified {"complete"} else {"incomplete"},
+        "preparation_mode":"imported-certified-log-table-v1",
+        "reusable_symbolic_template_prepared":true,
+        "preparation_mathematical_state_sha256":prepared.mathematical_state_sha256,
+        "fixture":metadata,"factor_base":fb.points.iter().map(point).collect::<Vec<_>>(),
+        "column_logs":table.columns.iter().map(|(p,l)| json!({"point":point(p),"log":l.to_string()})).collect::<Vec<_>>(),
+        "columns":table.len(),"trials":0,"relations":[],"collection_reports":[],
+        "solve_attempts":0,"effective_config":job.config,"summands":job.config.summands,
+        "effective_factor_base":job.factor_base,"descent_dispatch":dispatch,
+        "solutions":[{"index":0,"recovered":answer.log.as_ref().map(ToString::to_string),
+            "trials":answer.trials,"relation":answer.relation,"attempts":answer.attempts}],
+        "online_timing_schema":1,"online_wall_ns":online_ns,
+        "f4_stage_profile":f4_stage_profile,
+        "f4_layout_hits_online":layout_after.0-layout_before.0,
+        "f4_layout_misses_online":layout_after.1-layout_before.1,
+        "target_input":"supplied_public_point","reusable_setup_excluded":true,
+        "scalar_replay_included":replay.is_some(),"scalar_verified":verified,
+        "elapsed_seconds":start.elapsed().as_secs_f64()}),
+    )
+}
+
 fn main() {
     let arguments: Vec<_> = std::env::args().skip(1).collect();
     if arguments == ["--build-identity"] {
@@ -594,6 +758,149 @@ fn main() {
     println!("{}", report);
     if !success {
         std::process::exit(2);
+    }
+}
+
+#[cfg(test)]
+mod prepared_target_tests {
+    use super::*;
+
+    #[test]
+    fn default_direct_packing_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("direct_fused_pack").is_none());
+        config.direct_fused_pack = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("direct_fused_pack"), Some(&json!(true)));
+    }
+
+    fn prepared_job(cap: u64) -> Job {
+        // Shared mathematical fixture only. Historical preparation receipts,
+        // ordinary query streams and measurements remain invocation evidence.
+        let prepared: Value = serde_json::from_str(include_str!(
+            "../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-runtime-v1/mathematics.json"
+        )).unwrap();
+        serde_json::from_value(json!({"mode":"ic","degree":17,"curve_a":1,
+            "public_targets":[["52411","72106"]],"target_seeds":[],
+            "algorithm_seed":2026093032_u64,"exclusive_phases":true,
+            "factor_base":{"kind":"standard_subspace","dimension":6},
+            "config":{"solver":"f5","linear_algebra":"dense","summands":3,
+                "groebner_degree":3,"node_budget":8192,"batch_trials":1,"max_trials":cap},
+            "prepared":prepared}))
+        .unwrap()
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn prepared_f5_recovers_disclosed_target_without_ordinary_collection() {
+        let report = run(&prepared_job(8)).unwrap();
+        assert_eq!(report["query_schema_version"], 1);
+        assert_eq!(report["status"], "complete");
+        assert_eq!(report["solutions"][0]["recovered"], "24886");
+        assert_eq!(report["solutions"][0]["trials"], 3);
+        assert_eq!(report["trials"], 0);
+        assert_eq!(report["collection_reports"], json!([]));
+        assert_eq!(report["relations"], json!([]));
+        assert_eq!(report["solve_attempts"], 0);
+        assert_eq!(report["scalar_verified"], true);
+        assert_eq!(report["reusable_symbolic_template_prepared"], true);
+        assert_eq!(report["column_logs"].as_array().unwrap().len(), 29);
+        let phases = report["generic_phase_timing"]["online_phases_ns"]
+            .as_object()
+            .unwrap();
+        assert!(phases["rho_solve"].is_null());
+        let sum: u64 = phases
+            .iter()
+            .filter(|(k, _)| k.as_str() != "rho_solve")
+            .map(|(_, v)| v.as_u64().unwrap())
+            .sum();
+        assert_eq!(Some(sum), report["online_wall_ns"].as_u64());
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn prepared_f6_ic_recovers_disclosed_target_with_geometric_closure() {
+        let mut job = prepared_job(8);
+        job.config.solver = "f6_ic".into();
+        let report = run(&job).unwrap();
+        assert_eq!(report["status"], "complete");
+        assert_eq!(report["solutions"][0]["recovered"], "24886");
+        assert_eq!(report["scalar_verified"], true);
+        assert_eq!(report["trials"], 0);
+        let attempts = report["solutions"][0]["attempts"].as_array().unwrap();
+        assert!(attempts.iter().any(|attempt| {
+            let stats = &attempt["pdp"]["stats"];
+            stats["stats"]["geometric_witnesses"].as_u64().unwrap_or(0)
+                + stats["stats"]["geometric_refutations"]
+                    .as_u64()
+                    .unwrap_or(0)
+                > 0
+        }));
+        let phases = report["generic_phase_timing"]["online_phases_ns"]
+            .as_object()
+            .unwrap();
+        assert_eq!(
+            report["online_wall_ns"].as_u64(),
+            Some(phases.values().filter_map(Value::as_u64).sum())
+        );
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn prepared_failed_attempt_is_retained_without_a_scalar() {
+        let report = run(&prepared_job(1)).unwrap();
+        assert_eq!(report["query_schema_version"], 1);
+        assert_eq!(report["status"], "incomplete");
+        assert!(report["solutions"][0]["recovered"].is_null());
+        assert_eq!(report["solutions"][0]["trials"], 1);
+        assert_eq!(
+            report["solutions"][0]["attempts"].as_array().unwrap().len(),
+            1
+        );
+        assert_eq!(report["scalar_verified"], false);
+        assert_eq!(report["trials"], 0);
+        assert!(report["online_wall_ns"].as_u64().unwrap() > 0);
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn corrupt_or_incomplete_preparation_is_rejected_before_target_work() {
+        let mut job = prepared_job(1);
+        job.prepared.as_mut().unwrap().columns[0].log = "0".into();
+        assert!(run(&job).unwrap_err().contains("scalar replay"));
+        let mut job = prepared_job(1);
+        job.prepared.as_mut().unwrap().columns.pop();
+        assert!(run(&job).unwrap_err().contains("geometry differs"));
+        let mut job = prepared_job(1);
+        job.prepared.as_mut().unwrap().factor_base.swap(0, 1);
+        assert!(run(&job).unwrap_err().contains("geometry differs"));
+        let mut job = prepared_job(1);
+        let prepared = job.prepared.as_mut().unwrap();
+        prepared.columns[0] = prepared.columns[1].clone();
+        assert!(run(&job).unwrap_err().contains("column coverage"));
+        let mut job = prepared_job(1);
+        job.prepared.as_mut().unwrap().columns.swap(0, 1);
+        assert!(run(&job).unwrap_err().contains("column coverage"));
+        let mut job = prepared_job(1);
+        job.prepared.as_mut().unwrap().columns[0].log = "063339".into();
+        assert!(run(&job).unwrap_err().contains("noncanonical"));
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn prepared_mode_rejects_other_curves_stages_and_fixture_generation() {
+        for field in ["mode", "degree", "solver", "summands", "exclusive_phases"] {
+            let mut job = prepared_job(1);
+            match field {
+                "mode" => job.mode = "fixture".into(),
+                "degree" => job.degree = 19,
+                "solver" => job.config.solver = "pair_table".into(),
+                "summands" => job.config.summands = 2,
+                _ => job.exclusive_phases = false,
+            }
+            assert!(run(&job).unwrap_err().contains("prepared mode is limited"));
+        }
     }
 }
 

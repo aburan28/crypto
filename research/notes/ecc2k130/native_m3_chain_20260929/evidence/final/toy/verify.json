@@ -1,0 +1,42 @@
+{
+  "arm": "toy",
+  "branch_counts": {
+    "edge0_generic": 24,
+    "edge0_inverse": 3,
+    "edge1_copy_q": 3,
+    "edge1_generic": 24
+  },
+  "checks": [
+    {
+      "clauses": 4145,
+      "cnf_sha256": "ff5fc50608d67e41db6aae2009597e4b895c5cdf35495e3232902617a2dae8a3",
+      "label": "positive",
+      "status": "SAT",
+      "variables": 1197
+    },
+    {
+      "clauses": 4145,
+      "cnf_sha256": "0cc8014ef3ff47bb0c2c878c34122469b25cb3e315d8cfb9df8017b446e12a50",
+      "label": "generic_positive",
+      "status": "SAT",
+      "variables": 1197
+    },
+    {
+      "clauses": 4145,
+      "cnf_sha256": "6fcb5244ac14a5b8d6c27128e6226416a0d224074b7d60fdf9a2a991bad8748f",
+      "label": "negative",
+      "status": "UNSAT",
+      "variables": 1197
+    }
+  ],
+  "cpu_seconds": 0.06608499999999999,
+  "decision": "PASS",
+  "domain": "ecc2k130-native-m3-chain-20260929-v1",
+  "factor_triples": 27,
+  "peak_rss_bytes": 29491200,
+  "producer_sha256": "19af8af6eab23c04a4f36a55604eb6e2372f29a19d13373e0fc9c155519da80d",
+  "supported_targets": 27,
+  "triple_rows": 27,
+  "triple_rows_sha256": "5292ff1a133e07c21d8b8ea89b5d967a7c8848203a07c3ab655a19a71e00f741",
+  "wall_seconds": 0.06716220900125336
+}

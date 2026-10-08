@@ -21,11 +21,14 @@
 #   PACKED_TOP_HOIST  hoisted 3-bit product correction, bit-identical (default 0)
 #   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
 #   PACKED_FROM_REDUCED  5-word inverse of toPolynomial131 (default 0)
+#   PACKED_SIGMA_TABLE  fused-walk Frobenius steps from shared nibble tables (default 0)
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
 #   PACKED_SQUARE_TABLE  lambda^2 with its reduced half from a shared table
 #                        (default 0; table walk only; ROOFLINE.md)
+#   SIGMA_SQUARE_TABLE  the same exact table for lambda^2 in the sigma-fused
+#                       walk only (default 0; benchmarks/sigma-square-table)
 #   PACKED_INV_POLY  inversion accumulator kept in the polynomial basis
 #                    (default 0; 2 = link product out of line; ROOFLINE.md)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
@@ -35,11 +38,23 @@
 #   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
 #   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
 #                      selection (default 0)
+#   TABLE_SPLIT_FORWARD  report/select all slots before prefix products
+#                        (default 0; requires TABLE_PIPE_SELECT)
+#   TABLE_BATCH_HINTS  reconverge split-forward v3 cycle probes across slots
+#                      before building the prefix (default 0)
+#   TABLE_BLOCK_HINTS  compact hinted slots across a CUDA block (default 0;
+#                      requires TABLE_BATCH_HINTS)
+#   CYCLE_FAST2  prove raw two-cycles after one affine step (default 0)
+#   CYCLE_PROFILE  diagnostic exact-v3 cold-probe counters (default 0)
+#   TABLE_GLOBAL_HINT_THREADS  GPU-wide cold-resolver block width: 128, 256 or
+#                    512 (default 128; does not change the 188-block grid)
 #   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
 #                     CHEAPER-SELECTION.md)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
 #   PACKED_CHAINS  independent Montgomery chains per thread, 1 or 2 (default 1;
 #                  TWO-CHAINS.md; 2 needs TAG_DENOM and an even BATCH)
+#   SIGMA_FUSED_SHARED_SLOTS  full-word per-thread shared pchain/denominator
+#                    slots for the exact fused B16/T256/min2 preset: 0/2/3/4
 #   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
 #
@@ -76,6 +91,7 @@ PACKED_UNROLL_INV ?= 0
 PACKED_PAIR_PRODUCTS ?= 0
 PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
+PACKED_ADD_COMBINE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
 # Bits: 1 inline single polynomial products, 2 inline paired products.
 PACKED_INLINE_POLY ?= 0
@@ -112,10 +128,15 @@ PACKED_PAIR_ILP ?= 0
 UNROLL_SLOTS ?= 1
 PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
+SIGMA_FUSED ?= 0
+SIGMA_FUSED_LATE_Y ?= 0
+SIGMA_FUSED_SHARED_SLOTS ?= 0
+SIGMA_SQUARE_TABLE ?= 0
 PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
 PACKED_FROM_REDUCED ?= 0
+PACKED_SIGMA_TABLE ?= 0
 PACKED_CLMUL_FLAT ?= 0
 PACKED_PAIR_CLMUL ?= 0
 PACKED_ALU_SQR ?= 0
@@ -144,6 +165,20 @@ PHASE_PROFILE ?= 0
 # Forward pass software-pipelined: slot k's products issue before slot k+1's
 # selection (needs TAG_DENOM; two-pass kernel only).
 TABLE_PIPE_SELECT ?= 0
+# Keep the established kernel as the default until a matched GPU A/B qualifies.
+TABLE_SPLIT_FORWARD ?= 0
+# Resolve the split-forward pass's cold v3 hints after all raw tags are known.
+TABLE_BATCH_HINTS ?= 0
+# Compact up to TABLE_HINT_QUEUE pending (thread,slot) pairs in shared memory.
+TABLE_BLOCK_HINTS ?= 0
+TABLE_GLOBAL_HINTS ?= 0
+TABLE_GLOBAL_HINT_THREADS ?= 128
+TABLE_HINT_QUEUE ?= 512
+# Prove raw two-cycles after one affine step and one denominator check.
+CYCLE_FAST2 ?= 0
+# Count exact-v3 cold-probe outcomes. Diagnostic only; instrumented timing is
+# never performance evidence.
+CYCLE_PROFILE ?= 0
 # Reverse pass issues the chain product before lambda's.
 PACKED_CHAIN_FIRST ?= 0
 # Two independent Montgomery chains of BATCH/2 slots per thread, interleaved
@@ -231,6 +266,7 @@ SMARCH  ?= sm_90
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
        include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packednative131.h include/packedfusedsigma131.h include/packedblockinverse131.cuh include/packedblockinversereference131.cuh include/packedxonly23.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedsigmascratch.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -244,6 +280,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_FAST_CONVERT=$(PACKED_FAST_CONVERT) \
        -DECC_PACKED_POLY_CHAIN=$(PACKED_POLY_CHAIN) -DECC_PACKED_UNROLL_INV=$(PACKED_UNROLL_INV) \
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
+       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE)
        -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
        -DECC_PACKED_INLINE_POLY=$(PACKED_INLINE_POLY) \
@@ -258,18 +295,25 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_UNROLL_SLOTS=$(UNROLL_SLOTS) \
        -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
        -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
+       -DECC_SIGMA_FUSED=$(SIGMA_FUSED) \
+       -DECC_SIGMA_FUSED_LATE_Y=$(SIGMA_FUSED_LATE_Y) \
+       -DECC_SIGMA_FUSED_SHARED_SLOTS=$(SIGMA_FUSED_SHARED_SLOTS) \
+       -DECC_SIGMA_SQUARE_TABLE=$(SIGMA_SQUARE_TABLE) \
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
        -DECC_PACKED_FROM_REDUCED=$(PACKED_FROM_REDUCED) \
+       -DECC_PACKED_SIGMA_TABLE=$(PACKED_SIGMA_TABLE) \
        -DECC_PACKED_CLMUL_FLAT=$(PACKED_CLMUL_FLAT) \
        -DECC_PACKED_PAIR_CLMUL=$(PACKED_PAIR_CLMUL) \
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
-       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_TABLE_BLOCK_HINTS=$(TABLE_BLOCK_HINTS) -DECC_TABLE_HINT_QUEUE=$(TABLE_HINT_QUEUE) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
+       -DECC_TABLE_GLOBAL_HINTS=$(TABLE_GLOBAL_HINTS) \
+       -DECC_TABLE_GLOBAL_HINT_THREADS=$(TABLE_GLOBAL_HINT_THREADS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
@@ -370,6 +414,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 	python3 -m unittest discover -s codegen -p 'testwdsat.py'
 	python3 -m unittest discover -s codegen -p 'testlambdaprojective.py'
+	python3 -m unittest benchmarks/test_dp_identity.py
 
 # Exhaustively rule out sigma-walk orbit returns through CYCLE_LENGTH.
 # Equivariance alone does not rule out cycles. This check does not cover the
@@ -378,6 +423,20 @@ CYCLE_LENGTH ?= 24
 check-cycles:
 	cargo run --release --quiet --manifest-path ../Cargo.toml --bin ecc2k-guard -- \
 	    cycles --max-length $(CYCLE_LENGTH)
+
+# The campaign dashboard (ecc2k-status, which replaced aws/status.py) and the
+# Python-compatible JSON and number formatting it prints through. Their
+# expected bytes were printed by CPython.
+test-status:
+	cargo test --release --quiet --manifest-path ../Cargo.toml --lib -- \
+	    ecc2k130_status ecc2k130_pyjson
+
+# Offline half of aws/dp_ingest.py (Phase A). Own workspace under
+# ecc2k130/dp-ingest/ so the IC autolab frozen root Cargo.lock stays untouched.
+# Live daemon remains aws/dp_ingest.py until Phase B/C.
+test-dp-ingest:
+	cargo +1.98 test --quiet --manifest-path dp-ingest/Cargo.toml
+	cargo +1.98 clippy --quiet --manifest-path dp-ingest/Cargo.toml --all-targets -- -D warnings
 
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
@@ -407,6 +466,30 @@ build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
 
 trailforest: build/trailforest
 
+# Strict host replay for versioned table-v3 corpora.  Keep every rule switch
+# explicit: this is an evidence checker for the selected reference walk, not a
+# build that inherits whichever experimental knobs happen to be on a command
+# line.  Run-id, DP weight and producer max-iters remain required runtime
+# context because the v3 file header does not carry them.
+TABLE_V3_REPLAY_DEFS = -DECC_NO_CUDA -DECC_WALK_TABLE=1 -DECC_TABLE_BRANCHES=8 \
+	-DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -DECC_CYCLE_FAST2=1
+
+build/table-v3-replay: src/tablev3replay.cpp include/tablev3replay.h $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(TABLE_V3_REPLAY_DEFS) -Wall -Wextra \
+	    -Wno-unused-function -Wno-unknown-pragmas src/tablev3replay.cpp -o $@
+
+table-v3-replay: build/table-v3-replay
+
+build/test-table-v3-replay: src/testtablev3replay.cpp include/tablev3replay.h $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(TABLE_V3_REPLAY_DEFS) -Wall -Wextra \
+	    -Wno-unused-function -Wno-unknown-pragmas src/testtablev3replay.cpp -o $@
+
+test-table-v3-replay: build/table-v3-replay build/test-table-v3-replay
+	./build/test-table-v3-replay
+	./build/table-v3-replay --help >/dev/null
+
 # Orbit witnesses for a corpus: the j-counts a cairn piecework node can check
 # with one double scalar multiplication.  Host only.
 build/witness: src/witness.cpp $(HDRS) $(GEN)
@@ -427,12 +510,14 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_bootstrap_contract.py -v
 	python3 -m unittest discover -s aws -p test_campaign_guard.py -v
 	python3 -m unittest discover -s aws -p test_worker_family.py -v
-	python3 -m unittest discover -s aws -p test_status_walks.py -v
+	python3 -m unittest discover -s aws -p test_worker_banner.py -v
 	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
 	python3 -m unittest discover -s aws -p test_rollout.py -v
 	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
 	python3 -m unittest discover -s aws -p test_worker_spool.py -v
 	python3 -m unittest discover -s aws -p test_controlplane.py -v
+	python3 -m unittest discover -s aws -p test_seed_registry.py -v
+	python3 -m unittest discover -s aws -p test_seed_audit.py -v
 	python3 -m unittest discover -s . -p test_modal_sync.py -v
 	python3 -m unittest discover -s . -p test_modal_app.py -v
 	python3 -m unittest discover -s . -p test_modal_campaign.py -v
@@ -491,6 +576,12 @@ test-packed:
 
 test-packed-network:
 	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_ADD_COMBINE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-add
+	./build/test-packed-network
+	./build/test-packed-network-direct
+	./build/test-packed-network-add
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-generated
@@ -499,6 +590,9 @@ test-packed-network:
 	./build/test-packed-network-direct
 	./build/test-packed-network-generated
 	./build/test-packed-network-add
+
+test-sigma-square-table-native:
+	CXX="$(CXX)" /bin/sh benchmarks/sigma-square-table/run-native.sh
 
 test-generated-product:
 	python3 codegen/genpackedproduct.py --check
@@ -629,7 +723,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-status test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-table-v3-replay test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -719,16 +813,52 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# Confirmed 15.436677 B/s sigma configuration. The existing Modal preset
+# above has its own historical validation; this native target gives the exact
+# compiler settings used by the fused comparison without extending its cache.
+PRO6000_SIGMA_FUSED_KNOBS = BATCH=16 THREADS=256 MINBLOCKS=2 \
+    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+    PACKED_INLINE_POLY=3 SIGMA_FUSED=1 WITNESS=0 WALK_TABLE=0
+gpu-rtx-pro6000-sigma-fused:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+
+# The fused sigma walk with the Frobenius steps read from shared-memory nibble
+# tables (SIGMA-TABLE.md): 68 KB of shared memory per block, so one 512-thread
+# block per SM keeps the register budget and resident warps of the preset.
+PRO6000_SIGMA_TABLE_KNOBS = $(PRO6000_SIGMA_FUSED_KNOBS) THREADS=512 MINBLOCKS=1 PACKED_SIGMA_TABLE=1
+gpu-rtx-pro6000-sigma-table:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_TABLE_KNOBS)
+
+# Headline protocol (A/A panel, five A/B pairs, 64 launches) for the table
+# against the fused preset; benchmark-only, receipts in benchmarks/sigma-table/.
+bench-rtx-pro6000-sigma-table:
+	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-table/gpujob-headline.sh \
+	    --out $(TABLE_BENCH_OUT)
+TABLE_BENCH_OUT ?= /tmp/ecc2k-sigma-table-benchmark
+.PHONY: gpu-rtx-pro6000-sigma-table bench-rtx-pro6000-sigma-table
+
+# Matched replay, A/A noise and five-pair confirmation; benchmark-only.
+bench-rtx-pro6000-sigma-fused:
+	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-fused/gpujob-headline.sh \
+	    --out $(FUSED_BENCH_OUT)
+FUSED_BENCH_OUT ?= /tmp/ecc2k-sigma-fused-benchmark
+.PHONY: gpu-rtx-pro6000-sigma-fused bench-rtx-pro6000-sigma-fused
+
 # Architecture of the two RTX PRO 6000 builds below.  Override to run the same
 # knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
 # for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).
 PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
-# The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
-# 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
-# from the step tag, the products inlined, the forward pass software-pipelined.
-# Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
-# ALU squaring is on in this preset.  The value is expanded into the child
-# make, so a command-line PACKED_ALU_SQUARE reaches the build.
+# The knob set that measured 20 B/s under the historical v2 table rule, now
+# carrying the exact v3 schedule selected by the current matched comparison:
+# split selection from the prefix product and reconverge hinted slots before
+# the cold full-point probe.  See CYCLE-ESCAPE-V3.md and benchmarks/batch-hints.
+# ALU squaring is on in this preset.  The five-pair block-v3 confirmation also
+# selected the shared square table and out-of-line polynomial inversion as a
+# bounded +0.66% same-walk engineering gain.  Values are expanded into the
+# child make, and KNOBS remains the explicit override route.
 # The knob set itself, so the recipe below and gpu-preset cannot drift apart.
 PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
@@ -736,7 +866,9 @@ PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
 	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
-	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    PACKED_SQUARE_TABLE=1 PACKED_INV_POLY=2 \
+	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 TABLE_SPLIT_FORWARD=1 TABLE_BATCH_HINTS=1 \
+	    TABLE_BLOCK_HINTS=1 TABLE_HINT_QUEUE=512 CYCLE_FAST2=1 PACKED_CHAIN_FIRST=1 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
 gpu-rtx-pro6000-20b:
@@ -750,6 +882,31 @@ gpu-rtx-pro6000-20b:
 gpu-preset: PACKED_ALU_SQUARE = 1
 gpu-preset:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
+
+# Build the queue control with exactly the same arithmetic/layout preset.
+build/test-global-hints-cuda: benchmarks/global-hints/test_device.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -Xcompiler -fopenmp $< -o $@ -lgomp
+build/test-global-hints-cuda-128: TABLE_GLOBAL_HINT_THREADS = 128
+build/test-global-hints-cuda-256: TABLE_GLOBAL_HINT_THREADS = 256
+build/test-global-hints-cuda-512: TABLE_GLOBAL_HINT_THREADS = 512
+build/test-global-hints-cuda-128 build/test-global-hints-cuda-256 build/test-global-hints-cuda-512: benchmarks/global-hints/test_device.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -Xcompiler -fopenmp $< -o $@ -lgomp
+compile-global-hints-geometries: PACKED_ALU_SQUARE = 1
+compile-global-hints-geometries:
+	$(MAKE) -B build/test-global-hints-cuda-128 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) TABLE_BLOCK_HINTS=0 TABLE_GLOBAL_HINTS=1
+	$(MAKE) -B build/test-global-hints-cuda-256 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) TABLE_BLOCK_HINTS=0 TABLE_GLOBAL_HINTS=1
+	$(MAKE) -B build/test-global-hints-cuda-512 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) TABLE_BLOCK_HINTS=0 TABLE_GLOBAL_HINTS=1
+test-global-hints-geometries: compile-global-hints-geometries
+	./build/test-global-hints-cuda-128
+	./build/test-global-hints-cuda-256
+	./build/test-global-hints-cuda-512
+test-global-hints-preset: PACKED_ALU_SQUARE = 1
+test-global-hints-preset:
+	$(MAKE) -B build/test-global-hints-cuda ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
+	./build/test-global-hints-cuda
+.PHONY: test-global-hints-preset compile-global-hints-geometries test-global-hints-geometries
 
 # The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
 # pass per step, which does the same work per clock as the 20 B/s build and
@@ -948,10 +1105,77 @@ audit-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run packed_audit.py --batch 16 --min-blocks 2 --block-threads 256 --repeats 3 --workers $(RTX_PRO6000_WORKERS) \
 	    --output build/rtx-pro6000-audit.json
 
+test-sigma-fused-star:
+	bash benchmarks/sigma-fused/test_star_native.sh
+
+build/sigma-fused-shared-scratch-model: benchmarks/sigma-fused/shared-scratch/model.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+test-sigma-fused-shared-scratch-model: build/sigma-fused-shared-scratch-model
+	./build/sigma-fused-shared-scratch-model --self-test
+	./build/sigma-fused-shared-scratch-model > build/sigma-fused-shared-scratch-model.json
+	cmp build/sigma-fused-shared-scratch-model.json benchmarks/sigma-fused/shared-scratch/model.json
+
+build/test-sigma-fused-shared-scratch-native: benchmarks/sigma-fused/shared-scratch/test_native.cpp include/packedsigmascratch.h include/packedcompactstate.cuh include/packed131.h
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas $< -o $@
+
+build/sigma-fused-shared-scratch-summarize: benchmarks/sigma-fused/shared-scratch/summarize.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+build/sigma-fused-shared-scratch-source-audit: benchmarks/sigma-fused/shared-scratch/source_audit.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+build/sigma-fused-shared-scratch-compile-audit: benchmarks/sigma-fused/shared-scratch/compile_audit.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+build/sigma-fused-shared-scratch-log-check: benchmarks/sigma-fused/shared-scratch/log_check.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+test-sigma-fused-shared-scratch-native: build/test-sigma-fused-shared-scratch-native \
+                                      build/sigma-fused-shared-scratch-summarize \
+                                      build/sigma-fused-shared-scratch-source-audit \
+                                      build/sigma-fused-shared-scratch-compile-audit \
+                                      build/sigma-fused-shared-scratch-log-check
+	./build/test-sigma-fused-shared-scratch-native
+	./build/sigma-fused-shared-scratch-summarize --self-test
+	./build/sigma-fused-shared-scratch-source-audit --self-test
+	./build/sigma-fused-shared-scratch-source-audit .
+	./build/sigma-fused-shared-scratch-compile-audit --self-test
+	./build/sigma-fused-shared-scratch-log-check --self-test
+
+build/test-sigma-fused-shared-scratch-cuda-0: SIGMA_FUSED_SHARED_SLOTS = 0
+build/test-sigma-fused-shared-scratch-cuda-2: SIGMA_FUSED_SHARED_SLOTS = 2
+build/test-sigma-fused-shared-scratch-cuda-3: SIGMA_FUSED_SHARED_SLOTS = 3
+build/test-sigma-fused-shared-scratch-cuda-4: SIGMA_FUSED_SHARED_SLOTS = 4
+build/test-sigma-fused-shared-scratch-cuda-0 build/test-sigma-fused-shared-scratch-cuda-2 build/test-sigma-fused-shared-scratch-cuda-3 build/test-sigma-fused-shared-scratch-cuda-4: src/testsigmasharedscratchcuda.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo $< -o $@
+
+compile-sigma-fused-shared-scratch-cuda:
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-0 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-2 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-3 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-4 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+
+test-sigma-fused-shared-scratch-cuda: compile-sigma-fused-shared-scratch-cuda
+	./build/test-sigma-fused-shared-scratch-cuda-0
+	./build/test-sigma-fused-shared-scratch-cuda-2
+	./build/test-sigma-fused-shared-scratch-cuda-3
+	./build/test-sigma-fused-shared-scratch-cuda-4
+
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
+	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-add
+	rm -f build/test-packed-cuda
+	rm -f build/test-timing
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated build/test-packed-network-add
 	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host build/test-packed-pair-ilp-host build/test-packed-clmad-square-host
 	rm -f build/test-packed-top-hoist-host build/test-packed-onb-inv-host
@@ -960,11 +1184,20 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
+	rm -f build/table-v3-replay build/test-table-v3-replay
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
+	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
+	rm -f build/sigma-fused-shared-scratch-model build/sigma-fused-shared-scratch-model.json
+	rm -f build/test-sigma-fused-shared-scratch-native build/test-sigma-fused-shared-scratch-cuda-*
+	rm -f build/sigma-fused-shared-scratch-summarize build/sigma-fused-shared-scratch-source-audit build/sigma-fused-shared-scratch-compile-audit
+	rm -f build/sigma-fused-shared-scratch-log-check
 
 	rm -f build/test-packed-block-inverse-cuda build/test-last-slot-cache-cuda build/test-tail-product-cuda build/test-shared-x-cache-cuda
 
 .PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model test-sigma-fused-shared-scratch-native compile-sigma-fused-shared-scratch-cuda test-sigma-fused-shared-scratch-cuda
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-sigma-square-table-native test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
+.PHONY: path-cost all generate check-cli check-cycles test-status perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
 
 
 # Local packed preset. Prefer the measured optional assembler-only prefix,
@@ -1071,4 +1304,17 @@ test-cycle-escape:
 	./build/test-cycle-escape
 	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
 	./build/test-cycle-escape-hybrid
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_FAST2=1 src/testcycleescape.cpp -o build/test-cycle-escape-fast2
+	./build/test-cycle-escape-fast2
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_FAST2=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-fast2-hybrid
+	./build/test-cycle-escape-fast2-hybrid
 .PHONY: test-cycle-escape
+
+# Diagnostic counter reconciliation, both with the fast2 shortcut absent and
+# with the exact branch used by the B16 GPU profile.
+test-cycle-profile:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_PROFILE=1 -DECC_CYCLE_FAST2=0 src/testcycleprofile.cpp -o build/test-cycle-profile
+	./build/test-cycle-profile
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_PROFILE=1 -DECC_CYCLE_FAST2=1 src/testcycleprofile.cpp -o build/test-cycle-profile-fast2
+	./build/test-cycle-profile-fast2

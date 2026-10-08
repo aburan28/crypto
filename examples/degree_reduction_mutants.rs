@@ -156,7 +156,7 @@ fn main() {
         );
         // Total for the augmented route = extraction + final solve, summed in
         // linear space.
-        let total = (r.log2_extraction_cost.exp2() + solve.exp2()).log2();
+        let total = (r.extraction.log2_mean_cost(OMEGA).exp2() + solve.exp2()).log2();
         println!(
             "  {:>12} {:>4} {:>10.2} {:>10.2} {:>10.2} {:>10.2} {:>+9.2}",
             format!("{fam:?}"),
@@ -291,7 +291,7 @@ fn main() {
             // The augmented route's cost is extraction + solve. Storing the
             // solve alone would put a saving in the snapshot that the console
             // verdict does not agree with.
-            let total = (r.log2_extraction_cost.exp2() + solve.exp2()).log2();
+            let total = (r.extraction.log2_mean_cost(OMEGA).exp2() + solve.exp2()).log2();
             format!(
                 "{{\"family\":\"{fam:?}\",\"n\":{},\"n_sub\":{},\"full_vars\":{},\"targets\":{},\
                  \"cancel_dim_mean\":{:.3},\"pure_syzygies_mean\":{:.3},\"falls_mean\":{:.3},\

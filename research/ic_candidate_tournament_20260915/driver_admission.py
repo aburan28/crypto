@@ -20,7 +20,7 @@ EVALUATOR = ('autolab.py', 'tournament.py', 'portfolio.py', 'oracle.py', 'identi
              'measurement.py', 'driver_admission.py', 'qualification.py', 'producer/evidence.py', 'producer/timing.py')
 EVALUATOR += ('generic_driver.py', 'generic_admission.py', 'generic_build.py',
               'generic_bases.py', 'generic_stages.py', 'generic_queries.py',
-              'generic_query_law.py', 'generic_phases.py')
+              'generic_query_law.py', 'generic_phases.py', 'generic_backend_yield.py')
 INPUT_LAW = ('public-hash-to-curve-cofactor-v1; independently generated fixture, '
              'one supplied public point, no planted scalar')
 
@@ -229,7 +229,12 @@ def run_record(admitted, *, number, host_id, status, native=None, process_wall_n
 
 
 def online_table(rows, cases, arms, repetitions, rho_aliases):
-    """One paired row per target/IC/reference; failures never acquire a speedup."""
+    """One paired row per target/IC/reference; failures never acquire a speedup.
+
+    Run identifiers are a canonical sorted list. Screen execution shuffles
+    completion order, while verify rebuilds the same jobs by case, arm, and
+    repetition; that order is not part of the measurement.
+    """
     table = []
     for case in cases:
         for arm in arms:
@@ -242,6 +247,13 @@ def online_table(rows, cases, arms, repetitions, rho_aliases):
                     {r['repetition'] for r in group} == set(range(repetitions)) and
                     all(r['status'] == 'VERIFIED' and r['measurement']['native_timing'] is not None for r in group)
                     for group in (ic, rho))
+                if complete:
+                    require(len({r['measurement']['workload_id'] for r in ic+rho}) == 1,
+                            'paired online rows use different workloads')
+                    require(len({r['measurement']['candidate_id'] for r in ic}) == 1,
+                            'paired online IC repetitions use different candidates')
+                    require(len({r['measurement']['reference_id'] for r in rho}) == 1,
+                            'paired online rho repetitions use different references')
                 ic_ns = statistics.median(r['measurement']['native_timing']['online']['wall_ns'] for r in ic) if complete else None
                 rho_ns = statistics.median(r['measurement']['native_timing']['online']['wall_ns'] for r in rho) if complete else None
                 table.append(dict(case=case['id'], public_target=case['fixture']['targets'][0],
@@ -249,7 +261,7 @@ def online_table(rows, cases, arms, repetitions, rho_aliases):
                     candidate_ids=sorted({r['measurement']['candidate_id'] for r in ic}),
                     rho_reference_ids=sorted({r['measurement']['reference_id'] for r in rho}),
                     workload_ids=sorted({r['measurement']['workload_id'] for r in ic+rho}),
-                    run_ids=[r['measurement']['run_id'] for r in ic+rho],
+                    run_ids=sorted(r['measurement']['run_id'] for r in ic+rho),
                     IC_online_ms=ic_ns/1e6 if complete else None,
                     rho_online_ms=rho_ns/1e6 if complete else None,
                     online_speedup=rho_ns/ic_ns if complete else None,

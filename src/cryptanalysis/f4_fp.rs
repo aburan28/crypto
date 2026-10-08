@@ -69,6 +69,13 @@ fn field_ops_now() -> u64 {
     FIELD_OPS.load(AtomicOrdering::Relaxed)
 }
 
+/// The process-wide row-reduction counter, for callers that run several
+/// F4 solves concurrently and want the batch's total as one difference
+/// (per-report differences interleave under concurrency).
+pub fn field_ops_total() -> u64 {
+    field_ops_now()
+}
+
 #[inline]
 fn count_ops(n: usize) {
     FIELD_OPS.fetch_add(n as u64, AtomicOrdering::Relaxed);
@@ -288,6 +295,157 @@ impl F4Options {
     }
 }
 
+/// One step of a recorded run: the pair rows that did not reduce to zero
+/// by the reducers alone (as `(basis index, multiplier)`), and the leading
+/// monomials of the polynomials the step added.
+#[derive(Clone, Debug, Default)]
+pub struct TraceStep {
+    pub degree: u32,
+    pub rows: Vec<(usize, Vec<u32>)>,
+    pub new_lms: Vec<Vec<u32>>,
+}
+
+/// The trace of one run (Joux–Vitse's "F4 remake": the useful rows of
+/// every step, to be replayed on later systems of the same shape, skipping
+/// the pair selection and every row that reduced to zero).  A replay
+/// checks at every step that the leading monomials it finds are the
+/// recorded ones and gives up otherwise (`F4Report::trace_mismatch`).
+#[derive(Clone, Debug, Default)]
+pub struct F4Trace {
+    /// Leading monomials of the normalised input, in order.
+    pub input_lms: Vec<Vec<u32>>,
+    pub steps: Vec<TraceStep>,
+    /// The recorded run stopped at the staircase (`stop_staircase`).
+    pub stopped: bool,
+}
+
+/// Gauss–Jordan over `F_p` on dense `rows` (over the free columns), tracking
+/// for every pivot row which input rows it is a combination of.  Returns
+/// `(pivot column, contributing input rows)` per pivot.  Used once per `p`
+/// when a trace is recorded; its cost is not part of the replays.
+fn tracked_rref_contributors(rows: &[Vec<u64>], p: u64) -> Vec<(usize, Vec<usize>)> {
+    let n = rows.len();
+    if n == 0 {
+        return Vec::new();
+    }
+    let ncols = rows[0].len();
+    let words = n.div_ceil(64);
+    let mut m: Vec<Vec<u64>> = rows.to_vec();
+    let mut who: Vec<Vec<u64>> = (0..n)
+        .map(|i| {
+            let mut w = vec![0u64; words];
+            w[i / 64] |= 1 << (i % 64);
+            w
+        })
+        .collect();
+    let mut piv: Vec<(usize, usize)> = Vec::new(); // (row, col)
+    let mut r = 0usize;
+    for c in 0..ncols {
+        if r >= n {
+            break;
+        }
+        let Some(pr) = (r..n).find(|&i| m[i][c] != 0) else {
+            continue;
+        };
+        m.swap(r, pr);
+        who.swap(r, pr);
+        let inv = inv_mod_u64(m[r][c], p);
+        for v in m[r].iter_mut() {
+            *v = ((*v as u128 * inv as u128) % p as u128) as u64;
+        }
+        let pivot_row = m[r].clone();
+        let pivot_who = who[r].clone();
+        for i in 0..n {
+            if i != r && m[i][c] != 0 {
+                let f = m[i][c];
+                let neg = p - f;
+                for (x, &y) in m[i].iter_mut().zip(&pivot_row) {
+                    *x = ((*x as u128 + neg as u128 * y as u128) % p as u128) as u64;
+                }
+                for (a, &b) in who[i].iter_mut().zip(&pivot_who) {
+                    *a |= b;
+                }
+            }
+        }
+        piv.push((r, c));
+        r += 1;
+    }
+    piv.into_iter()
+        .map(|(row, col)| {
+            let contributors: Vec<usize> = (0..n)
+                .filter(|&i| who[row][i / 64] >> (i % 64) & 1 == 1)
+                .collect();
+            (col, contributors)
+        })
+        .collect()
+}
+
+fn inv_mod_u64(a: u64, p: u64) -> u64 {
+    // Fermat
+    let mut base = a % p;
+    let mut e = p - 2;
+    let mut acc = 1u64;
+    while e > 0 {
+        if e & 1 == 1 {
+            acc = ((acc as u128 * base as u128) % p as u128) as u64;
+        }
+        base = ((base as u128 * base as u128) % p as u128) as u64;
+        e >>= 1;
+    }
+    acc
+}
+
+enum TraceMode<'a> {
+    Off,
+    Record(&'a mut F4Trace),
+    Replay(&'a F4Trace),
+}
+
+/// [`f4`] recording the trace of the run.
+pub fn f4_record(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> (F4Report, F4Trace) {
+    let mut trace = F4Trace::default();
+    let r = f4_with_arithmetic(
+        input,
+        n_vars,
+        p,
+        opts,
+        arithmetic_mode(),
+        TraceMode::Record(&mut trace),
+    );
+    (r, trace)
+}
+
+/// [`f4`] replaying a recorded trace on a system of the same shape; the
+/// report's `trace_mismatch` is set (and its basis is then not a basis of
+/// anything) when the shapes diverge.
+pub fn f4_replay(
+    input: &[Poly],
+    n_vars: usize,
+    p: u64,
+    opts: &F4Options,
+    trace: &F4Trace,
+) -> F4Report {
+    f4_with_arithmetic(
+        input,
+        n_vars,
+        p,
+        opts,
+        arithmetic_mode(),
+        TraceMode::Replay(trace),
+    )
+}
+
+fn arithmetic_mode() -> u8 {
+    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+    *MODE.get_or_init(|| {
+        std::env::var("F4_FP_NARROW")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .filter(|&mode| mode <= 2)
+            .unwrap_or(2)
+    })
+}
+
 /// The number of monomials divisible by none of `lms` (the staircase of a
 /// zero-dimensional leading ideal), or `None` when it exceeds `bound` or is
 /// infinite.
@@ -375,6 +533,8 @@ pub struct F4Report {
     pub field_ops: u64,
     /// Steps reduced block by block under `F4Options::weights`.
     pub blocked_steps: usize,
+    /// A replay found leading monomials other than the recorded ones.
+    pub trace_mismatch: bool,
 }
 
 fn z3_weight(e: &[u32], w: &[u8]) -> u8 {
@@ -525,10 +685,114 @@ fn rref32(
     Some(pivots)
 }
 
-#[inline]
-fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+#[inline(always)]
+fn add_lazy_scalar(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
     for (x, &y) in acc[from..].iter_mut().zip(&pivot[from..]) {
         *x += factor * u64::from(y);
+    }
+}
+
+/// Four bounded 32-bit products accumulated in 64-bit lanes. The caller's
+/// existing normalization interval proves these additions cannot overflow.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn add_lazy_avx2(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    use std::arch::x86_64::{
+        __m128i, __m256i, _mm256_add_epi64, _mm256_cvtepu32_epi64, _mm256_loadu_si256,
+        _mm256_mul_epu32, _mm256_set1_epi64x, _mm256_storeu_si256, _mm_loadu_si128,
+    };
+    let (acc, pivot) = (&mut acc[from..], &pivot[from..]);
+    let multiplier = _mm256_set1_epi64x(factor as i64);
+    let mut i = 0;
+    while i + 4 <= acc.len() {
+        // SAFETY: the loop bounds cover four u32 pivot entries and four
+        // u64 accumulator entries; both intrinsics accept unaligned data.
+        let values = unsafe { _mm_loadu_si128(pivot.as_ptr().add(i) as *const __m128i) };
+        let wide = _mm256_cvtepu32_epi64(values);
+        let products = _mm256_mul_epu32(wide, multiplier);
+        let current = unsafe { _mm256_loadu_si256(acc.as_ptr().add(i) as *const __m256i) };
+        let updated = _mm256_add_epi64(current, products);
+        unsafe { _mm256_storeu_si256(acc.as_mut_ptr().add(i) as *mut __m256i, updated) };
+        i += 4;
+    }
+    for (x, &y) in acc[i..].iter_mut().zip(&pivot[i..]) {
+        *x += factor * u64::from(y);
+    }
+}
+
+/// Eight bounded 32-bit products accumulated in 64-bit lanes. The same
+/// 256-update normalization interval used by the scalar and AVX2 paths
+/// bounds every lane before it is reduced.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f")]
+unsafe fn add_lazy_avx512(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    use std::arch::x86_64::{
+        __m256i, __m512i, _mm256_loadu_si256, _mm512_add_epi64, _mm512_cvtepu32_epi64,
+        _mm512_loadu_si512, _mm512_mul_epu32, _mm512_set1_epi64, _mm512_storeu_si512,
+    };
+    let (acc, pivot) = (&mut acc[from..], &pivot[from..]);
+    let multiplier = _mm512_set1_epi64(factor as i64);
+    let mut i = 0;
+    while i + 8 <= acc.len() {
+        // SAFETY: the loop bounds cover eight pivot and accumulator entries;
+        // both loads and the store accept unaligned pointers.
+        let values = unsafe { _mm256_loadu_si256(pivot.as_ptr().add(i) as *const __m256i) };
+        let wide = _mm512_cvtepu32_epi64(values);
+        let products = _mm512_mul_epu32(wide, multiplier);
+        let current = unsafe { _mm512_loadu_si512(acc.as_ptr().add(i) as *const __m512i) };
+        let updated = _mm512_add_epi64(current, products);
+        unsafe { _mm512_storeu_si512(acc.as_mut_ptr().add(i) as *mut __m512i, updated) };
+        i += 8;
+    }
+    for (x, &y) in acc[i..].iter_mut().zip(&pivot[i..]) {
+        *x += factor * u64::from(y);
+    }
+}
+
+/// Zero selects scalar accumulation, one forces AVX2, and two forces
+/// AVX-512F. Both vector paths remain explicit opt-ins.
+fn lazy_simd_kind() -> u8 {
+    #[cfg(target_arch = "x86_64")]
+    {
+        static KIND: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+        *KIND.get_or_init(|| {
+            if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx512f")
+                && std::arch::is_x86_feature_detected!("avx2")
+            {
+                2
+            } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx2")
+            {
+                1
+            } else {
+                0
+            }
+        })
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        0
+    }
+}
+
+#[inline]
+fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64, simd: u8) {
+    debug_assert_eq!(acc.len(), pivot.len());
+    #[cfg(target_arch = "x86_64")]
+    if simd == 0 {
+        add_lazy_scalar(acc, pivot, from, factor);
+    } else if simd == 2 {
+        // SAFETY: `lazy_simd_kind` verified AVX-512F and AVX2.
+        unsafe { add_lazy_avx512(acc, pivot, from, factor) };
+    } else {
+        // SAFETY: `lazy_simd_kind` verified AVX2 before this call.
+        unsafe { add_lazy_avx2(acc, pivot, from, factor) };
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        let _ = simd;
+        add_lazy_scalar(acc, pivot, from, factor);
     }
     count_ops(acc.len() - from);
 }
@@ -551,6 +815,7 @@ fn rref32_deferred(
     deadline: Option<Instant>,
 ) -> Option<Vec<usize>> {
     const NORMALIZE_AFTER: usize = 256;
+    let simd = lazy_simd_kind();
     let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
     for source in std::mem::take(rows) {
         if deadline.is_some_and(|d| Instant::now() > d) {
@@ -564,7 +829,7 @@ fn rref32_deferred(
             }
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -595,7 +860,7 @@ fn rref32_deferred(
         for (c, pivot) in later.iter().rev() {
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -673,15 +938,7 @@ fn rref(rows: &mut Vec<Vec<u64>>, fp: Barrett, deadline: Option<Instant>) -> Opt
 
 /// Degree-bounded F4.
 pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
-    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
-    let mode = *MODE.get_or_init(|| {
-        std::env::var("F4_FP_NARROW")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .filter(|&mode| mode <= 2)
-            .unwrap_or(2)
-    });
-    f4_with_arithmetic(input, n_vars, p, opts, mode)
+    f4_with_arithmetic(input, n_vars, p, opts, arithmetic_mode(), TraceMode::Off)
 }
 
 fn f4_with_arithmetic(
@@ -690,6 +947,7 @@ fn f4_with_arithmetic(
     p: u64,
     opts: &F4Options,
     mode: u8,
+    mut trace: TraceMode<'_>,
 ) -> F4Report {
     let t0 = Instant::now();
     let ops0 = field_ops_now();
@@ -754,6 +1012,7 @@ fn f4_with_arithmetic(
             staircase_at_stop: None,
             field_ops: field_ops_now() - ops0,
             blocked_steps: bs,
+            trace_mismatch: false,
         }
     };
 
@@ -819,6 +1078,24 @@ fn f4_with_arithmetic(
             &mut pairs_above_bound,
         );
     }
+    let input_lms_now: Vec<Vec<u32>> = basis.iter().map(|f| f[0].0.clone()).collect();
+    let mut input_mismatch = false;
+    match &mut trace {
+        TraceMode::Record(t) => t.input_lms = input_lms_now,
+        TraceMode::Replay(t) => {
+            // other input leading monomials: not this trace's shape, a full run
+            if t.input_lms != input_lms_now {
+                input_mismatch = true;
+            }
+        }
+        TraceMode::Off => {}
+    }
+    let mut replay_step = 0usize;
+    let mut mismatch = false;
+    if input_mismatch {
+        mismatch = true;
+        trace = TraceMode::Off;
+    }
     // interreduce the input (tails included) so the first matrix is small
     let mut steps = 0usize;
     let mut max_rows = 0usize;
@@ -829,7 +1106,38 @@ fn f4_with_arithmetic(
     let mut learned = (0u32, 0usize, 0usize);
     let mut staircase_at_stop: Option<usize> = None;
 
-    while !pairs.is_empty() {
+    loop {
+        if let TraceMode::Replay(t) = &trace {
+            if replay_step >= t.steps.len() {
+                // the recorded run's end: the recorded staircase, or the
+                // pairs still pending are processed as a full run
+                let lms: Vec<&[u32]> = basis
+                    .iter()
+                    .zip(&alive)
+                    .filter(|(_, &a)| a)
+                    .map(|(f, _)| f[0].0.as_slice())
+                    .collect();
+                match (
+                    t.stopped,
+                    opts.stop_staircase
+                        .and_then(|b| staircase_at_most(&lms, n_vars, b)),
+                ) {
+                    (true, Some(count)) => {
+                        staircase_at_stop = Some(count);
+                        break;
+                    }
+                    _ => {
+                        mismatch = t.stopped;
+                        trace = TraceMode::Off;
+                        if pairs.is_empty() {
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if pairs.is_empty() {
+            break;
+        }
         if debug {
             eprintln!("f4: {} pairs pending, basis {}", pairs.len(), basis.len());
         }
@@ -851,24 +1159,61 @@ fn f4_with_arithmetic(
                 );
             }
         }
-        let d = pairs.iter().map(|pr| pr.degree).min().unwrap();
-        degree_reached = degree_reached.max(d);
-        let (selected, rest): (Vec<Pair>, Vec<Pair>) =
-            pairs.drain(..).partition(|pr| pr.degree == d);
-        pairs = rest;
         // symbolic preprocessing
         let mut rows_poly: Vec<(usize, Vec<u32>)> = Vec::new(); // (basis index, multiplier)
         let mut seen: FxSet<(usize, Vec<u32>)> = FxSet::default();
-        for pr in &selected {
-            for &idx in &[pr.i, pr.j] {
-                let m: Vec<u32> = pr
-                    .lcm
-                    .iter()
-                    .zip(&basis[idx][0].0)
-                    .map(|(a, b)| a - b)
-                    .collect();
-                if seen.insert((idx, m.clone())) {
-                    rows_poly.push((idx, m));
+        let d;
+        let mut selected_len = 0usize;
+        if let TraceMode::Replay(t) = &trace {
+            // the recorded useful rows of this step stand in for the pairs
+            let step = &t.steps[replay_step];
+            replay_step += 1;
+            d = step.degree;
+            degree_reached = degree_reached.max(d);
+            // the pairs stay as `add` accumulates them: a replay that diverges
+            // (or ends off the recorded staircase) finishes as a full run
+            // over all of them
+            for (idx, m) in &step.rows {
+                if *idx >= basis.len() {
+                    let mut r = report(
+                        &basis,
+                        &alive,
+                        false,
+                        degree_reached,
+                        solving_degree,
+                        steps,
+                        max_rows,
+                        max_cols,
+                        false,
+                        pairs_above_bound,
+                        learned,
+                        blocked_steps,
+                    );
+                    r.trace_mismatch = true;
+                    return r;
+                }
+                if seen.insert((*idx, m.clone())) {
+                    rows_poly.push((*idx, m.clone()));
+                }
+            }
+        } else {
+            d = pairs.iter().map(|pr| pr.degree).min().unwrap();
+            degree_reached = degree_reached.max(d);
+            let (selected, rest): (Vec<Pair>, Vec<Pair>) =
+                pairs.drain(..).partition(|pr| pr.degree == d);
+            pairs = rest;
+            selected_len = selected.len();
+            for pr in &selected {
+                for &idx in &[pr.i, pr.j] {
+                    let m: Vec<u32> = pr
+                        .lcm
+                        .iter()
+                        .zip(&basis[idx][0].0)
+                        .map(|(a, b)| a - b)
+                        .collect();
+                    if seen.insert((idx, m.clone())) {
+                        rows_poly.push((idx, m));
+                    }
                 }
             }
         }
@@ -978,6 +1323,12 @@ fn f4_with_arithmetic(
         if block_classes.is_some() {
             blocked_steps += 1;
         }
+        // which pair rows survived the reducers, and (when recording) their
+        // reduced rows before the echelon form, to find the contributors of
+        // every new pivot
+        let mut useful: Vec<bool> = Vec::new();
+        let recording = matches!(trace, TraceMode::Record(_));
+        let mut rec_rows: Vec<Vec<u64>> = Vec::new();
         let pivots: Option<(Vec<Vec<u64>>, Vec<usize>)> = if deferred {
             let fp32 = fp32.expect("deferred mode has narrow arithmetic");
             let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
@@ -1023,7 +1374,14 @@ fn f4_with_arithmetic(
                 pair_rows.iter().map(reduce_pair_row).collect()
             };
             reduced.and_then(|mut rows| {
+                useful = rows.iter().map(|r| r.iter().any(|&v| v != 0)).collect();
                 rows.retain(|r| r.iter().any(|&v| v != 0));
+                if recording {
+                    rec_rows = rows
+                        .iter()
+                        .map(|r| r.iter().map(|&v| v as u64).collect())
+                        .collect();
+                }
                 let piv = match &block_classes {
                     Some(cls) => {
                         rref_blocked(&mut rows, cls, |b| rref32_deferred(b, fp32, fp, deadline))
@@ -1069,7 +1427,14 @@ fn f4_with_arithmetic(
                 pair_rows.iter().map(reduce_pair_row).collect()
             };
             reduced.and_then(|mut rows| {
+                useful = rows.iter().map(|r| r.iter().any(|&v| v != 0)).collect();
                 rows.retain(|r| r.iter().any(|&v| v != 0));
+                if recording {
+                    rec_rows = rows
+                        .iter()
+                        .map(|r| r.iter().map(|&v| v as u64).collect())
+                        .collect();
+                }
                 let piv = match &block_classes {
                     Some(cls) => rref_blocked(&mut rows, cls, |b| rref32(b, fp32, deadline)),
                     None => rref32(&mut rows, fp32, deadline),
@@ -1113,7 +1478,11 @@ fn f4_with_arithmetic(
                 pair_rows.iter().map(reduce_pair_row).collect()
             };
             reduced.and_then(|mut rows| {
+                useful = rows.iter().map(|r| r.iter().any(|&v| v != 0)).collect();
                 rows.retain(|r| r.iter().any(|&v| v != 0));
+                if recording {
+                    rec_rows = rows.iter().map(|r| r.to_vec()).collect();
+                }
                 let piv = match &block_classes {
                     Some(cls) => rref_blocked(&mut rows, cls, |b| rref(b, fp, deadline)),
                     None => rref(&mut rows, fp, deadline),
@@ -1124,7 +1493,7 @@ fn f4_with_arithmetic(
         if debug {
             eprintln!(
                 "f4 step {steps}: degree {d}, {} pairs, {} rows × {n_cols} cols, {} pivots, basis {}",
-                selected.len(),
+                selected_len,
                 sparse.len(),
                 reducers.len() + pivots.as_ref().map_or(0, |(_, pv)| pv.len()),
                 basis.len()
@@ -1181,6 +1550,43 @@ fn f4_with_arithmetic(
             learned = (learned.0.max(d), max_cols, steps);
         }
         let learned_now = !new_polys.is_empty();
+        match &mut trace {
+            TraceMode::Record(t) => {
+                // the pair rows that the new pivots are combinations of
+                let retained: Vec<usize> = (0..n_pair_rows).filter(|&i| useful[i]).collect();
+                let mut needed = vec![false; retained.len()];
+                for (col, contributors) in tracked_rref_contributors(&rec_rows, p) {
+                    if !input_lm[free_cols[col]] {
+                        for i in contributors {
+                            needed[i] = true;
+                        }
+                    }
+                }
+                t.steps.push(TraceStep {
+                    degree: d,
+                    rows: retained
+                        .iter()
+                        .zip(&needed)
+                        .filter(|(_, &nd)| nd)
+                        .map(|(&i, _)| rows_poly[i].clone())
+                        .collect(),
+                    new_lms: new_polys.iter().map(|f| f[0].0.clone()).collect(),
+                });
+            }
+            TraceMode::Replay(t) => {
+                let expected = &t.steps[replay_step - 1].new_lms;
+                let found: Vec<&Vec<u32>> = new_polys.iter().map(|f| &f[0].0).collect();
+                if found.len() != expected.len() || found.iter().zip(expected).any(|(a, b)| *a != b)
+                {
+                    // the shapes diverged: keep what this step found (it is
+                    // in the ideal) and finish as a full run over the pairs
+                    // the basis has accumulated
+                    mismatch = true;
+                    trace = TraceMode::Off;
+                }
+            }
+            TraceMode::Off => {}
+        }
         for f in new_polys {
             add(
                 f,
@@ -1200,6 +1606,9 @@ fn f4_with_arithmetic(
                 .collect();
             if let Some(count) = staircase_at_most(&lms, n_vars, bound) {
                 staircase_at_stop = Some(count);
+                if let TraceMode::Record(t) = &mut trace {
+                    t.stopped = true;
+                }
                 break;
             }
         }
@@ -1229,6 +1638,7 @@ fn f4_with_arithmetic(
         staircase_at_stop,
         field_ops: field_ops_now() - ops0,
         blocked_steps,
+        trace_mismatch: mismatch,
     }
 }
 
@@ -1596,6 +2006,70 @@ pub fn eval(f: &Poly, x: &[u64], p: u64) -> u64 {
 mod tests {
     use super::*;
 
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn avx2_lazy_accumulation_matches_scalar_at_boundaries() {
+        if !std::arch::is_x86_feature_detected!("avx2") {
+            return;
+        }
+        let fp = Barrett::new(65521);
+        for width in [0, 1, 3, 4, 5, 7, 8, 15, 16, 17, 33, 257, 4097] {
+            let pivot: Vec<u32> = (0..width)
+                .map(|i| ((i * 7919 + 137) % 65521) as u32)
+                .collect();
+            for from in [0, width.min(1), width / 3, width] {
+                let initial: Vec<u64> = (0..width)
+                    .map(|i| ((i * 1_000_003 + 17) as u64) % 65521)
+                    .collect();
+                let mut scalar = initial.clone();
+                let mut vector = initial;
+                for update in 0..256 {
+                    let factor = ((update * 4093 + 1) % 65521) as u64;
+                    add_lazy_scalar(&mut scalar, &pivot, from, factor);
+                    // SAFETY: the runtime AVX2 feature was checked above.
+                    unsafe { add_lazy_avx2(&mut vector, &pivot, from, factor) };
+                    assert_eq!(vector, scalar, "width={width} from={from} update={update}");
+                }
+                normalize_lazy(&mut scalar, fp);
+                normalize_lazy(&mut vector, fp);
+                assert_eq!(vector, scalar, "normalization width={width} from={from}");
+            }
+        }
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn avx512_lazy_accumulation_matches_scalar_at_boundaries() {
+        if !std::arch::is_x86_feature_detected!("avx512f")
+            || !std::arch::is_x86_feature_detected!("avx2")
+        {
+            return;
+        }
+        let fp = Barrett::new(65521);
+        for width in [0, 1, 7, 8, 9, 15, 16, 17, 33, 257, 4097] {
+            let pivot: Vec<u32> = (0..width)
+                .map(|i| ((i * 7919 + 137) % 65521) as u32)
+                .collect();
+            for from in [0, width.min(1), width / 3, width] {
+                let initial: Vec<u64> = (0..width)
+                    .map(|i| ((i * 1_000_003 + 17) as u64) % 65521)
+                    .collect();
+                let mut scalar = initial.clone();
+                let mut vector = initial;
+                for update in 0..256 {
+                    let factor = ((update * 4093 + 1) % 65521) as u64;
+                    add_lazy_scalar(&mut scalar, &pivot, from, factor);
+                    // SAFETY: the runtime AVX-512F and AVX2 features were checked above.
+                    unsafe { add_lazy_avx512(&mut vector, &pivot, from, factor) };
+                    assert_eq!(vector, scalar, "width={width} from={from} update={update}");
+                }
+                normalize_lazy(&mut scalar, fp);
+                normalize_lazy(&mut vector, fp);
+                assert_eq!(vector, scalar, "normalization width={width} from={from}");
+            }
+        }
+    }
+
     fn poly(terms: &[(&[u32], u64)]) -> Poly {
         terms.iter().map(|(e, c)| (e.to_vec(), *c)).collect()
     }
@@ -1937,9 +2411,9 @@ mod tests {
                 .map(|_| monomials.iter().map(|m| (m.clone(), next() % p)).collect())
                 .collect();
             let opts = F4Options::new(Ordering::Grevlex, 6);
-            let wide = f4_with_arithmetic(&sys, 3, p, &opts, 0);
-            let narrow = f4_with_arithmetic(&sys, 3, p, &opts, 1);
-            let deferred = f4_with_arithmetic(&sys, 3, p, &opts, 2);
+            let wide = f4_with_arithmetic(&sys, 3, p, &opts, 0, TraceMode::Off);
+            let narrow = f4_with_arithmetic(&sys, 3, p, &opts, 1, TraceMode::Off);
+            let deferred = f4_with_arithmetic(&sys, 3, p, &opts, 2, TraceMode::Off);
             assert_eq!(narrow.basis, wide.basis, "p={p}");
             assert_eq!(narrow.steps, wide.steps, "p={p}");
             assert_eq!(

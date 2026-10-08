@@ -1,0 +1,855 @@
+{
+ "what_this_is": "Ledger \u00a723's figures, from the checked rows.",
+ "sizes": [
+  {
+   "curve": "K_1 / GF(2^47)",
+   "a": 1,
+   "n": 47,
+   "r": 106781081677,
+   "log2_r": 36.64,
+   "curve_id": "EC1N47Ce1h9669b6d5105b",
+   "candidate_id": "IC1N47Ckb1fb5264PDP3pairtableRCaimedLAsparseTDwalkISO0hfdc07b2031fa",
+   "rho_reference_uid": "urn:ec-candidate:1:sha256:262914cdb959dd20ec23bd8293fac95dc310609ccb8e972d79be331f4a85c7e9",
+   "rows": {
+    "R1": 64,
+    "R2": 4,
+    "not_passing": []
+   },
+   "all_rows_pass_the_check": true,
+   "online_speedup": {
+    "mean_ratio": 9.765321645722155,
+    "ci95": [
+     7.8270173013109074,
+     12.485660110344407
+    ],
+    "median_of_rows": 11.173605588938067,
+    "rows_above_one": 64
+   },
+   "online_speedup_rho_model": {
+    "mean_ratio": 4.34101280853476,
+    "ci95": [
+     3.473573898679461,
+     5.527832356600534
+    ]
+   },
+   "cold_ratio_ic_over_rho": {
+    "value": 4.946769165949517,
+    "ci95": [
+     4.5500424384951605,
+     5.409506746030778
+    ]
+   },
+   "break_even_targets": {
+    "value": 7.1187482335527985,
+    "ci95": [
+     6.316663662363045,
+     8.177450863430447
+    ]
+   },
+   "s_ic_online_mean": 0.06731665118067626,
+   "s_rho_online_mean": 0.6573687508921857,
+   "s_rho_model_mean": 0.2922224450029822,
+   "s_setup": 4.200432342525428,
+   "s_rho_setup": 0.20536586447710115,
+   "s_floor_steps": 0.12926948294637178,
+   "rho_steps_over_floor_mean": 1.0413241869608778,
+   "rho_units_per_step_median": 4.86695968803288,
+   "canonical_step_units": 2.1685398620292853,
+   "rho_step_over_model_median": 2.24706893515064,
+   "precomputation_boundary_model": {
+    "what": "Bernstein-Lange: a generic walk given the index calculus's set-up as its budget, online ~ 1.93*1.21 r c^2 / (2n P) units; a model",
+    "bl_online_units": 9088.721783343213,
+    "s_bl_online": 0.027813500530480293,
+    "ic_online_over_bl": 2.420286907320609
+   },
+   "ic_replay_ns_median": 7129.5,
+   "rho_replay_ns_median": 8440.0,
+   "aa": [
+    {
+     "target": 1,
+     "online_speedup_R2_over_R1": 1.2996808682720655,
+     "ic_online_R2_over_R1": 0.9101534642529449,
+     "rho_online_R2_over_R1": 1.1834895399574945
+    },
+    {
+     "target": 2,
+     "online_speedup_R2_over_R1": 1.0975973831521642,
+     "ic_online_R2_over_R1": 0.9757006914338189,
+     "rho_online_R2_over_R1": 1.068149768847553
+    },
+    {
+     "target": 3,
+     "online_speedup_R2_over_R1": 0.9530006141253663,
+     "ic_online_R2_over_R1": 0.9152961095131926,
+     "rho_online_R2_over_R1": 1.0044956471557869
+    },
+    {
+     "target": 4,
+     "online_speedup_R2_over_R1": 0.8776906695605728,
+     "ic_online_R2_over_R1": 1.2063799175571641,
+     "rho_online_R2_over_R1": 1.0746509390185695
+    }
+   ],
+   "isolation": {
+    "processes": 70,
+    "contended": 2,
+    "failed": 0,
+    "retries": 2
+   },
+   "diagnostics": {
+    "online_phase_shares": {
+     "recovery_check": 0.007184993267839883,
+     "target_descent": 0.0021944098463831966,
+     "target_pdp": 0.9590580306443377,
+     "target_query": 0.022283721682365688,
+     "target_relation_check": 0.0026797646503153383
+    },
+    "curve_construction_units": 38317.89582456302,
+    "s_curve_construction": 0.11726124324727022,
+    "cold_ratio_without_curve_construction": 6.313789246637844,
+    "cold_ratio_rho_at_canonical_step": 8.576867487432251,
+    "online_trials_mean": 4.3125,
+    "against_s22_batch_descent": {
+     "s22_files": 20,
+     "online_over_s22_per_target_descent": 0.9633500904095074,
+     "trials_ratio": 0.8141592920353983,
+     "units_per_trial_ratio": 1.1810545728557422
+    }
+   }
+  },
+  {
+   "curve": "K_0 / GF(2^57)",
+   "a": 0,
+   "n": 57,
+   "r": 275295876199,
+   "log2_r": 38.0,
+   "curve_id": "EC1N57Ce0hb5884395c7f2",
+   "candidate_id": "IC1N57Ckb0fb7296PDP3pairtableRCaimedLAsparseTDwalkISO0hce57078f6db6",
+   "rho_reference_uid": "urn:ec-candidate:1:sha256:55c5f5adbba0534321aa7967e6967947a323877fff3efdc3e14cc2847ee8adca",
+   "rows": {
+    "R1": 64,
+    "R2": 4,
+    "not_passing": []
+   },
+   "all_rows_pass_the_check": true,
+   "online_speedup": {
+    "mean_ratio": 13.537727158347499,
+    "ci95": [
+     10.725559173818155,
+     17.346473982010725
+    ],
+    "median_of_rows": 16.78469537151191,
+    "rows_above_one": 63
+   },
+   "online_speedup_rho_model": {
+    "mean_ratio": 5.965561658306264,
+    "ci95": [
+     4.764596953867595,
+     7.606960177985701
+    ]
+   },
+   "cold_ratio_ic_over_rho": {
+    "value": 1.9845626541276857,
+    "ci95": [
+     1.952040034931497,
+     2.0186986182709883
+    ]
+   },
+   "break_even_targets": {
+    "value": 15.202756221157943,
+    "ci95": [
+     13.39550041604799,
+     17.459170154392037
+    ]
+   },
+   "s_ic_online_mean": 0.042384311198860214,
+   "s_rho_online_mean": 0.573787240804662,
+   "s_rho_model_mean": 0.2528462218016413,
+   "s_setup": 8.07878919400616,
+   "s_rho_setup": 3.5183856559863838,
+   "s_floor_steps": 0.11738362384644484,
+   "rho_steps_over_floor_mean": 0.951218365452095,
+   "rho_units_per_step_median": 4.972046545147329,
+   "canonical_step_units": 2.255632469705837,
+   "rho_step_over_model_median": 2.175932379085758,
+   "precomputation_boundary_model": {
+    "what": "Bernstein-Lange: a generic walk given the index calculus's set-up as its budget, online ~ 1.93*1.21 r c^2 / (2n P) units; a model",
+    "bl_online_units": 6769.055583104221,
+    "s_bl_online": 0.012901144134549987,
+    "ic_online_over_bl": 3.2853141362363862
+   },
+   "ic_replay_ns_median": 9043.5,
+   "rho_replay_ns_median": 12109.0,
+   "aa": [
+    {
+     "target": 1,
+     "online_speedup_R2_over_R1": 1.2905579783077104,
+     "ic_online_R2_over_R1": 0.857589437390794,
+     "rho_online_R2_over_R1": 1.03921359056658
+    },
+    {
+     "target": 2,
+     "online_speedup_R2_over_R1": 0.9203854501060559,
+     "ic_online_R2_over_R1": 1.0565716783401322,
+     "rho_online_R2_over_R1": 0.9096184616800398
+    },
+    {
+     "target": 3,
+     "online_speedup_R2_over_R1": 1.1844912590041283,
+     "ic_online_R2_over_R1": 0.8779459394282806,
+     "rho_online_R2_over_R1": 1.0430667322179783
+    },
+    {
+     "target": 4,
+     "online_speedup_R2_over_R1": 1.1878081646013272,
+     "ic_online_R2_over_R1": 0.9748982852163113,
+     "rho_online_R2_over_R1": 1.1021294755714826
+    }
+   ],
+   "isolation": {
+    "processes": 68,
+    "contended": 0,
+    "failed": 0,
+    "retries": 0
+   },
+   "diagnostics": {
+    "online_phase_shares": {
+     "recovery_check": 0.009198528735821858,
+     "target_descent": 0.001508137935234541,
+     "target_pdp": 0.543109591691791,
+     "target_query": 0.4380743198394626,
+     "target_relation_check": 0.00168137310765051
+    },
+    "curve_construction_units": 1788472.646609568,
+    "s_curve_construction": 3.408650307467104,
+    "cold_ratio_without_curve_construction": 8.213014968979117,
+    "cold_ratio_rho_at_canonical_step": 2.1534537701162,
+    "online_trials_mean": 11061.53125
+   }
+  },
+  {
+   "curve": "K_0 / GF(2^41)",
+   "a": 0,
+   "n": 41,
+   "r": 549756390943,
+   "log2_r": 39.0,
+   "curve_id": "EC1N41Ce0he09550ab560a",
+   "candidate_id": "IC1N41Ckb0fb6560PDP3pairtableRCaimedLAsparseTDwalkISO0he13eaebe8e18",
+   "rho_reference_uid": "urn:ec-candidate:1:sha256:54f902777373ae61693286300c60be543f31e17d586cf7b67f5e06ffe83bc12e",
+   "rows": {
+    "R1": 64,
+    "R2": 4,
+    "not_passing": []
+   },
+   "all_rows_pass_the_check": true,
+   "online_speedup": {
+    "mean_ratio": 9.383847456632276,
+    "ci95": [
+     7.4308978775045205,
+     12.126913139715521
+    ],
+    "median_of_rows": 11.23618462197506,
+    "rows_above_one": 63
+   },
+   "online_speedup_rho_model": {
+    "mean_ratio": 4.573391331935683,
+    "ci95": [
+     3.6404295001013067,
+     5.849306166448212
+    ]
+   },
+   "cold_ratio_ic_over_rho": {
+    "value": 8.044290213253069,
+    "ci95": [
+     7.259586172239758,
+     9.010665102563982
+    ]
+   },
+   "break_even_targets": {
+    "value": 9.884128309762037,
+    "ci95": [
+     8.70264545117089,
+     11.454594836127228
+    ]
+   },
+   "s_ic_online_mean": 0.0665415801474906,
+   "s_rho_online_mean": 0.6244160376273226,
+   "s_rho_model_mean": 0.3043206858598371,
+   "s_setup": 5.514102718469544,
+   "s_rho_setup": 0.06932376422901197,
+   "s_floor_steps": 0.13840539283493047,
+   "rho_steps_over_floor_mean": 0.9642090344191143,
+   "rho_units_per_step_median": 4.652925803784777,
+   "canonical_step_units": 2.269717997999659,
+   "rho_step_over_model_median": 2.0408631475842087,
+   "precomputation_boundary_model": {
+    "what": "Bernstein-Lange: a generic walk given the index calculus's set-up as its budget, online ~ 1.93*1.21 r c^2 / (2n P) units; a model",
+    "bl_online_units": 19727.99372944072,
+    "s_bl_online": 0.026607114456267997,
+    "ic_online_over_bl": 2.500894272351845
+   },
+   "ic_replay_ns_median": 8590.5,
+   "rho_replay_ns_median": 10211.0,
+   "aa": [
+    {
+     "target": 1,
+     "online_speedup_R2_over_R1": 1.0174202618284525,
+     "ic_online_R2_over_R1": 0.948496535771126,
+     "rho_online_R2_over_R1": 0.9893796118606646
+    },
+    {
+     "target": 2,
+     "online_speedup_R2_over_R1": 1.3943338184615732,
+     "ic_online_R2_over_R1": 0.75225636194326,
+     "rho_online_R2_over_R1": 0.9987595921111397
+    },
+    {
+     "target": 3,
+     "online_speedup_R2_over_R1": 0.8106261041018659,
+     "ic_online_R2_over_R1": 1.1917568664167166,
+     "rho_online_R2_over_R1": 0.9795443292918613
+    },
+    {
+     "target": 4,
+     "online_speedup_R2_over_R1": 1.0843899491523117,
+     "ic_online_R2_over_R1": 1.0470748147137223,
+     "rho_online_R2_over_R1": 0.9407031098703134
+    }
+   ],
+   "isolation": {
+    "processes": 68,
+    "contended": 0,
+    "failed": 0,
+    "retries": 0
+   },
+   "diagnostics": {
+    "online_phase_shares": {
+     "recovery_check": 0.003287109875375314,
+     "target_descent": 0.0008774674380988318,
+     "target_pdp": 0.5279586859906829,
+     "target_query": 0.48393590332032965,
+     "target_relation_check": 0.0008379271221147216
+    },
+    "curve_construction_units": 21415.13118321495,
+    "s_curve_construction": 0.028882554115853703,
+    "cold_ratio_without_curve_construction": 8.891126124173486,
+    "cold_ratio_rho_at_canonical_step": 14.935707722381562,
+    "online_trials_mean": 28411.8125,
+    "against_s22_batch_descent": {
+     "s22_files": 20,
+     "online_over_s22_per_target_descent": 1.3851620830240372,
+     "trials_ratio": 1.2098430539296066,
+     "units_per_trial_ratio": 1.154154312963366
+    }
+   }
+  },
+  {
+   "curve": "K_0 / GF(2^53)",
+   "a": 0,
+   "n": 53,
+   "r": 21044858204113,
+   "log2_r": 44.26,
+   "curve_id": "EC1N53Ce0hb097de99be9a",
+   "candidate_id": "IC1N53Ckb0fb27984PDP3pairtableRCaimedLAsparseTDwalkISO0hea53259919c9",
+   "rho_reference_uid": "urn:ec-candidate:1:sha256:ae559fdc2cbeffe0f8946210ea2d0a6da2deca1274842a9f65181f3faa3aec7b",
+   "rows": {
+    "R1": 64,
+    "R2": 4,
+    "not_passing": []
+   },
+   "all_rows_pass_the_check": true,
+   "online_speedup": {
+    "mean_ratio": 17.489057559646973,
+    "ci95": [
+     13.616440401962318,
+     22.595779770476852
+    ],
+    "median_of_rows": 21.3575458456026,
+    "rows_above_one": 64
+   },
+   "online_speedup_rho_model": {
+    "mean_ratio": 9.367317061316216,
+    "ci95": [
+     7.334894040864442,
+     12.189256443256584
+    ]
+   },
+   "cold_ratio_ic_over_rho": {
+    "value": 14.703867319407847,
+    "ci95": [
+     13.062127240120772,
+     16.65893776014309
+    ]
+   },
+   "break_even_targets": {
+    "value": 16.125485011850408,
+    "ci95": [
+     14.140044391186134,
+     18.591533988694362
+    ]
+   },
+   "s_ic_online_mean": 0.027721901714047134,
+   "s_rho_online_mean": 0.4848299347398465,
+   "s_rho_model_mean": 0.25967984289812496,
+   "s_setup": 7.371088735353948,
+   "s_rho_setup": 0.01835813655770937,
+   "s_floor_steps": 0.12173263026670363,
+   "rho_steps_over_floor_mean": 0.993697891893538,
+   "rho_units_per_step_median": 3.9850650183431062,
+   "canonical_step_units": 2.142270081067134,
+   "rho_step_over_model_median": 1.8556736985826816,
+   "precomputation_boundary_model": {
+    "what": "Bernstein-Lange: a generic walk given the index calculus's set-up as its budget, online ~ 1.93*1.21 r c^2 / (2n P) units; a model",
+    "bl_online_units": 62925.49224605123,
+    "s_bl_online": 0.013716825685612884,
+    "ic_online_over_bl": 2.0210143621729992
+   },
+   "ic_replay_ns_median": 12494.0,
+   "rho_replay_ns_median": 15425.5,
+   "aa": [
+    {
+     "target": 1,
+     "online_speedup_R2_over_R1": 1.1347772609655913,
+     "ic_online_R2_over_R1": 0.8555120028761825,
+     "rho_online_R2_over_R1": 1.042437423217474
+    },
+    {
+     "target": 2,
+     "online_speedup_R2_over_R1": 0.9228667355761347,
+     "ic_online_R2_over_R1": 0.9810190420625173,
+     "rho_online_R2_over_R1": 0.9256053528446163
+    },
+    {
+     "target": 3,
+     "online_speedup_R2_over_R1": 0.9611056099605932,
+     "ic_online_R2_over_R1": 1.069722311834754,
+     "rho_online_R2_over_R1": 1.2647550892875492
+    },
+    {
+     "target": 4,
+     "online_speedup_R2_over_R1": 0.9992568021001415,
+     "ic_online_R2_over_R1": 1.107332016517215,
+     "rho_online_R2_over_R1": 1.1288725635935932
+    }
+   ],
+   "isolation": {
+    "processes": 68,
+    "contended": 0,
+    "failed": 0,
+    "retries": 0
+   },
+   "diagnostics": {
+    "online_phase_shares": {
+     "recovery_check": 0.001428159278764806,
+     "target_descent": 0.00037872442091469805,
+     "target_pdp": 0.6252280199628475,
+     "target_query": 0.3734730914537223,
+     "target_relation_check": 0.000384679088088309
+    },
+    "curve_construction_units": 43737.35057028719,
+    "s_curve_construction": 0.00953409488442768,
+    "cold_ratio_without_curve_construction": 15.240965981501452,
+    "cold_ratio_rho_at_canonical_step": 26.610791272288324,
+    "online_trials_mean": 56384.453125,
+    "against_s22_batch_descent": {
+     "s22_files": 20,
+     "online_over_s22_per_target_descent": 1.4521538385456856,
+     "trials_ratio": 1.1981370896557975,
+     "units_per_trial_ratio": 1.2163721319563428
+    }
+   }
+  },
+  {
+   "curve": "K_1 / GF(2^59)",
+   "a": 1,
+   "n": 59,
+   "r": 25179555920633,
+   "log2_r": 44.52,
+   "curve_id": "EC1N59Ce1h20858f64459b",
+   "candidate_id": "IC1N59Ckb1fb30208PDP3pairtableRCaimedLAsparseTDwalkISO0h5a79e6a6cec2",
+   "rho_reference_uid": "urn:ec-candidate:1:sha256:809d876e6e3120bdf88115bc143e4a2798e826e424f9bbb49306150f5927f148",
+   "rows": {
+    "R1": 64,
+    "R2": 4,
+    "not_passing": []
+   },
+   "all_rows_pass_the_check": true,
+   "online_speedup": {
+    "mean_ratio": 16.87050545272324,
+    "ci95": [
+     13.045115489360636,
+     22.091903881494
+    ],
+    "median_of_rows": 18.70244750972887,
+    "rows_above_one": 64
+   },
+   "online_speedup_rho_model": {
+    "mean_ratio": 8.895399369043808,
+    "ci95": [
+     6.852604117843578,
+     11.615222523264729
+    ]
+   },
+   "cold_ratio_ic_over_rho": {
+    "value": 15.668163853624774,
+    "ci95": [
+     13.881155771007709,
+     17.869326132352256
+    ]
+   },
+   "break_even_targets": {
+    "value": 18.439342463174974,
+    "ci95": [
+     15.928927252111986,
+     21.787319544961324
+    ]
+   },
+   "s_ic_online_mean": 0.030761335109632738,
+   "s_rho_online_mean": 0.5189592717001059,
+   "s_rho_model_mean": 0.27363436092517224,
+   "s_setup": 9.002048942607116,
+   "s_rho_setup": 0.05754799246327205,
+   "s_floor_steps": 0.11537691830657834,
+   "rho_steps_over_floor_mean": 1.0533085590039784,
+   "rho_units_per_step_median": 4.25386084636961,
+   "canonical_step_units": 2.246492578065093,
+   "rho_step_over_model_median": 1.8826055056773572,
+   "precomputation_boundary_model": {
+    "what": "Bernstein-Lange: a generic walk given the index calculus's set-up as its budget, online ~ 1.93*1.21 r c^2 / (2n P) units; a model",
+    "bl_online_units": 55674.113650360654,
+    "s_bl_online": 0.01109505037622384,
+    "ic_online_over_bl": 2.772527754858401
+   },
+   "ic_replay_ns_median": 13234.0,
+   "rho_replay_ns_median": 16641.0,
+   "aa": [
+    {
+     "target": 1,
+     "online_speedup_R2_over_R1": 1.007720922939385,
+     "ic_online_R2_over_R1": 0.9706269912875591,
+     "rho_online_R2_over_R1": 0.9718950298444486
+    },
+    {
+     "target": 2,
+     "online_speedup_R2_over_R1": 1.0805016428986305,
+     "ic_online_R2_over_R1": 1.0395980326664807,
+     "rho_online_R2_over_R1": 1.089030506957632
+    },
+    {
+     "target": 3,
+     "online_speedup_R2_over_R1": 1.1085914347028885,
+     "ic_online_R2_over_R1": 1.0577141047178291,
+     "rho_online_R2_over_R1": 1.127302072820892
+    },
+    {
+     "target": 4,
+     "online_speedup_R2_over_R1": 0.965649134406861,
+     "ic_online_R2_over_R1": 0.9595500638619745,
+     "rho_online_R2_over_R1": 0.9872460373003412
+    }
+   ],
+   "isolation": {
+    "processes": 68,
+    "contended": 0,
+    "failed": 0,
+    "retries": 0
+   },
+   "diagnostics": {
+    "online_phase_shares": {
+     "recovery_check": 0.0011983056608815654,
+     "target_descent": 0.00029867575200483013,
+     "target_pdp": 0.5262139506250096,
+     "target_query": 0.46056790221708577,
+     "target_relation_check": 0.0003874917192474295
+    },
+    "curve_construction_units": 230633.8969651114,
+    "s_curve_construction": 0.04596201964458491,
+    "cold_ratio_without_curve_construction": 17.317058867897916,
+    "cold_ratio_rho_at_canonical_step": 27.274431096037752,
+    "online_trials_mean": 51156.0
+   }
+  },
+  {
+   "curve": "K_0 / GF(2^61)",
+   "a": 0,
+   "n": 61,
+   "r": 162888033982417,
+   "log2_r": 47.21,
+   "curve_id": "EC1N61Ce0hd8c15448081e",
+   "candidate_id": "IC1N61Ckb0fb39040PDP3pairtableRCaimedLAsparseTDwalkISO0h031e95eb18e6",
+   "rho_reference_uid": "urn:ec-candidate:1:sha256:ef7bafe5845d88123049583e1ef7abdc1f0d2dfd4dc585018cf90b82354a9154",
+   "rows": {
+    "R1": 64,
+    "R2": 4,
+    "not_passing": []
+   },
+   "all_rows_pass_the_check": true,
+   "online_speedup": {
+    "mean_ratio": 8.83874129306946,
+    "ci95": [
+     6.764085464136691,
+     11.861698973750034
+    ],
+    "median_of_rows": 11.873969444074373,
+    "rows_above_one": 64
+   },
+   "online_speedup_rho_model": {
+    "mean_ratio": 4.684228035877141,
+    "ci95": [
+     3.627172375895677,
+     6.280993524113618
+    ]
+   },
+   "cold_ratio_ic_over_rho": {
+    "value": 31.599405794913018,
+    "ci95": [
+     28.18484755042808,
+     35.716280953889076
+    ]
+   },
+   "break_even_targets": {
+    "value": 36.540505449023996,
+    "ci95": [
+     31.875583935198808,
+     42.41802384018814
+    ]
+   },
+   "s_ic_online_mean": 0.052704741874363255,
+   "s_rho_online_mean": 0.4658435783455016,
+   "s_rho_model_mean": 0.2468810295115603,
+   "s_setup": 15.096301905277066,
+   "s_rho_setup": 0.013564380951953635,
+   "s_floor_steps": 0.11346973044749432,
+   "rho_steps_over_floor_mean": 0.953028955776286,
+   "rho_units_per_step_median": 4.294251594371072,
+   "canonical_step_units": 2.2734072757106256,
+   "rho_step_over_model_median": 1.8803623291649016,
+   "precomputation_boundary_model": {
+    "what": "Bernstein-Lange: a generic walk given the index calculus's set-up as its budget, online ~ 1.93*1.21 r c^2 / (2n P) units; a model",
+    "bl_online_units": 83639.486529873,
+    "s_bl_online": 0.006553401364454927,
+    "ic_online_over_bl": 8.042349147151148
+   },
+   "ic_replay_ns_median": 14304.5,
+   "rho_replay_ns_median": 18060.5,
+   "aa": [
+    {
+     "target": 1,
+     "online_speedup_R2_over_R1": 0.960000935090403,
+     "ic_online_R2_over_R1": 0.8813652876525174,
+     "rho_online_R2_over_R1": 0.7803898394937197
+    },
+    {
+     "target": 2,
+     "online_speedup_R2_over_R1": 1.1023406214941402,
+     "ic_online_R2_over_R1": 0.9191572972671548,
+     "rho_online_R2_over_R1": 1.0710486976831728
+    },
+    {
+     "target": 3,
+     "online_speedup_R2_over_R1": 1.1358563400022872,
+     "ic_online_R2_over_R1": 1.016510664019207,
+     "rho_online_R2_over_R1": 1.1701674086283378
+    },
+    {
+     "target": 4,
+     "online_speedup_R2_over_R1": 1.2577815290271794,
+     "ic_online_R2_over_R1": 0.870909889618334,
+     "rho_online_R2_over_R1": 1.098181576376407
+    }
+   ],
+   "isolation": {
+    "processes": 68,
+    "contended": 0,
+    "failed": 0,
+    "retries": 0
+   },
+   "diagnostics": {
+    "online_phase_shares": {
+     "recovery_check": 0.0003241295294755381,
+     "target_descent": 8.239464904134512e-05,
+     "target_pdp": 0.5321179046399431,
+     "target_query": 0.476154224718874,
+     "target_relation_check": 8.603312858046044e-05
+    },
+    "curve_construction_units": 113889.57554855011,
+    "s_curve_construction": 0.008923585387273827,
+    "cold_ratio_without_curve_construction": 32.50035798612046,
+    "cold_ratio_rho_at_canonical_step": 58.16576541007495,
+    "online_trials_mean": 218823.828125,
+    "against_s22_batch_descent": {
+     "s22_files": 20,
+     "online_over_s22_per_target_descent": 1.3370300057426678,
+     "trials_ratio": 1.1197692486456663,
+     "units_per_trial_ratio": 1.1478509677987405
+    }
+   }
+  }
+ ],
+ "fits_ln_s_on_ln_r": {
+  "s_ic_online_mean": {
+   "slope": -0.06805493508753377,
+   "ci95": [
+    -0.21903729637797814,
+    0.0829274262029106
+   ],
+   "points": 6
+  },
+  "s_rho_online_mean": {
+   "slope": -0.04425686158506405,
+   "ci95": [
+    -0.0657558721370195,
+    -0.02275785103310859
+   ],
+   "points": 6
+  },
+  "s_setup": {
+   "slope": 0.12344629473743493,
+   "ci95": [
+    0.010751921763459349,
+    0.2361406677114105
+   ],
+   "points": 6
+  },
+  "s_rho_model_mean": {
+   "slope": -0.016328016019578544,
+   "ci95": [
+    -0.04797543346702231,
+    0.015319401427865222
+   ],
+   "points": 6
+  },
+  "online_speedup": {
+   "slope": 0.023798073502469687,
+   "ci95": [
+    -0.11559879634913792,
+    0.16319494335407728
+   ],
+   "points": 6
+  },
+  "cold_ratio": {
+   "slope": 0.29468735865231716,
+   "ci95": [
+    0.08869698589934352,
+    0.5006777314052908
+   ],
+   "points": 6
+  }
+ },
+ "prediction_then_measurement": [
+  {
+   "curve": "K_1 / GF(2^47)",
+   "online_speedup": [
+    7.954742153202931,
+    9.765321645722155
+   ],
+   "online_speedup_model": [
+    4.254862081945753,
+    4.34101280853476
+   ],
+   "cold_ratio": [
+    8.445854360040348,
+    4.946769165949517
+   ],
+   "ic_online_over_bl": [
+    2.459026053575458,
+    2.420286907320609
+   ]
+  },
+  {
+   "curve": "K_0 / GF(2^57)",
+   "online_speedup": [
+    8.970048681915346,
+    13.537727158347499
+   ],
+   "online_speedup_model": [
+    4.797933015908208,
+    5.965561658306264
+   ],
+   "cold_ratio": [
+    10.767993689772474,
+    1.9845626541276857
+   ],
+   "ic_online_over_bl": [
+    2.7930499193350014,
+    3.2853141362363862
+   ]
+  },
+  {
+   "curve": "K_0 / GF(2^41)",
+   "online_speedup": [
+    12.38879175710942,
+    9.383847456632276
+   ],
+   "online_speedup_model": [
+    6.626563032872481,
+    4.573391331935683
+   ],
+   "cold_ratio": [
+    10.17262489923224,
+    8.044290213253069
+   ],
+   "ic_online_over_bl": [
+    1.9151496436375175,
+    2.500894272351845
+   ]
+  },
+  {
+   "curve": "K_0 / GF(2^53)",
+   "online_speedup": [
+    27.419849655641485,
+    17.489057559646973
+   ],
+   "online_speedup_model": [
+    14.666431211157073,
+    9.367317061316216
+   ],
+   "cold_ratio": [
+    14.083013664085275,
+    14.703867319407847
+   ],
+   "ic_online_over_bl": [
+    1.2043780819302168,
+    2.0210143621729992
+   ]
+  },
+  {
+   "curve": "K_1 / GF(2^59)",
+   "online_speedup": [
+    24.387925332451196,
+    16.87050545272324
+   ],
+   "online_speedup_model": [
+    13.044704247590175,
+    8.895399369043808
+   ],
+   "cold_ratio": [
+    15.69511575085155,
+    15.668163853624774
+   ],
+   "ic_online_over_bl": [
+    1.50907912920968,
+    2.772527754858401
+   ]
+  },
+  {
+   "curve": "K_0 / GF(2^61)",
+   "online_speedup": [
+    12.377699700493228,
+    8.83874129306946
+   ],
+   "online_speedup_model": [
+    6.620630072356842,
+    4.684228035877141
+   ],
+   "cold_ratio": [
+    28.218312411173326,
+    31.599405794913018
+   ],
+   "ic_online_over_bl": [
+    5.34446628596547,
+    8.042349147151148
+   ]
+  }
+ ]
+}

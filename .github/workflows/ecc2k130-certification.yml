@@ -5,6 +5,12 @@ on:
       - 'ecc2k130/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
       - 'src/bin/ecc2k_guard.rs'
+      - 'src/cryptanalysis/ecc2k130_merge.rs'
+      - 'src/bin/ecc2k_merge.rs'
+      - 'src/cryptanalysis/ecc2k130_pyjson.rs'
+      - 'src/cryptanalysis/ecc2k130_status.rs'
+      - 'src/bin/ecc2k_status.rs'
+      - 'src/hash/sha256.rs'
       - '.github/workflows/ecc2k130-certification.yml'
   push:
     branches: [main]
@@ -12,10 +18,22 @@ on:
       - 'ecc2k130/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
       - 'src/bin/ecc2k_guard.rs'
+      - 'src/cryptanalysis/ecc2k130_merge.rs'
+      - 'src/bin/ecc2k_merge.rs'
+      - 'src/cryptanalysis/ecc2k130_pyjson.rs'
+      - 'src/cryptanalysis/ecc2k130_status.rs'
+      - 'src/bin/ecc2k_status.rs'
+      - 'src/hash/sha256.rs'
       - '.github/workflows/ecc2k130-certification.yml'
   workflow_dispatch:
 permissions:
   contents: read
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # The generator's own checks: the packed/sigma/reduction generators agree
   # with the committed headers, the Modal entry points survive click, the
@@ -33,6 +51,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: make -C ecc2k130 check-cli
+      - run: make -C ecc2k130 test-sigma-fused-shared-scratch-model
       - run: python3 ecc2k130/codegen/lambda_projective.py --table
 
   # The sigma step schedule must exclude orbit returns through the tested bound: a walk
@@ -49,6 +68,61 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --lib ecc2k130_guard
       - run: make -C ecc2k130 check-cycles
+
+  # The Rust merge (ecc2k-merge) must stay byte-for-byte with merge.py until
+  # merge.py is retired: the certification suite's merge tests run against
+  # it, then test_merge_parity.py holds the two side by side on real corpora.
+  merge-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy==2.2.6 boto3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.98"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --lib ecc2k130_merge
+      - run: cargo build --release --bin ecc2k-merge
+      - run: make -C ecc2k130 cpu build/test-production
+      - name: Certification merge tests against the Rust merge
+        run: ECC_MERGE_BIN="$PWD/target/release/ecc2k-merge" python3 -m unittest discover -s ecc2k130/aws -p test_certification.py -v
+      - name: Byte-for-byte parity with merge.py
+        run: ECC_MERGE_BIN="$PWD/target/release/ecc2k-merge" python3 -m unittest discover -s ecc2k130/aws -p test_merge_parity.py -v
+
+  # The campaign dashboard (ecc2k-status, which replaced aws/status.py) and the
+  # Python-compatible JSON the Rust ports print through. The unit tests hold
+  # bytes CPython printed; the smoke run reads a rehearsal store end to end.
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.98"
+      - uses: Swatinem/rust-cache@v2
+      - run: make -C ecc2k130 test-status
+      - run: cargo build --release --bin ecc2k-status
+      - name: Snapshot of a rehearsal store
+        run: |
+          store=$(mktemp -d)
+          now=$(date +%s)
+          cat > "$store/slots.json" <<EOF
+          {"0": {"owner": "i-0a", "state": "active", "leaseUntil": $((now + 600)), "rate": 14.1e9,
+                 "walks": 6160384, "ckptIter": 17400000, "dpUploaded": 300000},
+           "1": {"owner": "i-0b", "state": "retired", "leaseUntil": 0, "ckptIter": 52, "walks": 16}}
+          EOF
+          ./target/release/ecc2k-status --local "$store"
+          ./target/release/ecc2k-status --local "$store" --json | python3 -c '
+          import json, sys
+          s = json.load(sys.stdin)
+          assert (s["slots"], s["alive"], s["retired"], s["stepsPerWalkSlots"]) == (2, 1, 1, 1), s
+          assert abs(s["stepsPerWalkLog2"] - 28.41) < 0.01, s
+          '
 
   local-software:
     runs-on: ubuntu-latest
@@ -77,6 +151,8 @@ jobs:
       # days after modal_app.py's image grew CPU_THREADS and CPU_BINARIES.
       - run: make -C ecc2k130 check-cli
       - run: make -C ecc2k130 certify-local
+      - name: Sigma-fused square-table native replay
+        run: make -C ecc2k130 test-sigma-square-table-native
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -104,3 +180,121 @@ jobs:
       - name: Compile packed table client
         run: |
           nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 -DECC_TABLE_TAG_DENOM=1 -c ecc2k130/src/main.cu -o /tmp/table-client.o
+      - name: Compile sigma-fused square-table client
+        run: |
+          nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 \
+            -DECC_BATCH=16 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_WITNESS=0 \
+            -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1 \
+            -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1 \
+            -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1 \
+            -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_INLINE_POLY=3 -DECC_PACKED_CLMAD=0 \
+            -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_COMPACT_STATE=1 \
+            -DECC_PACKED_SHARED_SIGMA=1 -DECC_PACKED_STATE_TILE=256 \
+            -DECC_SIGMA_FUSED=1 -DECC_SIGMA_SQUARE_TABLE=1 -DECC_PACKED_ALU_SQUARE=0 \
+            -DECC_PACKED_SQUARE_TABLE=0 -DECC_WALK_TABLE=0 -DECC_TABLE_TAG_DENOM=0 \
+            -c ecc2k130/src/main.cu -o /tmp/sigma-square-table-client.o
+      - name: Compile GPU-wide hint stages (no GPU needed)
+        run: |
+          for resolver_threads in 128 256 512; do
+            nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 \
+              -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_THREADS=128 -DECC_MINBLOCKS=1 \
+              -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 \
+              -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 \
+              -DECC_TABLE_TAG_DENOM=1 -DECC_TABLE_PIPE_SELECT=1 -DECC_TABLE_SPLIT_FORWARD=1 \
+              -DECC_TABLE_BATCH_HINTS=1 -DECC_TABLE_GLOBAL_HINTS=1 \
+              -DECC_TABLE_GLOBAL_HINT_THREADS="$resolver_threads" \
+              -c ecc2k130/src/main.cu -o "/tmp/table-global-hints-client-$resolver_threads.o"
+          done
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/test_queue.cpp -o /tmp/table-global-hints-model
+          /tmp/table-global-hints-model
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/summarize.cpp -o /tmp/table-global-hints-summary
+          /tmp/table-global-hints-summary --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/independent_audit.cpp -o /tmp/table-global-hints-audit
+          /tmp/table-global-hints-audit --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/resolver-geometry/summarize.cpp \
+            -o /tmp/table-global-hints-geometry-summary
+          /tmp/table-global-hints-geometry-summary --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/resolver-geometry/independent_audit.cpp \
+            -o /tmp/table-global-hints-geometry-audit
+          /tmp/table-global-hints-geometry-audit --self-test
+
+  sigma-square-sm120-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    container:
+      image: nvidia/cuda:13.3.1-devel-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native host compiler
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends build-essential binutils
+      - name: Compile exact sm_120 control and candidate without a GPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=ecc2k130/benchmarks/sigma-square-table/compile-artifact
+          mkdir -p "$out"
+          nvcc --version | tee "$out/nvcc-version.txt"
+          grep -q 'V13\.3\.73' "$out/nvcc-version.txt"
+          common=(
+            -O3 -std=c++17 -gencode arch=compute_120,code=sm_120 -lineinfo -Xptxas -v
+            -Xcompiler -O3 -Xcompiler -fopenmp
+            -DECC_BATCH=16 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_WITNESS=0
+            -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1
+            -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1
+            -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1
+            -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_INLINE_POLY=3 -DECC_PACKED_CLMAD=1
+            -DECC_PACKED_CLMAD_SQUARE=0 -DECC_PACKED_KARAT3=0 -DECC_PACKED_WEIGHTED_PREFIX=2
+            -DECC_PACKED_COMPACT_STATE=1 -DECC_PACKED_SHARED_SIGMA=1 -DECC_PACKED_TOP_CLMAD=0
+            -DECC_PACKED_STATE_TILE=256 -DECC_PACKED_ADD_COMBINE=0 -DECC_PACKED_PAIR_ILP=0
+            -DECC_UNROLL_SLOTS=1 -DECC_PACKED_SLOT_PREFETCH=0 -DECC_PACKED_SLOT_PIPELINE=0
+            -DECC_SIGMA_FUSED=1 -DECC_SIGMA_FUSED_LATE_Y=0 -DECC_PACKED_L2_PERSIST=0
+            -DECC_PACKED_TOP_HOIST=0 -DECC_PACKED_ONB_INV=0 -DECC_PACKED_FROM_REDUCED=0
+            -DECC_PACKED_CLMUL_FLAT=0 -DECC_PACKED_PAIR_CLMUL=0 -DECC_PACKED_ALU_SQR=0
+            -DECC_PACKED_ALU_SQUARE=0 -DECC_PACKED_SQUARE_TABLE=0 -DECC_PACKED_INV_POLY=0
+            -DECC_PACKED_CHAINS=1 -DECC_WALK_TABLE=0 -DECC_TABLE_BRANCHES=8
+            -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=0 -DECC_TABLE_TAG_DENOM=0
+            -DECC_TABLE_FUSED=0 -DECC_TABLE_FUSED_PIPE=0 -DECC_TABLE_PIPE_SELECT=0
+            -DECC_TABLE_SPLIT_FORWARD=0 -DECC_TABLE_BATCH_HINTS=0 -DECC_TABLE_BLOCK_HINTS=0
+            -DECC_TABLE_GLOBAL_HINTS=0 -DECC_TABLE_HINT_QUEUE=512 -DECC_TABLE_GLOBAL=0
+            -DECC_TABLE_ADDEND_GLOBAL=0 -DECC_CYCLE_FAST2=0 -DECC_CYCLE_PROFILE=0
+            -DECC_PACKED_CHAIN_FIRST=0 -DECC_PHASE_PROFILE=0
+          )
+          printf '%q ' nvcc "${common[@]}" > "$out/common-command.txt"
+          printf '\n' >> "$out/common-command.txt"
+          nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE=0 ecc2k130/src/main.cu \
+            -o "$out/control" -lgomp > "$out/control-build.log" 2>&1
+          nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE=1 ecc2k130/src/main.cu \
+            -o "$out/candidate" -lgomp > "$out/candidate-build.log" 2>&1
+          for arm in control candidate; do
+            table=0
+            [ "$arm" = candidate ] && table=1
+            nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE="$table" \
+              -c ecc2k130/src/testpackedcuda.cu -o "$out/probe-$arm-packed.o" \
+              > "$out/probe-$arm-packed.log" 2>&1
+            nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE="$table" \
+              -c ecc2k130/src/testpackedstatecuda.cu -o "$out/probe-$arm-storage.o" \
+              > "$out/probe-$arm-storage.log" 2>&1
+            nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE="$table" \
+              -c ecc2k130/src/testsharedsigmacuda.cu -o "$out/probe-$arm-shared-sigma.o" \
+              > "$out/probe-$arm-shared-sigma.log" 2>&1
+          done
+          cuobjdump --dump-resource-usage "$out/control" > "$out/control-resources.txt"
+          cuobjdump --dump-resource-usage "$out/candidate" > "$out/candidate-resources.txt"
+          cuobjdump --dump-sass "$out/control" > "$out/control.sass"
+          cuobjdump --dump-sass "$out/candidate" > "$out/candidate.sass"
+          sha256sum "$out/control" "$out/candidate" "$out"/*.o "$out"/*.log "$out"/*.txt "$out"/*.sass \
+            > "$out/files.sha256"
+          grep -q '0 bytes spill stores, 0 bytes spill loads' "$out/control-build.log"
+          grep -q '0 bytes spill stores, 0 bytes spill loads' "$out/candidate-build.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sigma-square-table-sm120-compile
+          path: ecc2k130/benchmarks/sigma-square-table/compile-artifact/

@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/Volumes/SSD990/koblitz-native-f4-build18-509e43c7/bin/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/koblitz-native-f4-run17-509e43c7-b39-t12/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 4.987009749995195,
+    "user_seconds": 27.369165,
+    "system_seconds": 0.8106439999999999,
+    "total_core_seconds": 28.179809,
+    "single_core_seconds": 28.179809,
+    "peak_rss_bytes": 2763997184,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

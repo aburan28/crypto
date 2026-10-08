@@ -1,0 +1,71 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index cd730af6..f751e356 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -3626,14 +3626,24 @@ impl PairSumTable {
+     /// Index of the filter word holding this key's bit.
+     #[inline]
+     fn filter_word(&self, key: u64) -> usize {
+-        ((pair_filter_hash(key) & self.present_mask) as usize) >> 6
++        self.filter_word_from_hash(pair_filter_hash(key))
++    }
++
++    #[inline]
++    fn filter_word_from_hash(&self, hash: u64) -> usize {
++        ((hash & self.present_mask) as usize) >> 6
+     }
+ 
+     /// Whether the filter admits this key.  A `false` is certain; a
+     /// `true` still has to be checked against the entries.
+     #[inline]
+     fn admitted(&self, key: u64) -> bool {
+-        let h = (pair_filter_hash(key) & self.present_mask) as usize;
++        self.admitted_hash(pair_filter_hash(key))
++    }
++
++    #[inline]
++    fn admitted_hash(&self, hash: u64) -> bool {
++        let h = (hash & self.present_mask) as usize;
+         self.present[h >> 6] >> (h & 63) & 1 == 1
+     }
+ 
+@@ -3759,7 +3769,12 @@ impl PairSumTable {
+     /// exposed so a benchmark can model that loop exactly.
+     #[doc(hidden)]
+     pub fn prefetch_key(&self, key: u64) {
+-        prefetch(&self.present[self.filter_word(key)]);
++        self.prefetch_hash(pair_filter_hash(key));
++    }
++
++    #[inline]
++    fn prefetch_hash(&self, hash: u64) {
++        prefetch(&self.present[self.filter_word_from_hash(hash)]);
+     }
+ 
+     /// The lookup half of [`Self::contains_pair`].
+@@ -4005,17 +4020,20 @@ impl PairSumTable {
+         const BLOCK: usize = 1024;
+         const LOOKAHEAD: usize = 32;
+         let mut keys = Vec::with_capacity(BLOCK);
++        let mut filter_hashes = Vec::with_capacity(BLOCK);
+         let mut pairs = Vec::new();
+         for (b, block) in rests.chunks(BLOCK).enumerate() {
+             self.keys_of(block, &mut keys);
+-            for &key in keys.iter().take(LOOKAHEAD) {
+-                prefetch(&self.present[self.filter_word(key)]);
++            filter_hashes.clear();
++            filter_hashes.extend(keys.iter().map(|&key| pair_filter_hash(key)));
++            for &hash in filter_hashes.iter().take(LOOKAHEAD) {
++                self.prefetch_hash(hash);
+             }
+             for (within, rest) in block.iter().enumerate() {
+-                if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
+-                    prefetch(&self.present[self.filter_word(ahead)]);
++                if let Some(&ahead) = filter_hashes.get(within + LOOKAHEAD) {
++                    self.prefetch_hash(ahead);
+                 }
+-                if !self.admitted(keys[within]) {
++                if !self.admitted_hash(filter_hashes[within]) {
+                     continue;
+                 }
+                 let offset = b * BLOCK + within;

@@ -52,6 +52,29 @@ pilot (§10, 2026-09-24).
   run and F4 stays. That mode's zero reductions come back as singular rows. The
   next lever for F4's zero rows is an exact early exit once a step's residue
   block reaches full rank (§14.8).
+- **Round 6 (§15, 2026-09-30) makes that exit.** F4 now stops a step's
+  elimination once the residue echelon is full. Every later row there reduces
+  to zero, and no pivot changes.
+  - It reproduces all 359 committed rows and 1,111 trace steps, but for the
+    multiply-adds and the residual counts. With it off it reproduces 313 rows
+    exactly.
+  - The multiply-adds fall 39% at `m = 4`, `N = 12` and 25% at `N = 16`, all in
+    the refutation step. They fall 0–15% at `m = 2` and ≤ 0.1% at `m = 3`.
+  - At one thread, isolated, `m = 4`, `N = 12` runs in 0.67 of the baseline's
+    time.
+  - `D` and memory are unchanged. This is engineering, not a finding.
+- **Round 7 (§16, 2026-10-06) runs `m = 3` at `N = 18` with F4.**
+  - §§16.1–16.6 pre-register it. A sizing stage repeats round 2's stopped run,
+    then both targets run with the `B'` cap raised as far as this host's memory
+    allows.
+  - The checks move to a native checker. It first reproduced the Python
+    scripts' output on every committed row, line for line.
+  - **`D = 7` on both targets**, confirmed by capped re-runs and by exhaustive
+    search. The `m = 3` line reads 6, 6, 7, 7 over `N = 9`–18: one level
+    without a rise, which A1 reads as inconclusive.
+  - Each target took 28 steps, six of them at degree 7. The address space
+    peaked at 96% of the host's 14 GB cap, so `N = 21` needs a bigger machine,
+    by an extrapolation from one ratio.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -2408,6 +2431,795 @@ trace of `m = 4`, `N = 16` shows where those rows are.
    times this one's memory.
 4. **`m = 2` at `N = 28`**, and the **independent replication** of §12.10's
    items 3–4.
+
+## 15. Round 6, 2026-09-30: stop a step's elimination at a full echelon
+
+§§15.1–15.6 were written and committed before the round's runs. The results
+follow as §15.7 onward. The data are in `research/pkm_tower_round6_20260930/`.
+
+### 15.1 The change
+
+§14.8 ranked this first. Its target is F4's zero rows, the goal the signature
+line (§§13–14) served.
+- **Where they are.** A step reduces its S-rows by the reduced reducer block
+  (`D − C·B'`), then echelonizes the residues in chunks.
+  - Once that echelon has a pivot on every residual column, every later S-row
+    reduces to zero.
+  - A pivot is never rewritten once found.
+  - So the rest of the step's S-rows can be skipped without changing a pivot,
+    the basis, the trace or `D`.
+- **The code.** `f4_fp_tower` gains `full_rank_exit`, on by default
+  (`--no-full-rank-exit` in the example turns it off).
+  - Each step records after how many S-rows its echelon filled and how many
+    rows were skipped. The trace prints both, with the step's multiply-adds.
+  - Rows add `full_rank_exit` and `rows_skipped_full_rank`.
+- **What may change.** Only these may change, and all may only fall:
+  - the multiply-adds;
+  - each step's residue count and `max_residual_rows`, since skipped rows are
+    not counted;
+  - the time.
+- **Class** (`AGENTS.md` §3): engineering at most. A solver-stage cost falls,
+  and `D` and every other output stay. There is no `S` and no scoreboard row.
+- **Tests.** Two new unit tests join the nine existing ones.
+  - The step's elimination with the exit on and off gives the same echelon,
+    row for row, and never more multiply-adds. That is checked on random
+    matrices, most of which fill the echelon, some in the middle of a chunk.
+  - The whole engine with the exit on and off gives the same basis, report and
+    trace, but for the multiply-adds, the residual rows and the skipped rows.
+    That is checked on 40 systems: Kummer towers like the pilot's, and towers
+    with every rule coefficient non-zero.
+
+### 15.2 The identity check
+
+`replay.sh` runs two passes at the host's default thread count (four here, as
+for the committed rows), and `compare_exit.py` checks them.
+- **The exit on.** Every committed system that round 3 replayed, with the flags
+  it was run with, and round 3's own cells:
+  - round 2's cross-check (XV1–XV5), its cells to the sizes they finished, its
+    confirmations and D1, which are round 3's 355 rows;
+  - round 3's `m = 4`, `N = 16` cell and its confirmation (M4b, C-M4b).
+
+  Every row must equal the committed row on every field but the wall clock,
+  the multiply-adds and `max_residual_rows`, and those two may only fall.
+  Every trace step must equal the committed step on every field the old build
+  printed up to the pairs left, except the residue count, which may only fall.
+- **The exit off.** The cross-check, D1, and M4 at `N ≤ 12`. Every row must
+  equal the committed row on every field but the wall clock, multiply-adds
+  included.
+
+### 15.3 The timing protocol (`AGENTS.md` §10)
+
+- **Host.** Intel Xeon at 2.10 GHz, 4 cores without SMT, AVX-512 (F, BW, CD,
+  DQ, VL, IFMA, VBMI, VNNI, BF16, FP16) and AVX2, 15 GB. Linux 6.18.44, x86-64,
+  rustc 1.94.1. It is not the host of rounds 2–5 (2.80 GHz), so no earlier
+  wall time is compared with a new one.
+- **Builds.**
+  - Baseline: the example built from `main` at `9f4df528`, whose
+    `f4_fp_tower.rs` is the one rounds 3–5 measured (sha256 `6fc24089…`).
+    Binary sha256
+    `830cfad997e249499674f9e1b1ae923f0b83b7d41375ea2a998df944f3f40764`.
+  - Candidate: the example built from the commit of this section.
+- **Runs.** `bench.py` times three systems, target 0 each: Kummer, `p₁`, at
+  `m = 4`, `N = 12`; `m = 3`, `N = 12`; and `m = 2`, `N = 16`.
+  - Every run is at one thread (`RAYON_NUM_THREADS=1`), through
+    `tools/isolated_bench.py` on CPU 3.
+  - First the baseline against a byte-identical copy of itself (A/A),
+    interleaved over five rounds. Then the baseline against the candidate
+    (A/B), interleaved over five rounds.
+  - The table gives the median and the minimum. Contended runs are reported
+    and not pooled.
+- **Metrics.** The multiply-adds are the primary metric. Wall time is a
+  practicality note and counts only from uncontended runs.
+- **No timing claim for `m = 4`, `N = 16`.** A one-thread run would take hours
+  per build. Its evidence is the replay's multiply-adds.
+
+### 15.4 What was measured before this section (a disclosure)
+
+- **The committed traces**, read without running anything:
+
+  | system | full-rank steps | residue phase in them, share of the run | rows after full rank, weighted |
+  |:--|--:|--:|--:|
+  | `m = 4`, `N = 16` (round 3) | 1 | 23% | 21% |
+  | `m = 4`, `N = 12` (round 4's T4, D1) | 1 | 48–54% | 28–31% |
+  | `m = 3`, `N = 9`–15 (T3) | 1 | 0–1% | ≤ 1% |
+  | `m = 2`, `N = 12`–20 (T2) | 1 | 0.2–11% | ≤ 11% |
+
+  - Every full-rank step there is a refutation's last step.
+  - The last column is an upper bound on the saving: it assumes the echelon
+    fills after as many rows as it has columns, where the time goes to rows
+    evenly.
+- **A plumbing check** with the candidate, on round 4's T4 at `N = 8` and T2
+  at `N = 12`, both targets.
+  - The exit off reproduces the committed rows exactly, multiply-adds
+    included.
+  - With the exit on, `N = 8` does not change.
+  - With the exit on, at `N = 12` the last step's echelon filled after 63 of
+    its 168 S-rows. The other 105 were skipped, and the multiply-adds fell from
+    65,014,148 to 64,802,468 (0.33%).
+- **The unit tests** of §15.1.
+
+### 15.5 Predictions, before the runs
+
+1. **Identity.** Every replayed row and trace step is as §15.2 requires, with
+   no exception.
+2. **The exit off** reproduces every row it runs exactly, multiply-adds
+   included.
+3. **Multiply-adds** fall on every system whose run has a step with S-rows
+   left after its echelon filled, and nowhere else. The rough ranges from
+   §15.4:
+   - 10–35% at `m = 4`, `N = 12`;
+   - 5–25% at `m = 4`, `N = 16`;
+   - under 1% at `m = 3`;
+   - under 11% at `m = 2`.
+4. **Timing** (one thread, isolated). At `m = 4`, `N = 12` the candidate's
+   median is below the baseline's by more than the A/A spread. On the other
+   two systems it is not above the baseline's by more than the A/A spread.
+
+### 15.6 Decision rule, fixed now
+
+- **Adoption.** The exit stays on by default if predictions 1 and 2 hold and no
+  timed system is slower by more than its A/A spread. Otherwise the default
+  goes back to off, the code stays, and this section records why.
+- **Instrument first.** A difference in any field other than §15.2's voids the
+  change until it is explained.
+- **Inadmissible:**
+  - changing the scripts' systems, flags or thread counts after the first
+    round-6 run;
+  - dropping a system;
+  - pooling contended runs with uncontended ones.
+
+
+### 15.7 The first timing measurement, and why there is a second
+
+`bench.py` ran §15.3's protocol from 04:08 to 04:26 UTC on 2026-09-30, with the
+candidate built from the pre-registration commit `00983dfc` (binary sha256
+`644ac866…`).
+- **Contention.** All 60 runs were uncontended. The tool refused 5 starts, all
+  at `m = 3`: the CPU pressure left by the previous run (PSI avg10 5.3–5.5, limit
+  5.0). Each was retried after 30 s. The refusals are in `bench/refusals.txt`.
+- **Multiply-adds.** They did not vary between repeats or between the two
+  copies of the baseline.
+
+| system | multiply-adds, baseline | candidate | B/A | A/A median, A / A2 (s) | A/B median, A / B (s) | A/B minimum, A / B (s) |
+|:--|--:|--:|--:|:--|:--|:--|
+| `m = 4`, `N = 12` | 85,477,602,933 | 51,426,567,808 | **0.602** | 32.18 / 32.37 | 32.46 / 21.63 | 31.72 / 20.94 |
+| `m = 3`, `N = 12` | 10,595,733,281 | 10,595,732,141 | 1.000 | 4.764 / 4.755 | 4.614 / 4.746 | 4.517 / 4.445 |
+| `m = 2`, `N = 16` | 6,178,203,100 | 5,655,592,357 | **0.915** | 2.932 / 2.952 | 2.953 / 2.728 | 2.838 / 2.636 |
+
+**§15.6's timing clause, as `bench.py` computed it, fails at `m = 3`,
+`N = 12`.**
+- The script's "A/A spread" is the difference between the two copies' medians.
+  It is 0.19% there, and the candidate's A/B median is 2.9% above the
+  baseline's. At `m = 4` and `m = 2` the clause holds: the candidate is faster
+  by far more than the spread (0.59% and 0.67%).
+- That spread, one difference between two five-run medians, cannot resolve 3%
+  on this system:
+  - the same baseline binary's median moved 3.2% between the A/A and the A/B
+    phases (4.764 s and 4.614 s);
+  - its ten runs span 7.4%;
+  - the A/A pairs' ratios run from 0.945 to 1.052.
+- The paired view of the same runs (`bench.py summary`): the mean of the five
+  A/B pair ratios is 1.023, with a 95% interval of [0.979, 1.067]. That
+  resolves no difference, and the candidate's minimum is below the baseline's.
+  At `m = 4` the A/B interval is [0.649, 0.679], and at `m = 2` [0.850, 0.966]:
+  both faster.
+- The candidate saves 1,140 multiply-adds there (a few skipped rows in the last
+  step). No change it makes could slow the rest.
+
+So the clause fired on a noise estimate that the same data show too narrow.
+Rather than choose a more favourable definition after the fact, §15.8 fixes a
+second, larger measurement and its test before it runs, and the default
+follows it. The first measurement stays as recorded. The record states that,
+read literally, it failed the clause at `m = 3`.
+
+### 15.8 The second timing measurement, fixed before it ran
+
+- **Runs.** The same builds, systems, thread count, CPU and tool as §15.3,
+  with fresh runs: 15 interleaved A/A pairs, then 15 interleaved A/B pairs,
+  per system (`bench.py run … --rounds 15 --dir bench2`).
+- **Test.** For each system, the mean of the A/B pairs' ratios (B/A) and its
+  95% confidence interval (Student's t, 14 degrees of freedom), from
+  uncontended pairs only. This is the paired interval `AGENTS.md` §8 asks of a
+  runtime claim.
+  - The candidate is **slower** on a system if the interval lies above 1.
+  - It is **faster** if the interval lies below 1.
+  - Otherwise no difference is resolved.
+  - The A/A pairs get the same test, as a check on the method.
+- **The timing clause of §15.6 becomes:** no timed system is slower by this
+  test. With predictions 1 and 2 of §15.5, it decides the default.
+- **Predictions.**
+  - Faster at `m = 4`, `N = 12` and at `m = 2`, `N = 16`.
+  - No difference resolved at `m = 3`, `N = 12`.
+  - Every A/A interval contains 1.
+
+
+### 15.9 The second measurement
+
+`bench.py` ran §15.8's protocol from 04:28 to 05:40 UTC on 2026-09-30, with
+the same builds.
+- **Contention.** All 180 runs were uncontended. The tool refused 18 starts,
+  and each was retried: 15 for the CPU pressure a previous run left (PSI avg10
+  5.2–6.1), 3 for other processes' CPU use.
+- **An interruption.** The session's background-task limit stopped the driver
+  after 56 records, inside the run `m4-N12-ab13-A`, which left no record.
+  - The killed tool had moved other processes off CPU 3 and never restored
+    them, so the first relaunch inherited a mask without CPU 3 and was refused
+    (`bench2/logs/m4-N12-ab13-A.log` then held that refusal).
+  - `bench.py` gained a resume (it skips labels that have a record, and removes
+    the half-written row of a run cut off), and the driver was relaunched with
+    the full mask. It re-ran `m4-N12-ab13-A` and went on in the same order.
+  - Rounds 12 and 13 of that A/B phase are 21 minutes apart (04:57 and
+    05:18). No other pair spans a gap.
+
+| system | multiply-adds B/A | A/B median, A / B (s) | A/B: mean B/A, 95% interval | A/A: mean A2/A, 95% interval | verdict |
+|:--|--:|:--|:--|:--|:--|
+| `m = 4`, `N = 12` | 0.602 | 31.29 / 21.04 | 0.669 [0.663, 0.675] | 1.001 [0.990, 1.012] | **faster** |
+| `m = 3`, `N = 12` | 1.000 | 4.791 / 4.857 | 1.019 [0.995, 1.043] | 0.999 [0.979, 1.018] | no difference resolved |
+| `m = 2`, `N = 16` | 0.915 | 3.003 / 2.773 | 0.916 [0.900, 0.931] | 1.006 [0.988, 1.025] | **faster** |
+
+**§15.8's predictions all hold.**
+- The candidate is faster at `m = 4` and at `m = 2`.
+- At `m = 3` no difference is resolved: the interval allows anything from 0.5%
+  faster to 4.3% slower.
+- Every A/A interval contains 1.
+
+No timed system is slower by §15.8's test, so the timing clause of §15.6, as
+§15.8 restated it, holds.
+
+The multiply-adds are the primary metric, and they did not vary between runs:
+- one thread saves 39.8% at `m = 4`, `N = 12`, and 8.5% at `m = 2`, `N = 16`;
+- at `m = 3`, `N = 12` the saving is 1,140 of 1.06e10.
+
+At one thread, time falls a little less than work: by 33% against 40% at
+`m = 4`, and by 8.4% against 8.5% at `m = 2`.
+
+
+### 15.10 The identity check
+
+`replay.sh` ran from 05:40 to 08:18 UTC on 2026-09-30, with the candidate built
+from `00983dfc`, at four threads. `compare_exit.py` gives:
+
+| pass | rows | as required | trace steps | as required | steps that skipped rows |
+|:--|--:|--:|--:|--:|--:|
+| the exit off | 313 | **313, exactly: multiply-adds too** | 129 | 129 | 0 |
+| the exit on | 359 | **359** | 1,111 | 1,111 | 37 |
+
+- **Two changes to the comparison script after the pre-registration.**
+  - **More trace references.** Round 2 traced few of its cells, so the script
+    also compares against round 3's replay traces, which are committed and come
+    from the same engine as the committed rows. That widens the check.
+  - **One wrong reference, fixed.** Round 2's D2 diagnostic, a run stopped
+    early, is the same system as round 3's M4b target 0. The script had
+    compared the new M4b target-0 row with D2's row. It now compares a replay
+    row with its own file's row, or else with a finished one.
+- **`verify.py`** agrees with all 200 distinct rows it checks.
+- **Where the exit fires.** Every step that fills its echelon is its run's
+  last step, the refutation. Each fills at the earliest possible row: after
+  exactly as many S-rows as residual columns, so every row until then gave a
+  pivot.
+- **Multiply-adds.** They fall on exactly the 179 rows whose runs skipped
+  S-rows, and on no other:
+
+| system | multiply-adds, committed → exit on | saved | the last step: S-rows, filled after, after the fill point |
+|:--|:--|--:|:--|
+| `m = 4`, `N = 12` (M4, D1) | 8.548e10 → 5.194e10 | **39.2%** | 7,440, 3,130, 4,310 |
+| `m = 4`, `N = 16` (M4b) | 2.705e13 → 2.039e13 | **24.6%** | 82,738, 9,661, 73,077 |
+| `m = 3`, `N = 9`, 12, 15 (M3) | 1.59e8, 1.06e10, 3.19e12 | 0.1%, 0.0%, 0.0% | 340, 81, 45 S-rows |
+| `m = 2`, `N = 12`–22 (K1) | 6.50e7 → … → 4.88e12 | 0.3%, 14.5%, 8.1%, 0.1%, 0.5%, 0.0% | 168 to 5,648 S-rows |
+| isogeny, `m = 2`, `p₀`, `N = 20` (I0) | 4.45e11 → 4.38e11 | 1.6% | 16,060, 410, 15,650 |
+
+- **A counting error, fixed after the runs.** When the echelon fills inside a
+  chunk, the round's build set the skipped count to the later chunks' rows
+  instead of adding them, so it lost the rest of that chunk.
+  - Only the counter was affected: the rows were skipped, and every output and
+    multiply-add is as the table shows.
+  - As a result, `rows_skipped_full_rank` and the trace's "skipped" in this
+    round's files run up to one chunk short (at `m = 2`, `N = 14`, 1,910 for
+    2,251).
+  - The last column of the table is exact: the S-rows minus the fill point,
+    both of which the trace prints.
+  - The counter is fixed in this PR, and both unit tests now pin the exact
+    count.
+- **Memory is unchanged.** M4b peaks at 8,075 MB, against round 3's 8,062 MB.
+  `B'` and the kept basis set the peak, and the exit touches neither.
+
+### 15.11 The rule of §15.6, applied
+
+**The predictions of §15.5.**
+1. **Identity: confirmed.**
+2. **The exit off: confirmed**, exactly, multiply-adds included.
+3. **Multiply-adds: the pattern is confirmed, and two of the four ranges were
+   missed on the high side.**
+   - The multiply-adds fell exactly where S-rows were left after the echelon
+     filled.
+   - At `m = 4`, `N = 16` the saving was 24.6%, inside 5–25%.
+   - At `m = 3` it was at most 0.1%, under 1%.
+   - At `m = 4`, `N = 12` it was 39.2%, above 10–35%.
+   - At `m = 2` it reached 14.5% at `N = 14`, above "under 11%".
+   - The ranges came from time shares (§15.4), and the refutation step carries
+     more of the multiply-adds than of the time.
+4. **Timing.** Read literally, the first measurement failed the clause at
+   `m = 3` (§15.7). The second measurement, fixed before it ran, meets §15.8's
+   test on every system (§15.9).
+
+**Adoption: yes.** Predictions 1 and 2 hold, and no timed system is slower by
+§15.8's test. The exit stays on by default.
+
+**Class** (`AGENTS.md` §3): engineering. F4's multiply-adds fall by up to 39%,
+and `D` and every other output are unchanged. This is a stage diagnostic: no
+`S`, no scoreboard row.
+
+### 15.12 What round 6 shows, and what it does not
+
+It shows three things.
+1. **The rows after a full echelon were a large part of `m = 4`'s work.** They
+   were 39% of the multiply-adds at `N = 12` and 25% at `N = 16`, all in the
+   refutation step, and they are now skipped exactly.
+2. **The echelon fills at the earliest possible row** in every refutation step
+   of these systems. The exit's saving is therefore the whole of the rows after
+   the column count, and the saving at a new size can be read off one trace.
+3. **At `m = 3`, and at `m = 2` beyond `N = 16`, the refutation step is cheap.**
+   The saving there is under 2%. Those runs' work is in their earlier steps'
+   zero rows, which no exact exit reaches.
+
+It does not show three things.
+1. **Any change in a degree.** `D` and every measured quantity of §§10–14 are
+   unchanged. This is engineering.
+2. **Any change in memory.** M4b still peaks at 8.1 GB, so this machine's
+   obstacle to `m = 4`, `N = 20` stands.
+3. **A speed beyond the three timed systems.** Wall time was measured at one
+   thread, isolated, on `m = 4`, `N = 12`, `m = 3`, `N = 12` and `m = 2`,
+   `N = 16` only. `m = 4`, `N = 16`'s evidence is its multiply-adds. Nothing is
+   priced end to end (`AGENTS.md` §2).
+
+**Next steps, ranked.**
+1. **`m = 3` at `N = 18` with F4** (§13.10 item 1).
+2. **`m = 4` at `N = 20`.** Memory limits it, not arithmetic: `B'` and the kept
+   basis reach 8 GB at `N = 16`. It needs a machine with several times this
+   one's memory, or a lever on those two.
+3. **The zero rows of the non-final steps**, 48% of step 49's S-rows at `m = 4`,
+   `N = 16`. No exact exit reaches them. The signature criteria were the
+   attempt (§§13–14), and none is ranked now.
+4. **`m = 2` at `N = 28`**, and the independent replication of §12.10's items
+   3–4.
+
+## 16. Round 7, 2026-10-06: `m = 3` at `N = 18`
+
+§§16.1–16.6 were written and committed before the round's runs. The results
+follow as §16.7 onward. The data are in `research/pkm_tower_round7_20261006/`.
+
+### 16.1 The question, and what the round can return
+
+§12.10 (item 2), §14.8 (item 2) and §15.12 (item 1) rank this next.
+- **The line.** The Kummer `m = 3` line at `p₁` (M3) has `D = 6, 6, 7` at
+  `N = 9, 12, 15`.
+  - Round 2 stopped both `N = 18` systems for size (§11.7). After 23 steps,
+    step 24 is at degree 7 over 104,600 columns, and its `B'` passed the
+    `--max-nnz` cap of `2·10⁹`.
+  - So `D ≥ 7` is all that is known at `N = 18`.
+- **Why it matters.** A fourth size makes this the first line at `m ≥ 3` that A1
+  can read, since the upper-half slope needs four values of `N` (§11.6). At
+  `m = 3`, §3.7 rules out beating rho with any oracle, so the line measures the
+  mechanism, not the verdict.
+- **What each outcome reads under A1** (§11.6). The values are at
+  `N = 9, 12, 15, 18`, so the upper half is `N = 15–18`.
+
+  | `D` at `N = 18` | final plateau `L` | upper-half slope | reading |
+  |:--|--:|--:|:--|
+  | 7 | 3 | 0 | inconclusive |
+  | 8 or more | 0 | at least 1/3 | H0 |
+  | stopped with `D ≥ 7` | — | — | inconclusive (three sizes) |
+  | stopped after a productive step at degree 8 or more | 0 | at least 1/3 | H0, from a lower bound |
+
+  - A stopped run gives `D ≥ d` only from a step that added elements to the
+    basis at degree `d`. Up to its stop, a run is the uncapped run's first
+    steps, so that step comes no later than the uncapped run's last productive
+    step.
+  - A lower bound of 8 counts because every value it allows reads H0. A lower
+    bound of 7 allows both readings.
+  - H1a needs `L > 10`, which no outcome of this round can give.
+- **For §3.6**, stated now and read after the runs.
+  - **`D = 7`:** one level without a rise at `m = 3` (`t = 5` to 6), as at
+    `m = 4` (`t = 3` to 4). That fits slow growth and closes nothing.
+  - **`D ≥ 8`:** rises at `t = 5` and at `t = 6`. Read as a rate over the upper
+    half, that is one rise per 3 in `N`, `β = 1/3`, and a width of
+    `p^{H(1/3)} ≈ p^{0.92}` per target by §3.6. That is the rule's reading of
+    two rises, not a fitted exponent, and it measures nothing at `m ≥ 4`.
+
+### 16.2 The engine: three additions, and nothing it computes changes
+
+- **The stopped step.** When a stop cuts a step off (`--max-nnz`, `--max-dense`
+  or the budget), the report now keeps that step as far as it got
+  (`stopped_step`).
+  - That is its matrix, its columns without a divisor and the planned size of
+    its `B'`, if the stop came in the elimination.
+  - An `on_stop` callback passes it on the moment the stop happens, before the
+    report's basis is built. For a large stopped run, that basis is the
+    largest allocation left.
+  - The example prints it as a `tower stop in step K` line. The line carries
+    the process's resident memory, its address space and peak (`VmSize`,
+    `VmPeak`, which `ulimit -v` caps) and the live heap (glibc's `mallinfo2`).
+- **A bound on `B'` alone.** `--max-nnz` bounds both a step's nonzeros and its
+  `B'`.
+  - Only `B'` is held in memory, at 4 bytes an entry. A step's rows are
+    formed when they are reduced.
+  - At `N = 15`, steps 21–23 had 1.6, 3.4 and 10 times as many nonzeros as
+    `B'` entries. A raised `--max-nnz` could therefore stop a step for
+    nonzeros that take no memory.
+  - `--max-dense` (`max_dense` in the engine) bounds `B'` alone. Without it,
+    `--max-nnz` bounds both, as before.
+- **`--targets`.** It measures the listed target indices only. Every target
+  and system is still drawn in order, so each one measured is the system a full
+  run gives it. Each target can then run as its own process.
+- **Rows** add `max_dense_entries` (the largest `B'`, counting a step stopped
+  for it) and `stopped_step`.
+- **Tests.** A twelfth unit test runs 24 small systems with every cap just
+  below a step's nonzeros or `B'`.
+  - A capped run must stop at the uncapped run's step, after the same steps,
+    reporting that step's matrix.
+  - `--max-dense` must stop it only at the first step whose `B'` passes the
+    cap.
+  - The other eleven tests pass unchanged.
+
+### 16.3 Stages
+
+**Stage 1: sizing, and an identity check.** Target 0 runs with round 2's flags
+at `t = 6`, under `ulimit -v 14000000`, at the host's four threads:
+
+```
+--engine tower --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 6
+--max-t-m3 6 --planted 0 --random 2 --targets 0 --ladder-t none --budget 7200
+--max-nnz 2000000000 --trace
+```
+
+- **Identity.** It must stop for size in step 24, as round 2 did. It must
+  reproduce round 2's target-0 row on every field but these:
+  - the wall clock;
+  - the multiply-adds and `max_residual_rows`, which may only fall (§15.1);
+  - the fields added since round 2.
+- **Sizing.** Its stop line gives three numbers for step 24: the entries of its
+  `B'`, `E`; its columns without a divisor, `q`; and the live heap at the stop,
+  `H`.
+
+**Stage 2: the measurement.** Both targets run, each in its own process
+(`--targets 0`, then `--targets 1`). They take stage 1's flags with
+`--budget 43200`, and `--max-dense C` in place of `--max-nnz`.
+- `C` is the largest multiple of `10⁸` with `H + 4C ≤ A − 2.5·10⁹` bytes.
+  - `A = 1.4336·10¹⁰` bytes is the address-space cap, `ulimit -v 14000000` in
+    KiB.
+  - The `2.5·10⁹` bytes are for the step's echelon, which becomes the next
+    basis, the residue chunks, the threads' arenas and stacks, and the
+    allocator's slack.
+  - At `N = 15` the echelons of the two degree-7 steps took 11% and 15% as many
+    entries as their `B'`. That is the growth of the kept entries across each
+    step.
+- If `C ≥ E`, step 24 fits by this rule.
+- If `C < E`, stage 2 runs once anyway with `--max-dense E`, so that step 24 is
+  tried, and the note records that the rule did not expect it to fit.
+- A run that the machine ends with an allocation failure, rather than the
+  engine, is reported as such, with the lower bound its trace gives. It is not
+  re-run.
+
+**Confirmation.** A system that finishes with `D` is re-run with the degree
+bound at `D − 1` (`--cap`) and otherwise stage 2's flags. Each must end with
+pairs above the bound, without refuting and without a staircase stop.
+
+**Checks: a native checker.** `AGENTS.md` now rules out Python for research
+tooling, and `verify.py` and `analyze.py` are Python. They are replaced by
+`examples/pkm_tower_check.rs`, which keeps their contracts.
+- `verify` checks every finished tower row against exhaustive search over
+  `V^m`, as `verify.py` does. At `N = 18` that is `64³ = 262,144` triples.
+- `analyze` prints what `analyze.py` prints:
+  - the per-cell tables, the fits and the A1 quantities and reading;
+  - the repeated-measurement, planted and engine checks;
+  - the confirmation table.
+
+  Its bootstrap draws from the same Mersenne Twister, seeded as the script
+  seeds it.
+- `compare` makes stage 1's identity check, and checks that stage 2 repeats
+  stage 1's 23 steps.
+- **The port is checked first.** On every committed row of rounds 1–6, it must
+  print what `verify.py` and `analyze.py` printed in CI on `main` at
+  `63a09ff7`, line for line. A difference is explained before the checker
+  reads round 7.
+
+### 16.4 What was run before this section (a disclosure)
+
+- **Read, not run:** round 6's committed traces of M3 at `N = 9`–15. They are
+  the source of §16.2's and §16.3's ratios.
+- **Run with the new build, all at `N ≤ 12`:**
+  - the twelve unit tests;
+  - M3 at `N = 9` and 12, both targets. Target 1 alone was also run with
+    `--targets 1`. Its rows match the full run's on every field but the wall
+    clock, and the multiply-adds equal round 6's committed counts
+    (158,988,902 and 10,595,732,141);
+  - M3 at `N = 12`, target 0, once with `--max-nnz 3000000` and once with
+    `--max-dense 3000000`. Both stop in step 12, whose `B'` has 3,051,952
+    entries, and print its stop line.
+- **Nothing at `N = 18`** has run on any build since round 2.
+
+### 16.5 Predictions, before the runs
+
+1. **Identity.** Stage 1 stops in step 24 for size and reproduces round 2's row
+   as §16.3 requires.
+2. **Sizing.** `E` is between `2·10⁹` and `3·10⁹`, and `C ≥ E`, so stage 2
+   fits by the rule.
+   - The confidence is low.
+   - The estimate comes from `N = 15`'s degree-7 steps, where `q` was 29–38% of
+     the columns and `B'` had 0.85–0.93 times (pivot rows × `q`) entries.
+     Scaled to step 24's 104,600 columns, that gives `1.7·10⁹` to `2.7·10⁹`,
+     and round 2 showed `E > 2·10⁹`.
+3. **`D = 7` on both targets, and both refute.**
+   - The confidence is low.
+   - It rests on an analogy with `m = 4`, whose `D` was 6, 7, 7 at
+     `t = 2, 3, 4`. The `m = 3` line has risen once in two levels, at `t = 4`
+     to 5.
+4. **Both targets give the same `D`, width and step count**, as every cell so
+   far has.
+
+### 16.6 Decision rule, fixed now
+
+- **A1, per §16.1's table.**
+- **Instrument first.** These void the round's reading until they are
+  explained:
+  - a verdict that the native checker's `verify` contradicts;
+  - a stage-1 difference from round 2 beyond §16.3's allowance.
+- **Inadmissible:**
+  - changing the engine, the cell, the budgets, the seeds or the rule for `C`
+    after stage 1 starts;
+  - dropping a target;
+  - re-running a system in the hope of a different answer.
+
+### 16.7 The native checker, before it read this round
+
+`examples/pkm_tower_check.rs` was written while stage 1 ran, and checked
+before it read any round-7 row.
+- **The reference.** A dispatch of the workflow on `main` was refused (HTTP
+  403), so the reference is round 6's last CI run (workflow run 36689898077,
+  job 109804351090, ubuntu-24.04, Python 3.12) at `a8b1e7ad`. Its rows and
+  scripts are `main`'s: no PKM file changed on `main` between that commit,
+  `63a09ff7` and `85be1540`.
+- **The result: identical.** On every committed row of rounds 1–6 the checker
+  prints what the scripts printed there, line for line, with the same exit
+  status.
+  - That is the six `verify` lines: 176, 198, 2, 38, 34 and 200 rows checked,
+    every one agreeing.
+  - It is also the 667 lines of `analyze` over rounds 1–5.
+  - `research/pkm_tower_pilot_20260924/legacy_output/` freezes that output.
+    Its `check.sh` diffs against it, and CI runs it in place of the Python
+    steps.
+- **What the reference does not reach.** Every bootstrap interval in it is
+  degenerate, so it does not exercise the checker's Mersenne Twister. A unit
+  test does: Python's first draws for seeds 0 and 42.
+- **Unit tests.** Five tests in all:
+  - `test_verify.py`'s fixtures: planted decompositions on random curves over
+    `F_1009` for `m = 2, 3, 4`, and both orders of eliminating the `m = 4`
+    chain;
+  - the `m = 2` counter against the group law;
+  - the twister, and the Python semantics `analyze` relies on.
+
+### 16.8 Stage 1: the identity check and the sizing
+
+`run.sh stage1` ran from 02:02 to 02:42 UTC, and exited 0.
+- **Identity: confirmed.** It stopped for size in step 24, as round 2 did.
+  `pkm_tower_check compare-rows` finds its row equal to round 2's target-0 row
+  on every field it compares, multiply-adds included (`2.12·10¹³`). The
+  full-rank exit did not fire in steps 1–23.
+- **The steps round 2 did not trace.** `pkm_tower_check trace-table` gives
+  steps 18–24 as follows; the whole table is in the round's README.
+
+  | step | degree | S-rows | columns | without a divisor | new elements (lowest degree) | `B'` entries | multiply-adds | time | memory |
+  |--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|
+  | 18 | 6 | 16 | 16,401 | 10,494 | 15 (6) | 5.2·10⁷ | 6.3·10⁹ | 0.9 s | 283 MB |
+  | 19 | 7 | 22,318 | 45,792 | 23,792 | 2,354 (5) | 4.5·10⁸ | 1.4·10¹² | 151 s | 2.0 GB |
+  | 20 | 6 | 23 | 26,660 | 18,369 | 17 (5) | 1.3·10⁸ | 4.6·10¹⁰ | 4.7 s | 2.0 GB |
+  | 21 | 6 | 7 | 227 | 129 | 1 (6) | 1.1·10⁴ | 4.7·10⁴ | 0 s | 2.0 GB |
+  | 22 | 7 | 29,963 | 88,958 | 44,066 | 4,343 (6) | 1.62·10⁹ | 8.2·10¹² | 15.2 min | 7.2 GB |
+  | 23 | 7 | 33,337 | 98,183 | 43,909 | 5,453 (6) | 1.98·10⁹ | 1.15·10¹³ | 21.2 min | 9.2 GB |
+  | 24, stopped | 7 | 28,321 | 104,600 | 40,311 | — | 2.23·10⁹ | — | — | 9.3 GB |
+
+  - Steps 1–18 climb to degree 6 over at most 16,419 columns.
+  - Step 19 is the first at degree 7, and steps 22–24 all stay at 7.
+  - Steps 22 and 23 carry 93% of the multiply-adds.
+  - At `N = 15` (round 6's trace), step 19 is also the first step at
+    degree 7, with almost the same S-rows (22,325), over 31,397 columns. There
+    the run falls back to degree 6 after its second degree-7 step and refutes
+    in step 24.
+- **The sizing.** Step 24's stop line gives `E = 2,227,368,915` entries of
+  `B'` (8.9 GB) and `q = 40,311`. At the stop, resident memory was 9,300 MB
+  (peak 9,636 MB), the address space 9,460 MB (peak 9,844 MB), and the live heap
+  `H` 1,583 MB.
+- **The rule of §16.3** (`pkm_tower_check size-cap`) gives `C = 2.5·10⁹ ≥ E`.
+  Step 24 fits, and stage 2 runs with `--max-dense 2500000000`. It started at
+  02:42 UTC.
+
+### 16.9 Stage 2: `D = 7` at `N = 18`
+
+**A restart.** The machine ended the first attempt at target 0, not the
+engine.
+- The session's container was reclaimed and restarted while the run was in
+  step 23, between 03:00 and 03:59 UTC. The run ended without an exit status.
+- Its files are kept as `M3b-t0.restart1.*`, and `progress.txt` records the
+  restart.
+- The run was repeated whole with the same flags and the same binary, as round
+  3 did after its restart (§12.7). §16.3's no-rerun clause is about allocation
+  failures, which this was not.
+- The killed run's 22 steps and the repeat's are identical.
+
+**Target 0 refutes, at `D = 7`.** The repeat ran from 03:59 to 06:56 UTC and
+exited 0. Its steps from 19 on:
+
+| step | degree | S-rows | columns | without a divisor | new elements (lowest degree) | `B'` entries | multiply-adds | time |
+|--:|--:|--:|--:|--:|:--|--:|--:|--:|
+| 19 | 7 | 22,318 | 45,792 | 23,792 | 2,354 (5) | 4.5·10⁸ | 1.4·10¹² | 2.6 min |
+| 20–21 | 6 | 30 | ≤ 26,660 | ≤ 18,369 | 18 (5) | ≤ 1.3·10⁸ | 4.6·10¹⁰ | 0.1 min |
+| 22 | 7 | 29,963 | 88,958 | 44,066 | 4,343 (6) | 1.62·10⁹ | 8.2·10¹² | 16.5 min |
+| 23 | 7 | 33,337 | 98,183 | 43,909 | 5,453 (6) | 1.98·10⁹ | 1.15·10¹³ | 23.3 min |
+| 24 | 7 | 28,321 | 104,600 | 40,311 | 5,118 (6) | 2.23·10⁹ | 1.11·10¹³ | 23.1 min |
+| 25 | 7 | 26,804 | 105,985 | 36,343 | 7,048 (6) | 2.25·10⁹ | 1.30·10¹³ | 26.2 min |
+| 26 | 7 | 64,767 | 106,288 | 29,462 | 14,093 (5) | 2.15·10⁹ | 3.63·10¹³ | 67.5 min |
+| 27 | 6 | 25,042 | 48,633 | 15,371 | 14,356 (3) | 5.1·10⁸ | 8.2·10¹² | 16.1 min |
+| 28 | 4 | 3,097 | 5,228 | 1,015 | 1,015 (0): `1` | 4.3·10⁶ | 7.1·10⁹ | 0.8 s |
+
+- **No step went above degree 7, and the system refuted**, so `D = 7`.
+- **The shape is `N = 15`'s, longer.**
+  - `N = 15` has two steps at degree 7 (19 and 21), then falls through
+    degrees 6 and 5 and finds `1` at degree 2.
+  - `N = 18` has six at degree 7: step 19, then steps 22–26 in a row. Each of
+    the five adds 4,343 to 14,093 elements, and the pending pairs grow to
+    328,504 after step 26. Step 26's new elements reach degree 5, and the run
+    falls through degree 6 (step 27) to `1` at degree 4 (step 28).
+- **The last step's echelon fills.** Its residues have full rank on the 1,015
+  columns without a divisor after 1,015 of 3,097 S-rows, and the full-rank exit
+  skips the other 2,082.
+- **Size.** The largest step has 141,593 rows and 2.34·10⁹ nonzeros. That
+  passes round 2's `--max-nnz` of `2·10⁹`, which would have stopped the run at a
+  step that fit in memory: §16.2's `--max-dense` is what let it through. The
+  largest `B'` has 2.25·10⁹ entries (step 25). The peak resident memory was
+  12,961 MB (the trace's MB are 2^20 bytes). The address space reached
+  13,411,820 KiB of the 14,000,000 KiB cap, 96%; that figure was read from
+  `/proc` during step 27, since the trace does not record it.
+
+**From `N = 15` to `N = 18` at `m = 3`** (target 0 at both sizes, the same
+build class and host class, four threads):
+
+| | `N = 15` | `N = 18` | ratio |
+|:--|--:|--:|--:|
+| `D` | 7 | 7 | 1 |
+| steps | 24 | 28 | 1.2 |
+| width (columns) | 31,397 | 106,288 | 3.4 |
+| rows, largest step | 52,129 | 141,593 | 2.7 |
+| nonzeros, largest step | 2.9·10⁸ | 2.3·10⁹ | 8.0 |
+| largest `B'` | 2.0·10⁸ | 2.3·10⁹ | 11.4 |
+| multiply-adds | 3.19·10¹² | 8.99·10¹³ | 28.2 |
+| peak resident memory (MB of 2^20 bytes) | 1,084 | 12,961 | 12.0 |
+| F4 time (practicality note) | 6.0 min | 176.4 min | 29.2 |
+
+From `N = 12` to `N = 15` the multiply-adds grew 301 times and the width 6.3
+times (round 6's rows), so both grew less per level here.
+
+**Confirmation.** `C-M3b-t0-cap6` re-ran target 0 with the degree bound at 6.
+It ended after 18 steps with 22,382 pairs above the bound, without refuting and
+without a staircase stop. Degree 6 does not suffice. Its 18 steps are the full
+run's.
+
+**Two more restarts.** The container was reclaimed twice more, each time
+during a run of target 1, so its third attempt is the measurement.
+- The first attempt started at 06:56 UTC. It was last seen alive at 08:21 UTC,
+  in step 25, and the container was back at 00:09 UTC on 2026-10-07.
+- The second started at 00:12 UTC, on another host class: an Intel Xeon at
+  2.80 GHz. It was last seen alive at 01:06 UTC, in step 24, and the container
+  was back at 14:04 UTC.
+- Neither ended with an exit status. Their files are kept as
+  `M3b-t1.restart1.*` and `M3b-t1.restart2.*`, and `progress.txt` records both
+  restarts.
+- The third ran from 14:06 to 17:15 UTC with the same flags and binary, and
+  exited 0. Its first 24 steps equal the first attempt's, and its first 23 the
+  second's, multiply-adds included.
+
+**Target 1 refutes at `D = 7`, with target 0's trace.** Its 28 steps equal
+target 0's in every count but two, so its row is target 0's but for those:
+`D = 7`, refuted in step 28, widest step 106,288 columns.
+- Steps 22 and 26 take 2,097 and 25,511 more multiply-adds than target 0's,
+  and step 26 has one more nonzero (2,344,243,163).
+- Both counts skip zero entries, so an entry that vanishes by chance in one
+  target and not the other moves them. Step 26 has about as many entries as
+  `F_p` has elements.
+- The degrees, pairs, columns, residues, new elements, `B'` sizes and kept
+  entries are equal in every step.
+- The address space reached 13,426,460 KiB of the cap, 96%, again read from
+  `/proc` during step 27. No time of target 1's is compared with target 0's,
+  since the host class changed.
+
+`C-M3b-t1-cap6`, its re-run with the degree bound at 6, ends as target 0's did:
+after 18 steps, with 22,382 pairs above the bound, without refuting and without
+a staircase stop.
+
+**Checks** (`pkm_tower_check`; the round's README lists the commands).
+- `verify` agrees with both rows: no triple of `V³` solves either system, out
+  of `64³ = 262,144`.
+- `compare-trace` finds each attempt identical to every other attempt at the
+  same target on the steps they share, multiply-adds included. Each capped run
+  is identical to its full run on its 18 steps, and target 0's repeat to stage
+  1 on its 23.
+- `analyze`, over rounds 1–5 and 7, finds no repeated measurement disagreeing
+  on a deterministic field, and marks both confirmation runs as confirming.
+
+### 16.10 The rule of §16.6, applied
+
+**The predictions of §16.5.**
+
+| | prediction | outcome |
+|:--|:--|:--|
+| 1 | stage 1 stops for size in step 24 and reproduces round 2's row | held: step 24, every compared field equal, multiply-adds included |
+| 2 | `2·10⁹ < E < 3·10⁹`, and `C ≥ E` | held: `E = 2.23·10⁹`, `C = 2.5·10⁹` |
+| 3 | `D = 7` on both targets, and both refute | held, and both capped re-runs confirm it |
+| 4 | both targets give the same `D`, width and step count | held: 7, 106,288 columns and 28 steps on both |
+
+**A1 for the Kummer `m = 3` line at `p₁`.**
+- The line has `N = 9, 12, 15, 18` and `D = 6, 6, 7, 7`.
+- The final plateau is `L = 3`, and the upper half (`N = 15`–18) has no rise:
+  **inconclusive**, the reading §16.1 fixed for this outcome.
+- `pkm_tower_check analyze` prints the same: "inconclusive (upper-half slope
+  0.000 over N = 15…18, final plateau L = 3)". Its leave-one-`N`-out slopes run
+  from 0.119 to 0.167.
+- It is the first line at `m ≥ 3` that A1 reads with four sizes. §11.8's row
+  for M3 becomes:
+
+  | cell: kind, `m`, prime (runs) | `N` | `D` | final plateau `L` | upper-half slope | reading |
+  |:--|:--|:--|--:|:--|:--|
+  | Kummer, 3, `p₁` (M3, M3b) | 9–18 | 6 6 7 7 | 3 | 0 (`N = 15–18`) | inconclusive |
+
+**For §3.6**, as §16.1 stated before the runs: `D = 7` at `N = 18` is one level
+without a rise at `m = 3`, as at `m = 4` from `N = 12` to 16. That fits slow
+growth and closes nothing.
+
+**Instrument first.** `verify` contradicts no verdict, and stage 1 differs from
+round 2 in no field it compares.
+
+**Class.** None of `AGENTS.md` §3's classes applies: no algorithm changed and
+nothing is priced. The engine's additions report a stopped step and bound `B'` alone,
+and change no output; the checker is a port. This is a stage diagnostic of the
+solver axis: no `S`, no scoreboard row.
+
+### 16.11 What round 7 shows, and what it does not
+
+It shows four things.
+1. **`D = 7` at `m = 3`, `N = 18`,** on both targets, confirmed by the capped
+   re-runs and by exhaustive search. The `m = 3` line reads 6, 6, 7, 7.
+2. **The refutation keeps its shape, longer.** Six steps at degree 7 where
+   `N = 15` had two, then the degree falls and `1` appears at degree 4. Steps
+   19 and 22–26, the degree-7 steps, carry 91% of the multiply-adds.
+3. **The cost of a level grew less than over the level before.** From `N = 12`
+   to 15 the multiply-adds grew 301 times and the width 6.3 times; from 15 to
+   18, 28 and 3.4 times. That is two ratios, not a fit.
+4. **The native checker reproduces the legacy Python output exactly** on every
+   committed row of rounds 1–6, and the round's checks ran on it.
+
+It does not show three things.
+1. **Whether `D` stays at 7 for larger `N` at `m = 3`.** One level without a
+   rise fits a bounded `D`, and fits slow growth equally (§12.9 said the same
+   of `m = 4`). The next size is `N = 21`. From `N = 15` to 18 the peak
+   resident memory grew 12 times, and the address space reached 96% of this
+   machine's cap, so `N = 21` is beyond it; that is an extrapolation from one
+   ratio.
+2. **Anything at `m ≥ 4`**, the regime that decides the oracle (§3.7). At
+   `m = 3` no oracle beats rho, so this line measures the mechanism.
+3. **Any speed, `S` or scoreboard row.** Nothing is priced end to end
+   (`AGENTS.md` §2).
+
+**Next steps, ranked.**
+1. **Memory, for both open sizes.** `m = 3` at `N = 21` and `m = 4` at
+   `N = 20` are each past this machine's 14 GB. At `N = 18` the two large
+   blocks are `B'`, up to 9.0 GB, and the kept basis, 5.0 GB at the end, both
+   at four bytes an entry. That needs a machine with several times this one's
+   memory (`AGENTS.md` §9 names the repository's AWS hosts, which this session
+   cannot reach), or a lever on those two blocks. The machine must also keep a
+   run alive for hours: three of this round's five stage-2 attempts were lost
+   when the session's container was reclaimed.
+2. **The zero rows of the non-final steps** (§15.12, next step 3).
+3. **`m = 2` at `N = 28`, and an independent engine's replication** of `D = 6`
+   at `m = 2`, `N = 20` and `D = 7` at `m = 4`, `N = 16` (§12.10, items 3–4).
 
 ---
 

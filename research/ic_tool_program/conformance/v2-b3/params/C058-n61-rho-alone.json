@@ -1,0 +1,31 @@
+{
+ "schema_version": 2,
+ "name": "C058: suite v1 row params/S/k0n61/M1-T01.json, translated to v2, rho alone",
+ "field": {
+  "kind": "binary",
+  "degree": 61,
+  "modulus": "0x2000000000000027"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "162888033982417",
+  "cofactor": "14156",
+  "generator": {
+   "rule": "koblitz_search_v1"
+  }
+ },
+ "target": {
+  "public_hash_seed": 23001
+ },
+ "method": {
+  "solve": "rho",
+  "fidelity": "F0",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

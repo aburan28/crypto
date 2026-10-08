@@ -1,0 +1,294 @@
+{
+  "schema": "ecbench.callgrind_census/v1",
+  "unit": "callgrind.Ir",
+  "rows": [
+    {
+      "seq": 64,
+      "arm": "ic-k42-control",
+      "workload_id": "W01f731b735b5",
+      "algorithm_seed": "10990194411280862837",
+      "expected_recovered": "48127845",
+      "status": "verified",
+      "solve_ir": 113588172
+    },
+    {
+      "seq": 65,
+      "arm": "ic-k42",
+      "workload_id": "W01f731b735b5",
+      "algorithm_seed": "10990194411280862837",
+      "expected_recovered": "48127845",
+      "status": "verified",
+      "solve_ir": 113588058
+    },
+    {
+      "seq": 67,
+      "arm": "ic-k16",
+      "workload_id": "W01f731b735b5",
+      "algorithm_seed": "10990194411280862837",
+      "expected_recovered": "48127845",
+      "status": "verified",
+      "solve_ir": 41348160
+    },
+    {
+      "seq": 71,
+      "arm": "rho-strong",
+      "workload_id": "W01f731b735b5",
+      "algorithm_seed": "10990194411280862837",
+      "expected_recovered": "48127845",
+      "status": "verified",
+      "solve_ir": 8374300
+    },
+    {
+      "seq": 72,
+      "arm": "ic-k42-control",
+      "workload_id": "Wdb4602a43312",
+      "algorithm_seed": "3196301111174792543",
+      "expected_recovered": "102082166",
+      "status": "verified",
+      "solve_ir": 113642439
+    },
+    {
+      "seq": 73,
+      "arm": "ic-k42",
+      "workload_id": "Wdb4602a43312",
+      "algorithm_seed": "3196301111174792543",
+      "expected_recovered": "102082166",
+      "status": "verified",
+      "solve_ir": 113644024
+    },
+    {
+      "seq": 75,
+      "arm": "ic-k16",
+      "workload_id": "Wdb4602a43312",
+      "algorithm_seed": "3196301111174792543",
+      "expected_recovered": "102082166",
+      "status": "verified",
+      "solve_ir": 41493693
+    },
+    {
+      "seq": 79,
+      "arm": "rho-strong",
+      "workload_id": "Wdb4602a43312",
+      "algorithm_seed": "3196301111174792543",
+      "expected_recovered": "102082166",
+      "status": "verified",
+      "solve_ir": 5201718
+    },
+    {
+      "seq": 80,
+      "arm": "ic-k42-control",
+      "workload_id": "W4857dc5fcae1",
+      "algorithm_seed": "6306522363161138162",
+      "expected_recovered": "60355387",
+      "status": "verified",
+      "solve_ir": 113586267
+    },
+    {
+      "seq": 81,
+      "arm": "ic-k42",
+      "workload_id": "W4857dc5fcae1",
+      "algorithm_seed": "6306522363161138162",
+      "expected_recovered": "60355387",
+      "status": "verified",
+      "solve_ir": 113585887
+    },
+    {
+      "seq": 83,
+      "arm": "ic-k16",
+      "workload_id": "W4857dc5fcae1",
+      "algorithm_seed": "6306522363161138162",
+      "expected_recovered": "60355387",
+      "status": "verified",
+      "solve_ir": 41378184
+    },
+    {
+      "seq": 87,
+      "arm": "rho-strong",
+      "workload_id": "W4857dc5fcae1",
+      "algorithm_seed": "6306522363161138162",
+      "expected_recovered": "60355387",
+      "status": "verified",
+      "solve_ir": 12525481
+    },
+    {
+      "seq": 88,
+      "arm": "ic-k42-control",
+      "workload_id": "W54ab9060182b",
+      "algorithm_seed": "180251574916397903",
+      "expected_recovered": "163199623",
+      "status": "verified",
+      "solve_ir": 113610595
+    },
+    {
+      "seq": 89,
+      "arm": "ic-k42",
+      "workload_id": "W54ab9060182b",
+      "algorithm_seed": "180251574916397903",
+      "expected_recovered": "163199623",
+      "status": "verified",
+      "solve_ir": 113610458
+    },
+    {
+      "seq": 91,
+      "arm": "ic-k16",
+      "workload_id": "W54ab9060182b",
+      "algorithm_seed": "180251574916397903",
+      "expected_recovered": "163199623",
+      "status": "verified",
+      "solve_ir": 42229496
+    },
+    {
+      "seq": 95,
+      "arm": "rho-strong",
+      "workload_id": "W54ab9060182b",
+      "algorithm_seed": "180251574916397903",
+      "expected_recovered": "163199623",
+      "status": "verified",
+      "solve_ir": 10307544
+    },
+    {
+      "seq": 96,
+      "arm": "ic-k42-control",
+      "workload_id": "Wd37d16c23159",
+      "algorithm_seed": "3546231703688746491",
+      "expected_recovered": "192217465",
+      "status": "verified",
+      "solve_ir": 113696524
+    },
+    {
+      "seq": 97,
+      "arm": "ic-k42",
+      "workload_id": "Wd37d16c23159",
+      "algorithm_seed": "3546231703688746491",
+      "expected_recovered": "192217465",
+      "status": "verified",
+      "solve_ir": 113695320
+    },
+    {
+      "seq": 99,
+      "arm": "ic-k16",
+      "workload_id": "Wd37d16c23159",
+      "algorithm_seed": "3546231703688746491",
+      "expected_recovered": "192217465",
+      "status": "verified",
+      "solve_ir": 41465693
+    },
+    {
+      "seq": 103,
+      "arm": "rho-strong",
+      "workload_id": "Wd37d16c23159",
+      "algorithm_seed": "3546231703688746491",
+      "expected_recovered": "192217465",
+      "status": "verified",
+      "solve_ir": 8065124
+    },
+    {
+      "seq": 104,
+      "arm": "ic-k42-control",
+      "workload_id": "W935dacbd4a6d",
+      "algorithm_seed": "4862979306390916722",
+      "expected_recovered": "140892571",
+      "status": "verified",
+      "solve_ir": 113559422
+    },
+    {
+      "seq": 105,
+      "arm": "ic-k42",
+      "workload_id": "W935dacbd4a6d",
+      "algorithm_seed": "4862979306390916722",
+      "expected_recovered": "140892571",
+      "status": "verified",
+      "solve_ir": 113559687
+    },
+    {
+      "seq": 107,
+      "arm": "ic-k16",
+      "workload_id": "W935dacbd4a6d",
+      "algorithm_seed": "4862979306390916722",
+      "expected_recovered": "140892571",
+      "status": "verified",
+      "solve_ir": 41558698
+    },
+    {
+      "seq": 111,
+      "arm": "rho-strong",
+      "workload_id": "W935dacbd4a6d",
+      "algorithm_seed": "4862979306390916722",
+      "expected_recovered": "140892571",
+      "status": "verified",
+      "solve_ir": 7467238
+    },
+    {
+      "seq": 112,
+      "arm": "ic-k42-control",
+      "workload_id": "W3770919a06f0",
+      "algorithm_seed": "17793392305641002984",
+      "expected_recovered": "26815237",
+      "status": "verified",
+      "solve_ir": 113609732
+    },
+    {
+      "seq": 113,
+      "arm": "ic-k42",
+      "workload_id": "W3770919a06f0",
+      "algorithm_seed": "17793392305641002984",
+      "expected_recovered": "26815237",
+      "status": "verified",
+      "solve_ir": 113609838
+    },
+    {
+      "seq": 115,
+      "arm": "ic-k16",
+      "workload_id": "W3770919a06f0",
+      "algorithm_seed": "17793392305641002984",
+      "expected_recovered": "26815237",
+      "status": "verified",
+      "solve_ir": 41560184
+    },
+    {
+      "seq": 119,
+      "arm": "rho-strong",
+      "workload_id": "W3770919a06f0",
+      "algorithm_seed": "17793392305641002984",
+      "expected_recovered": "26815237",
+      "status": "verified",
+      "solve_ir": 9251633
+    },
+    {
+      "seq": 120,
+      "arm": "ic-k42-control",
+      "workload_id": "W4ee69fadc6f1",
+      "algorithm_seed": "16849848847562241911",
+      "expected_recovered": "117001976",
+      "status": "verified",
+      "solve_ir": 113643286
+    },
+    {
+      "seq": 121,
+      "arm": "ic-k42",
+      "workload_id": "W4ee69fadc6f1",
+      "algorithm_seed": "16849848847562241911",
+      "expected_recovered": "117001976",
+      "status": "verified",
+      "solve_ir": 113642687
+    },
+    {
+      "seq": 123,
+      "arm": "ic-k16",
+      "workload_id": "W4ee69fadc6f1",
+      "algorithm_seed": "16849848847562241911",
+      "expected_recovered": "117001976",
+      "status": "verified",
+      "solve_ir": 42654021
+    },
+    {
+      "seq": 127,
+      "arm": "rho-strong",
+      "workload_id": "W4ee69fadc6f1",
+      "algorithm_seed": "16849848847562241911",
+      "expected_recovered": "117001976",
+      "status": "verified",
+      "solve_ir": 13616457
+    }
+  ]
+}

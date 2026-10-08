@@ -42,6 +42,19 @@ Environment (written to /etc/ecc2k130.env by bootstrap.sh):
   ECC_ROOT       directory holding campaign.json, the client, per-GPU work dirs
   ECC_CLIENT     client binary (default ECC_ROOT/ecc2k130)
   ECC_LOCAL_STORE  directory that stands in for S3 and DynamoDB (rehearsals)
+  ECC_CAIRN_NODE, ECC_CAIRN_OBJECTIVE
+                 optional: a cairn node's HTTP address and the piecework
+                 objective this walk is paid under (campaign.json may carry
+                 them as cairnNode / cairnObjective instead).  When both are
+                 set the supervisor also posts a heartbeat to the node's
+                 POST /progress on the 60 s tick, so this GPU appears on the
+                 node's dashboard (/ui/task?id=...).  Never a record, never
+                 paid, never allowed to disturb the campaign loop.
+  ECC_CAIRN_WORKER  the name on that dashboard: the pseudonym the orbits
+                 are submitted to cairn under, so settled and reported land
+                 on one row (default slot-NNNNN)
+  ECC_CAIRN_TRAIL_BITS  the job's seed layout, so the node can bin paid
+                 seeds by unit (default 16, the pinned ecc2k130 job's)
 
 No type hints, camelCase identifiers (project convention).
 """
@@ -59,6 +72,7 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.error
 import urllib.request
 import uuid
 
@@ -128,6 +142,11 @@ CKPT_MAGIC = b"ECC2K130"
 CKPT_ITER_OFFSET = 32      # magic[8] + version, m, threads, batch, lanes, runId (u32 each)
 LEASE_SECONDS = 180
 HEARTBEAT_SECONDS = 60
+# The cairn dashboard lists a worker as live for 180 s after its last
+# heartbeat, the same lease as above, so the slot tick is the cairn tick.
+CAIRN_CLIENT = "ecc2k130-aws-worker/1"
+CAIRN_HEARTBEAT_TIMEOUT = 5.0
+CAIRN_DEFAULT_TRAIL_BITS = 16
 GRACE_SECONDS = 600        # the client checkpoints on SIGTERM; give it this long
 MAX_SLOT = 65534           # run id = slot + 1 must fit in 16 bits
 
@@ -211,6 +230,11 @@ def instanceId():
         return socket.gethostname()
 
 
+def gpuName(gpu):
+    # Non-GPU clients (the FPGA host program) have no nvidia-smi; the
+    # bootstrap tells us what the device is instead.
+    if os.environ.get("ECC_DEVICE_NAME"):
+        return os.environ["ECC_DEVICE_NAME"]
 def isCpuDevice():
     return os.environ.get("ECC_DEVICE", "").lower() == "cpu"
 
@@ -253,19 +277,33 @@ def cpuThreadCount():
     return max(1, int(os.cpu_count() or 1))
 
 
-def gpuName(gpu):
+def gpuName(gpu, attempts=3):
     # Non-GPU clients (CPU / FPGA host) have no nvidia-smi; the bootstrap
     # tells us what the device is instead.
     if os.environ.get("ECC_DEVICE_NAME"):
         return os.environ["ECC_DEVICE_NAME"]
     if isCpuDevice():
         return "cpu/%d" % cpuThreadCount()
-    try:
-        r = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
-                           capture_output=True, text=True)
-    except OSError:
-        return "cpu"
-    return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else "cpu"
+    for attempt in range(attempts):
+        try:
+            r = subprocess.run(
+                ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
+                capture_output=True, text=True)
+        except OSError:
+            break
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.strip()
+        if attempt + 1 < attempts:
+            time.sleep(1 + attempt)
+    # Never "cpu" on a host that did not say it was one. A CPU-shaped gpuName
+    # goes into the slot record, isCpuSlotRecord then reads it as a CPU slot,
+    # and idleSlotClaimable refuses CPU slots to every GPU claimant -- so one
+    # failed nvidia-smi call would strand that slot's checkpoint behind a
+    # claimant that can only be a CPU worker, which would refuse the packed
+    # shape anyway (exit 6). An unreadable GPU is unknown, not absent.
+    log("nvidia-smi did not name GPU %d after %d attempts; "
+        "claiming as an unknown GPU rather than a CPU slot" % (gpu, attempts))
+    return "gpu%d-unknown" % gpu
 
 
 # campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
@@ -724,6 +762,74 @@ class LocalSlots:
 
 
 # ---------------------------------------------------------------------------
+def cairnConfig(cfg, env=None):
+    """Where to send heartbeats, or None when this fleet is not on cairn.
+
+    The environment wins over campaign.json, so one instance can be pointed
+    at a test node without a campaign-wide rollout; campaign.json carries
+    the settings for a fleet that is.  Both the node and the objective are
+    needed: a heartbeat names an objective the node must hold, and one
+    without the other is a misconfiguration worth refusing quietly rather
+    than guessing.
+    """
+    env = os.environ if env is None else env
+    cfg = cfg or {}
+    node = (env.get("ECC_CAIRN_NODE") or cfg.get("cairnNode") or "").strip().rstrip("/")
+    objective = (env.get("ECC_CAIRN_OBJECTIVE") or cfg.get("cairnObjective") or "").strip()
+    if not node or not objective:
+        return None
+    worker = (env.get("ECC_CAIRN_WORKER") or cfg.get("cairnWorker") or "").strip()
+    try:
+        trailBits = int(env.get("ECC_CAIRN_TRAIL_BITS") or cfg.get("cairnTrailBits") or CAIRN_DEFAULT_TRAIL_BITS)
+    except ValueError:
+        trailBits = CAIRN_DEFAULT_TRAIL_BITS
+    return {"node": node, "objective": objective, "worker": worker, "trailBits": trailBits}
+
+
+def cairnHeartbeat(conf, slot, state, last, spoolBytes, recordBytes, device, lanes):
+    """The body cairn's POST /progress takes, from what this supervisor knows.
+
+    Every count is this run's own and the node labels all of it as reported,
+    not verified.  `steps` is the client's own iteration total, which its
+    progress line already multiplies across every walk, and `rate` is the
+    same line's M it/s; `trails` is the distinguished points it found this
+    run; `units_submitted` is what has been uploaded to the campaign store,
+    `units_pending` what waits in the spool.  Fields the supervisor cannot
+    know on a run that has not printed yet are left out rather than zeroed,
+    so a fresh worker reads as "here, nothing yet" and not as idle.
+    """
+    body = {
+        "objective_id": conf["objective"],
+        "worker": conf["worker"] or ("slot-%05d" % slot),
+        "steps": int(last["iters"]) if last else 0,
+        "trails": int(last["dp"]) if last else 0,
+        "units_submitted": int(state.get("dpUploaded", 0)),
+        "units_pending": int(spoolBytes // recordBytes) if recordBytes else 0,
+        "trail_bits": int(conf["trailBits"]),
+        "client": CAIRN_CLIENT,
+    }
+    if last and last.get("rate") is not None:
+        body["steps_per_second"] = int(last["rate"])
+    if device:
+        body["device"] = str(device)[:200]
+    if lanes:
+        body["lanes"] = int(lanes)
+    return body
+
+
+def postCairnHeartbeat(conf, body, timeout=CAIRN_HEARTBEAT_TIMEOUT):
+    """POST the heartbeat.  Returns (status, text); raises on no answer."""
+    data = json.dumps(body, separators=(",", ":")).encode()
+    request = urllib.request.Request(conf["node"] + "/progress", data=data, method="POST",
+                                     headers={"content-type": "application/json",
+                                              "accept": "application/json"})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return response.status, response.read().decode(errors="replace")
+    except urllib.error.HTTPError as error:
+        return error.code, error.read().decode(errors="replace")
+
+
 class Worker:
     def __init__(self):
         self.root = os.environ.get("ECC_ROOT", os.getcwd())
@@ -762,6 +868,8 @@ class Worker:
         self.contract = None
         self.leaseLost = False
         self.lastBeatSuccess = None
+        self.cairnFailures = 0
+        self.cairnOff = False
         self.streamId = uuid.uuid4().hex
         # Prevent two local supervisors sharing offsets, checkpoint paths or a GPU.
         self.workLock = open(os.path.join(self.work, "worker.lock"), "a+")
@@ -1071,6 +1179,45 @@ class Worker:
         """True while anything at all sits in the spool, manifest or not."""
         return os.path.isdir(self.spoolDir) and bool(os.listdir(self.spoolDir))
 
+    def cairnBeat(self, slot, last):
+        """Post this GPU's heartbeat to the cairn node, if one is configured.
+
+        Beside the slot heartbeat and subordinate to it: nothing here can
+        stop the client, lose the lease or raise.  A node that is down costs
+        one bounded request a minute and a log line on the first failure and
+        every tenth after it; a node that answers 404 is one from before the
+        dashboard, said once and then left alone.
+        """
+        if self.cairnOff:
+            return
+        conf = cairnConfig(self.cfg)
+        if not conf:
+            return
+        try:
+            _, recordBytes = dpStride(self.dpPath)
+        except Exception:
+            recordBytes = RECORD_BYTES
+        body = cairnHeartbeat(conf, slot, self.state, last, self.spoolBytes(), recordBytes,
+                              self.gpuName, int(self.state.get("walks", 0)))
+        try:
+            status, text = postCairnHeartbeat(conf, body)
+        except Exception as e:
+            self.cairnFailures += 1
+            if self.cairnFailures == 1 or self.cairnFailures % 10 == 0:
+                log("cairn heartbeat failed (%d so far, will retry): %s" % (self.cairnFailures, e))
+            return
+        if status == 202:
+            self.cairnFailures = 0
+            return
+        if status == 404 and "no such objective" not in text:
+            self.cairnOff = True
+            log("cairn node %s has no POST /progress (built before the dashboard); heartbeats off"
+                % conf["node"])
+            return
+        self.cairnFailures += 1
+        if self.cairnFailures == 1 or self.cairnFailures % 10 == 0:
+            log("cairn heartbeat refused (%d, %d so far): %s" % (status, self.cairnFailures, text.strip()[:200]))
+
     def entrySize(self, entry):
         total = 0
         for path in (entry["payload"], entry["payload"] + ".json", entry["manifest"]):
@@ -1372,6 +1519,15 @@ class Worker:
                     out.write(src.read(base))
                 src.seek(offset)
                 out.write(src.read(whole - offset))
+            key = "dp/slot-%05d/%d-%016d.bin" % (slot, int(time.time()), offset)
+            self.store.put(delta, key)
+            self.reportRds(delta, slot)
+            os.remove(delta)
+            self.state["dpOffset"] = whole
+            # Cumulative across dp file rotations, so the dashboard's count
+            # is this slot's whole contribution.
+            self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + (whole - offset) // RECORD_BYTES
+            self.saveState()
             key = "dp/slot-%05d/%s-%016d-%s.bin" % (slot, self.streamId, offset, sha256File(delta))
             metaPath = None
             if self.contract:
@@ -1414,8 +1570,51 @@ class Worker:
                 self.saveState()
             os.remove(snap)
 
+    def reportRds(self, deltaPath, slot):
+        """Copy new GPU records into rho-dp, including each walk's starting seed.
+
+        No-op unless DATABASE_URL / RHO_DP_DSN is set.  Failures are logged;
+        S3 already has the durable copy."""
+        if not (os.environ.get("DATABASE_URL") or os.environ.get("RHO_DP_DSN")):
+            return
+        try:
+            from rds_gpu import reportGpuDelta
+            stats = reportGpuDelta(deltaPath, worker_id=self.owner,
+                                   campaign=os.environ.get("RHO_CAMPAIGN", "ecc2k-130"))
+            log("rds: reported %d dp (%d new, %d collisions) including starting seeds"
+                % (stats["reported"], stats["new"], stats["collisions"]))
+            if stats.get("last_collision"):
+                log("rds collision: %s" % stats["last_collision"])
+        except Exception as e:
+            log("rds report failed (points remain in S3): %s" % e)
+
     # ---- one client run ---------------------------------------------------
     def runClient(self, slot):
+        try:
+            from seed_registry import worker_guard
+        except ModuleNotFoundError as exc:
+            if exc.name != "seed_registry" or not hasattr(self.store, "bucket"):
+                raise
+            # Older bootstraps fetched worker.py alone. Install the pinned
+            # guard before starting a client, without requiring a kernel roll.
+            import hashlib
+            import importlib.util
+            expected = "2488a983bf57c4e284363a1f01b9e7c08fccf06c459bcb56509979c26da4bd70"
+            path = os.path.join(self.work, "seed_registry.py")
+            sh(["aws", "s3", "cp", "s3://%s/aws/seed-guard/%s/seed_registry.py"
+                % (self.store.bucket, expected), path, "--only-show-errors"])
+            with open(path, "rb") as source:
+                if hashlib.sha256(source.read()).hexdigest() != expected:
+                    raise RuntimeError("seed guard hash mismatch; refusing launch")
+            spec = importlib.util.spec_from_file_location("seed_registry", path)
+            guard = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(guard)
+            sys.modules["seed_registry"] = guard
+            worker_guard = guard.worker_guard
+        with worker_guard(self, slot, slot + 1):
+            return self._runClient(slot)
+
+    def _runClient(self, slot):
         """Run the client until it exits or a stop/restart is due.
 
         Returns (returncode, solvedLine)."""
@@ -1501,6 +1700,7 @@ class Worker:
                 if self.lastBeatSuccess is None or time.monotonic() - self.lastBeatSuccess >= LEASE_SECONDS:
                     self.leaseLost = True
                     self.stopping = True
+                self.cairnBeat(slot, last)
                 if last:
                     log("%.3f B it/s, %d iterations this run, %d dp, %d uploaded, checkpoint at %d"
                         % (last["rate"] / 1e9, last["iters"], last["dp"],

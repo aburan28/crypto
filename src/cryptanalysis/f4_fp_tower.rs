@@ -45,6 +45,14 @@
 //!   lead first), every S-row is reduced by it in one pass (`D − C·B'`), and
 //!   the residues are echelonized in chunks, each reduced in parallel by the
 //!   pivots found before it. Every pivot is a new leading monomial.
+//! - **A full echelon ends the step's elimination.** Once the residues'
+//!   echelon has a pivot on every column without a divisor, every later
+//!   S-row reduces to zero, and a pivot is never rewritten once found: the
+//!   remaining S-rows are skipped (`full_rank_exit`, on by default). The
+//!   basis, the trace and the solving degree are the same with it off; only
+//!   the multiply-adds and the count of residual rows fall. It matters most
+//!   in a refutation's last step, which in the rounds' systems ends with a
+//!   full echelon (note §15).
 //! - **Rows are formed on demand.** A row is kept as the product that makes
 //!   it and formed again, a block at a time, when it is eliminated, so a
 //!   step's memory is `B'` rather than the matrix.
@@ -693,11 +701,28 @@ pub struct TowerF4Options {
     /// this many non-zero entries, or a reduced reducer block with more
     /// than this many dense entries.
     pub max_nnz: Option<u64>,
+    /// When set, the bound on the reduced reducer block alone, in place of
+    /// `max_nnz`. The block is held in memory, 4 bytes an entry; a
+    /// matrix's rows are formed when they are reduced, so its nonzeros
+    /// never are.
+    pub max_dense: Option<u64>,
     /// Called with each step's number (from 1) and trace as soon as the step
     /// ends, so that a run that dies still leaves its trace.
     pub on_step: Option<fn(usize, &StepTrace)>,
+    /// Called once if a stop cuts a step off, at the moment it does, with
+    /// the step's number, whether the stop is `oversize` (else the
+    /// deadline), and the step as far as it got
+    /// ([`TowerF4Report::stopped_step`]). It comes before the report's basis
+    /// is built, which for a large stopped run can be the largest
+    /// allocation left.
+    pub on_stop: Option<fn(usize, bool, &StepTrace)>,
     /// The same for the signature engine's steps.
     pub on_sig_step: Option<fn(usize, &super::sig_fp_tower::SigStep)>,
+    /// Stop reducing a step's S-rows once the echelon of their residues
+    /// has a pivot on every column the residues live on: every later row
+    /// then reduces to zero, and no pivot changes. On by default; off
+    /// reproduces the elimination row for row, multiply-adds included.
+    pub full_rank_exit: bool,
 }
 
 impl TowerF4Options {
@@ -707,8 +732,11 @@ impl TowerF4Options {
             deadline: None,
             stop_staircase: None,
             max_nnz: None,
+            max_dense: None,
             on_step: None,
+            on_stop: None,
             on_sig_step: None,
+            full_rank_exit: true,
         }
     }
     pub fn on_step(mut self, f: fn(usize, &StepTrace)) -> Self {
@@ -725,6 +753,10 @@ impl TowerF4Options {
     }
     pub fn with_max_nnz(mut self, nnz: u64) -> Self {
         self.max_nnz = Some(nnz);
+        self
+    }
+    pub fn with_max_dense(mut self, entries: u64) -> Self {
+        self.max_dense = Some(entries);
         self
     }
 }
@@ -745,6 +777,12 @@ pub struct StepTrace {
     /// their residues live on (those without a divisor).
     pub residual_rows: usize,
     pub residual_cols: usize,
+    /// How many S-rows had been reduced when the echelon of the residues
+    /// reached a pivot on every residual column, if it did; and the S-rows
+    /// never reduced because of it (`full_rank_exit`). Skipped rows are
+    /// not counted in `residual_rows`.
+    pub full_rank_after: Option<usize>,
+    pub skipped_rows: usize,
     /// Entries of the reduced reducer block, dense over those columns.
     pub dense_entries: u64,
     pub fresh: usize,
@@ -788,6 +826,9 @@ pub struct TowerF4Report {
     pub max_cols: usize,
     pub max_nnz: u64,
     pub max_residual_rows: usize,
+    /// S-rows never reduced because their step's echelon was already full
+    /// (`full_rank_exit`).
+    pub rows_skipped: u64,
     pub max_dense_entries: u64,
     /// The unit: `F_p` multiply-adds in the eliminations.
     pub muladds: u64,
@@ -804,6 +845,14 @@ pub struct TowerF4Report {
     pub oversize: bool,
     pub ms: f64,
     pub trace: Vec<StepTrace>,
+    /// The step a stop (`timed_out` or `oversize`) cut off, as far as it
+    /// got. It is not in `trace`, and `on_step` never sees it. A stop in
+    /// symbolic preprocessing leaves only the degree, the pairs and the
+    /// nonzeros scanned; a stop in the elimination also leaves the matrix,
+    /// its columns without a divisor (`residual_cols`) and `B'`'s planned
+    /// entries (`dense_entries`). The basis fields are those before the
+    /// step, and `pairs_left` counts the step's pairs again.
+    pub stopped_step: Option<StepTrace>,
 }
 
 // ── Sparse rows and the two eliminations ─────────────────────────────
@@ -1093,8 +1142,13 @@ enum Stop {
 /// Counters of one elimination, for the trace.
 #[derive(Default)]
 struct ElimStats {
-    /// S-rows that the reducers alone do not reduce to zero.
+    /// S-rows that the reducers alone do not reduce to zero, among those
+    /// reduced.
     residual_rows: usize,
+    /// S-rows reduced when the echelon had a pivot on every `Q` column, if
+    /// it did, and the S-rows then skipped.
+    full_rank_after: Option<usize>,
+    skipped_rows: usize,
     /// Columns no reducer leads: those without a divisor.
     q_cols: usize,
     /// Entries of the reduced reducer block `B'`.
@@ -1124,6 +1178,12 @@ type FormRow<'a> = &'a (dyn Fn(usize) -> Row + Sync);
 /// 3. the residues are echelonized in chunks: each chunk is reduced in
 ///    parallel by the pivots found so far, then finished one row at a time.
 ///
+/// Once the echelon has a pivot on every `Q` column, every later S-row
+/// reduces to zero and no pivot changes (a pivot is never rewritten after
+/// it is found). With `full_rank_exit` the rest of the S-rows are then
+/// skipped: the rows of the current chunk not yet finished, and every
+/// later chunk. The echelon is the same either way.
+///
 /// Returns the pivots of the echelon, monic and semi-reduced, as the dense
 /// rows over `Q` that step 3 leaves. `B'` larger than `max_dense` entries
 /// stops it as oversize.
@@ -1138,6 +1198,7 @@ fn eliminate(
     s_row: FormRow,
     deadline: Option<Instant>,
     max_dense: Option<u64>,
+    full_rank_exit: bool,
     st: &mut ElimStats,
 ) -> Result<Echelon, Stop> {
     let kern = Kernel::new(fp);
@@ -1252,7 +1313,19 @@ fn eliminate(
     let chunk = per_task * 2 * rayon::current_num_threads().max(1);
     type Reduced = (Vec<(Option<Vec<u64>>, bool)>, u64);
     let all: Vec<usize> = (0..n_s).collect();
+    // S-rows reduced so far. With no residual column the echelon is full
+    // before the first row.
+    let mut done = 0usize;
+    if nq == 0 {
+        st.full_rank_after = Some(0);
+    }
     for rows in all.chunks(chunk) {
+        if full_rank_exit && leads.len() == nq {
+            // Added to the rows the previous chunk skipped after its echelon
+            // filled.
+            st.skipped_rows += n_s - done;
+            break;
+        }
         let reduced: Vec<Reduced> = rows
             .par_chunks(per_task)
             .map(|ks| {
@@ -1328,7 +1401,13 @@ fn eliminate(
             st.muladds += work;
             residues.extend(out);
         }
-        for (acc, residual) in residues {
+        for (i, (acc, residual)) in residues.into_iter().enumerate() {
+            if full_rank_exit && leads.len() + new_leads.len() == nq {
+                // The echelon filled up earlier in this chunk: the rest of
+                // it reduces to zero.
+                st.skipped_rows += rows.len() - i;
+                break;
+            }
             st.residual_rows += usize::from(residual);
             let Some(mut acc) = acc else { continue };
             for &l in &new_leads {
@@ -1348,7 +1427,11 @@ fn eliminate(
                 .collect();
             let at = new_leads.partition_point(|&m| m < l as u32);
             new_leads.insert(at, l as u32);
+            if leads.len() + new_leads.len() == nq {
+                st.full_rank_after = Some(done + i + 1);
+            }
         }
+        done += rows.len();
         leads.extend(new_leads);
         leads.sort_unstable();
     }
@@ -1936,6 +2019,13 @@ pub fn f4_tower(input: &[RPoly], ring: &TowerRing, opts: &TowerF4Options) -> Tow
                 rep.timed_out = true;
             }
             s.pairs.extend(selected);
+            tr.nnz = nnz;
+            kept(&s, &mut tr);
+            tr.ms = step_started.elapsed().as_secs_f64() * 1e3;
+            if let Some(f) = opts.on_stop {
+                f(rep.steps, rep.oversize, &tr);
+            }
+            rep.stopped_step = Some(tr);
             break;
         }
         rep.reducer_rows += r_desc.len() as u64;
@@ -2028,12 +2118,16 @@ pub fn f4_tower(input: &[RPoly], ring: &TowerRing, opts: &TowerF4Options) -> Tow
             s_list.len(),
             &s_row,
             opts.deadline,
-            opts.max_nnz,
+            opts.max_dense.or(opts.max_nnz),
+            opts.full_rank_exit,
             &mut st,
         );
         tr.muladds = st.muladds;
         rep.muladds += st.muladds;
         tr.residual_rows = st.residual_rows;
+        tr.full_rank_after = st.full_rank_after;
+        tr.skipped_rows = st.skipped_rows;
+        rep.rows_skipped += st.skipped_rows as u64;
         tr.residual_cols = st.q_cols;
         tr.dense_entries = st.dense_entries;
         tr.ms_reduce = st.ms_reducers;
@@ -2048,6 +2142,12 @@ pub fn f4_tower(input: &[RPoly], ring: &TowerRing, opts: &TowerF4Options) -> Tow
                     Stop::Oversize => rep.oversize = true,
                 }
                 s.pairs.extend(selected);
+                kept(&s, &mut tr);
+                tr.ms = step_started.elapsed().as_secs_f64() * 1e3;
+                if let Some(f) = opts.on_stop {
+                    f(rep.steps, rep.oversize, &tr);
+                }
+                rep.stopped_step = Some(tr);
                 break;
             }
         };
@@ -2303,6 +2403,7 @@ mod tests {
                     &|k| s_rows[k].clone(),
                     None,
                     None,
+                    false,
                     &mut st,
                 ) else {
                     panic!("no deadline and no cap were set");
@@ -2337,6 +2438,249 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// The full-rank exit leaves the echelon as it was: the same pivots,
+    /// row for row, and no more multiply-adds, on random matrices whose
+    /// S-rows outnumber the columns without a pivot row (so that most
+    /// fill the echelon, some in the middle of a chunk), and on matrices
+    /// where they do not.
+    #[test]
+    fn the_full_rank_exit_changes_no_pivot() {
+        use rand::{Rng, SeedableRng};
+        let mut rng = rand::rngs::StdRng::seed_from_u64(23);
+        let (mut exits, mut skipped_total) = (0, 0usize);
+        for &p in &[786433u64, 2013265921, 3221225473] {
+            let f = fp(p);
+            for trial in 0..10 {
+                let n_cols = rng.gen_range(60..300usize);
+                let density = rng.gen_range(0.05..0.4);
+                let random_row = |lead: usize, rng: &mut rand::rngs::StdRng| {
+                    let mut row = Row {
+                        cols: vec![lead as u32],
+                        vals: vec![rng.gen_range(1..p) as u32],
+                    };
+                    for c in lead + 1..n_cols {
+                        if rng.gen_bool(density) {
+                            row.cols.push(c as u32);
+                            row.vals.push(rng.gen_range(1..p) as u32);
+                        }
+                    }
+                    row
+                };
+                let mut pivot_of = vec![NONE; n_cols];
+                let mut piv_rows = Vec::new();
+                for c in 0..n_cols {
+                    if rng.gen_bool(0.5) {
+                        let mut row = random_row(c, &mut rng);
+                        row.vals[0] = 1;
+                        pivot_of[c] = piv_rows.len() as u32;
+                        piv_rows.push(row);
+                    }
+                }
+                let nq = pivot_of.iter().filter(|&&x| x == NONE).count();
+                // Even trials: several times as many S-rows as Q columns.
+                // Odd trials: fewer, so the echelon cannot fill.
+                let n_s = if trial % 2 == 0 {
+                    rng.gen_range(2 * nq + 1..6 * nq + 40)
+                } else {
+                    rng.gen_range(1..nq.max(2))
+                };
+                let s_rows: Vec<Row> = (0..n_s)
+                    .map(|_| {
+                        let lead = rng.gen_range(0..n_cols);
+                        random_row(lead, &mut rng)
+                    })
+                    .collect();
+                let piv_leads: Vec<u32> = piv_rows.iter().map(|r| r.cols[0]).collect();
+                let run = |exit: bool| {
+                    let mut st = ElimStats::default();
+                    let Ok(ech) = eliminate(
+                        f,
+                        n_cols,
+                        &piv_leads,
+                        &|k| piv_rows[k].clone(),
+                        &pivot_of,
+                        s_rows.len(),
+                        &|k| s_rows[k].clone(),
+                        None,
+                        None,
+                        exit,
+                        &mut st,
+                    ) else {
+                        panic!("no deadline and no cap were set");
+                    };
+                    (ech, st)
+                };
+                let (full, a) = run(false);
+                let (cut, b) = run(true);
+                assert_eq!(full.leads, cut.leads, "p = {p}, trial {trial}");
+                assert_eq!(full.rows, cut.rows, "p = {p}, trial {trial}");
+                assert_eq!(full.q_col, cut.q_col);
+                assert_eq!(
+                    a.full_rank_after, b.full_rank_after,
+                    "p = {p}, trial {trial}"
+                );
+                assert_eq!(a.skipped_rows, 0);
+                assert!(b.muladds <= a.muladds, "p = {p}, trial {trial}");
+                assert!(b.residual_rows <= a.residual_rows);
+                match a.full_rank_after {
+                    None => {
+                        assert!(full.leads.len() < nq);
+                        assert_eq!(b.skipped_rows, 0);
+                        assert_eq!(b.muladds, a.muladds);
+                        assert_eq!(b.residual_rows, a.residual_rows);
+                    }
+                    Some(k) => {
+                        assert_eq!(full.leads.len(), nq, "p = {p}, trial {trial}");
+                        assert!(k <= n_s);
+                        // Every row after the one that filled the echelon
+                        // is skipped: the rest of its chunk, and every chunk
+                        // after it.
+                        assert_eq!(b.skipped_rows, n_s - k, "p = {p}, trial {trial}");
+                        if b.skipped_rows > 0 {
+                            exits += 1;
+                            skipped_total += b.skipped_rows;
+                        }
+                    }
+                }
+            }
+        }
+        assert!(exits >= 5, "the exit fired in only {exits} trials");
+        eprintln!("the exit fired in {exits} trials and skipped {skipped_total} S-rows");
+    }
+
+    /// The whole engine with the exit on and off: the same basis, the same
+    /// report and the same trace, but for the multiply-adds, the residual
+    /// rows and the skipped rows, on Kummer systems like the pilot's and
+    /// on towers with every rule coefficient non-zero.
+    #[test]
+    fn the_full_rank_exit_changes_no_basis() {
+        use rand::SeedableRng;
+        let mut rng = rand::rngs::StdRng::seed_from_u64(2027);
+        let (mut exits, mut saved) = (0, 0u64);
+        for trial in 0..40 {
+            let general = trial % 2 == 1;
+            let (ring, g) = if general {
+                let ring = random_ring(&mut rng, 1_000_003, 2, 2 + trial % 3, trial % 2, true);
+                let g = biquadratic(&mut rng, &ring, 2 + trial % 3, None);
+                (ring, g)
+            } else {
+                let p = 97u64;
+                let t = 1 + trial % 4;
+                let (r0, _) = kummer_block(p, t, 0);
+                let (r1, _) = kummer_block(p, t, t);
+                let ring = TowerRing {
+                    p,
+                    rules: [r0, r1].concat(),
+                    n_free: 0,
+                };
+                let g = biquadratic(&mut rng, &ring, t, None);
+                (ring, g)
+            };
+            if g.is_empty() {
+                continue;
+            }
+            let on = TowerF4Options::new(64);
+            let mut off = TowerF4Options::new(64);
+            off.full_rank_exit = false;
+            let a = f4_tower(std::slice::from_ref(&g), &ring, &off);
+            let b = f4_tower(std::slice::from_ref(&g), &ring, &on);
+            assert_eq!(a.basis, b.basis, "trial {trial}");
+            assert_eq!(a.inconsistent, b.inconsistent);
+            assert_eq!(a.solving_degree_max, b.solving_degree_max);
+            assert_eq!(a.last_productive_degree, b.last_productive_degree);
+            assert_eq!(a.degree_reached, b.degree_reached);
+            assert_eq!(
+                (
+                    a.steps,
+                    a.max_rows,
+                    a.max_cols,
+                    a.max_nnz,
+                    a.max_dense_entries
+                ),
+                (
+                    b.steps,
+                    b.max_rows,
+                    b.max_cols,
+                    b.max_nnz,
+                    b.max_dense_entries
+                )
+            );
+            assert_eq!(
+                (
+                    a.critical_pairs_reduced,
+                    a.tower_pairs_reduced,
+                    a.reducer_rows
+                ),
+                (
+                    b.critical_pairs_reduced,
+                    b.tower_pairs_reduced,
+                    b.reducer_rows
+                )
+            );
+            assert_eq!(a.rows_skipped, 0);
+            assert!(b.muladds <= a.muladds, "trial {trial}");
+            assert_eq!(a.trace.len(), b.trace.len());
+            for (x, y) in a.trace.iter().zip(&b.trace) {
+                assert_eq!(
+                    (
+                        x.degree,
+                        x.s_rows,
+                        x.reducer_rows,
+                        x.promoted_rows,
+                        x.cols,
+                        x.nnz
+                    ),
+                    (
+                        y.degree,
+                        y.s_rows,
+                        y.reducer_rows,
+                        y.promoted_rows,
+                        y.cols,
+                        y.nnz
+                    )
+                );
+                assert_eq!(
+                    (
+                        x.residual_cols,
+                        x.dense_entries,
+                        x.fresh,
+                        x.fresh_min_degree
+                    ),
+                    (
+                        y.residual_cols,
+                        y.dense_entries,
+                        y.fresh,
+                        y.fresh_min_degree
+                    )
+                );
+                assert_eq!(
+                    (x.basis_active, x.basis_kept, x.basis_entries, x.pairs_left),
+                    (y.basis_active, y.basis_kept, y.basis_entries, y.pairs_left)
+                );
+                assert_eq!(x.full_rank_after, y.full_rank_after);
+                assert_eq!(x.skipped_rows, 0);
+                // Every S-row after the one that filled the echelon.
+                assert_eq!(
+                    y.skipped_rows,
+                    y.full_rank_after.map_or(0, |k| y.s_rows - k)
+                );
+                if y.skipped_rows == 0 {
+                    assert_eq!(x.muladds, y.muladds);
+                    assert_eq!(x.residual_rows, y.residual_rows);
+                } else {
+                    assert!(y.muladds <= x.muladds);
+                    assert!(y.residual_rows <= x.residual_rows);
+                }
+            }
+            if b.rows_skipped > 0 {
+                exits += 1;
+                saved += a.muladds - b.muladds;
+            }
+        }
+        assert!(exits > 0, "the exit never fired");
+        eprintln!("the exit fired on {exits} systems and saved {saved} multiply-adds");
     }
 
     /// Generic reduction by `y_j² − rule_j` on exponent vectors, as an
@@ -2741,5 +3085,141 @@ mod tests {
         let rep = f4_tower(&[g], &ring, &TowerF4Options::new(2));
         assert!(rep.degree_reached <= 2);
         assert!(rep.inconsistent || rep.pairs_above_bound > 0);
+    }
+
+    /// A run the size cap stops reports the step it cut off: the step the
+    /// uncapped run took there, as far as the stop let it get, after the
+    /// same earlier steps. A run that ends reports none.
+    #[test]
+    fn the_size_cap_reports_the_stopped_step() {
+        use rand::SeedableRng;
+        use std::sync::atomic::AtomicUsize;
+        // `on_stop` is a plain function, so it reports through a static that
+        // only this test touches.
+        static STOPS: AtomicUsize = AtomicUsize::new(0);
+        fn on_stop(k: usize, oversize: bool, st: &StepTrace) {
+            assert!(k > 0 && oversize && st.fresh == 0);
+            STOPS.fetch_add(1, AtomicOrdering::Relaxed);
+        }
+        let mut rng = rand::rngs::StdRng::seed_from_u64(31);
+        let (mut in_elimination, mut in_preprocessing, mut dense_only) = (0, 0, 0);
+        for trial in 0..24 {
+            let p = 97u64;
+            let t = 2 + trial % 3;
+            let (r0, _) = kummer_block(p, t, 0);
+            let (r1, _) = kummer_block(p, t, t);
+            let ring = TowerRing {
+                p,
+                rules: [r0, r1].concat(),
+                n_free: 0,
+            };
+            let g = biquadratic(&mut rng, &ring, t, None);
+            let full = f4_tower(std::slice::from_ref(&g), &ring, &TowerF4Options::new(64));
+            assert!(full.stopped_step.is_none() && !full.oversize);
+            let caps: Vec<u64> = full
+                .trace
+                .iter()
+                .flat_map(|s| [s.nnz, s.dense_entries])
+                .filter(|&x| x > 0)
+                .map(|x| x - 1)
+                .collect();
+            for cap in caps {
+                // `max_dense` alone bounds `B'` and nothing else: the run
+                // stops at the first step whose `B'` passes it.
+                let mut dense = TowerF4Options::new(64).with_max_dense(cap);
+                dense.on_stop = Some(on_stop);
+                let rep = f4_tower(std::slice::from_ref(&g), &ring, &dense);
+                let first = full.trace.iter().position(|s| s.dense_entries > cap);
+                match (&rep.stopped_step, first) {
+                    (None, None) => assert_eq!(rep.basis, full.basis),
+                    (Some(st), Some(k)) => {
+                        dense_only += 1;
+                        assert!(rep.oversize && rep.trace.len() == k);
+                        let want = &full.trace[k];
+                        assert_eq!(
+                            (st.cols, st.nnz, st.residual_cols, st.dense_entries),
+                            (want.cols, want.nnz, want.residual_cols, want.dense_entries)
+                        );
+                    }
+                    _ => panic!("trial {trial} cap {cap}: max_dense stopped elsewhere"),
+                }
+                let mut opts = TowerF4Options::new(64).with_max_nnz(cap);
+                opts.on_stop = Some(on_stop);
+                let rep = f4_tower(std::slice::from_ref(&g), &ring, &opts);
+                let Some(st) = &rep.stopped_step else {
+                    assert!(!rep.oversize);
+                    assert_eq!(rep.basis, full.basis, "trial {trial} cap {cap}");
+                    continue;
+                };
+                assert!(rep.oversize && !rep.inconsistent, "trial {trial} cap {cap}");
+                let k = rep.trace.len();
+                assert_eq!(rep.steps, k + 1);
+                let want = &full.trace[k];
+                assert_eq!(st.degree, want.degree);
+                for (x, y) in rep.trace.iter().zip(&full.trace) {
+                    assert_eq!((x.cols, x.nnz, x.fresh), (y.cols, y.nnz, y.fresh));
+                }
+                // The basis before the step, and its pairs given back.
+                if let Some(b) = k.checked_sub(1).map(|j| &full.trace[j]) {
+                    assert_eq!(
+                        (
+                            st.basis_active,
+                            st.basis_kept,
+                            st.basis_entries,
+                            st.pairs_left
+                        ),
+                        (b.basis_active, b.basis_kept, b.basis_entries, b.pairs_left)
+                    );
+                }
+                assert!(st.pairs_left >= want.critical_pairs + want.tower_pairs);
+                assert_eq!((st.fresh, st.residual_rows, st.muladds), (0, 0, 0));
+                if st.cols > 0 {
+                    // Stopped by `B'`: the whole matrix was built.
+                    in_elimination += 1;
+                    assert_eq!(
+                        (
+                            st.s_rows,
+                            st.reducer_rows,
+                            st.promoted_rows,
+                            st.cols,
+                            st.nnz
+                        ),
+                        (
+                            want.s_rows,
+                            want.reducer_rows,
+                            want.promoted_rows,
+                            want.cols,
+                            want.nnz
+                        )
+                    );
+                    assert_eq!(
+                        (st.residual_cols, st.dense_entries),
+                        (want.residual_cols, want.dense_entries)
+                    );
+                    assert!(st.dense_entries > cap);
+                    assert_eq!(
+                        rep.max_dense_entries,
+                        full.trace[..=k]
+                            .iter()
+                            .map(|s| s.dense_entries)
+                            .max()
+                            .unwrap()
+                    );
+                } else {
+                    // Stopped while the rows were scanned.
+                    in_preprocessing += 1;
+                    assert!(st.nnz > cap && st.nnz <= want.nnz);
+                    assert_eq!(st.dense_entries, 0);
+                }
+            }
+        }
+        assert!(
+            in_elimination > 0 && in_preprocessing > 0 && dense_only > 0,
+            "{in_elimination} {in_preprocessing} {dense_only}"
+        );
+        assert_eq!(
+            STOPS.load(AtomicOrdering::Relaxed),
+            in_elimination + in_preprocessing + dense_only
+        );
     }
 }

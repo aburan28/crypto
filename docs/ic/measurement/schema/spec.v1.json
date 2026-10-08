@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "icms.spec/v1",
+  "title": "ICMS experiment specification, version 1",
+  "description": "One index-calculus (or reference) configuration on one instance, and the measurement it runs under. Authored in YAML or JSON. Vocabulary values (factor-base families, units, windows, references) are checked against docs/ic/measurement/registry.json, so a new family is a registry entry, not a schema change. The identity view (everything except label, description and notes) is hashed into spec_id.",
+  "type": "object",
+  "required": ["icms", "instance", "factor_base", "decomposition", "relations", "linear_algebra", "accounting", "measurement", "execution"],
+  "additionalProperties": false,
+  "properties": {
+    "icms": {"const": "icms.spec/v1"},
+    "label": {"type": "string", "description": "Human handle; not part of identity."},
+    "description": {"type": "string"},
+    "role": {"enum": ["candidate", "baseline", "reference"], "description": "baseline: the unmodified configuration a candidate is compared with; reference: the rho arm."},
+    "instance": {"$ref": "#/$defs/instance"},
+    "factor_base": {"$ref": "#/$defs/factor_base"},
+    "decomposition": {"$ref": "#/$defs/decomposition"},
+    "relations": {"$ref": "#/$defs/relations"},
+    "linear_algebra": {"$ref": "#/$defs/linear_algebra"},
+    "descent": {"$ref": "#/$defs/descent"},
+    "reference": {"$ref": "#/$defs/reference"},
+    "accounting": {"$ref": "#/$defs/accounting"},
+    "measurement": {"$ref": "#/$defs/measurement"},
+    "execution": {"$ref": "#/$defs/execution"},
+    "extensions": {
+      "type": "object",
+      "description": "Variant knobs not yet in the schema, keyed 'namespace.knob'. Part of identity, so two specs that differ here are different specs.",
+      "patternProperties": {"^[a-z][a-z0-9_]*\\.[a-z0-9_.]+$": {}},
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "instance": {
+      "type": "object",
+      "required": ["curve", "workload"],
+      "additionalProperties": false,
+      "properties": {
+        "curve": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["regime"],
+          "properties": {
+            "regime": {"enum": ["prime", "char2", "koblitz", "subfield", "gls", "extension"]},
+            "ref": {"type": "string", "description": "ICV1 slug from docs/curves/registry.json, when the curve is registered."},
+            "degree": {"type": "integer", "minimum": 2, "description": "Field degree n for binary and extension fields (never a subgroup size)."},
+            "bits": {"type": "integer", "minimum": 4, "description": "Subgroup bit length for prime-field instances drawn by size."},
+            "koblitz_a": {"enum": [0, 1], "description": "K_a: y^2 + xy = x^3 + a x^2 + 1. Required for a Koblitz curve given by degree: producers default differently (crypto ic bench tries K_1 first, cryptanalysis ic-bench uses K_0)."},
+            "family": {"enum": ["generic", "j0", "j1728", "d7", "d8"], "description": "Prime-field curve family (ic bench --family)."},
+            "max_cofactor": {"type": "integer", "minimum": 1},
+            "selected_by_seed": {"type": "boolean", "description": "True when the producer draws the curve from the workload seed (random char2, CM prime). The adapter then forces one seed per workload and puts the curve in the workload identity."},
+            "explicit": {
+              "type": "object",
+              "description": "Explicit parameters, canonicalised into the EC1 curve record.",
+              "additionalProperties": false,
+              "properties": {
+                "field": {"type": "object"},
+                "model": {"type": "string"},
+                "coefficients": {"type": "object"},
+                "subgroup_order": {"type": "string"},
+                "cofactor": {"type": "string"},
+                "generator": {"type": "object"}
+              },
+              "required": ["field", "model", "coefficients", "subgroup_order"]
+            }
+          },
+          "allOf": [
+            {"if": {"properties": {"regime": {"enum": ["char2", "koblitz", "subfield", "gls", "extension"]}}}, "then": {"anyOf": [{"required": ["degree"]}, {"required": ["ref"]}, {"required": ["explicit"]}]}},
+            {"if": {"properties": {"regime": {"const": "prime"}}}, "then": {"anyOf": [{"required": ["bits"]}, {"required": ["ref"]}, {"required": ["explicit"]}]}},
+            {"if": {"properties": {"regime": {"const": "koblitz"}}}, "then": {"required": ["koblitz_a"]}}
+          ]
+        },
+        "workload": {
+          "type": "object",
+          "required": ["targets", "law", "seeds"],
+          "additionalProperties": false,
+          "properties": {
+            "targets": {"type": "integer", "minimum": 1, "description": "Targets solved per cold run. The primary comparison uses exactly 1 (AGENTS.md); more is a separate, labelled question."},
+            "law": {"enum": ["known_answer", "public_hash", "fixed_file"]},
+            "seeds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0},
+                      "description": "One workload per seed. Repetitions re-run the same seed; independent targets come from more seeds."},
+            "holdout": {"type": "boolean"},
+            "file": {"type": "object", "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}, "required": ["path", "sha256"], "additionalProperties": false,
+                     "description": "The target file of a fixed_file workload; required for that law and refused for the others."}
+          },
+          "if": {"properties": {"law": {"const": "fixed_file"}}}, "then": {"required": ["file"]}
+        }
+      }
+    },
+    "factor_base": {
+      "type": "object",
+      "required": ["family"],
+      "additionalProperties": false,
+      "properties": {
+        "family": {"type": "string", "description": "A family from registry.json factor_base_families."},
+        "params": {"type": "object", "description": "The family's own parameters (dimension, divisor, size, seed_masks, ...)."},
+        "quotient": {"type": "array", "uniqueItems": true, "items": {"enum": ["negation", "frobenius", "automorphism", "two_torsion", "gls"]},
+                     "description": "Symmetries folded out of the unknown vector. Empty means one column per point."},
+        "large_primes": {
+          "type": "object", "additionalProperties": false, "required": ["mode"],
+          "description": "Large-prime variation: relations may carry up to max_large_primes points outside the small base, which are merged (cycle finding) into full relations. single/double are the classical names for max_large_primes 1 and 2; multi takes max_large_primes >= 3 (gaudry_cubic GaudryOptions).",
+          "properties": {
+            "mode": {"enum": ["none", "single", "double", "multi"]},
+            "max_large_primes": {"type": "integer", "minimum": 1},
+            "bound": {"type": "integer", "minimum": 1},
+            "bound_kind": {"enum": ["dimension", "count"]},
+            "small_base": {"type": "integer", "minimum": 1, "description": "points in the small base (GaudryOptions.small_base)"},
+            "max_merge_level": {"type": "integer", "minimum": 0, "description": "0 means uncapped"},
+            "cycle_finding": {"enum": ["union_find", "graph_bfs"]}
+          },
+          "allOf": [
+            {"if": {"properties": {"mode": {"const": "multi"}}}, "then": {"required": ["max_large_primes"]}},
+            {"if": {"properties": {"mode": {"const": "single"}}}, "then": {"properties": {"max_large_primes": {"const": 1}}}},
+            {"if": {"properties": {"mode": {"const": "double"}}}, "then": {"properties": {"max_large_primes": {"const": 2}}}}
+          ]
+        },
+        "partition": {
+          "type": "object", "additionalProperties": false, "required": ["parts", "scheme"],
+          "description": "Splitting the base into parts, with summand i drawn from part assignment[i].",
+          "properties": {
+            "parts": {"type": "integer", "minimum": 2},
+            "scheme": {"enum": ["disjoint_subspaces", "nested_subspaces", "per_summand", "orbit_classes"]},
+            "assignment": {"type": "array", "items": {"type": "integer", "minimum": 0}}
+          }
+        }
+      }
+    },
+    "decomposition": {
+      "type": "object",
+      "required": ["arity", "method"],
+      "additionalProperties": false,
+      "properties": {
+        "arity": {"type": "integer", "minimum": 1, "description": "m: factor-base points per relation."},
+        "method": {"enum": ["subtract", "enumerate", "pair_table", "mitm", "mitm_frobenius", "algebraic", "symmetrised"]},
+        "params": {"type": "object"},
+        "encoding": {"enum": ["none", "expanded_semaev", "symmetrized", "chained_s3", "riemann_roch", "orbit_coordinates"]},
+        "splitting": {"enum": ["none", "chained_s3", "balanced_resultant", "mitm_table"]},
+        "solver": {
+          "type": "object", "required": ["name"], "additionalProperties": false,
+          "properties": {
+            "name": {"type": "string"},
+            "version": {"type": "string"},
+            "binary_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "options": {"type": "object", "description": "Every option in registry.json solver_options_that_change_search for this solver must be present."}
+          }
+        },
+        "limits": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "per_call_seconds": {"type": "integer", "minimum": 0, "description": "0 means no wall-clock budget. A wall budget makes counts load-dependent; the record flags any call that hit it."},
+            "per_call_conflicts": {"type": "integer", "minimum": 1}
+          }
+        }
+      },
+      "allOf": [{"if": {"properties": {"method": {"enum": ["algebraic", "symmetrised"]}}}, "then": {"required": ["encoding", "solver"]}}]
+    },
+    "relations": {
+      "type": "object",
+      "required": ["collector", "stop"],
+      "additionalProperties": false,
+      "properties": {
+        "collector": {"enum": ["walk", "random", "sample", "aimed", "rerandomized"]},
+        "stop": {"enum": ["first_log", "full_rank", "count"], "description": "first_log: stop when the target column is pinned (ic bench); full_rank: every column determined (ic workflow)."},
+        "count": {"type": "integer", "minimum": 1},
+        "max_trials": {"type": "integer", "minimum": 1}
+      }
+    },
+    "linear_algebra": {
+      "type": "object",
+      "required": ["method"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {"enum": ["incremental_gauss", "structured_gauss", "gauss", "lanczos", "block_wiedemann", "none"]},
+        "pivot": {"enum": ["min_index", "min_fill", "leftmost", "lightest_column"]},
+        "filtering": {"type": "array", "items": {"enum": ["singletons", "cliques", "merge"]}}
+      }
+    },
+    "descent": {
+      "type": "object", "additionalProperties": false,
+      "properties": {"method": {"enum": ["none", "embedded", "pdp", "rerandomize", "direct"]}}
+    },
+    "reference": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "rho": {"type": "string", "description": "An id from registry.json references.rho."},
+        "floor": {"type": "string", "description": "An id from registry.json references.floor."},
+        "rho_runs": {"type": "integer", "minimum": 0}
+      }
+    },
+    "accounting": {
+      "type": "object", "required": ["unit"], "additionalProperties": false,
+      "properties": {
+        "unit": {"type": "string", "description": "An id from registry.json units."},
+        "calibration": {"type": "object", "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "id": {"type": "string"}}, "additionalProperties": false}
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "required": ["window", "repetitions"],
+      "additionalProperties": false,
+      "properties": {
+        "window": {"type": "string", "description": "An id from registry.json windows."},
+        "repetitions": {"type": "integer", "minimum": 1},
+        "warmup": {"type": "integer", "minimum": 0},
+        "interleave": {"enum": ["abab", "seeded_blocks"]},
+        "isolation_required": {"enum": ["L0", "L1", "L2", "L3"], "description": "Minimum level for a wall-clock figure. Operation counts need only L0."},
+        "thresholds": {"type": "object", "description": "Tightened isolation thresholds; loosening is refused."},
+        "timeout_seconds": {"type": "integer", "minimum": 1},
+        "memory_limit_mib": {"type": "integer", "minimum": 1},
+        "sample_interval_ms": {"type": "integer", "minimum": 1, "description": "Contention sampler period."}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": ["adapter", "threads"],
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {"enum": ["crypto.ic_bench", "cryptanalysis.ic_bench", "autoresearcher.index_calculus", "command"]},
+        "threads": {"type": "integer", "minimum": 1},
+        "cpus": {"type": "integer", "minimum": 1},
+        "binary": {"type": "object", "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "build": {"type": "array", "items": {"type": "string"}}}, "additionalProperties": false},
+        "env": {"type": "object", "additionalProperties": {"type": "string"}},
+        "args": {"type": "object", "description": "Adapter-specific extras, validated by the adapter."},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

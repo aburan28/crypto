@@ -102,6 +102,7 @@ mkdir -p "$CL_DIR/build/checkpoints" "$CL_DIR/build/reports"
 export ECC_NENG=$NENG ECC_ID_W=$ID_W ECC_DP_WEIGHT=$DP_WEIGHT
 MMCM_MULT=${MMCM_MULT:-4}; MMCM_DIV=${MMCM_DIV:-3}; CLK_MHZ=${CLK_MHZ:-333}
 export ECC_MMCM_MULT=$MMCM_MULT ECC_MMCM_DIV=$MMCM_DIV
+echo "building cl_ecc2k130: $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz, tag $TAG"
 # the batch geometry, when given, goes the same way as the other defines
 [ -n "${LOG_W:-}" ] && export ECC_LOG_W=$LOG_W
 [ -n "${LOG_NB:-}" ] && export ECC_LOG_NB=$LOG_NB
@@ -184,6 +185,15 @@ out=$(aws ec2 create-fpga-image --name "ecc2k130-$TAG" \
       --input-storage-location "Bucket=$BUCKET,Key=$PREFIX/$TAG.Developer_CL.tar" \
       --logs-storage-location "Bucket=$BUCKET,Key=$PREFIX/afi-logs" \
       --tag-specifications "ResourceType=fpga-image,Tags=[{Key=Project,Value=ecc2k130},{Key=BuildTag,Value=$TAG}]" \
+      --output json) || fail "create-fpga-image"
+echo "$out"
+python3 - "$out" "$TAG" "$NENG" "$ID_W" "$DP_WEIGHT" "$TIMING" "$CLK_MHZ" > afi.json <<'EOF'
+import json, sys
+out, tag, neng, idw, dpw, timing, mhz = sys.argv[1:]
+d = json.loads(out)
+json.dump({"afi": d["FpgaImageId"], "agfi": d["FpgaImageGlobalId"], "tag": tag,
+           "neng": int(neng), "idW": int(idw), "dpWeight": int(dpw),
+           "walks": int(neng) << int(idw), "clkMhz": int(mhz), "timing": timing}, sys.stdout, indent=1)
       --output json) || fail "create-fpga-image (the tarball is uploaded: ./build_afi.sh submit $TAG makes the image from it)"
 echo "$out"
 python3 - "$out" build.json > afi.json <<'EOF'

@@ -14,6 +14,7 @@
 #if ECC_PACKED_BLOCK_INVERSE
 #include "packedblockinverse131.cuh"
 #endif
+#include "packedsigmascratch.h"
 #ifndef ECC_PACKED_COMPACT_STATE
 #define ECC_PACKED_COMPACT_STATE 0
 #endif
@@ -135,6 +136,58 @@ namespace eccPacked131 {
 #endif
 #if ECC_TABLE_FUSED_PIPE && !ECC_TABLE_FUSED
 #error "ECC_TABLE_FUSED_PIPE requires ECC_TABLE_FUSED"
+#endif
+// ECC_SIGMA_FUSED=1 applies the same reverse/next-forward fusion to the
+// sigma^j+1 walk.  The launch begins with one ordinary forward pass.  Each
+// reverse pass then computes the next points and, except on the final step,
+// immediately builds the next step's denominator, numerator and prefix chain
+// from those register values.  Slot order alternates so Montgomery inversion
+// still consumes each chain in reverse.  The walk and completed-launch state
+// are bit-identical; one x/y load pass per update is removed.
+#ifndef ECC_SIGMA_FUSED
+#define ECC_SIGMA_FUSED 0
+#endif
+#if ECC_SIGMA_FUSED != 0 && ECC_SIGMA_FUSED != 1
+#error "ECC_SIGMA_FUSED must be 0 or 1"
+#endif
+#ifndef ECC_SIGMA_FUSED_LATE_Y
+#define ECC_SIGMA_FUSED_LATE_Y 0
+#endif
+#if ECC_SIGMA_FUSED_LATE_Y != 0 && ECC_SIGMA_FUSED_LATE_Y != 1
+#error "ECC_SIGMA_FUSED_LATE_Y must be 0 or 1"
+#endif
+#if ECC_SIGMA_FUSED_LATE_Y && !ECC_SIGMA_FUSED
+#error "ECC_SIGMA_FUSED_LATE_Y requires ECC_SIGMA_FUSED"
+#endif
+#ifndef ECC_SIGMA_FUSED_SHARED_SLOTS
+#define ECC_SIGMA_FUSED_SHARED_SLOTS 0
+#endif
+#if ECC_SIGMA_FUSED_SHARED_SLOTS != 0 && ECC_SIGMA_FUSED_SHARED_SLOTS != 2 && \
+    ECC_SIGMA_FUSED_SHARED_SLOTS != 3 && ECC_SIGMA_FUSED_SHARED_SLOTS != 4
+#error "ECC_SIGMA_FUSED_SHARED_SLOTS must be 0, 2, 3 or 4"
+#if ECC_SIGMA_SQUARE_TABLE && (!ECC_SIGMA_FUSED || ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE)
+#error "ECC_SIGMA_SQUARE_TABLE requires the polynomial-state sigma-fused walk"
+#endif
+#if ECC_SIGMA_SQUARE_TABLE && (ECC_PACKED_SQUARE_TABLE || ECC_PACKED_ALU_SQUARE)
+#error "ECC_SIGMA_SQUARE_TABLE is a standalone first comparison; keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off"
+#endif
+#if ECC_SIGMA_SQUARE_TABLE
+static_assert(size_t(SQ_TAB_WORDS) * sizeof(uint32_t) == 8320,
+              "sigma lambda square table layout changed");
+#endif
+#if ECC_SIGMA_FUSED && (ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE || \
+                        !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN || \
+                        ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || \
+                        ECC_TABLE_TAG_DENOM || ECC_PACKED_SLOT_PIPELINE || \
+                        ECC_PACKED_SLOT_PREFETCH || ECC_PHASE_PROFILE || \
+                        ECC_PACKED_CHAIN_FIRST)
+#error "ECC_SIGMA_FUSED requires the one-chain polynomial sigma walk in weighted-prefix mode 2"
+#endif
+#if ECC_SIGMA_FUSED_SHARED_SLOTS && \
+    (!ECC_SIGMA_FUSED || ECC_BATCH != 16 || ECC_THREADS != 256 || ECC_MINBLOCKS != 2 || \
+     !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_SHARED_SIGMA || ECC_WITNESS || \
+     ECC_PACKED_INLINE_POLY != 3 || ECC_SIGMA_FUSED_LATE_Y || ECC_PACKED_SQUARE_TABLE)
+#error "sigma fused shared scratch requires the exact counter-free B16/T256/min2 fused preset"
 #endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
@@ -326,6 +379,56 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_TABLE_PIPE_SELECT && (!ECC_WALK_TABLE || !ECC_TABLE_TAG_DENOM || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || ECC_PACKED_SLOT_PIPELINE || ECC_PACKED_SLOT_PREFETCH)
 #error "ECC_TABLE_PIPE_SELECT requires the two-pass table walk with ECC_TABLE_TAG_DENOM, polynomial state and weighted prefix 2"
 #endif
+// The v3 cycle-anchor probe is cold but needs a large point array. Keep it out
+// of the prefix product's live range by selecting every slot first, then reload
+// the unchanged polynomial coordinates and build the prefix from hist's tag.
+#ifndef ECC_TABLE_SPLIT_FORWARD
+#define ECC_TABLE_SPLIT_FORWARD 0
+#endif
+#if ECC_TABLE_SPLIT_FORWARD != 0 && ECC_TABLE_SPLIT_FORWARD != 1
+#error "ECC_TABLE_SPLIT_FORWARD must be 0 or 1"
+#endif
+#if ECC_TABLE_SPLIT_FORWARD && !ECC_TABLE_PIPE_SELECT
+#error "ECC_TABLE_SPLIT_FORWARD requires ECC_TABLE_PIPE_SELECT"
+#endif
+#ifndef ECC_TABLE_BATCH_HINTS
+#define ECC_TABLE_BATCH_HINTS 0
+#endif
+#if ECC_TABLE_BATCH_HINTS != 0 && ECC_TABLE_BATCH_HINTS != 1
+#error "ECC_TABLE_BATCH_HINTS must be 0 or 1"
+#endif
+#if ECC_TABLE_BATCH_HINTS && (!ECC_TABLE_SPLIT_FORWARD || ECC_BATCH > 64)
+#error "ECC_TABLE_BATCH_HINTS requires split-forward and at most 64 slots"
+#endif
+#ifndef ECC_TABLE_BLOCK_HINTS
+#define ECC_TABLE_BLOCK_HINTS 0
+#endif
+#ifndef ECC_TABLE_GLOBAL_HINTS
+#define ECC_TABLE_GLOBAL_HINTS 0
+#endif
+#ifndef ECC_TABLE_GLOBAL_HINT_THREADS
+#define ECC_TABLE_GLOBAL_HINT_THREADS 128
+#endif
+#if ECC_TABLE_GLOBAL_HINTS != 0 && ECC_TABLE_GLOBAL_HINTS != 1
+#error "ECC_TABLE_GLOBAL_HINTS must be 0 or 1"
+#endif
+#if ECC_TABLE_GLOBAL_HINT_THREADS != 128 && ECC_TABLE_GLOBAL_HINT_THREADS != 256 && ECC_TABLE_GLOBAL_HINT_THREADS != 512
+#error "ECC_TABLE_GLOBAL_HINT_THREADS must be 128, 256 or 512"
+#endif
+#if ECC_TABLE_GLOBAL_HINTS && (!ECC_WALK_TABLE || !ECC_TABLE_BATCH_HINTS || \
+    !ECC_TABLE_SPLIT_FORWARD || ECC_TABLE_BLOCK_HINTS || ECC_TABLE_FUSED || \
+    ECC_TABLE_GLOBAL || ECC_TABLE_ADDEND_GLOBAL || ECC_CYCLE_PROFILE || ECC_PHASE_PROFILE)
+#error "GPU-wide hints require split/batch v3 with full shared tables, no block queue, fusion or profiling"
+#endif
+#ifndef ECC_TABLE_HINT_QUEUE
+#define ECC_TABLE_HINT_QUEUE 512
+#endif
+#if ECC_TABLE_BLOCK_HINTS != 0 && ECC_TABLE_BLOCK_HINTS != 1
+#error "ECC_TABLE_BLOCK_HINTS must be 0 or 1"
+#endif
+#if ECC_TABLE_BLOCK_HINTS && (!ECC_TABLE_BATCH_HINTS || ECC_TABLE_HINT_QUEUE < 1 || ECC_TABLE_HINT_QUEUE > 65536 || ECC_BATCH * ECC_THREADS > 65536)
+#error "ECC_TABLE_BLOCK_HINTS requires batch hints, a queue in [1,65536], and a 16-bit (slot,thread) index"
+#endif
 // ECC_PACKED_CHAINS=2: every thread runs two independent Montgomery chains
 // of ECC_BATCH/2 slots each (slots [0, B/2) and [B/2, B)) instead of one
 // chain of ECC_BATCH.  The chains are interleaved slot by slot in both
@@ -352,8 +455,32 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_PACKED_CHAINS == 2 && (ECC_BATCH % 2 != 0 || ECC_BATCH < 4)
 #error "ECC_PACKED_CHAINS=2 needs an even ECC_BATCH of at least 4"
 #endif
+#if ECC_SIGMA_FUSED && ECC_PACKED_CHAINS != 1
+#error "ECC_SIGMA_FUSED requires one Montgomery chain"
+#endif
+#if ECC_PACKED_SIGMA_TABLE && !ECC_SIGMA_FUSED
+#error "ECC_PACKED_SIGMA_TABLE is implemented for the fused sigma walk only"
+#endif
+#if ECC_PACKED_SIGMA_TABLE
+// Dynamic shared memory for the Frobenius nibble table (SIGMA_TABLE_BYTES
+// plus 256 bytes of alignment slack); the engine sizes every walk launch and
+// publishes the global copy through this symbol.
+extern __shared__ __align__(256) uint32_t eccSigmaSmem[];
+static __device__ const uint32_t *eccSigmaTableDevice;
+static const size_t SIGMA_SMEM_BYTES = size_t(SIGMA_TABLE_BYTES) + 256;
+#else
+static const size_t SIGMA_SMEM_BYTES = 0;
+#endif
+#if ECC_TABLE_GLOBAL_HINTS && ECC_PACKED_CHAINS != 1
+#error "GPU-wide hints require one Montgomery chain"
+#endif
 
 #if ECC_WALK_TABLE
+#if ECC_CYCLE_PROFILE
+#define ECC_CYCLE_PROFILE_ARG(params) , (params).cycleProfile
+#else
+#define ECC_CYCLE_PROFILE_ARG(params)
+#endif
 // The forward-pass selection of one slot, without the chain product: load the
 // point, weight and distinguished-point test, table-walk selection with its
 // history update, and the addend (d, e) in the polynomial basis.
@@ -376,6 +503,13 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
                 rec.iters = now - p.startIter[id];
                 toLimbs(x, rec.x);
                 toLimbs(fromPolynomial131(yp), rec.y);
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
                 p.dp[dest] = rec;
             }
             p.dead[id] = 1;
@@ -385,10 +519,282 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
-    const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
+    const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight
+                                  ECC_CYCLE_PROFILE_ARG(p));
+    twAddend(tag, xp, yp, twTab, dp, ep);
+}
+#if ECC_TABLE_SPLIT_FORWARD
+#if !ECC_TABLE_BATCH_HINTS
+__device__ __forceinline__ void tableSelectTagSlot(const WalkParams<unsigned> &p, int slot, int tid,
+                                                   unsigned long long now, bool guard,
+                                                   const uint32_t *twSel, const uint32_t *twTab) {
+    const P131 xp = load(p.x, slot, tid, p.threads);
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const size_t id = size_t(slot) * p.threads + tid;
+    const P131 x = fromPolynomial131(xp);
+    const int hw = weight(x);
+    if (!p.dead[id]) {
+        if (hw <= p.dpWeight) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            const unsigned dest = atomicAdd(p.dpCount, 1u);
+            if (dest < p.dpCap) {
+                DpRecord rec;
+                rec.seed = p.seed[id];
+                rec.iters = now - p.startIter[id];
+                toLimbs(x, rec.x);
+                toLimbs(fromPolynomial131(yp), rec.y);
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
+                p.dp[dest] = rec;
+            }
+            p.dead[id] = 1;
+        } else if (guard && now - p.startIter[id] >= p.maxIters) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            p.dead[id] = 1;
+            atomicAdd(p.dpCount + 1, 1u);
+        }
+    }
+    (void)twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight
+                   ECC_CYCLE_PROFILE_ARG(p));
+}
+#else
+// Record the raw tag immediately, but defer a hinted v3 point probe.  A later
+// warp-reconverged loop resolves one pending slot per lane at a time, so hints
+// found at different batch slots execute the same cold call concurrently.
+__device__ __forceinline__ bool tableSelectRawTagSlot(const WalkParams<unsigned> &p, int slot, int tid,
+                                                      unsigned long long now, bool guard,
+                                                      const uint32_t *twSel) {
+    const P131 xp = load(p.x, slot, tid, p.threads);
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const size_t id = size_t(slot) * p.threads + tid;
+    const P131 x = fromPolynomial131(xp);
+    const int hw = weight(x);
+    if (!p.dead[id]) {
+        if (hw <= p.dpWeight) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            const unsigned dest = atomicAdd(p.dpCount, 1u);
+            if (dest < p.dpCap) {
+                DpRecord rec;
+                rec.seed = p.seed[id];
+                rec.iters = now - p.startIter[id];
+                toLimbs(x, rec.x);
+                toLimbs(fromPolynomial131(yp), rec.y);
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
+                p.dp[dest] = rec;
+            }
+            p.dead[id] = 1;
+        } else if (guard && now - p.startIter[id] >= p.maxIters) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            p.dead[id] = 1;
+            atomicAdd(p.dpCount + 1, 1u);
+        }
+    }
+    const unsigned long long old = p.hist[id];
+    const unsigned raw = twRawTag(x, yp, hw, twSel);
+    const bool hinted = eccTagFruitless(raw, old, 131);
+    p.hist[id] = eccHistPush(old, raw);
+    return hinted;
+}
+
+__device__ __forceinline__ void tableResolveHintSlot(const WalkParams<unsigned> &p, int slot, int tid,
+                                                      const uint32_t *twSel, const uint32_t *twTab) {
+    const size_t id = size_t(slot) * p.threads + tid;
+    unsigned long long hist = p.hist[id];
+    const unsigned raw = unsigned(hist & 0xffffull);
+    const P131 x = fromPolynomial131(load(p.x, slot, tid, p.threads));
+    const P131 yp = load(p.y, slot, tid, p.threads);
+#if ECC_CYCLE_PROFILE
+    const unsigned tag = twCycleTagProfile(x, yp, raw, twSel, twTab, p.dpWeight,
+                                           p.cycleProfile);
+#else
+    const unsigned tag = twCycleTag(x, yp, raw, twSel, twTab, p.dpWeight);
+#endif
+    p.hist[id] = (hist & ~0xffffull) | tag;
+}
+#endif
+
+__device__ __forceinline__ void tableAddendFromHist(const WalkParams<unsigned> &p, int slot, int tid,
+                                                    const uint32_t *twTab, P131 *dp, P131 *ep) {
+    const size_t id = size_t(slot) * p.threads + tid;
+    const P131 xp = load(p.x, slot, tid, p.threads);
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const unsigned tag = unsigned(p.hist[id] & 0xffffull);
     twAddend(tag, xp, yp, twTab, dp, ep);
 }
 #endif
+#endif
+
+#if ECC_TABLE_GLOBAL_HINTS
+// Queue ownership is flat slot*workers+worker. Each worker reserves a range
+// once, then writes each hinted slot to a different entry. The following
+// kernel consumes only after every selection block completes on this stream.
+static __global__ void ECC_BOUNDS selectGlobalHints(WalkParams<unsigned> p,
+                                                     unsigned *queue, unsigned *count) {
+    extern __shared__ uint32_t table[];
+    twLoadShared(table, p.twConsts);
+    const unsigned tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid >= unsigned(p.threads)) return;
+    const bool guard = p.maxIters && p.iterBase % ECC_GUARD_PERIOD == 0;
+    unsigned long long pending = 0;
+#pragma unroll 1
+    for (int slot = 0; slot < ECC_BATCH; ++slot)
+        if (tableSelectRawTagSlot(p, slot, int(tid), p.iterBase, guard, table))
+            pending |= 1ull << slot;
+    const unsigned n = __popcll(pending);
+    if (!n) return;
+    unsigned pos = atomicAdd(count, n);
+    while (pending) {
+        const unsigned slot = unsigned(__ffsll((long long)pending) - 1);
+        queue[pos++] = slot * unsigned(p.threads) + tid;
+        pending &= pending - 1;
+    }
+}
+
+static __global__ __launch_bounds__(ECC_TABLE_GLOBAL_HINT_THREADS, 1)
+void resolveGlobalHints(WalkParams<unsigned> p, const unsigned *queue, const unsigned *count) {
+    extern __shared__ uint32_t table[];
+    twLoadShared(table, p.twConsts);
+    const unsigned n = *count;
+    const size_t stride = size_t(gridDim.x) * blockDim.x;
+    for (size_t pos = size_t(blockIdx.x) * blockDim.x + threadIdx.x; pos < n; pos += stride) {
+        const unsigned owner = queue[pos];
+        const int tid = int(owner % unsigned(p.threads));
+        const int slot = int(owner / unsigned(p.threads));
+        tableResolveHintSlot(p, slot, tid, table, table);
+    }
+}
+#endif
+
+#if ECC_SIGMA_FUSED
+#if ECC_SIGMA_FUSED_SHARED_SLOTS
+static __shared__ unsigned sigmaFusedSharedScratch131[
+    SIGMA_FUSED_SCRATCH_FIELDS * ECC_SIGMA_FUSED_SHARED_SLOTS * 5 * ECC_THREADS];
+#endif
+
+template<int Field>
+__device__ __forceinline__ P131 sigmaFusedScratchLoadOrGlobal131(
+    const unsigned *global, int slot, int tid, int threads) {
+#if ECC_SIGMA_FUSED_SHARED_SLOTS
+    if (slot < ECC_SIGMA_FUSED_SHARED_SLOTS)
+        return sigmaFusedScratchLoad131(sigmaFusedSharedScratch131, Field, slot,
+                                        int(threadIdx.x), ECC_SIGMA_FUSED_SHARED_SLOTS,
+                                        ECC_THREADS);
+#endif
+    return load(global, slot, tid, threads);
+}
+
+template<int Field>
+__device__ __forceinline__ void sigmaFusedScratchStoreOrGlobal131(
+    unsigned *global, int slot, int tid, int threads, P131 value) {
+#if ECC_SIGMA_FUSED_SHARED_SLOTS
+    if (slot < ECC_SIGMA_FUSED_SHARED_SLOTS) {
+        sigmaFusedScratchStore131(sigmaFusedSharedScratch131, Field, slot,
+                                  int(threadIdx.x), ECC_SIGMA_FUSED_SHARED_SLOTS,
+                                  ECC_THREADS, value);
+        return;
+    }
+#endif
+    store(global, slot, tid, threads, value);
+}
+
+// Forward work for one polynomial-state sigma slot.  `xp` and `yp` are either
+// freshly loaded launch inputs or the reverse pass's register outputs.  The
+// latter is the fusion: selection and prefix construction do not reload the
+// point that was just stored.
+__device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
+                                                 const P131 &xp, const P131 &yp,
+                                                 size_t id, int slot, int tid,
+                                                 unsigned long long now, bool guard,
+                                                 bool first, unsigned *denominators,
+                                                 P131 *prod, uint32_t sigmaBase) {
+    const P131 x = fromPolynomial131(xp);
+#if !ECC_SIGMA_FUSED_LATE_Y && !ECC_PACKED_SIGMA_TABLE
+    const P131 normalY = fromPolynomial131(yp);
+#endif
+    const int hw = weight(x);
+    if (!p.dead[id]) {
+        if (hw <= p.dpWeight) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            const unsigned dest = atomicAdd(p.dpCount, 1u);
+            if (dest < p.dpCap) {
+                DpRecord rec;
+                rec.seed = p.seed[id];
+                rec.iters = now - p.startIter[id];
+                toLimbs(x, rec.x);
+#if ECC_SIGMA_FUSED_LATE_Y || ECC_PACKED_SIGMA_TABLE
+                const P131 reportY = fromPolynomial131(yp);
+                toLimbs(reportY, rec.y);
+#else
+                toLimbs(normalY, rec.y);
+#endif
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
+                p.dp[dest] = rec;
+            }
+            p.dead[id] = 1;
+        } else if (guard && now - p.startIter[id] >= p.maxIters) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            p.dead[id] = 1;
+            atomicAdd(p.dpCount + 1, 1u);
+        }
+    }
+    const int j = 3 + ((hw >> 1) & 7);
+#if ECC_WITNESS
+    if (!p.dead[id])
+        p.counts[eccScalarCountIndex(slot, j - 3, tid, p.threads)] += 1u;
+#endif
+#if ECC_PACKED_SIGMA_TABLE
+    // x + sigma^j(x) and y + sigma^j(y) straight from the polynomial
+    // coordinates: no normal-basis y, no swap network, no conversions back.
+    const P131 dp = sigmaPlusTable131(xp, j - 3, sigmaBase);
+    const P131 ep = sigmaPlusTable131(yp, j - 3, sigmaBase);
+#else
+#if ECC_SIGMA_FUSED_LATE_Y
+    // Keep normal Y out of the report/guard branch's live range on the hot
+    // DP-weight-zero path. A rare reported point converts once for the record
+    // above and again here for the step; arithmetic and record bytes are
+    // unchanged.
+    const P131 normalY = fromPolynomial131(yp);
+#endif
+#if ECC_PACKED_SHARED_SIGMA
+    const SigmaWalkPair131 sigmas = sigmaWalkNetworkPairShared131(x, normalY, j - 3);
+#else
+    const SigmaWalkPair131 sigmas = sigmaWalkNetworkPair131(x, normalY, j - 3);
+#endif
+    const P131 dp = toPolynomial131(add131(x, sigmas.first));
+    const P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+#endif
+    if (!first) {
+        const PolynomialPair pair = mulPolynomialPair131(*prod, ep, dp);
+        sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_CHAIN>(
+            p.pchain, slot, tid, p.threads, pair.first);
+        *prod = pair.second;
+    } else {
+        *prod = dp;
+        sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_CHAIN>(
+            p.pchain, slot, tid, p.threads, ep);
+    }
+    P131 tagged = dp;
+    tagged.v[4] |= unsigned(j - 3) << 3;
+    sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_DENOMINATOR>(
+        denominators, slot, tid, p.threads, tagged);
+}
 
 #if ECC_PACKED_XONLY_23 && ECC_WALK_TABLE
 #error "ECC_PACKED_XONLY_23 and ECC_WALK_TABLE select different walks"
@@ -398,6 +804,84 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
 #error "Split batches, block inversion, shared-X slots, the last-slot cache and fused sigma are implemented only by the x-only walk (ECC_PACKED_XONLY_23)"
 #endif
 #if ECC_TABLE_FUSED
+static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
+    const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+#if ECC_SIGMA_SQUARE_TABLE
+    extern __shared__ uint32_t sigmaSquareShared[];
+    for (unsigned i = threadIdx.x; i < unsigned(SQ_TAB_WORDS); i += blockDim.x)
+        sigmaSquareShared[i] = p.twConsts[i];
+    __syncthreads();
+    const uint32_t *sigmaSquareTable = sigmaSquareShared;
+#else
+    const uint32_t *sigmaSquareTable = nullptr;
+#endif
+#if ECC_PACKED_SHARED_SIGMA
+    initSigmaWalkShared131();
+#endif
+#if ECC_PACKED_SIGMA_TABLE
+    // Whole-block staging must precede the per-thread exit below.
+    const uint32_t sigmaBase = stageSigmaTable(eccSigmaTableDevice, eccSigmaSmem);
+#else
+    const uint32_t sigmaBase = 0;
+#endif
+    if (tid >= p.threads) return;
+    P131 prod;
+    {
+        // Launch prologue: ordinary forward pass in slot order 0..B-1.
+        const unsigned long long now = p.iterBase;
+        const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+#pragma unroll 1
+        for (int slot = 0; slot < ECC_BATCH; ++slot) {
+            const size_t id = size_t(slot) * p.threads + tid;
+            sigmaFusedSelect(p, load(p.x, slot, tid, p.threads),
+                             load(p.y, slot, tid, p.threads), id, slot, tid,
+                             now, guard, slot == 0, denominators, &prod, sigmaBase);
+        }
+    }
+#pragma unroll 1
+    for (int step = 0; step < p.steps; ++step) {
+        const bool forward = (step & 1) != 0;
+        const bool last = step + 1 == p.steps;
+        const unsigned long long now = p.iterBase + step + 1;
+        const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+        P131 inv = invPolynomial131(prod), next;
+#if ECC_UNROLL_SLOTS > 1
+#pragma unroll 2
+#else
+#pragma unroll 1
+#endif
+        for (int i = 0; i < ECC_BATCH; ++i) {
+            const int slot = forward ? i : ECC_BATCH - 1 - i;
+            const size_t id = size_t(slot) * p.threads + tid;
+            const P131 x = load(p.x, slot, tid, p.threads);
+            const P131 y = load(p.y, slot, tid, p.threads);
+            P131 dp = sigmaFusedScratchLoadOrGlobal131<SIGMA_FUSED_SCRATCH_DENOMINATOR>(
+                denominators, slot, tid, p.threads);
+            dp.v[4] &= 7;
+            const P131 w = sigmaFusedScratchLoadOrGlobal131<SIGMA_FUSED_SCRATCH_CHAIN>(
+                p.pchain, slot, tid, p.threads);
+            P131 lambdaPoly;
+            if (i + 1 < ECC_BATCH) {
+                const PolynomialPair pair = mulPolynomialPair131(inv, w, dp);
+                lambdaPoly = pair.first;
+                inv = pair.second;
+            } else {
+                lambdaPoly = mulPolynomial131(inv, w);
+            }
+            const P131 nx = add131(add131(sigmaLambdaSquare131(lambdaPoly, sigmaSquareTable),
+                                          lambdaPoly), dp);
+            const P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
+            const P131 ny = add131(add131(product, nx), y);
+            store(p.x, slot, tid, p.threads, nx);
+            store(p.y, slot, tid, p.threads, ny);
+            if (!last)
+                sigmaFusedSelect(p, nx, ny, id, slot, tid, now, guard, i == 0,
+                                 denominators, &next, sigmaBase);
+        }
+        if (!last) prod = next;
+    }
+}
+#elif ECC_TABLE_FUSED
 // The forward-pass work for one point of one slot: the normal-basis weight and
 // distinguished-point test, the table-walk selection with its history update,
 // the addend, and this slot's contribution to the running prefix chain.
@@ -428,7 +912,8 @@ __device__ __forceinline__ void fusedSelect(const WalkParams<unsigned> &p, const
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
-    const unsigned tag = twSelectHist(x, yp, hw, &hist, twSel, twTab, p.dpWeight);
+    const unsigned tag = twSelectHist(x, yp, hw, &hist, twSel, twTab, p.dpWeight
+                                      ECC_CYCLE_PROFILE_ARG(p));
     p.hist[id] = hist;
     P131 dp, ep;
     twAddend(tag, xp, yp, twTab, &dp, &ep);
@@ -673,7 +1158,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
+#if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
+    __shared__ unsigned tableHintCount;
+    __shared__ unsigned short tableHintQueue[ECC_TABLE_HINT_QUEUE];
+    const bool tableBlockActive = tid < p.threads;
+#else
     if (tid >= p.threads) return;
+#endif
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_POLY_STATE
     unsigned *polyDenominators=denominators+size_t(p.threads)*ECC_BATCH*5;
 #endif
@@ -692,12 +1183,92 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
         ECC_PHASE_MARK(ph0);
 #if ECC_TABLE_PIPE_SELECT
+#if ECC_TABLE_SPLIT_FORWARD && !ECC_TABLE_GLOBAL_HINTS
+#if ECC_TABLE_BATCH_HINTS
+        unsigned long long pendingHints = 0;
+#if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
+        if (threadIdx.x == 0) tableHintCount = 0;
+        __syncthreads();
+        if (tableBlockActive) {
+#endif
+#pragma unroll 1
+        for (int slot = 0; slot < ECC_BATCH; ++slot)
+            if (tableSelectRawTagSlot(p, slot, tid, now, guard, twSel))
+                pendingHints |= 1ull << slot;
+#if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
+        }
+        const unsigned pendingCount = __popcll(pendingHints);
+        unsigned queueBase = 0;
+        if (pendingCount) queueBase = atomicAdd(&tableHintCount, pendingCount);
+        unsigned long long queueBits = pendingHints;
+        unsigned queueOffset = 0;
+        while (queueBits) {
+            const int slot = __ffsll((long long)queueBits) - 1;
+            const unsigned q = queueBase + queueOffset++;
+            if (q < ECC_TABLE_HINT_QUEUE)
+                tableHintQueue[q] = (unsigned short)(slot * ECC_THREADS + threadIdx.x);
+            queueBits &= queueBits - 1;
+        }
+        __syncthreads();
+        const unsigned queued = tableHintCount;
+        if (queued <= ECC_TABLE_HINT_QUEUE) {
+            for (unsigned q = threadIdx.x; q < queued; q += ECC_THREADS) {
+                const unsigned entry = tableHintQueue[q];
+                const int ownerThread = int(entry % ECC_THREADS);
+                const int ownerSlot = int(entry / ECC_THREADS);
+                const int ownerTid = int(blockIdx.x) * ECC_THREADS + ownerThread;
+                tableResolveHintSlot(p, ownerSlot, ownerTid, twSel, twTab);
+            }
+        } else {
+            const unsigned warpMask = __activemask();
+            while (__any_sync(warpMask, pendingHints != 0)) {
+                if (pendingHints) {
+                    const int slot = __ffsll((long long)pendingHints) - 1;
+                    tableResolveHintSlot(p, slot, tid, twSel, twTab);
+                    pendingHints &= pendingHints - 1;
+                }
+            }
+        }
+        __syncthreads();
+        if (!tableBlockActive) continue;
+#else
+#ifdef __CUDA_ARCH__
+        const unsigned warpMask = __activemask();
+        while (__any_sync(warpMask, pendingHints != 0)) {
+            if (pendingHints) {
+                const int slot = __ffsll((long long)pendingHints) - 1;
+                tableResolveHintSlot(p, slot, tid, twSel, twTab);
+                pendingHints &= pendingHints - 1;
+            }
+        }
+#else
+        while (pendingHints) {
+            const int slot = __builtin_ctzll(pendingHints);
+            tableResolveHintSlot(p, slot, tid, twSel, twTab);
+            pendingHints &= pendingHints - 1;
+        }
+#endif
+#endif
+#else
+#pragma unroll 1
+        for (int slot = 0; slot < ECC_BATCH; ++slot)
+            tableSelectTagSlot(p, slot, tid, now, guard, twSel, twTab);
+#endif
+#endif
         {
             P131 dpN, epN;
+#if ECC_TABLE_SPLIT_FORWARD
+            tableAddendFromHist(p, 0, tid, twTab, &dpN, &epN);
+#else
             tableSelectSlot(p, 0, tid, now, guard, twSel, twTab, &dpN, &epN);
+#endif
             prod = dpN;
             store(p.pchain, 0, tid, p.threads, epN);
+#if ECC_TABLE_SPLIT_FORWARD
+            tableAddendFromHist(p, 1, tid, twTab, &dpN, &epN);
+#else
             tableSelectSlot(p, 1, tid, now, guard, twSel, twTab, &dpN, &epN);
+#endif
             // Twelve CLMADs per slot: the chain product prod*d first, because
             // its reduction gates the next slot's products, then W = prod*e.
             // W's reduction and store are deferred by one slot, into the time
@@ -713,8 +1284,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 product131(prod, dp, hc);
                 product131(prod, ep, hb);
                 if (slot > 1) store(p.pchain, slot - 1, tid, p.threads, reducePolynomial131(hbPrev));
-                if (slot + 1 < ECC_BATCH)
+                if (slot + 1 < ECC_BATCH) {
+#if ECC_TABLE_SPLIT_FORWARD
+                    tableAddendFromHist(p, slot + 1, tid, twTab, &dpN, &epN);
+#else
                     tableSelectSlot(p, slot + 1, tid, now, guard, twSel, twTab, &dpN, &epN);
+#endif
+                }
                 prod = reducePolynomial131(hc);
 #pragma unroll
                 for (int i = 0; i < 9; ++i) hbPrev[i] = hb[i];
@@ -796,7 +1372,8 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if !ECC_PACKED_SLOT_PIPELINE
             const P131 yp = load(p.y, slot, tid, p.threads);
 #endif
-            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
+            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight
+                                          ECC_CYCLE_PROFILE_ARG(p));
             P131 dp, ep;
             twAddend(tag, xp, yp, twTab, &dp, &ep);
             if (slot) {
