@@ -290,9 +290,10 @@ def koblitz_phase_shares(a: int, n: int) -> tuple[dict, dict]:
         counts = counts or docs[0]["counts"]
         med = {}
         for g, keys in KOBLITZ_GROUPS.items():
-            med[g] = statistics.median(sum(x["median"]["phases_units"].get(k, 0.0) for k in keys)
-                                       for x in docs)
-        tot = sum(med.values())
+            med[g] = statistics.median(math.fsum(
+                x["median"]["phases_units"].get(k, 0.0) for k in keys
+            ) for x in docs)
+        tot = math.fsum(med.values())
         per_set.append({g: v / tot for g, v in med.items()})
     shares = {g: statistics.fmean(p[g] for p in per_set) for g in KOBLITZ_GROUPS}
     return shares, counts or {}
