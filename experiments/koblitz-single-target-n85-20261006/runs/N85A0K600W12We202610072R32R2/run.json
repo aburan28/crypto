@@ -1,0 +1,43 @@
+{
+  "active_arm": null,
+  "active_arm_started_at_utc": "2026-10-08T16:07:28+00:00",
+  "candidate_id": "IC1N85A0Ckb1fb102000PDP4rootRCguidedLAgaussTDdirectISO0parallel",
+  "curve": {
+    "a": 0,
+    "b": 1,
+    "cofactor": "2695534732",
+    "field_modulus": "x^85 + x^8 + x^2 + x + 1",
+    "n": 85,
+    "subgroup_order": "14351744671810121"
+  },
+  "ic_binary_sha256": "40ee22e1e950ff91cd3a85b1ca3cae1b9d58dfa4b0b2f3d1bc313f13f17fe036",
+  "ic_finished_at_utc": "2026-10-08T16:24:22+00:00",
+  "ic_rank_seed": 32,
+  "ic_rank_threads": 12,
+  "ic_return_code": 0,
+  "known_answer_sent_to_ic": false,
+  "known_answer_sent_to_rho": false,
+  "launch_finished_at_utc": "2026-10-08T16:24:22+00:00",
+  "launch_started_at_utc": "2026-10-08T04:00:50+00:00",
+  "memory_limit_mechanism": "No finite kernel cap; per-process peak RSS recorded with wait4(2)",
+  "paired_run_order": [
+    "rho",
+    "ic"
+  ],
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "python": "3.9.10",
+  "resource_cap_bytes_per_arm": null,
+  "rho_binary_sha256": "086912339a1d045c9e73ec8034d8b4038e0b3eee950b30d1d3e9cc89e4966cc6",
+  "rho_finished_at_utc": "2026-10-08T04:05:29+00:00",
+  "rho_return_code": 0,
+  "rho_walk_seed": 202610072,
+  "run_id": "N85A0K600W12We202610072R32R2",
+  "sidecar_validation_after_run": true,
+  "status": "PRODUCERS_COMPLETE",
+  "target": [
+    "12599156368032549807479514",
+    "36570408432718250497127020"
+  ],
+  "target_count": 1,
+  "validation_scalar_sidecar_path": "frozen/fixture.json"
+}

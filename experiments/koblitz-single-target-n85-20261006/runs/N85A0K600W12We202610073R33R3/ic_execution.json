@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/Volumes/SSD990/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+    "/Volumes/SSD990/crypto/experiments/koblitz-single-target-n85-20261006/base_n85_K600.jsonl",
+    "/Volumes/SSD990/crypto/experiments/koblitz-single-target-n85-20261006/frozen/target_points.jsonl",
+    "33",
+    "/Volumes/SSD990/crypto/experiments/koblitz-single-target-n85-20261006/runs/N85A0K600W12We202610073R33R3/ic.jsonl"
+  ],
+  "arm": "ic",
+  "elapsed_process_wall_s": 843.7987644170003,
+  "finished_at_utc": "2026-10-08T16:42:26+00:00",
+  "heartbeat_at_utc": "2026-10-08T16:41:59+00:00",
+  "known_answer_environment_variable_present": false,
+  "memory_limit_bytes": null,
+  "memory_limit_mechanism": "No finite kernel cap; wait4 records per-process peak RSS",
+  "peak_rss_bytes": 4539056128,
+  "peak_rss_source": "wait4(2) ru_maxrss for this exact child process (bytes on macOS)",
+  "pid": 55356,
+  "return_code": 0,
+  "started_at_utc": "2026-10-08T16:28:22+00:00",
+  "status": "COMPLETED",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "aba460fe232650990a526423008328385fa650d53cfb985b8d59d445d17d9e07"
+}

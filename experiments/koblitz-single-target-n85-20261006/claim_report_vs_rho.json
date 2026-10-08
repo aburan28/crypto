@@ -1,0 +1,130 @@
+{
+ "all_stages_charged_same_series": true,
+ "automorphism_discount": {
+  "A": 170,
+  "description": "signed Frobenius automorphism discount family used by the Koblitz rho control (quotient_mode signed_frobenius, automorphism_size 170)",
+  "formula": "sqrt(2n)",
+  "n": 85
+ },
+ "claim_boundary": "Public synthetic Koblitz n=85 (a=0, b=1 over GF(2^85), 53.7-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point (sequential single-process arms, same host); constant-factor win only. The online walls are conservative: unrelated verification processes shared the host during the runs. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, no deployed-curve impact.",
+ "claim_boundary_non_claims": [
+  "not ECC2K-130 evidence (n=131 is a different field degree)",
+  "not an asymptotic sub-rho claim",
+  "not key recovery or deployed-curve security impact",
+  "multi-target amortized results remain secondary",
+  "total operation-count comparison absent; S unknown"
+ ],
+ "curve": {
+  "a": 0,
+  "b": 1,
+  "cofactor": 2695534732,
+  "field_modulus": "x^85 + x^8 + x^2 + x + 1",
+  "weierstrass_model": "y^2 + x*y = x^3 + 1"
+ },
+ "deterministic_ic_relation": {
+  "probes": 215254,
+  "same_all_runs": true
+ },
+ "evidence": [
+  "crypto/experiments/koblitz-single-target-n85-20261006/runs/N85A0K600W12We202610071R31R1",
+  "crypto/experiments/koblitz-single-target-n85-20261006/runs/N85A0K600W12We202610072R32R2",
+  "crypto/experiments/koblitz-single-target-n85-20261006/runs/N85A0K600W12We202610073R33R3"
+ ],
+ "fixture_scalar": 9876543210987654,
+ "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input",
+ "ic_and_rho_scalar_identical": true,
+ "ic_verified_all_runs": true,
+ "independent_scalar_replay": {
+  "method": "standalone Python GF(2^85) polynomial/affine-curve arithmetic independent of the Rust producers",
+  "status": "PASS",
+  "validated_runs": [
+   "R1",
+   "R2",
+   "R3"
+  ]
+ },
+ "kind": "single_target_online_vs_rho_claim_report",
+ "median_online_speedup": 693.431532287225,
+ "n": 85,
+ "n_or_bits": 85,
+ "online_speedup_range_all_runs": [
+  227.42037744041002,
+  1109.7105697709176
+ ],
+ "paired_runs": [
+  {
+   "ic_online_ms": 499.33975000000004,
+   "ic_rank_seed": 31,
+   "online_speedup": 227.42037744041002,
+   "rho_online_ms": 113560.034416,
+   "rho_walk_seed": 202610071,
+   "rho_walk_steps": 9116219,
+   "run": "R1"
+  },
+  {
+   "ic_online_ms": 400.547417,
+   "ic_rank_seed": 32,
+   "online_speedup": 693.431532287225,
+   "rho_online_ms": 277752.20912400004,
+   "rho_walk_seed": 202610072,
+   "rho_walk_steps": 15608643,
+   "run": "R2"
+  },
+  {
+   "ic_online_ms": 215.529042,
+   "ic_rank_seed": 33,
+   "online_speedup": 1109.7105697709176,
+   "rho_online_ms": 239174.85600000003,
+   "rho_walk_seed": 202610073,
+   "rho_walk_steps": 22148321,
+   "run": "R3"
+  }
+ ],
+ "paired_same_public_point": true,
+ "precompute_detail": {
+  "edge_selectors": 0,
+  "factor_base_points": 102000,
+  "note": "first rung on the a=1 arm and the first ledger rung using the parallel guided rank (KIC_RANK_THREADS=12; logs identical to the sequential path)",
+  "orbit_columns": 600,
+  "pair_table_entries": 0,
+  "rank": 600,
+  "rank_failures": 0,
+  "rank_probes_mean_range": [
+   4179201.24,
+   4679624.466666667
+  ],
+  "rank_rows_without_gain": 0,
+  "rank_stage_ms_range": [
+   755788.652958,
+   1311191.7129169998
+  ],
+  "rank_threads": 12,
+  "regular_states": 30600000,
+  "root_table_entries": 30598167,
+  "target_probes": 215254
+ },
+ "public_generator": [
+  "20635810963392012626713602",
+  "3844135993074684155362043"
+ ],
+ "public_target_q": [
+  "12599156368032549807479514",
+  "36570408432718250497127020"
+ ],
+ "regime": "koblitz",
+ "resource_caps": {
+  "common_cap_bytes": null,
+  "ic_peak_rss_bytes_max": 4311842816,
+  "note": "no finite kernel cap declared; per-process peak RSS recorded with wait4(2)",
+  "rho_peak_rss_bytes_max": 3277193216
+ },
+ "rho_verified_all_runs": true,
+ "schema_version": "2.0",
+ "stage": "vs_rho",
+ "subgroup_log2_order": 53.7,
+ "subgroup_order": 14351744671810121,
+ "target_count": 1,
+ "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+ "timing_class": "single_target_online",
+ "verdict": "N85_A0_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+}
