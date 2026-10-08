@@ -12682,6 +12682,32 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-affine-log-orbit-round39-20261006 -->
+<!-- BEGIN p256-independent-batch-round40-20261006 -->
+<section class="panel" id="p256-independent-batch-round40-20261006">
+  <div class="panel-head">
+    <h2>P-256 independent pair batching: construction crosses, routing does not <span class="chip">stage measurement / negative</span></h2>
+    <p class="panel-summary">Deduplicating every request without discarding starts makes pair construction alone touch rho at a 103.35-billion-start batch, but the complete measured RAM router costs 3.4326 additions per start against a 0.3344 allowance and projects to 1.013257&times; rho.</p>
+    <p>The near-rho constants belong to the round-33 known-log selector, not <code>FB1h2f8621cda105</code>. The latter retains its degree-4 structured residual only as a separate comparison boundary.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Independent batching boundary; sub-rho rows exclude unmeasured external routing.</caption>
+    <thead><tr><th>Row</th><th class="n">Starts</th><th class="n">Pairs / start</th><th class="n">Pair-only / rho</th><th class="n">Peak state</th><th class="n">Traffic / batch</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>Measured RAM router</td><td class="n">2<sup>16</sup></td><td class="n">7.999924</td><td class="n"><strong>1.013257</strong> with routing</td><td class="n">17.83 MB</td><td class="n">83.89 MB</td><td>3.4326 additions/start; 10.26&times; budget</td></tr>
+      <tr><td>Pair-only threshold</td><td class="n">103.35 B</td><td class="n">0.334411</td><td class="n">1.000000</td><td class="n">28.11 TB</td><td class="n">132.29 TB</td><td>all routing would exceed rho</td></tr>
+      <tr><td>2<sup>38</sup> projection</td><td class="n">274.88 B</td><td class="n">0.125736</td><td class="n">0.999107</td><td class="n">74.77 TB</td><td class="n">351.84 TB</td><td>needs 6,133.97 B/add-time; tier unmeasured</td></tr>
+      <tr><td>Largest below 2<sup>50</sup> bytes</td><td class="n">4.139 T</td><td class="n">0.008350</td><td class="n"><strong>0.998605</strong></td><td class="n">1.126 PB</td><td class="n">5.298 PB</td><td>needs 3,925.65 B/add-time; tier unmeasured</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exact controls</span> 8,387,565 distinct requests at the largest checked depth, 4,096 native pair replays, zero FP/FN or route failures</span>
+    <span><span class="chip">scope</span> pinned uncontended RAM diagnostic; no disk timing, full selector, 138,031-row Dickson projection, or unplanted relation</span>
+    <span><span class="chip">degree</span> measured family dreg unknown; <code>FB1h2f8621cda105</code> residual maximum 4 is not transferred</span>
+    <span><span class="chip">decision</span> preserve batching as a construction-stage candidate; reject promotion and full-depth attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_independent_batch_round40_20261006/RESULT.md</code>; result SHA-256 <code>52154eb455ea7edd187d83944ba4b6d953d92014d4f05919e4bd8b7bc097ecbf</code></span>
+  </div>
+</section>
+<!-- END p256-independent-batch-round40-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
