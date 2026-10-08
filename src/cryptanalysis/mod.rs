@@ -123,6 +123,7 @@ pub mod crossbred;
 pub mod curve_catalog;
 pub mod curve_construction;
 pub mod curve_id;
+pub mod curve_traits;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod descent_algebraic;
