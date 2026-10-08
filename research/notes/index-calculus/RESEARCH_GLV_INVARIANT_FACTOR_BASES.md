@@ -32,9 +32,10 @@
 > two-summand degeneracy of §6.5 is gone, and every phase is priced in
 > one unit beside the matched rho), the folded rho on the `F_{p²}` and
 > `F_{p³}` groups (E9), the fitted exponents (E10), and the algebraic
-> `S₄` oracle on the line (E11: flat in `p`, the first arm of this note
-> whose fitted exponent sits below rho's `1/2`, and still not faster than
-> rho at any size run), then the pair table over orbit representatives
+> `S₄` oracle on the line (E11: flat in `p`, ~~the first arm of this note
+> whose fitted exponent sits below rho's `1/2`~~ — corrected in §8.10: its
+> fit is `0.53`, and on these groups rho's `1/2` is the best a line base can
+> reach — and still not faster than rho at any size run), then the pair table over orbit representatives
 > (E12: the table `÷ w/2`, worth `S ÷ 1.18` where the table is the cost,
 > `F_p` `j = 0`, and nothing on the line) and FGHR's `2`-torsion symmetry
 > with the fold (E13: a degree-`16` resultant in place of a `64`-dimensional
@@ -1024,8 +1025,10 @@ fold's reading is unchanged — columns `÷ 3`, relations `÷ 3.98`, both arms a
 `0.93` / `0.93` of full rank after `columns` relations, `S ÷ 4.17` — and
 the fitted exponents of the total over `26` instances are fold `0.53`,
 control `0.50`, rho `0.41` / `0.42`: with the oracle
-flat in `p` the stream is `p · ln` solves at a constant each, so the arms grow as `r^{1/3}`
-times the coupon factor, below rho's `1/2` for the first time in this note, and the
+flat in `p` the stream is `p · ln` solves at a constant each, ~~so the arms grow as `r^{1/3}`
+times the coupon factor, below rho's `1/2` for the first time in this note~~ (**accounting
+correction, §8.10:** on these instances `r ≈ p²/k` with `k ≤ 8`, not `p³`, so `p · ln` solves is
+`r^{1/2+o(1)}` — rho's exponent, not below it; the measured `0.53` / `0.50` are that), and the
 folded arm is still `3344`–`101441×` the matched rho at these sizes
 (a constant of `10⁶` multiplications a solve against `10²` a step).  **Frobenius
 symmetry breaking** (Galbraith–Granger–Merz–Petit's third lever) in the form the
@@ -1302,11 +1305,14 @@ rho's `64`–`164` in the same unit: `267`–`5741×` rho, against E11's `3344`�
 two orders of magnitude closer, by constants.  The solver dominates (`71`–`77 %`), the stream's
 group arithmetic is `18`–`26 %`, the base build `2`–`7 %`, the polynomials' set-up `≤ 5 %`, the linear
 algebra `< 0.1 %`.  The total grows as `p^{1.23}` (fitted over `p = 2^7`–`2^{13}`, `22` rows);
-against `r` the fits are `0.63` (fold `12`), `0.60` (fold `6`) and `0.41` (rho), but `r ≈ p³/h`
+against `r` the fits are `0.63` (fold `12`), `0.60` (fold `6`) and `0.41` (rho), ~~but `r ≈ p³/h`
 with `h` from `76` to `55804` across these instances, so `r` is a poor size variable here and a
 fit against it mixes the growth in `p` with the spread in `h`.  **Extrapolation, not measurement:** at fixed cofactor `p^{1.23}` is
 `r^{0.41}`, so `S` falls as `r^{−0.09}` and a `10³` gap to rho would close only after `r` grows by
-about `2^{110}` — on an exponent fitted over seven sizes of `p`.  Four small instances
+about `2^{110}` — on an exponent fitted over seven sizes of `p`.~~  **Accounting correction (§8.10):**
+the cofactor cannot be held fixed — it contains `E(F_p)`, so `h ≥ #E(F_p) ≈ p` and `r ≈ p²/k`
+(`k ≤ 8` here) — and the fit against `r` is the right reading: `0.63` against rho's `1/2`, a gap
+that **widens** with size.  E16 measures it to `p = 2^{16}`.  Four small instances
 (`r ≤ 2^{13.8}`) drew every target of the group with the folded arms at rank `columns` of
 `columns + 1`, as E8 and E12 did at `p = 2^7`; they are reported, not priced.
 
