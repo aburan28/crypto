@@ -28,7 +28,8 @@ published snapshots, divided by the time between them, with the span it
 used printed beside it. The **ETA** is the work still expected at exactly
 that rate. A snapshot carrying no iteration total falls back to the point
 count at one point per `2^25.27` iterations at `HW(x) <= 34`, which reads
-about six times low for this campaign and is labelled on the page as the
+about 8.8 times low against this campaign's measured weight-32 interval
+of `2^28.41` and is labelled on the page as the
 fallback; a campaign with one total so far says the rate arrives with the
 next snapshot rather than showing a number it cannot measure yet. See
 `scripts/rho_status/README.md` for where the total comes from and why the
