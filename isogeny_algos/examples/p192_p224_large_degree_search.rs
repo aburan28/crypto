@@ -128,6 +128,61 @@ fn resident_bytes(_: u32) -> Option<u64> {
 fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Json {
     let stdout_path = dir.join(format!("{stem}.json"));
     let stderr_path = dir.join(format!("{stem}.stderr.txt"));
+    let receipt_path = dir.join(format!("{stem}.receipt.json"));
+    if receipt_path.exists() {
+        let receipt = Json::parse(&fs::read_to_string(&receipt_path).unwrap()).unwrap();
+        let expected_command = Json::Arr(
+            std::iter::once(cli.to_string_lossy().into_owned())
+                .chain(args.iter().cloned())
+                .map(Json::str)
+                .collect(),
+        );
+        assert_eq!(receipt.get("command"), Some(&expected_command));
+        assert_eq!(
+            receipt.get("stdout_sha256").and_then(Json::as_str),
+            Some(sha256_hex(&fs::read(&stdout_path).unwrap()).as_str())
+        );
+        assert_eq!(
+            receipt.get("stderr_sha256").and_then(Json::as_str),
+            Some(sha256_hex(&fs::read(&stderr_path).unwrap()).as_str())
+        );
+        println!(
+            "{stem}: reused sealed {} receipt",
+            receipt.get("status").unwrap().as_str().unwrap()
+        );
+        return receipt;
+    }
+    if stdout_path.exists() || stderr_path.exists() {
+        let interrupted = dir.join("interrupted");
+        fs::create_dir_all(&interrupted).unwrap();
+        let index = (1..)
+            .find(|i| !interrupted.join(format!("{stem}-{i}")).exists())
+            .unwrap();
+        let archived = interrupted.join(format!("{stem}-{index}"));
+        fs::create_dir(&archived).unwrap();
+        let mut files = vec![];
+        for path in [&stdout_path, &stderr_path] {
+            if path.exists() {
+                let bytes = fs::read(path).unwrap();
+                files.push(Json::obj(vec![
+                    (
+                        "path",
+                        Json::str(path.file_name().unwrap().to_string_lossy()),
+                    ),
+                    ("bytes", Json::Num(bytes.len() as i64)),
+                    ("sha256", Json::str(sha256_hex(&bytes))),
+                ]));
+                fs::rename(path, archived.join(path.file_name().unwrap())).unwrap();
+            }
+        }
+        write_json(&archived.join("interruption.json"), &Json::obj(vec![
+            ("status", Json::str("INTERRUPTED_WITHOUT_RECEIPT")),
+            ("elapsed_ms_operational_only", Json::Null),
+            ("reason", Json::str("No surviving child process or completed receipt after session interruption; raw bytes preserved before rerun.")),
+            ("files", Json::Arr(files)),
+        ]));
+        println!("{stem}: preserved interrupted output before retry");
+    }
     let mut child = Command::new(cli)
         .args(args)
         .stdout(Stdio::from(fs::File::create(&stdout_path).unwrap()))
@@ -238,7 +293,7 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
             Json::str(sha256_hex(&fs::read(&stderr_path).unwrap())),
         ),
     ]);
-    write_json(&dir.join(format!("{stem}.receipt.json")), &result);
+    write_json(&receipt_path, &result);
     println!(
         "{stem}: {} ({} ms)",
         result.get("status").unwrap().as_str().unwrap(),
@@ -250,12 +305,24 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     assert!(
-        args.len() == 3,
-        "usage: search CLI OUTPUT_DIR SOURCE_COMMIT"
+        args.len() == 3 || (args.len() == 4 && args[3] == "--resume"),
+        "usage: search CLI OUTPUT_DIR SOURCE_COMMIT [--resume]"
     );
+    let resume = args.len() == 4;
     let cli = fs::canonicalize(&args[0]).unwrap();
     let out = PathBuf::from(&args[1]);
-    fs::create_dir(&out).expect("a new evidence directory is required");
+    if resume {
+        assert!(
+            out.is_dir(),
+            "resume requires an existing evidence directory"
+        );
+        assert!(
+            !out.join("search.json").exists(),
+            "completed search cannot be resumed"
+        );
+    } else {
+        fs::create_dir(&out).expect("a new evidence directory is required");
+    }
     let mut records = vec![];
     for name in ["p192", "p224"] {
         let rows = sieve(name, 4093);
@@ -269,24 +336,31 @@ fn main() {
                 degrees.push(*l);
             }
         }
-        write_json(
-            &out.join(format!("{name}-screen.json")),
-            &Json::obj(vec![
-                ("curve", Json::str(name)),
-                ("source_order", Json::str(order(name))),
-                (
-                    "degrees_attempted",
-                    Json::Arr(degrees.iter().map(|&l| Json::Num(l as i64)).collect()),
-                ),
-                (
-                    "screen",
-                    Json::Arr(rows.into_iter().map(|(_, _, r)| r).collect()),
-                ),
-            ]),
-        );
+        let plan = Json::obj(vec![
+            ("curve", Json::str(name)),
+            ("source_order", Json::str(order(name))),
+            (
+                "degrees_attempted",
+                Json::Arr(degrees.iter().map(|&l| Json::Num(l as i64)).collect()),
+            ),
+            (
+                "screen",
+                Json::Arr(rows.into_iter().map(|(_, _, r)| r).collect()),
+            ),
+        ]);
+        let plan_path = out.join(format!("{name}-screen.json"));
+        if plan_path.exists() {
+            assert_eq!(
+                fs::read_to_string(&plan_path).unwrap(),
+                format!("{}\n", plan.dump()),
+                "frozen search plan differs"
+            );
+        } else {
+            write_json(&plan_path, &plan);
+        }
         // Freeze the complete plan before starting this curve's construction attempts.
         let dir = out.join(name);
-        fs::create_dir(&dir).unwrap();
+        fs::create_dir_all(&dir).unwrap();
         let receipt = run(
             &cli,
             &dir,

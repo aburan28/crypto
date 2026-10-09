@@ -112,6 +112,7 @@ fn register(registry: &Path, curves: &[Value], source: &str) {
 
 struct Stats {
     name: String,
+    source: Value,
     screen: Value,
     attempts: Vec<Value>,
     split: usize,
@@ -120,7 +121,7 @@ struct Stats {
     pass: usize,
     timeouts: usize,
     fail: usize,
-    max: u64,
+    max: Option<u64>,
     maps: usize,
 }
 #[derive(Clone)]
@@ -149,17 +150,14 @@ fn scene(stats: &[Stats], replay: &Value) -> Vec<Op> {
     for (i, s) in stats.iter().enumerate() {
         let y = 105. + i as f64 * 190.;
         let records = replay["records"].as_array().unwrap();
-        let root = records
-            .iter()
-            .find(|r| {
-                r["ell"].as_u64() == Some(s.max)
-                    && r["source_icv1"].as_str().unwrap().contains(if i == 0 {
-                        "fp192"
-                    } else {
-                        "fp224"
-                    })
-            })
-            .unwrap();
+        let root = records.iter().find(|r| {
+                r["ell"].as_u64() == s.max
+                && r["source_icv1"].as_str().unwrap().contains(if i == 0 {
+                    "fp192"
+                } else {
+                    "fp224"
+                })
+        });
         o.push(Op::Rect(30., y, 465., 145., "#edf4fb".into()));
         o.push(Op::Text(
             45.,
@@ -171,53 +169,94 @@ fn scene(stats: &[Stats], replay: &Value) -> Vec<Op> {
             45.,
             y + 49.,
             11.,
-            root["source_icv1"].as_str().unwrap().into(),
+            s.source["source_icv1"].as_str().unwrap().into(),
         ));
         o.push(Op::Text(
             45.,
             y + 70.,
             12.,
-            root["source_ec1"].as_str().unwrap().into(),
+            s.source["source_ec1"].as_str().unwrap().into(),
         ));
-        let uid = root["source_curve_uid"].as_str().unwrap();
+        let uid = s.source["source_curve_uid"].as_str().unwrap();
         o.push(Op::Text(45., y + 93., 10., uid[..53].into()));
         o.push(Op::Text(45., y + 108., 10., uid[53..].into()));
         o.push(Op::Text(
             45.,
             y + 130.,
             12.,
-            format!("{} certified maps; largest degree {}", s.maps, s.max),
+            format!(
+                "{} certified maps; largest degree {}",
+                s.maps,
+                s.max.map_or("none".into(), |l| l.to_string())
+            ),
         ));
-        o.push(Op::Rect(620., y, 450., 145., "#e7f4ee".into()));
-        o.push(Op::Text(
-            635.,
-            y + 25.,
-            18.,
-            "One independently certified target".into(),
-        ));
-        o.push(Op::Text(
-            635.,
-            y + 49.,
-            11.,
-            root["target_icv1"].as_str().unwrap().into(),
-        ));
-        o.push(Op::Text(
-            635.,
-            y + 70.,
-            11.,
-            root["target_ec1"].as_str().unwrap().into(),
-        ));
-        let uid = root["target_curve_uid"].as_str().unwrap();
-        o.push(Op::Text(635., y + 93., 10., uid[..53].into()));
-        o.push(Op::Text(635., y + 108., 10., uid[53..].into()));
-        o.push(Op::Text(
-            635.,
-            y + 130.,
-            12.,
-            "Kernel, codomain, and public subgroup transport: PASS".into(),
-        ));
-        o.push(Op::Line(495., y + 77., 620., y + 77., "#136e4e".into()));
-        o.push(Op::Text(507., y + 64., 13., format!("degree {} ->", s.max)));
+        if let Some(root) = root {
+            o.push(Op::Rect(620., y, 450., 145., "#e7f4ee".into()));
+            o.push(Op::Text(
+                635.,
+                y + 25.,
+                18.,
+                "One independently certified target".into(),
+            ));
+            o.push(Op::Text(
+                635.,
+                y + 49.,
+                11.,
+                root["target_icv1"].as_str().unwrap().into(),
+            ));
+            o.push(Op::Text(
+                635.,
+                y + 70.,
+                11.,
+                root["target_ec1"].as_str().unwrap().into(),
+            ));
+            let uid = root["target_curve_uid"].as_str().unwrap();
+            o.push(Op::Text(635., y + 93., 10., uid[..53].into()));
+            o.push(Op::Text(635., y + 108., 10., uid[53..].into()));
+            o.push(Op::Text(
+                635.,
+                y + 130.,
+                12.,
+                "Kernel, codomain, and public subgroup transport: PASS".into(),
+            ));
+            o.push(Op::Line(495., y + 77., 620., y + 77., "#136e4e".into()));
+            o.push(Op::Text(
+                507.,
+                y + 64.,
+                13.,
+                format!("degree {} ->", s.max.unwrap()),
+            ));
+        } else {
+            o.push(Op::Rect(620., y, 450., 145., "#fff1df".into()));
+            o.push(Op::Text(
+                635.,
+                y + 25.,
+                18.,
+                "Explicit map remains unresolved".into(),
+            ));
+            o.push(Op::Text(
+                635.,
+                y + 57.,
+                13.,
+                format!("{} split candidate degrees in the frozen screen", s.split),
+            ));
+            o.push(Op::Text(
+                635.,
+                y + 82.,
+                13.,
+                format!(
+                    "{} construction attempts; {} timeouts",
+                    s.attempts.len(),
+                    s.timeouts
+                ),
+            ));
+            o.push(Op::Text(
+                635.,
+                y + 110.,
+                12.,
+                "No target edge is asserted from a candidate degree.".into(),
+            ));
+        }
     }
     o.push(Op::Text(
         30.,
@@ -341,7 +380,7 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
     let mut y = 728.;
     wrapped(&mut p1,&mut y,"Question: construct rational prime-degree maps using the new Hecke/Newton modular-polynomial and BMSS fastElkies' algorithms, including degrees above 1009.",11.);
     for s in stats {
-        wrapped(&mut p1,&mut y,&format!("{}: {} prime degrees screened; {} split, {} inert, {} repeated eigenvalue. {} explicit construction attempts; {} passed, {} timed out, {} failed. {} independently certified maps. Largest certified degree: {}.",s.name,s.screen["screen"].as_array().unwrap().len(),s.split,s.inert,s.repeated,s.attempts.len(),s.pass,s.timeouts,s.fail,s.maps,s.max),11.);
+        wrapped(&mut p1,&mut y,&format!("{}: {} prime degrees screened; {} split, {} inert, {} repeated eigenvalue. {} explicit construction attempts; {} passed, {} timed out, {} failed. {} independently certified maps. Largest certified degree: {}.",s.name,s.screen["screen"].as_array().unwrap().len(),s.split,s.inert,s.repeated,s.attempts.len(),s.pass,s.timeouts,s.fail,s.maps,s.max.map_or("none".into(), |l| l.to_string())),11.);
     }
     wrapped(&mut p1,&mut y,"Bounds: all primes from 67 through 4093 were screened. Every split degree through 257 was attempted, plus the first split prime at or above 509, 1009, 2003 and 4000 for each source. Each construction had a 180-second process budget. Other split primes are candidates without constructed maps.",11.);
     wrapped(&mut p1,&mut y,"Verification: the existing walker's independent implementation checks squarefreeness, torsion, subgroup closure, and the Velu codomain. The rational map is replayed on fresh public points, with 20 scalar-transport checks per map and a mapped nonidentity generator checked against the published prime order.",11.);
@@ -444,6 +483,7 @@ fn main() {
     let search = load(&evidence.join("search.json"));
     let replay = load(&evidence.join("replay.json"));
     let curves = load(&evidence.join("curves.json"));
+    let registry = load(Path::new(&args[1]));
     let mut stats = vec![];
     for (preset, name) in [("p192", "P-192"), ("p224", "P-224")] {
         let screen = load(&evidence.join(format!("{preset}-screen.json")));
@@ -451,6 +491,21 @@ fn main() {
         let split = rows.iter().filter(|r| r["status"] == "split").count();
         let inert = rows.iter().filter(|r| r["status"] == "inert").count();
         let repeated = rows.len() - split - inert;
+        let preflight = load(&evidence.join(preset).join("order.json"));
+        let slug = &preflight["result"]["icv1"]["slug"];
+        let entry = registry["curves"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| &c["slug"] == slug)
+            .unwrap();
+        let standard = entry["representations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["curve"]["cofactor"] == 1)
+            .unwrap();
+        let source = json!({"source_icv1":slug,"source_ec1":standard["ec1"],"source_curve_uid":standard["curve_uid"]});
         let attempts: Vec<Value> = search["attempts"]
             .as_array()
             .unwrap()
@@ -471,10 +526,10 @@ fn main() {
             .iter()
             .filter(|a| a["receipt"]["status"] == "PASS")
             .map(|a| a["ell"].as_u64().unwrap())
-            .max()
-            .unwrap();
+            .max();
         stats.push(Stats {
             name: name.into(),
+            source,
             screen,
             attempts,
             split,
@@ -507,7 +562,7 @@ fn main() {
             s.timeouts,
             s.fail,
             s.maps,
-            s.max
+            s.max.map_or("none".into(), |l| l.to_string())
         )
         .unwrap();
     }
@@ -565,6 +620,15 @@ fn main() {
         let b = fs::read(p).unwrap();
         sources.push(json!({"path":p,"bytes":b.len(),"sha256":hash(&b)}));
     }
-    fs::write(study.join("MANIFEST.json"),format!("{}\n",serde_json::to_string_pretty(&json!({"schema":"large-degree-isogeny-manifest/v1","base_revision":search["source_commit"],"host":{"cpu":"Apple M4 Pro","logical_cores":14,"ram_gib":48,"os":"macOS arm64","benchmark_isolation":"not a timing benchmark"},"sources":sources,"files":files})).unwrap())).unwrap();
+    let mut executables = vec![];
+    for p in [
+        "isogeny_algos/target/release/isogeny-algos",
+        "isogeny_algos/target/release/large-degree-search-supervised",
+        "isogeny_algos/target/release/large-degree-search-resumable",
+    ] {
+        let b = fs::read(p).unwrap();
+        executables.push(json!({"path":p,"bytes":b.len(),"sha256":hash(&b),"optimization":"release, level 3","included_in_git":false}));
+    }
+    fs::write(study.join("MANIFEST.json"),format!("{}\n",serde_json::to_string_pretty(&json!({"schema":"large-degree-isogeny-manifest/v1","base_revision":search["source_commit"],"host":{"cpu":"Apple M4 Pro","logical_cores":14,"ram_gib":48,"os":"macOS arm64","benchmark_isolation":"not a timing benchmark"},"sources":sources,"executables":executables,"files":files})).unwrap())).unwrap();
     println!("Report, vector visual, PDF, manifest and model registration written.");
 }

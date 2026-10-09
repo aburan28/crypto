@@ -66,11 +66,36 @@ fn eval(f: &Field, n: &Poly, d: &Poly, p: Option<(Fe, Fe)>) -> Option<(Fe, Fe)> 
 }
 fn main() {
     let a: Vec<String> = std::env::args().skip(1).collect();
-    assert_eq!(a.len(), 2, "usage: replay EVIDENCE_DIR REGISTRY_JSON");
+    assert!(
+        (2..=3).contains(&a.len()),
+        "usage: replay EVIDENCE_DIR REGISTRY_JSON [p192:ELL|p224:ELL]"
+    );
     let out = Path::new(&a[0]);
     let registry: Value = serde_json::from_slice(&fs::read(&a[1]).unwrap()).unwrap();
-    let summary: Value =
-        serde_json::from_slice(&fs::read(out.join("search.json")).unwrap()).unwrap();
+    let (summary, output_suffix): (Value, String) = if let Some(selection) = a.get(2) {
+        let (preset, degree) = selection
+            .split_once(':')
+            .expect("selection must be CURVE:ELL");
+        assert!(matches!(preset, "p192" | "p224"));
+        let ell: u64 = degree.parse().expect("prime degree integer");
+        let receipt: Value = serde_json::from_slice(
+            &fs::read(out.join(preset).join(format!("ell-{ell}.receipt.json"))).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            receipt["status"], "PASS",
+            "selection is not a completed construction"
+        );
+        (
+            json!({"attempts":[{"curve":preset,"ell":ell,"receipt":receipt}]}),
+            format!("-{preset}-{ell}"),
+        )
+    } else {
+        (
+            serde_json::from_slice(&fs::read(out.join("search.json")).unwrap()).unwrap(),
+            String::new(),
+        )
+    };
     let mut replayed = vec![];
     let mut curves = vec![];
     for attempt in summary["attempts"].as_array().unwrap() {
@@ -185,12 +210,12 @@ fn main() {
     let receipt = json!({"schema":"large-degree-isogeny-replay/v1","method":"existing walker kernel verifier, separate field and polynomial implementation",
         "scope":"same-host independent implementation","records":replayed,"status":"PASS"});
     fs::write(
-        out.join("replay.json"),
+        out.join(format!("replay{output_suffix}.json")),
         format!("{}\n", serde_json::to_string_pretty(&receipt).unwrap()),
     )
     .unwrap();
     fs::write(
-        out.join("curves.json"),
+        out.join(format!("curves{output_suffix}.json")),
         format!(
             "{}\n",
             serde_json::to_string_pretty(
