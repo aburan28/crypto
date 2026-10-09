@@ -625,45 +625,40 @@ pub fn rho4_folded(inst: &FoldInstance4, fold: RhoFold, seed: u64) -> RhoRun4F {
     let (mut steps, mut cycle_escapes) = (0u64, 0u64);
     let mut found = None;
     let cap = 64 * (n as f64).sqrt() as u64 + 1_000_000;
-    'outer: while steps <= cap {
-        let mut a = rng.gen_range(0..n);
-        let mut b = rng.gen_range(1..n);
-        let start = curve.add(&curve.mul(&inst.g, a), &curve.mul(&inst.q, b));
-        let (mut l, m) = canon(start);
-        a = mulm(a, m, n);
-        b = mulm(b, m, n);
-        loop {
-            steps += 1;
-            if let Some(&(a2, b2)) = table.get(&l) {
-                let db = (b + n - b2) % n;
-                if db != 0 {
-                    let da = (a2 + n - a) % n;
-                    found = Some(mulm(da, inv_mod(db, n), n));
-                    break 'outer;
-                }
-                // A fruitless cycle: escape by doubling, which costs one group
-                // operation where a restart costs two scalar multiplications.
-                cycle_escapes += 1;
-                let (dbl, m) = canon(curve.add(&l, &l));
-                l = dbl;
-                a = mulm(mulm(2, a, n), m, n);
-                b = mulm(mulm(2, b, n), m, n);
-                continue;
+    let mut a = rng.gen_range(0..n);
+    let mut b = rng.gen_range(1..n);
+    let start = curve.add(&curve.mul(&inst.g, a), &curve.mul(&inst.q, b));
+    let (mut l, m) = canon(start);
+    a = mulm(a, m, n);
+    b = mulm(b, m, n);
+    while steps <= cap {
+        steps += 1;
+        if let Some(&(a2, b2)) = table.get(&l) {
+            let db = (b + n - b2) % n;
+            if db != 0 {
+                let da = (a2 + n - a) % n;
+                found = Some(mulm(da, inv_mod(db, n), n));
+                break;
             }
-            table.insert(l, (a, b));
-            let mut j = part(&l);
-            let (mut next, mut m) = canon(curve.add(&l, &mults[j].2));
-            if fold != RhoFold::None && part(&next) == j {
-                j = (j + 1) % r;
-                (next, m) = canon(curve.add(&l, &mults[j].2));
-            }
-            a = mulm((a + mults[j].0) % n, m, n);
-            b = mulm((b + mults[j].1) % n, m, n);
-            l = next;
-            if steps > cap {
-                break 'outer;
-            }
+            // A fruitless cycle: escape by doubling, which costs one group
+            // operation where a restart costs two scalar multiplications.
+            cycle_escapes += 1;
+            let (dbl, m) = canon(curve.add(&l, &l));
+            l = dbl;
+            a = mulm(mulm(2, a, n), m, n);
+            b = mulm(mulm(2, b, n), m, n);
+            continue;
         }
+        table.insert(l, (a, b));
+        let mut j = part(&l);
+        let (mut next, mut m) = canon(curve.add(&l, &mults[j].2));
+        if fold != RhoFold::None && part(&next) == j {
+            j = (j + 1) % r;
+            (next, m) = canon(curve.add(&l, &mults[j].2));
+        }
+        a = mulm((a + mults[j].0) % n, m, n);
+        b = mulm((b + mults[j].1) % n, m, n);
+        l = next;
     }
     RhoRun4F {
         fold,
