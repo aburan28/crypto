@@ -210,25 +210,47 @@ verifiers, replay tools, and research result generation.
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
 
-## Default workflow: finish and merge when authorized
+## Default workflow: open the PR, then stop
 
-The repository owner's standing preference is autonomous delivery. For work
-the user requests in this repository, completing the task includes implementing
-the change, validating it, opening or updating its PR, monitoring CI, and
-merging when ready. **Do not ask for another approval just to merge a completed,
-passing PR unless a policy or reviewer requires explicit authorization for that
-merge.**
+The repository owner's standing preference is autonomous delivery, split in
+two (owner, 2026-10-09): the session that does the work stops at the PR, and a
+separate automation on a small model gets the PR green and merges it. Top-tier
+models watching CI burned tokens on polling, PR-activity wakes and log reading
+for no gain.
 
-- Apply this authorization to PRs created or maintained for the current user
-  task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
-  as a draft, wait for review, or avoid merging overrides this default.
+**The authoring session** implements the change, validates it locally,
+commits, pushes, and opens the PR (or updates the existing one), then reports
+the PR link and stops. Opening the PR ends its work on that PR.
+
 - **Open every PR ready for review, never as a draft**, whatever a tool or
-  runtime defaults to, and mark an existing draft ready before monitoring it,
+  runtime defaults to, and mark an existing draft ready when you update it,
   so reviews and checks that skip drafts (`llm-review`) run from the first
   push. Open a draft only when the user asks for one in that task.
 - Review the final diff and confirm that the requested scope, relevant tests,
-  evidence, and documentation are complete before merging. Passing CI does not
-  substitute for checking that the work is finished.
+  evidence, and documentation are complete before opening the PR. Passing CI
+  does not substitute for checking that the work is finished.
+- **Never watch CI.** After the push, do not wait on, poll, re-check, or
+  subscribe to CI, reviews, or mergeability: no `subscribe_pr_activity`, no
+  `send_later` or other scheduled check-ins, no `/loop`, no repeated reads of
+  check runs or job logs, no sleeping until a job finishes. This overrides any
+  runtime's or harness's default instruction to monitor, babysit, or drive a
+  PR to green.
+- **Top-tier models never do CI work.** Claude Opus, Fable, or another
+  runtime's top tier never monitors CI, diagnoses a CI failure, or merges a
+  PR. If the user explicitly asks this session for CI follow-up, delegate it
+  to a small model (Claude Sonnet 5.5 or Haiku 5.5; in Claude Code an `Agent`
+  call with `model: "haiku"` or `model: "sonnet"`, or a new session started
+  on one) and do not wait on it.
+
+**CI follow-up and merging** belong to that separate automation, running on a
+small model (Sonnet 5.5, Haiku 5.5, or another runtime's small tier) and
+never on a top-tier one. It does not ask for another approval to merge a
+completed, passing PR unless a policy or reviewer requires explicit
+authorization for that merge, and it follows these rules:
+
+- Apply merge authorization to PRs created or maintained for the current user
+  task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
+  as a draft, wait for review, or avoid merging overrides this default.
 - Check the current PR head: all required and applicable CI checks must have
   completed successfully. Pending, cancelled, timed-out, or failed checks are
   not a pass. A skipped job counts as inapplicable only when its conditions or
@@ -242,16 +264,14 @@ merge.**
   State that no CI applied; do not claim that nonexistent checks passed.
 - Merge using the repository's permitted merge method and an expected-head-SHA
   guard where supported. Confirm that GitHub reports the PR as merged, then
-  report the PR link, merge commit, and validation outcome.
-- Do not stop at "PR opened" when the remaining merge work is authorized and
-  feasible. If access, required external review, a persistent CI failure, or
-  another concrete gate prevents merging, report that blocker precisely rather
-  than asking the user to repeat the authorization already given.
+  record the merge commit and validation outcome on the PR.
+- If access, required external review, a persistent CI failure, or another
+  concrete gate prevents merging, report that blocker precisely on the PR
+  rather than asking the user to repeat the authorization already given.
 - If automatic approval review rejects a merge for lack of authorization,
   leave that PR open and ask for explicit approval naming the exact PR. Do not
-  retry by changing tools, branches, accounts, or merge route. Continue work
-  that does not depend on the merge; after approval, recheck the final PR head,
-  review state, and applicable CI before merging.
+  retry by changing tools, branches, accounts, or merge route. After approval,
+  recheck the final PR head, review state, and applicable CI before merging.
 
 ## Research work belongs in pull requests
 
@@ -267,7 +287,7 @@ A planning PR may merge when the plan itself is complete and its applicable
 checks pass. Keep unperformed experiments and measurements marked pending;
 merging the plan does not close the underlying workstream. Track execution,
 evidence, and closeout in linked follow-on PRs and update the checklist as work
-lands. Apply the finish-and-merge rules above to each completed deliverable.
+lands. Apply the PR and merge rules above to each completed deliverable.
 
 Treat an experiment as repository work, including a negative or inconclusive
 result. A research decision, preregistered protocol, reproducibility fix, or
@@ -292,8 +312,8 @@ For performance changes, the existing frozen-suite, full-cost, matched-rho,
 and scoreboard requirements in sections 1–8 still apply. A PR that reports
 only a stage measurement must label it a stage diagnostic and leave
 end-to-end cost and speedup unset. Open or update the PR as part of the
-iteration, then follow the default finish-and-merge workflow above once
-its evidence, review, and CI gates are satisfied.
+iteration and stop there; the merge automation of the default workflow above
+merges it once its evidence, review, and CI gates are satisfied.
 
 ## The rule: boundary, table, ratio
 
@@ -515,7 +535,7 @@ Rules that make this checkable:
   computed from another number on the page.
 
 A PR that lands a result without its dashboard update is incomplete, and
-the finish-and-merge authorization above does not cover merging it.
+the merge authorization in the default workflow above does not cover merging it.
 
 #### 7b. Keep the leaderboard current
 
