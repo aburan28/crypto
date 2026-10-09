@@ -140,3 +140,30 @@ Catalogue roster rendering retains the existing builder's large-prime
 coefficient-label convention so its generated contract remains compatible.
 New targets have empty standard-name lists and exact parameters/generators in
 the registry; the label does not assign them a named curve standard.
+
+The final whole-search replay passed for all 22 maps and checked stdout/stderr
+digests for all 40 degree outcomes (`validation/replay-final.log`). P-192 has
+three completed degrees and 21 timeouts; corrected P-224 has eight completed
+degrees and eight timeouts. All six probes at or above 1009 timed out.
+
+Before the canonical update, Conductor reported that T-145 held the registry
+while repairing the root library gate. The report was therefore rehearsed in
+an isolated temporary copy. Its first registration attempt exposed a parser
+assumption that `curves` was the final top-level registry member; the current
+registry also has a trailing `standards_source`. The failed generation log is
+retained (`validation/report-first-generation-failure.log`). The corrected
+stream parser replaces only the curve array and preserves the complete
+top-level suffix. The canonical registry was not edited during this failure.
+
+T-145's registry reservation cleared before the actual target registration.
+The construction task T-65 had completed its search and exhausted its four
+lease-claim attempts; catalogue closeout was recorded separately as T-148,
+with the study and all eight canonical paths reserved. No additional research
+agent or construction campaign was dispatched.
+
+The final pre-catalogue root release-library check again failed with the same
+643 compiler errors (`validation/lib-test-final.log`). The report's three-page
+PDF was rendered with Poppler at 130 dpi and visually checked in an isolated
+rehearsal; all identifiers, arrows, coverage labels and evidence paths were
+legible with no clipping. Final source and canonical-output hashes are frozen
+after the actual catalogue refresh.

@@ -32,8 +32,10 @@ fn pretty(v: &Value) -> String {
 fn register(registry: &Path, curves: &[Value], source: &str) {
     let text = fs::read_to_string(registry).unwrap();
     let start = text.find("\"curves\": [").unwrap() + "\"curves\": ".len();
-    let mut entries: Vec<Box<RawValue>> =
-        serde_json::from_str(&text[start..text.rfind('}').unwrap()]).unwrap();
+    let mut stream =
+        serde_json::Deserializer::from_str(&text[start..]).into_iter::<Vec<Box<RawValue>>>();
+    let mut entries = stream.next().unwrap().unwrap();
+    let end = start + stream.byte_offset();
     let mut held: Vec<String> = entries
         .iter()
         .map(|r| {
@@ -108,13 +110,14 @@ fn register(registry: &Path, curves: &[Value], source: &str) {
         (rank, degree, p, a, v["slug"].as_str().unwrap().to_owned())
     });
     let output = format!(
-        "{}[\n  {}\n ]\n}}\n",
+        "{}[\n  {}\n ]{}",
         &text[..start],
         entries
             .iter()
             .map(|e| e.get())
             .collect::<Vec<_>>()
-            .join(",\n  ")
+            .join(",\n  "),
+        &text[end..]
     );
     let _: Value = serde_json::from_str(&output).unwrap();
     fs::write(registry, output).unwrap();
@@ -230,6 +233,8 @@ fn scene(stats: &[Stats], replay: &Value) -> Vec<Op> {
                 "Kernel, codomain, and public subgroup transport: PASS".into(),
             ));
             o.push(Op::Line(495., y + 77., 620., y + 77., "#136e4e".into()));
+            o.push(Op::Line(620., y + 77., 608., y + 71., "#136e4e".into()));
+            o.push(Op::Line(620., y + 77., 608., y + 83., "#136e4e".into()));
             o.push(Op::Text(
                 507.,
                 y + 64.,
@@ -316,7 +321,7 @@ fn scene(stats: &[Stats], replay: &Value) -> Vec<Op> {
         o.push(Op::Line(x(l), 668., x(l), 675., "#333333".into()));
         o.push(Op::Text(x(l) - 14., 694., 12., l.to_string()));
     }
-    o.push(Op::Text(30.,730.,13.,"Green: certified maps. Orange: timed out. Red: failed. Blue: split candidate only. Gray: other screen status.".into()));
+    o.push(Op::Text(30.,730.,13.,"Green: replayed degree. Orange: timed out. Red: failed. Blue: split candidate only. Gray: other screen status.".into()));
     o
 }
 fn xml(s: &str) -> String {
@@ -705,6 +710,9 @@ research/p192_p224_large_degree_isogenies_20261008/target/release/replay NEW_EVI
     files.sort_by_key(|f| f["path"].as_str().unwrap().to_owned());
     let mut sources = vec![];
     for p in [
+        "isogeny_algos/Cargo.toml",
+        "isogeny_algos/Cargo.lock",
+        "isogeny_algos/tests/api.rs",
         "isogeny_algos/src/api.rs",
         "isogeny_algos/examples/p192_p224_large_degree_search.rs",
         "src/cryptanalysis/isogeny_walk/field.rs",
