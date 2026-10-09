@@ -90,7 +90,8 @@
 //!   Semaev-polynomial Gröbner basis cost across curve families.
 
 use crate::cryptanalysis::ec_index_calculus::{
-    find_one_relation, gaussian_eliminate_mod_n_particular, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
+    find_one_relation, gaussian_eliminate_mod_n, gaussian_eliminate_mod_n_particular, semaev_s3,
+    semaev_s3_in_x3, sqrt_mod_p,
     FactorBaseEntry,
 };
 use crate::ecc::curve::CurveParams;

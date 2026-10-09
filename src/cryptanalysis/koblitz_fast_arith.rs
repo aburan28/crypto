@@ -28,7 +28,6 @@
 
 use crate::binary_ecc::{BinaryPoint, IrreduciblePoly};
 use crate::cryptanalysis::semaev_decomp::{Gf2, Gf2_128};
-use crate::cryptanalysis::semaev_decomp::Gf2;
 
 /// Affine point on a binary curve with single-word coordinates.
 ///
@@ -395,7 +394,6 @@ pub fn artin_schreier_root(gf: &Gf2, n: u32, c: u64) -> Option<u64> {
         }
     }
     None
-    (0..(1u64 << n)).find(|&v| (gf.sqr(v) ^ v) == c)
 }
 
 /// Pack `(x, y)` exactly as [`crate::cryptanalysis::koblitz_index_calculus::pack_point`]
