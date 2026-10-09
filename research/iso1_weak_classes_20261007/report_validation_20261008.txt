@@ -1,0 +1,152 @@
+ISO-1 report validation receipt, 2026-10-08
+
+Scope: finish the existing p37/p41/p43/p47 report, check the necessary
+2-adic obstruction, retain census uncertainty, and verify its rendered PDF.
+The broader prime range and a sufficient class criterion remain open.
+
+Report branch: codex/iso1-report-final-20261008.
+Base: 97d1c1c7e (the committed obstruction and census through p47).
+The final branch excludes concurrent ring-class and p53 research edits.
+Host: arm64 macOS. Rustc 1.93.1 (01f6ddf75, Homebrew).
+These are correctness and document checks; CPU wall-time ratios are unset.
+
+1. Census rows and retained-input integrity
+
+All rows were read from the retained CSVs, including nonordinary and zero
+rows. Summing weak_representatives and grouping ordinary rows gives:
+
+p   all_rows  representative_sum  ordinary  weak   depth1_weak/rows  highdepth_zero/rows
+37  50654     3751060             49284     24352  0/24642           290/24642
+41  68922     5654884             67240     33224  0/33620           396/33620
+43  79508     6841300             77658     38452  0/38830           376/38828
+47  103824    9763780             101614    50382  0/50808           424/50806
+
+Every ordinary positive row satisfies t = +(p^6+1) or -(p^6+1) modulo 16.
+No weak-representative count or trace-assignment record was rewritten.
+
+Retained SHA-256 values checked with shasum -a 256:
+p41_twist_derived.csv
+  3da8253329e2003dc9505566d2a6dbc458fc0eea49d4ebd5bdcd08a540f42375
+p43_twist_derived.csv
+  f1e73aa3ad114063ea61f68fd58ba5fc83b85b3882aef8c996d34eed6349cab8
+gp_p41_p43_traces.csv
+  363f7d0d29341513cea62a0776a31ac3e90717ca21459204fbcd7a37eb0f654e
+p41_class_number_rows.csv
+  f9acc7e9be463fbf759df9636b03f11832c291806572ebcf15b6c8ee9ff6003c
+p47_class_number_rows.csv
+  1f19189f86e6dbd9e698002116741e32836fa1afa6c2c4f64580f59933da68a2
+
+The retained GP sample file has no header. Joining all its numeric rows
+to weak_representatives>0 gives p41: 5000 samples, 3952 distinct traces,
+0 missing; p43: 5000 samples, 4043 distinct traces, 0 missing. This is a
+recheck of the retained independent samples, not a new 5000-sample run.
+
+2. Native polynomial records, exact expansion, and mutation controls
+
+Command:
+  cargo run --release --locked --offline --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_report_check -- research/iso1_weak_classes_20261007/identity_certificates.json
+Outcome: exit 0; both records accepted at 32 recorded and 64 additional
+domain-separated evaluations each.
+
+  IDC1h8ae7209125dfe0a2: quotient factorization
+  IDC1he02ab9a5cf019a56: cleared rational 2-isogeny equation
+
+Command:
+  cargo test --release --locked --offline --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_report_check
+Outcome: exit 0; 2 passed, 0 failed. The tests replay the committed records
+and require a constant perturbation of either polynomial to be refused.
+The final worktree reused the source worktree's Cargo target cache; the
+package rebuilt for the new manifest path. The lockfile pins dependencies.
+
+Command:
+  gp -q -f research/iso1_weak_classes_20261007/algebra_identity_check.gp
+Outcome: exit 0. Both integer-polynomial differences expand to exact zero.
+The modular records have proof:null; they do not claim a formal theorem-
+prover artifact or certify every census cardinality. The theorem's field,
+torsion, and conductor deductions are written explicitly in the report.
+
+Code and record SHA-256:
+examples/iso1_report_check.rs
+  68d4684e941900d53c6af70f314f555b41a9bcb262aecd470fffba93ee17ca60
+src/cryptanalysis/identity_certificate.rs
+  d81ee915ad769a87d7aac5d9664631239607f4a0deb27850cdb52cea84e34270
+src/hash/sha256.rs
+  2bafe271f1b2f6e6eb1a100f672f81e2b16bbe30b6db29ac579c0740dfe9eddf
+identity_certificates.json
+  c225e7e4b22b172efb434fb68b7cb62b66f79b1642e8eaebbcacdfc9799f2897
+
+3. Finite-field and class-number controls
+
+Command:
+  gp -q -f research/iso1_weak_classes_20261007/quartic_isogeny_check.gp
+Outcome: exit 0, matching the retained receipt:
+  p=11 random fourth-power parameters: n=100 nondivisible_by_16=0
+  p=11 norm-one 2-isogeny checks: n=100 failures=0
+
+The p41 counterexample rows were re-read: t=136542 has weak=0,
+D_K=-891748, depth=2, ramified 2; t=5470 has weak=132, D_K=-779524,
+depth=2, ramified 2. A fresh native GP qfbclassno calculation returned
+192 for both discriminants. Their trace difference is 131072.
+The zero label remains conditional on the census's point-count assignment.
+
+4. Document, diagram, and context checks
+
+PDF build:
+  tectonic --keep-logs --keep-intermediates research/iso1_weak_classes_20261007/REPORT.tex
+Outcome: exit 0; 4 pages, PDF 1.7. Poppler pdfinfo and pdftoppm opened
+and rendered the complete document. All four final pages were inspected.
+The proof starts on its own page; tables, formulae, citations, and the
+landscape census diagram are legible. Diagram fonts include Arial Unicode
+MS and portable fallbacks so subscripts and superscripts remain visible.
+
+SVG conversion:
+  DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib UV_CACHE_DIR=/private/tmp/iso1-pdf-uv-cache uv run --offline --no-project --with cairosvg==2.8.2 python -c 'import cairosvg; cairosvg.svg2pdf(url="research/iso1_weak_classes_20261007/class_strata.svg", write_to="research/iso1_weak_classes_20261007/class_strata.pdf")'
+Outcome: exit 0. Cairo 1.18.4; vector diagram included in the report.
+The diagram generator's font declarations match the retained SVG.
+
+Context check in scripts/site:
+  python3 -m unittest test_build.BuildTests.test_progress_chart_data_file_is_canonical_and_fully_plotted
+Outcome: exit 0, 1 passed. The canonical progress data and its embedded
+copy agree. This report does not introduce an IC/rho cost-series point.
+
+Formatting:
+  rustfmt --edition 2021 --check examples/iso1_class_census.rs examples/iso1_report_check.rs
+  git diff --check
+Outcome: exit 0 for each.
+
+Final render SHA-256:
+REPORT.pdf
+  e45714102ffb7d2dad679654888dff5d32add7ee6423887c99605577cd91fb64
+class_strata.svg
+  cf2dc251cbf6bdaa49cfcebe799d352d09cdf5260bf8307647b9b28b8c69406c
+class_strata.pdf
+  7aea1186f58679e7a4388b4ee2798f5786dff054cbcb1cca2690abd3fa96d1f4
+
+5. Unsuccessful checks and preparation attempts retained explicitly
+
+A broader cargo test --release --lib was attempted in the original
+worktree. Compilation emitted existing duplicate definitions and type
+errors before tests could run. Examples include duplicate modules
+invalid_curve_attack, multi_key_hnp, and preprocessing_rho; duplicate
+projected_signed_orbit_map; and missing fields in several existing solver
+types. After these errors the still-running build was stopped, exit 143.
+This is not a passing repository-library test or a completed test suite.
+The focused report checker is built without those unrelated modules.
+
+The first Tectonic invocation inside the sandbox panicked with a macOS
+system-configuration error, exit 101; the installed engine succeeded with
+system access. The first SVG conversion could not find Cairo; setting
+DYLD_FALLBACK_LIBRARY_PATH to its installed location resolved that.
+An early final-render attempt preceded population of the new sparse
+worktree and failed on its absent SVG. Tracked files were then populated
+without overwriting the copied report edits, and both final PDFs rebuilt.
+Tectonic's input-probing warning mentions PDF 1.5; the output's declared
+version is explicitly 1.7 and was verified with pdfinfo.
+
+Conductor conflict/claim endpoints initially returned internal errors.
+The report task was subsequently claimed successfully. A held scoreboard
+scope was omitted, and the completed report was isolated on its own branch.
+
+Report-specific mathematical and document validation passes. The broader
+library build, individual zero-label certification, remaining requested
+primes, and a sufficient criterion retain the limitations stated above.

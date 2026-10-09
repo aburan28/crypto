@@ -1,11 +1,12 @@
-\documentclass[9pt]{extarticle}
+\documentclass[10pt]{extarticle}
 \usepackage[margin=0.68in]{geometry}
-\usepackage{amsmath,amssymb,booktabs,array,tikz,xcolor,hyperref}
+\usepackage{amsmath,amssymb,booktabs,array,tikz,xcolor,graphicx,pdflscape,hyperref}
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
 \title{ISO-1 weak isogeny classes: trace census and a proved 2-adic obstruction}
 \author{Research evidence report}
 \date{8 October 2026}
 \begin{document}
+\special{pdf:minorversion 7}
 \maketitle
 
 \noindent\textbf{Requested scope.} Base primes $p=37$ through about $200$,
@@ -72,21 +73,34 @@ independently confirmed with PARI/GP.
 \end{tikzpicture}
 \end{center}
 
+\clearpage
 \noindent\textbf{Proof of the necessary obstruction.} Put
 $K=\mathbb F_{p^6}$, $Q=p^6$, and
 $\lambda=\alpha^{p^2}/\alpha$ on a weak model
 $y^2=x(x-\alpha)(x-\alpha^{p^2})$.
 Then $N_{K/\mathbb F_{p^2}}(\lambda)=1$, so $\lambda$ has odd order
-dividing $p^4+p^2+1$ and equals $\mu^4$ for some $\mu\in K$.
+dividing $p^4+p^2+1$. Since $p^2\equiv1\pmod4$, an explicit fourth root is
+$\mu=\lambda^{(p^4+p^2+2)/4}$, with $\mu^4=\lambda$.
 The weak curve is a quadratic twist of
 $L_\lambda:y^2=x(x-1)(x-\lambda)$. The rational $2$-isogeny
 at $(0,0)$ has target
 \[
 L'_\lambda:y^2=x\bigl[x^2+2(1+\lambda)x+(1-\lambda)^2\bigr],
 \]
-with roots $0,-(1+\mu^2)^2,-(1-\mu^2)^2$. All their differences
+For $x\ne0$, the map is
+\[
+ (x,y)\longmapsto \left(x+a+\frac b x,\ y\left(1-\frac b{x^2}\right)\right),
+ \qquad a=-(1+\lambda),\quad b=\lambda.
+\]
+The identity and $(0,0)$ map to the identity. With $U=x^2+ax+b$,
+clearing the curve equations gives
+$U^2-2axU+(a^2-4b)x^2=(x^2-b)^2$.
+The target roots are $0,-(1+\mu^2)^2,-(1-\mu^2)^2$. All their differences
 are squares: the final difference is $\pm4\mu^2$ and $-1$ is a
-square in $K$. Thus $L'_\lambda[4]$ is rational,
+square in $K$. The roots are distinct since $\lambda\ne0,1$.
+By \href{https://arxiv.org/pdf/math/0106273}{Auer--Top, Lemma 2.1},
+each rational $2$-torsion point has a rational half, and the halves
+of two independent points generate $L'_\lambda[4]$. Therefore
 $16\mid\#L_\lambda(K)$, and the weak trace obeys
 $t\equiv\pm(Q+1)\pmod{16}$.
 
@@ -100,15 +114,34 @@ $t\equiv2\pmod4$, the arithmetic tests
  (t/2)^2\equiv p^6\pmod{16}\quad\Longleftrightarrow\quad
  t/2\equiv\pm p^3\pmod8
 \]
-are equivalent to the proved trace restriction. The converse is false.
+are equivalent to the proved trace restriction. Indeed,
+$d=(t/2)^2-p^6$ has $v_2(d)\geq3$. If $v_2(d)=3$, then
+$v_2(D_K)=3$ and $v_2(f_\pi)=1$; if $v_2(d)\geq4$, then
+$v_2(t^2-4p^6)\geq6$ and $v_2(D_K)\in\{0,2,3\}$ forces
+$v_2(f_\pi)\geq2$. Sufficiency fails on the recorded computational labels.
 There is a curve-level consequence: on the 2-isogenous neighbor with
-rational full $4$-torsion, $(\pi-1)/4$ is an endomorphism, so its
-endomorphism conductor has $2$-valuation at most $v_2(f_\pi)-2$.
+rational full $4$-torsion, $\pi-1$ factors through the separable map $[4]$.
+Thus $\eta=(\pi-1)/4$ is an endomorphism, and
+$\operatorname{disc}\mathbb Z[\eta]=(t_L^2-4p^6)/16$, where $t_L$ is
+the untwisted Legendre trace. Its generated order has conductor $f_\pi/4$,
+so the neighbor's endomorphism conductor has $2$-valuation at most $v_2(f_\pi)-2$.
 Twisting preserves that order, and a degree-$2$ isogeny changes its
 $2$-valuation by at most one (via the dual-isogeny inclusions of twice
 each endomorphism ring). Thus an ordinary weak curve satisfies
 $v_2(f_{\mathrm{End}(E)})\leq v_2(f_\pi)-1$: it is never at the deepest
 possible $2$-volcano level. Individual levels remain unmeasured.
+This bound also follows directly from full rational $2$-torsion:
+$(\pi-1)/2$ is an endomorphism and its generated order has conductor
+$f_\pi/2$. It applies to every full-$2$-torsion curve in the population,
+so it does not further distinguish weak representatives. The extra class
+restriction comes from full $4$-torsion on the neighbor.
+The accompanying identity records replay the target factorization and
+cleared isogeny equation at 32 recorded plus 64 additional points.
+Independent exact PARI/GP expansion checks both identities over the integers;
+the records cover those polynomial steps, while the theorem follows from
+the deduction above.
+The record IDs are \texttt{IDC1h8ae7209125dfe0a2} and
+\texttt{IDC1he02ab9a5cf019a56}.
 \newpage
 \noindent\textbf{Held-out classifier.} On $p=37$ rows the necessary rule
 has 24,352 true positives, 290 false positives, no false negatives,
@@ -152,6 +185,33 @@ fifth); $p=47$ has 392 of 424 residual zero rows in the outer fifth.
 This is an association, not a causal proof or an exact rule.
 
 \medskip
+\noindent\textbf{Residual zeros and class-number magnitude.}
+The population is ordinary positive traces with $v_2(f_\pi)\geq2$;
+negative traces are their quadratic-twist mirrors. Native PARI/GP
+\texttt{qfbclassno} gives $h_K$. Entries are zero labels / all traces in
+each bin; the bins use $q=p^2$.
+\begin{center}
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{@{}l r r r r r@{}}
+\toprule
+$h_K/q$ & $p=37$ & $p=41$ & $p=43$ & $p=47$ & combined \\
+\midrule
+$<1$ & 101/4,192 & 117/5,260 & 136/5,856 & 143/7,208 & 497/22,516 \\
+$[1,2)$ & 30/2,518 & 52/3,347 & 30/3,817 & 41/4,776 & 153/14,458 \\
+$[2,4)$ & 11/3,124 & 24/4,072 & 22/4,582 & 25/5,829 & 82/17,607 \\
+$[4,8)$ & 3/2,365 & 5/3,790 & 0/4,654 & 3/6,511 & 11/17,320 \\
+$\geq8$ & 0/122 & 0/341 & 0/505 & 0/1,079 & 0/2,047 \\
+\bottomrule
+\end{tabular}
+\endgroup
+\end{center}
+\noindent These are complete observed strata, not sampled rates.
+The matched pairs above rule out using the listed features as an exact
+classifier of the recorded labels. Independent certification of every
+zero label remains open.
+
+\medskip
 \noindent\textbf{Correction to prior evidence.} The earlier census
 used an $\mathbb F_p$ nonsquare for the second
 $\mathbb F_{p^2}$ square class. Every nonzero element of $\mathbb F_p$
@@ -178,4 +238,21 @@ The weak-model and reach assumptions are in
 \href{https://eprint.iacr.org/2011/020.pdf}{Joux--Vitse, \S4.1};
 \href{https://arxiv.org/abs/math/0106273}{Auer--Top} proves a
 broader Legendre-family statement.
+The accompanying \href{REPORT.md}{Markdown report} links every CSV,
+the identity records, and the new validation receipt.
+
+\clearpage
+\begin{landscape}
+\begin{center}
+\textbf{Complete observed trace strata and invariant flow}\\[1ex]
+\includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{class_strata.pdf}
+\end{center}
+\noindent Source: the seven census CSVs linked in the Markdown report,
+rendered by \texttt{iso1\_class\_census visual}. The bars count ordinary
+trace rows; their widths are fractions of each prime's row population.
+The right-hand labels give weak rows / ordinary rows. Sampling intervals
+apply to the separate 4,000-curve reach samples, not these census bars.
+The proof excludes every depth-1 class; the yellow segments retain the
+observed high-depth zero rows and their point-count uncertainty.
+\end{landscape}
 \end{document}

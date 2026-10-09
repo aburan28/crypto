@@ -116,18 +116,28 @@ above do have binomial sampling intervals.
 Let `K = F_(p⁶)`, `q=p²`, and `Q=p⁶`. For any weak curve
 `E_alpha: y²=x(x-alpha)(x-alpha^q)`, put `lambda=alpha^q/alpha`.
 Its norm from `K` to `F_q` is one, so its multiplicative order divides
-`q²+q+1`, an **odd** number. Consequently `lambda=mu⁴` for some
-`mu` in `K`. Up to a quadratic twist, `E_alpha` is the Legendre curve
+`q²+q+1`, an **odd** number. Since `q≡1 (mod 4)`, an explicit fourth root is
+`mu=lambda^((q²+q+2)/4)`, with `mu⁴=lambda`. Up to a quadratic twist,
+`E_alpha` is the Legendre curve
 `L_lambda: y²=x(x-1)(x-lambda)`.
 
 The rational 2-isogeny of `L_lambda` with kernel `(0,0)` has target
 
 `L'_lambda: y²=x[x²+2(1+lambda)x+(1-lambda)²]`.
 
+For `x≠0`, write `a=−(1+lambda)`, `b=lambda`. The map is
+`(x,y) ↦ (x+a+b/x, y(1−b/x²))`; the identity and `(0,0)` both map
+to the identity. With `U=x²+ax+b`, clearing the curve equations reduces to
+`U²−2axU+(a²−4b)x²=(x²−b)²`. Thus the displayed target and kernel
+can be checked without inferring an isogeny from a shared point count.
+
 Writing `s=mu²`, its three roots are `0, -(1+s)², -(1-s)²`.
 Every root difference is a square in `K`: the remaining difference is
 `4s`, up to sign, and `-1` is a square since `Q≡1 (mod 4)`.
-Thus **all of `L'_lambda[4]` is rational**, so
+The roots are distinct because `lambda≠0,1`. By the rational-halving
+criterion in [Auer–Top, Lemma 2.1](https://arxiv.org/pdf/math/0106273),
+every rational 2-torsion point has a rational half. The halves of two
+independent 2-torsion points generate **all of `L'_lambda[4]`**, so
 `16 | #L_lambda(K)`. Isogenous curves have equal point counts, and
 quadratic twisting negates the trace. Every weak trace therefore satisfies
 
@@ -136,6 +146,12 @@ quadratic twisting negates the trace. Every weak trace therefore satisfies
 For ordinary `t≡2 (mod 4)`, this is arithmetically equivalent to
 `(t/2)²≡p⁶ (mod 16)`, to `t/2≡±p³ (mod 8)`, and to
 `v₂(f_pi)≥2` where `t²-4p⁶=f_pi² D_K` and `D_K` is fundamental.
+To see the conductor equivalence, put `d=(t/2)²−p⁶`. Odd squares give
+`v₂(d)≥3`. If `v₂(d)=3`, the fundamental discriminant has 2-valuation
+3, so `v₂(f_pi)=1`. If `v₂(d)≥4`, then
+`v₂(t²−4p⁶)≥6`; a fundamental discriminant has 2-valuation 0, 2, or 3,
+so `v₂(f_pi)≥2`. This proves the equivalence without assuming the
+endomorphism order is maximal.
 The field and class trace determine `f_pi`; it is the **Frobenius-order**
 conductor, not a particular curve's endomorphism-ring conductor or its
 2-volcano level. The theorem proves absence for every ordinary depth-1
@@ -144,18 +160,27 @@ share without treating weakness as independent of class.
 
 There is also a curve-level consequence. On the 2-isogenous Legendre
 neighbor with rational full 4-torsion, Frobenius `pi` acts as the identity
-on the 4-torsion, so `(pi−1)/4` is an endomorphism. Its generated order has
-conductor `f_pi/4`; hence the neighbor's endomorphism conductor has
+on the 4-torsion. The separable map `[4]` therefore factors `pi−1`, so
+`eta=(pi−1)/4` is an endomorphism defined over `K`. The discriminant of
+`Z[eta]` is `(t_L²−4Q)/16`, where `t_L` is the untwisted Legendre trace;
+its conductor is `f_pi/4`. Hence the neighbor's endomorphism conductor has
 2-valuation at most `v₂(f_pi)−2`. A quadratic twist changes `pi` to `−pi`
 and preserves the endomorphism order. Across a degree-2 isogeny the
-2-valuations of the two endomorphism conductors differ by at most one:
-the dual isogeny gives `2 End(E') ⊆ End(E)` and the reverse inclusion.
+2-valuations of the two endomorphism conductors differ by at most one.
+Under the identification of their rational endomorphism algebras by the
+isogeny and its dual, `2 End(E') ⊆ End(E)` and `2 End(E) ⊆ End(E')`.
 Thus every **ordinary weak curve** has
 `v₂(f_End(E)) ≤ v₂(f_pi)−1`. It cannot lie at the deepest possible
 2-volcano level. This is a proved bound on weak curves, not a measured
 level for each representative or a sufficient criterion for a class.
+The same curve-level bound follows directly from full rational 2-torsion:
+`(pi−1)/2` is an endomorphism, whose generated order has conductor
+`f_pi/2`. It therefore applies to every full-2-torsion curve in this
+population and does not further distinguish weak representatives. The
+extra class restriction is supplied by full 4-torsion on the neighbor.
 
-The converse is false. The held-out p = 37, 41, 43, 47 tables have respectively
+The converse fails on the recorded computational labels. The held-out
+p = 37, 41, 43, 47 tables have respectively
 290, 396, 376, 424 high-depth zero rows and no low-depth weak rows. The p = 37
 classifier has 24,352 true positives, 290 false positives, zero false
 negatives, and 24,642 true negatives (99.41% of rows labeled correctly).
@@ -164,6 +189,20 @@ The p = 47 held-out classifier has TP 50,382, FP 424, FN 0, and TN 50,808
 Splitting of 2 and maximal-order class-number parity fit substantially
 worse; combining those variables and a finer 2-adic residue did not repair
 the false positives.
+
+The two polynomial steps have replayable `identity.certificate/v1`
+records in [identity_certificates.json](identity_certificates.json), emitted
+and checked by the [native report checker](../../examples/iso1_report_check.rs).
+The quotient-factorization record is `IDC1h8ae7209125dfe0a2`; the cleared
+isogeny-equation record is `IDC1he02ab9a5cf019a56`.
+Each record uses 32 evaluations over `F_(2^61−1)` and a further 64 replay
+evaluations. [Exact PARI/GP expansion](algebra_identity_check.gp) separately
+checks both identities over the integers. These records validate the
+displayed algebra; the finite-field torsion theorem uses the deductive
+argument above, and the census's zero labels keep their stated uncertainty.
+The [isolated checker package](report_check_runtime/README.md) reuses the
+repository's native certificate and SHA-256 modules without building other
+library modules. Its scope is polynomial replay and mutation rejection.
 
 ## Exact orbit quotient and a trace-count audit
 
@@ -311,3 +350,9 @@ proving universal reach: [Joux and Vitse, §4.1](https://eprint.iacr.org/2011/02
 The broader Legendre-family reach theorem concerns all order-divisible-by-four
 classes and does not identify this norm-one weak subfamily:
 [Auer and Top](https://arxiv.org/abs/math/0106273).
+
+The [validation receipt](report_validation_20261008.txt) records this report's
+replay commands and outcomes. The PDF includes the source-linked proof,
+residual-class-number table, and the complete census diagram. The report,
+study figure, cover ledger, and dashboard context were checked together;
+the diagnostic census does not change an IC/rho cost series or its ratios.
