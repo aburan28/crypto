@@ -41,7 +41,24 @@ The [receipt](local/controls.json) retains raw and binary hashes. The
 the N53 reference is the T025 expanded row of the existing
 [full-rank ledger](../koblitz-s3-target-conjugate-20261009/local/raw_c1200_fullrank_paired32.jsonl.gz).
 
-The saved bytes are the exact root-table payload difference. Process peak
-memory and paired one-target timing remain to be measured on a frozen panel;
-the T025 controls served correctness and trace equivalence. A host-isolated
-receipt is required to promote any CPU wall-time ratio.
+The saved bytes are the exact root-table payload difference. The T025
+controls served correctness and trace equivalence. A host-isolated receipt
+is required to promote any CPU wall-time ratio.
+
+## Peak process memory control
+
+The [RSS freeze](RSS_FREEZE.json) fixed the source, binary, point, workers,
+and 180-second limit before the compact measurement. Its
+[verified compact receipt](local/peak_rss_n53_t025.json) and
+[raw report](local/raw_peak_rss_n53_t025.json.gz) measured **17,988,763,648
+bytes** of peak child-process RSS through macOS `getrusage` on N53 T025. A
+fresh run of the frozen 16-byte reference measured **19,425,591,296 bytes**,
+with [receipt](local/reference_rss_repeat.json) and
+[raw report](local/reference_rss_repeat_raw.json.gz). Their observed
+difference is **1,436,827,648 bytes**. The earlier 16-byte
+[receipt](../koblitz-s3-target-conjugate-20261009/local/memory_peak_c1200_t025.json)
+measured 26,739,802,112 bytes for the same binary and point. This reference
+spread leaves the reproducible **1,610,612,736-byte table payload saving**
+as the firm memory result; additional controlled repetitions are needed for
+a stable peak-RSS estimate. The two RSS controls are memory and correctness
+observations, not a paired online timing panel.
