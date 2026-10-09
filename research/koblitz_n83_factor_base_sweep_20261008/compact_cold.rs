@@ -1217,6 +1217,7 @@ mod wide {
         basis: &NormalBasis128,
         solver: &S3Solver128,
         reps: &[u128],
+        unordered_pairs: bool,
     ) -> Index128 {
         let n = gf.n as usize;
         let shifted: Vec<Vec<u128>> = reps
@@ -1233,7 +1234,10 @@ mod wide {
             .collect();
         let mut states = Vec::new();
         for left in 0..reps.len() {
-            for right in 0..reps.len() {
+            // Swapping a pair and rotating it by Frobenius preserves the
+            // canonical root key. The complete-key check below tests this.
+            let right_start = if unordered_pairs { left } else { 0 };
+            for right in right_start..reps.len() {
                 for relative in 0..n {
                     if let Some(roots) =
                         solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
@@ -1596,8 +1600,17 @@ mod wide {
         let basis_ms = basis_started.elapsed().as_secs_f64() * 1000.0;
 
         let index_started = Instant::now();
-        let index = build_index128(&gf, &basis, &solver, &reps);
+        let unordered_pairs = matches!(std::env::var("ICV1_PAIR_MODE").as_deref(), Ok("unordered"));
+        eprintln!(
+            "icv1_phase {}",
+            json!({"phase":"index_started","pair_symmetry":if unordered_pairs {"unordered_frobenius"} else {"ordered_control"},"columns":base.columns})
+        );
+        let index = build_index128(&gf, &basis, &solver, &reps, unordered_pairs);
         let index_ms = index_started.elapsed().as_secs_f64() * 1000.0;
+        eprintln!(
+            "icv1_phase {}",
+            json!({"phase":"index_completed","index_ms":index_ms,"regular_states":index.states.len(),"root_table_entries":index.table.len})
+        );
         let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
 
         let rank_started = Instant::now();
@@ -1719,6 +1732,12 @@ mod wide {
                     FastBinaryCurve128::neg(rep),
                 );
                 rank_attempts += 1;
+                if rank_attempts % 64 == 0 {
+                    eprintln!(
+                        "icv1_phase {}",
+                        json!({"phase":"rank_progress","attempts":rank_attempts,"rank":echelon.rank,"relations":rank_relations,"elapsed_ms":rank_started.elapsed().as_secs_f64() * 1000.0})
+                    );
+                }
                 let mut unused_relation_check_ns = 0u128;
                 match extract128(
                     &gf,
@@ -1872,6 +1891,7 @@ mod wide {
             "factor_base_points":base.points.len(),
             "regular_states":index.states.len(),
             "root_table_entries":index.table.len,
+            "pair_symmetry":if unordered_pairs {"unordered_frobenius"} else {"ordered_control"},
             "pair_table_entries":0,
             "edge_selectors":0,
             "timing_ms":{
@@ -1929,6 +1949,31 @@ mod wide {
             std::fs::write(path, format!("{dump}\n")).expect("write base dump");
         }
         std::process::exit(0);
+    }
+
+    #[cfg(test)]
+    #[test]
+    fn unordered_pair_index_retains_every_ordered_canonical_root_key() {
+        let kc = super::pinned_a1_curve();
+        let fast = FastBinaryCurve128::new(&kc.curve.irreducible, 1).unwrap();
+        let gf = Gf2_128::new(&kc.curve.irreducible);
+        let (_, _, representatives, _) =
+            construct_base128(&fast, &kc, 1, 4, kc.subgroup_order.to_u64().unwrap());
+        let xs: Vec<_> = representatives
+            .iter()
+            .map(|point| point.unwrap()[0])
+            .collect();
+        let basis = NormalBasis128::new(&gf);
+        let solver = S3Solver128::new(&gf, 1);
+        let ordered = build_index128(&gf, &basis, &solver, &xs, false);
+        let unordered = build_index128(&gf, &basis, &solver, &xs, true);
+        assert!(unordered.states.len() < ordered.states.len());
+        for state in &ordered.states {
+            for &root in &state.normal_roots {
+                let (canonical, _) = basis.canonical(root);
+                assert!(unordered.table.get(canonical).is_some());
+            }
+        }
     }
 
     #[cfg(test)]
@@ -2325,19 +2370,31 @@ fn legacy_fixture_entrypoint() {
 
 // Fixed public fixture adapter. It accepts a retained panel directory and a
 // declared K; the target and curve are sealed by the study's public corpus.
-fn main() {
-    let args: Vec<_> = std::env::args().collect();
-    assert_eq!(args.len(), 4, "usage: compact_cold PANEL_DIR K MAX_SECONDS");
+pub fn run_cli(args: Vec<String>) -> ! {
+    assert!(
+        (4..=5).contains(&args.len()),
+        "usage: compact_cold PANEL_DIR K MAX_SECONDS [unordered]"
+    );
+    let unordered_pairs = match args.get(4).map(String::as_str) {
+        None => false,
+        Some("unordered") => true,
+        _ => panic!("pair mode must be unordered"),
+    };
     let root = Path::new(&args[1]);
     let columns: usize = args[2].parse().unwrap();
     assert!([64, 256, 600].contains(&columns));
     let budget: u64 = args[3].parse().unwrap();
     assert!((1..=600).contains(&budget));
     let adapter_start = Instant::now();
+    let mode = if unordered_pairs {
+        "unordered"
+    } else {
+        "ordered"
+    };
     let run_dir = (1..=8)
         .map(|attempt| {
             root.join(format!(
-                "cold-a1-hash-{columns}-seed-{PUBLIC_SEED}-attempt-{attempt}"
+                "cold-a1-hash-{columns}-{mode}-seed-{PUBLIC_SEED}-attempt-{attempt}"
             ))
         })
         .find(|path| !path.exists())
@@ -2466,10 +2523,11 @@ fn main() {
     target_file.sync_all().unwrap();
     let adapter_ms = adapter_start.elapsed().as_secs_f64() * 1000.0;
     std::env::set_var("ICV1_ADAPTER_MS", adapter_ms.to_string());
+    std::env::set_var("ICV1_PAIR_MODE", mode);
     let cap_path = run_dir.join("cap.json");
     std::thread::spawn(move || {
         std::thread::sleep(Duration::from_secs(budget));
-        fs::write(cap_path, format!("{}\n", json!({"status":"UNKNOWN_budget","budget_seconds":budget,"selected_best_total_runtime":null}))).unwrap();
+        fs::write(cap_path, format!("{}\n", json!({"status":"UNKNOWN_budget","budget_seconds":budget,"pair_mode":mode,"selected_best_total_runtime":null}))).unwrap();
         std::process::exit(124);
     });
     let call = vec![
@@ -2483,6 +2541,10 @@ fn main() {
             .into_owned(),
     ];
     wide::run(&call)
+}
+
+fn main() {
+    run_cli(std::env::args().collect())
 }
 
 #[cfg(test)]

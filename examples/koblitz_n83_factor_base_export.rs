@@ -18,6 +18,9 @@ use std::path::Path;
 use std::process::Command;
 use std::time::{Duration, Instant};
 
+#[path = "../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs"]
+mod compact_cold;
+
 const STUDY: &str = "koblitz_n83_factor_base_sweep_20261008";
 const PREFIX: &str = "s3://crypto-autoresearcher/factor-bases/icv1/etc";
 const SEEDS: [u64; 3] = [2026100801, 2026100802, 2026100803];
@@ -935,7 +938,8 @@ fn main() -> Result<()> {
         Some("replay")=>replay(Path::new(args.get(2).ok_or("replay directory")?))?,
         Some("probes")=>probes(Path::new(args.get(2).ok_or("probes directory budget_seconds")?),args.get(3).ok_or("budget")?.parse()?)?,
         Some("upload")=>upload(Path::new(args.get(2).ok_or("upload directory")?))?,
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory".into()),
+        Some("cold")=>compact_cold::run_cli(std::iter::once(args[0].clone()).chain(args[2..].iter().cloned()).collect()),
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered]".into()),
     }
     Ok(())
 }
