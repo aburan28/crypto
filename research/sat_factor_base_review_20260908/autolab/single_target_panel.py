@@ -107,8 +107,8 @@ def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
     """Build the paired one-target fields from the two verified producer rows."""
     ic_ms, rho_ms = float(ic_record["online_ms"]), float(rho_record["online_ms"])
     probes, steps = int(ic_record["probes"]), int(rho_record["walk_steps"])
-    if min(ic_ms, rho_ms, probes, steps) <= 0:
-        raise ValueError("a verified one-target claim needs positive online costs and counters")
+    if min(ic_ms, rho_ms) <= 0 or min(probes, steps) < 0:
+        raise ValueError("a verified one-target claim needs positive online costs and nonnegative counters")
     ic_hw = ic_record.get("online_hw_counts")
     rho_hw = rho_record.get("online_hw_counts")
     ic_hw = ic_hw if isinstance(ic_hw, dict) else {}
@@ -145,7 +145,7 @@ def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
             "operation_units": {"ic": "root-index probes", "rho": "walk steps"},
             "ic_online_operations": probes,
             "rho_online_operations": steps,
-            "rho_per_ic_native_counter": steps / probes,
+            "rho_per_ic_native_counter": steps / probes if probes else None,
             "ops_speedup_online": None,
         },
         "hardware_accounting": {

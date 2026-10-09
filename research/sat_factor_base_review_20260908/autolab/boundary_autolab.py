@@ -235,8 +235,8 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     ic_ops = accounting.get("ic_online_operations")
     rho_ops = accounting.get("rho_online_operations")
     for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
-        if positive_cost(value) is None:
-            errors.append(f"operation_accounting.{name} must be positive and finite")
+        if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+            errors.append(f"operation_accounting.{name} must be nonnegative and finite")
     units = accounting.get("operation_units")
     if not isinstance(units, dict) or not all(
         isinstance(units.get(arm), str) and units[arm].strip() for arm in ("ic", "rho")
@@ -249,12 +249,16 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     if status not in ("native_counters_only", "calibrated_common_unit"):
         errors.append("operation_accounting.comparison_status must name the calibration state")
     raw_quotient = accounting.get("rho_per_ic_native_counter")
-    if raw_quotient is not None and not errors:
-        expected = float(rho_ops) / float(ic_ops)
-        if positive_cost(raw_quotient) is None or not math.isclose(
-            float(raw_quotient), expected, rel_tol=1e-8, abs_tol=1e-12
-        ):
-            errors.append("operation_accounting.rho_per_ic_native_counter does not match the raw counts")
+    if not errors:
+        if ic_ops == 0:
+            if raw_quotient is not None:
+                errors.append("operation_accounting.rho_per_ic_native_counter must be null for zero IC probes")
+        elif raw_quotient is not None:
+            expected = float(rho_ops) / float(ic_ops)
+            if type(raw_quotient) not in (int, float) or not math.isfinite(raw_quotient) or raw_quotient < 0 or not math.isclose(
+                float(raw_quotient), expected, rel_tol=1e-8, abs_tol=1e-12
+            ):
+                errors.append("operation_accounting.rho_per_ic_native_counter does not match the raw counts")
     ratio = accounting.get("ops_speedup_online")
     if ratio is not None:
         calibrated = (
@@ -266,6 +270,8 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
         )
         if not calibrated:
             errors.append("operation_accounting.ops_speedup_online requires a calibrated common unit and receipt")
+        elif positive_cost(ic_ops) is None or positive_cost(rho_ops) is None:
+            errors.append("operation_accounting calibrated counts must be positive")
         elif positive_cost(ratio) is None:
             errors.append("operation_accounting.ops_speedup_online must be positive and finite")
         elif not errors:
@@ -274,6 +280,36 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
                 errors.append("operation_accounting.ops_speedup_online does not match calibrated counts")
     elif status == "calibrated_common_unit":
         errors.append("operation_accounting.ops_speedup_online is required for calibrated counts")
+    return errors
+
+
+def hardware_accounting_errors(accounting: Any) -> list[str]:
+    """Check the optional common retired-instruction counter for a paired target."""
+    if not isinstance(accounting, dict):
+        return ["hardware_accounting must be an object"]
+    errors = []
+    status = accounting.get("status")
+    if status not in ("measured_common_counter", "counter_unavailable"):
+        errors.append("hardware_accounting.status is invalid")
+    if accounting.get("unit") != "calling-thread user instructions retired":
+        errors.append("hardware_accounting.unit must name the measured unit")
+    if not isinstance(accounting.get("method"), str) or not accounting["method"].strip():
+        errors.append("hardware_accounting.method must describe the counter boundary")
+    ic_count = accounting.get("ic_online_instructions")
+    rho_count = accounting.get("rho_online_instructions")
+    for arm, count in (("ic", ic_count), ("rho", rho_count)):
+        if count is not None and (type(count) is not int or count <= 0):
+            errors.append(f"hardware_accounting.{arm}_online_instructions must be positive when present")
+    ratio = accounting.get("rho_per_ic_instructions")
+    if status == "measured_common_counter":
+        if type(ic_count) is not int or ic_count <= 0 or type(rho_count) is not int or rho_count <= 0:
+            errors.append("hardware_accounting measured status requires both online instruction counts")
+        elif positive_cost(ratio) is None or not math.isclose(
+            float(ratio), rho_count / ic_count, rel_tol=1e-9, abs_tol=1e-12
+        ):
+            errors.append("hardware_accounting.rho_per_ic_instructions must match the counts")
+    elif status == "counter_unavailable" and ratio is not None:
+        errors.append("hardware_accounting.rho_per_ic_instructions must be null when unavailable")
     return errors
 
 
@@ -389,6 +425,8 @@ def validate_claim(
         record_class = report.get("record_class")
         if record_class not in stage_schema.get("record_class_enum", []):
             validation_errors.append("record_class must identify exploratory or controlled wall evidence")
+        if "hardware_accounting" in report:
+            validation_errors.extend(hardware_accounting_errors(report["hardware_accounting"]))
         controlled_speedup = report.get("controlled_online_speedup")
         if controlled_speedup is None:
             if record_class == "verified_answer_controlled_wall":

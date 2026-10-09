@@ -121,6 +121,22 @@ class MeasurementSchemaTests(unittest.TestCase):
         )["hardware_accounting"]
         self.assertEqual(counted["status"], "measured_common_counter")
         self.assertEqual(counted["rho_per_ic_instructions"], 2.5)
+        counted_claim = copy.deepcopy(claim)
+        counted_claim["hardware_accounting"] = counted
+        self.assertEqual(lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        counted_claim["hardware_accounting"]["rho_per_ic_instructions"] = 3.0
+        self.assertIn("hardware_accounting.rho_per_ic_instructions must match the counts",
+                      lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["validation_errors"])
+        zero_step_claim = copy.deepcopy(claim)
+        zero_step_claim.update(panel.primary_claim_fields(
+            ic, rho | {"walk_steps": 0}, claim["online_interval"]))
+        self.assertEqual(zero_step_claim["operation_accounting"]["rho_per_ic_native_counter"], 0)
+        self.assertEqual(lab.validate_claim(zero_step_claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        zero_probe_claim = copy.deepcopy(claim)
+        zero_probe_claim.update(panel.primary_claim_fields(
+            ic | {"probes": 0}, rho, claim["online_interval"]))
+        self.assertIsNone(zero_probe_claim["operation_accounting"]["rho_per_ic_native_counter"])
+        self.assertEqual(lab.validate_claim(zero_probe_claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
         for change, expected in (
             (lambda row: row["rho_online_phase_ms"].pop("recovery_check_ms"),
              "rho_online_phase_ms must contain exactly the declared phases"),
