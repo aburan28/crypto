@@ -56,6 +56,14 @@ fn p224_small_low_limb_does_not_reject_modular_construction() {
 
 #[test]
 fn field_dispatch_handles_every_limb_boundary() {
+    use isogeny_algos::{field::Field, fp2::Fp2, fpm::FpM};
+
+    // A quadratic wrapper must retain its multiword base characteristic.
+    let mersenne = FpM::<2>::new(&Big::from_dec("170141183460469231731687303715884105727"));
+    let extension = Fp2::new(mersenne);
+    assert_eq!(extension.char(), u64::MAX);
+    assert!(extension.characteristic_exceeds(u64::MAX));
+
     struct Multiply(Int, Int);
     impl api::FieldTask for Multiply {
         type Out = Int;
