@@ -1168,8 +1168,9 @@ impl FrobeniusFactorBase {
     /// identical to the general-field version.  Curves too wide for the
     /// single-word field take the original slow path.
     pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
+        // The class set below uses pack_fast, which is exact only for n <= 62.
         let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)
-            .filter(|_| kc.n <= 63)
+            .filter(|_| kc.n <= 62)
         else {
             let mut classes = HashMap::new();
             for orbit in &self.signed_orbits {
@@ -1249,10 +1250,10 @@ impl FrobeniusFactorBase {
         //
         // The grid additions run as one Montgomery batch per layer and
         // the walks on words; sets, keys, and the verdict match the
-        // general-field version exactly.  Curves too wide for the
-        // single-word field take the original slow path below.
+        // general-field version exactly through degree 62. Degree 63
+        // and wider use exact multi-limb keys in the slow path below.
         let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)
-            .filter(|_| kc.n <= 63)
+            .filter(|_| kc.n <= 62)
         else {
             return self.m_can_decompose_slow(kc, &classes, m);
         };
@@ -1320,34 +1321,33 @@ impl FrobeniusFactorBase {
         layer_keys.iter().any(|k| class_keys.contains(k))
     }
 
-    /// Slow general-field admissibility walk, kept for curves too wide
-    /// for the single-word fast path (unreachable via the constructor)
-    /// and as a second reference alongside the naive one in tests.
+    /// General-field admissibility walk with exact point identities for
+    /// degrees too wide for the packed key, including caller-supplied N83 bases.
     fn m_can_decompose_slow(
         &self,
         kc: &KoblitzCurve,
         classes: &[BinaryPoint],
         m: usize,
     ) -> bool {
-        let identity = pack_point(&BinaryPoint::Infinity);
-        let class_keys: HashSet<u64> = classes.iter().map(pack_point).collect();
+        let identity = point_key(&BinaryPoint::Infinity);
+        let class_keys: HashSet<(BigUint, BigUint)> = classes.iter().map(point_key).collect();
         let mut layer: Vec<BinaryPoint> = vec![BinaryPoint::Infinity];
-        let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
+        let mut layer_keys: HashSet<(BigUint, BigUint)> = HashSet::from([identity]);
         for _ in 1..m {
             let reps = signed_frobenius_orbit_representatives(kc, &layer);
-            let mut next_keys: HashSet<u64> = HashSet::new();
+            let mut next_keys: HashSet<(BigUint, BigUint)> = HashSet::new();
             let mut next: Vec<BinaryPoint> = Vec::new();
             for q in &reps {
                 for c in classes {
                     let seed = kc.add(q, c);
-                    if next_keys.contains(&pack_point(&seed)) {
+                    if next_keys.contains(&point_key(&seed)) {
                         continue;
                     }
                     // Close the orbit of `seed` under π and negation.
                     let mut current = seed;
                     for _ in 0..kc.n {
                         for candidate in [current.clone(), point_neg(&current)] {
-                            if next_keys.insert(pack_point(&candidate)) {
+                            if next_keys.insert(point_key(&candidate)) {
                                 next.push(candidate);
                             }
                         }
@@ -1370,15 +1370,15 @@ impl FrobeniusFactorBase {
             return m == 0;
         }
         let classes = self.distinct_cofactor_classes(kc);
-        let identity = pack_point(&BinaryPoint::Infinity);
+        let identity = point_key(&BinaryPoint::Infinity);
         let mut layer: Vec<BinaryPoint> = vec![BinaryPoint::Infinity];
         for j in 1..=m {
-            let mut seen: HashSet<u64> = HashSet::new();
+            let mut seen: HashSet<(BigUint, BigUint)> = HashSet::new();
             let mut next: Vec<BinaryPoint> = Vec::new();
             for acc in &layer {
                 for c in &classes {
                     let sum = kc.add(acc, c);
-                    if seen.insert(pack_point(&sum)) {
+                    if seen.insert(point_key(&sum)) {
                         next.push(sum);
                     }
                 }
@@ -1411,19 +1411,20 @@ impl FrobeniusFactorBase {
 }
 
 /// One representative per orbit of a point set under Frobenius and
-/// negation (the set is assumed closed under both).
+/// negation (the set is assumed closed under both). Exact multi-limb keys
+/// keep distinct wide-field orbits separate.
 fn signed_frobenius_orbit_representatives(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Vec<BinaryPoint> {
-    let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
+    let mut seen: HashSet<(BigUint, BigUint)> = HashSet::with_capacity(points.len());
     let mut reps = Vec::new();
     for p in points {
-        if seen.contains(&pack_point(p)) {
+        if seen.contains(&point_key(p)) {
             continue;
         }
         reps.push(p.clone());
         let mut current = p.clone();
         for _ in 0..kc.n {
-            seen.insert(pack_point(&current));
-            seen.insert(pack_point(&point_neg(&current)));
+            seen.insert(point_key(&current));
+            seen.insert(point_key(&point_neg(&current)));
             current = kc.frobenius(&current);
         }
     }
@@ -5740,6 +5741,60 @@ mod tests {
             }
         }
         assert_eq!(BigUint::from(count), kc.group_order);
+    }
+
+    #[test]
+    fn wide_point_keys_keep_distinct_frobenius_orbits() {
+        // The packed key is exact only through degree 62. Find two valid
+        // degree-83 points with the same low-word key but different x values.
+        let n = 83;
+        let mut curve = BinaryCurve {
+            m: n,
+            irreducible: IrreduciblePoly {
+                degree: n,
+                low_terms: vec![0, 1, 2, 45],
+            },
+            a: F2mElement::zero(n),
+            b: F2mElement::one(n),
+            generator: BinaryPoint::Infinity,
+            order: BigUint::one(),
+            cofactor: BigUint::one(),
+        };
+        let p = points_with_x(&curve, &F2mElement::one(n))
+            .into_iter()
+            .next()
+            .expect("x=1 has a lift on K_0");
+        let q = (1u32..=32)
+            .find_map(|high| {
+                let x_bits = BigUint::one() + (BigUint::from(high) << 64usize);
+                let x = F2mElement::from_biguint(&x_bits, n);
+                points_with_x(&curve, &x)
+                    .into_iter()
+                    .find(|candidate| pack_point(candidate) == pack_point(&p))
+            })
+            .expect("a high-bit x with a matching low-word packed key");
+        assert!(curve.is_on_curve(&p) && curve.is_on_curve(&q));
+        assert_eq!(pack_point(&p), pack_point(&q));
+        assert_ne!(point_key(&p), point_key(&q));
+        curve.generator = p.clone();
+        // Only field arithmetic and Frobenius are used by this orbit walk.
+        let group_order = koblitz_point_count(0, n);
+        let kc = KoblitzCurve {
+            a: 0,
+            n,
+            curve,
+            trace: -1,
+            group_order: group_order.clone(),
+            subgroup_order: BigUint::one(),
+            cofactor: group_order,
+            lambda: BigUint::one(),
+            frobenius_is_endomorphism: true,
+        };
+        assert_eq!(kc.frobenius(&p), p);
+        assert_eq!(
+            signed_frobenius_orbit_representatives(&kc, &[p.clone(), q.clone()]),
+            vec![p, q]
+        );
     }
 
     #[test]

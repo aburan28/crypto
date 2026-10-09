@@ -69,6 +69,8 @@ The generic Koblitz IC source now draws uniform full-width additive scalars and 
 
 The primary adapter now imports the replayed `a=0` K=64 hash-derived base into the generic `FrobeniusFactorBase` representation without using its single-word field builder. The release example tests exercise a small imported base through the generic solver's zero-trial preflight and reject corrupted construction metadata and coefficients. The retained K=64 process check validates the real object and orbit representation, but does not call relation search. Therefore this step changes neither the runtime ranking nor the primary cold-run status.
 
+A source audit of cofactor-class admission found a distinct wide-field correctness gate: the general-field orbit walk hashed points with `pack_point`, which is documented as injective only through degree 62. The walk now uses exact multi-limb `point_key` identities, including its reference implementation; degree 63 also routes around the packed fast admission path. This matters when future N83 bases include nontrivial cofactor classes; all 54 retained bases were cofactor-projected into their respective subgroups, so the correction does not change their stored point sets or establish a runtime ranking. The regression constructs two valid degree-83 points with the same packed key but different Frobenius orbits.
+
 ## Validation and preserved failures
 
 The release profile uses optimization level 3, 256 codegen units and four Cargo build jobs. Toolchain and host facts are in `host.json`; the resolved dependency lockfile is retained in `verification/Cargo.lock`.
@@ -91,6 +93,10 @@ The release profile uses optimization level 3, 256 codegen units and four Cargo 
 | Replay-bound primary adapter example tests | 13 passed | `verification/primary-adapter-example-tests.log` |
 | Post-adapter study and boundary Python suites | 5 and 16 passed | `verification/primary-adapter-python-tests.log`, `verification/primary-adapter-boundary-tests.log` |
 | K=64 retained-object primary adapter check | PASS; 5.222421667 seconds process wall | `verification/primary-adapter-64.log`, `pilot-01/primary-adapter-a0-hash-64-budget.json` |
+| Wide-key degree-83 on-curve collision regression | 1 passed | `verification/wide-key-focused.log` |
+| Post-wide-key release library suite | 2,237 passed, 94 ignored, zero failed | `verification/wide-key-lib-tests.log` |
+| Post-wide-key touched example suite | 13 passed, zero failed | `verification/wide-key-example-tests.log` |
+| Post-wide-key study and boundary Python suites | 5 and 16 passed | `verification/wide-key-python-tests.log`, `verification/wide-key-boundary-tests.log` |
 | Native finite-grid audit | All 45,360,000 dispositions accounted for | `verification/design-audit.log`, `design.json` |
 
 Earlier build and test outcomes remain retained. Initial dependency resolution failed under restricted networking; `--locked` could not be used before this older baseline resolved a lockfile. Some build attempts were interrupted during baseline recovery. The first complete isolated library run had two loopback-network permission failures. The next run passed those tests and failed the pre-existing randomized SQIsign wrong-message assertion. Its focused replay passed; the subsequent full suite passed. The SQIsign source is unchanged, and the earlier failure remains visible rather than being relabeled as a pass.
