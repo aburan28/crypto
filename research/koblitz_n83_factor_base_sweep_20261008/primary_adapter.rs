@@ -11,8 +11,9 @@ use super::{
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count, point_key,
-    DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions,
+    build_union_s4_encoding, koblitz_index_calculus_dlp_with_factor_base_and_progress,
+    koblitz_point_count, point_key, DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase,
+    KoblitzCurve, KoblitzIcOptions, SatDecompositionOptions,
 };
 use num_bigint::BigUint;
 use num_traits::One;
@@ -22,6 +23,44 @@ use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::Path;
 use std::time::{Duration, Instant};
+
+fn checked_cgroup_memory_limit(memory_mib: u64) -> Result<u64> {
+    let bytes = memory_mib
+        .checked_mul(1024 * 1024)
+        .filter(|&value| value > 0)
+        .ok_or("invalid capacity memory limit")?;
+    let actual: u64 = fs::read_to_string("/sys/fs/cgroup/memory.max")?
+        .trim()
+        .parse()
+        .map_err(|_| "capacity worker requires a finite cgroup memory.max")?;
+    let swap: u64 = fs::read_to_string("/sys/fs/cgroup/memory.swap.max")?
+        .trim()
+        .parse()
+        .map_err(|_| "capacity worker requires a finite cgroup memory.swap.max")?;
+    if actual != bytes || swap != 0 {
+        return Err("capacity worker requires the declared hard memory cap and zero swap".into());
+    }
+    Ok(bytes)
+}
+
+fn process_usage() -> Value {
+    #[cfg(unix)]
+    {
+        let mut usage = std::mem::MaybeUninit::<libc::rusage>::uninit();
+        if unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) } == 0 {
+            let usage = unsafe { usage.assume_init() };
+            let seconds = |value: libc::timeval| {
+                value.tv_sec as f64 + value.tv_usec as f64 / 1_000_000.0
+            };
+            let multiplier = if cfg!(target_os = "macos") { 1 } else { 1024 };
+            return json!({
+                "cpu_seconds":seconds(usage.ru_utime)+seconds(usage.ru_stime),
+                "peak_rss_bytes":(usage.ru_maxrss.max(0) as u64).saturating_mul(multiplier)
+            });
+        }
+    }
+    json!({"cpu_seconds":null,"peak_rss_bytes":null})
+}
 
 pub(super) struct PrimaryBase {
     pub(super) curve: KoblitzCurve,
@@ -231,6 +270,79 @@ pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
         "total_index_calculus_runtime_ms": Value::Null,
         "selected_best_total_runtime": Value::Null
     }))
+}
+
+/// Construct the exact K=64/256/600 finite-domain factored S4 model and
+/// stop before search. The caller must impose and independently verify a
+/// hard process-wall limit; this worker refuses an absent cgroup memory cap.
+pub(super) fn build_capacity_cli(
+    root: &Path,
+    columns: usize,
+    memory_mib: u64,
+    output: &Path,
+) -> Result<Value> {
+    if ![64, 256, 600].contains(&columns) {
+        return Err("capacity gate supports only retained primary K=64/256/600 bases".into());
+    }
+    let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
+    let start = Instant::now();
+    let (base, row, manifest_hash) = load_panel(root, columns)?;
+    let base_import_ms = start.elapsed().as_secs_f64() * 1000.0;
+    let (target, corpus_hash) = public_target(root, &base.curve)?;
+    let target_validation_ms = start.elapsed().as_secs_f64() * 1000.0 - base_import_ms;
+    let model_start = Instant::now();
+    let enc = build_union_s4_encoding(
+        &base.curve,
+        &base.factor_base,
+        &target,
+        SatDecompositionOptions {
+            factored_s4: true,
+            ..Default::default()
+        },
+    )?;
+    let model_construction_ms = model_start.elapsed().as_secs_f64() * 1000.0;
+    let cgroup_peak_bytes: u64 = fs::read_to_string("/sys/fs/cgroup/memory.peak")?
+        .trim()
+        .parse()
+        .map_err(|_| "capacity worker requires a numeric cgroup memory.peak")?;
+    let receipt = json!({
+        "schema":"n83.factored-s4-capacity-worker/v1",
+        "study":STUDY,
+        "status":"PASS_model_construction_only",
+        "curve_a":0,
+        "fixture":0,
+        "orbit_columns":columns,
+        "object":row["object"],
+        "point_set_blake3":row["point_set_blake3"],
+        "panel_manifest_blake3":manifest_hash,
+        "public_corpus_canonical_json_blake3":corpus_hash,
+        "source_adapter_blake3":blake3::hash(include_bytes!("primary_adapter.rs")).to_hex().to_string(),
+        "source_union_builder_blake3":blake3::hash(include_bytes!("../../src/cryptanalysis/koblitz_index_calculus.rs")).to_hex().to_string(),
+        "source_factored_encoder_blake3":blake3::hash(include_bytes!("../../src/cryptanalysis/semaev_sat.rs")).to_hex().to_string(),
+        "memory_cgroup_limit_bytes":memory_limit_bytes,
+        "memory_cgroup_swap_limit_bytes":0,
+        "memory_cgroup_peak_bytes":cgroup_peak_bytes,
+        "base_points":base.factor_base.points.len(),
+        "legal_x_coordinates":base.factor_base.subspace.len(),
+        "sat_variables":enc.solver.n_vars(),
+        "sat_clauses":enc.solver.n_clauses(),
+        "sat_xor_rows":enc.solver.n_xors(),
+        "sat_x_variables":enc.n_x_vars,
+        "sat_e_variables":enc.n_e_vars,
+        "sat_aux_variables":enc.n_aux_vars,
+        "trivially_unsat":enc.trivially_unsat,
+        "base_import_ms":base_import_ms,
+        "target_validation_ms":target_validation_ms,
+        "model_construction_ms":model_construction_ms,
+        "process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
+        "process_usage":process_usage(),
+        "solver_search_executed":false,
+        "model_lifting_executed":false,
+        "total_index_calculus_runtime_ms":Value::Null,
+        "selected_best_total_runtime":Value::Null
+    });
+    write_new_json(output, &receipt)?;
+    Ok(receipt)
 }
 
 fn public_target(root: &Path, kc: &KoblitzCurve) -> Result<(BinaryPoint, String)> {

@@ -949,6 +949,13 @@ fn main() -> Result<()> {
             write_new_json(output,&receipt)?;
             println!("{receipt}");
         },
+        Some("primary-sat-build")=>{
+            if args.len()!=6 { return Err("primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON (run through the bounded capacity supervisor)".into()); }
+            let receipt=primary_adapter::build_capacity_cli(
+                Path::new(&args[2]),args[3].parse()?,args[4].parse()?,Path::new(&args[5]),
+            )?;
+            println!("{receipt}");
+        },
         Some("primary-cold")=>{
             if args.len()!=9 { return Err("primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()); }
             let summary=primary_adapter::run_cli(
@@ -957,7 +964,7 @@ fn main() -> Result<()> {
             )?;
             println!("{summary}");
         },
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
     }
     Ok(())
 }

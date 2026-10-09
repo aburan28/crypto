@@ -3321,24 +3321,38 @@ pub fn sat_decompose_with(
     }
 }
 
-/// The wide symmetrised S4 encoder already supports more than 64
-/// problem variables. Reuse it for three-point union decompositions;
-/// the finite coordinate domain keeps each X inside the union.
-fn sat_decompose_union_s4(
+/// Construct the exact finite-domain S4 model used by three-point union
+/// decomposition. This can be inspected before search, including on wide
+/// imported bases. A capacity receipt from construction alone does not
+/// establish a decomposition verdict or a total index-calculus runtime.
+pub fn build_union_s4_encoding(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
-    index_of: &HashMap<(BigUint, BigUint), usize>,
     target: &BinaryPoint,
-    max_models: usize,
     options: SatDecompositionOptions,
-) -> (Option<Vec<usize>>, SatDecompositionStats) {
+) -> Result<crate::cryptanalysis::semaev_sat::S4SatEncoding, &'static str> {
     use crate::cryptanalysis::semaev_sat::{
         encode_semaev_s4, encode_semaev_s4_factored_with, S4Options,
     };
-    let mut stats = SatDecompositionStats::default();
+    if !fb.uses_ambient_basis()
+        || fb.ell != kc.n
+        || fb.subspace_basis.len() != kc.n as usize
+        || fb
+            .subspace_basis
+            .iter()
+            .enumerate()
+            .any(|(bit, basis)| *basis != F2mElement::from_bit_positions(&[bit as u32], kc.n))
+    {
+        return Err("S4 union requires the full ambient polynomial basis");
+    }
+    if kc.curve.b != F2mElement::one(kc.n) {
+        return Err("S4 union requires Koblitz b = 1");
+    }
+    if options.factored_s4 && (options.encoding != XorEncoding::Native || kc.n > 127) {
+        return Err("factored S4 requires native XOR and degree at most 127");
+    }
     let BinaryPoint::Affine { x: x_r, .. } = target else {
-        stats.exhausted = true;
-        return (None, stats);
+        return Err("S4 union requires an affine target");
     };
     let mut enc = if options.factored_s4 {
         encode_semaev_s4_factored_with(
@@ -3394,6 +3408,29 @@ fn sat_decompose_union_s4(
         // polynomial equations use the CNF control encoding.
         enc.solver.add_xor(&vars, rhs);
     }
+    Ok(enc)
+}
+
+/// The wide symmetrised S4 encoder already supports more than 64
+/// problem variables. Reuse it for three-point union decompositions;
+/// the finite coordinate domain keeps each X inside the union.
+fn sat_decompose_union_s4(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    target: &BinaryPoint,
+    max_models: usize,
+    options: SatDecompositionOptions,
+) -> (Option<Vec<usize>>, SatDecompositionStats) {
+    let mut stats = SatDecompositionStats::default();
+    let BinaryPoint::Affine { x: x_r, .. } = target else {
+        stats.exhausted = true;
+        return (None, stats);
+    };
+    let Ok(mut enc) = build_union_s4_encoding(kc, fb, target, options) else {
+        stats.exhausted = true;
+        return (None, stats);
+    };
     loop {
         stats.solver_calls += 1;
         let result = enc.solver.solve();
@@ -5495,6 +5532,32 @@ mod tests {
         let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let target = kc.mul(&fb.points[0], &BigUint::from(3u32));
         assert_ne!(target, BinaryPoint::Infinity);
+        let model = build_union_s4_encoding(
+            &kc,
+            &fb,
+            &target,
+            SatDecompositionOptions {
+                factored_s4: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(model.n_x_vars, 3 * kc.n);
+        assert!(model.solver.n_vars() > model.n_x_vars);
+        assert!(model.solver.n_clauses() > 0);
+        assert!(model.solver.n_xors() > 0);
+        let mut malformed = fb.clone();
+        malformed.subspace_basis.swap(0, 1);
+        assert!(build_union_s4_encoding(
+            &kc,
+            &malformed,
+            &target,
+            SatDecompositionOptions {
+                factored_s4: true,
+                ..Default::default()
+            },
+        )
+        .is_err());
         for factored_s4 in [false, true] {
             let (out, stats) = sat_decompose_with(
                 &kc,
