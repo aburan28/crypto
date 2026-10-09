@@ -48,7 +48,8 @@ def main() -> None:
     assert batched["parent_plan_sha256"] == sha(parent_bytes)
     assert batched["source_sha256"] == sha(SOURCE.read_bytes())
     source_tree = git("rev-parse", "HEAD:src")
-    source_commit = git("rev-parse", "HEAD")
+    source_commit = git("log", "-1", "--format=%H", "--", "src")
+    assert git("rev-parse", f"{source_commit}:src") == source_tree
     shared_sha = sha(SHARED.read_bytes())
     curves = {}
     for n in (41, 53):
