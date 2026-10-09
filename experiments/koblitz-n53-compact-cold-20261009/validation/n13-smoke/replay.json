@@ -1,0 +1,22 @@
+{
+  "base_sha256": "f0684c41f14e0541e9beec187c3c9a023346bca60e1c7f4bad5dc478420a0408",
+  "curve_n": 13,
+  "factor_base_points": 104,
+  "orbit_columns": 4,
+  "rank": {
+    "attempts": 4,
+    "failures": 0,
+    "rank": 4,
+    "relations": 4,
+    "rows_without_gain": 0
+  },
+  "rank_trace_sha256": "381991a4c3bee597d35263e19ab1081e17fcb30823ca621516b572ebd3a6ab01",
+  "recovered_scalar": 7,
+  "status": "PASS",
+  "subgroup_order": 2003,
+  "target": [
+    384,
+    1476
+  ],
+  "target_sha256": "89ae09e1d7e17535aaaf9a990a19b53cce7949c18453f0e81c43cfa03a9af751"
+}

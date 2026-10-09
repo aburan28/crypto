@@ -1,6 +1,6 @@
 # Research Note: Point-Decomposition Speed-ups and the Isogenous-Curve Hypothesis
 
-**Date.** 2026-10-08.  **Status.** Measured on public synthetic toy instances.
+**Date.** 2026-10-08.  **Status.** Measured on public synthetic small-field instances.
 **Goal addressed.** (1) a drastic speed-up for the point-decomposition problem
 (PDP) in Semaev-polynomial index calculus; (2) whether isogenous curves give
 better relation yield or lower Gröbner degrees.
@@ -39,7 +39,7 @@ Macaulay matrix at the first useful degree. The one "drastic" candidate in
 `docs/ic/RESEARCH_IC_NOVEL_DIRECTIONS_20261007.md` (G1, Joux–Vitse F4 trace
 replay, 10–100× claimed in the literature) can only save rows that reduce to
 zero, so its ceiling is `rows / rank`. Measured at the landed cell shape
-(`K_0 / F_{2^31}`, 16-dimensional subspace, two summands, three random
+(`icv1-f2m31-tm90707-c95f16f5`, 16-dimensional subspace, two summands, three random
 targets; `macaulay_syzygy_probe`):
 
 | degree | rows | cols | rank | rows / rank | syzygies | stable across targets |

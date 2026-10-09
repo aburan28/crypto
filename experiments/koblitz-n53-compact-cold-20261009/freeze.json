@@ -1,0 +1,35 @@
+{
+  "ic_argv_suffix": [
+    "construct:53:0:244",
+    "target_points.jsonl",
+    "20261009"
+  ],
+  "ic_binary_sha256": "91d119f1218abe67fea5dbe84d30338e5b34255bd41cfa2490069c7ada53bcdf",
+  "kind": "n53_compact_cold_native_source_freeze",
+  "rho_argv_suffix": [
+    "53",
+    "0",
+    "signed_frobenius",
+    "1",
+    "strong",
+    "20261009",
+    "7948768810114"
+  ],
+  "rho_binary_sha256": "4e6e1829ebb45c6df4a4f1bf3582cc21fc9606b4ca6f22ce80cefa36463b5f75",
+  "rss_cap_bytes_per_arm": 17179869184,
+  "schema_version": 2,
+  "source_commit": "537c269c6386547737a4d9aa5969835363a5f6fe",
+  "source_sha256": {
+    "Cargo.lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "Cargo.toml": "d1845f2f1d564da051969e155fb93c827b3d841f4ce7fe410f5f8201f1a445d9",
+    "examples/koblitz_orbit_dlp_fast_online.rs": "ff6b7685a6dee8ad953b199cf71fb64c3f939626499b77438fa974b6b5b58bde",
+    "examples/koblitz_rho_fixture.rs": "a5f1146ff06700b0f7984214c8c54d2cd701018313357c42ec1bc49c81a81752",
+    "experiments/koblitz-n53-compact-cold-20261009/PROTOCOL.md": "00862a433b211ccd9c2e17cdbfacddb23fa152bb3fdf5eb282750ffc619143fa",
+    "experiments/koblitz-n53-compact-cold-20261009/native_replay.rs": "47fd05625bb9b3d06978e403f78058a18012f2b3fff43d9ecaddb1b97072aab5",
+    "experiments/koblitz-n53-compact-cold-20261009/native_run.rs": "f60cc886a58009419c4753dea9e232999a3750687e4e3bd8ec7d926efd81cad8",
+    "experiments/koblitz-n53-compact-cold-20261009/reference.rs": "12abd5eb5a85d6e2b436158527e6a4b5bdb89025d8090f7333239bd87b086d3a",
+    "experiments/koblitz-n53-compact-cold-20261009/target_points.jsonl": "5dbe9c8b526507e8380e5ae0427b3fbb21138373b8950b44dacf473fbe6588eb",
+    "experiments/koblitz-n53-compact-cold-20261009/workload.json": "afe3162d11be132d9ad1740c99503155d67dfb543828861b75d0edc178c101c2"
+  },
+  "wall_cap_seconds_per_arm": 900
+}
