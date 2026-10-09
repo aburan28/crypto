@@ -19,6 +19,9 @@ Probes and walk steps remain distinct native units.  The block keeps the
 counter quotients as diagnostics; a calibrated operation speedup and total
 work S remain unknown until a common boundary is measured.
 
+The generated top-level classification keeps a historical verdict as
+provenance while explicitly marking the recorded wall ratio exploratory.
+
 See docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md, findings F2-F4 and steps
 0.3, 1.1, 1.4, 1.5.
 
@@ -293,6 +296,9 @@ def apply_to_claim(name: str, block: dict[str, Any]) -> Path:
     indent = len(second) - len(second.lstrip()) or 2
     sort_keys = list(claim) == sorted(claim)
     claim["operation_accounting"] = block
+    claim["record_class"] = "verified_answer_exploratory_wall"
+    claim["controlled_online_speedup"] = None
+    claim["host_isolation_receipt"] = None
     non_claims = list(claim.get("claim_boundary_non_claims") or [])
     wanted = list(NON_CLAIMS)
     if block["host_contention"]["contended_runs"]:

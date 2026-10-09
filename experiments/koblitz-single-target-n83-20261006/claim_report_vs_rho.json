@@ -17,6 +17,7 @@
   "wall-clock speedup includes implementation speed; operation counts are in operation_accounting",
   "runs flagged host_contended in operation_accounting shared the host with unrelated processes and are exploratory"
  ],
+ "controlled_online_speedup": null,
  "curve": {
   "a": 1,
   "b": 1,
@@ -35,6 +36,7 @@
  ],
  "fixture_scalar": 3141592653589793,
  "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input",
+ "host_isolation_receipt": null,
  "ic_and_rho_scalar_identical": true,
  "ic_verified_all_runs": true,
  "independent_scalar_replay": {
@@ -229,6 +231,7 @@
   "2655898345537166180532960",
   "3881526307991673265292615"
  ],
+ "record_class": "verified_answer_exploratory_wall",
  "regime": "koblitz",
  "resource_caps": {
   "common_cap_bytes": null,

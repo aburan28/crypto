@@ -687,6 +687,10 @@ class OperationAccountingTests(unittest.TestCase):
             self.assertEqual(lab.operation_accounting_errors(block), [], name)
             claim = json.loads((lab.REPO / cfg["dir"] / "claim_report_vs_rho.json").read_text())
             self.assertEqual(claim.get("operation_accounting"), block, f"{name}: rerun op_accounting.py --write")
+            self.assertEqual(claim.get("record_class"), "verified_answer_exploratory_wall", name)
+            self.assertIn("controlled_online_speedup", claim, name)
+            self.assertIsNone(claim["controlled_online_speedup"], name)
+            self.assertIsNone(claim.get("host_isolation_receipt"), name)
             self.assertIsNone(block["total_work_S"], name)
             self.assertIsNone(block["ops_speedup_online"], name)
 
