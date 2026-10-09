@@ -54,7 +54,37 @@ The ecbench hot paths are **already single-word arithmetic**, not
 | `ic_boundary::invmod` | extended Euclid on `i128` | `__divti3` library call per Euclid step; one inversion per affine group operation |
 | `ecbench/generic.rs` | private copies of the first two | same, in BSGS and kangaroo coefficient updates |
 
-PROFILE_TABLE_PLACEHOLDER
+Measured on the same `ecbench exec` child inputs (calibration spec
+`research/ecbench_calibration_20261002`, target 0, round 0), callgrind
+`Ir` between the solve markers, collection toggled inside the walk for
+the per-function rows.  The recovered scalar and every counted phase are
+identical before and after; only `*_ns` timings and placement differ.
+
+| child | before (solve Ir) | after (solve Ir) | ratio |
+|---|---|---|---|
+| `rho.negation`, prime `p = 42652151` (26-bit, `r ≈ 2^25.3`) | 4,853,494 | 1,929,629 | 0.40 |
+| `rho.signed_frobenius`, Koblitz `a = 0, n = 41` (`r ≈ 2^40`) | 131,784,217 | 129,040,220 | 0.98 |
+
+Where the prime walk's instructions went, before → after:
+
+| function | before | after |
+|---|---|---|
+| `PrimeCurve::add` (group law, inversion inlined) | 31.7 % | 33.2 % |
+| `__divti3` + `u128_div_rem` + `__umodti3` + `__modti3` | 40.0 % | 0 |
+| `rho_walk_with` (walk, table, canonicalisation) | 11.2 % | 29.8 % |
+| `malloc_consolidate` + `unlink_chunk` | 11.7 % | 29.7 % |
+| `PrimeCurve::double_raw` | 4.8 % | 5.6 % |
+
+The Koblitz walk is bounded elsewhere: `Gf2::inv_clmul` 35.6 %,
+`TunedWalker::walk` 27.6 %, `SignedFrobeniusClasses::canon_parts`
+25.4 %, `FastCurve::add` 4.0 %, and `__umodti3` 3.5 % → 1.7 % (its
+coefficient modulus `r ≈ 2^40` is above the 32-bit fast path; only the
+additions sped up).  Wall time per child is single milliseconds at
+these sizes and was not the measurement.
+
+Replay: `ecbench verify --replay-all` on the committed `prime` and
+`koblitz` calibration sessions passes with the patched binary (every
+measured run re-executed with identical counts).
 
 ## 3. What changed
 
@@ -70,7 +100,14 @@ PROFILE_TABLE_PLACEHOLDER
   behind them.  `ecbench verify --replay-all` on an earlier session is
   the check.
 
-RELEASE_PROFILE_PLACEHOLDER
+### Release profile
+
+`Cargo.toml` has no `[profile.release]` section, so the default (16
+codegen units, no LTO) is what every one of the 56 workflows that run
+`cargo build --release` ships.  Fat LTO with one codegen unit is being
+measured against it on the same two child inputs (solve `Ir` and clean
+build time); the decision and its numbers follow in this section.
+`target-cpu=native` is not on the table, see §4.
 
 ## 4. TODO / feature list
 
@@ -85,6 +122,12 @@ RELEASE_PROFILE_PLACEHOLDER
   (`rho.plain_lockstep:k=…`), with its own bound and frontier entry,
   never a change to an existing method.  `koblitz_strong_rho` already
   does this for the signed-Frobenius walk and is the template.
+- **TODO: allocation inside the prime rho walk.**  After the division
+  fix, about 30 % of the prime walk's instructions are glibc
+  `malloc_consolidate` / `unlink_chunk`: something in `rho_walk_with` or
+  the distinguished-point table allocates per step or per walk.  Find
+  it with `--toggle-collect` and hoist the buffer; this changes no
+  count.
 - **TODO: Montgomery or Barrett `mulmod` for 33–64-bit moduli.**  The
   fast path above stops at 32-bit moduli because that is every curve
   ecbench registers.  `roster_prime_instance` can carry wider primes; a
