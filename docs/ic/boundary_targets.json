@@ -151,7 +151,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Repair the n=73/n=83 claim schemas, then obtain a verified one-target online IC/rho pair on the same point with complete phases and a qualifying CPU-isolation receipt. Higher-n rho projections remain secondary estimates."
+      "beat": "Retain the n=61/n=71/n=73/n=83 claim-check failures with their missing fields explicit. Obtain a new verified one-target online IC/rho pair on the same point with complete phases and a qualifying CPU-isolation receipt. Higher-n rho projections remain secondary estimates."
     },
     {
       "rank": 2,
@@ -912,7 +912,7 @@
             "verdict_status": "historical_label_retained; controlled_speedup_unknown"
           },
           "next_target": {
-            "summary": "First repair the n=73 and n=83 claim schemas and obtain a verified one-target IC/rho pair on the identical point in a qualifying isolated environment. Keep all five exclusive online phase costs, resource records, failures, and independent replay.",
+            "summary": "Retain the audited n=61/n=71/n=73/n=83 claim-check failures and fill historical fields only from verified receipts. Obtain a new one-target IC/rho pair on the identical point in a qualifying isolated environment, with five exclusive IC online phases, an exact rho interval, resource records, failures, and independent replay.",
             "acceptance_gates": [
               "exactly one previously unseen public target and the identical point in IC and rho",
               "complete candidate, workload, and run provenance with independent scalar replay",
