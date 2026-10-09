@@ -141,7 +141,7 @@ fn main() {
         );
         let reps = c["representations"].as_array().unwrap();
         let row = json!({"slug":slug,"family":"prime","field":format!("GF(p), {}-bit p",integer(&c["params"]["p"]).bits()),
-            "coefficients":"registered coefficients","order_bits":integer(&c["order"]).bits(),"standard":c["standard_names"],
+            "coefficients":"standard coefficients","order_bits":integer(&c["order"]).bits(),"standard":c["standard_names"],
             "ec1":reps.iter().map(|r|r["ec1"].clone()).collect::<Vec<_>>(),"ec1_unresolved":null,"legacy":c["aliases"],
             "on_board":false,"curves_yaml_key":null,"factor_base_link_status":"no_curves_yaml_record"});
         roster.push(rendered(&row, 2));

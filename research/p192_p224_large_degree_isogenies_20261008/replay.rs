@@ -100,9 +100,6 @@ fn main() {
     let mut replayed = vec![];
     let mut curves = vec![];
     for attempt in summary["attempts"].as_array().unwrap() {
-        if attempt["receipt"]["status"] != "PASS" {
-            continue;
-        }
         let preset = attempt["curve"].as_str().unwrap();
         let ell = attempt["ell"].as_u64().unwrap();
         let path = out
@@ -113,8 +110,18 @@ fn main() {
             sha256_hex(&bytes),
             attempt["receipt"]["stdout_sha256"].as_str().unwrap()
         );
+        let stderr = fs::read(out.join(preset).join(format!("ell-{ell}.stderr.txt"))).unwrap();
+        assert_eq!(
+            sha256_hex(&stderr),
+            attempt["receipt"]["stderr_sha256"].as_str().unwrap()
+        );
+        if attempt["receipt"]["status"] != "PASS" {
+            continue;
+        }
+        assert_eq!(attempt["receipt"]["exit_code"], 0);
         let doc: Value = serde_json::from_slice(&bytes).unwrap();
         assert_eq!(doc["status"], "PASS");
+        assert_eq!(doc["curve"]["preset"], preset);
         let p = integer(&doc["curve"]["p"]);
         let aa = integer(&doc["curve"]["a"]);
         let b = integer(&doc["curve"]["b"]);
@@ -130,6 +137,14 @@ fn main() {
             .iter()
             .find(|c| c["slug"] == source_slug)
             .unwrap();
+        assert!(source_entry["standard_names"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|name| name == if preset == "p192" { "P-192" } else { "P-224" }));
+        assert_eq!(integer(&source_entry["params"]["p"]), p);
+        assert_eq!(integer(&source_entry["params"]["a"]), aa);
+        assert_eq!(integer(&source_entry["params"]["b"]), b);
         let n = integer(&source_entry["order"]);
         let standard = source_entry["representations"]
             .as_array()

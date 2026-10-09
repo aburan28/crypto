@@ -118,3 +118,25 @@ to apply. Missing sample counts and the grace interval are recorded.
 The final rerun uses `evidence-v4/`, with the same sealed P-192 trial files
 copied from v2 and fresh P-224 trials. The earlier v3 monitor receipt is
 preserved without reclassifying it.
+
+The exact characteristic comparison also forwards through the existing generic
+quadratic-field wrapper. Its regression uses the public Mersenne modulus
+2^127 - 1 and compares against u64::MAX. This consistency fix does not change
+the prime-field construction route used by any recorded search invocation.
+The final search CLI was built from source revision
+631d857e8414aed95c1b0254f0365bc0ff56f3c5; the test build for this final wrapper
+change uses a separate target directory so it cannot replace that executable
+while the search is still running.
+
+The wrapper scope's Conductor CLI conflict check was clear. Expanding the
+existing task lease then hit its retry-budget limit; the MCP scope-expansion
+endpoint failed with an HTTPS/HTTP protocol mismatch. The existing T-65 task
+and reserved study/catalogue paths are retained; these coordination failures
+are not interpreted as validation passes.
+
+The final full standalone release suite passed 111 tests in 43 result groups
+(`validation/algorithms-tests-final.log`), including the wrapper check.
+Catalogue roster rendering retains the existing builder's large-prime
+coefficient-label convention so its generated contract remains compatible.
+New targets have empty standard-name lists and exact parameters/generators in
+the registry; the label does not assign them a named curve standard.

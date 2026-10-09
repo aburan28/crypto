@@ -473,7 +473,7 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
     let mut p3 = String::new();
     text(&mut p3, 42., 790., 21., "Validation and reproduction");
     let mut y = 751.;
-    for t in ["Two native fixes were required: P-192 now selects exactly three Montgomery limbs, and P-224's Hecke precondition compares the full characteristic against a small integer rather than its low word (1). The final standalone release suite passes 111 tests, including both regressions; the supervisor's two tests also pass.",
+    for t in ["Two native fixes were required: P-192 now selects exactly three Montgomery limbs, and P-224's Hecke precondition compares the full characteristic against a small integer rather than its low word (1). The final standalone release suite passes 111 tests, including the quadratic-wrapper consistency check; the supervisor's two tests also pass.",
         "Evidence history: evidence/ retains the initial P-192 preflight failure. evidence-v2/ retains the first 40-degree search and all 16 original P-224 assertion failures. It also preserves an interrupted P-192 degree-149 invocation without a receipt, followed by the sealed retry. Those extra invocations are separate from the final distinct-degree counts.",
         "Final evidence-v4/ reuses the 24 sealed P-192 trials byte for byte and executes fresh P-224 trials. evidence-v3/ retains a preflight RSS-monitor shutdown race. The corrected monitor samples every 25 ms and allows at most 100 ms of unavailable samples while the process exits; persistent unavailability fails closed.",
         "The mandated root cargo test --release --lib failed to compile with 643 pre-existing errors both before and after the rebase. Independent replay and standalone tests pass separately. The repository-wide validation and pre-push publication gate remains unresolved; see validation/lib-test-after-rebase.log.",
@@ -525,6 +525,11 @@ fn main() {
     let study = Path::new(&args[0]);
     let evidence = study.join("evidence-v4");
     let search = load(&evidence.join("search.json"));
+    assert_eq!(
+        search["protocol_sha256"],
+        hash(&fs::read(study.join("PROTOCOL.md")).unwrap()),
+        "the frozen protocol changed after the search"
+    );
     let replay = load(&evidence.join("replay.json"));
     assert_eq!(replay["status"], "PASS");
     for record in replay["records"].as_array().unwrap() {
@@ -655,7 +660,7 @@ A split degree is a structural candidate. A failed or timed-out construction lea
 
 ## Validation, source and delivery status
 
-Two native implementation fixes were required. The initial P-192 preflight exposed a limb-dispatch bug; the failed launch remains in [evidence/](evidence/) and [SEARCH.log](SEARCH.log). The dispatcher now chooses the exact Montgomery limb count. P-224's Hecke modular-polynomial precondition used the low-word characteristic accessor, whose value is 1 for this 224-bit prime. The precondition now uses an exact characteristic comparison. Its regression compares the Hecke polynomial with the separate linear-algebra route and requires two verified maps at a split degree. The final [standalone release suite](validation/algorithms-tests-p224-fix.log) passed all 111 tests. The [search example](validation/example-tests-final.log) passed both tests. The [exact map-identity tests](validation/exact-map-tests.log) passed, including rejection of a changed numerator and changed target coefficient.
+Two native implementation fixes were required. The initial P-192 preflight exposed a limb-dispatch bug; the failed launch remains in [evidence/](evidence/) and [SEARCH.log](SEARCH.log). The dispatcher now chooses the exact Montgomery limb count. P-224's Hecke modular-polynomial precondition used the low-word characteristic accessor, whose value is 1 for this 224-bit prime. The precondition now uses an exact characteristic comparison, which also forwards through the existing quadratic-field wrapper. Its regression compares the Hecke polynomial with the separate linear-algebra route and requires two verified maps at a split degree. The final [standalone release suite](validation/algorithms-tests-final.log) passed all 111 tests. The [search example](validation/example-tests-final.log) passed both tests. The [exact map-identity tests](validation/exact-map-tests.log) passed, including rejection of a changed numerator and changed target coefficient.
 
 The final table counts distinct planned degrees. [evidence-v2/search.json](evidence-v2/search.json) preserves the first complete 40-degree search, including the 16 P-224 assertion failures before its fix. It also retains one interrupted P-192 degree-149 invocation without a completed receipt, separately from the sealed retry. Final [evidence-v4/](evidence-v4/) reuses all 24 sealed P-192 trials and their screen byte for byte after command/digest checks; the P-224 trials were executed fresh with the corrected CLI. The original CLI is preserved locally as `isogeny-algos-pre-p224-fix`, with its digest in the manifest.
 
@@ -753,6 +758,18 @@ research/p192_p224_large_degree_isogenies_20261008/target/release/replay NEW_EVI
         let b = fs::read(p).unwrap();
         executables.push(json!({"path":p,"bytes":b.len(),"sha256":hash(&b),"optimization":"release, level 3","included_in_git":false}));
     }
-    fs::write(study.join("MANIFEST.json"),format!("{}\n",serde_json::to_string_pretty(&json!({"schema":"large-degree-isogeny-manifest/v1","base_revision":search["source_commit"],"host":{"cpu":"Apple M4 Pro","logical_cores":14,"ram_gib":48,"os":"macOS arm64","benchmark_isolation":"not a timing benchmark"},"sources":sources,"executables":executables,"canonical_outputs":canonical_outputs,"files":files})).unwrap())).unwrap();
+    let source_revision = std::process::Command::new("git")
+        .args(["rev-parse", "HEAD"])
+        .output()
+        .unwrap();
+    assert!(source_revision.status.success());
+    let source_revision = String::from_utf8(source_revision.stdout).unwrap();
+    let execution_phases = json!([
+        {"evidence":"evidence/","purpose":"initial P-192 preflight failure","construction_source_revision":"7819ee8c096b9c99617a8ff14ff001d9f4efd4e9","executable_digest":"not retained"},
+        {"evidence":"evidence-v2/","purpose":"first complete 40-degree search; additional interrupted degree-149 invocation retained separately","construction_executable":"isogeny_algos/target/release/isogeny-algos-pre-p224-fix","construction_source_revision":"ddf0799aa95e1edab8ab626ce9d31b75f12f3aa4","supervisor_executables":["isogeny_algos/target/release/large-degree-search-supervised","isogeny_algos/target/release/large-degree-search-resumable"]},
+        {"evidence":"evidence-v3/","purpose":"corrected P-224 preflight stopped by the preserved monitor race","construction_executable":"isogeny_algos/target/release/isogeny-algos","construction_source_revision":"631d857e8414aed95c1b0254f0365bc0ff56f3c5","p192":"sealed evidence-v2 files reused"},
+        {"evidence":"evidence-v4/","purpose":"final degree outcomes and strongest whole-search independent replay","construction_executable":"isogeny_algos/target/release/isogeny-algos","construction_source_revision":"631d857e8414aed95c1b0254f0365bc0ff56f3c5","supervisor_executable":"isogeny_algos/target/release/large-degree-search-monitor-fixed","p192":"24 sealed evidence-v2 trials copied byte for byte; not new construction invocations","p224":"16 fresh construction trials"}
+    ]);
+    fs::write(study.join("MANIFEST.json"),format!("{}\n",serde_json::to_string_pretty(&json!({"schema":"large-degree-isogeny-manifest/v1","base_revision":search["source_commit"],"integrated_upstream_revision":"2fe5cec8a4a9d8d55c8e0abec9fe22852f3a3726","source_snapshot_revision":source_revision.trim(),"protocol_sha256":search["protocol_sha256"],"execution_phases":execution_phases,"host":{"cpu":"Apple M4 Pro","logical_cores":14,"ram_gib":48,"os":"macOS arm64","benchmark_isolation":"not a timing benchmark"},"sources":sources,"executables":executables,"canonical_outputs":canonical_outputs,"files":files})).unwrap())).unwrap();
     println!("Report, vector visual, PDF, manifest and model registration written.");
 }
