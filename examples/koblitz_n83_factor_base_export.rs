@@ -1,6 +1,6 @@
 //! Native, public-data-only factor-base design, export and cross-backend replay.
 //! This program does not consume external targets or choose a runtime winner.
-use crypto_lib::binary_ecc::curve::{point_neg, scalar_mul};
+use crypto_lib::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::koblitz_fast_arith::{FastBinaryCurve128, FastPoint128};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
@@ -680,6 +680,165 @@ fn replay(root: &Path) -> Result<()> {
     Ok(())
 }
 
+struct TwoSumOutcome {
+    relation: Option<(FastPoint128, FastPoint128)>,
+    lookups: usize,
+    censored: bool,
+}
+
+// The oracle receives points only. Fixture scalars stay in a validation
+// sidecar and do not enter the lookup procedure.
+fn two_sum_probe(
+    fast: &FastBinaryCurve128,
+    points: &[FastPoint128],
+    set: &HashSet<FastPoint128>,
+    target: FastPoint128,
+    deadline: Instant,
+) -> TwoSumOutcome {
+    for (i, point) in points.iter().enumerate() {
+        if i % 1024 == 0 && Instant::now() >= deadline {
+            return TwoSumOutcome {
+                relation: None,
+                lookups: i,
+                censored: true,
+            };
+        }
+        let complement = fast.add(target, FastBinaryCurve128::neg(*point));
+        if set.contains(&complement) {
+            return TwoSumOutcome {
+                relation: Some((*point, complement)),
+                lookups: i + 1,
+                censored: false,
+            };
+        }
+    }
+    TwoSumOutcome {
+        relation: None,
+        lookups: points.len(),
+        censored: false,
+    }
+}
+
+fn probes(root: &Path, budget: u64) -> Result<()> {
+    if budget == 0 || budget > 3600 {
+        return Err("probe budget must be 1..3600 seconds".into());
+    }
+    let start = Instant::now();
+    let deadline = start + Duration::from_secs(budget);
+    let manifest_bytes = fs::read(root.join("manifest.json"))?;
+    let manifest_hash = blake3::hash(&manifest_bytes).to_hex().to_string();
+    let manifest: Value = serde_json::from_slice(&manifest_bytes)?;
+    let receipt: Value = serde_json::from_slice(&fs::read(root.join("replay.json"))?)?;
+    if receipt["status"] != "PASS" || receipt["panel_manifest_blake3"] != manifest_hash {
+        return Err("matching replay required for relation probes".into());
+    }
+    let mut targets = Vec::new();
+    let mut public_rows = Vec::new();
+    let mut validation_rows = Vec::new();
+    for a in [0, 1] {
+        let kc = curve(a)?;
+        let mut arm = Vec::new();
+        for i in 0..32 {
+            let digest =
+                blake3::hash(format!("{STUDY}:independent-public-probe:a{a}:{i}").as_bytes());
+            let scalar = BigUint::from_bytes_le(digest.as_bytes())
+                % (&kc.subgroup_order - BigUint::from(1u8))
+                + BigUint::from(1u8);
+            let target = kc.mul(kc.generator(), &scalar);
+            public_rows.push(json!({"a":a,"fixture":i,"point":point_json(words(&target))}));
+            validation_rows
+                .push(json!({"a":a,"fixture":i,"known_answer_scalar":scalar.to_string()}));
+            arm.push(target);
+        }
+        targets.push(arm);
+    }
+    let fixture_setup_ms = start.elapsed().as_secs_f64() * 1000.0;
+    let corpus = json!({"schema":"n83.public-probe-corpus/v1","study":STUDY,"inputs":"public synthetic fixtures only","targets":public_rows});
+    let corpus_hash = blake3::hash(&serde_json::to_vec(&corpus)?)
+        .to_hex()
+        .to_string();
+    write_new_json(&root.join("probe-corpus.json"), &corpus)?;
+    write_new_json(
+        &root.join("probe-validation.json"),
+        &json!({"schema":"n83.public-probe-validation/v1","corpus_canonical_json_blake3":corpus_hash,"oracle_receives_known_answer_scalars":false,"validation":validation_rows}),
+    )?;
+    let mut results = Vec::new();
+    let mut status = "completed_relation_stage_panel";
+    for base in manifest["bases"].as_array().ok_or("bases")? {
+        if Instant::now() >= deadline {
+            status = "budget_exhausted";
+            break;
+        }
+        let preparation_start = Instant::now();
+        let decoded = load_object(root, base)?;
+        let mut lines = std::str::from_utf8(&decoded)?.lines();
+        lines.next().ok_or("header")?;
+        let points: Vec<_> = lines
+            .map(|line| -> Result<_> {
+                let entry: Value = serde_json::from_str(line)?;
+                parse_point(&entry["point"])
+            })
+            .collect::<Result<_>>()?;
+        let set: HashSet<_> = points.iter().copied().collect();
+        if set.len() != points.len()
+            || points.len() != base["points"].as_u64().ok_or("points")? as usize
+        {
+            return Err("probe point count/distinctness".into());
+        }
+        let a: u8 = base["a"].as_u64().ok_or("a")?.try_into()?;
+        let kc = curve(a)?;
+        let fast =
+            FastBinaryCurve128::new(&kc.curve.irreducible, u128::from(a)).ok_or("wide backend")?;
+        let preparation_ms = preparation_start.elapsed().as_secs_f64() * 1000.0;
+        let mut outcomes = Vec::new();
+        let mut total_lookups = 0usize;
+        let mut relations = 0usize;
+        let mut solve_ms = 0.0;
+        let mut verify_ms = 0.0;
+        for (i, target) in targets
+            .get(a as usize)
+            .ok_or("target arm")?
+            .iter()
+            .enumerate()
+        {
+            let solve_start = Instant::now();
+            let outcome = two_sum_probe(&fast, &points, &set, words(target), deadline);
+            solve_ms += solve_start.elapsed().as_secs_f64() * 1000.0;
+            total_lookups += outcome.lookups;
+            let verify_start = Instant::now();
+            let relation = if let Some((p, q)) = outcome.relation {
+                if point_add(&kc.curve, &general(p), &general(q)) != *target {
+                    return Err("reference relation group verification".into());
+                }
+                relations += 1;
+                json!([point_json(p), point_json(q)])
+            } else {
+                Value::Null
+            };
+            verify_ms += verify_start.elapsed().as_secs_f64() * 1000.0;
+            outcomes.push(json!({"fixture":i,"complement_lookups":outcome.lookups,"relation":relation,"status":if outcome.censored{"UNKNOWN_budget"}else if outcome.relation.is_some(){"verified_relation"}else{"no_two_sum_in_complete_base"}}));
+            if outcome.censored {
+                status = "budget_exhausted";
+                break;
+            }
+        }
+        results.push(json!({"object":base["object"],"point_set_blake3":base["point_set_blake3"],"a":a,"policy":base["policy"],"seed":base["seed"],"columns":base["columns"],"summands":2,"backend":"exact_point_complement_lookup","max_large_primes":0,"threads":1,"targets_attempted":outcomes.len(),"verified_relations":relations,"complement_lookups":total_lookups,"preparation_ms_informational_L0":preparation_ms,"solve_ms_informational_L0":solve_ms,"verification_ms_informational_L0":verify_ms,"outcomes":outcomes,"matrix_rank":null,"total_index_calculus_runtime_ms":null,"runtime_rank_eligible":false}));
+        println!(
+            "probed a={a} K={} policy={} relations={relations} lookups={total_lookups}",
+            base["columns"], base["policy"]
+        );
+        if status == "budget_exhausted" {
+            break;
+        }
+    }
+    let git = Command::new("git").args(["rev-parse", "HEAD"]).output()?;
+    write_new_json(
+        &root.join("probes.json"),
+        &json!({"schema":"n83.relation-stage-probes/v1","study":STUDY,"status":status,"source_commit":String::from_utf8_lossy(&git.stdout).trim(),"source_blake3":blake3::hash(include_bytes!("koblitz_n83_factor_base_export.rs")).to_hex().to_string(),"panel_manifest_blake3":manifest_hash,"corpus_canonical_json_blake3":corpus_hash,"shared_fixture_setup_ms_informational_L0":fixture_setup_ms,"budget_seconds":budget,"elapsed_seconds_informational_L0":start.elapsed().as_secs_f64(),"completed_base_rows":results.len(),"results":results,"inference_scope":"fixed public two-summand relation-stage diagnostics; shared corpora and duplicate bases are dependent observations; no higher-arity or total-runtime inference","selected_best_total_runtime":null}),
+    )?;
+    Ok(())
+}
+
 fn upload(root: &Path) -> Result<()> {
     let manifest: Value = serde_json::from_slice(&fs::read(root.join("manifest.json"))?)?;
     let replay: Value = serde_json::from_slice(&fs::read(root.join("replay.json"))?)?;
@@ -737,7 +896,18 @@ fn upload(root: &Path) -> Result<()> {
         &root.join("upload-receipt.json"),
         &json!({"schema":"n83.factor-base-storage/v1","status":"PASS","bucket":"crypto-autoresearcher","prefix":PREFIX,"objects":receipts,"manifest_blake3":blake3::hash(&fs::read(root.join("manifest.json"))?).to_hex().to_string()}),
     )?;
-    for name in ["manifest.json", "replay.json", "upload-receipt.json"] {
+    for name in [
+        "manifest.json",
+        "replay.json",
+        "upload-receipt.json",
+        "duplicate-point-sets.json",
+        "probes.json",
+        "probe-corpus.json",
+        "probe-validation.json",
+    ] {
+        if !root.join(name).exists() {
+            continue;
+        }
         let uri = format!(
             "{PREFIX}/{STUDY}/panels/{}/{name}",
             blake3::hash(&fs::read(root.join("manifest.json"))?).to_hex()
@@ -763,8 +933,9 @@ fn main() -> Result<()> {
         Some("case")=>println!("{}",serde_json::to_string_pretty(&case(args.get(2).ok_or("case ordinal")?.parse()?)?)?),
         Some("pilot")=>pilot(Path::new(args.get(2).ok_or("pilot new-directory budget-seconds")?),args.get(3).ok_or("budget")?.parse()?)?,
         Some("replay")=>replay(Path::new(args.get(2).ok_or("replay directory")?))?,
+        Some("probes")=>probes(Path::new(args.get(2).ok_or("probes directory budget_seconds")?),args.get(3).ok_or("budget")?.parse()?)?,
         Some("upload")=>upload(Path::new(args.get(2).ok_or("upload directory")?))?,
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | upload directory".into()),
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory".into()),
     }
     Ok(())
 }
@@ -822,6 +993,52 @@ mod tests {
     fn subgroup_moduli_are_kept_separate() {
         assert!(curve(0).unwrap().subgroup_order.to_u64().is_none());
         assert!(curve(1).unwrap().subgroup_order.to_u64().is_some());
+    }
+    #[test]
+    fn point_only_oracle_finds_a_verified_relation_and_retains_censoring() {
+        let kc = curve(0).unwrap();
+        let fast = FastBinaryCurve128::new(&kc.curve.irreducible, 0).unwrap();
+        let p = words(kc.generator());
+        let q = fast.scalar_mul(p, &BigUint::from(7u8));
+        let target = fast.add(p, q);
+        let points = vec![p, q];
+        let set = points.iter().copied().collect();
+        let result = two_sum_probe(
+            &fast,
+            &points,
+            &set,
+            target,
+            Instant::now() + Duration::from_secs(10),
+        );
+        let (left, right) = result.relation.unwrap();
+        assert_eq!(
+            point_add(&kc.curve, &general(left), &general(right)),
+            general(target)
+        );
+        assert!(!result.censored);
+        let absent_target = fast.scalar_mul(p, &BigUint::from(9u8));
+        let absent = two_sum_probe(
+            &fast,
+            &points,
+            &set,
+            absent_target,
+            Instant::now() + Duration::from_secs(10),
+        );
+        assert!(absent.relation.is_none());
+        assert_eq!(absent.lookups, points.len());
+        assert!(!absent.censored);
+        for left in &points {
+            for right in &points {
+                assert_ne!(
+                    point_add(&kc.curve, &general(*left), &general(*right)),
+                    general(absent_target)
+                );
+            }
+        }
+        let capped = two_sum_probe(&fast, &points, &set, target, Instant::now());
+        assert!(capped.censored);
+        assert_eq!(capped.lookups, 0);
+        assert!(capped.relation.is_none());
     }
     #[test]
     fn small_export_replays_with_generic_arithmetic() {
