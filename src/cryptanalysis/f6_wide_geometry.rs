@@ -561,7 +561,7 @@ mod packed83 {
     /// The caller must have checked ARM64 AES/PMULL support and the pinned
     /// degree-83 irreducible polynomial.
     #[target_feature(enable = "aes")]
-    #[cfg(test)]
+    #[cfg(all(test, target_arch = "aarch64"))]
     pub(super) unsafe fn batch_add_fixed(
         curve: &BinaryCurve,
         fixed: &BinaryPoint,
