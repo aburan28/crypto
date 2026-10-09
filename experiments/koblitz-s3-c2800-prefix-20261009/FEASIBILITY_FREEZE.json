@@ -1,0 +1,32 @@
+{
+  "actual_usable_points_B": null,
+  "binary_sha256": "c6292074ec3cb7a8bd0d810b931ac837022a6d91d245ce145f1f12f13f6b60ae",
+  "candidate_id": null,
+  "controlled_speedup": null,
+  "curve_id": "EC1N53Ckb1h738a572b91f2",
+  "expected_input_roots_if_all_regular": 831040000,
+  "expected_regular_states_if_all_regular": 415520000,
+  "field_degree_n": 53,
+  "fixture_scalar": 429728658711,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c2800prefix_fullrank_feasibility_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "orbit_columns": 2800,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "point_file_relative": "holdout/n53/T025/public_target.json",
+  "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+  "prepare_rank": 2800,
+  "public_point": [
+    7024908122546358,
+    2805535303407364
+  ],
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "root_table_slot_step_limit": 1073741824,
+  "runner_sha256": "25eda993d9c0f9c183b5e8b2f618b2de3506d11e64b43750c42d7f94a7e2eb02",
+  "source_commit": "a1df596ee8cd836d13fdd11ab83864aa5fe031e0",
+  "source_sha256": "8909652b94eb417e9da25e4d99b4544c3d3a972d6262a326623324fb914410d0",
+  "target_label": "T025",
+  "target_workers": 1,
+  "timeout_seconds": 900
+}
