@@ -234,3 +234,15 @@ receipt. All timing ratios remain **exploratory**. They do not establish a
 controlled S3 speedup or an N41/N53 interaction, and they do not update the
 confirmatory sample size. The 92-per-curve provisional budget remains a
 planning value until a qualifying host completes a clean pilot.
+
+On 2026-10-08 the same frozen target set was repeated in one Modal VM
+Sandbox with guest CPU affinity, NUMA binding and separate whole-process
+`perf` passes. All 146 solver runs and exact-output hashes passed. The
+exploratory paired online ratios were 1.0559 (N41) and 1.0895 (N53), but the
+N53 A/A p95 ratio was 1.0563, above the fixed 1.05 limit. Guest steal ticks
+also increased in 23 run windows. The VM exposed no host-exclusive cpuset
+partition or PSI, so the strict claim gate still fails. See the
+[`modal/` VM follow-up](modal/README.md#follow-up-vm-paired-pilot-2026-10-08)
+for raw evidence and independent Sage replay. The repeated points do not
+increase the number of independent pilot targets or change the provisional
+sample size.

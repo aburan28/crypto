@@ -131,10 +131,13 @@ def main() -> None:
                                  "targets": targets}
     selection = panel["host"]["selection"]
     cgroup = panel["host"]["cgroup"]
+    vm_guest = panel.get("vm_guest_topology_is_not_host_isolation_evidence") is True
     fidelity = {
         "strict_host_isolation_receipt_present": panel["strict_host_isolation_receipt"] is not None,
-        "physical_smt_topology_known": selection["topology_known"],
-        "numa_node_known": selection["node"] is not None,
+        "physical_smt_topology_known": selection["topology_known"] and not vm_guest,
+        "guest_smt_topology_known": selection["topology_known"] if vm_guest else None,
+        "numa_node_known": selection["node"] is not None and not vm_guest,
+        "guest_numa_node_known": selection["node"] is not None if vm_guest else None,
         "exclusive_cpuset_visible": bool(cgroup.get("cpuset.cpus.exclusive.effective")),
         "cpuset_partition_visible": bool(cgroup.get("cpuset.cpus.partition")),
         "cpu_psi_visible": bool(panel["host"]["psi"].get("cpu")),
