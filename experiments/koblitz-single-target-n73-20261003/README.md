@@ -1,23 +1,24 @@
-# N73 single-target IC/rho boundary run
+# N73 paired single-target IC/rho runs
 
-Fifth primary single-target online rung. One compact-orbit index-calculus
-solve and one Pollard-rho solve per paired run on the same frozen public
-point. The point is a synthetic target on the Koblitz curve over
+Three paired runs recovered and independently replayed the same frozen
+public point. The recorded rho/IC wall ratios are 184.9×, 2,094.7×, and
+1,189.7× (median 1,189.7×); IC target extraction required 457,561 probes
+in each repeat. These are exploratory CPU timings: the host has no qualifying
+isolation receipt, R2/R3 shared it with unrelated work, and the retained rho
+interval includes setup whose target dependence is unresolved.
+
+The point is a synthetic target on the Koblitz curve over
 \(\mathbb{F}_{2^{73}}\) (a=0, b=1, modulus \(x^{73}+x^4+x^3+x^2+1\),
 subgroup \(r = 86020738150056119 \approx 2^{56.3}\), cofactor 109,796).
-This is a toy boundary rung, not ECC2K-130 evidence or a key-recovery
-claim.
 
-| Run | Targets | IC online | rho online | rho / IC | Replay |
+| Run | Targets | IC target interval | rho recorded interval | rho / IC recorded wall | Replay |
 |---|---:|---:|---:|---:|---|
 | R1 (seed 202610041 / 7) | 1 | 249.024 ms | 46,034.255 ms | 184.9× | PASS |
 | R2 (seed 202610042 / 8) | 1 | 326.159 ms | 683,096.952 ms | 2,094.7× | PASS |
 | R3 (seed 202610043 / 9) | 1 | 543.772 ms | 646,986 ms | 1,189.7× | PASS |
 
-**Median online speedup 1,189.7× (range 184.9×–2,094.7×).**  Both arms
-verify every run; the recovered scalar is identical across arms and runs
-(validation-only sidecar, never a solver input).  The target relation is
-deterministic: every run reports the same 457,561-probe decomposition.
+Both arms verify every run; the recovered scalar is identical across arms
+and runs (validation-only sidecar, never a solver input).
 
 The workload freezes the single public point
 `Q = ["1852858978593996699777","7821257062942871962177"]` in
@@ -28,17 +29,16 @@ known-answer scalar `12345678901234567` lives in
 The IC online clock starts after target-independent preparation (base
 load, S3 root index build, guided rank-600 log table) and includes
 target relation extraction, the group-lift check, log recovery, and the
-in-process `[d]G=Q` check.  rho's online clock includes per-target jump
-setup, the walk, and in-process validation; point construction is
-excluded from both arms.
+in-process `[d]G=Q` check. The retained rho interval includes jump setup,
+the walk, and in-process validation; the receipts do not establish that all
+setup is target dependent. Point construction is outside both intervals.
 
-The precompute is fully charged and logged, excluded from the online
-claim per the frozen contract: the guided rank acquired 600 relations
+The precompute is logged separately from the target interval: the guided
+rank acquired 600 relations
 (mean 57–70M probes per relation, heavy-tailed; R1 5.1 h single-thread;
-R2/R3 ran while an unrelated verification process shared the host, so
-their walls are conservative).  The parallel guided rank
-(`KIC_RANK_THREADS`, added 2026-10-05) reproduces the frozen target row
-exactly and cuts this stage 11.5× at 12 threads uncontended — see
+R2/R3 shared the host with an unrelated verification process). The parallel
+guided rank (`KIC_RANK_THREADS`, added 2026-10-05) reproduces the frozen
+target row exactly; its recorded 12-thread stage ratio is 11.5× — see
 `research/sat_factor_base_review_20260908/autolab/runs_manual/koblitz_parallel_rank_n73_20261005/`.
 
 ## Files
@@ -65,8 +65,6 @@ python3 assemble_claim_report.py                 # fail-closed claim
 python3 promote_to_ledger.py                    # ledger promotion
 ```
 
-Claim boundary: public synthetic Koblitz n=73, one unseen online
-target, identical frozen public point in both arms, constant-factor win
-only.  Not ECC2K-130 evidence (the challenge is n=131, same curve
-family — see `RESEARCH_ECC2K130_IC_FEASIBILITY.md`), not an asymptotic
-sub-rho claim, not key recovery, no deployed-curve impact.
+`derived_exploratory_claim_report.json` links the raw receipts and keeps
+the controlled online speedup unknown pending a qualifying host-isolation
+receipt, matched resource envelope, and a frozen rho online boundary.
