@@ -212,7 +212,14 @@ impl Gf2 {
         let has_clmul = std::arch::is_aarch64_feature_detected!("aes");
         #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
         let has_clmul = false;
-        Self::with_kernels(irr, has_clmul, true)
+        // Keep the ARM folding path opt-in until a matched full-operation
+        // measurement establishes its benefit on the selected device.
+        let fold_enabled = if cfg!(target_arch = "aarch64") {
+            std::env::var("GF2_ARM_PMULL_FOLD").ok().as_deref() == Some("1")
+        } else {
+            true
+        };
+        Self::with_kernels(irr, has_clmul, fold_enabled)
     }
 
     /// [`Self::new`] with the kernels chosen by the caller, so the tests
@@ -232,11 +239,12 @@ impl Gf2 {
         // above `zⁿ` of degree at most `deg t − 2`, whose product with
         // `t` has degree at most `2·deg t − 2` and must land below `zⁿ`.
         // Every modulus `find_irreducible_sparse` picks for `n ≤ 63`
-        // qualifies (its tails have degree 8 or less).  Only the x86-64
-        // path is written and measured; AArch64 keeps the table.
+        // qualifies (its tails have degree 8 or less).  Both x86-64
+        // PCLMUL and AArch64 PMULL have a guarded folding path.
         let tail = bits ^ (1u64 << n);
         let short_tail = tail != 0 && 2 * (63 - tail.leading_zeros()) <= n + 1;
-        let fold_tail = if cfg!(target_arch = "x86_64") && fold && has_clmul && short_tail {
+        let fold_tail = if cfg!(any(target_arch = "x86_64", target_arch = "aarch64"))
+            && fold && has_clmul && short_tail {
             tail << (64 - n)
         } else {
             0
@@ -297,20 +305,18 @@ impl Gf2 {
     /// (see [`Self::batch_inv_clmul`]).  Folding implies the CPU has the
     /// instruction.
     ///
-    /// Only the x86-64 paths ask; elsewhere the tests alone do.
-    #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
     #[inline(always)]
-    pub(crate) fn folds(&self) -> bool {
+    pub fn folds(&self) -> bool {
         self.fold_tail != 0
     }
 
     /// Fold a `< 2^{2n−1}` carry-less product back into the field.
     #[inline(always)]
     fn reduce(&self, w: u128) -> u64 {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
         if self.folds() {
-            // SAFETY: `fold_tail` is non-zero only when `pclmulqdq` was
-            // detected at construction.
+            // SAFETY: `fold_tail` is non-zero only when the platform's
+            // carry-less multiplication feature was detected.
             return unsafe { self.reduce_fold(w) };
         }
         self.reduce_table(w)
@@ -372,6 +378,24 @@ impl Gf2 {
         (_mm_cvtsi128_si64(r) as u64) >> s
     }
 
+    /// AArch64 sparse-tail folding with three PMULL products.  The final
+    /// reduction is the same two-fold polynomial identity as the x86 path.
+    ///
+    /// # Safety
+    ///
+    /// The CPU must support `aes` (which exposes PMULL), and `fold_tail`
+    /// must be nonzero for this field.
+    #[cfg(target_arch = "aarch64")]
+    #[inline]
+    #[target_feature(enable = "aes")]
+    unsafe fn mul_fold(&self, a: u64, b: u64) -> u64 {
+        let s = 64 - self.n;
+        let p = clmul_u64_neon(a, b << s);
+        let f = clmul_u64_neon((p >> 64) as u64, self.fold_tail);
+        let g = clmul_u64_neon((f >> 64) as u64, self.fold_tail);
+        ((p ^ f ^ g) as u64) >> s
+    }
+
     /// The multiply-and-fold of [`Self::mul_fold`] on operands already in
     /// vector registers: `a` as it is and `b` shifted up by `s`, each in
     /// its low word.  The product comes back in the low word shifted up
@@ -417,6 +441,20 @@ impl Gf2 {
         low ^ ((w as u64) & self.mask)
     }
 
+    /// Reduce an already formed wide product with two AArch64 PMULL folds.
+    ///
+    /// # Safety
+    ///
+    /// As for the AArch64 `mul_fold` path.
+    #[cfg(target_arch = "aarch64")]
+    #[inline]
+    #[target_feature(enable = "aes")]
+    unsafe fn reduce_fold(&self, w: u128) -> u64 {
+        let f = clmul_u64_neon((w >> self.n) as u64, self.fold_tail);
+        let g = clmul_u64_neon((f >> 64) as u64, self.fold_tail);
+        (((f ^ g) as u64) >> (64 - self.n)) ^ ((w as u64) & self.mask)
+    }
+
     #[inline(always)]
     fn clmul(&self, a: u64, b: u64) -> u128 {
         #[cfg(target_arch = "x86_64")]
@@ -452,10 +490,10 @@ impl Gf2 {
     /// it keeps an ordinary inlining hint.
     #[inline(always)]
     pub fn mul(&self, a: u64, b: u64) -> u64 {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
         if self.folds() {
-            // SAFETY: `fold_tail` is non-zero only when `pclmulqdq` was
-            // detected at construction.
+            // SAFETY: `fold_tail` is non-zero only when the platform's
+            // carry-less multiplication feature was detected.
             return unsafe { self.mul_fold(a, b) };
         }
         self.mul_table(a, b)
@@ -478,7 +516,7 @@ impl Gf2 {
     /// Always inlined, as [`Self::mul`] is.
     #[inline(always)]
     pub fn sqr(&self, a: u64) -> u64 {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
         if self.folds() {
             // SAFETY: as in `mul`.
             return unsafe { self.mul_fold(a, a) };
@@ -2756,7 +2794,7 @@ mod tests {
                 assert_eq!(zeros, vec![0u64; 6]);
             }
         }
-        // Where the CPU folds (x86-64 with pclmulqdq) the moduli really
+        // Where the CPU folds, the moduli really
         // were on both sides of the tail bound, and this was no table
         // against a table.
         let probe = Gf2::new(&find_irreducible_sparse(53).unwrap());
