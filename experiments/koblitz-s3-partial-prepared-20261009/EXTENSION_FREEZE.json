@@ -1,0 +1,21 @@
+{
+  "kind": "s3_partial_prepared_untouched_holdout_extension_v1",
+  "parent_freeze_sha256": "066fc7e399b7a6f6e6b1cc11ebd6ecd2ce4353eb8ae0d1d147fa6983113ac1b4",
+  "target_label_first": "T025",
+  "target_label_last": "T100",
+  "target_count_per_curve": 76,
+  "one_target_per_process": true,
+  "rank_thresholds": {"41": 243, "53": 237},
+  "relation_seed": 20260928,
+  "workers": 14,
+  "timeout_seconds_per_run": 180,
+  "arms": ["reference", "partial"],
+  "partial_binary_sha256": "50d3ad29fbd28c146ed60cbd6a255638fc6d48733ce08bd8097b08e03acbd195",
+  "reference_binary_sha256": "c4ff99ace090551747b2a1083b9546754e0ce1814f309a47e46d2ab0bd132ca7",
+  "partial_source_sha256": "294cee8a798f4cf417a4ce560cf780b66bb65030d1d76569a4431a7f454b46e1",
+  "reference_source_sha256": "edb605e0a65efb143116c02b918302cd25190b098d3542f4b0b64788d1af7d65",
+  "run_order": "increasing target number; alternate curve order and arm order by target parity",
+  "stop_rule": "complete_all_304_invocations_preserving_failures",
+  "analysis_scope": "exploratory_holdout_extension_frozen_after_first_24_per_curve_results",
+  "controlled_speedup": null
+}

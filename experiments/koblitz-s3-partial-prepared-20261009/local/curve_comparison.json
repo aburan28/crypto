@@ -1,0 +1,58 @@
+{
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "all_cold_s3_root_calls_equal_reference": true,
+      "all_relation_trace_prefixes_equal": true,
+      "at_least_2_count": 100,
+      "at_least_2_wilson_95": [
+        0.9630065017930143,
+        1
+      ],
+      "below_2_labels": [],
+      "exploratory_geometric_mean_online_ratio": 202.89993482186964,
+      "fallback_count": 0,
+      "fallback_free_wilson_95": [
+        0.9630065017930143,
+        1
+      ],
+      "log_ratio_standard_deviation": 0.946699851176756,
+      "minimum_exploratory_online_ratio": 7.960324551645382,
+      "target_count": 100
+    },
+    "53": {
+      "all_cold_s3_root_calls_equal_reference": true,
+      "all_relation_trace_prefixes_equal": true,
+      "at_least_2_count": 98,
+      "at_least_2_wilson_95": [
+        0.929988209271456,
+        0.9944980324498376
+      ],
+      "below_2_labels": [
+        "T085",
+        "T096"
+      ],
+      "exploratory_geometric_mean_online_ratio": 132.91056585278255,
+      "fallback_count": 12,
+      "fallback_free_wilson_95": [
+        0.8018790057328857,
+        0.9300059356298052
+      ],
+      "log_ratio_standard_deviation": 1.8169007054777193,
+      "minimum_exploratory_online_ratio": 1.5782721661894938,
+      "target_count": 100
+    }
+  },
+  "exploratory_ratio_of_curve_geometric_means": 1.5265899555841957,
+  "exploratory_target_bootstrap_95": [
+    1.028222742832642,
+    2.288523420984871
+  ],
+  "extension_analysis_sha256": "e9001cd8fea0dcb044f90ba7e44a2087752b3ee2a68d83655b15a45c3bed9df8",
+  "first_analysis_sha256": "0b726b280aa970d77dabd059453b248ace2c0d5376d3c6257f6377c404ad1a5d",
+  "kind": "s3_partial_rank237_100_target_curve_comparison_v1",
+  "observed_log_mean_difference": 0.4230364607616064,
+  "posthoc_equal_targets_per_curve_for_80_percent_power_at_alpha_0_05": 185,
+  "sample_size_assumptions": "two_sided_normal_approximation_on_independent_target_log_ratios; effect_and_variance_from_contended_mac_panel; recalibrate_with_isolated_host_AA_control_and_repeated_one_target_pairs",
+  "strict_host_isolation_receipt": null
+}
