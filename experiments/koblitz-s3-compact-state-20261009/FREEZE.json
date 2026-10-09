@@ -1,0 +1,56 @@
+{
+  "binary_sha256": "cfb6ef51201a2755c6671b12b4ab7e79a4683fe9ed925ae0ca2695ab1349ccea",
+  "controlled_speedup": null,
+  "controls": {
+    "41": {
+      "candidate_id": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0h4e2ce8b888ab",
+      "columns": 800,
+      "dense_report_sha256": "c8ade40f03933b7479fe873ac610ad81da7770f073d2c7c2af82ab893b8e6e55",
+      "expected_regular_states": 26240000,
+      "expected_root_table_entries": 26186260,
+      "expected_root_table_slots": 67108864,
+      "expected_target_s3_calls": 26,
+      "factor_base_digest": "cdd82bd0acdb98b53455a97fc5611af7cebdccc87b63d966d9000adb300092a7",
+      "factor_base_points": 65600,
+      "fixture_scalar": 253982070906,
+      "point_file_relative": "holdout/n41/T025/public_target.json",
+      "point_sha256": "b246b44a0e5a32b87d0e94b296b1f308511eb6ade56e9fa6d058538c60810dcc",
+      "prepare_rank": 800,
+      "public_point": [
+        1655120004424,
+        140655220686
+      ],
+      "target_label": "T025"
+    },
+    "53": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0h9543dd1fae18",
+      "columns": 1200,
+      "dense_report_sha256": "ea130966fb7f7094fedf83e0ff99d383f24162b5ea5b94f50e5dc9b31aea08ec",
+      "expected_regular_states": 76320000,
+      "expected_root_table_entries": 76301710,
+      "expected_root_table_slots": 268435456,
+      "expected_target_s3_calls": 3272,
+      "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+      "factor_base_points": 127200,
+      "fixture_scalar": 429728658711,
+      "point_file_relative": "holdout/n53/T025/public_target.json",
+      "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+      "prepare_rank": 1200,
+      "public_point": [
+        7024908122546358,
+        2805535303407364
+      ],
+      "target_label": "T025"
+    }
+  },
+  "dense_reference_state_struct_bytes": 72,
+  "kind": "s3_compact_index_state_fullrank_controls_freeze_v1",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "retained_state_struct_bytes": 40,
+  "source_commit": "05123c9cec3459c962bb48e4746758a2e31afb40",
+  "source_sha256": "41d65b35f87be7b659caa7a458a37c73357960a68be20e641d8033e649091798",
+  "target_workers": 1,
+  "timeout_seconds_per_control": 180
+}
