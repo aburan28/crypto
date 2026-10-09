@@ -1,0 +1,27 @@
+{
+  "kind": "local_arm_kernel_host_record_v1",
+  "physical_cpu_model": "Apple M4 Pro",
+  "hardware_model": "Mac16,7",
+  "architecture": "arm64",
+  "os": "macOS 26.6",
+  "os_build": "25G70",
+  "physical_cpu_count": 14,
+  "logical_cpu_count": 14,
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "source_commands": [
+    "uname -m",
+    "sysctl -n machdep.cpu.brand_string hw.model hw.ncpu hw.physicalcpu hw.logicalcpu",
+    "sw_vers",
+    "rustc --version"
+  ],
+  "host_exclusive_cpu_partition": null,
+  "cpu_affinity": null,
+  "memory_policy": null,
+  "fixed_frequency": null,
+  "irq_routing": null,
+  "cpu_quota": null,
+  "throttling": null,
+  "steal_time": null,
+  "interrupt_counts": null,
+  "host_isolation_receipt": null
+}

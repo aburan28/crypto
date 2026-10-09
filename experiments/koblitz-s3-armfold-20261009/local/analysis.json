@@ -1,0 +1,1553 @@
+{
+  "all_native_verified": true,
+  "all_phase_sums_valid": true,
+  "blocks": [
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.9279986315472045,
+        "table": 0.03285106823645734
+      },
+      "all_four_verified": true,
+      "label": "T025",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          0.419625,
+          1.061417
+        ],
+        "table": [
+          0.373917,
+          0.361833
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.5511476945623384,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ],
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ]
+        ],
+        "table": [
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ],
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          1376,
+          1376
+        ],
+        "table": [
+          1376,
+          1376
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 1.362391918825996,
+        "table": 0.004043677163809366
+      },
+      "all_four_verified": true,
+      "label": "T026",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          0.628042,
+          2.452833
+        ],
+        "table": [
+          0.15425,
+          0.154875
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.1245302648744327,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ],
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ]
+        ],
+        "table": [
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ],
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          384,
+          384
+        ],
+        "table": [
+          384,
+          384
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.054276474513306534,
+        "table": 1.2876759019789763
+      },
+      "all_four_verified": true,
+      "label": "T027",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          0.329458,
+          0.347834
+        ],
+        "table": [
+          1.161,
+          0.32033300000000003
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 1.8014860605603569,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ],
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ]
+        ],
+        "table": [
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ],
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          1024,
+          1024
+        ],
+        "table": [
+          1024,
+          1024
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.08535222335845828,
+        "table": 0.2589439498922217
+      },
+      "all_four_verified": true,
+      "label": "T028",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          39.772917,
+          43.316708000000006
+        ],
+        "table": [
+          26.08625,
+          33.796333
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.7153509736992754,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ],
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ]
+        ],
+        "table": [
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ],
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          320,
+          320
+        ],
+        "table": [
+          320,
+          320
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.13429891127452667,
+        "table": 1.2527862522695419
+      },
+      "all_four_verified": true,
+      "label": "T029",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          0.20350000000000001,
+          0.23274999999999998
+        ],
+        "table": [
+          0.269958,
+          0.944875
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 2.320642430299442,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ],
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ]
+        ],
+        "table": [
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ],
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          96,
+          96
+        ],
+        "table": [
+          96,
+          96
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.8075229582459711,
+        "table": 0.15201645375659598
+      },
+      "all_four_verified": true,
+      "label": "T030",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          0.8220000000000001,
+          1.8432089999999999
+        ],
+        "table": [
+          3.641334,
+          4.239166
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 3.1918852500461834,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ],
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ]
+        ],
+        "table": [
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ],
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          3744,
+          3744
+        ],
+        "table": [
+          3744,
+          3744
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.15095800372833215,
+        "table": 1.0303770967834325
+      },
+      "all_four_verified": true,
+      "label": "T031",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          1.406125,
+          1.63525
+        ],
+        "table": [
+          0.651084,
+          1.824417
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.7187477908733941,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ],
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ]
+        ],
+        "table": [
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ],
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          1728,
+          1728
+        ],
+        "table": [
+          1728,
+          1728
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 1.3482779972003005,
+        "table": 0.16178466730586363
+      },
+      "all_four_verified": true,
+      "label": "T032",
+      "n": 41,
+      "online_ms_by_arm": {
+        "fold": [
+          0.334834,
+          1.289375
+        ],
+        "table": [
+          0.49483299999999997,
+          0.420917
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.6945814208805926,
+      "table_over_fold_s3_call_ratio": 1.0,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ],
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ]
+        ],
+        "table": [
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ],
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          1280,
+          1280
+        ],
+        "table": [
+          1280,
+          1280
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.5468324614274461,
+        "table": 0.399997700592828
+      },
+      "all_four_verified": true,
+      "label": "T025",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          4.060333999999999,
+          2.350041
+        ],
+        "table": [
+          6.528459000000001,
+          4.376167000000001
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 1.7303489127892546,
+      "table_over_fold_s3_call_ratio": 1.0220596475018386,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ],
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ]
+        ],
+        "table": [
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ],
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          3776,
+          14816
+        ],
+        "table": [
+          6944,
+          8416
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 1.4730282677077458,
+        "table": 1.8797641414293034
+      },
+      "all_four_verified": true,
+      "label": "T026",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          7.254708,
+          31.648125
+        ],
+        "table": [
+          34.8395,
+          5.317417
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.8982606097960378,
+      "table_over_fold_s3_call_ratio": 1.5394308673894137,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            1193,
+            14940,
+            9194,
+            15181
+          ],
+          [
+            1193,
+            14940,
+            9194,
+            15181
+          ]
+        ],
+        "table": [
+          [
+            4774,
+            17399,
+            9068,
+            20450
+          ],
+          [
+            4774,
+            17399,
+            9068,
+            20450
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          41056,
+          23648
+        ],
+        "table": [
+          49248,
+          46720
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 1.5594978247640316,
+        "table": 0.4056326075384278
+      },
+      "all_four_verified": true,
+      "label": "T027",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          51.853833,
+          10.901834
+        ],
+        "table": [
+          10.950208,
+          7.298916
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.3760106556129804,
+      "table_over_fold_s3_call_ratio": 1.127914006670348,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            4247,
+            12054,
+            14795,
+            17161
+          ],
+          [
+            24466,
+            25188,
+            12099,
+            13340
+          ]
+        ],
+        "table": [
+          [
+            6099,
+            7061,
+            685,
+            17447
+          ],
+          [
+            13368,
+            4582,
+            6100,
+            10522
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          71712,
+          53344
+        ],
+        "table": [
+          52352,
+          92960
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 1.110702583026105,
+        "table": 0.4691572534549996
+      },
+      "all_four_verified": true,
+      "label": "T028",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          2.540542,
+          7.714333
+        ],
+        "table": [
+          13.279124999999999,
+          21.228625
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 3.7925671741267593,
+      "table_over_fold_s3_call_ratio": 0.7915213352123783,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ],
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ]
+        ],
+        "table": [
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ],
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          13280,
+          8320
+        ],
+        "table": [
+          8320,
+          8320
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 1.1912668084503366,
+        "table": 1.5252297457684054
+      },
+      "all_four_verified": true,
+      "label": "T029",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          14.036583,
+          46.197874999999996
+        ],
+        "table": [
+          16.618707999999998,
+          3.6157500000000002
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 0.3044080459209325,
+      "table_over_fold_s3_call_ratio": 0.8599307742421316,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            918,
+            9407,
+            3780,
+            24713
+          ],
+          [
+            2714,
+            4765,
+            9084,
+            18610
+          ]
+        ],
+        "table": [
+          [
+            918,
+            9407,
+            3780,
+            24713
+          ],
+          [
+            6290,
+            18514,
+            9059,
+            12184
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          46080,
+          52736
+        ],
+        "table": [
+          64032,
+          28064
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.5110209364268931,
+        "table": 1.0597171030537884
+      },
+      "all_four_verified": true,
+      "label": "T030",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          25.389125,
+          15.2305
+        ],
+        "table": [
+          46.412584,
+          16.084459
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 1.389441146346353,
+      "table_over_fold_s3_call_ratio": 0.5770590473723887,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            13269,
+            6072,
+            8417,
+            12923
+          ],
+          [
+            7821,
+            11160,
+            6877,
+            11518
+          ]
+        ],
+        "table": [
+          [
+            11479,
+            16432,
+            4699,
+            15464
+          ],
+          [
+            7821,
+            11160,
+            6877,
+            11518
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          90144,
+          67680
+        ],
+        "table": [
+          63424,
+          32032
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 0.16080198556835515,
+        "table": 3.147222408403821
+      },
+      "all_four_verified": true,
+      "label": "T031",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          4.593666,
+          5.395042
+        ],
+        "table": [
+          1.266166,
+          29.465374999999998
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 1.2269424358608982,
+      "table_over_fold_s3_call_ratio": 0.4268200528372255,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ],
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ]
+        ],
+        "table": [
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ],
+          [
+            1807,
+            7644,
+            4288,
+            11626
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          15456,
+          13760
+        ],
+        "table": [
+          1152,
+          33632
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "fold": 1.0475080459441009,
+        "table": 1.6447271614371521
+      },
+      "all_four_verified": true,
+      "label": "T032",
+      "n": 53,
+      "online_ms_by_arm": {
+        "fold": [
+          1.9684580000000003,
+          5.611166
+        ],
+        "table": [
+          10.58925,
+          2.044416
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "fold",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "table",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "table_over_fold_online_ratio": 1.399998600186061,
+      "table_over_fold_s3_call_ratio": 0.34051904212931466,
+      "target_relation_indices_by_arm": {
+        "fold": [
+          [
+            3221,
+            25177,
+            3164,
+            17789
+          ],
+          [
+            10618,
+            12755,
+            2747,
+            10920
+          ]
+        ],
+        "table": [
+          [
+            3221,
+            25177,
+            3164,
+            17789
+          ],
+          [
+            3221,
+            25177,
+            3164,
+            17789
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "fold": [
+          12320,
+          28960
+        ],
+        "table": [
+          6432,
+          6432
+        ]
+      }
+    }
+  ],
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "aa_p95_abs_log_ratio_by_arm": {
+        "fold": 1.362391918825996,
+        "table": 1.2876759019789763
+      },
+      "controlled_speedup": null,
+      "exploratory_table_over_fold_online_geomean": 0.8696230071948019,
+      "exploratory_target_bootstrap_95": [
+        0.430727940352452,
+        1.6247067142715117
+      ],
+      "median_charged_phase_ms_by_arm": {
+        "fold": {
+          "target_descent": 0.09254099999999986,
+          "target_pdp_charged": 0.8371255,
+          "target_query": 0.019375,
+          "target_recovery_check": 0.018833000000000003,
+          "target_relation_check": 0.005208
+        },
+        "table": {
+          "target_descent": 0.055666499999999924,
+          "target_pdp_charged": 0.3554585,
+          "target_query": 0.0361875,
+          "target_recovery_check": 0.0221665,
+          "target_relation_check": 0.0064585
+        }
+      },
+      "median_online_ms_by_arm": {
+        "fold": 0.9417085000000001,
+        "table": 0.5729584999999999
+      },
+      "median_target_s3_calls_by_arm": {
+        "fold": 1152.0,
+        "table": 1152.0
+      },
+      "points_above_1x": 3,
+      "points_at_least_2x": 2,
+      "run_count": 32,
+      "table_over_fold_s3_call_geomean": 1.0,
+      "target_count": 8,
+      "verified_target_blocks": 8
+    },
+    "53": {
+      "aa_p95_abs_log_ratio_by_arm": {
+        "fold": 1.5594978247640316,
+        "table": 3.147222408403821
+      },
+      "controlled_speedup": null,
+      "exploratory_table_over_fold_online_geomean": 1.0613648318719693,
+      "exploratory_target_bootstrap_95": [
+        0.6156919285845555,
+        1.7589564964792264
+      ],
+      "median_charged_phase_ms_by_arm": {
+        "fold": {
+          "target_descent": 0.10912499999999811,
+          "target_pdp_charged": 7.1233545,
+          "target_query": 0.0320205,
+          "target_recovery_check": 0.0316665,
+          "target_relation_check": 0.008375
+        },
+        "table": {
+          "target_descent": 0.11418749999999861,
+          "target_pdp_charged": 10.077646,
+          "target_query": 0.05675,
+          "target_recovery_check": 0.04725,
+          "target_relation_check": 0.012646000000000001
+        }
+      },
+      "median_online_ms_by_arm": {
+        "fold": 7.4845205,
+        "table": 10.769729
+      },
+      "median_target_s3_calls_by_arm": {
+        "fold": 26304.0,
+        "table": 30048.0
+      },
+      "points_above_1x": 5,
+      "points_at_least_2x": 1,
+      "run_count": 32,
+      "table_over_fold_s3_call_geomean": 0.7511136015750688,
+      "target_count": 8,
+      "verified_target_blocks": 8
+    }
+  },
+  "kind": "s3_arm_pmull_fold_paired_analysis_v1",
+  "ledger_sha256": "c37d327aff3d00663f61b4c67249cca1b8b02e4ef6807c12a0cc346cf45da1e2",
+  "plan_sha256": "ebb0175e784ee68c6654ddb43401c2803784622848e48afe94b60e8d85407340",
+  "run_count": 64
+}

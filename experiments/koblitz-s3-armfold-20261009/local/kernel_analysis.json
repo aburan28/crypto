@@ -1,0 +1,43 @@
+{
+  "architecture": "arm64",
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "exploratory_table_over_fold_geometric_ratio": 1.1637415065771362,
+      "fold_aa_abs_log_ratio": 0.013092470222657866,
+      "fold_process_median_ns_per_mul": [
+        1.842181,
+        1.8182195
+      ],
+      "same_checksum": true,
+      "table_aa_abs_log_ratio": 0.010326344003351102,
+      "table_process_median_ns_per_mul": [
+        2.1408595,
+        2.118866
+      ]
+    },
+    "53": {
+      "exploratory_table_over_fold_geometric_ratio": 2.8307692643620124,
+      "fold_aa_abs_log_ratio": 0.0005022661877153541,
+      "fold_process_median_ns_per_mul": [
+        1.8192135,
+        1.8183
+      ],
+      "same_checksum": true,
+      "table_aa_abs_log_ratio": 1.2893913966257131,
+      "table_process_median_ns_per_mul": [
+        9.8099515,
+        2.702037
+      ]
+    }
+  },
+  "kind": "arm_pmull_fold_fixed_operand_kernel_diagnostic_v1",
+  "operands_per_repetition": 1048576,
+  "process_order": [
+    "table1b",
+    "fold1b",
+    "fold2b",
+    "table2b"
+  ],
+  "repetitions_per_process": 9
+}
