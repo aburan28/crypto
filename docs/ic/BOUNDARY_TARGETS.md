@@ -149,7 +149,7 @@ verdict strings are retained as provenance. Their paired public-point scalar
 checks establish answer correctness. The earlier CPU wall ratios are
 exploratory because the retained runs lack a qualifying host-isolation
 receipt; the n=73 R2/R3 and all n=83 runs also shared the host with unrelated
-work. The n=73/n=83 reports fail the current `vs_rho` claim check because
+work. The n=61/n=71/n=73/n=83 reports fail the current `vs_rho` claim check because
 required fields are missing or named incompatibly. Neither the historical
 labels nor replay checks promote a controlled speedup. The older n=41/n=53
 producer also overlapped its `collection_ms` interval with solve and validation
@@ -178,9 +178,8 @@ quotient. The complete `S = total_operations / sqrt(r)` cost remains unknown
 without a fixed, calibrated operation boundary and all charged phases.
 Guided-rank queries also use a different query policy from target extraction;
 their mean probe count does not measure how fortunate a frozen target was.
-These results make no asymptotic or deployed-curve claim. See the
-[accounting review](./PLAN_IC_ACCOUNTING_FIXES_20261007.md) for evidence and
-remaining checks.
+See the [accounting review](./PLAN_IC_ACCOUNTING_FIXES_20261007.md) for the
+claim-check audit, native-counter boundary, and next measurements.
 
 ---
 

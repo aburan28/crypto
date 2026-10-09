@@ -55,9 +55,10 @@ work. Use `S = total_operations / sqrt(r)` only after fixing and calibrating a
 complete operation boundary, including every charged phase. Where costs are
 missing, total-work `S` and any operation speedup are unknown.
 
-The n=73 and n=83 claim reports fail the ledger's `vs_rho` claim check because
-required single-target fields and provenance are absent or recorded under
-incompatible names. Their correctness replays do not fill those schema fields.
+The n=61, n=71, n=73, and n=83 retained claim reports fail the current
+ledger's `vs_rho` claim check because required single-target fields and
+provenance are absent or recorded under incompatible names. Their correctness
+replays remain available but do not fill those schema fields.
 The historical verdict strings remain as provenance; they are not controlled
 speedup promotions. The older n=41/n=53 direct-producer timing overlap is a
 separate erratum: `collection_ms` covered solve and validation, which were then
@@ -82,6 +83,14 @@ Those counters must retain their native unit labels. Their former
 not promoted speedups. Missing thread counts or peak memory remain missing;
 there is no backfill from assumptions.
 
+The autolab protocol is valid JSON again, and its primary `vs_rho` validator
+requires the five exclusive online IC phases, a single-target timing class,
+finite costs, and a calibrated common unit before an operation-speedup value.
+The control-plane suite passes 46 tests. Historical n=61/n=71/n=73/n=83
+result notes now separate verified answers, exploratory wall ratios, current
+claim-check status, and unknown calibrated work. The n=71 ledger series and
+its earlier pilot are recorded as distinct workloads.
+
 The merged main branch also interleaved two previously valid machine ledgers,
 leaving `boundary_targets.json` syntactically invalid. This correction restores
 the one-target ledger as the primary schema-v2 object from commit `7d1539b8a`,
@@ -95,12 +104,12 @@ acceptance gate for the primary one-target result.
 
 | Work | Acceptance evidence | Status |
 | --- | --- | --- |
-| Repair n=73/n=83 claim schemas from retained raw runs | `claim-check --stage vs_rho` passes without invented fields; exact point, online intervals, phases, resource limits, and replay trace linked | Open |
-| Calibrate native counters | Same backend and host; ns/probe and ns/rho-step plus all conversion and phase costs; operation boundary fixed before measurement | Open |
-| Re-measure a one-target pair on an isolated host | Qualifying isolation receipt, matched resource envelope, full raw failures, independent replay, and five exclusive IC phases | Open |
-| Measure target variation | Fresh independently frozen targets after the primary pair; report distribution and uncertainty as a secondary study | Open |
-| Measure equal-budget precomputed rho | Same curve and points, calibrated preparation cost and retained bytes, failures and misses; label shared-table study secondary | Open |
-| Re-adjudicate historical verdicts | Ledger and JSON twin distinguish verified correctness, exploratory wall ratio, controlled online speedup, and complete operation work | Ledger status corrected; raw claim reports pending |
+| Audit n=61/n=71/n=73/n=83 historical claim schemas | `claim-check --stage vs_rho` passes only with exact point, online intervals, phases, resource limits, and replay trace from receipts | Audited: all four FAIL under the current schema; missing provenance and phase fields remain unknown |
+| Calibrate native counters | Same backend and host; ns/probe and ns/rho-step plus all conversion and phase costs; operation boundary fixed before measurement | Open; current reports preserve separate native counters and null calibrated speedup |
+| Re-measure a one-target pair on an isolated host | Qualifying isolation receipt, matched resource envelope, full raw failures, independent replay, and five exclusive IC phases | Awaiting a qualifying physical host and its isolation receipt |
+| Measure target variation | Fresh independently frozen targets after the primary pair; report distribution and uncertainty as a secondary study | Scheduled after the primary isolated one-target pair |
+| Measure equal-budget precomputed rho | Same curve and points, calibrated preparation cost and retained bytes, failures and misses; label shared-table study secondary | Scheduled after the primary isolated one-target pair |
+| Re-adjudicate historical verdicts | Ledger and JSON records distinguish verified correctness, exploratory wall ratio, controlled online speedup, and complete operation work | Ledger, result notes, and native-counter blocks corrected; historical claim reports retain FAIL status |
 
 Higher field-degree experiments and projected rho rates remain legitimate
 research questions. A projection is labeled as an extrapolation; it cannot
