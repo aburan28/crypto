@@ -1768,5 +1768,359 @@
     "seed": 1,
     "targets_decomposed": 379,
     "wall_ms": 1391520.0243459998
+  },
+  {
+    "base_points": 370,
+    "bits": 36.3473623228264,
+    "cofactor": 4,
+    "control": {
+      "arm": "control",
+      "columns": 370,
+      "correct": true,
+      "duplicate_rows": 0,
+      "filtered_out": 42,
+      "la_attempts": 1,
+      "la_ops": 2166795,
+      "la_ops_last": 2166795,
+      "phi": 0.8891891891891892,
+      "relations": 371,
+      "residuals_at_solve": 38986,
+      "row_weight": 5.0,
+      "solved": true,
+      "unknowns": 329,
+      "wiedemann_constant": 20.01824632071027
+    },
+    "decomposition_rate": 0.07448770491803279,
+    "decompositions": 2908,
+    "decompositions_per_target": [
+      38669,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      361,
+      0
+    ],
+    "experiment": "e18",
+    "family": "Translation",
+    "folded": {
+      "arm": "2torsion-tau",
+      "columns": 185,
+      "correct": true,
+      "duplicate_rows": 0,
+      "filtered_out": 11,
+      "la_attempts": 1,
+      "la_ops": 610395,
+      "la_ops_last": 610395,
+      "phi": 0.9459459459459459,
+      "relations": 186,
+      "residuals_at_solve": 18933,
+      "row_weight": 4.967741935483871,
+      "solved": true,
+      "unknowns": 175,
+      "wiedemann_constant": 19.931265306122448
+    },
+    "fp_muls_per_add": 97.0,
+    "group_order": 349708600964,
+    "n": 87427150241,
+    "p": 769,
+    "points_per_column": 2.0,
+    "residuals": 39040,
+    "rho": [
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 30134269,
+        "group_ops": 310271,
+        "seed": 2000,
+        "steps": 306733
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 29766232,
+        "group_ops": 306477,
+        "seed": 2001,
+        "steps": 302918
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 50432725,
+        "group_ops": 519535,
+        "seed": 2002,
+        "steps": 515983
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 28872147,
+        "group_ops": 297261,
+        "seed": 2003,
+        "steps": 293749
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 11189884,
+        "group_ops": 114971,
+        "seed": 2004,
+        "steps": 111423
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 38020360,
+        "group_ops": 391576,
+        "seed": 2005,
+        "steps": 388069
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 22658112,
+        "group_ops": 233198,
+        "seed": 2006,
+        "steps": 229665
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 26574299,
+        "group_ops": 273574,
+        "seed": 2007,
+        "steps": 270055
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 13191414,
+        "group_ops": 135602,
+        "seed": 2008,
+        "steps": 132052
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 59633070,
+        "group_ops": 614380,
+        "seed": 2009,
+        "steps": 610837
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 47014026,
+        "group_ops": 484285,
+        "seed": 2010,
+        "steps": 480703
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 26388300,
+        "group_ops": 271651,
+        "seed": 2011,
+        "steps": 268079
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 34942643,
+        "group_ops": 359845,
+        "seed": 2012,
+        "steps": 356331
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 1770965,
+        "group_ops": 17866,
+        "seed": 2013,
+        "steps": 14313
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 10970276,
+        "group_ops": 112707,
+        "seed": 2014,
+        "steps": 109111
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 41883145,
+        "group_ops": 431395,
+        "seed": 2015,
+        "steps": 427898
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 150,
+        "fold": "Negation",
+        "fp_muls": 11374118,
+        "group_ops": 116838,
+        "seed": 2000,
+        "steps": 109922
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 332,
+        "fold": "Negation",
+        "fp_muls": 25075994,
+        "group_ops": 258059,
+        "seed": 2001,
+        "steps": 246625
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 349,
+        "fold": "Negation",
+        "fp_muls": 28810975,
+        "group_ops": 296562,
+        "seed": 2002,
+        "steps": 284293
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 274,
+        "fold": "Negation",
+        "fp_muls": 21135007,
+        "group_ops": 217443,
+        "seed": 2003,
+        "steps": 207360
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 390,
+        "fold": "Negation",
+        "fp_muls": 30540064,
+        "group_ops": 314381,
+        "seed": 2004,
+        "steps": 301380
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 527,
+        "fold": "Negation",
+        "fp_muls": 38683862,
+        "group_ops": 398313,
+        "seed": 2005,
+        "steps": 382976
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 492,
+        "fold": "Negation",
+        "fp_muls": 40044331,
+        "group_ops": 412341,
+        "seed": 2006,
+        "steps": 396432
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 203,
+        "fold": "Negation",
+        "fp_muls": 18187947,
+        "group_ops": 187077,
+        "seed": 2007,
+        "steps": 177996
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 491,
+        "fold": "Negation",
+        "fp_muls": 37740773,
+        "group_ops": 388592,
+        "seed": 2008,
+        "steps": 373353
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 331,
+        "fold": "Negation",
+        "fp_muls": 26950844,
+        "group_ops": 277385,
+        "seed": 2009,
+        "steps": 265608
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 393,
+        "fold": "Negation",
+        "fp_muls": 30777388,
+        "group_ops": 316820,
+        "seed": 2010,
+        "steps": 303877
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 15,
+        "fold": "Negation",
+        "fp_muls": 1754756,
+        "group_ops": 17694,
+        "seed": 2011,
+        "steps": 13687
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 235,
+        "fold": "Negation",
+        "fp_muls": 18236142,
+        "group_ops": 187567,
+        "seed": 2012,
+        "steps": 178577
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 232,
+        "fold": "Negation",
+        "fp_muls": 21470835,
+        "group_ops": 220912,
+        "seed": 2013,
+        "steps": 210687
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 135,
+        "fold": "Negation",
+        "fp_muls": 12506411,
+        "group_ops": 128517,
+        "seed": 2014,
+        "steps": 121106
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 235,
+        "fold": "Negation",
+        "fp_muls": 18889977,
+        "group_ops": 194306,
+        "seed": 2015,
+        "steps": 185041
+      }
+    ],
+    "seed": 2,
+    "targets_decomposed": 371,
+    "wall_ms": 1266629.640916
   }
 ]
