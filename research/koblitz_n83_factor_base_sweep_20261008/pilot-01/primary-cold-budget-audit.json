@@ -1,0 +1,74 @@
+{
+  "accounting_note": "Prior construction uses internal elapsed time; other stages use outer process wall. Idle time is excluded. These are budget receipts, not matched IC runtimes.",
+  "authorized_active_seconds": "3600",
+  "cases": [
+    {
+      "case": "primary-cold-a0-hash-64-m2-enumerate-preflight-01",
+      "elapsed_process_wall_seconds": "3.9693657499992696",
+      "exit_code": 0,
+      "inner_cap_seconds": 20,
+      "outer_timeout_seconds": 24,
+      "source_adapter_blake3": "039222d7f9abe00f25b64db5f6d5199b5d7b48210b8afd97e4df2c5e1f9c51f1",
+      "status": "PASS_preflight"
+    },
+    {
+      "case": "primary-cold-a0-hash-64-m2-enumerate-one-trial-01",
+      "elapsed_process_wall_seconds": "5.457374749999872",
+      "exit_code": 0,
+      "inner_cap_seconds": 20,
+      "outer_timeout_seconds": 22,
+      "source_adapter_blake3": "039222d7f9abe00f25b64db5f6d5199b5d7b48210b8afd97e4df2c5e1f9c51f1",
+      "status": "UNKNOWN_trial_cap"
+    },
+    {
+      "case": "primary-cold-a0-hash-64-m2-enumerate-preflight-final",
+      "elapsed_process_wall_seconds": "2.3227020840004116",
+      "exit_code": 0,
+      "inner_cap_seconds": 11,
+      "outer_timeout_seconds": 14,
+      "source_adapter_blake3": "876576c9a3d46333ab1f9d7d7a63ffb249e11e9f2b1ccfce262080b047d29193",
+      "status": "PREFLIGHT_ONLY"
+    },
+    {
+      "case": "primary-cold-a0-hash-64-m2-enumerate-one-trial-final",
+      "elapsed_process_wall_seconds": "3.6995932919999177",
+      "exit_code": 0,
+      "inner_cap_seconds": 11,
+      "outer_timeout_seconds": 14,
+      "source_adapter_blake3": "876576c9a3d46333ab1f9d7d7a63ffb249e11e9f2b1ccfce262080b047d29193",
+      "status": "UNKNOWN_trial_cap"
+    },
+    {
+      "case": "primary-cold-a0-hash-64-m3-enumerate-one-trial-final",
+      "elapsed_process_wall_seconds": "15.035790625001027",
+      "exit_code": 124,
+      "inner_cap_seconds": 15,
+      "outer_timeout_seconds": 18,
+      "source_adapter_blake3": "876576c9a3d46333ab1f9d7d7a63ffb249e11e9f2b1ccfce262080b047d29193",
+      "status": "UNKNOWN_budget"
+    },
+    {
+      "case": "primary-cold-a0-hash-256-m2-enumerate-preflight-final",
+      "elapsed_process_wall_seconds": "11.061315916998865",
+      "exit_code": 124,
+      "inner_cap_seconds": 11,
+      "outer_timeout_seconds": 14,
+      "source_adapter_blake3": "876576c9a3d46333ab1f9d7d7a63ffb249e11e9f2b1ccfce262080b047d29193",
+      "status": "UNKNOWN_budget"
+    },
+    {
+      "case": "primary-cold-a0-hash-256-m2-enumerate-one-trial-final",
+      "elapsed_process_wall_seconds": "14.057679124998685",
+      "exit_code": 124,
+      "inner_cap_seconds": 14,
+      "outer_timeout_seconds": 17,
+      "source_adapter_blake3": "876576c9a3d46333ab1f9d7d7a63ffb249e11e9f2b1ccfce262080b047d29193",
+      "status": "UNKNOWN_budget"
+    }
+  ],
+  "prior_active_seconds_approx": "3536.070421667",
+  "remaining_active_seconds_approx": "8.3257567900019521",
+  "schema": "n83.primary-cold-active-budget-audit/v1",
+  "selected_best_total_runtime": null,
+  "total_active_seconds_approx": "3591.6742432099980479"
+}

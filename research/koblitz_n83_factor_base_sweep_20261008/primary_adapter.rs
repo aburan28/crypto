@@ -5,20 +5,23 @@
 //! point and signed-Frobenius label before building the public structure.
 
 use super::{
-    curve, general, load_object, parse_point, point_json, point_set_hash, words, Result, SEEDS,
-    STUDY,
+    curve, general, load_object, parse_point, point_json, point_set_hash, words, write_new_json,
+    Result, SEEDS, STUDY,
 };
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_point_count, point_key, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve,
+    koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count, point_key,
+    DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions,
 };
 use num_bigint::BigUint;
 use num_traits::One;
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
-use std::fs;
+use std::fs::{self, OpenOptions};
+use std::io::Write;
 use std::path::Path;
+use std::time::{Duration, Instant};
 
 pub(super) struct PrimaryBase {
     pub(super) curve: KoblitzCurve,
@@ -170,8 +173,9 @@ fn from_record(row: &Value, bytes: &[u8]) -> Result<PrimaryBase> {
     Ok(PrimaryBase { curve, factor_base })
 }
 
-pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
+fn load_panel(root: &Path, columns: usize) -> Result<(PrimaryBase, Value, String)> {
     let manifest_bytes = fs::read(root.join("manifest.json"))?;
+    let manifest_hash = blake3::hash(&manifest_bytes).to_hex().to_string();
     let manifest: Value = serde_json::from_slice(&manifest_bytes)?;
     let replay: Value = serde_json::from_slice(&fs::read(root.join("replay.json"))?)?;
     if manifest["schema"] != "n83.factor-base-panel/v1"
@@ -180,7 +184,7 @@ pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
         || manifest["completed_base_count"] != 54
         || replay["schema"] != "n83.factor-base-replay/v1"
         || replay["status"] != "PASS"
-        || replay["panel_manifest_blake3"] != blake3::hash(&manifest_bytes).to_hex().to_string()
+        || replay["panel_manifest_blake3"] != manifest_hash
     {
         return Err("panel or replay receipt is not complete and bound".into());
     }
@@ -206,6 +210,11 @@ pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
         return Err("selected object lacks a successful replay".into());
     }
     let base = from_record(row, &load_object(root, row)?)?;
+    Ok((base, row.clone(), manifest_hash))
+}
+
+pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
+    let (base, row, _) = load_panel(root, columns)?;
     Ok(json!({
         "schema": "n83.primary-factor-base-adapter/v1",
         "study": STUDY,
@@ -224,6 +233,234 @@ pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
     }))
 }
 
+fn public_target(root: &Path, kc: &KoblitzCurve) -> Result<(BinaryPoint, String)> {
+    let corpus: Value = serde_json::from_slice(&fs::read(root.join("probe-corpus.json"))?)?;
+    if corpus["schema"] != "n83.public-probe-corpus/v1" || corpus["study"] != STUDY {
+        return Err("public target corpus mismatch".into());
+    }
+    let targets = corpus["targets"].as_array().ok_or("public targets")?;
+    let mut selected = targets
+        .iter()
+        .filter(|row| row["a"] == 0 && row["fixture"] == 0);
+    let row = selected
+        .next()
+        .ok_or("primary public fixture zero absent")?;
+    if selected.next().is_some() {
+        return Err("ambiguous primary public fixture".into());
+    }
+    let encoded = parse_point(&row["point"])?.ok_or("identity public target")?;
+    let target = general(Some(encoded));
+    if !kc.curve.is_on_curve(&target)
+        || kc.mul(&target, &kc.subgroup_order) != BinaryPoint::Infinity
+    {
+        return Err("primary public target fails group validation".into());
+    }
+    let corpus_hash = blake3::hash(&serde_json::to_vec(&corpus)?)
+        .to_hex()
+        .to_string();
+    Ok((target, corpus_hash))
+}
+
+fn candidate_matches_validation(
+    root: &Path,
+    corpus_hash: &str,
+    candidate: &BigUint,
+) -> Result<bool> {
+    let validation: Value = serde_json::from_slice(&fs::read(root.join("probe-validation.json"))?)?;
+    if validation["schema"] != "n83.public-probe-validation/v1"
+        || validation["corpus_canonical_json_blake3"] != corpus_hash
+        || validation["oracle_receives_known_answer_scalars"] != false
+    {
+        return Err("public validation sidecar mismatch".into());
+    }
+    let entries = validation["validation"]
+        .as_array()
+        .ok_or("validation entries")?;
+    let mut selected = entries
+        .iter()
+        .filter(|row| row["a"] == 0 && row["fixture"] == 0);
+    let row = selected.next().ok_or("primary validation fixture absent")?;
+    if selected.next().is_some() {
+        return Err("ambiguous primary validation fixture".into());
+    }
+    let expected: BigUint = row["known_answer_scalar"]
+        .as_str()
+        .ok_or("known-answer encoding")?
+        .parse()?;
+    Ok(*candidate == expected)
+}
+
+/// Run one bounded primary workload. The public target is the solver's only
+/// target input; its known-answer sidecar is opened only after a candidate log.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn run_cli(
+    root: &Path,
+    columns: usize,
+    m: usize,
+    strategy_name: &str,
+    max_trials: usize,
+    budget_seconds: u64,
+    run_dir: &Path,
+) -> Result<Value> {
+    if ![64, 256, 600].contains(&columns) || !(2..=6).contains(&m) {
+        return Err("unsupported primary K or summand count".into());
+    }
+    let strategy = match strategy_name {
+        "enumerate" => DecompositionStrategy::Enumerate,
+        "sat-m3" => return Err("primary SAT S4 coordinate-domain encoding truncates F2^83 coordinates to u64; wide domain adapter required".into()),
+        _ => return Err("primary strategy must be enumerate".into()),
+    };
+    if budget_seconds == 0 || budget_seconds > 86_400 {
+        return Err("primary wall cap must be 1..86400 seconds".into());
+    }
+    let start = Instant::now();
+    fs::create_dir(run_dir)?;
+    write_new_json(
+        &run_dir.join("config.json"),
+        &json!({
+            "schema":"n83.primary-cold-config/v1", "study":STUDY,
+            "panel_dir":root.to_string_lossy(),
+            "curve_a":0, "fixture":0, "orbit_columns":columns,
+            "summands":m, "strategy":strategy_name, "max_trials":max_trials,
+            "budget_seconds":budget_seconds, "allow_direct_relation":false,
+            "source_adapter_blake3":blake3::hash(include_bytes!("primary_adapter.rs")).to_hex().to_string()
+        }),
+    )?;
+    let cap_path = run_dir.join("cap.json");
+    let cap_strategy = strategy_name.to_owned();
+    let deadline = start + Duration::from_secs(budget_seconds);
+    std::thread::spawn(move || {
+        std::thread::sleep(deadline.saturating_duration_since(Instant::now()));
+        let cap = json!({
+            "schema":"n83.primary-cold-cap/v1", "status":"UNKNOWN_budget",
+            "orbit_columns":columns, "summands":m, "strategy":cap_strategy,
+            "max_trials":max_trials, "budget_seconds":budget_seconds,
+            "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
+            "selected_best_total_runtime":Value::Null
+        });
+        if write_new_json(&cap_path, &cap).is_err() {
+            std::process::exit(125);
+        }
+        std::process::exit(124);
+    });
+
+    let import_start = Instant::now();
+    let (base, row, manifest_hash) = load_panel(root, columns)?;
+    let base_import_ms = import_start.elapsed().as_secs_f64() * 1000.0;
+    let target_start = Instant::now();
+    let (target, corpus_hash) = public_target(root, &base.curve)?;
+    let target_validation_ms = target_start.elapsed().as_secs_f64() * 1000.0;
+
+    let mut options = KoblitzIcOptions::default();
+    options.m = m;
+    options.strategy = strategy;
+    options.max_trials = max_trials;
+    options.seed = 2026100901;
+    options.allow_direct_relation = false;
+    let mut events = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(run_dir.join("events.jsonl"))?;
+    let solver_start = Instant::now();
+    let mut event_write_failed = false;
+    let report = koblitz_index_calculus_dlp_with_factor_base_and_progress(
+        &base.curve,
+        &target,
+        &base.factor_base,
+        &options,
+        &mut |event| {
+            let line = json!({
+                "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
+                "event":format!("{event:?}")
+            });
+            if writeln!(events, "{line}")
+                .and_then(|_| events.flush())
+                .is_err()
+            {
+                event_write_failed = true;
+            }
+        },
+    );
+    let solver_ms = solver_start.elapsed().as_secs_f64() * 1000.0;
+    if event_write_failed {
+        return Err("primary progress-event write failed".into());
+    }
+    let Some(report) = report else {
+        let summary = json!({
+            "schema":"n83.primary-cold-result/v1", "status":"PRODUCER_FAILURE",
+            "reason":"generic solver rejected the primary base or strategy",
+            "solver_stage_executed":false, "selected_best_total_runtime":Value::Null
+        });
+        write_new_json(&run_dir.join("summary.json"), &summary)?;
+        return Err("generic primary solver rejected the imported base or strategy".into());
+    };
+    let verification_start = Instant::now();
+    let candidate_valid = match &report.log {
+        Some(candidate) => {
+            base.curve.mul(base.curve.generator(), candidate) == target
+                && candidate_matches_validation(root, &corpus_hash, candidate).unwrap_or(false)
+        }
+        None => false,
+    };
+    let post_solver_validation_ms = verification_start.elapsed().as_secs_f64() * 1000.0;
+    let status = if report.inconsistent_relations != 0
+        || report.verification_failures != 0
+        || report.sat_invalid_models != 0
+        || report.direct_relation
+        || (report.log.is_some() && !candidate_valid)
+    {
+        "PRODUCER_FAILURE"
+    } else if candidate_valid {
+        "PASS_verified_target_only"
+    } else if !report.m_cofactor_admissible {
+        "INADMISSIBLE_cofactor_class"
+    } else if max_trials == 0 {
+        "PREFLIGHT_ONLY"
+    } else {
+        "UNKNOWN_trial_cap"
+    };
+    let summary = json!({
+        "schema":"n83.primary-cold-result/v1", "study":STUDY,
+        "status":status, "curve_a":0, "fixture":0,
+        "object":row["object"], "point_set_blake3":row["point_set_blake3"],
+        "panel_manifest_blake3":manifest_hash,
+        "public_corpus_canonical_json_blake3":corpus_hash,
+        "orbit_columns":columns, "summands":m, "strategy":strategy_name,
+        "max_trials":max_trials, "sampler_seed":options.seed,
+        "budget_seconds":budget_seconds,
+        "base_import_ms":base_import_ms, "target_validation_ms":target_validation_ms,
+        "solver_ms":solver_ms, "post_solver_validation_ms":post_solver_validation_ms,
+        "pre_summary_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
+        "solver_stage_executed":report.trials>0,
+        "report":{
+            "factor_base_size":report.factor_base_size,
+            "orbit_count":report.orbit_count,
+            "trials":report.trials, "relations":report.relations,
+            "independent_relations":report.independent_relations,
+            "dependent_relations":report.dependent_relations,
+            "inconsistent_relations":report.inconsistent_relations,
+            "verification_failures":report.verification_failures,
+            "sat_unknowns":report.sat_unknowns,
+            "sat_invalid_models":report.sat_invalid_models,
+            "linear_solve_attempts":report.linear_solve_attempts,
+            "relation_collection_ns":report.relation_collection_ns.to_string(),
+            "linear_algebra_ns":report.linear_algebra_ns.to_string(),
+            "m_cofactor_admissible":report.m_cofactor_admissible,
+            "direct_relations_skipped":report.direct_relations_skipped
+        },
+        "verified_log":if candidate_valid { report.log.as_ref().map(ToString::to_string) } else { None },
+        "column_log_verification":false,
+        "total_index_calculus_runtime_ms":Value::Null,
+        "selected_best_total_runtime":Value::Null
+    });
+    write_new_json(&run_dir.join("summary.json"), &summary)?;
+    if status == "PRODUCER_FAILURE" {
+        Err("primary solver result failed verification; inspect summary.json".into())
+    } else {
+        Ok(summary)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::construct;
@@ -231,7 +468,7 @@ mod tests {
     use crypto_lib::cryptanalysis::koblitz_index_calculus::{
         koblitz_index_calculus_dlp_with_factor_base, KoblitzIcOptions,
     };
-    use std::time::{Duration, Instant};
+    use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
     #[test]
     fn small_primary_export_maps_to_generic_orbits_and_zero_trial_preflight() {
@@ -297,5 +534,62 @@ mod tests {
             .collect::<Vec<_>>()
             .join("\n");
         assert!(from_record(&row, bad.as_bytes()).is_err());
+    }
+
+    #[test]
+    fn public_target_and_post_solver_validation_bind_the_same_fixture() {
+        let (bytes, row) = construct(
+            0,
+            "public_x_hash",
+            2,
+            17,
+            Instant::now() + Duration::from_secs(60),
+        )
+        .unwrap();
+        let base = from_record(&row, &bytes).unwrap();
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "n83-primary-fixture-{}-{suffix}",
+            std::process::id()
+        ));
+        fs::create_dir(&root).unwrap();
+        let target = base.curve.generator().clone();
+        let corpus = json!({
+            "schema":"n83.public-probe-corpus/v1", "study":STUDY,
+            "targets":[{"a":0,"fixture":0,"point":point_json(words(&target))}]
+        });
+        write_new_json(&root.join("probe-corpus.json"), &corpus).unwrap();
+        let (selected, hash) = public_target(&root, &base.curve).unwrap();
+        assert_eq!(selected, target);
+        let validation = json!({
+            "schema":"n83.public-probe-validation/v1",
+            "corpus_canonical_json_blake3":hash,
+            "oracle_receives_known_answer_scalars":false,
+            "validation":[{"a":0,"fixture":0,"known_answer_scalar":"1"}]
+        });
+        write_new_json(&root.join("probe-validation.json"), &validation).unwrap();
+        assert!(candidate_matches_validation(&root, &hash, &BigUint::one()).unwrap());
+        assert!(!candidate_matches_validation(&root, &hash, &BigUint::from(2u8)).unwrap());
+        let duplicate = json!({
+            "schema":"n83.public-probe-corpus/v1", "study":STUDY,
+            "targets":[
+                {"a":0,"fixture":0,"point":point_json(words(&target))},
+                {"a":0,"fixture":0,"point":point_json(words(&target))}
+            ]
+        });
+        fs::write(
+            root.join("probe-corpus.json"),
+            serde_json::to_vec(&duplicate).unwrap(),
+        )
+        .unwrap();
+        assert!(public_target(&root, &base.curve).is_err());
+        let rejected_run = root.join("rejected-sat-m3");
+        let error = run_cli(&root, 64, 3, "sat-m3", 1, 1, &rejected_run).unwrap_err();
+        assert!(error.to_string().contains("truncates F2^83"));
+        assert!(!rejected_run.exists());
+        fs::remove_dir_all(root).unwrap();
     }
 }
