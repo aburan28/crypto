@@ -156,6 +156,8 @@ fn a_session_runs_verifies_compares_and_loads() {
         assert_eq!(arm["verified"], 8);
         assert!(arm["process_wall_ns_sum"].as_u64().unwrap() > 0);
         assert!(arm["peak_rss_kib"].as_u64().unwrap() > 0);
+        assert!(arm["phase_gae_totals"].is_object());
+        assert_eq!(arm["online_complete_runs"], 8);
         assert!(arm["method_counter_totals"].is_object());
     }
 

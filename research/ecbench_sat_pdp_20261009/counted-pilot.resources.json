@@ -26,6 +26,36 @@
       "pmu_errors": [
         "no perf_event_open on this OS"
       ],
+      "phase_gae_totals": {
+        "factor_base": 108.222596,
+        "linear_algebra": 2.029482,
+        "oracle_setup": 196692.0,
+        "relations": 1486.786694,
+        "verify": 49.0
+      },
+      "phase_wall_ns_totals": {
+        "factor_base": 767833,
+        "linear_algebra": 16542,
+        "oracle_setup": 25059708,
+        "relations": 250624,
+        "verify": 7584
+      },
+      "phase_wall_covered_runs": {
+        "factor_base": 2,
+        "linear_algebra": 2,
+        "oracle_setup": 2,
+        "relations": 2,
+        "verify": 2
+      },
+      "online_wall_ns_sum": 290292,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "target_PDP": 8041,
+        "target_descent": 17251,
+        "target_query": 245208,
+        "target_recovery_check": 19792,
+        "target_relation_check": 0
+      },
       "phase_native_totals": {
         "factor_base.abscissae_scanned": 1024,
         "factor_base.as_solves": 1024,
@@ -91,6 +121,36 @@
       "pmu_errors": [
         "no perf_event_open on this OS"
       ],
+      "phase_gae_totals": {
+        "factor_base": 108.222596,
+        "linear_algebra": 1.615302,
+        "oracle_setup": 7074.0,
+        "relations": 1486.342465,
+        "verify": 49.0
+      },
+      "phase_wall_ns_totals": {
+        "factor_base": 645708,
+        "linear_algebra": 9334,
+        "oracle_setup": 1401541,
+        "relations": 242043,
+        "verify": 7499
+      },
+      "phase_wall_covered_runs": {
+        "factor_base": 2,
+        "linear_algebra": 2,
+        "oracle_setup": 2,
+        "relations": 2,
+        "verify": 2
+      },
+      "online_wall_ns_sum": 272417,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "target_PDP": 7043,
+        "target_descent": 10082,
+        "target_query": 236584,
+        "target_recovery_check": 18708,
+        "target_relation_check": 0
+      },
       "phase_native_totals": {
         "factor_base.abscissae_scanned": 1024,
         "factor_base.as_solves": 1024,
@@ -158,6 +218,36 @@
       "pmu_errors": [
         "no perf_event_open on this OS"
       ],
+      "phase_gae_totals": {
+        "factor_base": 108.222596,
+        "linear_algebra": 2.250378,
+        "oracle_setup": 0.0,
+        "relations": 1611.797325,
+        "verify": 49.0
+      },
+      "phase_wall_ns_totals": {
+        "factor_base": 613459,
+        "linear_algebra": 55164,
+        "oracle_setup": 50333,
+        "relations": 22856412544,
+        "verify": 8459
+      },
+      "phase_wall_covered_runs": {
+        "factor_base": 2,
+        "linear_algebra": 2,
+        "oracle_setup": 2,
+        "relations": 2,
+        "verify": 2
+      },
+      "online_wall_ns_sum": 22856495375,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "target_PDP": 22856052339,
+        "target_descent": 57667,
+        "target_query": 359536,
+        "target_recovery_check": 25833,
+        "target_relation_check": 0
+      },
       "phase_native_totals": {
         "factor_base.abscissae_scanned": 1024,
         "factor_base.as_solves": 1024,
@@ -228,6 +318,36 @@
       "pmu_errors": [
         "no perf_event_open on this OS"
       ],
+      "phase_gae_totals": {
+        "factor_base": 108.222596,
+        "linear_algebra": 2.664558,
+        "oracle_setup": 0.0,
+        "relations": 1584.510288,
+        "verify": 49.0
+      },
+      "phase_wall_ns_totals": {
+        "factor_base": 630834,
+        "linear_algebra": 37501,
+        "oracle_setup": 49667,
+        "relations": 775354999,
+        "verify": 8000
+      },
+      "phase_wall_covered_runs": {
+        "factor_base": 2,
+        "linear_algebra": 2,
+        "oracle_setup": 2,
+        "relations": 2,
+        "verify": 2
+      },
+      "online_wall_ns_sum": 775420042,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "target_PDP": 775073081,
+        "target_descent": 39583,
+        "target_query": 282253,
+        "target_recovery_check": 25125,
+        "target_relation_check": 0
+      },
       "phase_native_totals": {
         "factor_base.abscissae_scanned": 1024,
         "factor_base.as_solves": 1024,
@@ -301,6 +421,17 @@
       "pmu_errors": [
         "no perf_event_open on this OS"
       ],
+      "phase_gae_totals": {
+        "search": 402.01010039515813,
+        "setup": 1536.1077375483535
+      },
+      "phase_wall_ns_totals": {},
+      "phase_wall_covered_runs": {},
+      "online_wall_ns_sum": 43001,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "rho_solve": 43001
+      },
       "phase_native_totals": {},
       "method_counter_totals": {
         "canonicalisations_uncharged": 256,
@@ -344,6 +475,17 @@
       "pmu_errors": [
         "no perf_event_open on this OS"
       ],
+      "phase_gae_totals": {
+        "search": 402.01010039515813,
+        "setup": 1536.1077375483535
+      },
+      "phase_wall_ns_totals": {},
+      "phase_wall_covered_runs": {},
+      "online_wall_ns_sum": 39667,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "rho_solve": 39667
+      },
       "phase_native_totals": {},
       "method_counter_totals": {
         "canonicalisations_uncharged": 256,
