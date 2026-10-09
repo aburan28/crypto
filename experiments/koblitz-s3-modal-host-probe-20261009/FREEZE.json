@@ -1,0 +1,29 @@
+{
+  "analyzer_sha256": "85e16fef1213d24bb4e3190f6db5c3d1cd3751c45c97986895a3040b8acbf41c",
+  "block_network": true,
+  "controlled_speedup": null,
+  "cpu_physical_cores": 16,
+  "cryptanalysis_sources_or_fixtures_transferred": [],
+  "guest_observability_checks": [
+    "guest_pin_held",
+    "guest_cpu_topology_visible",
+    "guest_numa_policy_visible",
+    "guest_cgroup_cpu_visible",
+    "guest_psi_visible",
+    "guest_steal_irq_visible",
+    "process_perf_ipc_visible"
+  ],
+  "host_exclusive_partition_verified": false,
+  "kind": "source_free_modal_vm_cpu_probe_freeze_v1",
+  "local_runner_sha256": "0f03898782ac1d1ca6899b4baebee92419680f3e4a152dd948be4294b47a6cae",
+  "memory_mib": 32768,
+  "modal_sdk_version": "1.2.4",
+  "modal_volume": null,
+  "remote_code_bytes": 8018,
+  "remote_code_sha256": "1d81f6b45a95a31bd5f3229efe0e37de6e5d6f67dba746ce4e8e76ec4a559044",
+  "repository_files_transferred": [],
+  "requested_120_second_compute_cost_usd_estimate": "0.1012992",
+  "sandbox_creation_attempts": 1,
+  "sandbox_timeout_seconds": 120,
+  "vm_runtime": true
+}
