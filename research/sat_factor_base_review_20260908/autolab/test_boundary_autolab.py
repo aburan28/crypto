@@ -193,6 +193,33 @@ class MeasurementSchemaTests(unittest.TestCase):
             result["pairing_errors"],
         )
 
+        report["operation_accounting"] = valid_operation_accounting()
+        report["ic_online_phase_ms"]["T_target_query_ms"] = "invalid"
+        result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(result["status"], "FAIL")
+        self.assertIn(
+            "ic_online_phase_ms must contain finite nonnegative costs",
+            result["pairing_errors"],
+        )
+
+    def test_operation_accounting_rejects_nonfinite_counts_and_ratios(self) -> None:
+        for key, value in (
+            ("ic_online_operations", float("nan")),
+            ("rho_online_operations", float("inf")),
+            ("rho_per_ic_native_counter", float("nan")),
+        ):
+            with self.subTest(key=key):
+                accounting = valid_operation_accounting()
+                accounting[key] = value
+                self.assertTrue(lab.operation_accounting_errors(accounting))
+
+        accounting = valid_operation_accounting()
+        accounting["comparison_status"] = "calibrated_common_unit"
+        accounting["operation_units"] = {"ic": "group additions", "rho": "group additions"}
+        accounting["calibration_receipt"] = "calibration.json"
+        accounting["ops_speedup_online"] = float("inf")
+        self.assertTrue(lab.operation_accounting_errors(accounting))
+
     def test_vs_rho_different_public_points_fail(self) -> None:
         report = {
             "n_or_bits": 41,

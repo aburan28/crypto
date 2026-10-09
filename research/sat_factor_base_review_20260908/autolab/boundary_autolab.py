@@ -235,8 +235,8 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     ic_ops = accounting.get("ic_online_operations")
     rho_ops = accounting.get("rho_online_operations")
     for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
-        if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
-            errors.append(f"operation_accounting.{name} must be positive")
+        if positive_cost(value) is None:
+            errors.append(f"operation_accounting.{name} must be positive and finite")
     units = accounting.get("operation_units")
     if not isinstance(units, dict) or not all(
         isinstance(units.get(arm), str) and units[arm].strip() for arm in ("ic", "rho")
@@ -251,7 +251,7 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     raw_quotient = accounting.get("rho_per_ic_native_counter")
     if raw_quotient is not None and not errors:
         expected = float(rho_ops) / float(ic_ops)
-        if not isinstance(raw_quotient, (int, float)) or isinstance(raw_quotient, bool) or not math.isclose(
+        if positive_cost(raw_quotient) is None or not math.isclose(
             float(raw_quotient), expected, rel_tol=1e-8, abs_tol=1e-12
         ):
             errors.append("operation_accounting.rho_per_ic_native_counter does not match the raw counts")
@@ -266,8 +266,8 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
         )
         if not calibrated:
             errors.append("operation_accounting.ops_speedup_online requires a calibrated common unit and receipt")
-        elif not isinstance(ratio, (int, float)) or isinstance(ratio, bool):
-            errors.append("operation_accounting.ops_speedup_online must be numeric")
+        elif positive_cost(ratio) is None:
+            errors.append("operation_accounting.ops_speedup_online must be positive and finite")
         elif not errors:
             expected = float(rho_ops) / float(ic_ops)
             if not math.isclose(float(ratio), expected, rel_tol=1e-8, abs_tol=1e-12):
@@ -310,24 +310,26 @@ def validate_claim(
             pairing_errors.append("IC target recovery is not verified")
         if report.get("rho_verified") is not True:
             pairing_errors.append("rho target recovery is not verified")
-        if not isinstance(report.get("ic_online_ms"), (int, float)) or report.get("ic_online_ms", 0) <= 0:
+        if positive_cost(report.get("ic_online_ms")) is None:
             pairing_errors.append("positive ic_online_ms is required")
-        if not isinstance(report.get("rho_online_ms"), (int, float)) or report.get("rho_online_ms", 0) <= 0:
+        if positive_cost(report.get("rho_online_ms")) is None:
             pairing_errors.append("positive rho_online_ms is required")
-        if not isinstance(report.get("online_speedup"), (int, float)) or report.get("online_speedup", 0) <= 0:
+        if positive_cost(report.get("online_speedup")) is None:
             pairing_errors.append("positive same-target online_speedup is required")
-        elif isinstance(report.get("ic_online_ms"), (int, float)) and isinstance(report.get("rho_online_ms"), (int, float)):
+        elif positive_cost(report.get("ic_online_ms")) is not None and positive_cost(report.get("rho_online_ms")) is not None:
             expected = float(report["rho_online_ms"]) / float(report["ic_online_ms"])
-            if abs(float(report["online_speedup"]) - expected) > max(1e-9, expected * 1e-8):
+            if not math.isclose(float(report["online_speedup"]), expected, rel_tol=1e-8, abs_tol=1e-9):
                 pairing_errors.append("online_speedup does not equal rho_online_ms / ic_online_ms")
         for arm in ("ic", "rho"):
             phases = report.get(f"{arm}_online_phase_ms")
             total = report.get(f"{arm}_online_ms")
             if not isinstance(phases, dict) or not phases:
                 pairing_errors.append(f"{arm}_online_phase_ms must record exclusive phases")
-            elif isinstance(total, (int, float)):
-                phase_sum = sum(float(value) for value in phases.values())
-                if abs(phase_sum - float(total)) > max(0.02, float(total) * 1e-8):
+            elif any(type(value) not in (int, float) or not math.isfinite(value) or value < 0 for value in phases.values()):
+                pairing_errors.append(f"{arm}_online_phase_ms must contain finite nonnegative costs")
+            elif positive_cost(total) is not None:
+                phase_sum = math.fsum(float(value) for value in phases.values())
+                if not math.isclose(phase_sum, float(total), rel_tol=1e-8, abs_tol=0.02):
                     pairing_errors.append(f"{arm} online phase costs do not sum to online time")
             else:
                 pairing_errors.append(f"{arm}_online_ms is missing")
@@ -938,7 +940,13 @@ def exclusive_precomputation_ms(row: dict[str, Any] | None) -> float | None:
         return None
     return sum(values)
 def positive_cost(value):
-    return float(value) if type(value) in (int, float) and math.isfinite(value) and value > 0 else None
+    if type(value) not in (int, float) or value <= 0:
+        return None
+    try:
+        result = float(value)
+    except (OverflowError, ValueError):
+        return None
+    return result if math.isfinite(result) else None
 
 
 def extract_ic_cost(rows: list[dict[str, Any]], timing_class: str) -> float | None:
