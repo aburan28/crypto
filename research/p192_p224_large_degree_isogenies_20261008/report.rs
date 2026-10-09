@@ -295,8 +295,8 @@ fn scene(stats: &[Stats], replay: &Value) -> Vec<Op> {
             let color = match state {
                 Some("PASS") => "#136e4e",
                 Some("TIMEOUT") => "#cc7c14",
-                Some("FAIL") => "#ad3333",
-                _ => {
+                Some(_) => "#ad3333",
+                None => {
                     if r["status"] == "split" {
                         "#819ec5"
                     } else {
@@ -392,8 +392,40 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
     for s in stats {
         wrapped(&mut p1,&mut y,&format!("{}: {} prime degrees screened; {} split, {} inert, {} repeated eigenvalue. {} explicit construction attempts; {} passed, {} timed out, {} failed. {} independently certified maps. Largest certified degree: {}.",s.name,s.screen["screen"].as_array().unwrap().len(),s.split,s.inert,s.repeated,s.attempts.len(),s.pass,s.timeouts,s.fail,s.maps,s.max.map_or("none".into(), |l| l.to_string())),11.);
     }
+    text(
+        &mut p1,
+        42.,
+        y,
+        13.,
+        "Construction probes at or beyond degree 1009",
+    );
+    y -= 24.;
+    for s in stats {
+        for a in s
+            .attempts
+            .iter()
+            .filter(|a| a["ell"].as_u64().unwrap() >= 1009)
+        {
+            text(
+                &mut p1,
+                42.,
+                y,
+                10.,
+                &format!(
+                    "{} | degree {} | {} | receipt: evidence-v2/{}/ell-{}.receipt.json",
+                    s.name,
+                    a["ell"],
+                    a["receipt"]["status"].as_str().unwrap(),
+                    a["curve"].as_str().unwrap(),
+                    a["ell"]
+                ),
+            );
+            y -= 16.;
+        }
+    }
+    y -= 8.;
     wrapped(&mut p1,&mut y,"Bounds: all primes from 67 through 4093 were screened. Every split degree through 257 was attempted, plus the first split prime at or above 509, 1009, 2003 and 4000 for each source. Each construction had a 180-second process budget. Other split primes are candidates without constructed maps.",11.);
-    wrapped(&mut p1,&mut y,"Verification: the existing walker's independent implementation checks squarefreeness, torsion, subgroup closure, and the Velu codomain. The rational map is replayed on fresh public points, with 20 scalar-transport checks per map and a mapped nonidentity generator checked against the published prime order.",11.);
+    wrapped(&mut p1,&mut y,"Verification: the existing walker's independent implementation checks squarefreeness, torsion, subgroup closure, and the Velu codomain. Exact rational-map substitution and 20 fresh public scalar-transport checks pass for every map; each mapped nonidentity generator satisfies the published prime order.",11.);
     wrapped(&mut p1,&mut y,"Interpretation boundary: a split Frobenius polynomial supplies candidate eigenlines. Only completed, independently replayed kernels and maps count as certified constructions. A timeout is a resource-bounded outcome, not a nonexistence result. ECDLP-cost changes were not measured.",11.);
     text(&mut p1, 42., y - 8., 13., "Sources and evidence");
     y -= 36.;
@@ -647,9 +679,35 @@ fn main() {
         "src/cryptanalysis/isogeny_walk/kernel.rs",
         "src/cryptanalysis/isogeny_walk/modpoly.rs",
         "src/hash/sha256.rs",
+        "src/bin/curve_cover_check/checker.rs",
+        "src/bin/curve_cover_check/models.rs",
+        "src/bin/curve_cover_check/links.rs",
+        "src/binary_ecc/f2m.rs",
+        "src/cryptanalysis/ecc2k130_guard.rs",
+        "src/ct_bignum.rs",
+        "src/utils/mod.rs",
+        "src/utils/encoding.rs",
+        "src/utils/random.rs",
     ] {
         let b = fs::read(p).unwrap();
         sources.push(json!({"path":p,"bytes":b.len(),"sha256":hash(&b)}));
+    }
+    visit(Path::new(""), Path::new("isogeny_algos/src"), &mut sources);
+    sources.sort_by_key(|s| s["path"].as_str().unwrap().to_owned());
+    sources.dedup_by(|a, b| a["path"] == b["path"]);
+    let mut canonical_outputs = vec![];
+    for path in [
+        "docs/curves/registry.json",
+        "docs/curves/covers.json",
+        "docs/curves/cover-links.yaml",
+        "src/cryptanalysis/curve_aliases.json",
+        "docs/ic/leaderboard.json",
+        "docs/ic/LEADERBOARD.md",
+        "docs/ic-leaderboard.html",
+        "docs/browser/data.json",
+    ] {
+        let b = fs::read(path).unwrap();
+        canonical_outputs.push(json!({"path":path,"bytes":b.len(),"sha256":hash(&b)}));
     }
     let mut executables = vec![];
     for p in [
@@ -660,6 +718,6 @@ fn main() {
         let b = fs::read(p).unwrap();
         executables.push(json!({"path":p,"bytes":b.len(),"sha256":hash(&b),"optimization":"release, level 3","included_in_git":false}));
     }
-    fs::write(study.join("MANIFEST.json"),format!("{}\n",serde_json::to_string_pretty(&json!({"schema":"large-degree-isogeny-manifest/v1","base_revision":search["source_commit"],"host":{"cpu":"Apple M4 Pro","logical_cores":14,"ram_gib":48,"os":"macOS arm64","benchmark_isolation":"not a timing benchmark"},"sources":sources,"executables":executables,"files":files})).unwrap())).unwrap();
+    fs::write(study.join("MANIFEST.json"),format!("{}\n",serde_json::to_string_pretty(&json!({"schema":"large-degree-isogeny-manifest/v1","base_revision":search["source_commit"],"host":{"cpu":"Apple M4 Pro","logical_cores":14,"ram_gib":48,"os":"macOS arm64","benchmark_isolation":"not a timing benchmark"},"sources":sources,"executables":executables,"canonical_outputs":canonical_outputs,"files":files})).unwrap())).unwrap();
     println!("Report, vector visual, PDF, manifest and model registration written.");
 }
