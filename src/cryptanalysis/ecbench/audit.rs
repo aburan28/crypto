@@ -387,10 +387,16 @@ pub fn audit_with(
     );
     problems.extend(record_problems);
 
-    // Replays: evenly spaced over the measured deterministic verified runs.
+    // Replays: evenly spaced over measured deterministic completions and
+    // budget exits. A budgeted walk is evidence only if its cap, counters,
+    // and exhausted status reproduce as exactly as a verified answer does.
     let candidates: Vec<&Record> = records
         .iter()
-        .filter(|r| r.counts() && r.cost.deterministic)
+        .filter(|r| {
+            !r.warmup
+                && r.cost.deterministic
+                && matches!(r.outcome.status.as_str(), "verified" | "exhausted")
+        })
         .collect();
     let mut replays = Vec::new();
     if replay > 0 && !candidates.is_empty() {
@@ -422,6 +428,9 @@ pub fn audit_with(
                 ),
                 Some(rep) => {
                     let mut diffs = Vec::new();
+                    if rep.exhausted != (r.outcome.status == "exhausted") {
+                        diffs.push("outcome status");
+                    }
                     if rep.recovered != r.outcome.recovered {
                         diffs.push("recovered");
                     }

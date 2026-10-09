@@ -802,14 +802,28 @@ fn the_m83_gate_curve_plans_runs_a_budgeted_walk_and_replays() {
         );
         assert_eq!(r["workload"]["curve"]["r"], "2417851639230796216685689");
     }
+    let audit = dir.join("audit.json");
     let (ok, _, err) = ecbench(&[
         "verify",
         "--dir",
         out_dir.to_str().unwrap(),
         "--replay-all",
+        "--out",
+        audit.to_str().unwrap(),
         "--exit-code",
     ]);
     assert!(ok, "{err}");
+    let receipt: Value = serde_json::from_str(&std::fs::read_to_string(&audit).unwrap()).unwrap();
+    assert_eq!(receipt["ok"], true);
+    assert_eq!(
+        receipt["replays"].as_array().unwrap().len(),
+        records.iter().filter(|r| r["warmup"] == false).count()
+    );
+    assert!(receipt["replays"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .all(|r| r["reproduced"] == true));
     let (ok, sql, err) = ecbench(&["db", "sql", out_dir.to_str().unwrap()]);
     assert!(ok, "{err}");
     assert!(
