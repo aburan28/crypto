@@ -55,6 +55,7 @@
   12.671208207334514
  ],
  "operation_accounting": {
+  "comparison_status": "native_counters_only",
   "generated_by": "research/sat_factor_base_review_20260908/autolab/op_accounting.py",
   "host_contention": {
    "contended_runs": [
@@ -72,7 +73,7 @@
    2646554.625
   ],
   "ic_rank_probes_mean_pooled": 2448317.7533333334,
-  "ic_rank_probes_note": "each rank relation runs the same extraction on a random subgroup point, so the rank mean estimates the online probes of a random target; per-relation counts are not retained, so no confidence interval is available",
+  "ic_rank_probes_note": "guided rank queries and target extraction use different input laws and scan starts; this mean is a rank-stage diagnostic, not an estimate of unseen-target cost; per-relation counts are not retained, so no confidence interval is available",
   "ic_rank_probes_source": [
    "runs/N83A1K600W12We202610061R21R1/ic_summary.jsonl",
    "runs/N83A1K600W12We202610062R22R2/ic_summary.jsonl",
@@ -86,14 +87,16 @@
    "ic": "target probes",
    "rho": "walk steps"
   },
-  "ops_speedup_measured_walk_median": 0.7471532510363248,
-  "ops_speedup_online": 1.0180553621881687,
-  "ops_speedup_online_mean_target": 3.678096369929416,
-  "ops_speedup_total_mean_target": 0.006119960682078896,
+  "ops_speedup_online": null,
   "precompute_rank_probes": 1468990652.0,
   "precompute_rank_probes_note": "rank_probes_mean x rank_attempts; the S3 root-index build is not counted in probes",
+  "rank_mean_to_frozen_probe_ratio": 0.27678865907684347,
+  "rho_expected_steps_per_rank_mean_probe": 3.678096369929416,
+  "rho_expected_steps_per_rank_plus_target_probe": 0.006119960682078896,
   "rho_online_operations": 9005148.640969077,
   "rho_online_operations_basis": "expected walk sqrt(pi*r/(4n)) on signed-Frobenius classes; measured walks are under runs",
+  "rho_per_ic_native_counter": 1.0180553621881687,
+  "rho_steps_per_ic_probe_measured_median": 0.7471532510363248,
   "runs": [
    {
     "exploratory": true,
@@ -105,10 +108,10 @@
     "ic_rank_threads": 12,
     "ic_target_threads": null,
     "ic_to_rho_rate_ratio": 10.946916321284272,
-    "ops_speedup_measured_walk": 0.7471532510363248,
     "rho_ideal_steps_recorded": 9005148.640969077,
     "rho_online_ms": 64952.48304199999,
     "rho_peak_rss_bytes": 1097678848,
+    "rho_steps_per_ic_probe_measured": 0.7471532510363248,
     "rho_steps_per_s": 101778.10410118444,
     "rho_threads": null,
     "rho_walk_ms": 64934.39879199999,
@@ -126,10 +129,10 @@
     "ic_rank_threads": 12,
     "ic_target_threads": null,
     "ic_to_rho_rate_ratio": 8.234576188147976,
-    "ops_speedup_measured_walk": 0.6736549370461009,
     "rho_ideal_steps_recorded": 9005148.640969077,
     "rho_online_ms": 42987.579541,
     "rho_peak_rss_bytes": 1099153408,
+    "rho_steps_per_ic_probe_measured": 0.6736549370461009,
     "rho_steps_per_s": 138675.56575873485,
     "rho_threads": null,
     "rho_walk_ms": 42969.1775,
@@ -147,10 +150,10 @@
     "ic_rank_threads": 12,
     "ic_target_threads": null,
     "ic_to_rho_rate_ratio": 9.200473539786552,
-    "ops_speedup_measured_walk": 1.3769172164508248,
     "rho_ideal_steps_recorded": 9005148.640969077,
     "rho_online_ms": 71253.68991600002,
     "rho_peak_rss_bytes": 2188230656,
+    "rho_steps_per_ic_probe_measured": 1.3769172164508248,
     "rho_steps_per_s": 170970.02572173148,
     "rho_threads": null,
     "rho_walk_ms": 71237.28237500001,
@@ -159,10 +162,10 @@
     "wall_speedup": 12.671208207334514
    }
   ],
-  "schema_version": "1.0",
-  "target_luck_factor": 0.27678865907684347,
+  "schema_version": "2.0",
   "thread_note": "ic_target_threads and rho_threads were not recorded by these run drivers (null)",
-  "unit_assumption": "one IC probe (S3 quadratic solve plus root-table lookup) and one rho walk step (one group addition plus class canonicalisation) are each counted as one operation; not yet calibrated on a common backend (plan step 1.2)",
+  "total_work_S": null,
+  "unit_assumption": "IC probes (S3 quadratic solve plus root-table lookup) and rho walk steps (group addition plus class canonicalisation) are distinct native counters; no common operation calibration or complete total-work boundary is recorded",
   "wall_speedup_median_all_runs": 8.181301978998246,
   "wall_speedup_median_uncontended_runs": null
  },

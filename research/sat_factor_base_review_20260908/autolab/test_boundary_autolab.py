@@ -19,11 +19,13 @@ import op_accounting
 
 def valid_operation_accounting(ic_ops: float = 100.0, rho_ops: float = 400.0) -> dict:
     return {
-        "unit_assumption": "one probe and one rho step each count as one operation",
+        "unit_assumption": "IC probes and rho steps are distinct native counters",
+        "comparison_status": "native_counters_only",
         "operation_units": {"ic": "target probes", "rho": "walk steps"},
         "ic_online_operations": ic_ops,
         "rho_online_operations": rho_ops,
-        "ops_speedup_online": rho_ops / ic_ops,
+        "rho_per_ic_native_counter": rho_ops / ic_ops,
+        "ops_speedup_online": None,
     }
 
 
@@ -178,8 +180,7 @@ class MeasurementSchemaTests(unittest.TestCase):
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "FAIL")
         self.assertIn(
-            "operation_accounting.ops_speedup_online does not equal "
-            "rho_online_operations / ic_online_operations",
+            "operation_accounting.ops_speedup_online requires a calibrated common unit and receipt",
             result["pairing_errors"],
         )
 
@@ -482,7 +483,8 @@ class HelperTests(unittest.TestCase):
             accounting = claim["operation_accounting"]
             self.assertEqual(accounting["ic_online_operations"], 1)
             self.assertEqual(accounting["rho_online_operations"], 12)
-            self.assertEqual(accounting["ops_speedup_online"], 12.0)
+            self.assertEqual(accounting["rho_per_ic_native_counter"], 12.0)
+            self.assertIsNone(accounting["ops_speedup_online"])
             self.assertEqual(lab.operation_accounting_errors(accounting), [])
             self.assertEqual(
                 claim["independent_replay_pointer"],
@@ -658,33 +660,27 @@ class OperationAccountingTests(unittest.TestCase):
             self.assertEqual(lab.operation_accounting_errors(block), [], name)
             claim = json.loads((lab.REPO / cfg["dir"] / "claim_report_vs_rho.json").read_text())
             self.assertEqual(claim.get("operation_accounting"), block, f"{name}: rerun op_accounting.py --write")
-            self.assertFalse(
-                any("S unknown" in item for item in claim["claim_boundary_non_claims"]), name
-            )
+            self.assertIsNone(block["total_work_S"], name)
+            self.assertIsNone(block["ops_speedup_online"], name)
 
-    def test_n73_separates_contended_runs_and_lucky_target(self) -> None:
+    def test_n73_separates_contended_runs_and_native_counter_ratios(self) -> None:
         block = op_accounting.account_rung("n73")
         self.assertEqual(block["ic_online_operations"], 457561)
         self.assertEqual(block["host_contention"]["contended_runs"], ["R2", "R3"])
         self.assertAlmostEqual(block["wall_speedup_median_uncontended_runs"], 184.8588, places=3)
-        self.assertGreater(block["target_luck_factor"], 100)
-        self.assertLess(block["ops_speedup_online_mean_target"], 1)
+        self.assertGreater(block["rank_mean_to_frozen_probe_ratio"], 100)
+        self.assertIn("not an estimate of unseen-target cost", block["ic_rank_probes_note"])
+        self.assertLess(block["rho_expected_steps_per_rank_mean_probe"], 1)
         expected = op_accounting.expected_rho_steps(86020738150056119, 73)
-        self.assertAlmostEqual(block["ops_speedup_online"], expected / 457561)
+        self.assertAlmostEqual(block["rho_per_ic_native_counter"], expected / 457561)
 
-    def test_strip_s_unknown_keeps_the_rest_of_the_non_claim(self) -> None:
-        strip = op_accounting.strip_s_unknown
-        self.assertIsNone(strip("total operation-count comparison absent; S unknown"))
-        self.assertEqual(
-            strip("not an asymptotic sub-rho claim (both arms remain sqrt-class; "
-                  "total operation-count boundary not comparable, S unknown)"),
-            "not an asymptotic sub-rho claim (both arms remain sqrt-class)",
-        )
-        self.assertEqual(
-            strip("not an asymptotic sub-rho claim (total operation-count boundary not comparable, S unknown)"),
-            "not an asymptotic sub-rho claim",
-        )
-        self.assertEqual(strip("not key recovery"), "not key recovery")
+    def test_native_counters_do_not_promote_total_work(self) -> None:
+        block = op_accounting.account_rung("n73")
+        self.assertEqual(block["comparison_status"], "native_counters_only")
+        self.assertIsNone(block["total_work_S"])
+        self.assertIsNone(block["ops_speedup_online"])
+
+
 class TimingTests(unittest.TestCase):
     """The wall metric must not charge a producer for its first execution.
 

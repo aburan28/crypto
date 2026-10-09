@@ -225,9 +225,9 @@ def missing_fields(report: dict[str, Any], keys: list[str]) -> list[str]:
 def operation_accounting_errors(accounting: Any) -> list[str]:
     """Check the operation-count block that sits next to the wall ratio.
 
-    A wall ratio mixes the algorithmic comparison with the speed of each
-    arm's implementation, so a vs_rho claim must also state both arms'
-    online operation counts, their units, and their ratio.
+    Native IC probes and rho steps have different costs.  Keep both counts
+    and their units, while requiring a calibration receipt before reporting
+    an operation speedup.
     """
     if not isinstance(accounting, dict):
         return ["operation_accounting must be an object"]
@@ -245,16 +245,35 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     assumption = accounting.get("unit_assumption")
     if not isinstance(assumption, str) or not assumption.strip():
         errors.append("operation_accounting.unit_assumption must state how the units compare")
-    ratio = accounting.get("ops_speedup_online")
-    if not isinstance(ratio, (int, float)) or isinstance(ratio, bool):
-        errors.append("operation_accounting.ops_speedup_online is required")
-    elif not errors:
+    status = accounting.get("comparison_status")
+    if status not in ("native_counters_only", "calibrated_common_unit"):
+        errors.append("operation_accounting.comparison_status must name the calibration state")
+    raw_quotient = accounting.get("rho_per_ic_native_counter")
+    if raw_quotient is not None and not errors:
         expected = float(rho_ops) / float(ic_ops)
-        if abs(float(ratio) - expected) > max(1e-12, expected * 1e-8):
-            errors.append(
-                "operation_accounting.ops_speedup_online does not equal "
-                "rho_online_operations / ic_online_operations"
-            )
+        if not isinstance(raw_quotient, (int, float)) or isinstance(raw_quotient, bool) or not math.isclose(
+            float(raw_quotient), expected, rel_tol=1e-8, abs_tol=1e-12
+        ):
+            errors.append("operation_accounting.rho_per_ic_native_counter does not match the raw counts")
+    ratio = accounting.get("ops_speedup_online")
+    if ratio is not None:
+        calibrated = (
+            status == "calibrated_common_unit"
+            and isinstance(units, dict)
+            and units.get("ic") == units.get("rho")
+            and isinstance(accounting.get("calibration_receipt"), str)
+            and bool(accounting["calibration_receipt"].strip())
+        )
+        if not calibrated:
+            errors.append("operation_accounting.ops_speedup_online requires a calibrated common unit and receipt")
+        elif not isinstance(ratio, (int, float)) or isinstance(ratio, bool):
+            errors.append("operation_accounting.ops_speedup_online must be numeric")
+        elif not errors:
+            expected = float(rho_ops) / float(ic_ops)
+            if not math.isclose(float(ratio), expected, rel_tol=1e-8, abs_tol=1e-12):
+                errors.append("operation_accounting.ops_speedup_online does not match calibrated counts")
+    elif status == "calibrated_common_unit":
+        errors.append("operation_accounting.ops_speedup_online is required for calibrated counts")
     return errors
 
 
@@ -1122,17 +1141,15 @@ def draft_vs_rho_claim(
     ):
         operation_accounting = {
             "schema_version": "1.0",
-            "unit_assumption": (
-                "one IC target relation trial and one rho walk step are each counted "
-                "as one operation; uncalibrated, so compare the ratio only together "
-                "with a measured per-operation cost"
-            ),
+            "unit_assumption": "IC target trials and rho walk steps are distinct uncalibrated counters",
+            "comparison_status": "native_counters_only",
             "operation_units": {"ic": "target relation trials", "rho": "walk steps"},
             "ic_online_operations": ic_operations,
             "ic_online_operations_basis": "target_trials of the one online target",
             "rho_online_operations": rho_operations,
             "rho_online_operations_basis": "measured walk steps of this run",
-            "ops_speedup_online": float(rho_operations) / float(ic_operations),
+            "rho_per_ic_native_counter": float(rho_operations) / float(ic_operations),
+            "ops_speedup_online": None,
         }
     claim = {
         "schema_version": 2,

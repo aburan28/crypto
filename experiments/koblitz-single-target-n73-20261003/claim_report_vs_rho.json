@@ -46,6 +46,7 @@
   2094.667646891953
  ],
  "operation_accounting": {
+  "comparison_status": "native_counters_only",
   "generated_by": "research/sat_factor_base_review_20260908/autolab/op_accounting.py",
   "host_contention": {
    "contended_runs": [
@@ -62,7 +63,7 @@
    65475673.415
   ],
   "ic_rank_probes_mean_pooled": 61301006.038888894,
-  "ic_rank_probes_note": "each rank relation runs the same extraction on a random subgroup point, so the rank mean estimates the online probes of a random target; per-relation counts are not retained, so no confidence interval is available",
+  "ic_rank_probes_note": "guided rank queries and target extraction use different input laws and scan starts; this mean is a rank-stage diagnostic, not an estimate of unseen-target cost; per-relation counts are not retained, so no confidence interval is available",
   "ic_rank_probes_source": [
    "runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR1/ic_summary.jsonl",
    "runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR2/ic_summary.jsonl",
@@ -76,14 +77,16 @@
    "ic": "target probes",
    "rho": "walk steps"
   },
-  "ops_speedup_measured_walk_median": 90.89713939780707,
-  "ops_speedup_online": 66.48690130045642,
-  "ops_speedup_online_mean_target": 0.4962693928161436,
-  "ops_speedup_total_mean_target": 0.0008257394223230343,
+  "ops_speedup_online": null,
   "precompute_rank_probes": 36780603623.333336,
   "precompute_rank_probes_note": "rank_probes_mean x rank_attempts; the S3 root-index build is not counted in probes",
+  "rank_mean_to_frozen_probe_ratio": 133.973406909437,
+  "rho_expected_steps_per_rank_mean_probe": 0.4962693928161436,
+  "rho_expected_steps_per_rank_plus_target_probe": 0.0008257394223230343,
   "rho_online_operations": 30421813.04593814,
   "rho_online_operations_basis": "expected walk sqrt(pi*r/(4n)) on signed-Frobenius classes; measured walks are under runs",
+  "rho_per_ic_native_counter": 66.48690130045642,
+  "rho_steps_per_ic_probe_measured_median": 90.89713939780707,
   "runs": [
    {
     "exploratory": false,
@@ -95,10 +98,10 @@
     "ic_rank_threads": null,
     "ic_target_threads": null,
     "ic_to_rho_rate_ratio": 8.005778913070449,
-    "ops_speedup_measured_walk": 23.082843598995545,
     "rho_ideal_steps_recorded": 30421813.04593814,
     "rho_online_ms": 46034.26425,
     "rho_peak_rss_bytes": 2187935744,
+    "rho_steps_per_ic_probe_measured": 23.082843598995545,
     "rho_steps_per_s": 229511.4840555465,
     "rho_threads": null,
     "rho_walk_ms": 46018.6515,
@@ -116,10 +119,10 @@
     "ic_rank_threads": null,
     "ic_target_threads": null,
     "ic_to_rho_rate_ratio": 21.832824671307925,
-    "ops_speedup_measured_walk": 95.92737361794384,
     "rho_ideal_steps_recorded": 30421813.04593814,
     "rho_online_ms": 683195.490543,
     "rho_peak_rss_bytes": 5007884288,
+    "rho_steps_per_ic_probe_measured": 95.92737361794384,
     "rho_steps_per_s": 64255.337205197415,
     "rho_threads": null,
     "rho_walk_ms": 683096.952084,
@@ -137,10 +140,10 @@
     "ic_rank_threads": null,
     "ic_target_threads": null,
     "ic_to_rho_rate_ratio": 13.087157362605156,
-    "ops_speedup_measured_walk": 90.89713939780707,
     "rho_ideal_steps_recorded": 30421813.04593814,
     "rho_online_ms": 646995.649916,
     "rho_peak_rss_bytes": 5199986688,
+    "rho_steps_per_ic_probe_measured": 90.89713939780707,
     "rho_steps_per_s": 64291.726561328556,
     "rho_threads": null,
     "rho_walk_ms": 646910.3914999999,
@@ -149,10 +152,10 @@
     "wall_speedup": 1189.7419463922945
    }
   ],
-  "schema_version": "1.0",
-  "target_luck_factor": 133.973406909437,
+  "schema_version": "2.0",
   "thread_note": "ic_target_threads and rho_threads were not recorded by these run drivers (null)",
-  "unit_assumption": "one IC probe (S3 quadratic solve plus root-table lookup) and one rho walk step (one group addition plus class canonicalisation) are each counted as one operation; not yet calibrated on a common backend (plan step 1.2)",
+  "total_work_S": null,
+  "unit_assumption": "IC probes (S3 quadratic solve plus root-table lookup) and rho walk steps (group addition plus class canonicalisation) are distinct native counters; no common operation calibration or complete total-work boundary is recorded",
   "wall_speedup_median_all_runs": 1189.7419463922945,
   "wall_speedup_median_uncontended_runs": 184.8588383342762
  },
