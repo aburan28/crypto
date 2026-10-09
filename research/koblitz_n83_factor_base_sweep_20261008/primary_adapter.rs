@@ -307,7 +307,7 @@ pub(super) fn run_cli(
     }
     let strategy = match strategy_name {
         "enumerate" => DecompositionStrategy::Enumerate,
-        "sat-m3" => return Err("primary SAT S4 coordinate-domain encoding truncates F2^83 coordinates to u64; wide domain adapter required".into()),
+        "sat-m3" => return Err("primary SAT S4 model replay and resource-capacity gate is incomplete for F2^83".into()),
         _ => return Err("primary strategy must be enumerate".into()),
     };
     if budget_seconds == 0 || budget_seconds > 86_400 {
@@ -588,7 +588,7 @@ mod tests {
         assert!(public_target(&root, &base.curve).is_err());
         let rejected_run = root.join("rejected-sat-m3");
         let error = run_cli(&root, 64, 3, "sat-m3", 1, 1, &rejected_run).unwrap_err();
-        assert!(error.to_string().contains("truncates F2^83"));
+        assert!(error.to_string().contains("gate is incomplete for F2^83"));
         assert!(!rejected_run.exists());
         fs::remove_dir_all(root).unwrap();
     }
