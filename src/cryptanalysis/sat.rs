@@ -921,22 +921,6 @@ impl Solver {
         // boundary also retains any learnt clauses that preceded them, which
         // costs memory but cannot change an answer.
         self.n_orig_clauses = self.clauses.len();
-        let (l0, l1) = (lits[0], lits[1]);
-        let idx = self.push_clause(&lits);
-        let (w0, w1) = (self.watch_slot(l0), self.watch_slot(l1));
-        self.watches[w0].push(Watcher {
-            cref: idx,
-            blocker: l1,
-        });
-        self.watches[w1].push(Watcher {
-            cref: idx,
-            blocker: l0,
-        });
-        self.detached.resize(self.clause_at.len(), false);
-        // Theory clauses are permanent propagation lemmas. Advancing this
-        // boundary also retains any learnt clauses that preceded them, which
-        // costs memory but cannot change an answer.
-        self.n_orig_clauses = self.clause_at.len();
         match non_false {
             0 => Some(Conflict::Clause(idx)),
             1 if self.lit_value(l0).is_none() => {
@@ -1871,12 +1855,6 @@ impl Solver {
                     restart_limit = 100u64 * luby(luby_index);
                 }
             } else {
-                if !trigger_vars.is_empty()
-                    && trigger_vars
-                        .iter()
-                        .all(|&variable| self.assignment[(variable - 1) as usize].is_some())
-                {
-                    if let Some(clauses) = theory(&self.assignment) {
                 // Through the `n_vars`-long assignment, so a trigger past the
                 // variables panics on the index as it did before the tables
                 // had spare slots, instead of reading as never assigned.
@@ -1903,10 +1881,6 @@ impl Solver {
                                 && clause
                                     .iter()
                                     .all(|&lit| self.lit_value(lit) == Some(false))
-                        });
-                        if has_current_conflict
-                            || normalized.iter().any(|clause| clause.len() < 2)
-                                && clause.iter().all(|&lit| self.lit_value(lit) == Some(false))
                         });
                         if has_current_conflict || normalized.iter().any(|clause| clause.len() < 2)
                         {
@@ -2224,10 +2198,6 @@ pub fn to_dimacs_xor(solver: &Solver) -> String {
     let mut output = format!("p cnf {} {}\n", solver.n_vars, constraints);
     for clause in solver.clauses.iter().take(solver.n_orig_clauses) {
         for &literal in clause {
-    let constraints = solver.n_orig_clauses + solver.xors.len() + usize::from(solver.is_unsat);
-    let mut output = format!("p cnf {} {}\n", solver.n_vars, constraints);
-    for &cref in solver.clause_at.iter().take(solver.n_orig_clauses) {
-        for &literal in clause_in(&solver.arena, cref) {
             output.push_str(&literal.to_string());
             output.push(' ');
         }
