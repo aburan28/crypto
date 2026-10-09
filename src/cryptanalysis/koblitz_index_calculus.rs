@@ -1279,10 +1279,9 @@ fn attach_prime_subgroup(
 }
 
 impl KoblitzCurve {
-    /// The `2`-power Frobenius `π(x, y) = (x², y²)`; the identity on an
-    /// isogenous model where squaring would leave the curve.
     /// The `q`-power Frobenius `π(x, y) = (x^q, y^q)` — squaring for a
-    /// Koblitz curve.
+    /// Koblitz curve — and the identity on an isogenous model where
+    /// field Frobenius would leave the curve.
     pub fn frobenius(&self, p: &BinaryPoint) -> BinaryPoint {
         if !self.frobenius_is_endomorphism {
             return p.clone();
@@ -1296,9 +1295,14 @@ impl KoblitzCurve {
         }
     }
 
-    /// `x ↦ x^q`, the Frobenius on abscissae.
+    /// The abscissa action of [`Self::frobenius`]: `x ↦ x^q` when that
+    /// map is a curve endomorphism, and the identity otherwise.
     pub fn frobenius_x(&self, x: &F2mElement) -> F2mElement {
-        x.square_k_times(self.k, &self.curve.irreducible)
+        if self.frobenius_is_endomorphism {
+            x.square_k_times(self.k, &self.curve.irreducible)
+        } else {
+            x.clone()
+        }
     }
 
     /// The degree `e = n / k` of `F_{2^n}` over the subfield: the
@@ -2062,6 +2066,15 @@ fn fast_frobenius(
     }
 }
 
+/// The same curve action on the packed `FastCurve` point representation.
+fn packed_curve_frobenius(kc: &KoblitzCurve, fc: &FastCurve, point: FastPoint) -> FastPoint {
+    if kc.frobenius_is_endomorphism {
+        fc.frobenius_k(point, kc.k)
+    } else {
+        point
+    }
+}
+
 /// Word-level twin of [`signed_frobenius_orbit_representatives`]: same
 /// traversal over packed keys, so the representative sequence matches
 /// exactly while the arithmetic stays allocation-free.
@@ -2182,7 +2195,7 @@ fn fast_classes_can_cancel(
                 for _ in 0..kc.n {
                     next_keys.insert(current.pack());
                     next_keys.insert(fc.neg(current).pack());
-                    current = fc.frobenius_k(current, kc.k);
+                    current = packed_curve_frobenius(kc, fc, current);
                 }
             }
         }
@@ -3062,7 +3075,9 @@ pub fn build_subgroup_orbit_factor_base_with_cost(
             for _ in 0..kc.extension_degree() {
                 abscissae.insert(orbit.to_biguint());
                 orbit = kc.frobenius_x(&orbit);
-                cost.frobenius_squarings += 1;
+                if kc.frobenius_is_endomorphism {
+                    cost.frobenius_squarings += u64::from(kc.k);
+                }
             }
             representatives.push(x);
             added += 1;
@@ -3241,7 +3256,7 @@ fn orbit_maps_packed(
             }
             orbit_of[idx] = (o, k);
             cycle.push(idx);
-            cur = curve.frobenius_k(cur, kc.k);
+            cur = packed_curve_frobenius(kc, curve, cur);
             k += 1;
         }
         orbits.push(cycle);
@@ -3266,7 +3281,7 @@ fn orbit_maps_packed(
                     return None;
                 }
             }
-            current = curve.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, curve, current);
         }
         if current != fast[start] {
             return None;
@@ -8341,7 +8356,7 @@ fn projected_signed_orbit_map_fast(
                     canonical_key = key;
                 }
             }
-            current = fc.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, &fc, current);
         }
         representatives.push(canonical);
     }
@@ -8357,7 +8372,7 @@ fn projected_signed_orbit_map_fast(
             location_by_key
                 .entry(fc.neg(current).pack())
                 .or_insert((orbit, k, true));
-            current = fc.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, &fc, current);
         }
     }
     let orbit_of = projected
@@ -8412,7 +8427,7 @@ fn project_by_frobenius_orbits(
             }
             let walks = orbit
                 .windows(2)
-                .all(|w| fc.frobenius_k(lifted[w[0]], kc.k) == lifted[w[1]]);
+                .all(|w| packed_curve_frobenius(kc, fc, lifted[w[0]]) == lifted[w[1]]);
             if !walks {
                 return None;
             }
@@ -8420,7 +8435,7 @@ fn project_by_frobenius_orbits(
             let mut images = Vec::with_capacity(orbit.len());
             images.push(current);
             for _ in 1..orbit.len() {
-                current = fc.frobenius_k(current, kc.k);
+                current = packed_curve_frobenius(kc, fc, current);
                 images.push(current);
             }
             Some(images)
@@ -18783,6 +18798,7 @@ mod isogenous_model_tests {
         assert_eq!(kc.mul(&g, &kc.subgroup_order), BinaryPoint::Infinity);
         // Squaring really leaves the curve: `(x², y²)` is not a point of `E_b`.
         if let BinaryPoint::Affine { x, y } = &g {
+            assert_eq!(kc.frobenius_x(x), x.clone());
             let irr = &kc.curve.irreducible;
             let (xs, ys) = (x.square(irr), y.square(irr));
             let lifted = points_with_x(&kc.curve, &xs);
@@ -18803,6 +18819,12 @@ mod isogenous_model_tests {
         let kc = KoblitzCurve::isogenous_model(1, 11, b, None).expect("isogenous model");
         let fb = build_frobenius_factor_base(&kc, 0).expect("factor base on the model");
         // Without a Frobenius endomorphism every point is its own orbit.
+        assert!(fb.orbits.iter().all(|orbit| orbit.len() == 1));
+        let fast = FastCurve::new(&kc.curve).expect("packed curve");
+        assert_eq!(
+            orbit_maps_packed(&kc, &fast, &fb.points),
+            orbit_maps_bigint(&kc, &fb.points)
+        );
         for p in &fb.points {
             assert_eq!(kc.frobenius(p), *p);
         }
