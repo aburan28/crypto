@@ -1,0 +1,161 @@
+{
+  "controlled_online_speedup": null,
+  "counter_note": "IC S3 root-index probes and rho walk steps are distinct native counters; their quotient is not an operation speedup.",
+  "field_degree": 83,
+  "host_isolation_receipt": null,
+  "missing_for_promotion": [
+    "qualifying physical-host isolation receipt",
+    "verified matching resource envelope and exact rho online boundary",
+    "canonical IC1 candidate and workload manifests"
+  ],
+  "public_generator": [
+    "6614244651398184860292015",
+    "8868260410029249391539529"
+  ],
+  "public_target_q": [
+    "2655898345537166180532960",
+    "3881526307991673265292615"
+  ],
+  "record_class": "verified_answer_exploratory_wall",
+  "rho_interval_note": "The legacy interval includes setup_ms; its target dependence is not established by these receipts. A new paired run must freeze the exact online start event.",
+  "runs": [
+    {
+      "candidate_id": null,
+      "common_resource_cap_bytes": null,
+      "ic_binary_sha256": "d6eac10583be218b133224c483978120f38a471b550cd5390cffe480125a421b",
+      "ic_online_ms": 7939.137707999999,
+      "ic_online_phase_ms": {
+        "target_descent": 0.003125,
+        "target_pdp": 7938.990041999999,
+        "target_query": 4.1e-05,
+        "target_recovery_check": 0.12725,
+        "target_relation_check": 0.016792
+      },
+      "ic_peak_rss_bytes": 5808242688,
+      "ic_rank_seed": 21,
+      "independent_replay": "PASS",
+      "legacy_run_id": "N83A1K600W12We202610061R21R1",
+      "native_counters": {
+        "ic_s3_root_index_probes": 8845441,
+        "rho_walk_steps": 6608900
+      },
+      "public_target_q": [
+        "2655898345537166180532960",
+        "3881526307991673265292615"
+      ],
+      "recorded_wall_ratio": 8.181301978998246,
+      "rho_binary_sha256": "2b8e15cd00c846ffd9943733208f9de43cde9ca89aee83a58d98db5ef792bb17",
+      "rho_peak_rss_bytes": 1097678848,
+      "rho_recorded_online_ms": 64952.48304199999,
+      "rho_recorded_phase_ms": {
+        "setup_ms": 7.556,
+        "validation_ms": 10.52825,
+        "walk_ms": 64934.39879199999
+      },
+      "rho_walk_plus_validation_ms": 64944.927041999996,
+      "rho_walk_seed": 202610061,
+      "source_sha256": {
+        "ic.jsonl": "cde4b261a09ddf6bd2f64f0c94235dd9d875bbe5d1c4067f3bf34368b7a1ac1d",
+        "ic_execution.json": "44fdcb876b58e80e7848494a98baac66d1a1bdb2ce4e8882cb8b5c19a496c003",
+        "independent_replay.json": "ad06d2e3f80766eda8bfeb903006215b1719e3cb9ae0308eb68329af0d2a3dc8",
+        "rho.jsonl": "d97f131ed4ad94bf768075809175ba950caf5a70bb3a91be3d251b4e134596aa",
+        "rho_execution.json": "f958452f50b7629592b1dbaf206dcda6bdd5919fc36ec24e07db15a0cd3de4a7",
+        "run.json": "e54cdb1ecda99875d667363e7d1cd9854920d290e98e1f0995d7962225a3d69f"
+      },
+      "workload_id": null
+    },
+    {
+      "candidate_id": null,
+      "common_resource_cap_bytes": null,
+      "ic_binary_sha256": "d6eac10583be218b133224c483978120f38a471b550cd5390cffe480125a421b",
+      "ic_online_ms": 7746.01425,
+      "ic_online_phase_ms": {
+        "target_descent": 0.0024590000000000002,
+        "target_pdp": 7745.859626999999,
+        "target_query": 0.00029099999999999997,
+        "target_recovery_check": 0.115208,
+        "target_relation_check": 0.036581
+      },
+      "ic_peak_rss_bytes": 5808652288,
+      "ic_rank_seed": 22,
+      "independent_replay": "PASS",
+      "legacy_run_id": "N83A1K600W12We202610062R22R2",
+      "native_counters": {
+        "ic_s3_root_index_probes": 8845441,
+        "rho_walk_steps": 5958775
+      },
+      "public_target_q": [
+        "2655898345537166180532960",
+        "3881526307991673265292615"
+      ],
+      "recorded_wall_ratio": 5.549638582319933,
+      "rho_binary_sha256": "2b8e15cd00c846ffd9943733208f9de43cde9ca89aee83a58d98db5ef792bb17",
+      "rho_peak_rss_bytes": 1099153408,
+      "rho_recorded_online_ms": 42987.579541,
+      "rho_recorded_phase_ms": {
+        "setup_ms": 7.816083,
+        "validation_ms": 10.585958,
+        "walk_ms": 42969.1775
+      },
+      "rho_walk_plus_validation_ms": 42979.763458,
+      "rho_walk_seed": 202610062,
+      "source_sha256": {
+        "ic.jsonl": "4ec8298b0f4a12fd3887bfa3827fd854ca21d9e6564fbbe3ed11d9af3ad31287",
+        "ic_execution.json": "95fa130d3799eec36466e14c64fa00fe5d8178b0f646925c495f3fe4867f9bd6",
+        "independent_replay.json": "967efcae9ade0eb7817a2db8a1a7fe94a2d45bcb094c1afd6422261708c6f802",
+        "rho.jsonl": "17de3de7c7d4904c57e235aa55f2848c3b4e5edc1c1181dcc0c713df463b417d",
+        "rho_execution.json": "add66dd144b9d450167b738431e0cb8aaba03cad3804464b795961ae3071eb08",
+        "run.json": "4377bf549fcd173a1b7703e6a844685b36b8dce8b19aef4c32e6f1a55e9e058a"
+      },
+      "workload_id": null
+    },
+    {
+      "candidate_id": null,
+      "common_resource_cap_bytes": null,
+      "ic_binary_sha256": "d6eac10583be218b133224c483978120f38a471b550cd5390cffe480125a421b",
+      "ic_online_ms": 5623.275125,
+      "ic_online_phase_ms": {
+        "target_descent": 0.00675,
+        "target_pdp": 5623.126208,
+        "target_query": 4.2e-05,
+        "target_recovery_check": 0.126167,
+        "target_relation_check": 0.015417
+      },
+      "ic_peak_rss_bytes": 5811257344,
+      "ic_rank_seed": 23,
+      "independent_replay": "PASS",
+      "legacy_run_id": "N83A1K600W12We202610063R23R3",
+      "native_counters": {
+        "ic_s3_root_index_probes": 8845441,
+        "rho_walk_steps": 12179440
+      },
+      "public_target_q": [
+        "2655898345537166180532960",
+        "3881526307991673265292615"
+      ],
+      "recorded_wall_ratio": 12.671208207334512,
+      "rho_binary_sha256": "2b8e15cd00c846ffd9943733208f9de43cde9ca89aee83a58d98db5ef792bb17",
+      "rho_peak_rss_bytes": 2188230656,
+      "rho_recorded_online_ms": 71253.689916,
+      "rho_recorded_phase_ms": {
+        "setup_ms": 7.51625,
+        "validation_ms": 8.891291,
+        "walk_ms": 71237.28237500001
+      },
+      "rho_walk_plus_validation_ms": 71246.17366600002,
+      "rho_walk_seed": 202610063,
+      "source_sha256": {
+        "ic.jsonl": "309c25638e3483f42206859fafaae1370d984b902726a818cf69b13fe7e1e7a8",
+        "ic_execution.json": "14934478e548ba1e26130bddcdbde4253ea18477a78f4962d2765de78f0c2c4b",
+        "independent_replay.json": "baf1b86cb3d303724f3876d28faec11d83b54093f56097e291395ebc1cc58376",
+        "rho.jsonl": "92e13a3fda3a5554535f3d1d8419fa16d8c49212b59b0bea3ef082459d4818fb",
+        "rho_execution.json": "c0befba238af9db5353ed0094f1b85eb6f14a2954c46b285d3d5c2df7667e5ac",
+        "run.json": "56da67a3153cc144d53233ac2980618ed6e29ad05a3c7cbc32d45cf1b147f410"
+      },
+      "workload_id": null
+    }
+  ],
+  "schema_version": 2,
+  "stage": "vs_rho",
+  "target_count": 1
+}
