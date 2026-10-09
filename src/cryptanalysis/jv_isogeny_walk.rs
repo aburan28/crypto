@@ -1635,6 +1635,10 @@ pub struct EndToEndReport {
     pub seed: u64,
     pub moves: usize,
     pub l: u64,
+    #[serde(default)]
+    pub curve_order: u128,
+    #[serde(default)]
+    pub subgroup_cofactor: u64,
     pub bits: f64,
     /// The challenge curve was not weak when handed over.
     pub challenge_non_weak: bool,
@@ -1689,13 +1693,15 @@ pub fn run_end_to_end(
     let w0 = Curve2 {
         e: [E6::ZERO, spec0.alpha, f.sigma(&spec0.alpha)],
     };
-    let trace = (p as i128).pow(6) + 1 - 4 * l as i128;
+    let trace = (p as i128).pow(6) + 1 - spec0.order as i128;
     let mut rng = StdRng::seed_from_u64(seed ^ 0xE2E_18);
     let mut rep = EndToEndReport {
         p,
         seed,
         moves,
         l,
+        curve_order: spec0.order,
+        subgroup_cofactor: spec0.subgroup_cofactor,
         bits: (l as f64).log2(),
         c_add_e: 0.0,
         rho_s_ref,
@@ -1799,7 +1805,16 @@ pub fn run_end_to_end(
         y: mapped[1].1,
         inf: false,
     };
-    let Some(spec) = super::jv_cover::spec_from_curve(p, alpha, l, gm, qm, spec0.d) else {
+    let Some(spec) = super::jv_cover::spec_from_curve(
+        p,
+        alpha,
+        l,
+        spec0.order,
+        spec0.subgroup_cofactor,
+        gm,
+        qm,
+        spec0.d,
+    ) else {
         rep.stage = String::from("spec_from_curve_none");
         rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
         return rep;
