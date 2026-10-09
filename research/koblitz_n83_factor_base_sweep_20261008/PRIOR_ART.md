@@ -2,6 +2,8 @@
 
 Inspected source revision: `c70c32d486a3ac7531fe27f7193d9f09caa58344`. The isolated native baseline is recorded in RESULT.md. Every capability below describes source, not a completed degree-83 experiment.
 
+A follow-up source audit on study-branch revision `c26ae1e3953823436cb0143d8eb77261cd784783` checked the balanced-S5 and wide compact-orbit implementations. `S5_CAPACITY.md` records their exact degree, subgroup-width, polynomial-basis and retained-object transfer gates.
+
 `SOLVER_GATES.md` distinguishes modules present in that inspected main snapshot from modules actually present on the isolated study branch. In particular, the WDSat, FES and original double-large-prime files named below are absent from this branch, and their pinned implementations have width or system-shape limits that bar direct N83 execution. This branch now has a separate full-width large-prime row eliminator, documented in `WIDE_LP_ADAPTER.md`; it has no N83 partial-relation producer. The native S4 SAT source is present but its full retained-base model and capacity have not been validated.
 
 | Source | Existing work | Consequence for this design |
@@ -15,6 +17,7 @@ Inspected source revision: `c70c32d486a3ac7531fe27f7193d9f09caa58344`. The isola
 | `src/cryptanalysis/ecbench_large_prime.rs` | Exact zero/one/two-large-prime binary IC with single-word field/point/order types | The idea is implemented, but this adapter cannot be assumed to cover degree 83 |
 | `src/cryptanalysis/ecbench/` and `docs/ecbench/README.md` | Native matched workloads, exclusive phase accounting, L0/L2 grades, replay and paired intervals | Required integration path for future complete comparisons; construction data is a stage diagnostic |
 | `examples/koblitz_orbit_dlp_fast.rs` | Compact signed-Frobenius bases, S3 four-sum root index, parallel guided rank | Existing online-after-setup results do not identify the minimum cold runtime |
+| `examples/koblitz_s5_sat_instance.rs` | Balanced-S5 native-XOR SAT with orbit-factorized finite domains, pair-sum trie, relative pair support and group lifting, admitted only through n=53 | Four-summand prior art, but its `u64` point/rank path and n<=53 domain gate require a full-width transfer and independent N83 replay |
 | `experiments/koblitz-single-target-n83-20261006/` | Frozen a=1 public fixture, K=600 base, three online IC/rho observations, separate preprocessing records | Different 53-bit subgroup; historical walls shared host load and excluded setup |
 | `RESEARCH_ECC2K130_IC_FEASIBILITY.md` and `docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md` | Higher-arity proposals, implicit-index limits and corrections to total-cost extrapolations | Keep counts, empirical fits, proposed arities and end-to-end evidence separate |
 | `docs/ic/boundary_targets.json` | Fail-closed evidence, distinct timing classes and promotion gates | No promotion from this construction panel or a compatibility count |

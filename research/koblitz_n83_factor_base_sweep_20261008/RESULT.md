@@ -18,6 +18,7 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | S3 storage | PASS: 54 compressed objects uploaded, downloaded and byte-hash matched; content-addressed panel receipts uploaded |
 | Primary base to generic solver adapter | PASS: replay-bound K=64 S3 object reconstructed as generic ordinary and signed Frobenius orbits; solver stage unexecuted |
 | Primary cold runner | K=64, m=2 exact-enumeration preflight PASS; one trial returned `UNKNOWN_trial_cap` with zero relations. K=64 m=3 and K=256 m=2 attempts reached `UNKNOWN_budget` caps. All retain null total runtime and winner |
+| Existing four-summand source transfer | Balanced-S5 SAT is admitted only through n=53; the wide compact-orbit n=83 runner uses a different polynomial basis/base schema and u64 rank. `S5_CAPACITY.md` records exact source gates and index-size formulas; no retained-base four-summand run followed |
 | Best total runtime | Unresolved: full relation collection, rank, linear algebra and individual-log phases have not completed the comparison gate |
 
 ## Exact revisions and instances
