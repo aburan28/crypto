@@ -25,6 +25,14 @@ It drops the timed-out Buchberger arm and uses the versioned
 cost from counts instead of subtracting a wall-derived floating charge.
 The method keeps SAT conflicts and other units without a pinned
 conversion explicitly unpriced. Its pilot and holdout panel have
-separate frozen specs. An audit and result note will be added as those
-sessions complete; their absence here does not promote the first
-pilot to a complete comparison.
+separate frozen specs. The holdout panel's result is pending; the
+first pilot cannot stand in for it.
+
+The counted-method [`pilot`](sessions/counted-pilot) completed with 24
+of 24 verified executions. Its [`full-replay receipt`](counted-pilot.audit.json)
+passed with all 12 measured records identical and zero problems;
+receipt SHA-256
+`090ae757b4899c236a01a1515ec445f802e097e94ee9be4590008f8aa3bfca21`.
+It meets `PROTOCOL-2.md`'s gate to run the eight-target holdout panel.
+The SAT arms still carry `solver_conflicts_uncharged`, so their `S`
+remains a lower bound.
