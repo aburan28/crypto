@@ -116,6 +116,22 @@ impl FghrInstance {
     }
 }
 
+/// A `Y`-line: the map from the line's `F_p^*` parameter `t` to the
+/// abscissa of the base points above it.  The oracles below see an
+/// instance only through it, so one oracle serves the subfield line of
+/// E13 and the full-group line of E17 (`fghr_full`).
+pub trait YLine {
+    /// `x` above the line's parameter `t`, on the field's counted
+    /// arithmetic.
+    fn x_at(&self, t: u64) -> Fp3El;
+}
+
+impl YLine for FghrInstance {
+    fn x_at(&self, t: u64) -> Fp3El {
+        self.x_of_y(self.sub.curve.f.scale(self.yline, t))
+    }
+}
+
 /// A subfield instance (`generate_subfield_instance`) whose base curve
 /// has a root `x₀ ∈ F_p` of `x³ + ax + b` with `3x₀² + a` a nonzero
 /// square; tries successive seeds.
@@ -383,6 +399,61 @@ pub fn s4_in_y(f: &SolverField, s4x: &Poly4, mobius: [u64; 4]) -> Poly4 {
     out
 }
 
+/// [`s4_in_y`] with a Möbius map whose coefficients are in `F_{p³}`
+/// (the full-group line of `fghr_full`, where `x₀ ∉ F_p`); the same
+/// substitution, on the solver field's arithmetic.
+pub fn s4_in_y_ext(f: &SolverField, s4x: &Poly4, mobius: [E3; 4]) -> Poly4 {
+    let [a, b, c, d] = mobius;
+    let mul1 = |u: &[E3], lin: [E3; 2]| -> Vec<E3> {
+        let mut out = vec![SolverField::ZERO; u.len() + 1];
+        for (i, x) in u.iter().enumerate() {
+            out[i] = f.add(&out[i], &f.mul(x, &lin[0]));
+            out[i + 1] = f.add(&out[i + 1], &f.mul(x, &lin[1]));
+        }
+        out
+    };
+    let u: Vec<Vec<E3>> = (0..=4usize)
+        .map(|k| {
+            let mut v = vec![SolverField::ONE];
+            for _ in 0..k {
+                v = mul1(&v, [b, a]);
+            }
+            for _ in k..4 {
+                v = mul1(&v, [d, c]);
+            }
+            v
+        })
+        .collect();
+    let mut out: Poly4 = HashMap::new();
+    for (e, coef) in s4x {
+        let (u1, u2, u3) = (&u[e[0] as usize], &u[e[1] as usize], &u[e[2] as usize]);
+        for (i, c1) in u1.iter().enumerate() {
+            if *c1 == SolverField::ZERO {
+                continue;
+            }
+            for (j, c2) in u2.iter().enumerate() {
+                if *c2 == SolverField::ZERO {
+                    continue;
+                }
+                let c12 = f.mul(c1, c2);
+                for (k, c3) in u3.iter().enumerate() {
+                    if *c3 == SolverField::ZERO {
+                        continue;
+                    }
+                    let scalar = f.mul(&c12, c3);
+                    add_term4(
+                        f,
+                        &mut out,
+                        [i as u8, j as u8, k as u8, e[3]],
+                        f.mul(coef, &scalar),
+                    );
+                }
+            }
+        }
+    }
+    out
+}
+
 /// Rewrite a polynomial symmetric in its first three variables in a set
 /// of invariant generators by repeatedly cancelling the lex-leading
 /// term: `lead_to_key` maps a leading exponent to the generator exponent
@@ -530,17 +601,47 @@ pub struct FghrPolynomials {
 
 pub fn fghr_polynomials(inst: &FghrInstance) -> Result<FghrPolynomials, String> {
     let sub = &inst.sub;
-    let field = SolverField::with_cube_nonresidue(sub.p, sub.curve.f.nu)?;
-    let g = Pt3::affine(E3(sub.generator.x), E3(sub.generator.y));
-    let curve3 = Curve3::new(field.clone(), E3(sub.curve.a), E3(sub.curve.b), sub.r, g);
+    fghr_polynomials_on(
+        &sub.curve,
+        sub.r,
+        sub.generator,
+        inst.yline,
+        Mobius::Fp(inst.mobius),
+    )
+}
+
+/// The coefficients of `x = (A Y + B)/(C Y + D)`: in `F_p` on a subfield
+/// curve (E13), in `F_{p³}` on the full group (E17).
+#[derive(Clone, Copy, Debug)]
+pub enum Mobius {
+    Fp([u64; 4]),
+    Fp3([Fp3El; 4]),
+}
+
+/// [`FghrPolynomials`] for any curve over `F_{p³}` with a `Y`-coordinate
+/// `x = Mobius(Y)` on which a rational `2`-torsion translation acts as
+/// `Y ↦ −Y`, taken on the line `Y ∈ L·F_p`.
+pub fn fghr_polynomials_on(
+    curve: &Fp3Curve,
+    r: u64,
+    generator: Fp3Point,
+    yline: Fp3El,
+    mobius: Mobius,
+) -> Result<FghrPolynomials, String> {
+    let field = SolverField::with_cube_nonresidue(curve.f.p, curve.f.nu)?;
+    let g = Pt3::affine(E3(generator.x), E3(generator.y));
+    let curve3 = Curve3::new(field.clone(), E3(curve.a), E3(curve.b), r, g);
     let f = &curve3.field;
     f.reset_muls();
     let s4x = s4_terms(&curve3);
-    let y = s4_in_y(f, &s4x, inst.mobius);
+    let y = match mobius {
+        Mobius::Fp(m) => s4_in_y(f, &s4x, m),
+        Mobius::Fp3(m) => s4_in_y_ext(f, &s4x, m.map(E3)),
+    };
     let y_terms = y.len();
     let s3 = symmetrise_s3(f, y.clone())?;
     let d3 = symmetrise_d3(f, y)?;
-    let l = E3(inst.yline);
+    let l = E3(yline);
     let mut pow = vec![SolverField::ONE];
     for _ in 0..24 {
         let last = *pow.last().unwrap();
@@ -1072,7 +1173,7 @@ pub fn solve_d3(
 // ── The oracles ────────────────────────────────────────────────────
 
 fn lift_triples(
-    inst: &FghrInstance,
+    inst: &dyn YLine,
     ctx: &InstanceCtx<'_, Fp3Curve>,
     fb: &FactorBase<Fp3Point>,
     ops: &mut GroupOps,
@@ -1083,9 +1184,9 @@ fn lift_triples(
     let f = &ctx.group.f;
     for t in triples {
         let xs = [
-            f.pack(inst.x_of_y(f.scale(inst.yline, t[0]))),
-            f.pack(inst.x_of_y(f.scale(inst.yline, t[1]))),
-            f.pack(inst.x_of_y(f.scale(inst.yline, t[2]))),
+            f.pack(inst.x_at(t[0])),
+            f.pack(inst.x_at(t[1])),
+            f.pack(inst.x_at(t[2])),
         ];
         if let Some(idx) = lift_abscissae(ctx.group, fb, ops, &xs, target) {
             return Some(idx);
@@ -1097,7 +1198,7 @@ fn lift_triples(
 
 /// The `D₃`-symmetrised oracle: 16 solutions a system.
 pub struct FghrOracle<'i> {
-    inst: &'i FghrInstance,
+    inst: &'i dyn YLine,
     polys: &'i FghrPolynomials,
     pub stats: FghrStats,
     totals: SolverTotals,
@@ -1105,7 +1206,7 @@ pub struct FghrOracle<'i> {
 }
 
 impl<'i> FghrOracle<'i> {
-    pub fn new(inst: &'i FghrInstance, polys: &'i FghrPolynomials, seed: u64) -> Self {
+    pub fn new(inst: &'i dyn YLine, polys: &'i FghrPolynomials, seed: u64) -> Self {
         Self {
             inst,
             polys,
@@ -1197,7 +1298,7 @@ impl DecompositionOracle<Fp3Curve> for FghrOracle<'_> {
 /// system, the existing Macaulay solver — the E11 oracle in the `Y`
 /// coordinate, so the two presentations meet on one base.
 pub struct YLineS4Oracle<'i> {
-    inst: &'i FghrInstance,
+    inst: &'i dyn YLine,
     solver_inst: Instance3,
     polys: &'i FghrPolynomials,
     rng: StdRng,
@@ -1207,7 +1308,7 @@ pub struct YLineS4Oracle<'i> {
 }
 
 impl<'i> YLineS4Oracle<'i> {
-    pub fn new(inst: &'i FghrInstance, polys: &'i FghrPolynomials, seed: u64) -> Self {
+    pub fn new(inst: &'i dyn YLine, polys: &'i FghrPolynomials, seed: u64) -> Self {
         Self {
             inst,
             solver_inst: Instance3 {

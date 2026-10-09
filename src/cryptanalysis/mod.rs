@@ -154,6 +154,7 @@ pub mod f4_fp_tower;
 pub mod f6_wide_geometry;
 pub mod fes_gpu;
 pub mod ffd_harness;
+pub mod fghr_full;
 pub mod fghr_line;
 pub mod fght_snfs;
 pub(crate) mod fx_hash;

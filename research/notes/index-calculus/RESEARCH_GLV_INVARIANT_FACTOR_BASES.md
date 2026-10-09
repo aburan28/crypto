@@ -1633,3 +1633,61 @@ compound with the Frobenius fold; the relation phase is still `p^{1+o(1)}` solve
 remains is the constant of a solve (a degree-`16` univariate root-finding and three conics) and
 not a lever on the base.  E12 settles the pair-table regime: the table folds by `w/2`, and that
 is worth having only where the table is the cost (`F_p`, two summands).  E15 settles the transfer question for the base: on the challenge's `4·prime` shape the Frobenius-fixed cofactor does not confine two-summand relations, but on `m = 31`, the program's primary exploratory size, the `373` cofactor does.  E14 closes the base side: a Q-curve endomorphism of degree 2 or 3 keeps base points only at chance, as E4's CM maps did, so the folds on these families are the automorphisms, the Frobenius-type maps and `τ_T`, and every experiment of §8.1 has run.  E16 then states the boundary that governs all of them: on a subfield curve the large prime lives in the trace-zero part, `r ≈ p²`, so rho costs `Θ(p)` and no line base can do better than a constant against it; the best arm is `10³`–`10⁴×` rho and the ratio grows as `r^{0.18}`.
+
+## 9. Goal G2 — the cheapest oracle, moved to where the exponent can beat rho
+
+**Why this goal.**  §8.10 closes the subfield families: their large prime lives in a group of
+order `≈ p²`, so rho costs `Θ(p)`, and no line base, fold or solver can do better than a constant
+against it.  The setting where index calculus has a **sub-rho exponent** is the full group: a curve
+over `F_{p³}` that is not a subfield curve, prime `r ≈ p³/h` with a small cofactor `h`, and
+Gaudry's base of abscissae in an `F_p`-line, which needs `≈ p ∝ r^{1/3}` relations against rho's
+`r^{1/2}` steps.  `RESEARCH_EXTENSION_FIELD_BOUNDARIES.md` prices that setting in full and names
+the single object that keeps it from crossing rho — the cost `C₃` of one `S₄` decomposition
+solve, `≈ 0.88·10⁶` `F_p` multiplications with the `S₃`-symmetrised Macaulay solver:
+
+- the plain method (base of all `x ∈ F_p`) is bounded away from rho, its minimum `S* ≈ 265`
+  (`≈ 200×` rho) at `N* ≈ 2^{50}` (Theorem 2, extrapolated from measured exponents);
+- the double-large-prime variant has the sub-rho exponent `N^{4/9}` but crosses rho only at
+  `N_× = 2^{33}·1989^{18} ≈ 2^{230}` (Theorem 3), because `C_DLP` is dominated by `C₃`;
+- the `ψ`-folded `j = 0` arm (`RESEARCH_GLV_INDEX_CALCULUS.md`) is `220`–`540×` rho at
+  `n = 2^{24}`–`2^{33}`.
+
+E13 (§8.7) cut exactly that solve by `33`–`41×` — `S₄` in a coordinate `Y` with
+`Y(P + T) = −Y(P)`, symmetrised by `D₃ = (Z/2)² ⋊ S₃`, solved as three conics over `F_p[q₃]` —
+but on a subfield curve, where it could buy only a constant.  **G2 moves that oracle and the
+`τ_T` fold to the full group and measures how far the crossover moves.**  `N_×` is the 18th power
+of the constant, so a cheaper solve is worth `18` bits of `n` per halving of `C_DLP` — the
+leverage in this program that is largest per unit of engineering.
+
+**The instance (`src/cryptanalysis/fghr_full.rs`).**  `x₀ ∈ F_{p³} \ F_p` and `c ∈ F_p^*` at
+random, `a = c² − 3x₀²`, `b = −x₀³ − a x₀`: `x₀` is a root of `x³ + ax + b` and
+`f'(x₀) = c²`, so `T = (x₀, 0)` is rational and `x(P + T) − x₀ = c²/(x − x₀)`.  `j(E) ∉ F_p` is
+checked, so no instance is a twist of a subfield curve; `#E(F_{p³}) = h·r` is counted by
+baby-step giant-step in the Hasse interval, with `h ≤ 8`.  The coordinate
+`Y = (x − x₀ − c)/(x − x₀ + c)` has `Y(P + T) = −Y(P)`; its inverse is a Möbius map with
+coefficients `c ∓ x₀ ∈ F_{p³}` (in `F_p` on E13's curves), so E13's oracles carry over through
+one generalised substitution (`fghr_line::s4_in_y_ext`, `fghr_polynomials_on`) and nothing else.
+The base `{P : Y(P) ∈ F_p \ {0, ±1}}` is Gaudry's affine line `x ∈ x₀ + F_p` in that coordinate;
+`τ_T` keeps it and folds with coefficient `1`, so `⟨−1, τ_T⟩` puts `4` points in a column against
+`⟨−1⟩`'s `2`.  The two unit tests already show the `D₃` oracle returning a decomposition on
+exactly the targets the `S₃` oracle and the exhaustive pair table do (`p = 2^6`, `118` targets).
+
+**Predictions, fixed before E17 runs.**
+
+| id | question | prediction | falsified by |
+|:--|:--|:--|:--|
+| G2.1 | do the oracles agree on the full group? | `D₃`, `S₃` and the pair table decompose the same targets, every decomposition re-added in the group | any disagreement at `p ≤ 2^8` |
+| G2.2 | the oracle constant | `C₃(D₃)` `÷ ≥ 20` against `C₃(S₃)` on the same instance and targets (E13: `÷ 33`–`41`), flat in `p` up to `log p` | a ratio below `10` at any size |
+| G2.3 | the `τ_T` fold | columns `÷ 2.0 ± 0.05`, relations to the pinned logarithm `÷ ≈ 2` | a column ratio outside `[1.9, 2.1]` |
+| G2.4 | end to end | `S / rho S ≤ 50` at `r ≥ 2^{28}` on the `D₃` + `τ_T` arm, against `220`–`540` for the `ψ`-fold with `S₃` | `S / rho S > 100` at `r ≥ 2^{28}` |
+| G2.5 | the ratio's slope | relations `∝ p`, rho `∝ p^{3/2}`: while the relation phase dominates, `S / rho S` falls, fitted exponent in `r` `≤ −0.10` (E16 on the subfield line: `+0.18`) | a fitted exponent `≥ 0` |
+
+**What follows if they hold.**  G2.2 and G2.4 give the measured constants to put into
+`RESEARCH_EXTENSION_FIELD_BOUNDARIES.md` Theorems 2–3 in place of `C₃ ≈ 0.88·10⁶`: the plain
+method's minimum `S*` moves by `√` of the constant (it is the geometric mean of the two terms),
+and the double-large-prime crossover by `18·log₂` of the share of `C_DLP` the solve is.  Neither is
+an exponent; both are the constant the boundary note says is the only lever, measured on the
+group where it matters.  **Class if they hold: engineering**, on a variant whose exponent is
+already sub-rho.  A falsified G2.2 would mean the `D₃` structure that made E13 cheap is an
+artefact of `F_p` Möbius coefficients; a falsified G2.5 would mean the full-group arm, too, has a
+cost that grows as fast as rho in the measured range.
