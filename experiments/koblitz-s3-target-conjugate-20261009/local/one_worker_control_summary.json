@@ -1,0 +1,44 @@
+{
+  "comparisons": [
+    {
+      "baseline_online_ms": 2.588834,
+      "conjugate_count": 41,
+      "conjugate_online_ms": 0.8033750000000001,
+      "equal_fields": {
+        "factor_base_digest": true,
+        "fallback_attempts": true,
+        "prepared_rank": true,
+        "rank_relation_witnesses": true,
+        "recovered_scalar": true,
+        "root_table_entries": true,
+        "root_table_slots": true,
+        "target_relation_indices": true,
+        "target_s3_calls": true,
+        "target_state_probes": true
+      },
+      "extra_index_bytes": 78111232,
+      "n": 41
+    },
+    {
+      "baseline_online_ms": 22.763125,
+      "conjugate_count": 53,
+      "conjugate_online_ms": 16.811083,
+      "equal_fields": {
+        "factor_base_digest": true,
+        "fallback_attempts": true,
+        "prepared_rank": true,
+        "rank_relation_witnesses": true,
+        "recovered_scalar": true,
+        "root_table_entries": true,
+        "root_table_slots": true,
+        "target_relation_indices": true,
+        "target_s3_calls": true,
+        "target_state_probes": true
+      },
+      "extra_index_bytes": 265959936,
+      "n": 53
+    }
+  ],
+  "kind": "s3_target_conjugate_one_worker_controls_v1",
+  "raw_gzip_sha256": "0a07ab4d4a27067637ab13eee6db2b4b9758d7666aa48cef59257d5f5e87c210"
+}
