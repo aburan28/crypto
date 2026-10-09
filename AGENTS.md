@@ -560,6 +560,13 @@ workloads, under the same isolation, into the same sealed records.
   native `boundary_autolab.py claim-check --stage vs_rho`).  It passes
   only with an audit receipt from another host class that replayed both
   runs; without one it fails on that and says so.
+- **The m = 83 gate runs in the two-word group.**  `koblitz_explicit`
+  builds a Koblitz curve from frozen parameters for `63 ≤ n ≤ 126`
+  (`src/cryptanalysis/koblitz_wide.rs`); its tuned signed-Frobenius walk
+  reproduces the word-size walk step for step on every curve both hold,
+  so its figures are in the same unit.  Only the rho walks run there;
+  a budgeted walk (`rho.signed_frobenius_budget`) is a step-rate
+  diagnostic, never a solve.
 - **Skills:** `ecbench-measure`, `ecbench-independent-runner` and
   `ecbench-extend` under `.agents/skills/`.
 

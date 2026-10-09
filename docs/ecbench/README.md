@@ -136,7 +136,11 @@ unseen target**, cold, with every phase charged, verified.
   cleared), so nobody knows its logarithm and `[k]G = Q` is the only
   check. That is what the IC claim rules mean by a previously unseen
   public target, and `ecbench claim` accepts nothing else. The law is in
-  the workload id, so the two kinds never share one.
+  the workload id, so the two kinds never share one. Both laws take one
+  word of the SHA-256 digest while `r < 2^64` and sixteen bytes of it,
+  with `r` carried as two words, past that; so a two-word instance of a
+  word-size curve draws exactly the targets the word-size instance
+  draws, and its workloads are the same workloads.
 
 ### Boundaries
 
@@ -175,6 +179,13 @@ different fact sets. The two claim identities are hashed the way
 `identity.py` hashes them (UTF-8, not ASCII-escaped) and are pinned
 against its values in `claim.rs`'s tests, so a claim built here and a
 tournament candidate with the same inputs carry the same id.
+
+An integer past `2^64` (a two-word subgroup order, cofactor, group
+order or recovered scalar) is written as a decimal string wherever it
+appears — records, plans, comparisons, the database — and an integer
+that fits a word stays a JSON number, so every file of a word-size
+curve is byte for byte what it was before two-word curves existed, and
+every identity view already spelt its integers out.
 
 ## 5. Confounders, and how each one is controlled
 
@@ -263,6 +274,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | family | charged | counted, not charged (`*_uncharged`) |
 |---|---|---|
 | `rho.*` | jump-table set-up, walk starts, every step, cycle escapes, look-ahead additions, internal verification | canonicalisations (negation, signed Frobenius), Frobenius maps |
+| `rho.signed_frobenius_budget` | as `rho.signed_frobenius`, stopped after `steps` walk operations: a step-rate diagnostic for a subgroup too large to solve. Its runs end `exhausted` and are never a result; a table that holds one says so | as `rho.*` |
 | `rho.signed_frobenius_strong` | group additions exactly; each scalar multiplication (jump table, walk start stride, candidate checks) at `1.5·log₂ r` additions, `ic_boundary::signed_frobenius_rho`'s convention | canonicalisations, partition hashes, distinguished-point table queries and inserts |
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
@@ -483,7 +495,15 @@ FROM method_by_curve ORDER BY curve_slug, mean_s;
   The `ecbench-extend` skill walks through it.
 - **A curve construction:** a variant of `workload::CurveSpec` that calls
   an existing constructor. Register any new curve before citing its slug
-  (AGENTS.md §11).
+  (AGENTS.md §11). A Koblitz curve a word cannot hold is given outright
+  (`koblitz_explicit`: degree, modulus, `a`, subgroup order, cofactor,
+  generator) and built in the two-word group
+  (`src/cryptanalysis/koblitz_wide.rs`), which checks the parameters
+  (Rabin's irreducibility test, the Lucas order, primality, `[r]G = O`)
+  and derives `λ` the way the word-size curve does. On a curve both
+  groups hold, the two constructions give the same workload ids and the
+  same counts, and the tests require it; a wide port of a method must
+  pass that sameness test or carry a new id.
 - **A factor base or oracle:** add it to `ic_framework` as a plug-in;
   `ic.pipeline` reaches it through its name. Dump it with `ecbench fb` to
   store its points.
@@ -500,10 +520,20 @@ Stated so that nothing here is read as more than it is:
   is a passing audit of these exact files, run elsewhere, that
   reproduced both runs, and a reader checks the receipt itself at the
   pointer the claim cites.
-- **Word-size curves only.** The counted group types hold `GF(p)` with
-  `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
-  (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
-  it.
+- **Two-word Koblitz curves run the rho walks only.** The word-size
+  groups hold `GF(p)` with `p < 2^62` and `GF(2^m)` with `m ≤ 62`, and
+  every method runs there. A Koblitz curve given outright
+  (`koblitz_explicit`, `3 ≤ n ≤ 126`, the m = 83 gate included) runs
+  `rho.signed_frobenius` and `rho.signed_frobenius_budget`; the strong
+  single-target reference, BSGS (whose table at m = 83 would hold about
+  `2^40` entries), the kangaroo and index calculus (whose factor bases
+  and relation solver are word-size) are refused with the reason. A
+  one-target solve of the gate is about `1.5 × 10^11` walk steps; the
+  harness can run it, and `research/ecbench_m83_gate_20261003` records
+  the measured step cost it would take, but no such solve has been run,
+  so no `S` at m = 83 exists yet. The IC1 claim identity stops at
+  `n = 61` (above), so `ecbench claim` cannot name an m = 83 candidate
+  until the tournament's adapter is widened.
 - **NUMA binding has met a two-node kernel, not two-socket hardware.** In
   a two-node QEMU guest the policy read back as `bind:<node>` and every
   anonymous page sat on the bound node, and that test found and fixed a

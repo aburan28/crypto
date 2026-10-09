@@ -1,0 +1,17 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "m = 83 gate: step-rate diagnostic on icv1-f2m83-tm6151469093347-debefd74",
+  "description": "The m = 83 confidence gate's curve (AGENTS.md §8a; frozen parameters of research/ic_tool_program/conformance/v2/params/gate-m83-T001.json) in the two-word group, walked by the tuned signed-Frobenius rho for a fixed budget of walk operations. Every run ends `exhausted` by design: the subgroup's floor is about 1.5e11 steps per target, and what this spec measures is the cost of a step (wall, instructions) and the walk's shape at this size, from which the gate's full cost is a stated extrapolation. Not a result, not a solve; a stage diagnostic.",
+  "workloads": {
+    "curves": [{"kind": "koblitz_explicit", "a": 0, "n": 83,
+                "modulus": "0x800000000200000000007",
+                "r": "2417851639230796216685689", "cofactor": "4",
+                "gx": "0x477f77103dfad59850800", "gy": "0x2fa5e737d542c4e4fd5c3"}],
+    "targets_per_curve": 2,
+    "target_seed": 83
+  },
+  "arms": [
+    {"name": "rho-frob-budget", "role": "reference", "method": {"id": "rho.signed_frobenius_budget", "params": {"steps": "2000000"}}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 1, "seed": 2293761, "isolation_required": "L2", "timeout_seconds": 600}
+}

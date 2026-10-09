@@ -55,8 +55,15 @@ Add a `workload::CurveSpec` variant that calls an existing repository
 constructor, and give `call()` its registry `generator_call` form. Check that
 `ecbench plan` shows the slug `registered=true` and an EC1 alias. Otherwise
 register the curve (`scripts/build_curve_registry.py`, AGENTS.md §11) before
-citing it. Word-size limits: `GF(p)` with `p < 2^62`, and `GF(2^m)` with
-`m ≤ 62`.
+citing it. Limits: `GF(p)` with `p < 2^62`; `GF(2^m)` with `m ≤ 62` in the
+word-size group (`koblitz`, `binary_random`) and `3 ≤ m ≤ 126` for a Koblitz
+curve given outright in the two-word group (`koblitz_explicit`:
+`src/cryptanalysis/koblitz_wide.rs`, which runs `rho.signed_frobenius` and its
+budgeted variant only; index calculus, BSGS, the kangaroo and the strong rho
+stay word-size). A new wide method must pass the same step-for-step sameness
+test against its narrow twin that `koblitz_wide`'s walk passes
+(`wide_walk_matches_the_narrow_walk_step_for_step`), or it is a different
+method under a new id.
 
 ## A factor base or decomposition oracle
 

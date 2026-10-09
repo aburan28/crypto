@@ -125,9 +125,16 @@ pub fn splitmix64(mut x: u64) -> u64 {
 /// their canonical JSON.  Used for planted logarithms and algorithm
 /// seeds, so neither depends on an RNG crate's stream.
 pub fn derive_u64(domain: &str, parts: &[u64]) -> u64 {
-    let v = serde_json::json!({"domain": domain, "parts": parts});
-    let d = sha256(canonical(&v).expect("integers only").as_bytes());
+    let d = derive_bytes(domain, parts);
     u64::from_be_bytes(d[..8].try_into().expect("eight bytes"))
+}
+
+/// The whole digest [`derive_u64`] takes its first eight bytes from, for
+/// a derivation that needs more than a word (a scalar on a two-word
+/// subgroup takes sixteen).
+pub fn derive_bytes(domain: &str, parts: &[u64]) -> [u8; 32] {
+    let v = serde_json::json!({"domain": domain, "parts": parts});
+    sha256(canonical(&v).expect("integers only").as_bytes())
 }
 
 #[cfg(test)]

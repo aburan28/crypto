@@ -662,6 +662,164 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     let _ = std::fs::remove_dir_all(&dir);
 }
 
+fn sameness_spec(curve: &str) -> String {
+    format!(
+        r#"{{
+      "schema": "ecbench.spec/v1",
+      "label": "wide sameness",
+      "workloads": {{"curves": [{curve}], "targets_per_curve": 2, "target_seed": 3}},
+      "arms": [
+        {{"name": "rho-frob", "role": "reference", "method": {{"id": "rho.signed_frobenius"}}}},
+        {{"name": "budget", "role": "candidate", "method": {{"id": "rho.signed_frobenius_budget", "params": {{"steps": "20000"}}}}}}
+      ],
+      "measurement": {{"rounds": 1, "warmup": 0, "seed": 9, "isolation_required": "L0", "timeout_seconds": 120}}
+    }}"#
+    )
+}
+
+fn records_of(session: &Path) -> Vec<Value> {
+    std::fs::read_to_string(session.join("records.jsonl"))
+        .unwrap()
+        .lines()
+        .map(|l| serde_json::from_str(l).unwrap())
+        .collect()
+}
+
+#[test]
+fn a_two_word_session_of_a_word_size_curve_matches_the_narrow_session() {
+    // The same curve built narrow (`koblitz`) and wide (`koblitz_explicit`
+    // from the narrow plan's facts): the same workload ids, and for every
+    // arm the same status, answer, cost, counters and phases, record for
+    // record.  The walk is the reference on both; the budgeted walk
+    // exhausts on both.
+    let dir = scratch("wide-narrow");
+    std::fs::write(
+        dir.join("spec.json"),
+        sameness_spec(r#"{"kind": "koblitz", "a": 0, "n": 41}"#),
+    )
+    .unwrap();
+    let (ok, out, err) = ecbench(&[
+        "plan",
+        "--spec",
+        dir.join("spec.json").to_str().unwrap(),
+        "--json",
+    ]);
+    assert!(ok, "{err}");
+    let plan: Value = serde_json::from_str(&out).unwrap();
+    let c = &plan["workloads"][0]["curve"];
+    let wide_curve = format!(
+        r#"{{"kind": "koblitz_explicit", "a": 0, "n": 41, "modulus": "{}", "r": "{}", "cofactor": "{}", "gx": "{}", "gy": "{}"}}"#,
+        c["modulus"].as_str().unwrap(),
+        c["r"],
+        c["cofactor"],
+        c["generator"][0].as_str().unwrap(),
+        c["generator"][1].as_str().unwrap()
+    );
+    let wide = scratch("wide-wide");
+    std::fs::write(wide.join("spec.json"), sameness_spec(&wide_curve)).unwrap();
+    let (ok, err) = run_spec(&dir, &dir.join("s"), &[]);
+    assert!(ok, "{err}");
+    let (ok, err) = run_spec(&wide, &wide.join("s"), &[]);
+    assert!(ok, "{err}");
+    let (a, b) = (records_of(&dir.join("s")), records_of(&wide.join("s")));
+    assert_eq!(a.len(), 4);
+    assert_eq!(a.len(), b.len());
+    for (x, y) in a.iter().zip(&b) {
+        let tag = format!("{} on {}", x["arm"], x["workload"]["workload_id"]);
+        assert_eq!(
+            x["workload"]["workload_id"], y["workload"]["workload_id"],
+            "{tag}"
+        );
+        assert_eq!(x["arm"], y["arm"], "{tag}");
+        assert_eq!(x["outcome"]["status"], y["outcome"]["status"], "{tag}");
+        assert_eq!(
+            x["outcome"]["recovered"], y["outcome"]["recovered"],
+            "{tag}"
+        );
+        assert_eq!(x["cost"]["total_gae"], y["cost"]["total_gae"], "{tag}");
+        assert!(
+            x.get("counters").is_some() && x.get("phases").is_some(),
+            "{x}"
+        );
+        assert_eq!(x["counters"], y["counters"], "{tag}");
+        assert_eq!(x["phases"], y["phases"], "{tag}");
+    }
+    assert!(a
+        .iter()
+        .filter(|r| r["arm"] == "rho-frob")
+        .all(|r| r["outcome"]["status"] == "verified"));
+    assert!(a
+        .iter()
+        .filter(|r| r["arm"] == "budget")
+        .all(|r| r["outcome"]["status"] == "exhausted"));
+    for d in [&dir, &wide] {
+        let (ok, _, err) = ecbench(&[
+            "verify",
+            "--dir",
+            d.join("s").to_str().unwrap(),
+            "--replay-all",
+            "--exit-code",
+        ]);
+        assert!(ok, "{err}");
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+    let _ = std::fs::remove_dir_all(&wide);
+}
+
+#[test]
+fn the_m83_gate_curve_plans_runs_a_budgeted_walk_and_replays() {
+    // The committed step-rate spec: the registered gate slug with
+    // two-word facts, every run `exhausted` at the budget with the walk's
+    // shape recorded, exact replays, and a database load that carries the
+    // subgroup order as text.
+    let dir = scratch("m83");
+    let spec =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("docs/ecbench/specs/gate-m83-steprate.json");
+    let (ok, out, err) = ecbench(&["plan", "--spec", spec.to_str().unwrap(), "--json"]);
+    assert!(ok, "{err}");
+    let plan: Value = serde_json::from_str(&out).unwrap();
+    let c = &plan["workloads"][0]["curve"];
+    assert_eq!(c["slug"], "icv1-f2m83-tm6151469093347-debefd74");
+    assert_eq!(c["registered"], true);
+    assert_eq!(c["r"], "2417851639230796216685689");
+    assert_eq!(c["cofactor"], 4);
+    assert_eq!(c["automorphisms_available"], 166);
+    std::fs::copy(&spec, dir.join("spec.json")).unwrap();
+    let out_dir = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out_dir, &[]);
+    assert!(ok, "{err}");
+    let records = records_of(&out_dir);
+    assert!(records.len() >= 4, "{}", records.len());
+    for r in &records {
+        assert_eq!(r["outcome"]["status"], "exhausted", "{r}");
+        assert!(r["counters"]["walk_operations"].as_u64().unwrap() >= 2_000_000);
+        assert_eq!(r["counters"]["distinguished_point_bits"], 20);
+        assert_eq!(r["counters"]["jumps"], 16);
+        assert!(
+            r["cost"]["s"].as_f64().unwrap() < 1e-4,
+            "{}",
+            r["cost"]["s"]
+        );
+        assert_eq!(r["workload"]["curve"]["r"], "2417851639230796216685689");
+    }
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out_dir.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "{err}");
+    let (ok, sql, err) = ecbench(&["db", "sql", out_dir.to_str().unwrap()]);
+    assert!(ok, "{err}");
+    assert!(
+        sql.contains("'2417851639230796216685689'"),
+        "{}",
+        &sql[..2000]
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     std::fs::create_dir_all(to).unwrap();
     for e in std::fs::read_dir(from).unwrap() {

@@ -300,7 +300,7 @@ pub fn audit_with(
         // Every derived figure must follow from the record's own counts:
         // a hand-edited S, ratio or flag fails here even if resealed.
         let floor = floor_s(r.boundaries.automorphisms_available);
-        let sqrt_r = (w.curve.r as f64).sqrt();
+        let sqrt_r = w.curve.r.as_f64().sqrt();
         let derived_ok = r.boundaries.automorphisms_available == w.curve.automorphisms_available
             && close(r.boundaries.floor_s, floor)
             && match (r.cost.total_gae, r.cost.s, r.boundaries.ratio_to_floor) {
@@ -320,9 +320,9 @@ pub fn audit_with(
         }
         // Re-check the answer here.
         let inst = p.instance(ex.workload);
-        let rec: Option<u64> = r.outcome.recovered.as_deref().and_then(|s| s.parse().ok());
+        let rec: Option<u128> = r.outcome.recovered.as_deref().and_then(|s| s.parse().ok());
         let target_ok = rec.map(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target));
-        let planted_ok = w.planted.and_then(|p| rec.map(|k| k == p));
+        let planted_ok = w.planted.and_then(|p| rec.map(|k| k == p.0));
         if target_ok != r.outcome.matches_target || planted_ok != r.outcome.matches_planted {
             record_problems.push(format!("{tag}: verification does not reproduce"));
         }
@@ -422,7 +422,7 @@ pub fn audit_with(
                 ),
                 Some(rep) => {
                     let mut diffs = Vec::new();
-                    if rep.recovered.map(|k| k.to_string()) != r.outcome.recovered {
+                    if rep.recovered != r.outcome.recovered {
                         diffs.push("recovered");
                     }
                     // Integer counts compare exactly; a float compares after

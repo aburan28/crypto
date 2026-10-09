@@ -382,7 +382,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         "  workload {} {} r=2^{:.2} A={} registered={} ec1={}",
                         w.workload_id,
                         w.curve.slug,
-                        (w.curve.r as f64).log2(),
+                        w.curve.r.as_f64().log2(),
                         w.curve.automorphisms_available,
                         w.curve.registered,
                         w.curve.ec1.as_deref().unwrap_or("-")
@@ -560,7 +560,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         "| {} | {} | {:.2} | {} | {} | {} |",
                         w.workload_id,
                         w.slug,
-                        (w.r as f64).log2(),
+                        w.r.as_f64().log2(),
                         o(w.a_mean_s),
                         o(w.b_mean_s),
                         o(w.ratio_b_over_a)
@@ -787,7 +787,7 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                     arm.name,
                     arm.method.id,
                     slug,
-                    any.map(|r| (r.workload.curve.r as f64).log2())
+                    any.map(|r| r.workload.curve.r.as_f64().log2())
                         .unwrap_or(f64::NAN),
                     ok.len(),
                     mine.len(),

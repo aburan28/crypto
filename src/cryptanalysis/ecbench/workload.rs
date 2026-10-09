@@ -13,14 +13,105 @@
 //! (`canonical::derive_u64`), never from an RNG stream, and no solver is
 //! handed it: the runner verifies the solver's answer afterwards.
 
-use serde::{Deserialize, Serialize};
+use std::fmt;
+
+use serde::de;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{json, Value};
 
-use crate::cryptanalysis::ecbench::canonical::{bare_id, derive_u64};
+use crate::binary_ecc::IrreduciblePoly;
+use crate::cryptanalysis::curve_id::{self, CurveId};
+use crate::cryptanalysis::ecbench::canonical::{bare_id, derive_bytes, derive_u64};
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
     BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeCurve, PrimeInstance, PrimePoint,
 };
+use crate::cryptanalysis::koblitz_wide::WideInstance;
+
+/// An integer up to `2^128`: a group order, subgroup order, cofactor or
+/// scalar.  It is written as a JSON number when it fits a word, so every
+/// record, identity and database row of a word-size curve is byte for
+/// byte what it was before two-word curves existed, and as a decimal
+/// string past that, which a JSON value holds exactly where a number
+/// would not.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Wide(pub u128);
+
+impl Wide {
+    pub fn as_f64(self) -> f64 {
+        self.0 as f64
+    }
+
+    /// The value as a word, when it is one.
+    pub fn to_u64(self) -> Option<u64> {
+        u64::try_from(self.0).ok()
+    }
+}
+
+impl From<u64> for Wide {
+    fn from(v: u64) -> Self {
+        Self(u128::from(v))
+    }
+}
+
+impl From<u128> for Wide {
+    fn from(v: u128) -> Self {
+        Self(v)
+    }
+}
+
+impl fmt::Display for Wide {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Serialize for Wide {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        match u64::try_from(self.0) {
+            Ok(v) => s.serialize_u64(v),
+            Err(_) => s.serialize_str(&self.0.to_string()),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for Wide {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        struct V;
+        impl de::Visitor<'_> for V {
+            type Value = Wide;
+            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str("an integer, or a decimal string for one past 2^64")
+            }
+            fn visit_u64<E: de::Error>(self, v: u64) -> Result<Wide, E> {
+                Ok(Wide::from(v))
+            }
+            fn visit_i64<E: de::Error>(self, v: i64) -> Result<Wide, E> {
+                u128::try_from(v)
+                    .map(Wide)
+                    .map_err(|_| E::custom("a negative integer"))
+            }
+            fn visit_u128<E: de::Error>(self, v: u128) -> Result<Wide, E> {
+                Ok(Wide(v))
+            }
+            fn visit_f64<E: de::Error>(self, v: f64) -> Result<Wide, E> {
+                Err(E::custom(format!(
+                    "{v} is a float; an integer past 2^64 is written as a decimal string"
+                )))
+            }
+            fn visit_str<E: de::Error>(self, v: &str) -> Result<Wide, E> {
+                v.parse::<u128>()
+                    .map(Wide)
+                    .map_err(|_| E::custom(format!("not an integer: `{v}`")))
+            }
+        }
+        d.deserialize_any(V)
+    }
+}
+
+fn parse_hex128(s: &str) -> Option<u128> {
+    u128::from_str_radix(s.trim_start_matches("0x"), 16).ok()
+}
 
 /// How to build the curve.  Each variant is a constructor the repository
 /// already has, so the registry's `generator_call` names the same curve.
@@ -54,6 +145,25 @@ pub enum CurveSpec {
         r: u64,
         gx: u64,
         gy: u64,
+    },
+    /// A Koblitz curve `K_a` over `F_2[z]/(modulus)` given outright, in
+    /// the two-word group (`koblitz_wide`, `3 ≤ n ≤ 126`): the frozen
+    /// parameters of a curve a word cannot hold, such as the m = 83
+    /// confidence gate (AGENTS.md §8a).  `modulus` and the generator are
+    /// hex, the subgroup order and cofactor decimal.  Checked on build:
+    /// the modulus is irreducible, the subgroup order is prime and times
+    /// the cofactor is the curve's order by the Lucas sequence, the
+    /// generator is on the curve and `[r]G = O`.  On a curve the narrow
+    /// group also holds this builds the same curve, point for point and
+    /// count for count, in the slower arithmetic.
+    KoblitzExplicit {
+        a: u8,
+        n: u32,
+        modulus: String,
+        r: String,
+        cofactor: String,
+        gx: String,
+        gy: String,
     },
 }
 
@@ -122,6 +232,48 @@ impl CurveSpec {
                 inst.name = inst.curve_id().slug;
                 Ok(Instance::Prime(inst))
             }
+            CurveSpec::KoblitzExplicit {
+                a,
+                n,
+                ref modulus,
+                ref r,
+                ref cofactor,
+                ref gx,
+                ref gy,
+            } => {
+                let m = parse_hex128(modulus)
+                    .filter(|&m| m != 0)
+                    .ok_or_else(|| format!("koblitz_explicit: bad modulus `{modulus}`"))?;
+                let degree = 127 - m.leading_zeros();
+                if degree != n {
+                    return Err(format!(
+                        "koblitz_explicit: the modulus {modulus} has degree {degree}, not n = {n}"
+                    ));
+                }
+                let irr = IrreduciblePoly {
+                    degree: n,
+                    low_terms: (0..n).filter(|&t| (m >> t) & 1 == 1).collect(),
+                };
+                let dec = |name: &str, s: &str| {
+                    s.parse::<u128>().map_err(|_| {
+                        format!("koblitz_explicit: {name} `{s}` is not a decimal integer")
+                    })
+                };
+                let hex = |name: &str, s: &str| {
+                    parse_hex128(s)
+                        .ok_or_else(|| format!("koblitz_explicit: {name} `{s}` is not hex"))
+                };
+                let inst = WideInstance::explicit(
+                    a,
+                    &irr,
+                    dec("r", r)?,
+                    dec("cofactor", cofactor)?,
+                    hex("gx", gx)?,
+                    hex("gy", gy)?,
+                )
+                .map_err(|e| format!("koblitz_explicit: {e}"))?;
+                Ok(Instance::Wide(Box::new(inst)))
+            }
         }
     }
 
@@ -139,6 +291,15 @@ impl CurveSpec {
                 gy: i.generator.1,
             }),
             Instance::Binary(_) => None,
+            Instance::Wide(i) => Some(CurveSpec::KoblitzExplicit {
+                a: i.a,
+                n: i.n,
+                modulus: i.modulus_hex(),
+                r: i.r.to_string(),
+                cofactor: i.cofactor.to_string(),
+                gx: format!("0x{:x}", i.generator.x),
+                gy: format!("0x{:x}", i.generator.y),
+            }),
         }
     }
 
@@ -158,6 +319,11 @@ impl CurveSpec {
             CurveSpec::PrimeExplicit { p, a, b, .. } => {
                 format!("PrimeCurve {{ p: {p}, a: {a}, b: {b} }} (explicit)")
             }
+            CurveSpec::KoblitzExplicit {
+                a, n, ref modulus, ..
+            } => {
+                format!("WideInstance::explicit(K_{a}, F_2^{n}, {modulus}) (explicit, two-word)")
+            }
         }
     }
 }
@@ -166,6 +332,8 @@ impl CurveSpec {
 pub enum Instance {
     Prime(PrimeInstance),
     Binary(Box<BinaryInstance>),
+    /// A Koblitz curve in the two-word group (`koblitz_wide`).
+    Wide(Box<WideInstance>),
 }
 
 /// The facts about a built curve every record carries.
@@ -181,9 +349,12 @@ pub struct CurveFacts {
     pub field_degree: Option<u32>,
     /// Bits of the field characteristic for prime curves.
     pub field_bits: Option<u32>,
-    pub group_order: u64,
-    pub r: u64,
-    pub cofactor: u64,
+    pub group_order: Wide,
+    pub r: Wide,
+    pub cofactor: Wide,
+    /// The field's modulus as a hex integer, for binary curves.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modulus: Option<String>,
     /// Generator coordinates as lower-case hex.
     pub generator: [String; 2],
     /// Automorphisms a generic algorithm may use: 2 (negation), or `2n`
@@ -210,23 +381,19 @@ fn registry_entry(slug: &str) -> Option<Value> {
         .cloned()
 }
 
-fn parse_hex(s: &str) -> Option<u64> {
-    u64::from_str_radix(s.trim_start_matches("0x"), 16).ok()
-}
-
 /// `(ec1, curve_uid)` of the representation with this subgroup and
 /// generator.
-fn matching_representation(entry: &Value, r: u64, gx: u64, gy: u64) -> Option<(String, String)> {
+fn matching_representation(entry: &Value, r: u128, gx: u128, gy: u128) -> Option<(String, String)> {
     entry
         .get("representations")?
         .as_array()?
         .iter()
         .find_map(|rep| {
             let c = rep.get("curve")?;
-            let order: u64 = c.get("subgroup_order")?.as_str()?.parse().ok()?;
+            let order: u128 = c.get("subgroup_order")?.as_str()?.parse().ok()?;
             let g = c.get("generator")?.as_array()?;
-            let x = parse_hex(g.first()?.as_str()?)?;
-            let y = parse_hex(g.get(1)?.as_str()?)?;
+            let x = parse_hex128(g.first()?.as_str()?)?;
+            let y = parse_hex128(g.get(1)?.as_str()?)?;
             if order != r || x != gx || y != gy {
                 return None;
             }
@@ -237,61 +404,93 @@ fn matching_representation(entry: &Value, r: u64, gx: u64, gy: u64) -> Option<(S
         })
 }
 
+/// The facts of a built curve before the registry is consulted.
+struct RawFacts {
+    id: CurveId,
+    family: &'static str,
+    degree: Option<u32>,
+    bits: Option<u32>,
+    order: u128,
+    r: u128,
+    h: u128,
+    gx: u128,
+    gy: u128,
+    aut: u32,
+    modulus: Option<String>,
+}
+
 impl Instance {
-    pub fn r(&self) -> u64 {
+    pub fn r(&self) -> Wide {
         match self {
-            Instance::Prime(i) => i.r,
-            Instance::Binary(i) => i.r,
+            Instance::Prime(i) => Wide::from(i.r),
+            Instance::Binary(i) => Wide::from(i.r),
+            Instance::Wide(i) => Wide(i.r),
         }
     }
 
     pub fn facts(&self, spec: &CurveSpec) -> CurveFacts {
-        let (id, family, degree, bits, order, r, h, gx, gy, aut) = match self {
-            Instance::Prime(i) => (
-                i.curve_id(),
-                "prime",
-                None,
-                Some(64 - i.curve.p.leading_zeros()),
-                i.group_order,
-                i.r,
-                i.cofactor,
-                i.generator.0,
-                i.generator.1,
-                2,
-            ),
-            Instance::Binary(i) => (
-                i.curve_id(),
-                if i.koblitz.is_some() {
+        let raw = match self {
+            Instance::Prime(i) => RawFacts {
+                id: i.curve_id(),
+                family: "prime",
+                degree: None,
+                bits: Some(64 - i.curve.p.leading_zeros()),
+                order: i.group_order.into(),
+                r: i.r.into(),
+                h: i.cofactor.into(),
+                gx: i.generator.0.into(),
+                gy: i.generator.1.into(),
+                aut: 2,
+                modulus: None,
+            },
+            Instance::Binary(i) => RawFacts {
+                id: i.curve_id(),
+                family: if i.koblitz.is_some() {
                     "koblitz"
                 } else {
                     "binary"
                 },
-                Some(i.n),
-                None,
-                i.group_order,
-                i.r,
-                i.cofactor,
-                i.generator.x,
-                i.generator.y,
-                if i.koblitz.is_some() { 2 * i.n } else { 2 },
-            ),
+                degree: Some(i.n),
+                bits: None,
+                order: i.group_order.into(),
+                r: i.r.into(),
+                h: i.cofactor.into(),
+                gx: i.generator.x.into(),
+                gy: i.generator.y.into(),
+                aut: if i.koblitz.is_some() { 2 * i.n } else { 2 },
+                modulus: Some(format!("0x{:x}", curve_id::modulus_integer(&i.irreducible))),
+            },
+            Instance::Wide(i) => RawFacts {
+                id: i.curve_id(),
+                family: "koblitz",
+                degree: Some(i.n),
+                bits: None,
+                order: i.group_order,
+                r: i.r,
+                h: i.cofactor,
+                gx: i.generator.x,
+                gy: i.generator.y,
+                aut: 2 * i.n,
+                modulus: Some(i.modulus_hex()),
+            },
         };
-        let entry = registry_entry(&id.slug);
+        let entry = registry_entry(&raw.id.slug);
         let rep = entry
             .as_ref()
-            .and_then(|e| matching_representation(e, r, gx, gy));
+            .and_then(|e| matching_representation(e, raw.r, raw.gx, raw.gy));
         CurveFacts {
-            slug: id.slug,
-            icv1: id.icv1,
-            family: family.into(),
+            slug: raw.id.slug,
+            icv1: raw.id.icv1,
+            family: raw.family.into(),
             construction: spec.call(),
-            field_degree: degree,
-            field_bits: bits,
-            group_order: order,
-            r,
-            cofactor: h,
-            generator: [format!("0x{gx:x}"), format!("0x{gy:x}")],
-            automorphisms_available: aut,
+            field_degree: raw.degree,
+            field_bits: raw.bits,
+            group_order: Wide(raw.order),
+            r: Wide(raw.r),
+            cofactor: Wide(raw.h),
+            modulus: raw.modulus,
+            generator: [format!("0x{:x}", raw.gx), format!("0x{:x}", raw.gy)],
+            automorphisms_available: raw.aut,
             registered: entry.is_some(),
             ec1: rep.as_ref().map(|(a, _)| a.clone()),
             curve_uid: rep.map(|(_, u)| u),
@@ -300,17 +499,24 @@ impl Instance {
 
     /// `[k]G` as hex coordinates, computed by the instance's own counted
     /// double-and-add on a ledger nobody reads.  Used to build the
-    /// target and, separately, to verify an answer.
-    pub fn mul_generator_hex(&self, k: u64) -> Option<[String; 2]> {
+    /// target and, separately, to verify an answer.  `None` for the
+    /// identity, and for a `k` a word-size group cannot hold.
+    pub fn mul_generator_hex(&self, k: u128) -> Option<[String; 2]> {
         let mut scratch = GroupOps::default();
         match self {
             Instance::Prime(i) => {
+                let k = u64::try_from(k).ok()?;
                 let p = i.curve.mul(&mut scratch, i.generator_point(), k);
                 (!p.infinity).then(|| [format!("0x{:x}", p.x), format!("0x{:x}", p.y)])
             }
             Instance::Binary(i) => {
+                let k = u64::try_from(k).ok()?;
                 let g = BinaryGroup(&i.fast);
                 let p = g.mul(&mut scratch, i.generator, k);
+                (!p.infinity).then(|| [format!("0x{:x}", p.x), format!("0x{:x}", p.y)])
+            }
+            Instance::Wide(i) => {
+                let p = i.curve.mul_counted(&mut scratch, i.generator, k);
                 (!p.infinity).then(|| [format!("0x{:x}", p.x), format!("0x{:x}", p.y)])
             }
         }
@@ -333,9 +539,40 @@ impl Instance {
         let model = model_hash(curve);
         let mut scratch = GroupOps::default();
         for counter in 0..10_000u64 {
-            let h = derive_u64(PUBLIC_TARGET_LAW, &[model, curve.r, seed, index, counter]);
+            // One word of hash on a word-size subgroup; two words, with
+            // `r` carried as two words, past it.
+            let h64 = curve
+                .r
+                .to_u64()
+                .map(|r| derive_u64(PUBLIC_TARGET_LAW, &[model, r, seed, index, counter]));
+            let h = h64.unwrap_or(0);
             let flip = (h >> 63) & 1 == 1;
             match self {
+                Instance::Wide(i) => {
+                    // The one-word derivation whenever `r` is a word, so a
+                    // two-word instance of a word-size curve draws the
+                    // narrow instance's targets; two words past that.
+                    let (h, flip) = match h64 {
+                        Some(h) => (u128::from(h), flip),
+                        None => {
+                            let r = i.r;
+                            let d = derive_bytes(
+                                PUBLIC_TARGET_LAW,
+                                &[model, r as u64, (r >> 64) as u64, seed, index, counter],
+                            );
+                            let h = u128::from_be_bytes(d[..16].try_into().expect("sixteen bytes"));
+                            (h, (h >> 127) & 1 == 1)
+                        }
+                    };
+                    let pts = i.points_with_x(h & i.curve.field.mask());
+                    let Some(&p) = pts.get(usize::from(flip && pts.len() > 1)) else {
+                        continue;
+                    };
+                    let q = i.curve.mul(p, i.cofactor);
+                    if !q.infinity {
+                        return Some(([format!("0x{:x}", q.x), format!("0x{:x}", q.y)], counter));
+                    }
+                }
                 Instance::Prime(i) => {
                     let c = &i.curve;
                     let x = h % c.p;
@@ -408,12 +645,27 @@ impl TargetKind {
     }
 }
 
-/// `k ∈ [1, r−1]` for target `index` under `target_seed`.
-pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u64 {
+/// `k ∈ [1, r−1]` for target `index` under `target_seed`: one word of
+/// hash reduced modulo `r − 1` on a word-size subgroup, and past that
+/// two words of the same digest with `r` carried as two words.
+pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> Wide {
     // The curve's model hash and subgroup enter the derivation, so the
     // same seed on two curves gives unrelated scalars.
     let model = model_hash(curve);
-    1 + derive_u64(TARGET_LAW, &[model, curve.r, target_seed, index]) % (curve.r - 1)
+    match curve.r.to_u64() {
+        Some(r) => {
+            Wide::from(1 + derive_u64(TARGET_LAW, &[model, r, target_seed, index]) % (r - 1))
+        }
+        None => {
+            let r = curve.r.0;
+            let d = derive_bytes(
+                TARGET_LAW,
+                &[model, r as u64, (r >> 64) as u64, target_seed, index],
+            );
+            let h = u128::from_be_bytes(d[..16].try_into().expect("sixteen bytes"));
+            Wide(1 + h % (r - 1))
+        }
+    }
 }
 
 /// One built single-target workload.
@@ -433,7 +685,7 @@ pub struct Workload {
     /// The planted `k` with `Q = [k]G`, for a planted target.  Not in the
     /// identity (the target point is) and never passed to a solver.
     /// `None` for a public target, whose logarithm nobody knows.
-    pub planted: Option<u64>,
+    pub planted: Option<Wide>,
     /// The hash counter that landed a public target in the subgroup.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_counter: Option<u64>,
@@ -465,7 +717,7 @@ impl Workload {
         kind: TargetKind,
     ) -> Result<Workload, String> {
         let curve = inst.facts(spec);
-        if curve.r < 5 {
+        if curve.r.0 < 5 {
             return Err(format!(
                 "subgroup order {} is too small to measure",
                 curve.r
@@ -475,14 +727,14 @@ impl Workload {
             TargetKind::Planted => {
                 let k = planted_scalar(&curve, target_seed, index);
                 let q = inst
-                    .mul_generator_hex(k)
+                    .mul_generator_hex(k.0)
                     .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
                 (TARGET_LAW, q, Some(k), None)
             }
             TargetKind::Public => {
                 // With r | h the r-torsion can be Z/r × Z/r, and a cleared
                 // point need not lie in <G>.
-                if curve.cofactor.is_multiple_of(curve.r) {
+                if curve.cofactor.0.is_multiple_of(curve.r.0) {
                     return Err(format!(
                         "r = {} divides the cofactor {}: a hashed target need not lie in <G>",
                         curve.r, curve.cofactor
@@ -615,8 +867,95 @@ mod tests {
                 w
             );
             // In <G>, by exhaustion on a subgroup this small.
-            assert!((1..w.curve.r).any(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target)));
+            assert!((1..w.curve.r.0).any(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target)));
         }
+    }
+
+    #[test]
+    fn a_koblitz_curve_given_outright_is_the_same_workload() {
+        // The two-word construction of a word-size curve: the same slug,
+        // subgroup, generator and targets (planted and public), so the
+        // same workload ids; only the constructor text differs.
+        let narrow = CurveSpec::Koblitz { a: 1, n: 17 };
+        let (w0, inst) = Workload::build(&narrow, 11, 0, TargetKind::Public).unwrap();
+        let f = inst.facts(&narrow);
+        let wide = CurveSpec::KoblitzExplicit {
+            a: 1,
+            n: 17,
+            modulus: f.modulus.clone().unwrap(),
+            r: f.r.to_string(),
+            cofactor: f.cofactor.to_string(),
+            gx: f.generator[0].clone(),
+            gy: f.generator[1].clone(),
+        };
+        let (w1, inst1) = Workload::build(&wide, 11, 0, TargetKind::Public).unwrap();
+        assert!(matches!(inst1, Instance::Wide(_)));
+        assert_eq!(w1.workload_id, w0.workload_id);
+        assert_eq!(w1.curve.slug, w0.curve.slug);
+        assert_eq!(w1.curve.icv1, w0.curve.icv1);
+        assert_eq!(
+            (w1.curve.r, w1.curve.cofactor, w1.curve.group_order),
+            (w0.curve.r, w0.curve.cofactor, w0.curve.group_order)
+        );
+        assert_eq!(w1.target, w0.target);
+        assert_eq!(w1.target_counter, w0.target_counter);
+        assert_ne!(w1.curve.construction, w0.curve.construction);
+        let (p0, _) = Workload::build(&narrow, 11, 3, TargetKind::Planted).unwrap();
+        let (p1, _) = Workload::build(&wide, 11, 3, TargetKind::Planted).unwrap();
+        assert_eq!(p1.workload_id, p0.workload_id);
+        assert_eq!(p1.planted, p0.planted);
+        assert_eq!(p1.target, p0.target);
+        assert_eq!(CurveSpec::explicit(&inst1), Some(wide));
+    }
+
+    /// The m = 83 gate's curve, as a spec names it.
+    const GATE_M83: &str = r#"{"kind":"koblitz_explicit","a":0,"n":83,"modulus":"0x800000000200000000007","r":"2417851639230796216685689","cofactor":"4","gx":"0x477f77103dfad59850800","gy":"0x2fa5e737d542c4e4fd5c3"}"#;
+
+    #[test]
+    fn wide_integers_serialise_as_numbers_below_a_word_and_strings_above() {
+        let small = Wide(65587);
+        let big = Wide(2_417_851_639_230_796_216_685_689);
+        assert_eq!(serde_json::to_string(&small).unwrap(), "65587");
+        assert_eq!(
+            serde_json::to_string(&big).unwrap(),
+            "\"2417851639230796216685689\""
+        );
+        assert_eq!(serde_json::from_str::<Wide>("65587").unwrap(), small);
+        assert_eq!(
+            serde_json::from_str::<Wide>("\"2417851639230796216685689\"").unwrap(),
+            big
+        );
+        assert_eq!(serde_json::from_str::<Wide>("\"65587\"").unwrap(), small);
+        assert!(serde_json::from_str::<Wide>("1.5").is_err());
+        assert!(serde_json::from_str::<Wide>("-1").is_err());
+
+        // The gate curve: registered slug, two-word facts that round-trip
+        // through a record, a planted scalar and a public target in <G>.
+        let spec: CurveSpec = serde_json::from_str(GATE_M83).unwrap();
+        let (w, inst) = Workload::build(&spec, 1, 0, TargetKind::Planted).unwrap();
+        assert_eq!(w.curve.slug, "icv1-f2m83-tm6151469093347-debefd74");
+        assert!(w.curve.registered);
+        assert_eq!(w.curve.r, big);
+        assert_eq!(w.curve.cofactor, Wide(4));
+        assert_eq!(w.curve.automorphisms_available, 166);
+        let k = w.planted.unwrap().0;
+        assert!(k > 0 && k < big.0);
+        let text = serde_json::to_string(&w).unwrap();
+        assert!(
+            text.contains("\"r\":\"2417851639230796216685689\""),
+            "{text}"
+        );
+        let back: Workload = serde_json::from_str(&text).unwrap();
+        assert_eq!(back, w);
+        assert_eq!(w.recompute_id().unwrap(), w.workload_id);
+        assert_eq!(inst.mul_generator_hex(k).as_ref(), Some(&w.target));
+        let (p, _) = Workload::build(&spec, 1, 0, TargetKind::Public).unwrap();
+        let Instance::Wide(i) = &inst else { panic!() };
+        let x = parse_hex128(&p.target[0]).unwrap();
+        let y = parse_hex128(&p.target[1]).unwrap();
+        let q = crate::cryptanalysis::koblitz_wide::WidePoint::affine(x, y);
+        assert!(i.curve.is_on_curve(q) && i.curve.mul(q, i.r).infinity && !q.infinity);
+        assert!(p.planted.is_none());
     }
 
     #[test]
@@ -669,7 +1008,7 @@ mod tests {
         .unwrap();
         let n = 20_000u64;
         let mut xs: Vec<f64> = (0..n)
-            .map(|i| planted_scalar(&w.curve, 20261002, i) as f64 / w.curve.r as f64)
+            .map(|i| planted_scalar(&w.curve, 20261002, i).as_f64() / w.curve.r.as_f64())
             .collect();
         xs.sort_by(f64::total_cmp);
         let d = xs

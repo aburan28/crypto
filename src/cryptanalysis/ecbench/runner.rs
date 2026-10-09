@@ -692,11 +692,12 @@ fn assemble(
         .and_then(|o| o.error.clone())
         .or_else(|| reaped.parse_error.clone());
     let exited_cleanly = reaped.exit.as_deref() == Some("exit 0");
-    let recovered = report.as_ref().and_then(|r| r.recovered);
+    let recovered_text = report.as_ref().and_then(|r| r.recovered.clone());
+    let recovered: Option<u128> = recovered_text.as_deref().and_then(|s| s.parse().ok());
     // Verification in the runner's own process: [k]G against the target.
     let matches_target = recovered.map(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target));
     // A public target has no planted answer: [k]G = Q decides alone.
-    let matches_planted = w.planted.and_then(|p| recovered.map(|k| k == p));
+    let matches_planted = w.planted.and_then(|p| recovered.map(|k| k == p.0));
     let status = if reaped.timed_out {
         "timeout"
     } else if !exited_cleanly && report.is_none() {
@@ -705,12 +706,12 @@ fn assemble(
         "error"
     } else if matches_target == Some(true) && matches_planted != Some(false) {
         "verified"
-    } else if recovered.is_some() {
+    } else if recovered_text.is_some() {
         "wrong_answer"
     } else {
         "exhausted"
     };
-    let sqrt_r = (w.curve.r as f64).sqrt();
+    let sqrt_r = w.curve.r.as_f64().sqrt();
     let floor = floor_s(w.curve.automorphisms_available);
     let s = report.as_ref().map(|r| r.total_gae / sqrt_r);
     let placement = reaped
@@ -749,7 +750,7 @@ fn assemble(
         algorithm_seed: ex.algorithm_seed.to_string(),
         outcome: Outcome {
             status: status.into(),
-            recovered: recovered.map(|k| k.to_string()),
+            recovered: recovered_text,
             matches_target,
             matches_planted,
             error: child_error,

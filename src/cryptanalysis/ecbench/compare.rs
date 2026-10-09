@@ -41,6 +41,7 @@ use crate::cryptanalysis::ecbench::record::Record;
 use crate::cryptanalysis::ecbench::runner::{read_records, read_session};
 use crate::cryptanalysis::ecbench::spec::{Level, Spec};
 use crate::cryptanalysis::ecbench::stats::{bootstrap_ci, cluster_bootstrap_ci, mean, median};
+use crate::cryptanalysis::ecbench::workload::Wide;
 
 pub const COMPARISON_SCHEMA: &str = "ecbench.comparison/v1";
 
@@ -66,7 +67,7 @@ pub struct ArmSummary {
 pub struct WorkloadRow {
     pub workload_id: String,
     pub slug: String,
-    pub r: u64,
+    pub r: Wide,
     pub floor_s: f64,
     /// Matched, verified pairs on this workload.
     pub pairs: u64,
@@ -345,7 +346,7 @@ pub fn compare(
             let (ratio_b_over_a, ci95, ci_method) = ratio_with_interval(&strata, resamples, seed);
             CurveRatio {
                 slug: slug.clone(),
-                log2_r: (mine[0].r as f64).log2(),
+                log2_r: mine[0].r.as_f64().log2(),
                 workloads: mine.len() as u64,
                 pairs: strata.iter().map(|s| s.len() as u64).sum(),
                 ratio_b_over_a,

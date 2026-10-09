@@ -1,0 +1,64 @@
+{
+  "schema": "ecbench.host/v1",
+  "env_class_id": "ECBENV2h59034d4cd61b",
+  "env_class_sha256": "59034d4cd61b4a58a9fcd8856c227aa4db4df557e3e7a375cb1e4eef79f79371",
+  "stable": {
+    "os": "macos",
+    "arch": "aarch64",
+    "kernel_release": "25.6.0",
+    "cpu_vendor": null,
+    "cpu_model": "Apple M4 Pro",
+    "cpu_signature": null,
+    "microcode": null,
+    "features": [
+      "aes",
+      "crc",
+      "dotprod",
+      "lse",
+      "neon",
+      "pmull",
+      "sha2",
+      "sha3"
+    ],
+    "flags_sha256": null,
+    "logical_cpus": 14,
+    "physical_cores": 14,
+    "packages": 1,
+    "numa_nodes": 1,
+    "topology": {
+      "cpus": [],
+      "nodes": []
+    },
+    "perf_levels": [
+      {
+        "name": "Performance",
+        "physical": 10,
+        "logical": 10
+      },
+      {
+        "name": "Efficiency",
+        "physical": 4,
+        "logical": 4
+      }
+    ],
+    "mem_total_kib": 50331648,
+    "cpu_settings": {},
+    "transparent_hugepages": null,
+    "virtualization": {
+      "kern_hv_vmm_present": "0"
+    },
+    "rustc_vv": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8"
+  },
+  "build": {
+    "binary_path": "/private/tmp/claude-501/-Volumes-SSD990-crypto--claude-worktrees-eloquent-ellis-53d3cb/456d1076-ed95-487f-82e3-8fd0cb4505d8/scratchpad/target/release/ecbench",
+    "binary_sha256": "2a35592e82b3e97d180c1ed0d10cf50b9954f279691a910ae273f103b00a6ad9",
+    "git_commit": null,
+    "git_dirty": null,
+    "debug_assertions": false,
+    "target_os": "macos",
+    "target_arch": "aarch64",
+    "build_env": {}
+  },
+  "process_affinity": null,
+  "captured_unix_ms": 1791004589776
+}

@@ -44,6 +44,9 @@ use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_strong_rho::{
     RawPoint as StrongPoint, StrongRho, StrongRhoCharges, StrongRhoParams,
 };
+use crate::cryptanalysis::koblitz_wide::{
+    signed_frobenius_walk, wide_rho_cap, WidePoint, WideRhoResult,
+};
 use rand::{rngs::StdRng, SeedableRng};
 
 /// A parameter a method reads.  `default: None` means required: a value
@@ -117,6 +120,18 @@ pub fn registry() -> &'static [MethodDecl] {
             entry: "ic_boundary::signed_frobenius_rho_tuned",
             applies: Applies::KoblitzOnly,
             params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_budget",
+            family: "rho",
+            summary: "rho.signed_frobenius stopped after `steps` walk operations: a step-rate diagnostic for a subgroup too large to solve, never a result (its runs end `exhausted` unless the budget happens to suffice)",
+            entry: "ic_boundary::signed_frobenius_rho_tuned / koblitz_wide::signed_frobenius_walk, max_steps = steps",
+            applies: Applies::KoblitzOnly,
+            params: &[ParamDecl {
+                name: "steps",
+                default: None,
+                help: "walk operations before the run stops; the wall time and counts over them are the diagnostic",
+            }],
         },
         MethodDecl {
             id: "rho.signed_frobenius_strong",
@@ -380,7 +395,9 @@ pub struct OnlineWindow {
 /// What a solve reports.  The runner adds verification and timing.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct SolveReport {
-    pub recovered: Option<u64>,
+    /// The recovered logarithm, decimal: a word-size one or a two-word
+    /// one, which a JSON value would not hold as a number.
+    pub recovered: Option<String>,
     /// The budget ran out before an answer.
     pub exhausted: bool,
     pub phases: Vec<PhaseRecord>,
@@ -437,7 +454,7 @@ fn param_u64(m: &ResolvedMethod, name: &str) -> Result<u64, String> {
 fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
     let total = out.setup.gae() + out.search.gae();
     SolveReport {
-        recovered: out.recovered,
+        recovered: out.recovered.map(|k| k.to_string()),
         exhausted: out.exhausted,
         phases: vec![
             ops_phase("setup", out.setup),
@@ -457,9 +474,59 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
     }
 }
 
+/// What a rho report is made from: the fields of `ic_boundary::RhoResult`
+/// and of `koblitz_wide::WideRhoResult` that the report reads.
+struct RhoLike {
+    method: String,
+    automorphisms: u32,
+    group_ops: GroupOps,
+    steps: u64,
+    walks: u64,
+    distinguished_points: u64,
+    gae: f64,
+    expected_steps: f64,
+    recovered: Option<String>,
+    counters: BTreeMap<String, u64>,
+}
+
+impl From<RhoResult> for RhoLike {
+    fn from(r: RhoResult) -> Self {
+        Self {
+            method: r.method,
+            automorphisms: r.automorphisms,
+            group_ops: r.group_ops,
+            steps: r.steps,
+            walks: r.walks,
+            distinguished_points: r.distinguished_points,
+            gae: r.gae,
+            expected_steps: r.expected_steps,
+            recovered: r.recovered.map(|k| k.to_string()),
+            counters: r.counters,
+        }
+    }
+}
+
+impl From<WideRhoResult> for RhoLike {
+    fn from(r: WideRhoResult) -> Self {
+        Self {
+            method: r.method,
+            automorphisms: r.automorphisms,
+            group_ops: r.group_ops,
+            steps: r.steps,
+            walks: r.walks,
+            distinguished_points: r.distinguished_points,
+            gae: r.gae,
+            expected_steps: r.expected_steps,
+            recovered: r.recovered.map(|k| k.to_string()),
+            counters: r.counters,
+        }
+    }
+}
+
 /// Split a tuned rho run into set-up, walk and verification from its own
 /// counters; the frozen walk has none and stays one phase.
-fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
+fn rho_report(res: impl Into<RhoLike>, wall: u64) -> SolveReport {
+    let res: RhoLike = res.into();
     let c = &res.counters;
     let get = |k: &str| c.get(k).copied().unwrap_or(0);
     let phases = if c.is_empty() {
@@ -486,8 +553,8 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
     counters.insert("walks".into(), res.walks);
     counters.insert("distinguished_points".into(), res.distinguished_points);
     SolveReport {
-        recovered: res.recovered,
         exhausted: res.recovered.is_none(),
+        recovered: res.recovered,
         total_gae: res.gae,
         automorphisms_used: res.automorphisms,
         unpriced: unpriced_of(&counters),
@@ -570,8 +637,13 @@ fn solve_generic<G: CountedGroup>(
     Ok(rep)
 }
 
-fn parse_hex(s: &str) -> Result<u64, String> {
-    u64::from_str_radix(s.trim_start_matches("0x"), 16).map_err(|_| format!("bad hex `{s}`"))
+fn parse_hex(s: &str) -> Result<u128, String> {
+    u128::from_str_radix(s.trim_start_matches("0x"), 16).map_err(|_| format!("bad hex `{s}`"))
+}
+
+/// A target coordinate as a word, for the word-size groups.
+fn narrow(v: u128) -> Result<u64, String> {
+    u64::try_from(v).map_err(|_| format!("coordinate 0x{v:x} does not fit a word-size group"))
 }
 
 /// Solve for `target` with method `m` on `inst`, under algorithm seed
@@ -608,26 +680,76 @@ fn solve_inner(
     inst: &Instance,
     curve: &CurveFacts,
     d: &MethodDecl,
-    tx: u64,
-    ty: u64,
+    tx: u128,
+    ty: u128,
     seed: u64,
 ) -> Result<SolveReport, String> {
+    // The tuned signed-Frobenius walk, to its cap or to the budget the
+    // diagnostic variant names.
+    let budget = |r_bits_floor: &dyn Fn(f64) -> u64| -> Result<u64, String> {
+        if m.id == "rho.signed_frobenius_budget" {
+            param_u64(m, "steps")
+        } else {
+            Ok(r_bits_floor(param_u64(m, "cap_multiple")? as f64))
+        }
+    };
     match (inst, d.family) {
-        (Instance::Prime(i), "ic") => solve_ic_prime(m, i, curve, PrimePoint::affine(tx, ty), seed),
-        (Instance::Binary(i), "ic") => {
-            solve_ic_binary(m, i, curve, FastPoint::affine(tx, ty), seed)
+        (Instance::Wide(_), "ic") => Err(format!(
+            "`{}` on a two-word curve: index calculus in ecbench is word-size (factor bases, relation solver); only the rho walks run on {}",
+            m.id, curve.slug
+        )),
+        (Instance::Wide(i), _)
+            if m.id == "rho.signed_frobenius" || m.id == "rho.signed_frobenius_budget" =>
+        {
+            let target = WidePoint::affine(tx, ty);
+            if !i.curve.is_on_curve(target) {
+                return Err("the target is not on the curve".into());
+            }
+            let cap = budget(&|mult| wide_rho_cap(i.r, mult))?;
+            let t = Instant::now();
+            measurement::begin_online(Phase::RhoSolve);
+            let res = signed_frobenius_walk(i, target, seed, cap);
+            measurement::end_online();
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64))
         }
+        (Instance::Wide(i), _) => Err(match d.family {
+            "bsgs" => format!(
+                "`{}` on {}: a baby-step table of about √r/2 ≈ 2^{:.0} entries is beyond any host; two-word curves run the rho walks",
+                m.id, curve.slug, (i.r as f64).log2() / 2.0 - 1.0
+            ),
+            _ => format!(
+                "`{}` is not ported to two-word curves; {} runs rho.signed_frobenius and rho.signed_frobenius_budget",
+                m.id, curve.slug
+            ),
+        }),
+        (Instance::Prime(i), "ic") => solve_ic_prime(
+            m,
+            i,
+            curve,
+            PrimePoint::affine(narrow(tx)?, narrow(ty)?),
+            seed,
+        ),
+        (Instance::Binary(i), "ic") => solve_ic_binary(
+            m,
+            i,
+            curve,
+            FastPoint::affine(narrow(tx)?, narrow(ty)?),
+            seed,
+        ),
         (Instance::Binary(i), _) if m.id == "rho.signed_frobenius_strong" => {
-            solve_strong(m, i, FastPoint::affine(tx, ty), seed)
+            solve_strong(m, i, FastPoint::affine(narrow(tx)?, narrow(ty)?), seed)
         }
-        (Instance::Binary(i), _) if m.id == "rho.signed_frobenius" => {
+        (Instance::Binary(i), _)
+            if m.id == "rho.signed_frobenius" || m.id == "rho.signed_frobenius_budget" =>
+        {
+            let cap = budget(&|mult| rho_cap(i.r, mult))?;
             let t = Instant::now();
             measurement::begin_online(Phase::RhoSolve);
             let res = signed_frobenius_rho_tuned(
                 i,
-                FastPoint::affine(tx, ty),
+                FastPoint::affine(narrow(tx)?, narrow(ty)?),
                 seed,
-                rho_cap(i.r, param_u64(m, "cap_multiple")? as f64),
+                cap,
             )
             .ok_or("not a Koblitz instance")?;
             measurement::end_online();
@@ -637,13 +759,20 @@ fn solve_inner(
             m,
             &i.curve,
             i.generator_point(),
-            PrimePoint::affine(tx, ty),
+            PrimePoint::affine(narrow(tx)?, narrow(ty)?),
             i.r,
             seed,
         ),
         (Instance::Binary(i), _) => {
             let g = BinaryGroup(&i.fast);
-            solve_generic(m, &g, i.generator, FastPoint::affine(tx, ty), i.r, seed)
+            solve_generic(
+                m,
+                &g,
+                i.generator,
+                FastPoint::affine(narrow(tx)?, narrow(ty)?),
+                i.r,
+                seed,
+            )
         }
     }
 }
@@ -802,7 +931,7 @@ fn solve_strong(
         counters.insert(k.to_string(), v);
     }
     Ok(SolveReport {
-        recovered: Some(o.scalar),
+        recovered: Some(o.scalar.to_string()),
         exhausted: false,
         total_gae: setup.gae + search.gae,
         phases: vec![setup, search],
@@ -925,7 +1054,7 @@ fn ic_report(
         "framework_total_gae_before_solver_removal": rep.total_gae,
     });
     SolveReport {
-        recovered: rep.recovered,
+        recovered: rep.recovered.map(|k| k.to_string()),
         exhausted: rep.exhausted,
         phases,
         total_gae: total,
@@ -1207,6 +1336,10 @@ pub fn dump_factor_base(
     let facts = inst.facts(curve);
     let (name, params) = Params::parse_spec(fb_spec)?;
     match &inst {
+        Instance::Wide(_) => Err(format!(
+            "no factor base on {}: index calculus in ecbench is word-size",
+            facts.slug
+        )),
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
             let orbit = GlvOrbitBase { instance: i };

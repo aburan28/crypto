@@ -29,9 +29,17 @@ Write, in the note or PR that will carry the result:
 Copy `docs/ecbench/specs/smoke-prime.json` and edit it. Rules:
 
 - Curves come from constructors (`prime_search`, `prime_roster`, `koblitz`,
-  `binary_random`, `prime_explicit`). Run `ecbench plan --spec S` and check every
+  `binary_random`, `prime_explicit`), or, for a Koblitz curve a word cannot hold
+  (`63 ≤ n ≤ 126`, the m = 83 gate of AGENTS.md §8a), from frozen parameters
+  (`koblitz_explicit`; start from `docs/ecbench/specs/gate-m83-steprate.json`).
+  A `koblitz_explicit` curve runs `rho.signed_frobenius` and
+  `rho.signed_frobenius_budget` only. Run `ecbench plan --spec S` and check every
   slug is `registered=true`. Register new curves (AGENTS.md §11) before citing
   them in prose.
+- `rho.signed_frobenius_budget` (`steps` required) stops the walk after a fixed
+  number of walk operations. Its runs end `exhausted`: it is a step-rate
+  diagnostic for a subgroup too large to solve, never a result, and a table
+  containing it says so (README §7).
 - `targets_per_curve` sets independent one-target workloads. Prefer more targets
   to more rounds: BSGS's cost is fixed by its target, and intervals resample
   workloads. Use 8 or more targets per curve for a claim, and 2 for a smoke run.

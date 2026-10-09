@@ -1,0 +1,14 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n = 61 step rate, narrow construction (koblitz): K_0 / GF(2^61), 2e7 walk operations per run",
+  "description": "PROTOCOL.md of this directory. The largest word-size Koblitz degree, built by the repository's constructor and walked by the narrow tuned signed-Frobenius rho for 20 000 000 walk operations per run: the narrow side of the two-word overhead ratio.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 61}],
+    "targets_per_curve": 2,
+    "target_seed": 61
+  },
+  "arms": [
+    {"name": "rho-frob-budget", "role": "reference", "method": {"id": "rho.signed_frobenius_budget", "params": {"steps": "20000000"}}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "seed": 2293761, "isolation_required": "L2", "timeout_seconds": 1800}
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n = 61 step rate, two-word construction (koblitz_explicit): icv1-f2m61-t158598901-ab42b6c5, 2e7 walk operations per run",
+  "description": "PROTOCOL.md of this directory. The same curve, subgroup and generator as steprate-n61-narrow.json (its facts, from `ecbench plan`), built in the two-word group and walked by the wide port of the same walk for 20 000 000 walk operations per run: the wide side of the two-word overhead ratio. The workload ids and every count must equal the narrow session's (H1).",
+  "workloads": {
+    "curves": [{"kind": "koblitz_explicit", "a": 0, "n": 61,
+                "modulus": "0x2000000000000027",
+                "r": "162888033982417", "cofactor": "14156",
+                "gx": "0x5cc1d6ba365013e", "gy": "0x171d9a59a2d31eb9"}],
+    "targets_per_curve": 2,
+    "target_seed": 61
+  },
+  "arms": [
+    {"name": "rho-frob-budget", "role": "reference", "method": {"id": "rho.signed_frobenius_budget", "params": {"steps": "20000000"}}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "seed": 2293761, "isolation_required": "L2", "timeout_seconds": 1800}
+}
