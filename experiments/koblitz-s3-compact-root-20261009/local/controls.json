@@ -1,0 +1,44 @@
+{
+  "binary_sha256": "85712103bd5f26c03ac4adfa0f61c19179e9e52ba73d66c1f4a349ef9eaff1c2",
+  "controls": {
+    "N41": {
+      "candidate_id": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0heee01c30874c",
+      "compact_report_sha256": "38816061e487ac66b91dae320e322f3e154c2ef38c107a637068ebc3a72fd5e7",
+      "compact_root_slot_bytes": 13,
+      "non_timing_reports_equal": true,
+      "point_sha256": "b246b44a0e5a32b87d0e94b296b1f308511eb6ade56e9fa6d058538c60810dcc",
+      "prepared_rank": 800,
+      "recovered_scalar": 253982070906,
+      "reference_report_sha256": "794843451f9d564b3b8f78841516e4156c1a17f84b4d9c8b3bcf3828b0fd2359",
+      "reference_root_slot_bytes": 16,
+      "root_payload_bytes_after": 1744830464,
+      "root_payload_bytes_before": 2147483648,
+      "root_payload_bytes_saved": 402653184,
+      "root_table_slots": 134217728,
+      "target_label": "T025",
+      "target_s3_calls": 26
+    },
+    "N53": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0ha9eb2dd51ea9",
+      "compact_report_sha256": "3448dc8c4f346110db94bac860f0e5e047ea5948f7b0cb88fafa26dacff081b3",
+      "compact_root_slot_bytes": 13,
+      "non_timing_reports_equal": true,
+      "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+      "prepared_rank": 1200,
+      "recovered_scalar": 429728658711,
+      "reference_report_sha256": "b7021087280c8d5f964ecadbc1bd878ad4808df240a58513feafb0642840cfc7",
+      "reference_root_slot_bytes": 16,
+      "root_payload_bytes_after": 6979321856,
+      "root_payload_bytes_before": 8589934592,
+      "root_payload_bytes_saved": 1610612736,
+      "root_table_slots": 536870912,
+      "target_label": "T025",
+      "target_s3_calls": 3272
+    }
+  },
+  "kind": "s3_packed_root_slot_fullrank_correctness_controls_v1",
+  "n53_reference_ledger_sha256": "c0c1676284cea4f696223868d3bf5af0ac8a1231d34d66b36dd09ee2dc4f36df",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "source_sha256": "0ac1a74ad13f87f413b7fb3ae94df2bdee9c4af998a49deb737ad99d49a6a8e1",
+  "wall_speedup": null
+}
