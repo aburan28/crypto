@@ -1,0 +1,57 @@
+{
+  "arms": {
+    "baseline": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hef845ab7d8e0",
+      "candidate_manifest": "experiments/koblitz-s3-c1800-stripe-20261009/identities/candidates/IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hef845ab7d8e0.json",
+      "columns": 1200,
+      "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+      "factor_base_points": 127200,
+      "prepare_rank": 1200,
+      "root_table_slots": 268435456,
+      "target_search_lead_states": 0,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "native_rotating_state_order",
+      "target_search_stripes": 1
+    },
+    "expanded": {
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h0d3040bc6eaf",
+      "candidate_manifest": "experiments/koblitz-s3-c1800-stripe-20261009/identities/candidates/IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h0d3040bc6eaf.json",
+      "columns": 1800,
+      "factor_base_digest": "0c3597d24ca943d7bb081ee30078596ffc433766356a8042ba8180c2ced78030",
+      "factor_base_points": 190800,
+      "prepare_rank": 1800,
+      "root_table_slots": 536870912,
+      "target_search_lead_states": 256,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_prefix256_then_striped8_c1200_then_complete_c1800",
+      "target_search_stripes": 8
+    }
+  },
+  "binary_sha256": "10bac9adde666d63ff6a1b3fda8643e55143f7ab6b2e55ad306231168275eec0",
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1200_c1800stripe_paired_call_screen_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_diagnostic_freeze_sha256": "1d3f0824d74038eb457f3cd6d6e3ee4207184d0a63571ff7d376ed17fc4c3313",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 1,
+  "run_order": "AB_even_target_BA_odd_target",
+  "runner_sha256": "3af8923413a0fc7335b76ac4c7f4ba8e78ad3f471d587837d2fe792ccf163a36",
+  "screen_advance_root_call_geomean_ratio_min": 3,
+  "source_commit": "24dc5747e8515a7bc936efdbb03a5a305f7a1b11",
+  "source_sha256": "6e46e56b7574dbff96cde353eff049a2b303378ae44ab370fb19ff1b26b171ef",
+  "target_labels": [
+    "T133",
+    "T134",
+    "T135",
+    "T136",
+    "T137",
+    "T138",
+    "T139",
+    "T140"
+  ],
+  "target_workers": 1,
+  "timeout_seconds_per_run": 180
+}
