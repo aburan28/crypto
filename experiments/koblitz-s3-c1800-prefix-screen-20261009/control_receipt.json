@@ -1,0 +1,24 @@
+{
+  "arms": {
+    "baseline": {
+      "compressed_sha256": "ce5dd9fdd82e78cfc5bb41af36c9bb2345d22ebb847227ec14f0cd2d591d0961",
+      "online_ms": 1.297625,
+      "raw_sha256": "00f81416d413cad1ce07000d0cdf009ee5342a2c24dbe3b748e66a89067f0d01",
+      "target_s3_calls": 3272
+    },
+    "expanded": {
+      "compressed_sha256": "a1b39a8d63fee86e764403ef0088afc69cf1f7b234a4b58328ac002f4f7794b2",
+      "online_ms": 0.333958,
+      "raw_sha256": "11f1b8fcd90c5b9608e7827496c57bc9056b5c14ff01878ed01c66c2dab66965",
+      "target_s3_calls": 498
+    }
+  },
+  "baseline_exact_nontiming_reference_match": true,
+  "binary_sha256": "fb3c9c62b6e2ae0ebd0ab6058f92db90b60cd02a91b8516414aac86de10ce9b3",
+  "controlled_speedup": null,
+  "kind": "s3_n53_c1800prefix_T025_correctness_control_v1",
+  "native_and_fixture_verified": true,
+  "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+  "recovered_scalar": 429728658711,
+  "source_sha256": "0c04dd4532d0902f7b7d7ae7d39863315d2fcdbad99e6698ab9e1f1bf2004773"
+}
