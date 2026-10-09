@@ -58,10 +58,9 @@ variation for that point.
   range panic; legacy `u64` fixtures are unchanged.
 - `runs/pilot-R1-concurrent-session/` preserves a concurrent session's pilot
   attempt (its rho observation with the wide backend is valid; its IC arm ran
-  against a pre-fix binary and emitted no rows). The top-level `README.md`,
-  `candidate-*.json`, and `single-target-results.csv` are that session's
-  pilot documents (16.78x observation with Sage replay); the ledger record
-  above is independent of them.
+  against a pre-fix binary and emitted no rows). The top-level `README.md`
+  distinguishes this ledger series from the earlier 16.78x pilot pair;
+  `candidate-*.json` and `single-target-results.csv` remain pilot artifacts.
 - `base_n71_K600.jsonl` is the retained base (deterministic x-scan;
   identical hash across independent constructions).
 - `dump_out.jsonl`, `smoke_out.jsonl` are construction smoke receipts
