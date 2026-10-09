@@ -2,6 +2,8 @@
 
 Inspected source revision: `c70c32d486a3ac7531fe27f7193d9f09caa58344`. The isolated native baseline is recorded in RESULT.md. Every capability below describes source, not a completed degree-83 experiment.
 
+`SOLVER_GATES.md` distinguishes modules present in that inspected main snapshot from modules actually present on the isolated study branch. In particular, the WDSat, FES and double-large-prime files named below are absent from this branch, and their pinned implementations have width or system-shape limits that bar direct N83 execution. The native S4 SAT source is present but its full retained-base model and capacity have not been validated.
+
 | Source | Existing work | Consequence for this design |
 | --- | --- | --- |
 | `src/cryptanalysis/koblitz_index_calculus.rs` | Frobenius-divisor bases, explicit orbit domains, SAT decomposition, wide arithmetic, pinned degree-83 curve constructors and modular LA | Separate the invariant-subspace and compact-orbit families; bind exact representations and subgroup order |

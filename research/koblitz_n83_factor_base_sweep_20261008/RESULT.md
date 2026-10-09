@@ -8,7 +8,7 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | --- | --- |
 | Review repository prior art | Complete source/literature inventory in PRIOR_ART.md, with inspected main revision pinned |
 | Every combination | All 45,360,000 tuples in the declared finite grid receive one disposition and a reproducible ordinal; choices outside that grid remain unsearched |
-| Splitting, symmetry, WDSat, Gray, FES, double large primes, Frobenius | Included in the design; compatibility/capacity audit is complete. Signed-Frobenius construction and Gray-prefix policies are executed. Most solver combinations require adapters and have no full runtime evidence |
+| Splitting, symmetry, WDSat, Gray, FES, double large primes, Frobenius | Included in the design; all finite tuple dispositions are audited. Signed-Frobenius construction and Gray-prefix policies are executed. N83 solver capacity and most backend adapters remain unvalidated, with no full runtime evidence |
 | Empirical factor-base panel | 54 constructions complete, containing 42 distinct point sets; exact scan counts, all points and labels retained |
 | Arithmetic replay | PASS: 54 bases, 2,748,960 point records and 16,560 representatives checked with generic multi-limb arithmetic |
 | Relation-stage experiments | 1,728 fixed public two-summand probes, 87,966,720 exact complement lookups, zero relations; other arities and complete runtimes remain separate |
@@ -110,6 +110,9 @@ The release profile uses optimization level 3, 256 codegen units and four Cargo 
 | Wide SAT coordinate-domain regression | 2 focused tests passed, including degree-83 high-bit membership | `verification/wide-sat-domain-focused.log` |
 | Post-wide-SAT release library suite | 2,238 passed, 94 ignored, zero failed | `verification/wide-sat-lib-tests.log` |
 | Post-wide-SAT touched example and Python suites | 14, 5 and 16 passed | `verification/wide-sat-example-tests.log`, `verification/wide-sat-study-python.log`, `verification/wide-sat-boundary-python.log` |
+| Pinned solver availability and core-size audit | PASS: four main-only backend modules and 910 native S4 core variables checked | `verification/solver-gates-source-check.log`, `SOLVER_GATES.md` |
+| Post-audit release library and touched example suites | 2,238 passed with 94 ignored; 14 passed | `verification/solver-gates-lib-tests.log`, `verification/solver-gates-example-tests.log` |
+| Post-audit study and boundary Python suites | 5 and 16 passed | `verification/solver-gates-study-python.log`, `verification/solver-gates-boundary-python.log` |
 | Native finite-grid audit | All 45,360,000 dispositions accounted for | `verification/design-audit.log`, `design.json` |
 
 Earlier build and test outcomes remain retained. Initial dependency resolution failed under restricted networking; `--locked` could not be used before this older baseline resolved a lockfile. Some build attempts were interrupted during baseline recovery. The first complete isolated library run had two loopback-network permission failures. The next run passed those tests and failed the pre-existing randomized SQIsign wrong-message assertion. Its focused replay passed; the subsequent full suite passed. The SQIsign source is unchanged, and the earlier failure remains visible rather than being relabeled as a pass.
@@ -123,5 +126,7 @@ Generic-versus-wide arithmetic replay uses a separate process on the same host a
 ## Remaining comparison work
 
 The imported primary base still needs an end-to-end solver run with an audited wide-field relation oracle, full subgroup-modulus handling, natural rank, verified column logarithms and target extraction. An available BigUint elimination routine does not by itself establish those coupled phases. Large-prime graph adapters, WDSat sealed ANF capacities, FES full-system verification, cofactor-aware subspace lifting and domain-preserving symmetry remain explicit gates in `protocol.json`.
+
+`SOLVER_GATES.md` pins the immediate source and capacity blockers. At `n=l=83`, the native S4 encoding has 910 base variables before monomial auxiliaries or factor-base domain clauses; the exact wide coordinate trie has a focused regression, but the full retained-base model has no capacity or lifting receipt. The WDSat, FES and double-large-prime modules in the inspected main snapshot are absent from this isolated branch and cannot directly represent the primary N83 system as implemented there. A further enumeration cap would add another censored observation without addressing those backend gates.
 
 Select a base only after complete, matched one-target cold runs, natural rank gain, verified column logarithms and an individual logarithm, all failed work charged, disjoint holdouts, A/A controls, at least five paired rounds, admitted uncertainty and independent validation. The local L0 observations do not establish that minimum. Literal coverage of every possible point set and parameter value is outside this finite experiment.

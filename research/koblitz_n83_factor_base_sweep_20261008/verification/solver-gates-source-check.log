@@ -1,0 +1,8 @@
+pinned_only src/cryptanalysis/wdsat_oracle.rs 22f71fa2bc112f3ce910b6ba305128c2c3c97141
+pinned_only src/cryptanalysis/mq_fes.rs 9e8c1862d0f6a192fa44dc53c4ade006b8f92f1c
+pinned_only src/cryptanalysis/mq_monica.rs 64bf49f4605ba0442669afd8f82c66182008c06d
+pinned_only src/cryptanalysis/ecbench_large_prime.rs 4053f12f063c5ed2e7d4f5616bf483fb0824daa4
+pinned_width_gates wdsat_model_max=64 moebius_variables_max=24 moebius_equations_max=64 monica_variables_max=40 monica_equations_max=128 large_prime_corpus=u64
+native_s4_core x= 249 e= 495 ordering= 166 subtotal= 910
+retained_x_coordinates K64=5312 K256=21248 K600=49800
+status PASS
