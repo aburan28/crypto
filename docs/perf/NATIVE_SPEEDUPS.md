@@ -86,6 +86,14 @@ Replay: `ecbench verify --replay-all` on the committed `prime` and
 `koblitz` calibration sessions passes with the patched binary (every
 measured run re-executed with identical counts).
 
+Tests: `cargo test --release --lib -- ic_boundary::tests::word_sized…
+ic_boundary::tests::invmod_inverts… ecbench` at `93ff0c72` + this patch:
+67 passed, 1 failed.  The failure,
+`ecbench::record::tests::legacy_record_deserializer_reproduces_v1_decimal_semantics`,
+is serde float parsing and needs serde_json's `arbitrary_precision`
+feature, which `main`'s `Cargo.toml` enables and `93ff0c72`'s does not;
+it touches nothing this change does.
+
 ## 3. What changed
 
 - `mulmod`, `addmod`, `invmod` in `src/cryptanalysis/ic_boundary.rs`
