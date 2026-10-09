@@ -124,7 +124,16 @@ The release profile uses optimization level 3, 256 codegen units and four Cargo 
 | Linux capacity worker cross-build and startup | PASS cross-build with native Redis TLS disabled only for this isolated worker; guarded startup reached the deliberately empty manifest and reported `PRODUCER_FAILURE_worker_exit`. This is a malformed-input check, not a retained-base construction. | `verification/sat-capacity-linux-build.log`, `verification/sat-capacity-linux-build-command.txt`, `verification/capacity-worker-startup/` |
 | Post-capacity-builder release and Python suites | 2,242 library tests passed with 94 ignored; N83 example 15 passed; study and boundary Python 5 and 16 passed | `verification/sat-capacity-lib-full.log`, `verification/sat-capacity-example-full.log`, `verification/sat-capacity-study-python.log`, `verification/sat-capacity-boundary-python.log` |
 | Wide large-prime row adapter | 3 focused release tests passed for full-width cycle algebra, signed-orbit replay and fail-closed graph caps; final library suite 2,245 passed with 94 ignored; N83 example 15 passed; study and boundary Python suites 5 and 16 passed. This is adapter validation, not a retained N83 partial-relation or runtime result. | `verification/wide-lp-focused-final.log`, `verification/wide-lp-lib-full.log`, `verification/wide-lp-example-full.log`, `verification/wide-lp-study-python.log`, `verification/wide-lp-boundary-python.log`, `WIDE_LP_ADAPTER.md` |
+| Nested finite large-prime pool screen | 18 retained curve/policy/seed prefix checks passed; 90 exact support-count cases. The bounded child took 0.419 seconds and the receipt conservatively charged 1.419 active seconds, bringing the pilot total to 3,593.093 of 3,600. The result is an existence ceiling, not an observed partial, graph cycle, rank row or runtime winner. | `pilot-01/large-prime-pool-screen.json`, `pilot-01/large-prime-pool-budget.json`, `LARGE_PRIME_POOL_SCREEN.md` |
+| Post-pool release and Python suites | 2,245 library tests passed with 94 ignored; N83 example 15 passed; study and boundary Python suites 8 and 16 passed; independent pool receipt verifier passed. | `verification/lp-pool-lib-full.log`, `verification/lp-pool-example-full.log`, `verification/lp-pool-study-python.log`, `verification/lp-pool-boundary-python.log`, `verification/lp-pool-independent-receipt-check.log` |
 | Native finite-grid audit | All 45,360,000 dispositions accounted for | `verification/design-audit.log`, `design.json` |
+
+The separate large-prime pool receipt verifier passed all 54
+manifest/replay/S3 object bindings, 18 prefix receipts, 90 exact count cases
+and the charged budget check. Its log is
+verification/lp-pool-independent-receipt-check.log. It does not re-open
+the compressed point objects; the bounded producer performs that header
+check.
 
 The wide large-prime adapter's first focused compile stopped at an ambiguous
 integer type in its 81-bit fixture; that annotation was fixed. Its first full
