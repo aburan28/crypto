@@ -39,6 +39,11 @@ pub trait Field: Clone + Send + Sync + 'static {
     #[allow(clippy::wrong_self_convention)]
     fn from_u64(&self, n: u64) -> Self::E;
     fn char(&self) -> u64;
+    /// Exact comparison against a small integer. Multiword prime fields override
+    /// this because their legacy `char()` accessor exposes only the low limb.
+    fn characteristic_exceeds(&self, n: u64) -> bool {
+        self.char() > n
+    }
     /// Field size q (p or p^2).
     fn size(&self) -> u128;
     fn random(&self, rng: &mut Rng) -> Self::E;

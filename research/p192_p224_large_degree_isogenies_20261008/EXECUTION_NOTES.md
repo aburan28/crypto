@@ -87,3 +87,34 @@ an implementation verification of the supplied maps, not a proposed new
 algebraic rule. The degree-199 replay passes these stronger checks; the final
 whole-search replay applies them to every completed construction. Earlier
 partial replay records remain frozen as the checks that were performed then.
+
+The first complete 40-trial summary is retained in `evidence-v2/search.json`.
+P-192 produced six maps at degrees 73, 193 and 199, and 21 bounded timeouts.
+All 16 P-224 construction trials failed immediately with
+`characteristic must exceed l + 1`. The source-order preflight had passed.
+The modular-polynomial precondition used the low-word `Field::char()` accessor;
+P-224's low word is 1 although its full characteristic is 224 bits. The native
+fix adds an exact small-integer characteristic comparison, overridden by
+multiword prime fields, and uses it for the Hecke/Newton precondition. The
+regression checks a P-224 modular polynomial against the independent linear
+algebra route and requires two verified maps at a structurally split degree.
+
+The corrected P-224 trials use `evidence-v3/`. P-192's sealed screen and trial
+files were copied byte for byte and reused after command/digest checks; they
+are not represented as newly executed constructions. The complete earlier
+failure run is preserved. The original CLI executable was saved as
+`isogeny-algos-pre-p224-fix` before rebuilding, so both construction versions
+can be identified by executable hashes. Resource limits, seeds, source models,
+candidate degrees and the frozen protocol remain unchanged.
+
+The corrected CLI built in 7m52s and its complete release suite passed 111
+tests (`validation/algorithms-tests-p224-fix.log`). The first rerun, retained
+in `evidence-v3/`, stopped at an RSS-monitor shutdown race: P-224's preflight
+emitted `PASS` and exited with code 0, but `proc_taskinfo` disappeared just
+before `waitpid` reported the exit. The supervisor now permits up to 100 ms
+for a transient unavailable sample to resolve; persistent unavailable
+monitoring still fails closed, and the original 180-second deadline continues
+to apply. Missing sample counts and the grace interval are recorded.
+The final rerun uses `evidence-v4/`, with the same sealed P-192 trial files
+copied from v2 and fresh P-224 trials. The earlier v3 monitor receipt is
+preserved without reclassifying it.

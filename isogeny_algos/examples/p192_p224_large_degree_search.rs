@@ -194,6 +194,8 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
     let mut memory_limited = false;
     let mut monitor_unavailable = false;
     let mut peak_rss = 0;
+    let mut unavailable_since = None;
+    let mut unavailable_samples = 0;
     let status = loop {
         if let Some(status) = child.try_wait().unwrap() {
             break status;
@@ -205,6 +207,7 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
         }
         match resident_bytes(child.id()) {
             Some(rss) => {
+                unavailable_since = None;
                 peak_rss = peak_rss.max(rss);
                 if rss > 8u64 << 30 {
                     memory_limited = true;
@@ -216,9 +219,16 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
                 if let Some(status) = child.try_wait().unwrap() {
                     break status;
                 }
-                monitor_unavailable = true;
-                child.kill().unwrap();
-                break child.wait().unwrap();
+                unavailable_samples += 1;
+                let first = unavailable_since.get_or_insert_with(Instant::now);
+                // proc_taskinfo can disappear during exit before waitpid reports the
+                // final status. Allow at most 100 ms for that transition; a live child
+                // without restored monitoring still fails closed.
+                if first.elapsed() >= Duration::from_millis(100) {
+                    monitor_unavailable = true;
+                    child.kill().unwrap();
+                    break child.wait().unwrap();
+                }
             }
         }
         thread::sleep(Duration::from_millis(25));
@@ -283,6 +293,8 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
         ("resident_memory_limit_bytes", Json::str(8u64 << 30)),
         ("sampled_peak_resident_bytes", Json::str(peak_rss)),
         ("memory_sampling_interval_ms", Json::Num(25)),
+        ("unavailable_memory_samples", Json::Num(unavailable_samples)),
+        ("memory_monitor_grace_ms", Json::Num(100)),
         (
             "stdout",
             Json::str(stdout_path.file_name().unwrap().to_string_lossy()),
