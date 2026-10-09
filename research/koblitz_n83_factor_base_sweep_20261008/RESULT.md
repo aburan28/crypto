@@ -7,12 +7,13 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | Requested work | Evidence and limit |
 | --- | --- |
 | Review repository prior art | Complete source/literature inventory in PRIOR_ART.md, with inspected main revision pinned |
-| Every combination | All 45,360,000 tuples in the declared finite grid receive one disposition and a reproducible ordinal; choices outside that grid remain unsearched |
+| Every combination | All 45,360,000 frozen v1 tuples receive one disposition and a reproducible ordinal. A versioned size frontier adds 11,664,000 addressable, unexecuted tuples; choices outside these finite grids remain unsearched |
 | Splitting, symmetry, WDSat, Gray, FES, double large primes, Frobenius | Included in the design; all finite tuple dispositions are audited. Signed-Frobenius construction and Gray-prefix policies are executed. N83 solver capacity and most backend adapters remain unvalidated, with no full runtime evidence |
 | Empirical factor-base panel | 54 constructions complete, containing 42 distinct point sets; exact scan counts, all points and labels retained |
 | Arithmetic replay | PASS: 54 bases, 2,748,960 point records and 16,560 representatives checked with generic multi-limb arithmetic |
 | Relation-stage experiments | 1,728 fixed public two-summand probes, 87,966,720 exact complement lookups, zero relations; other arities and complete runtimes remain separate |
 | Exact support screen | 30 base-size/arity cases derived from the retained point counts and subgroup orders; uniform-target Markov ceilings only, with no solver or fixed-fixture yield inference |
+| Size frontier extension | Exact v2 design has 57,024,000 addressable tuples, preserving all v1 ordinals and adding K=1,182/2,048/4,096/8,192/16,627; no new bases constructed or timed |
 | S3 storage | PASS: 54 compressed objects uploaded, downloaded and byte-hash matched; content-addressed panel receipts uploaded |
 | Primary base to generic solver adapter | PASS: replay-bound K=64 S3 object reconstructed as generic ordinary and signed Frobenius orbits; solver stage unexecuted |
 | Primary cold runner | K=64, m=2 exact-enumeration preflight PASS; one trial returned `UNKNOWN_trial_cap` with zero relations. K=64 m=3 and K=256 m=2 attempts reached `UNKNOWN_budget` caps. All retain null total runtime and winner |
@@ -65,6 +66,14 @@ An optional unordered-pair index reduces duplicate summand-pair states under Fro
 `SUPPORT_MOMENTS.md` proves an exact first-moment upper bound for full smooth unordered m-summand relations with repetition, using each verified base's distinct point count and exact subgroup order. `pilot-01/support-moments.json` retains 30 exact integer/fraction cases for both curve arms, K=64/256/600 and m=2..6. This is a uniform-target mathematical ceiling, not a rate estimate for the fixed public fixtures or a solver benchmark. At primary a=0, K=600, the m=4 ceiling is **1.695987e-6** and the m=5 ceiling is **0.03378543**; at m=6 the bound is vacuous. Thus the current small primary bases offer little full-smooth coverage at m=4/5 under the uniform-target model, while m=6 still needs a verified feasible solver. Splitting, Gray/FES and symmetry do not enlarge the fixed full-smooth sumset; double-large-prime partials require their own graph/rank model. None of these bounds identifies a total-runtime winner.
 
 `RANK_QUERY_SCREEN.md` and `pilot-01/rank-query-screen.json` apply that exact multiset count to a separate one-row rank-query model. For uniform whole-subgroup query targets and at most one full-smooth row per query, no independence assumption is needed to show `Pr(rank >= K) <= min(1, q min(M,r)/(rK))` after `q >= K` queries. At primary a=0 K=600, the upper bound cannot reach one half until at least **176,888,106** four-summand queries or **8,880** five-summand queries. The six-summand bound is vacuous and reduces to `q >= K`. These are necessary query counts only: they do not measure solver time, imply row independence or cover biased queries, multirow solvers and large-prime partials. The current cold driver has not demonstrated uniform full-width sampling on the primary arm.
+
+`SIZE_FRONTIER_V2.md` and `size-frontier-v2.json` extend the exact sizing
+screen beyond the frozen K=900 design limit while preserving all v1 ordinals.
+The new 1,182-column and 16,627-column coordinates straddle the primary
+five- and four-summand Markov-vacuity thresholds. They are design candidates,
+not constructed bases or measured solver arms. A complete pair table would
+address 19,249,672,578 pairs even at K=1,182, so source and capacity gates
+must precede a larger-base cold run.
 
 The generic Koblitz IC source now draws uniform full-width additive scalars and full-width nonzero coefficients when the subgroup order exceeds 64 bits, while preserving the previous at-most-64-bit random stream. The factor-base-log precompute skips its single-word rank tracker for wide moduli and uses the existing BigUint solve. This removes low-limb sampling and rank-gate errors for the 81-bit primary order. It does not turn the retained S3 bases into a completed primary cold run, establish solver throughput, or change any factor-base ranking. That source-only change added no timed pilot work.
 
