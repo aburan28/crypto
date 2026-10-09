@@ -26,9 +26,9 @@ use crate::cryptanalysis::ecbench::generic::{
 };
 use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance};
 use crate::cryptanalysis::ic_boundary::{
-    rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
-    Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses, PrimeInstance,
-    PrimePoint, RhoResult, RhoWalk,
+    price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
+    BinaryInstance, Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses,
+    PrimeInstance, PrimePoint, RhoResult, RhoWalk,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, GlvOrbitBase,
@@ -84,6 +84,44 @@ const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {
     default: Some("64"),
     help: "step budget as a multiple of √r before the run counts as exhausted",
 }];
+
+const IC_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "factor_base",
+        default: None,
+        help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2",
+    },
+    ParamDecl {
+        name: "oracle",
+        default: None,
+        help: "subtract, mitm, mitm-frobenius or descent-algebraic, with :m=2|3",
+    },
+    ParamDecl {
+        name: "solver",
+        default: Some(""),
+        help: "descent-algebraic only: buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
+    },
+    ParamDecl {
+        name: "linalg",
+        default: Some("incremental-gauss"),
+        help: "incremental-gauss or structured-gauss",
+    },
+    ParamDecl {
+        name: "targets",
+        default: Some("walk"),
+        help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
+    },
+    ParamDecl {
+        name: "max_trials",
+        default: Some("100000000"),
+        help: "relation trials before the run counts as exhausted",
+    },
+    ParamDecl {
+        name: "solver_budget_seconds",
+        default: Some("0"),
+        help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
+    },
+];
 
 /// Every method `ecbench` knows.  Adding one is an entry here and an arm
 /// in [`solve`]; nothing else changes.
@@ -195,43 +233,15 @@ pub fn registry() -> &'static [MethodDecl] {
             summary: "index calculus through ic_framework::run_pipeline: factor base, oracle set-up, relations, linear algebra, verification, all charged",
             entry: "ic_framework::run_pipeline",
             applies: Applies::Any,
-            params: &[
-                ParamDecl {
-                    name: "factor_base",
-                    default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2",
-                },
-                ParamDecl {
-                    name: "oracle",
-                    default: None,
-                    help: "subtract, mitm, mitm-frobenius or descent-algebraic, with :m=2|3",
-                },
-                ParamDecl {
-                    name: "solver",
-                    default: Some(""),
-                    help: "descent-algebraic only: buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
-                },
-                ParamDecl {
-                    name: "linalg",
-                    default: Some("incremental-gauss"),
-                    help: "incremental-gauss or structured-gauss",
-                },
-                ParamDecl {
-                    name: "targets",
-                    default: Some("walk"),
-                    help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
-                },
-                ParamDecl {
-                    name: "max_trials",
-                    default: Some("100000000"),
-                    help: "relation trials before the run counts as exhausted",
-                },
-                ParamDecl {
-                    name: "solver_budget_seconds",
-                    default: Some("0"),
-                    help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
-                },
-            ],
+            params: IC_PARAMS,
+        },
+        MethodDecl {
+            id: "ic.pipeline_counted",
+            family: "ic",
+            summary: "index calculus with solver wall pricing excluded by deterministic phase recomputation; unpriced solver work remains explicit",
+            entry: "ic_framework::run_pipeline + ecbench::ic_report(counted)",
+            applies: Applies::Any,
+            params: IC_PARAMS,
         },
     ]
 }
@@ -1012,7 +1022,9 @@ fn ic_report(
     // which is not a count.  Take it back out and list it unpriced.
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
-        if s.gae > 0.0 && s.priced_by != "pinned" {
+        if (s.gae > 0.0 || (m.id == "ic.pipeline_counted" && s.calls > 0))
+            && s.priced_by != "pinned"
+        {
             phases[2].gae -= s.gae;
             total -= s.gae;
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
@@ -1020,6 +1032,23 @@ fn ic_report(
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
             nondeterminism.push("solver ran under a wall-clock budget".into());
         }
+    }
+    if m.id == "ic.pipeline_counted" {
+        // run_pipeline adds a wall-priced solver charge to `relations`.
+        // Subtracting that floating value back out loses low bits when
+        // the wall duration changes, even with identical integer work.
+        // Rebuild the relation price from its group and pinned native
+        // counts, then add only a pinned solver charge, if one exists.
+        let mut counted = rep.decomposition.cost.clone();
+        price_phase(&mut counted, calib);
+        phases[2].gae = counted.gae
+            + rep
+                .decomposition
+                .solver
+                .as_ref()
+                .filter(|s| s.priced_by == "pinned")
+                .map_or(0.0, |s| s.gae);
+        total = phases.iter().map(|p| p.gae).sum();
     }
     // Native counters with no pinned ratio for this curve.
     for (counter, unit) in PRICED_NATIVE {

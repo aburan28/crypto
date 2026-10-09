@@ -279,6 +279,15 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
+| `ic.pipeline_counted` | the same pipeline and phase ledger, with the relation charge recomputed from integer group/native counters before adding any pinned solver charge | every algebraic-solver unit without a pinned full-run conversion (including SAT conflicts); preserved as a lower bound and a resource counter |
+
+`ic.pipeline_counted` is a new method identity because the earlier
+`ic.pipeline` subtracts a wall-priced algebraic-solver charge from a
+floating total. Cancellation can leave different low bits on replay
+even when the integer work agrees. Historical `ic.pipeline` records
+retain their method and cost rule; use the counted variant for new
+SAT/PDP panels. A SAT conflict is not a constant amount of EC work,
+so ecbench records its count and does not invent a GAE conversion.
 
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
