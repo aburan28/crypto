@@ -662,16 +662,14 @@ fn split_at(bits: &[u64], at: u32) -> (Vec<u64>, Vec<u64>) {
                 low.push(bits[i] & mask);
                 high.push(bits[i] >> bit_at);
             }
+        } else if bit_at == 0 {
+            high.push(bits[i]);
         } else {
-            if bit_at == 0 {
-                high.push(bits[i]);
-            } else {
-                // bits[i] contributes to high at offset (i - word_at).
-                if let Some(last) = high.last_mut() {
-                    *last ^= bits[i] << (64 - bit_at);
-                }
-                high.push(bits[i] >> bit_at);
+            // bits[i] contributes to high at offset (i - word_at).
+            if let Some(last) = high.last_mut() {
+                *last ^= bits[i] << (64 - bit_at);
             }
+            high.push(bits[i] >> bit_at);
         }
     }
     if low.is_empty() {

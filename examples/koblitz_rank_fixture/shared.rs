@@ -1,0 +1,3612 @@
+//! Point-defined factor base, exact-support relation collection, and rank trace.
+//!
+//! This is the fully charged V2 control for the Koblitz crossover task.  The
+//! base is selected only from public point coordinates.  A published fixture
+//! scalar is retained by the validator, but it is never used to select a base,
+//! target arm, or decomposition.
+
+#[cfg(test)]
+use crypto_lib::binary_ecc::curve::point_neg;
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+#[cfg(test)]
+use crypto_lib::cryptanalysis::koblitz_index_calculus::points_with_x;
+use crypto_lib::cryptanalysis::koblitz_index_calculus::{point_key, KoblitzCurve};
+use num_bigint::BigUint;
+use num_traits::ToPrimitive;
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
+use serde_json::json;
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::time::Instant;
+
+const TASK_ID: &str = "TASK-KIC-SAT-RHO-CROSSOVER-20260909";
+const DEFAULT_FACTOR_BASE_SEED: u64 = 0xD1B5_4A32_D192_ED03;
+
+#[derive(Clone)]
+struct Base {
+    points: Vec<BinaryPoint>,
+    point_labels: Vec<(usize, u64)>,
+    representatives: Vec<BinaryPoint>,
+    scanned_x: u64,
+    signed_size: usize,
+    point_selection: &'static str,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum PairMode {
+    Full,
+    SignedQuotient,
+    SignedExpanded,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum TargetMode {
+    Independent,
+    CoefficientWalk,
+    PartitionWalk,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum QueryMode {
+    Pointwise,
+    BatchInverse,
+    BatchInverse4,
+    BatchInverse8,
+    BatchInverse16,
+    BatchInverse32,
+    BatchInverse64,
+    BatchInverse128,
+    BatchInverse256,
+    FiberBatch16,
+    FiberBatch32,
+    FiberBatch64,
+    PairPair16,
+    PairPair32,
+    PairPair64,
+    PairPair128,
+    PairPair256,
+    PairPairDual64,
+    PairPairDual128,
+    PairPairDual256,
+    PairPairGuided256,
+}
+
+impl QueryMode {
+    fn parse(value: &str) -> Self {
+        match value {
+            "pointwise" => Self::Pointwise,
+            "batch_inverse" => Self::BatchInverse,
+            "batch_inverse_4" => Self::BatchInverse4,
+            "batch_inverse_8" => Self::BatchInverse8,
+            "batch_inverse_16" => Self::BatchInverse16,
+            "batch_inverse_32" => Self::BatchInverse32,
+            "batch_inverse_64" => Self::BatchInverse64,
+            "batch_inverse_128" => Self::BatchInverse128,
+            "batch_inverse_256" => Self::BatchInverse256,
+            "fiber_batch_16" => Self::FiberBatch16,
+            "fiber_batch_32" => Self::FiberBatch32,
+            "fiber_batch_64" => Self::FiberBatch64,
+            "pair_pair_16" => Self::PairPair16,
+            "pair_pair_32" => Self::PairPair32,
+            "pair_pair_64" => Self::PairPair64,
+            "pair_pair_128" => Self::PairPair128,
+            "pair_pair_256" => Self::PairPair256,
+            "pair_pair_dual_64" => Self::PairPairDual64,
+            "pair_pair_dual_128" => Self::PairPairDual128,
+            "pair_pair_dual_256" => Self::PairPairDual256,
+            "pair_pair_guided_256" => Self::PairPairGuided256,
+            _ => panic!("unknown query mode {value}"),
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Pointwise => "pointwise",
+            Self::BatchInverse => "batch_inverse",
+            Self::BatchInverse4 => "batch_inverse_4",
+            Self::BatchInverse8 => "batch_inverse_8",
+            Self::BatchInverse16 => "batch_inverse_16",
+            Self::BatchInverse32 => "batch_inverse_32",
+            Self::BatchInverse64 => "batch_inverse_64",
+            Self::BatchInverse128 => "batch_inverse_128",
+            Self::BatchInverse256 => "batch_inverse_256",
+            Self::FiberBatch16 => "fiber_batch_16",
+            Self::FiberBatch32 => "fiber_batch_32",
+            Self::FiberBatch64 => "fiber_batch_64",
+            Self::PairPair16 => "pair_pair_16",
+            Self::PairPair32 => "pair_pair_32",
+            Self::PairPair64 => "pair_pair_64",
+            Self::PairPair128 => "pair_pair_128",
+            Self::PairPair256 => "pair_pair_256",
+            Self::PairPairDual64 => "pair_pair_dual_64",
+            Self::PairPairDual128 => "pair_pair_dual_128",
+            Self::PairPairDual256 => "pair_pair_dual_256",
+            Self::PairPairGuided256 => "pair_pair_guided_256",
+        }
+    }
+
+    fn width(self, points: usize) -> Option<usize> {
+        match self {
+            Self::Pointwise => None,
+            Self::BatchInverse => Some(points),
+            Self::BatchInverse4 => Some(4),
+            Self::BatchInverse8 => Some(8),
+            Self::BatchInverse16 => Some(16),
+            Self::BatchInverse32 => Some(32),
+            Self::BatchInverse64 => Some(64),
+            Self::BatchInverse128 => Some(128),
+            Self::BatchInverse256 => Some(256),
+            Self::FiberBatch16
+            | Self::FiberBatch32
+            | Self::FiberBatch64
+            | Self::PairPair16
+            | Self::PairPair32
+            | Self::PairPair64
+            | Self::PairPair128
+            | Self::PairPair256
+            | Self::PairPairDual64
+            | Self::PairPairDual128
+            | Self::PairPairDual256
+            | Self::PairPairGuided256 => None,
+        }
+    }
+
+    fn fiber_width(self) -> Option<usize> {
+        match self {
+            Self::FiberBatch16 => Some(16),
+            Self::FiberBatch32 => Some(32),
+            Self::FiberBatch64 => Some(64),
+            _ => None,
+        }
+    }
+
+    fn pair_pair_width(self) -> Option<usize> {
+        match self {
+            Self::PairPair16 => Some(16),
+            Self::PairPair32 => Some(32),
+            Self::PairPair64 => Some(64),
+            Self::PairPair128 => Some(128),
+            Self::PairPair256 => Some(256),
+            _ => None,
+        }
+    }
+
+    fn pair_pair_dual_width(self) -> Option<usize> {
+        match self {
+            Self::PairPairDual64 => Some(64),
+            Self::PairPairDual128 => Some(128),
+            Self::PairPairDual256 => Some(256),
+            _ => None,
+        }
+    }
+
+    fn pair_pair_guided_width(self) -> Option<usize> {
+        match self {
+            Self::PairPairGuided256 => Some(256),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone)]
+struct RawFiber {
+    x: u64,
+    members: Vec<(usize, u64)>,
+}
+
+#[derive(Default)]
+struct BatchInverseScratch {
+    denominators: Vec<u64>,
+    prefixes: Vec<u64>,
+    inverses: Vec<u64>,
+}
+
+impl TargetMode {
+    fn parse(value: &str) -> Self {
+        match value {
+            "independent" => Self::Independent,
+            "coefficient_walk" => Self::CoefficientWalk,
+            "partition_walk" => Self::PartitionWalk,
+            _ => panic!("unknown target mode {value}"),
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Independent => "independent",
+            Self::CoefficientWalk => "coefficient_walk",
+            Self::PartitionWalk => "partition_walk",
+        }
+    }
+}
+
+impl PairMode {
+    fn parse(value: &str) -> Self {
+        match value {
+            "full" => Self::Full,
+            "signed_quotient" => Self::SignedQuotient,
+            "signed_expanded" => Self::SignedExpanded,
+            _ => panic!("unknown pair-index mode {value}"),
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Full => "full",
+            Self::SignedQuotient => "signed_quotient",
+            Self::SignedExpanded => "signed_expanded",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Default)]
+struct QuotientPairWitness {
+    packed_labels: [u64; 2],
+    image_y: u64,
+}
+
+impl QuotientPairWitness {
+    fn new(labels: [(usize, u64); 2], image_y: u64) -> Self {
+        const COEFFICIENT_BITS: u32 = 48;
+        const COEFFICIENT_MASK: u64 = (1u64 << COEFFICIENT_BITS) - 1;
+        assert!(labels.iter().all(|&(column, coefficient)| {
+            column <= u16::MAX as usize && coefficient <= COEFFICIENT_MASK
+        }));
+        Self {
+            packed_labels: labels
+                .map(|(column, coefficient)| ((column as u64) << COEFFICIENT_BITS) | coefficient),
+            image_y,
+        }
+    }
+
+    fn labels(self) -> [(usize, u64); 2] {
+        const COEFFICIENT_BITS: u32 = 48;
+        const COEFFICIENT_MASK: u64 = (1u64 << COEFFICIENT_BITS) - 1;
+        self.packed_labels.map(|packed| {
+            (
+                (packed >> COEFFICIENT_BITS) as usize,
+                packed & COEFFICIENT_MASK,
+            )
+        })
+    }
+
+    fn image_y(self) -> u64 {
+        self.image_y
+    }
+}
+
+struct CompactPairTable {
+    keys_x: Vec<u64>,
+    keys_y: Vec<u64>,
+    values: Vec<QuotientPairWitness>,
+    x_filter: Vec<u64>,
+    x_filter_mask: usize,
+    x_filter_exact: bool,
+    x_filter_hashes: usize,
+    mask: usize,
+    len: usize,
+    x_only: bool,
+}
+
+impl CompactPairTable {
+    #[allow(dead_code)] // Legacy convenience constructor retained for fixture compatibility.
+    fn with_capacity(expected: usize, x_only: bool, x_domain: usize) -> Self {
+        Self::with_capacity_config(expected, x_only, x_domain, 16, 2)
+    }
+
+    fn with_capacity_config(
+        expected: usize,
+        x_only: bool,
+        x_domain: usize,
+        filter_bits_per_expected: usize,
+        filter_hashes: usize,
+    ) -> Self {
+        assert!(filter_bits_per_expected > 0);
+        assert!((1..=16).contains(&filter_hashes));
+        let capacity = expected.max(2).next_power_of_two();
+        let x_filter_exact = x_only && x_domain <= (1usize << 29);
+        let filter_bits = if !x_only {
+            0
+        } else if x_filter_exact {
+            x_domain
+        } else {
+            (expected.max(4) * filter_bits_per_expected).next_power_of_two()
+        };
+        Self {
+            keys_x: vec![u64::MAX; capacity],
+            keys_y: if x_only {
+                Vec::new()
+            } else {
+                vec![0; capacity]
+            },
+            values: vec![QuotientPairWitness::default(); capacity],
+            x_filter: if filter_bits != 0 {
+                vec![0; filter_bits.div_ceil(u64::BITS as usize)]
+            } else {
+                Vec::new()
+            },
+            x_filter_mask: filter_bits.saturating_sub(1),
+            x_filter_exact,
+            x_filter_hashes: if x_filter_exact { 1 } else { filter_hashes },
+            mask: capacity - 1,
+            len: 0,
+            x_only,
+        }
+    }
+
+    fn hash((x, y): (u64, u64)) -> u64 {
+        let mut value = x ^ y.rotate_left(23) ^ 0x9e37_79b9_7f4a_7c15;
+        value ^= value >> 30;
+        value = value.wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        value ^= value >> 27;
+        value = value.wrapping_mul(0x94d0_49bb_1331_11eb);
+        value ^ (value >> 31)
+    }
+
+    fn insert(&mut self, key: (u64, u64), value: QuotientPairWitness) {
+        let hash_key = if self.x_only { (key.0, 0) } else { key };
+        let mut index = Self::hash(hash_key) as usize & self.mask;
+        loop {
+            if self.keys_x[index] == u64::MAX {
+                self.keys_x[index] = key.0;
+                if !self.x_only {
+                    self.keys_y[index] = key.1;
+                }
+                self.values[index] = value;
+                if self.x_only {
+                    self.insert_x_filter(key.0);
+                }
+                self.len += 1;
+                return;
+            }
+            if self.keys_x[index] == key.0 && (self.x_only || self.keys_y[index] == key.1) {
+                return;
+            }
+            index = (index + 1) & self.mask;
+        }
+    }
+
+    fn get(&self, key: (u64, u64)) -> Option<&QuotientPairWitness> {
+        if self.x_only && !self.might_contain_x(key.0) {
+            return None;
+        }
+        let hash_key = if self.x_only { (key.0, 0) } else { key };
+        let mut index = Self::hash(hash_key) as usize & self.mask;
+        loop {
+            if self.keys_x[index] == u64::MAX {
+                return None;
+            }
+            if self.keys_x[index] == key.0 && (self.x_only || self.keys_y[index] == key.1) {
+                return Some(&self.values[index]);
+            }
+            index = (index + 1) & self.mask;
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.len
+    }
+
+    fn might_contain_x(&self, x: u64) -> bool {
+        if !self.x_only {
+            return true;
+        }
+        (0..self.x_filter_hashes).all(|ordinal| {
+            let index = self.x_filter_index(x, ordinal);
+            self.x_filter[index / u64::BITS as usize] & (1u64 << (index % u64::BITS as usize)) != 0
+        })
+    }
+
+    fn insert_x_filter(&mut self, x: u64) {
+        for ordinal in 0..self.x_filter_hashes {
+            let index = self.x_filter_index(x, ordinal);
+            self.x_filter[index / u64::BITS as usize] |= 1u64 << (index % u64::BITS as usize);
+        }
+    }
+
+    fn x_filter_index(&self, x: u64, ordinal: usize) -> usize {
+        if self.x_filter_exact {
+            return x as usize;
+        }
+        let first = Self::hash((x, 0)) as usize & self.x_filter_mask;
+        let second = Self::hash((x ^ 0xd6e8_feb8_6659_fd93, x.rotate_left(17))) as usize
+            & self.x_filter_mask;
+        match ordinal {
+            0 => first,
+            1 => second,
+            _ => first.wrapping_add(ordinal.wrapping_mul(second | 1)) & self.x_filter_mask,
+        }
+    }
+
+    fn allocated_bytes(&self) -> usize {
+        self.keys_x.len()
+            * (std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>())
+            + self.keys_y.len() * std::mem::size_of::<u64>()
+            + self.x_filter.len() * std::mem::size_of::<u64>()
+    }
+
+    fn x_filter_kind(&self) -> &'static str {
+        if !self.x_only {
+            "disabled"
+        } else if self.x_filter_exact {
+            "exact_dense_bitset"
+        } else {
+            "two_hash_bloom_prefilter_with_exact_table_fallback"
+        }
+    }
+
+    fn x_filter_bits(&self) -> usize {
+        self.x_filter.len() * u64::BITS as usize
+    }
+
+    fn x_filter_hashes(&self) -> usize {
+        self.x_filter_hashes
+    }
+
+    fn slots(&self) -> usize {
+        self.keys_x.len()
+    }
+
+    fn signed_pair_at_slot(
+        &self,
+        slot: usize,
+        negative: bool,
+        modulus: u64,
+    ) -> Option<(RawPoint, [(usize, u64); 2])> {
+        let key_x = *self.keys_x.get(slot)?;
+        if key_x == u64::MAX || (key_x == 0 && negative) {
+            return None;
+        }
+        let witness = self.values[slot];
+        let mut labels = witness.labels();
+        let point = if key_x == 0 {
+            None
+        } else {
+            let x = key_x - 1;
+            let mut y = witness.image_y();
+            if negative {
+                y ^= x;
+                labels = labels.map(|(column, coefficient)| {
+                    (
+                        column,
+                        if coefficient == 0 {
+                            0
+                        } else {
+                            modulus - coefficient
+                        },
+                    )
+                });
+            }
+            Some((x, y))
+        };
+        Some((point, labels))
+    }
+}
+
+fn compact_point_key(point: &BinaryPoint) -> (u64, u64) {
+    match point {
+        BinaryPoint::Infinity => (0, 0),
+        BinaryPoint::Affine { x, y } => (
+            x.raw_bits().first().copied().unwrap_or(0) + 1,
+            y.raw_bits().first().copied().unwrap_or(0),
+        ),
+    }
+}
+
+fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
+    if curve.n <= 31 {
+        let mut wide = value;
+        wide = (wide | (wide << 16)) & 0x0000_ffff_0000_ffff;
+        wide = (wide | (wide << 8)) & 0x00ff_00ff_00ff_00ff;
+        wide = (wide | (wide << 4)) & 0x0f0f_0f0f_0f0f_0f0f;
+        wide = (wide | (wide << 2)) & 0x3333_3333_3333_3333;
+        wide = (wide | (wide << 1)) & 0x5555_5555_5555_5555;
+        return reduce_raw(curve, wide as u128);
+    }
+    reduce_raw(curve, carryless_product(value, value))
+}
+
+fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
+    if curve.n <= 31 && wide <= u64::MAX as u128 {
+        let mut narrow = wide as u64;
+        let mask = (1u64 << curve.n) - 1;
+        while narrow >> curve.n != 0 {
+            let high = narrow >> curve.n;
+            narrow &= mask;
+            for &term in &curve.curve.irreducible.low_terms {
+                narrow ^= high << term;
+            }
+        }
+        return narrow;
+    }
+    let mask = (1u128 << curve.n) - 1;
+    while wide >> curve.n != 0 {
+        let high = wide >> curve.n;
+        wide &= mask;
+        for &term in &curve.curve.irreducible.low_terms {
+            wide ^= high << term;
+        }
+    }
+    wide as u64
+}
+
+fn carryless_product_software(left: u64, right: u64) -> u128 {
+    let mut product = 0u128;
+    let mut value = right;
+    while value != 0 {
+        let bit = value.trailing_zeros();
+        product ^= (left as u128) << bit;
+        value &= value - 1;
+    }
+    product
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn carryless_product_pmull(left: u64, right: u64) -> u128 {
+    std::arch::aarch64::vmull_p64(left, right)
+}
+
+fn carryless_product(left: u64, right: u64) -> u128 {
+    #[cfg(target_arch = "aarch64")]
+    if std::arch::is_aarch64_feature_detected!("aes") {
+        // SAFETY: the runtime feature check above proves PMULL availability.
+        return unsafe { carryless_product_pmull(left, right) };
+    }
+    carryless_product_software(left, right)
+}
+
+fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
+    reduce_raw(curve, carryless_product(left, right))
+}
+
+fn inverse_raw(curve: &KoblitzCurve, value: u64) -> u64 {
+    assert_ne!(value, 0);
+    let exponent = (1u64 << curve.n) - 2;
+    let mut result = 1u64;
+    let mut base = value;
+    for bit in 0..curve.n {
+        if (exponent >> bit) & 1 == 1 {
+            result = mul_raw(curve, result, base);
+        }
+        base = square_raw(curve, base);
+    }
+    result
+}
+
+type RawPoint = Option<(u64, u64)>;
+
+fn to_raw_point(point: &BinaryPoint) -> RawPoint {
+    raw_affine(point)
+}
+
+fn raw_neg_point(point: RawPoint) -> RawPoint {
+    point.map(|(x, y)| (x, y ^ x))
+}
+
+fn raw_double_point(curve: &KoblitzCurve, point: RawPoint) -> RawPoint {
+    let (x, y) = point?;
+    if x == 0 {
+        return None;
+    }
+    let lambda = x ^ mul_raw(curve, y, inverse_raw(curve, x));
+    let x3 = square_raw(curve, lambda) ^ lambda ^ curve.a as u64;
+    let y3 = square_raw(curve, x) ^ mul_raw(curve, lambda ^ 1, x3);
+    Some((x3, y3))
+}
+
+fn raw_add_point(curve: &KoblitzCurve, left: RawPoint, right: RawPoint) -> RawPoint {
+    match (left, right) {
+        (None, point) | (point, None) => point,
+        (Some((x1, y1)), Some((x2, y2))) => {
+            if x1 == x2 {
+                return if y1 ^ y2 == x1 {
+                    None
+                } else {
+                    raw_double_point(curve, left)
+                };
+            }
+            let lambda = mul_raw(curve, y1 ^ y2, inverse_raw(curve, x1 ^ x2));
+            let x3 = square_raw(curve, lambda) ^ lambda ^ x1 ^ x2 ^ curve.a as u64;
+            let y3 = mul_raw(curve, lambda, x1 ^ x3) ^ x3 ^ y1;
+            Some((x3, y3))
+        }
+    }
+}
+
+fn raw_scalar_point(curve: &KoblitzCurve, point: RawPoint, scalar: u64) -> RawPoint {
+    let mut result = None;
+    for bit in (0..64 - scalar.leading_zeros()).rev() {
+        result = raw_double_point(curve, result);
+        if (scalar >> bit) & 1 == 1 {
+            result = raw_add_point(curve, result, point);
+        }
+    }
+    result
+}
+
+fn raw_compact_key(point: RawPoint) -> (u64, u64) {
+    point.map(|(x, y)| (x + 1, y)).unwrap_or((0, 0))
+}
+
+fn target_partition(point: RawPoint) -> usize {
+    let (x, y) = raw_compact_key(point);
+    let mut value = x ^ y.rotate_left(17) ^ 0xd6e8_feb8_6659_fd93;
+    value ^= value >> 32;
+    value = value.wrapping_mul(0x9e37_79b9_7f4a_7c15);
+    value ^= value >> 29;
+    value as usize % 3
+}
+
+fn raw_affine(point: &BinaryPoint) -> Option<(u64, u64)> {
+    match point {
+        BinaryPoint::Infinity => None,
+        BinaryPoint::Affine { x, y } => Some((
+            x.raw_bits().first().copied().unwrap_or(0),
+            y.raw_bits().first().copied().unwrap_or(0),
+        )),
+    }
+}
+
+#[cfg(test)]
+fn canonical_signed_point(
+    curve: &KoblitzCurve,
+    point: &BinaryPoint,
+    modulus: u64,
+    lambda: u64,
+) -> ((u64, u64), u64, usize) {
+    canonical_signed_key(curve, compact_point_key(point), modulus, lambda)
+}
+
+fn canonical_signed_key(
+    curve: &KoblitzCurve,
+    key: (u64, u64),
+    modulus: u64,
+    lambda: u64,
+) -> ((u64, u64), u64, usize) {
+    if key.0 == 0 {
+        return (key, 1, 0);
+    }
+    let mut current_x = key.0 - 1;
+    let mut current_y = key.1;
+    let mut multiplier = 1u64;
+    let mut best_key = (current_x + 1, current_y);
+    let mut best_multiplier = multiplier;
+    let mut maps = 0usize;
+    for exponent in 0..curve.n {
+        let key = (current_x + 1, current_y);
+        if key < best_key {
+            best_key = key;
+            best_multiplier = multiplier;
+        }
+        let negative_key = (current_x + 1, current_y ^ current_x);
+        if negative_key < best_key {
+            best_key = negative_key;
+            best_multiplier = modulus - multiplier;
+        }
+        if exponent + 1 < curve.n {
+            current_x = square_raw(curve, current_x);
+            current_y = square_raw(curve, current_y);
+            multiplier = ((multiplier as u128 * lambda as u128) % modulus as u128) as u64;
+            maps += 1;
+        }
+    }
+    (best_key, best_multiplier, maps)
+}
+
+#[derive(Default)]
+struct Echelon {
+    pivots: Vec<Option<Vec<u64>>>,
+    rank: usize,
+}
+
+#[derive(Default)]
+struct ReverseEchelon {
+    pivots: Vec<Option<Vec<u64>>>,
+    rank: usize,
+}
+
+fn modpow(mut base: u64, mut exponent: u64, modulus: u64) -> u64 {
+    let mut result = 1u64;
+    while exponent != 0 {
+        if exponent & 1 == 1 {
+            result = ((result as u128 * base as u128) % modulus as u128) as u64;
+        }
+        base = ((base as u128 * base as u128) % modulus as u128) as u64;
+        exponent >>= 1;
+    }
+    result
+}
+
+fn signed_scalars(lambda: u64, modulus: u64, n: u32) -> BTreeSet<u64> {
+    let mut result = BTreeSet::new();
+    let mut value = 1u64;
+    for _ in 0..n {
+        result.insert(value);
+        result.insert((modulus - value) % modulus);
+        value = ((value as u128 * lambda as u128) % modulus as u128) as u64;
+    }
+    assert_eq!(value, 1);
+    result
+}
+
+fn balanced_orbits(
+    subgroup_order: &BigUint,
+    signed_size: usize,
+    numerator: u32,
+    denominator: u32,
+) -> usize {
+    let rhs = subgroup_order * BigUint::from(6u32 * numerator);
+    for k in 1usize.. {
+        let points = BigUint::from((signed_size * k) as u64);
+        if points.pow(3) * BigUint::from(denominator) >= rhs {
+            return k;
+        }
+    }
+    unreachable!()
+}
+
+#[cfg(test)]
+fn signed_point_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPoint> {
+    let mut by_key = BTreeMap::new();
+    let mut current = point.clone();
+    for _ in 0..curve.n {
+        by_key
+            .entry(point_key(&current))
+            .or_insert_with(|| current.clone());
+        let negative = point_neg(&current);
+        by_key.entry(point_key(&negative)).or_insert(negative);
+        current = curve.frobenius(&current);
+    }
+    by_key.into_values().collect()
+}
+
+#[cfg(test)]
+fn absolute_trace_bit(curve: &KoblitzCurve, x: &F2mElement) -> bool {
+    let mut trace = F2mElement::zero(curve.n);
+    let mut power = x.clone();
+    for _ in 0..curve.n {
+        trace = trace.add(&power);
+        power = power.square(&curve.curve.irreducible);
+    }
+    assert!(trace.is_zero() || trace == F2mElement::one(curve.n));
+    !trace.is_zero()
+}
+
+#[cfg(test)]
+fn batch_target_minus_base(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    points: &[BinaryPoint],
+) -> Vec<BinaryPoint> {
+    let BinaryPoint::Affine {
+        x: target_x,
+        y: target_y,
+    } = target
+    else {
+        return points.iter().map(point_neg).collect();
+    };
+    let irr = &curve.curve.irreducible;
+    let mut denominators: Vec<Option<F2mElement>> = Vec::with_capacity(points.len());
+    let mut prefixes: Vec<Option<F2mElement>> = Vec::with_capacity(points.len());
+    let mut product = F2mElement::one(curve.n);
+    for point in points {
+        let BinaryPoint::Affine { x, .. } = point else {
+            denominators.push(None);
+            prefixes.push(None);
+            continue;
+        };
+        if x == target_x {
+            denominators.push(None);
+            prefixes.push(None);
+            continue;
+        }
+        let denominator = target_x.add(x);
+        prefixes.push(Some(product.clone()));
+        product = product.mul(&denominator, irr);
+        denominators.push(Some(denominator));
+    }
+    let mut inverse_product = product
+        .flt_inverse(irr)
+        .expect("nonempty nonzero batch product");
+    let mut inverses: Vec<Option<F2mElement>> = vec![None; points.len()];
+    for index in (0..points.len()).rev() {
+        let (Some(denominator), Some(prefix)) = (&denominators[index], &prefixes[index]) else {
+            continue;
+        };
+        inverses[index] = Some(inverse_product.mul(prefix, irr));
+        inverse_product = inverse_product.mul(denominator, irr);
+    }
+    points
+        .iter()
+        .enumerate()
+        .map(|(index, point)| {
+            let negative = point_neg(point);
+            let BinaryPoint::Affine { x, y } = &negative else {
+                return target.clone();
+            };
+            let Some(inverse) = &inverses[index] else {
+                return curve.add(target, &negative);
+            };
+            let lambda = target_y.add(y).mul(inverse, irr);
+            let x3 = lambda
+                .square(irr)
+                .add(&lambda)
+                .add(target_x)
+                .add(x)
+                .add(&curve.curve.a);
+            let y3 = lambda.mul(&target_x.add(&x3), irr).add(&x3).add(target_y);
+            BinaryPoint::Affine { x: x3, y: y3 }
+        })
+        .collect()
+}
+
+#[cfg(test)]
+fn batch_target_minus_keys(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    points: &[BinaryPoint],
+) -> Vec<(u64, u64)> {
+    let Some((target_x, target_y)) = raw_affine(target) else {
+        return points
+            .iter()
+            .map(|point| {
+                let (x, y) = raw_affine(point).expect("factor-base points are affine");
+                (x + 1, y ^ x)
+            })
+            .collect();
+    };
+    let raw_points: Vec<_> = points
+        .iter()
+        .map(|point| raw_affine(point).expect("factor-base points are affine"))
+        .collect();
+    let mut denominators = vec![0u64; points.len()];
+    let mut prefixes = vec![0u64; points.len()];
+    let mut product = 1u64;
+    for (index, &(x, _)) in raw_points.iter().enumerate() {
+        let denominator = target_x ^ x;
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    let mut inverses = vec![0u64; points.len()];
+    for index in (0..points.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+    raw_points
+        .iter()
+        .enumerate()
+        .map(|(index, &(x, y))| {
+            if denominators[index] == 0 {
+                return compact_point_key(&curve.add(target, &point_neg(&points[index])));
+            }
+            let negative_y = y ^ x;
+            let lambda = mul_raw(curve, target_y ^ negative_y, inverses[index]);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ (curve.a as u64);
+            let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+            (x3 + 1, y3)
+        })
+        .collect()
+}
+
+fn batch_raw_target_minus_keys(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    points: &[RawPoint],
+) -> Vec<(u64, u64)> {
+    let Some((target_x, target_y)) = target else {
+        return points
+            .iter()
+            .map(|&point| raw_compact_key(raw_neg_point(point)))
+            .collect();
+    };
+    let mut denominators = vec![0u64; points.len()];
+    let mut prefixes = vec![0u64; points.len()];
+    let mut product = 1u64;
+    for (index, point) in points.iter().enumerate() {
+        let (x, _) = point.expect("factor-base points are affine");
+        let denominator = target_x ^ x;
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    let mut inverses = vec![0u64; points.len()];
+    for index in (0..points.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+    points
+        .iter()
+        .enumerate()
+        .map(|(index, point)| {
+            let (x, y) = (*point).unwrap();
+            if denominators[index] == 0 {
+                return raw_compact_key(raw_add_point(curve, target, raw_neg_point(*point)));
+            }
+            let lambda = mul_raw(curve, target_y ^ y ^ x, inverses[index]);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
+            let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+            (x3 + 1, y3)
+        })
+        .collect()
+}
+
+fn batch_raw_target_minus_points_x_filtered(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    points: &[RawPoint],
+    table: &CompactPairTable,
+    output: &mut Vec<(usize, (u64, u64))>,
+    scratch: &mut BatchInverseScratch,
+) -> usize {
+    assert!(table.x_only);
+    output.clear();
+    let Some((target_x, target_y)) = target else {
+        for (index, &point) in points.iter().enumerate() {
+            let key = raw_compact_key(raw_neg_point(point));
+            if table.might_contain_x(key.0) {
+                output.push((index, key));
+            }
+        }
+        return points.len();
+    };
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes.resize(points.len(), 0);
+    scratch.inverses.resize(points.len(), 0);
+    scratch.inverses.fill(0);
+    let denominators = &mut scratch.denominators[..points.len()];
+    let prefixes = &mut scratch.prefixes[..points.len()];
+    let inverses = &mut scratch.inverses[..points.len()];
+    let mut product = 1u64;
+    for (index, point) in points.iter().enumerate() {
+        let denominator = point.map(|(x, _)| target_x ^ x).unwrap_or(0);
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    for index in (0..points.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+    for (index, &point) in points.iter().enumerate() {
+        let Some((x, y)) = point else {
+            let key = raw_compact_key(target);
+            if table.might_contain_x(key.0) {
+                output.push((index, key));
+            }
+            continue;
+        };
+        if denominators[index] == 0 {
+            let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(point)));
+            if table.might_contain_x(key.0) {
+                output.push((index, key));
+            }
+            continue;
+        }
+        let lambda = mul_raw(curve, target_y ^ y ^ x, inverses[index]);
+        let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
+        let key_x = x3 + 1;
+        if !table.might_contain_x(key_x) {
+            continue;
+        }
+        let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+        output.push((index, (key_x, y3)));
+    }
+    points.len()
+}
+
+/// Compute `target - point` and `target - (-point)` with one shared batch
+/// inversion per affine x-coordinate.  The returned boolean identifies a
+/// negated left operand.  Infinity has only one sign.
+fn batch_raw_target_minus_signed_points_x_filtered(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    points: &[RawPoint],
+    table: &CompactPairTable,
+    output: &mut Vec<(usize, bool, (u64, u64))>,
+    scratch: &mut BatchInverseScratch,
+) -> usize {
+    assert!(table.x_only);
+    output.clear();
+    let Some((target_x, target_y)) = target else {
+        let mut attempted = 0usize;
+        for (index, &point) in points.iter().enumerate() {
+            let positive_key = raw_compact_key(raw_neg_point(point));
+            attempted += 1;
+            if table.might_contain_x(positive_key.0) {
+                output.push((index, false, positive_key));
+            }
+            if point.is_some() {
+                let negative_key = raw_compact_key(point);
+                attempted += 1;
+                if table.might_contain_x(negative_key.0) {
+                    output.push((index, true, negative_key));
+                }
+            }
+        }
+        return attempted;
+    };
+
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes.resize(points.len(), 0);
+    scratch.inverses.resize(points.len(), 0);
+    scratch.inverses.fill(0);
+    let denominators = &mut scratch.denominators[..points.len()];
+    let prefixes = &mut scratch.prefixes[..points.len()];
+    let inverses = &mut scratch.inverses[..points.len()];
+    let mut product = 1u64;
+    for (index, point) in points.iter().enumerate() {
+        let denominator = point.map(|(x, _)| target_x ^ x).unwrap_or(0);
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    for index in (0..points.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+
+    let mut attempted = 0usize;
+    for (index, &point) in points.iter().enumerate() {
+        let Some((x, y)) = point else {
+            let key = raw_compact_key(target);
+            attempted += 1;
+            if table.might_contain_x(key.0) {
+                output.push((index, false, key));
+            }
+            continue;
+        };
+        if denominators[index] == 0 {
+            for (negative, left) in [(false, point), (true, raw_neg_point(point))] {
+                let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(left)));
+                attempted += 1;
+                if table.might_contain_x(key.0) {
+                    output.push((index, negative, key));
+                }
+            }
+            continue;
+        }
+
+        let inverse = inverses[index];
+        for (negative, numerator) in [(false, target_y ^ y ^ x), (true, target_y ^ y)] {
+            let lambda = mul_raw(curve, numerator, inverse);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
+            let key_x = x3 + 1;
+            attempted += 1;
+            if !table.might_contain_x(key_x) {
+                continue;
+            }
+            let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+            output.push((index, negative, (key_x, y3)));
+        }
+    }
+    attempted
+}
+
+fn batch_raw_add_keys(curve: &KoblitzCurve, pairs: &[(RawPoint, RawPoint)]) -> Vec<(u64, u64)> {
+    let mut denominators = vec![0u64; pairs.len()];
+    let mut prefixes = vec![0u64; pairs.len()];
+    let mut product = 1u64;
+    for (index, &(left, right)) in pairs.iter().enumerate() {
+        let denominator = match (left, right) {
+            (Some((x1, _)), Some((x2, _))) if x1 != x2 => x1 ^ x2,
+            _ => 0,
+        };
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    let mut inverses = vec![0u64; pairs.len()];
+    for index in (0..pairs.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+    pairs
+        .iter()
+        .enumerate()
+        .map(|(index, &(left, right))| {
+            let (Some((x1, y1)), Some((x2, y2))) = (left, right) else {
+                return raw_compact_key(raw_add_point(curve, left, right));
+            };
+            if denominators[index] == 0 {
+                return raw_compact_key(raw_add_point(curve, left, right));
+            }
+            let lambda = mul_raw(curve, y1 ^ y2, inverses[index]);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ x1 ^ x2 ^ curve.a as u64;
+            let y3 = mul_raw(curve, lambda, x1 ^ x3) ^ x3 ^ y1;
+            (x3 + 1, y3)
+        })
+        .collect()
+}
+
+fn raw_fibers(points: &[RawPoint]) -> Vec<RawFiber> {
+    let mut grouped: BTreeMap<u64, Vec<(usize, u64)>> = BTreeMap::new();
+    for (index, point) in points.iter().enumerate() {
+        let (x, y) = (*point).expect("factor-base points are affine");
+        grouped.entry(x).or_default().push((index, y));
+    }
+    let mut fibers: Vec<_> = grouped
+        .into_iter()
+        .map(|(x, mut members)| {
+            members.sort_unstable();
+            RawFiber { x, members }
+        })
+        .collect();
+    fibers.sort_by_key(|fiber| fiber.members[0].0);
+    fibers
+}
+
+fn batch_raw_target_minus_fibers(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    fibers: &[RawFiber],
+    output: &mut Vec<(usize, (u64, u64))>,
+) {
+    assert!(fibers.len() <= 64);
+    output.clear();
+    let Some((target_x, target_y)) = target else {
+        for fiber in fibers {
+            for &(index, y) in &fiber.members {
+                output.push((index, (fiber.x + 1, y ^ fiber.x)));
+            }
+        }
+        return;
+    };
+    let mut denominators = [0u64; 64];
+    let mut prefixes = [0u64; 64];
+    let mut product = 1u64;
+    for (index, fiber) in fibers.iter().enumerate() {
+        let denominator = target_x ^ fiber.x;
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    let mut inverses = [0u64; 64];
+    for index in (0..fibers.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+    for (fiber_index, fiber) in fibers.iter().enumerate() {
+        for &(point_index, y) in &fiber.members {
+            let key = if denominators[fiber_index] == 0 {
+                raw_compact_key(raw_add_point(
+                    curve,
+                    target,
+                    raw_neg_point(Some((fiber.x, y))),
+                ))
+            } else {
+                let lambda = mul_raw(curve, target_y ^ y ^ fiber.x, inverses[fiber_index]);
+                let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ fiber.x ^ curve.a as u64;
+                let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+                (x3 + 1, y3)
+            };
+            output.push((point_index, key));
+        }
+    }
+    output.sort_by_key(|(index, _)| *index);
+}
+
+fn batch_raw_target_minus_fibers_x_filtered(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    fibers: &[RawFiber],
+    table: &CompactPairTable,
+    output: &mut Vec<(usize, (u64, u64))>,
+) -> usize {
+    assert!(fibers.len() <= 64);
+    assert!(table.x_only);
+    output.clear();
+    let attempted = fibers.iter().map(|fiber| fiber.members.len()).sum();
+    let Some((target_x, target_y)) = target else {
+        for fiber in fibers {
+            for &(index, y) in &fiber.members {
+                let key = (fiber.x + 1, y ^ fiber.x);
+                if table.might_contain_x(key.0) {
+                    output.push((index, key));
+                }
+            }
+        }
+        return attempted;
+    };
+    let mut denominators = [0u64; 64];
+    let mut prefixes = [0u64; 64];
+    let mut product = 1u64;
+    for (index, fiber) in fibers.iter().enumerate() {
+        let denominator = target_x ^ fiber.x;
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    let mut inverses = [0u64; 64];
+    for index in (0..fibers.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+    for (fiber_index, fiber) in fibers.iter().enumerate() {
+        for &(point_index, y) in &fiber.members {
+            if denominators[fiber_index] == 0 {
+                let key = raw_compact_key(raw_add_point(
+                    curve,
+                    target,
+                    raw_neg_point(Some((fiber.x, y))),
+                ));
+                if table.might_contain_x(key.0) {
+                    output.push((point_index, key));
+                }
+                continue;
+            }
+            let lambda = mul_raw(curve, target_y ^ y ^ fiber.x, inverses[fiber_index]);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ fiber.x ^ curve.a as u64;
+            let key_x = x3 + 1;
+            if !table.might_contain_x(key_x) {
+                continue;
+            }
+            let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+            output.push((point_index, (key_x, y3)));
+        }
+    }
+    output.sort_by_key(|(index, _)| *index);
+    attempted
+}
+
+#[cfg(test)]
+fn frobenius_key_images(
+    curve: &KoblitzCurve,
+    key: (u64, u64),
+    modulus: u64,
+    lambda: u64,
+) -> (Vec<((u64, u64), u64)>, usize) {
+    if key.0 == 0 {
+        return (vec![(key, 1)], 0);
+    }
+    let mut current_x = key.0 - 1;
+    let mut current_y = key.1;
+    let mut multiplier = 1u64;
+    let mut images = Vec::with_capacity(curve.n as usize);
+    for exponent in 0..curve.n {
+        images.push(((current_x + 1, current_y), multiplier));
+        if exponent + 1 < curve.n {
+            current_x = square_raw(curve, current_x);
+            current_y = square_raw(curve, current_y);
+            multiplier = ((multiplier as u128 * lambda as u128) % modulus as u128) as u64;
+        }
+    }
+    (images, curve.n.saturating_sub(1) as usize)
+}
+
+fn lookup_signed_expanded_pair(
+    rest_key: (u64, u64),
+    modulus: u64,
+    quotient_pairs: &CompactPairTable,
+    label_to_index: &HashMap<(usize, u64), usize>,
+) -> Option<([usize; 2], [(usize, u64); 2])> {
+    quotient_pairs.get(rest_key).map(|pair| {
+        let stored = pair.labels();
+        let image_y = pair.image_y();
+        let labels = if rest_key.1 == image_y {
+            stored
+        } else {
+            let raw_x = rest_key.0.saturating_sub(1);
+            assert_eq!(rest_key.1, image_y ^ raw_x);
+            stored.map(|(column, coefficient)| {
+                (
+                    column,
+                    if coefficient == 0 {
+                        0
+                    } else {
+                        modulus - coefficient
+                    },
+                )
+            })
+        };
+        let indices = labels.map(|label| label_to_index[&label]);
+        (indices, labels)
+    })
+}
+
+fn lookup_pair_witness(
+    pair_mode: PairMode,
+    curve: &KoblitzCurve,
+    rest_key: (u64, u64),
+    right: usize,
+    modulus: u64,
+    lambda: u64,
+    base: &Base,
+    full_pairs: &HashMap<(u64, u64), (usize, usize)>,
+    quotient_pairs: &CompactPairTable,
+    label_to_index: &HashMap<(usize, u64), usize>,
+) -> (Option<([usize; 3], [(usize, u64); 3])>, usize) {
+    match pair_mode {
+        PairMode::Full => {
+            let witness = full_pairs.get(&rest_key).map(|&(left, middle)| {
+                let indices = [left, middle, right];
+                let labels = indices.map(|index| base.point_labels[index]);
+                (indices, labels)
+            });
+            (witness, 0)
+        }
+        PairMode::SignedQuotient => {
+            let (key, multiplier, maps) = canonical_signed_key(curve, rest_key, modulus, lambda);
+            let witness = quotient_pairs.get(key).map(|pair| {
+                let stored = pair.labels();
+                let inverse = modpow(multiplier, modulus - 2, modulus);
+                let left_label = (
+                    stored[0].0,
+                    ((stored[0].1 as u128 * inverse as u128) % modulus as u128) as u64,
+                );
+                let middle_label = (
+                    stored[1].0,
+                    ((stored[1].1 as u128 * inverse as u128) % modulus as u128) as u64,
+                );
+                let labels = [left_label, middle_label, base.point_labels[right]];
+                let indices = labels.map(|label| label_to_index[&label]);
+                (indices, labels)
+            });
+            (witness, maps)
+        }
+        PairMode::SignedExpanded => {
+            let witness =
+                lookup_signed_expanded_pair(rest_key, modulus, quotient_pairs, label_to_index).map(
+                    |(pair_indices, pair_labels)| {
+                        let labels = [pair_labels[0], pair_labels[1], base.point_labels[right]];
+                        let indices = [pair_indices[0], pair_indices[1], right];
+                        (indices, labels)
+                    },
+                );
+            (witness, 0)
+        }
+    }
+}
+
+fn raw_trace_bit(curve: &KoblitzCurve, value: u64) -> bool {
+    let mut trace = 0u64;
+    let mut power = value;
+    for _ in 0..curve.n {
+        trace ^= power;
+        power = square_raw(curve, power);
+    }
+    assert!(trace == 0 || trace == 1);
+    trace == 1
+}
+
+fn raw_points_with_x(curve: &KoblitzCurve, x: u64) -> Vec<RawPoint> {
+    if x == 0 {
+        return vec![Some((0, 1))];
+    }
+    let inverse_x = inverse_raw(curve, x);
+    let rhs = x ^ curve.a as u64 ^ square_raw(curve, inverse_x);
+    if raw_trace_bit(curve, rhs) {
+        return Vec::new();
+    }
+    let mut half_trace = 0u64;
+    let mut power = rhs;
+    for _ in 0..=(curve.n - 1) / 2 {
+        half_trace ^= power;
+        power = square_raw(curve, square_raw(curve, power));
+    }
+    assert_eq!(square_raw(curve, half_trace) ^ half_trace, rhs);
+    let y = mul_raw(curve, x, half_trace);
+    vec![Some((x, y)), Some((x, y ^ x))]
+}
+
+fn raw_signed_orbit(curve: &KoblitzCurve, point: RawPoint) -> Vec<RawPoint> {
+    let mut by_key = BTreeMap::new();
+    let mut current = point;
+    for _ in 0..curve.n {
+        by_key.entry(raw_compact_key(current)).or_insert(current);
+        let negative = raw_neg_point(current);
+        by_key.entry(raw_compact_key(negative)).or_insert(negative);
+        current = current.map(|(x, y)| (square_raw(curve, x), square_raw(curve, y)));
+    }
+    by_key.into_values().collect()
+}
+
+fn binary_from_raw(curve: &KoblitzCurve, point: RawPoint) -> BinaryPoint {
+    match point {
+        None => BinaryPoint::Infinity,
+        Some((x, y)) => BinaryPoint::Affine {
+            x: F2mElement::from_biguint(&BigUint::from(x), curve.n),
+            y: F2mElement::from_biguint(&BigUint::from(y), curve.n),
+        },
+    }
+}
+
+fn point_defined_base_with_seed(
+    curve: &KoblitzCurve,
+    wanted: usize,
+    factor_base_seed: u64,
+) -> Base {
+    let modulus = curve.subgroup_order.to_u64().unwrap();
+    let lambda = curve.lambda.to_u64().unwrap();
+    let signed_size = signed_scalars(lambda, modulus, curve.n).len();
+    let cofactor_two = curve.cofactor == BigUint::from(2u8);
+    let cofactor = curve.cofactor.to_u64().unwrap();
+    let mut accepted: Vec<Vec<RawPoint>> = Vec::new();
+    let mut seen_orbits = HashSet::new();
+    let mut scanned_x = 0u64;
+    let mask = if curve.n >= 64 {
+        u64::MAX
+    } else {
+        (1u64 << curve.n) - 1
+    };
+    // Exhaustive affine order is fine on small fields; past ~32 bits a
+    // full `2^n` walk is impossible, so draw abscissae from a fixed LCG.
+    let exhaustive = curve.n <= 32;
+    let budget = if exhaustive {
+        1u64 << curve.n
+    } else {
+        1u64 << 24
+    };
+    let mut state = factor_base_seed ^ (curve.n as u64) ^ ((wanted as u64) << 17);
+    for i in 0..budget {
+        let x = if exhaustive {
+            i
+        } else {
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            state & mask
+        };
+        scanned_x += 1;
+        for point in raw_points_with_x(curve, x) {
+            let subgroup_point = if cofactor_two {
+                if raw_trace_bit(curve, x) ^ (curve.a == 1) {
+                    None
+                } else {
+                    point
+                }
+            } else {
+                raw_scalar_point(curve, point, cofactor)
+            };
+            if subgroup_point.is_none() {
+                continue;
+            }
+            let orbit = raw_signed_orbit(curve, subgroup_point);
+            let canonical = raw_compact_key(orbit[0]);
+            if !seen_orbits.insert(canonical) {
+                continue;
+            }
+            accepted.push(orbit);
+            if accepted.len() == wanted {
+                break;
+            }
+        }
+        if accepted.len() == wanted {
+            break;
+        }
+    }
+    assert_eq!(
+        accepted.len(),
+        wanted,
+        "failed to collect {wanted} orbits at n={} after {scanned_x} abscissae",
+        curve.n
+    );
+    accepted.sort_by_key(|orbit| raw_compact_key(orbit[0]));
+    let mut points = Vec::new();
+    let mut point_labels = Vec::new();
+    let mut representatives = Vec::new();
+    for (column, orbit) in accepted.into_iter().enumerate() {
+        let representative = orbit[0];
+        representatives.push(binary_from_raw(curve, representative));
+        let mut labels = HashMap::new();
+        let mut current = representative;
+        let mut coefficient = 1u64;
+        for _ in 0..curve.n {
+            labels
+                .entry(raw_compact_key(current))
+                .or_insert(coefficient);
+            labels
+                .entry(raw_compact_key(raw_neg_point(current)))
+                .or_insert(modulus - coefficient);
+            current = current.map(|(x, y)| (square_raw(curve, x), square_raw(curve, y)));
+            coefficient = ((coefficient as u128 * lambda as u128) % modulus as u128) as u64;
+        }
+        assert_eq!(labels.len(), orbit.len());
+        for member in orbit {
+            points.push(binary_from_raw(curve, member));
+            point_labels.push((column, labels[&raw_compact_key(member)]));
+        }
+    }
+    Base {
+        points,
+        point_labels,
+        representatives,
+        scanned_x,
+        signed_size,
+        point_selection: if cofactor_two {
+            "first admissible signed Frobenius orbits in affine coordinate order"
+        } else {
+            "small-cofactor projections of the first affine curve points in coordinate order"
+        },
+    }
+}
+
+#[cfg(test)]
+fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
+    point_defined_base_with_seed(curve, wanted, DEFAULT_FACTOR_BASE_SEED)
+}
+
+#[cfg(test)]
+fn reference_point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
+    let modulus = curve.subgroup_order.to_u64().unwrap();
+    let lambda = curve.lambda.to_u64().unwrap();
+    let signed_size = signed_scalars(lambda, modulus, curve.n).len();
+    let field_size = 1u64 << curve.n;
+    let cofactor_two = curve.cofactor == BigUint::from(2u8);
+    let mut accepted: Vec<Vec<BinaryPoint>> = Vec::new();
+    let mut seen_orbits = HashSet::new();
+    let mut scanned_x = 0u64;
+
+    for raw_x in 0..field_size {
+        scanned_x += 1;
+        let x = F2mElement::from_biguint(&BigUint::from(raw_x), curve.n);
+        let rational = points_with_x(&curve.curve, &x);
+        for point in rational {
+            let in_subgroup = if cofactor_two {
+                !(absolute_trace_bit(curve, &x) ^ (curve.a == 1))
+            } else {
+                curve.mul(&point, &curve.subgroup_order) == BinaryPoint::Infinity
+            };
+            if point == BinaryPoint::Infinity || !in_subgroup {
+                continue;
+            }
+            let orbit = signed_point_orbit(curve, &point);
+            let canonical = point_key(&orbit[0]);
+            if !seen_orbits.insert(canonical) {
+                continue;
+            }
+            if !cofactor_two {
+                assert_eq!(
+                    curve.mul(&point, &curve.subgroup_order),
+                    BinaryPoint::Infinity,
+                );
+            }
+            accepted.push(orbit);
+            if accepted.len() == wanted {
+                break;
+            }
+        }
+        if accepted.len() == wanted {
+            break;
+        }
+    }
+    assert_eq!(
+        accepted.len(),
+        wanted,
+        "field scan did not find enough subgroup orbits"
+    );
+
+    accepted.sort_by_key(|orbit| point_key(&orbit[0]));
+    let mut points = Vec::new();
+    let mut point_labels = Vec::new();
+    let mut representatives = Vec::new();
+    for (column, orbit) in accepted.into_iter().enumerate() {
+        let representative = orbit[0].clone();
+        representatives.push(representative.clone());
+        let mut labels = HashMap::new();
+        let mut current = representative;
+        let mut coefficient = 1u64;
+        for _ in 0..curve.n {
+            labels.entry(point_key(&current)).or_insert(coefficient);
+            labels
+                .entry(point_key(&point_neg(&current)))
+                .or_insert((modulus - coefficient) % modulus);
+            current = curve.frobenius(&current);
+            coefficient = ((coefficient as u128 * lambda as u128) % modulus as u128) as u64;
+        }
+        assert_eq!(labels.len(), orbit.len());
+        for member in orbit {
+            points.push(member.clone());
+            point_labels.push((column, labels[&point_key(&member)]));
+        }
+    }
+    let keys: HashSet<_> = points.iter().map(point_key).collect();
+    assert_eq!(keys.len(), points.len());
+    assert!(points.iter().all(|point| {
+        keys.contains(&point_key(&curve.frobenius(point)))
+            && keys.contains(&point_key(&point_neg(point)))
+    }));
+    Base {
+        points,
+        point_labels,
+        representatives,
+        scanned_x,
+        signed_size,
+        point_selection: "first admissible signed Frobenius orbits in affine coordinate order",
+    }
+}
+
+impl Echelon {
+    fn new(columns: usize) -> Self {
+        Self {
+            pivots: vec![None; columns],
+            rank: 0,
+        }
+    }
+
+    fn insert(&mut self, mut row: Vec<u64>, modulus: u64) -> bool {
+        for column in 0..row.len() {
+            if row[column] == 0 {
+                continue;
+            }
+            if let Some(pivot) = &self.pivots[column] {
+                let factor = row[column];
+                for index in column..row.len() {
+                    let product =
+                        ((factor as u128 * pivot[index] as u128) % modulus as u128) as u64;
+                    row[index] = if row[index] >= product {
+                        row[index] - product
+                    } else {
+                        modulus - (product - row[index])
+                    };
+                }
+                continue;
+            }
+            let inverse = modpow(row[column], modulus - 2, modulus);
+            for value in &mut row[column..] {
+                *value = ((*value as u128 * inverse as u128) % modulus as u128) as u64;
+            }
+            self.pivots[column] = Some(row);
+            self.rank += 1;
+            return true;
+        }
+        false
+    }
+}
+
+impl ReverseEchelon {
+    fn new(columns: usize) -> Self {
+        Self {
+            pivots: vec![None; columns],
+            rank: 0,
+        }
+    }
+
+    fn insert(&mut self, mut row: Vec<u64>, modulus: u64) -> bool {
+        for column in (0..row.len()).rev() {
+            if row[column] == 0 {
+                continue;
+            }
+            if let Some(pivot) = &self.pivots[column] {
+                let factor = row[column];
+                for index in 0..=column {
+                    let product =
+                        ((factor as u128 * pivot[index] as u128) % modulus as u128) as u64;
+                    row[index] = if row[index] >= product {
+                        row[index] - product
+                    } else {
+                        modulus - (product - row[index])
+                    };
+                }
+                continue;
+            }
+            let inverse = modpow(row[column], modulus - 2, modulus);
+            for value in &mut row[..=column] {
+                *value = ((*value as u128 * inverse as u128) % modulus as u128) as u64;
+            }
+            self.pivots[column] = Some(row);
+            self.rank += 1;
+            return true;
+        }
+        false
+    }
+}
+
+fn dense_rank(input: &[Vec<u64>], columns: usize, modulus: u64) -> usize {
+    let mut matrix = input.to_vec();
+    let mut rank = 0usize;
+    for column in 0..columns {
+        let Some(pivot) = (rank..matrix.len()).find(|&row| matrix[row][column] != 0) else {
+            continue;
+        };
+        matrix.swap(rank, pivot);
+        let inverse = modpow(matrix[rank][column], modulus - 2, modulus);
+        for index in column..columns {
+            matrix[rank][index] =
+                ((matrix[rank][index] as u128 * inverse as u128) % modulus as u128) as u64;
+        }
+        for row in 0..matrix.len() {
+            if row == rank || matrix[row][column] == 0 {
+                continue;
+            }
+            let factor = matrix[row][column];
+            for index in column..columns {
+                let product =
+                    ((factor as u128 * matrix[rank][index] as u128) % modulus as u128) as u64;
+                matrix[row][index] = if matrix[row][index] >= product {
+                    matrix[row][index] - product
+                } else {
+                    modulus - (product - matrix[row][index])
+                };
+            }
+        }
+        rank += 1;
+        if rank == matrix.len() {
+            break;
+        }
+    }
+    rank
+}
+
+fn solve_full_column_rank_system(
+    rows: &[Vec<u64>],
+    right_hand_sides: &[u64],
+    columns: usize,
+    modulus: u64,
+) -> Option<Vec<u64>> {
+    assert_eq!(rows.len(), right_hand_sides.len());
+    let mut matrix: Vec<Vec<u64>> = rows
+        .iter()
+        .zip(right_hand_sides)
+        .map(|(row, &rhs)| {
+            assert_eq!(row.len(), columns);
+            let mut augmented = row.clone();
+            augmented.push(rhs);
+            augmented
+        })
+        .collect();
+    let mut pivot_row = 0usize;
+    for column in 0..columns {
+        let pivot = (pivot_row..matrix.len()).find(|&row| matrix[row][column] != 0)?;
+        matrix.swap(pivot_row, pivot);
+        let inverse = modpow(matrix[pivot_row][column], modulus - 2, modulus);
+        for value in &mut matrix[pivot_row][column..=columns] {
+            *value = ((*value as u128 * inverse as u128) % modulus as u128) as u64;
+        }
+        for row in 0..matrix.len() {
+            if row == pivot_row || matrix[row][column] == 0 {
+                continue;
+            }
+            let factor = matrix[row][column];
+            for index in column..=columns {
+                let product =
+                    ((factor as u128 * matrix[pivot_row][index] as u128) % modulus as u128) as u64;
+                matrix[row][index] = if matrix[row][index] >= product {
+                    matrix[row][index] - product
+                } else {
+                    modulus - (product - matrix[row][index])
+                };
+            }
+        }
+        pivot_row += 1;
+    }
+    Some((0..columns).map(|row| matrix[row][columns]).collect())
+}
+
+/// `collection_ms` contains target generation, group checks, final linear
+/// solve, and scalar replay. Return its residual PDP/rank/receipt work.
+fn exclusive_pdp_ms(
+    collection_ms: f64,
+    target_generation_ms: f64,
+    packed_verification_ms: f64,
+    linear_solve_ms: f64,
+    solution_validation_ms: f64,
+) -> f64 {
+    let exclusive = collection_ms
+        - target_generation_ms
+        - packed_verification_ms
+        - linear_solve_ms
+        - solution_validation_ms;
+    assert!(exclusive.is_finite() && exclusive >= -1e-9);
+    exclusive.max(0.0)
+}
+
+pub(super) fn run() {
+    let arguments: Vec<_> = std::env::args().collect();
+    assert!(
+        (6..=10).contains(&arguments.len()),
+        "usage: <n> <a> <eta_numerator> <eta_denominator> <seed> [full|signed_quotient|signed_expanded] [independent|coefficient_walk|partition_walk] [pointwise|batch_inverse_*|fiber_batch_*|pair_pair_*] [batch_fixtures]"
+    );
+    let n: u32 = arguments[1].parse().unwrap();
+    let a: u8 = arguments[2].parse().unwrap();
+    let eta_numerator: u32 = arguments[3].parse().unwrap();
+    let eta_denominator: u32 = arguments[4].parse().unwrap();
+    let seed: u64 = arguments[5].parse().unwrap();
+    let pair_mode = PairMode::parse(arguments.get(6).map(String::as_str).unwrap_or("full"));
+    let target_mode = TargetMode::parse(
+        arguments
+            .get(7)
+            .map(String::as_str)
+            .unwrap_or("independent"),
+    );
+    let query_mode = QueryMode::parse(arguments.get(8).map(String::as_str).unwrap_or("pointwise"));
+    let batch_fixtures: u64 = arguments
+        .get(9)
+        .map(String::as_str)
+        .unwrap_or("1")
+        .parse()
+        .unwrap();
+    let summary_only = std::env::var("KIC_SUMMARY_ONLY").as_deref() == Ok("1");
+    let batch_corpus = std::env::var("KIC_BATCH_CORPUS").ok();
+    let shared_public_fixture_domain =
+        std::env::var("KIC_SHARED_PUBLIC_FIXTURE_DOMAIN").as_deref() == Ok("1");
+    let shared_public_fixture_offset: u64 = std::env::var("KIC_SHARED_PUBLIC_FIXTURE_OFFSET")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_SHARED_PUBLIC_FIXTURE_OFFSET must be an integer")
+        })
+        .unwrap_or(0);
+    assert!(
+        !shared_public_fixture_domain || batch_corpus.is_some(),
+        "KIC_SHARED_PUBLIC_FIXTURE_DOMAIN requires KIC_BATCH_CORPUS"
+    );
+    let relation_cap_extra: usize = std::env::var("KIC_RELATION_CAP_EXTRA")
+        .ok()
+        .map(|value| value.parse().unwrap())
+        .unwrap_or(0);
+    let required_surplus_relations: usize = std::env::var("KIC_REQUIRED_SURPLUS_RELATIONS")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_REQUIRED_SURPLUS_RELATIONS must be an integer")
+        })
+        .unwrap_or(32);
+    let factor_base_seed: u64 = std::env::var("KIC_FACTOR_BASE_SEED")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_FACTOR_BASE_SEED must be an integer")
+        })
+        .unwrap_or(DEFAULT_FACTOR_BASE_SEED);
+    let x_filter_bits_per_expected: usize = std::env::var("KIC_X_FILTER_BITS_PER_EXPECTED")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_X_FILTER_BITS_PER_EXPECTED must be an integer")
+        })
+        .unwrap_or(16);
+    let x_filter_hashes: usize = std::env::var("KIC_X_FILTER_HASHES")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_X_FILTER_HASHES must be an integer")
+        })
+        .unwrap_or(2);
+    let shared_factor_log_precomputation =
+        std::env::var("KIC_SHARED_FACTOR_LOG_PRECOMPUTATION").as_deref() == Ok("1");
+    assert!(
+        !shared_factor_log_precomputation || batch_fixtures > 1,
+        "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION requires at least two fixtures"
+    );
+    let incremental_rank_crosscheck =
+        std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
+    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
+    assert!(eta_numerator > 0 && eta_denominator > 0);
+    assert!(batch_fixtures > 0);
+
+    let curve_setup_started = Instant::now();
+    let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
+    let curve_setup_ms = curve_setup_started.elapsed().as_secs_f64() * 1000.0;
+    let setup_started = Instant::now();
+    let modulus = curve.subgroup_order.to_u64().unwrap();
+    let lambda = curve.lambda.to_u64().unwrap();
+    let automorphisms: Vec<_> = signed_scalars(lambda, modulus, n).into_iter().collect();
+    let signed_size = automorphisms.len();
+    let columns = balanced_orbits(
+        &curve.subgroup_order,
+        signed_size,
+        eta_numerator,
+        eta_denominator,
+    );
+    let base_started = Instant::now();
+    let base = point_defined_base_with_seed(&curve, columns, factor_base_seed);
+    let base_ms = base_started.elapsed().as_secs_f64() * 1000.0;
+    let raw_base_points: Vec<_> = base.points.iter().map(to_raw_point).collect();
+    let base_fibers = raw_fibers(&raw_base_points);
+
+    let pair_started = Instant::now();
+    let pair_types = columns * (columns + 1) / 2;
+    let mut full_pairs = HashMap::with_capacity(base.points.len() * (base.points.len() + 1) / 2);
+    let quotient_capacity = match pair_mode {
+        PairMode::Full => 0,
+        PairMode::SignedQuotient => pair_types * base.signed_size,
+        PairMode::SignedExpanded => pair_types * base.signed_size * (base.signed_size / 2),
+    };
+    let mut quotient_pairs = CompactPairTable::with_capacity_config(
+        quotient_capacity,
+        pair_mode == PairMode::SignedExpanded,
+        (1usize << n) + 1,
+        x_filter_bits_per_expected,
+        x_filter_hashes,
+    );
+    let mut pair_additions = 0usize;
+    let mut pair_canonicalization_maps = 0usize;
+    let mut pair_batch_inversions = 0usize;
+    let label_to_index: HashMap<_, _> = base
+        .point_labels
+        .iter()
+        .copied()
+        .enumerate()
+        .map(|(index, label)| (label, index))
+        .collect();
+    assert_eq!(label_to_index.len(), base.points.len());
+    match pair_mode {
+        PairMode::Full => {
+            for left in 0..base.points.len() {
+                for right in left..base.points.len() {
+                    let sum = curve.add(&base.points[left], &base.points[right]);
+                    full_pairs
+                        .entry(compact_point_key(&sum))
+                        .or_insert((left, right));
+                    pair_additions += 1;
+                }
+            }
+        }
+        PairMode::SignedQuotient | PairMode::SignedExpanded => {
+            assert_eq!(automorphisms.len(), base.signed_size);
+            let diagonal_relatives: Vec<_> = automorphisms
+                .iter()
+                .copied()
+                .filter(|&value| value <= modpow(value, modulus - 2, modulus))
+                .collect();
+            let mut jobs = Vec::new();
+            let mut operands = Vec::new();
+            for left_column in 0..columns {
+                let left = label_to_index[&(left_column, 1)];
+                for right_column in left_column..columns {
+                    let relatives = if left_column == right_column {
+                        &diagonal_relatives
+                    } else {
+                        &automorphisms
+                    };
+                    for &relative in relatives {
+                        let right = label_to_index[&(right_column, relative)];
+                        jobs.push((left_column, right_column, relative));
+                        operands.push((
+                            to_raw_point(&base.points[left]),
+                            to_raw_point(&base.points[right]),
+                        ));
+                    }
+                }
+            }
+            let sum_keys = batch_raw_add_keys(&curve, &operands);
+            pair_batch_inversions = usize::from(!sum_keys.is_empty());
+            for ((left_column, right_column, relative), key) in jobs.into_iter().zip(sum_keys) {
+                if pair_mode == PairMode::SignedQuotient {
+                    let (canonical, multiplier, maps) =
+                        canonical_signed_key(&curve, key, modulus, lambda);
+                    pair_canonicalization_maps += maps;
+                    let witness = QuotientPairWitness::new(
+                        [
+                            (left_column, multiplier),
+                            (
+                                right_column,
+                                ((relative as u128 * multiplier as u128) % modulus as u128) as u64,
+                            ),
+                        ],
+                        canonical.1,
+                    );
+                    quotient_pairs.insert(canonical, witness);
+                } else {
+                    let mut image_key = key;
+                    let mut multiplier = 1u64;
+                    for exponent in 0..curve.n {
+                        let witness = QuotientPairWitness::new(
+                            [
+                                (left_column, multiplier),
+                                (
+                                    right_column,
+                                    ((relative as u128 * multiplier as u128) % modulus as u128)
+                                        as u64,
+                                ),
+                            ],
+                            image_key.1,
+                        );
+                        quotient_pairs.insert(image_key, witness);
+                        if exponent + 1 < curve.n && image_key.0 != 0 {
+                            let x = square_raw(&curve, image_key.0 - 1);
+                            let y = square_raw(&curve, image_key.1);
+                            image_key = (x + 1, y);
+                            multiplier =
+                                ((multiplier as u128 * lambda as u128) % modulus as u128) as u64;
+                            pair_canonicalization_maps += 1;
+                        }
+                    }
+                }
+                pair_additions += 1;
+            }
+        }
+    }
+    let support_index_entries = match pair_mode {
+        PairMode::Full => full_pairs.len(),
+        PairMode::SignedQuotient | PairMode::SignedExpanded => quotient_pairs.len(),
+    };
+    let guided_slot_index_started = Instant::now();
+    let mut guided_slot_bins: Vec<Vec<u32>> = Vec::new();
+    if query_mode.pair_pair_guided_width().is_some() {
+        assert!(pair_mode == PairMode::SignedExpanded);
+        let mean_bin = support_index_entries.div_ceil(columns);
+        guided_slot_bins = (0..columns)
+            .map(|_| Vec::with_capacity(mean_bin + mean_bin / 8 + 1024))
+            .collect();
+        for slot in 0..quotient_pairs.slots() {
+            if quotient_pairs.keys_x[slot] == u64::MAX {
+                continue;
+            }
+            let labels = quotient_pairs.values[slot].labels();
+            let left = labels[0].0;
+            let right = labels[1].0;
+            let bin = if left == right
+                || CompactPairTable::hash((slot as u64, quotient_pairs.keys_x[slot])) & 1 == 0
+            {
+                left
+            } else {
+                right
+            };
+            guided_slot_bins[bin].push(slot as u32);
+        }
+        assert_eq!(
+            guided_slot_bins.iter().map(Vec::len).sum::<usize>(),
+            support_index_entries
+        );
+    }
+    let guided_slot_index_entries = guided_slot_bins.iter().map(Vec::len).sum::<usize>();
+    let guided_slot_index_allocated_bytes = guided_slot_bins
+        .iter()
+        .map(|bin| bin.capacity() * std::mem::size_of::<u32>())
+        .sum::<usize>();
+    let guided_slot_index_ms = guided_slot_index_started.elapsed().as_secs_f64() * 1000.0;
+    let support_occupied_slot_payload_bytes = match pair_mode {
+        PairMode::Full => {
+            support_index_entries
+                * (2 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>())
+        }
+        PairMode::SignedQuotient => {
+            support_index_entries
+                * (2 * std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>())
+        }
+        PairMode::SignedExpanded => {
+            support_index_entries
+                * (std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>())
+        }
+    };
+    let pair_ms = pair_started.elapsed().as_secs_f64() * 1000.0;
+    let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+    let base_validation_started = Instant::now();
+    assert!(base
+        .representatives
+        .iter()
+        .all(|point| { curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity }));
+    let base_validation_ms = base_validation_started.elapsed().as_secs_f64() * 1000.0;
+    let representative_keys: Vec<_> = base
+        .representatives
+        .iter()
+        .map(|point| {
+            let (x, y) = point_key(point);
+            json!([x.to_string(), y.to_string()])
+        })
+        .collect();
+    let factor_base_point_keys: Vec<_> = base
+        .points
+        .iter()
+        .map(|point| {
+            let (x, y) = point_key(point);
+            json!([x.to_string(), y.to_string()])
+        })
+        .collect();
+    let generator_key = point_key(curve.generator());
+    let base_hash = blake3::hash(&serde_json::to_vec(&representative_keys).unwrap())
+        .to_hex()
+        .to_string();
+    println!(
+        "{}",
+        json!({
+            "schema_version":"1.0",
+            "task_id":TASK_ID,
+            "kind":"point_defined_factor_base",
+            "evidence_class":"measured_factor_base_construction",
+            "n":n,
+            "a":a,
+            "subgroup_order":modulus,
+            "cofactor":curve.cofactor.to_string(),
+            "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
+            "orbit_columns":columns,
+            "signed_automorphism_size":base.signed_size,
+            "factor_base_points":base.points.len(),
+            "factor_base_seed":factor_base_seed,
+            "base_hash":&base_hash,
+            "field_modulus_low_terms":curve.curve.irreducible.low_terms,
+            "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
+            "factor_base_point_coordinates":base.points.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
+            "factor_base_representatives":base.representatives.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
+            "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
+            "representative_point_keys":representative_keys,
+            "factor_base_point_keys":factor_base_point_keys,
+            "factor_base_point_labels":base.point_labels,
+            "point_selection":base.point_selection,
+            "field_x_values_scanned":base.scanned_x,
+            "base_construction_ms":base_ms,
+            "support_index_ms":pair_ms,
+            "pair_index_mode":pair_mode.name(),
+            "total_setup_ms":setup_ms,
+            "curve_setup_ms":curve_setup_ms,
+            "independent_base_validation_ms":base_validation_ms,
+            "pair_group_additions":pair_additions,
+            "pair_canonicalization_maps":pair_canonicalization_maps,
+            "pair_batch_inversions":pair_batch_inversions,
+            "support_index_entries":support_index_entries,
+            "support_payload_lower_bound_bytes":support_occupied_slot_payload_bytes,
+            "support_occupied_slot_payload_bytes":support_occupied_slot_payload_bytes,
+            "support_witness_bytes":std::mem::size_of::<QuotientPairWitness>(),
+            "guided_slot_index_entries":guided_slot_index_entries,
+            "guided_slot_index_allocated_bytes":guided_slot_index_allocated_bytes,
+            "guided_slot_index_ms":guided_slot_index_ms,
+            "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
+            "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
+            "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
+            "support_x_prefilter_hashes":quotient_pairs.x_filter_hashes(),
+            "frobenius_closed":true,
+            "negation_closed":true,
+            "subgroup_membership_verified":true,
+            "selection_uses_scalar_labels":false
+        })
+    );
+
+    if std::env::var("KIC_CONSTRUCTION_ONLY").as_deref() == Ok("1") {
+        return;
+    }
+
+    let batch_started = Instant::now();
+    let mut batch_online_charged_ms = 0.0f64;
+    let mut batch_fixture_generation_ms = 0.0f64;
+    let mut batch_reference_validation_ms = 0.0f64;
+    let mut batch_target_trials = 0usize;
+    let mut batch_admitted_relations = 0usize;
+    let mut batch_support_queries = 0usize;
+    let mut batch_rank_plus_32 = 0u64;
+    let mut batch_shared_log_one_relation = 0u64;
+    let mut retained_factor_base_logs: Option<Vec<u64>> = None;
+    for fixture_index in 0..batch_fixtures {
+        let uses_retained_factor_logs =
+            shared_factor_log_precomputation && retained_factor_base_logs.is_some();
+        let fixture_material = if shared_public_fixture_domain {
+            format!(
+                "KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{}|{seed}|{}",
+                batch_corpus.as_deref().unwrap(),
+                shared_public_fixture_offset + fixture_index
+            )
+        } else if batch_fixtures == 1 {
+            format!("{TASK_ID}|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}")
+        } else if let Some(corpus) = &batch_corpus {
+            format!("TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{corpus}|{seed}|{fixture_index}")
+        } else {
+            format!(
+            "TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}|{fixture_index}"
+        )
+        };
+        let digest = blake3::hash(fixture_material.as_bytes());
+        let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
+        let mut rng = StdRng::seed_from_u64(fixture_seed);
+        let fixture_generation_started = Instant::now();
+        let d0 = rng.gen_range(1..modulus);
+        let q = curve.mul(curve.generator(), &BigUint::from(d0));
+        let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
+        let fixture_setup_started = Instant::now();
+        let generator_raw = to_raw_point(curve.generator());
+        let q_raw = to_raw_point(&q);
+        let (mut walk_a, mut walk_b, delta_a, delta_b, mut walk_target, walk_jump) =
+            match target_mode {
+                TargetMode::CoefficientWalk => {
+                    let walk_a = rng.gen_range(0..modulus);
+                    let walk_b = rng.gen_range(1..modulus);
+                    let delta_a = rng.gen_range(1..modulus);
+                    let delta_b = rng.gen_range(1..modulus);
+                    let walk_target = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, walk_a),
+                        raw_scalar_point(&curve, q_raw, walk_b),
+                    );
+                    let walk_jump = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, delta_a),
+                        raw_scalar_point(&curve, q_raw, delta_b),
+                    );
+                    (walk_a, walk_b, delta_a, delta_b, walk_target, walk_jump)
+                }
+                TargetMode::PartitionWalk => {
+                    let walk_a = rng.gen_range(0..modulus);
+                    let walk_b = rng.gen_range(1..modulus);
+                    let walk_target = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, walk_a),
+                        raw_scalar_point(&curve, q_raw, walk_b),
+                    );
+                    (walk_a, walk_b, 0, 0, walk_target, None)
+                }
+                TargetMode::Independent => (0, 0, 0, 0, None, None),
+            };
+        let mut echelon = Echelon::new(columns + 1);
+        let mut reverse_echelon = ReverseEchelon::new(columns + 1);
+        let mut rows = Vec::new();
+        let mut right_hand_sides = Vec::new();
+        let mut exact_rows = HashSet::new();
+        let mut projective_rows = HashSet::new();
+        let mut duplicate_rows = 0usize;
+        let mut scalar_multiple_rows = 0usize;
+        let mut accepted = 0usize;
+        let mut trials = 0usize;
+        let mut rank_full_at = None;
+        let mut decomposition_queries = 0usize;
+        let mut query_additions = 0usize;
+        let mut query_canonicalization_maps = 0usize;
+        let mut query_x_filter_rejections = 0usize;
+        let mut query_exact_table_misses = 0usize;
+        let mut target_walk_additions = 0usize;
+        let mut query_batch_inversions = 0usize;
+        let mut reference_validation_records = Vec::new();
+        let mut walk_seen = HashSet::new();
+        let mut target_walk_restarts = 0usize;
+        let mut target_scalar_multiplications = match target_mode {
+            TargetMode::Independent => 0,
+            TargetMode::CoefficientWalk => 4,
+            TargetMode::PartitionWalk => 2,
+        };
+        let mut fiber_rest_scratch = Vec::with_capacity(128);
+        let mut pair_point_scratch = Vec::with_capacity(256);
+        let mut pair_label_scratch = Vec::with_capacity(256);
+        let mut pair_rest_scratch = Vec::with_capacity(256);
+        let mut pair_signed_rest_scratch = Vec::with_capacity(512);
+        let mut pair_inverse_scratch = BatchInverseScratch::default();
+        let mut guided_bin_order = Vec::with_capacity(columns);
+        let mut column_relation_counts = vec![0usize; columns];
+        let mut guided_bins_visited = 0usize;
+        let mut guided_priority_hits = 0usize;
+        let mut dense_rank_recomputations = 0usize;
+        let mut dimension_bound_rank_crosschecks = 0usize;
+        let mut reverse_incremental_rank_crosschecks = 0usize;
+        let mut terminal_dense_rank_crosschecks = 0usize;
+        let mut target_generation_ns = 0u128;
+        let mut query_total_ns = 0u128;
+        let mut packed_verification_ns = 0u128;
+        let mut rank_diagnostics_ns = 0u128;
+        let mut receipt_construction_ns = 0u128;
+        let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
+        let collection_started = Instant::now();
+        let relation_cap = 2 * columns + 64 + relation_cap_extra;
+        let target_cap = 100_000usize;
+
+        while trials < target_cap {
+            if uses_retained_factor_logs && accepted >= 1 {
+                break;
+            } else if let Some(full_at) = rank_full_at {
+                if accepted >= full_at + required_surplus_relations {
+                    break;
+                }
+            } else if accepted >= relation_cap {
+                break;
+            }
+            trials += 1;
+            let target_generation_started = Instant::now();
+            if target_mode != TargetMode::Independent
+                && !walk_seen.insert(raw_compact_key(walk_target))
+            {
+                loop {
+                    walk_a = rng.gen_range(0..modulus);
+                    walk_b = rng.gen_range(1..modulus);
+                    walk_target = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, walk_a),
+                        raw_scalar_point(&curve, q_raw, walk_b),
+                    );
+                    target_scalar_multiplications += 2;
+                    if walk_seen.insert(raw_compact_key(walk_target)) {
+                        break;
+                    }
+                }
+                target_walk_restarts += 1;
+            }
+            let (coefficient_a, coefficient_b, target) = match target_mode {
+                TargetMode::Independent => {
+                    let coefficient_a = rng.gen_range(0..modulus);
+                    let coefficient_b = rng.gen_range(1..modulus);
+                    let target = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, coefficient_a),
+                        raw_scalar_point(&curve, q_raw, coefficient_b),
+                    );
+                    target_scalar_multiplications += 2;
+                    (coefficient_a, coefficient_b, target)
+                }
+                TargetMode::CoefficientWalk => {
+                    let result = (walk_a, walk_b, walk_target);
+                    walk_a = (walk_a + delta_a) % modulus;
+                    walk_b = (walk_b + delta_b) % modulus;
+                    walk_target = raw_add_point(&curve, walk_target, walk_jump);
+                    target_walk_additions += 1;
+                    result
+                }
+                TargetMode::PartitionWalk => {
+                    let result = (walk_a, walk_b, walk_target);
+                    match target_partition(walk_target) {
+                        0 => {
+                            walk_a = (walk_a + 1) % modulus;
+                            walk_target = raw_add_point(&curve, walk_target, generator_raw);
+                        }
+                        1 => {
+                            walk_b = (walk_b + 1) % modulus;
+                            walk_target = raw_add_point(&curve, walk_target, q_raw);
+                        }
+                        _ => {
+                            walk_a = (2 * walk_a) % modulus;
+                            walk_b = (2 * walk_b) % modulus;
+                            walk_target = raw_double_point(&curve, walk_target);
+                        }
+                    }
+                    target_walk_additions += 1;
+                    result
+                }
+            };
+            target_generation_ns += target_generation_started.elapsed().as_nanos();
+            let query_started = Instant::now();
+            let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
+            if let Some(width) = query_mode.pair_pair_guided_width() {
+                assert!(pair_mode == PairMode::SignedExpanded);
+                let target_key = raw_compact_key(target);
+                guided_bin_order.clear();
+                guided_bin_order.extend(0..columns);
+                guided_bin_order.sort_unstable_by_key(|&column| {
+                    (
+                        usize::from(echelon.pivots[column].is_some()),
+                        column_relation_counts[column],
+                        CompactPairTable::hash((
+                            target_key.0 ^ column as u64,
+                            target_key.1 ^ (column as u64).rotate_left(19),
+                        )),
+                    )
+                });
+                for (priority, &column) in guided_bin_order.iter().enumerate() {
+                    let bin = &guided_slot_bins[column];
+                    if bin.is_empty() {
+                        continue;
+                    }
+                    guided_bins_visited += 1;
+                    let start = CompactPairTable::hash((
+                        target_key.0 ^ (column as u64).rotate_left(11),
+                        target_key.1,
+                    )) as usize
+                        % bin.len();
+                    let mut cursor = 0usize;
+                    while cursor < bin.len() && witness.is_none() {
+                        pair_point_scratch.clear();
+                        pair_label_scratch.clear();
+                        while cursor < bin.len() && pair_point_scratch.len() < width {
+                            let slot = bin[(start + cursor) % bin.len()] as usize;
+                            cursor += 1;
+                            if let Some((point, labels)) =
+                                quotient_pairs.signed_pair_at_slot(slot, false, modulus)
+                            {
+                                pair_point_scratch.push(point);
+                                pair_label_scratch.push(labels);
+                            }
+                        }
+                        let attempted = batch_raw_target_minus_signed_points_x_filtered(
+                            &curve,
+                            target,
+                            &pair_point_scratch,
+                            &quotient_pairs,
+                            &mut pair_signed_rest_scratch,
+                            &mut pair_inverse_scratch,
+                        );
+                        query_additions += attempted;
+                        decomposition_queries += attempted;
+                        query_x_filter_rejections += attempted - pair_signed_rest_scratch.len();
+                        query_batch_inversions += usize::from(target.is_some());
+                        for &(position, negative, rest_key) in &pair_signed_rest_scratch {
+                            let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                                rest_key,
+                                modulus,
+                                &quotient_pairs,
+                                &label_to_index,
+                            ) else {
+                                query_exact_table_misses += 1;
+                                continue;
+                            };
+                            let mut left_labels = pair_label_scratch[position];
+                            if negative {
+                                left_labels = left_labels.map(|(column, coefficient)| {
+                                    (
+                                        column,
+                                        if coefficient == 0 {
+                                            0
+                                        } else {
+                                            modulus - coefficient
+                                        },
+                                    )
+                                });
+                            }
+                            let left_indices = left_labels.map(|label| label_to_index[&label]);
+                            witness = Some((
+                                vec![
+                                    left_indices[0],
+                                    left_indices[1],
+                                    right_indices[0],
+                                    right_indices[1],
+                                ],
+                                vec![
+                                    left_labels[0],
+                                    left_labels[1],
+                                    right_labels[0],
+                                    right_labels[1],
+                                ],
+                            ));
+                            guided_priority_hits += usize::from(priority < columns / 4);
+                            break;
+                        }
+                    }
+                    if witness.is_some() {
+                        break;
+                    }
+                }
+            } else if let Some(width) = query_mode.pair_pair_dual_width() {
+                assert!(pair_mode == PairMode::SignedExpanded);
+                let slots = quotient_pairs.slots();
+                let start_slot =
+                    CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1);
+                let mut cursor = 0usize;
+                while cursor < slots && witness.is_none() {
+                    pair_point_scratch.clear();
+                    pair_label_scratch.clear();
+                    while cursor < slots && pair_point_scratch.len() < width {
+                        let slot = (start_slot + cursor) & (slots - 1);
+                        cursor += 1;
+                        if let Some((point, labels)) =
+                            quotient_pairs.signed_pair_at_slot(slot, false, modulus)
+                        {
+                            pair_point_scratch.push(point);
+                            pair_label_scratch.push(labels);
+                        }
+                    }
+                    if pair_point_scratch.is_empty() {
+                        continue;
+                    }
+                    let attempted = batch_raw_target_minus_signed_points_x_filtered(
+                        &curve,
+                        target,
+                        &pair_point_scratch,
+                        &quotient_pairs,
+                        &mut pair_signed_rest_scratch,
+                        &mut pair_inverse_scratch,
+                    );
+                    query_additions += attempted;
+                    decomposition_queries += attempted;
+                    query_x_filter_rejections += attempted - pair_signed_rest_scratch.len();
+                    query_batch_inversions += usize::from(target.is_some());
+                    for &(position, negative, rest_key) in &pair_signed_rest_scratch {
+                        let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                            rest_key,
+                            modulus,
+                            &quotient_pairs,
+                            &label_to_index,
+                        ) else {
+                            query_exact_table_misses += 1;
+                            continue;
+                        };
+                        let mut left_labels = pair_label_scratch[position];
+                        if negative {
+                            left_labels = left_labels.map(|(column, coefficient)| {
+                                (
+                                    column,
+                                    if coefficient == 0 {
+                                        0
+                                    } else {
+                                        modulus - coefficient
+                                    },
+                                )
+                            });
+                        }
+                        let left_indices = left_labels.map(|label| label_to_index[&label]);
+                        witness = Some((
+                            vec![
+                                left_indices[0],
+                                left_indices[1],
+                                right_indices[0],
+                                right_indices[1],
+                            ],
+                            vec![
+                                left_labels[0],
+                                left_labels[1],
+                                right_labels[0],
+                                right_labels[1],
+                            ],
+                        ));
+                        break;
+                    }
+                }
+            } else if let Some(width) = query_mode.pair_pair_width() {
+                assert!(pair_mode == PairMode::SignedExpanded);
+                let slots = quotient_pairs.slots();
+                let start_slot =
+                    CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1);
+                let mut cursor = 0usize;
+                while cursor < 2 * slots && witness.is_none() {
+                    pair_point_scratch.clear();
+                    pair_label_scratch.clear();
+                    while cursor < 2 * slots && pair_point_scratch.len() < width {
+                        let slot = (start_slot + cursor / 2) & (slots - 1);
+                        let negative = cursor & 1 == 1;
+                        cursor += 1;
+                        if let Some((point, labels)) =
+                            quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
+                        {
+                            pair_point_scratch.push(point);
+                            pair_label_scratch.push(labels);
+                        }
+                    }
+                    if pair_point_scratch.is_empty() {
+                        continue;
+                    }
+                    let attempted = batch_raw_target_minus_points_x_filtered(
+                        &curve,
+                        target,
+                        &pair_point_scratch,
+                        &quotient_pairs,
+                        &mut pair_rest_scratch,
+                        &mut pair_inverse_scratch,
+                    );
+                    query_additions += attempted;
+                    decomposition_queries += attempted;
+                    query_x_filter_rejections += attempted - pair_rest_scratch.len();
+                    query_batch_inversions += usize::from(target.is_some());
+                    for &(position, rest_key) in &pair_rest_scratch {
+                        let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                            rest_key,
+                            modulus,
+                            &quotient_pairs,
+                            &label_to_index,
+                        ) else {
+                            query_exact_table_misses += 1;
+                            continue;
+                        };
+                        let left_labels = pair_label_scratch[position];
+                        let left_indices = left_labels.map(|label| label_to_index[&label]);
+                        witness = Some((
+                            vec![
+                                left_indices[0],
+                                left_indices[1],
+                                right_indices[0],
+                                right_indices[1],
+                            ],
+                            vec![
+                                left_labels[0],
+                                left_labels[1],
+                                right_labels[0],
+                                right_labels[1],
+                            ],
+                        ));
+                        break;
+                    }
+                }
+            } else if let Some(width) = query_mode.fiber_width() {
+                for start in (0..base_fibers.len()).step_by(width) {
+                    let end = (start + width).min(base_fibers.len());
+                    let attempted = if pair_mode == PairMode::SignedExpanded {
+                        batch_raw_target_minus_fibers_x_filtered(
+                            &curve,
+                            target,
+                            &base_fibers[start..end],
+                            &quotient_pairs,
+                            &mut fiber_rest_scratch,
+                        )
+                    } else {
+                        batch_raw_target_minus_fibers(
+                            &curve,
+                            target,
+                            &base_fibers[start..end],
+                            &mut fiber_rest_scratch,
+                        );
+                        fiber_rest_scratch.len()
+                    };
+                    query_additions += attempted;
+                    decomposition_queries += attempted;
+                    query_x_filter_rejections += attempted - fiber_rest_scratch.len();
+                    query_batch_inversions += usize::from(target.is_some());
+                    for &(right, rest_key) in &fiber_rest_scratch {
+                        let (candidate, maps) = lookup_pair_witness(
+                            pair_mode,
+                            &curve,
+                            rest_key,
+                            right,
+                            modulus,
+                            lambda,
+                            &base,
+                            &full_pairs,
+                            &quotient_pairs,
+                            &label_to_index,
+                        );
+                        query_canonicalization_maps += maps;
+                        if let Some((indices, labels)) = candidate {
+                            witness = Some((indices.to_vec(), labels.to_vec()));
+                            break;
+                        }
+                    }
+                    if witness.is_some() {
+                        break;
+                    }
+                }
+            } else if let Some(width) = query_mode.width(base.points.len()) {
+                for start in (0..base.points.len()).step_by(width) {
+                    let end = (start + width).min(base.points.len());
+                    let rests =
+                        batch_raw_target_minus_keys(&curve, target, &raw_base_points[start..end]);
+                    query_additions += rests.len();
+                    query_batch_inversions += usize::from(target.is_some());
+                    for (offset, &rest_key) in rests.iter().enumerate() {
+                        let right = start + offset;
+                        decomposition_queries += 1;
+                        let (candidate, maps) = lookup_pair_witness(
+                            pair_mode,
+                            &curve,
+                            rest_key,
+                            right,
+                            modulus,
+                            lambda,
+                            &base,
+                            &full_pairs,
+                            &quotient_pairs,
+                            &label_to_index,
+                        );
+                        query_canonicalization_maps += maps;
+                        if let Some((indices, labels)) = candidate {
+                            witness = Some((indices.to_vec(), labels.to_vec()));
+                            break;
+                        }
+                    }
+                    if witness.is_some() {
+                        break;
+                    }
+                }
+            } else {
+                for (right, &point) in raw_base_points.iter().enumerate() {
+                    let rest = raw_add_point(&curve, target, raw_neg_point(point));
+                    query_additions += 1;
+                    decomposition_queries += 1;
+                    let (candidate, maps) = lookup_pair_witness(
+                        pair_mode,
+                        &curve,
+                        raw_compact_key(rest),
+                        right,
+                        modulus,
+                        lambda,
+                        &base,
+                        &full_pairs,
+                        &quotient_pairs,
+                        &label_to_index,
+                    );
+                    query_canonicalization_maps += maps;
+                    if let Some((indices, labels)) = candidate {
+                        witness = Some((indices.to_vec(), labels.to_vec()));
+                        break;
+                    }
+                }
+            }
+            let query_elapsed = query_started.elapsed();
+            let query_ms = query_elapsed.as_secs_f64() * 1000.0;
+            query_total_ns += query_elapsed.as_nanos();
+            let Some((indices, witness_labels)) = witness else {
+                continue;
+            };
+            for (position, &(column, _)) in witness_labels.iter().enumerate() {
+                if !witness_labels[..position]
+                    .iter()
+                    .any(|&(earlier_column, _)| earlier_column == column)
+                {
+                    column_relation_counts[column] += 1;
+                }
+            }
+            let packed_verification_started = Instant::now();
+            let sum = indices.iter().fold(None, |accumulator, &index| {
+                raw_add_point(&curve, accumulator, raw_base_points[index])
+            });
+            assert_eq!(
+                sum, target,
+                "support-index relation must verify in the group"
+            );
+            reference_validation_records.push((indices.clone(), coefficient_a, coefficient_b));
+            packed_verification_ns += packed_verification_started.elapsed().as_nanos();
+
+            let rank_started = Instant::now();
+            let mut row = vec![0u64; columns + 1];
+            for &(column, coefficient) in &witness_labels {
+                row[column] = (row[column] + coefficient) % modulus;
+            }
+            row[columns] = (modulus - coefficient_b) % modulus;
+            let exact_duplicate = !exact_rows.insert(row.clone());
+            duplicate_rows += usize::from(exact_duplicate);
+            let first_nonzero = row.iter().copied().find(|&value| value != 0).unwrap();
+            let normalization_inverse = modpow(first_nonzero, modulus - 2, modulus);
+            let normalized_row: Vec<_> = row
+                .iter()
+                .map(|value| {
+                    ((*value as u128 * normalization_inverse as u128) % modulus as u128) as u64
+                })
+                .collect();
+            let scalar_multiple = !projective_rows.insert(normalized_row);
+            scalar_multiple_rows += usize::from(scalar_multiple);
+            let rank_before = echelon.rank;
+            let incremented = echelon.insert(row.clone(), modulus);
+            let rank_after = echelon.rank;
+            assert_eq!(rank_after, rank_before + usize::from(incremented));
+            rows.push(row.clone());
+            right_hand_sides.push(coefficient_a);
+            let independently_crosschecked_rank = if incremental_rank_crosscheck {
+                let reverse_before = reverse_echelon.rank;
+                let reverse_incremented = reverse_echelon.insert(row.clone(), modulus);
+                assert_eq!(
+                    reverse_echelon.rank,
+                    reverse_before + usize::from(reverse_incremented)
+                );
+                reverse_incremental_rank_crosschecks += 1;
+                reverse_echelon.rank
+            } else if rank_before == columns + 1 {
+                dimension_bound_rank_crosschecks += 1;
+                columns + 1
+            } else if columns > 64 || std::env::var("KIC_SKIP_DENSE_RANK").as_deref() == Ok("1") {
+                // Full dense GE after every accepted row is O(#rows · K³) and
+                // dominates past ~64 columns (n=53 balanced bases). Trust the
+                // incremental echelon; optional end-of-run dense check remains
+                // available via KIC_INCREMENTAL_RANK_CROSSCHECK.
+                rank_after
+            } else {
+                dense_rank_recomputations += 1;
+                dense_rank(&rows, columns + 1, modulus)
+            };
+            assert_eq!(independently_crosschecked_rank, rank_after);
+            accepted += 1;
+            if rank_after == columns + 1 && rank_full_at.is_none() {
+                rank_full_at = Some(accepted);
+            }
+            rank_diagnostics_ns += rank_started.elapsed().as_nanos();
+            let receipt_started = Instant::now();
+            let point_indices: Vec<_> = indices.into_iter().collect();
+            assert_eq!(
+                point_indices
+                    .iter()
+                    .map(|&index| base.point_labels[index])
+                    .collect::<Vec<_>>(),
+                witness_labels
+            );
+            if !summary_only {
+                let labels: Vec<_> = point_indices
+                    .iter()
+                    .map(|&index| {
+                        let (column, coefficient) = base.point_labels[index];
+                        json!({"column":column,"coefficient":coefficient})
+                    })
+                    .collect();
+                let (target_x, target_y) = raw_compact_key(target);
+                let relation_material = serde_json::to_vec(&json!({
+                    "n":n,
+                    "a":a,
+                    "base_hash":&base_hash,
+                    "trial":trials,
+                    "coefficient_a":coefficient_a,
+                    "coefficient_b":coefficient_b,
+                    "target":[target_x,target_y],
+                    "indices":&point_indices,
+                    "row":&row
+                }))
+                .unwrap();
+                let relation_hash = blake3::hash(&relation_material).to_hex().to_string();
+                println!(
+                    "{}",
+                    json!({
+                        "schema_version":"1.0",
+                        "task_id":TASK_ID,
+                        "kind":"relation_rank_receipt",
+                        "evidence_class":"measured_exact_support_relation",
+                        "n":n,
+                        "a":a,
+                        "fixture_seed":fixture_seed,
+                        "base_hash":&base_hash,
+                        "relation_hash":relation_hash,
+                        "published_fixture_scalar":d0,
+                        "trial":trials,
+                        "accepted_relation":accepted,
+                        "coefficient_a":coefficient_a,
+                        "coefficient_b":coefficient_b,
+                        "target_point_key":[target_x,target_y],
+                        "factor_point_indices":&point_indices,
+                        "orbit_labels":labels,
+                        "sparse_row":&row,
+                        "rank_before":rank_before,
+                        "rank_after":rank_after,
+                        "rank_incremented":incremented,
+                        "duplicate_row":exact_duplicate,
+                        "scalar_multiple_row":scalar_multiple,
+                        "dense_crosscheck_rank":rank_after,
+                        "query_ms":query_ms,
+                        "verified_group_identity":true,
+                        "group_identity_backend":"packed_u64_polynomial_basis",
+                        "fixture_scalar_used_by_collector":false
+                    })
+                );
+            }
+            receipt_construction_ns += receipt_started.elapsed().as_nanos();
+        }
+        if incremental_rank_crosscheck {
+            let terminal_dense_rank = dense_rank(&rows, columns + 1, modulus);
+            assert_eq!(terminal_dense_rank, echelon.rank);
+            assert_eq!(terminal_dense_rank, reverse_echelon.rank);
+            terminal_dense_rank_crosschecks += 1;
+        }
+        let linear_solve_started = Instant::now();
+        let solution = if let Some(factor_logs) = retained_factor_base_logs.as_ref() {
+            assert!(uses_retained_factor_logs);
+            assert_eq!(factor_logs.len(), columns);
+            assert_eq!(rows.len(), 1);
+            let row = &rows[0];
+            let factor_sum = row[..columns].iter().zip(factor_logs).fold(
+                0u64,
+                |sum, (&coefficient, &logarithm)| {
+                    (sum + ((coefficient as u128 * logarithm as u128) % modulus as u128) as u64)
+                        % modulus
+                },
+            );
+            let negative_target_coefficient = row[columns];
+            let target_coefficient = if negative_target_coefficient == 0 {
+                0
+            } else {
+                modulus - negative_target_coefficient
+            };
+            assert_ne!(target_coefficient, 0);
+            let numerator = if factor_sum >= right_hand_sides[0] {
+                factor_sum - right_hand_sides[0]
+            } else {
+                modulus - (right_hand_sides[0] - factor_sum)
+            };
+            let recovered = ((numerator as u128
+                * modpow(target_coefficient, modulus - 2, modulus) as u128)
+                % modulus as u128) as u64;
+            let mut values = factor_logs.clone();
+            values.push(recovered);
+            Some(values)
+        } else {
+            (echelon.rank == columns + 1).then(|| {
+                solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus)
+                    .unwrap()
+            })
+        };
+        let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
+        let solution_validation_started = Instant::now();
+        if let Some(solution) = &solution {
+            assert_eq!(solution[columns], d0);
+            assert_eq!(
+                curve.mul(curve.generator(), &BigUint::from(solution[columns])),
+                q
+            );
+            if !uses_retained_factor_logs {
+                for (column, representative) in base.representatives.iter().enumerate() {
+                    assert_eq!(
+                        curve.mul(curve.generator(), &BigUint::from(solution[column])),
+                        *representative
+                    );
+                }
+            }
+            for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
+                let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
+                    (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
+                });
+                assert_eq!(value, rhs);
+            }
+        }
+        if shared_factor_log_precomputation && retained_factor_base_logs.is_none() {
+            let solution = solution
+                .as_ref()
+                .expect("first fixture must establish the reusable factor-log table");
+            retained_factor_base_logs = Some(solution[..columns].to_vec());
+        }
+        let solution_validation_ms = solution_validation_started.elapsed().as_secs_f64() * 1000.0;
+        let collection_ms = collection_started.elapsed().as_secs_f64() * 1000.0;
+        let reference_validation_started = Instant::now();
+        for (indices, coefficient_a, coefficient_b) in &reference_validation_records {
+            let target = curve.add(
+                &curve.mul(curve.generator(), &BigUint::from(*coefficient_a)),
+                &curve.mul(&q, &BigUint::from(*coefficient_b)),
+            );
+            let sum = indices
+                .iter()
+                .fold(BinaryPoint::Infinity, |accumulator, &index| {
+                    curve.add(&accumulator, &base.points[index])
+                });
+            assert_eq!(sum, target, "independent reference relation validation");
+        }
+        let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
+        let target_generation_ms = target_generation_ns as f64 / 1_000_000.0;
+        let packed_verification_ms = packed_verification_ns as f64 / 1_000_000.0;
+        let target_pdp_ms = exclusive_pdp_ms(
+            collection_ms,
+            target_generation_ms,
+            packed_verification_ms,
+            linear_solve_ms,
+            solution_validation_ms,
+        );
+        let online_phase_ms = uses_retained_factor_logs.then(|| {
+            json!({
+                "target_query":fixture_setup_ms+target_generation_ms,
+                "target_pdp":target_pdp_ms,
+                "target_relation_check":packed_verification_ms+reference_validation_ms,
+                "target_descent":0.0,
+                "target_recovery_check":linear_solve_ms+solution_validation_ms
+            })
+        });
+        let target_online_ms = uses_retained_factor_logs
+            .then_some(fixture_setup_ms + collection_ms + reference_validation_ms);
+        let q_key = point_key(&q);
+        let generator_key = point_key(curve.generator());
+        let status = if uses_retained_factor_logs && accepted == 1 && solution.is_some() {
+            "SHARED_FACTOR_LOG_ONE_RELATION"
+        } else if rank_full_at
+            .map(|full_at| accepted >= full_at + required_surplus_relations)
+            .unwrap_or(false)
+        {
+            if required_surplus_relations == 32 {
+                "RANK_PLUS_32"
+            } else {
+                "RANK_PLUS_SURPLUS"
+            }
+        } else if accepted >= relation_cap {
+            "RANK_DEFICIENT"
+        } else {
+            "TARGET_CAP"
+        };
+        batch_online_charged_ms += fixture_setup_ms + collection_ms + reference_validation_ms;
+        batch_fixture_generation_ms += fixture_generation_ms;
+        batch_reference_validation_ms += reference_validation_ms;
+        batch_target_trials += trials;
+        batch_admitted_relations += accepted;
+        batch_support_queries += decomposition_queries;
+        batch_rank_plus_32 += u64::from(matches!(status, "RANK_PLUS_32" | "RANK_PLUS_SURPLUS"));
+        batch_shared_log_one_relation += u64::from(status == "SHARED_FACTOR_LOG_ONE_RELATION");
+        println!(
+            "{}",
+            json!({
+                "schema_version":"1.0",
+                "task_id":TASK_ID,
+                "kind":"relation_rank_summary",
+                "evidence_class":"measured_exact_support_relation",
+                "fixture_index":fixture_index,
+                "fixture_seed":fixture_seed,
+                "published_fixture_scalar":d0,
+                "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
+                "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
+                "published_q_point_key":[q_key.0.to_string(),q_key.1.to_string()],
+                "recovered_fixture_scalar":solution.as_ref().map(|values| values[columns]),
+                "factor_base_log_solution":solution.as_ref().map(|values| &values[..columns]),
+                "linear_solution_verified":solution.is_some(),
+                "n":n,
+                "a":a,
+                "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
+                "status":status,
+                "required_surplus_relations":required_surplus_relations,
+                "uses_retained_factor_logs":uses_retained_factor_logs,
+                "shared_factor_log_precomputation":shared_factor_log_precomputation,
+                "precomputation_fixture":shared_factor_log_precomputation && !uses_retained_factor_logs,
+                "online_target_count":if uses_retained_factor_logs {1usize} else {0usize},
+                "target_online_wall_ms":target_online_ms,
+                "target_online_phase_ms":online_phase_ms,
+                "target_online_interval":if uses_retained_factor_logs {
+                    "single target relation search after reusable factor-base/index/log preparation through exact relation and scalar replay; fixture point generation excluded"
+                } else {
+                    "not an online target row; this fixture builds reusable factor logs"
+                },
+                "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
+                "orbit_columns":columns,
+                "matrix_columns":columns+1,
+                "factor_base_points":base.points.len(),
+                "factor_base_seed":factor_base_seed,
+                "base_hash":&base_hash,
+                "target_trials":trials,
+                "admitted_relations":accepted,
+                "terminal_rank":echelon.rank,
+                "duplicate_rows":duplicate_rows,
+                "scalar_multiple_rows":scalar_multiple_rows,
+                "full_rank_at_relation":rank_full_at,
+                "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
+                "relation_cap_without_rank":relation_cap,
+                "relation_cap_extra":relation_cap_extra,
+                "collection_ms":collection_ms,
+                "collection_exclusive_ms":collection_ms-linear_solve_ms-solution_validation_ms,
+                "linear_solve_ms":linear_solve_ms,
+                "solution_validation_ms":solution_validation_ms,
+                "setup_ms":setup_ms,
+                "curve_setup_ms":curve_setup_ms,
+                "fixture_setup_ms":fixture_setup_ms,
+                "fixture_generation_ms":fixture_generation_ms,
+                "charged_total_ms":setup_ms+fixture_setup_ms+collection_ms+reference_validation_ms,
+                "pair_group_additions":pair_additions,
+                "pair_index_mode":pair_mode.name(),
+                "pair_canonicalization_maps":pair_canonicalization_maps,
+                "pair_batch_inversions":pair_batch_inversions,
+                "query_group_additions":query_additions,
+                "query_canonicalization_maps":query_canonicalization_maps,
+                "query_x_filter_rejections":query_x_filter_rejections,
+                "query_exact_table_misses":query_exact_table_misses,
+                "guided_bins_visited":guided_bins_visited,
+                "guided_priority_quartile_hits":guided_priority_hits,
+                "query_mode":query_mode.name(),
+                "decomposition_arity":if query_mode.pair_pair_width().is_some() || query_mode.pair_pair_dual_width().is_some() || query_mode.pair_pair_guided_width().is_some() {4} else {3},
+                "query_batch_inversions":query_batch_inversions,
+                "target_mode":target_mode.name(),
+                "target_walk_additions":target_walk_additions,
+                "target_walk_restarts":target_walk_restarts,
+                "target_scalar_multiplications":target_scalar_multiplications,
+                "support_queries":decomposition_queries,
+                "all_relations_group_verified":true,
+                "reference_validation_ms":reference_validation_ms,
+                "reference_relations_validated":reference_validation_records.len(),
+                "rank_crosschecked_after_every_relation":true,
+                "dense_rank_recomputations":dense_rank_recomputations,
+                "dimension_bound_rank_crosschecks":dimension_bound_rank_crosschecks,
+                "post_full_rank_crosscheck":if incremental_rank_crosscheck {
+                    "reverse-pivot incremental rank with terminal dense check"
+                } else {
+                    "ambient dimension bound"
+                },
+                "rank_crosscheck_mode":if incremental_rank_crosscheck {
+                    "forward_and_reverse_incremental_plus_terminal_dense"
+                } else {
+                    "dense_until_full_then_ambient_dimension"
+                },
+                "reverse_incremental_rank_crosschecks":reverse_incremental_rank_crosschecks,
+                "terminal_dense_rank_crosschecks":terminal_dense_rank_crosschecks,
+                "variant":match pair_mode { PairMode::Full=>"V2_full_pair_support_index", PairMode::SignedQuotient=>"V2_signed_quotient_pair_support_index", PairMode::SignedExpanded=>"V2_signed_expanded_pair_support_index" },
+                "summary_only_timing":summary_only,
+                "timing_breakdown_ms":{
+                    "target_generation":target_generation_ns as f64/1_000_000.0,
+                    "query":query_total_ns as f64/1_000_000.0,
+                    "packed_verification":packed_verification_ns as f64/1_000_000.0,
+                    "rank_and_diagnostics":rank_diagnostics_ns as f64/1_000_000.0,
+                    "receipt_construction":receipt_construction_ns as f64/1_000_000.0
+                },
+                "claim_boundary":"public synthetic relation/rank control; fixture scalar retained only for validation"
+            })
+        );
+    }
+    if batch_fixtures > 1 {
+        let observed_batch_section_ms = batch_started.elapsed().as_secs_f64() * 1000.0;
+        println!(
+            "{}",
+            json!({
+                "schema_version":"1.0",
+                "task_id":"TASK-KIC-DIRECT-BATCH-20260910",
+                "kind":"retained_support_batch_summary",
+                "evidence_class":"direct_measured_retained_support_batch",
+                "n":n,
+                "a":a,
+                "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
+                "batch_seed":seed,
+                "batch_fixtures":batch_fixtures,
+                "batch_corpus":&batch_corpus,
+                "shared_public_fixture_domain":shared_public_fixture_domain,
+                "shared_public_fixture_offset":shared_public_fixture_offset,
+                "independent_fixture_seed_domain":if batch_corpus.is_some() {
+                    "BLAKE3(TASK-KIC-DIRECT-BATCH-20260910 || rank || curve || corpus || batch_seed || fixture_index)"
+                } else {
+                    "BLAKE3(TASK-KIC-DIRECT-BATCH-20260910 || rank || curve || eta || batch_seed || fixture_index)"
+                },
+                "support_table_builds":1,
+                "factor_base_seed":factor_base_seed,
+                "support_table_instance_reused":true,
+                "support_index_entries":support_index_entries,
+                "guided_slot_index_entries":guided_slot_index_entries,
+                "guided_slot_index_allocated_bytes":guided_slot_index_allocated_bytes,
+                "guided_slot_index_ms":guided_slot_index_ms,
+                "support_occupied_slot_payload_bytes":support_occupied_slot_payload_bytes,
+                "support_witness_bytes":std::mem::size_of::<QuotientPairWitness>(),
+                "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
+                "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
+                "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
+                "support_x_prefilter_hashes":quotient_pairs.x_filter_hashes(),
+                "base_hash":&base_hash,
+                "pair_index_mode":pair_mode.name(),
+                "query_mode":query_mode.name(),
+                "target_mode":target_mode.name(),
+                "rank_plus_32_fixtures":batch_rank_plus_32,
+                "shared_factor_log_one_relation_fixtures":batch_shared_log_one_relation,
+                "shared_factor_log_precomputation":shared_factor_log_precomputation,
+                "all_fixtures_solved":batch_rank_plus_32+batch_shared_log_one_relation==batch_fixtures,
+                "all_fixtures_rank_plus_32":batch_rank_plus_32==batch_fixtures,
+                "required_surplus_relations":required_surplus_relations,
+                "all_fixtures_rank_plus_surplus":batch_rank_plus_32==batch_fixtures,
+                "all_relations_group_verified":true,
+                "all_relations_reference_validated":true,
+                "total_target_trials":batch_target_trials,
+                "total_admitted_relations":batch_admitted_relations,
+                "total_support_queries":batch_support_queries,
+                "curve_setup_ms":curve_setup_ms,
+                "support_setup_ms":setup_ms,
+                "online_charged_ms":batch_online_charged_ms,
+                "projection_matched_charged_total_ms":setup_ms+batch_online_charged_ms,
+                "full_algorithm_charged_total_ms":curve_setup_ms+setup_ms+batch_online_charged_ms,
+                "fixture_generation_evidence_ms":batch_fixture_generation_ms,
+                "reference_validation_evidence_ms":batch_reference_validation_ms,
+                "observed_batch_section_ms":observed_batch_section_ms,
+                "scope":"deterministic public synthetic fixtures only; no external point, unknown scalar, production key, or key recovery claim"
+            })
+        );
+    }
+}
+
+#[cfg(test)]
+mod packed_tests {
+    use super::*;
+
+    #[test]
+    fn online_timer_phases_exclude_nested_solve_and_validation() {
+        let collection_ms = 10.0;
+        let target_generation_ms = 1.0;
+        let packed_verification_ms = 0.5;
+        let linear_solve_ms = 2.0;
+        let solution_validation_ms = 1.0;
+        let external_relation_check_ms = 4.0;
+        let query_ms = 0.5;
+        let target_pdp_ms = exclusive_pdp_ms(
+            collection_ms,
+            target_generation_ms,
+            packed_verification_ms,
+            linear_solve_ms,
+            solution_validation_ms,
+        );
+        let recovery_check_ms = linear_solve_ms + solution_validation_ms;
+        let online_ms = query_ms + collection_ms + external_relation_check_ms;
+        assert_eq!(target_pdp_ms, 5.5);
+        assert_eq!(
+            query_ms
+                + target_generation_ms
+                + target_pdp_ms
+                + packed_verification_ms
+                + external_relation_check_ms
+                + recovery_check_ms,
+            online_ms
+        );
+    }
+
+    #[test]
+    fn quotient_pair_witness_packs_48_bit_coefficients_losslessly() {
+        let labels = [
+            (511usize, (1u64 << 48) - 1),
+            (376usize, 21_044_858_204_112u64),
+        ];
+        let witness = QuotientPairWitness::new(labels, 0x1234_5678_9abc);
+        assert_eq!(witness.labels(), labels);
+        assert_eq!(witness.image_y(), 0x1234_5678_9abc);
+        assert_eq!(std::mem::size_of::<QuotientPairWitness>(), 24);
+    }
+
+    #[test]
+    fn packed_field_and_group_operations_match_reference() {
+        for (n, a) in [(7, 1), (11, 1), (13, 0), (17, 1), (19, 1), (23, 1)] {
+            let curve = KoblitzCurve::new(a, n).unwrap();
+            let mask = (1u64 << n) - 1;
+            let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ n as u64;
+            for _ in 0..256 {
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                let left = state & mask;
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                let right = state & mask;
+                let left_fe = F2mElement::from_biguint(&BigUint::from(left), n);
+                let right_fe = F2mElement::from_biguint(&BigUint::from(right), n);
+                assert_eq!(
+                    square_raw(&curve, left),
+                    left_fe
+                        .square(&curve.curve.irreducible)
+                        .raw_bits()
+                        .first()
+                        .copied()
+                        .unwrap_or(0)
+                );
+                assert_eq!(
+                    mul_raw(&curve, left, right),
+                    left_fe
+                        .mul(&right_fe, &curve.curve.irreducible)
+                        .raw_bits()
+                        .first()
+                        .copied()
+                        .unwrap_or(0)
+                );
+                if left != 0 {
+                    assert_eq!(
+                        inverse_raw(&curve, left),
+                        left_fe
+                            .flt_inverse(&curve.curve.irreducible)
+                            .unwrap()
+                            .raw_bits()
+                            .first()
+                            .copied()
+                            .unwrap_or(0)
+                    );
+                }
+            }
+            let generator_raw = to_raw_point(curve.generator());
+            for scalar in 0..64u64 {
+                assert_eq!(
+                    raw_scalar_point(&curve, generator_raw, scalar),
+                    to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar)))
+                );
+            }
+            let target = curve.mul(curve.generator(), &BigUint::from(71u64));
+            let points: Vec<_> = (1..=48u64)
+                .map(|scalar| curve.mul(curve.generator(), &BigUint::from(scalar)))
+                .collect();
+            let reference = batch_target_minus_keys(&curve, &target, &points);
+            let packed = batch_raw_target_minus_keys(
+                &curve,
+                to_raw_point(&target),
+                &points.iter().map(to_raw_point).collect::<Vec<_>>(),
+            );
+            assert_eq!(packed, reference);
+            for x in 0..(1u64 << n).min(512) {
+                let reference_points: HashSet<_> = points_with_x(
+                    &curve.curve,
+                    &F2mElement::from_biguint(&BigUint::from(x), n),
+                )
+                .iter()
+                .map(to_raw_point)
+                .collect();
+                let packed_points: HashSet<_> = raw_points_with_x(&curve, x).into_iter().collect();
+                assert_eq!(packed_points, reference_points, "n={n}, x={x}");
+            }
+            if curve.cofactor == BigUint::from(2u8) {
+                let wanted = balanced_orbits(&curve.subgroup_order, 2 * n as usize, 1, 1);
+                let packed_base = point_defined_base(&curve, wanted);
+                let reference_base = reference_point_defined_base(&curve, wanted);
+                assert_eq!(
+                    packed_base
+                        .representatives
+                        .iter()
+                        .map(point_key)
+                        .collect::<Vec<_>>(),
+                    reference_base
+                        .representatives
+                        .iter()
+                        .map(point_key)
+                        .collect::<Vec<_>>()
+                );
+                assert_eq!(packed_base.point_labels, reference_base.point_labels);
+            }
+        }
+    }
+
+    #[test]
+    fn x_filter_and_lazy_y_recovery_match_full_fiber_batch() {
+        let curve = KoblitzCurve::new(1, 23).unwrap();
+        let raw_points: Vec<_> = (1..=48u64)
+            .map(|scalar| to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar))))
+            .collect();
+        let fibers = raw_fibers(&raw_points);
+        assert!(fibers.len() <= 64);
+        let target = to_raw_point(&curve.mul(curve.generator(), &BigUint::from(71u64)));
+        let mut full = Vec::new();
+        batch_raw_target_minus_fibers(&curve, target, &fibers, &mut full);
+
+        for x_domain in [(1usize << 23) + 1, (1usize << 37) + 1] {
+            let mut table = CompactPairTable::with_capacity(16, true, x_domain);
+            for (position, &(_, key)) in full.iter().enumerate() {
+                if position % 5 == 0 {
+                    table.insert(key, QuotientPairWitness::default());
+                }
+            }
+            let expected: Vec<_> = full
+                .iter()
+                .copied()
+                .filter(|(_, key)| table.might_contain_x(key.0))
+                .collect();
+            let mut filtered = Vec::new();
+            let attempted = batch_raw_target_minus_fibers_x_filtered(
+                &curve,
+                target,
+                &fibers,
+                &table,
+                &mut filtered,
+            );
+            assert_eq!(attempted, full.len());
+            assert_eq!(filtered, expected);
+            assert!(filtered.len() < full.len());
+            let pointwise_full = batch_raw_target_minus_keys(&curve, target, &raw_points);
+            let pointwise_expected: Vec<_> = pointwise_full
+                .iter()
+                .copied()
+                .enumerate()
+                .filter(|(_, key)| table.might_contain_x(key.0))
+                .collect();
+            let mut pointwise_filtered = Vec::new();
+            let mut pointwise_scratch = BatchInverseScratch::default();
+            let pointwise_attempted = batch_raw_target_minus_points_x_filtered(
+                &curve,
+                target,
+                &raw_points,
+                &table,
+                &mut pointwise_filtered,
+                &mut pointwise_scratch,
+            );
+            assert_eq!(pointwise_attempted, raw_points.len());
+            assert_eq!(pointwise_filtered, pointwise_expected);
+            for (_, key) in full.iter().step_by(5) {
+                assert!(table.might_contain_x(key.0));
+                assert!(table.get(*key).is_some());
+            }
+        }
+    }
+
+    #[test]
+    fn dual_sign_batch_matches_separate_signed_inputs() {
+        let curve = KoblitzCurve::new(1, 23).unwrap();
+        let points: Vec<_> = (1..=96u64)
+            .map(|scalar| to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar))))
+            .collect();
+        let target = to_raw_point(&curve.mul(curve.generator(), &BigUint::from(197u64)));
+        let signed_points: Vec<_> = points
+            .iter()
+            .flat_map(|&point| [point, raw_neg_point(point)])
+            .collect();
+        let candidate_keys: Vec<_> = signed_points
+            .iter()
+            .map(|&left| raw_compact_key(raw_add_point(&curve, target, raw_neg_point(left))))
+            .collect();
+        let mut table = CompactPairTable::with_capacity(64, true, (1usize << 23) + 1);
+        for (position, &key) in candidate_keys.iter().enumerate() {
+            if position % 3 == 0 {
+                table.insert(key, QuotientPairWitness::default());
+            }
+        }
+
+        let mut separate = Vec::new();
+        let mut separate_scratch = BatchInverseScratch::default();
+        let separate_attempted = batch_raw_target_minus_points_x_filtered(
+            &curve,
+            target,
+            &signed_points,
+            &table,
+            &mut separate,
+            &mut separate_scratch,
+        );
+        let separate_normalized: Vec<_> = separate
+            .into_iter()
+            .map(|(position, key)| (position / 2, position % 2 == 1, key))
+            .collect();
+
+        let mut dual = Vec::new();
+        let mut dual_scratch = BatchInverseScratch::default();
+        let dual_attempted = batch_raw_target_minus_signed_points_x_filtered(
+            &curve,
+            target,
+            &points,
+            &table,
+            &mut dual,
+            &mut dual_scratch,
+        );
+        assert_eq!(dual_attempted, separate_attempted);
+        assert_eq!(dual, separate_normalized);
+        assert_eq!(
+            dual_scratch.denominators.len() * 2,
+            separate_scratch.denominators.len()
+        );
+    }
+
+    #[test]
+    fn packed_n37_field_group_and_point_defined_base_validate() {
+        let curve = KoblitzCurve::new(0, 37).unwrap();
+        assert_eq!(curve.subgroup_order, BigUint::from(230_603_167u64));
+        assert_eq!(curve.cofactor, BigUint::from(596u64));
+        let mask = (1u64 << 37) - 1;
+        let mut state = 0x9e37_79b9_7f4a_7c15u64;
+        for index in 0..64 {
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            let left = state & mask;
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            let right = state & mask;
+            let left_fe = F2mElement::from_biguint(&BigUint::from(left), 37);
+            let right_fe = F2mElement::from_biguint(&BigUint::from(right), 37);
+            assert_eq!(
+                square_raw(&curve, left),
+                left_fe
+                    .square(&curve.curve.irreducible)
+                    .raw_bits()
+                    .first()
+                    .copied()
+                    .unwrap_or(0)
+            );
+            assert_eq!(
+                mul_raw(&curve, left, right),
+                left_fe
+                    .mul(&right_fe, &curve.curve.irreducible)
+                    .raw_bits()
+                    .first()
+                    .copied()
+                    .unwrap_or(0)
+            );
+            if index < 16 && left != 0 {
+                assert_eq!(
+                    inverse_raw(&curve, left),
+                    left_fe
+                        .flt_inverse(&curve.curve.irreducible)
+                        .unwrap()
+                        .raw_bits()
+                        .first()
+                        .copied()
+                        .unwrap_or(0)
+                );
+            }
+        }
+        let generator = to_raw_point(curve.generator());
+        for scalar in 0..32u64 {
+            assert_eq!(
+                raw_scalar_point(&curve, generator, scalar),
+                to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar)))
+            );
+        }
+        let base = point_defined_base(&curve, 1);
+        assert_eq!(base.representatives.len(), 1);
+        assert_eq!(base.points.len(), 74);
+        assert!(base
+            .points
+            .iter()
+            .all(|point| { curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity }));
+    }
+
+    #[test]
+    fn packed_n41_field_group_and_point_defined_base_validate() {
+        let curve = KoblitzCurve::new(0, 41).unwrap();
+        assert_eq!(curve.subgroup_order, BigUint::from(549_756_390_943u64));
+        assert_eq!(curve.cofactor, BigUint::from(4u64));
+        let mask = (1u64 << 41) - 1;
+        let mut state = 0xd6e8_feb8_6659_fd93u64;
+        for index in 0..32 {
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            let left = state & mask;
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            let right = state & mask;
+            let left_fe = F2mElement::from_biguint(&BigUint::from(left), 41);
+            let right_fe = F2mElement::from_biguint(&BigUint::from(right), 41);
+            assert_eq!(
+                square_raw(&curve, left),
+                left_fe
+                    .square(&curve.curve.irreducible)
+                    .raw_bits()
+                    .first()
+                    .copied()
+                    .unwrap_or(0)
+            );
+            assert_eq!(
+                mul_raw(&curve, left, right),
+                left_fe
+                    .mul(&right_fe, &curve.curve.irreducible)
+                    .raw_bits()
+                    .first()
+                    .copied()
+                    .unwrap_or(0)
+            );
+            if index < 8 && left != 0 {
+                assert_eq!(
+                    inverse_raw(&curve, left),
+                    left_fe
+                        .flt_inverse(&curve.curve.irreducible)
+                        .unwrap()
+                        .raw_bits()
+                        .first()
+                        .copied()
+                        .unwrap_or(0)
+                );
+            }
+        }
+        let generator = to_raw_point(curve.generator());
+        for scalar in 0..16u64 {
+            assert_eq!(
+                raw_scalar_point(&curve, generator, scalar),
+                to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar)))
+            );
+        }
+        let base = point_defined_base(&curve, 1);
+        assert_eq!(base.representatives.len(), 1);
+        assert_eq!(base.points.len(), 82);
+        assert!(base
+            .points
+            .iter()
+            .all(|point| { curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity }));
+    }
+
+    #[test]
+    fn forward_and_reverse_incremental_ranks_match_dense_elimination() {
+        let modulus = 991u64;
+        let mut state = 0x94d0_49bb_1331_11ebu64;
+        for columns in 2..=12 {
+            let mut rows = Vec::new();
+            let mut forward = Echelon::new(columns);
+            let mut reverse = ReverseEchelon::new(columns);
+            for _ in 0..64 {
+                let row: Vec<_> = (0..columns)
+                    .map(|_| {
+                        state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                        state % modulus
+                    })
+                    .collect();
+                rows.push(row.clone());
+                forward.insert(row.clone(), modulus);
+                reverse.insert(row, modulus);
+                let dense = dense_rank(&rows, columns, modulus);
+                assert_eq!(forward.rank, dense);
+                assert_eq!(reverse.rank, dense);
+            }
+        }
+    }
+
+    #[test]
+    fn full_rank_solver_recovers_unique_public_solution() {
+        let modulus = 991u64;
+        let solution = vec![137u64, 503, 947];
+        let rows = vec![
+            vec![1, 0, 0],
+            vec![0, 1, 0],
+            vec![0, 0, 1],
+            vec![17, 29, 41],
+        ];
+        let right_hand_sides = rows
+            .iter()
+            .map(|row| {
+                row.iter()
+                    .zip(&solution)
+                    .fold(0u64, |sum, (&left, &right)| {
+                        (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
+                    })
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            solve_full_column_rank_system(&rows, &right_hand_sides, 3, modulus),
+            Some(solution)
+        );
+    }
+}

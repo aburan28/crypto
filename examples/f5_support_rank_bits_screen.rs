@@ -191,16 +191,14 @@ fn main() {
                     } else {
                         reference = Some(run.clone());
                     }
-                } else {
-                    if let Some(reference) = &reference {
-                        let errors = compare(reference, &run);
-                        if !errors.is_empty() {
-                            run["status"] = json!("structural_mismatch");
-                            run["errors"] = json!(errors);
-                        }
-                    } else {
-                        run["status"] = json!("reference_missing");
+                } else if let Some(reference) = &reference {
+                    let errors = compare(reference, &run);
+                    if !errors.is_empty() {
+                        run["status"] = json!("structural_mismatch");
+                        run["errors"] = json!(errors);
                     }
+                } else {
+                    run["status"] = json!("reference_missing");
                 }
             }
             if run["status"] != "ok" {
