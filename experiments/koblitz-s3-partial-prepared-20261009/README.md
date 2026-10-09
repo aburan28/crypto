@@ -247,3 +247,20 @@ interrupts, steal/throttle counters, and the same target-point hashes. The
 record should retain `perf` instruction and cycle counts, including IPC, when
 the host permits them. A single-target rho run on the same points and resource
 envelope can then test the primary IC/rho online comparison.
+
+[`modal_rank243_panel.py`](modal_rank243_panel.py) prepares an exploratory
+Modal VM run for the frozen rank-243 N53 plan. A local `--preview-upload`
+inventory selected 1,243 files totaling 52,252,236 bytes: Cargo metadata,
+the Rust `src/` tree, three required documentation subtrees, the frozen
+reference and partial S3 examples, the rank-243 plan, 24 fresh public points,
+and three full-rank stress public points. No credential-named files or common
+private-key/API-token patterns were found in that set. The 32-vCPU, 16-GiB VM
+runner checks for 15 distinct physical execution CPUs on one NUMA node, pins
+the 14-worker processes, records affinity masks, guest topology, cgroup,
+PSI, IRQ and steal snapshots, paired ABBA/BAAB order, a rank-243 A/A timing
+control, and whole-process `perf stat` cycles/instructions when available.
+Its smoke setting (`--count 1`) runs one fresh point and the three stress
+points; `--count 24` covers all 27 frozen points. The runner has passed local
+syntax, remote-code compilation, source/point hash, and upload-inventory
+checks. No Modal job or upload has been started; the third-party source and
+fixture upload awaits explicit approval following automatic review rejection.
