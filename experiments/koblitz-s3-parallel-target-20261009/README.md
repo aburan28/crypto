@@ -60,17 +60,30 @@ N41 and 2989.8/2912.9 ms for N53 (group-lift/parallel), outside the online
 clock. Peak RSS was unavailable in these local rows. The
 [analysis](local/analysis.json) retains all 48 per-point paired blocks,
 run IDs, failures, timing, root-call ratios and uncertainty.
+The group-lift arm makes exactly the same number of S3 calls on its two
+repeats of each point. The N53 parallel arm has schedule-dependent work:
+its S3-call A/A p95 absolute log ratio is 2.300, versus zero for group-lift.
+The [Modal analysis](analyze_modal_parallel.py) therefore uses the
+deterministic group-lift A/A timing as its **environmental** 10% gate and
+reports parallel A/A timing and root-call variation separately. Its
+hierarchical bootstrap resamples both public points and executions within
+each point; it does not treat a first-winner scheduling race as CPU
+contention by itself.
 Across the 24 shared target labels, N53's arm effect divided by N41's is
 2.887× (paired-label bootstrap 95% 1.827–4.505). The worker policy itself
 differs by curve (14 versus one), so this estimates the chosen per-curve
 implementations rather than an isolated field-size effect.
 
-Using the N53 local between-target log-ratio variance, a two-sided 95%
-interval with 80% power for a geometric mean above 2× gives a **provisional
-112 point-pair** estimate. The 24-point target bootstrap interval still
-includes 2×. The high A/A noise makes that sample-size estimate unsuitable
-as a fixed Modal run count: start with the frozen 24-point pilot, apply the
-host fidelity gate, and recompute the requirement from its paired variance.
+Using the N53 local between-target and within-target log-time variance, a
+two-sided 95% interval with 80% power for a geometric mean above 2× gives a
+**provisional 112 point-pair estimate at two repeats per arm** (448 N53
+one-target solves). Four repeats would require an estimated 96 points (768
+N53 solves). The 24-point target bootstrap interval still includes 2×.
+The high environmental A/A noise makes these sample-size estimates
+unsuitable as a fixed Modal run count: start with the selected 24-point
+pilot, apply its fidelity gate, then recompute the requirement. The parent
+freeze has 200 public points per curve available for an independently frozen
+follow-on panel.
 N41's current estimated effect is below 2×, so this estimator gives no
 finite sample count for that threshold.
 

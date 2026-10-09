@@ -97,6 +97,61 @@ def bootstrap_geomean(values: list[float], seed: int) -> list[float] | None:
     return [samples[499], samples[19_499]]
 
 
+def hierarchical_bootstrap_geomean(blocks: list[dict], seed: int) -> list[float] | None:
+    """Resample public points and the two executions within each selected arm."""
+    if len(blocks) < 4:
+        return None
+    rng = random.Random(seed)
+    samples = []
+    for _ in range(BOOTSTRAPS):
+        effects = []
+        for block in rng.choices(blocks, k=len(blocks)):
+            logs = {arm: list(map(math.log, block["online_ms_by_arm"][arm]))
+                    for arm in ("grouplift", "parallel")}
+            effects.append(statistics.mean(rng.choices(logs["grouplift"], k=2))
+                           - statistics.mean(rng.choices(logs["parallel"], k=2)))
+        samples.append(math.exp(statistics.mean(effects)))
+    samples.sort()
+    return [samples[499], samples[19_499]]
+
+
+def repeat_count_plan(blocks: list[dict]) -> dict | None:
+    """Estimate target and within-target log-time variance for repeat choices."""
+    if len(blocks) < 4:
+        return None
+    effects = []
+    within = {arm: [] for arm in ("grouplift", "parallel")}
+    for block in blocks:
+        logs = {arm: list(map(math.log, block["online_ms_by_arm"][arm]))
+                for arm in within}
+        effects.append(statistics.mean(logs["grouplift"])
+                       - statistics.mean(logs["parallel"]))
+        for arm in within:
+            within[arm].append(statistics.variance(logs[arm]))
+    observed = statistics.variance(effects)
+    within_by_arm = {arm: statistics.mean(values) for arm, values in within.items()}
+    within_sum = sum(within_by_arm.values())
+    between = max(0.0, observed - within_sum / 2)
+    margin = statistics.mean(effects) - math.log(2)
+    choices = {}
+    for repeats in (2, 4, 8, 16):
+        required = (max(24, math.ceil(((Z95_TWO_SIDED + Z80) ** 2)
+                                      * (between + within_sum / repeats) / margin ** 2))
+                    if margin > 0 else None)
+        choices[str(repeats)] = {
+            "target_pairs_required_exploratory": required,
+            "one_target_solves_for_this_curve": (
+                2 * repeats * required if required is not None else None),
+        }
+    return {"effect_mean_log_ratio": statistics.mean(effects),
+            "margin_above_log_2": margin,
+            "observed_between_target_effect_variance_at_two_repeats": observed,
+            "estimated_true_between_target_variance": between,
+            "within_target_log_time_variance_by_arm": within_by_arm,
+            "assumption": "independent targets and repetitions, stable target law and host",
+            "95_percent_two_sided_80_percent_power_by_repeats": choices}
+
+
 def required_pairs_for_log_effect(log_effects: list[float], one_sided: bool) -> int | None:
     if len(log_effects) < 4:
         return None
@@ -116,6 +171,7 @@ def analyze(paths: list[Path], output: Path) -> dict:
     parent_bytes = PARENT.read_bytes()
     assert plan["parent_plan_sha256"] == sha(parent_bytes)
     parent = json.loads(parent_bytes)
+    assert parent["target_count_per_curve"] == 200
     parent_targets = {(item["n"], item["label"]): item for item in parent["targets"]}
     targets = {}
     for item in plan["targets"]:
@@ -189,16 +245,22 @@ def analyze(paths: list[Path], output: Path) -> dict:
                         assert report["target_query_workers"] == (
                             plan["target_workers_by_curve"][str(n)])
             good = all(row["verified_native_and_fixture"] and row["phase_ok"] for row in rows)
-            ratio = aa = None
+            ratio = aa = by_arm = calls_by_arm = root_aa = None
             if good:
-                times = [(row["arm"], json.loads(row["raw_text"])["timing_ms"][
-                    "target_online_after_reusable_setup"]) for row in rows]
-                by_arm = {arm: [value for name, value in times if name == arm]
+                reports = [(row["arm"], json.loads(row["raw_text"])) for row in rows]
+                by_arm = {arm: [report["timing_ms"]["target_online_after_reusable_setup"]
+                                for name, report in reports if name == arm]
                           for arm in ("grouplift", "parallel")}
+                calls_by_arm = {arm: [report["target_s3_calls"] for name, report in reports
+                                      if name == arm]
+                                for arm in by_arm}
                 assert all(value > 0 for values in by_arm.values() for value in values)
+                assert all(value > 0 for values in calls_by_arm.values() for value in values)
                 ratio = math.sqrt(math.prod(by_arm["grouplift"]) / math.prod(by_arm["parallel"]))
                 aa = {arm: abs(math.log(values[0] / values[1]))
                       for arm, values in by_arm.items()}
+                root_aa = {arm: abs(math.log(values[0] / values[1]))
+                           for arm, values in calls_by_arm.items()}
                 assert math.isclose(ratio, block["exploratory_online_ratio"], rel_tol=1e-10)
                 assert all(math.isclose(aa[arm], block["aa_abs_log_ratio_by_arm"][arm],
                                         rel_tol=1e-10) for arm in aa)
@@ -206,6 +268,9 @@ def analyze(paths: list[Path], output: Path) -> dict:
                                     "workload_id": target["workload_id"],
                                     "all_verified": good, "online_ratio": ratio,
                                     "aa_abs_log_ratio_by_arm": aa,
+                                    "online_ms_by_arm": by_arm,
+                                    "target_s3_calls_by_arm": calls_by_arm,
+                                    "aa_abs_log_root_calls_by_arm": root_aa,
                                     "run_ids": [row["run_id"] for row in rows]})
         assert len(used_tags) == len(set(used_tags)) == len(by_tag)
         assert set(used_tags) == set(by_tag)
@@ -215,15 +280,21 @@ def analyze(paths: list[Path], output: Path) -> dict:
     curves = {}
     for n in (41, 53):
         blocks = [block for block in analyzed_blocks if block["n"] == n]
+        verified_blocks = [block for block in blocks if block["all_verified"]]
         scored_runs = [row for row in analyzed_runs if row["n"] == n]
         ratios = [block["online_ratio"] for block in blocks if block["online_ratio"] is not None]
         aas = {arm: sorted(block["aa_abs_log_ratio_by_arm"][arm] for block in blocks
                            if block["aa_abs_log_ratio_by_arm"] is not None)
                for arm in ("grouplift", "parallel")}
+        root_aas = {arm: sorted(block["aa_abs_log_root_calls_by_arm"][arm]
+                                for block in verified_blocks)
+                    for arm in ("grouplift", "parallel")}
         log_margin = [math.log(value) - math.log(2) for value in ratios]
         curves[str(n)] = {
             "candidate_id": plan["curves"][str(n)]["parallel_candidate_id"],
             "reference_candidate_id": plan["curves"][str(n)]["grouplift_candidate_id"],
+            "selected_plan_targets_per_curve": plan["target_count_per_curve"],
+            "parent_frozen_pool_targets_per_curve": parent["target_count_per_curve"],
             "aggregate_poolable_on_recorded_hardware": same_hardware,
             "guest_fidelity_score_0_to_100": (
                 min(row["guest_score_0_to_100"] for row in scored_runs) if scored_runs else None),
@@ -236,15 +307,24 @@ def analyze(paths: list[Path], output: Path) -> dict:
                 if ratios and same_hardware else None),
             "target_bootstrap_95_descriptive": (
                 bootstrap_geomean(ratios, 20261009 + n) if same_hardware else None),
+            "target_and_repeat_hierarchical_bootstrap_95_descriptive": (
+                hierarchical_bootstrap_geomean(verified_blocks, 20261109 + n)
+                if same_hardware else None),
             "aa_p95_abs_log_ratio_by_arm": {
                 arm: percentile(values, .95) if values else None
                 for arm, values in aas.items()},
-            "aa_10_percent_gate": all(
-                values and percentile(values, .95) <= fidelity.AA_ABS_LOG_CAP
-                for values in aas.values()),
+            "root_call_aa_p95_abs_log_ratio_by_arm": {
+                arm: percentile(values, .95) if values else None
+                for arm, values in root_aas.items()},
+            "aa_10_percent_environment_gate": (
+                percentile(aas["grouplift"], .95) <= fidelity.AA_ABS_LOG_CAP
+                if aas["grouplift"] else None),
+            "aa_environment_gate_arm": "grouplift_deterministic_target_query",
             "pilot_pairs_for_geomean_above_2_one_sided_95_80_percent_power":
                 required_pairs_for_log_effect(log_margin, one_sided=True)
                 if same_hardware else None,
+            "target_and_repeat_count_plan_exploratory": (
+                repeat_count_plan(verified_blocks) if same_hardware else None),
         }
     by_index = {(block["n"], int(block["label"][1:])): block for block in analyzed_blocks}
     paired = []
@@ -267,11 +347,14 @@ def analyze(paths: list[Path], output: Path) -> dict:
             bootstrap_geomean([math.exp(value) for value in differences], 20261009)
             if same_hardware else None,
         "pilot_pairs_per_curve_for_difference_two_sided_95_80_percent_power": required_difference,
-        "frozen_pool_size_per_curve": plan["target_count_per_curve"],
+        "selected_plan_targets_per_curve": plan["target_count_per_curve"],
+        "parent_frozen_pool_targets_per_curve": parent["target_count_per_curve"],
     }
     required = curve_difference["pilot_pairs_per_curve_for_difference_two_sided_95_80_percent_power"]
-    curve_difference["frozen_pool_covers_estimate"] = (
+    curve_difference["selected_plan_covers_estimate"] = (
         required <= plan["target_count_per_curve"] if required is not None else None)
+    curve_difference["parent_pool_covers_estimate"] = (
+        required <= parent["target_count_per_curve"] if required is not None else None)
     guest_score = min(row["guest_score_0_to_100"] for row in analyzed_runs)
     result = {
         "kind": "s3_parallel_modal_fidelity_analysis_v1",
