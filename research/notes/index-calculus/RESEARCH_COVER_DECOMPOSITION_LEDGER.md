@@ -1365,6 +1365,8 @@ The [larger-field report](../../iso1_weak_classes_20261007/larger_fields_2026100
 
 For odd prime n, the absolute-Frobenius orbit count is now proved as C_(p,n)=[N+A+B-3+2e(n-1)^2]/(4n), where N=(p^(2n)-1)/(p^2-1), A=(p^n-1)/(p-1), B=(p^n+1)/(p+1), and e=1 iff p^2=1 mod n. Its cleared sum has record IDC1h90d58cc0e0c48fe3. Eight exhaustive cyclic-group audits cover 6,928,970 parameters; 45 stabilizer cases pass. The temporary p59 continuation was interrupted and is now restarted with a finite local service and persistent receipts; the original requested range through p199 remains preserved.
 
+The p = 59 census completed during this round: 100,408 weak ordinary rows among 201,898, 0/100,950 depth-1 positives, and 540/100,948 higher-depth zeros. All 5,000 GP controls are positive (4,565 distinct absolute traces). The archived CSV and decompressed SHA replay are retained in the larger-field report's p59_completed directory. The worker has advanced to p61.
+
 ### 18.7 Historical candidate R-v2, registered before its held-out test and now falsified (2026-10-08)
 
 This preregistration is preserved as research history. The corrected p = 37,

@@ -7,6 +7,11 @@ and all **17 independently counted source/target pairs** pass. The work
 also proves an exact absolute-Frobenius orbit formula for every odd prime
 extension degree, extending the cubic count to degrees 5 and 7.
 
+The complete **p=59** census also finished during this round: **100,408**
+weak ordinary rows out of **201,898**, zero depth-1 positives, and
+**540** higher-depth zero rows. All 5,000 independent GP controls agree;
+the worker has advanced to p=61.
+
 The user requested larger primes **and** larger odd extension degrees.
 The original every-prime census through p=199 remains part of the scope;
 these larger-field positive controls are an additional deliverable.
@@ -18,7 +23,7 @@ these larger-field positive controls are an additional deliverable.
 | Explicit rational isogeny and target 4-torsion | Verified on 49 seeded parameters | [geometric receipts](evidence_run1/receipts.tsv), [GP source](control.gp) |
 | Independent source and target cardinalities | Verified for one pair in every field | 34 point counts; all equal in pairs, divisible by 16, in Hasse, and ordinary |
 | Extension-degree orbit theorem | Proved for odd prime n | [proof](REPORT.tex), [identity record](orbit_identity_certificate.json), [exact cyclic audits](orbit_validation.txt) |
-| Every prime through 199 | Restarted at p=59; later primes pending | [finite launch configuration](census_launchd.plist), [dated restart status](census_restart_status.tsv) |
+| Every prime through 199 | p=59 complete; p=61 running; later primes pending | [finite launch configuration](census_launchd.plist), [dated restart status](census_restart_status.tsv) |
 | Class-existence criterion | Necessary condition remains proved; sufficient criterion open | Individual norm-one positives do not classify all trace rows |
 
 ## Fields, exact models, and measured checks
@@ -150,3 +155,23 @@ documents cardinality computation over finite extensions and the available
 algorithms. The necessary conductor theorem applies at every size; the
 larger positive controls and orbit formula extend the tested models and
 price enumeration while the remaining class-existence criterion is pursued.
+
+## Completed p=59 census
+
+The [archived CSV](p59_completed/p59_absolute.csv.zst) has 205,380
+Hasse rows and weights to all 24,241,684 normalized representatives.
+It uses 1,010,651 point counts. Of 201,898 ordinary rows, 100,408 are
+weak; depth-1 weak is 0/100,950 and higher-depth zero is 540/100,948.
+The [native all-row audit](p59_completed/p59_validation.txt) passes
+with all 5,000 GP controls positive (4,565 distinct absolute traces).
+The randomized census labels retain their stated uncertainty.
+
+The [run receipt](p59_completed/p59_receipt.txt) records exit 0,
+4,613.407 process wall seconds and the frozen census binary; its raw
+statistics record 4,613.034 inner wall seconds and 554,248,010,615 charged
+Fp multiplications. These are separate resource-accounting intervals.
+The compressed CSV was tested and replayed to SHA-256
+42a764eb83093c1afda459bf6b072036db546340b00e19b2f15253b8220ce76e.
+The imported archive was independently decompressed and audited again.
+The latest six-prime class panel is in the new figure; the October 8
+class figure remains the dated historical snapshot.

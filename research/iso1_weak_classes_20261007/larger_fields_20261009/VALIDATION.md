@@ -4,7 +4,7 @@ The expanded controls verify 17 ordinary source/target cardinality pairs
 through log2(Q)=252, 49 geometric fixtures, 34 exact ICV1 identities,
 and the prime-degree orbit theorem. Every larger-field cell completed
 inside its registered cap. The complete-prime continuation is active
-at p=59 under an independent finite local service.
+at p=61 under an independent finite local service; p=59 has completed.
 
 | Check | Result and evidence |
 | --- | --- |
@@ -81,3 +81,16 @@ sources, records, artifacts, and current dashboard context.
 Readable transcript copies normalize trailing whitespace; adjacent .raw.gz
 archives retain the exact original bytes and were checked by decompression.
 Normalized copies: native_tests.stdout, census_restart_source_freeze.txt, orbit_tests.stdout.
+
+The p59 archived result completed during this round. Its imported zstd
+archive was independently decompressed and audited: all 205,380 rows,
+24,241,684 weighted representatives, 100,408 weak ordinary rows,
+0/100,950 depth-1 positives, and 540/100,948 higher-depth zeros agree.
+All 5,000 controls are positive, with 4,565 distinct absolute traces.
+The queue has advanced to p61; the earlier PID snapshot remains
+historical and the final status snapshot records the completed transition.
+
+Every class-panel value was replayed from the six census CSVs using
+header-named fields, including frobenius_2_depth; all counts match.
+The initial documentary check selected two_split by position and was
+corrected before acceptance. The plotted values were unchanged.

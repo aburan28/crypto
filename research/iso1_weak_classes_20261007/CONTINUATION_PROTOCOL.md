@@ -95,3 +95,10 @@ The user also requested larger primes and odd extension degrees. The
 additional report verifies 17 paired point counts through log2(Q)=252
 and total extension degrees 10 and 14, plus the prime-degree orbit
 theorem. These controls do not complete the full trace census.
+
+The restarted p59 census completed and passed all 5,000 independent
+controls: 100,408 weak ordinary rows out of 201,898, 0/100,950 depth-1
+positives, and 540/100,948 higher-depth zero rows. The compressed CSV
+and full receipt are retained in larger_fields_20261009/p59_completed.
+The persistent worker has advanced to p61; later requested primes remain
+pending.

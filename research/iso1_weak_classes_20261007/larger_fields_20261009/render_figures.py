@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parent
 DATA=json.loads((ROOT/'curve_records.json').read_text())
 plt.rcParams.update({'font.family':'DejaVu Sans','font.size':10,'svg.fonttype':'none','pdf.fonttype':42})
 colors={3:'#235b9d',5:'#16826c',7:'#9a5b17'}
-fig,(ax,work)=plt.subplots(2,1,figsize=(7.1,6.2),gridspec_kw={'height_ratios':[1,1.15]},layout='constrained')
+fig,(ax,work,census)=plt.subplots(3,1,figsize=(7.1,8.6),gridspec_kw={'height_ratios':[1,1.15,1]},layout='constrained')
 for n in (3,5,7):
     rows=[r for r in DATA['records'] if r['odd_degree']==n]
     ax.scatter([float(r['log2_field_cardinality']) for r in rows],[n]*len(rows),s=65,c=colors[n],label=f'n = {n}: {len(rows)} paired counts',zorder=3)
@@ -23,6 +23,13 @@ for n in (3,5,7):
     work.plot(range(3),[lookup[(p,n)] for p in xs],marker='o',lw=2,color=colors[n],label=f'n = {n}')
 work.set(xticks=range(3),xticklabels=['p = 13','p = 257','p = 1009'],ylabel='log10(point-count calls)',ylim=(0,37),title='Exact orbit work for a complete parameter census')
 work.grid(alpha=.23);work.legend(fontsize=8,loc='upper left')
+class_rows=json.loads((ROOT/'class_census.json').read_text())['rows']
+for i,r in enumerate(class_rows):
+    den=r['ordinary'];low=100*r['depth1_rows']/den;positive=100*r['weak']/den;zero=100*r['high_depth_zero']/den
+    census.barh(i,low,color='#e99b84');census.barh(i,positive,left=low,color='#65b991');census.barh(i,zero,left=low+positive,color='#e6bf64')
+    census.text(100.8,i,f"{r['weak']:,} weak; {r['high_depth_zero']} high-depth zero",va='center',fontsize=7)
+census.set(yticks=range(len(class_rows)),yticklabels=[f"p = {r['p']}" for r in class_rows],xlim=(0,153),xticks=[0,25,50,75,100],xlabel='Share of ordinary trace rows, %',title='Complete observed census through p = 59')
+census.invert_yaxis();census.grid(axis='x',alpha=.2)
 fig.suptitle('Larger fields verified; complete-census work remains explicit',fontsize=13)
 fig.savefig(ROOT/'field_expansion.svg');fig.savefig(ROOT/'field_expansion.pdf');plt.close(fig)
 pair=next(r for r in DATA['records'] if r['characteristic']==13 and r['odd_degree']==5)

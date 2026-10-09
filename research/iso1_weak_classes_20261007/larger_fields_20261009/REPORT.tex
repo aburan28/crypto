@@ -16,8 +16,8 @@ All 49 explicit geometric controls and all 17 independently counted
 source/target pairs pass. We also prove an exact absolute-Frobenius orbit
 formula for every odd prime extension degree. It specializes to the
 cubic formula and prices the complete parameter census at degrees 5
-and 7 without extrapolating execution time. The complete-prime census
-through $p=199$ resumes with persistent receipts and a finite local worker.
+and 7. The completed $p=59$ census adds 100,408 weak ordinary rows
+and 540 higher-depth zero rows; the finite local worker continues at $p=61$.
 \end{abstract}
 
 \section{Measured larger-field controls}
@@ -140,7 +140,10 @@ sufficient class-existence criterion.
 
 The earlier temporary worker and directory were absent at this round's
 start. The original every-prime request through 199 is preserved.
-The restarted $p=59$ job uses four workers and an internal-volume runtime
+The $p=59$ census has completed and passed its audit. Of 201,898 ordinary
+rows, 100,408 are weak, with zero depth-1 weak rows and 540 higher-depth
+zero rows. All 5,000 independent GP controls are positive. The worker
+has advanced to $p=61$ using four workers and an internal-volume runtime
 copy, checked against the frozen sources and executables. A finite
 \texttt{launchd} service owns the process independently of this chat;
 \texttt{KeepAlive=false} preserves a failure or completion without
@@ -164,13 +167,15 @@ all code, exact field and curve records, the cyclic audits, native tests,
 failed preliminary attempts, and the persistent-service receipts.
 
 \clearpage
-\begin{landscape}
+
 \begin{center}
-\includegraphics[width=\linewidth,height=0.88\textheight,keepaspectratio]{field_expansion.pdf}
+\includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{field_expansion.pdf}
 \end{center}
 \noindent Top: 17 completed point-count pairs; every plotted marker is a
-measured field case. Bottom: exact orbit-call requirements from the
-proved formula, displayed on a logarithmic scale. The graph does not
-infer runtime or class reach from the positive controls.
-\end{landscape}
+measured field case. Middle: exact orbit-call requirements from the
+proved formula, displayed on a logarithmic scale. Bottom: complete
+observed ordinary trace strata through $p=59$. Orange is depth 1,
+green is observed weak, and yellow is higher-depth zero; those census
+labels retain their randomized point-count uncertainty.
+
 \end{document}
