@@ -463,6 +463,7 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
         "Environment: Apple M4 Pro, 14 logical cores, 48 GiB RAM, macOS arm64. Elapsed values in process receipts are operational time-budget records on a shared host. No timing or speedup comparison is made.",
         "Reproduce from the feature branch: build isogeny_algos in release mode; run its p192_p224_large_degree_search example with the CLI path and a NEW output directory; build this study's replay binary; replay the directory against docs/curves/registry.json; then run the report binary.",
         "Canonical views: registered target models, native cover certificates, aliases, leaderboard rosters and browser identities are refreshed from the replay. Existing IC measurement bytes, the boundary ledger and progress timeline retain their performance results. See RESULTS.md for validation and delivery status.",
+        "Dependent traits catalogue: its native exporter cannot build because the unchanged root library has 485 compiler errors. The old 121-row traits file remains unchanged and stale. Its parser also lacks existing Montgomery and Edwards model forms. These unresolved gates are recorded explicitly, without claiming a completed traits refresh.",
         "Source: report.rs. Final progress: SEARCH-final.log. MANIFEST.json binds protocol, source, executable versions and evidence bytes. SEARCH.svg is editable. Failures and timeouts remain alongside the completed maps."] {wrapped(&mut p3,&mut y,t,11.);}
     let pages = vec![(595, 842, p1), (842, 595, p2), (595, 842, p3)];
     let mut objects = vec![
@@ -504,6 +505,32 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
 }
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.len() == 3 && args[2] == "--check-manifest" {
+        let study = Path::new(&args[0]);
+        let manifest = load(&study.join("MANIFEST.json"));
+        let mut count = 0;
+        for group in ["files", "sources", "canonical_outputs", "executables"] {
+            for record in manifest[group].as_array().unwrap() {
+                let path = Path::new(record["path"].as_str().unwrap());
+                let path = if group == "files" {
+                    study.join(path)
+                } else {
+                    path.to_path_buf()
+                };
+                let bytes = fs::read(&path).unwrap();
+                assert_eq!(
+                    bytes.len() as u64,
+                    record["bytes"].as_u64().unwrap(),
+                    "{}",
+                    path.display()
+                );
+                assert_eq!(hash(&bytes), record["sha256"], "{}", path.display());
+                count += 1;
+            }
+        }
+        println!("Manifest byte lengths and SHA-256 digests verified: {count} bound files.");
+        return;
+    }
     assert_eq!(args.len(), 2, "usage: report STUDY_DIR REGISTRY_JSON");
     let study = Path::new(&args[0]);
     let evidence = study.join("evidence-v4");
@@ -653,6 +680,16 @@ The mandatory root release-library check failed to compile with 643 existing err
 
 The target registry is updated natively from frozen replayed models. Native cover certificates and the linked cover graph, aliases, leaderboard curve rosters, and browser curve identities are refreshed together. The catalogue tools reproduce the existing outputs exactly before extension. Existing IC measurement bytes are preserved. The boundary ledger, performance scoreboard, progress timeline, and older walker guide receive no new performance row: the experiment supplies maps and exact models without an IC/rho ratio or boundary promotion.
 
+| Catalogue obligation | Status and evidence |
+|---|---|
+| Registry, mapped generators and EC1 identities | 22 verified targets added; 343 models total; existing record bytes and order preserved. |
+| Covers and linked cover graph | [Native replay](validation/catalogue-covers-check-preserved-order.log): all 343 models verified, zero invalid or unsupported inputs. |
+| Aliases, leaderboard roster and browser identities | [Native refresh](validation/catalogue-views-preserved-order.log): 22 added roster rows; existing IC board bytes preserved; identity and source-digest joins checked. |
+| Dependent traits catalogue | BLOCKED. [Native exporter build](validation/curve-traits-build.log) failed with 485 existing root-library errors. The old 121-row file remains unchanged and was already stale against the 321-model base registry. Static inspection of its parser also shows that existing Montgomery and Edwards forms need upstream support before whole-catalogue regeneration. |
+| Performance scoreboard, progress timeline, performance-gains figures and existing theory figures | Checked for impact; no cost measurements, fitted exponents, boundary promotions or old-walker integrations were supplied by this round. Their measured and theoretical results are unchanged. |
+
+All finished search work is committed locally on `codex/p192-p224-large-degree-isogenies-20261008`. The owner's verify-before-push rule requires the root library failures to be fixed first, so branch publication, PR creation and merge remain blocked. The [post-catalogue root check](validation/lib-test-post-catalogue.log) again reports 643 compiler errors. These are separate from the passing standalone suite and map/covers replay.
+
 Sources: [BMSS](https://arxiv.org/abs/cs/0609020), [native CLI/API](../../isogeny_algos/docs/USAGE.md), [existing walker](../../docs/isogeny-walk/README.md). The vector and PDF share editable [report.rs](report.rs) source; [SEARCH.pdf](SEARCH.pdf) includes the report and visual.
 
 ## Reproduction
@@ -720,6 +757,7 @@ research/p192_p224_large_degree_isogenies_20261008/target/release/replay NEW_EVI
         "docs/curves/registry.json",
         "docs/curves/covers.json",
         "docs/curves/cover-links.yaml",
+        "docs/curves/traits.json",
         "src/cryptanalysis/curve_aliases.json",
         "docs/ic/leaderboard.json",
         "docs/ic/LEADERBOARD.md",

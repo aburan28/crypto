@@ -173,3 +173,28 @@ unsupported inputs. Diff review showed that globally sorting the expanded
 registry moved existing standard records. Registration now preserves all
 existing raw entries and their order and appends only the 22 replayed models.
 The derived views were regenerated from this preserved-order registry.
+
+The preserved-order catalogue replay passed for all 343 models, with zero
+invalid or unsupported inputs (`validation/catalogue-covers-check-preserved-order.log`).
+Aliases, leaderboard rosters and browser curve identities were refreshed with
+all identity/source joins checked and existing IC measurement bytes preserved
+(`validation/catalogue-views-preserved-order.log`). Existing theory figures,
+the performance-gains views, the IC scoreboard, the boundary ledger and the
+progress timeline received no new performance measurement or old-walker edge.
+
+The dependent native traits exporter was attempted with
+`cargo run --locked --release --offline --bin curve_traits -- build`.
+It failed to compile the unchanged root library with 485 errors; the complete
+log is `validation/curve-traits-build.log`. Its existing file has 121 rows and
+registry digest a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed,
+already stale against the 321-model base registry. Static inspection also
+shows that the current parser accepts only binary and short-Weierstrass forms,
+while the base includes Montgomery and Edwards forms. The old traits file is
+preserved and included in the manifest, with this refresh obligation blocked.
+
+The post-catalogue mandatory release-library test again failed with 643
+existing compiler errors (`validation/lib-test-post-catalogue.log`). Upstream
+main was refreshed and remained at 2fe5cec8a4a9d8d55c8e0abec9fe22852f3a3726.
+The owner's verify-before-push rule keeps publication, PR creation and merge
+blocked until the root gate passes. Finished code, evidence and artifacts are
+committed locally; no failed check is treated as a pass.
