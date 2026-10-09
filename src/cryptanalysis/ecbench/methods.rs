@@ -30,9 +30,9 @@ use crate::cryptanalysis::ecbench_large_prime::{
     self as large_prime, SolveConfig as LargePrimeConfig,
 };
 use crate::cryptanalysis::ic_boundary::{
-    price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
-    Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost, PointClasses,
-    PrimeInstance, PrimePoint, RhoResult, RhoWalk,
+    price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
+    BinaryInstance, Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost,
+    PointClasses, PrimeInstance, PrimePoint, RhoResult, RhoWalk,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
@@ -94,13 +94,41 @@ const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {
 // Keep the defaults of the frozen `ic.pipeline_counted` sessions. The
 // existing `ic.pipeline` declaration below retains main's newer options.
 const IC_COUNTED_PARAMS: &[ParamDecl] = &[
-    ParamDecl { name: "factor_base", default: None, help: "factor-base plug-in spec" },
-    ParamDecl { name: "oracle", default: None, help: "decomposition oracle plug-in spec" },
-    ParamDecl { name: "solver", default: Some(""), help: "algebraic solver plug-in spec" },
-    ParamDecl { name: "linalg", default: Some("incremental-gauss"), help: "linear algebra plug-in" },
-    ParamDecl { name: "targets", default: Some("walk"), help: "random or walk" },
-    ParamDecl { name: "max_trials", default: Some("100000000"), help: "relation trial cap" },
-    ParamDecl { name: "solver_budget_seconds", default: Some("0"), help: "per-call solver wall budget" },
+    ParamDecl {
+        name: "factor_base",
+        default: None,
+        help: "factor-base plug-in spec",
+    },
+    ParamDecl {
+        name: "oracle",
+        default: None,
+        help: "decomposition oracle plug-in spec",
+    },
+    ParamDecl {
+        name: "solver",
+        default: Some(""),
+        help: "algebraic solver plug-in spec",
+    },
+    ParamDecl {
+        name: "linalg",
+        default: Some("incremental-gauss"),
+        help: "linear algebra plug-in",
+    },
+    ParamDecl {
+        name: "targets",
+        default: Some("walk"),
+        help: "random or walk",
+    },
+    ParamDecl {
+        name: "max_trials",
+        default: Some("100000000"),
+        help: "relation trial cap",
+    },
+    ParamDecl {
+        name: "solver_budget_seconds",
+        default: Some("0"),
+        help: "per-call solver wall budget",
+    },
 ];
 
 /// Every method `ecbench` knows.  Adding one is an entry here and an arm
