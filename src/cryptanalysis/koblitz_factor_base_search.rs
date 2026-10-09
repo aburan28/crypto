@@ -832,7 +832,11 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),
-        FactorBaseSpec::FrobeniusUnion { .. } | FactorBaseSpec::Pruned { .. } => None,
+        FactorBaseSpec::FrobeniusUnion { .. }
+        | FactorBaseSpec::Pruned { .. }
+        | FactorBaseSpec::StandardSubspace { .. }
+        | FactorBaseSpec::CofactorProjected { .. }
+        | FactorBaseSpec::SubgroupOrbits { .. } => None,
     }
 }
 
