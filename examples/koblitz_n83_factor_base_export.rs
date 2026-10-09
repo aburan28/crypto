@@ -1174,6 +1174,19 @@ fn main() -> Result<()> {
             )?;
             println!("{receipt}");
         },
+        Some("primary-s3-probe")=>{
+            if args.len()!=10 { return Err("primary-s3-probe PANEL_DIR K POLICY SEED ordered|unordered MAX_STATES MEMORY_MIB NEW_OUTPUT_JSON (requires a hard cgroup memory cap and external process-wall cap)".into()); }
+            let unordered_pairs=match args[6].as_str() {
+                "ordered"=>false,
+                "unordered"=>true,
+                _=>return Err("primary-s3-probe pair mode must be ordered or unordered".into()),
+            };
+            let receipt=primary_adapter::s3_probe_cli(
+                Path::new(&args[2]),args[3].parse()?,&args[4],args[5].parse()?,unordered_pairs,
+                args[7].parse()?,args[8].parse()?,Path::new(&args[9]),
+            )?;
+            println!("{receipt}");
+        },
         Some("primary-cold")=>{
             if args.len()!=9 { return Err("primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()); }
             let summary=primary_adapter::run_cli(
@@ -1182,7 +1195,7 @@ fn main() -> Result<()> {
             )?;
             println!("{summary}");
         },
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS | v2-replay-one PANEL_DIR BUDGET_SECONDS | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS | v2-replay-one PANEL_DIR BUDGET_SECONDS | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-s3-probe PANEL_DIR K POLICY SEED ordered|unordered MAX_STATES MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
     }
     Ok(())
 }

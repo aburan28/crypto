@@ -5,8 +5,8 @@
 //! point and signed-Frobenius label before building the public structure.
 
 use super::{
-    curve, general, load_object, parse_point, point_json, point_set_hash, words, write_new_json,
-    Result, SEEDS, STUDY,
+    compact_cold, curve, frozen_v2_source_commit, general, load_object, parse_point, point_json,
+    point_set_hash, words, write_new_json, Result, SEEDS, STUDY,
 };
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -212,7 +212,17 @@ fn from_record(row: &Value, bytes: &[u8]) -> Result<PrimaryBase> {
     Ok(PrimaryBase { curve, factor_base })
 }
 
-fn load_panel(root: &Path, columns: usize) -> Result<(PrimaryBase, Value, String)> {
+fn load_panel_selected(
+    root: &Path,
+    columns: usize,
+    policy: &str,
+    seed: u64,
+) -> Result<(PrimaryBase, Value, String)> {
+    if !["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+        || !SEEDS.contains(&seed)
+    {
+        return Err("primary base policy or seed outside frozen panel".into());
+    }
     let manifest_bytes = fs::read(root.join("manifest.json"))?;
     let manifest_hash = blake3::hash(&manifest_bytes).to_hex().to_string();
     let manifest: Value = serde_json::from_slice(&manifest_bytes)?;
@@ -233,8 +243,8 @@ fn load_panel(root: &Path, columns: usize) -> Result<(PrimaryBase, Value, String
     }
     let mut rows = rows.iter().filter(|row| {
         row["a"].as_u64() == Some(0)
-            && row["policy"] == "public_x_hash"
-            && row["seed"].as_u64() == Some(SEEDS[0])
+            && row["policy"] == policy
+            && row["seed"].as_u64() == Some(seed)
             && row["columns"].as_u64() == Some(columns as u64)
     });
     let row = rows.next().ok_or("requested primary base absent")?;
@@ -250,6 +260,10 @@ fn load_panel(root: &Path, columns: usize) -> Result<(PrimaryBase, Value, String
     }
     let base = from_record(row, &load_object(root, row)?)?;
     Ok((base, row.clone(), manifest_hash))
+}
+
+fn load_panel(root: &Path, columns: usize) -> Result<(PrimaryBase, Value, String)> {
+    load_panel_selected(root, columns, "public_x_hash", SEEDS[0])
 }
 
 pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
@@ -270,6 +284,100 @@ pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
         "total_index_calculus_runtime_ms": Value::Null,
         "selected_best_total_runtime": Value::Null
     }))
+}
+
+/// Probe the published primary point with a replayed retained base through
+/// the point-only wide compact index. This is one relation diagnostic, not a
+/// rank or total-runtime result. A Linux cgroup with a hard memory limit and
+/// zero swap is mandatory; the caller must also impose a process-wall cap.
+pub(super) fn s3_probe_cli(
+    root: &Path,
+    columns: usize,
+    policy: &str,
+    seed: u64,
+    unordered_pairs: bool,
+    max_candidate_states: usize,
+    memory_mib: u64,
+    output: &Path,
+) -> Result<Value> {
+    if ![64, 256, 600].contains(&columns) {
+        return Err("S3 probe supports retained primary K=64/256/600 bases".into());
+    }
+    let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
+    let source_commit = frozen_v2_source_commit()?;
+    let checkout = Path::new(env!("CARGO_MANIFEST_DIR"));
+    for (path, compiled) in [
+        (
+            "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs",
+            include_bytes!("primary_adapter.rs").as_slice(),
+        ),
+        (
+            "research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs",
+            include_bytes!("compact_cold.rs").as_slice(),
+        ),
+    ] {
+        if blake3::hash(&fs::read(checkout.join(path))?) != blake3::hash(compiled) {
+            return Err("compiled S3 probe source differs from checked-out source".into());
+        }
+    }
+    let started = Instant::now();
+    let (base, row, manifest_hash) = load_panel_selected(root, columns, policy, seed)?;
+    let base_import_ms = started.elapsed().as_secs_f64() * 1000.0;
+    let (target, corpus_hash) = public_target(root, &base.curve)?;
+    let target_validation_ms = started.elapsed().as_secs_f64() * 1000.0 - base_import_ms;
+    let representatives: Vec<_> = base
+        .factor_base
+        .signed_orbits
+        .iter()
+        .map(|orbit| base.factor_base.points[orbit[0]].clone())
+        .collect();
+    let probe_started = Instant::now();
+    let probe = compact_cold::probe_checked_four_sum(
+        &base.curve,
+        &base.factor_base.points,
+        &representatives,
+        &target,
+        unordered_pairs,
+        max_candidate_states,
+    )?;
+    let probe_ms = probe_started.elapsed().as_secs_f64() * 1000.0;
+    let cgroup_peak_bytes: u64 = fs::read_to_string("/sys/fs/cgroup/memory.peak")?
+        .trim()
+        .parse()
+        .map_err(|_| "S3 probe requires a numeric cgroup memory.peak")?;
+    let receipt = json!({
+        "schema":"n83.primary-compact-s3-probe/v1",
+        "study":STUDY,
+        "status":probe["status"],
+        "curve_a":0,
+        "fixture":0,
+        "orbit_columns":columns,
+        "policy":policy,
+        "seed":seed,
+        "object":row["object"],
+        "point_set_blake3":row["point_set_blake3"],
+        "panel_manifest_blake3":manifest_hash,
+        "public_corpus_canonical_json_blake3":corpus_hash,
+        "source_commit":source_commit,
+        "source_adapter_blake3":blake3::hash(include_bytes!("primary_adapter.rs")).to_hex().to_string(),
+        "source_compact_blake3":blake3::hash(include_bytes!("compact_cold.rs")).to_hex().to_string(),
+        "memory_cgroup_limit_bytes":memory_limit_bytes,
+        "memory_cgroup_swap_limit_bytes":0,
+        "memory_cgroup_peak_bytes":cgroup_peak_bytes,
+        "max_candidate_states":max_candidate_states,
+        "base_import_ms":base_import_ms,
+        "target_validation_ms":target_validation_ms,
+        "point_probe_ms":probe_ms,
+        "process_wall_ms":started.elapsed().as_secs_f64()*1000.0,
+        "process_usage":process_usage(),
+        "probe":probe,
+        "rank_stage_executed":false,
+        "column_log_verification":false,
+        "total_index_calculus_runtime_ms":Value::Null,
+        "selected_best_total_runtime":Value::Null
+    });
+    write_new_json(output, &receipt)?;
+    Ok(receipt)
 }
 
 /// Construct the exact K=64/256/600 finite-domain factored S4 model and

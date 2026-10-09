@@ -18,7 +18,7 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | S3 storage | PASS: 54 compressed objects uploaded, downloaded and byte-hash matched; content-addressed panel receipts uploaded |
 | Primary base to generic solver adapter | PASS: replay-bound K=64 S3 object reconstructed as generic ordinary and signed Frobenius orbits; solver stage unexecuted |
 | Primary cold runner | K=64, m=2 exact-enumeration preflight PASS; one trial returned `UNKNOWN_trial_cap` with zero relations. K=64 m=3 and K=256 m=2 attempts reached `UNKNOWN_budget` caps. All retain null total runtime and winner |
-| Existing four-summand source transfer | Balanced-S5 SAT is admitted only through n=53; the wide compact-orbit n=83 runner uses a different polynomial basis/base schema and u64 rank. `S5_CAPACITY.md` records exact source gates and index-size formulas; no retained-base four-summand run followed |
+| Existing four-summand source transfer | Balanced-S5 SAT is admitted only through n=53; the upstream wide compact-orbit n=83 runner uses a different polynomial basis/base schema and u64 rank. The study-local diagnostic adapter already pins the study field. A new primary point-only compact probe accepts a replayed base, checks a state/cgroup cap and verifies any witness in the generic group; its n=71 small-order fixture passes both pair modes. No retained primary four-summand probe, rank or cold run followed; see `S5_CAPACITY.md` |
 | Best total runtime | Unresolved: full relation collection, rank, linear algebra and individual-log phases have not completed the comparison gate |
 
 ## Exact revisions and instances
@@ -212,5 +212,17 @@ the passing runs. No retained N83 precomputation has been timed on this source.
 `SOLVER_GATES.md` pins the immediate source and capacity blockers. At `n=l=83`, the original native S4 encoder needs at least **593,364 SAT variables and 2,349,149 AND-definition clauses** from its unreduced x/e correspondence and default ordering. An experimental factored encoder now has a source-derived ceiling of **158,032 variables and 469,881 AND-definition clauses**, before finite-base domain constraints and ordering clauses. Its small-system equivalence and explicit-orbit group-lifting checks pass, but no N83 model construction, capacity or lifting receipt exists. The exact wide coordinate trie has a focused regression. The WDSat, FES and double-large-prime modules in the inspected main snapshot are absent from this isolated branch and cannot directly represent the primary N83 system as implemented there. A further enumeration cap would add another censored observation without addressing those backend gates.
 
 After the pilot, the exact enumerator gained a `u128` batched-add path for degree 83. Focused generic-arithmetic and retained-primary-base witness-order tests pass. These tests establish correctness for the checked cases; no cold workload has been rerun on the new source, so all earlier capped timings remain pinned to their original implementation. The exponential enumeration count, unvalidated N83 SAT/WDSat/FES capacity and missing large-prime partial producer still prevent a total-runtime factor-base ranking.
+
+The point-only compact-S3 path now accepts a replayed primary base selected
+by all three retained policies and seeds at K=64/256/600. Its CLI requires a
+declared hard cgroup memory cap, zero swap and a candidate-state cap; an
+external wall supervisor is still required. A public n=71 `a=0` small-order
+fixture checks ordered and Frobenius-unordered extraction on deterministic
+planted four-sums, independently re-adds each returned point tuple, and
+rejects a too-small state cap before allocation. The current release library
+suite passed 2,249 tests (94 ignored), the N83 exporter example passed 17,
+and the study/boundary Python suites passed 13/16. No retained N83 compact
+index or natural relation was run, and the point-only witness is not yet an
+81-bit rank row or a complete runtime.
 
 Select a base only after complete, matched one-target cold runs, natural rank gain, verified column logarithms and an individual logarithm, all failed work charged, disjoint holdouts, A/A controls, at least five paired rounds, admitted uncertainty and independent validation. The local L0 observations do not establish that minimum. Literal coverage of every possible point set and parameter value is outside this finite experiment.

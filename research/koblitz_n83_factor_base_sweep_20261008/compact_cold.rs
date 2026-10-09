@@ -1040,7 +1040,7 @@ mod wide {
         basis: &NormalBasis128,
         solver: &S3Solver128,
         index: &Index128,
-        base: &Base128,
+        domain: &PointDomain128<'_>,
         target: FastPoint128,
         start: usize,
         threads: usize,
@@ -1054,7 +1054,7 @@ mod wide {
                 basis,
                 solver,
                 index,
-                base,
+                domain,
                 target,
                 start,
                 &mut relation_check_ns,
@@ -1078,7 +1078,7 @@ mod wide {
                 let basis = basis;
                 let solver = solver;
                 let index = index;
-                let base = base;
+                let domain = domain;
                 handles.push(scope.spawn(move || {
                     let pos_lo = thread * chunk;
                     let pos_hi = ((thread + 1) * chunk).min(n_states);
@@ -1123,7 +1123,7 @@ mod wide {
                                         index.shifted[right2][right_shift2],
                                     ];
                                     if let Some(point_indices) =
-                                        lift128(fast, base, &codes, target, &mut relation_check_ns)
+                                        lift128(fast, domain, &codes, target, &mut relation_check_ns)
                                     {
                                         let position = pos_lo + offset;
                                         sender
@@ -1212,6 +1212,14 @@ mod wide {
         columns: usize,
     }
 
+    // Four-sum extraction needs point coordinates and x fibers, but no
+    // subgroup-order-sized labels. Keep that boundary explicit so the
+    // primary 81-bit arm can reuse the index without u64 rank arithmetic.
+    struct PointDomain128<'a> {
+        points: &'a [FastPoint128],
+        by_x: &'a HashMap<u128, Vec<usize>>,
+    }
+
     fn build_index128(
         gf: &Gf2_128,
         basis: &NormalBasis128,
@@ -1274,23 +1282,23 @@ mod wide {
 
     fn lift128(
         fast: &FastBinaryCurve128,
-        base: &Base128,
+        domain: &PointDomain128<'_>,
         codes: &[u128; 4],
         target: FastPoint128,
         relation_check_ns: &mut u128,
     ) -> Option<[usize; 4]> {
         let choices: Vec<&Vec<usize>> = codes
             .iter()
-            .map(|code| base.by_x.get(code))
+            .map(|code| domain.by_x.get(code))
             .collect::<Option<_>>()?;
         for &a in choices[0] {
             for &b in choices[1] {
-                let ab = fast.add(base.points[a], base.points[b]);
+                let ab = fast.add(domain.points[a], domain.points[b]);
                 for &c in choices[2] {
-                    let abc = fast.add(ab, base.points[c]);
+                    let abc = fast.add(ab, domain.points[c]);
                     for &d in choices[3] {
                         let check_started = Instant::now();
-                        let matches = fast.add(abc, base.points[d]) == target;
+                        let matches = fast.add(abc, domain.points[d]) == target;
                         *relation_check_ns += check_started.elapsed().as_nanos();
                         if matches {
                             return Some([a, b, c, d]);
@@ -1308,7 +1316,7 @@ mod wide {
         basis: &NormalBasis128,
         solver: &S3Solver128,
         index: &Index128,
-        base: &Base128,
+        domain: &PointDomain128<'_>,
         target: FastPoint128,
         start: usize,
         relation_check_ns: &mut u128,
@@ -1344,7 +1352,7 @@ mod wide {
                             index.shifted[right2][right_shift2],
                         ];
                         if let Some(point_indices) =
-                            lift128(fast, base, &codes, target, relation_check_ns)
+                            lift128(fast, domain, &codes, target, relation_check_ns)
                         {
                             return Some(Relation128 {
                                 point_indices,
@@ -1358,6 +1366,110 @@ mod wide {
             }
         }
         None
+    }
+
+    /// Source-ready point-only four-sum gate for a replayed wide base. It
+    /// deliberately never imports labels into u64; the 81-bit primary rows
+    /// must be built by the separate exact rank adapter after this witness
+    /// has been independently re-added in the original group.
+    pub(super) fn probe_checked_four_sum(
+        curve: &KoblitzCurve,
+        points: &[BinaryPoint],
+        representatives: &[BinaryPoint],
+        target: &BinaryPoint,
+        unordered_pairs: bool,
+        max_candidate_states: usize,
+    ) -> Result<Value, String> {
+        let n = curve.n as usize;
+        if !(65..=127).contains(&n) || n % 2 == 0 || curve.curve.m as usize != n {
+            return Err("compact wide four-sum requires an odd 65..=127-bit field".into());
+        }
+        let columns = representatives.len();
+        if columns == 0 || columns > u16::MAX as usize {
+            return Err("compact wide orbit-column count is out of range".into());
+        }
+        let expected_points = columns
+            .checked_mul(n)
+            .and_then(|value| value.checked_mul(2))
+            .ok_or("factor-base size overflow")?;
+        if points.len() != expected_points {
+            return Err("factor-base point count is not 2n per orbit column".into());
+        }
+        if *target == BinaryPoint::Infinity || !curve.curve.is_on_curve(target) {
+            return Err("compact four-sum requires an affine on-curve target".into());
+        }
+        let pair_count = if unordered_pairs {
+            columns
+                .checked_mul(columns + 1)
+                .map(|value| value / 2)
+        } else {
+            columns.checked_mul(columns)
+        }
+        .ok_or("pair-state count overflow")?;
+        let candidate_states = n.checked_mul(pair_count).ok_or("state count overflow")?;
+        if max_candidate_states == 0 || candidate_states > max_candidate_states {
+            return Err("compact index state cap exceeded before allocation".into());
+        }
+        let fast = FastBinaryCurve128::new(&curve.curve.irreducible, curve.a as u128)
+            .ok_or("wide curve construction failed")?;
+        let convert = |point: &BinaryPoint| -> Result<FastPoint128, String> {
+            if !curve.curve.is_on_curve(point) {
+                return Err("factor-base point is off curve".into());
+            }
+            match point {
+                BinaryPoint::Affine { x, y } => Ok(Some((fast.word(x), fast.word(y)))),
+                BinaryPoint::Infinity => Err("factor-base identity point".into()),
+            }
+        };
+        let fast_points: Vec<_> = points.iter().map(convert).collect::<Result<_, _>>()?;
+        let reps: Vec<u128> = representatives
+            .iter()
+            .map(|point| convert(point).map(|p| p.unwrap().0))
+            .collect::<Result<_, _>>()?;
+        let target_fast = convert(target)?;
+        let mut by_x: HashMap<u128, Vec<usize>> = HashMap::new();
+        for (index, point) in fast_points.iter().enumerate() {
+            by_x.entry(point.unwrap().0).or_default().push(index);
+        }
+        let domain = PointDomain128 {
+            points: &fast_points,
+            by_x: &by_x,
+        };
+        let gf = Gf2_128::new(&curve.curve.irreducible);
+        let basis = NormalBasis128::new(&gf);
+        let solver = S3Solver128::new(&gf, gf.from_element(&curve.curve.b));
+        let index = build_index128(&gf, &basis, &solver, &reps, unordered_pairs);
+        let mut relation_check_ns = 0;
+        let witness = extract128(
+            &gf, &fast, &basis, &solver, &index, &domain, target_fast, 0,
+            &mut relation_check_ns,
+        );
+        if let Some(relation) = &witness {
+            let mut sum = BinaryPoint::Infinity;
+            for &index in &relation.point_indices {
+                sum = curve.add(&sum, &points[index]);
+            }
+            if sum != *target {
+                return Err("compact witness failed independent group replay".into());
+            }
+        }
+        Ok(json!({
+            "schema":"compact-four-sum-point-probe/v1",
+            "status":if witness.is_some() { "HIT" } else { "MISS" },
+            "n":n,
+            "curve_a":curve.a,
+            "orbit_columns":columns,
+            "unordered_pairs":unordered_pairs,
+            "candidate_states":candidate_states,
+            "regular_states":index.states.len(),
+            "root_table_entries":index.table.len,
+            "point_indices":witness.as_ref().map(|relation| relation.point_indices),
+            "x_codes":witness.as_ref().map(|relation| relation.x_codes.map(|x| x.to_string())),
+            "probes":witness.as_ref().map(|relation| relation.probes),
+            "group_verified":witness.as_ref().map(|_| true),
+            "rank_stage_executed":false,
+            "total_index_calculus_runtime_ms":Value::Null
+        }))
     }
 
     /// Frobenius-closed signed-orbit base from a deterministic public
@@ -1574,6 +1686,10 @@ mod wide {
             by_x,
             columns: representatives.len(),
         };
+        let domain = PointDomain128 {
+            points: &base.points,
+            by_x: &base.by_x,
+        };
         let reps: Vec<u128> = representatives
             .iter()
             .map(|p| p.expect("affine representative")[0])
@@ -1651,6 +1767,7 @@ mod wide {
                     let solver = &solver;
                     let index = &index;
                     let base = &base;
+                    let domain = &domain;
                     let generator = &generator;
                     let representatives = &representatives;
                     handles.push(scope.spawn(move || {
@@ -1674,7 +1791,7 @@ mod wide {
                                     basis,
                                     solver,
                                     index,
-                                    base,
+                                    domain,
                                     point,
                                     start,
                                     &mut thread_relation_check_ns,
@@ -1745,7 +1862,7 @@ mod wide {
                     &basis,
                     &solver,
                     &index,
-                    &base,
+                    &domain,
                     point,
                     (rank_seed >> 20) as usize,
                     &mut unused_relation_check_ns,
@@ -1820,7 +1937,7 @@ mod wide {
                 &basis,
                 &solver,
                 &index,
-                &base,
+                &domain,
                 target,
                 start,
                 target_threads,
@@ -1977,6 +2094,114 @@ mod wide {
     }
 
     #[cfg(test)]
+    #[test]
+    fn wide_compact_extractor_lifts_public_four_sums_on_small_curve() {
+        // Exercise the same u128 index/extractor used by the pinned N83
+        // diagnostic, without spending the N83 pilot budget. The group
+        // equation is checked again with the independent generic arithmetic.
+        let kc = KoblitzCurve::new(0, 71).unwrap();
+        let fast = FastBinaryCurve128::new(&kc.curve.irreducible, 0).unwrap();
+        let gf = Gf2_128::new(&kc.curve.irreducible);
+        let b = gf.from_element(&kc.curve.b);
+        let (points, labels, representatives, _) =
+            construct_base128(&fast, &kc, b, 2, kc.subgroup_order.to_u64().unwrap());
+        let mut by_x: HashMap<u128, Vec<usize>> = HashMap::new();
+        for (index, point) in points.iter().enumerate() {
+            by_x.entry(point.unwrap().0).or_default().push(index);
+        }
+        let base = Base128 {
+            points,
+            labels,
+            by_x,
+            columns: representatives.len(),
+        };
+        let domain = PointDomain128 {
+            points: &base.points,
+            by_x: &base.by_x,
+        };
+        let reps: Vec<_> = representatives.iter().map(|p| p.unwrap()[0]).collect();
+        let basis = NormalBasis128::new(&gf);
+        let solver = S3Solver128::new(&gf, b);
+        let to_general = |point: FastPoint128| match point {
+            None => BinaryPoint::Infinity,
+            Some((x, y)) => BinaryPoint::Affine {
+                x: F2mElement::from_hex(&format!("{x:x}"), 71),
+                y: F2mElement::from_hex(&format!("{y:x}"), 71),
+            },
+        };
+        let generic_points: Vec<_> = base.points.iter().copied().map(to_general).collect();
+        let generic_reps: Vec<_> = representatives
+            .iter()
+            .copied()
+            .map(|point| to_general(point.map(|[x, y]| (x, y))))
+            .collect();
+        let mut checked = 0;
+        for unordered in [false, true] {
+            let index = build_index128(&gf, &basis, &solver, &reps, unordered);
+            assert!(!index.states.is_empty());
+            for trial in 0..12 {
+                let chosen = [
+                    (7 * trial + 0) % base.points.len(),
+                    (11 * trial + 2) % base.points.len(),
+                    (13 * trial + 4) % base.points.len(),
+                    (17 * trial + 6) % base.points.len(),
+                ];
+                let mut target = None;
+                for &point in &chosen {
+                    target = fast.add(target, base.points[point]);
+                }
+                if target.is_none() {
+                    continue;
+                }
+                if trial == 0 {
+                    let checked_probe = super::probe_checked_four_sum(
+                        &kc,
+                        &generic_points,
+                        &generic_reps,
+                        &to_general(target),
+                        unordered,
+                        1_000,
+                    )
+                    .unwrap();
+                    assert_eq!(checked_probe["status"], "HIT");
+                    assert_eq!(checked_probe["group_verified"], true);
+                    assert_eq!(
+                        checked_probe["candidate_states"],
+                        if unordered { 213 } else { 284 }
+                    );
+                    assert!(super::probe_checked_four_sum(
+                        &kc,
+                        &generic_points,
+                        &generic_reps,
+                        &to_general(target),
+                        unordered,
+                        1,
+                    )
+                    .is_err());
+                }
+                let mut check_ns = 0;
+                let witness = extract128(
+                    &gf, &fast, &basis, &solver, &index, &domain, target,
+                    trial, &mut check_ns,
+                )
+                .unwrap_or_else(|| panic!("planted four-sum missed: unordered={unordered} trial={trial}"));
+                let mut sum = BinaryPoint::Infinity;
+                for (summand, &point_index) in witness.point_indices.iter().enumerate() {
+                    let point = to_general(base.points[point_index]);
+                    let BinaryPoint::Affine { x, .. } = &point else {
+                        panic!("factor-base point must be affine")
+                    };
+                    assert_eq!(x.to_biguint(), BigUint::from(witness.x_codes[summand]));
+                    sum = kc.add(&sum, &point);
+                }
+                assert_eq!(sum, to_general(target));
+                checked += 1;
+            }
+        }
+        assert!(checked >= 16, "enough nonidentity public four-sum controls");
+    }
+
+    #[cfg(test)]
     mod wide_json_tests {
         use super::{decode_pair128, decode_point_list128, encode_pair128};
         use serde_json::json;
@@ -2010,6 +2235,24 @@ mod wide {
             );
         }
     }
+}
+
+pub(super) fn probe_checked_four_sum(
+    curve: &KoblitzCurve,
+    points: &[BinaryPoint],
+    representatives: &[BinaryPoint],
+    target: &BinaryPoint,
+    unordered_pairs: bool,
+    max_candidate_states: usize,
+) -> Result<Value, String> {
+    wide::probe_checked_four_sum(
+        curve,
+        points,
+        representatives,
+        target,
+        unordered_pairs,
+        max_candidate_states,
+    )
 }
 
 fn legacy_fixture_entrypoint() {

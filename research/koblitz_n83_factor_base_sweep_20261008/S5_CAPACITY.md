@@ -1,10 +1,11 @@
 # Balanced-S5 and compact-orbit transfer gate for N83
 
-This is a source and capacity audit on study-branch revision
+The initial source and capacity audit used study-branch revision
 `c26ae1e3953823436cb0143d8eb77261cd784783`, after the one-hour pilot.
-It performs no N83 index construction, relation search, rank run, or cold
-comparison. The primary objective remains the complete single-target cold
-runtime on the pinned `a=0` curve.
+This file also records the subsequent point-only adapter on the study branch.
+It includes no retained N83 index construction, relation search, rank run,
+or cold comparison. The primary objective remains the complete single-target
+cold runtime on the pinned `a=0` curve.
 
 ## Existing implementations and the exact mismatch
 
@@ -31,24 +32,39 @@ checks a supplied header's modulus against it. It also converts the subgroup
 order, Frobenius eigenvalue and rank rows to `u64`. The study's primary
 `a=0` subgroup order is `2417851639230796216685689` (81 bits), so its
 existing rank and log path cannot run that arm. A diagnostic `a=1` port
-would still need an explicit field-basis isomorphism or a pinned-curve
-constructor, an object/label importer and independent replay. The existing
-runner's historical online timing excludes reusable preparation and is not
-the cold objective here.
+of that upstream runner would need an explicit field-basis isomorphism or a
+pinned-curve constructor, an object/label importer and independent replay.
+The existing runner's historical online timing excludes reusable
+preparation and is not the cold objective here.
+
+The study-local `compact_cold.rs` already supplies a separate pinned-field
+adapter for the diagnostic `a=1` arm: it uses the study polynomial and
+reconstructs the retained public-x base before its wide index. Its three
+600-second diagnostic attempts ended at their caps. This adapter still
+keeps subgroup labels and rank rows in `u64`, so it does not transfer the
+primary 81-bit arm. The point-only `primary-s3-probe` CLI now selects each
+retained primary policy/seed/size through `primary_adapter.rs`. It
+constructs the same wide compact index under a state cap and a mandatory
+Linux cgroup memory cap,
+and independently re-adds any returned witness in the generic curve
+group. It has not been run on a retained N83 base; an external wall
+supervisor remains required before that experiment.
 
 The current study branch has a separate exact wide relation-rank and
-factor-log gate, but the compact-orbit producer is not wired to it. A
-transfer should first bind the pinned modulus, generator, subgroup,
-Frobenius labels and stored point coordinates; then replay compact-index
-witnesses as group equations and wide modular rows on independent small
-fixtures. A retained N83 construction under a memory/wall guard and a
+factor-log gate. The new point-only probe does not yet feed it rows. A
+public `a=0`, n=71 small-order fixture exercises both ordered and
+Frobenius-unordered index modes on planted four-sums, checks every returned
+point sum with generic curve arithmetic, and rejects a state cap before
+allocation. That fixture validates checked cases, not N83 yield or index
+capacity. A retained K=64 construction under a memory/wall guard and a
 natural relation/rank receipt are later gates. A full cold comparison comes
 only after all phases, including failed work and I/O, are charged.
 
 ## Source-derived index size, not a timing projection
 
-For `K` full signed-Frobenius columns, `build_index128` tries exactly
-`83 K^2` ordered `(left,right,relative)` states. Let `S` be the number of
+For `K` full signed-Frobenius columns, ordered `build_index128` tries exactly
+`83 K^2` `(left,right,relative)` states; the study-local unordered option
+tries `83 K(K+1)/2`. Let `S` be the number of
 states for which the S3 root solver returns roots. The source retains one
 `State128` per such state and allocates a `RootTable128` with
 `C=max(16,next_power_of_two(4S))` slots. On this 64-bit build, a direct
@@ -94,8 +110,8 @@ context for the source audit, not an observation for a study candidate.
 The frozen v1/v2 `compact_s3_four_sum` dispositions remain recipes. Do not
 rank the stored 54 bases by the historical n=83 online result, by the S5
 half-regular illustration, or by construction speed. The smallest useful
-next producer gate is a pinned-field, wide-order, replay-bound compact-index
-adapter with a guarded K=64 construction; K=1,182 and larger need an
+next empirical gate is a wall-supervised, retained K=64 primary point probe,
+followed by an exact wide relation-row/rank bridge; K=1,182 and larger need an
 explicit memory strategy before a construction attempt. The balanced-S5
 SAT example is an alternative source of four-summand algebra and domain
 constraints, not a directly executable N83 backend.
