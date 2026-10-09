@@ -1,0 +1,26 @@
+{
+  "count": 1,
+  "field_degree": 53,
+  "fixtures": [
+    {
+      "fixture_scalar": "756040932823",
+      "label": "T001",
+      "public_point": [
+        4183009106082000,
+        6075301077766888
+      ],
+      "scalar_derivation_sha256": "f25066d46ece2f73922874481b54d3e2afb5ccb52b165a8d284a7cc52131f166",
+      "workload_id": null
+    }
+  ],
+  "generator": [
+    198217578752339,
+    7929897206038174
+  ],
+  "kind": "s3_pair_public_target_fixtures_v1",
+  "koblitz_a": 0,
+  "scalar_law": "1 + int_be(SHA256('s3-pair-target-v1:' || seed_label || ':' || u32be(n) || u32be(index))) mod (r-1)",
+  "seed_label": "modal-warmup-v1",
+  "solver_input_policy": "only each public_target.json point is passed to the solver; fixture_scalar is for independent checking after measurement",
+  "subgroup_order": "21044858204113"
+}

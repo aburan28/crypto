@@ -1,0 +1,84 @@
+{
+  "binary_sha256": {
+    "candidate": "c4ff99ace090551747b2a1083b9546754e0ce1814f309a47e46d2ab0bd132ca7",
+    "prepared": "3e815ab0d48210f9d739af69fc13571d40501cae31973b7ab2c69feef9228d3f"
+  },
+  "captured_unix_ns_after_panel": 1791525318553004000,
+  "cargo": {
+    "argv": [
+      "cargo",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "cargo 1.93.1 (Homebrew)"
+  },
+  "cargo_lock_sha256": "4ddc5ef76119493b41352c64a551fbd3fea3b5789644949ee775975b38150bca",
+  "cpu_affinity_policy": "unverified_host_shared",
+  "frequency_policy": "not_fixed",
+  "host_exclusivity_verified": false,
+  "hw_logicalcpu": {
+    "argv": [
+      "sysctl",
+      "-n",
+      "hw.logicalcpu"
+    ],
+    "exit_code": 1,
+    "stderr": "sysctl: sysctl fmt -1 1024 1: Operation not permitted",
+    "stdout": ""
+  },
+  "hw_model": {
+    "argv": [
+      "sysctl",
+      "-n",
+      "hw.model"
+    ],
+    "exit_code": 1,
+    "stderr": "sysctl: sysctl fmt -1 1024 1: Operation not permitted",
+    "stdout": ""
+  },
+  "hw_physicalcpu": {
+    "argv": [
+      "sysctl",
+      "-n",
+      "hw.physicalcpu"
+    ],
+    "exit_code": 1,
+    "stderr": "sysctl: sysctl fmt -1 1024 1: Operation not permitted",
+    "stdout": ""
+  },
+  "kind": "s3_prepared_local_environment_v1",
+  "machine": "arm64",
+  "memory_policy": "unverified",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "run_level_psi_irq_steal_counters": null,
+  "rustc": {
+    "argv": [
+      "rustc",
+      "--version",
+      "--verbose"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8"
+  },
+  "sage_launcher_startup_env": {
+    "LD": "/usr/bin/ld"
+  },
+  "sage_launcher_startup_note": "Sage native/source verification passed; LD uses the default linker and skips Sage upstream deprecated ld_classic detection that stalled on this host.",
+  "source_commit": "833ef86191947ba8e4def56a78ee6c51a4ea0ff2",
+  "source_sha256": {
+    "candidate": "edb605e0a65efb143116c02b918302cd25190b098d3542f4b0b64788d1af7d65",
+    "prepared": "44754357600a412d00ea3e1b4a8a5404a1e8bc733a4aac5ac779b1af3eb420d7"
+  },
+  "strict_host_isolation_receipt": null,
+  "timing_status": "exploratory",
+  "uname": [
+    "Darwin",
+    "Adams-MacBook-Pro.local",
+    "25.6.0",
+    "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041",
+    "arm64",
+    "arm"
+  ]
+}
