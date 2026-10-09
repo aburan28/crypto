@@ -60,6 +60,8 @@ An optional unordered-pair index reduces duplicate summand-pair states under Fro
 
 `SUPPORT_MOMENTS.md` proves an exact first-moment upper bound for full smooth unordered m-summand relations with repetition, using each verified base's distinct point count and exact subgroup order. `pilot-01/support-moments.json` retains 30 exact integer/fraction cases for both curve arms, K=64/256/600 and m=2..6. This is a uniform-target mathematical ceiling, not a rate estimate for the fixed public fixtures or a solver benchmark. At primary a=0, K=600, the m=4 ceiling is **1.695987e-6** and the m=5 ceiling is **0.03378543**; at m=6 the bound is vacuous. Thus the current small primary bases offer little full-smooth coverage at m=4/5 under the uniform-target model, while m=6 still needs a verified feasible solver. Splitting, Gray/FES and symmetry do not enlarge the fixed full-smooth sumset; double-large-prime partials require their own graph/rank model. None of these bounds identifies a total-runtime winner.
 
+`RANK_QUERY_SCREEN.md` and `pilot-01/rank-query-screen.json` apply that exact multiset count to a separate one-row rank-query model. For uniform whole-subgroup query targets and at most one full-smooth row per query, no independence assumption is needed to show `Pr(rank >= K) <= min(1, q min(M,r)/(rK))` after `q >= K` queries. At primary a=0 K=600, the upper bound cannot reach one half until at least **176,888,106** four-summand queries or **8,880** five-summand queries. The six-summand bound is vacuous and reduces to `q >= K`. These are necessary query counts only: they do not measure solver time, imply row independence or cover biased queries, multirow solvers and large-prime partials. The current cold driver has not demonstrated uniform full-width sampling on the primary arm.
+
 ## Validation and preserved failures
 
 The release profile uses optimization level 3, 256 codegen units and four Cargo build jobs. Toolchain and host facts are in `host.json`; the resolved dependency lockfile is retained in `verification/Cargo.lock`.
@@ -71,9 +73,15 @@ The release profile uses optimization level 3, 256 codegen units and four Cargo 
 | Integrated export/probe/cold example release tests | 12 passed, zero failed | `verification/export-cold-tests-final.log` |
 | Relevant boundary autolab Python suite | 16 passed | `verification/boundary-tests.log` |
 | Exact support screen small-group controls | 2 passed | `verification/support-moments-tests.log` |
+| Post-screen release library recheck | 2,235 passed, 94 ignored | `verification/lib-tests-rank-screen-escalated.log` |
+| Post-screen touched example recheck | 12 passed | `verification/example-tests-rank-screen.log` |
+| Rank-query small-group, threshold and receipt checks | 3 passed | `verification/rank-query-tests.log`, `verification/rank-query-replay.log` |
+| Post-screen support and boundary Python rechecks | 2 and 16 passed | `verification/support-moments-tests-rank-screen.log`, `verification/boundary-tests-rank-screen.log` |
 | Native finite-grid audit | All 45,360,000 dispositions accounted for | `verification/design-audit.log`, `design.json` |
 
 Earlier build and test outcomes remain retained. Initial dependency resolution failed under restricted networking; `--locked` could not be used before this older baseline resolved a lockfile. Some build attempts were interrupted during baseline recovery. The first complete isolated library run had two loopback-network permission failures. The next run passed those tests and failed the pre-existing randomized SQIsign wrong-message assertion. Its focused replay passed; the subsequent full suite passed. The SQIsign source is unchanged, and the earlier failure remains visible rather than being relabeled as a pass.
+
+The post-rank-screen sandboxed full suite again reached the same two loopback bind denials (2,233 passes, 2 failures; `verification/lib-tests-rank-screen.log`). Rerunning the required full suite with loopback access passed all 2,235 tests (`verification/lib-tests-rank-screen-escalated.log`). This recheck changed no Rust source or factor-base object.
 
 Example tests exercise finite coverage and ordinal bounds, the same complete set under binary/Gray enumeration, field encoding rejection, separate subgroup moduli, generic arithmetic replay, corrupted compressed bytes, semantic coefficient corruption with recomputed byte hashes, and point-only relation discovery, negative coverage and budget censoring.
 

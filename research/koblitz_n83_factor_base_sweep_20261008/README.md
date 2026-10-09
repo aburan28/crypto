@@ -51,6 +51,8 @@ Ordered-pair K=256 and K=64, plus exploratory unordered-pair K=64, each reached 
 
 `SUPPORT_MOMENTS.md` and `pilot-01/support-moments.json` add a post-pilot exact support-count screen for every retained K and m=2..6. Its uniform-target Markov ceilings concern the existence of full smooth decompositions, not the fixed public fixtures or solver runtime. At the primary a=0 K=600 base size, the m=4 ceiling is about 1.70e-6 and m=5 is about 0.0338; m=6 becomes vacuous. This directs future full-smooth work toward arity/size regimes with non-negligible potential coverage, while the actual cost of the needed solver and large-prime graph variants remains unmeasured.
 
+`RANK_QUERY_SCREEN.md` and `pilot-01/rank-query-screen.json` derive a further necessary condition for a uniform-target oracle returning at most one full-smooth row per query. Even allowing dependent queries, the primary K=600 four-summand base requires at least 176,888,106 queries before the first-moment bound can permit a 50% chance of 600 rank rows; five summands require at least 8,880. These are exact query-count gates under the stated model, not predicted completion times. They do not apply to biased sampling, multirow solvers or large-prime partials. The current capped driver has not established uniform full-width primary sampling.
+
 ## Subsequent total-runtime experiment
 
 Freeze the exact public target corpora, resource envelope and native backend versions before the first relation measurement. Use disjoint tuning and holdout targets, with validation-only known-answer scalars kept out of solver input. Keep one result per independent one-target workload. Preserve every phase cost, operation unit, cap, failed attempt, OOM and timeout. Baseline and candidate receive the same target and budget; randomize/interleave their order with A/A controls. Require at least five paired rounds and a paired 95% interval outside the measured noise floor for a runtime improvement. Run the admitted measurements on an L2-capable host; local macOS L0 timings cannot establish that comparison.
@@ -70,6 +72,8 @@ target/release/examples/koblitz_n83_factor_base_export pilot research/koblitz_n8
 target/release/examples/koblitz_n83_factor_base_export replay research/koblitz_n83_factor_base_sweep_20261008/pilot-01
 python3 research/koblitz_n83_factor_base_sweep_20261008/support_moments.py
 python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_support_moments.py -v
+python3 research/koblitz_n83_factor_base_sweep_20261008/rank_query_screen.py
+python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_rank_query_screen.py -v
 target/release/examples/koblitz_n83_factor_base_export probes research/koblitz_n83_factor_base_sweep_20261008/pilot-01 600
 target/release/examples/koblitz_n83_factor_base_export upload research/koblitz_n83_factor_base_sweep_20261008/pilot-01
 target/release/examples/koblitz_n83_factor_base_export cold research/koblitz_n83_factor_base_sweep_20261008/pilot-01 64 600
