@@ -78,14 +78,11 @@ use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
-    from_fast_point, projected_signed_orbit_count, restrict_factor_base_to_orbits,
-    saturate_factor_base_two_torsion, span_f2, to_fast_point, FactorBaseDomain,
-    build_frobenius_factor_base, build_frobenius_factor_base_from_divisor,
-    build_frobenius_union_factor_base, build_standard_subspace_factor_base,
-    build_subgroup_orbit_factor_base, cofactor_project_factor_base, groebner_decompose,
-    invariant_factors, projected_signed_orbit_count, restrict_factor_base_to_orbits,
-    saturate_factor_base_two_torsion, span_f2, top_factor_indices, FactorBaseDomain,
-    FrobeniusFactorBase, KoblitzCurve, PairSumTable,
+    build_standard_subspace_factor_base, build_subgroup_orbit_factor_base,
+    cofactor_project_factor_base, from_fast_point, groebner_decompose, invariant_factors,
+    projected_signed_orbit_count, restrict_factor_base_to_orbits,
+    saturate_factor_base_two_torsion, span_f2, to_fast_point, top_factor_indices,
+    FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
 use super::koblitz_fast_arith::FastBinaryCurve;
 
