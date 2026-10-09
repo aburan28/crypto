@@ -46,6 +46,16 @@ fn register(registry: &Path, curves: &[Value], source: &str) {
     for c in curves {
         let slug = c["name"].as_str().unwrap();
         if held.iter().any(|s| s == slug) {
+            let existing: Value = serde_json::from_str(
+                entries
+                    .iter()
+                    .find(|r| serde_json::from_str::<Value>(r.get()).unwrap()["slug"] == slug)
+                    .unwrap()
+                    .get(),
+            )
+            .unwrap();
+            assert!(existing["representations"].as_array().unwrap().iter().any(|r|r["ec1"]==c["target_ec1"] && r["curve_uid"]==c["target_curve_uid"]),
+                "existing target model needs its mapped-generator representation registered");
             continue;
         }
         let p = big(&c["p"]);
@@ -151,7 +161,7 @@ fn scene(stats: &[Stats], replay: &Value) -> Vec<Op> {
         let y = 105. + i as f64 * 190.;
         let records = replay["records"].as_array().unwrap();
         let root = records.iter().find(|r| {
-                r["ell"].as_u64() == s.max
+            r["ell"].as_u64() == s.max
                 && r["source_icv1"].as_str().unwrap().contains(if i == 0 {
                     "fp192"
                 } else {
@@ -482,6 +492,11 @@ fn main() {
     let evidence = study.join("evidence-v2");
     let search = load(&evidence.join("search.json"));
     let replay = load(&evidence.join("replay.json"));
+    assert_eq!(replay["status"], "PASS");
+    for record in replay["records"].as_array().unwrap() {
+        assert_eq!(record["status"], "PASS");
+        assert_eq!(record["exact_rational_map_check"], "PASS");
+    }
     let curves = load(&evidence.join("curves.json"));
     let registry = load(Path::new(&args[1]));
     let mut stats = vec![];
@@ -522,11 +537,27 @@ fn main() {
             .filter(|a| a["receipt"]["status"] == "TIMEOUT")
             .count();
         let fail = attempts.len() - pass - timeouts;
-        let max = attempts
+        let certified: Vec<_> = replay["records"]
+            .as_array()
+            .unwrap()
             .iter()
-            .filter(|a| a["receipt"]["status"] == "PASS")
-            .map(|a| a["ell"].as_u64().unwrap())
-            .max();
+            .filter(|r| &r["source_icv1"] == slug)
+            .collect();
+        assert_eq!(
+            certified.len(),
+            pass * 2,
+            "every completed construction requires two independently certified maps"
+        );
+        for attempt in attempts.iter().filter(|a| a["receipt"]["status"] == "PASS") {
+            let degree_records: Vec<_> = certified
+                .iter()
+                .filter(|r| r["ell"] == attempt["ell"])
+                .collect();
+            assert_eq!(degree_records.len(), 2);
+            assert!(degree_records.iter().any(|r| r["index"] == 0));
+            assert!(degree_records.iter().any(|r| r["index"] == 1));
+        }
+        let max = certified.iter().map(|r| r["ell"].as_u64().unwrap()).max();
         stats.push(Stats {
             name: name.into(),
             source,
@@ -539,7 +570,7 @@ fn main() {
             timeouts,
             fail,
             max,
-            maps: pass * 2,
+            maps: certified.len(),
         });
     }
     register(
