@@ -14,6 +14,7 @@ use num_traits::{One, Zero};
 
 use crate::binary_ecc::curve::point_neg;
 use crate::binary_ecc::{BinaryPoint, F2mElement};
+use crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n;
 use crate::cryptanalysis::koblitz_index_calculus::{point_key, FrobeniusFactorBase, KoblitzCurve};
 use crate::utils::mod_inverse;
 
@@ -91,6 +92,13 @@ impl WideFullRelation {
         }
         Ok(row)
     }
+}
+
+/// A full-rank solution whose orbit logs and target log passed group replay.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct WideSolvedLogs {
+    pub column_logs: Vec<BigUint>,
+    pub target_log: BigUint,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -298,6 +306,92 @@ impl<'a> WideLargePrimeEliminator<'a> {
         stats.pivot_rows = self.reducer.pivots.len();
         stats.pivot_reductions = self.reducer.reductions;
         stats
+    }
+
+    /// Solve completed graph rows in the signed-orbit basis used by this
+    /// eliminator. Every row is replayed before entering the matrix; every
+    /// recovered orbit log and the target log is checked in the group.
+    /// Missing rank returns `None`, including when Gaussian elimination can
+    /// assign arbitrary values to free columns.
+    pub fn solve_completed_full_rank(
+        &self,
+        relations: &[WideFullRelation],
+    ) -> Result<Option<WideSolvedLogs>, &'static str> {
+        let orbit_count = self.base.signed_orbits.len();
+        let columns = orbit_count + 1;
+        if relations.len() < columns {
+            return Ok(None);
+        }
+        let modulus = &self.reducer.modulus;
+        let mut matrix = Vec::with_capacity(relations.len());
+        let mut rhs = Vec::with_capacity(relations.len());
+        for relation in relations {
+            if relation.coef_a >= *modulus
+                || relation.coef_b >= *modulus
+                || relation.small.values().any(|value| value >= modulus)
+                || relation
+                    .source_coeffs
+                    .values()
+                    .any(|value| value >= modulus)
+            {
+                return Err("completed row is not reduced modulo subgroup order");
+            }
+            self.verify_row(&SparseRow {
+                coef_a: relation.coef_a.clone(),
+                coef_b: relation.coef_b.clone(),
+                small: relation.small.clone(),
+                large: BTreeMap::new(),
+                sources: relation.source_coeffs.clone(),
+            })?;
+            let mut row = relation.dense_row(orbit_count)?;
+            row.push(sub_mod(&BigUint::zero(), &relation.coef_b, modulus));
+            matrix.push(row);
+            rhs.push(relation.coef_a.clone());
+        }
+        let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus)
+            .ok_or("completed-row matrix has a noninvertible pivot")?;
+        for (row, value) in matrix.iter().zip(&rhs) {
+            if row.iter().all(BigUint::is_zero) && !value.is_zero() {
+                return Err("completed-row matrix is inconsistent");
+            }
+        }
+        // The generic eliminator returns values for free columns. Require an
+        // actual unit pivot for each column before accepting its solution.
+        let mut unit_pivots = vec![false; columns];
+        for row in &matrix {
+            let mut nonzero_column = None;
+            for (column, value) in row.iter().enumerate() {
+                if !value.is_zero() {
+                    if nonzero_column.is_some() {
+                        nonzero_column = None;
+                        break;
+                    }
+                    nonzero_column = Some(column);
+                }
+            }
+            if let Some(column) = nonzero_column {
+                unit_pivots[column] |= row[column] == BigUint::one();
+            }
+        }
+        if unit_pivots.iter().any(|&pivot| !pivot) {
+            return Ok(None);
+        }
+        for (orbit, log) in solution[..orbit_count].iter().enumerate() {
+            let index = *self.base.signed_orbits[orbit]
+                .first()
+                .ok_or("empty signed orbit")?;
+            if self.curve.mul(self.curve.generator(), log) != self.base.points[index] {
+                return Err("completed-row orbit log failed group replay");
+            }
+        }
+        let target_log = solution[orbit_count].clone();
+        if self.curve.mul(self.curve.generator(), &target_log) != self.target {
+            return Err("completed-row target log failed group replay");
+        }
+        Ok(Some(WideSolvedLogs {
+            column_logs: solution[..orbit_count].to_vec(),
+            target_log,
+        }))
     }
 
     fn canonical_residual(&self, point: &BinaryPoint) -> Result<(PointKey, BigUint), &'static str> {
@@ -650,10 +744,55 @@ mod tests {
             full.dense_row(base.unknowns()).unwrap().len(),
             base.unknowns()
         );
+        assert_eq!(base.unknowns(), 1);
+        assert!(graph
+            .solve_completed_full_rank(&[full.clone()])
+            .unwrap()
+            .is_none());
+        let FeedOutcome::Full(direct) = graph
+            .feed(PartialCandidate {
+                source_id: 4,
+                coef_a: BigUint::one(),
+                coef_b: BigUint::zero(),
+                small_point_indices: vec![base.index_map()[&point_key(curve.generator())]],
+                residual_points: vec![],
+            })
+            .unwrap()
+        else {
+            panic!("a full point relation must complete immediately");
+        };
+        let solution = graph
+            .solve_completed_full_rank(&[direct.clone(), full.clone()])
+            .unwrap()
+            .expect("independent full rows must solve both logs");
+        assert_eq!(solution.target_log, BigUint::from(17u32));
+        assert_eq!(solution.column_logs.len(), 1);
+        let FeedOutcome::Full(dependent) = graph
+            .feed(PartialCandidate {
+                source_id: 5,
+                coef_a: BigUint::from(2u32),
+                coef_b: BigUint::zero(),
+                small_point_indices: vec![
+                    base.index_map()[&point_key(curve.generator())],
+                    base.index_map()[&point_key(curve.generator())],
+                ],
+                residual_points: vec![],
+            })
+            .unwrap()
+        else {
+            panic!("a second full point relation must complete immediately");
+        };
+        assert!(graph
+            .solve_completed_full_rank(&[direct.clone(), dependent])
+            .unwrap()
+            .is_none());
+        let mut corrupt = full.clone();
+        corrupt.coef_a = (&corrupt.coef_a + BigUint::one()) % r;
+        assert!(graph.solve_completed_full_rank(&[direct, corrupt]).is_err());
         let stats = graph.stats();
-        assert_eq!(stats.accepted_candidates, 3);
+        assert_eq!(stats.accepted_candidates, 5);
         assert_eq!(stats.full_from_partials, 1);
-        assert_eq!(stats.full_rows, 1);
+        assert_eq!(stats.full_rows, 3);
         assert_eq!(stats.pivot_rows, 2);
         assert!(graph.feed(make(3, 3, &[1])).is_err(), "duplicate source id");
     }
