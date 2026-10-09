@@ -49,6 +49,7 @@ import perfindex  # noqa: E402  (same directory)
 
 SCHEMA = "perf.history/v1"
 ECBENCH_AREA = "ecbench"
+MOVER = 0.05  # a single-step change below this is within build noise
 PALETTE = {
     "index": "#111111",
     "gf2_la": "#4e79a7",
@@ -433,7 +434,11 @@ def render_md(snaps: list[dict], ch: dict, svg_rel: str | None) -> str:
              "each.  The index chains consecutive `Ir` ratios and takes no credit across a fingerprint "
              "change (the kernel computed something else: **re-based**).  Formula: "
              "`docs/perf/PERFORMANCE_INDEX.md`; what this does and does not mean: engineering class, "
-             "`AGENTS.md` §3.\n")
+             "`AGENTS.md` §3.  **Noise floor:** two builds of different sources move the `Ir` of "
+             "untouched kernels by up to a few per cent (the release profile's 16 codegen units are "
+             "partitioned afresh, and cross-module inlining changes with them), so a single step under "
+             "about 5 % on one kernel is build noise, not a result; a trend over several snapshots, or "
+             "an area index, is.\n")
     if svg_rel:
         L.append(f"![performance history]({svg_rel})\n")
     L.append(f"**Latest snapshot:** `{last['rev_short']}` ({last['committed_at'][:19]}Z) — {last['subject']}  ")
@@ -472,10 +477,11 @@ def render_md(snaps: list[dict], ch: dict, svg_rel: str | None) -> str:
             if h["step"]:
                 moves.append((h["step"], kid, hist[-2]["ir"], h["ir"]))
         moves.sort(reverse=True)
-        up = [m for m in moves if m[0] > 1.02][:12]
-        down = sorted([m for m in moves if m[0] < 1 / 1.02])[:12]
+        up = [m for m in moves if m[0] > 1 + MOVER][:12]
+        down = sorted([m for m in moves if m[0] < 1 / (1 + MOVER)])[:12]
         L.append("## Movers in the latest step\n")
-        L.append("Kernels whose `Ir` changed by more than 2 % against the previous snapshot with the same fingerprint.\n")
+        L.append(f"Kernels whose `Ir` changed by more than {MOVER * 100:.0f} % against the previous snapshot with the "
+                 "same fingerprint (the build-noise floor is a few per cent, see above).\n")
         if up:
             L.append("Fewer instructions:\n")
             L.append("| kernel | previous Ir | latest Ir | step |")

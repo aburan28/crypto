@@ -42,8 +42,13 @@ python3 scripts/perf/perfhistory.py check --binary target/release/examples/perfb
 
 The chained index takes no credit across a fingerprint change: a kernel
 that computes something else is re-based, not sped up.  `Ir` is charted
-because it is deterministic; the wall column is one reading on the
-recording host and is informational.
+because it is deterministic for one binary; across two builds of different
+sources the untouched kernels still move by up to a few per cent (the
+release profile's codegen units are partitioned afresh and cross-module
+inlining follows), so one step under about 5 % on one kernel is build
+noise and a trend or an area index is the signal.  The wall column is one
+reading on the recording host and is informational.  Recording a snapshot
+takes about fifteen minutes of callgrind on four cores.
 
 ## What it measures, and what it does not
 
