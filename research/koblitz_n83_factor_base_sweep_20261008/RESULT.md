@@ -12,6 +12,7 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | Empirical factor-base panel | 54 constructions complete, containing 42 distinct point sets; exact scan counts, all points and labels retained |
 | Arithmetic replay | PASS: 54 bases, 2,748,960 point records and 16,560 representatives checked with generic multi-limb arithmetic |
 | Relation-stage experiments | 1,728 fixed public two-summand probes, 87,966,720 exact complement lookups, zero relations; other arities and complete runtimes remain separate |
+| Exact support screen | 30 base-size/arity cases derived from the retained point counts and subgroup orders; uniform-target Markov ceilings only, with no solver or fixed-fixture yield inference |
 | S3 storage | PASS: 54 compressed objects uploaded, downloaded and byte-hash matched; content-addressed panel receipts uploaded |
 | Best total runtime | Unresolved: full relation collection, rank, linear algebra and individual-log phases have not completed the comparison gate |
 
@@ -55,6 +56,10 @@ The integrated `cold` subcommand accepts the retained, replayed S3-backed base a
 
 An optional unordered-pair index reduces duplicate summand-pair states under Frobenius canonicalization. The test checks that every canonical root key in a small ordered index exists in the unordered index. This is an exploratory implementation choice outside the frozen v1 grid. Its K=64 index completed in **0.771463875 seconds**, with 172,640 regular states and 339,776 root-table entries. Its remaining 600-second solver window did not produce a completed rank/target record. The ordered runs predate phase checkpoints, so there is no matched ordered index timing in this panel; no index or total-runtime speedup is claimed.
 
+## Post-pilot exact support screen
+
+`SUPPORT_MOMENTS.md` proves an exact first-moment upper bound for full smooth unordered m-summand relations with repetition, using each verified base's distinct point count and exact subgroup order. `pilot-01/support-moments.json` retains 30 exact integer/fraction cases for both curve arms, K=64/256/600 and m=2..6. This is a uniform-target mathematical ceiling, not a rate estimate for the fixed public fixtures or a solver benchmark. At primary a=0, K=600, the m=4 ceiling is **1.695987e-6** and the m=5 ceiling is **0.03378543**; at m=6 the bound is vacuous. Thus the current small primary bases offer little full-smooth coverage at m=4/5 under the uniform-target model, while m=6 still needs a verified feasible solver. Splitting, Gray/FES and symmetry do not enlarge the fixed full-smooth sumset; double-large-prime partials require their own graph/rank model. None of these bounds identifies a total-runtime winner.
+
 ## Validation and preserved failures
 
 The release profile uses optimization level 3, 256 codegen units and four Cargo build jobs. Toolchain and host facts are in `host.json`; the resolved dependency lockfile is retained in `verification/Cargo.lock`.
@@ -65,6 +70,7 @@ The release profile uses optimization level 3, 256 codegen units and four Cargo 
 | Touched export/probe example release tests | 7 passed, zero failed | `verification/export-probe-tests-final.log` |
 | Integrated export/probe/cold example release tests | 12 passed, zero failed | `verification/export-cold-tests-final.log` |
 | Relevant boundary autolab Python suite | 16 passed | `verification/boundary-tests.log` |
+| Exact support screen small-group controls | 2 passed | `verification/support-moments-tests.log` |
 | Native finite-grid audit | All 45,360,000 dispositions accounted for | `verification/design-audit.log`, `design.json` |
 
 Earlier build and test outcomes remain retained. Initial dependency resolution failed under restricted networking; `--locked` could not be used before this older baseline resolved a lockfile. Some build attempts were interrupted during baseline recovery. The first complete isolated library run had two loopback-network permission failures. The next run passed those tests and failed the pre-existing randomized SQIsign wrong-message assertion. Its focused replay passed; the subsequent full suite passed. The SQIsign source is unchanged, and the earlier failure remains visible rather than being relabeled as a pass.

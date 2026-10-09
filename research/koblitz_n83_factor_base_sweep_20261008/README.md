@@ -49,6 +49,8 @@ The bounded `probes` command follows successful replay. It generates 32 domain-s
 
 Ordered-pair K=256 and K=64, plus exploratory unordered-pair K=64, each reached a 600-second cap before a complete summary; all three `cap.json` files retain `UNKNOWN_budget`. The `unordered` pair-index mode uses summand exchange and Frobenius canonicalization to avoid redundant pair states. A test checks that every canonical root key in a small ordered index remains in the unordered index. It is an added implementation experiment outside the frozen 45,360,000-tuple v1 grid. Its K=64 index completed in 0.771 seconds, but neither that stage nor the key-set test establishes a total-runtime gain. The three cold cases and approximate 3,530.848-second pilot budget audit are in `pilot-01/cold-diagnostics.json`.
 
+`SUPPORT_MOMENTS.md` and `pilot-01/support-moments.json` add a post-pilot exact support-count screen for every retained K and m=2..6. Its uniform-target Markov ceilings concern the existence of full smooth decompositions, not the fixed public fixtures or solver runtime. At the primary a=0 K=600 base size, the m=4 ceiling is about 1.70e-6 and m=5 is about 0.0338; m=6 becomes vacuous. This directs future full-smooth work toward arity/size regimes with non-negligible potential coverage, while the actual cost of the needed solver and large-prime graph variants remains unmeasured.
+
 ## Subsequent total-runtime experiment
 
 Freeze the exact public target corpora, resource envelope and native backend versions before the first relation measurement. Use disjoint tuning and holdout targets, with validation-only known-answer scalars kept out of solver input. Keep one result per independent one-target workload. Preserve every phase cost, operation unit, cap, failed attempt, OOM and timeout. Baseline and candidate receive the same target and budget; randomize/interleave their order with A/A controls. Require at least five paired rounds and a paired 95% interval outside the measured noise floor for a runtime improvement. Run the admitted measurements on an L2-capable host; local macOS L0 timings cannot establish that comparison.
@@ -66,6 +68,8 @@ target/release/examples/koblitz_n83_factor_base_export plan research/koblitz_n83
 target/release/examples/koblitz_n83_factor_base_export case 45359999
 target/release/examples/koblitz_n83_factor_base_export pilot research/koblitz_n83_factor_base_sweep_20261008/pilot-01 3600
 target/release/examples/koblitz_n83_factor_base_export replay research/koblitz_n83_factor_base_sweep_20261008/pilot-01
+python3 research/koblitz_n83_factor_base_sweep_20261008/support_moments.py
+python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_support_moments.py -v
 target/release/examples/koblitz_n83_factor_base_export probes research/koblitz_n83_factor_base_sweep_20261008/pilot-01 600
 target/release/examples/koblitz_n83_factor_base_export upload research/koblitz_n83_factor_base_sweep_20261008/pilot-01
 target/release/examples/koblitz_n83_factor_base_export cold research/koblitz_n83_factor_base_sweep_20261008/pilot-01 64 600

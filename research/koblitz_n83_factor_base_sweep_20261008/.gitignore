@@ -6,3 +6,5 @@ pilot-*/cold-*/legacy-base.jsonl
 *.out
 !verification/*.log
 !verification/Cargo.lock
+__pycache__/
+*.pyc
