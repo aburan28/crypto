@@ -43,6 +43,19 @@ jobs:
           gp -q -f "$study/p7_counterexample_check.gp" > counterexample.txt 2> counterexample.stderr
           test ! -s counterexample.stderr
           cmp counterexample.txt "$study/p7_counterexample_check.txt"
+          gp -q -f "$study/larger_fields_20261009/orbit_exact.gp" > prime_orbit.txt 2> prime_orbit.stderr
+          test ! -s prime_orbit.stderr
+          cmp prime_orbit.txt "$study/larger_fields_20261009/orbit_exact.txt"
+      - name: Prime-degree orbit replay and larger-degree smoke
+        run: |
+          study=research/iso1_weak_classes_20261007
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_prime_degree_check -- "$study/larger_fields_20261009/orbit_identity_certificate.json"
+          ISO1_P=13 ISO1_A=2 ISO1_N=5 ISO1_SAMPLES=2 ISO1_SEED=20261009 ISO1_MODE=count gp -q -f -s 256M "$study/larger_fields_20261009/control.gp" > degree5.txt 2> degree5.stderr
+          test ! -s degree5.stderr
+          test "$(tail -n 1 degree5.txt)" = 'COMPLETE|13|2|5|2'
+          gp -q -f -s 256M "$study/larger_fields_20261009/replay_models.gp" > models.txt 2> models.stderr
+          test ! -s models.stderr
+          cmp models.txt "$study/larger_fields_20261009/model_coordinate_replay.txt"
       - name: Replay every p7 orbit by exact field enumeration
         env:
           RAYON_NUM_THREADS: '2'

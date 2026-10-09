@@ -86,7 +86,10 @@ fn main() {
     let out = PathBuf::from(&args[0]);
     fs::create_dir_all(&out).unwrap();
     let out = fs::canonicalize(out).unwrap();
-    let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let manifest_dir = std::env::var_os("ISO1_QUEUE_RUNTIME_MANIFEST_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")));
+    let manifest = manifest_dir.as_path();
     let study = manifest.parent().unwrap();
     let root = manifest.ancestors().nth(3).unwrap();
     let bin = fs::canonicalize(std::env::current_exe().unwrap()).unwrap();

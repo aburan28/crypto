@@ -78,3 +78,20 @@ CSV and started p = 59; the remaining primes retain their queued status.
 See `p53_absolute_validation.txt`, `larger_prime_source_freeze.txt`,
 and the dated `larger_prime_status_20261008.tsv` snapshot. The live
 status file remains under `/private/tmp/iso1-larger-primes-20261009/run2`.
+
+## 2026-10-09 larger-field expansion and restart
+
+The old temporary output directory and p59 worker were absent at the
+start of this round. Preserve the old status as a historical snapshot.
+The replacement finite launchd service uses a checked internal-volume
+runtime and persistent receipts under
+/Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run3.
+It restarts at p59 and retains the complete requested prime list through
+p199. See larger_fields_20261009/census_restart_status.tsv and
+census_launchd.plist. The source supports an explicit relocated runtime
+manifest; census arithmetic and the census executable are unchanged.
+
+The user also requested larger primes and odd extension degrees. The
+additional report verifies 17 paired point counts through log2(Q)=252
+and total extension degrees 10 and 14, plus the prime-degree orbit
+theorem. These controls do not complete the full trace census.

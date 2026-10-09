@@ -22,3 +22,11 @@ path = "../../../examples/iso1_theorem_check.rs"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 hex = "0.4"
+
+[[bin]]
+name = "iso1_prime_degree_check"
+path = "../larger_fields_20261009/orbit_check.rs"
+
+[[bin]]
+name = "iso1_large_records_check"
+path = "../larger_fields_20261009/check_records.rs"

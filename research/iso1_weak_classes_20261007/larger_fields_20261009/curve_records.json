@@ -1,0 +1,1785 @@
+{
+  "schema": "iso1-larger-field-controls/v1",
+  "date": "2026-10-09",
+  "geometry_controls": 49,
+  "paired_counts": 17,
+  "field_cells": 17,
+  "input_law": "uniform nonidentity norm-one lambda from random(z)^(p^2-1), per-curve seed 20261009+i",
+  "curve_identity_spec": "docs/curves/ICV1.md",
+  "prime_degree_orbit_identity": "IDC1h90d58cc0e0c48fe3",
+  "records": [
+    {
+      "characteristic": 257,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "288136807515649",
+      "log2_field_cardinality": "48.033747",
+      "absolute_orbit_calls": "363555713",
+      "log10_absolute_orbit_calls": "8.560571",
+      "modulus_low_coefficients": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "lambda_coefficients": [
+        247,
+        179,
+        150,
+        82,
+        223,
+        79
+      ],
+      "ordinary": true,
+      "source_count_ms": 4,
+      "target_count_ms": 2,
+      "source": {
+        "icv1": "ICV1:fpk-257-6-55633a03:-4201662:288136811717312:200,91,167,30,247,41:unk:unk:r:fcf0108671c4",
+        "slug": "icv1-fp9k6-tm4201662-fcf01086",
+        "model_json": "{\"a\":[\"220\",\"106\",\"172\",\"256\",\"83\",\"53\"],\"b\":[\"87\",\"20\",\"167\",\"151\",\"1\",\"256\"],\"field\":\"fpk-257-6-55633a03\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"257\",\"v\":\"1\"}",
+        "model_sha256": "fcf0108671c44c9cf653317c714591d4499d687311490751fa21b1e1d923ad3f",
+        "trace": "-4201662",
+        "group_order": "288136811717312",
+        "j_coefficients": [
+          "200",
+          "91",
+          "167",
+          "30",
+          "247",
+          "41"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-257-6-55633a03:-4201662:288136811717312:18,56,130,14,104,88:unk:unk:r:d0d5674cb5e4",
+        "slug": "icv1-fp9k6-tm4201662-d0d5674c",
+        "model_json": "{\"a\":[\"13\",\"239\",\"193\",\"103\",\"253\",\"172\"],\"b\":[\"40\",\"199\",\"177\",\"198\",\"118\",\"168\"],\"field\":\"fpk-257-6-55633a03\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"257\",\"v\":\"1\"}",
+        "model_sha256": "d0d5674cb5e4cd2d2ab13e54c01bf4107a051adf9a53fa804071dcee43228e6f",
+        "trace": "-4201662",
+        "group_order": "288136811717312",
+        "j_coefficients": [
+          "18",
+          "56",
+          "130",
+          "14",
+          "104",
+          "88"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-257-6-55633a03:-4201662:288136811717312:200,91,167,30,247,41:unk:unk:r:fcf0108671c4",
+        "target": "ICV1:fpk-257-6-55633a03:-4201662:288136811717312:18,56,130,14,104,88:unk:unk:r:d0d5674cb5e4",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 509,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "17390284781428441",
+      "log2_field_cardinality": "53.949131",
+      "absolute_orbit_calls": "5593645151",
+      "log10_absolute_orbit_calls": "9.747695",
+      "modulus_low_coefficients": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "lambda_coefficients": [
+        20,
+        142,
+        499,
+        106,
+        437,
+        69
+      ],
+      "ordinary": true,
+      "source_count_ms": 14,
+      "target_count_ms": 11,
+      "source": {
+        "icv1": "ICV1:fpk-509-6-a085e921:155480538:17390284625947904:410,118,56,130,389,46:unk:unk:r:beddab05eeb2",
+        "slug": "icv1-fp9k6-t155480538-beddab05",
+        "model_json": "{\"a\":[\"60\",\"441\",\"352\",\"86\",\"268\",\"77\"],\"b\":[\"404\",\"405\",\"355\",\"210\",\"502\",\"351\"],\"field\":\"fpk-509-6-a085e921\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"509\",\"v\":\"1\"}",
+        "model_sha256": "beddab05eeb23c837e6009ae8426f75f12586d9991de6c7e3a6f0ea8526fd053",
+        "trace": "155480538",
+        "group_order": "17390284625947904",
+        "j_coefficients": [
+          "410",
+          "118",
+          "56",
+          "130",
+          "389",
+          "46"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-509-6-a085e921:155480538:17390284625947904:291,143,480,0,279,3:unk:unk:r:cc9241215bda",
+        "slug": "icv1-fp9k6-t155480538-cc924121",
+        "model_json": "{\"a\":[\"469\",\"240\",\"402\",\"65\",\"119\",\"241\"],\"b\":[\"75\",\"356\",\"50\",\"442\",\"326\",\"134\"],\"field\":\"fpk-509-6-a085e921\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"509\",\"v\":\"1\"}",
+        "model_sha256": "cc9241215bda71f958568401495e148fb91044800757da831aa6c42e1897e1e1",
+        "trace": "155480538",
+        "group_order": "17390284625947904",
+        "j_coefficients": [
+          "291",
+          "143",
+          "480",
+          "0",
+          "279",
+          "3"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-509-6-a085e921:155480538:17390284625947904:410,118,56,130,389,46:unk:unk:r:beddab05eeb2",
+        "target": "ICV1:fpk-509-6-a085e921:155480538:17390284625947904:291,143,480,0,279,3:unk:unk:r:cc9241215bda",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 1009,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "1055229678769825441",
+      "log2_field_cardinality": "59.872263",
+      "absolute_orbit_calls": "86374331401",
+      "log10_absolute_orbit_calls": "10.936385",
+      "modulus_low_coefficients": [
+        407,
+        220,
+        27,
+        996,
+        6,
+        5
+      ],
+      "lambda_coefficients": [
+        794,
+        424,
+        133,
+        384,
+        369,
+        244
+      ],
+      "ordinary": true,
+      "source_count_ms": 27,
+      "target_count_ms": 26,
+      "source": {
+        "icv1": "ICV1:fpk-1009-6-5133db99:-932404270:1055229679702229712:467,539,284,621,601,14:unk:unk:r:50f3b69cb97c",
+        "slug": "icv1-fp10k6-tm932404270-50f3b69c",
+        "model_json": "{\"a\":[\"622\",\"916\",\"942\",\"179\",\"608\",\"75\"],\"b\":[\"531\",\"741\",\"233\",\"506\",\"786\",\"365\"],\"field\":\"fpk-1009-6-5133db99\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"407\",\"220\",\"27\",\"996\",\"6\",\"5\"],\"p\":\"1009\",\"v\":\"1\"}",
+        "model_sha256": "50f3b69cb97c5d893668159e3a16adefc8ae279bf53e1ed454470169bc56ac60",
+        "trace": "-932404270",
+        "group_order": "1055229679702229712",
+        "j_coefficients": [
+          "467",
+          "539",
+          "284",
+          "621",
+          "601",
+          "14"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-1009-6-5133db99:-932404270:1055229679702229712:144,494,685,662,798,621:unk:unk:r:9187c4993bdc",
+        "slug": "icv1-fp10k6-tm932404270-9187c499",
+        "model_json": "{\"a\":[\"688\",\"814\",\"277\",\"277\",\"781\",\"873\"],\"b\":[\"889\",\"680\",\"650\",\"36\",\"270\",\"306\"],\"field\":\"fpk-1009-6-5133db99\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"407\",\"220\",\"27\",\"996\",\"6\",\"5\"],\"p\":\"1009\",\"v\":\"1\"}",
+        "model_sha256": "9187c4993bdc68fafa5f1bed930cc5a928931341779c23f8c0213ed50a4a2038",
+        "trace": "-932404270",
+        "group_order": "1055229679702229712",
+        "j_coefficients": [
+          "144",
+          "494",
+          "685",
+          "662",
+          "798",
+          "621"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-1009-6-5133db99:-932404270:1055229679702229712:467,539,284,621,601,14:unk:unk:r:50f3b69cb97c",
+        "target": "ICV1:fpk-1009-6-5133db99:-932404270:1055229679702229712:144,494,685,662,798,621:unk:unk:r:9187c4993bdc",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 2003,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "64578164324862916729",
+      "log2_field_cardinality": "65.807680",
+      "absolute_orbit_calls": "1341352354343",
+      "log10_absolute_orbit_calls": "12.127543",
+      "modulus_low_coefficients": [
+        271,
+        237,
+        16,
+        1944,
+        1995,
+        5
+      ],
+      "lambda_coefficients": [
+        835,
+        862,
+        756,
+        946,
+        518,
+        1360
+      ],
+      "ordinary": true,
+      "source_count_ms": 117,
+      "target_count_ms": 248,
+      "source": {
+        "icv1": "ICV1:fpk-2003-6-1a76e229:-12317097734:64578164337180014464:589,242,227,493,1410,136:unk:unk:r:c0f5fad02ab6",
+        "slug": "icv1-fp11k6-tm12317097734-c0f5fad0",
+        "model_json": "{\"a\":[\"1226\",\"1536\",\"1592\",\"1165\",\"1222\",\"1229\"],\"b\":[\"1758\",\"321\",\"1354\",\"657\",\"16\",\"1939\"],\"field\":\"fpk-2003-6-1a76e229\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"271\",\"237\",\"16\",\"1944\",\"1995\",\"5\"],\"p\":\"2003\",\"v\":\"1\"}",
+        "model_sha256": "c0f5fad02ab6ac1763d6a75b520ff3607c2a86183e916485cf29af7fff05b908",
+        "trace": "-12317097734",
+        "group_order": "64578164337180014464",
+        "j_coefficients": [
+          "589",
+          "242",
+          "227",
+          "493",
+          "1410",
+          "136"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-2003-6-1a76e229:-12317097734:64578164337180014464:1775,381,611,599,1799,674:unk:unk:r:42413d51537a",
+        "slug": "icv1-fp11k6-tm12317097734-42413d51",
+        "model_json": "{\"a\":[\"1057\",\"1232\",\"1818\",\"441\",\"635\",\"438\"],\"b\":[\"1744\",\"936\",\"1750\",\"255\",\"556\",\"1018\"],\"field\":\"fpk-2003-6-1a76e229\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"271\",\"237\",\"16\",\"1944\",\"1995\",\"5\"],\"p\":\"2003\",\"v\":\"1\"}",
+        "model_sha256": "42413d51537a126f34d17a5eeff068c7b4557014de42cfee18b04f982694689f",
+        "trace": "-12317097734",
+        "group_order": "64578164337180014464",
+        "j_coefficients": [
+          "1775",
+          "381",
+          "611",
+          "599",
+          "1799",
+          "674"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-2003-6-1a76e229:-12317097734:64578164337180014464:589,242,227,493,1410,136:unk:unk:r:c0f5fad02ab6",
+        "target": "ICV1:fpk-2003-6-1a76e229:-12317097734:64578164337180014464:1775,381,611,599,1799,674:unk:unk:r:42413d51537a",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 8191,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "302010161517773079920641",
+      "log2_field_cardinality": "77.998943",
+      "absolute_orbit_calls": "375116767334401",
+      "log10_absolute_orbit_calls": "14.574166",
+      "modulus_low_coefficients": [
+        407,
+        220,
+        27,
+        8178,
+        6,
+        5
+      ],
+      "lambda_coefficients": [
+        1977,
+        6087,
+        4576,
+        3490,
+        1864,
+        2379
+      ],
+      "ordinary": true,
+      "source_count_ms": 182,
+      "target_count_ms": 411,
+      "source": {
+        "icv1": "ICV1:fpk-8191-6-b8dc2ee6:179999003714:302010161517593080916928:7289,4732,7135,1544,4865,6274:unk:unk:r:f7cc12efcbb6",
+        "slug": "icv1-fp13k6-t179999003714-f7cc12ef",
+        "model_json": "{\"a\":[\"2038\",\"3881\",\"3438\",\"4542\",\"1418\",\"7707\"],\"b\":[\"1608\",\"96\",\"2829\",\"453\",\"6371\",\"3408\"],\"field\":\"fpk-8191-6-b8dc2ee6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"407\",\"220\",\"27\",\"8178\",\"6\",\"5\"],\"p\":\"8191\",\"v\":\"1\"}",
+        "model_sha256": "f7cc12efcbb6067927d80a80260ad9e39b08261a2634a4683058fc00d17268ab",
+        "trace": "179999003714",
+        "group_order": "302010161517593080916928",
+        "j_coefficients": [
+          "7289",
+          "4732",
+          "7135",
+          "1544",
+          "4865",
+          "6274"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-8191-6-b8dc2ee6:179999003714:302010161517593080916928:7507,4691,7939,2190,807,5912:unk:unk:r:c92fd2192417",
+        "slug": "icv1-fp13k6-t179999003714-c92fd219",
+        "model_json": "{\"a\":[\"344\",\"6210\",\"5131\",\"3474\",\"289\",\"4003\"],\"b\":[\"7487\",\"1335\",\"2848\",\"4058\",\"7874\",\"1516\"],\"field\":\"fpk-8191-6-b8dc2ee6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"407\",\"220\",\"27\",\"8178\",\"6\",\"5\"],\"p\":\"8191\",\"v\":\"1\"}",
+        "model_sha256": "c92fd2192417e2d757a987319dcaca90a4f6736bb060a2dc7412c70b1dcfe973",
+        "trace": "179999003714",
+        "group_order": "302010161517593080916928",
+        "j_coefficients": [
+          "7507",
+          "4691",
+          "7939",
+          "2190",
+          "807",
+          "5912"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-8191-6-b8dc2ee6:179999003714:302010161517593080916928:7289,4732,7135,1544,4865,6274:unk:unk:r:f7cc12efcbb6",
+        "target": "ICV1:fpk-8191-6-b8dc2ee6:179999003714:302010161517593080916928:7507,4691,7939,2190,807,5912:unk:unk:r:c92fd2192417",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 65537,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "79235416345888816038194577409",
+      "log2_field_cardinality": "96.000132",
+      "absolute_orbit_calls": "1537322501022646273",
+      "log10_absolute_orbit_calls": "18.186765",
+      "modulus_low_coefficients": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "lambda_coefficients": [
+        33479,
+        55322,
+        57149,
+        42487,
+        64349,
+        26104
+      ],
+      "ordinary": true,
+      "source_count_ms": 273,
+      "target_count_ms": 519,
+      "source": {
+        "icv1": "ICV1:fpk-65537-6-5118dbcb:452900308443586:79235416345888363137886133824:3243,38949,31875,15106,63296,56930:unk:unk:r:880f75471160",
+        "slug": "icv1-fp17k6-t452900308443586-880f7547",
+        "model_json": "{\"a\":[\"43339\",\"30722\",\"54716\",\"37143\",\"6368\",\"29072\"],\"b\":[\"13993\",\"51978\",\"37446\",\"49688\",\"24384\",\"37867\"],\"field\":\"fpk-65537-6-5118dbcb\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"65537\",\"v\":\"1\"}",
+        "model_sha256": "880f754711605e3bbf73a309fcdf53fe5cd0b9928dc6ceff2f98e71d285f5788",
+        "trace": "452900308443586",
+        "group_order": "79235416345888363137886133824",
+        "j_coefficients": [
+          "3243",
+          "38949",
+          "31875",
+          "15106",
+          "63296",
+          "56930"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-65537-6-5118dbcb:452900308443586:79235416345888363137886133824:17223,54234,56289,48350,12013,31165:unk:unk:r:0c540acb5a44",
+        "slug": "icv1-fp17k6-t452900308443586-0c540acb",
+        "model_json": "{\"a\":[\"7018\",\"16260\",\"31119\",\"21319\",\"12308\",\"29626\"],\"b\":[\"63464\",\"51402\",\"8512\",\"31651\",\"39801\",\"65410\"],\"field\":\"fpk-65537-6-5118dbcb\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"65537\",\"v\":\"1\"}",
+        "model_sha256": "0c540acb5a4484290a7d6deb1e7bf15d6d21dcbd5732b0a173991ac9f92ea649",
+        "trace": "452900308443586",
+        "group_order": "79235416345888363137886133824",
+        "j_coefficients": [
+          "17223",
+          "54234",
+          "56289",
+          "48350",
+          "12013",
+          "31165"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-65537-6-5118dbcb:452900308443586:79235416345888363137886133824:3243,38949,31875,15106,63296,56930:unk:unk:r:880f75471160",
+        "target": "ICV1:fpk-65537-6-5118dbcb:452900308443586:79235416345888363137886133824:17223,54234,56289,48350,12013,31165:unk:unk:r:0c540acb5a44",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 1048583,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "1329281237998693845036542985209236369",
+      "log2_field_cardinality": "120.000058",
+      "absolute_orbit_calls": "100746508478609550213333",
+      "log10_absolute_orbit_calls": "23.003230",
+      "modulus_low_coefficients": [
+        13,
+        10,
+        3,
+        3,
+        8,
+        5
+      ],
+      "lambda_coefficients": [
+        775366,
+        536398,
+        776410,
+        616559,
+        449597,
+        743178
+      ],
+      "ordinary": true,
+      "source_count_ms": 649,
+      "target_count_ms": 754,
+      "source": {
+        "icv1": "ICV1:fpk-1048583-6-c53cb3ec:-927079723928371550:1329281237998693845963622709137607920:415964,731745,255870,308626,328948,633086:unk:unk:r:a499fc7bacd9",
+        "slug": "icv1-fp21k6-tm927079723928371550-a499fc7b",
+        "model_json": "{\"a\":[\"161186\",\"873608\",\"286809\",\"52404\",\"41645\",\"679270\"],\"b\":[\"190690\",\"60789\",\"956815\",\"418410\",\"159827\",\"252735\"],\"field\":\"fpk-1048583-6-c53cb3ec\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"13\",\"10\",\"3\",\"3\",\"8\",\"5\"],\"p\":\"1048583\",\"v\":\"1\"}",
+        "model_sha256": "a499fc7bacd9adb56a8253f18370f8abf781336e31ed8c250888b056107197c4",
+        "trace": "-927079723928371550",
+        "group_order": "1329281237998693845963622709137607920",
+        "j_coefficients": [
+          "415964",
+          "731745",
+          "255870",
+          "308626",
+          "328948",
+          "633086"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-1048583-6-c53cb3ec:-927079723928371550:1329281237998693845963622709137607920:59531,651544,668962,310657,358465,428261:unk:unk:r:0fec2c4a657a",
+        "slug": "icv1-fp21k6-tm927079723928371550-0fec2c4a",
+        "model_json": "{\"a\":[\"478688\",\"288784\",\"599091\",\"115358\",\"939409\",\"109129\"],\"b\":[\"933122\",\"293528\",\"125705\",\"132636\",\"218793\",\"14592\"],\"field\":\"fpk-1048583-6-c53cb3ec\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"13\",\"10\",\"3\",\"3\",\"8\",\"5\"],\"p\":\"1048583\",\"v\":\"1\"}",
+        "model_sha256": "0fec2c4a657aebcb3149085c765b7c4e4b607affa294579c3c2b1e46be52ed6c",
+        "trace": "-927079723928371550",
+        "group_order": "1329281237998693845963622709137607920",
+        "j_coefficients": [
+          "59531",
+          "651544",
+          "668962",
+          "310657",
+          "358465",
+          "428261"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-1048583-6-c53cb3ec:-927079723928371550:1329281237998693845963622709137607920:415964,731745,255870,308626,328948,633086:unk:unk:r:a499fc7bacd9",
+        "target": "ICV1:fpk-1048583-6-c53cb3ec:-927079723928371550:1329281237998693845963622709137607920:59531,651544,668962,310657,358465,428261:unk:unk:r:0fec2c4a657a",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 4294967311,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "6277101866921829272070045767607599270296215402067836915361",
+      "log2_field_cardinality": "192.000000",
+      "absolute_orbit_calls": "28356864306219019939806637761836181001",
+      "log10_absolute_orbit_calls": "37.452658",
+      "modulus_low_coefficients": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "lambda_coefficients": [
+        1894193139,
+        626959587,
+        3826680504,
+        323848564,
+        3611819621,
+        1203507973
+      ],
+      "ordinary": true,
+      "source_count_ms": 2547,
+      "target_count_ms": 2792,
+      "source": {
+        "icv1": "ICV1:fpk-4294967311-6-1061f314:-24932403969225860243224553758:6277101866921829272070045767632531674265441262311061469120:2244907391,3655491163,503722626,3497297927,653068301,1454296714:unk:unk:r:92482ac0a182",
+        "slug": "icv1-fp33k6-tm24932403969225860243224553758-92482ac0",
+        "model_json": "{\"a\":[\"898820257\",\"3088115625\",\"2066229547\",\"4287590360\",\"2554290659\",\"623135934\"],\"b\":[\"1709038624\",\"2868058762\",\"3547927031\",\"3935171405\",\"1566275999\",\"2543022931\"],\"field\":\"fpk-4294967311-6-1061f314\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"4294967311\",\"v\":\"1\"}",
+        "model_sha256": "92482ac0a182d8c76c66df62a58d70f35626b8c11d9990067e389c277d6505a1",
+        "trace": "-24932403969225860243224553758",
+        "group_order": "6277101866921829272070045767632531674265441262311061469120",
+        "j_coefficients": [
+          "2244907391",
+          "3655491163",
+          "503722626",
+          "3497297927",
+          "653068301",
+          "1454296714"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-4294967311-6-1061f314:-24932403969225860243224553758:6277101866921829272070045767632531674265441262311061469120:4059111365,192365095,392920019,1985299744,26424681,399903314:unk:unk:r:8c249042ed0d",
+        "slug": "icv1-fp33k6-tm24932403969225860243224553758-8c249042",
+        "model_json": "{\"a\":[\"17789184\",\"4248285001\",\"112696271\",\"2668347540\",\"1675061798\",\"3195530691\"],\"b\":[\"1393553264\",\"1356930037\",\"2647195243\",\"2634791820\",\"3404711158\",\"934130393\"],\"field\":\"fpk-4294967311-6-1061f314\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"4294967311\",\"v\":\"1\"}",
+        "model_sha256": "8c249042ed0defe2ce395d091a3b00660ca05c35a566c5283dbe1ee9144f7bf7",
+        "trace": "-24932403969225860243224553758",
+        "group_order": "6277101866921829272070045767632531674265441262311061469120",
+        "j_coefficients": [
+          "4059111365",
+          "192365095",
+          "392920019",
+          "1985299744",
+          "26424681",
+          "399903314"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-4294967311-6-1061f314:-24932403969225860243224553758:6277101866921829272070045767632531674265441262311061469120:2244907391,3655491163,503722626,3497297927,653068301,1454296714:unk:unk:r:92482ac0a182",
+        "target": "ICV1:fpk-4294967311-6-1061f314:-24932403969225860243224553758:6277101866921829272070045767632531674265441262311061469120:4059111365,192365095,392920019,1985299744,26424681,399903314:unk:unk:r:8c249042ed0d",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 4398046511119,
+      "base_degree": 2,
+      "odd_degree": 3,
+      "field_degree": 6,
+      "field_cardinality": "7237005577480357624133357844251601109645805376271468001686387397097912389281",
+      "log2_field_cardinality": "252.000000",
+      "absolute_orbit_calls": "31178701596817948546998630412788512450435114952201",
+      "log10_absolute_orbit_calls": "49.493858",
+      "modulus_low_coefficients": [
+        97,
+        62,
+        49,
+        23,
+        14,
+        5
+      ],
+      "lambda_coefficients": [
+        1293653411223,
+        2697641377580,
+        2424457628528,
+        2982298064175,
+        601501629059,
+        1768560135497
+      ],
+      "ordinary": true,
+      "source_count_ms": 7822,
+      "target_count_ms": 8630,
+      "source": {
+        "icv1": "ICV1:fpk-4398046511119-6-5b1a8526:80369948951667839190628429049567884210:7237005577480357624133357844251601109565435427319800162495758968048344505072:2616088954272,902054986310,1990197965083,359336195060,1602831468111,1405058324002:unk:unk:r:8a669356d4d0",
+        "slug": "icv1-fp43k6-t80369948951667839190628429049567884210-8a669356",
+        "model_json": "{\"a\":[\"2253803012394\",\"3630391213102\",\"3374266364292\",\"1282446936815\",\"996618294589\",\"2194249978977\"],\"b\":[\"2889000543283\",\"880590613020\",\"1658349615202\",\"633515690453\",\"3340196979196\",\"3373097675899\"],\"field\":\"fpk-4398046511119-6-5b1a8526\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"97\",\"62\",\"49\",\"23\",\"14\",\"5\"],\"p\":\"4398046511119\",\"v\":\"1\"}",
+        "model_sha256": "8a669356d4d0101a98178065cee5af4b5dab99371b9eddc47fc0eba38d0317dc",
+        "trace": "80369948951667839190628429049567884210",
+        "group_order": "7237005577480357624133357844251601109565435427319800162495758968048344505072",
+        "j_coefficients": [
+          "2616088954272",
+          "902054986310",
+          "1990197965083",
+          "359336195060",
+          "1602831468111",
+          "1405058324002"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-4398046511119-6-5b1a8526:80369948951667839190628429049567884210:7237005577480357624133357844251601109565435427319800162495758968048344505072:207997362203,1115819809997,850808201836,1372044108199,2627722027494,4220953469116:unk:unk:r:1a345239e401",
+        "slug": "icv1-fp43k6-t80369948951667839190628429049567884210-1a345239",
+        "model_json": "{\"a\":[\"183582467398\",\"3336323858559\",\"48071243890\",\"3963142660416\",\"2387156660413\",\"2147542323730\"],\"b\":[\"3411537234841\",\"4183015757449\",\"1080744694606\",\"1175731587779\",\"2102907526761\",\"3596705973911\"],\"field\":\"fpk-4398046511119-6-5b1a8526\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"97\",\"62\",\"49\",\"23\",\"14\",\"5\"],\"p\":\"4398046511119\",\"v\":\"1\"}",
+        "model_sha256": "1a345239e401324410ead8ae6a81a760ea8bab88a56d87d73211350434441a15",
+        "trace": "80369948951667839190628429049567884210",
+        "group_order": "7237005577480357624133357844251601109565435427319800162495758968048344505072",
+        "j_coefficients": [
+          "207997362203",
+          "1115819809997",
+          "850808201836",
+          "1372044108199",
+          "2627722027494",
+          "4220953469116"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-4398046511119-6-5b1a8526:80369948951667839190628429049567884210:7237005577480357624133357844251601109565435427319800162495758968048344505072:2616088954272,902054986310,1990197965083,359336195060,1602831468111,1405058324002:unk:unk:r:8a669356d4d0",
+        "target": "ICV1:fpk-4398046511119-6-5b1a8526:80369948951667839190628429049567884210:7237005577480357624133357844251601109565435427319800162495758968048344505072:207997362203,1115819809997,850808201836,1372044108199,2627722027494,4220953469116:unk:unk:r:1a345239e401",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 13,
+      "base_degree": 2,
+      "odd_degree": 5,
+      "field_degree": 10,
+      "field_cardinality": "137858491849",
+      "log2_field_cardinality": "37.004397",
+      "absolute_orbit_calls": "41032186",
+      "log10_absolute_orbit_calls": "7.613125",
+      "modulus_low_coefficients": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "lambda_coefficients": [
+        11,
+        9,
+        6,
+        7,
+        4,
+        6,
+        10,
+        5,
+        7,
+        0
+      ],
+      "ordinary": true,
+      "source_count_ms": 0,
+      "target_count_ms": 0,
+      "source": {
+        "icv1": "ICV1:fpk-13-10-2350618e:115754:137858376096:1,8,9,11,10,2,5,4,10,9:unk:unk:r:7486f4511059",
+        "slug": "icv1-fp4k10-t115754-7486f451",
+        "model_json": "{\"a\":[\"6\",\"7\",\"3\",\"2\",\"2\",\"10\",\"8\",\"0\",\"7\",\"0\"],\"b\":[\"7\",\"0\",\"10\",\"12\",\"8\",\"7\",\"2\",\"6\",\"11\",\"4\"],\"field\":\"fpk-13-10-2350618e\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"13\",\"v\":\"1\"}",
+        "model_sha256": "7486f4511059edfe17a01685095aace0b946138a580785fc145bc410aebede6d",
+        "trace": "115754",
+        "group_order": "137858376096",
+        "j_coefficients": [
+          "1",
+          "8",
+          "9",
+          "11",
+          "10",
+          "2",
+          "5",
+          "4",
+          "10",
+          "9"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-13-10-2350618e:115754:137858376096:2,10,9,6,1,10,8,7,3,4:unk:unk:r:1633a97e3553",
+        "slug": "icv1-fp4k10-t115754-1633a97e",
+        "model_json": "{\"a\":[\"3\",\"1\",\"12\",\"6\",\"8\",\"6\",\"10\",\"1\",\"11\",\"0\"],\"b\":[\"1\",\"6\",\"4\",\"9\",\"4\",\"4\",\"10\",\"12\",\"12\",\"4\"],\"field\":\"fpk-13-10-2350618e\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"13\",\"v\":\"1\"}",
+        "model_sha256": "1633a97e355330b725f9eccea091738ae212f18cd0376973a2b0477835f2d7b3",
+        "trace": "115754",
+        "group_order": "137858376096",
+        "j_coefficients": [
+          "2",
+          "10",
+          "9",
+          "6",
+          "1",
+          "10",
+          "8",
+          "7",
+          "3",
+          "4"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-13-10-2350618e:115754:137858376096:1,8,9,11,10,2,5,4,10,9:unk:unk:r:7486f4511059",
+        "target": "ICV1:fpk-13-10-2350618e:115754:137858376096:2,10,9,6,1,10,8,7,3,4:unk:unk:r:1633a97e3553",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 257,
+      "base_degree": 2,
+      "odd_degree": 5,
+      "field_degree": 10,
+      "field_cardinality": "1256988294225653106805249",
+      "log2_field_cardinality": "80.056245",
+      "absolute_orbit_calls": "951571807474811290",
+      "log10_absolute_orbit_calls": "17.978442",
+      "modulus_low_coefficients": [
+        67,
+        61,
+        63,
+        75,
+        76,
+        22,
+        253,
+        12,
+        17,
+        7
+      ],
+      "lambda_coefficients": [
+        77,
+        254,
+        51,
+        239,
+        249,
+        103,
+        197,
+        119,
+        215,
+        132
+      ],
+      "ordinary": true,
+      "source_count_ms": 202,
+      "target_count_ms": 473,
+      "source": {
+        "icv1": "ICV1:fpk-257-10-9a5f1210:1192017885538:1256988294224461088919712:121,19,106,49,167,73,231,222,141,22:unk:unk:r:29089137b33c",
+        "slug": "icv1-fp9k10-t1192017885538-29089137",
+        "model_json": "{\"a\":[\"191\",\"29\",\"201\",\"94\",\"19\",\"214\",\"45\",\"77\",\"46\",\"85\"],\"b\":[\"81\",\"181\",\"25\",\"200\",\"222\",\"192\",\"14\",\"178\",\"42\",\"6\"],\"field\":\"fpk-257-10-9a5f1210\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"67\",\"61\",\"63\",\"75\",\"76\",\"22\",\"253\",\"12\",\"17\",\"7\"],\"p\":\"257\",\"v\":\"1\"}",
+        "model_sha256": "29089137b33c0d2758c5c4c5471ced3c6242e2c859763fb69cd8c69b5ace2009",
+        "trace": "1192017885538",
+        "group_order": "1256988294224461088919712",
+        "j_coefficients": [
+          "121",
+          "19",
+          "106",
+          "49",
+          "167",
+          "73",
+          "231",
+          "222",
+          "141",
+          "22"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-257-10-9a5f1210:1192017885538:1256988294224461088919712:21,183,207,156,85,225,40,224,192,145:unk:unk:r:2809d13289ff",
+        "slug": "icv1-fp9k10-t1192017885538-2809d132",
+        "model_json": "{\"a\":[\"63\",\"44\",\"203\",\"184\",\"59\",\"213\",\"88\",\"253\",\"256\",\"196\"],\"b\":[\"129\",\"221\",\"141\",\"229\",\"223\",\"117\",\"190\",\"23\",\"38\",\"27\"],\"field\":\"fpk-257-10-9a5f1210\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"67\",\"61\",\"63\",\"75\",\"76\",\"22\",\"253\",\"12\",\"17\",\"7\"],\"p\":\"257\",\"v\":\"1\"}",
+        "model_sha256": "2809d13289ff36f8a53e08cafc9391cc483a5e8b0a434f08b38cc764f50b3b28",
+        "trace": "1192017885538",
+        "group_order": "1256988294224461088919712",
+        "j_coefficients": [
+          "21",
+          "183",
+          "207",
+          "156",
+          "85",
+          "225",
+          "40",
+          "224",
+          "192",
+          "145"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-257-10-9a5f1210:1192017885538:1256988294224461088919712:121,19,106,49,167,73,231,222,141,22:unk:unk:r:29089137b33c",
+        "target": "ICV1:fpk-257-10-9a5f1210:1192017885538:1256988294224461088919712:21,183,207,156,85,225,40,224,192,145:unk:unk:r:2809d13289ff",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 1009,
+      "base_degree": 2,
+      "odd_degree": 5,
+      "field_degree": 10,
+      "field_cardinality": "1093733872802526507260136674401",
+      "log2_field_cardinality": "99.787105",
+      "absolute_orbit_calls": "53715517091222544722306",
+      "log10_absolute_orbit_calls": "22.730100",
+      "modulus_low_coefficients": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "lambda_coefficients": [
+        524,
+        372,
+        485,
+        170,
+        357,
+        476,
+        180,
+        501,
+        799,
+        35
+      ],
+      "ordinary": true,
+      "source_count_ms": 567,
+      "target_count_ms": 608,
+      "source": {
+        "icv1": "ICV1:fpk-1009-10-27f2a8e8:1457039790144130:1093733872802525050220346530272:875,669,116,788,401,406,64,999,716,10:unk:unk:r:541c1c3d2c24",
+        "slug": "icv1-fp10k10-t1457039790144130-541c1c3d",
+        "model_json": "{\"a\":[\"278\",\"896\",\"295\",\"266\",\"271\",\"207\",\"550\",\"998\",\"475\",\"27\"],\"b\":[\"990\",\"135\",\"966\",\"988\",\"91\",\"986\",\"487\",\"794\",\"825\",\"548\"],\"field\":\"fpk-1009-10-27f2a8e8\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"1009\",\"v\":\"1\"}",
+        "model_sha256": "541c1c3d2c24330d95b1193a1fe5f6f3f2bca3db532ab0b3e23b992c311268c2",
+        "trace": "1457039790144130",
+        "group_order": "1093733872802525050220346530272",
+        "j_coefficients": [
+          "875",
+          "669",
+          "116",
+          "788",
+          "401",
+          "406",
+          "64",
+          "999",
+          "716",
+          "10"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-1009-10-27f2a8e8:1457039790144130:1093733872802525050220346530272:606,457,777,407,188,54,228,75,47,107:unk:unk:r:37e6cef0a58e",
+        "slug": "icv1-fp10k10-t1457039790144130-37e6cef0",
+        "model_json": "{\"a\":[\"685\",\"45\",\"897\",\"425\",\"504\",\"854\",\"659\",\"511\",\"516\",\"861\"],\"b\":[\"478\",\"644\",\"828\",\"592\",\"869\",\"413\",\"504\",\"182\",\"556\",\"186\"],\"field\":\"fpk-1009-10-27f2a8e8\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"],\"p\":\"1009\",\"v\":\"1\"}",
+        "model_sha256": "37e6cef0a58e46151044468fa461544e2d4bfd0c82e936627e018713f1bf1516",
+        "trace": "1457039790144130",
+        "group_order": "1093733872802525050220346530272",
+        "j_coefficients": [
+          "606",
+          "457",
+          "777",
+          "407",
+          "188",
+          "54",
+          "228",
+          "75",
+          "47",
+          "107"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-1009-10-27f2a8e8:1457039790144130:1093733872802525050220346530272:875,669,116,788,401,406,64,999,716,10:unk:unk:r:541c1c3d2c24",
+        "target": "ICV1:fpk-1009-10-27f2a8e8:1457039790144130:1093733872802525050220346530272:606,457,777,407,188,54,228,75,47,107:unk:unk:r:37e6cef0a58e",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 65537,
+      "base_degree": 2,
+      "odd_degree": 5,
+      "field_degree": 10,
+      "field_cardinality": "1461724660096217828138574006242194311125809102849",
+      "log2_field_cardinality": "160.000220",
+      "absolute_orbit_calls": "17016195379674920501111149859163969946",
+      "log10_absolute_orbit_calls": "37.230862",
+      "modulus_low_coefficients": [
+        1147,
+        2263,
+        3317,
+        3317,
+        1922,
+        304,
+        65303,
+        65433,
+        1,
+        7
+      ],
+      "lambda_coefficients": [
+        22965,
+        9838,
+        21318,
+        985,
+        16392,
+        43100,
+        32455,
+        45448,
+        62047,
+        40544
+      ],
+      "ordinary": true,
+      "source_count_ms": 1403,
+      "target_count_ms": 1590,
+      "source": {
+        "icv1": "ICV1:fpk-65537-10-143462e8:-631075689354270536704190:1461724660096217828138574637317883665396345807040:45152,11874,49824,52524,33586,25022,22872,11067,20478,51299:unk:unk:r:2a3ca5dd4407",
+        "slug": "icv1-fp17k10-tm631075689354270536704190-2a3ca5dd",
+        "model_json": "{\"a\":[\"39812\",\"50384\",\"29152\",\"3974\",\"56081\",\"43600\",\"31800\",\"35485\",\"8080\",\"10199\"],\"b\":[\"10051\",\"22293\",\"25438\",\"51171\",\"16488\",\"55458\",\"11330\",\"7252\",\"21406\",\"18318\"],\"field\":\"fpk-65537-10-143462e8\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"1147\",\"2263\",\"3317\",\"3317\",\"1922\",\"304\",\"65303\",\"65433\",\"1\",\"7\"],\"p\":\"65537\",\"v\":\"1\"}",
+        "model_sha256": "2a3ca5dd4407bc3ca2ba7639d470ed3425011ecb72254ad5eeb37a108f66c52d",
+        "trace": "-631075689354270536704190",
+        "group_order": "1461724660096217828138574637317883665396345807040",
+        "j_coefficients": [
+          "45152",
+          "11874",
+          "49824",
+          "52524",
+          "33586",
+          "25022",
+          "22872",
+          "11067",
+          "20478",
+          "51299"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-65537-10-143462e8:-631075689354270536704190:1461724660096217828138574637317883665396345807040:20321,26312,13527,3207,48615,53614,54416,9257,37740,21824:unk:unk:r:d6634b57796a",
+        "slug": "icv1-fp17k10-tm631075689354270536704190-d6634b57",
+        "model_json": "{\"a\":[\"56061\",\"1194\",\"53636\",\"64586\",\"39658\",\"24711\",\"599\",\"4856\",\"25530\",\"4090\"],\"b\":[\"13300\",\"21355\",\"51932\",\"6104\",\"28102\",\"38774\",\"49415\",\"14639\",\"35942\",\"26902\"],\"field\":\"fpk-65537-10-143462e8\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"10\",\"modulus\":[\"1147\",\"2263\",\"3317\",\"3317\",\"1922\",\"304\",\"65303\",\"65433\",\"1\",\"7\"],\"p\":\"65537\",\"v\":\"1\"}",
+        "model_sha256": "d6634b57796a98f31fad37e7a519e21af3d894edfd17d2b3cd5df90cb320056b",
+        "trace": "-631075689354270536704190",
+        "group_order": "1461724660096217828138574637317883665396345807040",
+        "j_coefficients": [
+          "20321",
+          "26312",
+          "13527",
+          "3207",
+          "48615",
+          "53614",
+          "54416",
+          "9257",
+          "37740",
+          "21824"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-65537-10-143462e8:-631075689354270536704190:1461724660096217828138574637317883665396345807040:45152,11874,49824,52524,33586,25022,22872,11067,20478,51299:unk:unk:r:2a3ca5dd4407",
+        "target": "ICV1:fpk-65537-10-143462e8:-631075689354270536704190:1461724660096217828138574637317883665396345807040:20321,26312,13527,3207,48615,53614,54416,9257,37740,21824:unk:unk:r:d6634b57796a",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 13,
+      "base_degree": 2,
+      "odd_degree": 7,
+      "field_degree": 14,
+      "field_cardinality": "3937376385699289",
+      "log2_field_cardinality": "51.806156",
+      "absolute_orbit_calls": "837027639705",
+      "log10_absolute_orbit_calls": "11.922740",
+      "modulus_low_coefficients": [
+        2,
+        4,
+        5,
+        4,
+        4,
+        11,
+        10,
+        6,
+        3,
+        10,
+        1,
+        10,
+        4,
+        9
+      ],
+      "lambda_coefficients": [
+        0,
+        5,
+        1,
+        1,
+        12,
+        2,
+        0,
+        4,
+        0,
+        6,
+        3,
+        1,
+        6,
+        12
+      ],
+      "ordinary": true,
+      "source_count_ms": 5,
+      "target_count_ms": 3,
+      "source": {
+        "icv1": "ICV1:fpk-13-14-97d5c120:-18181270:3937376403880560:3,3,10,9,5,4,5,5,10,4,2,1,5,0:unk:unk:r:b3789dd57cfd",
+        "slug": "icv1-fp4k14-tm18181270-b3789dd5",
+        "model_json": "{\"a\":[\"2\",\"12\",\"6\",\"8\",\"5\",\"3\",\"9\",\"3\",\"0\",\"11\",\"9\",\"6\",\"4\",\"5\"],\"b\":[\"8\",\"6\",\"12\",\"12\",\"9\",\"3\",\"12\",\"8\",\"5\",\"6\",\"8\",\"3\",\"10\",\"3\"],\"field\":\"fpk-13-14-97d5c120\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"2\",\"4\",\"5\",\"4\",\"4\",\"11\",\"10\",\"6\",\"3\",\"10\",\"1\",\"10\",\"4\",\"9\"],\"p\":\"13\",\"v\":\"1\"}",
+        "model_sha256": "b3789dd57cfda95dc771022b16ba106d11e9984018c387bd09c099a326516c48",
+        "trace": "-18181270",
+        "group_order": "3937376403880560",
+        "j_coefficients": [
+          "3",
+          "3",
+          "10",
+          "9",
+          "5",
+          "4",
+          "5",
+          "5",
+          "10",
+          "4",
+          "2",
+          "1",
+          "5",
+          "0"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-13-14-97d5c120:-18181270:3937376403880560:3,2,9,12,11,12,9,1,9,3,3,1,3,11:unk:unk:r:5a46b5675052",
+        "slug": "icv1-fp4k14-tm18181270-5a46b567",
+        "model_json": "{\"a\":[\"2\",\"0\",\"1\",\"3\",\"10\",\"6\",\"9\",\"9\",\"0\",\"7\",\"7\",\"1\",\"0\",\"10\"],\"b\":[\"9\",\"6\",\"5\",\"4\",\"4\",\"0\",\"1\",\"10\",\"5\",\"9\",\"11\",\"9\",\"10\",\"11\"],\"field\":\"fpk-13-14-97d5c120\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"2\",\"4\",\"5\",\"4\",\"4\",\"11\",\"10\",\"6\",\"3\",\"10\",\"1\",\"10\",\"4\",\"9\"],\"p\":\"13\",\"v\":\"1\"}",
+        "model_sha256": "5a46b56750526f3b1e2ac5c9265d2d18b4bcd6f17d9639ca832d63401cf78290",
+        "trace": "-18181270",
+        "group_order": "3937376403880560",
+        "j_coefficients": [
+          "3",
+          "2",
+          "9",
+          "12",
+          "11",
+          "12",
+          "9",
+          "1",
+          "9",
+          "3",
+          "3",
+          "1",
+          "3",
+          "11"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-13-14-97d5c120:-18181270:3937376403880560:3,3,10,9,5,4,5,5,10,4,2,1,5,0:unk:unk:r:b3789dd57cfd",
+        "target": "ICV1:fpk-13-14-97d5c120:-18181270:3937376403880560:3,2,9,12,11,12,9,1,9,3,3,1,3,11:unk:unk:r:5a46b5675052",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 257,
+      "base_degree": 2,
+      "odd_degree": 7,
+      "field_degree": 14,
+      "field_cardinality": "5483574227962890893331590433934849",
+      "log2_field_cardinality": "112.078744",
+      "absolute_orbit_calls": "2965145601879871433128498341",
+      "log10_absolute_orbit_calls": "27.472046",
+      "modulus_low_coefficients": [
+        230,
+        178,
+        142,
+        36,
+        31,
+        143,
+        179,
+        164,
+        158,
+        85,
+        69,
+        206,
+        18,
+        9
+      ],
+      "lambda_coefficients": [
+        23,
+        212,
+        183,
+        3,
+        3,
+        65,
+        185,
+        142,
+        213,
+        1,
+        242,
+        16,
+        150,
+        247
+      ],
+      "ordinary": true,
+      "source_count_ms": 911,
+      "target_count_ms": 1064,
+      "source": {
+        "icv1": "ICV1:fpk-257-14-d68410db:68020905055396130:5483574227962890825310685378538720:141,199,130,134,54,219,138,100,170,247,210,9,23,109:unk:unk:r:7892b472303c",
+        "slug": "icv1-fp9k14-t68020905055396130-7892b472",
+        "model_json": "{\"a\":[\"207\",\"81\",\"226\",\"176\",\"59\",\"72\",\"182\",\"177\",\"20\",\"175\",\"40\",\"6\",\"4\",\"94\"],\"b\":[\"214\",\"198\",\"249\",\"91\",\"26\",\"121\",\"254\",\"227\",\"51\",\"87\",\"29\",\"136\",\"87\",\"167\"],\"field\":\"fpk-257-14-d68410db\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"230\",\"178\",\"142\",\"36\",\"31\",\"143\",\"179\",\"164\",\"158\",\"85\",\"69\",\"206\",\"18\",\"9\"],\"p\":\"257\",\"v\":\"1\"}",
+        "model_sha256": "7892b472303c3bf4443883bbda6305e337ec95c8e46943f2621d6da26eef84d5",
+        "trace": "68020905055396130",
+        "group_order": "5483574227962890825310685378538720",
+        "j_coefficients": [
+          "141",
+          "199",
+          "130",
+          "134",
+          "54",
+          "219",
+          "138",
+          "100",
+          "170",
+          "247",
+          "210",
+          "9",
+          "23",
+          "109"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-257-14-d68410db:68020905055396130:5483574227962890825310685378538720:158,55,187,247,190,189,97,43,38,14,68,45,35,24:unk:unk:r:6186a592b31c",
+        "slug": "icv1-fp9k14-t68020905055396130-6186a592",
+        "model_json": "{\"a\":[\"92\",\"49\",\"82\",\"161\",\"44\",\"4\",\"28\",\"238\",\"240\",\"170\",\"115\",\"183\",\"25\",\"144\"],\"b\":[\"155\",\"192\",\"35\",\"158\",\"141\",\"6\",\"186\",\"79\",\"134\",\"66\",\"193\",\"83\",\"245\",\"62\"],\"field\":\"fpk-257-14-d68410db\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"230\",\"178\",\"142\",\"36\",\"31\",\"143\",\"179\",\"164\",\"158\",\"85\",\"69\",\"206\",\"18\",\"9\"],\"p\":\"257\",\"v\":\"1\"}",
+        "model_sha256": "6186a592b31cdba7491a2eab853f897b8f9b6f941def88034b9fd341f30ecaf7",
+        "trace": "68020905055396130",
+        "group_order": "5483574227962890825310685378538720",
+        "j_coefficients": [
+          "158",
+          "55",
+          "187",
+          "247",
+          "190",
+          "189",
+          "97",
+          "43",
+          "38",
+          "14",
+          "68",
+          "45",
+          "35",
+          "24"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-257-14-d68410db:68020905055396130:5483574227962890825310685378538720:141,199,130,134,54,219,138,100,170,247,210,9,23,109:unk:unk:r:7892b472303c",
+        "target": "ICV1:fpk-257-14-d68410db:68020905055396130:5483574227962890825310685378538720:158,55,187,247,190,189,97,43,38,14,68,45,35,24:unk:unk:r:6186a592b31c",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 1009,
+      "base_degree": 2,
+      "odd_degree": 7,
+      "field_degree": 14,
+      "field_cardinality": "1133643043389560521028701605795494160060961",
+      "log2_field_cardinality": "139.701946",
+      "absolute_orbit_calls": "39768241738986289429167795506486283",
+      "log10_absolute_orbit_calls": "34.599536",
+      "modulus_low_coefficients": [
+        605,
+        79,
+        637,
+        961,
+        993,
+        600,
+        995,
+        326,
+        205,
+        577,
+        142,
+        57,
+        32,
+        9
+      ],
+      "lambda_coefficients": [
+        406,
+        477,
+        671,
+        938,
+        992,
+        992,
+        310,
+        943,
+        21,
+        176,
+        963,
+        644,
+        826,
+        779
+      ],
+      "ordinary": true,
+      "source_count_ms": 1358,
+      "target_count_ms": 1512,
+      "source": {
+        "icv1": "ICV1:fpk-1009-14-35108ea6:1763479535656845742434:1133643043389560521026938126259837314318528:181,913,672,335,124,534,621,914,743,317,887,341,291,420:unk:unk:r:b3516bfebff8",
+        "slug": "icv1-fp10k14-t1763479535656845742434-b3516bfe",
+        "model_json": "{\"a\":[\"474\",\"565\",\"184\",\"888\",\"298\",\"502\",\"363\",\"791\",\"344\",\"583\",\"204\",\"447\",\"809\",\"632\"],\"b\":[\"735\",\"863\",\"203\",\"171\",\"261\",\"966\",\"3\",\"881\",\"499\",\"109\",\"683\",\"399\",\"414\",\"266\"],\"field\":\"fpk-1009-14-35108ea6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"605\",\"79\",\"637\",\"961\",\"993\",\"600\",\"995\",\"326\",\"205\",\"577\",\"142\",\"57\",\"32\",\"9\"],\"p\":\"1009\",\"v\":\"1\"}",
+        "model_sha256": "b3516bfebff863ddc5f0b4798458f7041a535ec9eca5e15d25d5c6aa69089d89",
+        "trace": "1763479535656845742434",
+        "group_order": "1133643043389560521026938126259837314318528",
+        "j_coefficients": [
+          "181",
+          "913",
+          "672",
+          "335",
+          "124",
+          "534",
+          "621",
+          "914",
+          "743",
+          "317",
+          "887",
+          "341",
+          "291",
+          "420"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-1009-14-35108ea6:1763479535656845742434:1133643043389560521026938126259837314318528:16,781,75,852,68,817,598,566,148,672,82,55,898,599:unk:unk:r:9c5865a39378",
+        "slug": "icv1-fp10k14-t1763479535656845742434-9c5865a3",
+        "model_json": "{\"a\":[\"462\",\"198\",\"865\",\"234\",\"383\",\"587\",\"831\",\"112\",\"239\",\"712\",\"434\",\"254\",\"715\",\"773\"],\"b\":[\"991\",\"143\",\"701\",\"14\",\"450\",\"736\",\"254\",\"81\",\"207\",\"549\",\"722\",\"948\",\"960\",\"150\"],\"field\":\"fpk-1009-14-35108ea6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"605\",\"79\",\"637\",\"961\",\"993\",\"600\",\"995\",\"326\",\"205\",\"577\",\"142\",\"57\",\"32\",\"9\"],\"p\":\"1009\",\"v\":\"1\"}",
+        "model_sha256": "9c5865a393785ee7bf6cfa06c650880ccbfe3fcf491de596b4a9f1cd5b186f07",
+        "trace": "1763479535656845742434",
+        "group_order": "1133643043389560521026938126259837314318528",
+        "j_coefficients": [
+          "16",
+          "781",
+          "75",
+          "852",
+          "68",
+          "817",
+          "598",
+          "566",
+          "148",
+          "672",
+          "82",
+          "55",
+          "898",
+          "599"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-1009-14-35108ea6:1763479535656845742434:1133643043389560521026938126259837314318528:181,913,672,335,124,534,621,914,743,317,887,341,291,420:unk:unk:r:b3516bfebff8",
+        "target": "ICV1:fpk-1009-14-35108ea6:1763479535656845742434:1133643043389560521026938126259837314318528:16,781,75,852,68,817,598,566,148,672,82,55,898,599:unk:unk:r:9c5865a39378",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    },
+    {
+      "characteristic": 65537,
+      "base_degree": 2,
+      "odd_degree": 7,
+      "field_degree": 14,
+      "field_cardinality": "26965706504352387672564992041750118800909059081520136804293290098689",
+      "log2_field_cardinality": "224.000308",
+      "absolute_orbit_calls": "224223257320288187040830473431685280487633434708484671781",
+      "log10_absolute_orbit_calls": "56.350681",
+      "modulus_low_coefficients": [
+        2029,
+        3776,
+        6053,
+        4148,
+        1316,
+        64909,
+        65202,
+        935,
+        929,
+        85,
+        65349,
+        65486,
+        18,
+        9
+      ],
+      "lambda_coefficients": [
+        64021,
+        38837,
+        45704,
+        44721,
+        58329,
+        27329,
+        1507,
+        56995,
+        21545,
+        20169,
+        20218,
+        6660,
+        33577,
+        21758
+      ],
+      "ordinary": true,
+      "source_count_ms": 4716,
+      "target_count_ms": 4773,
+      "source": {
+        "icv1": "ICV1:fpk-65537-14-5f033afd:-8584681529762742589363022356005534:26965706504352387672564992041750127385590588844262726167315646104224:40347,44754,45663,34798,53900,38450,51986,14309,42183,41450,8439,22872,21540,14245:unk:unk:r:53bab9db0c79",
+        "slug": "icv1-fp17k14-tm8584681529762742589363022356005534-53bab9db",
+        "model_json": "{\"a\":[\"36197\",\"49225\",\"38142\",\"4723\",\"10345\",\"56882\",\"59772\",\"26024\",\"26257\",\"25066\",\"56309\",\"54742\",\"27383\",\"45717\"],\"b\":[\"25175\",\"16040\",\"5483\",\"53886\",\"25701\",\"60540\",\"13165\",\"50848\",\"57060\",\"47818\",\"17867\",\"61795\",\"19629\",\"22172\"],\"field\":\"fpk-65537-14-5f033afd\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"2029\",\"3776\",\"6053\",\"4148\",\"1316\",\"64909\",\"65202\",\"935\",\"929\",\"85\",\"65349\",\"65486\",\"18\",\"9\"],\"p\":\"65537\",\"v\":\"1\"}",
+        "model_sha256": "53bab9db0c793576b046f97eb215ceb5ae3fd8c9f9c275865388e0cd64575c9a",
+        "trace": "-8584681529762742589363022356005534",
+        "group_order": "26965706504352387672564992041750127385590588844262726167315646104224",
+        "j_coefficients": [
+          "40347",
+          "44754",
+          "45663",
+          "34798",
+          "53900",
+          "38450",
+          "51986",
+          "14309",
+          "42183",
+          "41450",
+          "8439",
+          "22872",
+          "21540",
+          "14245"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "target": {
+        "icv1": "ICV1:fpk-65537-14-5f033afd:-8584681529762742589363022356005534:26965706504352387672564992041750127385590588844262726167315646104224:27514,50662,1715,47417,19012,61061,26677,46394,39704,43174,7391,7170,54728,61251:unk:unk:r:f251cdbb6e0c",
+        "slug": "icv1-fp17k14-tm8584681529762742589363022356005534-f251cdbb",
+        "model_json": "{\"a\":[\"43777\",\"51651\",\"6233\",\"43266\",\"46385\",\"51311\",\"52237\",\"3197\",\"49606\",\"55295\",\"20756\",\"21442\",\"56109\",\"2464\"],\"b\":[\"26867\",\"5624\",\"39157\",\"32912\",\"28877\",\"8358\",\"38707\",\"47274\",\"61187\",\"32015\",\"23894\",\"37366\",\"28332\",\"22147\"],\"field\":\"fpk-65537-14-5f033afd\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"2029\",\"3776\",\"6053\",\"4148\",\"1316\",\"64909\",\"65202\",\"935\",\"929\",\"85\",\"65349\",\"65486\",\"18\",\"9\"],\"p\":\"65537\",\"v\":\"1\"}",
+        "model_sha256": "f251cdbb6e0c2b047fa48e46dd3cf1cc018019882e3e5fe674a0ff3688cbab57",
+        "trace": "-8584681529762742589363022356005534",
+        "group_order": "26965706504352387672564992041750127385590588844262726167315646104224",
+        "j_coefficients": [
+          "27514",
+          "50662",
+          "1715",
+          "47417",
+          "19012",
+          "61061",
+          "26677",
+          "46394",
+          "39704",
+          "43174",
+          "7391",
+          "7170",
+          "54728",
+          "61251"
+        ],
+        "endomorphism_order_conductor": null,
+        "frobenius_order_conductor": null,
+        "volcano_level": null,
+        "subgroup_order": null
+      },
+      "isogeny": {
+        "degree": 2,
+        "source": "ICV1:fpk-65537-14-5f033afd:-8584681529762742589363022356005534:26965706504352387672564992041750127385590588844262726167315646104224:40347,44754,45663,34798,53900,38450,51986,14309,42183,41450,8439,22872,21540,14245:unk:unk:r:53bab9db0c79",
+        "target": "ICV1:fpk-65537-14-5f033afd:-8584681529762742589363022356005534:26965706504352387672564992041750127385590588844262726167315646104224:27514,50662,1715,47417,19012,61061,26677,46394,39704,43174,7391,7170,54728,61251:unk:unk:r:f251cdbb6e0c",
+        "kernel_original_model": [
+          [
+            0,
+            0
+          ]
+        ],
+        "original_map": "(x,y) -> (x+a+b/x, y*(1-b/x^2)); a=-(1+lambda), b=lambda",
+        "short_model_coordinate_changes": "X=x+a2/3 on each original model; Y=y",
+        "status": "explicit_point_replay_and_equal_independent_cardinalities",
+        "identity_record": "IDC1he02ab9a5cf019a56"
+      },
+      "verification": {
+        "norm_one": true,
+        "fourth_root": true,
+        "two_independent_target_halves": true,
+        "full_rational_target_4_torsion": true,
+        "point_count_pair_equal": true,
+        "hasse": true,
+        "cardinality_mod16": 0
+      }
+    }
+  ]
+}

@@ -1359,6 +1359,12 @@ The condition is **not sufficient for the recorded computational labels**: held-
 
 Hilbert 90 identifies normalized `α/F_q^*` with the nonidentity norm-one parameters `λ=α^q/α`. The `q`-Frobenius and inversion orbits of `λ` have size six except one two-element orbit, and preserve the symmetric trace pair. The [orbit implementation and receipt](../../iso1_weak_classes_20261007/orbit_run_receipt.txt) reduce point-count calls by almost exactly sixfold: p = 13 and 37 orbit CSVs are byte-identical to their direct twist-derived CSVs, with 312,589 rather than 1,875,530 calls at p = 37. At p = 47, the completed [orbit census](../../iso1_weak_classes_20261007/p47_orbit_run_receipt.txt) needs 813,649 point counts and weights to 9,763,780 representatives. The special orbit yields two nonordinary Hasse-boundary rows at `t=±2·47³`, independently checked with PARI/GP. Another 5,000 independent GP norm-one samples give 4,200 distinct traces, all in the p = 47 positive set. These operation counts and sampled positive controls do not certify every zero row or establish an isolated CPU speedup.
 
+### 18.6.1 Larger-field controls and prime-degree orbit theorem (2026-10-09)
+
+The [larger-field report](../../iso1_weak_classes_20261007/larger_fields_20261009/REPORT.md) verifies 17 independently counted source/target pairs, 49 explicit geometric controls, fields through log2(Q)=252, and total extension degrees 10 and 14. All pairs are ordinary, have equal cardinality divisible by 16, and pass Hasse. Exact coefficient vectors, moduli, and 34 ICV1 model IDs are retained. These are individual norm-one positive controls; full trace-class coverage remains a separate requirement.
+
+For odd prime n, the absolute-Frobenius orbit count is now proved as C_(p,n)=[N+A+B-3+2e(n-1)^2]/(4n), where N=(p^(2n)-1)/(p^2-1), A=(p^n-1)/(p-1), B=(p^n+1)/(p+1), and e=1 iff p^2=1 mod n. Its cleared sum has record IDC1h90d58cc0e0c48fe3. Eight exhaustive cyclic-group audits cover 6,928,970 parameters; 45 stabilizer cases pass. The temporary p59 continuation was interrupted and is now restarted with a finite local service and persistent receipts; the original requested range through p199 remains preserved.
+
 ### 18.7 Historical candidate R-v2, registered before its held-out test and now falsified (2026-10-08)
 
 This preregistration is preserved as research history. The corrected p = 37,
