@@ -131,7 +131,7 @@ use std::sync::{Arc, OnceLock};
 use num_bigint::BigUint;
 use num_traits::{One, ToPrimitive, Zero};
 use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
+use rand::{Rng, RngCore, SeedableRng};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -8440,6 +8440,35 @@ pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
     koblitz_index_calculus_dlp_observed(kc, q, fb, opts, progress)
 }
 
+/// Draw a nonzero relation coefficient from the entire prime subgroup.
+///
+/// Keep the old `gen_range` path for a one-word order so frozen small-curve
+/// relation streams remain bit-for-bit unchanged.  A wider order is sampled
+/// by masked rejection; taking its low limb would silently restrict the
+/// relation workload to a different coefficient distribution.
+fn sample_relation_scalar(r: &BigUint, rng: &mut StdRng) -> BigUint {
+    if r.bits() <= 64 {
+        let word = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+        return BigUint::from(rng.gen_range(1..word));
+    }
+    let bits = r.bits();
+    let mut bytes = vec![0u8; bits.div_ceil(8) as usize];
+    let high_bits = bits % 8;
+    let high_mask = if high_bits == 0 {
+        u8::MAX
+    } else {
+        (1u8 << high_bits) - 1
+    };
+    loop {
+        rng.fill_bytes(&mut bytes);
+        *bytes.last_mut().expect("nonzero subgroup order") &= high_mask;
+        let candidate = BigUint::from_bytes_le(&bytes);
+        if !candidate.is_zero() && &candidate < r {
+            return candidate;
+        }
+    }
+}
+
 fn koblitz_index_calculus_dlp_observed(
     kc: &KoblitzCurve,
     q: &BinaryPoint,
@@ -8580,7 +8609,6 @@ fn koblitz_index_calculus_dlp_observed(
     // solver is the fallback for a modulus wider than 64 bits.
     let mut echelon = IncrementalRelationSolver::new(relation_unknowns, r);
     let mut rng = StdRng::seed_from_u64(opts.seed);
-    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     let relation_start = std::time::Instant::now();
 
     // Record the exact incremental rank and, when allowed and pinned,
@@ -8656,8 +8684,8 @@ fn koblitz_index_calculus_dlp_observed(
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
-                let a = BigUint::from(rng.gen_range(1..r_u64));
-                let b = BigUint::from(rng.gen_range(1..r_u64));
+                let a = sample_relation_scalar(r, &mut rng);
+                let b = sample_relation_scalar(r, &mut rng);
                 let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
                 (a, b, target)
             })
@@ -12314,6 +12342,39 @@ impl<'a> IndividualLogSolver<'a> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::koblitz_groebner::build_decomposition_system;
+
+    #[test]
+    fn relation_scalar_sampler_preserves_one_word_stream() {
+        for (seed, order) in [(0, 65537u64), (1, 1_000_003), (5, u64::MAX - 58)] {
+            let mut sampler = StdRng::seed_from_u64(seed);
+            let mut reference = StdRng::seed_from_u64(seed);
+            let r = BigUint::from(order);
+            for _ in 0..128 {
+                assert_eq!(
+                    sample_relation_scalar(&r, &mut sampler),
+                    BigUint::from(reference.gen_range(1..order))
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn relation_scalar_sampler_covers_full_m83_order_reproducibly() {
+        let r = BigUint::parse_bytes(b"2417851639230796216685689", 10).unwrap();
+        assert!(r.bits() > 64);
+        let mut saw_high_limb = false;
+        for seed in [0, 1, 5, 0x83] {
+            let mut first = StdRng::seed_from_u64(seed);
+            let mut replay = StdRng::seed_from_u64(seed);
+            for _ in 0..128 {
+                let value = sample_relation_scalar(&r, &mut first);
+                assert!(value > BigUint::zero() && value < r);
+                saw_high_limb |= value.bits() > 64;
+                assert_eq!(value, sample_relation_scalar(&r, &mut replay));
+            }
+        }
+        assert!(saw_high_limb, "the m=83 stream never reached a high limb");
+    }
 
     #[test]
     fn rho_preparation_preserves_walk_and_charges() {
