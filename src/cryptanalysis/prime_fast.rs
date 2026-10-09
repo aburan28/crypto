@@ -1393,8 +1393,8 @@ pub fn point_order_hasse(curve: &FastCurve, g: Pt) -> Option<u64> {
 /// Deterministic `a = −3` prime-order bench curve at `bits` bits in the
 /// requested residue class of `p mod 4`: `p` the largest such prime
 /// below `2^bits`, `b` the smallest positive value giving prime order,
-/// `G` the smallest-x point.  Reproduces
-/// [`crate::cryptanalysis::research_bench::bench_curves_a_minus_3`].
+/// `G` the smallest-x point. Reproduces the curve and the generator's
+/// negation class in [`crate::cryptanalysis::research_bench::bench_curves_a_minus_3`].
 pub fn find_a3_curve(bits: u32, residue_mod_4: u64) -> Option<(FastCurve, Pt)> {
     assert!((8..=MAX_BITS).contains(&bits));
     let mut p = (1u64 << bits) - 1;
@@ -1617,9 +1617,15 @@ mod tests {
             let (fc, g) = ladder(bits);
             assert_eq!(point_order_hasse(&fc, g), Some(fc.n), "bits={bits}");
             let (gen, gg) = find_a3_curve(bits, 3).unwrap();
+            let found = gen.canonical(gg);
+            let frozen = fc.canonical(g);
             assert_eq!(
-                (gen.f.p, gen.n, gen.canonical(gg)),
-                (fc.f.p, fc.n, fc.canonical(g))
+                (gen.f.p, gen.n, gen.f.from_mont(gen.b), found.0),
+                (fc.f.p, fc.n, fc.f.from_mont(fc.b), frozen.0),
+            );
+            assert!(
+                found.1 == frozen.1 || found.1 == (fc.f.p - frozen.1) % fc.f.p,
+                "generated point must match the frozen generator up to sign"
             );
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();

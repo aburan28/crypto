@@ -15,7 +15,8 @@ the complete rank and shared-log implementations in separate modules behind
 their existing options.
 
 The curve registry had a missing record boundary; its JSON delimiters are
-repaired while retaining all 322 curve records. The ECC2K130 Makefile had
+repaired. The duplicate `sect113r1` records were consolidated with both
+representations retained, leaving 321 distinct curves. The ECC2K130 Makefile had
 duplicated continuation fragments. The shared cover checker now receives its
 model-normalization module in both commands that include it.
 

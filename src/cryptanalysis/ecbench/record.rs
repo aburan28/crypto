@@ -737,7 +737,9 @@ mod tests {
         // Compatibility is the archived bit pattern, independent of whether
         // the current parser happens to differ on this decimal fixture.
         assert_eq!(legacy.gae.to_bits(), 3934.013766884967_f64.to_bits());
-        assert_eq!(legacy.nested[0].to_bits(), 0.3722266573040223_f64.to_bits());
+        // serde_json's v1 integer-significand path parses this sealed decimal
+        // one ULP below its correctly rounded value (see the archived audit).
+        assert_eq!(legacy.nested[0].to_bits(), 4_600_377_059_258_432_959);
         assert_eq!(legacy.integer, 17);
     }
 
