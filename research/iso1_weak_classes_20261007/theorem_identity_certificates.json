@@ -1,0 +1,340 @@
+[
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hf8aba4800a6ceb5c",
+    "statement": {
+      "name": "ISO-1 rational halving point lies on the translated curve",
+      "source": "research/iso1_weak_classes_20261007/THEOREM.tex; P=(a*b,a*b*(a+b)) after translating a root to zero",
+      "variables": [
+        "a",
+        "b"
+      ],
+      "degree_bound": 6,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "b"
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "b"
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "47c04b71a362a1b5a9d544a968da98180d27895eaeee0e2516fafe4ad8b32f06",
+    "independence": "Native polynomial replay; separate exact PARI expansion. The finite-field and order-theoretic arguments are written proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h1bc37ec40bcb8619",
+    "statement": {
+      "name": "ISO-1 absolute-orbit counting numerator",
+      "source": "research/iso1_weak_classes_20261007/THEOREM.tex; twelve times the total orbit count",
+      "variables": [
+        "p"
+      ],
+      "degree_bound": 4,
+      "lhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "p"
+                      },
+                      {
+                        "op": "var",
+                        "args": "p"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "p"
+                      },
+                      {
+                        "op": "var",
+                        "args": "p"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "p"
+                    },
+                    {
+                      "op": "var",
+                      "args": "p"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": 4
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "p"
+                      },
+                      {
+                        "op": "var",
+                        "args": "p"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "const",
+                    "args": -1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": 12
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "p"
+                  },
+                  {
+                    "op": "var",
+                    "args": "p"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "p"
+                  },
+                  {
+                    "op": "var",
+                    "args": "p"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": 3
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "p"
+                  },
+                  {
+                    "op": "var",
+                    "args": "p"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": 8
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "4ee9d4118bc7dd80aff5e0ce0ce6ec6d7bc9e993e7762d216d439488c97c8775",
+    "independence": "Native polynomial replay; separate exact PARI expansion. The finite-field and order-theoretic arguments are written proofs.",
+    "proof": null
+  }
+]

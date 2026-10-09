@@ -1,4 +1,23 @@
-# ISO-1 weak isogeny classes: trace census and 2-adic obstruction (updated 2026-10-08)
+# ISO-1 weak isogeny classes: a norm-one conductor theorem and trace census (updated 2026-10-08)
+
+Every curve in the norm-one weak family over an odd extension of
+`F_q`, with `q ≡ 1 (mod 4)`, has a Legendre twist with a rational
+2-isogenous neighbor carrying full rational 4-torsion. Consequently
+`t ≡ ±(q^n+1) (mod 16)` and every ordinary weak class has
+`v₂(f_pi) ≥ 2`. The [standalone theorem and proof](THEOREM.tex)
+([compiled note](THEOREM.pdf)) establish this at every field size.
+An exact p = 7 census, independently matched against all PARI/GP orbits,
+proves that this condition is insufficient: the existing class
+`t = ±610` has conductor `72`, depth 3, and no weak representative.
+
+Absolute Frobenius and inversion reduce the cubic census to exactly
+`(p⁴+3p²+8)/12` point-count calls. The new p = 13 run reproduces the
+retained CSV byte for byte with 2,423 calls, compared with 4,789 for
+the previous quotient. The completed p = 53 census adds **72,540 weak
+rows among 146,068 ordinary rows**, no depth-1 weak row, and **494**
+high-depth zero rows. All 5,000 independent GP controls agree with its
+positive set. The sequential worker has started p = 59 and retains
+the remaining requested primes through p = 199.
 
 ## Requested question and scope
 
@@ -6,19 +25,21 @@ The requested base primes are **p = 37 through about 200**, with
 q = p² and curves over F_(q³) = F_(p⁶).  The requested result is a label for
 every ordinary full-2-torsion isogeny class at every such p, followed by a
 formula that can replace both the cover-branch reach census and random
-seed grinding. This round completed **p = 37, 41, 43, and 47** in that range
-and used p = 11, 13, 17 as development and held-out checks. It also proves
-a necessary trace condition for every odd base prime. The remaining primes
-and a necessary-and-sufficient formula remain open.
+seed grinding. This round completed **p = 37, 41, 43, 47, and 53** in that range
+and used p = 11, 13, 17 as development and held-out checks. The present
+continuation adds the exact p = 7 converse counterexample and the
+generalized theorem. The [continuation protocol](CONTINUATION_PROTOCOL.md)
+preserves the full requested range. Larger-prime counts enter the result
+table only after the completed CSV passes its recorded checks.
 
 | Requested item | Status | Evidence or gap |
 |:--|:--|:--|
-| Every trace at p = 37, 41, 43, 47 | Measured, probabilistic point-count assignment | [p37](p37_twist_derived.csv), [p41](p41_twist_derived.csv), [p43](p43_twist_derived.csv), and [p47](p47_orbit.csv) trace rows |
-| Every trace at p = 53 through about 200 | Not completed | Even the exact sixfold orbit quotient leaves hundreds of millions of point counts near p = 200 |
+| Every trace at p = 37, 41, 43, 47, 53 | Measured, probabilistic point-count assignment | [p37](p37_twist_derived.csv), [p41](p41_twist_derived.csv), [p43](p43_twist_derived.csv), [p47](p47_orbit.csv), and [p53](p53_absolute.csv) trace rows |
+| Every trace at p = 59 through about 200 | Running at p = 59; later primes queued | Absolute-Frobenius quotient and sequential native worker; exact call count at p = 199 is 130,696,501 |
 | Fit 2-splitting, Frobenius-order 2-depth, trace residues, class-number parity | Completed on p = 11, 13; tested on p = 17, 37, 41, 43, 47 | [held-out p37 fit](fit_p11_p13_to_p37.txt), [p41 fit](fit_p11_p13_to_p41.txt), [p43 fit](fit_p11_p13_to_p43.txt), [p47 fit](fit_p11_p13_to_p47.txt) |
 | Prove a class obstruction | Verified theorem | The norm-one parameter is a fourth power; the 2-isogenous Legendre curve has full rational 4-torsion; see proof below |
 | Actual endomorphism-ring 2-volcano levels | Bounded, not individually measured | The proof below places every ordinary weak curve at least one level above the deepest possible level; exact levels need curve-specific endomorphism orders |
-| Exact criterion replacing reach census and seed sieve | Not established | The proved necessary condition has 290, 396, 376, and 424 false positives at p = 37, 41, 43, 47; see counterexamples below |
+| Exact criterion replacing reach census and seed sieve | Necessary condition proved; converse disproved | Exact p = 7 counterexample; larger recorded tables retain 290, 396, 376, 424, and 494 high-depth zero rows at p = 37, 41, 43, 47, 53 |
 
 ## Field, representatives, and trace assignment
 
@@ -46,16 +67,22 @@ all 100 lie in the Rust census's positive weak-trace set. The same control
 placed [3,952 distinct p = 41 and 4,043 distinct p = 43 traces](gp_p41_p43_validation_receipt.txt)
 from 5,000 samples per prime in their positive sets. At p = 47, another
 [5,000 GP samples gave 4,200 distinct positive traces and zero missing](gp_p47_validation_receipt.txt).
+At p = 53, [5,000 samples give 4,404 distinct absolute traces and zero missing](p53_absolute_validation.txt).
 These test positive labels through a different
 point counter and field model, while leaving zero labels dependent on the
-exhaustive Rust enumeration.
+exhaustive Rust enumeration. The new [p = 7 exact CSV](p7_exact_absolute.csv)
+uses a square table and visits every field element for each of the 213
+absolute-Frobenius orbits. Its complete weighted trace distribution agrees
+with [all 213 independent PARI/GP orbit counts](gp_p7_absolute_orbits.csv)
+under the [native audit](p7_exact_validation.txt). This certifies its
+weak and zero labels, including 20 ordinary high-depth zero classes.
 
 The pre-existing census used `w` from F_p as its supposed nonsquare in
 F_(p²).  Every nonzero F_p element is a square in F_(p²), so that run
-duplicated one branch and omitted the other.  The source now selects an
-actual F_(p²) nonsquare.  Prior p = 7–31 weak-class counts and reach
-fractions are historical and require correction; p = 23 and 31 have not
-yet been rerun with the corrected representative set.
+duplicated one branch and omitted the other. The source now selects an
+actual F_(p²) nonsquare. Prior p = 7–31 outputs remain historical; use
+the new exact p = 7 table and corrected p = 11, 13, 17 tables here.
+p = 23 and 31 have not yet been rerun with the corrected representative set.
 
 The trace `t = p⁶+1-#E(F_(p⁶))` identifies the F_(p⁶) isogeny class.
 The CSV includes every `t ≡ 2 (mod 4)` in the Hasse interval, including
@@ -68,6 +95,7 @@ speedup measurement is asserted.
 
 | p | q | normalized weak representatives | ordinary trace rows | weak rows | weak rows with v₂(f_pi)=1 | zero rows with v₂(f_pi)>=2 | random full-2 curves in weak class (n=4,000, Wilson 95%) |
 |---:|---:|---:|---:|---:|---:|---:|:--|
+| 7 | 49 | 4,900 | 294 | 126 | 0 / 148 | 20 / 146 | Not sampled; exact census and full GP orbit agreement |
 | 11 | 121 | 29,524 | 1,210 | 542 | 0 / 606 | 62 / 604 | 2,363 / 4,000 = 0.5908 [0.5754, 0.6059] |
 | 13 | 169 | 57,460 | 2,028 | 928 | 0 / 1,014 | 86 / 1,014 | 2,324 / 4,000 = 0.5810 [0.5656, 0.5962] |
 | 17 | 289 | 167,620 | 4,624 | 2,198 | 0 / 2,312 | 114 / 2,312 | 2,480 / 4,000 = 0.6200 [0.6048, 0.6349] |
@@ -75,6 +103,7 @@ speedup measurement is asserted.
 | **41** | **1,681** | **5,654,884** | **67,240** | **33,224** | **0 / 33,620** | **396 / 33,620** | **2,501 / 4,000 = 0.6253 [0.6101, 0.6401]** |
 | **43** | **1,849** | **6,841,300** | **77,658** | **38,452** | **0 / 38,830** | **376 / 38,828** | **2,478 / 4,000 = 0.6195 [0.6043, 0.6344]** |
 | **47** | **2,209** | **9,763,780** | **101,614** | **50,382** | **0 / 50,808** | **424 / 50,806** | **2,528 / 4,000 = 0.6320 [0.6169, 0.6468]** |
+| **53** | **2,809** | **15,786,580** | **146,068** | **72,540** | **0 / 73,034** | **494 / 73,034** | **2,539 / 4,000 = 0.6348 [0.6197, 0.6495]** |
 
 The [p = 37 run receipt](p37_run.txt) and CSV sum to 3,751,060 representative counts. Its 50,654
 candidate rows include 1,370 nonordinary or boundary rows, none with an
@@ -96,6 +125,19 @@ orbit gives two representatives at each Hasse-boundary trace
 confirms that boundary trace. These two rows are outside the ordinary
 class fit.
 
+The [p = 53 absolute-orbit census](p53_absolute.csv) uses **658,243**
+point counts and weights to **15,786,580** representatives. It writes
+all **148,878** Hasse rows, including 2,810 nonordinary or boundary rows.
+Its [run output](p53_absolute.stderr) records **313,857,554,508** charged
+F_p multiplications and **2,057.706 s** wall time with four workers on
+the contended host. The exact field tower has `u²=2`, `theta³=1+u`,
+and `theta^q=(26+24u)theta`; the [PARI field receipt](census_field_receipt.txt)
+reproduces the retained constructor. The [completed audit](p53_absolute_validation.txt)
+checks every row, both trace signs, the representative sum, the conductor
+strata, the necessary congruence, and all 5,000 independent GP controls.
+The [4,000-curve sample](p53_reach_sample.txt) uses the same retained
+input law and seed as the earlier samples.
+
 The two denominators differ: **24,932/49,284 ordinary trace rows (50.59%)**
 have no observed weak representative, while **1,567/4,000 sampled random
 full-2-torsion curves (39.18%)** land in those zero rows.  Larger
@@ -107,17 +149,19 @@ while 1,472/4,000 sampled curves (36.80%) miss the positive set.
 ![Observed class strata and invariant flow](class_strata.svg)
 
 The [editable visual source](../../examples/iso1_class_census.rs) reads
-the seven census CSVs. The bars show complete observed trace counts, so
+the nine census CSVs. The bars show complete observed trace counts, so
 sampling intervals do not apply to them.  The 4,000-curve reach fractions
 above do have binomial sampling intervals.
 
 ## A proved class obstruction
 
-Let `K = F_(p⁶)`, `q=p²`, and `Q=p⁶`. For any weak curve
-`E_alpha: y²=x(x-alpha)(x-alpha^q)`, put `lambda=alpha^q/alpha`.
-Its norm from `K` to `F_q` is one, so its multiplicative order divides
-`q²+q+1`, an **odd** number. Since `q≡1 (mod 4)`, an explicit fourth root is
-`mu=lambda^((q²+q+2)/4)`, with `mu⁴=lambda`. Up to a quadratic twist,
+Let `q` be odd with `q ≡ 1 (mod 4)`, let `n ≥ 3` be odd, and put
+`K = F_(q^n)` and `Q=q^n`. For any weak curve
+`E_alpha: y²=x(x-alpha)(x-alpha^q)`, with `alpha` outside `F_q`, put
+`lambda=alpha^q/alpha`. Its norm to `F_q` is one, so its order divides
+`1+q+...+q^(n-1)`, an **odd** number. Fourth powering is an automorphism
+of this subgroup: choose `mu⁴=lambda`. For the cubic case, an explicit
+root is `mu=lambda^((q²+q+2)/4)`. Up to a quadratic twist,
 `E_alpha` is the Legendre curve
 `L_lambda: y²=x(x-1)(x-lambda)`.
 
@@ -141,9 +185,19 @@ independent 2-torsion points generate **all of `L'_lambda[4]`**, so
 `16 | #L_lambda(K)`. Isogenous curves have equal point counts, and
 quadratic twisting negates the trace. Every weak trace therefore satisfies
 
-`t ≡ ±(p⁶+1) (mod 16)`.
+`t ≡ ±(Q+1) (mod 16)`.
 
-For ordinary `t≡2 (mod 4)`, this is arithmetically equivalent to
+For an ordinary curve over any `F_Q` with `Q ≡ 1 (mod 4)`, the trace
+congruence is equivalent to `4 | f_pi`. In the forward direction,
+`eta=(epsilon*pi-1)/4` has integral trace and norm, so its order has
+discriminant `(t²-4Q)/16` and integral conductor `f_pi/4`. Conversely,
+writing `pi=u+f_pi*v*omega` in the maximal order, `4 | f_pi` forces
+`u` odd; choose `epsilon*u ≡ 1 (mod 4)` and take the norm of the
+integral element `(epsilon*pi-1)/4`. Twisting preserves `Z[pi]`.
+This quadratic-order argument proves the generalized equivalence;
+[Theorem 1 and Lemma 2](THEOREM.pdf) give the details.
+
+Specializing to `q=p²`, `n=3`, and ordinary `t≡2 (mod 4)`, this is also equivalent to
 `(t/2)²≡p⁶ (mod 16)`, to `t/2≡±p³ (mod 8)`, and to
 `v₂(f_pi)≥2` where `t²-4p⁶=f_pi² D_K` and `D_K` is fundamental.
 To see the conductor equivalence, put `d=(t/2)²−p⁶`. Odd squares give
@@ -179,13 +233,23 @@ The same curve-level bound follows directly from full rational 2-torsion:
 population and does not further distinguish weak representatives. The
 extra class restriction is supplied by full 4-torsion on the neighbor.
 
-The converse fails on the recorded computational labels. The held-out
+The converse fails on **certified labels** at p = 7. The exact census
+has zero weak representatives at `t=±610`, although
+`t²-4·7⁶ = 72²·(-19)` and `v₂(72)=3`. Independently,
+`y²=x³+2x+6` over `F_(7⁶)` has trace 610 and all three 2-torsion
+roots rational, as recorded in the [PARI/GP existence check](p7_counterexample_check.txt).
+Thus the zero row is an existing ordinary full-2 class. Both the
+[field-element enumeration](p7_exact_absolute.csv) and the complete
+PARI/GP orbit census exclude a weak representative in it.
+
+The held-out
 p = 37, 41, 43, 47 tables have respectively
 290, 396, 376, 424 high-depth zero rows and no low-depth weak rows. The p = 37
 classifier has 24,352 true positives, 290 false positives, zero false
 negatives, and 24,642 true negatives (99.41% of rows labeled correctly).
 The p = 47 held-out classifier has TP 50,382, FP 424, FN 0, and TN 50,808
 (99.58% of ordinary rows correctly labeled).
+The new p = 53 holdout has TP 72,540, FP 494, FN 0, and TN 73,034.
 Splitting of 2 and maximal-order class-number parity fit substantially
 worse; combining those variables and a finer 2-adic residue did not repair
 the false positives.
@@ -203,6 +267,15 @@ argument above, and the census's zero labels keep their stated uncertainty.
 The [isolated checker package](report_check_runtime/README.md) reuses the
 repository's native certificate and SHA-256 modules without building other
 library modules. Its scope is polynomial replay and mutation rejection.
+The continuation adds rational-halving identity `IDC1hf8aba4800a6ceb5c`
+and orbit-count identity `IDC1h1bc37ec40bcb8619` in
+[theorem_identity_certificates.json](theorem_identity_certificates.json),
+with the same 32 plus 64 evaluation contract and mutation rejection.
+[Exact integer expansion](theorem_algebra_check.txt) agrees. Independent
+[generalized finite-field controls](generalized_theorem_check.txt)
+check 1,100 norm-one parameters over 11 field/extension pairs and the
+conductor equivalence for every ordinary Hasse trace at ten field sizes
+(476 traces), with zero recorded failures.
 
 ## Exact orbit quotient and a trace-count audit
 
@@ -233,6 +306,27 @@ expected special trace pair, which is two modulo six. The
 commands, and whole-file comparisons. This exact
 structural check detects isolated trace-assignment errors; it cannot
 certify that every count or zero label is correct.
+
+The new `--absolute-orbit-quotient` mode additionally uses absolute
+`p`-Frobenius, selecting one least-encoded parameter from
+`lambda^(±p^j)`, `0 ≤ j < 6`. The exact exceptional-orbit classification
+is proved in [Theorem 6](THEOREM.pdf): one size-2 orbit,
+`(p²-1)/3` size-6 orbits, and `(p⁴-p²)/12` size-12 orbits.
+Each orbit contributes its weight to both trace signs.
+
+| p | previous sixfold quotient calls | absolute-Frobenius calls | evidence status |
+|---:|---:|---:|:--|
+| 7 | 409 | 213 | Exact field enumeration and complete GP orbit agreement |
+| 13 | 4,789 | 2,423 | Retained CSV byte-identical; complete GP orbit agreement |
+| 37 | 312,589 | 156,523 | Algebraic call count; retained census used the previous method |
+| 47 | 813,649 | 407,193 | Algebraic call count; retained census used the previous method |
+| 53 | 1,315,549 | 658,243 | Completed; all 5,000 independent GP controls positive |
+| 199 | 261,379,801 | 130,696,501 | Algebraic call count for the queued prime |
+
+The [p = 13 audit](p13_absolute_validation.txt) matches all 2,423 GP
+orbits and their per-trace weights. These are reductions in point-count
+calls, independent of CPU timing. The larger runs keep the randomized
+point counter and therefore retain its stated class-label uncertainty.
 
 ## Residual zero rows and counterexamples
 
@@ -331,18 +425,22 @@ was `923d687011fd804adb2fae9c105509f4b2b337b0187a7b0d43d9cdba67864b55`.
 The program records failed and zero-witness trace rows in each CSV.
 
 At p = 199, normalization gives 3,136,557,604 representatives.
-Twist symmetry requires 1,568,278,802 point counts; the exact orbit
-quotient reduces that to **261,379,801**. Scaling the p = 37 direct
+Twist symmetry requires 1,568,278,802 point counts; the earlier quotient
+uses 261,379,801 and the absolute-Frobenius quotient uses **130,696,501**.
+Scaling the p = 37 direct
 run by representative count and the point counter's approximate
 `p^(3/2)` baby-step cost gives roughly **130 days** for the older method
 at that prime on comparable resources. This is only a crude extrapolation,
 not a timed p = 199 run, and does not price the growing trace-factorization
-work. The sixfold reduction in point-count calls still leaves hundreds of
-millions of calls at p = 199. The full p = 37–200 request therefore needs
-an exact criterion for the high-depth residual rows or a substantially
-faster trace algorithm. Neither was established in this round. The proved
-obstruction is an exact negative class test and removes about half of
-candidate traces from any seed sieve; it cannot certify reach in the other half.
+work. The absolute quotient still leaves over 130 million calls at p = 199.
+The [native continuation package](census_runtime/README.md) runs sequential
+primes with four workers, checks each completed CSV against 5,000 independent
+GP counts and structural invariants, and retains compressed CSVs and receipts.
+Its storage preflight requires one GiB plus twice a conservative raw-CSV
+estimate; it records any refusal and leaves later requested primes unfinished.
+The [continuation protocol](CONTINUATION_PROTOCOL.md) retains every prime
+through 199. A sufficient criterion still requires a new class-existence
+argument, because the exact p = 7 example disproves the conductor converse.
 
 The original Joux–Vitse paper gives the weak model and explicitly treats
 independence of weak form and isogeny class as an assumption, rather than
@@ -356,3 +454,7 @@ replay commands and outcomes. The PDF includes the source-linked proof,
 residual-class-number table, and the complete census diagram. The report,
 study figure, cover ledger, and dashboard context were checked together;
 the diagnostic census does not change an IC/rho cost series or its ratios.
+The [theorem continuation receipt](theorem_validation_20261008.txt) records
+the exact p = 7 and p = 13 checks, generalized controls, native tests,
+PDF compilation, and the running queue's source freeze. Failed preliminary
+API and launch attempts remain explicitly recorded alongside the successful runs.

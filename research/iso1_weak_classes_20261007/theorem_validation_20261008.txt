@@ -1,0 +1,157 @@
+ISO-1 norm-one theorem, exact converse counterexample, and p53 continuation
+Validation date: 2026-10-08 PDT / 2026-10-09 UTC
+Base commit: 62becf9572fe74cbe8b3d8cebee3bf8a240708a1
+Worktree branch: codex/iso1-theorem-20261009
+Existing publication: https://github.com/aburan28/crypto/pull/1588
+
+Mathematical statements
+1. Odd q = 1 (mod 4), odd n >= 3: norm-one lambda is a fourth power,
+   its rational 2-isogeny target has full rational 4-torsion, and
+   t = +/-(q^n+1) (mod 16). Ordinary implies 4 divides f_pi.
+2. Any ordinary Q = 1 (mod 4): the trace congruence is equivalent to
+   4 dividing the Frobenius-order conductor, by quadratic integrality.
+3. Cubic q=p^2, p>3: absolute Frobenius and inversion need exactly
+   (p^4+3p^2+8)/12 point counts with weights 2, 6, 12.
+4. Exact p7 counterexample: t=+/-610, D_K=-19, f_pi=72, v2(f_pi)=3,
+   zero norm-one weak representatives. An independent full-2 curve of
+   trace 610 exists. The conductor converse is therefore false.
+Deductive proofs: THEOREM.tex. Native records validate polynomial steps;
+PARI controls check examples and every stated finite audit population.
+
+Native polynomial checks
+cargo test --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bins
+Exit 0: 4 tests, including retained and new record replay and constant
+polynomial mutation rejection. Raw output: theorem_native_tests.stdout/stderr.
+New IDs: IDC1hf8aba4800a6ceb5c, IDC1h1bc37ec40bcb8619.
+Retained IDs: IDC1h8ae7209125dfe0a2, IDC1he02ab9a5cf019a56.
+Each uses 32 recorded evaluations plus 64 fresh domain-separated replays.
+Exact GP integer expansions separately report two polynomial zeros.
+
+Native census checks
+cargo test --release --locked --manifest-path research/iso1_weak_classes_20261007/census_runtime/Cargo.toml --bins
+Exit 0: 14 audit tests and 13 queue tests (including retained SHA tests),
+with mutated trace weight rejection and the large-CSV storage guard.
+Final queue tests were repeated after adding --after-pid and passed.
+Raw output: census_native_tests.stdout/stderr.
+Focused native package sources are frozen extracts of the base commit;
+SOURCE_PROVENANCE.txt and larger_prime_source_freeze.txt retain hashes.
+The initial test build lacked the dev-only hex dependency; adding that
+existing repository test dependency fixed the build. This preliminary
+compiler failure did not produce a census result.
+
+Generalized PARI checks
+GP/PARI 2.17.3, native arm64 build.
+gp -q -f research/iso1_weak_classes_20261007/generalized_theorem_check.gp
+Exit 0, empty stderr, 1100 norm-one samples across 11 q/n pairs:
+(5,3),(5,5),(5,7),(9,3),(9,5),(13,3),(17,3),(25,3),
+(49,3),(121,3),(169,3). All fourth-root, isogeny-cardinality, full-4,
+and ordinary conductor checks pass.
+The same script checks all ordinary Hasse traces for Q=5,13,17,25,
+81,125,169,289,729,3125: 476 traces and zero equivalence failures.
+Source and output: generalized_theorem_check.gp/.txt/.stderr.
+
+gp -q -f research/iso1_weak_classes_20261007/theorem_algebra_check.gp
+Exit 0, empty stderr: exact integer expansions for the halving point
+and absolute-orbit numerator are zero.
+
+gp -q -f research/iso1_weak_classes_20261007/census_field_receipt.gp
+Exit 0, empty stderr: explicit retained-constructor moduli and Frobenius
+multipliers at p=7,13,53,59,61,199; see census_field_receipt.txt.
+
+Certified p7 labels
+RAYON_NUM_THREADS=4 research/iso1_weak_classes_20261007/census_runtime/target/release/iso1_class_census 7 research/iso1_weak_classes_20261007/p7_exact_absolute.csv --derive-twists --absolute-orbit-quotient --exact-squares
+Exit 0; exact field-square counting for every x on each of 213 orbits,
+weighted to all 4900 normalized representatives and both trace signs.
+344 Hasse rows, 294 ordinary, 126 weak ordinary; depth1 0/148;
+high-depth zero 20/146. Exact CSV SHA-256:
+2ebbec9b2f446e4fd61dd0f094030291d60f9aa92e9d63fe8153476c1aa57558
+ISO1_P=7 gp -q -f research/iso1_weak_classes_20261007/gp_full_absolute_orbit.gp
+Exit 0, empty stderr, all 213 orbits. Weight histogram {2:1,6:16,12:196}.
+Native audit exit 0: every per-trace weight agrees with the GP census.
+See p7_exact_validation.txt and gp_p7_absolute_orbits.csv.
+gp -q -f research/iso1_weak_classes_20261007/p7_counterexample_check.gp
+Exit 0, empty stderr: y^2=x^3+2x+6 over F_(7^6) has trace 610,
+cardinality 117040, three rational 2-torsion roots, D_K=-19, f_pi=72.
+The preliminary polrootsff API call produced type errors even though GP
+returned exit 0. It is INVALID evidence, retained as
+p7_counterexample_check.failed_type.txt/.stderr. The corrected function
+uses polrootsmod on the finite-field polynomial and requires all asserts
+and empty stderr before acceptance.
+
+p13 quotient reproduction
+The final frozen census executable was replayed with:
+RAYON_NUM_THREADS=4 research/iso1_weak_classes_20261007/census_runtime/target/release/iso1_class_census 13 /private/tmp/iso1-p13-final-replay.csv --derive-twists --absolute-orbit-quotient
+Exit 0, 2423 calls, 57460 weighted representatives; cmp against the
+retained p13_twist_derived.csv exits 0. CSV SHA-256:
+0deedb7537aae6a6a9d3ee84c752dca1cf68271a6d66fc993e190a742747d230
+The all-orbit GP audit exits 0 with histogram {2:1,6:56,12:2366},
+464 distinct absolute traces, and equality of every per-trace weight.
+See p13_absolute_validation.txt and gp_p13_absolute_orbits.csv.
+
+Completed larger prime p53
+See p53_run_receipt.txt, p53_absolute_validation.txt, p53_absolute.stderr,
+p53_reach_sample.txt, and the retained 5000-row GP control CSV.
+Native census and independent GP control processes both exited 0.
+Audit exit 0: 148878 Hasse rows, 15786580 weighted representatives,
+146068 ordinary, 72540 weak; depth1 0/73034; high-depth zero 494/73034.
+All 5000 GP controls are positive (4404 distinct absolute traces).
+p53 CSV SHA-256:
+70e48434b6e671a4cec1462d11bccfac6c68b003cd0d033a2d65776cc938e1ee
+These larger-prime labels retain the randomized point-count uncertainty.
+Wall seconds (2057.706) account for resources on a contended host.
+The separate 4000-curve reach sample has 2539 hits, Wilson95
+[0.619705,0.649536], seed 1 ^ 0xE8AC7, and exit 0 with empty stderr.
+
+Larger-prime worker and preliminary launch failures
+The running native queue PID 90592 validated p53, then launched p59
+(PID 9297 at snapshot) with four workers. It retains all remaining
+primes through p199 under CONTINUATION_PROTOCOL.md. Live directory:
+/private/tmp/iso1-larger-primes-20261009/run2
+The dated status snapshot and frozen hashes are committed separately.
+A sandbox nohup/zsh attempt failed to set nice; a nohup/bash attempt
+lost its child after launcher exit; a foreground sandbox attempt could
+not invoke ps and exited 101. Those attempts did not establish a running
+worker. The successful foreground managed session used allowed process
+access and was independently verified running. Its status log records
+WAITING_FOR_PRIOR_CENSUS, PRIOR_CENSUS_VALIDATED, then RUNNING at p59.
+Each future prime must pass its own audit before entering a result table.
+Storage refusals and failed attempts remain explicit queue statuses.
+
+Dashboard and source checks
+rustfmt --check --edition 2021 on the changed example, theorem checker,
+and all focused census package modules: exit 0.
+git diff --check: exit 0.
+Existing scripts/site/test_build.py canonical-timeline test: passes;
+embedded JSON equals docs/ic/progress-timeline.json and every plotted
+point has its table row. All prior IC/rho point data are retained.
+The panel-structure test has five pre-existing errors. Comparing HEAD
+and this branch after normalizing line numbers gives the identical five
+mismatches; this round introduces no panel-structure mismatch.
+A sparse-worktree curve-name helper import attempt lacked its excluded
+curve_id.py module. The existing PR's full curve-name job has separate
+legacy-name failures. Neither is recorded as a successful full name scan.
+PR #1588's base-head checks also report duplicate Rust library definitions
+and unrelated dashboard/replay failures; focused ISO-1 checks are listed
+above. The new iso1-theorem workflow rebuilds and replays the relevant
+native and PARI evidence on Linux; its remote result is tracked on the PR.
+
+PDF artifacts and visual checks
+Installed Tectonic fallback used because native editor/compile tools were
+not exposed in this session; no LaTeX installation was performed.
+REPORT.tex and THEOREM.tex compile successfully to PDF 1.7.
+REPORT.pdf: four pages; THEOREM.pdf: six pages.
+SVG figures rendered with CairoSVG 2.8.2; PDFs rendered with pdftoppm.
+The report's short spill page and the theorem's long census-summary line
+were repaired. Every final page and both figure outputs were inspected
+for clipping, math glyphs, figure labels, tables, and page breaks.
+Tectonic warns that an included PDF 1.7 exceeds its internal default 1.5;
+pdfinfo confirms the resulting documents are PDF 1.7.
+Artifact and evidence hashes: theorem_evidence_sha256.txt.
+
+Raw transcript preservation
+Four human-readable receipts had terminal blank lines or trailing spaces.
+Their original bytes are retained in adjacent .raw.gz archives, each
+verified by exact decompression before whitespace normalization in the
+readable copy: census_native_tests.stdout, larger_prime_source_freeze.txt,
+p7_counterexample_check.failed_type.stderr, theorem_native_tests.stdout.
+Scientific data and source files are unchanged by this formatting step.

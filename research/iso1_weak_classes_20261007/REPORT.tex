@@ -2,20 +2,32 @@
 \usepackage[margin=0.68in]{geometry}
 \usepackage{amsmath,amssymb,booktabs,array,tikz,xcolor,graphicx,pdflscape,hyperref}
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
-\title{ISO-1 weak isogeny classes: trace census and a proved 2-adic obstruction}
+\title{ISO-1 weak isogeny classes: a norm-one conductor theorem and trace census}
 \author{Research evidence report}
 \date{8 October 2026}
 \begin{document}
 \special{pdf:minorversion 7}
 \maketitle
 
+\noindent\textbf{Contribution.} Over every odd extension of
+$\mathbb F_q$, with $q\equiv1\pmod4$, the norm-one weak family has a
+Legendre twist whose rational $2$-isogeny target carries full rational
+$4$-torsion. Hence $t\equiv\pm(q^n+1)\pmod{16}$, and every ordinary
+weak class has $4\mid f_\pi$. An exact $p=7$ census proves that the
+converse fails: the existing full-$2$ class $t=\pm610$ has conductor
+$72$ and no weak representative. Absolute Frobenius and inversion reduce
+the cubic census to exactly $(p^4+3p^2+8)/12$ point-count calls.
+The \href{THEOREM.pdf}{standalone theorem note} gives the generalized
+proof, exceptional-orbit classification, and counterexample certificate.
+
+\medskip
 \noindent\textbf{Requested scope.} Base primes $p=37$ through about $200$,
 $q=p^2$, and curves over $\mathbb F_{q^3}=\mathbb F_{p^6}$: label every
 full-2-torsion isogeny class and find a criterion for weak-class reach.
-This round completed every-trace censuses at $p=37,41,43,47$ and diagnostic
-censuses at $p=11,13,17$. It proves a necessary class obstruction for
-every odd base prime. The other requested primes and an exact sufficient
-criterion remain open.
+This round completed every-trace censuses at $p=37,41,43,47,53$ and diagnostic
+censuses at $p=11,13,17$. The validated $p=53$ census adds 72,540 weak
+ordinary rows and 494 high-depth zero rows. The worker has started $p=59$
+and retains all remaining primes through $p=199$.
 
 \medskip
 \noindent\textbf{Method.} A weak representative has
@@ -27,16 +39,20 @@ Trace assignment uses a randomized two-point baby-step/giant-step
 counter. Its labels are computational evidence, not independent
 certificates of every cardinality. Full and twist-derived CSVs agreed
 exactly at $p=13$; two false individual assignments at $p=7$ were found
-by exact square-table counting.
+by exact square-table counting. The new $p=7$ census instead counts every
+field element for all 213 absolute orbits; its complete weighted trace
+distribution agrees with independent PARI/GP counts of all those orbits.
 Independent PARI/GP \texttt{ellcard} checks placed 100, 3,952, 4,043,
 and 4,200 distinct norm-one Legendre traces at $p=37,41,43,47$ in the
 respective positive sets (5,000 samples each at $p=41,43,47$).
+At $p=53$, all 5,000 controls (4,404 distinct absolute traces) are positive.
 
 \begin{center}
 \begin{tabular}{@{}r r r r r r r@{}}
 \toprule
 $p$ & $q$ & weak reps & ordinary $t$ & weak $t$ & depth-1 weak & depth-$\geq2$ zero \\
 \midrule
+7 & 49 & 4,900 & 294 & 126 & 0/148 & 20/146 \\
 11 & 121 & 29,524 & 1,210 & 542 & 0/606 & 62/604 \\
 13 & 169 & 57,460 & 2,028 & 928 & 0/1,014 & 86/1,014 \\
 17 & 289 & 167,620 & 4,624 & 2,198 & 0/2,312 & 114/2,312 \\
@@ -44,6 +60,7 @@ $p$ & $q$ & weak reps & ordinary $t$ & weak $t$ & depth-1 weak & depth-$\geq2$ z
 \textbf{41} & \textbf{1,681} & \textbf{5,654,884} & \textbf{67,240} & \textbf{33,224} & \textbf{0/33,620} & \textbf{396/33,620} \\
 \textbf{43} & \textbf{1,849} & \textbf{6,841,300} & \textbf{77,658} & \textbf{38,452} & \textbf{0/38,830} & \textbf{376/38,828} \\
 \textbf{47} & \textbf{2,209} & \textbf{9,763,780} & \textbf{101,614} & \textbf{50,382} & \textbf{0/50,808} & \textbf{424/50,806} \\
+\textbf{53} & \textbf{2,809} & \textbf{15,786,580} & \textbf{146,068} & \textbf{72,540} & \textbf{0/73,034} & \textbf{494/73,034} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -63,24 +80,25 @@ At $p=47$ the special size-two orbit yields the two nonordinary
 Hasse-boundary traces $t=\pm2\cdot47^3$ (two representatives each),
 independently confirmed with PARI/GP.
 
-\begin{center}
-\begin{tikzpicture}[x=1cm,y=1cm, every node/.style={font=\small}]
-\node[draw,rounded corners,fill=blue!10,minimum width=3.3cm,minimum height=0.8cm] (trace) at (0,0) {trace $t$, $t\equiv2\pmod4$};
-\node[draw,rounded corners,fill=red!12,minimum width=3.2cm,minimum height=0.8cm] (low) at (4.0,0.6) {$v_2(f_\pi)=1$: proved empty};
-\node[draw,rounded corners,fill=green!12,minimum width=3.2cm,minimum height=0.8cm] (high) at (4.0,-0.6) {$v_2(f_\pi)\geq2$: mostly weak};
-\draw[->,thick] (trace.east) -- (low.west);
-\draw[->,thick] (trace.east) -- (high.west);
-\end{tikzpicture}
-\end{center}
+\medskip
+\noindent The $p=53$ run uses 658,243 point counts, weighted to all
+15,786,580 representatives, and writes 148,878 Hasse rows. It records
+313,857,554,508 charged $\mathbb F_p$ multiplications and 2,057.706 wall
+seconds with four workers on the contended host. Its field tower is
+$u^2=2$, $\theta^3=1+u$, with $\theta^q=(26+24u)\theta$.
+Its 4,000-curve sample
+has 2,539 hits: $0.6348$, Wilson 95\% interval $[0.6197,0.6495]$.
 
 \clearpage
 \noindent\textbf{Proof of the necessary obstruction.} Put
-$K=\mathbb F_{p^6}$, $Q=p^6$, and
-$\lambda=\alpha^{p^2}/\alpha$ on a weak model
-$y^2=x(x-\alpha)(x-\alpha^{p^2})$.
-Then $N_{K/\mathbb F_{p^2}}(\lambda)=1$, so $\lambda$ has odd order
-dividing $p^4+p^2+1$. Since $p^2\equiv1\pmod4$, an explicit fourth root is
-$\mu=\lambda^{(p^4+p^2+2)/4}$, with $\mu^4=\lambda$.
+$K=\mathbb F_{q^n}$ and $Q=q^n$, where $q\equiv1\pmod4$ is odd
+and $n\ge3$ is odd. On a weak model
+$y^2=x(x-\alpha)(x-\alpha^q)$, with $\alpha\notin\mathbb F_q$, put
+$\lambda=\alpha^q/\alpha$.
+Then $N_{K/\mathbb F_q}(\lambda)=1$, so $\lambda$ has odd order
+dividing $1+q+\cdots+q^{n-1}$. Fourth powering is an automorphism of
+this subgroup; choose $\mu^4=\lambda$.
+For $n=3$, take $\mu=\lambda^{(q^2+q+2)/4}$.
 The weak curve is a quadratic twist of
 $L_\lambda:y^2=x(x-1)(x-\lambda)$. The rational $2$-isogeny
 at $(0,0)$ has target
@@ -103,8 +121,13 @@ each rational $2$-torsion point has a rational half, and the halves
 of two independent points generate $L'_\lambda[4]$. Therefore
 $16\mid\#L_\lambda(K)$, and the weak trace obeys
 $t\equiv\pm(Q+1)\pmod{16}$.
+For any ordinary curve with $Q\equiv1\pmod4$, this congruence is
+equivalent to $4\mid f_\pi$: the integral trace and norm of
+$(\varepsilon\pi-1)/4$ give an order of conductor $f_\pi/4$.
+Conversely, $4\mid f_\pi$ permits a sign with that element integral,
+whose norm recovers the congruence. Twisting preserves $\mathbb Z[\pi]$.
 
-\noindent Let
+\noindent Specialize to $q=p^2$ and $n=3$. Let
 $t^2-4p^6=f_\pi^2D_K$, where $D_K$ is the fundamental CM
 discriminant. The measured $v_2(f_\pi)$ is a class-wide bound, not
 a certified endomorphism-ring volcano level. For ordinary
@@ -118,7 +141,7 @@ are equivalent to the proved trace restriction. Indeed,
 $d=(t/2)^2-p^6$ has $v_2(d)\geq3$. If $v_2(d)=3$, then
 $v_2(D_K)=3$ and $v_2(f_\pi)=1$; if $v_2(d)\geq4$, then
 $v_2(t^2-4p^6)\geq6$ and $v_2(D_K)\in\{0,2,3\}$ forces
-$v_2(f_\pi)\geq2$. Sufficiency fails on the recorded computational labels.
+$v_2(f_\pi)\geq2$.
 There is a curve-level consequence: on the 2-isogenous neighbor with
 rational full $4$-torsion, $\pi-1$ factors through the separable map $[4]$.
 Thus $\eta=(\pi-1)/4$ is an endomorphism, and
@@ -142,12 +165,28 @@ the records cover those polynomial steps, while the theorem follows from
 the deduction above.
 The record IDs are \texttt{IDC1h8ae7209125dfe0a2} and
 \texttt{IDC1he02ab9a5cf019a56}.
+The new halving and orbit-count records are
+\texttt{IDC1hf8aba4800a6ceb5c} and \texttt{IDC1h1bc37ec40bcb8619}.
+Independent generalized PARI controls check 1,100 norm-one parameters
+over 11 field/extension pairs and the conductor equivalence on all 476
+ordinary Hasse traces at ten field sizes, with zero recorded failures.
 \newpage
+\noindent\textbf{Certified failure of the converse.} At $p=7$,
+$t=\pm610$ satisfies
+$t^2-4\cdot7^6=72^2(-19)$, so $v_2(f_\pi)=3$.
+Every-field-element counting and an independent complete PARI/GP orbit
+census both give zero weak representatives. Independently,
+$y^2=x^3+2x+6$ over $\mathbb F_{7^6}$ has trace 610 and three rational
+$2$-torsion roots. Thus this is an existing ordinary full-$2$ class.
+The exact $p=7$ census has 20 ordinary high-depth zero rows in total.
+
+\medskip
 \noindent\textbf{Held-out classifier.} On $p=37$ rows the necessary rule
 has 24,352 true positives, 290 false positives, no false negatives,
 and 24,642 true negatives (99.41\% correct); $p=41,43,47$ add 396,
 376, and 424 false positives, respectively. At $p=47$, the necessary
 rule has 99.58\% ordinary-row accuracy and no observed false negative.
+The $p=53$ holdout has TP 72,540, FP 494, FN 0, and TN 73,034.
 
 \noindent\textbf{Counterexample to the proposed small invariants.}
 At $p=37$, $t=-92{,}218$ has zero observed weak representatives and
@@ -177,6 +216,12 @@ $p=37$ needed 312,589 rather than 1,875,530 point counts. The corrected
 $p=37,41,43,47$ counts obey the modulo-six constraint; at $p=47$ its
 special pair is nonordinary. This structural
 check is not an independent proof of every zero label.
+The new absolute-$p$-Frobenius quotient uses exponents $\pm p^j$,
+$0\le j<6$, and has one size-2 orbit, $(p^2-1)/3$ size-6 orbits, and
+$(p^4-p^2)/12$ size-12 orbits. At $p=13$ it reproduces the retained CSV
+byte for byte using 2,423 instead of 4,789 calls; all 2,423 independent
+GP orbit counts have the same per-trace weights. These are algebraic
+call reductions, independent of host timing.
 
 \noindent\textbf{Where the residual zeros occur.} At $p=37$,
 234 of 290 high-depth zero rows lie in the outer fifth of
@@ -217,29 +262,32 @@ used an $\mathbb F_p$ nonsquare for the second
 $\mathbb F_{p^2}$ square class. Every nonzero element of $\mathbb F_p$
 is a square in $\mathbb F_{p^2}$, so it duplicated one branch and
 omitted the other. The corrected code selects a genuine
-$\mathbb F_{p^2}$ nonsquare. Old $p\leq31$ values remain historical;
-$p=23,31$ await corrected reruns.
+$\mathbb F_{p^2}$ nonsquare. Use the new exact $p=7$ table and corrected
+$p=11,13,17$ tables; $p=23,31$ await corrected reruns.
 
 \noindent\textbf{Limit.} At $p=199$, twist symmetry needs 1,568,278,802
-point counts; the exact orbit quotient reduces this to 261,379,801.
-Scaling the measured $p=37$ direct run by work count and the approximate
-$p^{3/2}$ cost per point count gives roughly 130 days for the older
-method on comparable resources. This is a crude extrapolation, not a
-run, and excludes growing trace-factorization work.
-The requested $p=53$--200 census and a sufficient replacement formula
-have not been established. The theorem certifies absence in about half
-of the candidate classes and can safely prefilter them.
+point counts; the prior quotient uses 261,379,801 and the absolute
+quotient uses 130,696,501.
+The Markdown report retains the earlier resource extrapolation and its
+assumptions.
+The native worker continues sequentially through $p=199$, using four
+workers and 5,000 independent GP controls per completed prime. It
+retains compressed CSVs, source hashes, and failures; a storage preflight
+requires one GiB plus twice a conservative raw-CSV estimate before each run.
+The $p=53$ census has passed its audit; $p=59$ is running and later
+requested primes remain unfinished.
+The theorem certifies absence in about half of the candidate classes and
+provides an exact prefilter; the certified $p=7$ example requires a new
+existence argument for a sufficient rule.
 
 \medskip
-\noindent\textbf{Evidence.} The accompanying Markdown report links
-the code, complete CSVs, fit output, samples, and SVG. The $p=37$ command used
-\texttt{RAYON\_NUM\_THREADS=4} and \texttt{--derive-twists}.
-The weak-model and reach assumptions are in
+\noindent\textbf{Evidence.} The \href{REPORT.md}{Markdown report} links
+every CSV, exact command, identity record, sample, and
+\href{theorem_validation_20261008.txt}{validation receipt}.
+The weak model is from
 \href{https://eprint.iacr.org/2011/020.pdf}{Joux--Vitse, \S4.1};
-\href{https://arxiv.org/abs/math/0106273}{Auer--Top} proves a
-broader Legendre-family statement.
-The accompanying \href{REPORT.md}{Markdown report} links every CSV,
-the identity records, and the new validation receipt.
+the broader Legendre-family result is due to
+\href{https://arxiv.org/abs/math/0106273}{Auer--Top}.
 
 \clearpage
 \begin{landscape}
@@ -247,12 +295,13 @@ the identity records, and the new validation receipt.
 \textbf{Complete observed trace strata and invariant flow}\\[1ex]
 \includegraphics[width=\linewidth,height=0.85\textheight,keepaspectratio]{class_strata.pdf}
 \end{center}
-\noindent Source: the seven census CSVs linked in the Markdown report,
+\noindent Source: the nine census CSVs linked in the Markdown report,
 rendered by \texttt{iso1\_class\_census visual}. The bars count ordinary
 trace rows; their widths are fractions of each prime's row population.
 The right-hand labels give weak rows / ordinary rows. Sampling intervals
 apply to the separate 4,000-curve reach samples, not these census bars.
 The proof excludes every depth-1 class; the yellow segments retain the
-observed high-depth zero rows and their point-count uncertainty.
+observed high-depth zero rows. The $p=7$ labels are independently exact;
+the larger-prime labels retain their randomized point-count uncertainty.
 \end{landscape}
 \end{document}

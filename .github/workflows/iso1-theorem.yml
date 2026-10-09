@@ -1,0 +1,65 @@
+name: ISO-1 theorem and exact census replay
+on:
+  pull_request:
+    paths:
+      - 'examples/iso1_class_census.rs'
+      - 'examples/iso1_report_check.rs'
+      - 'examples/iso1_theorem_check.rs'
+      - 'research/iso1_weak_classes_20261007/**'
+      - 'src/hash/sha256.rs'
+      - 'src/cryptanalysis/identity_certificate.rs'
+      - '.github/workflows/iso1-theorem.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install independent point counter
+        run: sudo apt-get update && sudo apt-get install -y pari-gp
+      - name: Native polynomial replay and mutation controls
+        run: |
+          cargo test --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bins
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_theorem_check -- research/iso1_weak_classes_20261007/theorem_identity_certificates.json
+      - name: Native census checks
+        run: |
+          cargo test --release --locked --manifest-path research/iso1_weak_classes_20261007/census_runtime/Cargo.toml --bins
+          cargo build --release --locked --manifest-path research/iso1_weak_classes_20261007/census_runtime/Cargo.toml --bins
+      - name: Exact algebra and generalized finite-field controls
+        run: |
+          study=research/iso1_weak_classes_20261007
+          gp -q -f "$study/theorem_algebra_check.gp" > algebra.txt 2> algebra.stderr
+          test ! -s algebra.stderr
+          cmp algebra.txt "$study/theorem_algebra_check.txt"
+          gp -q -f "$study/generalized_theorem_check.gp" > generalized.txt 2> generalized.stderr
+          test ! -s generalized.stderr
+          cmp generalized.txt "$study/generalized_theorem_check.txt"
+          gp -q -f "$study/census_field_receipt.gp" > fields.txt 2> fields.stderr
+          test ! -s fields.stderr
+          cmp fields.txt "$study/census_field_receipt.txt"
+          gp -q -f "$study/p7_counterexample_check.gp" > counterexample.txt 2> counterexample.stderr
+          test ! -s counterexample.stderr
+          cmp counterexample.txt "$study/p7_counterexample_check.txt"
+      - name: Replay every p7 orbit by exact field enumeration
+        env:
+          RAYON_NUM_THREADS: '2'
+          ISO1_P: '7'
+        run: |
+          study=research/iso1_weak_classes_20261007
+          runtime="$study/census_runtime/target/release"
+          "$runtime/iso1_class_census" 7 p7.csv --derive-twists --absolute-orbit-quotient --exact-squares
+          cmp p7.csv "$study/p7_exact_absolute.csv"
+          gp -q -f "$study/gp_full_absolute_orbit.gp" > p7_gp.csv 2> p7_gp.stderr
+          test ! -s p7_gp.stderr
+          "$runtime/iso1_census_audit" p7.csv orbits p7_gp.csv
+      - name: Replay the p13 orbit reduction against the retained census
+        env:
+          RAYON_NUM_THREADS: '2'
+        run: |
+          study=research/iso1_weak_classes_20261007
+          runtime="$study/census_runtime/target/release"
+          "$runtime/iso1_class_census" 13 p13.csv --derive-twists --absolute-orbit-quotient
+          cmp p13.csv "$study/p13_twist_derived.csv"

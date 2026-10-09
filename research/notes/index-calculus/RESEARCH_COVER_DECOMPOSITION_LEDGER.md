@@ -1326,10 +1326,24 @@ the representative bug; corrected p = 23 and 31 reruns are also pending.
 
 ### 18.6 ISO-1 corrected weak-class labels and invariant audit (updated 2026-10-08)
 
+The [generalized norm-one theorem](../../iso1_weak_classes_20261007/THEOREM.pdf)
+proves `t ≡ ±(q^n+1) (mod 16)` and `4 | f_pi` for every ordinary
+weak curve when `q ≡ 1 (mod 4)` and `n ≥ 3` is odd. The exact
+[p = 7 census](../../iso1_weak_classes_20261007/p7_exact_absolute.csv)
+and complete independent GP orbit counts prove the converse false:
+the existing ordinary full-2 class `t = ±610` has `f_pi=72`, depth 3,
+and no weak representative. Absolute Frobenius and inversion give exactly
+`(p^4+3p^2+8)/12` point-count calls for the cubic census. The completed
+p = 53 census has 72,540 weak rows among 146,068 ordinary rows, no
+depth-1 weak row, and 494 high-depth zero rows. All 5,000 independent
+GP controls agree. The worker has started p = 59 and retains later
+primes through 199 under the [protocol](../../iso1_weak_classes_20261007/CONTINUATION_PROTOCOL.md).
+
 [The dated report](../../iso1_weak_classes_20261007/REPORT.md), [every-trace p = 37 CSV](../../iso1_weak_classes_20261007/p37_twist_derived.csv), [fit output](../../iso1_weak_classes_20261007/fit_p11_p13_to_p37.txt), and [visual](../../iso1_weak_classes_20261007/class_strata.svg) are the frozen evidence. The corrected census chooses an actual nonsquare of `F_{p²}` and uses both square-class branches, with one quadratic twist's trace derived from the other at p = 37. It visits all `2q²+2q = 3,751,060` normalized weak representatives at p = 37 and writes all 50,654 Hasse trace candidates; 49,284 are ordinary. The trace assignment remains probabilistic because `curve_order` validates a baby-step result on two random points. As an independent positive-label control, [PARI/GP `ellcard`](../../iso1_weak_classes_20261007/gp_p37_validation_receipt.txt) placed 100 distinct traces of random norm-one Legendre curves in the observed weak set; this does not certify every zero row.
 
 | p | q | ordinary trace rows | rows with weak representatives | depth-1 weak / depth-1 rows | depth-≥2 zero / depth-≥2 rows | random full-2 curves in weak class (4,000 samples) |
 |--:|--:|--:|--:|--:|--:|--:|
+| 7 | 49 | 294 | 126 | 0 / 148 | 20 / 146 | Exact census; not sampled |
 | 11 | 121 | 1,210 | 542 | 0 / 606 | 62 / 604 | 0.59075 [0.57543, 0.60589] |
 | 13 | 169 | 2,028 | 928 | 0 / 1,014 | 86 / 1,014 | 0.58100 [0.56564, 0.59621] |
 | 17 | 289 | 4,624 | 2,198 | 0 / 2,312 | 114 / 2,312 | 0.62000 [0.60485, 0.63492] |
@@ -1337,6 +1351,7 @@ the representative bug; corrected p = 23 and 31 reruns are also pending.
 | **41** | **1,681** | **67,240** | **33,224** | **0 / 33,620** | **396 / 33,620** | **0.62525 [0.61014, 0.64012]** |
 | **43** | **1,849** | **77,658** | **38,452** | **0 / 38,830** | **376 / 38,828** | **0.61950 [0.60435, 0.63443]** |
 | **47** | **2,209** | **101,614** | **50,382** | **0 / 50,808** | **424 / 50,806** | **0.63200 [0.61694, 0.64681]** |
+| **53** | **2,809** | **146,068** | **72,540** | **0 / 73,034** | **494 / 73,034** | **0.63475 [0.61971, 0.64954]** |
 
 For `D=t²−4p⁶=f_π²D_K` with `D_K` fundamental, the weak-trace condition `v₂(f_π)≥2`, equivalently `(t/2)²≡p⁶ (mod 16)` or `t/2≡±p³ (mod 8)`, is now **proved necessary**. Put `λ=α^{p²}/α` on a weak model. It has norm one, hence odd order and a fourth root `μ` in `F_{p⁶}`. The 2-isogenous quotient of the Legendre model `y²=x(x−1)(x−λ)` at `(0,0)` has roots `0, −(1+μ²)², −(1−μ²)²`; their pairwise differences are squares because `−1` is square. The quotient has full rational 4-torsion, forcing its order divisible by 16. The weak model is a quadratic twist of the Legendre model, so its trace satisfies `t≡±(p⁶+1) (mod 16)`. This is the exact class obstruction behind approximately half the zero rows. The quotient also has `(π−1)/4` in its endomorphism ring, so its 2-adic endomorphism conductor is at most `v₂(f_π)−2`; the quadratic twist has the same order, and a degree-2 isogeny changes conductor depth by at most one. Therefore every ordinary weak curve satisfies `v₂(f_End(E))≤v₂(f_π)−1`: it is not at the deepest possible 2-volcano level. This is a curve-level bound, not a measured exact level or a class-existence criterion. The bound is shared by every full-2-torsion curve, since (pi-1)/2 is an endomorphism with generated-order conductor f_pi/2; the extra weak-class restriction comes from full 4-torsion on the neighbor. The report now supplies the explicit map and replayable polynomial records.
 
