@@ -1834,3 +1834,94 @@ and the linear algebra by four.  No exponent moved, and §11.15's verdict on `k 
 plain method is bounded away from rho at every size.  What E17 establishes for the goal is that
 both levers survive the move to a non-subfield curve, which is the precondition for using them at
 `k = 4` (§9.1).
+
+### 9.3 E18 — the folds on the `k = 4` linear algebra, measured
+
+**Runner:** `cargo run --release --example quartic_folds -- --family psi --sizes
+241,337,541,601,733,769,997,1069 --seeds 1 --rho-runs 16 --json experiments/26_quartic_folds_psi.json`
+and `-- --family tau --sizes 269,521,769,1033 --seeds 2 --rho-runs 16 --json
+experiments/26_quartic_folds_tau.json`.  **Data:** `experiments/26_quartic_folds_{psi,tau}.{json,log}`
+(2026-10-09).  **Tables:** `cargo run --release --example glv_invariant_experiment_tables --
+experiments/26_quartic_folds_psi.json experiments/26_quartic_folds_tau.json` (the E18 printer).
+**Source:** `src/cryptanalysis/quartic_folds.rs`, `examples/quartic_folds.rs`.  **Registered in
+advance:** §9.1, pushed (`c4f29698f`) before the module existed.
+
+**Three changes the smoke runs forced, all made before the frozen runs and all recorded in the
+rows:**
+
+1. **Identical rows are skipped.**  On the `ψ` arm, two decompositions of one target that differ
+   by `P + ψP + ψ²P = O` fold to one row.  Kept, they made half the folded cores singular (rank
+   `13` of `17` at `p = 97`; `19`–`46` solve attempts).  The control keeps such pairs in distinct
+   columns, where they are independent.  `duplicate_rows` counts the skipped rows: `0` on every
+   frozen row, because of rule 2.
+2. **Each target contributes one decomposition, drawn uniformly from its verified ones.**  On a
+   curve with rational `T`, each decomposition comes with the seven that add `T` to an even number
+   of summands, and the eight rows have rank `5`.  Square cores drawn from such families were
+   singular, and the stream never ended (`p = 61`, `97`).  Taking the oracle's first decomposition
+   instead would pick the lower index of every `{P, P + T}` pair, half-folding the control: its
+   core shrank to `φ ≈ 0.67`, and the linear-algebra ratio read `1.6`–`2.6` where the uniform draw
+   gives `3.0`–`4.2`.  §11.19 kept every decomposition, which on its prime-order curves is one per
+   target with rare exceptions.  `decompositions_per_target` records the histogram on every row.
+3. **A fruitless cycle is escaped by doubling.**  Restarting the walk cost two scalar
+   multiplications, about `87` times per negation walk at `n = 2^{32}`, `13 %` of the walk.  A
+   test now holds each walk's steps to its class size: unfolded / negation in `[1.15, 1.75]`,
+   unfolded / `ψ` in `[1.9, 3.1]`.
+
+**The `ψ` arm: `8` prime-order `j = 0` curves over `F_{p⁴}`**, `p = 241`–`1069`,
+`n = 2^{31.7}`–`2^{40.2}`.  One curve per `p`: the six sextic twists fix the possible orders, and
+two seeds at one `p` would land on isomorphic curves.  **Every logarithm was recovered on both
+arms, and all `384` walks verified.**
+
+| p | log₂ n | cols control / folded | control core (φ) | folded core (φ) | LA ratio | r control / unfolded walk | r control / ψ walk | r folded / ψ walk |
+|--:|--:|:--|:--|:--|--:|--:|--:|--:|
+| 241 | 31.7 | 120 / 40 | 103 (0.858) | 34 (0.850) | 9.20 | 0.487 | 1.083 | 0.118 |
+| 337 | 33.6 | 165 / 55 | 151 (0.915) | 49 (0.891) | 9.49 | 0.535 | 1.189 | 0.125 |
+| 541 | 36.3 | 273 / 91 | 239 (0.875) | 86 (0.945) | 7.77 | 0.520 | 1.155 | 0.149 |
+| 601 | 36.9 | 291 / 97 | 256 (0.880) | 87 (0.897) | 8.68 | 0.483 | 1.074 | 0.124 |
+| 733 | 38.1 | 414 / 138 | 367 (0.886) | 126 (0.913) | 8.49 | 0.667 | 1.483 | 0.175 |
+| 769 | 38.3 | 438 / 146 | 387 (0.884) | 130 (0.890) | 8.86 | 0.674 | 1.498 | 0.169 |
+| 997 | 39.8 | 477 / 159 | 431 (0.904) | 136 (0.855) | 10.05 | 0.498 | 1.106 | 0.110 |
+| 1069 | 40.2 | 561 / 187 | 495 (0.882) | 162 (0.866) | 9.33 | 0.571 | 1.268 | 0.136 |
+
+Rho's `S`, pooled over `128` walks per fold in `F_p` multiplications per `√n`: unfolded
+**`120.3 ± 5.5`**, negation **`91.0 ± 4.6`**, `ψ` **`54.1 ± 2.6`**, so unfolded / negation is
+`1.32` and negation / `ψ` is `1.68`.  `r` pooled over the curves, against each walk:
+
+| arm | unfolded walk | negation walk | `ψ` walk | fitted exponent in `n` |
+|:--|--:|--:|--:|--:|
+| control (`⟨−1⟩`) | `0.554 ± 0.027` | `0.733 ± 0.036` | `1.232 ± 0.061` | `0.03` |
+| `ψ`-folded | `0.062 ± 0.004` | `0.082 ± 0.005` | **`0.138 ± 0.008`** | `0.02` |
+
+**Reading, against §9.1.**
+
+- **G2.6 holds.**  Unfolded / negation is `1.32` in multiplications, inside `[1.25, 1.6]`; the
+  canonical representative and the look-ahead cost the negation walk part of its `√2`.  So
+  §11.19's `r∞ = 0.518`, which is against the unfolded walk, reads **`0.73` against the negation
+  walk**: past the handover the plain method beats the walk this program uses everywhere else by
+  `1.36×`, not `1.9×`.  The control reproduces §11.19 on different curves, `0.554 ± 0.027`
+  against `0.518 ± 0.031`.
+- **G2.7 holds on every component.**  Columns `÷ 3.00` on every curve; linear algebra `÷ 7.8`–`10.1`
+  (`÷ 9` predicted, with the filtering fractions equal to within `±0.07`); the `ψ` walk `÷ 1.68`
+  against the negation walk (`√3 = 1.73`); and **`r_ψ = 0.138 ± 0.008`** against the matched
+  `ψ`-folded walk (`≈ 0.14` predicted).  The control on the same curves is **`1.23`** against that
+  walk (`≈ 1.27` predicted).  Both are flat in `n`.
+
+So on a `j = 0` curve the plain `k = 4` method does **not** beat the rho an attacker would run
+there, at any size, because its linear algebra alone costs `1.23×` that walk.  The `ψ`-folded base
+does, asymptotically, by **`1/0.138 ≈ 7.2×`**.
+
+**The handover, re-derived (extrapolation, not measurement).**  §11.16's form with the measured
+pooled `S` of the matched walk and §11.17's `C₄ = 1.213·10¹²`: residuals `24` per relation, the
+relation phase `24·(columns)·C₄`, against rho `S·√n` with `√n ≈ p²`:
+
+| method | against | `r` | `p*` | `n* ≈ p*⁴` |
+|:--|:--|--:|--:|--:|
+| plain | unfolded walk (§11.19's convention) | `0.554` | `2.7·10¹¹` | `2^{151.9}` (§11.19: `2^{151.1}`) |
+| plain | negation walk | `0.733` | `6.0·10¹¹` | `2^{156.5}` |
+| plain, on `j = 0` | `ψ` walk | `1.232` | — | never |
+| **`ψ`-folded, on `j = 0`** | **`ψ` walk** | **`0.138`** | `1.0·10¹¹` | **`2^{146.4}`** |
+
+The fold moves the handover earlier by `5.5` bits against §11.19's convention and `10` bits against
+the negation walk.  It does this because the relation count falls by `3` while the matched rho falls
+by only `√6/√2`.  `C₄` still sets the handover, and the `D₄` lever on `C₄` is a separate goal
+(§9.4).
