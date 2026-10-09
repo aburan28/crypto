@@ -30,3 +30,31 @@ path = "../larger_fields_20261009/orbit_check.rs"
 [[bin]]
 name = "iso1_large_records_check"
 path = "../larger_fields_20261009/check_records.rs"
+
+[[bin]]
+name = "iso1_population_run"
+path = "../large_population_20261009/runner.rs"
+
+[[bin]]
+name = "iso1_population_check"
+path = "../large_population_20261009/check.rs"
+
+[[bin]]
+name = "iso1_population_structure"
+path = "../large_population_20261009/structure.rs"
+
+[[bin]]
+name = "iso1_population_cm_probe"
+path = "../large_population_20261009/probe.rs"
+
+[[bin]]
+name = "iso1_population_present"
+path = "../large_population_20261009/present.rs"
+
+[[bin]]
+name = "iso1_population_emit_replay"
+path = "../large_population_20261009/emit_replay.rs"
+
+[[bin]]
+name = "iso1_quadratic_scope_records"
+path = "../large_population_20261009/scope_records.rs"

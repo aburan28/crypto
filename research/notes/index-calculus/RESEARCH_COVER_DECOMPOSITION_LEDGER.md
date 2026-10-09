@@ -1367,7 +1367,27 @@ For odd prime n, the absolute-Frobenius orbit count is now proved as C_(p,n)=[N+
 
 The p = 59 census completed during this round: 100,408 weak ordinary rows among 201,898, 0/100,950 depth-1 positives, and 540/100,948 higher-depth zeros. All 5,000 GP controls are positive (4,565 distinct absolute traces). The archived CSV and decompressed SHA replay are retained in the larger-field report's p59_completed directory. The worker has advanced to p61.
 
+### 18.6.2 Independently sampled 192–252-bit fields (2026-10-09)
+
+The [population report](../../iso1_weak_classes_20261007/large_population_20261009/REPORT.md) point-counts 512 uniformly sampled full-2-torsion root-pair models in ten fields with total extension degrees 6, 10 and 14. All are ordinary. The proved conductor condition admits 323/512 (63.0859%; pooled Wilson 95% 58.8229–67.1540%). Every admitted source, after choosing the trace sign, has a verified full-4 representative at distance at most one rational 2-isogeny. The new theorem proves this torsion equivalence; its duplication identity has certificate IDC1h40099ec00a503c89. An independent exhaustive check verifies all 5,264 root pairs in eight smaller fields.
+
+The bounded degree-2/3 searches test 32,484 vertices and find zero norm-one witnesses from the independent population. All 323 admitted weak-class labels remain unresolved: 219 restricted-component closures and 104 vertex caps. Ten separately constructed large-field controls find a weak endpoint after two tested vertices and one edge. In the exact p7 validation, four weak classes appear among restricted-component closures, directly confirming that these closures cannot label a class zero. The precision interval for the admitted large-field population remains [0,1]; the earlier class-uniform small-prime precision is a separate result.
+
+The direct weak-model density bound is 3/(p²−1), from the three norm-fiber conditions; its degree-3/5/7 geometric sums have certified polynomial records. A CM preflight on an admitted 192-bit source obtains f_pi=8, then `polclass` reports an integer-conversion overflow on the 188-bit fundamental discriminant. The report retains the source law, all 512 field/model identities and raw receipts, 1,326 independent model replays, 72 route replays, proofs, SVGs, and a compiled PDF. Canonical dashboard context is refreshed; IC/rho ratios keep their earlier workloads and values.
+
 ### 18.7 Historical candidate R-v2, registered before its held-out test and now falsified (2026-10-08)
+
+Scope correction, 2026-10-09: the earlier weak-row labels, conductor
+restriction and zero examples select the cubic norm-one branch. The
+[prior-work comparison](../../iso1_weak_classes_20261007/large_population_20261009/PRIOR_WORK.md)
+verifies three quadratic-h Joux–Vitse models independently by complete
+affine-x enumeration and two infinity points. Their traces are −38, −10
+and 610, with Frobenius conductors 18, 26 and 72. The first two have
+conductor depth one, and the third occupies the class empty in the cubic
+census. Consequently those cubic exclusions do not exclude the broader
+published family. The 192–252-bit admission measurement and restricted
+searches also concern the cubic family. The next class criterion must
+include the quadratic branch explicitly.
 
 This preregistration is preserved as research history. The corrected p = 37,
 41, 43, 47 censuses in §18.6 falsify its **if and only if** claim, while the

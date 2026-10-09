@@ -56,6 +56,30 @@ jobs:
           gp -q -f -s 256M "$study/larger_fields_20261009/replay_models.gp" > models.txt 2> models.stderr
           test ! -s models.stderr
           cmp models.txt "$study/larger_fields_20261009/model_coordinate_replay.txt"
+      - name: Large-population receipts, one-edge theorem and saved routes
+        run: |
+          study=research/iso1_weak_classes_20261007
+          pop="$study/large_population_20261009"
+          for run in validation_p7_run1 pilot_run1 positive_controls_run1 population_run1; do
+            cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_population_check -- "$pop" "$pop/$run"
+          done
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_population_structure -- "$pop/identity_certificates.json"
+          gp -q -f -s 256M "$pop/structure_exact.gp" > population_algebra.txt 2> population_algebra.stderr
+          test ! -s population_algebra.stderr
+          cmp population_algebra.txt "$pop/structure_exact.txt"
+          gp -q -f -s 256M "$pop/torsion_exact.gp" > one_edge.txt 2> one_edge.stderr
+          test ! -s one_edge.stderr
+          cmp one_edge.txt "$pop/torsion_exact.txt"
+          ISO1_POPULATION_STUDY="$pop" gp -q -f -s 256M "$pop/replay_models.gp" > population_models.txt 2> population_models.stderr
+          test ! -s population_models.stderr
+          cmp population_models.txt "$pop/model_replay.txt"
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_population_structure -- --quartic "$pop/quartic_identity_certificate.json"
+          ISO1_POPULATION_STUDY="$pop" gp -q -f -s 256M "$pop/quadratic_replay.gp" > quadratic.txt 2> quadratic.stderr
+          test ! -s quadratic.stderr
+          cmp quadratic.txt "$pop/quadratic_replay.txt"
+          ISO1_P=7 ISO1_N=3 ISO1_SEED=202610090013 ISO1_BUDGET=256 ISO1_MODE=population gp -q -f -s 256M "$pop/sample.gp" > population_smoke.txt 2> population_smoke.stderr
+          test ! -s population_smoke.stderr
+          test "$(tail -n 1 population_smoke.txt)" = 'COMPLETE|7|3|202610090013|population'
       - name: Replay every p7 orbit by exact field enumeration
         env:
           RAYON_NUM_THREADS: '2'
