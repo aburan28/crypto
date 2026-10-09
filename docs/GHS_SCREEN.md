@@ -61,3 +61,7 @@ experiment under this repository's accounting rules.
 The reported `C -> E` label describes the GHS descent cover associated with the
 field tower. It is separate from the same-field elementary covers cataloged by
 [`curve_cover_check`](curves/COVERS.md).
+
+For a checked point-level trace on a subfield-defined binary curve, use
+[`ghs_transport`](GHS_TRANSPORT.md). Higher-magic rows remain structural
+until a smooth model and norm-conorm map are constructed.

@@ -105,7 +105,7 @@ prime-field curves have cofactor one),
 | 113-bit subgroup instance generation and complete ISO-1 solve | Unresolved: point count, primality, `Spec` and sieve/descent widths |
 | 192-bit extension-field instance and complete ISO-1 solve | Unresolved: above plus full-order and walk trace widths, scale |
 | Actual P-192 ISO-1 attack | Unresolved: no applicable cover/transfer route established |
-| `sect113r1`/`sect113r2` ISO-1 attack | Unresolved: characteristic-two route absent |
+| `sect113r1`/`sect113r2` ISO-1 attack | Unresolved: odd-prime ISO-1 does not apply; the binary GHS route is separately screened and only its trace branch is executable |
 
 The next implementation gate is a **certified wide-order input** for a
 specific weak curve, with independent checks of `[l]G = O`, `Q = [d]G`,
