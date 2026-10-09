@@ -113,6 +113,8 @@ of order `216`. Full `K0[9]` is rational over `F_(2^(37*24))`; full
 uses the smaller torsion order, but no map or gluing step was implemented.
 The receipt stores `constructs_isogeny: false`, and the C37 prototype and
 `F_q` operation counts remain open.
+The canonical isogeny and performance graphs are unchanged because this
+preflight adds no verified map, transfer-cost point, or paired runtime row.
 
 ## Remaining obligation
 
