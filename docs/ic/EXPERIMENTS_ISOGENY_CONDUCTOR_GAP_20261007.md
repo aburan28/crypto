@@ -52,7 +52,7 @@ disks at 100%. Set `TMPDIR` to the session scratchpad, keep artifacts under
 ## E0. Smoke test of a one-level descent at a toy rung (done, see status)
 
 **Angles:** V2, V9. **Script:** `research/isogeny_conductor_gap_20261007/v2_descend_toy.py`.
-Builds `K_0/F_{2^23}`, finds a point of order 967 in `E(F_{q^21})`, rejects the
+Builds `icv1-f2m23-t5197-69e76b73`, finds a point of order 967 in `E(F_{q^21})`, rejects the
 two τ-eigenlines by a Weil-pairing test, computes the Vélu 967-isogeny,
 checks `j(E') ∈ F_q \ F_2`, descends to `E_1/F_q` by the minimal polynomial of
 `j'`, picks the twist of the right order, and checks that `φ(G)` keeps the
