@@ -6,7 +6,7 @@ mod curve;
 #[path = "../../src/cryptanalysis/isogeny_walk/field.rs"]
 mod field;
 #[allow(dead_code)]
-#[path = "../../src/cryptanalysis/isogeny_walk/kernel.rs"]
+#[path = "verification_kernel.rs"]
 mod kernel;
 #[allow(dead_code)]
 #[path = "../../src/cryptanalysis/isogeny_walk/modpoly.rs"]
