@@ -1,5 +1,6 @@
 //! Installed isogeny construction, screening, and independent certificate replay.
 #![allow(dead_code)]
+mod catalog;
 mod constructor;
 #[path = "../../../src/cryptanalysis/isogeny_walk/curve.rs"]
 mod curve;
@@ -18,7 +19,10 @@ mod modpoly;
 pub mod modular_polynomial;
 #[path = "../../../research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs"]
 mod poly;
-mod replay;
+mod verification_field;
+mod replay {
+    include!(concat!(env!("OUT_DIR"), "/verification_engines.rs"));
+}
 mod supervisor;
 #[cfg(test)]
 pub mod cryptanalysis {
@@ -53,6 +57,7 @@ const HELP: &str = "isogeny — public-curve isogeny search and independent veri
   isogeny verify --input RESULTS
   isogeny screen --curve p192 --from 1010 --to 65537 [--max-order 8]
   isogeny version
+  isogeny curves                 full pinned catalogue and operation capabilities
 
 search options:
   --method auto|kernel|modpoly  auto selects the validated kernel route for
@@ -76,7 +81,7 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .collect()
 }
 fn standard_order(name: &str) -> Int {
-    supervisor::order(name)
+    catalog::source_order(name)
 }
 fn provenance() -> Value {
     json!({"name":"isogeny", "version":env!("CARGO_PKG_VERSION"),
@@ -128,25 +133,33 @@ impl Options {
     }
     fn curve(&self) -> Result<&str, String> {
         let curve = self.need("curve")?;
-        if matches!(curve, "p192" | "p224") {
-            Ok(curve)
-        } else {
-            Err("--curve must be p192 or p224".into())
-        }
+        Ok(catalog::label(catalog::resolve(curve)?))
     }
 }
 
 fn eigenvalues(name: &str, ell: u64) -> Option<[u64; 2]> {
-    let c = PrimeCurve::preset(name).unwrap();
-    let t = &(&c.p + &Int::one()) - &standard_order(name);
+    let q = catalog::field_order(catalog::resolve(name).unwrap()).unwrap();
+    let t = &(&q + &Int::one()) - &standard_order(name);
+    eigenvalues_from_trace(&q, &t, ell)
+}
+fn eigenvalues_from_trace(q: &Int, t: &Int, ell: u64) -> Option<[u64; 2]> {
     let tm = t.mod_u64(ell);
-    let pm = c.p.mod_u64(ell);
+    let pm = q.mod_u64(ell);
+    if pm == 0 {
+        return None;
+    }
     let disc = (tm * tm + ell - (4 * pm) % ell) % ell;
     if disc == 0 {
         return None;
     }
-    let field = Zp::new(ell);
-    let sqrt = field.sqrt(disc)?;
+    let sqrt = if ell == 3 {
+        if disc != 1 {
+            return None;
+        }
+        1
+    } else {
+        Zp::new(ell).sqrt(disc)?
+    };
     Some([
         (tm + sqrt) % ell * ((ell + 1) / 2) % ell,
         (tm + ell - sqrt) % ell * ((ell + 1) / 2) % ell,
@@ -176,7 +189,7 @@ fn multiplicative_order(a: u64, p: u64) -> u64 {
 }
 
 fn general_worker(name: &str, ell: u64) -> Result<Json, String> {
-    let c = PrimeCurve::preset(name).unwrap();
+    let c = catalog::prime_curve(catalog::resolve(name)?)?;
     let n = standard_order(name);
     let identity = |c: &PrimeCurve| {
         let id = icv1::prime(&c.p, &c.a, &c.b, &n).ok_or("curve identity could not be formed")?;
@@ -239,6 +252,7 @@ fn general_worker(name: &str, ell: u64) -> Result<Json, String> {
 fn execute(args: &[String]) -> Result<(Value, i32), String> {
     let command = args.first().map(String::as_str).unwrap_or("help");
     match command {
+        "curves" => Ok((catalog::inventory(), 0)),
         "version" | "--version" | "-V" => {
             Ok((json!({"schema":"isogeny-tool/v1","tool":provenance()}), 0))
         }
@@ -254,11 +268,13 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
                 );
             }
             let mut candidates = vec![];
+            let q = catalog::field_order(catalog::resolve(name)?)?;
+            let trace = &(&q + &Int::one()) - &standard_order(name);
             for ell in lower..=upper {
                 if !is_prime(ell) {
                     continue;
                 }
-                if let Some(roots) = eigenvalues(name, ell) {
+                if let Some(roots) = eigenvalues_from_trace(&q, &trace, ell) {
                     let orders = roots.map(|a| multiplicative_order(a, ell));
                     if *orders.iter().min().unwrap() <= max_order {
                         candidates.push(json!({"curve":name,"ell":ell,"eigenvalues":roots,"eigenvalue_orders":orders}));
@@ -276,12 +292,25 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
                 &["curve", "ell", "out", "timeout", "method", "construct-only"],
             )?;
             let name = o.curve()?;
+            let entry = catalog::resolve(name)?;
+            let capabilities = catalog::capabilities(entry);
+            if capabilities["construction"] != true {
+                return Err(capabilities["detail"].as_str().unwrap().into());
+            }
+            if o.get("construct-only").is_none() && capabilities["independent_replay"] != true {
+                return Err("no registered subgroup generator for independent replay; use --construct-only explicitly".into());
+            }
             let ell = o.number("ell", None)?;
             let timeout = o.number("timeout", Some(1800))?;
             if !(3..=1_000_000).contains(&ell) || !is_prime(ell) || timeout == 0 {
                 return Err(
                     "search needs an odd prime degree <= 1000000 and a positive timeout".into(),
                 );
+            }
+            if let Some(rep) = catalog::representation(entry) {
+                if catalog::integer(&rep["curve"]["subgroup_order"]).mod_u64(ell) == 0 {
+                    return Err("degree must be coprime to the registered subgroup order".into());
+                }
             }
             let supported = matches!((name, ell), ("p192", 10453) | ("p224", 1471));
             let single = match o.get("method").unwrap_or("auto") {
@@ -394,9 +423,8 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty()
-        || args
-            .iter()
-            .any(|a| matches!(a.as_str(), "help" | "--help" | "-h"))
+        || args.first().is_some_and(|a| a == "help")
+        || args.iter().any(|a| matches!(a.as_str(), "--help" | "-h"))
     {
         println!("{HELP}");
         return;
@@ -426,12 +454,21 @@ mod cli_tests {
         }
     }
     #[test]
+    fn degree_three_screening_uses_the_characteristic_three_residue_field() {
+        for curve in ["P-256", "P-384", "P-521", "SM2"] {
+            let roots = eigenvalues(curve, 3);
+            if let Some(roots) = roots {
+                assert!(roots.iter().all(|&root| root > 0 && root < 3));
+            }
+        }
+    }
+    #[test]
     fn usage_failures_precede_output_creation() {
         for args in [
             vec![
                 "search",
                 "--curve",
-                "p256",
+                "unknown-curve",
                 "--ell",
                 "1471",
                 "--out",

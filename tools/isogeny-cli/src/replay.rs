@@ -1,11 +1,11 @@
 //! Independent exact certificate replay, compiled into the installed tool.
-use crate::{
+use super::{
     curve,
     field::{Fe, Field},
     kernel, map_identity,
     poly::{self, Poly},
-    sha256_hex,
 };
+use crate::sha256_hex;
 use curve::Model;
 use num_bigint::BigUint;
 use serde_json::{json, Value};
@@ -91,21 +91,19 @@ pub fn verify(out: &Path, write_certificate: bool) -> Value {
             .iter()
             .find(|c| c["slug"] == source_slug)
             .unwrap();
-        assert!(source_entry["standard_names"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .any(|name| name == if preset == "p192" { "P-192" } else { "P-224" }));
         assert_eq!(integer(&source_entry["params"]["p"]), p);
         assert_eq!(integer(&source_entry["params"]["a"]), aa);
         assert_eq!(integer(&source_entry["params"]["b"]), b);
-        let n = integer(&source_entry["order"]);
-        let standard = source_entry["representations"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|r| r["curve"]["cofactor"] == 1)
-            .unwrap();
+        let group_order = integer(&source_entry["order"]);
+        let standard =
+            crate::catalog::representation(source_entry).expect("no complete source subgroup");
+        let n = integer(&standard["curve"]["subgroup_order"]);
+        let cofactor = crate::catalog::integer(&standard["curve"]["cofactor"]);
+        let cofactor_big = BigUint::parse_bytes(cofactor.to_string().as_bytes(), 10).unwrap();
+        assert_eq!(
+            num_bigint::BigUint::parse_bytes(cofactor.to_string().as_bytes(), 10).unwrap() * &n,
+            group_order
+        );
         let g = (
             f.from_big(&integer(&standard["curve"]["generator"][0])),
             f.from_big(&integer(&standard["curve"]["generator"][1])),
@@ -177,7 +175,7 @@ pub fn verify(out: &Path, write_certificate: bool) -> Value {
             let target_a = f.to_big(&cod.a);
             let target_b = f.to_big(&cod.b);
             let field_record = json!({"characteristic":json_number(&p),"degree":1,"representation":"prime","element_encoding":"hex integer modulo the characteristic"});
-            let curve_record = json!({"model":"short Weierstrass","coefficients":[0,0,0,json_number(&target_a),json_number(&target_b)],"subgroup_order":n.to_string(),"cofactor":1,
+            let curve_record = json!({"model":"short Weierstrass","coefficients":[0,0,0,json_number(&target_a),json_number(&target_b)],"subgroup_order":n.to_string(),"cofactor":json_number(&cofactor_big),
                 "generator":[format!("0x{:x}",f.to_big(&gp.0)),format!("0x{:x}",f.to_big(&gp.1))],"target_group":"prime-order subgroup"});
             let digest = sha256_hex(
                 serde_json::to_string(&json!({"field":field_record,"curve":curve_record}))
@@ -193,7 +191,7 @@ pub fn verify(out: &Path, write_certificate: bool) -> Value {
                 "public_scalar_transport_checks":point_checks,"status":"PASS"});
             replayed.push(row);
             curves.push(json!({"name":target_id["slug"],"icv1":target_id["icv1"],"p":p.to_string(),"a":target_a.to_string(),"b":target_b.to_string(),
-                "group_order":n.to_string(),"subgroup_order":n.to_string(),"cofactor":1,"j":iso["codomain"]["j"],"generator":[format!("0x{:x}",f.to_big(&gp.0)),format!("0x{:x}",f.to_big(&gp.1))],
+                "group_order":group_order.to_string(),"subgroup_order":n.to_string(),"cofactor":json_number(&cofactor_big),"j":iso["codomain"]["j"],"generator":[format!("0x{:x}",f.to_big(&gp.0)),format!("0x{:x}",f.to_big(&gp.1))],
                 "source":source_slug,"ell":ell,"index":index,"target_ec1":ec1,"target_curve_uid":uid,"model_json":target_id["model_json"]}));
         }
         eprintln!(

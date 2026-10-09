@@ -16,7 +16,7 @@
 //! * [`isogeny_from_kernel`]: Kohel/Velu from a kernel polynomial or a kernel x-coordinate.
 //!
 //! Fields are chosen by the size of p: u64 arithmetic below 2^62, and Montgomery with
-//! exactly the required number of limbs, up to 512 bits.
+//! exactly the required number of limbs, up to 640 bits.
 use crate::bigint::Big;
 use crate::curve::{
     jinv, on_curve, padd, pmul_big, random_point_f, Curve, Isogeny, Pt, RatIsogeny,
@@ -44,8 +44,8 @@ impl PrimeCurve {
         if p <= Int::from(3i64) || !p.is_probable_prime() {
             return Err(format!("p = {p} is not a prime above 3"));
         }
-        if p.bits() > 512 {
-            return Err("p above 512 bits is not supported".into());
+        if p.bits() > 640 {
+            return Err("p above 640 bits is not supported".into());
         }
         let (a, b) = (a.modulo(&p), b.modulo(&p));
         let c = PrimeCurve { p, a, b };
@@ -160,9 +160,13 @@ pub fn with_field<T: FieldTask>(p: &Int, task: T) -> T::Out {
         task.run(&FpM::<6>::from_dec(&p.to_string()))
     } else if bits <= 448 {
         task.run(&FpM::<7>::from_dec(&p.to_string()))
-    } else {
-        assert!(bits <= 512, "prime fields above 512 bits are unsupported");
+    } else if bits <= 512 {
         task.run(&FpM::<8>::from_dec(&p.to_string()))
+    } else if bits <= 576 {
+        task.run(&FpM::<9>::from_dec(&p.to_string()))
+    } else {
+        assert!(bits <= 640, "prime fields above 640 bits are unsupported");
+        task.run(&FpM::<10>::from_dec(&p.to_string()))
     }
 }
 
