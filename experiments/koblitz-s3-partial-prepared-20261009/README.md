@@ -1,5 +1,14 @@
 # Fixed partial-rank S3 preparation with online target-span fallback
 
+The frozen N53 relation stream implies a **2.2199× lower bound on the
+reference/rank-243 ratio of online S3 root evaluations**
+for the previously examined 100 single-target points. The trace calculation
+gives a minimum 5.2280× ratio on T085, which was also measured as rank-243
+stress control S085. All 27 executed rank-243 targets match the online
+root-call formula exactly. These
+are operation-count results; the paired wall-time evidence and its CPU
+fidelity gate are reported below.
+
 A fixed, target-independent relation prefix prepares rank 243 on N41 and rank
 237 on N53 before the public target point is read. The solver then decomposes
 one target and checks whether its coefficient row lies in the prepared span.
@@ -202,6 +211,38 @@ Each replay verified 560 distinct relation witnesses as point equations and
 checked the target decompositions and used factor-base labels. The rank-243
 replay checked 2,251 distinct used base labels.
 
+### Frozen-panel rank-243 root-call bound
+
+The `extract` loop visits at most 3,155,408 indexed N53 states and charges
+two S3 root evaluations at each visit, so a direct target decomposition costs
+at most 6,310,816 such evaluations. The fixed relation stream costs 7,699,066
+evaluations through attempt 238, 15,323,984 through attempt 462, and
+18,819,864 through attempt 560. All 100 original N53 reference runs stopped
+between attempts 238 and 560, and each found and verified a direct target
+decomposition. The rank-243 preparation completes at attempt 462.
+
+If the reference stops by attempt 462, the target row is already in the
+prepared span and rank 243 charges only its direct decomposition online. Its
+reference/rank-243 online root-call ratio is therefore at least
+`(7,699,066 + 6,310,816) / 6,310,816 = 2.219979...`.
+If the reference stops later, rank 243 continues the identical stream online.
+For this frozen panel the remaining stream has at most 3,495,880 evaluations,
+so the corresponding ratio is at least
+`(18,819,864 + 6,310,816) / (3,495,880 + 6,310,816) = 2.562604...`.
+Together these branches give the 2.2199× lower bound above without using the
+observed maximum direct-target cost.
+
+[`derive_rank243_root_bound.py`](derive_rank243_root_bound.py) checks archive
+and source hashes, every reference relation prefix, the direct decomposition
+in both originally executed arms, and the formula against all 27 actually
+executed rank-243 targets. The machine-readable
+[`rank243_root_call_bound.json`](local/rank243_root_call_bound.json) preserves
+the 100 target-specific projections, exact rational ratios, the bound, and
+the 27 exact-match validations. The prior 100 points were used during rank
+selection. Rank-243 work on 97 of them is **trace-derived counterfactual**;
+T067, T085, and T096 were later executed as labeled stress controls. The
+separately frozen 24 fresh points supply the rank-243 holdout measurements.
+
 ## Reproduction
 
 From this checkout, build the frozen examples with an out-of-tree Cargo target
@@ -224,6 +265,7 @@ The extension and later thresholds use their own frozen plans and outputs:
 python3 experiments/koblitz-s3-partial-prepared-20261009/run_extension.py --binaries /private/tmp/s3-partial-build/release/examples --output /private/tmp/s3-partial-extension-rerun
 python3 experiments/koblitz-s3-partial-prepared-20261009/run_rank242.py --plan experiments/koblitz-s3-partial-prepared-20261009/rank242/FREEZE.json --binaries /private/tmp/s3-partial-build/release/examples --output /private/tmp/s3-rank242-rerun
 python3 experiments/koblitz-s3-partial-prepared-20261009/run_rank242.py --plan experiments/koblitz-s3-partial-prepared-20261009/rank243/FREEZE.json --binaries /private/tmp/s3-partial-build/release/examples --output /private/tmp/s3-rank243-rerun
+python3 experiments/koblitz-s3-partial-prepared-20261009/derive_rank243_root_bound.py --output /private/tmp/s3-rank243-root-bound-rerun.json
 env LD=/usr/bin/ld /Volumes/SSD990/cryptanalysis/sage -python experiments/koblitz-s3-partial-prepared-20261009/replay_holdout_sage.py --ledger /private/tmp/s3-partial-extension-rerun/raw.jsonl --runtime-info /private/tmp/s3-partial-rerun-sage-runtime-info.json --receipt /private/tmp/s3-partial-extension-sage-replay.json --first-target 25 --target-count-per-curve 76
 env LD=/usr/bin/ld /Volumes/SSD990/cryptanalysis/sage -python experiments/koblitz-s3-partial-prepared-20261009/replay_rank242_sage.py --plan experiments/koblitz-s3-partial-prepared-20261009/rank242/FREEZE.json --ledger /private/tmp/s3-rank242-rerun/raw.jsonl --runtime-info /private/tmp/s3-partial-rerun-sage-runtime-info.json --receipt /private/tmp/s3-rank242-sage-replay.json
 env LD=/usr/bin/ld /Volumes/SSD990/cryptanalysis/sage -python experiments/koblitz-s3-partial-prepared-20261009/replay_rank242_sage.py --plan experiments/koblitz-s3-partial-prepared-20261009/rank243/FREEZE.json --ledger /private/tmp/s3-rank243-rerun/raw.jsonl --runtime-info /private/tmp/s3-partial-rerun-sage-runtime-info.json --receipt /private/tmp/s3-rank243-sage-replay.json

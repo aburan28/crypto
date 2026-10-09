@@ -1,0 +1,1846 @@
+{
+  "archive_sha256": {
+    "extension": "60fec46ea00db4a2ad7c8a7e76685b305855c75a1568b4865f2d9e33481c4e37",
+    "initial": "88d726f4508d6083311115324c311cae5a1f3c4af7ab46a3298da690ee5f3e79",
+    "rank243": "62ce737b1d1e3c37bfcba63a0403d8fc7ef7c60240ae674a6e962b229ac3770b"
+  },
+  "claim_type": "exact trace projection for 100 prior targets, including 3 executed rank243 controls; 27 executed rank243 targets validate the formula",
+  "controlled_speedup": null,
+  "curve_id": "EC1N53Ckb1h738a572b91f2",
+  "direct_target_s3_call_cap": 6310816,
+  "executed_rank243_validation": {
+    "exact_online_call_match_count": 27,
+    "minimum_measured_ratio": {
+      "decimal": 5.228029069799525,
+      "exact": "4737091/906095"
+    },
+    "minimum_measured_ratio_label": "S085",
+    "target_count": 27,
+    "targets": [
+      {
+        "family": "fresh",
+        "label": "F001",
+        "measured_rank243_online_s3_calls": 12202,
+        "ratio": {
+          "decimal": 716.7841337485659,
+          "exact": "4373100/6101"
+        },
+        "reference_attempts": 266
+      },
+      {
+        "family": "fresh",
+        "label": "F002",
+        "measured_rank243_online_s3_calls": 31182,
+        "ratio": {
+          "decimal": 247.9073824642422,
+          "exact": "3865124/15591"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F003",
+        "measured_rank243_online_s3_calls": 1748,
+        "ratio": {
+          "decimal": 4405.5,
+          "exact": "8811/2"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F004",
+        "measured_rank243_online_s3_calls": 4552,
+        "ratio": {
+          "decimal": 1692.3589630931458,
+          "exact": "3851809/2276"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F005",
+        "measured_rank243_online_s3_calls": 76764,
+        "ratio": {
+          "decimal": 101.29526861549685,
+          "exact": "3887915/38382"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F006",
+        "measured_rank243_online_s3_calls": 3178,
+        "ratio": {
+          "decimal": 2423.613593455003,
+          "exact": "3851122/1589"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F007",
+        "measured_rank243_online_s3_calls": 25786,
+        "ratio": {
+          "decimal": 595.2753432094935,
+          "exact": "7674885/12893"
+        },
+        "reference_attempts": 462
+      },
+      {
+        "family": "fresh",
+        "label": "F008",
+        "measured_rank243_online_s3_calls": 18068,
+        "ratio": {
+          "decimal": 427.1161168917423,
+          "exact": "3858567/9034"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F009",
+        "measured_rank243_online_s3_calls": 3024,
+        "ratio": {
+          "decimal": 2546.987433862434,
+          "exact": "3851045/1512"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F010",
+        "measured_rank243_online_s3_calls": 26008,
+        "ratio": {
+          "decimal": 297.02683789603196,
+          "exact": "3862537/13004"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F011",
+        "measured_rank243_online_s3_calls": 9520,
+        "ratio": {
+          "decimal": 809.7254201680672,
+          "exact": "3854293/4760"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F012",
+        "measured_rank243_online_s3_calls": 736,
+        "ratio": {
+          "decimal": 10461.6875,
+          "exact": "167387/16"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F013",
+        "measured_rank243_online_s3_calls": 72976,
+        "ratio": {
+          "decimal": 106.50134290725718,
+          "exact": "3886021/36488"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F014",
+        "measured_rank243_online_s3_calls": 18852,
+        "ratio": {
+          "decimal": 409.3951835349035,
+          "exact": "3858959/9426"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F015",
+        "measured_rank243_online_s3_calls": 69476,
+        "ratio": {
+          "decimal": 111.81619552075537,
+          "exact": "3884271/34738"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F016",
+        "measured_rank243_online_s3_calls": 17794,
+        "ratio": {
+          "decimal": 433.6776441497134,
+          "exact": "3858430/8897"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F017",
+        "measured_rank243_online_s3_calls": 7104,
+        "ratio": {
+          "decimal": 1386.8507882882882,
+          "exact": "2463047/1776"
+        },
+        "reference_attempts": 308
+      },
+      {
+        "family": "fresh",
+        "label": "F018",
+        "measured_rank243_online_s3_calls": 12314,
+        "ratio": {
+          "decimal": 626.2286828000649,
+          "exact": "3855690/6157"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F019",
+        "measured_rank243_online_s3_calls": 52738,
+        "ratio": {
+          "decimal": 146.98706814820434,
+          "exact": "3875902/26369"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F020",
+        "measured_rank243_online_s3_calls": 4400,
+        "ratio": {
+          "decimal": 1750.7877272727274,
+          "exact": "3851733/2200"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F021",
+        "measured_rank243_online_s3_calls": 112420,
+        "ratio": {
+          "decimal": 78.69078455790785,
+          "exact": "631887/8030"
+        },
+        "reference_attempts": 266
+      },
+      {
+        "family": "fresh",
+        "label": "F022",
+        "measured_rank243_online_s3_calls": 25142,
+        "ratio": {
+          "decimal": 307.2232917031262,
+          "exact": "3862104/12571"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F023",
+        "measured_rank243_online_s3_calls": 16452,
+        "ratio": {
+          "decimal": 468.9714320447362,
+          "exact": "3857759/8226"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "fresh",
+        "label": "F024",
+        "measured_rank243_online_s3_calls": 18034,
+        "ratio": {
+          "decimal": 427.91948541643563,
+          "exact": "3858550/9017"
+        },
+        "reference_attempts": 238
+      },
+      {
+        "family": "full_rank_stress_control",
+        "label": "S067",
+        "measured_rank243_online_s3_calls": 3534462,
+        "ratio": {
+          "decimal": 5.335591668548141,
+          "exact": "9429223/1767231"
+        },
+        "reference_attempts": 560
+      },
+      {
+        "family": "full_rank_stress_control",
+        "label": "S085",
+        "measured_rank243_online_s3_calls": 3624380,
+        "ratio": {
+          "decimal": 5.228029069799525,
+          "exact": "4737091/906095"
+        },
+        "reference_attempts": 560
+      },
+      {
+        "family": "full_rank_stress_control",
+        "label": "S096",
+        "measured_rank243_online_s3_calls": 3539848,
+        "ratio": {
+          "decimal": 5.3289949172958835,
+          "exact": "181383/34037"
+        },
+        "reference_attempts": 560
+      }
+    ]
+  },
+  "frozen_panel": {
+    "early_stop_lower_bound": {
+      "decimal": 2.2199794765050984,
+      "exact": "7004941/3155408"
+    },
+    "executed_rank243_stress_labels": {
+      "T067": "S067",
+      "T085": "S085",
+      "T096": "S096"
+    },
+    "executed_rank243_stress_overlap_count": 3,
+    "minimum_predicted_ratio": {
+      "decimal": 5.228029069799525,
+      "exact": "4737091/906095"
+    },
+    "minimum_predicted_ratio_label": "T085",
+    "observed_max_direct_target_s3_calls": 156700,
+    "post_rank243_stop_lower_bound": {
+      "decimal": 2.5626041635225563,
+      "exact": "3141335/1225837"
+    },
+    "predicted_at_least_2_count": 100,
+    "prior_target_count": 100,
+    "reference_attempt_distribution": {
+      "238": 88,
+      "266": 1,
+      "294": 1,
+      "308": 4,
+      "336": 2,
+      "462": 1,
+      "560": 3
+    },
+    "targets": [
+      {
+        "direct_target_s3_calls": 32822,
+        "label": "T001",
+        "point_sha256": "30f0c19026b276531abe082fe0faa2960221b8f0a46545e1ab62e68a7518210a",
+        "predicted_ratio": {
+          "decimal": 235.57028822131497,
+          "exact": "3865944/16411"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 32822,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7731888
+      },
+      {
+        "direct_target_s3_calls": 2898,
+        "label": "T002",
+        "point_sha256": "61fbd181fbd4b6966fb0fa7bc44266d67286955cbdca394812001a7e402feff9",
+        "predicted_ratio": {
+          "decimal": 2657.6825396825398,
+          "exact": "167434/63"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 2898,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7701964
+      },
+      {
+        "direct_target_s3_calls": 576,
+        "label": "T003",
+        "point_sha256": "1442a08607beefa849feca31e581cc94154c84eaf2cef64b6fea5e46f08413d8",
+        "predicted_ratio": {
+          "decimal": 26605.13888888889,
+          "exact": "957785/36"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 576,
+        "reference_attempts": 462,
+        "reference_online_s3_calls": 15324560
+      },
+      {
+        "direct_target_s3_calls": 15784,
+        "label": "T004",
+        "point_sha256": "272e22b6c4a3c394b05eea0afe82322600e58245c9a183a0774fca7c0b813ebe",
+        "predicted_ratio": {
+          "decimal": 488.77660922453117,
+          "exact": "3857425/7892"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 15784,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7714850
+      },
+      {
+        "direct_target_s3_calls": 31438,
+        "label": "T005",
+        "point_sha256": "8a01c50dcb451c67f6eb066ff16128e38da0d387ff036283d4f9b2f3e166a051",
+        "predicted_ratio": {
+          "decimal": 342.7514472930848,
+          "exact": "5387710/15719"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 31438,
+        "reference_attempts": 336,
+        "reference_online_s3_calls": 10775420
+      },
+      {
+        "direct_target_s3_calls": 156700,
+        "label": "T006",
+        "point_sha256": "327f52b09ca8d55f4ed8917b52a7cc6ff54e855bbf3eb57f2870b4d198848a5e",
+        "predicted_ratio": {
+          "decimal": 50.13252074026803,
+          "exact": "3927883/78350"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 156700,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7855766
+      },
+      {
+        "direct_target_s3_calls": 153092,
+        "label": "T007",
+        "point_sha256": "6834410e9ac97f6ec3b66b11b2934cb532f951118b5fd9f97d05881806d840d5",
+        "predicted_ratio": {
+          "decimal": 51.29045279962376,
+          "exact": "3926079/76546"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 153092,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7852158
+      },
+      {
+        "direct_target_s3_calls": 5722,
+        "label": "T008",
+        "point_sha256": "40057c54762806ec77f9392d627a233f65430a53b070330a4aa4d02256e2f6ca",
+        "predicted_ratio": {
+          "decimal": 1346.5200978678783,
+          "exact": "3852394/2861"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 5722,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7704788
+      },
+      {
+        "direct_target_s3_calls": 27364,
+        "label": "T009",
+        "point_sha256": "7f2aace2c0d9d34fec3bbd0818d4db912e9d9a2a823b7a866b002ed5bd7eef46",
+        "predicted_ratio": {
+          "decimal": 282.3574769770501,
+          "exact": "3863215/13682"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 27364,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7726430
+      },
+      {
+        "direct_target_s3_calls": 43260,
+        "label": "T010",
+        "point_sha256": "bfe30d065b9a34da3c659862f5a66d61e494140c365c09eda90d8babff9dc8f5",
+        "predicted_ratio": {
+          "decimal": 178.9719371243643,
+          "exact": "3871163/21630"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 43260,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7742326
+      },
+      {
+        "direct_target_s3_calls": 12734,
+        "label": "T011",
+        "point_sha256": "4308a3611eb2a95fbaa2de33d48f72ed63d4ddf62e5df4ec23b63fa0afa2cd26",
+        "predicted_ratio": {
+          "decimal": 605.607036280823,
+          "exact": "3855900/6367"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 12734,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7711800
+      },
+      {
+        "direct_target_s3_calls": 33600,
+        "label": "T012",
+        "point_sha256": "e14cff946e8bcf6e73237ddc9c163adfa70662652d0996421c8b467d6d8598dc",
+        "predicted_ratio": {
+          "decimal": 230.13886904761904,
+          "exact": "3866333/16800"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 33600,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7732666
+      },
+      {
+        "direct_target_s3_calls": 9092,
+        "label": "T013",
+        "point_sha256": "743b8c2b25bcfcbc59ebda1059d4ecdf15d21808e1af2ca3f965f101b1faa181",
+        "predicted_ratio": {
+          "decimal": 847.7956445226573,
+          "exact": "3854079/4546"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 9092,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7708158
+      },
+      {
+        "direct_target_s3_calls": 64686,
+        "label": "T014",
+        "point_sha256": "b6c53e88590049ee63c56c152254e14d93749af8dd2bd16c0e3a911eb94843e9",
+        "predicted_ratio": {
+          "decimal": 120.02213771140588,
+          "exact": "3881876/32343"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 64686,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7763752
+      },
+      {
+        "direct_target_s3_calls": 9116,
+        "label": "T015",
+        "point_sha256": "bd32ce163cbbdaf800431ab96c8b5380c7bf7e3a76c216edb6ce9a7850b72443",
+        "predicted_ratio": {
+          "decimal": 845.5662571303203,
+          "exact": "3854091/4558"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 9116,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7708182
+      },
+      {
+        "direct_target_s3_calls": 20212,
+        "label": "T016",
+        "point_sha256": "3a113e274dc2d0abe390d35c3fe895219f8ef3361d5e6c6bcbf3cc2362f796d8",
+        "predicted_ratio": {
+          "decimal": 381.91559469622007,
+          "exact": "3859639/10106"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 20212,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7719278
+      },
+      {
+        "direct_target_s3_calls": 56090,
+        "label": "T017",
+        "point_sha256": "523d12976640e65c0b5bf41a0a65d6282cc7c62a6f2d40c97374e8cdfbbdf170",
+        "predicted_ratio": {
+          "decimal": 138.26272062756286,
+          "exact": "3877578/28045"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 56090,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7755156
+      },
+      {
+        "direct_target_s3_calls": 38924,
+        "label": "T018",
+        "point_sha256": "2cba0a7d7889843a4a3dc514930d1535182a48334761f1d0740c0ef581cde972",
+        "predicted_ratio": {
+          "decimal": 198.7974000616586,
+          "exact": "3868995/19462"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 38924,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7737990
+      },
+      {
+        "direct_target_s3_calls": 19504,
+        "label": "T019",
+        "point_sha256": "eac6035d9c0602bf06589edeb244bdfdf2e23869d08d650445ccf096572eacaa",
+        "predicted_ratio": {
+          "decimal": 395.7429245283019,
+          "exact": "167795/424"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 19504,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7718570
+      },
+      {
+        "direct_target_s3_calls": 18394,
+        "label": "T020",
+        "point_sha256": "0bb62d7186286137e527977a6b67eb78d14027271555b0904add243b43bc6db2",
+        "predicted_ratio": {
+          "decimal": 419.56398825704036,
+          "exact": "3858730/9197"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 18394,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7717460
+      },
+      {
+        "direct_target_s3_calls": 9992,
+        "label": "T021",
+        "point_sha256": "7def04c431ac0f49f28ed8018a6ee09c734d301bd0da2cf997682f4c47fee597",
+        "predicted_ratio": {
+          "decimal": 771.5230184147318,
+          "exact": "3854529/4996"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 9992,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7709058
+      },
+      {
+        "direct_target_s3_calls": 2222,
+        "label": "T022",
+        "point_sha256": "8eab9b44c1d2bce3ac8dd18a3a7f982bc79817c1a0f19ff3fe493ab46cbddf47",
+        "predicted_ratio": {
+          "decimal": 3465.926192619262,
+          "exact": "3850644/1111"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 2222,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7701288
+      },
+      {
+        "direct_target_s3_calls": 1498,
+        "label": "T023",
+        "point_sha256": "8ffb78048430f6916a662b87494cfce99c41225059ae0c8ac42b7f7d9a2a9ebe",
+        "predicted_ratio": {
+          "decimal": 5140.563417890521,
+          "exact": "3850282/749"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 1498,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7700564
+      },
+      {
+        "direct_target_s3_calls": 113650,
+        "label": "T024",
+        "point_sha256": "b808320182ef6a44b4132a0c3101c92a238db00da51a6e4daa70bddf8144dcb5",
+        "predicted_ratio": {
+          "decimal": 68.74365156181258,
+          "exact": "3906358/56825"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 113650,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7812716
+      },
+      {
+        "direct_target_s3_calls": 17062,
+        "label": "T025",
+        "point_sha256": "2c6464eee46faf764ca7a4d1a1c4e1a74664cb313123e63daf151132c9029212",
+        "predicted_ratio": {
+          "decimal": 452.2405345211581,
+          "exact": "203056/449"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 17062,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7716128
+      },
+      {
+        "direct_target_s3_calls": 7002,
+        "label": "T026",
+        "point_sha256": "2136aa059865d14469212c9bd365c0fcf19d5b2ae9d5ec3112224356260c4192",
+        "predicted_ratio": {
+          "decimal": 1100.5524135961155,
+          "exact": "3853034/3501"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 7002,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7706068
+      },
+      {
+        "direct_target_s3_calls": 45342,
+        "label": "T027",
+        "point_sha256": "ff70241e4618bfad7cd4394b75fe568bee2c1875afbf1053dd4b3928f9bb6b0f",
+        "predicted_ratio": {
+          "decimal": 218.1294605443077,
+          "exact": "4945213/22671"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 45342,
+        "reference_attempts": 308,
+        "reference_online_s3_calls": 9890426
+      },
+      {
+        "direct_target_s3_calls": 9560,
+        "label": "T028",
+        "point_sha256": "b37a357a31ba6ea89cd87bf13858ce005a5efe5ffd118d3b08c2d074974518c0",
+        "predicted_ratio": {
+          "decimal": 806.3416317991632,
+          "exact": "3854313/4780"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 9560,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7708626
+      },
+      {
+        "direct_target_s3_calls": 21982,
+        "label": "T029",
+        "point_sha256": "6c837a8e55cdd01dcfe56ab59a461c146cd275af9af309e71e937341b7e2ffc3",
+        "predicted_ratio": {
+          "decimal": 351.2441088163043,
+          "exact": "3860524/10991"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 21982,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7721048
+      },
+      {
+        "direct_target_s3_calls": 998,
+        "label": "T030",
+        "point_sha256": "4bb8a684b4a2ddcca02818499e8386677465a79f5a67d665921b53c2f1c1bdc3",
+        "predicted_ratio": {
+          "decimal": 7715.49498997996,
+          "exact": "3850032/499"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 998,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7700064
+      },
+      {
+        "direct_target_s3_calls": 12190,
+        "label": "T031",
+        "point_sha256": "cf18aef250a226af0e4550254a011f48af5b97eb569645550cc089a6ae04ff81",
+        "predicted_ratio": {
+          "decimal": 632.5886792452831,
+          "exact": "167636/265"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 12190,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7711256
+      },
+      {
+        "direct_target_s3_calls": 55212,
+        "label": "T032",
+        "point_sha256": "98b82f82caa63be2af614ba6282e75213e728947d60235e0e8ddd79b1a8e02ac",
+        "predicted_ratio": {
+          "decimal": 140.4455190900529,
+          "exact": "3877139/27606"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 55212,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7754278
+      },
+      {
+        "direct_target_s3_calls": 14286,
+        "label": "T033",
+        "point_sha256": "93a3372f89354abb1676b3912d6571a70a6844acfb212997729cf008e3521b38",
+        "predicted_ratio": {
+          "decimal": 539.9238415231696,
+          "exact": "3856676/7143"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 14286,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7713352
+      },
+      {
+        "direct_target_s3_calls": 106194,
+        "label": "T034",
+        "point_sha256": "abcfe278a9f6bef656c79a2eecd37f9eb979a37937255cb1ec350fd8cdfd8619",
+        "predicted_ratio": {
+          "decimal": 73.50000941672788,
+          "exact": "3902630/53097"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 106194,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7805260
+      },
+      {
+        "direct_target_s3_calls": 15396,
+        "label": "T035",
+        "point_sha256": "d62df6f1d57fe594b1eb242fa5a60d110b6b6f107368cf7d26d4b8fe137383e7",
+        "predicted_ratio": {
+          "decimal": 501.0692387633151,
+          "exact": "3857231/7698"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 15396,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7714462
+      },
+      {
+        "direct_target_s3_calls": 8008,
+        "label": "T036",
+        "point_sha256": "564fa81f3648c7dfbd3a28ae6ea069ed014193b666bad7e868c192bb39e51b9d",
+        "predicted_ratio": {
+          "decimal": 962.4218281718282,
+          "exact": "3853537/4004"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 8008,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7707074
+      },
+      {
+        "direct_target_s3_calls": 13062,
+        "label": "T037",
+        "point_sha256": "7c84b04028886c4f6b25b87b808c7ebed6ef463da857f7c974c22edafd6462be",
+        "predicted_ratio": {
+          "decimal": 590.4247435308529,
+          "exact": "3856064/6531"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 13062,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7712128
+      },
+      {
+        "direct_target_s3_calls": 22100,
+        "label": "T038",
+        "point_sha256": "925c67d1331fc90b3c24ec37e1e80ec07902ebb43c539358c1ab936ac8c140c6",
+        "predicted_ratio": {
+          "decimal": 349.37402714932125,
+          "exact": "3860583/11050"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 22100,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7721166
+      },
+      {
+        "direct_target_s3_calls": 57206,
+        "label": "T039",
+        "point_sha256": "bf941186d6de31e684e5c7040382ef3e001022aa7ff5752ddfcdf0184f1175dc",
+        "predicted_ratio": {
+          "decimal": 135.5849386427997,
+          "exact": "3878136/28603"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 57206,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7756272
+      },
+      {
+        "direct_target_s3_calls": 26400,
+        "label": "T040",
+        "point_sha256": "51c73764b7e07e3d4b0ff40ab568022673944643caa714b103dc8fa553ce156e",
+        "predicted_ratio": {
+          "decimal": 292.6312878787879,
+          "exact": "3862733/13200"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 26400,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7725466
+      },
+      {
+        "direct_target_s3_calls": 8114,
+        "label": "T041",
+        "point_sha256": "e55bc7bb4ab741d39d53ab003cbc480b4ee6923d079986cddefb602c9a515ca5",
+        "predicted_ratio": {
+          "decimal": 949.8619669706679,
+          "exact": "3853590/4057"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 8114,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7707180
+      },
+      {
+        "direct_target_s3_calls": 21584,
+        "label": "T042",
+        "point_sha256": "9dcb8269021f819a7394132b7c8aebfe8bf61261f546595cbb72aad9e297b160",
+        "predicted_ratio": {
+          "decimal": 357.7024647887324,
+          "exact": "203175/568"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 21584,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7720650
+      },
+      {
+        "direct_target_s3_calls": 64428,
+        "label": "T043",
+        "point_sha256": "5a4e04d2ab92d769f3da67f5875dbaeb320c089e54e0b9d7f61b4ebf868f6a7e",
+        "predicted_ratio": {
+          "decimal": 153.8075370956727,
+          "exact": "2477378/16107"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 64428,
+        "reference_attempts": 308,
+        "reference_online_s3_calls": 9909512
+      },
+      {
+        "direct_target_s3_calls": 65838,
+        "label": "T044",
+        "point_sha256": "ced81b7216a151ce588a93df623a277031f9c9fd16fdbe24d40c8442c6e4797b",
+        "predicted_ratio": {
+          "decimal": 117.93954858896078,
+          "exact": "3882452/32919"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 65838,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7764904
+      },
+      {
+        "direct_target_s3_calls": 6536,
+        "label": "T045",
+        "point_sha256": "e8430c273ef933281b4b13e267df24d2c1801b25635ec3a2d8d6edabe37cbe7a",
+        "predicted_ratio": {
+          "decimal": 1178.9476744186047,
+          "exact": "202779/172"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 6536,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7705602
+      },
+      {
+        "direct_target_s3_calls": 3890,
+        "label": "T046",
+        "point_sha256": "04d7e26cf986128bd2476486add5dbb647c54b3b813d69e9d7e89d7c9dae1742",
+        "predicted_ratio": {
+          "decimal": 1980.1943444730077,
+          "exact": "3851478/1945"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 3890,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7702956
+      },
+      {
+        "direct_target_s3_calls": 5024,
+        "label": "T047",
+        "point_sha256": "28cdda85075794801073aee5e61bb7e2561aa00871016ea7b103d920e4d2a50d",
+        "predicted_ratio": {
+          "decimal": 2139.5314490445858,
+          "exact": "5374503/2512"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 5024,
+        "reference_attempts": 336,
+        "reference_online_s3_calls": 10749006
+      },
+      {
+        "direct_target_s3_calls": 2400,
+        "label": "T048",
+        "point_sha256": "4db6a23dad1577bc643e153b28283ed5aed06850aecf9d3700573da5153a1198",
+        "predicted_ratio": {
+          "decimal": 3208.9441666666667,
+          "exact": "3850733/1200"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 2400,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7701466
+      },
+      {
+        "direct_target_s3_calls": 14014,
+        "label": "T049",
+        "point_sha256": "e7efdbcff4ed733b771eda3901121dd79f8a50b6a149559360283260ca066355",
+        "predicted_ratio": {
+          "decimal": 550.3839018124733,
+          "exact": "3856540/7007"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 14014,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7713080
+      },
+      {
+        "direct_target_s3_calls": 21698,
+        "label": "T050",
+        "point_sha256": "cc478d112c65894012c88b3ecf9f1f27c0c1a01e2ac8886bbf95f1efc28e044c",
+        "predicted_ratio": {
+          "decimal": 355.82837127845886,
+          "exact": "203178/571"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 21698,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7720764
+      },
+      {
+        "direct_target_s3_calls": 5740,
+        "label": "T051",
+        "point_sha256": "a1b662d785866e18b80190e43f339d8fcd068a73a55701dfe5e0ae074633ef10",
+        "predicted_ratio": {
+          "decimal": 1342.3006968641114,
+          "exact": "3852403/2870"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 5740,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7704806
+      },
+      {
+        "direct_target_s3_calls": 14140,
+        "label": "T052",
+        "point_sha256": "7e08b6a316eab2719a7838d1d9994269183c9a266c4a5b0e86d5efd4f6e65b22",
+        "predicted_ratio": {
+          "decimal": 545.4884016973126,
+          "exact": "3856603/7070"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 14140,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7713206
+      },
+      {
+        "direct_target_s3_calls": 1604,
+        "label": "T053",
+        "point_sha256": "ea64e163a56e405562e9a32eb10ec9807d27edbd103bc406794e3566e455e713",
+        "predicted_ratio": {
+          "decimal": 4800.916458852867,
+          "exact": "3850335/802"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 1604,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7700670
+      },
+      {
+        "direct_target_s3_calls": 7964,
+        "label": "T054",
+        "point_sha256": "fbda84a21b802e3bf8ba4050f66addb59319e0ad7bbeec1e0b33c61af15f2561",
+        "predicted_ratio": {
+          "decimal": 967.7335509794074,
+          "exact": "3853515/3982"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 7964,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7707030
+      },
+      {
+        "direct_target_s3_calls": 70314,
+        "label": "T055",
+        "point_sha256": "eb93e8b2e3f0077f549e4906ddcce2c2c2afe530d60425556c258fc3b633237c",
+        "predicted_ratio": {
+          "decimal": 110.49549165173366,
+          "exact": "3884690/35157"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 70314,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7769380
+      },
+      {
+        "direct_target_s3_calls": 38056,
+        "label": "T056",
+        "point_sha256": "e39a5795d56c7a4c745cecf852b6bf9fa3b50a2201434d09710c83529df2c64a",
+        "predicted_ratio": {
+          "decimal": 203.30886062644524,
+          "exact": "3868561/19028"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 38056,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7737122
+      },
+      {
+        "direct_target_s3_calls": 65842,
+        "label": "T057",
+        "point_sha256": "7b5d11d5add1033fd6e87c4388373552621b6fc4802b3787ae902e83878fd066",
+        "predicted_ratio": {
+          "decimal": 117.93244433644179,
+          "exact": "3882454/32921"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 65842,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7764908
+      },
+      {
+        "direct_target_s3_calls": 27916,
+        "label": "T058",
+        "point_sha256": "d9b5a4c3d725d356fa035f81d5a8a1f673dac60c12cfac115893e66f8bea0e09",
+        "predicted_ratio": {
+          "decimal": 276.7940249319387,
+          "exact": "3863491/13958"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 27916,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7726982
+      },
+      {
+        "direct_target_s3_calls": 46524,
+        "label": "T059",
+        "point_sha256": "e7c89c75657dded54738b46df5c2454953410d4ace0ac736ba04ea036f5ac048",
+        "predicted_ratio": {
+          "decimal": 166.48589975066633,
+          "exact": "3872795/23262"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 46524,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7745590
+      },
+      {
+        "direct_target_s3_calls": 11736,
+        "label": "T060",
+        "point_sha256": "8e9b189f061d5843505bb1a165ba680e0b183157480e2b27f1ef566167da1d8c",
+        "predicted_ratio": {
+          "decimal": 657.0213019768235,
+          "exact": "3855401/5868"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 11736,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7710802
+      },
+      {
+        "direct_target_s3_calls": 43608,
+        "label": "T061",
+        "point_sha256": "fa3c31beb7550435285073f2da304ea32495452da44c15eaaa6b4c80e8013a25",
+        "predicted_ratio": {
+          "decimal": 201.28430563199413,
+          "exact": "4388803/21804"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 43608,
+        "reference_attempts": 266,
+        "reference_online_s3_calls": 8777606
+      },
+      {
+        "direct_target_s3_calls": 74176,
+        "label": "T062",
+        "point_sha256": "ef2cee68d545d3b9f2e29d8490d4e3455f5b34fe142c18e0e9e01890a0f3d626",
+        "predicted_ratio": {
+          "decimal": 104.79456967213115,
+          "exact": "204559/1952"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 74176,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7773242
+      },
+      {
+        "direct_target_s3_calls": 11134,
+        "label": "T063",
+        "point_sha256": "ed9dc8d033c8e3f27a7b8c71f34286025f6bc24626017dffd93721284e550ccb",
+        "predicted_ratio": {
+          "decimal": 692.4914675767918,
+          "exact": "202900/293"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 11134,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7710200
+      },
+      {
+        "direct_target_s3_calls": 12382,
+        "label": "T064",
+        "point_sha256": "e1a036ec895a71ff59bccb95de61f8a6d7df70b6ca99037563787fc4fa79ab26",
+        "predicted_ratio": {
+          "decimal": 622.7950250363431,
+          "exact": "3855724/6191"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 12382,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7711448
+      },
+      {
+        "direct_target_s3_calls": 66594,
+        "label": "T065",
+        "point_sha256": "adb923b0b5d1fb2e67fdd56016a3de5a71314fc002e2ba243878edbca87831c5",
+        "predicted_ratio": {
+          "decimal": 116.61200708772562,
+          "exact": "3882830/33297"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 66594,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7765660
+      },
+      {
+        "direct_target_s3_calls": 15186,
+        "label": "T066",
+        "point_sha256": "d652cf11c75cfc8c76a65e27c8b0eeae35259f036e088ac280e3ca352de8b99a",
+        "predicted_ratio": {
+          "decimal": 507.9844593704728,
+          "exact": "3857126/7593"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 15186,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7714252
+      },
+      {
+        "direct_target_s3_calls": 38582,
+        "label": "T067",
+        "point_sha256": "9fbe94e1395531e9feb0be91a3139b2019a32f3c0b3d028fcb904af15021e7ef",
+        "predicted_ratio": {
+          "decimal": 5.335591668548141,
+          "exact": "9429223/1767231"
+        },
+        "rank243_executed_stress_label": "S067",
+        "rank243_predicted_fallback_attempts": 98,
+        "rank243_predicted_fallback_s3_calls": 3495880,
+        "rank243_predicted_online_s3_calls": 3534462,
+        "reference_attempts": 560,
+        "reference_online_s3_calls": 18858446
+      },
+      {
+        "direct_target_s3_calls": 13712,
+        "label": "T068",
+        "point_sha256": "7a5ecff7a5fdd16a15a1f43d74fe30b5c50aaf5cf48b5235caf31fab9c6a1007",
+        "predicted_ratio": {
+          "decimal": 562.4838098016336,
+          "exact": "3856389/6856"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 13712,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7712778
+      },
+      {
+        "direct_target_s3_calls": 11118,
+        "label": "T069",
+        "point_sha256": "47d981b1e0f72a1f9580037f9c1cd5498349e3dda12e53e3d92b6708f7b4a3cc",
+        "predicted_ratio": {
+          "decimal": 693.4865983090484,
+          "exact": "3855092/5559"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 11118,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7710184
+      },
+      {
+        "direct_target_s3_calls": 72308,
+        "label": "T070",
+        "point_sha256": "556dc558afb5aced077714eb13c6476da906fb6814fe89f4f8bb4c085a951aac",
+        "predicted_ratio": {
+          "decimal": 137.15483763898877,
+          "exact": "2479348/18077"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 72308,
+        "reference_attempts": 308,
+        "reference_online_s3_calls": 9917392
+      },
+      {
+        "direct_target_s3_calls": 30644,
+        "label": "T071",
+        "point_sha256": "0310cb7b807bb31c00c24f8b86d3c9ca12f3a4247a132f6be67b7bfa1dad1f1a",
+        "predicted_ratio": {
+          "decimal": 252.24220075708132,
+          "exact": "3864855/15322"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 30644,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7729710
+      },
+      {
+        "direct_target_s3_calls": 3472,
+        "label": "T072",
+        "point_sha256": "615d40e98cfdead3afa54786169bfddc8b85356441c2f8d6c3d17b375ecd8159",
+        "predicted_ratio": {
+          "decimal": 2218.4729262672813,
+          "exact": "3851269/1736"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 3472,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7702538
+      },
+      {
+        "direct_target_s3_calls": 80950,
+        "label": "T073",
+        "point_sha256": "35e1d4e44c1fa679fb3975bfdbb15bf28069bbef0f0dbb0e3249027d3e9a5716",
+        "predicted_ratio": {
+          "decimal": 96.10890673255096,
+          "exact": "3890008/40475"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 80950,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7780016
+      },
+      {
+        "direct_target_s3_calls": 15402,
+        "label": "T074",
+        "point_sha256": "459e53991b3eec41acf92ee9ceed1a64543ca2e46b6f3c72a3932edea3e63d93",
+        "predicted_ratio": {
+          "decimal": 500.8744318919621,
+          "exact": "3857234/7701"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 15402,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7714468
+      },
+      {
+        "direct_target_s3_calls": 79998,
+        "label": "T075",
+        "point_sha256": "252ea3ebe28275512f115d68fa0caa8f0b1fc2b1765ffe553112b6d186aed460",
+        "predicted_ratio": {
+          "decimal": 97.24073101827545,
+          "exact": "3889532/39999"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 79998,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7779064
+      },
+      {
+        "direct_target_s3_calls": 64940,
+        "label": "T076",
+        "point_sha256": "59f865358fecf5588e6ecf73545c03090bdf0c27ef94a6f80d26d0a43fc34278",
+        "predicted_ratio": {
+          "decimal": 119.55660609793655,
+          "exact": "3882003/32470"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 64940,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7764006
+      },
+      {
+        "direct_target_s3_calls": 35472,
+        "label": "T077",
+        "point_sha256": "659fa0f53422f54b0fb88bef7d34caa9ba62f0c1242ea5df8be852b7b7cc211d",
+        "predicted_ratio": {
+          "decimal": 218.0462900315742,
+          "exact": "3867269/17736"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 35472,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7734538
+      },
+      {
+        "direct_target_s3_calls": 1828,
+        "label": "T078",
+        "point_sha256": "0cd0ad33ce0b5dcec32ead1cc6f236343304add0b175d50e87faecac0f62fc06",
+        "predicted_ratio": {
+          "decimal": 4212.742888402626,
+          "exact": "3850447/914"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 1828,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7700894
+      },
+      {
+        "direct_target_s3_calls": 24804,
+        "label": "T079",
+        "point_sha256": "c7ff2749595fd9d2ac906bf082d05619222bf26831691ab31c6744b3b0a76756",
+        "predicted_ratio": {
+          "decimal": 311.3961457829382,
+          "exact": "3861935/12402"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 24804,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7723870
+      },
+      {
+        "direct_target_s3_calls": 5720,
+        "label": "T080",
+        "point_sha256": "3d3514e96ec351bf8667b7a9b3a8dac391d942fdc89bde7b59d66c5740f4ad59",
+        "predicted_ratio": {
+          "decimal": 1346.9905594405595,
+          "exact": "3852393/2860"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 5720,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7704786
+      },
+      {
+        "direct_target_s3_calls": 99596,
+        "label": "T081",
+        "point_sha256": "91e7e54cb93be3652416b0321ccfd0632178259139cca65be19bd8e28d0e99d2",
+        "predicted_ratio": {
+          "decimal": 78.3029639744568,
+          "exact": "3899331/49798"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 99596,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7798662
+      },
+      {
+        "direct_target_s3_calls": 31020,
+        "label": "T082",
+        "point_sha256": "cc774fc956201b9b41bda0b4194b0441c94311a0a0232abc3dc2c4c004295075",
+        "predicted_ratio": {
+          "decimal": 249.1968407479046,
+          "exact": "3865043/15510"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 31020,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7730086
+      },
+      {
+        "direct_target_s3_calls": 31504,
+        "label": "T083",
+        "point_sha256": "404c45535ebe925df9d666384c9d9477a11d5995e590f2bdd1821797b846479f",
+        "predicted_ratio": {
+          "decimal": 245.38376079228036,
+          "exact": "3865285/15752"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 31504,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7730570
+      },
+      {
+        "direct_target_s3_calls": 60758,
+        "label": "T084",
+        "point_sha256": "06456786bba32ce74c11e7a619cdc5c3e38b1d631a0f6053c8fb028d7d353e9d",
+        "predicted_ratio": {
+          "decimal": 127.71690970736364,
+          "exact": "3879912/30379"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 60758,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7759824
+      },
+      {
+        "direct_target_s3_calls": 128500,
+        "label": "T085",
+        "point_sha256": "23549809e3d38194062d652a60a60a9a8db22117c744ce597c28e7e519c9c645",
+        "predicted_ratio": {
+          "decimal": 5.228029069799525,
+          "exact": "4737091/906095"
+        },
+        "rank243_executed_stress_label": "S085",
+        "rank243_predicted_fallback_attempts": 98,
+        "rank243_predicted_fallback_s3_calls": 3495880,
+        "rank243_predicted_online_s3_calls": 3624380,
+        "reference_attempts": 560,
+        "reference_online_s3_calls": 18948364
+      },
+      {
+        "direct_target_s3_calls": 1142,
+        "label": "T086",
+        "point_sha256": "16a6bc88e0c26ad265b8603b4ec29f12ac00f75be0f2e4365fe285f81acb7c87",
+        "predicted_ratio": {
+          "decimal": 6742.739054290718,
+          "exact": "3850104/571"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 1142,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7700208
+      },
+      {
+        "direct_target_s3_calls": 4558,
+        "label": "T087",
+        "point_sha256": "35c5531aeaf1b41f19350eedf4bd16c5f7e6e165a41ef6ed25e4adc3c0bb51bc",
+        "predicted_ratio": {
+          "decimal": 1690.1325142606406,
+          "exact": "3851812/2279"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 4558,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7703624
+      },
+      {
+        "direct_target_s3_calls": 53448,
+        "label": "T088",
+        "point_sha256": "8e9ab2cfdb5c7cd2b91cdd2e9ce3ac4af204fd1dc146aeef842b38435acab20f",
+        "predicted_ratio": {
+          "decimal": 145.04778476276007,
+          "exact": "3876257/26724"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 53448,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7752514
+      },
+      {
+        "direct_target_s3_calls": 10518,
+        "label": "T089",
+        "point_sha256": "d952bbbda5b09695aa009b845225e18916d384289bbdde883a7cf05cac0570fd",
+        "predicted_ratio": {
+          "decimal": 732.989541737973,
+          "exact": "3854792/5259"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 10518,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7709584
+      },
+      {
+        "direct_target_s3_calls": 24250,
+        "label": "T090",
+        "point_sha256": "b27ccd797467fa223d5d9f66fc0a304eada9a7f7974530459ab3172673555b22",
+        "predicted_ratio": {
+          "decimal": 318.4872577319588,
+          "exact": "3861658/12125"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 24250,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7723316
+      },
+      {
+        "direct_target_s3_calls": 17452,
+        "label": "T091",
+        "point_sha256": "40a9e6d1ab75848b0379219511c813e22052c5cd5bbc2005874c661d938a3a9a",
+        "predicted_ratio": {
+          "decimal": 442.1566582626633,
+          "exact": "3858259/8726"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 17452,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7716518
+      },
+      {
+        "direct_target_s3_calls": 17220,
+        "label": "T092",
+        "point_sha256": "4951dcf4ea90731f578068f091605febf733bfd7d88300987dff02f1f652943a",
+        "predicted_ratio": {
+          "decimal": 572.7238095238096,
+          "exact": "60136/105"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 17220,
+        "reference_attempts": 308,
+        "reference_online_s3_calls": 9862304
+      },
+      {
+        "direct_target_s3_calls": 62464,
+        "label": "T093",
+        "point_sha256": "1bdfb208903f1ebfbe7c6bc1c45ffc91ab88926e61c444585407f52290139c05",
+        "predicted_ratio": {
+          "decimal": 124.25605148565573,
+          "exact": "3880765/31232"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 62464,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7761530
+      },
+      {
+        "direct_target_s3_calls": 48656,
+        "label": "T094",
+        "point_sha256": "40cbf53d387db8002ec73c192abfd26f0f94251bc1e62c71dff245f54f4a6a3e",
+        "predicted_ratio": {
+          "decimal": 159.2346678724104,
+          "exact": "3873861/24328"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 48656,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7747722
+      },
+      {
+        "direct_target_s3_calls": 39666,
+        "label": "T095",
+        "point_sha256": "fd15f00007eeec374f1d0a5a9d75d5647040533abb6b467e1294adba30f5509c",
+        "predicted_ratio": {
+          "decimal": 195.09736298089044,
+          "exact": "3869366/19833"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 39666,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7738732
+      },
+      {
+        "direct_target_s3_calls": 43968,
+        "label": "T096",
+        "point_sha256": "31d5be825ed752102a101df155fd6987c17824e4cdf4f96d4310d358229a5e7f",
+        "predicted_ratio": {
+          "decimal": 5.3289949172958835,
+          "exact": "181383/34037"
+        },
+        "rank243_executed_stress_label": "S096",
+        "rank243_predicted_fallback_attempts": 98,
+        "rank243_predicted_fallback_s3_calls": 3495880,
+        "rank243_predicted_online_s3_calls": 3539848,
+        "reference_attempts": 560,
+        "reference_online_s3_calls": 18863832
+      },
+      {
+        "direct_target_s3_calls": 854,
+        "label": "T097",
+        "point_sha256": "132fab850a96217a297d46b8c6830e28a427da6f1d2657c8d74f859bc3226fea",
+        "predicted_ratio": {
+          "decimal": 9016.299765807962,
+          "exact": "3849960/427"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 854,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7699920
+      },
+      {
+        "direct_target_s3_calls": 17566,
+        "label": "T098",
+        "point_sha256": "8571d9012fa16bf4334a8ab94d879aa62a727e7a25050aac9e8f4a7631133989",
+        "predicted_ratio": {
+          "decimal": 439.2936354320847,
+          "exact": "3858316/8783"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 17566,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7716632
+      },
+      {
+        "direct_target_s3_calls": 51884,
+        "label": "T099",
+        "point_sha256": "2aba3d184b83ccb1b969a645a08ef16f29bf49cb21b0373cc1ac5eb45031d5a3",
+        "predicted_ratio": {
+          "decimal": 149.38998535193895,
+          "exact": "3875475/25942"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 51884,
+        "reference_attempts": 238,
+        "reference_online_s3_calls": 7750950
+      },
+      {
+        "direct_target_s3_calls": 45636,
+        "label": "T100",
+        "point_sha256": "4e5a5f0f0ec5f5770f6efe7a0106f60a4329abacaa63287699bc981e17c7f31c",
+        "predicted_ratio": {
+          "decimal": 209.4152861775791,
+          "exact": "2389219/11409"
+        },
+        "rank243_executed_stress_label": null,
+        "rank243_predicted_fallback_attempts": 0,
+        "rank243_predicted_fallback_s3_calls": 0,
+        "rank243_predicted_online_s3_calls": 45636,
+        "reference_attempts": 294,
+        "reference_online_s3_calls": 9556876
+      }
+    ],
+    "trace_only_rank243_target_count": 97,
+    "uniform_lower_bound": {
+      "decimal": 2.2199794765050984,
+      "exact": "7004941/3155408"
+    }
+  },
+  "kind": "s3_rank243_n53_frozen_panel_root_call_bound_v1",
+  "metric": "online S3 root evaluations; two charged per visited index state",
+  "rank243_candidate_id": "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111",
+  "rank243_plan_sha256": "08bda8010f1f9b76df1030d47f392fc43fb339638232d054c2f419a155b94123",
+  "reference_candidate_id": "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954b",
+  "regular_states": 3155408,
+  "relation_prefix_s3_calls": {
+    "at_238": 7699066,
+    "at_462": 15323984,
+    "at_560": 18819864
+  },
+  "relation_seed": 20260928,
+  "relation_tail_463_through_560_s3_calls": 3495880,
+  "workers": 14
+}
