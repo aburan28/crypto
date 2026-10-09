@@ -192,6 +192,13 @@ unsafe fn clmul_u64_neon(a: u64, b: u64) -> u128 {
     std::arch::aarch64::vmull_p64(a, b)
 }
 
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
+    // The wide Karatsuba kernel uses the same runtime-gated PMULL primitive.
+    unsafe { clmul_u64_neon(a, b) }
+}
+
 impl Gf2 {
     /// Carry-less multiplication selected by this instance's runtime dispatch.
     pub fn kernel_name(&self) -> &'static str {
@@ -838,7 +845,7 @@ impl Gf2_128 {
         }
         // z^t mod irr ladders for the two reduction tables.
         let red_lo_positions = ((128 - n as usize) + 7) / 8;
-        let mut pow = bits ^ (1u128 << n); // z^n ≡ the low terms
+        let pow = bits ^ (1u128 << n); // z^n ≡ the low terms
         let mut red_lo = vec![0u128; red_lo_positions * 256];
         // Byte k of the folded part sits at absolute position n + 8k:
         // record every 8th ladder rung starting from z^n.
@@ -2170,15 +2177,13 @@ mod tests {
         // Random agreement with an independent square-and-multiply
         // Fermat computation at larger n.
         for n in [13u32, 31, 41, 53, 63] {
-            let irr = crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse(n)
-                .unwrap();
+            let irr =
+                crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse(n).unwrap();
             let gf = Gf2::new(&irr);
             assert_eq!(gf.inv(0), 0);
             let mut state = 0x1234_5678_9ABC_DEF0u64 ^ ((n as u64) << 32);
             for _ in 0..300 {
-                state = state
-                    .wrapping_mul(6364136223846793005)
-                    .wrapping_add(1);
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
                 let a = (state >> 11) & gf.mask;
                 if a == 0 {
                     continue;
@@ -3856,7 +3861,9 @@ mod wide_tests {
     #[test]
     fn wide_batch_inv_agrees_with_pointwise() {
         let gf = gf71();
-        let mut xs: Vec<u128> = (1..=64u128).map(|i| (i.wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ 0x1234) & gf.mask).collect();
+        let mut xs: Vec<u128> = (1..=64u128)
+            .map(|i| (i.wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ 0x1234) & gf.mask)
+            .collect();
         xs[3] = 0;
         let mut scratch = Vec::new();
         let mut expected = xs.clone();
