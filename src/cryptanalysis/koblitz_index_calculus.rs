@@ -3003,6 +3003,10 @@ fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
 #[derive(Clone, Copy, Debug)]
 pub struct SatDecompositionOptions {
     pub encoding: XorEncoding,
+    /// Use the experimental shared-product S4 encoding for ambient-basis
+    /// three-summand unions. Native XOR is required. Other shapes fail
+    /// closed as inconclusive instead of silently selecting an encoder.
+    pub factored_s4: bool,
     /// Prioritize summand coordinates; all other variables remain eligible.
     pub branch_on_summands: bool,
     /// Exclude summand coordinates without a rational factor-base point.
@@ -3040,6 +3044,7 @@ impl Default for SatDecompositionOptions {
     fn default() -> Self {
         Self {
             encoding: XorEncoding::Native,
+            factored_s4: false,
             branch_on_summands: false,
             restrict_to_factor_base: false,
             trace_constraint: true,
@@ -3138,6 +3143,17 @@ pub fn sat_decompose_with(
     macaulay_degree: Option<u32>,
     options: SatDecompositionOptions,
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
+    if options.factored_s4
+        && (m != 3 || !fb.uses_ambient_basis() || options.encoding != XorEncoding::Native)
+    {
+        return (
+            None,
+            SatDecompositionStats {
+                exhausted: true,
+                ..Default::default()
+            },
+        );
+    }
     if m == 3 && fb.uses_ambient_basis() {
         return sat_decompose_union_s4(kc, fb, index_of, target, max_models, options);
     }
@@ -3316,20 +3332,36 @@ fn sat_decompose_union_s4(
     max_models: usize,
     options: SatDecompositionOptions,
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
-    use crate::cryptanalysis::semaev_sat::encode_semaev_s4;
+    use crate::cryptanalysis::semaev_sat::{
+        encode_semaev_s4, encode_semaev_s4_factored_with, S4Options,
+    };
     let mut stats = SatDecompositionStats::default();
     let BinaryPoint::Affine { x: x_r, .. } = target else {
         stats.exhausted = true;
         return (None, stats);
     };
-    let mut enc = encode_semaev_s4(
-        kc.n,
-        kc.n,
-        &kc.curve.irreducible,
-        &kc.curve.b,
-        x_r,
-        options.encoding,
-    );
+    let mut enc = if options.factored_s4 {
+        encode_semaev_s4_factored_with(
+            kc.n,
+            kc.n,
+            &kc.curve.irreducible,
+            &kc.curve.b,
+            x_r,
+            S4Options {
+                encoding: options.encoding,
+                break_symmetry: true,
+            },
+        )
+    } else {
+        encode_semaev_s4(
+            kc.n,
+            kc.n,
+            &kc.curve.irreducible,
+            &kc.curve.b,
+            x_r,
+            options.encoding,
+        )
+    };
     enc.solver.conflict_budget = options.conflict_budget;
     let mut codes: Vec<_> = fb
         .points
@@ -5450,6 +5482,62 @@ mod tests {
         assert_eq!(fb.orbits.len(), 8);
         assert_eq!(fb.signed_orbits.len(), 4);
         assert_eq!(fb.unknowns(), 4);
+    }
+
+    #[test]
+    fn factored_s4_ambient_union_lifts_to_the_same_small_group_target() {
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("generator must be affine");
+        };
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let index = fb.index_map();
+        let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let target = kc.mul(&fb.points[0], &BigUint::from(3u32));
+        assert_ne!(target, BinaryPoint::Infinity);
+        for factored_s4 in [false, true] {
+            let (out, stats) = sat_decompose_with(
+                &kc,
+                &fb,
+                &index,
+                &field,
+                &target,
+                3,
+                128,
+                None,
+                SatDecompositionOptions {
+                    factored_s4,
+                    conflict_budget: 500_000,
+                    ..Default::default()
+                },
+            );
+            assert_eq!(stats.spurious, 0, "factored={factored_s4}: {stats:?}");
+            assert!(!stats.exhausted, "factored={factored_s4}: {stats:?}");
+            let ids = out.expect("three copies of a retained point must lift");
+            let sum = ids
+                .iter()
+                .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+            assert_eq!(sum, target);
+        }
+        for (m, encoding) in [(2, XorEncoding::Native), (3, XorEncoding::Cnf)] {
+            let (out, stats) = sat_decompose_with(
+                &kc,
+                &fb,
+                &index,
+                &field,
+                &target,
+                m,
+                1,
+                None,
+                SatDecompositionOptions {
+                    factored_s4: true,
+                    encoding,
+                    ..Default::default()
+                },
+            );
+            assert!(out.is_none() && stats.exhausted && !stats.refuted);
+            assert_eq!(stats.solver_calls, 0);
+        }
     }
 
     #[test]
