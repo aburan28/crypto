@@ -493,7 +493,26 @@ pub fn weil_descend_s4(
         correspondence.push(row);
     }
 
-    // ── half 2: S₄ over the e-variables ─────────────────────────────
+    S4System {
+        n,
+        l,
+        correspondence,
+        semaev: descend_symmetrised_s4_e_only(n, l, irr, b, x_r),
+    }
+}
+
+/// Descend only the S4 equations over the elementary-symmetric
+/// coefficients. A factored SAT correspondence can use these equations
+/// without first expanding all cubic x-monomials.
+pub fn descend_symmetrised_s4_e_only(
+    n: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    b: &F2mElement,
+    x_r: &F2mElement,
+) -> Vec<AnfPoly> {
+    assert!(l >= 1 && l <= n, "subspace dimension l must lie in 1..=n");
+    assert_eq!(*b, F2mElement::one(n), "symmetrised S4 needs b = 1");
     // Each e_i becomes a free symbolic element whose coefficients are
     // the fresh e-variables.
     let mut offset = 0u32;
@@ -553,12 +572,7 @@ pub fn weil_descend_s4(
         "the symmetrised system must be quadratic in the e-variables"
     );
 
-    S4System {
-        n,
-        l,
-        correspondence,
-        semaev: f3.coeffs,
-    }
+    f3.coeffs
 }
 
 /// Evaluate the symmetrised `f₃` directly over `F_{2ⁿ}`, for cross-

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Audit the current S4 encoder's unavoidable x-monomial auxiliaries.
+"""Audit source-derived auxiliary bounds for both native S4 encoders.
 
-This is a source-derived lower bound, not a solver construction or timing.
+These are model-shape bounds, not solver construction or timing results.
 It deliberately fails if a relied-on source expression changes.
 """
 
@@ -52,6 +52,8 @@ def main() -> None:
             "let sigma2 = x0x1.xor(&x0x2).xor(&x1x2);",
             "let sigma3 = x0x1.mul(&xs[2]);",
             "let mut row = sigma.coeffs.clone();",
+            "pub fn descend_symmetrised_s4_e_only(",
+            "semaev: descend_symmetrised_s4_e_only(n, l, irr, b, x_r)",
         ),
     )
     require(
@@ -63,6 +65,15 @@ def main() -> None:
             "for (mono, &z) in aux_of.iter() {",
             "for &v in mono {\n            solver.add_clause(vec![-zi, v as Lit]);",
             "solver.add_clause(big);",
+            "pub fn encode_semaev_s4_factored_with(",
+            "correspondence: Vec::new(),",
+            "let pair_coeff_base = pair_gate_base + 3 * pair_span;",
+            "let triple_gate_base = pair_coeff_base + 3 * coeffs;",
+            "let mut next = triple_gate_base + coeffs * l;",
+            "solver.add_clause(vec![-z, a]);",
+            "solver.add_clause(vec![-z, b]);",
+            "solver.add_clause(vec![z, -a, -b]);",
+            "for monomial in eq.monomials().filter(|m| m.len() >= 2)",
         ),
     )
     for l in range(1, 6):
@@ -80,13 +91,37 @@ def main() -> None:
         593364,
         2349149,
     )
+    pair_coefficients = 3 * (2 * l - 1)
+    triple_gates = l * (2 * l - 1)
+    factored_x_gates = quadratics + triple_gates
+    e_variables = 6 * l - 3
+    max_e_quadratics = e_variables * (e_variables - 1) // 2
+    factored_variables_without_e_aux = core + pair_coefficients + factored_x_gates
+    factored_variables_upper = factored_variables_without_e_aux + max_e_quadratics
+    factored_and_clauses_upper = 3 * (factored_x_gates + max_e_quadratics)
+    assert (
+        pair_coefficients,
+        triple_gates,
+        factored_x_gates,
+        max_e_quadratics,
+        factored_variables_without_e_aux,
+        factored_variables_upper,
+        factored_and_clauses_upper,
+    ) == (495, 13695, 34362, 122265, 35767, 158032, 469881)
     for path in (DESCENT, ENCODER):
         print(f"source {path.relative_to(ROOT)} sha256={sha256(path.read_bytes()).hexdigest()}")
     print("small_block_enumeration l=1..5 PASS")
     print(f"n83 core={core} x_quadratic_aux={quadratics} x_cubic_aux={cubics}")
     print(f"n83 sat_variables_lower_bound={variables}")
     print(f"n83 and_definition_clauses_lower_bound={and_clauses}")
-    print("status PASS source-derived bound only; no solver memory or runtime claim")
+    print(
+        "n83 factored_pair_coefficients="
+        f"{pair_coefficients} factored_x_and_gates={factored_x_gates} "
+        f"possible_e_quadratic_aux_at_most={max_e_quadratics}"
+    )
+    print(f"n83 factored_sat_variables_before_domain_at_most={factored_variables_upper}")
+    print(f"n83 factored_and_definition_clauses_at_most={factored_and_clauses_upper}")
+    print("status PASS source-derived bounds only; no N83 solver memory or runtime claim")
 
 
 if __name__ == "__main__":

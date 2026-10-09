@@ -63,6 +63,8 @@ The `primary-cold` command connects that replay-bound base to public primary fix
 
 The exact-enumeration oracle now projects degree-83 points to the existing `u128` field implementation and batches ordinary affine additions at each recursion node. Focused tests compare its wide additions with generic curve arithmetic and its first decomposition witness with a separate generic recursion on the primary curve. This preserves the reference oracle's semantics while removing the previous multi-limb arithmetic fallback for degrees 64 through 127. Its `|F|^(m-1)` search count is unchanged. The prior capped pilot receipts are measurements of the earlier source and cannot be relabeled as results for this path; no total-runtime or relative-speed claim follows from correctness tests.
 
+An experimental native-XOR S4 encoder factors the x/e correspondence through shared pair-product coefficients. It builds the e-space S4 equations directly, without constructing the original cubic x-ANF. It agrees with the reference encoding for every x assignment in a small complete instance, and a positive n=15 model passes scalar S4 verification. Source-derived N83 counts bound its pre-domain model by 158,032 variables and 469,881 AND-definition clauses; those counts do not include finite-base domain constraints or establish resource feasibility. This candidate is outside the frozen v1 design and is not exposed through `primary-cold` until a retained-base N83 construction, complete model lifting and hard resource cap pass.
+
 ## Subsequent total-runtime experiment
 
 Freeze the exact public target corpora, resource envelope and native backend versions before the first relation measurement. Use disjoint tuning and holdout targets, with validation-only known-answer scalars kept out of solver input. Keep one result per independent one-target workload. Preserve every phase cost, operation unit, cap, failed attempt, OOM and timeout. Baseline and candidate receive the same target and budget; randomize/interleave their order with A/A controls. Require at least five paired rounds and a paired 95% interval outside the measured noise floor for a runtime improvement. Run the admitted measurements on an L2-capable host; local macOS L0 timings cannot establish that comparison.
@@ -83,6 +85,7 @@ target/release/examples/koblitz_n83_factor_base_export replay research/koblitz_n
 python3 research/koblitz_n83_factor_base_sweep_20261008/support_moments.py
 python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_support_moments.py -v
 python3 research/koblitz_n83_factor_base_sweep_20261008/rank_query_screen.py
+python3 research/koblitz_n83_factor_base_sweep_20261008/verify_s4_aux_bound.py
 python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_rank_query_screen.py -v
 target/release/examples/koblitz_n83_factor_base_export probes research/koblitz_n83_factor_base_sweep_20261008/pilot-01 600
 target/release/examples/koblitz_n83_factor_base_export upload research/koblitz_n83_factor_base_sweep_20261008/pilot-01

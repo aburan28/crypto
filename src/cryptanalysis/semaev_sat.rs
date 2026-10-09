@@ -103,7 +103,9 @@
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-use crate::cryptanalysis::binary_semaev_s4::weil_descend_s4;
+use crate::cryptanalysis::binary_semaev_s4::{
+    descend_symmetrised_s4_e_only, weil_descend_s4, S4System,
+};
 use crate::cryptanalysis::ffd_harness::{
     monomial_index, quad_monomial_index, weil_descend_s3, weil_descend_s3_subspace, F2BoolPoly,
 };
@@ -341,7 +343,9 @@ pub struct S4SatEncoding {
     /// `6l − 3` variables for the coefficients of `e₁, e₂, e₃`,
     /// immediately after the x-variables.
     pub n_e_vars: u32,
-    /// One auxiliary per distinct monomial of degree ≥ 2, after those.
+    /// Algebraic auxiliaries after the x- and e-variables. The original
+    /// encoder uses one per non-linear monomial; a factored encoder may
+    /// also use shared intermediate coefficients and product gates.
     pub n_aux_vars: u32,
     pub solver: Solver,
     pub trivially_unsat: bool,
@@ -568,6 +572,186 @@ pub fn encode_semaev_s4_with(
     let free: Vec<u32> = (1..=n_x).collect();
     solver.set_branch_priority(&free);
 
+    S4SatEncoding {
+        n,
+        l,
+        n_x_vars: n_x,
+        n_e_vars: n_e,
+        n_aux_vars: n_aux,
+        solver,
+        trivially_unsat,
+    }
+}
+
+/// Encode the same S4 equations with shared polynomial-product gates for
+/// the x/e correspondence. This experimental variant accepts native XOR
+/// rows only; the original ANF encoder remains the reference and retains
+/// its exact upstream-size regression.
+///
+/// Pairwise products use `3l²` AND gates. Their `3(2l−1)` coefficient
+/// parities are shared by the quadratic correspondence and by the third
+/// product, which uses another `l(2l−1)` AND gates. This avoids one gate
+/// per cubic x-monomial. The e-space equations are constructed separately,
+/// without materialising the reference cubic x-ANF. A full wide-model
+/// construction and resource receipt are still required.
+pub fn encode_semaev_s4_factored_with(
+    n: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    b: &F2mElement,
+    x_r: &F2mElement,
+    opts: S4Options,
+) -> S4SatEncoding {
+    assert_eq!(
+        opts.encoding,
+        XorEncoding::Native,
+        "factored S4 needs native XOR"
+    );
+    assert!(l <= 127, "factored S4 is bounded to one-word x-coordinates");
+    let sys = S4System {
+        n,
+        l,
+        correspondence: Vec::new(),
+        semaev: descend_symmetrised_s4_e_only(n, l, irr, b, x_r),
+    };
+    let n_x = sys.n_x_vars();
+    let n_e = sys.n_e_vars();
+    let coeffs = 2 * l - 1;
+    let pair_span = l * l;
+    let pair_gate_base = n_x + n_e + 1;
+    let pair_coeff_base = pair_gate_base + 3 * pair_span;
+    let triple_gate_base = pair_coeff_base + 3 * coeffs;
+    let mut next = triple_gate_base + coeffs * l;
+    let x = |block: u32, bit: u32| block * l + bit + 1;
+    let e = |which: usize, degree: u32| n_x + sys.e_var(which, degree as usize) + 1;
+    let pair_gate = |pair: u32, a: u32, b: u32| pair_gate_base + pair * pair_span + a * l + b;
+    let pair_coeff = |pair: u32, degree: u32| pair_coeff_base + pair * coeffs + degree;
+    let triple_gate = |degree: u32, bit: u32| triple_gate_base + degree * l + bit;
+
+    let mut e_aux: std::collections::BTreeMap<Vec<u32>, u32> = std::collections::BTreeMap::new();
+    for eq in &sys.semaev {
+        for monomial in eq.monomials().filter(|m| m.len() >= 2) {
+            let variables: Vec<u32> = monomial.iter().map(|&v| n_x + v + 1).collect();
+            e_aux.entry(variables).or_insert(0);
+        }
+    }
+    for auxiliary in e_aux.values_mut() {
+        *auxiliary = next;
+        next += 1;
+    }
+    let n_aux = next - (n_x + n_e + 1);
+    let sym_base = next;
+    if opts.break_symmetry {
+        next += 2 * l;
+    }
+    let mut solver = Solver::new(next - 1);
+    let mut trivially_unsat = false;
+    let define_and = |solver: &mut Solver, z: u32, a: u32, b: u32| {
+        let (z, a, b) = (z as Lit, a as Lit, b as Lit);
+        solver.add_clause(vec![-z, a]);
+        solver.add_clause(vec![-z, b]);
+        solver.add_clause(vec![z, -a, -b]);
+    };
+    let mut add_parity = |solver: &mut Solver, variables: &[u32], rhs: bool| {
+        if variables.is_empty() {
+            if rhs {
+                solver.add_clause(vec![]);
+                trivially_unsat = true;
+            }
+        } else if !solver.add_xor(variables, rhs) {
+            trivially_unsat = true;
+        }
+    };
+
+    for (pair, (left, right)) in [(0, 1), (0, 2), (1, 2)].into_iter().enumerate() {
+        for a in 0..l {
+            for b in 0..l {
+                define_and(
+                    &mut solver,
+                    pair_gate(pair as u32, a, b),
+                    x(left, a),
+                    x(right, b),
+                );
+            }
+        }
+        for degree in 0..coeffs {
+            let mut row = vec![pair_coeff(pair as u32, degree)];
+            for a in 0..l {
+                if degree >= a && degree - a < l {
+                    row.push(pair_gate(pair as u32, a, degree - a));
+                }
+            }
+            add_parity(&mut solver, &row, false);
+        }
+    }
+    for degree in 0..coeffs {
+        for bit in 0..l {
+            define_and(
+                &mut solver,
+                triple_gate(degree, bit),
+                pair_coeff(0, degree),
+                x(2, bit),
+            );
+        }
+    }
+    for degree in 0..l {
+        add_parity(
+            &mut solver,
+            &[e(0, degree), x(0, degree), x(1, degree), x(2, degree)],
+            false,
+        );
+    }
+    for degree in 0..coeffs {
+        add_parity(
+            &mut solver,
+            &[
+                e(1, degree),
+                pair_coeff(0, degree),
+                pair_coeff(1, degree),
+                pair_coeff(2, degree),
+            ],
+            false,
+        );
+    }
+    for degree in 0..(3 * l - 2) {
+        let mut row = vec![e(2, degree)];
+        for bit in 0..l {
+            if degree >= bit && degree - bit < coeffs {
+                row.push(triple_gate(degree - bit, bit));
+            }
+        }
+        add_parity(&mut solver, &row, false);
+    }
+    for (monomial, &z) in &e_aux {
+        let zi = z as Lit;
+        let mut big = vec![zi];
+        for &v in monomial {
+            solver.add_clause(vec![-zi, v as Lit]);
+            big.push(-(v as Lit));
+        }
+        solver.add_clause(big);
+    }
+    for eq in &sys.semaev {
+        let mut row = Vec::new();
+        for monomial in eq.monomials().filter(|m| !m.is_empty()) {
+            let variables: Vec<u32> = monomial.iter().map(|&v| n_x + v + 1).collect();
+            row.push(if variables.len() == 1 {
+                variables[0]
+            } else {
+                e_aux[&variables]
+            });
+        }
+        add_parity(&mut solver, &row, eq.has_constant());
+    }
+    if opts.break_symmetry {
+        for pair in 0..2u32 {
+            let a: Vec<u32> = (0..l).map(|bit| x(pair, bit)).collect();
+            let b: Vec<u32> = (0..l).map(|bit| x(pair + 1, bit)).collect();
+            let eq: Vec<u32> = (0..l).map(|bit| sym_base + pair * l + bit).collect();
+            encode_lex_le(&mut solver, &a, &b, &eq);
+        }
+    }
+    solver.set_branch_priority(&(1..=n_x).collect::<Vec<_>>());
     S4SatEncoding {
         n,
         l,
@@ -1342,6 +1526,89 @@ mod tests {
         assert_eq!(enc.n_x_vars, 18);
         assert_eq!(enc.n_e_vars, 33);
         assert_eq!(enc.n_x_vars + enc.n_e_vars + enc.n_aux_vars, 767);
+    }
+
+    #[test]
+    fn factored_s4_matches_reference_for_every_small_x_assignment() {
+        let n = 7;
+        let l = 2;
+        let irr = IrreduciblePoly {
+            degree: n,
+            low_terms: vec![0, 1],
+        };
+        let b = F2mElement::one(n);
+        let element = |code: u32| {
+            F2mElement::from_bit_positions(
+                &(0..n)
+                    .filter(|bit| (code >> bit) & 1 == 1)
+                    .collect::<Vec<_>>(),
+                n,
+            )
+        };
+        let mut target = None;
+        'search: for x0 in 0..(1 << l) {
+            for x1 in 0..(1 << l) {
+                for x2 in 0..(1 << l) {
+                    let (e1, e2, e3) =
+                        elementary_symmetric_3(&element(x0), &element(x1), &element(x2), &irr);
+                    for xr in 0..(1 << n) {
+                        if symmetrised_s4_eval(&e1, &e2, &e3, &element(xr), &irr).is_zero() {
+                            target = Some(xr);
+                            break 'search;
+                        }
+                    }
+                }
+            }
+        }
+        let x_r = element(target.expect("small S4 family has a positive instance"));
+        let opts = S4Options {
+            encoding: XorEncoding::Native,
+            break_symmetry: false,
+        };
+        let mut sat_count = 0;
+        for assignment in 0..(1 << (3 * l)) {
+            let mut reference = encode_semaev_s4_with(n, l, &irr, &b, &x_r, opts);
+            let mut factored = encode_semaev_s4_factored_with(n, l, &irr, &b, &x_r, opts);
+            for bit in 0..(3 * l) {
+                let literal = (bit + 1) as Lit;
+                let literal = if assignment & (1 << bit) == 0 {
+                    -literal
+                } else {
+                    literal
+                };
+                reference.solver.add_clause(vec![literal]);
+                factored.solver.add_clause(vec![literal]);
+            }
+            let expected = reference.solver.solve();
+            let actual = factored.solver.solve();
+            assert_eq!(actual, expected, "x assignment {assignment}");
+            if actual == SolveResult::Sat {
+                sat_count += 1;
+            }
+        }
+        assert!(sat_count > 0 && sat_count < (1 << (3 * l)));
+    }
+
+    #[test]
+    fn factored_s4_reduces_model_size_at_n15() {
+        let n = 15;
+        let l = 5;
+        let irr = IrreduciblePoly {
+            degree: n,
+            low_terms: vec![0, 2, 4, 5],
+        };
+        let x_r = F2mElement::from_bit_positions(&[1, 2, 6, 7, 9, 12, 14], n);
+        let b = F2mElement::one(n);
+        let opts = S4Options::default();
+        let reference = encode_semaev_s4_with(n, l, &irr, &b, &x_r, opts);
+        let mut factored = encode_semaev_s4_factored_with(n, l, &irr, &b, &x_r, opts);
+        assert!(factored.solver.n_vars() < reference.solver.n_vars());
+        assert!(factored.solver.n_clauses() < reference.solver.n_clauses());
+        factored.solver.conflict_budget = 5_000_000;
+        assert_eq!(factored.solver.solve(), SolveResult::Sat);
+        let xs = factored.decode();
+        let (e1, e2, e3) = elementary_symmetric_3(&xs[0], &xs[1], &xs[2], &irr);
+        assert!(symmetrised_s4_eval(&e1, &e2, &e3, &x_r, &irr).is_zero());
     }
 
     /// **End-to-end at `n = 15`** — the smaller corpus family.
