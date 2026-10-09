@@ -342,7 +342,7 @@
 <!-- BEGIN IC DASHBOARD OVERVIEW -->
 <main class="dash" id="ic-overview">
   <nav class="dash-nav" aria-label="Dashboard"><a class="dash-brand" href="#ic-overview"><span class="brand-mark">IC</span> Research lab</a><div><a href="#lab-results">Results</a><a href="#lab-pipeline">Pipeline</a><a href="#lab-next">Next experiment</a><a href="#evidence-search">Evidence</a></div></nav>
-  <header class="dash-hero"><p class="dash-kicker">Index calculus · bounded autolab · updated 2 October 2026</p><h1>What works.<br>What still needs proof.</h1><p class="dash-lead">The tournament has kept its incumbent. F5 now completes a source-bound prepared control; SAT still needs that gate. A fresh comparison of these solver families has not run.</p><a class="dash-primary" href="#lab-results">See the measured results <span aria-hidden="true">↓</span></a></header>
+  <header class="dash-hero"><p class="dash-kicker">Index calculus · bounded autolab · updated 9 October 2026</p><h1>What works.<br>What still needs proof.</h1><p class="dash-lead">The tournament has kept its incumbent. A new native SAT/PDP ecbench panel verified 240 executions and replayed all 200 measured runs; its SAT operation count leaves solver conflicts unpriced, so it establishes no full-cost win. The separate F5/SAT prepared-control gate remains open.</p><a class="dash-primary" href="#ecbench-sat-pdp-20261009">See the new counted panel <span aria-hidden="true">↓</span></a></header>
   <div class="dash-metrics" aria-label="Current status">
     <article><span class="status neutral">Tournament</span><h2>Incumbent retained</h2><p>Three closed improvement rounds. No challenger passed promotion.</p><a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md">Last round →</a></article>
     <article><span class="status good">F5 · disclosed control</span><h2>Complete &amp; verified</h2><p>Three target attempts. Two negatives and one valid decomposition; scalar independently checked.</p><a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/RESULT.md">Original evidence →</a></article>
@@ -10922,6 +10922,37 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage201-exact-ends -->
+<!-- BEGIN ecbench-sat-pdp-20261009 -->
+<div class="panel" id="ecbench-sat-pdp-20261009">
+  <div class="panel-head">
+    <h2>ecbench SAT/PDP: a lower counted column is not a full-cost win <span class="chip">accounting</span></h2>
+    <p class="panel-summary">Five arms on eight public icv1-f2m17-tm101-00378d4e targets: 240/240 verified, 200/200 measured replays identical. SAT native-XOR counts 0.854&times; strong rho in S but leaves 2,755,966 conflicts unpriced; all wall figures are L0 diagnostics.</p>
+    <p>The frozen <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_sat_pdp_20261009/PROTOCOL-3.md">budget-qualified protocol</a>
+      keeps the same public targets, factor base and seeds across the strong signed-Frobenius rho,
+      meet-in-the-middle, Frobenius meet-in-the-middle and native-XOR SAT arms. Its CNF predecessor
+      hit 56 per-call conflict limits in two measured pilot runs and was excluded by the declared
+      stop rule. Both interrupted main attempts and the original replay failure remain in the
+      <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_sat_pdp_20261009/README.md">research record</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold counted group-addition equivalents per &radic;r, one public target per run, 40 measured runs per arm. The generic floor is S = 0.215. Values and intervals come from the <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_sat_pdp_20261009/count-qualified-main.table.md">frozen ecbench table</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_sat_pdp_20261009/sessions/count-qualified-main/comparisons/rho-strong__ic-sat-xor.json">paired comparison</a>. Ratios involving an unpriced row are diagnostics, not bounds on full cost.</caption>
+    <thead><tr><th>Variant</th><th class="n">Mean S</th><th class="n">vs rho</th><th class="n">vs floor</th><th>Correct</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Strong signed-Frobenius rho</td><td class="n">3.998</td><td class="n">1.000</td><td class="n">18.598</td><td>40/40</td><td><span class="chip">reference</span>; native table work unpriced</td></tr>
+      <tr><td>Strong rho A/A control</td><td class="n">3.998</td><td class="n">1.000</td><td class="n">18.598</td><td>40/40</td><td><span class="chip">control</span>; identical counted work</td></tr>
+      <tr><td>IC meet-in-the-middle</td><td class="n">387.277</td><td class="n">96.880</td><td class="n">1801.777</td><td>40/40</td><td><span class="chip">baseline</span></td></tr>
+      <tr><td>IC Frobenius meet-in-the-middle</td><td class="n">17.073</td><td class="n">4.271</td><td class="n">79.430</td><td>40/40</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>IC native-XOR SAT</td><td class="n">3.413 <small>lower bound</small></td><td class="n">0.854 <small>diagnostic</small></td><td class="n">15.879 <small>lower bound</small></td><td>40/40</td><td><span class="chip">accounting</span>; solver conflicts unpriced</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend">
+    <span><span class="chip">audit</span> <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_sat_pdp_20261009/count-qualified-main.audit.json">full replay receipt</a>: 240 verified, 200 identical measured replays, zero problems</span>
+    <span><span class="chip">resource</span> <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_sat_pdp_20261009/count-qualified-main.resources.json">native vector</a>: SAT used 2,755,966 conflicts in 749 solver calls, zero conflict-budget exits and 8,560 KiB peak RSS; no PMU counts on this Mac</span>
+    <span><span class="chip">wall</span> L0 on macOS: all 40 pairs per comparison failed the L2 admission gate; their times do not support a runtime claim</span>
+    <span><span class="chip">scope</span> one small Koblitz curve; m = 83, a two-socket NUMA host and independent replay remain separate gates</span>
+  </div>
+</div>
+<!-- END ecbench-sat-pdp-20261009 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by

@@ -316,6 +316,7 @@ Two consequences to read every table with:
 
 `ecbench resources --dir SESSION --out resources.json` reports, for every
 measured attempt including failures, the native integer counters by phase,
+charged GAE and clocks by phase, the target's exclusive online window,
 method counters, fork-to-reap and solve time, CPU time, peak resident memory,
 and solve-wide instructions and cycles when the host exposes a PMU. A PMU
 sum is null unless **every** measured run in that arm has the counter.

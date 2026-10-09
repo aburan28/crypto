@@ -40,6 +40,15 @@ pub struct ArmResources {
     pub cycles_sum: Option<u64>,
     pub pmu_complete_runs: usize,
     pub pmu_errors: Vec<String>,
+    /// Cold charged work by named phase; the sum is the arm's charged GAE.
+    pub phase_gae_totals: BTreeMap<String, f64>,
+    /// Wall totals are descriptive until the session earns its required level.
+    /// Coverage states how many measured attempts reported each phase clock.
+    pub phase_wall_ns_totals: BTreeMap<String, u64>,
+    pub phase_wall_covered_runs: BTreeMap<String, usize>,
+    pub online_wall_ns_sum: Option<u64>,
+    pub online_complete_runs: usize,
+    pub online_phase_ns_totals: BTreeMap<String, u64>,
     /// Integer counters have their original units. Phase names prevent a
     /// `lookups` counter in two phases from being mistaken for one unit.
     pub phase_native_totals: BTreeMap<String, u64>,
@@ -96,6 +105,12 @@ fn summarize(arm: &str, records: &[&Record]) -> Result<ArmResources, String> {
         cycles_sum: Some(0),
         pmu_complete_runs: 0,
         pmu_errors: Vec::new(),
+        phase_gae_totals: BTreeMap::new(),
+        phase_wall_ns_totals: BTreeMap::new(),
+        phase_wall_covered_runs: BTreeMap::new(),
+        online_wall_ns_sum: Some(0),
+        online_complete_runs: 0,
+        online_phase_ns_totals: BTreeMap::new(),
         phase_native_totals: BTreeMap::new(),
         method_counter_totals: BTreeMap::new(),
     };
@@ -136,7 +151,27 @@ fn summarize(arm: &str, records: &[&Record]) -> Result<ArmResources, String> {
             "instructions",
         )?;
         add_optional(&mut out.cycles_sum, hw.and_then(|h| h.cycles), "cycles")?;
+        if let Some(window) = &r.online {
+            out.online_complete_runs += 1;
+            add_optional(
+                &mut out.online_wall_ns_sum,
+                Some(window.wall_ns),
+                "online_wall_ns",
+            )?;
+            for (name, &value) in &window.phases_ns {
+                add_map(&mut out.online_phase_ns_totals, name.clone(), value)?;
+            }
+        } else {
+            out.online_wall_ns_sum = None;
+        }
         for phase in &r.phases {
+            *out.phase_gae_totals.entry(phase.name.clone()).or_default() += phase.gae;
+            if let Some(value) = phase.wall_ns {
+                add_map(&mut out.phase_wall_ns_totals, phase.name.clone(), value)?;
+                *out.phase_wall_covered_runs
+                    .entry(phase.name.clone())
+                    .or_default() += 1;
+            }
             for (name, &value) in &phase.native {
                 add_map(
                     &mut out.phase_native_totals,
