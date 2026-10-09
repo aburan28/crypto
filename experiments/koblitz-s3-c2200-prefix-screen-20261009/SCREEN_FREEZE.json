@@ -1,0 +1,52 @@
+{
+  "arms": {
+    "baseline": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hfe1dee46ef50",
+      "candidate_manifest": "experiments/koblitz-s3-c2200-prefix-screen-20261009/identities/candidates/IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hfe1dee46ef50.json",
+      "columns": 1200,
+      "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+      "factor_base_points": 127200,
+      "prepare_rank": 1200,
+      "root_table_slots": 268435456,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "native_rotating_state_order"
+    },
+    "expanded": {
+      "candidate_id": "IC1N53Ckb1fb233200PDP4rootRCsampleLAgaussTDdirectISO0hd2accd16723d",
+      "candidate_manifest": "experiments/koblitz-s3-c2200-prefix-20261009/identities/candidates/IC1N53Ckb1fb233200PDP4rootRCsampleLAgaussTDdirectISO0hd2accd16723d.json",
+      "columns": 2200,
+      "factor_base_digest": "60f89ff3c9009d1102f40a14fef4d49aec2ce8ca461a2f393494a8a5bb878012",
+      "factor_base_points": 233200,
+      "prepare_rank": 2200,
+      "root_table_slots": 536870912,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c2200"
+    }
+  },
+  "binary_sha256": "e674fa2b4c3880a4ebd3fa383ef73896b2e479f490da4d6f1fe034fef00a56f1",
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1200_c2200prefix_paired_call_screen_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 1,
+  "run_order": "AB_even_target_BA_odd_target",
+  "runner_sha256": "5ce8def7e23e502d4a626d41db2181029b8ee5d44f8c08f08a5c437647a90c61",
+  "screen_advance_root_call_geomean_ratio_min": 3,
+  "source_commit": "9fd5762e9a1f71a1703386a87a467f76f721d9fe",
+  "source_sha256": "3f1b9fdd65ccb688ab3c0e0c67b33db3d9865cd0d5969cc3253ee26efd684945",
+  "target_labels": [
+    "T125",
+    "T126",
+    "T127",
+    "T128",
+    "T129",
+    "T130",
+    "T131",
+    "T132"
+  ],
+  "target_workers": 1,
+  "timeout_seconds_per_run": 600
+}
