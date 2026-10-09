@@ -1,0 +1,77 @@
+{
+  "all_scalars_independently_recovered": true,
+  "distinct_relation_witnesses_group_checked": 714,
+  "kind": "s3_crosscurve_independent_sage_replay_v1",
+  "ledger_sha256": "003274f11f80ec2b7760e76580a28d9799c3f0ba98b69915113725f4e482b46f",
+  "plan_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "run_count": 8,
+  "runs": [
+    {
+      "arm": "reference",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 41,
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W01fe6b4d4c51R1"
+    },
+    {
+      "arm": "prepared",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 41,
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW01fe6b4d4c51R1"
+    },
+    {
+      "arm": "prepared",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 41,
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW01fe6b4d4c51R2"
+    },
+    {
+      "arm": "reference",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 41,
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W01fe6b4d4c51R2"
+    },
+    {
+      "arm": "prepared",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 53,
+      "rank": 243,
+      "run_id": "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W368597d135b1R1"
+    },
+    {
+      "arm": "reference",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 53,
+      "rank": 237,
+      "run_id": "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW368597d135b1R1"
+    },
+    {
+      "arm": "reference",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 53,
+      "rank": 237,
+      "run_id": "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW368597d135b1R2"
+    },
+    {
+      "arm": "prepared",
+      "independent_recovery": true,
+      "label": "T001",
+      "n": 53,
+      "rank": 243,
+      "run_id": "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W368597d135b1R2"
+    }
+  ],
+  "sage_runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "sage_version": "10.10.rc0",
+  "target_count": 2
+}
