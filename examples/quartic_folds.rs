@@ -10,6 +10,8 @@
 //! ```text
 //! cargo run --release --example quartic_folds -- --family psi --sizes 277,541,769,1033 --seeds 2 --rho-runs 16 --json experiments/26_quartic_folds_psi.json
 //! cargo run --release --example quartic_folds -- --family tau --sizes 269,521,769,1033 --seeds 2 --rho-runs 16 --json experiments/26_quartic_folds_tau.json
+//! # --first-seed k runs seeds k, k+1, …: one curve per invocation survives a restart of the host
+//! cargo run --release --example quartic_folds -- --family tau --sizes 1033 --first-seed 1 --seeds 1 --rho-runs 16 --json experiments/26_quartic_folds_tau_1033s1.json
 //! ```
 //!
 //! Tables: `cargo run --release --example glv_invariant_experiment_tables
@@ -26,6 +28,7 @@ fn main() {
     let mut family = Family4::Psi;
     let mut sizes: Vec<u64> = vec![277, 541, 769, 1033];
     let mut seeds = 2u64;
+    let mut first_seed = 1u64;
     let mut rho_runs = 16usize;
     let mut json: Option<String> = None;
     let mut i = 0;
@@ -45,6 +48,10 @@ fn main() {
                     .split(',')
                     .map(|v| v.parse().expect("--sizes"))
                     .collect();
+            }
+            "--first-seed" => {
+                i += 1;
+                first_seed = args[i].parse().expect("--first-seed");
             }
             "--seeds" => {
                 i += 1;
@@ -83,7 +90,7 @@ fn main() {
     }
     let mut rows: Vec<Value> = Vec::new();
     for &p in &sizes {
-        for seed in 1..=seeds {
+        for seed in first_seed..first_seed + seeds {
             let r = match run_k4_folds(family, p, seed, rho_runs) {
                 Ok(r) => r,
                 Err(e) => {
