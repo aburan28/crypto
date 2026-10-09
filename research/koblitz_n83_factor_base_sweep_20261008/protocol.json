@@ -1,0 +1,41 @@
+{
+  "schema": "n83.factor-base-protocol/v1",
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "inputs": "public synthetic known-answer fixtures only",
+  "primary_curve": "icv1-f2m83-tm6151469093347-debefd74",
+  "diagnostic_curve": "icv1-f2m83-t6151469093347-cdcc5432",
+  "primary_objective": "fully charged single-target cold index-calculus runtime",
+  "finite_design_tuples": 45360000,
+  "literal_universal_search_complete": false,
+  "compatibility_audit_is_execution": false,
+  "maximum_local_pilot_seconds": 3600,
+  "construction_panel_bases": 54,
+  "construction_panel_families": ["public_x_sequential", "public_x_hash", "public_x_gray_prefix"],
+  "construction_panel_columns": [64, 256, 600],
+  "construction_panel_seeds": [2026100801, 2026100802, 2026100803],
+  "solver_prerequisites": {
+    "all": ["exact curve and subgroup binding", "natural target probes", "full model and group verification", "complete exclusive phase accounting", "resource and timeout retention"],
+    "splitting": ["sealed branch policy", "coverage of branches", "UNKNOWN on exhausted budget"],
+    "symmetry": ["preserves actual variable domain", "exceptional and torsion points handled", "no presumed multiplicative gains"],
+    "wdsat": ["sealed original ANF", "derived variable and equation capacities", "binary and configuration hashes", "model lifting and full verification"],
+    "fes": ["quadratic representation or verified filter", "explicit variable and packed-equation limits", "complete original-system verifier"],
+    "large_primes": ["wide field and point adapter", "exact modular signs and Frobenius labels", "group-checked cycles", "graph, filtering, density and rank costs"],
+    "linear_algebra": ["full subgroup modulus without truncation", "verified column logs", "rank measured over the exact prime field"],
+    "subspace_projection": ["cofactor-aware relation equation", "explicit lifting", "torsion residue handling", "post-projection coordinates not assumed in raw x-space"]
+  },
+  "cold_cost_exclusive_phases": ["curve_setup", "factor_base_construction", "orbit_and_index_construction", "relation_generation_and_encoding", "relation_solving_and_lifting", "partial_relation_graph_and_filtering", "linear_algebra", "individual_log", "verification", "artifact_io"],
+  "selection_gate": {
+    "complete_verified_one_target_runs": true,
+    "matched_baseline_and_candidate_resource_envelope": true,
+    "aa_controls": true,
+    "minimum_interleaved_paired_rounds": 5,
+    "disjoint_tuning_and_holdout_targets": true,
+    "paired_interval_confidence": 0.95,
+    "wall_isolation_required": "L2",
+    "independent_replay_required": true,
+    "timeout_or_missing_phase_can_win": false,
+    "construction_time_or_relation_yield_alone_can_win": false
+  },
+  "pilot_host_isolation": "L0",
+  "selected_best_total_runtime": null
+}

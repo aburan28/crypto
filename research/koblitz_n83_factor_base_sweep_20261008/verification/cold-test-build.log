@@ -1,0 +1,167 @@
+warning: unused imports: `Echelon`, `mulmod`, and `peak_rss_bytes`
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:706:9
+    |
+706 |         mulmod, pack, peak_rss_bytes, unpack, BinaryPoint, Echelon, F2mElement, PUBLIC_SEED, STUDY,
+    |         ^^^^^^        ^^^^^^^^^^^^^^                       ^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `Linear` is never constructed
+  --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:94:8
+   |
+94 | struct Linear {
+   |        ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated items `from_images` and `apply` are never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:99:8
+    |
+ 98 | impl Linear {
+    | ----------- associated items in this implementation
+ 99 |     fn from_images(images: &[u64]) -> Self {
+    |        ^^^^^^^^^^^
+...
+114 |     fn apply(&self, v: u64) -> u64 {
+    |        ^^^^^
+
+warning: struct `NormalBasis` is never constructed
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:123:8
+    |
+123 | struct NormalBasis {
+    |        ^^^^^^^^^^^
+
+warning: associated items `new`, `rotate`, and `canonical` are never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:131:8
+    |
+130 | impl NormalBasis {
+    | ---------------- associated items in this implementation
+131 |     fn new(gf: &Gf2) -> Self {
+    |        ^^^
+...
+156 |     fn rotate(&self, v: u64, k: u32) -> u64 {
+    |        ^^^^^^
+...
+165 |     fn canonical(&self, v: u64) -> (u64, u32) {
+    |        ^^^^^^^^^
+
+warning: function `invert_columns` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:182:4
+    |
+182 | fn invert_columns(columns: &[u64], n: usize) -> Option<Vec<u64>> {
+    |    ^^^^^^^^^^^^^^
+
+warning: struct `S3Solver` is never constructed
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:218:8
+    |
+218 | struct S3Solver {
+    |        ^^^^^^^^
+
+warning: associated items `new` and `roots` are never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:226:8
+    |
+225 | impl S3Solver {
+    | ------------- associated items in this implementation
+226 |     fn new(gf: &Gf2, b: u64) -> Self {
+    |        ^^^
+...
+264 |     fn roots(&self, gf: &Gf2, basis: &NormalBasis, left: u64, right: u64) -> Option<[u64; 2]> {
+    |        ^^^^^
+
+warning: function `invert` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:286:4
+    |
+286 | fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
+    |    ^^^^^^
+
+warning: struct `RootTable` is never constructed
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:307:8
+    |
+307 | struct RootTable {
+    |        ^^^^^^^^^
+
+warning: associated items `with_capacity`, `slot`, `insert_if_absent`, and `get` are never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:314:8
+    |
+313 | impl RootTable {
+    | -------------- associated items in this implementation
+314 |     fn with_capacity(entries: usize) -> Self {
+    |        ^^^^^^^^^^^^^
+...
+324 |     fn slot(&self, key: u64) -> usize {
+    |        ^^^^
+...
+328 |     fn insert_if_absent(&mut self, key: u64, value: u64) {
+    |        ^^^^^^^^^^^^^^^^
+...
+345 |     fn get(&self, key: u64) -> Option<u64> {
+    |        ^^^
+
+warning: struct `State` is never constructed
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:361:8
+    |
+361 | struct State {
+    |        ^^^^^
+
+warning: struct `Index` is never constructed
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:368:8
+    |
+368 | struct Index {
+    |        ^^^^^
+
+warning: function `build_index` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:387:4
+    |
+387 | fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -> Index {
+    |    ^^^^^^^^^^^
+
+warning: struct `Relation` is never constructed
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:438:8
+    |
+438 | struct Relation {
+    |        ^^^^^^^^
+
+warning: enum `TargetInput` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:446:6
+    |
+446 | enum TargetInput {
+    |      ^^^^^^^^^^^
+
+warning: struct `Base` is never constructed
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:451:8
+    |
+451 | struct Base {
+    |        ^^^^
+
+warning: function `lift` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:458:4
+    |
+458 | fn lift(
+    |    ^^^^
+
+warning: function `extract` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:484:4
+    |
+484 | fn extract(
+    |    ^^^^^^^
+
+warning: function `construct_base` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:546:4
+    |
+546 | fn construct_base(
+    |    ^^^^^^^^^^^^^^
+
+warning: function `relation_row` is never used
+   --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:675:4
+    |
+675 | fn relation_row(base: &Base, relation: &Relation, rhs: u64, r: u64) -> Vec<u64> {
+    |    ^^^^^^^^^^^^
+
+warning: function `legacy_fixture_entrypoint` is never used
+    --> research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:1970:4
+     |
+1970 | fn legacy_fixture_entrypoint() {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: 22 warnings emitted
+

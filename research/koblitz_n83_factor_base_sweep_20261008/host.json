@@ -1,0 +1,22 @@
+{
+  "schema": "n83.factor-base-host/v1",
+  "date": "2026-10-08",
+  "cpu": "Apple M4 Pro",
+  "architecture": "arm64",
+  "os": "Darwin",
+  "logical_cpus": 14,
+  "memory_bytes": 51539607552,
+  "producer_threads": 1,
+  "isolation": "L0",
+  "wall_time_rank_eligible": false,
+  "rustc": "1.93.1 (01f6ddf75 2026-02-11) Homebrew",
+  "release_opt_level": 3,
+  "release_codegen_units": 256,
+  "cargo_jobs": 4,
+  "aws_cli": "2.27.12",
+  "aws_region": "us-west-2",
+  "requested_pilot_cap_seconds": 3600,
+  "recorded_inspection_commit": "c70c32d486a3ac7531fe27f7193d9f09caa58344",
+  "fallback_library_commit": "8ab924b935923df9faac25915ed7d9849974de0b",
+  "timing_scope": "descriptive construction elapsed only; no admitted runtime comparison"
+}
