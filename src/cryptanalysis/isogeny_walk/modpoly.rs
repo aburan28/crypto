@@ -32,6 +32,7 @@
 use super::field::{Fe, Field};
 use super::poly::{self, Poly};
 use num_bigint::BigUint;
+use rayon::prelude::*;
 
 /// Extra positive exponents checked beyond those that determine `Φ_ℓ`.
 const CHECK_BAND: usize = 8;
@@ -327,17 +328,32 @@ pub fn modular_polynomial(f: &Field, ell: u64) -> Result<ModPoly, String> {
                 }
                 v
             };
-            let mut jhat = lift(&jser);
-            ntt_in_place(&x, &mut jhat, &root);
-            let mut prev = lift(&apow[0]);
-            ntt_in_place(&x, &mut prev, &root);
-            for _ in 1..=l + 1 {
-                let mut prod: Vec<Fe2> = prev.iter().zip(jhat.iter()).map(|(u, v)| x.mul(u, v)).collect();
-                ntt_in_place(&x, &mut prod, &inv_root);
-                let next: Vec<Fe> = prod[..len].iter().map(|c| f.mul(&c.0, &inv_n)).collect();
-                prev = lift(&next);
-                ntt_in_place(&x, &mut prev, &root);
-                apow.push(next);
+            // Level-wise doubling: with A[1..m] known, A[m+1..2m] = A[m]·A[1..m]
+            // are independent and computed in parallel, two transforms each.
+            let transform = |s: &[Fe]| -> Vec<Fe2> {
+                let mut v = lift(s);
+                ntt_in_place(&x, &mut v, &root);
+                v
+            };
+            let first = mul_trunc(f, &apow[0], &jser, len);
+            apow.push(first);
+            let mut m = 1usize;
+            while m < l + 1 {
+                let hat_m = transform(&apow[m]);
+                let hi = (2 * m).min(l + 1);
+                let level: Vec<Vec<Fe>> = (m + 1..=hi)
+                    .into_par_iter()
+                    .map(|a| {
+                        let mut v = transform(&apow[a - m]);
+                        for (u, w) in v.iter_mut().zip(hat_m.iter()) {
+                            *u = x.mul(u, w);
+                        }
+                        ntt_in_place(&x, &mut v, &inv_root);
+                        v[..len].iter().map(|c| f.mul(&c.0, &inv_n)).collect()
+                    })
+                    .collect();
+                apow.extend(level);
+                m = hi;
             }
         }
         _ => {
@@ -369,21 +385,30 @@ pub fn modular_polynomial(f: &Field, ell: u64) -> Result<ModPoly, String> {
     // and is kept exactly when that index lies in 0..len.
     let add_product = |r: &mut Vec<Fe>, pole: usize, s: &[Fe], t: &[Fe]| {
         let base = top as isize - pole as isize;
-        for (kq, tk) in t.iter().enumerate() {
-            if f.is_zero(tk) {
-                continue;
+        let terms: Vec<(usize, Fe)> = t
+            .iter()
+            .enumerate()
+            .filter(|(_, tk)| !f.is_zero(tk))
+            .map(|(kq, tk)| (kq * l, *tk))
+            .collect();
+        let lo = base.max(0) as usize;
+        r[lo..].par_chunks_mut(1024).enumerate().for_each(|(ci, chunk)| {
+            for (i, ri) in chunk.iter_mut().enumerate() {
+                let idx = lo + ci * 1024 + i;
+                let rel = idx as isize - base; // = ℓkq + k
+                let mut acc = *ri;
+                for (off, tk) in terms.iter() {
+                    let k = rel - *off as isize;
+                    if k < 0 {
+                        break;
+                    }
+                    if (k as usize) < s.len() {
+                        acc = f.add(&acc, &f.mul(tk, &s[k as usize]));
+                    }
+                }
+                *ri = acc;
             }
-            let start = base + (kq * l) as isize;
-            if start >= len as isize {
-                break;
-            }
-            let k_lo = (-start).max(0) as usize;
-            let k_hi = ((len as isize - start).max(0) as usize).min(s.len());
-            for (k, sk) in s.iter().enumerate().take(k_hi).skip(k_lo) {
-                let idx = (start + k as isize) as usize;
-                r[idx] = f.add(&r[idx], &f.mul(tk, sk));
-            }
-        }
+        });
     };
     // Coefficient of q^e in X^a Y^b, for e ≥ −(a + ℓb), from the stored powers.
     let coef_at = |a: usize, b: usize, e: isize| -> Fe {
@@ -442,17 +467,24 @@ pub fn modular_polynomial(f: &Field, ell: u64) -> Result<ModPoly, String> {
         }
         // Row: Σ_{a ≤ b} c_{ab} X^a Y^b = q^{−(b + ℓb)} · (Σ_a c_{ab} q^{b−a} A[a]) · Bq[b].
         let pole = b + l * b;
+        let coefs: Vec<(usize, Fe)> = (0..=b.min(l + 1))
+            .filter(|&a| !f.is_zero(&c[a][b]))
+            .map(|a| (a, c[a][b]))
+            .collect();
         let mut row = vec![f.zero(); len];
-        for a in 0..=b.min(l + 1) {
-            let coef = c[a][b];
-            if f.is_zero(&coef) {
-                continue;
+        row.par_chunks_mut(1024).enumerate().for_each(|(ci, chunk)| {
+            for (i, rk) in chunk.iter_mut().enumerate() {
+                let k = ci * 1024 + i;
+                let mut acc = f.zero();
+                for (a, coef) in coefs.iter() {
+                    let sh = b - a;
+                    if k >= sh {
+                        acc = f.add(&acc, &f.mul(coef, &apow[*a][k - sh]));
+                    }
+                }
+                *rk = acc;
             }
-            let sh = b - a;
-            for (k, ak) in apow[a].iter().enumerate().take(len - sh) {
-                row[k + sh] = f.add(&row[k + sh], &f.mul(&coef, ak));
-            }
-        }
+        });
         add_product(&mut r, pole, &row, &bpow[b]);
         // Mirror: Σ_{a < b} c_{ab} X^b Y^a = q^{−(b + ℓb)} · A[b] · (Σ_a c_{ab} Q^{b−a} Bq[a]).
         if b >= 1 {
