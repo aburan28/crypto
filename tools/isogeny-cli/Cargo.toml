@@ -1,0 +1,24 @@
+[package]
+name = "isogeny-cli"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Dedicated public-curve isogeny search and independent certificate replay tool"
+
+[workspace]
+
+[[bin]]
+name = "isogeny"
+path = "src/main.rs"
+
+[dependencies]
+isogeny_algos = { path = "../../isogeny_algos" }
+num-bigint = { version = "0.4", features = ["rand"] }
+num-traits = "0.2"
+rand = { version = "0.8", features = ["small_rng"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["arbitrary_precision", "raw_value"] }
+blake3 = "1.5"
+subtle = "2.5"
+hex = "0.4"
+getrandom = "0.2"

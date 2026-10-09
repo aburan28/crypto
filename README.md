@@ -47,6 +47,22 @@ companion as much as a working library.
 
 ## Quick tour
 
+The dedicated [`isogeny` executable](tools/isogeny-cli/README.md) screens P192/P224
+prime degrees, constructs explicit isogenies, and verifies their certificates.
+Download its platform archive from [Releases](https://github.com/aburan28/crypto/releases)
+and run it directly:
+
+```sh
+isogeny search --curve p224 --ell 1471 --out ./p224-1471
+isogeny search --curve p192 --ell 10453 --out ./p192-10453
+isogeny verify --input ./p224-1471
+```
+
+The executable embeds its algorithms and standard curve data. The kernel route at
+these two degrees constructs one Frobenius eigenline of two and labels coverage
+`PARTIAL`. The repository's Release workflow builds the platform archives and
+publishes them through ReleaseMe; PR runs test the archives before publication.
+
 ```bash
 # Build
 cargo build --release
