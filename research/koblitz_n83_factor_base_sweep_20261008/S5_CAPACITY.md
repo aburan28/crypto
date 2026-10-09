@@ -109,9 +109,15 @@ context for the source audit, not an observation for a study candidate.
 
 The frozen v1/v2 `compact_s3_four_sum` dispositions remain recipes. Do not
 rank the stored 54 bases by the historical n=83 online result, by the S5
-half-regular illustration, or by construction speed. The smallest useful
-next empirical gate is a wall-supervised, retained K=64 primary point probe,
-followed by an exact wide relation-row/rank bridge; K=1,182 and larger need an
-explicit memory strategy before a construction attempt. The balanced-S5
-SAT example is an alternative source of four-summand algebra and domain
-constraints, not a directly executable N83 backend.
+half-regular illustration, or by construction speed. The source-ready primary
+probe now checks a four-point hit against its public target, converts its
+signed-Frobenius labels into full-width coefficients modulo the 81-bit order,
+and independently replays the resulting row on the original curve. A small
+public fixture verifies sign, phase, high-limb coefficients, malformed labels,
+and insertion into the exact wide rank tracker. This is a correctness gate;
+it has not produced a retained N83 relation or measured natural rank.
+The smallest useful next empirical gate is a wall-supervised, retained K=64
+primary probe, followed by natural relation accumulation and rank measurement;
+K=1,182 and larger need an explicit memory strategy before construction.
+The balanced-S5 SAT example is an alternative source of four-summand algebra
+and domain constraints, not a directly executable N83 backend.

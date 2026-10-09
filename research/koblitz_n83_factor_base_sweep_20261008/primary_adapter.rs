@@ -16,7 +16,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     KoblitzCurve, KoblitzIcOptions, SatDecompositionOptions,
 };
 use num_bigint::BigUint;
-use num_traits::One;
+use num_traits::{One, Zero};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
 use std::fs::{self, OpenOptions};
@@ -286,9 +286,76 @@ pub(super) fn check_panel(root: &Path, columns: usize) -> Result<Value> {
     }))
 }
 
+/// Convert a checked four-summand witness into exact signed-orbit
+/// coefficients. The retained primary base consists entirely of order-r
+/// points, so replaying the row against its representatives must reproduce
+/// the original target without a cofactor projection.
+fn checked_primary_relation_row(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    indices: &[usize; 4],
+    target: &BinaryPoint,
+) -> Result<Vec<BigUint>> {
+    let r = &kc.subgroup_order;
+    if r <= &BigUint::one() || fb.signed_orbit_of.len() != fb.points.len() {
+        return Err("invalid primary relation domain".into());
+    }
+    let mut row = vec![BigUint::zero(); fb.unknowns()];
+    let mut point_sum = BinaryPoint::Infinity;
+    for &index in indices {
+        let point = fb
+            .points
+            .get(index)
+            .ok_or("relation point index out of range")?;
+        let &(column, phase, negative) = fb
+            .signed_orbit_of
+            .get(index)
+            .ok_or("relation point label absent")?;
+        let rep_index = *fb
+            .signed_orbits
+            .get(column)
+            .and_then(|orbit| orbit.first())
+            .ok_or("relation orbit representative absent")?;
+        let representative = fb
+            .points
+            .get(rep_index)
+            .ok_or("relation representative index out of range")?;
+        if phase >= kc.n || kc.mul(representative, r) != BinaryPoint::Infinity {
+            return Err("relation representative outside the primary subgroup".into());
+        }
+        let positive = kc.lambda.modpow(&BigUint::from(phase), r);
+        let coefficient = if negative && !positive.is_zero() {
+            r - &positive
+        } else {
+            positive
+        };
+        if kc.mul(representative, &coefficient) != *point {
+            return Err("relation point and signed-Frobenius label disagree".into());
+        }
+        row[column] = (&row[column] + coefficient) % r;
+        point_sum = kc.add(&point_sum, point);
+    }
+    if point_sum != *target {
+        return Err("relation point sum differs from target".into());
+    }
+    let mut row_sum = BinaryPoint::Infinity;
+    for (column, coefficient) in row.iter().enumerate() {
+        if coefficient.is_zero() {
+            continue;
+        }
+        let rep_index = fb.signed_orbits[column][0];
+        row_sum = kc.add(&row_sum, &kc.mul(&fb.points[rep_index], coefficient));
+    }
+    if row_sum != *target {
+        return Err("relation row failed independent group replay".into());
+    }
+    Ok(row)
+}
+
 /// Probe the published primary point with a replayed retained base through
-/// the point-only wide compact index. This is one relation diagnostic, not a
-/// rank or total-runtime result. A Linux cgroup with a hard memory limit and
+/// the point-only wide compact index. A hit is also converted to a full-width
+/// relation row and independently replayed. This is one relation diagnostic,
+/// not a rank or total-runtime result. A Linux cgroup with a hard memory limit and
 /// zero swap is mandatory; the caller must also impose a process-wall cap.
 pub(super) fn s3_probe_cli(
     root: &Path,
@@ -341,6 +408,46 @@ pub(super) fn s3_probe_cli(
         max_candidate_states,
     )?;
     let probe_ms = probe_started.elapsed().as_secs_f64() * 1000.0;
+    let row_started = Instant::now();
+    let relation_row = if probe["status"] == "HIT" {
+        let indices: [usize; 4] = probe["point_indices"]
+            .as_array()
+            .ok_or("compact hit lacks point indices")?
+            .iter()
+            .map(|value| {
+                value
+                    .as_u64()
+                    .and_then(|index| usize::try_from(index).ok())
+                    .ok_or("compact hit has invalid point index")
+            })
+            .collect::<std::result::Result<Vec<_>, _>>()?
+            .try_into()
+            .map_err(|_| "compact hit is not a four-summand witness")?;
+        let row = checked_primary_relation_row(&base.curve, &base.factor_base, &indices, &target)?;
+        let dense_decimal: Vec<_> = row.iter().map(ToString::to_string).collect();
+        let nonzero: Vec<_> = row
+            .iter()
+            .enumerate()
+            .filter(|(_, coefficient)| !coefficient.is_zero())
+            .map(|(column, coefficient)| {
+                json!({"column":column,"coefficient_decimal":coefficient.to_string()})
+            })
+            .collect();
+        Some(json!({
+            "schema":"n83.primary-wide-relation-row/v1",
+            "modulus_decimal":base.curve.subgroup_order.to_string(),
+            "orbit_columns":columns,
+            "nonzero":nonzero,
+            "dense_decimal_blake3":blake3::hash(&serde_json::to_vec(&dense_decimal)?).to_hex().to_string(),
+            "group_verified":true
+        }))
+    } else if probe["status"] == "MISS" {
+        None
+    } else {
+        return Err("compact probe returned an unknown status".into());
+    };
+    let relation_row_stage_executed = relation_row.is_some();
+    let relation_row_ms = row_started.elapsed().as_secs_f64() * 1000.0;
     let cgroup_peak_bytes: u64 = fs::read_to_string("/sys/fs/cgroup/memory.peak")?
         .trim()
         .parse()
@@ -368,9 +475,12 @@ pub(super) fn s3_probe_cli(
         "base_import_ms":base_import_ms,
         "target_validation_ms":target_validation_ms,
         "point_probe_ms":probe_ms,
+        "relation_row_ms":relation_row_ms,
         "process_wall_ms":started.elapsed().as_secs_f64()*1000.0,
         "process_usage":process_usage(),
         "probe":probe,
+        "relation_row":relation_row,
+        "relation_row_stage_executed":relation_row_stage_executed,
         "rank_stage_executed":false,
         "column_log_verification":false,
         "total_index_calculus_runtime_ms":Value::Null,
@@ -688,6 +798,7 @@ mod tests {
     use crypto_lib::cryptanalysis::koblitz_index_calculus::{
         enumerate_decompose, koblitz_index_calculus_dlp_with_factor_base, KoblitzIcOptions,
     };
+    use crypto_lib::cryptanalysis::koblitz_relation_solver::WideRankTracker;
     use std::collections::HashMap;
     use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -719,6 +830,36 @@ mod tests {
                 point,
                 &base.factor_base.points[base.factor_base.signed_orbits[column][index % 166]]
             );
+        }
+        let kc = &base.curve;
+        let fb = &base.factor_base;
+        let indices = [0, 2, 165, 168];
+        let target = indices.iter().fold(BinaryPoint::Infinity, |sum, &index| {
+            kc.add(&sum, &fb.points[index])
+        });
+        let relation = checked_primary_relation_row(kc, fb, &indices, &target).unwrap();
+        let lambda_82 = kc.lambda.modpow(&BigUint::from(82u32), &kc.subgroup_order);
+        assert_eq!(
+            relation[0],
+            (BigUint::one() + &kc.lambda + &kc.subgroup_order - lambda_82) % &kc.subgroup_order
+        );
+        assert_eq!(relation[1], kc.lambda);
+        assert!(relation.iter().any(|coefficient| coefficient.bits() > 64));
+        assert!(
+            checked_primary_relation_row(kc, fb, &[usize::MAX, 2, 165, 168], &target).is_err()
+        );
+        assert!(checked_primary_relation_row(kc, fb, &indices, &point_neg(&target)).is_err());
+        let mut bad_labels = fb.clone();
+        bad_labels.signed_orbit_of[2] = (1, 1, false);
+        assert!(checked_primary_relation_row(kc, &bad_labels, &indices, &target).is_err());
+        let mut rank = WideRankTracker::new(&kc.subgroup_order, fb.unknowns());
+        for (column, indices) in [(0, [0; 4]), (1, [166; 4])] {
+            let target = indices.iter().fold(BinaryPoint::Infinity, |sum, &index| {
+                kc.add(&sum, &fb.points[index])
+            });
+            let row = checked_primary_relation_row(kc, fb, &indices, &target).unwrap();
+            assert_eq!(rank.insert(row.clone()), column + 1);
+            assert_eq!(rank.insert(row), column + 1);
         }
         let mut opts = KoblitzIcOptions::default();
         opts.max_trials = 0;
