@@ -434,9 +434,8 @@ pub fn point_to_words(curve: &FastBinaryCurve, p: &BinaryPoint) -> Option<FastPo
 //
 // Twin of the `u64` fast path with identical group-law semantics; the
 // `u64` code above is deliberately untouched so every `n ≤ 63`
-// fixture stays byte-identical.  Subgroup scalars still fit `u64`
-// (every admitted `r < 2^64` through `n = 127`), so only field
-// elements move to the wider word.
+// fixture stays byte-identical. Subgroup scalars remain `BigUint`;
+// only field elements use the wider word.
 
 /// An affine point as two `u128` field words; `None` is infinity.
 pub type FastPoint128 = Option<(u128, u128)>;
@@ -562,6 +561,40 @@ impl FastBinaryCurve128 {
             }
         }
         result
+    }
+
+    /// Add a batch of affine pairs with one inversion for all ordinary
+    /// denominators. Infinity, doubling and opposite-point cases retain
+    /// the exact semantics of [`Self::add`].
+    pub fn batch_add(&self, pairs: &[(u128, u128, u128, u128, bool, bool)]) -> Vec<FastPoint128> {
+        let mut out = vec![None; pairs.len()];
+        let mut dxs = Vec::with_capacity(pairs.len());
+        let mut indices = Vec::with_capacity(pairs.len());
+        for (k, &(x1, y1, x2, y2, inf1, inf2)) in pairs.iter().enumerate() {
+            if inf1 {
+                out[k] = if inf2 { None } else { Some((x2, y2)) };
+            } else if inf2 {
+                out[k] = Some((x1, y1));
+            } else if x1 == x2 {
+                out[k] = self.add(Some((x1, y1)), Some((x2, y2)));
+            } else {
+                indices.push(k);
+                dxs.push(x1 ^ x2);
+            }
+        }
+        if dxs.is_empty() {
+            return out;
+        }
+        let mut scratch = Vec::new();
+        self.gf.batch_inv(&mut dxs, &mut scratch);
+        for (t, &k) in indices.iter().enumerate() {
+            let (x1, y1, x2, y2, _, _) = pairs[k];
+            let lambda = self.gf.mul(y1 ^ y2, dxs[t]);
+            let x3 = self.gf.sqr(lambda) ^ lambda ^ x1 ^ x2 ^ self.a;
+            let y3 = self.gf.mul(lambda, x1 ^ x3) ^ x3 ^ y1;
+            out[k] = Some((x3, y3));
+        }
+        out
     }
 }
 
@@ -1239,6 +1272,38 @@ mod wide_tests {
                 expect(&scalar_mul(&curve.curve, &p1, &k)),
                 "scalar_mul"
             );
+        }
+    }
+
+    #[test]
+    fn wide_batch_add_matches_general_curve_at_71() {
+        let (curve, fast, _) = setup71();
+        let g = curve.generator().clone();
+        let points: Vec<BinaryPoint> = (1u32..=24)
+            .map(|k| scalar_mul(&curve.curve, &g, &BigUint::from(k)))
+            .collect();
+        let mut inputs = Vec::new();
+        for i in 0..points.len() {
+            let j = (7 * i + 3) % points.len();
+            inputs.push((points[i].clone(), points[j].clone()));
+        }
+        inputs.push((BinaryPoint::Infinity, points[0].clone()));
+        inputs.push((points[0].clone(), BinaryPoint::Infinity));
+        inputs.push((points[0].clone(), points[0].clone()));
+        inputs.push((points[0].clone(), point_neg(&points[0])));
+        let pairs: Vec<_> = inputs
+            .iter()
+            .map(|(p, q)| {
+                let left = point_to_words_128(&fast, p).unwrap();
+                let right = point_to_words_128(&fast, q).unwrap();
+                let (x1, y1, inf1) = left.map_or((0, 0, true), |(x, y)| (x, y, false));
+                let (x2, y2, inf2) = right.map_or((0, 0, true), |(x, y)| (x, y, false));
+                (x1, y1, x2, y2, inf1, inf2)
+            })
+            .collect();
+        for ((p, q), actual) in inputs.iter().zip(fast.batch_add(&pairs)) {
+            let expected = point_add(&curve.curve, p, q);
+            assert_eq!(actual, point_to_words_128(&fast, &expected).unwrap());
         }
     }
 

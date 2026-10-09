@@ -140,7 +140,9 @@ use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
     SolveOptions, SolveStats, SolverEngine,
 };
-use crate::cryptanalysis::koblitz_fast_arith::{pack_fast, FastBinaryCurve, FastPoint};
+use crate::cryptanalysis::koblitz_fast_arith::{
+    pack_fast, FastBinaryCurve, FastBinaryCurve128, FastPoint, FastPoint128,
+};
 use crate::cryptanalysis::koblitz_relation_solver::{
     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
 };
@@ -2133,8 +2135,9 @@ pub struct KoblitzRelation {
 /// decomposition exists.  [`groebner_decompose`] answers the same
 /// question algebraically; the two are cross-checked in the tests.
 ///
-/// The search itself runs on the single-word field with one Montgomery
-/// inversion per recursion level (see
+/// For fields of degree at most 127, the search runs on a single `u64` or
+/// `u128` field word with one Montgomery batch inversion for the
+/// ordinary pairs at each recursion node (see
 /// [`crate::cryptanalysis::koblitz_fast_arith`]): identical visit order
 /// and identical first witness as the textbook recursion, which is kept
 /// as [`decompose`] below for cross-checking.
@@ -2149,6 +2152,8 @@ pub fn enumerate_decompose(
         if let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) {
             return enumerate_decompose_fast(&fast, fb, target, m);
         }
+    } else if let Some(fast) = FastBinaryCurve128::new(&kc.curve.irreducible, kc.a as u128) {
+        return enumerate_decompose_fast_128(&fast, fb, target, m);
     }
     decompose(kc, fb, index_of, target, m, 0)
 }
@@ -2198,6 +2203,72 @@ fn enumerate_decompose_fast(
             return if idx >= start { Some(vec![idx]) } else { None };
         }
         // One batch for the whole level: rests[i] = target + (−P_i).
+        let mut pairs = Vec::with_capacity(fbw.len() - start);
+        for p in fbw.iter().skip(start) {
+            let (tx, ty, t_inf) = match target {
+                None => (0, 0, true),
+                Some((x, y)) => (x, y, false),
+            };
+            let (px, py, p_inf) = match p {
+                None => (0, 0, true),
+                Some((x, y)) => (*x, *x ^ *y, false),
+            };
+            pairs.push((tx, ty, px, py, t_inf, p_inf));
+        }
+        let rests = fast.batch_add(&pairs);
+        for (offset, rest) in rests.into_iter().enumerate() {
+            let i = start + offset;
+            if let Some(mut tail) = rec(fast, fbw, windex, rest, m - 1, i) {
+                let mut out = vec![i];
+                out.append(&mut tail);
+                return Some(out);
+            }
+        }
+        None
+    }
+    rec(fast, &fbw, &windex, to_fw(target), m, 0)
+}
+
+/// Wide-word twin of [`enumerate_decompose_fast`]. It preserves the
+/// factor-base order and the non-decreasing-index recursion exactly.
+fn enumerate_decompose_fast_128(
+    fast: &FastBinaryCurve128,
+    fb: &FrobeniusFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+) -> Option<Vec<usize>> {
+    let to_fw = |p: &BinaryPoint| -> FastPoint128 {
+        match p {
+            BinaryPoint::Infinity => None,
+            BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+        }
+    };
+    let fbw: Vec<FastPoint128> = fb.points.iter().map(to_fw).collect();
+    let mut windex: HashMap<(u128, u128), usize> = HashMap::with_capacity(fbw.len() * 2);
+    for (i, p) in fbw.iter().enumerate() {
+        if let Some(pt) = p {
+            windex.insert(*pt, i);
+        }
+    }
+    fn rec(
+        fast: &FastBinaryCurve128,
+        fbw: &[FastPoint128],
+        windex: &HashMap<(u128, u128), usize>,
+        target: FastPoint128,
+        m: usize,
+        start: usize,
+    ) -> Option<Vec<usize>> {
+        if m == 0 {
+            return if target.is_none() {
+                Some(Vec::new())
+            } else {
+                None
+            };
+        }
+        if m == 1 {
+            let idx = *windex.get(&target?)?;
+            return if idx >= start { Some(vec![idx]) } else { None };
+        }
         let mut pairs = Vec::with_capacity(fbw.len() - start);
         for p in fbw.iter().skip(start) {
             let (tx, ty, t_inf) = match target {

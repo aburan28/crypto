@@ -466,8 +466,9 @@ mod tests {
     use super::super::construct;
     use super::*;
     use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-        koblitz_index_calculus_dlp_with_factor_base, KoblitzIcOptions,
+        enumerate_decompose, koblitz_index_calculus_dlp_with_factor_base, KoblitzIcOptions,
     };
+    use std::collections::HashMap;
     use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
     #[test]
@@ -534,6 +535,70 @@ mod tests {
             .collect::<Vec<_>>()
             .join("\n");
         assert!(from_record(&row, bad.as_bytes()).is_err());
+    }
+
+    #[test]
+    fn wide_enumerator_matches_generic_witness_order_on_primary_curve() {
+        let (bytes, row) = construct(
+            0,
+            "public_x_hash",
+            2,
+            17,
+            Instant::now() + Duration::from_secs(60),
+        )
+        .unwrap();
+        let base = from_record(&row, &bytes).unwrap();
+        let kc = &base.curve;
+        let fb = &base.factor_base;
+        let index: HashMap<_, _> = fb
+            .points
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (point_key(p), i))
+            .collect();
+        fn reference(
+            kc: &KoblitzCurve,
+            fb: &FrobeniusFactorBase,
+            index: &HashMap<(BigUint, BigUint), usize>,
+            target: &BinaryPoint,
+            m: usize,
+            start: usize,
+        ) -> Option<Vec<usize>> {
+            if m == 0 {
+                return (target == &BinaryPoint::Infinity).then(Vec::new);
+            }
+            if m == 1 {
+                let i = *index.get(&point_key(target))?;
+                return (i >= start).then(|| vec![i]);
+            }
+            for i in start..fb.points.len() {
+                let rest = kc.add(target, &point_neg(&fb.points[i]));
+                if let Some(mut tail) = reference(kc, fb, index, &rest, m - 1, i) {
+                    let mut result = vec![i];
+                    result.append(&mut tail);
+                    return Some(result);
+                }
+            }
+            None
+        }
+        let p0 = &fb.points[0];
+        let p2 = &fb.points[2];
+        let two = kc.add(p0, p2);
+        let three = kc.add(&kc.add(p0, p0), p2);
+        let cases = [
+            (BinaryPoint::Infinity, 0),
+            (p0.clone(), 1),
+            (BinaryPoint::Infinity, 2),
+            (two, 2),
+            (three, 3),
+        ];
+        for (target, m) in cases {
+            assert_eq!(
+                enumerate_decompose(kc, fb, &index, &target, m),
+                reference(kc, fb, &index, &target, m, 0),
+                "wide witness at m={m}"
+            );
+        }
     }
 
     #[test]
