@@ -274,6 +274,7 @@ pub mod prime_fast;
 pub mod prime_field_smt;
 pub mod q_curve;
 pub mod quantum_estimator;
+pub mod quartic_folds;
 pub mod quasi_subfield;
 pub mod recursive_descent;
 pub mod research_bench;
