@@ -970,8 +970,11 @@ impl KoblitzCurve {
         // reaches the boundary-ledger rungs at n = 37 / n = 41, and
         // its `u128` twin reaches the wide rungs past the `u64` shift
         // ceiling (`1u64 << n` wraps for `n ≥ 64`).
-        // reaches the boundary-ledger rungs at n = 37 / n = 41.
-        let irreducible = find_irreducible_sparse(n)?;
+        let irreducible = if n <= 63 {
+            find_irreducible_sparse(n)?
+        } else {
+            find_irreducible_sparse_wide(n)?
+        };
         // F_q ⊂ F_{2^n} is the kernel of X^{2^k} + X.
         let subfield_basis = linearised_kernel_basis(&[0, k], n, &irreducible);
         if subfield_basis.len() != k as usize {
