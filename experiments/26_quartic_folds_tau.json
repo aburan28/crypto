@@ -352,5 +352,359 @@
     "seed": 1,
     "targets_decomposed": 117,
     "wall_ms": 83604.700934
+  },
+  {
+    "base_points": 134,
+    "bits": 30.285831087559643,
+    "cofactor": 4,
+    "control": {
+      "arm": "control",
+      "columns": 134,
+      "correct": true,
+      "duplicate_rows": 0,
+      "filtered_out": 10,
+      "la_attempts": 1,
+      "la_ops": 313251,
+      "la_ops_last": 313251,
+      "phi": 0.9328358208955224,
+      "relations": 135,
+      "residuals_at_solve": 12320,
+      "row_weight": 5.0,
+      "solved": true,
+      "unknowns": 125,
+      "wiedemann_constant": 20.048064
+    },
+    "decomposition_rate": 0.08387305699481866,
+    "decompositions": 1036,
+    "decompositions_per_target": [
+      12217,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      116,
+      5
+    ],
+    "experiment": "e18",
+    "family": "Translation",
+    "folded": {
+      "arm": "2torsion-tau",
+      "columns": 67,
+      "correct": true,
+      "duplicate_rows": 0,
+      "filtered_out": 11,
+      "la_attempts": 1,
+      "la_ops": 64291,
+      "la_ops_last": 64291,
+      "phi": 0.8507462686567164,
+      "relations": 68,
+      "residuals_at_solve": 5835,
+      "row_weight": 4.897058823529412,
+      "solved": true,
+      "unknowns": 57,
+      "wiedemann_constant": 19.787934749153585
+    },
+    "fp_muls_per_add": 97.0,
+    "group_order": 5236047676,
+    "n": 1309011919,
+    "p": 269,
+    "points_per_column": 2.0,
+    "residuals": 12352,
+    "rho": [
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 2199000,
+        "group_ops": 22361,
+        "seed": 2000,
+        "steps": 19470
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 2767585,
+        "group_ops": 28218,
+        "seed": 2001,
+        "steps": 25241
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 6010335,
+        "group_ops": 61649,
+        "seed": 2002,
+        "steps": 58652
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 2585982,
+        "group_ops": 26346,
+        "seed": 2003,
+        "steps": 23397
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 2518470,
+        "group_ops": 25650,
+        "seed": 2004,
+        "steps": 22702
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 5846347,
+        "group_ops": 59968,
+        "seed": 2005,
+        "steps": 57078
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 6480397,
+        "group_ops": 66495,
+        "seed": 2006,
+        "steps": 63512
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 3450629,
+        "group_ops": 35264,
+        "seed": 2007,
+        "steps": 32301
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 5984145,
+        "group_ops": 61379,
+        "seed": 2008,
+        "steps": 58449
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 5671164,
+        "group_ops": 58152,
+        "seed": 2009,
+        "steps": 55181
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 7134521,
+        "group_ops": 73236,
+        "seed": 2010,
+        "steps": 70238
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 3866995,
+        "group_ops": 39558,
+        "seed": 2011,
+        "steps": 36650
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 7904131,
+        "group_ops": 81176,
+        "seed": 2012,
+        "steps": 78218
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 1152006,
+        "group_ops": 11560,
+        "seed": 2013,
+        "steps": 8615
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 3456867,
+        "group_ops": 35324,
+        "seed": 2014,
+        "steps": 32324
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 1024575,
+        "group_ops": 10250,
+        "seed": 2015,
+        "steps": 7292
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 51,
+        "fold": "Negation",
+        "fp_muls": 5215990,
+        "group_ops": 53454,
+        "seed": 2000,
+        "steps": 49064
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 10,
+        "fold": "Negation",
+        "fp_muls": 747362,
+        "group_ops": 7389,
+        "seed": 2001,
+        "steps": 4273
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 39,
+        "fold": "Negation",
+        "fp_muls": 3258895,
+        "group_ops": 33276,
+        "seed": 2002,
+        "steps": 29348
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 46,
+        "fold": "Negation",
+        "fp_muls": 4043214,
+        "group_ops": 41360,
+        "seed": 2003,
+        "steps": 37221
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 35,
+        "fold": "Negation",
+        "fp_muls": 3292516,
+        "group_ops": 33623,
+        "seed": 2004,
+        "steps": 29737
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 8,
+        "fold": "Negation",
+        "fp_muls": 851193,
+        "group_ops": 8470,
+        "seed": 2005,
+        "steps": 5413
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 51,
+        "fold": "Negation",
+        "fp_muls": 5039170,
+        "group_ops": 51627,
+        "seed": 2006,
+        "steps": 47195
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 26,
+        "fold": "Negation",
+        "fp_muls": 2536219,
+        "group_ops": 25832,
+        "seed": 2007,
+        "steps": 22186
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 29,
+        "fold": "Negation",
+        "fp_muls": 3061213,
+        "group_ops": 31240,
+        "seed": 2008,
+        "steps": 27489
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 63,
+        "fold": "Negation",
+        "fp_muls": 6027866,
+        "group_ops": 61817,
+        "seed": 2009,
+        "steps": 57087
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 41,
+        "fold": "Negation",
+        "fp_muls": 3459388,
+        "group_ops": 35340,
+        "seed": 2010,
+        "steps": 31360
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 93,
+        "fold": "Negation",
+        "fp_muls": 6962092,
+        "group_ops": 71448,
+        "seed": 2011,
+        "steps": 66462
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 14,
+        "fold": "Negation",
+        "fp_muls": 1140490,
+        "group_ops": 11445,
+        "seed": 2012,
+        "steps": 8209
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 50,
+        "fold": "Negation",
+        "fp_muls": 4859520,
+        "group_ops": 49772,
+        "seed": 2013,
+        "steps": 45408
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 25,
+        "fold": "Negation",
+        "fp_muls": 2352997,
+        "group_ops": 23939,
+        "seed": 2014,
+        "steps": 20314
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 41,
+        "fold": "Negation",
+        "fp_muls": 3154989,
+        "group_ops": 32205,
+        "seed": 2015,
+        "steps": 28386
+      }
+    ],
+    "seed": 2,
+    "targets_decomposed": 135,
+    "wall_ms": 55581.770960999995
   }
 ]
