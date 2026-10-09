@@ -1,0 +1,1553 @@
+{
+  "all_native_verified": true,
+  "all_phase_sums_valid": true,
+  "blocks": [
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 1.3578615114976107,
+        "parallel": 0.9375335026776643
+      },
+      "all_four_verified": true,
+      "label": "T025",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          1.37825,
+          0.3545
+        ],
+        "parallel": [
+          1.108083,
+          0.43391700000000005
+        ]
+      },
+      "parallel_over_batched_online_ratio": 0.9920129882283066,
+      "parallel_over_batched_s3_call_ratio": 0.9927325581395351,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ],
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ]
+        ],
+        "parallel": [
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ],
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          1376,
+          1376
+        ],
+        "parallel": [
+          1366,
+          1366
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.41246676423581463,
+        "parallel": 0.8405548752581189
+      },
+      "all_four_verified": true,
+      "label": "T026",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          0.339917,
+          0.513458
+        ],
+        "parallel": [
+          0.181667,
+          0.421041
+        ]
+      },
+      "parallel_over_batched_online_ratio": 0.6620050638232192,
+      "parallel_over_batched_s3_call_ratio": 0.9947916666666669,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ],
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ]
+        ],
+        "parallel": [
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ],
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          384,
+          384
+        ],
+        "parallel": [
+          382,
+          382
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.8792008044958826,
+        "parallel": 1.2360808917489339
+      },
+      "all_four_verified": true,
+      "label": "T027",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          0.675416,
+          0.28037500000000004
+        ],
+        "parallel": [
+          1.17275,
+          0.340708
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.4525750184811521,
+      "parallel_over_batched_s3_call_ratio": 0.9843750000000002,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ],
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ]
+        ],
+        "parallel": [
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ],
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          1024,
+          1024
+        ],
+        "parallel": [
+          1008,
+          1008
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.18136428820211997,
+        "parallel": 0.6945732770616181
+      },
+      "all_four_verified": true,
+      "label": "T028",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          19.067166999999998,
+          22.858708
+        ],
+        "parallel": [
+          10.364625,
+          20.758833
+        ]
+      },
+      "parallel_over_batched_online_ratio": 0.7026019312612305,
+      "parallel_over_batched_s3_call_ratio": 0.9312500000000004,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ],
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ]
+        ],
+        "parallel": [
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ],
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          320,
+          320
+        ],
+        "parallel": [
+          298,
+          298
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.8276770886905351,
+        "parallel": 0.9953882544056748
+      },
+      "all_four_verified": true,
+      "label": "T029",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          0.08520900000000001,
+          0.19495800000000002
+        ],
+        "parallel": [
+          0.099417,
+          0.26899999999999996
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.2688000940130815,
+      "parallel_over_batched_s3_call_ratio": 0.7708333333333337,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ],
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ]
+        ],
+        "parallel": [
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ],
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          96,
+          96
+        ],
+        "parallel": [
+          74,
+          74
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.04128691807447186,
+        "parallel": 0.7610623963722162
+      },
+      "all_four_verified": true,
+      "label": "T030",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          0.910666,
+          0.873833
+        ],
+        "parallel": [
+          2.4222089999999996,
+          1.131583
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.8559028209730954,
+      "parallel_over_batched_s3_call_ratio": 0.9941239316239311,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ],
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ]
+        ],
+        "parallel": [
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ],
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          3744,
+          3744
+        ],
+        "parallel": [
+          3722,
+          3722
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.03985113404900487,
+        "parallel": 0.2552112790725482
+      },
+      "all_four_verified": true,
+      "label": "T031",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          1.124291,
+          1.17
+        ],
+        "parallel": [
+          1.45525,
+          1.127459
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.1168295205660994,
+      "parallel_over_batched_s3_call_ratio": 0.9826388888888887,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ],
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ]
+        ],
+        "parallel": [
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ],
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          1728,
+          1728
+        ],
+        "parallel": [
+          1698,
+          1698
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.06775239994876074,
+        "parallel": 0.24291928749252414
+      },
+      "all_four_verified": true,
+      "label": "T032",
+      "n": 41,
+      "online_ms_by_arm": {
+        "batched": [
+          0.350084,
+          0.374625
+        ],
+        "parallel": [
+          1.2249999999999999,
+          1.561833
+        ]
+      },
+      "parallel_over_batched_online_ratio": 3.8194500300504006,
+      "parallel_over_batched_s3_call_ratio": 0.9921875000000002,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ],
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ]
+        ],
+        "parallel": [
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ],
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          1280,
+          1280
+        ],
+        "parallel": [
+          1270,
+          1270
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.326554612997683,
+        "parallel": 1.0689355883830574
+      },
+      "all_four_verified": true,
+      "label": "T025",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          1.424083,
+          1.9740410000000002
+        ],
+        "parallel": [
+          1.492875,
+          4.347667
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.519476975975584,
+      "parallel_over_batched_s3_call_ratio": 0.9563340166596899,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ],
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ]
+        ],
+        "parallel": [
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ],
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          3840,
+          21120
+        ],
+        "parallel": [
+          5812,
+          12762
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.22624350003104451,
+        "parallel": 1.1585272109245535
+      },
+      "all_four_verified": true,
+      "label": "T026",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          5.097208,
+          6.391292
+        ],
+        "parallel": [
+          7.7250000000000005,
+          2.4252499999999997
+        ]
+      },
+      "parallel_over_batched_online_ratio": 0.7583452883457841,
+      "parallel_over_batched_s3_call_ratio": 0.323432505680587,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            4774,
+            17399,
+            9068,
+            20450
+          ],
+          [
+            4774,
+            17399,
+            9068,
+            20450
+          ]
+        ],
+        "parallel": [
+          [
+            4774,
+            17399,
+            9068,
+            20450
+          ],
+          [
+            4774,
+            17399,
+            9068,
+            20450
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          33312,
+          45568
+        ],
+        "parallel": [
+          12298,
+          12912
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 1.0373938357233286,
+        "parallel": 0.33292558199973443
+      },
+      "all_four_verified": true,
+      "label": "T027",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          16.719833,
+          5.9251249999999995
+        ],
+        "parallel": [
+          6.831,
+          9.529542000000001
+        ]
+      },
+      "parallel_over_batched_online_ratio": 0.8106127507011092,
+      "parallel_over_batched_s3_call_ratio": 0.9462178944132941,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            6099,
+            7061,
+            685,
+            17447
+          ],
+          [
+            9714,
+            13935,
+            10827,
+            20897
+          ]
+        ],
+        "parallel": [
+          [
+            13368,
+            4582,
+            6100,
+            10522
+          ],
+          [
+            6099,
+            7061,
+            685,
+            17447
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          95520,
+          47648
+        ],
+        "parallel": [
+          66912,
+          60900
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 1.1235550014373623,
+        "parallel": 0.8418710690035942
+      },
+      "all_four_verified": true,
+      "label": "T028",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          6.955083,
+          2.26125
+        ],
+        "parallel": [
+          7.577875000000001,
+          3.265333
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.2543305756241747,
+      "parallel_over_batched_s3_call_ratio": 0.6729495036602021,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ],
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ]
+        ],
+        "parallel": [
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ],
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          29888,
+          28608
+        ],
+        "parallel": [
+          28334,
+          13666
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.06923849501264895,
+        "parallel": 0.20654262353560976
+      },
+      "all_four_verified": true,
+      "label": "T029",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          4.285708,
+          4.592958
+        ],
+        "parallel": [
+          16.838290999999998,
+          20.701334
+        ]
+      },
+      "parallel_over_batched_online_ratio": 4.208144513578193,
+      "parallel_over_batched_s3_call_ratio": 2.5511814294933144,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            6290,
+            18514,
+            9059,
+            12184
+          ],
+          [
+            6290,
+            18514,
+            9059,
+            12184
+          ]
+        ],
+        "parallel": [
+          [
+            21167,
+            3568,
+            4493,
+            5306
+          ],
+          [
+            23093,
+            2431,
+            9267,
+            21361
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          23968,
+          36288
+        ],
+        "parallel": [
+          52874,
+          107062
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 1.1233298937937501,
+        "parallel": 0.9030859030009103
+      },
+      "all_four_verified": true,
+      "label": "T030",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          13.530209,
+          4.399958
+        ],
+        "parallel": [
+          12.619958,
+          5.115083
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.041306979525804,
+      "parallel_over_batched_s3_call_ratio": 1.4295126613608593,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            15114,
+            12039,
+            3454,
+            8694
+          ],
+          [
+            15114,
+            12039,
+            3454,
+            8694
+          ]
+        ],
+        "parallel": [
+          [
+            15114,
+            12039,
+            3454,
+            8694
+          ],
+          [
+            15114,
+            12039,
+            3454,
+            8694
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          73984,
+          54752
+        ],
+        "parallel": [
+          123560,
+          66994
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 1.1728693675193318,
+        "parallel": 0.37355208852812394
+      },
+      "all_four_verified": true,
+      "label": "T031",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          3.852459,
+          1.19225
+        ],
+        "parallel": [
+          0.726083,
+          1.054916
+        ]
+      },
+      "parallel_over_batched_online_ratio": 0.4083658303469797,
+      "parallel_over_batched_s3_call_ratio": 0.2783733743323705,
+      "statuses": [
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ],
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ]
+        ],
+        "parallel": [
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ],
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          15488,
+          4000
+        ],
+        "parallel": [
+          1596,
+          3008
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "batched": 0.7299108854302347,
+        "parallel": 1.052462093449227
+      },
+      "all_four_verified": true,
+      "label": "T032",
+      "n": 53,
+      "online_ms_by_arm": {
+        "batched": [
+          4.993583,
+          2.406667
+        ],
+        "parallel": [
+          3.037292,
+          8.700917
+        ]
+      },
+      "parallel_over_batched_online_ratio": 1.4828992588846814,
+      "parallel_over_batched_s3_call_ratio": 2.3131664460897894,
+      "statuses": [
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "batched",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "parallel",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "batched": [
+          [
+            5121,
+            12924,
+            14521,
+            19308
+          ],
+          [
+            10618,
+            12755,
+            2747,
+            10920
+          ]
+        ],
+        "parallel": [
+          [
+            3221,
+            25177,
+            3164,
+            17789
+          ],
+          [
+            5121,
+            12924,
+            14521,
+            19308
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "batched": [
+          24992,
+          3072
+        ],
+        "parallel": [
+          15676,
+          26206
+        ]
+      }
+    }
+  ],
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "aa_p95_abs_log_ratio_by_arm": {
+        "batched": 1.3578615114976107,
+        "parallel": 1.2360808917489339
+      },
+      "controlled_speedup": null,
+      "exploratory_parallel_over_batched_online_geomean": 1.2691715883106307,
+      "exploratory_target_bootstrap_95": [
+        0.9038803548133383,
+        1.8857564600652754
+      ],
+      "median_charged_phase_ms_by_arm": {
+        "batched": {
+          "target_descent": 0.07329150000000001,
+          "target_pdp_charged": 0.41020850000000003,
+          "target_query": 0.025875,
+          "target_recovery_check": 0.024271,
+          "target_relation_check": 0.007146
+        },
+        "parallel": {
+          "target_descent": 0.09647849999999983,
+          "target_pdp_charged": 0.9908545,
+          "target_query": 0.025834,
+          "target_recovery_check": 0.027499999999999997,
+          "target_relation_check": 0.0056665
+        }
+      },
+      "median_online_ms_by_arm": {
+        "batched": 0.594437,
+        "parallel": 1.129521
+      },
+      "median_target_s3_calls_by_arm": {
+        "batched": 1152.0,
+        "parallel": 1139.0
+      },
+      "parallel_over_batched_s3_call_geomean": 0.9522971782255041,
+      "points_above_1x": 5,
+      "points_at_least_2x": 1,
+      "run_count": 32,
+      "target_count": 8,
+      "verified_target_blocks": 8
+    },
+    "53": {
+      "aa_p95_abs_log_ratio_by_arm": {
+        "batched": 1.1728693675193318,
+        "parallel": 1.1585272109245535
+      },
+      "controlled_speedup": null,
+      "exploratory_parallel_over_batched_online_geomean": 1.1523306887589009,
+      "exploratory_target_bootstrap_95": [
+        0.7613253489481696,
+        1.8414705974613745
+      ],
+      "median_charged_phase_ms_by_arm": {
+        "batched": {
+          "target_descent": 0.05202000000000134,
+          "target_pdp_charged": 4.331687,
+          "target_query": 0.042624999999999996,
+          "target_recovery_check": 0.035520499999999997,
+          "target_relation_check": 0.011417
+        },
+        "parallel": {
+          "target_descent": 0.09833349999999919,
+          "target_pdp_charged": 5.795374499999999,
+          "target_query": 0.0358125,
+          "target_recovery_check": 0.0419585,
+          "target_relation_check": 0.012583500000000001
+        }
+      },
+      "median_online_ms_by_arm": {
+        "batched": 4.4964580000000005,
+        "parallel": 5.973041500000001
+      },
+      "median_target_s3_calls_by_arm": {
+        "batched": 29248.0,
+        "parallel": 20941.0
+      },
+      "parallel_over_batched_s3_call_geomean": 0.9081160554215845,
+      "points_above_1x": 5,
+      "points_at_least_2x": 1,
+      "run_count": 32,
+      "target_count": 8,
+      "verified_target_blocks": 8
+    }
+  },
+  "kind": "s3_batched_group_inversion_paired_analysis_v1",
+  "ledger_sha256": "9ce4893b441b06856d34f5e86d451a4e8e3004db32b967b488f7b1222c0443f3",
+  "plan_sha256": "f8dcd9aa09dc6aa3d46a7f67139ddc4358baa966dfce2f74114649a2901d7d3d",
+  "run_count": 64
+}
