@@ -45,3 +45,32 @@ public subgroup transport checks from the first round. Only the explicitly
 declared enumeration scope differs: it requires one map, one specified
 eigenline and degree coverage PARTIAL. It cannot report complete two-eigenline
 enumeration. All failed launches/builds and bounded outcomes are preserved.
+
+High-degree exact verification additionally uses validated reciprocal
+polynomial reduction, memoized division recurrences and block modular
+composition. Twelve tests compare these with the unchanged reference routines.
+The initial eager degree-10453 replay exited 143 before a certificate; the
+separately preserved memoized replay completed all checks. The exact fixture
+control was replayed again before target use.
+
+```sh
+CARGO_TARGET_DIR=/private/tmp/p192-p224-continuation.f9sck4/replay \
+  cargo test --manifest-path research/p192_p224_large_degree_isogenies_20261009/Cargo.toml \
+  --locked --release --offline --bin verification-poly-checks --bin verification-kernel-checks
+/private/tmp/p192-p224-continuation.f9sck4/replay/release/continuation-report \
+  research/p192_p224_large_degree_isogenies_20261009 docs/curves/registry.json
+research/p192_p224_large_degree_isogenies_20261008/target/release/catalogue-covers \
+  docs/curves/registry.json docs/curves/covers.json docs/curves/cover-links.yaml
+research/p192_p224_large_degree_isogenies_20261008/target/release/catalogue-covers \
+  docs/curves/registry.json docs/curves/covers.json docs/curves/cover-links.yaml --check
+research/p192_p224_large_degree_isogenies_20261008/target/release/catalogue-views
+/private/tmp/p192-p224-continuation.f9sck4/replay/release/continuation-report \
+  research/p192_p224_large_degree_isogenies_20261009 docs/curves/registry.json
+/private/tmp/p192-p224-continuation.f9sck4/replay/release/continuation-report \
+  research/p192_p224_large_degree_isogenies_20261009 docs/curves/registry.json --check-manifest
+```
+
+The final report/manifest invocation prints to the terminal so no study log
+changes after being hashed. Canonical catalogue outputs and the old traits
+file are bound, along with source files, raw evidence and executed binaries.
+The root release-library check remains a separately recorded failed gate.

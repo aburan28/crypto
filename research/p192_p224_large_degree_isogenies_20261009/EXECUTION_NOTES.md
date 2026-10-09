@@ -78,3 +78,32 @@ kernel degrees are 5226 and 735; numerator/denominator coefficient counts are
 10454/10453 and 1472/1471. These are individual verified maps, with the other
 eigenline left unresolved at each degree. All four full-Hecke probes timed out
 within their declared bounds, and none is recast as a kernel-first success.
+
+The final two target models were registered before rendering their identities.
+The native covers and linked graph replay verified all 345 models, with zero
+invalid or unsupported inputs. Alias, leaderboard-roster and browser refresh
+added two records and preserved existing IC measurement bytes. Native logs are
+validation/catalogue-covers-check.log and validation/catalogue-views.log.
+No ECDLP cost, fitted exponent, boundary promotion or old-walker integration
+was measured, so the performance scoreboard, timeline and existing theory
+figures keep their prior results.
+
+The branch was refreshed onto upstream dba53d92517a8899699639a55f7748f489be4693
+after all construction and independent replay completed. Exact pre-rebase build
+revisions remain reachable in the local source-archive branch
+codex/p192-p224-large-degree-isogenies-build-snapshots. The executed binaries
+were not replaced during any run. The manifest records their byte digests and
+the complete source snapshot as well as the recorded build revision labels.
+
+The mandatory root cargo test --release --lib was rerun after the refresh and
+failed with the same 643 pre-existing compiler errors; its complete log is
+validation/root-release-library.log. Publication, PR creation and merge remain
+blocked by the owner's fix-before-push rule. The previous traits export failure
+and unsupported model forms remain unresolved; the original stale traits file
+is preserved and pinned rather than reported as refreshed.
+
+The three-page continuation PDF was rendered with Poppler at 130 dpi. All
+pages were visually inspected: complete source/target identities, directed
+degree edges, partial-coverage labels, quantitative probe population and
+evidence paths are legible without clipping. Artifact and catalogue hashes
+are frozen only after all final logs and notes have closed.
