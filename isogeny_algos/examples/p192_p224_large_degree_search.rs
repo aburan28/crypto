@@ -91,6 +91,40 @@ fn sieve(name: &str, upper: u64) -> Vec<(u64, i64, Json)> {
 fn write_json(path: &Path, value: &Json) {
     fs::write(path, format!("{}\n", value.dump())).unwrap();
 }
+#[cfg(target_os = "macos")]
+fn resident_bytes(pid: u32) -> Option<u64> {
+    #[link(name = "proc")]
+    extern "C" {
+        fn proc_pidinfo(
+            pid: i32,
+            flavor: i32,
+            arg: u64,
+            buffer: *mut std::ffi::c_void,
+            size: i32,
+        ) -> i32;
+    }
+    let mut info = [0u64; 12];
+    let size = std::mem::size_of_val(&info) as i32;
+    // SDK proc_taskinfo: 96 bytes; the second u64 is resident size.
+    let got = unsafe { proc_pidinfo(pid as i32, 4, 0, info.as_mut_ptr().cast(), size) };
+    (got == size).then_some(info[1])
+}
+#[cfg(target_os = "linux")]
+fn resident_bytes(pid: u32) -> Option<u64> {
+    fs::read_to_string(format!("/proc/{pid}/status"))
+        .ok()?
+        .lines()
+        .find_map(|line| {
+            line.strip_prefix("VmRSS:")
+                .and_then(|s| s.split_whitespace().next())
+                .and_then(|s| s.parse::<u64>().ok())
+                .map(|kb| kb * 1024)
+        })
+}
+#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+fn resident_bytes(_: u32) -> Option<u64> {
+    None
+}
 fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Json {
     let stdout_path = dir.join(format!("{stem}.json"));
     let stderr_path = dir.join(format!("{stem}.stderr.txt"));
@@ -102,6 +136,9 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
         .unwrap();
     let start = Instant::now();
     let mut timed_out = false;
+    let mut memory_limited = false;
+    let mut monitor_unavailable = false;
+    let mut peak_rss = 0;
     let status = loop {
         if let Some(status) = child.try_wait().unwrap() {
             break status;
@@ -110,6 +147,24 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
             timed_out = true;
             child.kill().unwrap();
             break child.wait().unwrap();
+        }
+        match resident_bytes(child.id()) {
+            Some(rss) => {
+                peak_rss = peak_rss.max(rss);
+                if rss > 8u64 << 30 {
+                    memory_limited = true;
+                    child.kill().unwrap();
+                    break child.wait().unwrap();
+                }
+            }
+            None => {
+                if let Some(status) = child.try_wait().unwrap() {
+                    break status;
+                }
+                monitor_unavailable = true;
+                child.kill().unwrap();
+                break child.wait().unwrap();
+            }
         }
         thread::sleep(Duration::from_millis(25));
     };
@@ -127,6 +182,8 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
             }
         });
     let pass = !timed_out
+        && !memory_limited
+        && !monitor_unavailable
         && status.success()
         && parsed
             .as_ref()
@@ -147,7 +204,11 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
         ),
         (
             "status",
-            Json::str(if timed_out {
+            Json::str(if memory_limited {
+                "MEMORY_LIMIT"
+            } else if monitor_unavailable {
+                "RESOURCE_MONITOR_UNAVAILABLE"
+            } else if timed_out {
                 "TIMEOUT"
             } else if accepted {
                 "PASS"
@@ -164,6 +225,9 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
             Json::Num(start.elapsed().as_millis() as i64),
         ),
         ("map_count", n.map_or(Json::Null, |n| Json::Num(n as i64))),
+        ("resident_memory_limit_bytes", Json::str(8u64 << 30)),
+        ("sampled_peak_resident_bytes", Json::str(peak_rss)),
+        ("memory_sampling_interval_ms", Json::Num(25)),
         (
             "stdout",
             Json::str(stdout_path.file_name().unwrap().to_string_lossy()),

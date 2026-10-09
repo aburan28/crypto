@@ -27,12 +27,21 @@ and new public point samples. Preserve the protocol SHA-256 in the run manifest.
    each source curve, the first split prime at or above each of 509, 1009,
    2003, and 4000, within the frozen upper bound. Do not replace failures
    with easier degrees. All other degrees are structural screening only.
-3. Give each construction process 180 seconds, including modular-polynomial
+3. Give each construction process 180 seconds and an 8 GiB resident-memory
+   limit, including modular-polynomial
    setup, root finding, kernel construction, and the CLI's checks. Kill the
    child at the deadline, preserve its partial stdout/stderr, and record a
    timeout. Execute one construction at a time. No speed comparison is made;
    process elapsed times are operational receipts on a shared macOS host,
    not isolated benchmark measurements.
+
+The memory limit was recorded before the second launch, after the preserved
+first launch stopped at the P-192 dispatcher preflight. The upper-degree
+Hecke/Newton tables otherwise grow beyond this host's available memory.
+macOS rejected `ulimit -v`, so the native parent samples child RSS every
+25 milliseconds with `proc_pidinfo` and kills it if it exceeds the limit.
+An unavailable monitor fails closed. Sampled peak RSS and stop reasons are
+retained. Brief growth between samples is possible; this is a supervised cap.
 4. A construction is accepted only if the CLI exits successfully, all its
    checks pass, and the number of maps equals the two distinct Frobenius
    eigenlines for a split degree. Retain any discrepancy as a failure.

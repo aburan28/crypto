@@ -10,6 +10,42 @@ fn dec(s: &str) -> Int {
     Int::from_big(&Big::from_dec(s))
 }
 
+#[test]
+fn p192_order_and_split_degree_maps_are_supported() {
+    let c = PrimeCurve::preset("p192").unwrap();
+    let n = dec("6277101735386680763835789423176059013767194773182842284081");
+    let count = api::check_order(&c, &n, 1);
+    assert!(count.certificate.certified && count.twist_certificate.certified);
+    let maps = api::isogenies(&c, 13, 1).unwrap();
+    assert_eq!(maps.len(), 2);
+    assert!(maps.iter().all(|r| r.verified()));
+}
+
+#[test]
+fn field_dispatch_handles_every_limb_boundary() {
+    struct Multiply(Int, Int);
+    impl api::FieldTask for Multiply {
+        type Out = Int;
+        fn run<F: api::PrimeFieldInt>(self, f: &F) -> Int {
+            f.int(f.mul(f.elem(&self.0), f.elem(&self.1)))
+        }
+    }
+    // Montgomery arithmetic also works over these odd composite moduli; this checks
+    // dispatch and reduction at both ends of every limb width, not primality.
+    for bits in [
+        63, 64, 65, 128, 129, 192, 193, 256, 257, 320, 321, 384, 385, 448, 449, 512,
+    ] {
+        let p = &Int::from_big(&Big::from_u64(1).shl(bits)) - &Int::one();
+        let a = &p - &Int::from(2i64);
+        let b = &p - &Int::from(3i64);
+        assert_eq!(
+            api::with_field(&p, Multiply(a, b)),
+            Int::from(6i64),
+            "bits={bits}"
+        );
+    }
+}
+
 /// Standard curves: the orders come out certified and the ICV1 slugs are the ones the crypto
 /// repository's curve registry (`docs/curves/registry.json`) lists for P-256 and secp256k1.
 #[test]

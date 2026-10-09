@@ -1,0 +1,203 @@
+//! Independent certification of the new algorithms' kernels and public subgroup maps.
+#[allow(dead_code)]
+#[path = "../../src/cryptanalysis/isogeny_walk/curve.rs"]
+mod curve;
+#[allow(dead_code)]
+#[path = "../../src/cryptanalysis/isogeny_walk/field.rs"]
+mod field;
+#[allow(dead_code)]
+#[path = "../../src/cryptanalysis/isogeny_walk/kernel.rs"]
+mod kernel;
+#[allow(dead_code)]
+#[path = "../../src/cryptanalysis/isogeny_walk/modpoly.rs"]
+mod modpoly;
+#[allow(dead_code)]
+#[path = "../../src/cryptanalysis/isogeny_walk/poly.rs"]
+mod poly;
+use curve::Model;
+use field::{Fe, Field};
+#[allow(dead_code)]
+#[path = "../../src/hash/sha256.rs"]
+mod hash_sha256;
+fn sha256_hex(bytes: &[u8]) -> String {
+    hash_sha256::sha256(bytes)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+use num_bigint::BigUint;
+use poly::Poly;
+use serde_json::{json, Value};
+use std::{fs, path::Path};
+
+fn json_number(n: &BigUint) -> Value {
+    serde_json::from_str(&n.to_string()).unwrap()
+}
+fn integer(v: &Value) -> BigUint {
+    let s = v.as_str().expect("decimal or hex integer string");
+    if let Some(h) = s.strip_prefix("0x") {
+        BigUint::parse_bytes(h.as_bytes(), 16).unwrap()
+    } else {
+        BigUint::parse_bytes(s.as_bytes(), 10).unwrap()
+    }
+}
+fn coeffs(f: &Field, v: &Value) -> Poly {
+    v.as_array()
+        .unwrap()
+        .iter()
+        .map(|x| f.from_big(&integer(x)))
+        .collect()
+}
+fn eval(f: &Field, n: &Poly, d: &Poly, p: Option<(Fe, Fe)>) -> Option<(Fe, Fe)> {
+    let (x, y) = p?;
+    let nv = poly::eval(f, n, &x);
+    let dv = poly::eval(f, d, &x);
+    if f.is_zero(&dv) {
+        return None;
+    }
+    let top = f.sub(
+        &f.mul(&poly::eval(f, &poly::derivative(f, n), &x), &dv),
+        &f.mul(&nv, &poly::eval(f, &poly::derivative(f, d), &x)),
+    );
+    Some((
+        f.div(&nv, &dv).unwrap(),
+        f.mul(&y, &f.div(&top, &f.sqr(&dv)).unwrap()),
+    ))
+}
+fn main() {
+    let a: Vec<String> = std::env::args().skip(1).collect();
+    assert_eq!(a.len(), 2, "usage: replay EVIDENCE_DIR REGISTRY_JSON");
+    let out = Path::new(&a[0]);
+    let registry: Value = serde_json::from_slice(&fs::read(&a[1]).unwrap()).unwrap();
+    let summary: Value =
+        serde_json::from_slice(&fs::read(out.join("search.json")).unwrap()).unwrap();
+    let mut replayed = vec![];
+    let mut curves = vec![];
+    for attempt in summary["attempts"].as_array().unwrap() {
+        if attempt["receipt"]["status"] != "PASS" {
+            continue;
+        }
+        let preset = attempt["curve"].as_str().unwrap();
+        let ell = attempt["ell"].as_u64().unwrap();
+        let path = out
+            .join(preset)
+            .join(attempt["receipt"]["stdout"].as_str().unwrap());
+        let bytes = fs::read(&path).unwrap();
+        assert_eq!(
+            sha256_hex(&bytes),
+            attempt["receipt"]["stdout_sha256"].as_str().unwrap()
+        );
+        let doc: Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(doc["status"], "PASS");
+        let p = integer(&doc["curve"]["p"]);
+        let aa = integer(&doc["curve"]["a"]);
+        let b = integer(&doc["curve"]["b"]);
+        let f = Field::new(&p).unwrap();
+        let source = Model {
+            a: f.from_big(&aa),
+            b: f.from_big(&b),
+        };
+        let source_slug = doc["result"]["source_icv1"]["slug"].as_str().unwrap();
+        let source_entry = registry["curves"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| c["slug"] == source_slug)
+            .unwrap();
+        let n = integer(&source_entry["order"]);
+        let standard = source_entry["representations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["curve"]["cofactor"] == 1)
+            .unwrap();
+        let g = (
+            f.from_big(&integer(&standard["curve"]["generator"][0])),
+            f.from_big(&integer(&standard["curve"]["generator"][1])),
+        );
+        assert!(source.on_curve(&f, &g.0, &g.1));
+        assert!(curve::scalar_mul(&f, &source, &g.0, &g.1, &n).is_none());
+        let isos = doc["result"]["isogenies"].as_array().unwrap();
+        assert_eq!(isos.len(), 2);
+        for (index, iso) in isos.iter().enumerate() {
+            assert_eq!(iso["verified"], true);
+            let h = coeffs(&f, &iso["kernel"]);
+            let num = coeffs(&f, &iso["x_map"]["num"]);
+            let den = coeffs(&f, &iso["x_map"]["den"]);
+            let cod = kernel::verify_kernel(&f, &source, ell, &h)
+                .expect("independent kernel certificate failed");
+            assert_eq!(f.to_big(&cod.a), integer(&iso["codomain"]["a"]));
+            assert_eq!(f.to_big(&cod.b), integer(&iso["codomain"]["b"]));
+            assert_eq!(
+                poly::mul(&f, &h, &h),
+                den,
+                "denominator must equal kernel squared"
+            );
+            let gp = eval(&f, &num, &den, Some(g))
+                .expect("prime subgroup generator cannot lie in the small-degree kernel");
+            assert!(cod.on_curve(&f, &gp.0, &gp.1));
+            assert!(curve::scalar_mul(&f, &cod, &gp.0, &gp.1, &n).is_none());
+            let mut point_checks = 0;
+            for seed_x in [101, 1009, 10007, 65537] {
+                let q = curve::least_point(&f, &source, seed_x);
+                let iq = eval(&f, &num, &den, Some(q)).unwrap();
+                assert!(cod.on_curve(&f, &iq.0, &iq.1));
+                for k in [2, 3, 17, 65537, ell] {
+                    let k = BigUint::from(k);
+                    let left = eval(
+                        &f,
+                        &num,
+                        &den,
+                        curve::scalar_mul(&f, &source, &q.0, &q.1, &k),
+                    );
+                    let right = curve::scalar_mul(&f, &cod, &iq.0, &iq.1, &k);
+                    assert_eq!(left, right, "public scalar transport failed");
+                    point_checks += 1;
+                }
+            }
+            assert!(eval(&f, &num, &den, None).is_none());
+            let target_id = &iso["codomain"]["icv1"];
+            let target_a = f.to_big(&cod.a);
+            let target_b = f.to_big(&cod.b);
+            let field_record = json!({"characteristic":json_number(&p),"degree":1,"representation":"prime","element_encoding":"hex integer modulo the characteristic"});
+            let curve_record = json!({"model":"short Weierstrass","coefficients":[0,0,0,json_number(&target_a),json_number(&target_b)],"subgroup_order":n.to_string(),"cofactor":1,
+                "generator":[format!("0x{:x}",f.to_big(&gp.0)),format!("0x{:x}",f.to_big(&gp.1))],"target_group":"prime-order subgroup"});
+            let digest = sha256_hex(
+                serde_json::to_string(&json!({"field":field_record,"curve":curve_record}))
+                    .unwrap()
+                    .as_bytes(),
+            );
+            let ec1 = format!("EC1P{}Cfph{}", p.bits(), &digest[..12]);
+            let uid = format!("urn:ec-record:1:sha256:{digest}");
+            let row = json!({"source_icv1":source_slug,"source_ec1":standard["ec1"],"source_curve_uid":standard["curve_uid"],
+                "ell":ell,"index":index,"target_icv1":target_id["slug"],"target_ec1":ec1,"target_curve_uid":uid,
+                "kernel_degree":h.len()-1,"map_numerator_coefficients":num.len(),"map_denominator_coefficients":den.len(),
+                "certificate_sha256":sha256_hex(&bytes),"kernel_check":"PASS","codomain_check":"PASS","subgroup_check":"PASS",
+                "public_scalar_transport_checks":point_checks,"status":"PASS"});
+            replayed.push(row);
+            curves.push(json!({"name":target_id["slug"],"icv1":target_id["icv1"],"p":p.to_string(),"a":target_a.to_string(),"b":target_b.to_string(),
+                "group_order":n.to_string(),"subgroup_order":n.to_string(),"cofactor":1,"j":iso["codomain"]["j"],"generator":[format!("0x{:x}",f.to_big(&gp.0)),format!("0x{:x}",f.to_big(&gp.1))],
+                "source":source_slug,"ell":ell,"index":index,"target_ec1":ec1,"target_curve_uid":uid,"model_json":target_id["model_json"]}));
+        }
+        println!("replayed {preset} ell={ell}: two certified maps");
+    }
+    assert!(!replayed.is_empty(), "no completed construction to certify");
+    let receipt = json!({"schema":"large-degree-isogeny-replay/v1","method":"existing walker kernel verifier, separate field and polynomial implementation",
+        "scope":"same-host independent implementation","records":replayed,"status":"PASS"});
+    fs::write(
+        out.join("replay.json"),
+        format!("{}\n", serde_json::to_string_pretty(&receipt).unwrap()),
+    )
+    .unwrap();
+    fs::write(
+        out.join("curves.json"),
+        format!(
+            "{}\n",
+            serde_json::to_string_pretty(
+                &json!({"schema":"large-degree-isogeny-curves/v1","curves":curves})
+            )
+            .unwrap()
+        ),
+    )
+    .unwrap();
+}

@@ -1,0 +1,23 @@
+[package]
+name = "p192-p224-large-degree-replay"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[[bin]]
+name = "replay"
+path = "replay.rs"
+test = false
+
+[[bin]]
+name = "report"
+path = "report.rs"
+test = false
+
+[dependencies]
+num-bigint = "0.4"
+num-traits = "0.2"
+rand = { version = "0.8", features = ["small_rng"] }
+serde = "1.0"
+serde_json = { version = "1.0", features = ["arbitrary_precision", "raw_value"] }
