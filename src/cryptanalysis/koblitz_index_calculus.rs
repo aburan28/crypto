@@ -126,7 +126,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-use num_bigint::BigUint;
+use num_bigint::{BigUint, RandBigInt};
 use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -3909,6 +3909,28 @@ pub(crate) fn from_fast_point(fast: &FastBinaryCurve, p: FastPoint) -> BinaryPoi
     }
 }
 
+/// Draw a nonzero scalar modulo the full wide subgroup order. Keep the historical
+/// single-word stream unchanged for existing small-curve fixtures.
+fn sample_nonzero_ic_scalar(rng: &mut StdRng, order: &BigUint) -> BigUint {
+    if order.bits() > 64 {
+        rng.gen_biguint_range(&BigUint::one(), order)
+    } else {
+        let word = order.to_u64_digits().first().copied().unwrap_or(1).max(2);
+        BigUint::from(rng.gen_range(1..word))
+    }
+}
+
+/// A uniform additive randomizer makes `[a]G + [b]Q` uniform over the
+/// whole subgroup for any fixed nonzero `b`. The wider path includes zero;
+/// the <=64-bit path retains its established random stream and fixtures.
+fn sample_ic_additive_randomizer(rng: &mut StdRng, order: &BigUint) -> BigUint {
+    if order.bits() > 64 {
+        rng.gen_biguint_below(order)
+    } else {
+        sample_nonzero_ic_scalar(rng, order)
+    }
+}
+
 fn koblitz_index_calculus_dlp_observed(
     kc: &KoblitzCurve,
     q: &BinaryPoint,
@@ -4002,7 +4024,6 @@ fn koblitz_index_calculus_dlp_observed(
     // solver is the fallback for a modulus wider than 64 bits.
     let mut echelon = IncrementalRelationSolver::new(relation_unknowns, r);
     let mut rng = StdRng::seed_from_u64(opts.seed);
-    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     // Fast single-word arithmetic for trial sampling (`R = [a]G + [b]Q`
     // per attempt).  Bit-exact with the general arithmetic; the final
     // verification (`[d]G == Q`) and every relation re-add stay on the
@@ -4050,8 +4071,8 @@ fn koblitz_index_calculus_dlp_observed(
         let mut scalars_a = Vec::with_capacity(batch_size);
         let mut scalars_b = Vec::with_capacity(batch_size);
         for _ in 0..batch_size {
-            scalars_a.push(BigUint::from(rng.gen_range(1..r_u64)));
-            scalars_b.push(BigUint::from(rng.gen_range(1..r_u64)));
+            scalars_a.push(sample_ic_additive_randomizer(&mut rng, r));
+            scalars_b.push(sample_nonzero_ic_scalar(&mut rng, r));
         }
         let attempts: Vec<_> = if fast_sampling {
             let fast = fast_curve.as_ref().expect("fast sampling enabled");
@@ -4564,7 +4585,6 @@ pub fn solve_factor_base_logs(
     let h = &kc.cofactor % r;
 
     let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x4c_4f_47_53_00_00_00_00);
-    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     // Fast single-word sampling for the loop-carried probes below. The
     // draws stay serial (rank is re-checked per probe), but each probe
     // drops from a slow alloc-heavy scalar mul to one fast one; targets
@@ -4582,13 +4602,15 @@ pub fn solve_factor_base_logs(
     // reach full column rank, so every earlier attempt is skipped. Skipped
     // attempts could never verify (underdetermined against random true
     // logs), hence trial counts, tables, and verdicts are unchanged.
-    // `r` always fits a `u64` here (`n <= 63` curves materialise).
+    // The native rank tracker is valid only when the entire modulus fits
+    // in one word. For wider subgroups, attempt the reference BigUint solve
+    // after enough rows instead of reducing coefficients modulo a low limb.
     let r_mod = r.to_u64_digits().first().copied().unwrap_or(0);
-    let mut ranker = U64RankTracker::new(r_mod, n_cols);
+    let mut ranker = (r.bits() <= 64).then(|| U64RankTracker::new(r_mod, n_cols));
 
     while report.trials < opts.max_trials {
         report.trials += 1;
-        let a = BigUint::from(rng.gen_range(1..r_u64));
+        let a = sample_nonzero_ic_scalar(&mut rng, r);
         let target = match &fast_curve {
             Some(fast) if fast_sampling => from_fast_point(fast, fast.scalar_mul(g_fast, &a)),
             _ => kc.mul(&g, &a),
@@ -4608,12 +4630,12 @@ pub fn solve_factor_base_logs(
         report.relations += 1;
 
         // Rank gate for the dense attempt below (see declaration).
-        let full_rank = match matrix.last() {
-            Some(row) if row.len() == n_cols => {
+        let full_rank = match (ranker.as_mut(), matrix.last()) {
+            (Some(ranker), Some(row)) if row.len() == n_cols => {
                 let urow: Vec<u64> = row.iter().map(|c| to_u64_mod(c, r_mod)).collect();
                 ranker.insert(urow) >= n_cols
             }
-            // Unexpected shape: fall back to attempting (old behavior).
+            // A wide modulus or unexpected shape uses the reference solve.
             _ => true,
         };
 
@@ -4714,7 +4736,6 @@ pub fn individual_log(
     let h = &kc.cofactor % r;
 
     let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x44_45_53_43_45_4e_54_00);
-    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     // Same fast-sampling setup as the precompute loop above; draws stay
     // serial (each draw is returned on success), arithmetic goes fast.
     let fast_curve = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64);
@@ -4725,8 +4746,8 @@ pub fn individual_log(
     };
     while report.trials < opts.max_trials {
         report.trials += 1;
-        let a = BigUint::from(rng.gen_range(1..r_u64));
-        let b = BigUint::from(rng.gen_range(1..r_u64));
+        let a = sample_ic_additive_randomizer(&mut rng, r);
+        let b = sample_nonzero_ic_scalar(&mut rng, r);
         let target = match &fast_curve {
             Some(fast) if fast_sampling => from_fast_point(
                 fast,
@@ -4779,6 +4800,50 @@ pub fn individual_log(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ic_scalar_draws_cover_wide_order_and_preserve_small_stream() {
+        let small_order = BigUint::from(97u32);
+        let mut legacy = StdRng::seed_from_u64(0x83_64);
+        let mut current = StdRng::seed_from_u64(0x83_64);
+        for _ in 0..64 {
+            assert_eq!(
+                sample_ic_additive_randomizer(&mut current, &small_order),
+                BigUint::from(legacy.gen_range(1..97u64))
+            );
+            assert_eq!(
+                sample_nonzero_ic_scalar(&mut current, &small_order),
+                BigUint::from(legacy.gen_range(1..97u64))
+            );
+        }
+
+        let primary_order = BigUint::parse_bytes(b"2417851639230796216685689", 10).unwrap();
+        let mut wide = StdRng::seed_from_u64(0x83_81);
+        let mut reference = StdRng::seed_from_u64(0x83_81);
+        let mut above_word = 0;
+        for _ in 0..128 {
+            let a = sample_ic_additive_randomizer(&mut wide, &primary_order);
+            let b = sample_nonzero_ic_scalar(&mut wide, &primary_order);
+            assert_eq!(a, reference.gen_biguint_below(&primary_order));
+            assert_eq!(
+                b,
+                reference.gen_biguint_range(&BigUint::one(), &primary_order)
+            );
+            assert!(a < primary_order);
+            assert!(b > BigUint::zero() && b < primary_order);
+            above_word += usize::from(a.bits() > 64 && b.bits() > 64);
+        }
+        assert!(above_word > 100, "wide draws must reach beyond one limb");
+
+        // Translation by any fixed bQ permutes the whole subgroup when a
+        // ranges over all residues; a uniform draw therefore gives a
+        // uniform relation target without requiring Q's logarithm.
+        for fixed_bq in 0..7 {
+            let mut values: Vec<_> = (0..7).map(|a| (a + fixed_bq) % 7).collect();
+            values.sort_unstable();
+            assert_eq!(values, (0..7).collect::<Vec<_>>());
+        }
+    }
 
     #[test]
     fn irreducibility_test_matches_known_polynomials() {

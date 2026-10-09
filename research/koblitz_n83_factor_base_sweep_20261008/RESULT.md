@@ -62,6 +62,8 @@ An optional unordered-pair index reduces duplicate summand-pair states under Fro
 
 `RANK_QUERY_SCREEN.md` and `pilot-01/rank-query-screen.json` apply that exact multiset count to a separate one-row rank-query model. For uniform whole-subgroup query targets and at most one full-smooth row per query, no independence assumption is needed to show `Pr(rank >= K) <= min(1, q min(M,r)/(rK))` after `q >= K` queries. At primary a=0 K=600, the upper bound cannot reach one half until at least **176,888,106** four-summand queries or **8,880** five-summand queries. The six-summand bound is vacuous and reduces to `q >= K`. These are necessary query counts only: they do not measure solver time, imply row independence or cover biased queries, multirow solvers and large-prime partials. The current cold driver has not demonstrated uniform full-width sampling on the primary arm.
 
+The generic Koblitz IC source now draws uniform full-width additive scalars and full-width nonzero coefficients when the subgroup order exceeds 64 bits, while preserving the previous at-most-64-bit random stream. The factor-base-log precompute skips its single-word rank tracker for wide moduli and uses the existing BigUint solve. This removes low-limb sampling and rank-gate errors for the 81-bit primary order. It does not turn the retained S3 bases into a completed primary cold run, establish solver throughput, or change any factor-base ranking. No timed pilot work was added.
+
 ## Validation and preserved failures
 
 The release profile uses optimization level 3, 256 codegen units and four Cargo build jobs. Toolchain and host facts are in `host.json`; the resolved dependency lockfile is retained in `verification/Cargo.lock`.
@@ -77,6 +79,9 @@ The release profile uses optimization level 3, 256 codegen units and four Cargo 
 | Post-screen touched example recheck | 12 passed | `verification/example-tests-rank-screen.log` |
 | Rank-query small-group, threshold and receipt checks | 3 passed | `verification/rank-query-tests.log`, `verification/rank-query-replay.log` |
 | Post-screen support and boundary Python rechecks | 2 and 16 passed | `verification/support-moments-tests-rank-screen.log`, `verification/boundary-tests-rank-screen.log` |
+| Wide-order sampler and rank-gate release library recheck | 2,236 passed, 94 ignored | `verification/wide-sampler-lib-tests.log` |
+| Post-source touched example recheck | 12 passed | `verification/wide-sampler-example-tests.log` |
+| Post-source study and boundary Python suites | 5 and 16 passed | `verification/wide-sampler-python-tests.log`, `verification/wide-sampler-boundary-tests.log` |
 | Native finite-grid audit | All 45,360,000 dispositions accounted for | `verification/design-audit.log`, `design.json` |
 
 Earlier build and test outcomes remain retained. Initial dependency resolution failed under restricted networking; `--locked` could not be used before this older baseline resolved a lockfile. Some build attempts were interrupted during baseline recovery. The first complete isolated library run had two loopback-network permission failures. The next run passed those tests and failed the pre-existing randomized SQIsign wrong-message assertion. Its focused replay passed; the subsequent full suite passed. The SQIsign source is unchanged, and the earlier failure remains visible rather than being relabeled as a pass.

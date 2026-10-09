@@ -2,6 +2,8 @@
 
 This screen applies to a **one-row full-smooth oracle**: each query asks for a decomposition of one subgroup point into `m` points of a fixed base, and returns at most one relation row. Its query targets must each be uniform over the whole prime-order subgroup. Dependence between queries is allowed. The current capped cold driver has not demonstrated this sampling model for the 81-bit primary arm, so these numbers are a guide for a future full-width sampler, not measurements of that driver.
 
+The generic Koblitz IC sampler now draws a uniform full-width additive scalar for subgroup orders above 64 bits, which supplies this target distribution for its `[a]G+[b]Q` probes when `b` is nonzero. The retained-base cold driver is still diagnostic `a=1` only. Applying this query screen to an actual primary cold run additionally requires a verified adapter from the stored base and a one-row full-smooth oracle with the stated semantics.
+
 For a base of `B` distinct points and subgroup order `r`, exactly `M = binomial(B+m-1,m)` unordered multisets with repetition exist. Each has one group sum. A uniform query hits a full-smooth sum with probability at most `p = min(1,M/r)`, including possible identity sums. If `S` of `q` queries return a row, then `E[S] <= qp` without any independence assumption. Matrix rank is at most `S`, so for `K` required independent rows:
 
 `Pr(rank >= K) <= 0` for `q < K`; otherwise `Pr(rank >= K) <= min(1, qp/K)`.
