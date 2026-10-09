@@ -1844,10 +1844,14 @@ mod tests {
         let a_fe = curve.a_fe();
         let g = curve.generator();
         let q = g.scalar_mul(&BigUint::from(190u32), &a_fe);
-        let plain = ec_index_calculus_dlp(&curve, &g, &q, 8, 4, 5000);
-        let staged = ec_index_calculus_dlp_staged(&curve, &g, &q, 8, 4, 5000, 64);
-        let (staged_x, report) = staged.expect("staged solve succeeds on the tiny curve");
-        let plain_x = plain.expect("plain solve succeeds on the tiny curve");
+        // A bounded fresh relation set may leave the target column free.
+        // Retry the randomized collection while keeping both correctness checks.
+        let plain_x = (0..64)
+            .find_map(|_| ec_index_calculus_dlp(&curve, &g, &q, 8, 4, 5000))
+            .expect("plain solve succeeds on the small curve within 64 attempts");
+        let (staged_x, report) = (0..64)
+            .find_map(|_| ec_index_calculus_dlp_staged(&curve, &g, &q, 8, 4, 5000, 64))
+            .expect("staged solve succeeds on the small curve within 64 attempts");
         assert_eq!(staged_x, plain_x);
         assert_eq!(g.scalar_mul(&staged_x, &a_fe), q);
         assert_eq!(report.factor_base_size, 8);
