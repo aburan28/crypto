@@ -19,6 +19,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,9 +63,6 @@ def run_arm(args: argparse.Namespace) -> None:
     target = [args.x, args.y]
     fixture = beat["curve_fixture"]
     curve = panel.cached_curve(fixture)
-    target_point = curve.decode(target)
-    if target_point is None or curve.mul(target_point, curve.r) is not None:
-        raise ValueError("target is not a point in the declared subgroup")
     env = os.environ.copy()
     env["RAYON_NUM_THREADS"] = "1"
     with tempfile.TemporaryDirectory(prefix="ic-one-target-") as directory:
@@ -87,6 +85,10 @@ def run_arm(args: argparse.Namespace) -> None:
             print(result.stdout, file=sys.stderr)
             print(result.stderr, file=sys.stderr)
             raise RuntimeError(f"{args.arm} producer exited {result.returncode}")
+        replay_started = time.perf_counter_ns()
+        target_point = curve.decode(target)
+        if target_point is None or curve.mul(target_point, curve.r) is not None:
+            raise ValueError("target is not a point in the declared subgroup")
 
         if args.arm == "ic":
             record = require_one(rows(output_path.read_text()), "compact_orbit_dlp_target")
@@ -131,12 +133,15 @@ def run_arm(args: argparse.Namespace) -> None:
         online_ms = float(record["online_ms"])
         if not math.isfinite(online_ms) or online_ms <= 0:
             raise ValueError("invalid online interval")
+        replay_ms = (time.perf_counter_ns() - replay_started) / 1_000_000.0
+        certificate["independent_replay_ms"] = replay_ms
         print("producer_json=" + json.dumps(record, sort_keys=True, separators=(",", ":")))
         print("certificate_json=" + json.dumps(certificate, sort_keys=True, separators=(",", ":")))
         print("summary_json=" + json.dumps(summary, sort_keys=True, separators=(",", ":")))
         print(f"online_ms={online_ms:.9f} verified=1 target_hash={point_hash(n, a, target)} "
               f"scalar={scalar} arm={args.arm} n={n} a={a} "
-              f"online_instructions={instructions if instructions is not None else 'unavailable'}")
+              f"online_instructions={instructions if instructions is not None else 'unavailable'} "
+              f"independent_replay_ms={replay_ms:.6f}")
 
 
 def make_manifest(args: argparse.Namespace) -> None:

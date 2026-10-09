@@ -30,7 +30,8 @@ The local rehearsal checked the four IC relation points against `Q`; its five
 exclusive IC target phases summed to 45.066542 ms. The rho record used an
 empty distinguished-point table and its walk/collision and replay phases
 summed to 233.141209 ms. These local times are diagnostics. The paired
-physical-host result is produced by the procedure below.
+physical-host result is produced by the procedure below. The adapter reports
+`independent_replay_ms` separately from each producer's online interval.
 
 ## Physical-host procedure
 
