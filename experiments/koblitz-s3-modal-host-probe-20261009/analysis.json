@@ -1,0 +1,29 @@
+{
+  "busy_cgroup_throttled_us": 0,
+  "busy_involuntary_context_switches": 66,
+  "busy_selected_cpu_interrupts": 1303,
+  "busy_selected_cpu_steal_ticks": 0,
+  "busy_system_cpu_psi_some_us": null,
+  "controlled_speedup": null,
+  "guest_observability_checks": {
+    "guest_cgroup_cpu_visible": false,
+    "guest_cpu_topology_visible": true,
+    "guest_numa_policy_visible": true,
+    "guest_pin_held": true,
+    "guest_psi_visible": false,
+    "guest_steal_irq_visible": true,
+    "process_perf_ipc_visible": true
+  },
+  "guest_observability_fraction": 0.7142857142857143,
+  "guest_observability_max": 7,
+  "guest_observability_score": 5,
+  "host_exclusive_partition_verified": false,
+  "idle_cgroup_throttled_us": 0,
+  "idle_selected_cpu_interrupts": 10,
+  "idle_selected_cpu_steal_ticks": 0,
+  "idle_system_cpu_psi_some_us": null,
+  "kind": "source_free_modal_vm_cpu_probe_analysis_v1",
+  "perf_ipc": 3.4452874317455775,
+  "remote_exit_code": 0,
+  "sandbox_id": "sb-oaq34hMRw2UhcNoyMCJalI"
+}
