@@ -57,7 +57,7 @@ frozen Rust counts:
     python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_size_frontier_v2.py -v
 
 On the current branch, the release library suite passed 2,249 tests (94
-ignored), the existing N83 exporter example passed 15, the study Python suite
+ignored), the N83 exporter example passed 16, the study Python suite
 passed 13 and the boundary Python suite passed 16. The v2 generator was rerun
 against its saved JSON without a byte change. These are design and source
 checks, not N83 performance measurements.
@@ -69,3 +69,31 @@ path, source-pinned relation production, natural rank and fully charged cold
 comparison remain required. The declared
 S3 destination for future versioned objects is
 `s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/`.
+
+The exporter now has a one-object path for the five added sizes. It accepts
+only the two pinned curve arms, the three public-x policies, the three frozen
+seeds and signed-Frobenius closure. Construction requires a clean committed
+worktree and checks that the compiled exporter matches its on-disk source.
+A fresh directory receives a
+content-addressed compressed object and a manifest bound to this v2 design;
+a process-wall watchdog records `UNKNOWN_budget` if construction exceeds its
+cap. The separate bounded replay uses generic multi-limb curve arithmetic to
+check source points, cofactor projection, subgroup and Frobenius identities,
+every point label, closure and the point-set hash. `upload` requires that
+replay, uploads to the versioned S3 prefix, downloads the object to rehash its
+bytes, and uploads the manifest and receipt. The commands, after a new
+construction/replay budget and a memory guard are authorized, are:
+
+    cargo run --release --example koblitz_n83_factor_base_export -- v2-construct-one NEW_DIRECTORY 0 public_x_hash 1182 2026100801 BUDGET_SECONDS
+    cargo run --release --example koblitz_n83_factor_base_export -- v2-replay-one NEW_DIRECTORY BUDGET_SECONDS
+    cargo run --release --example koblitz_n83_factor_base_export -- upload NEW_DIRECTORY
+
+The size and destination gate and the v2 replay schema pass the existing
+small public fixture; out-of-grid publication fails before any AWS call. The
+CLI also rejects a valid v2 construction request from an unfrozen worktree
+before creating its output directory, and rejects a v1 manifest at the bounded
+v2 replay entry point. These negative controls do not exercise a larger base.
+Larger-object construction, its memory use, generic replay time and S3
+round-trip have **not** been run under the exhausted pilot budget. The
+watchdog bounds process wall only, so a future run also needs an external
+memory limit and a fresh run directory.

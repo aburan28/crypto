@@ -25,6 +25,8 @@ mod primary_adapter;
 
 const STUDY: &str = "koblitz_n83_factor_base_sweep_20261008";
 const PREFIX: &str = "s3://crypto-autoresearcher/factor-bases/icv1/etc";
+const V2_SUBDIR: &str = "v2-size-frontier";
+const V2_SIZES: [usize; 5] = [1182, 2048, 4096, 8192, 16627];
 const SEEDS: [u64; 3] = [2026100801, 2026100802, 2026100803];
 const SIZES: [usize; 6] = [32, 64, 128, 256, 600, 900];
 const DIMS: [usize; 8] = [4, 8, 12, 16, 20, 28, 41, 82];
@@ -491,6 +493,182 @@ fn pilot(root: &Path, budget: u64) -> Result<()> {
     Ok(())
 }
 
+fn v2_design_hash() -> String {
+    blake3::hash(include_bytes!(
+        "../research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json"
+    ))
+    .to_hex()
+    .to_string()
+}
+
+fn v2_object_uri(a: u8, object: &str) -> String {
+    format!("{PREFIX}/{STUDY}/{V2_SUBDIR}/a{a}/{object}")
+}
+
+fn v2_row_is_declared(row: &Value) -> bool {
+    row["a"].as_u64().is_some_and(|a| a <= 1)
+        && row["policy"].as_str().is_some_and(|policy| {
+            ["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+        })
+        && row["columns"]
+            .as_u64()
+            .and_then(|columns| usize::try_from(columns).ok())
+            .is_some_and(|columns| V2_SIZES.contains(&columns))
+        && row["seed"].as_u64().is_some_and(|seed| SEEDS.contains(&seed))
+}
+
+fn frozen_v2_source_commit() -> Result<String> {
+    let checkout = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let status = Command::new("git")
+        .current_dir(checkout)
+        .args(["status", "--porcelain", "--untracked-files=normal"])
+        .output()?;
+    if !status.status.success() || !status.stdout.is_empty() {
+        return Err("v2 construction requires a clean, frozen worktree".into());
+    }
+    let disk_source = fs::read(checkout.join(file!()))?;
+    let compiled_source = include_bytes!("koblitz_n83_factor_base_export.rs");
+    if blake3::hash(&disk_source) != blake3::hash(compiled_source) {
+        return Err("v2 compiled exporter differs from the checked-out source".into());
+    }
+    let head = Command::new("git")
+        .current_dir(checkout)
+        .args(["rev-parse", "HEAD"])
+        .output()?;
+    if !head.status.success() {
+        return Err("v2 source commit unavailable".into());
+    }
+    Ok(String::from_utf8(head.stdout)?.trim().to_owned())
+}
+
+/// One larger signed-orbit object per fresh directory. Keeping each object
+/// separate makes the bounded construction and S3 round-trip independently
+/// replayable; the frozen 54-object panel is never rewritten.
+fn construct_v2_one(
+    root: &Path,
+    a: u8,
+    policy: &str,
+    columns: usize,
+    seed: u64,
+    budget_seconds: u64,
+) -> Result<()> {
+    if a > 1
+        || !["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+        || !V2_SIZES.contains(&columns)
+        || !SEEDS.contains(&seed)
+        || budget_seconds == 0
+        || budget_seconds > 7200
+    {
+        return Err("v2 object is outside the declared size/policy/seed/budget grid".into());
+    }
+    let source_commit = frozen_v2_source_commit()?;
+    fs::create_dir(root)?;
+    fs::create_dir(root.join("objects"))?;
+    let start = Instant::now();
+    let deadline = start + Duration::from_secs(budget_seconds);
+    let cap_path = root.join("cap.json");
+    let watchdog_cap_path = cap_path.clone();
+    let cap_policy = policy.to_owned();
+    std::thread::spawn(move || {
+        std::thread::sleep(deadline.saturating_duration_since(Instant::now()));
+        let cap = json!({
+            "schema":"n83.factor-base-object-cap/v2-size-frontier",
+            "status":"UNKNOWN_budget", "curve_a":a, "policy":cap_policy,
+            "orbit_columns":columns, "seed":seed,
+            "budget_seconds":budget_seconds,
+            "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
+            "selected_best_total_runtime":Value::Null
+        });
+        if write_new_json(&watchdog_cap_path, &cap).is_err() && !watchdog_cap_path.exists() {
+            std::process::exit(125);
+        }
+        std::process::exit(124);
+    });
+    let (bytes, mut row) = match construct(a, policy, columns, seed, deadline) {
+        Ok(object) => object,
+        Err(error) if error.to_string() == "BUDGET_EXHAUSTED" => {
+            let cap = json!({
+                "schema":"n83.factor-base-object-cap/v2-size-frontier",
+                "status":"UNKNOWN_budget", "curve_a":a, "policy":policy,
+                "orbit_columns":columns, "seed":seed,
+                "budget_seconds":budget_seconds,
+                "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
+                "selected_best_total_runtime":Value::Null
+            });
+            if let Err(write_error) = write_new_json(&cap_path, &cap) {
+                if !cap_path.exists() {
+                    return Err(write_error);
+                }
+            }
+            return Err(error);
+        }
+        Err(error) => return Err(error),
+    };
+    let plain_hash = blake3::hash(&bytes).to_hex().to_string();
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    encoder.write_all(&bytes)?;
+    let compressed = encoder.finish()?;
+    let compressed_hash = blake3::hash(&compressed).to_hex().to_string();
+    let object = format!("objects/{compressed_hash}.jsonl.gz");
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(root.join(&object))?;
+    file.write_all(&compressed)?;
+    row["object"] = json!(object);
+    row["compressed_blake3"] = json!(compressed_hash);
+    row["plain_blake3"] = json!(plain_hash);
+    row["bytes"] = json!(compressed.len());
+    row["s3_uri"] = json!(v2_object_uri(a, &object));
+    write_new_json(
+        &root.join("manifest.json"),
+        &json!({
+            "schema":"n83.factor-base-panel/v2-size-frontier",
+            "study":STUDY, "status":"completed_factor_base_object",
+            "source_commit":source_commit,
+            "source_blake3":blake3::hash(include_bytes!("koblitz_n83_factor_base_export.rs")).to_hex().to_string(),
+            "size_design_blake3":v2_design_hash(),
+            "budget_seconds":budget_seconds,
+            "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
+            "expected_base_count":1, "completed_base_count":1,
+            "bases":[row],
+            "selected_best_total_runtime":Value::Null,
+            "measurement_scope":"one factor-base construction only; no relation, rank, individual log or total runtime"
+        }),
+    )?;
+    Ok(())
+}
+
+fn replay_v2_one_bounded(root: &Path, budget_seconds: u64) -> Result<()> {
+    if budget_seconds == 0 || budget_seconds > 7200 {
+        return Err("v2 replay wall cap must be 1..7200 seconds".into());
+    }
+    let manifest: Value = serde_json::from_slice(&fs::read(root.join("manifest.json"))?)?;
+    if manifest["schema"] != "n83.factor-base-panel/v2-size-frontier" {
+        return Err("bounded v2 replay requires a v2 single-object manifest".into());
+    }
+    let rows = manifest["bases"].as_array().ok_or("v2 manifest bases")?;
+    if rows.len() != 1 || !v2_row_is_declared(&rows[0]) {
+        return Err("bounded v2 replay requires a declared size-frontier object".into());
+    }
+    let start = Instant::now();
+    let deadline = start + Duration::from_secs(budget_seconds);
+    let cap_path = root.join("replay-cap.json");
+    std::thread::spawn(move || {
+        std::thread::sleep(deadline.saturating_duration_since(Instant::now()));
+        let cap = json!({
+            "schema":"n83.factor-base-replay-cap/v2-size-frontier",
+            "status":"UNKNOWN_budget", "budget_seconds":budget_seconds,
+            "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0
+        });
+        if write_new_json(&cap_path, &cap).is_err() {
+            std::process::exit(125);
+        }
+        std::process::exit(124);
+    });
+    replay(root)
+}
+
 fn load_object(root: &Path, row: &Value) -> Result<Vec<u8>> {
     let object = row["object"].as_str().ok_or("missing object")?;
     let hash = row["compressed_blake3"]
@@ -519,16 +697,26 @@ fn load_object(root: &Path, row: &Value) -> Result<Vec<u8>> {
 fn replay(root: &Path) -> Result<()> {
     let manifest: Value = serde_json::from_slice(&fs::read(root.join("manifest.json"))?)?;
     let rows = manifest["bases"].as_array().ok_or("manifest bases")?;
-    if manifest["schema"] != "n83.factor-base-panel/v1"
+    let v2 = manifest["schema"] == "n83.factor-base-panel/v2-size-frontier";
+    let panel_shape_valid = if v2 {
+        manifest["status"] == "completed_factor_base_object"
+            && manifest["expected_base_count"] == 1
+            && manifest["completed_base_count"] == 1
+            && rows.len() == 1
+            && manifest["size_design_blake3"] == v2_design_hash()
+    } else {
+        manifest["schema"] == "n83.factor-base-panel/v1"
+            && manifest["expected_base_count"] == 54
+            && manifest["completed_base_count"].as_u64() == Some(rows.len() as u64)
+            && match manifest["status"].as_str() {
+                Some("completed_factor_base_panel") => rows.len() == 54,
+                Some("budget_exhausted") => rows.len() < 54,
+                _ => false,
+            }
+    };
+    if !panel_shape_valid
         || manifest["study"] != STUDY
         || rows.is_empty()
-        || manifest["completed_base_count"].as_u64() != Some(rows.len() as u64)
-        || manifest["expected_base_count"] != 54
-        || match manifest["status"].as_str() {
-            Some("completed_factor_base_panel") => rows.len() != 54,
-            Some("budget_exhausted") => rows.len() >= 54,
-            _ => true,
-        }
     {
         return Err("incomplete or invalid panel manifest".into());
     }
@@ -680,7 +868,7 @@ fn replay(root: &Path) -> Result<()> {
     }
     write_new_json(
         &root.join("replay.json"),
-        &json!({"schema":"n83.factor-base-replay/v1","status":"PASS","panel_manifest_blake3":blake3::hash(&fs::read(root.join("manifest.json"))?).to_hex().to_string(),"backend":"generic multi-limb BinaryCurve versus producer Gf2_128","independence":"same host and repository; external independent replay remains pending","checks":checks,"best_total_runtime":null}),
+        &json!({"schema":if v2 {"n83.factor-base-replay/v2-size-frontier"} else {"n83.factor-base-replay/v1"},"status":"PASS","panel_manifest_blake3":blake3::hash(&fs::read(root.join("manifest.json"))?).to_hex().to_string(),"backend":"generic multi-limb BinaryCurve versus producer Gf2_128","independence":"same host and repository; external independent replay remains pending","checks":checks,"best_total_runtime":null}),
     )?;
     Ok(())
 }
@@ -847,7 +1035,29 @@ fn probes(root: &Path, budget: u64) -> Result<()> {
 fn upload(root: &Path) -> Result<()> {
     let manifest: Value = serde_json::from_slice(&fs::read(root.join("manifest.json"))?)?;
     let replay: Value = serde_json::from_slice(&fs::read(root.join("replay.json"))?)?;
-    if replay["status"] != "PASS"
+    let v2 = manifest["schema"] == "n83.factor-base-panel/v2-size-frontier";
+    let rows = manifest["bases"].as_array().ok_or("bases")?;
+    if v2
+        && (rows.len() != 1
+            || manifest["size_design_blake3"] != v2_design_hash()
+            || !v2_row_is_declared(&rows[0]))
+    {
+        return Err("v2 object is outside the declared size design".into());
+    }
+    let storage_prefix = if v2 {
+        format!("{PREFIX}/{STUDY}/{V2_SUBDIR}")
+    } else if manifest["schema"] == "n83.factor-base-panel/v1" {
+        format!("{PREFIX}/{STUDY}")
+    } else {
+        return Err("unknown factor-base panel schema".into());
+    };
+    let expected_replay_schema = if v2 {
+        "n83.factor-base-replay/v2-size-frontier"
+    } else {
+        "n83.factor-base-replay/v1"
+    };
+    if replay["schema"] != expected_replay_schema
+        || replay["status"] != "PASS"
         || replay["panel_manifest_blake3"]
             != blake3::hash(&fs::read(root.join("manifest.json"))?)
                 .to_hex()
@@ -856,12 +1066,12 @@ fn upload(root: &Path) -> Result<()> {
         return Err("matching replay receipt required".into());
     }
     let mut receipts = Vec::new();
-    for row in manifest["bases"].as_array().ok_or("bases")? {
+    for row in rows {
         load_object(root, row)?;
         let object = row["object"].as_str().ok_or("object")?;
         let uri = row["s3_uri"].as_str().ok_or("uri")?;
         let expected = format!(
-            "{PREFIX}/{STUDY}/a{}/{object}",
+            "{storage_prefix}/a{}/{object}",
             row["a"].as_u64().ok_or("a")?
         );
         if uri != expected {
@@ -899,7 +1109,7 @@ fn upload(root: &Path) -> Result<()> {
     }
     write_new_json(
         &root.join("upload-receipt.json"),
-        &json!({"schema":"n83.factor-base-storage/v1","status":"PASS","bucket":"crypto-autoresearcher","prefix":PREFIX,"objects":receipts,"manifest_blake3":blake3::hash(&fs::read(root.join("manifest.json"))?).to_hex().to_string()}),
+        &json!({"schema":if v2 {"n83.factor-base-storage/v2-size-frontier"} else {"n83.factor-base-storage/v1"},"status":"PASS","bucket":"crypto-autoresearcher","prefix":if v2 {storage_prefix.as_str()} else {PREFIX},"objects":receipts,"manifest_blake3":blake3::hash(&fs::read(root.join("manifest.json"))?).to_hex().to_string()}),
     )?;
     for name in [
         "manifest.json",
@@ -914,7 +1124,7 @@ fn upload(root: &Path) -> Result<()> {
             continue;
         }
         let uri = format!(
-            "{PREFIX}/{STUDY}/panels/{}/{name}",
+            "{storage_prefix}/panels/{}/{name}",
             blake3::hash(&fs::read(root.join("manifest.json"))?).to_hex()
         );
         if !Command::new("aws")
@@ -937,6 +1147,14 @@ fn main() -> Result<()> {
         Some("plan")=>{ let value=design(); write_new_json(Path::new(args.get(2).ok_or("plan output.json")?),&value)?; println!("{}",json!({"base_specs":value["base_spec_count"],"tuples":value["total_tuple_count"],"dispositions":value["disposition_counts"]})); },
         Some("case")=>println!("{}",serde_json::to_string_pretty(&case(args.get(2).ok_or("case ordinal")?.parse()?)?)?),
         Some("pilot")=>pilot(Path::new(args.get(2).ok_or("pilot new-directory budget-seconds")?),args.get(3).ok_or("budget")?.parse()?)?,
+        Some("v2-construct-one")=>{
+            if args.len()!=8 { return Err("v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS".into()); }
+            construct_v2_one(Path::new(&args[2]),args[3].parse()?,&args[4],args[5].parse()?,args[6].parse()?,args[7].parse()?)?;
+        },
+        Some("v2-replay-one")=>{
+            if args.len()!=4 { return Err("v2-replay-one PANEL_DIR BUDGET_SECONDS".into()); }
+            replay_v2_one_bounded(Path::new(&args[2]),args[3].parse()?)?;
+        },
         Some("replay")=>replay(Path::new(args.get(2).ok_or("replay directory")?))?,
         Some("probes")=>probes(Path::new(args.get(2).ok_or("probes directory budget_seconds")?),args.get(3).ok_or("budget")?.parse()?)?,
         Some("upload")=>upload(Path::new(args.get(2).ok_or("upload directory")?))?,
@@ -964,7 +1182,7 @@ fn main() -> Result<()> {
             )?;
             println!("{summary}");
         },
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS | v2-replay-one PANEL_DIR BUDGET_SECONDS | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
     }
     Ok(())
 }
@@ -972,6 +1190,29 @@ fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn v2_object_gate_matches_the_frozen_size_receipt() {
+        let design: Value = serde_json::from_slice(include_bytes!(
+            "../research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json"
+        ))
+        .unwrap();
+        assert_eq!(design["new_sizes"], json!(V2_SIZES));
+        assert_eq!(
+            design["s3_destination_for_future_new_objects"],
+            format!("{PREFIX}/{STUDY}/{V2_SUBDIR}/")
+        );
+        let mut row = json!({"a":0,"policy":"public_x_hash","columns":1182,"seed":SEEDS[0]});
+        assert!(v2_row_is_declared(&row));
+        row["seed"] = json!(17);
+        assert!(!v2_row_is_declared(&row));
+        row["seed"] = json!(SEEDS[0]);
+        row["columns"] = json!(900);
+        assert!(!v2_row_is_declared(&row));
+        assert_eq!(
+            v2_object_uri(0, "objects/hash.jsonl.gz"),
+            format!("{PREFIX}/{STUDY}/{V2_SUBDIR}/a0/objects/hash.jsonl.gz")
+        );
+    }
     #[test]
     fn finite_grid_is_addressable_and_accounts_for_every_tuple() {
         let bases = base_specs();
@@ -1093,6 +1334,31 @@ mod tests {
         fs::write(dir.join(&object), compressed).unwrap();
         write_new_json(&dir.join("manifest.json"), &json!({"schema":"n83.factor-base-panel/v1","study":STUDY,"status":"budget_exhausted","completed_base_count":1,"expected_base_count":54,"bases":[row.clone()]})).unwrap();
         replay(&dir).unwrap();
+        // The single-object format uses the same independent generic replay.
+        // A small fixture exercises the schema branch without constructing a
+        // larger retained object or entering the S3 publication path.
+        let mut v2_row = row.clone();
+        v2_row["s3_uri"] = json!(v2_object_uri(0, &object));
+        fs::remove_file(dir.join("replay.json")).unwrap();
+        let mut v2_manifest = json!({"schema":"n83.factor-base-panel/v2-size-frontier","study":STUDY,"status":"completed_factor_base_object","completed_base_count":1,"expected_base_count":1,"size_design_blake3":v2_design_hash(),"bases":[v2_row]});
+        fs::write(dir.join("manifest.json"), serde_json::to_vec(&v2_manifest).unwrap()).unwrap();
+        replay(&dir).unwrap();
+        let v2_replay: Value = serde_json::from_slice(&fs::read(dir.join("replay.json")).unwrap()).unwrap();
+        assert_eq!(v2_replay["schema"], "n83.factor-base-replay/v2-size-frontier");
+        assert!(replay_v2_one_bounded(&dir, 1)
+            .unwrap_err()
+            .to_string()
+            .contains("declared size-frontier object"));
+        assert!(upload(&dir).unwrap_err().to_string().contains("outside the declared size design"));
+        v2_manifest["size_design_blake3"] = json!("wrong-design");
+        fs::write(dir.join("manifest.json"), serde_json::to_vec(&v2_manifest).unwrap()).unwrap();
+        assert!(replay(&dir)
+            .unwrap_err()
+            .to_string()
+            .contains("invalid panel manifest"));
+        let invalid_root = dir.join("invalid-v2-size");
+        assert!(construct_v2_one(&invalid_root,0,"public_x_hash",2,SEEDS[0],1).is_err());
+        assert!(!invalid_root.exists());
         // Rehash a semantically invalid coefficient: byte hashes alone must
         // not allow it through the separate arithmetic verifier.
         let text = std::str::from_utf8(&bytes).unwrap();

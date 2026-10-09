@@ -14,6 +14,7 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | Relation-stage experiments | 1,728 fixed public two-summand probes, 87,966,720 exact complement lookups, zero relations; other arities and complete runtimes remain separate |
 | Exact support screen | 30 base-size/arity cases derived from the retained point counts and subgroup orders; uniform-target Markov ceilings only, with no solver or fixed-fixture yield inference |
 | Size frontier extension | Exact v2 design has 57,024,000 addressable tuples, preserving all v1 ordinals and adding K=1,182/2,048/4,096/8,192/16,627; no new bases constructed or timed |
+| Larger-base producer path | A bounded one-object constructor, generic replay and hash-verified S3 publication path are source-ready for the five v2 sizes; only a small public fixture has exercised the new schema, and no v2 object was built or uploaded |
 | S3 storage | PASS: 54 compressed objects uploaded, downloaded and byte-hash matched; content-addressed panel receipts uploaded |
 | Primary base to generic solver adapter | PASS: replay-bound K=64 S3 object reconstructed as generic ordinary and signed Frobenius orbits; solver stage unexecuted |
 | Primary cold runner | K=64, m=2 exact-enumeration preflight PASS; one trial returned `UNKNOWN_trial_cap` with zero relations. K=64 m=3 and K=256 m=2 attempts reached `UNKNOWN_budget` caps. All retain null total runtime and winner |
@@ -74,6 +75,16 @@ five- and four-summand Markov-vacuity thresholds. They are design candidates,
 not constructed bases or measured solver arms. A complete pair table would
 address 19,249,672,578 pairs even at K=1,182, so source and capacity gates
 must precede a larger-base cold run.
+
+The example exporter now accepts one v2 size per fresh, bounded directory.
+It requires a clean committed worktree and checks the compiled exporter
+against its on-disk source. Its v2 manifest binds the design and
+content-addressed object. Generic replay must pass before the upload command
+will publish it; that path then downloads and rehashes the S3 bytes. A small
+public fixture passed the v2 replay schema
+and confirmed that an out-of-grid object is rejected before AWS. This is
+source preparation only: the newly declared objects, memory capacity,
+generic replay throughput and S3 round-trip remain unmeasured.
 
 The generic Koblitz IC source now draws uniform full-width additive scalars and full-width nonzero coefficients when the subgroup order exceeds 64 bits, while preserving the previous at-most-64-bit random stream. The factor-base-log precompute skips its single-word rank tracker for wide moduli and uses the existing BigUint solve. This removes low-limb sampling and rank-gate errors for the 81-bit primary order. It does not turn the retained S3 bases into a completed primary cold run, establish solver throughput, or change any factor-base ranking. That source-only change added no timed pilot work.
 
