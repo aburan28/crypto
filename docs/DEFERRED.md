@@ -235,6 +235,24 @@ modules (`hash::ripemd160`, `encoding::der`, `symmetric::aes_cbc`,
 
 ---
 
+## Native arithmetic speedups (assembly, FFI, intrinsics)
+
+Decided 2026-10-09 and recorded in
+[`perf/NATIVE_SPEEDUPS.md`](perf/NATIVE_SPEEDUPS.md): **no assembly or new
+FFI layer now**.  The ecbench unit counts group operations, so codegen
+cannot move a bound or a frontier; the field layer already has the
+`pclmulqdq` / Montgomery-limb wins; a per-architecture kernel costs
+replayability on isolab's mixed hosts.  The profile found the remaining
+cost in 128-bit library-call remainders inside `mulmod`, `addmod` and
+`invmod`, which are now word-sized with identical results.  The open items
+there, in order of expected payoff: lockstep batched inversion as a **new
+ecbench method id** (not a patch to an existing one), a reciprocal-based
+`mulmod` for moduli above 32 bits, aarch64 parity for `Gf2`'s folded
+reduction, and a perf-index kernel through the counted prime-curve group
+law.
+
+---
+
 ## Strategic recommendation
 
 The next single highest-leverage addition would be **Ed25519 +
