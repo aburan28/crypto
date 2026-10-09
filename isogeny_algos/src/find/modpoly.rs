@@ -20,6 +20,7 @@ impl<F: Field> Clone for Phi<F> {
     }
 }
 
+#[cfg(test)]
 fn sigma3(n: usize) -> u64 {
     let mut s = 0u64;
     for d in 1..=n {
@@ -30,14 +31,38 @@ fn sigma3(n: usize) -> u64 {
     s
 }
 
-/// S(q) = q*j(q) = E4^3 / prod(1-q^n)^24 as a power series over F, `len` coefficients.
-fn s_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
+fn e4_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
     let mut e4 = vec![f.zero(); len];
+    if len == 0 {
+        return e4;
+    }
     e4[0] = f.one();
     let c240 = f.from_u64(240);
-    for n in 1..len {
-        e4[n] = f.mul(c240, f.from_u64(sigma3(n)));
+    // Each d contributes 240*d^3 to every positive multiple of d. Compute
+    // in the field: integer cubes and divisor sums can exceed u64 at the
+    // precisions needed by larger prime degrees.
+    for d in 1..len {
+        let x = f.from_u64(d as u64);
+        let term = f.mul(c240, f.mul(f.sq(x), x));
+        for n in (d..len).step_by(d) {
+            e4[n] = f.add(e4[n], term);
+        }
     }
+    e4
+}
+
+fn stage_trace(stage: &str, ell: Option<usize>, precision: usize, start: std::time::Instant) {
+    if std::env::var_os("ISOGENY_STAGE_TRACE").is_some() {
+        eprintln!("isogeny-stage stage={stage} ell={ell:?} precision={precision} elapsed_ms_operational_only={}", start.elapsed().as_millis());
+    }
+}
+
+/// S(q) = q*j(q) = E4^3 / prod(1-q^n)^24 as a power series over F, `len` coefficients.
+fn s_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
+    let start = std::time::Instant::now();
+    stage_trace("e4_begin", None, len, start);
+    let e4 = e4_series(f, len);
+    stage_trace("e4_done", None, len, start);
     // S = q j = E4^3 / prod(1 - q^n)^24 = (E4 P^8)^3 with P = 1 / prod(1 - q^n) = sum p(n) q^n,
     // the partition numbers by Euler's pentagonal recurrence (additions only):
     // p(n) = sum_{k >= 1} (-1)^(k+1) (p(n - k(3k-1)/2) + p(n - k(3k+1)/2)).
@@ -66,11 +91,14 @@ fn s_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
         }
         part[n] = acc;
     }
+    stage_trace("partition_done", None, len, start);
     let p2 = series::mul(f, &part, &part, len);
     let p4 = series::mul(f, &p2, &p2, len);
     let p8 = series::mul(f, &p4, &p4, len);
     let t = series::mul(f, &e4, &p8, len);
-    series::mul(f, &series::mul(f, &t, &t, len), &t, len)
+    let result = series::mul(f, &series::mul(f, &t, &t, len), &t, len);
+    stage_trace("q_series_done", None, len, start);
+    result
 }
 
 /// Integer coefficients of Phi_l (symmetric residues of a CRT over 62-bit primes; the
@@ -159,6 +187,8 @@ impl<F: Field> Phi<F> {
         let l1 = l + 1;
         let prec = l + 1; // non-negative powers q^0 .. q^l of the e_k(j_r)
         let len = l * prec + l1 + 2; // indices of S^m needed: n + m with n <= l (prec - 1), m <= l + 1
+        let start = std::time::Instant::now();
+        stage_trace("hecke_begin", Some(l), len, start);
         let s = s_series(f, len);
         let one_series = || {
             let mut v = vec![f.zero(); len];
@@ -188,6 +218,7 @@ impl<F: Field> Phi<F> {
             let next = series::mul(f, giant.last().unwrap(), &step, len);
             giant.push(next);
         }
+        stage_trace("baby_giant_done", Some(l), len, start);
         let coeff = |m: usize, n: usize| -> F::E {
             let (g, a) = (m / bsz, m % bsz);
             match (g, a) {
@@ -213,6 +244,7 @@ impl<F: Field> Phi<F> {
             }
             pw.push(v);
         }
+        stage_trace("power_sums_done", Some(l), len, start);
         // offset-1 Laurent product truncated to q^{prec-1}: (q^{i-1})(q^{k-1}) = q^{i+k-2}, i.e.
         // coefficients 1..=w of the plain product (lazily accumulated)
         let lmul =
@@ -239,8 +271,9 @@ impl<F: Field> Phi<F> {
             e.push(acc.into_iter().map(|x| f.mul(x, ki)).collect());
         }
         e.push(vec![f.zero(); w]); // e_{l+1} of l conjugates = 0
-                                   // j(q^l) = sum_n [j]_n q^{l n}, n >= -1
-                                   // E_k = e_k + j(q^l) e_{k-1}: polar order <= l + 1; represent with offset l+1, up to q^0
+        stage_trace("newton_done", Some(l), len, start);
+        // j(q^l) = sum_n [j]_n q^{l n}, n >= -1
+        // E_k = e_k + j(q^l) e_{k-1}: polar order <= l + 1; represent with offset l+1, up to q^0
         let wo = l1 + 1;
         let jpow = |d: usize, ex: i64| -> F::E {
             // coefficient of q^ex in j^d
@@ -293,6 +326,7 @@ impl<F: Field> Phi<F> {
                 cmat[d][l1 - k] = if sign_neg { f.neg(c) } else { c };
             }
         }
+        stage_trace("hecke_done", Some(l), len, start);
         Phi { ell, c: cmat }
     }
 
@@ -494,5 +528,58 @@ impl<F: Field> Phi<F> {
     /// Distinct F-rational roots j' of Phi_l(j, Y).
     pub fn neighbors(&self, f: &F, j: F::E, rng: &mut crate::field::Rng) -> Vec<F::E> {
         poly::roots(f, &self.y_poly(f, j), rng)
+    }
+}
+
+#[cfg(test)]
+mod e4_tests {
+    use super::*;
+    use crate::field::Zp;
+
+    #[test]
+    fn sieve_matches_independent_divisor_enumeration() {
+        for p in [7, 101, 1_000_000_007] {
+            let f = Zp::new(p);
+            let coefficients = e4_series(&f, 129);
+            assert_eq!(coefficients[0], 1);
+            for n in 1..coefficients.len() {
+                assert_eq!(
+                    coefficients[n],
+                    ((240u128 * sigma3(n) as u128) % p as u128) as u64
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn large_index_avoids_u64_cube_and_sum_overflow() {
+        let n = 3_000_000usize;
+        let p = 1_000_000_007u64;
+        let f = Zp::new(p);
+        let coefficients = e4_series(&f, n + 1);
+        let mut exact = 0u128;
+        let mut d = 1usize;
+        while d * d <= n {
+            if n.is_multiple_of(d) {
+                exact += (d as u128).pow(3);
+                let other = n / d;
+                if other != d {
+                    exact += (other as u128).pow(3);
+                }
+            }
+            d += 1;
+        }
+        assert!(exact > u64::MAX as u128);
+        let expected = ((exact % p as u128) * 240 % p as u128) as u64;
+        assert_eq!(coefficients[n], expected);
+    }
+
+    #[test]
+    fn normalized_j_series_has_the_known_initial_coefficients() {
+        let f = Zp::new(1_000_000_007);
+        assert_eq!(
+            &s_series(&f, 16)[..5],
+            &[1, 744, 196884, 21493760, 864299970]
+        );
     }
 }
