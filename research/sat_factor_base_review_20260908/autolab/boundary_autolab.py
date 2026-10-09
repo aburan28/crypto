@@ -316,7 +316,6 @@ def validate_claim(
             pairing_errors.append("same-target charged intervals are not confirmed")
         if field_present(report, "operation_accounting"):
             pairing_errors.extend(operation_accounting_errors(report["operation_accounting"]))
-    ok = not missing_stage and not missing_global and not pairing_errors
     validation_errors: list[str] = []
 
     if stage == "vs_rho":
@@ -360,8 +359,12 @@ def validate_claim(
             validation_errors.append("IC and rho target hashes must be nonempty strings")
         elif target_hashes[0] != target_hashes[1]:
             validation_errors.append("IC and rho target hashes must match")
-        if report.get("timing_class") not in stage_schema.get("timing_class_enum", []):
-            validation_errors.append("timing_class must be single_target_online_wall")
+        timing_classes = stage_schema.get("timing_class_enum", [])
+        if "primary_ic_online_phase_keys" in stage_schema:
+            if report.get("timing_class") != "single_target_online":
+                validation_errors.append("timing_class must be single_target_online for a primary vs_rho claim")
+        elif report.get("timing_class") not in timing_classes:
+            validation_errors.append(f"timing_class must be one of {timing_classes}")
         if report.get("same_resource_envelope") is not True:
             validation_errors.append("same_resource_envelope must be true")
         for key in ("ic_scalar_verified", "rho_scalar_verified"):
@@ -394,10 +397,20 @@ def validate_claim(
             validation_errors.append("online_speedup must equal rho_online_wall_ms / ic_online_wall_ms")
 
         phase_costs = report.get("ic_online_phase_ms")
-        phase_fields = stage_schema.get("ic_online_phase_fields", [])
+        phase_fields = stage_schema.get("ic_online_phase_fields")
+        if phase_fields is None:
+            primary_keys = stage_schema.get("primary_ic_online_phase_keys", [])
+            phase_fields = [f"T_{key}_ms" for key in primary_keys]
+        if not phase_fields:
+            validation_errors.append("ledger must specify IC online phase fields")
         if not isinstance(phase_costs, dict):
             validation_errors.append("ic_online_phase_ms must be an object")
         else:
+            unexpected = set(phase_costs) - set(phase_fields)
+            if unexpected:
+                validation_errors.append(
+                    f"ic_online_phase_ms has unexpected fields: {sorted(unexpected)}"
+                )
             phase_values = []
             for key in phase_fields:
                 value = phase_costs.get(key)
@@ -450,7 +463,7 @@ def validate_claim(
                 if not isinstance(value, str) or not value.strip():
                     validation_errors.append(f"rho_policy.{key} must be a nonempty string")
 
-    ok = not missing_stage and not missing_global and not validation_errors
+    ok = not missing_stage and not missing_global and not pairing_errors and not validation_errors
     return {
         "schema_version": ledger.get("schema_version"),
         "stage": stage,
@@ -720,13 +733,6 @@ def _run_once(
     # Peak RSS after wait is cumulative for this process's children; treat as
     # an observed upper bound for single-producer launches.
     peak_rss = children_rss_bytes(int(usage_after.ru_maxrss))
-    return {
-        "command": command,
-        "exit_code": completed.returncode,
-        "whole_process_wall_ms": elapsed_ms,
-        "children_cpu_user_ms": cpu_user_ms,
-        "children_cpu_system_ms": cpu_system_ms,
-        "children_peak_rss_bytes": peak_rss,
     return completed, elapsed_ms, cpu_user_ms, cpu_system_ms
 
 
@@ -1069,6 +1075,7 @@ def draft_vs_rho_claim(
         and rho_row.get("verified") is True
         and rho_row.get("recovered_fixture_scalar") == rho_scalar
         and rho_online is not None
+    )
     direct_rows = parse_json_lines(direct_obs["stdout"])
     rho_rows = parse_json_lines(rho_obs["stdout"])
     producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
@@ -1632,46 +1639,6 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         else:
             raise AutolabError(f"unsupported launch stage: {stage}")
 
-            {k: direct_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
-        )
-
-        rho_obs = run_timed(rho_cmd, env=env, cwd=REPO, repeats=repeats)
-        rho_obs["seed"] = rho_seed
-        (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
-        (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
-        write_json(
-            run / "receipts/rho.resource.json",
-            {k: rho_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
-        )
-
-        claim = draft_vs_rho_claim(
-            beat=beat,
-            beat_id=beat_id,
-            run=run,
-            direct_obs=direct_obs,
-            rho_obs=rho_obs,
-            binaries=binaries,
-        )
-        write_json(run / "artifacts/claim_draft.json", claim)
-        validation = validate_claim(claim, stage="vs_rho", ledger=ledger)
-        write_json(run / "artifacts/claim_check.json", validation)
-
-        producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
-        status = "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
-        if validation["status"] != "PASS":
-            status = "SCHEMA_INCOMPLETE"
-        if producers_ok and claim['comparison_integrity']['status'] != 'MATCHED':
-            status = 'INVALID_COMPARISON'
-        elif producers_ok and not claim['all_stages_charged_same_series']:
-            status = 'ACCOUNTING_INCOMPLETE'
-        state.update(
-            status=status,
-            phase="analysis",
-            updated_at=now(),
-            direct_exit_code=direct_obs["exit_code"],
-            rho_exit_code=rho_obs["exit_code"],
-            claim_check=validation["status"],
-        )
         write_json(run / "state.json", state)
         write_json(
             run / "artifacts/candidate.json",
@@ -2521,7 +2488,6 @@ def parser() -> argparse.ArgumentParser:
     launch_parser.add_argument(
         "--fixtures",
         type=int,
-        help="Online target count (default from beat); vs_rho primary runs require exactly 1",
         help="Compatibility option; the only accepted value is 1 target per workload",
     )
     launch_parser.add_argument(
