@@ -1,0 +1,45 @@
+{
+  "binary_sha256": "658c73703c0e37db40cb0fc5cc18a06f5b3b11cc7315948538308bccf8f7f666",
+  "controls": {
+    "N41": {
+      "candidate_id": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0hab6cf6576605",
+      "compact_report_sha256": "38816061e487ac66b91dae320e322f3e154c2ef38c107a637068ebc3a72fd5e7",
+      "compact_slots": 134217728,
+      "dense_load_fraction": 0.3902056813240051,
+      "dense_payload_bytes": 872415232,
+      "dense_report_sha256": "c8ade40f03933b7479fe873ac610ad81da7770f073d2c7c2af82ab893b8e6e55",
+      "dense_slots": 67108864,
+      "payload_saved_vs_compact_bytes": 872415232,
+      "payload_saved_vs_original_16byte_bytes": 1275068416,
+      "point_sha256": "b246b44a0e5a32b87d0e94b296b1f308511eb6ade56e9fa6d058538c60810dcc",
+      "prepared_rank": 800,
+      "recovered_scalar": 253982070906,
+      "root_table_entries": 26186260,
+      "semantic_reports_equal": true,
+      "target_label": "T025",
+      "target_s3_calls": 26
+    },
+    "N53": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hebadb4a47304",
+      "compact_report_sha256": "3448dc8c4f346110db94bac860f0e5e047ea5948f7b0cb88fafa26dacff081b3",
+      "compact_slots": 536870912,
+      "dense_load_fraction": 0.2842460200190544,
+      "dense_payload_bytes": 3489660928,
+      "dense_report_sha256": "ea130966fb7f7094fedf83e0ff99d383f24162b5ea5b94f50e5dc9b31aea08ec",
+      "dense_slots": 268435456,
+      "payload_saved_vs_compact_bytes": 3489660928,
+      "payload_saved_vs_original_16byte_bytes": 5100273664,
+      "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+      "prepared_rank": 1200,
+      "recovered_scalar": 429728658711,
+      "root_table_entries": 76301710,
+      "semantic_reports_equal": true,
+      "target_label": "T025",
+      "target_s3_calls": 3272
+    }
+  },
+  "kind": "s3_dense_packed_root_slot_fullrank_controls_v1",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "source_sha256": "bb6605e974dc33ad33b67129e8d51922459352c5797fee1b09e8d9cd2f618374",
+  "wall_speedup": null
+}
