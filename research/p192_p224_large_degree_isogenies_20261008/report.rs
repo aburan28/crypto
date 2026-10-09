@@ -85,30 +85,8 @@ fn register(registry: &Path, curves: &[Value], source: &str) {
         entries.push(RawValue::from_string(item).unwrap());
         held.push(slug.to_owned());
     }
-    entries.sort_by_key(|r| {
-        let v: Value = serde_json::from_str(r.get()).unwrap();
-        let rank = match v["family"].as_str().unwrap() {
-            "koblitz" => 0,
-            "subfield" => 1,
-            "binary" => 2,
-            "prime" => 3,
-            _ => 4,
-        };
-        let degree = v["params"]["n"]
-            .as_u64()
-            .or_else(|| v["params"]["m"].as_u64())
-            .unwrap_or(0);
-        let p = v["params"]["p"]
-            .as_str()
-            .and_then(|s| BigUint::parse_bytes(s.as_bytes(), 10))
-            .unwrap_or_default();
-        let a = if rank == 0 {
-            v["params"]["a"].as_u64().unwrap_or(0)
-        } else {
-            0
-        };
-        (rank, degree, p, a, v["slug"].as_str().unwrap().to_owned())
-    });
+    // Preserve the existing registry's order and raw records. Append only the
+    // newly replayed models; sorting here would reorder unrelated standards.
     let output = format!(
         "{}[\n  {}\n ]{}",
         &text[..start],

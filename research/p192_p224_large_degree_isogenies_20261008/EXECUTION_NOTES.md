@@ -167,3 +167,9 @@ PDF was rendered with Poppler at 130 dpi and visually checked in an isolated
 rehearsal; all identifiers, arrows, coverage labels and evidence paths were
 legible with no clipping. Final source and canonical-output hashes are frozen
 after the actual catalogue refresh.
+
+The first native catalogue pass verified all 343 models, with zero invalid or
+unsupported inputs. Diff review showed that globally sorting the expanded
+registry moved existing standard records. Registration now preserves all
+existing raw entries and their order and appends only the 22 replayed models.
+The derived views were regenerated from this preserved-order registry.
