@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import copy
 import io
 import os
 import stat
@@ -15,6 +16,7 @@ from unittest import mock
 
 import boundary_autolab as lab
 import op_accounting
+import single_target_panel as panel
 
 
 def valid_operation_accounting(ic_ops: float = 100.0, rho_ops: float = 400.0) -> dict:
@@ -96,11 +98,48 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertIn("timing_class", result["missing_stage_fields"])
         self.assertTrue(result["missing_global_provenance"])
 
+    def test_single_target_producer_fields_complete_archived_claim(self) -> None:
+        run = (lab.REPO / "research/sat_factor_base_review_20260908/autolab/evidence"
+               / "20261001-koblitz-n61-single-target/autolab_runs"
+               / "20261001T200614Z-d687d78737")
+        claim = json.loads((run / "artifacts/claim_draft.json").read_text())
+        workload = json.loads((run / "artifacts/manifests/workloads"
+                               / f"{claim['workload_id']}.json").read_text())
+        target = workload["record"]["targets"][0]
+        ic = {"online_ms": claim["ic_online_wall_ms"], "probes": claim["counts"]["ic_probes"],
+              "target": target, "group_verified": True}
+        rho = {"online_ms": claim["rho_online_wall_ms"], "walk_steps": claim["counts"]["rho_walk_steps"],
+               "published_q": target, "automorphism_size": claim["rho_policy"]["automorphism_size"],
+               "verified": True}
+        claim.update(panel.primary_claim_fields(ic, rho, claim["online_interval"]))
+        self.assertEqual(lab.validate_claim(claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        for change, expected in (
+            (lambda row: row["rho_online_phase_ms"].pop("recovery_check_ms"),
+             "rho_online_phase_ms must contain exactly the declared phases"),
+            (lambda row: row["online_interval"].pop("rho_start_event"),
+             "online_interval.rho_start_event is missing or invalid"),
+            (lambda row: row.update(ic_cost=row["ic_cost"] + 1),
+             "ic_cost must equal ic_online_wall_ms"),
+            (lambda row: row["automorphism_discount"].update(A=1),
+             "automorphism_discount.A must match rho_policy.automorphism_size"),
+            (lambda row: row.update(controlled_online_speedup=row["online_speedup"]),
+             "controlled_online_speedup requires a controlled wall record"),
+            (lambda row: row.update(record_class="verified_answer_controlled_wall"),
+             "controlled wall record requires controlled_online_speedup"),
+        ):
+            with self.subTest(expected=expected):
+                malformed = copy.deepcopy(claim)
+                change(malformed)
+                result = lab.validate_claim(malformed, stage="vs_rho", ledger=self.ledger)
+                self.assertEqual(result["status"], "FAIL")
+                self.assertIn(expected, result["validation_errors"])
+
     def test_vs_rho_single_target_online_claim_passes(self) -> None:
         report = {
             "n": 37,
             "n_or_bits": 37,
             "timing_class": "single_target_online",
+            "record_class": "verified_answer_exploratory_wall",
             "ic_cost": 10.0,
             "rho_cost": 20.0,
             "automorphism_discount": {"A": 74, "formula": "sqrt(2*n)"},
@@ -144,6 +183,7 @@ class MeasurementSchemaTests(unittest.TestCase):
                 "walk_policy": "signed_frobenius",
                 "collision_policy": "distinguished_point",
                 "distinguished_point_memory_bytes": 0,
+                "automorphism_size": 74,
             },
             "verdict": "DRAFT",
             "claim_boundary": "single public target only",
@@ -157,7 +197,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "rho_verified": True,
             "ic_online_ms": 10.0,
             "rho_online_ms": 20.0,
-            "rho_online_phase_ms": {"target_walk": 20.0},
+            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
             "ic_online_interval": "target work only",
             "rho_online_interval": "target walk through replay",
             "fixture_hash": "target-abc",
@@ -173,7 +213,8 @@ class MeasurementSchemaTests(unittest.TestCase):
 
         del report["operation_accounting"]
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
-        self.assertEqual(result["status"], "PASS", result)
+        self.assertEqual(result["status"], "FAIL", result)
+        self.assertIn("operation_accounting", result["missing_stage_fields"])
 
         report["operation_accounting"] = valid_operation_accounting()
         report["operation_accounting"]["ops_speedup_online"] = 40.0
@@ -224,6 +265,7 @@ class MeasurementSchemaTests(unittest.TestCase):
         report = {
             "n_or_bits": 41,
             "timing_class": "single_target_online",
+            "record_class": "verified_answer_exploratory_wall",
             "ic_cost": 10.0,
             "rho_cost": 20.0,
             "automorphism_discount": {"A": 82, "formula": "sqrt(2*n)"},
@@ -243,7 +285,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "rho_online_ms": 20.0,
             "online_speedup": 2.0,
             "ic_online_phase_ms": {"target_pdp": 10.0},
-            "rho_online_phase_ms": {"target_walk": 20.0},
+            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
             "ic_online_interval": "target work only",
             "rho_online_interval": "target walk through replay",
             "fixture_hash": "abc",
@@ -275,6 +317,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "ic_target_hash": "target-abc",
             "rho_target_hash": "target-abc",
             "timing_class": "single_target_online",
+            "record_class": "verified_answer_exploratory_wall",
             "ic_online_wall_ms": 10.0,
             "rho_online_wall_ms": 20.0,
             "ic_online_ms": 10.0,
@@ -310,7 +353,7 @@ class MeasurementSchemaTests(unittest.TestCase):
                 "rho_public_q": [17, 23],
                 "same_public_point": True,
             },
-            "rho_online_phase_ms": {"target_walk": 20.0},
+            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
             "ic_online_interval": "first target query through independent replay",
             "rho_online_interval": "first target walk through independent replay",
             "rho_policy": {
@@ -318,6 +361,7 @@ class MeasurementSchemaTests(unittest.TestCase):
                 "walk_policy": "walk",
                 "collision_policy": "collision",
                 "distinguished_point_memory_bytes": 0,
+                "automorphism_size": 74,
             },
             "verdict": "DRAFT",
             "claim_boundary": "single public target only",
@@ -328,6 +372,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "resource_caps": {},
             "seeds": 1,
             "claim_boundary_non_claims": ["not key recovery"],
+            "operation_accounting": valid_operation_accounting(),
         }
         variants = []
         batched = copy.deepcopy(base)

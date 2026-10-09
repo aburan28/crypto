@@ -386,6 +386,26 @@ def validate_claim(
                 validation_errors.append("timing_class must be single_target_online for a primary vs_rho claim")
         elif report.get("timing_class") not in timing_classes:
             validation_errors.append(f"timing_class must be one of {timing_classes}")
+        record_class = report.get("record_class")
+        if record_class not in stage_schema.get("record_class_enum", []):
+            validation_errors.append("record_class must identify exploratory or controlled wall evidence")
+        controlled_speedup = report.get("controlled_online_speedup")
+        if controlled_speedup is None:
+            if record_class == "verified_answer_controlled_wall":
+                validation_errors.append("controlled wall record requires controlled_online_speedup")
+        else:
+            if record_class != "verified_answer_controlled_wall":
+                validation_errors.append("controlled_online_speedup requires a controlled wall record")
+            measured_speedup = positive_cost(report.get("online_speedup"))
+            if positive_cost(controlled_speedup) is None or measured_speedup is None or not math.isclose(
+                float(controlled_speedup), measured_speedup, rel_tol=1e-9, abs_tol=1e-12
+            ):
+                validation_errors.append("controlled_online_speedup must equal the paired online ratio")
+            receipt = report.get("host_isolation_receipt")
+            if not isinstance(receipt, dict) or receipt.get("status") != "PASS" or not isinstance(
+                receipt.get("path"), str
+            ) or not receipt["path"].strip():
+                validation_errors.append("controlled_online_speedup requires a host-isolation receipt")
         if report.get("same_resource_envelope") is not True:
             validation_errors.append("same_resource_envelope must be true")
         for key in ("ic_scalar_verified", "rho_scalar_verified"):
@@ -416,6 +436,20 @@ def validate_claim(
             validation_errors.append("online times and speedup must be positive finite numbers")
         elif not math.isclose(speedup, rho_ms / ic_ms, rel_tol=1e-9, abs_tol=1e-12):
             validation_errors.append("online_speedup must equal rho_online_wall_ms / ic_online_wall_ms")
+        for arm, wall_ms in (("ic", ic_ms), ("rho", rho_ms)):
+            for alias in (f"{arm}_cost", f"{arm}_online_ms"):
+                alias_ms = positive_cost(report.get(alias))
+                if alias_ms is None or wall_ms is None or not math.isclose(
+                    alias_ms, wall_ms, rel_tol=1e-9, abs_tol=1e-12
+                ):
+                    validation_errors.append(f"{alias} must equal {arm}_online_wall_ms")
+
+        discount = report.get("automorphism_discount")
+        policy = report.get("rho_policy")
+        if not isinstance(discount, dict) or type(discount.get("A")) is not int or discount["A"] < 1:
+            validation_errors.append("automorphism_discount.A must be a positive integer")
+        elif isinstance(policy, dict) and discount["A"] != policy.get("automorphism_size"):
+            validation_errors.append("automorphism_discount.A must match rho_policy.automorphism_size")
 
         phase_costs = report.get("ic_online_phase_ms")
         phase_fields = stage_schema.get("ic_online_phase_fields")
@@ -442,6 +476,21 @@ def validate_claim(
             if len(phase_values) == len(phase_fields) and ic_ms is not None:
                 if not math.isclose(math.fsum(phase_values), ic_ms, rel_tol=1e-6, abs_tol=1e-3):
                     validation_errors.append("IC exclusive phase costs must sum to ic_online_wall_ms")
+
+        rho_phases = report.get("rho_online_phase_ms")
+        rho_phase_fields = stage_schema.get("rho_online_phase_fields", [])
+        if not isinstance(rho_phases, dict):
+            validation_errors.append("rho_online_phase_ms must be an object")
+        elif rho_phase_fields:
+            if set(rho_phases) != set(rho_phase_fields):
+                validation_errors.append("rho_online_phase_ms must contain exactly the declared phases")
+            elif all(type(rho_phases[key]) in (int, float) and math.isfinite(rho_phases[key])
+                     and rho_phases[key] >= 0 for key in rho_phase_fields) and rho_ms is not None:
+                if not math.isclose(math.fsum(float(rho_phases[key]) for key in rho_phase_fields),
+                                    rho_ms, rel_tol=1e-6, abs_tol=1e-3):
+                    validation_errors.append("rho exclusive phase costs must sum to rho_online_wall_ms")
+            else:
+                validation_errors.append("rho_online_phase_ms must contain finite nonnegative costs")
 
         interval = report.get("online_interval")
         interval_fields = (

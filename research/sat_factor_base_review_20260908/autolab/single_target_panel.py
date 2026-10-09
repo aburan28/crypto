@@ -102,6 +102,47 @@ def input_law(beat: dict[str, Any]) -> str:
             "of digest byte 8; Q = [h]P. No scalar is known to either arm.")
 
 
+def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
+                         interval: dict[str, Any]) -> dict[str, Any]:
+    """Build the paired one-target fields from the two verified producer rows."""
+    ic_ms, rho_ms = float(ic_record["online_ms"]), float(rho_record["online_ms"])
+    probes, steps = int(ic_record["probes"]), int(rho_record["walk_steps"])
+    if min(ic_ms, rho_ms, probes, steps) <= 0:
+        raise ValueError("a verified one-target claim needs positive online costs and counters")
+    return {
+        "timing_class": "single_target_online",
+        "record_class": "verified_answer_exploratory_wall",
+        "ic_cost": ic_ms, "rho_cost": rho_ms,
+        "ic_online_ms": ic_ms, "rho_online_ms": rho_ms,
+        "ic_online_wall_ms": ic_ms, "rho_online_wall_ms": rho_ms,
+        "online_speedup": rho_ms / ic_ms,
+        "controlled_online_speedup": None,
+        "automorphism_discount": {
+            "A": int(rho_record["automorphism_size"]),
+            "formula": "sqrt(A) for signed Frobenius classes",
+        },
+        "all_stages_charged_same_series": True,
+        "paired_target": {
+            "ic_public_q": ic_record["target"],
+            "rho_public_q": rho_record["published_q"],
+            "same_public_point": ic_record["target"] == rho_record["published_q"],
+        },
+        "ic_verified": ic_record["group_verified"] is True,
+        "rho_verified": rho_record["verified"] is True,
+        "ic_online_interval": f"{interval['ic_start_event']} -> {interval['ic_stop_event']}",
+        "rho_online_interval": f"{interval['rho_start_event']} -> {interval['rho_stop_event']}",
+        "operation_accounting": {
+            "unit_assumption": "IC root-index probes and rho walk steps are distinct native counters",
+            "comparison_status": "native_counters_only",
+            "operation_units": {"ic": "root-index probes", "rho": "walk steps"},
+            "ic_online_operations": probes,
+            "rho_online_operations": steps,
+            "rho_per_ic_native_counter": steps / probes,
+            "ops_speedup_online": None,
+        },
+    }
+
+
 def untimed(record: dict[str, Any], extra_skip: tuple[str, ...] = ()) -> dict[str, Any]:
     """Drop timers (`*_ms*`, `*_ns`, `*_event`), as `boundary_autolab.untimed_digest` does."""
     return {k: v for k, v in record.items()
@@ -641,6 +682,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             ic_cold_ms = ic_record["online_stop_ns"] / 1e6
             rho_cold_ms = rho_record["online_stop_ns"] / 1e6
             claim = {
+                **primary_claim_fields(ic_record, rho_record, online_interval),
                 "schema_version": 2, "task_id": lab.TASK_ID, "beat_id": beat_id, "autolab_run_id": run.name,
                 "stage": "vs_rho", "status": "PENDING_INDEPENDENT_VALIDATION",
                 "regime": beat["regime"], "result_class": beat["result_class"],
@@ -650,8 +692,6 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 "workload_id": work["workload_id"], "workload_manifest_sha256": work["record_sha256"],
                 "run_id": run_key, "rho_reference_uid": rho_uid["candidate_uid"],
                 "target_count": 1, "ic_target_hash": target_hash, "rho_target_hash": target_hash,
-                "timing_class": "single_target_online_wall",
-                "ic_online_wall_ms": ic_ms, "rho_online_wall_ms": rho_ms, "online_speedup": speedup,
                 "ic_online_phase_ms": {schema: float(ic_record[field]) for schema, field in PHASE_FIELDS.items()},
                 "rho_online_phase_ms": {"walk_and_collision_ms": rho_record["walk_and_collision_ms"],
                                         "recovery_check_ms": rho_record["recovery_check_ms"]},

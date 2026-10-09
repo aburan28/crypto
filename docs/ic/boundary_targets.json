@@ -115,13 +115,36 @@
         "ic_online_phase_ms",
         "rho_online_phase_ms",
         "ic_online_interval",
-        "rho_online_interval"
+        "rho_online_interval",
+        "candidate_id",
+        "candidate_manifest_sha256",
+        "workload_id",
+        "workload_manifest_sha256",
+        "run_id",
+        "ic_target_hash",
+        "rho_target_hash",
+        "ic_online_wall_ms",
+        "rho_online_wall_ms",
+        "online_interval",
+        "same_resource_envelope",
+        "independent_validation",
+        "ic_replay_certificate_sha256",
+        "rho_replay_certificate_sha256",
+        "ic_resource_envelope",
+        "rho_resource_envelope",
+        "rho_policy",
+        "operation_accounting",
+        "record_class"
       ],
       "timing_class_enum": [
         "algorithmic_charged",
         "projection_matched",
         "whole_process_wall",
         "single_target_online"
+      ],
+      "record_class_enum": [
+        "verified_answer_exploratory_wall",
+        "verified_answer_controlled_wall"
       ],
       "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control",
       "operation_accounting_contract": "Retain raw IC probes and rho walk steps as distinct counters. Report a calibrated operation ratio only when both arms and all included phases share a fixed operation boundary. S=total_operations/sqrt(r) requires a complete operation ledger. The primary speedup is verified one-target online wall time, subject to CPU isolation.",
@@ -131,6 +154,27 @@
         "target_relation_check",
         "target_descent",
         "target_recovery_check"
+      ],
+      "ic_online_phase_fields": [
+        "T_target_query_ms",
+        "T_target_PDP_ms",
+        "T_target_relation_check_ms",
+        "T_target_descent_ms",
+        "T_target_recovery_check_ms"
+      ],
+      "rho_online_phase_fields": [
+        "walk_and_collision_ms",
+        "recovery_check_ms"
+      ],
+      "online_interval_event_fields": [
+        "ic_start_event",
+        "ic_stop_event",
+        "rho_start_event",
+        "rho_stop_event"
+      ],
+      "online_interval_stage_fields": [
+        "ic_included_stages",
+        "rho_included_stages"
       ],
       "controlled_cpu_speedup_requires": "Qualifying host-isolation receipt, matched resource envelope, and five exclusive IC target phase costs; claim-check PASS alone is insufficient."
     }
