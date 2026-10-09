@@ -1,0 +1,29 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "binary GHS curve panel: matched single-target ECDLP operations",
+  "description": "Four field sizes and one same-size model pair; operation counts only, no wall-time or index-calculus claim",
+  "workloads": {
+    "curves": [
+      {"kind": "koblitz", "a": 0, "n": 7},
+      {"kind": "koblitz", "a": 0, "n": 9},
+      {"kind": "koblitz", "a": 1, "n": 9},
+      {"kind": "koblitz", "a": 0, "n": 13},
+      {"kind": "koblitz", "a": 0, "n": 15}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261009
+  },
+  "arms": [
+    {"name": "rho-frob", "role": "reference", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "rho-neg", "role": "baseline", "method": {"id": "rho.negation"}},
+    {"name": "bsgs-neg", "role": "candidate", "method": {"id": "bsgs.negation"}}
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261009,
+    "isolation_required": "L0",
+    "timeout_seconds": 60
+  }
+}
