@@ -106,6 +106,16 @@ pub enum Model {
     },
     /// `y² = x³ + ax + b` over `GF(p)`.
     Prime { p: BigUint, a: BigUint, b: BigUint },
+    /// Short Weierstrass model over `GF(p^k)`, in the registered polynomial basis.
+    Extension {
+        p: BigUint,
+        k: u32,
+        q: BigUint,
+        field_id: String,
+        modulus: Vec<BigUint>,
+        a: Vec<BigUint>,
+        b: Vec<BigUint>,
+    },
 }
 
 impl Model {
@@ -114,6 +124,7 @@ impl Model {
         match self {
             Model::Binary { n, .. } => BigUint::one() << *n,
             Model::Prime { p, .. } => p.clone(),
+            Model::Extension { q, .. } => q.clone(),
         }
     }
 
@@ -122,15 +133,23 @@ impl Model {
         match self {
             Model::Binary { n, .. } => u64::from(*n),
             Model::Prime { p, .. } => p.bits(),
+            Model::Extension { q, .. } => q.bits(),
         }
     }
+}
+
+/// Generator coordinates in the model's declared field representation.
+#[derive(Clone, Debug)]
+pub enum GeneratorCoords {
+    Affine(BigUint, BigUint),
+    Extension(Vec<BigUint>, Vec<BigUint>),
 }
 
 /// One recorded representation, mapped into `Model` coordinates: a generator
 /// of the prime subgroup.
 #[derive(Clone, Debug)]
 pub struct Representation {
-    pub generator: (BigUint, BigUint),
+    pub generator: GeneratorCoords,
     pub subgroup_order: BigUint,
     pub cofactor: BigUint,
 }
@@ -153,6 +172,26 @@ fn parse_uint(s: &str) -> Option<BigUint> {
         Some(h) => BigUint::parse_bytes(h.as_bytes(), 16),
         None => s.parse().ok(),
     }
+}
+
+fn value_uint(value: &Value) -> Option<BigUint> {
+    match value {
+        Value::String(s) => parse_uint(s),
+        Value::Number(n) => parse_uint(&n.to_string()),
+        _ => None,
+    }
+}
+
+fn extension_coordinates(value: &Value, k: u32, p: &BigUint) -> Option<Vec<BigUint>> {
+    let coefficients = value.as_array()?;
+    if coefficients.len() != k as usize {
+        return None;
+    }
+    let coordinates: Vec<BigUint> = coefficients.iter().map(value_uint).collect::<Option<_>>()?;
+    coordinates
+        .iter()
+        .all(|coordinate| coordinate < p)
+        .then_some(coordinates)
 }
 
 fn str_field<'a>(v: &'a Value, key: &str) -> Result<&'a str, String> {
@@ -281,6 +320,59 @@ fn parse_model(model_json: &str) -> Result<(Model, CoordinateMap), String> {
                 CoordinateMap::Identity,
             ))
         }
+        "y^2=x^3+a*x+b" if m["a"].is_array() => {
+            let p = num("p")?;
+            let k: u32 = str_field(&m, "k")?
+                .parse()
+                .map_err(|_| "bad extension degree k")?;
+            if p <= BigUint::one() || k < 2 {
+                return Err("invalid extension field size".into());
+            }
+            let field_id = str_field(&m, "field")?.to_string();
+            if !field_id.starts_with(&format!("fpk-{p}-{k}-")) {
+                return Err(format!("field {field_id} is not GF({p}^{k})"));
+            }
+            let coeffs = |key: &str| -> Result<Vec<BigUint>, String> {
+                m[key]
+                    .as_array()
+                    .ok_or_else(|| format!("missing coefficient array {key}"))?
+                    .iter()
+                    .map(|value| {
+                        value
+                            .as_str()
+                            .and_then(parse_uint)
+                            .ok_or_else(|| format!("bad coefficient in {key}"))
+                    })
+                    .collect()
+            };
+            let modulus = coeffs("modulus")?;
+            let a = coeffs("a")?;
+            let b = coeffs("b")?;
+            if [modulus.len(), a.len(), b.len()]
+                .iter()
+                .any(|&len| len != k as usize)
+                || modulus
+                    .iter()
+                    .chain(&a)
+                    .chain(&b)
+                    .any(|coefficient| coefficient >= &p)
+            {
+                return Err("extension coefficients are not canonical k-vectors".into());
+            }
+            let q = p.pow(k);
+            Ok((
+                Model::Extension {
+                    p,
+                    k,
+                    q,
+                    field_id,
+                    modulus,
+                    a,
+                    b,
+                },
+                CoordinateMap::Identity,
+            ))
+        }
         "y^2=x^3+a*x+b" => Ok((
             Model::Prime {
                 p: num("p")?,
@@ -373,18 +465,42 @@ fn parse_representation(rep: &Value, model: &Model, map: &CoordinateMap) -> Opti
                 return None;
             }
         }
+        Model::Extension { p, k, modulus, .. } => {
+            if field["degree"].as_u64()? != u64::from(*k)
+                || value_uint(&field["characteristic"])? != *p
+                || !field["representation"].as_str()?.starts_with("polynomial")
+            {
+                return None;
+            }
+            let field_modulus = field["modulus"].as_array()?;
+            if field_modulus.len() != *k as usize + 1
+                || value_uint(field_modulus.last()?)? != BigUint::one()
+                || !field_modulus[..*k as usize]
+                    .iter()
+                    .zip(modulus)
+                    .all(|(value, coefficient)| value_uint(value).as_ref() == Some(coefficient))
+            {
+                return None;
+            }
+        }
     }
     let gen = curve["generator"].as_array()?;
-    let coord = |v: &Value| parse_uint(v.as_str()?);
-    let cofactor = match &curve["cofactor"] {
-        Value::String(s) => parse_uint(s)?,
-        v => BigUint::from(v.as_u64()?),
-    };
-    let x = coord(gen.first()?)?;
-    let y = coord(gen.get(1)?)?;
+    let cofactor = value_uint(&curve["cofactor"])?;
     let generator = match model {
-        Model::Binary { .. } => (x, y),
-        Model::Prime { p, .. } => short_coordinates(x, y, p, map)?,
+        Model::Binary { .. } => GeneratorCoords::Affine(
+            parse_uint(gen.first()?.as_str()?)?,
+            parse_uint(gen.get(1)?.as_str()?)?,
+        ),
+        Model::Prime { p, .. } => {
+            let x = parse_uint(gen.first()?.as_str()?)?;
+            let y = parse_uint(gen.get(1)?.as_str()?)?;
+            let (x, y) = short_coordinates(x, y, p, map)?;
+            GeneratorCoords::Affine(x, y)
+        }
+        Model::Extension { p, k, .. } => GeneratorCoords::Extension(
+            extension_coordinates(gen.first()?, *k, p)?,
+            extension_coordinates(gen.get(1)?, *k, p)?,
+        ),
     };
     Some(Representation {
         generator,
@@ -659,6 +775,16 @@ fn small_primes(delta: &BigInt, characteristic: &BigUint) -> Vec<SmallPrime> {
 }
 
 fn subfield_record(c: &RegistryCurve) -> Result<SubfieldRecord, String> {
+    if matches!(&c.model, Model::Extension { .. }) {
+        return Ok(SubfieldRecord {
+            j_field_degree: None,
+            definition_degree: None,
+            base_trace: None,
+            base_trace_sign_free: false,
+            status: Status::NotEvaluated,
+            method: "extension-field subfield analysis is not implemented".into(),
+        });
+    }
     let Model::Binary { n, irr, a, b, .. } = &c.model else {
         return Ok(SubfieldRecord {
             j_field_degree: None,
@@ -877,7 +1003,7 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
     let q = c.model.q();
     let characteristic = match &c.model {
         Model::Binary { .. } => BigUint::from(2u8),
-        Model::Prime { p, .. } => p.clone(),
+        Model::Prime { p, .. } | Model::Extension { p, .. } => p.clone(),
     };
     let (status, method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
@@ -898,11 +1024,13 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
             kind: match c.model {
                 Model::Binary { .. } => "binary",
                 Model::Prime { .. } => "prime",
+                Model::Extension { .. } => "extension",
             }
             .into(),
             degree: match &c.model {
                 Model::Binary { n, .. } => *n,
                 Model::Prime { .. } => 1,
+                Model::Extension { k, .. } => *k,
             },
             size_bits: c.model.size_bits(),
         },
@@ -1170,6 +1298,48 @@ mod tests {
             .filter(|c| !c.representations.is_empty())
             .count();
         assert!(with_gen >= 80, "only {with_gen} representations parsed");
+    }
+
+    #[test]
+    fn extension_registry_preserves_field_and_subgroup_records() {
+        let curves = read_registry(REGISTRY).unwrap();
+        let extensions: Vec<_> = curves
+            .iter()
+            .filter(|curve| matches!(&curve.model, Model::Extension { .. }))
+            .collect();
+        assert_eq!(extensions.len(), 9);
+        for curve in extensions {
+            let Model::Extension {
+                p,
+                k,
+                q,
+                field_id,
+                modulus,
+                a,
+                b,
+            } = &curve.model
+            else {
+                unreachable!()
+            };
+            assert_eq!(q, &p.pow(*k));
+            assert!(field_id.starts_with(&format!("fpk-{p}-{k}-")));
+            assert_eq!(
+                (modulus.len(), a.len(), b.len()),
+                (*k as usize, *k as usize, *k as usize)
+            );
+            let rep = curve.representations.first().unwrap();
+            assert_eq!(&rep.subgroup_order * &rep.cofactor, curve.order);
+            assert!(matches!(
+                &rep.generator,
+                GeneratorCoords::Extension(x, y) if x.len() == *k as usize && y.len() == *k as usize
+            ));
+            assert_eq!(
+                certify::check_order(&curve.model, &curve.order, &curve.representations)
+                    .unwrap()
+                    .0,
+                Status::NotEvaluated
+            );
+        }
     }
 
     #[test]
