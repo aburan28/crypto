@@ -559,16 +559,17 @@ pub struct RhoRun4F {
     /// Every `F_p` multiplication the walk spent, set-up and the class
     /// representative included (an `F_{p⁴}` inversion at `40`).
     pub fp_muls: u64,
-    pub restarts: u64,
+    /// Fruitless cycles met and escaped by doubling.
+    pub cycle_escapes: u64,
     pub correct: bool,
 }
 
 /// An r-adding walk with exhaustive storage on class representatives.
 /// A step whose successor would land in its own partition takes the next
 /// partition instead (the look-ahead that keeps a folded walk out of
-/// fruitless 2-cycles); a self-collision restarts the walk and keeps the
-/// table.  Every group operation and field multiplication is charged,
-/// set-up included.
+/// fruitless 2-cycles); a self-collision — a longer fruitless cycle — is
+/// escaped by doubling the current point.  Every group operation and field
+/// multiplication is charged, set-up included.
 pub fn rho4_folded(inst: &FoldInstance4, fold: RhoFold, seed: u64) -> RhoRun4F {
     assert!(fold != RhoFold::Psi || inst.family == Family4::Psi);
     let curve = inst.curve();
@@ -621,7 +622,7 @@ pub fn rho4_folded(inst: &FoldInstance4, fold: RhoFold, seed: u64) -> RhoRun4F {
         })
         .collect();
     let mut table: HashMap<Pt4, (u64, u64)> = HashMap::new();
-    let (mut steps, mut restarts) = (0u64, 0u64);
+    let (mut steps, mut cycle_escapes) = (0u64, 0u64);
     let mut found = None;
     let cap = 64 * (n as f64).sqrt() as u64 + 1_000_000;
     'outer: while steps <= cap {
@@ -640,8 +641,14 @@ pub fn rho4_folded(inst: &FoldInstance4, fold: RhoFold, seed: u64) -> RhoRun4F {
                     found = Some(mulm(da, inv_mod(db, n), n));
                     break 'outer;
                 }
-                restarts += 1;
-                break;
+                // A fruitless cycle: escape by doubling, which costs one group
+                // operation where a restart costs two scalar multiplications.
+                cycle_escapes += 1;
+                let (dbl, m) = canon(curve.add(&l, &l));
+                l = dbl;
+                a = mulm(mulm(2, a, n), m, n);
+                b = mulm(mulm(2, b, n), m, n);
+                continue;
             }
             table.insert(l, (a, b));
             let mut j = part(&l);
@@ -664,7 +671,7 @@ pub fn rho4_folded(inst: &FoldInstance4, fold: RhoFold, seed: u64) -> RhoRun4F {
         steps,
         group_ops: curve.ops(),
         fp_muls: f.muls(),
-        restarts,
+        cycle_escapes,
         correct: found == Some(inst.d),
     }
 }
@@ -938,5 +945,31 @@ mod log_tests {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod rho_tests {
+    use super::*;
+
+    /// Each walk takes the steps its class size predicts: `√(π n / 2w)`,
+    /// `w = 1, 2, 6`, so the unfolded walk takes `√2` and `√6` times the
+    /// steps of the negation and `ψ` walks (bands for `80` walks each).
+    #[test]
+    fn folded_walks_take_the_steps_their_classes_predict() {
+        let inst = generate_psi_instance(97, 1).unwrap();
+        let mean_steps = |fold: RhoFold| -> f64 {
+            let runs: Vec<RhoRun4F> = (0..80u64)
+                .into_par_iter()
+                .map(|s| rho4_folded(&inst, fold, s))
+                .collect();
+            assert!(runs.iter().all(|r| r.correct), "{fold:?}");
+            runs.iter().map(|r| r.steps as f64).sum::<f64>() / runs.len() as f64
+        };
+        let none = mean_steps(RhoFold::None);
+        let neg = none / mean_steps(RhoFold::Negation);
+        let psi = none / mean_steps(RhoFold::Psi);
+        assert!((1.15..1.75).contains(&neg), "unfolded / negation = {neg}");
+        assert!((1.9..3.1).contains(&psi), "unfolded / psi = {psi}");
     }
 }

@@ -1829,6 +1829,161 @@ fn e17(o: &mut String, rows: &[&Value]) {
     }
 }
 
+/// One E18 row's walks of one fold: mean `F_p` multiplications, mean
+/// steps, mean `S = muls / √n`, and whether every walk recovered `d`.
+fn e18_walk(r: &Value, fold: &str) -> Option<(f64, f64, Vec<f64>, bool)> {
+    let w: Vec<&Value> = r["rho"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|w| w["fold"].as_str() == Some(fold))
+        .collect();
+    if w.is_empty() {
+        return None;
+    }
+    let sq = fl(r, "n").sqrt();
+    let muls: Vec<f64> = w.iter().map(|w| fl(w, "fp_muls")).collect();
+    let steps: Vec<f64> = w.iter().map(|w| fl(w, "steps")).collect();
+    Some((
+        mean(&muls),
+        mean(&steps),
+        muls.iter().map(|m| m / sq).collect(),
+        w.iter().all(|w| bool_at(w, "correct")),
+    ))
+}
+
+/// E18 (goal G2, note §9.1): folds of the base on the `k = 4` linear
+/// algebra.  `r = LA·16 / rho` in `F_p` multiplications (a mod-`n`
+/// multiplication is `16`, §11.16), per curve against that curve's walks,
+/// and pooled the way §11.19 pools rho: `S` per fold over every walk of
+/// the family, `r = LA·16 / (S·√n)`.
+fn e18(o: &mut String, rows: &[&Value]) {
+    let rows = sorted(rows, &["family", "bits", "seed"]);
+    o.push_str(
+        "### E18 — folds of the base on the k = 4 linear algebra, against the matched rho\n\n",
+    );
+    o.push_str("| family | p | log2 n | h | base | cols control / folded | rate | targets with > 1 decomposition | control core (φ) | folded core (φ) | duplicates skipped (folded) | LA control | LA folded | LA ratio | rho steps unfolded / negation / ψ | correct (control, folded, walks) |\n");
+    o.push_str("|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|--:|--:|--:|:--|:--|\n");
+    let mut pooled: BTreeMap<(String, String), Vec<f64>> = BTreeMap::new();
+    for r in &rows {
+        let fam = py_str(at(r, "family"));
+        let hist: Vec<f64> = r["decompositions_per_target"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(num)
+            .collect();
+        let multi: f64 = hist[2..].iter().sum();
+        let walks: Vec<_> = ["None", "Negation", "Psi"]
+            .iter()
+            .map(|f| e18_walk(r, f))
+            .collect();
+        for (f, w) in ["None", "Negation", "Psi"].iter().zip(&walks) {
+            if let Some((_, _, s, _)) = w {
+                pooled
+                    .entry((fam.clone(), f.to_string()))
+                    .or_default()
+                    .extend(s);
+            }
+        }
+        let steps = walks
+            .iter()
+            .map(|w| w.as_ref().map_or("—".into(), |w| format!("{:.0}", w.1)))
+            .collect::<Vec<_>>()
+            .join(" / ");
+        let walks_ok = walks.iter().flatten().all(|w| w.3);
+        let _ = writeln!(
+            o,
+            "| {} | {} | {:.1} | {} | {} | {} / {} | {:.4} | {:.0} of {:.0} | {} ({:.3}) | {} ({:.3}) | {} | {} | {} | {:.2} | {} | {}, {}, {} |",
+            fam,
+            py_str(at(r, "p")),
+            fl(r, "bits"),
+            py_str(at(r, "cofactor")),
+            py_str(at(r, "base_points")),
+            py_str(at(r, "control.columns")),
+            py_str(at(r, "folded.columns")),
+            fl(r, "decomposition_rate"),
+            multi,
+            fl(r, "targets_decomposed"),
+            py_str(at(r, "control.unknowns")),
+            fl(r, "control.phi"),
+            py_str(at(r, "folded.unknowns")),
+            fl(r, "folded.phi"),
+            py_str(at(r, "folded.duplicate_rows")),
+            g3(fl(r, "control.la_ops")),
+            g3(fl(r, "folded.la_ops")),
+            fl(r, "control.la_ops") / fl(r, "folded.la_ops"),
+            steps,
+            yes(bool_at(r, "control.correct")),
+            yes(bool_at(r, "folded.correct")),
+            yes(walks_ok),
+        );
+    }
+    o.push_str("\n#### E18 — rho's S per fold, pooled over every walk of the family (F_p multiplications / √n)\n\n");
+    o.push_str(
+        "| family | walk | S (mean ± s.e.) | walks | unfolded / this |\n|:--|:--|--:|--:|--:|\n",
+    );
+    let stat = |v: &[f64]| -> (f64, f64) {
+        let m = mean(v);
+        let sd =
+            (v.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (v.len().max(2) - 1) as f64).sqrt();
+        (m, sd / (v.len() as f64).sqrt())
+    };
+    for ((fam, fold), v) in &pooled {
+        let (m, se) = stat(v);
+        let base = stat(&pooled[&(fam.clone(), "None".to_string())]).0;
+        let _ = writeln!(
+            o,
+            "| {fam} | {fold} | {m:.3} ± {se:.3} | {} | {:.3} |",
+            v.len(),
+            base / m
+        );
+    }
+    o.push_str("\n#### E18 — r = LA / rho, against the pooled S of each walk\n\n");
+    o.push_str("| family | p | log2 n | r control, unfolded | r control, negation | r control, ψ | r folded, unfolded | r folded, negation | r folded, ψ |\n");
+    o.push_str("|:--|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    let mut fits: BTreeMap<String, Vec<(f64, f64)>> = BTreeMap::new();
+    let mut means: BTreeMap<String, Vec<f64>> = BTreeMap::new();
+    for r in &rows {
+        let fam = py_str(at(r, "family"));
+        let sq = fl(r, "n").sqrt();
+        let cell = |arm: &str, fold: &str| -> Option<f64> {
+            let v = pooled.get(&(fam.clone(), fold.to_string()))?;
+            Some(fl(r, &format!("{arm}.la_ops")) * 16.0 / (mean(v) * sq))
+        };
+        let mut cells = Vec::new();
+        for arm in ["control", "folded"] {
+            for fold in ["None", "Negation", "Psi"] {
+                let v = cell(arm, fold);
+                if let Some(x) = v {
+                    let key = format!("{fam} | {arm} | {fold}");
+                    fits.entry(key.clone()).or_default().push((fl(r, "n"), x));
+                    means.entry(key).or_default().push(x);
+                }
+                cells.push(v.map_or("—".into(), |x| format!("{x:.3}")));
+            }
+        }
+        let _ = writeln!(
+            o,
+            "| {} | {} | {:.1} | {} |",
+            fam,
+            py_str(at(r, "p")),
+            fl(r, "bits"),
+            cells.join(" | ")
+        );
+    }
+    o.push_str("\n| family | arm | walk | r, mean ± s.e. over curves | fitted exponent in n | curves |\n|:--|:--|:--|--:|--:|--:|\n");
+    for (key, v) in &means {
+        let (m, se) = stat(v);
+        let _ = writeln!(
+            o,
+            "| {key} | {m:.3} ± {se:.3} | {} | {} |",
+            fmt_f(fit_exponent(&fits[key])),
+            v.len()
+        );
+    }
+}
+
 fn e13_ok(r: &Value) -> bool {
     ["d3_fold12", "d3_fold6", "s3_fold12", "s3_fold6"]
         .iter()
@@ -2253,7 +2408,8 @@ fn main() {
     for path in env::args().skip(1) {
         let text = fs::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
         let v: Value = serde_json::from_str(&text).unwrap_or_else(|e| panic!("{path}: {e}"));
-        rows.extend(v["rows"].as_array().cloned().unwrap_or_default());
+        // `{"rows": [...]}` (this binary's runners) or a bare array (`quartic_folds`).
+        rows.extend(v["rows"].as_array().or(v.as_array()).cloned().unwrap_or_default());
     }
     let mut by: BTreeMap<String, Vec<&Value>> = BTreeMap::new();
     for r in &rows {
@@ -2261,7 +2417,7 @@ fn main() {
     }
     let mut o = String::new();
     type Printer = fn(&mut String, &[&Value]);
-    let printers: [(&str, Printer); 17] = [
+    let printers: [(&str, Printer); 18] = [
         ("e1", e1),
         ("e2", e2),
         ("e3", e3),
@@ -2277,6 +2433,7 @@ fn main() {
         ("e13", e13),
         ("e13", e16),
         ("e17", e17),
+        ("e18", e18),
         ("e14", e14),
         ("e15", e15),
     ];
