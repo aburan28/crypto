@@ -99,3 +99,24 @@ saving `--runtime-info` beside the run:
 env LD=/usr/bin/ld /Volumes/SSD990/cryptanalysis/sage --runtime-info > /private/tmp/s3-crosscurve-sage-runtime-info.json
 env LD=/usr/bin/ld /Volumes/SSD990/cryptanalysis/sage -python experiments/koblitz-s3-crosscurve-20261009/replay_sage.py --ledger /private/tmp/s3-crosscurve-local-smoke/raw.jsonl --runtime-info /private/tmp/s3-crosscurve-sage-runtime-info.json --receipt /private/tmp/s3-crosscurve-local-smoke/sage_replay.json
 ```
+
+## Prepared Modal CPU panel
+
+[`modal_crosscurve_panel.py`](modal_crosscurve_panel.py) runs 1–24 frozen index
+pairs per VM. `--first 1 --count 1` is an eight-run correctness and topology
+smoke; `--first 1 --count 24` is the 192-run paired pilot. Further disjoint
+blocks can use the already frozen indices 25–200. Each block keeps two
+reference and two rank-243 one-target runs, the exact candidate/workload/run
+IDs, all raw reports and failures, CPU affinity and SMT topology, NUMA bind,
+PSI, cgroup quota/throttle/OOM counters, IRQ and steal deltas, frequency, and
+optional whole-process `perf` cycles and instructions. The VM requests 16
+physical cores, with 15 benchmark cores and a separate monitoring core.
+Guest diagnostics remain distinct from the host-wide isolation receipt.
+
+Local `--preview-upload` selected **1,615 files totaling 52,444,334 bytes**:
+the exact Rust build inputs, required documentation, this frozen plan, and
+the 400 public point files. A local filename and token-pattern scan found
+zero credential-named or key-pattern files in that inventory. The preview,
+remote-code compilation, source hashes, and point hashes passed locally.
+No third-party upload or Modal job has begun; explicit approval for the
+source and fixture transfer is pending after automatic review rejection.
