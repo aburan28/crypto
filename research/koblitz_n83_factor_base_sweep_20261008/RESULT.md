@@ -123,7 +123,16 @@ The release profile uses optimization level 3, 256 codegen units and four Cargo 
 | Factored S4 capacity guard preparation | Shared finite-domain model builder and cgroup-guarded, no-network construction-only worker; synthetic success, timeout, memory-kill and malformed-receipt outcomes retained. No N83 model construction was run. | `verification/capacity-guard-smoke/`, `sat_capacity_supervisor.py` |
 | Linux capacity worker cross-build and startup | PASS cross-build with native Redis TLS disabled only for this isolated worker; guarded startup reached the deliberately empty manifest and reported `PRODUCER_FAILURE_worker_exit`. This is a malformed-input check, not a retained-base construction. | `verification/sat-capacity-linux-build.log`, `verification/sat-capacity-linux-build-command.txt`, `verification/capacity-worker-startup/` |
 | Post-capacity-builder release and Python suites | 2,242 library tests passed with 94 ignored; N83 example 15 passed; study and boundary Python 5 and 16 passed | `verification/sat-capacity-lib-full.log`, `verification/sat-capacity-example-full.log`, `verification/sat-capacity-study-python.log`, `verification/sat-capacity-boundary-python.log` |
+| Wide large-prime row adapter | 3 focused release tests passed for full-width cycle algebra, signed-orbit replay and fail-closed graph caps; final library suite 2,245 passed with 94 ignored; N83 example 15 passed; study and boundary Python suites 5 and 16 passed. This is adapter validation, not a retained N83 partial-relation or runtime result. | `verification/wide-lp-focused-final.log`, `verification/wide-lp-lib-full.log`, `verification/wide-lp-example-full.log`, `verification/wide-lp-study-python.log`, `verification/wide-lp-boundary-python.log`, `WIDE_LP_ADAPTER.md` |
 | Native finite-grid audit | All 45,360,000 dispositions accounted for | `verification/design-audit.log`, `design.json` |
+
+The wide large-prime adapter's first focused compile stopped at an ambiguous
+integer type in its 81-bit fixture; that annotation was fixed. Its first full
+library run passed 2,242 tests but the two unchanged loopback-network tests
+failed at socket setup under the sandbox. The required full suite then passed
+with loopback access on the final source. Both earlier failure logs are
+retained as `verification/wide-lp-initial-compile-failure.log` and
+`verification/wide-lp-sandbox-loopback-failure.log`.
 
 Earlier build and test outcomes remain retained. Initial dependency resolution failed under restricted networking; `--locked` could not be used before this older baseline resolved a lockfile. Some build attempts were interrupted during baseline recovery. The first complete isolated library run had two loopback-network permission failures. The next run passed those tests and failed the pre-existing randomized SQIsign wrong-message assertion. Its focused replay passed; the subsequent full suite passed. The SQIsign source is unchanged, and the earlier failure remains visible rather than being relabeled as a pass.
 

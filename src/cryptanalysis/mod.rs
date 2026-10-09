@@ -143,6 +143,7 @@ pub mod koblitz_factor_base_search;
 pub mod koblitz_fast_arith;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
+pub mod koblitz_large_prime;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
 pub mod koblitz_symmetrised;
