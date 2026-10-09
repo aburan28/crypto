@@ -1581,7 +1581,27 @@ mod tests {
             let (fc, g) = ladder(bits);
             assert_eq!(point_order_hasse(&fc, g), Some(fc.n), "bits={bits}");
             let (gen, gg) = find_a3_curve(bits, 3).unwrap();
-            assert_eq!((gen.f.p, gen.n, gen.canonical(gg)), (fc.f.p, fc.n, fc.canonical(g)));
+            let (x, y) = gen.canonical(gg);
+            let (expected_x, expected_y) = fc.canonical(g);
+            assert_eq!(
+                (
+                    gen.f.p,
+                    gen.n,
+                    gen.f.from_mont(gen.a),
+                    gen.f.from_mont(gen.b),
+                    x,
+                    y.min(gen.f.p - y),
+                ),
+                (
+                    fc.f.p,
+                    fc.n,
+                    fc.f.from_mont(fc.a),
+                    fc.f.from_mont(fc.b),
+                    expected_x,
+                    expected_y.min(fc.f.p - expected_y),
+                ),
+                "bits={bits}"
+            );
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();
         assert_eq!(gen.f.p, 268_435_399);
