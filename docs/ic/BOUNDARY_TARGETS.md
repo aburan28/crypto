@@ -131,7 +131,9 @@ subspace factor bases (`semaev_decomp`, `semaev_sat`, `pq_descent`,
 oracles (enumerate / Groebner / SAT) + exact-support collectors
 (`koblitz_index_calculus`, `koblitz_rank_fixture`, SAT factor-base review).
 
-Code guard: `MAX_N = 63` in `koblitz_index_calculus` (u64 field packing).
+Code guard: `MAX_N = 127` in `koblitz_index_calculus`; the single-word
+arithmetic path handles degrees up to 63 and the `u128` path handles wider
+admitted degrees.
 
 Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 
