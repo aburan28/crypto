@@ -1,5 +1,11 @@
 # C1800 prefix-256 striped target search
 
+The frozen T110 control verified both scalars. C1200 used **1,822** target
+S3 calls, the earlier C1800 prefix used **964**, and the new striped C1800
+path used **542**. The old C1800/striped call ratio is **1.779×** on this
+previously used point. It demonstrates the new branch executes and can
+shorten one search; fresh-target yield remains to be measured.
+
 The candidate retains the first 256 point-seeded C1200 index states in their
 original order. It then visits the remaining embedded C1200 states by
 round-robin across eight distant contiguous ranges and finally falls back
@@ -28,3 +34,13 @@ The diagnostic runner validates source, binary, candidate and workload
 hashes, factor-base and root-table identities, rank, scalar replay, and
 exclusive one-target online phase accounting. It retains complete reports
 and all statuses.
+[`local/raw_diagnostic2.jsonl.gz`](local/raw_diagnostic2.jsonl.gz) and
+[`local/raw_reports.tar.gz`](local/raw_reports.tar.gz) retain both complete
+runs. [`analyze_diagnostic.py`](analyze_diagnostic.py) checks report digests,
+source and candidate identities, schedule fields, scalar equality, and the
+prior T110 reference before producing
+[`diagnostic_analysis.json`](diagnostic_analysis.json). The decompressed
+ledger SHA-256 is
+`0bfd813a1cabc198606c24e3a3a19bf49cf2fa4d273fbbd95161e9993109870b`;
+the report archive SHA-256 is
+`5e41ea0c7063ce45c4b81b65c741b76111ef387778c4dccd3a29403fca4eeb26`.
