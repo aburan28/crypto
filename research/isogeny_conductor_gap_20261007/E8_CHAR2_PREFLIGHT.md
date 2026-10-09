@@ -97,6 +97,14 @@ audit and branch diagram. It was rendered with the checked-in
 `ea8a35fae95fffd41a3baf43f53c89de2448871e8d5220193357d6509f9164fd`.
 `pdfinfo`, `pdftotext`, and a two-page PNG render were checked after creation.
 
+The repository-wide `cargo test --release --lib --locked --offline --
+--test-threads=4` was attempted on this branch's base
+`dba53d92517a8899699639a55f7748f489be4693`. It did not compile: Cargo
+reported 654 existing library source errors, including mismatched SAT solver
+fields and missing Groebner statistic fields. This branch changes no library
+source. Crypto PR #1605 separately repairs those mainline merge defects; the
+full release-library gate must be rerun after that repair lands.
+
 For `M = 81`, the auxiliary degree is `m = 8`, so the cited Section 3
 coprimality hypothesis fails in characteristic two. The exact source-curve
 calculation gives `pi mod 9 = -tau`, of order `24`, and `pi mod 81 = 27-tau`,
