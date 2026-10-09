@@ -1,0 +1,54 @@
+{
+  "arms": {
+    "baseline": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hee573707e568",
+      "candidate_manifest": "experiments/koblitz-s3-c1800-prefix-20261009/identities/candidates/IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hee573707e568.json",
+      "columns": 1200,
+      "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+      "factor_base_points": 127200,
+      "prepare_rank": 1200,
+      "root_table_slots": 268435456,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "native_rotating_state_order"
+    },
+    "expanded": {
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h98f1ea052683",
+      "candidate_manifest": "experiments/koblitz-s3-c1800-prefix-20261009/identities/candidates/IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h98f1ea052683.json",
+      "columns": 1800,
+      "factor_base_digest": "0c3597d24ca943d7bb081ee30078596ffc433766356a8042ba8180c2ced78030",
+      "factor_base_points": 190800,
+      "prepare_rank": 1800,
+      "root_table_slots": 536870912,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c1800"
+    }
+  },
+  "binary_sha256": "fb3c9c62b6e2ae0ebd0ab6058f92db90b60cd02a91b8516414aac86de10ce9b3",
+  "confirmation_root_call_bootstrap95_lower_strictly_gt": 1,
+  "confirmation_root_call_geomean_ratio_min": 2,
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1200_c1800prefix_paired_confirmation_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 2,
+  "run_order": "ABBA_even_target_BAAB_odd_target",
+  "runner_sha256": "66aade5e776b97842497e986630a36c210eacabf14d973edb1152a4cb7f19530",
+  "screen_freeze_sha256": "acc8aed8e55a44588a9638ad70647a7d537537b6da1d3dfa5443b397baa535ea",
+  "source_commit": "59f95350aa5d6cb4eda934017bbdbd52d4d4634a",
+  "source_sha256": "0c04dd4532d0902f7b7d7ae7d39863315d2fcdbad99e6698ab9e1f1bf2004773",
+  "target_labels": [
+    "T117",
+    "T118",
+    "T119",
+    "T120",
+    "T121",
+    "T122",
+    "T123",
+    "T124"
+  ],
+  "target_workers": 1,
+  "timeout_seconds_per_run": 180
+}
