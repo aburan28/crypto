@@ -128,6 +128,7 @@ PAGES = (
 DATA = (
     ("docs/ecc2k130-status/status.json", ("status/status.json", "status.json")),
     ("docs/ecc2k130-status/history.json", ("status/history.json", "history.json")),
+    ("docs/ecc2k130-status/mac-control.json", ("status/mac-control.json",)),
 )
 
 # Pages worth listing for crawlers. Data files and the 404 stay out.
