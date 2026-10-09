@@ -92,7 +92,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "45142795a034aa02768a267e59845f1b5ed77904cda7fcbdd4daa7cc0d9e2f24"
+   "sha256": "6cadc45b189b30492e0b6e4ac47a6bc703cf04358792970c408564d3c05b2beb"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -12508,6 +12508,42 @@
    "on_board": false,
    "order_bits": 224,
    "slug": "icv1-fp224-t4733100108545601916421827343930821-13c26cb8",
+   "standard": []
+  },
+  {
+   "coefficients": "standard coefficients",
+   "curves_yaml_key": null,
+   "ec1": [
+    "EC1P192Cfph565b24cb61ba"
+   ],
+   "ec1_unresolved": null,
+   "factor_base_link_status": "no_curves_yaml_record",
+   "family": "prime",
+   "field": "GF(p), 192-bit p",
+   "legacy": [
+    "icv1-fp192-t31607402316713927207482677199-e2f29854"
+   ],
+   "on_board": false,
+   "order_bits": 192,
+   "slug": "icv1-fp192-t31607402316713927207482677199-e2f29854",
+   "standard": []
+  },
+  {
+   "coefficients": "standard coefficients",
+   "curves_yaml_key": null,
+   "ec1": [
+    "EC1P224Cfph266bc36adb82"
+   ],
+   "ec1_unresolved": null,
+   "factor_base_link_status": "no_curves_yaml_record",
+   "family": "prime",
+   "field": "GF(p), 224-bit p",
+   "legacy": [
+    "icv1-fp224-t4733100108545601916421827343930821-5a35f6f7"
+   ],
+   "on_board": false,
+   "order_bits": 224,
+   "slug": "icv1-fp224-t4733100108545601916421827343930821-5a35f6f7",
    "standard": []
   }
  ],

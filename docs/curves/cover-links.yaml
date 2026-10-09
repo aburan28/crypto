@@ -2484,6 +2484,29 @@
         "schema_version": "hyperelliptic-model/v1"
       }
     },
+    "urn:hc-model:1:sha256:393432f9ef5bd304faa07ac34cd8fb6c44715b08bb96740f84e093e26fe5687a": {
+      "cover_id": "HC1G2h393432f9ef5b",
+      "cover_uid": "urn:hc-model:1:sha256:393432f9ef5bd304faa07ac34cd8fb6c44715b08bb96740f84e093e26fe5687a",
+      "record": {
+        "f": [
+          "0xca5aed1f03649034f6b4cc765c83adb90dd78550e264adeb946f183f",
+          "0x0",
+          "0x7b68de29ecd10cbacda4dc7bffea09f77a0955afb82e9dbdd5608209",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "field": {
+          "label": "fp-26959946667150639794667015087019630673557916260026308143510066298881",
+          "p": "26959946667150639794667015087019630673557916260026308143510066298881"
+        },
+        "form": "v^2+h(u)*v=f(u)",
+        "genus": 2,
+        "h": [],
+        "schema_version": "hyperelliptic-model/v1"
+      }
+    },
     "urn:hc-model:1:sha256:396eb7ef243afe3e1bc83d6c0e257f1497bdb33817403fe7065695483848951d": {
       "cover_id": "HC1G2h396eb7ef243a",
       "cover_uid": "urn:hc-model:1:sha256:396eb7ef243afe3e1bc83d6c0e257f1497bdb33817403fe7065695483848951d",
@@ -4116,6 +4139,29 @@
           "0x0",
           "0x1"
         ],
+        "schema_version": "hyperelliptic-model/v1"
+      }
+    },
+    "urn:hc-model:1:sha256:723df8fb2abdeddaace9e37161714a58a8b52e32839b6e6a3b7bdbf78662a073": {
+      "cover_id": "HC1G2h723df8fb2abd",
+      "cover_uid": "urn:hc-model:1:sha256:723df8fb2abdeddaace9e37161714a58a8b52e32839b6e6a3b7bdbf78662a073",
+      "record": {
+        "f": [
+          "0x9f266a519150350353fc73c076d67a957311f9ff1103551d",
+          "0x0",
+          "0xa2947cbe0619cd4c24f92b4548a6e7b88ea2e4e904156383",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "field": {
+          "label": "fp-6277101735386680763835789423207666416083908700390324961279",
+          "p": "6277101735386680763835789423207666416083908700390324961279"
+        },
+        "form": "v^2+h(u)*v=f(u)",
+        "genus": 2,
+        "h": [],
         "schema_version": "hyperelliptic-model/v1"
       }
     },
@@ -29169,6 +29215,108 @@
       "standard_names": [],
       "standards_provenance": null,
       "status": "verified_over_declared_field"
+    },
+    {
+      "cover_links": [
+        {
+          "cover_uid": "urn:hc-model:1:sha256:723df8fb2abdeddaace9e37161714a58a8b52e32839b6e6a3b7bdbf78662a073",
+          "direction": "H -> E",
+          "map_uid": "urn:curve-cover-map:1:sha256:988dc348e8da75f516a477ba65d2807ae4a08f327904d61b9035b0247b01986f"
+        }
+      ],
+      "icv1_identity": {
+        "full": "ICV1:fp-6277101735386680763835789423207666416083908700390324961279:31607402316713927207482677199:6277101735386680763835789423176059013767194773182842284081:5461027792116898396396750221115522236291241351826597137907:unk:unk:r:e2f29854e7e7",
+        "slug": "icv1-fp192-t31607402316713927207482677199-e2f29854"
+      },
+      "model_json": "{\"a\":\"3986450697305509265042568287810885773684105136724132586371\",\"b\":\"3902348111392033316355938056055165904575570264382943483165\",\"field\":\"fp-6277101735386680763835789423207666416083908700390324961279\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"6277101735386680763835789423207666416083908700390324961279\",\"v\":\"1\"}",
+      "model_sha256": "e2f29854e7e7778bf8dc99aed3fba76a2931bb7a5b50c09640bc51830f25ff1e",
+      "representations": [
+        {
+          "curve": {
+            "coefficients": [
+              0,
+              0,
+              0,
+              3986450697305509265042568287810885773684105136724132586371,
+              3902348111392033316355938056055165904575570264382943483165
+            ],
+            "cofactor": 1,
+            "generator": [
+              "0x850e36d21dcca2602ad676737c0de56a7ae154a94e43a2e4",
+              "0x5534be072605830a3450f3ea589fbe0dfe12ee7e26ed7f2"
+            ],
+            "model": "short Weierstrass",
+            "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+            "target_group": "prime-order subgroup"
+          },
+          "curve_uid": "urn:ec-record:1:sha256:565b24cb61baf7e082d65cad3c41cd468ec662b8bfe6a0e76d27f66925d4caea",
+          "ec1": "EC1P192Cfph565b24cb61ba",
+          "field": {
+            "characteristic": 6277101735386680763835789423207666416083908700390324961279,
+            "degree": 1,
+            "element_encoding": "hex integer modulo the characteristic",
+            "representation": "prime"
+          },
+          "subgroup_transport": {
+            "evidence_ref": null,
+            "status": "not_tested"
+          }
+        }
+      ],
+      "standard_names": [],
+      "standards_provenance": null,
+      "status": "verified_over_declared_field"
+    },
+    {
+      "cover_links": [
+        {
+          "cover_uid": "urn:hc-model:1:sha256:393432f9ef5bd304faa07ac34cd8fb6c44715b08bb96740f84e093e26fe5687a",
+          "direction": "H -> E",
+          "map_uid": "urn:curve-cover-map:1:sha256:682168d6d9208938d6cacafcc3737c5b06c38bf43806a58cb9c825ac8ba7b247"
+        }
+      ],
+      "icv1_identity": {
+        "full": "ICV1:fp-26959946667150639794667015087019630673557916260026308143510066298881:4733100108545601916421827343930821:26959946667150639794667015087019625940457807714424391721682722368061:2436021004496008061429060489784524910621658457489218052096156526721:unk:unk:r:5a35f6f747ed",
+        "slug": "icv1-fp224-t4733100108545601916421827343930821-5a35f6f7"
+      },
+      "model_json": "{\"a\":\"12996551997136608115693539300274202749864195580055986865452903072265\",\"b\":\"21310487808578113863905197375753415524112486413216636925198983960639\",\"field\":\"fp-26959946667150639794667015087019630673557916260026308143510066298881\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"26959946667150639794667015087019630673557916260026308143510066298881\",\"v\":\"1\"}",
+      "model_sha256": "5a35f6f747ed31a6a48d549cd02e140e16ba068b673ed25cfd2c3b2abe61fa3a",
+      "representations": [
+        {
+          "curve": {
+            "coefficients": [
+              0,
+              0,
+              0,
+              12996551997136608115693539300274202749864195580055986865452903072265,
+              21310487808578113863905197375753415524112486413216636925198983960639
+            ],
+            "cofactor": 1,
+            "generator": [
+              "0x653cb744472b847259a7f44b00c01ff669b41de75dd9363cae5c61cc",
+              "0x862daae2bcfcfe25b929a70bc0bf66ddc288b18a125c9ac179f9961c"
+            ],
+            "model": "short Weierstrass",
+            "subgroup_order": "26959946667150639794667015087019625940457807714424391721682722368061",
+            "target_group": "prime-order subgroup"
+          },
+          "curve_uid": "urn:ec-record:1:sha256:266bc36adb82a7afb36a60c7b868ceb1f9d18d757bdb8c6b8e4b102bd403632d",
+          "ec1": "EC1P224Cfph266bc36adb82",
+          "field": {
+            "characteristic": 26959946667150639794667015087019630673557916260026308143510066298881,
+            "degree": 1,
+            "element_encoding": "hex integer modulo the characteristic",
+            "representation": "prime"
+          },
+          "subgroup_transport": {
+            "evidence_ref": null,
+            "status": "not_tested"
+          }
+        }
+      ],
+      "standard_names": [],
+      "standards_provenance": null,
+      "status": "verified_over_declared_field"
     }
   ],
   "global_standard_coverage": "not_claimed; see standards/coverage.json",
@@ -33760,6 +33908,32 @@
       },
       "verification_status": "verified_over_declared_field"
     },
+    "urn:curve-cover-map:1:sha256:682168d6d9208938d6cacafcc3737c5b06c38bf43806a58cb9c825ac8ba7b247": {
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "map_id": "CV1D2h682168d6d920",
+      "map_uid": "urn:curve-cover-map:1:sha256:682168d6d9208938d6cacafcc3737c5b06c38bf43806a58cb9c825ac8ba7b247",
+      "proof_refs": [
+        "docs/curves/COVERS.md"
+      ],
+      "record": {
+        "degree": 2,
+        "schema_version": "curve-cover-map/v1",
+        "source_cover_uid": "urn:hc-model:1:sha256:393432f9ef5bd304faa07ac34cd8fb6c44715b08bb96740f84e093e26fe5687a",
+        "target_model_json": "{\"a\":\"12996551997136608115693539300274202749864195580055986865452903072265\",\"b\":\"21310487808578113863905197375753415524112486413216636925198983960639\",\"field\":\"fp-26959946667150639794667015087019630673557916260026308143510066298881\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"26959946667150639794667015087019630673557916260026308143510066298881\",\"v\":\"1\"}",
+        "target_model_map": null,
+        "target_model_sha256": "5a35f6f747ed31a6a48d549cd02e140e16ba068b673ed25cfd2c3b2abe61fa3a",
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "verification_status": "verified_over_declared_field"
+    },
     "urn:curve-cover-map:1:sha256:68a825a671a83b0d2716652c9d82f38d916eb50b932919c999b5f27c4d4f2b7f": {
       "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
       "map_id": "CV1D2h68a825a671a8",
@@ -35401,6 +35575,32 @@
         ],
         "y_v": [
           "0x0",
+          "0x1"
+        ]
+      },
+      "verification_status": "verified_over_declared_field"
+    },
+    "urn:curve-cover-map:1:sha256:988dc348e8da75f516a477ba65d2807ae4a08f327904d61b9035b0247b01986f": {
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "map_id": "CV1D2h988dc348e8da",
+      "map_uid": "urn:curve-cover-map:1:sha256:988dc348e8da75f516a477ba65d2807ae4a08f327904d61b9035b0247b01986f",
+      "proof_refs": [
+        "docs/curves/COVERS.md"
+      ],
+      "record": {
+        "degree": 2,
+        "schema_version": "curve-cover-map/v1",
+        "source_cover_uid": "urn:hc-model:1:sha256:723df8fb2abdeddaace9e37161714a58a8b52e32839b6e6a3b7bdbf78662a073",
+        "target_model_json": "{\"a\":\"3986450697305509265042568287810885773684105136724132586371\",\"b\":\"3902348111392033316355938056055165904575570264382943483165\",\"field\":\"fp-6277101735386680763835789423207666416083908700390324961279\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"6277101735386680763835789423207666416083908700390324961279\",\"v\":\"1\"}",
+        "target_model_map": null,
+        "target_model_sha256": "e2f29854e7e7778bf8dc99aed3fba76a2931bb7a5b50c09640bc51830f25ff1e",
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
           "0x1"
         ]
       },
@@ -39657,6 +39857,6 @@
       "verification_status": "verified_over_declared_field"
     }
   },
-  "registry_sha256": "45142795a034aa02768a267e59845f1b5ed77904cda7fcbdd4daa7cc0d9e2f24",
+  "registry_sha256": "6cadc45b189b30492e0b6e4ac47a6bc703cf04358792970c408564d3c05b2beb",
   "schema_version": "curve-cover-graph/v1"
 }
