@@ -1878,9 +1878,7 @@ impl Solver {
                         }
                         let has_current_conflict = normalized.iter().any(|clause| {
                             !clause.is_empty()
-                                && clause
-                                    .iter()
-                                    .all(|&lit| self.lit_value(lit) == Some(false))
+                                && clause.iter().all(|&lit| self.lit_value(lit) == Some(false))
                         });
                         if has_current_conflict || normalized.iter().any(|clause| clause.len() < 2)
                         {

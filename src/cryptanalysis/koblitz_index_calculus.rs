@@ -149,13 +149,13 @@ use crate::cryptanalysis::ec_index_calculus::{
 use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
+use crate::cryptanalysis::koblitz_fast_arith::{
+    pack_fast, FastBinaryCurve, FastPoint as ArithFastPoint,
+};
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
     solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
     FieldStructure, NodeOracleDecision, SolveOptions, SolveStats, SolverEngine,
-};
-use crate::cryptanalysis::koblitz_fast_arith::{
-    pack_fast, FastBinaryCurve, FastPoint as ArithFastPoint,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{
     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
@@ -531,8 +531,7 @@ fn memo_get(
     memo: &std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>>,
     n: u32,
 ) -> Option<Vec<u64>> {
-    memo
-        .get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+    memo.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
         .lock()
         .unwrap_or_else(|e| e.into_inner())
         .get(&n)
@@ -544,8 +543,7 @@ fn memo_put(
     n: u32,
     factors: Vec<u64>,
 ) -> Vec<u64> {
-    memo
-        .get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+    memo.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
         .lock()
         .unwrap_or_else(|e| e.into_inner())
         .insert(n, factors.clone());
@@ -1147,11 +1145,7 @@ impl KoblitzCurve {
 
         // Certify the class order on sampled points.
         let half_order = &group_order >> 1u32;
-        let mask = if n >= 64 {
-            u64::MAX
-        } else {
-            (1u64 << n) - 1
-        };
+        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
         let mut state = 0x2545_f491_4f6c_dd1du64 ^ (n as u64) ^ ((a as u64) << 32);
         let mut samples = 0usize;
         // Every sample must be killed by `#E`; with `r > 2√q` (every admitted
@@ -1229,11 +1223,7 @@ fn attach_prime_subgroup(
         // `2^n` sweep is impossible, so sample deterministically from
         // a fixed LCG (reproducible across hosts).
         let mut generator = BinaryPoint::Infinity;
-        let mask = if n >= 64 {
-            u64::MAX
-        } else {
-            (1u64 << n) - 1
-        };
+        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
         let exhaustive = n <= 24;
         let budget = if exhaustive {
             1u64 << n
@@ -1248,9 +1238,7 @@ fn attach_prime_subgroup(
             let raw = if exhaustive {
                 i
             } else {
-                state = state
-                    .wrapping_mul(6364136223846793005)
-                    .wrapping_add(1);
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
                 state & mask
             };
             let x = F2mElement::from_biguint(&BigUint::from(raw), n);
@@ -1777,8 +1765,11 @@ impl FrobeniusFactorBase {
             // One batched `[r]` for every point (was: one slow scalar mul
             // each).  Bit-exact, so the class list is unchanged.
             Some(fast) if kc.n <= 63 => {
-                let pts: Vec<ArithFastPoint> =
-                    self.points.iter().map(|p| to_fast_point(&fast, p)).collect();
+                let pts: Vec<ArithFastPoint> = self
+                    .points
+                    .iter()
+                    .map(|p| to_fast_point(&fast, p))
+                    .collect();
                 let rs: Vec<BigUint> = (0..pts.len()).map(|_| kc.subgroup_order.clone()).collect();
                 fast.batch_scalar_mul(&pts, &rs)
                     .into_iter()
@@ -1815,8 +1806,8 @@ impl FrobeniusFactorBase {
         } else {
             kc.extension_degree()
         };
-        let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)
-            .filter(|_| kc.n <= 63)
+        let Some(fast) =
+            FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64).filter(|_| kc.n <= 63)
         else {
             let mut classes = HashMap::new();
             for orbit in &self.signed_orbits {
@@ -1836,7 +1827,11 @@ impl FrobeniusFactorBase {
         let reps: Vec<ArithFastPoint> = self
             .signed_orbits
             .iter()
-            .filter_map(|orbit| orbit.first().map(|&i| to_fast_point(&fast, &self.points[i])))
+            .filter_map(|orbit| {
+                orbit
+                    .first()
+                    .map(|&i| to_fast_point(&fast, &self.points[i]))
+            })
             .collect();
         let rs: Vec<BigUint> = (0..reps.len()).map(|_| kc.subgroup_order.clone()).collect();
         let projs = fast.batch_scalar_mul(&reps, &rs);
@@ -1890,8 +1885,8 @@ impl FrobeniusFactorBase {
         // the walks on words; sets, keys, and the verdict match the
         // general-field version exactly.  Curves too wide for the
         // single-word field take the original slow path below.
-        let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)
-            .filter(|_| kc.n <= 63)
+        let Some(fast) =
+            FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64).filter(|_| kc.n <= 63)
         else {
             return self.m_can_decompose_slow(kc, &classes, m);
         };
@@ -1903,11 +1898,7 @@ impl FrobeniusFactorBase {
         let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
         let frob = |p: ArithFastPoint| fast_frobenius(kc, &fast, p);
         for _ in 1..m {
-            let reps = signed_frobenius_orbit_representatives_fast(
-                &fast,
-                kc,
-                &layer,
-            );
+            let reps = signed_frobenius_orbit_representatives_fast(&fast, kc, &layer);
             // One batch for the reps × classes grid; replayed below in
             // the same nested order, so traversal matches exactly.
             let mut pairs = Vec::with_capacity(reps.len() * class_pts.len());
@@ -1955,12 +1946,7 @@ impl FrobeniusFactorBase {
     /// Slow general-field admissibility walk, kept for curves too wide
     /// for the single-word fast path (unreachable via the constructor)
     /// and as a second reference alongside the naive one in tests.
-    fn m_can_decompose_slow(
-        &self,
-        kc: &KoblitzCurve,
-        classes: &[BinaryPoint],
-        m: usize,
-    ) -> bool {
+    fn m_can_decompose_slow(&self, kc: &KoblitzCurve, classes: &[BinaryPoint], m: usize) -> bool {
         match FastCurve::new(&kc.curve) {
             Some(fc) => fast_classes_can_cancel(kc, &fc, &classes, m),
             None => classes_can_cancel(kc, &classes, m),
@@ -5706,7 +5692,6 @@ impl PairSumTable {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
-
 }
 
 /// Project a general point to single-word coordinates for the fast field.
@@ -15822,7 +15807,10 @@ mod tests {
     fn constructs_n71_a0_with_expected_subgroup() {
         let curve = KoblitzCurve::new(0, 71).expect("K_0/F_2^71 must construct");
         assert_eq!(curve.n, 71);
-        assert_eq!(curve.subgroup_order, BigUint::from(5_513_228_015_079_457u64));
+        assert_eq!(
+            curve.subgroup_order,
+            BigUint::from(5_513_228_015_079_457u64)
+        );
         assert_eq!(curve.cofactor, BigUint::from(428_276u32));
         assert_eq!(
             scalar_mul(&curve.curve, curve.generator(), &curve.subgroup_order),
@@ -17313,9 +17301,7 @@ mod tests {
         // (input order within each key), multiset preserved.
         let mut rng_state = 0x9e3779b97f4a7c15u64;
         let mut next = move || {
-            rng_state = rng_state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
             rng_state
         };
         for &len in &[0usize, 1, 2, 3, 17, 1000, 70000] {
@@ -18101,10 +18087,7 @@ mod tests {
         }
         // Off-subgroup points: raw abscissa lifts (some outside <G>).
         for raw in [0u64, 1, 2, 7, 42, 100, 300] {
-            let x = crate::binary_ecc::F2mElement::from_biguint(
-                &BigUint::from(raw),
-                kc.n,
-            );
+            let x = crate::binary_ecc::F2mElement::from_biguint(&BigUint::from(raw), kc.n);
             for p in points_with_x(&kc.curve, &x) {
                 targets.push(p);
             }
@@ -18808,7 +18791,10 @@ mod isogenous_model_tests {
             let irr = &kc.curve.irreducible;
             let (xs, ys) = (x.square(irr), y.square(irr));
             let lifted = points_with_x(&kc.curve, &xs);
-            assert!(!lifted.contains(&BinaryPoint::Affine { x: xs.clone(), y: ys }));
+            assert!(!lifted.contains(&BinaryPoint::Affine {
+                x: xs.clone(),
+                y: ys
+            }));
         }
         // Some small `b` lies outside the class and must fail the certificate.
         let fast = FastBinaryCurve::new(&kc0.curve.irreducible, 1).unwrap();

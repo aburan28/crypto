@@ -1815,8 +1815,7 @@ fn rref_f2_m4ri(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
                 // Bring this candidate into echelon form with respect to the
                 // pivots already selected in the current block.
                 for (index, &pivot_column) in pivot_columns.iter().enumerate() {
-                    let (pivot_word, pivot_bit) =
-                        (pivot_column / 64, 1u64 << (pivot_column % 64));
+                    let (pivot_word, pivot_bit) = (pivot_column / 64, 1u64 << (pivot_column % 64));
                     if matrix[row][pivot_word] & pivot_bit != 0 {
                         for (target, source) in matrix[row][pivot_word..words]
                             .iter_mut()
@@ -8302,8 +8301,8 @@ mod reference_equivalence_tests {
             let mut pivot_row = 0usize;
             for column in 0..n_cols {
                 let (word, bit) = (column / 64, 1u64 << (column % 64));
-                let Some(pivot) = (pivot_row..matrix.len())
-                    .find(|&row| matrix[row][word] & bit != 0)
+                let Some(pivot) =
+                    (pivot_row..matrix.len()).find(|&row| matrix[row][word] & bit != 0)
                 else {
                     continue;
                 };
@@ -8345,10 +8344,7 @@ mod reference_equivalence_tests {
                 let mut suffix = input.clone();
                 let mut m4ri = input;
                 let rank = reference(&mut expected, columns);
-                assert_eq!(
-                    rref_f2_suffix(&mut suffix, columns),
-                    rank
-                );
+                assert_eq!(rref_f2_suffix(&mut suffix, columns), rank);
                 assert_eq!(suffix, expected);
                 assert_eq!(rref_f2_m4ri(&mut m4ri, columns), rank);
                 assert_eq!(m4ri, expected);

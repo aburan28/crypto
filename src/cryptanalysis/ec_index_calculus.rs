@@ -1483,13 +1483,9 @@ pub fn ec_index_calculus_dlp_staged(
     while relations.len() < target {
         let found = 'attempt: {
             for _ in 0..max_relation_attempts {
-                if let Some(found) = find_one_relation_counted(
-                    curve,
-                    g,
-                    q,
-                    &fb,
-                    max_trials_per_relation,
-                ) {
+                if let Some(found) =
+                    find_one_relation_counted(curve, g, q, &fb, max_trials_per_relation)
+                {
                     break 'attempt Some(found);
                 }
                 attempts_exhausted += 1;
@@ -1788,7 +1784,11 @@ mod tests {
                 // c_{k-1} - r·c_k (with c_{-1} = c_len = 0).
                 let mut fixed = vec![BigUint::from(0u32); poly.len() + 1];
                 for k in 0..=poly.len() {
-                    let prev = if k > 0 { poly[k - 1].clone() } else { BigUint::from(0u32) };
+                    let prev = if k > 0 {
+                        poly[k - 1].clone()
+                    } else {
+                        BigUint::from(0u32)
+                    };
                     let cur = poly.get(k).cloned().unwrap_or(BigUint::from(0u32));
                     let term = (BigUint::from(*r) * cur) % &p;
                     let neg = if term.is_zero() {
@@ -1800,13 +1800,14 @@ mod tests {
                 }
                 poly = fixed;
             }
-            let coeffs: Vec<FieldElement> =
-                poly.iter().map(|c| FieldElement::new(c % &p, p.clone())).collect();
+            let coeffs: Vec<FieldElement> = poly
+                .iter()
+                .map(|c| FieldElement::new(c % &p, p.clone()))
+                .collect();
             let found = find_roots_fp_fast(&coeffs, &p);
             let mut found_sorted: Vec<BigUint> = found.iter().map(|f| f.value.clone()).collect();
             found_sorted.sort();
-            let mut expect: Vec<BigUint> =
-                roots.iter().map(|r| BigUint::from(*r)).collect();
+            let mut expect: Vec<BigUint> = roots.iter().map(|r| BigUint::from(*r)).collect();
             expect.sort();
             expect.dedup();
             assert_eq!(found_sorted, expect, "roots {roots:?}");
