@@ -144,7 +144,7 @@ use crate::cryptanalysis::koblitz_fast_arith::{
     pack_fast, FastBinaryCurve, FastBinaryCurve128, FastPoint, FastPoint128,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{
-    to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+    to_u64_mod, RelationSolver, RowStatus, U64RankTracker,
 };
 use crate::cryptanalysis::sat::SolveResult;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
@@ -4164,9 +4164,10 @@ fn koblitz_index_calculus_dlp_observed(
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
     let wanted = relation_unknowns + opts.extra_relations.max(1);
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
-    // Incremental reduced echelon form over Z/rZ; the dense big-integer
-    // solver is the fallback for a modulus wider than 64 bits.
-    let mut echelon = IncrementalRelationSolver::new(relation_unknowns, r);
+    // Incremental reduced echelon form over the full subgroup modulus.
+    // Native-word arithmetic is retained for small groups; wide subgroups
+    // use exact BigUint coefficients and the same rank/target semantics.
+    let mut echelon = RelationSolver::new(relation_unknowns, r);
     let mut rng = StdRng::seed_from_u64(opts.seed);
     // Fast single-word arithmetic for trial sampling (`R = [a]G + [b]Q`
     // per attempt).  Bit-exact with the general arithmetic; the final
@@ -4183,7 +4184,7 @@ fn koblitz_index_calculus_dlp_observed(
     // Extract, announce and verify a candidate scalar from the echelon
     // form.  `Some(true)` means solved; `Some(false)` means a pinned
     // scalar failed verification, which only a wrong relation can cause.
-    let finish_incremental = |echelon: &IncrementalRelationSolver,
+    let finish_incremental = |echelon: &RelationSolver,
                                   report: &mut KoblitzIcReport,
                                   progress: &mut dyn FnMut(KoblitzIcEvent)|
      -> Option<bool> {
@@ -4353,7 +4354,7 @@ fn koblitz_index_calculus_dlp_observed(
                         report.direct_relation = true;
                         report.relations = relations.len();
                         report.independent_relations =
-                            echelon.as_ref().map_or(0, IncrementalRelationSolver::rank);
+                            echelon.as_ref().map_or(0, RelationSolver::rank);
                         report.relation_collection_ns = relation_start
                             .elapsed()
                             .as_nanos()

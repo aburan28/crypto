@@ -15,9 +15,10 @@
 //!
 //! This solver keeps the relation matrix in **reduced row echelon form
 //! over `Z/rZ`** and updates it per row in `O(U²)` native `u64`
-//! operations (`r < 2^64`, which covers every field degree this crate
-//! materialises).  Column `U` is `d`; because every pivot row has zeros
-//! in all other pivot columns, a pivot in column `U` reads off `d`
+//! operations when `r < 2^64`. The wide subgroup path uses the same
+//! echelon invariant with full-width coefficients. Column `U` is `d`;
+//! because every pivot row has zeros in all other pivot columns, a pivot
+//! in column `U` reads off `d`
 //! directly, so `target()` answers the "is `d` determined?" question
 //! exactly.  Dependent relations are recognised and dropped instead of
 //! silently padding the matrix, and an inconsistent row is reported —
@@ -30,8 +31,10 @@
 //! systems with planted solutions.
 
 use num_bigint::BigUint;
+use num_traits::{One, Zero};
 
 use super::koblitz_index_calculus::KoblitzRelation;
+use crate::utils::mod_inverse;
 
 /// Outcome of feeding one relation to the solver.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -241,6 +244,168 @@ impl IncrementalRelationSolver {
     }
 }
 
+/// Full-width reduced echelon form for a prime subgroup order above `u64`.
+/// A target is returned only when its own column has a pivot. This avoids
+/// treating the dense reference solver's arbitrary free-column values as a
+/// rank certificate.
+#[derive(Clone, Debug)]
+pub struct WideIncrementalRelationSolver {
+    modulus: BigUint,
+    unknowns: usize,
+    pivot_rows: Vec<Option<Vec<BigUint>>>,
+    rank: usize,
+    rows_seen: usize,
+    dependent_rows: usize,
+    inconsistent: bool,
+}
+
+impl WideIncrementalRelationSolver {
+    pub fn new(unknowns: usize, modulus: &BigUint) -> Option<Self> {
+        if modulus < &BigUint::from(2u32) {
+            return None;
+        }
+        Some(Self {
+            modulus: modulus.clone(),
+            unknowns,
+            pivot_rows: vec![None; unknowns + 1],
+            rank: 0,
+            rows_seen: 0,
+            dependent_rows: 0,
+            inconsistent: false,
+        })
+    }
+
+    pub fn rank(&self) -> usize {
+        self.rank
+    }
+
+    pub fn rows_seen(&self) -> usize {
+        self.rows_seen
+    }
+
+    pub fn dependent_rows(&self) -> usize {
+        self.dependent_rows
+    }
+
+    pub fn is_inconsistent(&self) -> bool {
+        self.inconsistent
+    }
+
+    pub fn add_relation(&mut self, relation: &KoblitzRelation, cofactor: &BigUint) -> RowStatus {
+        assert_eq!(relation.row.len(), self.unknowns, "relation width");
+        let m = &self.modulus;
+        let h = cofactor % m;
+        let mut row = relation.row.clone();
+        row.push((m - (&h * &relation.coef_b) % m) % m);
+        row.push((&h * &relation.coef_a) % m);
+        self.add_row(row)
+    }
+
+    /// Feed `[c_0, …, c_{U−1}, c_d | rhs]`, reducing every input modulo `r`.
+    pub fn add_row(&mut self, mut row: Vec<BigUint>) -> RowStatus {
+        assert_eq!(row.len(), self.unknowns + 2, "row width");
+        let m = &self.modulus;
+        let width = row.len();
+        for value in &mut row {
+            *value %= m;
+        }
+        self.rows_seen += 1;
+        for col in 0..=self.unknowns {
+            if row[col].is_zero() {
+                continue;
+            }
+            if let Some(pivot) = &self.pivot_rows[col] {
+                let factor = row[col].clone();
+                for k in col..width {
+                    if !pivot[k].is_zero() {
+                        let term = (&factor * &pivot[k]) % m;
+                        row[k] = (&row[k] + m - term) % m;
+                    }
+                }
+            }
+        }
+        let lead = (0..=self.unknowns).find(|&col| !row[col].is_zero());
+        let Some(lead) = lead else {
+            if !row[self.unknowns + 1].is_zero() {
+                self.inconsistent = true;
+                return RowStatus::Inconsistent;
+            }
+            self.dependent_rows += 1;
+            return RowStatus::Dependent;
+        };
+        let inverse = mod_inverse(&row[lead], m).expect("prime subgroup order");
+        for value in &mut row[lead..width] {
+            *value = (&*value * &inverse) % m;
+        }
+        for col in 0..=self.unknowns {
+            if col == lead {
+                continue;
+            }
+            if let Some(pivot) = self.pivot_rows[col].as_mut() {
+                let factor = pivot[lead].clone();
+                if factor.is_zero() {
+                    continue;
+                }
+                for k in lead..width {
+                    if !row[k].is_zero() {
+                        let term = (&factor * &row[k]) % m;
+                        pivot[k] = (&pivot[k] + m - term) % m;
+                    }
+                }
+            }
+        }
+        self.pivot_rows[lead] = Some(row);
+        self.rank += 1;
+        RowStatus::Independent
+    }
+
+    pub fn target_biguint(&self) -> Option<BigUint> {
+        let row = self.pivot_rows[self.unknowns].as_ref()?;
+        debug_assert!(row[..self.unknowns].iter().all(BigUint::is_zero));
+        debug_assert_eq!(row[self.unknowns], BigUint::one());
+        Some(row[self.unknowns + 1].clone())
+    }
+}
+
+/// Select native-word arithmetic when possible and full-width arithmetic
+/// otherwise, with one rank/target interface for the index-calculus driver.
+#[derive(Clone, Debug)]
+pub enum RelationSolver {
+    Word(IncrementalRelationSolver),
+    Wide(WideIncrementalRelationSolver),
+}
+
+impl RelationSolver {
+    pub fn new(unknowns: usize, modulus: &BigUint) -> Option<Self> {
+        if modulus.bits() <= 64 {
+            IncrementalRelationSolver::new(unknowns, modulus).map(Self::Word)
+        } else {
+            WideIncrementalRelationSolver::new(unknowns, modulus).map(Self::Wide)
+        }
+    }
+
+    pub fn rank(&self) -> usize {
+        match self {
+            Self::Word(solver) => solver.rank(),
+            Self::Wide(solver) => solver.rank(),
+        }
+    }
+
+    pub fn add_relation(&mut self, relation: &KoblitzRelation, cofactor: &BigUint) -> RowStatus {
+        match self {
+            Self::Word(solver) => solver.add_relation(relation, cofactor),
+            Self::Wide(solver) => solver.add_relation(relation, cofactor),
+        }
+    }
+
+    pub fn target_biguint(&self) -> Option<BigUint> {
+        match self {
+            Self::Word(solver) => solver.target_biguint(),
+            Self::Wide(solver) => solver.target_biguint(),
+        }
+    }
+}
+
 /// Minimal rank tracker for dense `u64` rows over `Z/mZ`.
 ///
 /// The factor-base-logs precompute grows a big-integer relation matrix
@@ -430,6 +595,120 @@ mod tests {
     }
 
     #[test]
+    fn wide_rank_and_target_use_the_entire_subgroup_order() {
+        let modulus = BigUint::parse_bytes(b"2417851639230796216685689", 10).unwrap();
+        let cofactor = BigUint::from(4u32);
+        let inverse_h = mod_inverse(&cofactor, &modulus).unwrap();
+        let column_log = BigUint::from(1234u32);
+        let target_log = BigUint::from(5678u32);
+        let high = BigUint::one() << 75usize;
+        let first = &high + BigUint::from(9u32);
+        let second = &first * BigUint::from(2u32) + BigUint::one();
+        let make_relation = |coefficient: BigUint, b: u32| {
+            let b = BigUint::from(b);
+            let rhs = (&coefficient * &column_log + &modulus
+                - (&cofactor * &b * &target_log) % &modulus)
+                % &modulus;
+            KoblitzRelation {
+                coef_a: (rhs * &inverse_h) % &modulus,
+                coef_b: b,
+                summands: Vec::new(),
+                summand_negated: Vec::new(),
+                row: vec![coefficient],
+            }
+        };
+        let relation1 = make_relation(first, 2);
+        let relation2 = make_relation(second, 5);
+        let mut solver = RelationSolver::new(1, &modulus).unwrap();
+        assert!(matches!(&solver, RelationSolver::Wide(_)));
+        assert_eq!(
+            solver.add_relation(&relation1, &cofactor),
+            RowStatus::Independent
+        );
+        assert_eq!(solver.rank(), 1);
+        assert!(solver.target_biguint().is_none());
+        assert_eq!(
+            solver.add_relation(&relation2, &cofactor),
+            RowStatus::Independent
+        );
+        assert_eq!(solver.rank(), 2);
+        assert_eq!(solver.target_biguint(), Some(target_log.clone()));
+        assert_eq!(
+            solver.add_relation(&relation1, &cofactor),
+            RowStatus::Dependent
+        );
+        let mut wrong = relation1.clone();
+        wrong.coef_a = (&wrong.coef_a + BigUint::one()) % &modulus;
+        assert_eq!(
+            solver.add_relation(&wrong, &cofactor),
+            RowStatus::Inconsistent
+        );
+        let RelationSolver::Wide(wide) = solver else {
+            unreachable!();
+        };
+        assert_eq!(wide.rows_seen(), 4);
+        assert_eq!(wide.dependent_rows(), 1);
+        assert!(wide.is_inconsistent());
+
+        let mut matrix = vec![
+            vec![
+                relation1.row[0].clone(),
+                (&modulus - (&cofactor * &relation1.coef_b) % &modulus) % &modulus,
+            ],
+            vec![
+                relation2.row[0].clone(),
+                (&modulus - (&cofactor * &relation2.coef_b) % &modulus) % &modulus,
+            ],
+        ];
+        let mut rhs = vec![
+            (&cofactor * &relation1.coef_a) % &modulus,
+            (&cofactor * &relation2.coef_a) % &modulus,
+        ];
+        let dense = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &modulus).unwrap();
+        assert_eq!(dense, vec![column_log, target_log]);
+    }
+
+    #[test]
+    fn wide_random_planted_rows_agree_with_dense_solution() {
+        let modulus = BigUint::parse_bytes(b"2417851639230796216685689", 10).unwrap();
+        let mut rng = StdRng::seed_from_u64(0x83_1c_2026);
+        for unknowns in [1usize, 3, 6] {
+            let columns = unknowns + 1;
+            let mut sample = || {
+                (BigUint::from(rng.gen::<u64>()) + (BigUint::from(rng.gen::<u64>()) << 64usize))
+                    % &modulus
+            };
+            let secret: Vec<BigUint> = (0..columns).map(|_| sample()).collect();
+            let mut solver = WideIncrementalRelationSolver::new(unknowns, &modulus).unwrap();
+            let mut matrix = Vec::new();
+            let mut rhs_values = Vec::new();
+            for _ in 0..(2 * columns + 5) {
+                let coefficients: Vec<BigUint> = (0..columns).map(|_| sample()).collect();
+                let rhs = coefficients
+                    .iter()
+                    .zip(&secret)
+                    .fold(BigUint::zero(), |acc, (coefficient, value)| {
+                        (acc + coefficient * value) % &modulus
+                    });
+                let mut row = coefficients.clone();
+                row.push(rhs.clone());
+                assert_ne!(solver.add_row(row), RowStatus::Inconsistent);
+                if let Some(target) = solver.target_biguint() {
+                    assert_eq!(target, secret[unknowns]);
+                }
+                matrix.push(coefficients);
+                rhs_values.push(rhs);
+            }
+            assert_eq!(solver.rank(), columns);
+            assert_eq!(solver.target_biguint(), Some(secret[unknowns].clone()));
+            assert_eq!(
+                gaussian_eliminate_mod_n(&mut matrix, &mut rhs_values, &modulus).unwrap(),
+                secret
+            );
+        }
+    }
+
+    #[test]
     fn rank_tracker_agrees_with_incremental_solver() {
         use rand::{rngs::StdRng, Rng, SeedableRng};
         // Same row stream into both structures: ranks must agree at
@@ -441,8 +720,7 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(0x274c);
         for unknowns in [1usize, 4, 9] {
             let mut tracker = U64RankTracker::new(m, unknowns);
-            let mut solver =
-                IncrementalRelationSolver::new(unknowns, &big).expect("modulus fits");
+            let mut solver = IncrementalRelationSolver::new(unknowns, &big).expect("modulus fits");
             for _ in 0..3 * unknowns + 5 {
                 let coeff: Vec<u64> = (0..unknowns).map(|_| rng.gen_range(0..m)).collect();
                 let t_rank = tracker.insert(coeff.clone());
