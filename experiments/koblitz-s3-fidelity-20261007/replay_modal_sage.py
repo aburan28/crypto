@@ -2,12 +2,15 @@
 
 Save /Volumes/SSD990/cryptanalysis/sage --runtime-info to
 modal/sage_runtime_info.json before launching this file through the checked
-repository Sage launcher. This validates arithmetic and relations, not host
-timing or physical CPU isolation.
+repository Sage launcher. The --panel, --runtime-info and --receipt arguments
+select a later raw panel without changing the frozen mathematical inputs.
+This validates arithmetic and relations, not host timing or physical CPU
+isolation.
 """
 
 from __future__ import annotations
 
+import argparse
 import gzip
 import hashlib
 import json
@@ -224,13 +227,13 @@ def replay_curve(n: int, panel: dict) -> dict:
             "targets": results}
 
 
-def main() -> None:
-    if RECEIPT.exists():
-        raise FileExistsError(RECEIPT)
-    runtime = load(RUNTIME)
+def main(panel_path: Path, runtime_path: Path, receipt_path: Path) -> None:
+    if receipt_path.exists():
+        raise FileExistsError(receipt_path)
+    runtime = load(runtime_path)
     assert runtime["status"] == "verified" and runtime["sage_version"] == SAGE_VERSION
     started = time.perf_counter_ns()
-    panel_bytes = PANEL.read_bytes()
+    panel_bytes = panel_path.read_bytes()
     panel = json.loads(gzip.decompress(panel_bytes))
     assert len(panel["blocks"]) == 24 and len(panel["runs"]) == 146
     assert all(run["raw_text"] is not None and sha(run["raw_text"].encode()) == run["raw_sha256"]
@@ -240,7 +243,7 @@ def main() -> None:
     receipt = {"kind": "modal_two_curve_independent_sage_replay_v1",
                "scope": "all distinct public points, full factor bases, one semantic relation trace per target, rank and target scalar; no host timing certification",
                "sage_version": SAGE_VERSION,
-               "sage_runtime_info_sha256": sha(RUNTIME.read_bytes()),
+               "sage_runtime_info_sha256": sha(runtime_path.read_bytes()),
                "replay_script_sha256": sha(Path(__file__).read_bytes()),
                "panel_sha256": sha(panel_bytes),
                "target_count": sum(len(c["targets"]) for c in curves),
@@ -250,10 +253,16 @@ def main() -> None:
                "all_target_scalars_independently_recovered": True,
                "all_factor_base_points_and_labels_checked": True,
                "curves": curves, "replay_wall_ns": time.perf_counter_ns() - started}
-    RECEIPT.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
-    print(json.dumps({"receipt": str(RECEIPT), "targets": receipt["target_count"],
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({"receipt": str(receipt_path), "targets": receipt["target_count"],
                       "relations": receipt["relation_witnesses_group_checked"]}), flush=True)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--panel", type=Path, default=PANEL)
+    parser.add_argument("--runtime-info", type=Path, default=RUNTIME)
+    parser.add_argument("--receipt", type=Path, default=RECEIPT)
+    args = parser.parse_args()
+    main(args.panel, args.runtime_info, args.receipt)

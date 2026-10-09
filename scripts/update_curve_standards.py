@@ -14,7 +14,13 @@ def catalog_displays():
     """Refresh names/roster only; preserve every frozen measurement field."""
     import build_ic_leaderboard as display
     doc = json.loads(display.OUT_JSON.read_text())
-    doc['roster'] = display.roster(display.Names(), {r['slug'] for r in doc['board']})
+    records, _ = display.curve_records()
+    roster = []
+    for row in display.roster(display.Names(), {r['slug'] for r in doc['board']}):
+        record = display.curve_record(records, row['slug'])
+        roster.append({**row, 'curves_yaml_key': record['curves_yaml_key'],
+                       'factor_base_link_status': record['factor_base_link_status']})
+    doc['roster'] = roster
     doc['sources']['registry']['sha256'] = hashlib.sha256(REGISTRY.read_bytes()).hexdigest()
     return {display.OUT_JSON: json.dumps(doc, indent=1, ensure_ascii=False) + '\n',
             display.OUT_MD: display.markdown(doc),

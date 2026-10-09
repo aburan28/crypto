@@ -1,7 +1,5 @@
 {
-  "checker_source_sha256": "3348fae6898ccb095c1a0eb20e06704fd40fbe915cba82fe9f1918c3b0fe0b83",
-  "coefficient_encoding": "0x field elements, ascending powers of u; H: v^2+h(u)*v=f(u); x=x(u), y=y_v(u)*v+y_0(u)",
-  "checker_source_sha256": "011d1d90a451419d8c41f73ebb2d80175ea200644975b915dcb8c26833c9c943",
+  "checker_source_sha256": "741c19d1566bf1a54f860b2d598bd7cbbea6c34b4fac2a97d63a5e3e3e1b7f62",
   "coefficient_encoding": "0x field elements, ascending powers of u; H: v^2+h(u)*v=f(u); x=x(u), y=y_v(u)*v+y_0(u); a GF(p^k) element e_0+e_1*t+...+e_{k-1}*t^(k-1) is the integer e_0+e_1*p+...+e_{k-1}*p^(k-1)",
   "curves": [
     {
@@ -4522,54 +4520,6 @@
         "degree": 3,
         "f": [
           "0x0",
-          "0x1df93aa20579d377f97203f385b11",
-          "0x0",
-          "0x0",
-          "0x3088250ca6e7c7fe649ce85820f7",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 3,
-        "h": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [
-          "0x1df93aa20579d377f97203f385b11"
-        ],
-        "y_v": [
-          "0x0",
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "irreducibility_proved_by_Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "97df4ac684cbe5e6ab7686805d46ec4aa74945314512fd4ed79598337d243117",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "binary_cubic_pullback_v1",
-        "degree": 3,
-        "f": [
-          "0x0",
           "0x4aa05687600addb8ceee4c36af91",
           "0x0",
           "0x0",
@@ -5700,357 +5650,6 @@
       "model_sha256": "76dadd18862f89d1d83448f01f54a24b4b543230f2c38acceb813523c2a6d196",
       "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
       "slug": "icv1-fp256-t432420386565659656852420866390673177327-76dadd18",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x24b8333948cfb53",
-          "0x0",
-          "0x1b4f0b41080af94",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "07ccd925d6963c07565faa474724c6692baa6ba370bd1422473913550817de92",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp6k11-tm527622722-07ccd925",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0xecbe76",
-          "0x0",
-          "0xb14eba",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "55c8d6404e985edbb2f10643c26badc5ea0d66bd7f83f6d05fea3609dce007b0",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp9k3-t1227-55c8d640",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x20cc89",
-          "0x0",
-          "0x2777e0",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "aba104bae738a15bd4d4a4f518066a02076592f50c110e89208aca316fb128cb",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp9k3-tm4575-aba104ba",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x993cb3",
-          "0x0",
-          "0x1bc22b0",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "bbd5cc8b7e15ea9d7397e6af76fcddbdc797008865bfa6ebbdb0778990ae5e9d",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp10k3-t3589-bbd5cc8b",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x21ff6150",
-          "0x0",
-          "0x16b699c0",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "dfa3991d266837a4dc8596fba86cd943b6d48d34b6bff53b88911e723767c2d3",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp10k3-t41822-dfa3991d",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x9560bfb",
-          "0x0",
-          "0x12a8cbaa",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "3c2726bc5e60a09198b9ea992eea3485b29e7a5276395ec082b141b9b549bbff",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp11k3-tm30789-3c2726bc",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x298e5f8151caa1",
-          "0x0",
-          "0x6940126b804f02",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "475f42718ca5e405f4b5f21d1d76f0bac064dffffb73debe8e0fc64e119048ea",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp12k5-tm296780010-475f4271",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x306c8913a45c50c2",
-          "0x0",
-          "0x20191c14db2c14a2",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "6687f4aa0d02c9f820c0a0ba89f02602f68abfa33f7af8b1a158dafb116c7a50",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp31k2-t1044939202-6687f4aa",
-      "status": "verified_over_declared_field",
-      "subfield_descent": "not_tested",
-      "subgroup_transfer": "not_tested"
-    },
-    {
-      "certificate": {
-        "construction": "prime_quadratic_pullback_v1",
-        "degree": 2,
-        "f": [
-          "0x20bf941edf34e2586d",
-          "0x0",
-          "0xebe1dd614fbe7efae",
-          "0x0",
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "genus": 2,
-        "h": [],
-        "x": [
-          "0x0",
-          "0x0",
-          "0x1"
-        ],
-        "y_0": [],
-        "y_v": [
-          "0x1"
-        ]
-      },
-      "dlp_advantage": null,
-      "exists": true,
-      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
-      "field_relation": "same_field",
-      "map_direction": "H -> E",
-      "minimal_degree": null,
-      "minimal_genus": null,
-      "model_sha256": "0d78f78721389c50087d71b00dc51977589a9cfac38e0c2c5b429cfb70f74fe6",
-      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-      "slug": "icv1-fp36k2-tm52676205250-0d78f787",
       "status": "verified_over_declared_field",
       "subfield_descent": "not_tested",
       "subgroup_transfer": "not_tested"
@@ -14844,20 +14443,367 @@
       "status": "verified_over_declared_field",
       "subfield_descent": "not_tested",
       "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x24b8333948cfb53",
+          "0x0",
+          "0x1b4f0b41080af94",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "07ccd925d6963c07565faa474724c6692baa6ba370bd1422473913550817de92",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp6k11-tm527622722-07ccd925",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0xecbe76",
+          "0x0",
+          "0xb14eba",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "55c8d6404e985edbb2f10643c26badc5ea0d66bd7f83f6d05fea3609dce007b0",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp9k3-t1227-55c8d640",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x20cc89",
+          "0x0",
+          "0x2777e0",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "aba104bae738a15bd4d4a4f518066a02076592f50c110e89208aca316fb128cb",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp9k3-tm4575-aba104ba",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x993cb3",
+          "0x0",
+          "0x1bc22b0",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "bbd5cc8b7e15ea9d7397e6af76fcddbdc797008865bfa6ebbdb0778990ae5e9d",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp10k3-t3589-bbd5cc8b",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x21ff6150",
+          "0x0",
+          "0x16b699c0",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "dfa3991d266837a4dc8596fba86cd943b6d48d34b6bff53b88911e723767c2d3",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp10k3-t41822-dfa3991d",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x9560bfb",
+          "0x0",
+          "0x12a8cbaa",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "3c2726bc5e60a09198b9ea992eea3485b29e7a5276395ec082b141b9b549bbff",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp11k3-tm30789-3c2726bc",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x298e5f8151caa1",
+          "0x0",
+          "0x6940126b804f02",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "475f42718ca5e405f4b5f21d1d76f0bac064dffffb73debe8e0fc64e119048ea",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp12k5-tm296780010-475f4271",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x306c8913a45c50c2",
+          "0x0",
+          "0x20191c14db2c14a2",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "6687f4aa0d02c9f820c0a0ba89f02602f68abfa33f7af8b1a158dafb116c7a50",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp31k2-t1044939202-6687f4aa",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x20bf941edf34e2586d",
+          "0x0",
+          "0xebe1dd614fbe7efae",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "0d78f78721389c50087d71b00dc51977589a9cfac38e0c2c5b429cfb70f74fe6",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp36k2-tm52676205250-0d78f787",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
     }
   ],
   "generated_by": "cargo run --bin curve_cover_check --",
   "proof": "docs/curves/COVERS.md",
-  "registry_sha256": "1140e62e4ba6ac3d3b912a9bfc306c76c40deb8cbb63e42bf0594b7c747ff00a",
-  "registry_sha256": "2342a3d22dd3a947dfc8ac2a791e2f42061dad4e7b723db6bd0abe7b851b64a6",
-  "registry_sha256": "d11d19fcb65175b8a8ad363b2c15ea87ccc733331d5c20b36cb0954901108c92",
+  "registry_sha256": "f8297bb893b0cb062b5b9e4a6f177ec4d1b1864485966695372cd53ad4441fba",
   "schema_version": "curve-covers/v1",
   "scope": "same-field existence for the supplied elliptic model; no optimality, descent, subgroup-map or DLP-cost claim",
   "summary": {
     "invalid_input": 0,
     "unsupported": 0,
-    "verified": 304
-    "verified": 124
-    "verified": 130
+    "verified": 321
   }
 }
