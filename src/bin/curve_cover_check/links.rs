@@ -18,18 +18,28 @@ fn coefficient_list_eq(a: &Value, b: &Value) -> Result<bool, String> {
     let (Some(a), Some(b)) = (a.as_array(), b.as_array()) else {
         return Ok(false);
     };
-    if a.len() != b.len() { return Ok(false); }
+    if a.len() != b.len() {
+        return Ok(false);
+    }
     for (x, y) in a.iter().zip(b) {
-        if integer(x)? != integer(y)? { return Ok(false); }
+        if integer(x)? != integer(y)? {
+            return Ok(false);
+        }
     }
     Ok(true)
 }
 
 fn zero_coefficients(v: &Value, degree: usize) -> Result<bool, String> {
-    let Some(values) = v.as_array() else { return Ok(false); };
-    if values.len() != degree { return Ok(false); }
+    let Some(values) = v.as_array() else {
+        return Ok(false);
+    };
+    if values.len() != degree {
+        return Ok(false);
+    }
     for x in values {
-        if !integer(x)?.is_zero() { return Ok(false); }
+        if !integer(x)?.is_zero() {
+            return Ok(false);
+        }
     }
     Ok(true)
 }
@@ -68,21 +78,32 @@ fn bind(model: &Value, rep: &Value, row: &Value) -> Result<(), String> {
             let extension_degree = if model["k"].is_null() {
                 None
             } else {
-                Some(model["k"].as_str().and_then(|s| s.parse::<usize>().ok())
-                    .ok_or("invalid extension degree")?)
+                Some(
+                    model["k"]
+                        .as_str()
+                        .and_then(|s| s.parse::<usize>().ok())
+                        .ok_or("invalid extension degree")?,
+                )
             };
             if !eq(&field["characteristic"], &model["p"])? {
                 return Err("EC1 field differs from model".into());
             }
             if let Some(degree) = extension_degree {
-                let modulus = field["modulus"].as_array().ok_or("missing EC1 extension modulus")?;
-                let model_modulus = model["modulus"].as_array().ok_or("missing model extension modulus")?;
+                let modulus = field["modulus"]
+                    .as_array()
+                    .ok_or("missing EC1 extension modulus")?;
+                let model_modulus = model["modulus"]
+                    .as_array()
+                    .ok_or("missing model extension modulus")?;
                 if field["representation"] != "polynomial"
                     || field["degree"].as_u64() != Some(degree as u64)
                     || modulus.len() != degree + 1
                     || model_modulus.len() != degree
                     || !integer(&modulus[degree])?.is_one()
-                    || !coefficient_list_eq(&Value::Array(modulus[..degree].to_vec()), &model["modulus"])?
+                    || !coefficient_list_eq(
+                        &Value::Array(modulus[..degree].to_vec()),
+                        &model["modulus"],
+                    )?
                 {
                     return Err("EC1 field differs from model".into());
                 }
