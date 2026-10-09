@@ -3,11 +3,7 @@
  "generated_by": "scripts/build_lab_browser.py",
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
-  "curves": 304,
-  "methods": 46,
-  "factor_bases": 29,
-  "curves": 124,
-  "curves": 130,
+  "curves": 321,
   "methods": 49,
   "factor_bases": 30,
   "candidates": 258,
@@ -16,27 +12,11 @@
   "yields": 2436
  },
  "sources": {
-  "docs/curves/registry.json": "1140e62e4ba6ac3d3b912a9bfc306c76c40deb8cbb63e42bf0594b7c747ff00a",
-  "docs/curves/covers.json": "2246221b5f7a0daec20039e6a19a1b5a0d059946fb9a11285648bbae40a9bddf",
-  "docs/curves/cover-links.yaml": "ebb890d384cb5e2e696ecf75faaadb321f8f00e4d750122ba7f152d124c7704d",
+  "docs/curves/registry.json": "f8297bb893b0cb062b5b9e4a6f177ec4d1b1864485966695372cd53ad4441fba",
+  "docs/curves/covers.json": "852307fea2c3cdc946159002d98836e0c5d3a2ff159d65054fcd483861f1fb5c",
+  "docs/curves/cover-links.yaml": "29de2ec63feb8a81f296f2cbc367dfd2c63c17ec29f806b19f0dd54397229fb4",
   "docs/curves/standards/coverage.json": "80cb0d6d5400904a34115be076d7463f5adf9ad0b40ffc2ce92f741a16985f56",
-  "docs/ic/leaderboard.json": "b201f767644d63ecd77b11e2de621c14c6d3ec90e4370e626f63401a428d1314",
-  "docs/curves/registry.json": "2342a3d22dd3a947dfc8ac2a791e2f42061dad4e7b723db6bd0abe7b851b64a6",
-  "docs/curves/covers.json": "4300d27564ed72b21623ea4e68bebd36fc76d33714b6f144a4b6ef8b6d4e4865",
-  "docs/ic/leaderboard.json": "44da9b7b75c513fb4778c7bb91bf6936e35daacdaada90e58bf1519aa815ff72",
-  "docs/curves/registry.json": "d11d19fcb65175b8a8ad363b2c15ea87ccc733331d5c20b36cb0954901108c92",
-  "docs/curves/covers.json": "e4d59ab26061ea2ab02a1f6e5f33c6cb02a4ae10277754a874cf1a4514887b79",
-  "docs/ic/leaderboard.json": "ab9832187616a80953aca50a4c2c7cc40e92543d7513061a70655036cad46eef",
-  "docs/curves/registry.json": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3",
-  "docs/curves/covers.json": "5f90fe0c1dfaa5cd2bd187a87dfd5ee5985c4d0171ea93e7874f9246527aaf9b",
-  "docs/ic/leaderboard.json": "bf8e682b1fd3fdeb9a11f9644ccc315cf8d9731ddfac5d4f1f2979716cd34b36",
-  "docs/curves/registry.json": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
-  "docs/curves/covers.json": "b1634d75fff27add2e27adf996ba820a8852ea72468088d9eb3c88bb69759a39",
-  "docs/ic/leaderboard.json": "ecfcfa4e5b522c34d6c51f2bf349cbf572fdb11b395405a72f5efab7c5d439c9",
-  "docs/ic/leaderboard.json": "f06718881306df35453ba137238cec0d538070903ae426abc1397a7ccca2e2ea",
-  "docs/ic/leaderboard.json": "259363c762ad248ac6327013efa7788ca2c496f71e9bb83942e82cc66fca6f99",
-  "docs/ic/leaderboard.json": "f06718881306df35453ba137238cec0d538070903ae426abc1397a7ccca2e2ea",
-  "docs/ic/leaderboard.json": "3fc2c323691ef75c2941f2fbda02d73fa8cfc38517b6f4f60f69bfa3848e872b",
+  "docs/ic/leaderboard.json": "04d2c612ad3feb3196b21f21580f58f3b2e4b39315799979302c410e797b077a",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -3241,6 +3221,112 @@
    "standards_provenance": []
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "icv1": "ICV1:f2m-11-4c26487e:67:1982:0x1:-7:unk:r:ae0facd240e8",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 11,
+    "degree": 11,
+    "modulus": "0x913"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "67",
+   "order": "1982",
+   "order_bits": 10.936,
+   "r": "991",
+   "r_bits": 9.936,
+   "cofactor": 2,
+   "generator": [
+    "0x4a9",
+    "0x3ef"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-4c26487e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x913\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N11Ce1h41243ed45ca3"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:41243ed45ca391b7b99cc37e02cfcd9ad4ae329b034049781a11c9701f91ab59"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "ae0facd240e84e43254c1fb74f0851b186e405bce8ed4a264913dd67d2d9a894",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m11-t67-ae0facd2",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:8c4849741c4c0ba074c74860138a7f786e31a96afa05793520de29cb814dcbf6",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:10e219f92a198cfd022ed2b251087d23d6ca201719bc08daec92c7e9a1f4473a",
+     "cover_id": "HC1G3h8c4849741c4c",
+     "map_id": "CV1D3h10e219f92a19"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
    "family": "koblitz",
@@ -3916,6 +4002,112 @@
    "standards_provenance": []
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "icv1": "ICV1:f2m-13-517bd51f:-181:8374:0x1:-7:unk:r:e4cd523ec44f",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 13,
+    "degree": 13,
+    "modulus": "0x3d33"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-181",
+   "order": "8374",
+   "order_bits": 13.022,
+   "r": "79",
+   "r_bits": 6.234,
+   "cofactor": 106,
+   "generator": [
+    "0x112d",
+    "0xbe3"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-517bd51f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3d33\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N13Ce1h98fd3bab3884"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:98fd3bab3884fa9d550cb6f4afeb86a8ce5cb7b973875cf7ecfe1197de65338c"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "e4cd523ec44fc00eb103a3ea48f2c4b6b6d11634ca16b0a83f0043565dd88a5e",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m13-tm181-e4cd523e",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:327b758f0e73a323253daf34bbf1fb65384f30dc5160e5e80ddef3e621b5bf48",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:e76e6e8f1dbdeffb658ec15c98837b73a812b7ad53c9f6d97702a530beecbb68",
+     "cover_id": "HC1G3h327b758f0e73",
+     "map_id": "CV1D3he76e6e8f1dbd"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
    "family": "koblitz",
@@ -4025,6 +4217,112 @@
      "map_uid": "urn:curve-cover-map:1:sha256:10a94d64c6e48547b97096e27bdd6f0aa17293749111854bf5e637538708aca0",
      "cover_id": "HC1G3h4d9fe32a0d48",
      "map_id": "CV1D3h10a94d64c6e4"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "icv1": "ICV1:f2m-15-bcb514a8:275:32494:0x1:-7:unk:r:25edae8389f1",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 15,
+    "degree": 15,
+    "modulus": "0x8035"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "275",
+   "order": "32494",
+   "order_bits": 14.983,
+   "r": "211",
+   "r_bits": 7.648,
+   "cofactor": 154,
+   "generator": [
+    "0x8e4",
+    "0x203a"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-bcb514a8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8035\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N15Ce1h68b09ca2a6f8"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:68b09ca2a6f858390f7dfbd1021e3b41ff530d8c7d0161893a0693b9fdfd8a56"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n15-l5"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "25edae8389f13e4f7ba13ea611b2ae6c61d85c6409a79c7f39e3582c2535219c",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m15-t275-25edae83",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:8c2d556cead1445f6a969b566343ed6f405c17a7cfa6a78553a0cb8b6ea72c8d",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:b827d74e64436b67fd1e61ed8b1ec7a882d48f94127fa7eaf78fb3962465e434",
+     "cover_id": "HC1G3h8c2d556cead1",
+     "map_id": "CV1D3hb827d74e6443"
     }
    ],
    "standards_provenance": []
@@ -4255,7 +4553,7 @@
    },
    "a": "1",
    "b": "0x1",
-   "construction": "KoblitzCurve::new(1, 17)",
+   "construction": null,
    "trace": "-101",
    "order": "131174",
    "order_bits": 17.001,
@@ -4263,33 +4561,36 @@
    "r_bits": 16.001,
    "cofactor": 2,
    "generator": [
-    "0xaaad",
-    "0x5b2b"
+    "0x1fa03",
+    "0xd814"
    ],
    "target_group": "prime-order subgroup",
    "j": "0x1",
    "endomorphism_discriminant": "-7",
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
    "ec1": [
+    "EC1N17Ce1h381f66e2762a",
     "EC1N17Ce1hdfbf24105ef5"
    ],
    "curve_uid": [
+    "urn:ec-record:1:sha256:381f66e2762a47b4af4fe5a8b915914be8cbc242ecad57198264dc254c63d57e",
     "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
    ],
    "ec1_unresolved": null,
    "retired_names": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
     "K_1/2^17",
     "K_1/F_2^17"
    ],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -4583,6 +4884,36 @@
      "verified": 6,
      "mean_s": 1.7578,
      "mean_ratio_to_floor": 8.178
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.4472,
+     "mean_ratio_to_floor": 6.733
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.066,
+     "mean_ratio_to_floor": 18.917
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.066,
+     "mean_ratio_to_floor": 18.917
     },
     {
      "session_id": "ECBS1h73210d525d59",
@@ -5465,6 +5796,36 @@
      "mean_ratio_to_floor": 3528.538
     },
     {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.7604,
+     "mean_ratio_to_floor": 3.74
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.0821,
+     "mean_ratio_to_floor": 15.16
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.0821,
+     "mean_ratio_to_floor": 15.16
+    },
+    {
      "session_id": "ECBS1hb0cb85a662d8",
      "arm": "ic-sub6-mitm",
      "method": "ic.pipeline",
@@ -6068,7 +6429,7 @@
    },
    "a": "1",
    "b": "0x1",
-   "construction": "KoblitzCurve::new(1, 19)",
+   "construction": null,
    "trace": "-797",
    "order": "525086",
    "order_bits": 19.002,
@@ -6076,33 +6437,36 @@
    "r_bits": 18.002,
    "cofactor": 2,
    "generator": [
-    "0x6001e",
-    "0x798a"
+    "0x7e3ea",
+    "0x24541"
    ],
    "target_group": "prime-order subgroup",
    "j": "0x1",
    "endomorphism_discriminant": "-7",
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
    "ec1": [
+    "EC1N19Ce1h6186a62ebfaa",
     "EC1N19Ce1h7e63aa468dcc"
    ],
    "curve_uid": [
+    "urn:ec-record:1:sha256:6186a62ebfaa1d11afc99ffa6ef0b9067190b7a03bc67150c379ffbf30e6a7d9",
     "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23"
    ],
    "ec1_unresolved": null,
    "retired_names": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
     "K_1/2^19",
     "K_1/F_2^19"
    ],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -6111,9 +6475,9 @@
      "log2_r": 18.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 4.872889458440391,
-     "ratio_rho": 14.896649773263793,
-     "ratio_floor": 120.62428246801784,
+     "best_s": 4.87288945844,
+     "ratio_rho": 14.8966497733,
+     "ratio_floor": 120.624282468,
      "verified": true
     }
    ],
@@ -6739,6 +7103,36 @@
      "mean_ratio_to_floor": 13107.556
     },
     {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.4404,
+     "mean_ratio_to_floor": 2.383
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0885,
+     "mean_ratio_to_floor": 5.89
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0885,
+     "mean_ratio_to_floor": 5.89
+    },
+    {
      "session_id": "ECBS1hf4c34c2455f9",
      "arm": "bsgs",
      "method": "bsgs.textbook",
@@ -7316,9 +7710,9 @@
      "log2_r": 22.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 1.432406399234411,
-     "ratio_rho": 6.988294347307033,
-     "ratio_floor": 39.01229984655938,
+     "best_s": 1.43240639923,
+     "ratio_rho": 6.98829434731,
+     "ratio_floor": 39.0122998466,
      "verified": true
     }
    ],
@@ -7384,6 +7778,112 @@
      "mean_ratio_to_floor": 8.192
     }
    ],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:abf12fd3a82e8253972ade85437dd08d8442807a0cb1d3d442b809c66780c944",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:00e08ba122bd60afdb4c124d781289ab8b01b84a1ad58b2c81a7e87d25663bd3",
+     "cover_id": "HC1G3habf12fd3a82e",
+     "map_id": "CV1D3h00e08ba122bd"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "icv1": "ICV1:f2m-23-bb3650c7:-5197:8393806:0x1:-7:unk:r:a023238e6474",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 23,
+    "degree": 23,
+    "modulus": "0xdcf5eb"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-5197",
+   "order": "8393806",
+   "order_bits": 23.001,
+   "r": "4196903",
+   "r_bits": 22.001,
+   "cofactor": 2,
+   "generator": [
+    "0x2e62c9",
+    "0x55e90c"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-bb3650c7\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0xdcf5eb\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N23Ce1he238479aae6d"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:e238479aae6dae6c48e4c249888db39e58360f2d9d6fd36418f9648bcc0d8b80"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
    "factor_bases": [],
    "tournament_cells": [
     {
@@ -7536,20 +8036,20 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "model_sha256": "a023238e6474f945bd8be7ddb502618b652064406ac23760b8ab5560b58ac039",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "slug": "icv1-f2m23-tm5197-a023238e",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
    },
    "cover_links": [
     {
-     "cover_uid": "urn:hc-model:1:sha256:abf12fd3a82e8253972ade85437dd08d8442807a0cb1d3d442b809c66780c944",
+     "cover_uid": "urn:hc-model:1:sha256:af751aeea28f05601c1102fd433ea15ad300eee94976d39d8115c60be23a792a",
      "direction": "H -> E",
-     "map_uid": "urn:curve-cover-map:1:sha256:00e08ba122bd60afdb4c124d781289ab8b01b84a1ad58b2c81a7e87d25663bd3",
-     "cover_id": "HC1G3habf12fd3a82e",
-     "map_id": "CV1D3h00e08ba122bd"
+     "map_uid": "urn:curve-cover-map:1:sha256:6d0ae1c0b90325416d76e083dc6d5f7b99c99a930b09ef1b56eb51379170a3fe",
+     "cover_id": "HC1G3haf751aeea28f",
+     "map_id": "CV1D3h6d0ae1c0b903"
     }
    ],
    "standards_provenance": []
@@ -7607,6 +8107,36 @@
    "on_leaderboard": false,
    "leaderboard": [],
    "ecbench": [
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1733,
+     "mean_ratio_to_floor": 7.129
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5383,
+     "mean_ratio_to_floor": 27.577
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5383,
+     "mean_ratio_to_floor": 27.577
+    },
     {
      "session_id": "ECBS1hb0cb85a662d8",
      "arm": "ic-sub6-mitm",
@@ -7812,6 +8342,112 @@
     "FB1h280d69cfbf38",
     "FB1h3a3262d6867f"
    ],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:9f5ba8c9c587b831f1e55ce7102cdd1abf9d90f95c93eeb1ba7532776da8b521",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:af66e5b2a5f0ee2be329ffeaeb76688c27fad3277c301b18bec61bc01a6afdc9",
+     "cover_id": "HC1G3h9f5ba8c9c587",
+     "map_id": "CV1D3haf66e5b2a5f0"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "icv1": "ICV1:f2m-29-797da7cf:-40309:536911222:0x1:-7:unk:r:6aecea52fac9",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 29,
+    "degree": 29,
+    "modulus": "0x3a0b7cb9"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-40309",
+   "order": "536911222",
+   "order_bits": 29.0,
+   "r": "42457",
+   "r_bits": 15.296,
+   "cofactor": 12646,
+   "generator": [
+    "0x1a849ba3",
+    "0x4b3542e"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-797da7cf\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3a0b7cb9\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N29Ce1h7fed23ba87ea"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:7fed23ba87eaf8303f4a16985bb0e665733faae9285069c5a430a9bdd9fab8a7"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
    "tournament_cells": [
     {
      "round": "round-0016",
@@ -7927,20 +8563,20 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "model_sha256": "6aecea52fac93749eeedfd85e1121feaed9eb35764396fcadf862d8411b40307",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "slug": "icv1-f2m29-tm40309-6aecea52",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
    },
    "cover_links": [
     {
-     "cover_uid": "urn:hc-model:1:sha256:9f5ba8c9c587b831f1e55ce7102cdd1abf9d90f95c93eeb1ba7532776da8b521",
+     "cover_uid": "urn:hc-model:1:sha256:04f1a604e173ca28a13e347f2684ae0c05968c98be4c83266d20194941f9831e",
      "direction": "H -> E",
-     "map_uid": "urn:curve-cover-map:1:sha256:af66e5b2a5f0ee2be329ffeaeb76688c27fad3277c301b18bec61bc01a6afdc9",
-     "cover_id": "HC1G3h9f5ba8c9c587",
-     "map_id": "CV1D3haf66e5b2a5f0"
+     "map_uid": "urn:curve-cover-map:1:sha256:e80d58d929c3aa762b69d5fa89ff49af69625e519248cd7549e1967755554082",
+     "cover_id": "HC1G3h04f1a604e173",
+     "map_id": "CV1D3he80d58d929c3"
     }
    ],
    "standards_provenance": []
@@ -8169,6 +8805,112 @@
    "standards_provenance": []
   },
   {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "icv1": "ICV1:f2m-31-eaa21191:90707:2147392942:0x1:-7:unk:r:5fc996f03a86",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 31,
+    "degree": 31,
+    "modulus": "0x851e410f"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "90707",
+   "order": "2147392942",
+   "order_bits": 31.0,
+   "r": "41231",
+   "r_bits": 15.258,
+   "cofactor": 52082,
+   "generator": [
+    "0x6347c766",
+    "0xc3503f0"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-eaa21191\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x851e410f\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N31Ce1h6be2d6a625f9"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:6be2d6a625f9a828dca420147995b710ca572754e3fde55313ff248ee4ec42cc"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n31-l8"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "5fc996f03a86af22aab8a078ea9e1e59ea1c188a4ca0ab837b81ee91fb31b322",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m31-t90707-5fc996f0",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:6c912a6fb2c85618de08c9598fe76a4ed813b307a9a3156f16e8307c263a2abe",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:8fd1d43fd5bace8e71b37fbd3f6440355d4864d91d3b80b20b3d5f080e4666ac",
+     "cover_id": "HC1G3h6c912a6fb2c8",
+     "map_id": "CV1D3h8fd1d43fd5ba"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
    "slug": "icv1-f2m31-t90707-8fd18741",
    "icv1": "ICV1:f2m-31-200700ef:90707:2147392942:0x1:-7:unk:r:8fd187414f75",
    "family": "koblitz",
@@ -8327,9 +9069,9 @@
      "log2_r": 27.78,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.48528077638942624,
-     "ratio_rho": 5.260801523504233,
-     "ratio_floor": 16.763524472349825,
+     "best_s": 0.485280776389,
+     "ratio_rho": 5.2608015235,
+     "ratio_floor": 16.7635244723,
      "verified": true
     }
    ],
@@ -8929,11 +9671,11 @@
     {
      "regime": "koblitz",
      "log2_r": 39.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 5.580644298617035,
-     "ratio_rho": 8.044290213253069,
-     "ratio_floor": 40.3210032810846,
+     "best_s": 11.1691398617,
+     "ratio_rho": 7.65714117337,
+     "ratio_floor": 80.6987331411,
      "verified": true
     },
     {
@@ -8941,9 +9683,9 @@
      "log2_r": 39.0,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.24079642651229552,
-     "ratio_rho": 3.6156712977275385,
-     "ratio_floor": 8.756153147889457,
+     "best_s": 0.240796426512,
+     "ratio_rho": 3.61567129773,
+     "ratio_floor": 8.75615314789,
      "verified": true
     }
    ],
@@ -9077,9 +9819,51 @@
      "verified": 24,
      "mean_s": 0.1384,
      "mean_ratio_to_floor": 1.0
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 23,
+     "mean_s": 42.5686,
+     "mean_ratio_to_floor": 307.565
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "ic-k16-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 23,
+     "mean_s": 42.5686,
+     "mean_ratio_to_floor": 307.565
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 80,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 0.1571,
+     "mean_ratio_to_floor": 1.135
     }
    ],
-   "factor_bases": [],
+   "factor_bases": [
+    "FB1h762e47b20056"
+   ],
    "tournament_cells": [],
    "hyperelliptic_cover": {
     "certificate": {
@@ -9194,9 +9978,9 @@
      "log2_r": 32.11,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.3248333744103279,
-     "ratio_rho": 4.875031509653909,
-     "ratio_floor": 12.09668173360119,
+     "best_s": 0.32483337441,
+     "ratio_rho": 4.87503150965,
+     "ratio_floor": 12.0966817336,
      "verified": true
     }
    ],
@@ -9464,9 +10248,9 @@
      "log2_r": 24.8,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.8563454652154826,
-     "ratio_rho": 7.190079591360827,
-     "ratio_floor": 32.62320627281522,
+     "best_s": 0.856345465215,
+     "ratio_rho": 7.19007959136,
+     "ratio_floor": 32.6232062728,
      "verified": true
     }
    ],
@@ -9586,11 +10370,11 @@
     {
      "regime": "koblitz",
      "log2_r": 36.64,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 4.267748993706104,
-     "ratio_rho": 4.946769165949517,
-     "ratio_floor": 33.01435804053309,
+     "best_s": 9.50680578078,
+     "ratio_rho": 5.22592584414,
+     "ratio_floor": 73.542537373,
      "verified": true
     },
     {
@@ -9598,9 +10382,9 @@
      "log2_r": 36.64,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.23441213095035382,
-     "ratio_rho": 3.8928784425876555,
-     "ratio_floor": 9.12641881482961,
+     "best_s": 0.23441213095,
+     "ratio_rho": 3.89287844259,
+     "ratio_floor": 9.12641881483,
      "verified": true
     }
    ],
@@ -9772,11 +10556,11 @@
     {
      "regime": "koblitz",
      "log2_r": 44.26,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 7.398810637067995,
-     "ratio_rho": 14.703867319407847,
-     "ratio_floor": 60.779189777284564,
+     "best_s": 16.9761829945,
+     "ratio_rho": 13.240997537,
+     "ratio_floor": 139.454663531,
      "verified": true
     },
     {
@@ -9784,13 +10568,53 @@
      "log2_r": 44.26,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.2605273559740867,
-     "ratio_rho": 5.113845470925767,
-     "ratio_floor": 10.77116427992114,
+     "best_s": 0.260527355974,
+     "ratio_rho": 5.11384547093,
+     "ratio_floor": 10.7711642799,
      "verified": true
     }
    ],
    "ecbench": [
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.119,
+     "mean_ratio_to_floor": 0.977
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1063,
+     "mean_ratio_to_floor": 0.873
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.125,
+     "mean_ratio_to_floor": 1.027
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1099,
+     "mean_ratio_to_floor": 0.903
+    },
     {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
@@ -9840,6 +10664,46 @@
      "verified": 24,
      "mean_s": 0.0989,
      "mean_ratio_to_floor": 0.813
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "ic-k16-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 80,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    },
+    {
+     "session_id": "ECBS1he98c2d9648b6",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 0.1414,
+     "mean_ratio_to_floor": 1.162
     }
    ],
    "factor_bases": [],
@@ -9955,11 +10819,11 @@
     {
      "regime": "koblitz",
      "log2_r": 38.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 8.12117350520502,
-     "ratio_rho": 1.9845626541276857,
-     "ratio_floor": 69.18489342115318,
+     "best_s": 11.0145815141,
+     "ratio_rho": 6.12119406427,
+     "ratio_floor": 93.8340558345,
      "verified": true
     }
    ],
@@ -10078,15 +10942,55 @@
     {
      "regime": "koblitz",
      "log2_r": 44.52,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 9.032810277716749,
-     "ratio_rho": 15.668163853624774,
-     "ratio_floor": 78.2895782821557,
+     "best_s": 16.2570323477,
+     "ratio_rho": 12.0308894345,
+     "ratio_floor": 140.903679751,
      "verified": true
     }
    ],
    "ecbench": [
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1123,
+     "mean_ratio_to_floor": 0.973
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1059,
+     "mean_ratio_to_floor": 0.918
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1245,
+     "mean_ratio_to_floor": 1.079
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1055,
+     "mean_ratio_to_floor": 0.915
+    },
     {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
@@ -10254,11 +11158,11 @@
     {
      "regime": "koblitz",
      "log2_r": 47.21,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 15.14900664715143,
-     "ratio_rho": 31.599405794913018,
-     "ratio_floor": 133.50702947303913,
+     "best_s": 24.9316448651,
+     "ratio_rho": 20.9708619596,
+     "ratio_floor": 219.72066706,
      "verified": true
     },
     {
@@ -10266,13 +11170,53 @@
      "log2_r": 47.21,
      "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
      "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.4884575885497573,
-     "ratio_rho": 9.202036756044834,
-     "ratio_floor": 21.66522289873162,
+     "best_s": 0.48845758855,
+     "ratio_rho": 9.20203675604,
+     "ratio_floor": 21.6652228987,
      "verified": true
     }
    ],
    "ecbench": [
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1176,
+     "mean_ratio_to_floor": 1.036
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1275,
+     "mean_ratio_to_floor": 1.123
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.126,
+     "mean_ratio_to_floor": 1.111
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.127,
+     "mean_ratio_to_floor": 1.119
+    },
     {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
@@ -14117,12 +15061,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 13.994265033718973,
+     "log2_r": 13.9942650337,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 26.313945594196156,
-     "ratio_rho": 13.069161008261789,
-     "ratio_floor": 29.692108012575694,
+     "best_s": 26.3139455942,
+     "ratio_rho": 13.0691610083,
+     "ratio_floor": 29.6921080126,
      "verified": true
     }
    ],
@@ -15087,12 +16031,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 14.997841035008591,
+     "log2_r": 14.997841035,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 21.30470007604251,
-     "ratio_rho": 10.621069650895725,
-     "ratio_floor": 24.039779727024555,
+     "best_s": 21.304700076,
+     "ratio_rho": 10.6210696509,
+     "ratio_floor": 24.039779727,
      "verified": true
     }
    ],
@@ -15421,12 +16365,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 19.998217158598404,
+     "log2_r": 19.9982171586,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 24.390627126303627,
-     "ratio_rho": 17.986362549690746,
-     "ratio_floor": 27.521875521715703,
+     "best_s": 24.3906271263,
+     "ratio_rho": 17.9863625497,
+     "ratio_floor": 27.5218755217,
      "verified": true
     }
    ],
@@ -16077,12 +17021,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 21.000262077754154,
+     "log2_r": 21.0002620778,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 27.240364296650327,
-     "ratio_rho": 23.025248464568847,
-     "ratio_floor": 30.737459576432638,
+     "best_s": 27.2403642967,
+     "ratio_rho": 23.0252484646,
+     "ratio_floor": 30.7374595764,
      "verified": true
     }
    ],
@@ -16411,12 +17355,12 @@
    "leaderboard": [
     {
      "regime": "char2",
-     "log2_r": 24.414902680079198,
+     "log2_r": 24.4149026801,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 36.929397566960354,
-     "ratio_rho": 38.21077630869644,
-     "ratio_floor": 41.67036286794578,
+     "best_s": 36.929397567,
+     "ratio_rho": 38.2107763087,
+     "ratio_floor": 41.6703628679,
      "verified": true
     }
    ],
@@ -16805,6 +17749,214 @@
    "standards_provenance": []
   },
   {
+   "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x17ef6a3b098891f6b4c529b62f0dd:unk:unk:r:5de3030fefcc",
+   "family": "binary",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 113,
+    "degree": 113,
+    "modulus": "0x20000000000000000000000000201"
+   },
+   "a": "0x3088250ca6e7c7fe649ce85820f7",
+   "b": "0x162b1a595685a1387c82647bf44cf",
+   "construction": null,
+   "trace": "-122610772499221213",
+   "order": "10384593717069655379671765157661406",
+   "order_bits": 113.0,
+   "r": "5192296858534827689835882578830703",
+   "r_bits": 112.0,
+   "cofactor": 2,
+   "generator": [
+    "0x18f4e7a48635b736527e45354b897",
+    "0x7eea00533a71541476d03dcdf4b8"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x17ef6a3b098891f6b4c529b62f0dd",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0x162b1a595685a1387c82647bf44cf\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N113Crbh2ee3581888f2"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0xb990c6334a3e1c1c3bef672156cb",
+      "0x0",
+      "0x0",
+      "0x3088250ca6e7c7fe649ce85820f7",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0xb990c6334a3e1c1c3bef672156cb"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "5de3030fefccf2b61cb1ca25102903eb702eeb68a231e2c5da9ea2d1e29b0dfe",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:5f2bfb5bc73c7ccf7614550ff28862a334c5889237a1c2222f979eda957cfaa0",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:c235a66f3c4c413e5a659b816e63b53297b09cf38e1e96415da98a796dfe6246",
+     "cover_id": "HC1G3h5f2bfb5bc73c",
+     "map_id": "CV1D3hc235a66f3c4c"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0xb1df3d9c423aa919217735a6d6ba:unk:unk:r:fd54d0ebcd45",
+   "family": "binary",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 113,
+    "degree": 113,
+    "modulus": "0x20000000000000000000000000201"
+   },
+   "a": "0x3088250ca6e7c7fe649ce85820f7",
+   "b": "0x109267245489e254e8f14002629a1",
+   "construction": null,
+   "trace": "-122610772499221213",
+   "order": "10384593717069655379671765157661406",
+   "order_bits": 113.0,
+   "r": "5192296858534827689835882578830703",
+   "r_bits": 112.0,
+   "cofactor": 2,
+   "generator": [
+    "0x13046f06d2108d8dbf031f5a033ab",
+    "0x11bb93fb05d5d549787a527aaf285"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0xb1df3d9c423aa919217735a6d6ba",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0x109267245489e254e8f14002629a1\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N113Crbh921ab2cd913f"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [],
+   "sources": [
+    "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x4aa05687600addb8ceee4c36af91",
+      "0x0",
+      "0x0",
+      "0x3088250ca6e7c7fe649ce85820f7",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x4aa05687600addb8ceee4c36af91"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "fd54d0ebcd451516257d578057b4819e745a575ef46e10b5263af670825df98b",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:51111348c54bf181aebc05fd642ef1f94991285c28932bf608ec3e8dec6666b6",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:298962b08f7236eb53c6c7e2c7cd70f313b163a07635ad076e38287f605a8036",
+     "cover_id": "HC1G3h51111348c54b",
+     "map_id": "CV1D3h298962b08f72"
+    }
+   ],
+   "standards_provenance": []
+  },
+  {
    "slug": "icv1-fp6-tm7-fc20da94",
    "icv1": "ICV1:fp-59:-7:67:52:unk:unk:r:fc20da944826",
    "family": "prime",
@@ -16945,12 +18097,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 9.684748620421626,
+     "log2_r": 9.68474862042,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 22.84909965469822,
-     "ratio_rho": 6.338382939564868,
-     "ratio_floor": 25.782448037250745,
+     "best_s": 22.8490996547,
+     "ratio_rho": 6.33838293956,
+     "ratio_floor": 25.7824480373,
      "verified": true
     }
    ],
@@ -17155,12 +18307,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 11.925183519434208,
+     "log2_r": 11.9251835194,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 15.617808489239641,
-     "ratio_rho": 5.4703789655979405,
-     "ratio_floor": 17.622809734945452,
+     "best_s": 15.6178084892,
+     "ratio_rho": 5.4703789656,
+     "ratio_floor": 17.6228097349,
      "verified": true
     }
    ],
@@ -17453,12 +18605,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 13.986464267334126,
+     "log2_r": 13.9864642673,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.07494054076345,
-     "ratio_rho": 6.42943611579286,
-     "ratio_floor": 14.753490517210013,
+     "best_s": 13.0749405408,
+     "ratio_rho": 6.42943611579,
+     "ratio_floor": 14.7534905172,
      "verified": true
     }
    ],
@@ -17852,105 +19004,6 @@
    "slug": "icv1-fp16-t351-d433f24e",
    "icv1": "ICV1:fp-65353:351:65003:20412:unk:unk:r:d433f24edf51",
    "family": "prime",
-   "slug": "icv1-f2m11-t67-ae0facd2",
-   "icv1": "ICV1:f2m-11-4c26487e:67:1982:0x1:-7:unk:r:ae0facd240e8",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 11,
-    "degree": 11,
-    "modulus": "0x913"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "67",
-   "order": "1982",
-   "order_bits": 10.936,
-   "r": "991",
-   "r_bits": 9.936,
-   "cofactor": 2,
-   "generator": [
-    "0x4a9",
-    "0x3ef"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-4c26487e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x913\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N11Ce1h41243ed45ca3"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:41243ed45ca391b7b99cc37e02cfcd9ad4ae329b034049781a11c9701f91ab59"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n11-l4"
-   ],
-   "sources": [
-    "docs/curves/sources/ecbench-large-prime.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "ae0facd240e84e43254c1fb74f0851b186e405bce8ed4a264913dd67d2d9a894",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m11-t67-ae0facd2",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m13-t181-515ee569",
-   "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
-   "family": "koblitz",
    "standard_names": [],
    "field": {
     "characteristic": "p",
@@ -17998,12 +19051,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 15.988218682078955,
+     "log2_r": 15.9882186821,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 11.683400801861266,
-     "ratio_rho": 6.714597175542405,
-     "ratio_floor": 13.18330606564726,
+     "best_s": 11.6834008019,
+     "ratio_rho": 6.71459717554,
+     "ratio_floor": 13.1833060656,
      "verified": true
     }
    ],
@@ -18177,6 +19230,36 @@
      "verified": 24,
      "mean_s": 1.6592,
      "mean_ratio_to_floor": 1.872
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1111,
+     "mean_ratio_to_floor": 1.254
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.3054,
+     "mean_ratio_to_floor": 1.473
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.3054,
+     "mean_ratio_to_floor": 1.473
     },
     {
      "session_id": "ECBS1h548d49a71881",
@@ -18354,193 +19437,6 @@
     "FB1hda7246a3d24d",
     "FB1h8d9da29112f1"
    ],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "515ee569629443177ac0bdecb536e29041d06205752b7438ab4a764469538d9e",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m13-t181-515ee569",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m13-tm181-25e736d2",
-   "icv1": "ICV1:f2m-13-752c6463:-181:8374:0x1:-7:unk:r:25e736d29ac4",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 13,
-    "degree": 13,
-    "modulus": "0x201b"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "-181",
-   "order": "8374",
-   "order_bits": 13.022,
-   "r": null,
-   "r_bits": null,
-   "cofactor": null,
-   "generator": null,
-   "target_group": null,
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
-   "ec1": [],
-   "curve_uid": [],
-   "ec1_unresolved": "KoblitzCurve::new(1, 13) finds no usable prime-order subgroup, so the repository has built no generator on it",
-   "retired_names": [
-    "k1n13",
-    "K_1 / GF(2^13)",
-    "K_1/2^13",
-    "K_1/F_2^13"
-   ],
-   "sources": [
-    "prose, by the constructor rule: docs/browser/data.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "25e736d29ac44d41b09db689fa23cabf409b35e5b872b130f6947c69723ce3c1",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m13-tm181-25e736d2",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m13-tm181-e4cd523e",
-   "icv1": "ICV1:f2m-13-517bd51f:-181:8374:0x1:-7:unk:r:e4cd523ec44f",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 13,
-    "degree": 13,
-    "modulus": "0x3d33"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "-181",
-   "order": "8374",
-   "order_bits": 13.022,
-   "r": "79",
-   "r_bits": 6.234,
-   "cofactor": 106,
-   "generator": [
-    "0x112d",
-    "0xbe3"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-517bd51f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3d33\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N13Ce1h98fd3bab3884"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:98fd3bab3884fa9d550cb6f4afeb86a8ce5cb7b973875cf7ecfe1197de65338c"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n13-l4"
-   ],
-   "sources": [
-    "docs/curves/sources/ecbench-large-prime.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
    "tournament_cells": [],
    "hyperelliptic_cover": {
     "certificate": {
@@ -18550,11 +19446,6 @@
       "0x2a419",
       "0x0",
       "0x2e1d5",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
       "0x0",
       "0x0",
       "0x0",
@@ -18582,9 +19473,6 @@
     "model_sha256": "d28d5e0941032b3b01cc23e89b235dfabc15878fc6bc871c143476820bbf952a",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
     "slug": "icv1-fp18-tm337-d28d5e09",
-    "model_sha256": "e4cd523ec44fc00eb103a3ea48f2c4b6b6d11634ca16b0a83f0043565dd88a5e",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m13-tm181-e4cd523e",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -18604,9 +19492,6 @@
    "slug": "icv1-fp18-t175-45770ebc",
    "icv1": "ICV1:fp-261847:175:261673:864:unk:unk:r:45770ebcfcb2",
    "family": "prime",
-   "slug": "icv1-f2m15-tm275-2d22ff5d",
-   "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
-   "family": "koblitz",
    "standard_names": [],
    "field": {
     "characteristic": "p",
@@ -18641,35 +19526,6 @@
    "ec1_unresolved": null,
    "retired_names": [
     "bench-18bit"
-   "a": "0",
-   "b": "0x1",
-   "construction": "KoblitzCurve::new(0, 15)",
-   "trace": "-275",
-   "order": "33044",
-   "order_bits": 15.008,
-   "r": "751",
-   "r_bits": 9.467,
-   "cofactor": 44,
-   "generator": [
-    "0x6ea0",
-    "0x43c5"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N15Ce0hf0a769285cc9"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:f0a769285cc95aa852be0c1244f2e9ef5ff1088db774553d2cdeaf561808bd92"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "k0n15",
-    "K_0 / GF(2^15)",
-    "K_0/2^15",
-    "K_0/F_2^15"
    ],
    "sources": [
     "src/cryptanalysis/research_bench.rs",
@@ -18683,216 +19539,15 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 17.997405546030816,
+     "log2_r": 17.997405546,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 8.413718646746405,
-     "ratio_rho": 5.819428361014084,
-     "ratio_floor": 9.493864838791692,
+     "best_s": 8.41371864675,
+     "ratio_rho": 5.81942836101,
+     "ratio_floor": 9.49386483879,
      "verified": true
     }
    ],
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "2d22ff5d351f96e9c028bb789f008bfcb31c6f84d9c1aa2868e957ec1bfaca90",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m15-tm275-2d22ff5d",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m15-t275-25edae83",
-   "icv1": "ICV1:f2m-15-bcb514a8:275:32494:0x1:-7:unk:r:25edae8389f1",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 15,
-    "degree": 15,
-    "modulus": "0x8035"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "275",
-   "order": "32494",
-   "order_bits": 14.983,
-   "r": "211",
-   "r_bits": 7.648,
-   "cofactor": 154,
-   "generator": [
-    "0x8e4",
-    "0x203a"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-bcb514a8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8035\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N15Ce1h68b09ca2a6f8"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:68b09ca2a6f858390f7dfbd1021e3b41ff530d8c7d0161893a0693b9fdfd8a56"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n15-l5"
-   ],
-   "sources": [
-    "docs/curves/sources/ecbench-large-prime.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "25edae8389f13e4f7ba13ea611b2ae6c61d85c6409a79c7f39e3582c2535219c",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m15-t275-25edae83",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m15-t275-b7f03703",
-   "icv1": "ICV1:f2m-15-2d490b65:275:32494:0x1:-7:unk:r:b7f03703e5d7",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 15,
-    "degree": 15,
-    "modulus": "0x8003"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": "KoblitzCurve::new(1, 15)",
-   "trace": "275",
-   "order": "32494",
-   "order_bits": 14.983,
-   "r": "211",
-   "r_bits": 7.648,
-   "cofactor": 154,
-   "generator": [
-    "0x3b0b",
-    "0x50d"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N15Ce1h33cd37a1308e"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:33cd37a1308e1ce1a94f56a0f6ea7bda8991c3239a3719c95ad7fd10b5fbe083"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "k1n15",
-    "K_1 / GF(2^15)",
-    "K_1/2^15",
-    "K_1/F_2^15"
-   ],
-   "sources": [
-    "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/browser/data.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
    "ecbench": [],
    "factor_bases": [],
    "tournament_cells": [],
@@ -18905,20 +19560,6 @@
       "0x0",
       "0x3",
       "0x0",
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
       "0x0",
       "0x0",
       "0x1"
@@ -18932,24 +19573,12 @@
      ],
      "y_0": [],
      "y_v": [
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
       "0x1"
      ]
     },
     "dlp_advantage": null,
     "exists": true,
     "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
-    "field_check": "irreducibility_proved_by_Rabin",
     "field_relation": "same_field",
     "map_direction": "H -> E",
     "minimal_degree": null,
@@ -18969,51 +19598,6 @@
      "cover_id": "HC1G2haccc409eb732",
      "map_id": "CV1D2h00259ba83932"
     }
-    "model_sha256": "b7f03703e5d725a6b8a2af66890e39162684b9302ade0807b9e0b731316854b8",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m15-t275-b7f03703",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m17-t101-e6c4b64d",
-   "icv1": "ICV1:f2m-17-237ceae1:101:130972:0x1:-7:unk:r:e6c4b64dcf8b",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 17,
-    "degree": 17,
-    "modulus": "0x20009"
-   },
-   "a": "0",
-   "b": "0x1",
-   "construction": null,
-   "trace": "101",
-   "order": "130972",
-   "order_bits": 16.998,
-   "r": null,
-   "r_bits": null,
-   "cofactor": null,
-   "generator": null,
-   "target_group": null,
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
-   "ec1": [],
-   "curve_uid": [],
-   "ec1_unresolved": "KoblitzCurve::new(0, 17) finds no usable prime-order subgroup, so the repository has built no generator on it",
-   "retired_names": [
-    "k0n17",
-    "K_0 / GF(2^17)",
-    "K_0/2^17",
-    "K_0/F_2^17"
-   ],
-   "sources": [
-    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "standards_provenance": []
   },
@@ -19041,29 +19625,6 @@
    "generator": [
     "0x425b0",
     "0xbc1d"
-   "slug": "icv1-f2m17-tm101-00378d4e",
-   "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 17,
-    "degree": 17,
-    "modulus": "0x20009"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "-101",
-   "order": "131174",
-   "order_bits": 17.001,
-   "r": "65587",
-   "r_bits": 16.001,
-   "cofactor": 2,
-   "generator": [
-    "0x1fa03",
-    "0xd814"
    ],
    "target_group": "prime-order subgroup",
    "j": "476305",
@@ -19078,33 +19639,14 @@
    "ec1_unresolved": null,
    "retired_names": [
     "generated-20bit-563153"
-    "EC1N17Ce1h381f66e2762a",
-    "EC1N17Ce1hdfbf24105ef5"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:381f66e2762a47b4af4fe5a8b915914be8cbc242ecad57198264dc254c63d57e",
-    "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n17-l6",
-    "k1n17",
-    "K_1 / GF(2^17)",
-    "K_1/2^17",
-    "K_1/F_2^17"
    ],
    "sources": [
-    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "research/ecbench_calibration_20261002/sessions/prime/plan.json",
     "research/ecbench_calibration_20261002/sessions/prime/spec.json",
     "research/ecbench_calibration_20261002/specs/prime.json",
     "research/ecbench_numa_vm_20261002/sessions/auto/plan.json",
     "research/ecbench_numa_vm_20261002/sessions/auto/spec.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -19161,37 +19703,6 @@
     },
     {
      "session_id": "ECBS1h162089ae4d82",
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "candidate",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4472,
-     "mean_ratio_to_floor": 6.733
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.066,
-     "mean_ratio_to_floor": 18.917
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.066,
-     "mean_ratio_to_floor": 18.917
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
      "arm": "bsgs-il",
      "method": "bsgs.interleaved",
      "method_id": "ECM1h6153371050b8",
@@ -19249,6 +19760,36 @@
      "verified": 24,
      "mean_s": 1.935,
      "mean_ratio_to_floor": 2.183
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0552,
+     "mean_ratio_to_floor": 1.191
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.289,
+     "mean_ratio_to_floor": 1.455
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.289,
+     "mean_ratio_to_floor": 1.455
     },
     {
      "session_id": "ECBS1h445dba3005bc",
@@ -19768,12 +20309,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 19.99782863366001,
+     "log2_r": 19.9978286337,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 10.722871957641596,
-     "ratio_rho": 8.300039808611233,
-     "ratio_floor": 12.099465328435453,
+     "best_s": 10.7228719576,
+     "ratio_rho": 8.30003980861,
+     "ratio_floor": 12.0994653284,
      "verified": true
     }
    ],
@@ -19883,170 +20424,6 @@
      "arm": "bsgs",
      "method": "bsgs.textbook",
      "method_id": "ECM1h2ee5b13dfb35",
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 3.0224,
-     "mean_ratio_to_floor": 14.866
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-buch",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h3075d130f22b",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 18.0857,
-     "mean_ratio_to_floor": 88.954
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-crossbred",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h5d1cc715a465",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 18.0885,
-     "mean_ratio_to_floor": 88.968
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-f4",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h5419a6e9f1f2",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 18.0857,
-     "mean_ratio_to_floor": 88.954
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-sat",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h618b0c8673db",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 18.0788,
-     "mean_ratio_to_floor": 88.92
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hdadb641f6adb",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 23.6473,
-     "mean_ratio_to_floor": 116.309
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h9b26cd84a902",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 873.2246,
-     "mean_ratio_to_floor": 4294.947
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-buch",
-     "method": "ic.pipeline",
-     "method_id": "ECM1haa0adaa5c500",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 6.2057,
-     "mean_ratio_to_floor": 30.523
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-crossbred",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h1df19a9faf4e",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 6.2361,
-     "mean_ratio_to_floor": 30.672
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-f4",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h7ba0103c09d8",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 6.2057,
-     "mean_ratio_to_floor": 30.523
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-sat",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h54be4a694482",
-     "runs": 4,
-     "verified": 1,
-     "mean_s": 4.9507,
-     "mean_ratio_to_floor": 24.35
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h1c8c6d092a14",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 112.6474,
-     "mean_ratio_to_floor": 554.055
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hdfada545e44f",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 717.4026,
-     "mean_ratio_to_floor": 3528.538
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "candidate",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.7604,
-     "mean_ratio_to_floor": 3.74
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.0821,
-     "mean_ratio_to_floor": 15.16
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.0821,
-     "mean_ratio_to_floor": 15.16
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "ic-sub6-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h1b3ceb861d0c",
      "runs": 24,
      "verified": 24,
      "mean_s": 1.4001,
@@ -20111,6 +20488,36 @@
      "verified": 24,
      "mean_s": 1.6,
      "mean_ratio_to_floor": 1.805
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9866,
+     "mean_ratio_to_floor": 1.113
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.2474,
+     "mean_ratio_to_floor": 1.408
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.2474,
+     "mean_ratio_to_floor": 1.408
     },
     {
      "session_id": "ECBS1haf997766feb9",
@@ -20419,12 +20826,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 21.650392222310906,
+     "log2_r": 21.6503922223,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 12.770222471900254,
-     "ratio_rho": 10.501329293724387,
-     "ratio_floor": 14.409652996467209,
+     "best_s": 12.7702224719,
+     "ratio_rho": 10.5013292937,
+     "ratio_floor": 14.4096529965,
      "verified": true
     }
    ],
@@ -20629,12 +21036,12 @@
    "leaderboard": [
     {
      "regime": "prime",
-     "log2_r": 23.38228535388855,
+     "log2_r": 23.3822853539,
      "reference": "matched rho, negation map (A = 2), one target",
      "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.965657630366684,
-     "ratio_rho": 13.455139231662017,
-     "ratio_floor": 15.75855712489425,
+     "best_s": 13.9656576304,
+     "ratio_rho": 13.4551392317,
+     "ratio_floor": 15.7585571249,
      "verified": true
     }
    ],
@@ -21008,6 +21415,36 @@
      "mean_ratio_to_floor": 1.687
     },
     {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.96,
+     "mean_ratio_to_floor": 1.083
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1432,
+     "mean_ratio_to_floor": 1.29
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1432,
+     "mean_ratio_to_floor": 1.29
+    },
+    {
      "session_id": "ECBS1haf997766feb9",
      "arm": "bsgs",
      "method": "bsgs.textbook",
@@ -21283,18 +21720,6 @@
    "generator": [
     "0x2700230",
     "0x190fe61"
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "-797",
-   "order": "525086",
-   "order_bits": 19.002,
-   "r": "262543",
-   "r_bits": 18.002,
-   "cofactor": 2,
-   "generator": [
-    "0x7e3ea",
-    "0x24541"
    ],
    "target_group": "prime-order subgroup",
    "j": "38191413",
@@ -21309,46 +21734,14 @@
    "ec1_unresolved": null,
    "retired_names": [
     "generated-26bit-42652151"
-    "EC1N19Ce1h6186a62ebfaa",
-    "EC1N19Ce1h7e63aa468dcc"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:6186a62ebfaa1d11afc99ffa6ef0b9067190b7a03bc67150c379ffbf30e6a7d9",
-    "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n19-l6",
-    "k1n19",
-    "K_1 / GF(2^19)",
-    "K_1/2^19",
-    "K_1/F_2^19"
    ],
    "sources": [
-    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "research/ecbench_calibration_20261002/sessions/followup-prime/plan.json",
     "research/ecbench_calibration_20261002/sessions/followup-prime/spec.json",
     "research/ecbench_calibration_20261002/sessions/prime/plan.json",
     "research/ecbench_calibration_20261002/sessions/prime/spec.json",
     "research/ecbench_calibration_20261002/specs/followup-prime.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 18.0,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 4.87288945844,
-     "ratio_rho": 14.8966497733,
-     "ratio_floor": 120.624282468,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -22830,246 +23223,6 @@
      "y_v": [
       "0x1"
      ]
-   "ecbench": [
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 1.1715,
-     "mean_ratio_to_floor": 6.339
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-buch",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h3075d130f22b",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 26.8611,
-     "mean_ratio_to_floor": 145.359
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-crossbred",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h5d1cc715a465",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 26.859,
-     "mean_ratio_to_floor": 145.348
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-f4",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h5419a6e9f1f2",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 26.8611,
-     "mean_ratio_to_floor": 145.359
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-da-sat",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h618b0c8673db",
-     "runs": 4,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hdadb641f6adb",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 28.7386,
-     "mean_ratio_to_floor": 155.519
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub6-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h9b26cd84a902",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 1894.5035,
-     "mean_ratio_to_floor": 10252.137
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-buch",
-     "method": "ic.pipeline",
-     "method_id": "ECM1haa0adaa5c500",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 10.3951,
-     "mean_ratio_to_floor": 56.253
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-crossbred",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h1df19a9faf4e",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 10.3961,
-     "mean_ratio_to_floor": 56.259
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-f4",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h7ba0103c09d8",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 10.3951,
-     "mean_ratio_to_floor": 56.253
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-da-sat",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h54be4a694482",
-     "runs": 4,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h1c8c6d092a14",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 36.2553,
-     "mean_ratio_to_floor": 196.196
-    },
-    {
-     "session_id": "ECBS1h0d1ce1d04e54",
-     "arm": "sub8-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hdfada545e44f",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 2422.1596,
-     "mean_ratio_to_floor": 13107.556
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "candidate",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.4404,
-     "mean_ratio_to_floor": 2.383
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0885,
-     "mean_ratio_to_floor": 5.89
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0885,
-     "mean_ratio_to_floor": 5.89
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.6581,
-     "mean_ratio_to_floor": 8.973
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3934,
-     "mean_ratio_to_floor": 7.54
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.1592,
-     "mean_ratio_to_floor": 6.273
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "ic-frob-m2",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hc7c4b0dfed64",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 142.5623,
-     "mean_ratio_to_floor": 771.478
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "ic-frob-m3",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hd70ad0f0e54f",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 142.6435,
-     "mean_ratio_to_floor": 771.918
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "ic-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1he1c6f33755e1",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 109.5988,
-     "mean_ratio_to_floor": 593.096
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.1769,
-     "mean_ratio_to_floor": 11.78
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "rho-frob",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.4569,
-     "mean_ratio_to_floor": 2.472
     },
     "dlp_advantage": null,
     "exists": true,
@@ -25240,87 +25393,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 22.0,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 1.43240639923,
-     "ratio_rho": 6.98829434731,
-     "ratio_floor": 39.0122998466,
-     "verified": true
-    }
-   ],
-   "ecbench": [
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2192,
-     "mean_ratio_to_floor": 6.598
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9991,
-     "mean_ratio_to_floor": 5.407
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.0635,
-     "mean_ratio_to_floor": 11.167
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-frob",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.4276,
-     "mean_ratio_to_floor": 2.314
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0842,
-     "mean_ratio_to_floor": 5.867
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.5138,
-     "mean_ratio_to_floor": 8.192
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -25336,20 +25408,6 @@
       "0x0",
       "0x0",
       "0x0",
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
       "0x0",
       "0x0",
       "0x1"
@@ -25364,152 +25422,6 @@
      "y_0": [],
      "y_v": [
       "0x1"
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m23-tm5197-1f85e9e1",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m23-tm5197-a023238e",
-   "icv1": "ICV1:f2m-23-bb3650c7:-5197:8393806:0x1:-7:unk:r:a023238e6474",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 23,
-    "degree": 23,
-    "modulus": "0xdcf5eb"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "-5197",
-   "order": "8393806",
-   "order_bits": 23.001,
-   "r": "4196903",
-   "r_bits": 22.001,
-   "cofactor": 2,
-   "generator": [
-    "0x2e62c9",
-    "0x55e90c"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-bb3650c7\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0xdcf5eb\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N23Ce1he238479aae6d"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:e238479aae6dae6c48e4c249888db39e58360f2d9d6fd36418f9648bcc0d8b80"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n23-l7"
-   ],
-   "sources": [
-    "docs/curves/sources/ecbench-large-prime.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [
-    {
-     "round": "round-0016",
-     "cell": "n23a1",
-     "stages": [
-      "aa",
-      "confirmation",
-      "development",
-      "replay",
-      "selection",
-      "smoke"
-     ]
-    },
-    {
-     "round": "round-0017",
-     "cell": "n23a1",
-     "stages": [
-      "aa",
-      "confirmation",
-      "development",
-      "replay",
-      "selection",
-      "smoke"
-     ]
-    },
-    {
-     "round": "round-0018",
-     "cell": "n23a1",
-     "stages": [
-      "aa",
-      "confirmation",
-      "development",
-      "replay",
-      "selection",
-      "smoke"
-     ]
-    },
-    {
-     "round": "round-0018b",
-     "cell": "n23a1",
-     "stages": [
-      "aa",
-      "confirmation",
-      "development",
-      "replay",
-      "selection",
-      "smoke"
-     ]
-    },
-    {
-     "round": "round-0019",
-     "cell": "n23a1",
-     "stages": [
-      "aa",
-      "confirmation",
-      "development",
-      "replay",
-      "selection",
-      "smoke"
-     ]
-    },
-    {
-     "round": "round-0020",
-     "cell": "n23a1",
-     "stages": [
-      "aa",
-      "confirmation",
-      "development",
-      "replay",
-      "selection",
-      "smoke"
      ]
     },
     "dlp_advantage": null,
@@ -25858,9 +25770,6 @@
     "model_sha256": "9e4bc1d2e781272f3150372db80db4af698a5622d439f72139f0f0fc8469a6cd",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
     "slug": "icv1-fp512-t115792089237316195423570985008687840101103879741288409693302319863988063823175-9e4bc1d2",
-    "model_sha256": "a023238e6474f945bd8be7ddb502618b652064406ac23760b8ab5560b58ac039",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m23-tm5197-a023238e",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -25965,226 +25874,6 @@
      "y_v": [
       "0x1"
      ]
-   "ecbench": [
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "candidate",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.1733,
-     "mean_ratio_to_floor": 7.129
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.5383,
-     "mean_ratio_to_floor": 27.577
-    },
-    {
-     "session_id": "ECBS1h5eaf9eef9f25",
-     "arm": "incumbent-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.5383,
-     "mean_ratio_to_floor": 27.577
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "ic-sub6-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h1b3ceb861d0c",
-     "runs": 24,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "ic-sub6-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h8fb6399115b6",
-     "runs": 24,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "ic-sub8-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hab99147a7fb3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 473.8889,
-     "mean_ratio_to_floor": 2879.589
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "ic-sub8-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hb95b75751359",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 36989.4376,
-     "mean_ratio_to_floor": 224766.605
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "rho-frob",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.0757,
-     "mean_ratio_to_floor": 18.689
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.5775,
-     "mean_ratio_to_floor": 27.815
-    },
-    {
-     "session_id": "ECBS1hb0cb85a662d8",
-     "arm": "rho-strong-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.5775,
-     "mean_ratio_to_floor": 27.815
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.7757,
-     "mean_ratio_to_floor": 10.79
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4936,
-     "mean_ratio_to_floor": 9.076
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2649,
-     "mean_ratio_to_floor": 7.686
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "ic-frob-m2",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hc7c4b0dfed64",
-     "runs": 24,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "ic-frob-m3",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hd70ad0f0e54f",
-     "runs": 24,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "ic-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1he1c6f33755e1",
-     "runs": 24,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.8145,
-     "mean_ratio_to_floor": 11.026
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "rho-frob",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.0757,
-     "mean_ratio_to_floor": 18.689
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 7.8625,
-     "mean_ratio_to_floor": 47.777
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.1625,
-     "mean_ratio_to_floor": 13.14
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.3722,
-     "mean_ratio_to_floor": 14.415
-    },
-    {
-     "session_id": "ECBS1hf4c34c2455f9",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.5775,
-     "mean_ratio_to_floor": 27.815
     },
     "dlp_advantage": null,
     "exists": true,
@@ -26222,113 +25911,6 @@
        "name": "Wireless Application Protocol Wireless Transport Layer Security Specification",
        "url": "https://www.wapforum.org/tech/documents/WAP-199-WTLS-20000218-a.pdf"
       }
-   "factor_bases": [
-    "FB1h280d69cfbf38",
-    "FB1h3a3262d6867f"
-   ],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m29-tm40309-30c52b96",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m29-tm40309-6aecea52",
-   "icv1": "ICV1:f2m-29-797da7cf:-40309:536911222:0x1:-7:unk:r:6aecea52fac9",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 29,
-    "degree": 29,
-    "modulus": "0x3a0b7cb9"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "-40309",
-   "order": "536911222",
-   "order_bits": 29.0,
-   "r": "42457",
-   "r_bits": 15.296,
-   "cofactor": 12646,
-   "generator": [
-    "0x1a849ba3",
-    "0x4b3542e"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-797da7cf\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3a0b7cb9\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N29Ce1h7fed23ba87ea"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:7fed23ba87eaf8303f4a16985bb0e665733faae9285069c5a430a9bdd9fab8a7"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n29-l8"
-   ],
-   "sources": [
-    "docs/curves/sources/ecbench-large-prime.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [
-    {
-     "round": "round-0016",
-     "cell": "n29a1",
-     "stages": [
-      "confirmation",
-      "replay"
      ]
     }
    ]
@@ -26997,9 +26579,6 @@
     "model_sha256": "a443a69b3cc1fc6287de6d4c588c5055b4bada8d2800104c048678b00c85a3d4",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
     "slug": "icv1-fp477-tm246288457138303-a443a69b",
-    "model_sha256": "6aecea52fac93749eeedfd85e1121feaed9eb35764396fcadf862d8411b40307",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m29-tm40309-6aecea52",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -27165,16 +26744,6 @@
     "bits": 190,
     "degree": 1,
     "modulus": null
-   "slug": "icv1-f2m31-t90707-5fc996f0",
-   "icv1": "ICV1:f2m-31-eaa21191:90707:2147392942:0x1:-7:unk:r:5fc996f03a86",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 31,
-    "degree": 31,
-    "modulus": "0x851e410f"
    },
    "a": "0",
    "b": "4097",
@@ -27205,124 +26774,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-   "trace": "90707",
-   "order": "2147392942",
-   "order_bits": 31.0,
-   "r": "41231",
-   "r_bits": 15.258,
-   "cofactor": 52082,
-   "generator": [
-    "0x6347c766",
-    "0xc3503f0"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-eaa21191\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x851e410f\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N31Ce1h6be2d6a625f9"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:6be2d6a625f9a828dca420147995b710ca572754e3fde55313ff248ee4ec42cc"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "ecbench-koblitz-n31-l8"
-   ],
-   "sources": [
-    "docs/curves/sources/ecbench-large-prime.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "5fc996f03a86af22aab8a078ea9e1e59ea1c188a4ca0ab837b81ee91fb31b322",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m31-t90707-5fc996f0",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m31-t90707-8fd18741",
-   "icv1": "ICV1:f2m-31-200700ef:90707:2147392942:0x1:-7:unk:r:8fd187414f75",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 31,
-    "degree": 31,
-    "modulus": "0x80000009"
-   },
-   "a": "1",
-   "b": "0x1",
-   "construction": null,
-   "trace": "90707",
-   "order": "2147392942",
-   "order_bits": 31.0,
-   "r": null,
-   "r_bits": null,
-   "cofactor": null,
-   "generator": null,
-   "target_group": null,
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-200700ef\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000009\",\"v\":\"1\"}",
-   "ec1": [],
-   "curve_uid": [],
-   "ec1_unresolved": "KoblitzCurve::new(1, 31) finds no usable prime-order subgroup, so the repository has built no generator on it",
-   "retired_names": [
-    "k1n31",
-    "K_1 / GF(2^31)",
-    "K_1/2^31",
-    "K_1/F_2^31"
-   ],
-   "sources": [
-    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -27435,25 +26886,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 27.78,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.485280776389,
-     "ratio_rho": 5.2608015235,
-     "ratio_floor": 16.7635244723,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -29975,220 +29407,6 @@
    "leaderboard": [],
    "ecbench": [],
    "factor_bases": [],
-    "k0n41",
-    "K_0 / GF(2^41)",
-    "K_0/2^41",
-    "K_0/F_2^41"
-   ],
-   "sources": [
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz",
-     "log2_r": 39.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-     "best_recipe": "koblitz_one_target",
-     "best_s": 5.58064429862,
-     "ratio_rho": 8.04429021325,
-     "ratio_floor": 40.3210032811,
-     "best_s": 11.16913986167439,
-     "ratio_rho": 7.657141173367715,
-     "ratio_floor": 80.69873314109438,
-     "verified": true
-    },
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 39.0,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.240796426512,
-     "ratio_rho": 3.61567129773,
-     "ratio_floor": 8.75615314789,
-     "verified": true
-    }
-   ],
-   "ecbench": [
-    {
-     "session_id": "ECBS1h6f9ddee85cae",
-     "arm": "rho-frob",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 128,
-     "verified": 128,
-     "mean_s": 0.1393,
-     "mean_ratio_to_floor": 1.006
-    },
-    {
-     "session_id": "ECBS1h6f9ddee85cae",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 128,
-     "verified": 128,
-     "mean_s": 1.2401,
-     "mean_ratio_to_floor": 8.96
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2192,
-     "mean_ratio_to_floor": 8.809
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9796,
-     "mean_ratio_to_floor": 7.078
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.9341,
-     "mean_ratio_to_floor": 13.974
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-frob",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1342,
-     "mean_ratio_to_floor": 0.97
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.8749,
-     "mean_ratio_to_floor": 6.321
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9926,
-     "mean_ratio_to_floor": 7.172
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9151,
-     "mean_ratio_to_floor": 6.612
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-c1",
-     "method": "claw.pair_table",
-     "method_id": "ECM1h3f1995f505fa",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.3467,
-     "mean_ratio_to_floor": 2.505
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-pr",
-     "method": "claw.pair_table",
-     "method_id": "ECM1hd9f76acb83c0",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 5.7741,
-     "mean_ratio_to_floor": 41.719
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1384,
-     "mean_ratio_to_floor": 1.0
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1384,
-     "mean_ratio_to_floor": 1.0
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "ic-k16",
-     "method": "ic.shared_rank",
-     "method_id": "ECM1h670d3d9b99a0",
-     "runs": 80,
-     "verified": 23,
-     "mean_s": 42.5686,
-     "mean_ratio_to_floor": 307.565
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "ic-k16-control",
-     "method": "ic.shared_rank",
-     "method_id": "ECM1h670d3d9b99a0",
-     "runs": 80,
-     "verified": 23,
-     "mean_s": 42.5686,
-     "mean_ratio_to_floor": 307.565
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "ic-k8",
-     "method": "ic.shared_rank",
-     "method_id": "ECM1h90d7515e0e7a",
-     "runs": 80,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1h1d9961ee4601",
-     "runs": 80,
-     "verified": 80,
-     "mean_s": 0.1571,
-     "mean_ratio_to_floor": 1.135
-    }
-   ],
-   "factor_bases": [
-    "FB1h762e47b20056"
-   ],
    "tournament_cells": [],
    "hyperelliptic_cover": {
     "certificate": {
@@ -30309,134 +29527,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/curves/sources/generated.json",
-    "research/ic_descent_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/browser/data.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 32.11,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.32483337441,
-     "ratio_rho": 4.87503150965,
-     "ratio_floor": 12.0966817336,
-     "verified": true
-    }
-   ],
-   "ecbench": [
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3759,
-     "mean_ratio_to_floor": 10.181
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0135,
-     "mean_ratio_to_floor": 7.499
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.2064,
-     "mean_ratio_to_floor": 16.325
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-frob",
-     "method": "rho.signed_frobenius",
-     "method_id": "ECM1h64b303e4183b",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1563,
-     "mean_ratio_to_floor": 1.157
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9047,
-     "mean_ratio_to_floor": 6.694
-    },
-    {
-     "session_id": "ECBS1h73210d525d59",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3634,
-     "mean_ratio_to_floor": 10.088
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9103,
-     "mean_ratio_to_floor": 6.735
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-c1",
-     "method": "claw.pair_table",
-     "method_id": "ECM1h3f1995f505fa",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.3381,
-     "mean_ratio_to_floor": 2.502
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-pr",
-     "method": "claw.pair_table",
-     "method_id": "ECM1hd9f76acb83c0",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.7929,
-     "mean_ratio_to_floor": 35.464
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1829,
-     "mean_ratio_to_floor": 1.354
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1829,
-     "mean_ratio_to_floor": 1.354
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -30727,22 +29817,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/curves/sources/generated.json",
-    "research/ic_descent_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/browser/data.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 24.8,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.856345465215,
-     "ratio_rho": 7.19007959136,
-     "ratio_floor": 32.6232062728,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -30868,37 +29942,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/curves/sources/generated.json",
-    "research/ic_descent_20260930/curve_records.json",
-    "research/ic_exponent_top_20260930/curve_records.json",
-    "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/browser/data.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz",
-     "log2_r": 36.64,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-     "best_recipe": "koblitz_one_target",
-     "best_s": 4.26774899371,
-     "ratio_rho": 4.94676916595,
-     "ratio_floor": 33.0143580405,
-     "best_s": 9.506805780776906,
-     "ratio_rho": 5.2259258441371435,
-     "ratio_floor": 73.54253737303847,
-     "verified": true
-    },
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 36.64,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.23441213095,
-     "ratio_rho": 3.89287844259,
-     "ratio_floor": 9.12641881483,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -31276,285 +30319,6 @@
    ],
    "on_leaderboard": false,
    "leaderboard": [],
-    "docs/curves/sources/generated.json",
-    "research/ic_rho_koblitz_20260923/batch/k0n53.json",
-    "research/ic_descent_20260930/curve_records.json",
-    "research/ic_exponent_top_20260930/curve_records.json",
-    "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: .github/workflows/ic-e2e-benchmark.yml"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz",
-     "log2_r": 44.26,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-     "best_recipe": "koblitz_one_target",
-     "best_s": 7.39881063707,
-     "ratio_rho": 14.7038673194,
-     "ratio_floor": 60.7791897773,
-     "best_s": 16.97618299454087,
-     "ratio_rho": 13.24099753697916,
-     "ratio_floor": 139.45466353062287,
-     "verified": true
-    },
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 44.26,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.260527355974,
-     "ratio_rho": 5.11384547093,
-     "ratio_floor": 10.7711642799,
-     "verified": true
-    }
-   ],
-   "ecbench": [
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp10",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1h3ed103818d38",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.119,
-     "mean_ratio_to_floor": 0.977
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp4",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1hcd1c05c08f3e",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1063,
-     "mean_ratio_to_floor": 0.873
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp8",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1h8629e993c452",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.125,
-     "mean_ratio_to_floor": 1.027
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1099,
-     "mean_ratio_to_floor": 0.903
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0564,
-     "mean_ratio_to_floor": 8.678
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-c1",
-     "method": "claw.pair_table",
-     "method_id": "ECM1h3f1995f505fa",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.2925,
-     "mean_ratio_to_floor": 2.403
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-pr",
-     "method": "claw.pair_table",
-     "method_id": "ECM1hd9f76acb83c0",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.3832,
-     "mean_ratio_to_floor": 27.792
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.0989,
-     "mean_ratio_to_floor": 0.813
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.0989,
-     "mean_ratio_to_floor": 0.813
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "ic-k16",
-     "method": "ic.shared_rank",
-     "method_id": "ECM1h670d3d9b99a0",
-     "runs": 80,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "ic-k16-control",
-     "method": "ic.shared_rank",
-     "method_id": "ECM1h670d3d9b99a0",
-     "runs": 80,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "ic-k8",
-     "method": "ic.shared_rank",
-     "method_id": "ECM1h90d7515e0e7a",
-     "runs": 80,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1he98c2d9648b6",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1h1d9961ee4601",
-     "runs": 80,
-     "verified": 80,
-     "mean_s": 0.1414,
-     "mean_ratio_to_floor": 1.162
-    }
-   ],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "dac20a8570a84b848932fb22e0dec5d0638b0a1194d5dbc7a20854048a16c43c",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m53-tm56619371-dac20a85",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m57-tm747311035-c1f545af",
-   "icv1": "ICV1:f2m-57-07f61dad:-747311035:144115188823166908:0x1:-7:unk:r:c1f545af2eb9",
-   "family": "koblitz",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 57,
-    "degree": 57,
-    "modulus": "0x200000000000011"
-   },
-   "a": "0",
-   "b": "0x1",
-   "construction": null,
-   "trace": "-747311035",
-   "order": "144115188823166908",
-   "order_bits": 57.0,
-   "r": "275295876199",
-   "r_bits": 38.002,
-   "cofactor": 523492,
-   "generator": [
-    "0x152b73c20219bc",
-    "0xffeaa680a84eeb"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-57-07f61dad\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x200000000000011\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N57Ce0hb5884395c7f2"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:b5884395c7f28d0d22eb1acc451c34ff979b0a40f93629e44b30107592b76695"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "k0n57",
-    "K_0 / GF(2^57)",
-    "K_0/2^57",
-    "K_0/F_2^57"
-   ],
-   "sources": [
-    "research/ic_exponent_top_20260930/curve_records.json",
-    "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/browser/data.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz",
-     "log2_r": 38.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-     "best_recipe": "koblitz_one_target",
-     "best_s": 8.12117350521,
-     "ratio_rho": 1.98456265413,
-     "ratio_floor": 69.1848934212,
-     "best_s": 11.014581514064941,
-     "ratio_rho": 6.121194064269396,
-     "ratio_floor": 93.8340558345144,
-     "verified": true
-    }
-   ],
    "ecbench": [],
    "factor_bases": [],
    "tournament_cells": [],
@@ -31679,118 +30443,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/curves/sources/generated.json",
-    "research/ic_exponent_top_20260930/curve_records.json",
-    "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: .github/workflows/koblitz-stage132-current-gate-audit.yml"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz",
-     "log2_r": 44.52,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-     "best_recipe": "koblitz_one_target",
-     "best_s": 9.03281027772,
-     "ratio_rho": 15.6681638536,
-     "ratio_floor": 78.2895782822,
-     "best_s": 16.25703234767737,
-     "ratio_rho": 12.030889434458363,
-     "ratio_floor": 140.90367975056634,
-     "verified": true
-    }
-   ],
-   "ecbench": [
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp10",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1h3ed103818d38",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1123,
-     "mean_ratio_to_floor": 0.973
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp4",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1hcd1c05c08f3e",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1059,
-     "mean_ratio_to_floor": 0.918
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp8",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1h8629e993c452",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1245,
-     "mean_ratio_to_floor": 1.079
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1055,
-     "mean_ratio_to_floor": 0.915
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9371,
-     "mean_ratio_to_floor": 8.122
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-c1",
-     "method": "claw.pair_table",
-     "method_id": "ECM1h3f1995f505fa",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.2358,
-     "mean_ratio_to_floor": 2.044
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-pr",
-     "method": "claw.pair_table",
-     "method_id": "ECM1hd9f76acb83c0",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.798,
-     "mean_ratio_to_floor": 41.585
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1138,
-     "mean_ratio_to_floor": 0.986
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1138,
-     "mean_ratio_to_floor": 0.986
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -31924,161 +30576,6 @@
     "secg/sect193r1",
     "sect193r1",
     "x963/ansit193r1"
-   "a": "0",
-   "b": "0x1",
-   "construction": "KoblitzCurve::new(0, 61)",
-   "trace": "158598901",
-   "order": "2305843009055095052",
-   "order_bits": 61.0,
-   "r": "162888033982417",
-   "r_bits": 47.157,
-   "cofactor": 14156,
-   "generator": [
-    "0x5cc1d6ba365013e",
-    "0x171d9a59a2d31eb9"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x1",
-   "endomorphism_discriminant": "-7",
-   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-61-78c443be\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000000000000027\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N61Ce0hd8c15448081e"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:d8c15448081eb349784c3d5d9d3144eaa4a5252d115f9049e10bbadf373db689"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "k0n61",
-    "K_0 / GF(2^61)",
-    "K_0/2^61",
-    "K_0/F_2^61"
-   ],
-   "sources": [
-    "docs/curves/sources/generated.json",
-    "research/ic_rho_koblitz_20260923/batch/k0n61.json",
-    "research/ic_descent_20260930/curve_records.json",
-    "research/ic_exponent_top_20260930/curve_records.json",
-    "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/browser/data.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "koblitz",
-     "log2_r": 47.21,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-     "best_recipe": "koblitz_one_target",
-     "best_s": 15.1490066472,
-     "ratio_rho": 31.5994057949,
-     "ratio_floor": 133.507029473,
-     "best_s": 24.931644865085715,
-     "ratio_rho": 20.970861959576446,
-     "ratio_floor": 219.72066706038663,
-     "verified": true
-    },
-    {
-     "regime": "koblitz_batch",
-     "log2_r": 47.21,
-     "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
-     "best_recipe": "koblitz_collection_m3_aimed",
-     "best_s": 0.48845758855,
-     "ratio_rho": 9.20203675604,
-     "ratio_floor": 21.6652228987,
-     "verified": true
-    }
-   ],
-   "ecbench": [
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp10",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1h3ed103818d38",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1176,
-     "mean_ratio_to_floor": 1.036
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp4",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1hcd1c05c08f3e",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1275,
-     "mean_ratio_to_floor": 1.123
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "escape-dp8",
-     "method": "rho.signed_frobenius_strong_escape",
-     "method_id": "ECM1h8629e993c452",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.126,
-     "mean_ratio_to_floor": 1.111
-    },
-    {
-     "session_id": "ECBS1ha38a29e8e509",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.127,
-     "mean_ratio_to_floor": 1.119
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9043,
-     "mean_ratio_to_floor": 7.969
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-c1",
-     "method": "claw.pair_table",
-     "method_id": "ECM1h3f1995f505fa",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.258,
-     "mean_ratio_to_floor": 2.274
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "claw-pr",
-     "method": "claw.pair_table",
-     "method_id": "ECM1hd9f76acb83c0",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.6348,
-     "mean_ratio_to_floor": 32.033
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1266,
-     "mean_ratio_to_floor": 1.115
-    },
-    {
-     "session_id": "ECBS1ha960fa84a3c2",
-     "arm": "rho-strong-aa",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1hb6123afffc07",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.1266,
-     "mean_ratio_to_floor": 1.115
-    }
    ],
    "sources": [
     "docs/curves/standards/registry.json"
@@ -32452,9 +30949,11 @@
    "endomorphism_discriminant": null,
    "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0xe8bee4d3e2260744188be0e9c723\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
    "ec1": [
-    "EC1N113Cstandardhf529f17bd191"
+    "EC1N113Cstandardhf529f17bd191",
+    "EC1N113Csect113r1hf529f17bd191"
    ],
    "curve_uid": [
+    "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97",
     "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97"
    ],
    "ec1_unresolved": null,
@@ -32465,7 +30964,8 @@
     "wtls/wap-wsg-idm-ecid-wtls4"
    ],
    "sources": [
-    "docs/curves/standards/registry.json"
+    "docs/curves/standards/registry.json",
+    "src/binary_ecc/curve.rs"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -36382,25 +34882,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "char2",
-     "log2_r": 13.9942650337,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 26.3139455942,
-     "ratio_rho": 13.0691610083,
-     "ratio_floor": 29.6921080126,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -37499,25 +35980,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "char2",
-     "log2_r": 14.997841035,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 21.304700076,
-     "ratio_rho": 10.6210696509,
-     "ratio_floor": 24.039779727,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -37878,25 +36340,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "char2",
-     "log2_r": 19.9982171586,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 24.3906271263,
-     "ratio_rho": 17.9863625497,
-     "ratio_floor": 27.5218755217,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -38577,28 +37020,6 @@
    "ec1_unresolved": null,
    "retired_names": [
     "nums/ed-383-mers"
-    "random-binary-n24-b5fc9da"
-   ],
-   "sources": [
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "char2",
-     "log2_r": 21.0002620778,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 27.2403642967,
-     "ratio_rho": 23.0252484646,
-     "ratio_floor": 30.7374595764,
-     "verified": true
-    }
    ],
    "sources": [
     "docs/curves/standards/registry.json"
@@ -38964,25 +37385,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-headline-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "char2",
-     "log2_r": 24.4149026801,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 36.929397567,
-     "ratio_rho": 38.2107763087,
-     "ratio_floor": 41.6703628679,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -39382,294 +37784,6 @@
   {
    "slug": "icv1-fp221-t1654906936176842234216578963930838-382ff3f7",
    "icv1": "ICV1:fp-3369993333393829974333376885877453834204643052817571560137951281149:1654906936176842234216578963930838:3369993333393829974333376885877452179297706875975337343558987350312:2119864108777535555325163541712602564156091662862403894456052195536:unk:unk:r:382ff3f74d82",
-   "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
-   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x17ef6a3b098891f6b4c529b62f0dd:unk:unk:r:5de3030fefcc",
-   "family": "binary",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 113,
-    "degree": 113,
-    "modulus": "0x20000000000000000000000000201"
-   },
-   "a": "0x3088250ca6e7c7fe649ce85820f7",
-   "b": "0x162b1a595685a1387c82647bf44cf",
-   "construction": null,
-   "trace": "-122610772499221213",
-   "order": "10384593717069655379671765157661406",
-   "order_bits": 113.0,
-   "r": "5192296858534827689835882578830703",
-   "r_bits": 112.0,
-   "cofactor": 2,
-   "generator": [
-    "0x18f4e7a48635b736527e45354b897",
-    "0x7eea00533a71541476d03dcdf4b8"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x17ef6a3b098891f6b4c529b62f0dd",
-   "endomorphism_discriminant": null,
-   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0x162b1a595685a1387c82647bf44cf\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N113Crbh2ee3581888f2"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [],
-   "sources": [
-    "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0xb990c6334a3e1c1c3bef672156cb",
-      "0x0",
-      "0x0",
-      "0x3088250ca6e7c7fe649ce85820f7",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0xb990c6334a3e1c1c3bef672156cb"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "5de3030fefccf2b61cb1ca25102903eb702eeb68a231e2c5da9ea2d1e29b0dfe",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
-   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb",
-   "family": "binary",
-   "standard_names": [
-    "sect113r1"
-   ],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 113,
-    "degree": 113,
-    "modulus": "0x20000000000000000000000000201"
-   },
-   "a": "0x3088250ca6e7c7fe649ce85820f7",
-   "b": "0xe8bee4d3e2260744188be0e9c723",
-   "construction": null,
-   "trace": "-122610772499221213",
-   "order": "10384593717069655379671765157661406",
-   "order_bits": 113.0,
-   "r": "5192296858534827689835882578830703",
-   "r_bits": 112.0,
-   "cofactor": 2,
-   "generator": [
-    "0x9d73616f35f4ab1407d73562c10f",
-    "0xa52830277958ee84d1315ed31886"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0x6942e38fc45c62366c09aa8204cd",
-   "endomorphism_discriminant": null,
-   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0xe8bee4d3e2260744188be0e9c723\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N113Csect113r1hf529f17bd191"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "sect113r1"
-   ],
-   "sources": [
-    "src/binary_ecc/curve.rs"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x1df93aa20579d377f97203f385b11",
-      "0x0",
-      "0x0",
-      "0x3088250ca6e7c7fe649ce85820f7",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x1df93aa20579d377f97203f385b11"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "97df4ac684cbe5e6ab7686805d46ec4aa74945314512fd4ed79598337d243117",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
-   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0xb1df3d9c423aa919217735a6d6ba:unk:unk:r:fd54d0ebcd45",
-   "family": "binary",
-   "standard_names": [],
-   "field": {
-    "characteristic": 2,
-    "p": null,
-    "bits": 113,
-    "degree": 113,
-    "modulus": "0x20000000000000000000000000201"
-   },
-   "a": "0x3088250ca6e7c7fe649ce85820f7",
-   "b": "0x109267245489e254e8f14002629a1",
-   "construction": null,
-   "trace": "-122610772499221213",
-   "order": "10384593717069655379671765157661406",
-   "order_bits": 113.0,
-   "r": "5192296858534827689835882578830703",
-   "r_bits": 112.0,
-   "cofactor": 2,
-   "generator": [
-    "0x13046f06d2108d8dbf031f5a033ab",
-    "0x11bb93fb05d5d549787a527aaf285"
-   ],
-   "target_group": "prime-order subgroup",
-   "j": "0xb1df3d9c423aa919217735a6d6ba",
-   "endomorphism_discriminant": null,
-   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0x109267245489e254e8f14002629a1\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1N113Crbh921ab2cd913f"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [],
-   "sources": [
-    "research/sect113r1-weak-curve-20261006/degree5_curve_records.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [],
-   "factor_bases": [],
-   "tournament_cells": [],
-   "hyperelliptic_cover": {
-    "certificate": {
-     "construction": "binary_cubic_pullback_v1",
-     "degree": 3,
-     "f": [
-      "0x0",
-      "0x4aa05687600addb8ceee4c36af91",
-      "0x0",
-      "0x0",
-      "0x3088250ca6e7c7fe649ce85820f7",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "genus": 3,
-     "h": [
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "x": [
-      "0x0",
-      "0x0",
-      "0x0",
-      "0x1"
-     ],
-     "y_0": [
-      "0x4aa05687600addb8ceee4c36af91"
-     ],
-     "y_v": [
-      "0x0",
-      "0x1"
-     ]
-    },
-    "dlp_advantage": null,
-    "exists": true,
-    "field_check": "irreducibility_proved_by_Rabin",
-    "field_relation": "same_field",
-    "map_direction": "H -> E",
-    "minimal_degree": null,
-    "minimal_genus": null,
-    "model_sha256": "fd54d0ebcd451516257d578057b4819e745a575ef46e10b5263af670825df98b",
-    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
-    "status": "verified_over_declared_field",
-    "subfield_descent": "not_tested",
-    "subgroup_transfer": "not_tested"
-   }
-  },
-  {
-   "slug": "icv1-fp6-tm7-fc20da94",
-   "icv1": "ICV1:fp-59:-7:67:52:unk:unk:r:fc20da944826",
    "family": "prime",
    "standard_names": [],
    "field": {
@@ -39823,25 +37937,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "src/cryptanalysis/research_bench.rs",
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 9.68474862042,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 22.8490996547,
-     "ratio_rho": 6.33838293956,
-     "ratio_floor": 25.7824480373,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -40069,25 +38164,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "src/cryptanalysis/research_bench.rs",
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 11.9251835194,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk",
-     "best_s": 15.6178084892,
-     "ratio_rho": 5.4703789656,
-     "ratio_floor": 17.6228097349,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -40410,25 +38486,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "src/cryptanalysis/research_bench.rs",
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 13.9864642673,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.0749405408,
-     "ratio_rho": 6.42943611579,
-     "ratio_floor": 14.7534905172,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -41039,25 +39096,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "src/cryptanalysis/research_bench.rs",
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 15.9882186821,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 11.6834008019,
-     "ratio_rho": 6.71459717554,
-     "ratio_floor": 13.1833060656,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -41193,246 +39231,6 @@
      "y_v": [
       "0x1"
      ]
-   "ecbench": [
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.26,
-     "mean_ratio_to_floor": 1.422
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2763,
-     "mean_ratio_to_floor": 1.44
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.7653,
-     "mean_ratio_to_floor": 0.864
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.3654,
-     "mean_ratio_to_floor": 2.669
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 5.1422,
-     "mean_ratio_to_floor": 5.802
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3279,
-     "mean_ratio_to_floor": 1.498
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.6592,
-     "mean_ratio_to_floor": 1.872
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "candidate",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.1111,
-     "mean_ratio_to_floor": 1.254
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3054,
-     "mean_ratio_to_floor": 1.473
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3054,
-     "mean_ratio_to_floor": 1.473
-    },
-    {
-     "session_id": "ECBS1h548d49a71881",
-     "arm": "abs16-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1heb856a52d202",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 15.4846,
-     "mean_ratio_to_floor": 17.473
-    },
-    {
-     "session_id": "ECBS1h548d49a71881",
-     "arm": "abs16-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hef647ea37eae",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 376.8603,
-     "mean_ratio_to_floor": 425.241
-    },
-    {
-     "session_id": "ECBS1h548d49a71881",
-     "arm": "abs32-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1he27eac0cec8f",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 10.3323,
-     "mean_ratio_to_floor": 11.659
-    },
-    {
-     "session_id": "ECBS1h548d49a71881",
-     "arm": "abs32-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1heb3c3fdeabc8",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 330.5322,
-     "mean_ratio_to_floor": 372.966
-    },
-    {
-     "session_id": "ECBS1h548d49a71881",
-     "arm": "abs64-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1h583836210c2d",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 13.4609,
-     "mean_ratio_to_floor": 15.189
-    },
-    {
-     "session_id": "ECBS1h548d49a71881",
-     "arm": "abs64-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1hba3ff3ad30bc",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 282.4121,
-     "mean_ratio_to_floor": 318.668
-    },
-    {
-     "session_id": "ECBS1h548d49a71881",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 4,
-     "verified": 4,
-     "mean_s": 1.3934,
-     "mean_ratio_to_floor": 1.572
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.5879,
-     "mean_ratio_to_floor": 1.792
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.5692,
-     "mean_ratio_to_floor": 1.771
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0919,
-     "mean_ratio_to_floor": 1.232
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "ic-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1he27eac0cec8f",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 9.9606,
-     "mean_ratio_to_floor": 11.239
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "ic-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1heb3c3fdeabc8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 309.8714,
-     "mean_ratio_to_floor": 349.652
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.2689,
-     "mean_ratio_to_floor": 2.56
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 4.8153,
-     "mean_ratio_to_floor": 5.433
     },
     "dlp_advantage": null,
     "exists": true,
@@ -41868,25 +39666,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "src/cryptanalysis/research_bench.rs",
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 17.997405546,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 8.41371864675,
-     "ratio_rho": 5.81942836101,
-     "ratio_floor": 9.49386483879,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -42024,269 +39803,6 @@
      "y_v": [
       "0x1"
      ]
-   "j": "476305",
-   "endomorphism_discriminant": null,
-   "model_json": "{\"a\":\"51142\",\"b\":\"548946\",\"field\":\"fp-563153\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"563153\",\"v\":\"1\"}",
-   "ec1": [
-    "EC1P20Cfphd19e740ea95d"
-   ],
-   "curve_uid": [
-    "urn:ec-record:1:sha256:d19e740ea95dfa20b38c78009a4067ce877a0e0d2ee70bb71e58deb560c2228c"
-   ],
-   "ec1_unresolved": null,
-   "retired_names": [
-    "generated-20bit-563153"
-   ],
-   "sources": [
-    "docs/curves/sources/generated.json",
-    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
-    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
-    "research/ecbench_calibration_20261002/specs/prime.json",
-    "research/ecbench_numa_vm_20261002/sessions/auto/plan.json",
-    "research/ecbench_numa_vm_20261002/sessions/auto/spec.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [
-    {
-     "session_id": "ECBS1h14bbcca48793",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 0.9374,
-     "mean_ratio_to_floor": 1.058
-    },
-    {
-     "session_id": "ECBS1h14bbcca48793",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.9475,
-     "mean_ratio_to_floor": 2.197
-    },
-    {
-     "session_id": "ECBS1h14bbcca48793",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.3185,
-     "mean_ratio_to_floor": 1.488
-    },
-    {
-     "session_id": "ECBS1h14bbcca48793",
-     "arm": "rho-neg-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.3185,
-     "mean_ratio_to_floor": 1.488
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.5296,
-     "mean_ratio_to_floor": 1.726
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3244,
-     "mean_ratio_to_floor": 1.494
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0322,
-     "mean_ratio_to_floor": 1.165
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.0346,
-     "mean_ratio_to_floor": 2.296
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.619,
-     "mean_ratio_to_floor": 4.084
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2554,
-     "mean_ratio_to_floor": 1.417
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.935,
-     "mean_ratio_to_floor": 2.183
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "candidate",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0552,
-     "mean_ratio_to_floor": 1.191
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.289,
-     "mean_ratio_to_floor": 1.455
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.289,
-     "mean_ratio_to_floor": 1.455
-    },
-    {
-     "session_id": "ECBS1h445dba3005bc",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 0.9374,
-     "mean_ratio_to_floor": 1.058
-    },
-    {
-     "session_id": "ECBS1h445dba3005bc",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.9475,
-     "mean_ratio_to_floor": 2.197
-    },
-    {
-     "session_id": "ECBS1h445dba3005bc",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.3185,
-     "mean_ratio_to_floor": 1.488
-    },
-    {
-     "session_id": "ECBS1h445dba3005bc",
-     "arm": "rho-neg-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.3185,
-     "mean_ratio_to_floor": 1.488
-    },
-    {
-     "session_id": "ECBS1h46ed5b65cdcf",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 0.9374,
-     "mean_ratio_to_floor": 1.058
-    },
-    {
-     "session_id": "ECBS1h46ed5b65cdcf",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.9475,
-     "mean_ratio_to_floor": 2.197
-    },
-    {
-     "session_id": "ECBS1h46ed5b65cdcf",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.3185,
-     "mean_ratio_to_floor": 1.488
-    },
-    {
-     "session_id": "ECBS1h46ed5b65cdcf",
-     "arm": "rho-neg-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.3185,
-     "mean_ratio_to_floor": 1.488
-    },
-    {
-     "session_id": "ECBS1h498fa819ba21",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 0.9374,
-     "mean_ratio_to_floor": 1.058
-    },
-    {
-     "session_id": "ECBS1h498fa819ba21",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 6,
-     "verified": 6,
-     "mean_s": 1.9475,
-     "mean_ratio_to_floor": 2.197
     },
     "dlp_advantage": null,
     "exists": true,
@@ -45922,25 +43438,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "src/cryptanalysis/research_bench.rs",
-    "docs/curves/sources/generated.json",
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 19.9978286337,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 10.7228719576,
-     "ratio_rho": 8.30003980861,
-     "ratio_floor": 12.0994653284,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -46053,217 +43550,6 @@
    "retired_names": [
     "gost/gost256",
     "gost256"
-    "generated-22bit-2434423"
-   ],
-   "sources": [
-    "docs/curves/sources/generated.json",
-    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
-    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
-    "research/ecbench_calibration_20261002/specs/prime.json"
-   ],
-   "on_leaderboard": false,
-   "leaderboard": [],
-   "ecbench": [
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4001,
-     "mean_ratio_to_floor": 1.58
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.3939,
-     "mean_ratio_to_floor": 1.573
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9014,
-     "mean_ratio_to_floor": 1.017
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.1096,
-     "mean_ratio_to_floor": 2.38
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.9156,
-     "mean_ratio_to_floor": 3.29
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.1584,
-     "mean_ratio_to_floor": 1.307
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.6,
-     "mean_ratio_to_floor": 1.805
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "candidate",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9866,
-     "mean_ratio_to_floor": 1.113
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2474,
-     "mean_ratio_to_floor": 1.408
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2474,
-     "mean_ratio_to_floor": 1.408
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4405,
-     "mean_ratio_to_floor": 1.625
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.1657,
-     "mean_ratio_to_floor": 1.315
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9417,
-     "mean_ratio_to_floor": 1.063
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "ic-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1he27eac0cec8f",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 16.2338,
-     "mean_ratio_to_floor": 18.318
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "ic-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1heb3c3fdeabc8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 926.7039,
-     "mean_ratio_to_floor": 1045.673
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.2094,
-     "mean_ratio_to_floor": 2.493
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.6086,
-     "mean_ratio_to_floor": 2.943
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4796,
-     "mean_ratio_to_floor": 1.67
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-neg-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4796,
-     "mean_ratio_to_floor": 1.67
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.6627,
-     "mean_ratio_to_floor": 1.876
-    }
    ],
    "sources": [
     "docs/curves/standards/registry.json"
@@ -46494,25 +43780,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 21.6503922223,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 12.7702224719,
-     "ratio_rho": 10.5013292937,
-     "ratio_floor": 14.4096529965,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -46740,25 +44007,6 @@
    ],
    "sources": [
     "docs/curves/standards/registry.json"
-    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-headline-2026-09-21.json"
-   ],
-   "on_leaderboard": true,
-   "leaderboard": [
-    {
-     "regime": "prime",
-     "log2_r": 23.3822853539,
-     "reference": "matched rho, negation map (A = 2), one target",
-     "best_recipe": "mitm_m2_negfold_walk_balanced",
-     "best_s": 13.9656576304,
-     "ratio_rho": 13.4551392317,
-     "ratio_floor": 15.7585571249,
-     "verified": true
-    }
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -47131,196 +44379,6 @@
      "y_v": [
       "0x1"
      ]
-   "ecbench": [
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.7047,
-     "mean_ratio_to_floor": 1.924
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.5249,
-     "mean_ratio_to_floor": 1.721
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2051,
-     "mean_ratio_to_floor": 1.36
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.8859,
-     "mean_ratio_to_floor": 2.128
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 3.137,
-     "mean_ratio_to_floor": 3.54
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0801,
-     "mean_ratio_to_floor": 1.219
-    },
-    {
-     "session_id": "ECBS1h162089ae4d82",
-     "arm": "rho-plain",
-     "method": "rho.plain",
-     "method_id": "ECM1hb367476fce6c",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4954,
-     "mean_ratio_to_floor": 1.687
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "candidate",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.96,
-     "mean_ratio_to_floor": 1.083
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.1432,
-     "mean_ratio_to_floor": 1.29
-    },
-    {
-     "session_id": "ECBS1h3a5708ad901b",
-     "arm": "incumbent-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.1432,
-     "mean_ratio_to_floor": 1.29
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs",
-     "method": "bsgs.textbook",
-     "method_id": "ECM1h2ee5b13dfb35",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.4561,
-     "mean_ratio_to_floor": 1.643
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs-il",
-     "method": "bsgs.interleaved",
-     "method_id": "ECM1h6153371050b8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.2707,
-     "mean_ratio_to_floor": 1.434
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "bsgs-neg",
-     "method": "bsgs.negation",
-     "method_id": "ECM1h87f6341629c3",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 0.9566,
-     "mean_ratio_to_floor": 1.079
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "ic-mitm",
-     "method": "ic.pipeline",
-     "method_id": "ECM1he27eac0cec8f",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 43.7375,
-     "mean_ratio_to_floor": 49.352
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "ic-subtract",
-     "method": "ic.pipeline",
-     "method_id": "ECM1heb3c3fdeabc8",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2775.0377,
-     "mean_ratio_to_floor": 3131.295
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "kangaroo",
-     "method": "kangaroo.vow",
-     "method_id": "ECM1h05c1dc19c164",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.4613,
-     "mean_ratio_to_floor": 2.777
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-frozen",
-     "method": "rho.frozen_reference",
-     "method_id": "ECM1h9c08616a41bb",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 2.4003,
-     "mean_ratio_to_floor": 2.708
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-neg",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0801,
-     "mean_ratio_to_floor": 1.219
-    },
-    {
-     "session_id": "ECBS1haf997766feb9",
-     "arm": "rho-neg-aa",
-     "method": "rho.negation",
-     "method_id": "ECM1hefea4e0ebe79",
-     "runs": 24,
-     "verified": 24,
-     "mean_s": 1.0801,
-     "mean_ratio_to_floor": 1.219
     },
     "dlp_advantage": null,
     "exists": true,
@@ -48529,7 +45587,6 @@
      ]
     }
    ]
-   }
   },
   {
    "slug": "icv1-fp6k11-tm527622722-07ccd925",
@@ -48650,7 +45707,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:df6816a602f470182c8864cd3cd207174af214ef49b13a2077934159633e9e69",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:4de9e6f310ccc398038a1779e63d171bb4166d55fc27473bac2e230d9da0749e",
+     "cover_id": "HC1G2hdf6816a602f4",
+     "map_id": "CV1D2h4de9e6f310cc"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp9k3-t1227-55c8d640",
@@ -48747,7 +45814,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:0249facb3352580fb6e6da1ea030ce4656feeba7b93e5925cd438c0113136bd8",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:bf61732cbae249c9c0db020b8f6c215fdc993e6f212a090f8e20796b325516b6",
+     "cover_id": "HC1G2h0249facb3352",
+     "map_id": "CV1D2hbf61732cbae2"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp9k3-tm4575-aba104ba",
@@ -48844,7 +45921,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:dce61b93d70265a3fa606935572d0fe67b038b1b5100873d1dc7051bb8ce4fc4",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:e2663523320a2cd667c227f9ede3255b4802aff20eb00c666aaf391661bb1b15",
+     "cover_id": "HC1G2hdce61b93d702",
+     "map_id": "CV1D2he2663523320a"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp10k3-t3589-bbd5cc8b",
@@ -48941,7 +46028,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:4af21926ac3d605c8b09dabf1cbc689691e6b3bf80c08f7dec2ab607f5c9e3f2",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:95bce84131d5725d91e29715223a5b1727fea6d37c0f0db222083ca4f93ef984",
+     "cover_id": "HC1G2h4af21926ac3d",
+     "map_id": "CV1D2h95bce84131d5"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp10k3-t41822-dfa3991d",
@@ -49038,7 +46135,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:79fb76528fc077169b464f49757a95ef1a10c37aa35c7a75970a541fdb9e76d4",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:8e2ff8cd1f75b5f3131dd0bfd0ab8db4bf486ed85ec3f990f3ffd4ecf4866822",
+     "cover_id": "HC1G2h79fb76528fc0",
+     "map_id": "CV1D2h8e2ff8cd1f75"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp11k3-tm30789-3c2726bc",
@@ -49135,7 +46242,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:d88529e86cdff02f31a4a61db6c462f6c79ff0e6cfccc9f88ff3cb2055c00125",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:4ce63903dbfb6fd3ccc53790d7a1631051cbc8a8900d7ee416e833301ead5ad3",
+     "cover_id": "HC1G2hd88529e86cdf",
+     "map_id": "CV1D2h4ce63903dbfb"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp12k5-tm296780010-475f4271",
@@ -49238,7 +46355,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:659703ef99b9096436bdd82a63b8ed9ce74995554a874449580b8e78fc257aa7",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:e5bb3882c9e1c136586cdbbccc8a506ee574a7cfc6893be667c240300b4cb731",
+     "cover_id": "HC1G2h659703ef99b9",
+     "map_id": "CV1D2he5bb3882c9e1"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp31k2-t1044939202-6687f4aa",
@@ -49332,7 +46459,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:13deaa3e91fea207bdc556dfd187a0215ecace6a2322db432867de0a9ae0dba6",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:97689f364d1a3d1fdb94018d0d9b09f213520bdbfaf00fb0f46bb1db8157e666",
+     "cover_id": "HC1G2h13deaa3e91fe",
+     "map_id": "CV1D2h97689f364d1a"
+    }
+   ],
+   "standards_provenance": []
   },
   {
    "slug": "icv1-fp36k2-tm52676205250-0d78f787",
@@ -49426,7 +46563,17 @@
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
-   }
+   },
+   "cover_links": [
+    {
+     "cover_uid": "urn:hc-model:1:sha256:995b7811cc63ce42da73f32101902356c5ad9c73300dd9a63159d4cc30527d85",
+     "direction": "H -> E",
+     "map_uid": "urn:curve-cover-map:1:sha256:16e5ef994868e65b2fe252053e0fec1c003d49de3a673e6a0ba2dc807d0b735b",
+     "cover_id": "HC1G2h995b7811cc63",
+     "map_id": "CV1D2h16e5ef994868"
+    }
+   ],
+   "standards_provenance": []
   }
  ],
  "methods": [

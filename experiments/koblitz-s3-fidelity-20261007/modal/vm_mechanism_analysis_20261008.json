@@ -1,0 +1,2338 @@
+{
+  "candidate_id": null,
+  "confirmatory_targets_per_curve": null,
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "counters": {
+        "rank_state_probes": {
+          "mean_baseline": 174551,
+          "mean_candidate": 174551,
+          "mean_candidate_minus_baseline": 0
+        },
+        "rank_target_s3_calls": {
+          "mean_baseline": 348982,
+          "mean_candidate": 349102,
+          "mean_candidate_minus_baseline": 120
+        },
+        "target_s3_calls": {
+          "mean_baseline": 860.5,
+          "mean_candidate": 861.1666666666666,
+          "mean_candidate_minus_baseline": 0.6666666666666666
+        },
+        "target_state_probes": {
+          "mean_baseline": 430.5833333333333,
+          "mean_candidate": 430.5833333333333,
+          "mean_candidate_minus_baseline": 0
+        }
+      },
+      "pdp_share_of_mean_online_difference": 1.0203109613473509,
+      "phase_timing_ms": {
+        "index_build": {
+          "descriptive_95pct_interval_ms": [
+            -0.529313239996286,
+            0.24353665666294613
+          ],
+          "mean_baseline_minus_candidate_ms": -0.14288829166666991,
+          "mean_baseline_ms": 63.15716129166666,
+          "mean_candidate_ms": 63.30004958333333,
+          "sample_sd_paired_delta_ms": 0.6081891472579023,
+          "target_count": 12
+        },
+        "rank_linear_algebra_incremental": {
+          "descriptive_95pct_interval_ms": [
+            -0.030357933106546692,
+            -0.005459233560119911
+          ],
+          "mean_baseline_minus_candidate_ms": -0.0179085833333333,
+          "mean_baseline_ms": 2.2078992083333335,
+          "mean_candidate_ms": 2.2258077916666665,
+          "sample_sd_paired_delta_ms": 0.019593867981907726,
+          "target_count": 12
+        },
+        "rank_pdp_wall": {
+          "descriptive_95pct_interval_ms": [
+            2.6690213557707216,
+            3.950325977562612
+          ],
+          "mean_baseline_minus_candidate_ms": 3.309673666666667,
+          "mean_baseline_ms": 52.886354499999996,
+          "mean_candidate_ms": 49.576680833333334,
+          "sample_sd_paired_delta_ms": 1.0083142518020156,
+          "target_count": 12
+        },
+        "rank_query_generation": {
+          "descriptive_95pct_interval_ms": [
+            -0.037187570686179575,
+            -0.003144179313819318
+          ],
+          "mean_baseline_minus_candidate_ms": -0.020165874999999445,
+          "mean_baseline_ms": 3.661759125,
+          "mean_candidate_ms": 3.6819249999999997,
+          "sample_sd_paired_delta_ms": 0.026790223118386546,
+          "target_count": 12
+        },
+        "rank_relation_check": {
+          "descriptive_95pct_interval_ms": [
+            0.0071316834599951355,
+            0.04588948320667202
+          ],
+          "mean_baseline_minus_candidate_ms": 0.026510583333333577,
+          "mean_baseline_ms": 1.4776011666666666,
+          "mean_candidate_ms": 1.4510905833333332,
+          "sample_sd_paired_delta_ms": 0.03050019580699697,
+          "target_count": 12
+        },
+        "target_descent": {
+          "descriptive_95pct_interval_ms": [
+            -0.10510161446380382,
+            -0.028719135536197885
+          ],
+          "mean_baseline_minus_candidate_ms": -0.06691037500000085,
+          "mean_baseline_ms": 8.271295458333334,
+          "mean_candidate_ms": 8.338205833333335,
+          "sample_sd_paired_delta_ms": 0.06010868983127841,
+          "target_count": 12
+        },
+        "target_online_after_reusable_setup": {
+          "descriptive_95pct_interval_ms": [
+            2.641454154399649,
+            3.9181606789336776
+          ],
+          "mean_baseline_minus_candidate_ms": 3.2798074166666633,
+          "mean_baseline_ms": 61.92842266666666,
+          "mean_candidate_ms": 58.648615250000006,
+          "sample_sd_paired_delta_ms": 1.0046958093821408,
+          "target_count": 12
+        },
+        "target_pdp_charged": {
+          "descriptive_95pct_interval_ms": [
+            2.706057117728795,
+            3.986789798937875
+          ],
+          "mean_baseline_minus_candidate_ms": 3.346423458333335,
+          "mean_baseline_ms": 53.621809666666664,
+          "mean_candidate_ms": 50.27538620833333,
+          "sample_sd_paired_delta_ms": 1.0078641669189807,
+          "target_count": 12
+        },
+        "target_query": {
+          "descriptive_95pct_interval_ms": [
+            -0.0006884108626682482,
+            0.0009959108626682485
+          ],
+          "mean_baseline_minus_candidate_ms": 0.0001537500000000001,
+          "mean_baseline_ms": 0.014717458333333332,
+          "mean_candidate_ms": 0.014563708333333333,
+          "sample_sd_paired_delta_ms": 0.0013254659129391577,
+          "target_count": 12
+        },
+        "target_recovery_check": {
+          "descriptive_95pct_interval_ms": [
+            -6.360611878980207e-05,
+            7.42727854564684e-05
+          ],
+          "mean_baseline_minus_candidate_ms": 5.3333333333331736e-06,
+          "mean_baseline_ms": 0.01444,
+          "mean_candidate_ms": 0.014434666666666667,
+          "sample_sd_paired_delta_ms": 0.00010850289760130162,
+          "target_count": 12
+        },
+        "target_relation_check": {
+          "descriptive_95pct_interval_ms": [
+            -0.00018489429776096436,
+            0.00045539429776096435
+          ],
+          "mean_baseline_minus_candidate_ms": 0.00013524999999999998,
+          "mean_baseline_ms": 0.006160083333333333,
+          "mean_candidate_ms": 0.006024833333333333,
+          "sample_sd_paired_delta_ms": 0.0005038709024776447,
+          "target_count": 12
+        }
+      },
+      "target_count": 12,
+      "target_rows": [
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 811,
+              "candidate": 812
+            },
+            "target_state_probes": {
+              "baseline": 406,
+              "candidate": 406
+            }
+          },
+          "label": "T001",
+          "run_tags": [
+            "n41-T001-pair-1",
+            "n41-T001-pair-2",
+            "n41-T001-pair-3",
+            "n41-T001-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 63.364965999999995,
+              "baseline_minus_candidate": 0.636565499999989,
+              "candidate": 62.728400500000006
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.210511500000001,
+              "baseline_minus_candidate": -0.023555999999999244,
+              "candidate": 2.2340675
+            },
+            "rank_pdp_wall": {
+              "baseline": 55.189704,
+              "baseline_minus_candidate": 2.4241170000000025,
+              "candidate": 52.765587
+            },
+            "rank_query_generation": {
+              "baseline": 3.6674385000000003,
+              "baseline_minus_candidate": -0.010384999999999867,
+              "candidate": 3.6778235
+            },
+            "rank_relation_check": {
+              "baseline": 1.4753664999999998,
+              "baseline_minus_candidate": -0.0013215000000004196,
+              "candidate": 1.4766880000000002
+            },
+            "target_descent": {
+              "baseline": 9.267212000000006,
+              "baseline_minus_candidate": -0.13742349999999348,
+              "candidate": 9.4046355
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 65.2272375,
+              "baseline_minus_candidate": 2.2861970000000014,
+              "candidate": 62.9410405
+            },
+            "target_pdp_charged": {
+              "baseline": 55.9272565,
+              "baseline_minus_candidate": 2.424362500000001,
+              "candidate": 53.502894
+            },
+            "target_query": {
+              "baseline": 0.015007,
+              "baseline_minus_candidate": 8.94999999999993e-05,
+              "candidate": 0.0149175
+            },
+            "target_recovery_check": {
+              "baseline": 0.013741,
+              "baseline_minus_candidate": 9.999999999999593e-06,
+              "candidate": 0.013731
+            },
+            "target_relation_check": {
+              "baseline": 0.004021,
+              "baseline_minus_candidate": -0.0008415000000000002,
+              "candidate": 0.0048625000000000005
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 516,
+              "candidate": 516
+            },
+            "target_state_probes": {
+              "baseline": 258,
+              "candidate": 258
+            }
+          },
+          "label": "T002",
+          "run_tags": [
+            "n41-T002-pair-1",
+            "n41-T002-pair-2",
+            "n41-T002-pair-3",
+            "n41-T002-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 66.3052405,
+              "baseline_minus_candidate": 0.5471615000000014,
+              "candidate": 65.758079
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.1929535,
+              "baseline_minus_candidate": -0.041028500000000356,
+              "candidate": 2.233982
+            },
+            "rank_pdp_wall": {
+              "baseline": 56.97674000000001,
+              "baseline_minus_candidate": 4.634696000000005,
+              "candidate": 52.342044
+            },
+            "rank_query_generation": {
+              "baseline": 3.641298999999999,
+              "baseline_minus_candidate": -0.012840000000000629,
+              "candidate": 3.654139
+            },
+            "rank_relation_check": {
+              "baseline": 1.4981905000000006,
+              "baseline_minus_candidate": 0.0016540000000007105,
+              "candidate": 1.4965365
+            },
+            "target_descent": {
+              "baseline": 8.819471999999998,
+              "baseline_minus_candidate": -0.05727249999999984,
+              "candidate": 8.876744499999997
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 66.3705095,
+              "baseline_minus_candidate": 4.635685500000001,
+              "candidate": 61.734823999999996
+            },
+            "target_pdp_charged": {
+              "baseline": 57.518238,
+              "baseline_minus_candidate": 4.692672999999999,
+              "candidate": 52.825565
+            },
+            "target_query": {
+              "baseline": 0.014381499999999998,
+              "baseline_minus_candidate": 0.0003099999999999978,
+              "candidate": 0.0140715
+            },
+            "target_recovery_check": {
+              "baseline": 0.014567,
+              "baseline_minus_candidate": -7.499999999999868e-05,
+              "candidate": 0.014641999999999999
+            },
+            "target_relation_check": {
+              "baseline": 0.0038510000000000003,
+              "baseline_minus_candidate": 5.0000000000000565e-05,
+              "candidate": 0.0038009999999999997
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 533,
+              "candidate": 534
+            },
+            "target_state_probes": {
+              "baseline": 267,
+              "candidate": 267
+            }
+          },
+          "label": "T003",
+          "run_tags": [
+            "n41-T003-pair-1",
+            "n41-T003-pair-2",
+            "n41-T003-pair-3",
+            "n41-T003-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 64.40126699999999,
+              "baseline_minus_candidate": -0.7629405000000133,
+              "candidate": 65.1642075
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.192589,
+              "baseline_minus_candidate": -0.029593999999999454,
+              "candidate": 2.2221829999999994
+            },
+            "rank_pdp_wall": {
+              "baseline": 55.6398115,
+              "baseline_minus_candidate": 4.361450999999995,
+              "candidate": 51.278360500000005
+            },
+            "rank_query_generation": {
+              "baseline": 3.648721499999999,
+              "baseline_minus_candidate": -0.057969000000001714,
+              "candidate": 3.7066905000000006
+            },
+            "rank_relation_check": {
+              "baseline": 1.5311365,
+              "baseline_minus_candidate": 0.05021600000000048,
+              "candidate": 1.4809204999999994
+            },
+            "target_descent": {
+              "baseline": 8.362790999999998,
+              "baseline_minus_candidate": -0.20034399999999764,
+              "candidate": 8.563134999999996
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 64.5658335,
+              "baseline_minus_candidate": 4.2088984999999965,
+              "candidate": 60.356935
+            },
+            "target_pdp_charged": {
+              "baseline": 56.165535500000004,
+              "baseline_minus_candidate": 4.404719499999999,
+              "candidate": 51.760816000000005
+            },
+            "target_query": {
+              "baseline": 0.018403,
+              "baseline_minus_candidate": 0.004115999999999998,
+              "candidate": 0.014287000000000001
+            },
+            "target_recovery_check": {
+              "baseline": 0.014471999999999999,
+              "baseline_minus_candidate": -2.4500000000000216e-05,
+              "candidate": 0.014496499999999999
+            },
+            "target_relation_check": {
+              "baseline": 0.004632000000000001,
+              "baseline_minus_candidate": 0.00043150000000000046,
+              "candidate": 0.0042005
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 279,
+              "candidate": 280
+            },
+            "target_state_probes": {
+              "baseline": 140,
+              "candidate": 140
+            }
+          },
+          "label": "T004",
+          "run_tags": [
+            "n41-T004-pair-1",
+            "n41-T004-pair-2",
+            "n41-T004-pair-3",
+            "n41-T004-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 61.294873499999994,
+              "baseline_minus_candidate": -1.1407025000000033,
+              "candidate": 62.435576
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.2271710000000002,
+              "baseline_minus_candidate": -0.024383499999999003,
+              "candidate": 2.2515544999999992
+            },
+            "rank_pdp_wall": {
+              "baseline": 49.550208500000004,
+              "baseline_minus_candidate": 1.4908325000000033,
+              "candidate": 48.059376
+            },
+            "rank_query_generation": {
+              "baseline": 3.6781905000000013,
+              "baseline_minus_candidate": 0.0007015000000016869,
+              "candidate": 3.6774889999999996
+            },
+            "rank_relation_check": {
+              "baseline": 1.4610560000000006,
+              "baseline_minus_candidate": 0.04201250000000023,
+              "candidate": 1.4190435000000003
+            },
+            "target_descent": {
+              "baseline": 9.037749999999999,
+              "baseline_minus_candidate": 0.005884500000002291,
+              "candidate": 9.031865499999997
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 58.94200550000001,
+              "baseline_minus_candidate": 1.5600775000000056,
+              "candidate": 57.381928
+            },
+            "target_pdp_charged": {
+              "baseline": 49.86592850000001,
+              "baseline_minus_candidate": 1.5528315000000106,
+              "candidate": 48.313097
+            },
+            "target_query": {
+              "baseline": 0.014752500000000002,
+              "baseline_minus_candidate": 0.00013600000000000417,
+              "candidate": 0.014616499999999998
+            },
+            "target_recovery_check": {
+              "baseline": 0.015557999999999999,
+              "baseline_minus_candidate": 0.0001544999999999984,
+              "candidate": 0.0154035
+            },
+            "target_relation_check": {
+              "baseline": 0.0080165,
+              "baseline_minus_candidate": 0.001070999999999999,
+              "candidate": 0.0069455
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 222,
+              "candidate": 222
+            },
+            "target_state_probes": {
+              "baseline": 111,
+              "candidate": 111
+            }
+          },
+          "label": "T005",
+          "run_tags": [
+            "n41-T005-pair-1",
+            "n41-T005-pair-2",
+            "n41-T005-pair-3",
+            "n41-T005-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 61.4069655,
+              "baseline_minus_candidate": -0.383912500000001,
+              "candidate": 61.790878
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.2157525,
+              "baseline_minus_candidate": -0.006834500000000077,
+              "candidate": 2.222587
+            },
+            "rank_pdp_wall": {
+              "baseline": 50.7633545,
+              "baseline_minus_candidate": 2.632892499999997,
+              "candidate": 48.130462
+            },
+            "rank_query_generation": {
+              "baseline": 3.674704,
+              "baseline_minus_candidate": -0.044906000000001,
+              "candidate": 3.719610000000001
+            },
+            "rank_relation_check": {
+              "baseline": 1.4328279999999998,
+              "baseline_minus_candidate": 0.003911999999999249,
+              "candidate": 1.4289160000000005
+            },
+            "target_descent": {
+              "baseline": 7.811398499999999,
+              "baseline_minus_candidate": -0.0678060000000027,
+              "candidate": 7.879204500000002
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 58.8393355,
+              "baseline_minus_candidate": 2.5817354999999935,
+              "candidate": 56.257600000000004
+            },
+            "target_pdp_charged": {
+              "baseline": 50.995763499999995,
+              "baseline_minus_candidate": 2.6511454999999913,
+              "candidate": 48.344618000000004
+            },
+            "target_query": {
+              "baseline": 0.0142015,
+              "baseline_minus_candidate": -0.0013429999999999987,
+              "candidate": 0.0155445
+            },
+            "target_recovery_check": {
+              "baseline": 0.0131245,
+              "baseline_minus_candidate": -0.00014099999999999877,
+              "candidate": 0.0132655
+            },
+            "target_relation_check": {
+              "baseline": 0.0048475,
+              "baseline_minus_candidate": -0.00012000000000000031,
+              "candidate": 0.0049675000000000006
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 325,
+              "candidate": 326
+            },
+            "target_state_probes": {
+              "baseline": 163,
+              "candidate": 163
+            }
+          },
+          "label": "T006",
+          "run_tags": [
+            "n41-T006-pair-1",
+            "n41-T006-pair-2",
+            "n41-T006-pair-3",
+            "n41-T006-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 61.111717999999996,
+              "baseline_minus_candidate": -0.5546775000000039,
+              "candidate": 61.6663955
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.221298,
+              "baseline_minus_candidate": -0.01061150000000044,
+              "candidate": 2.2319095000000004
+            },
+            "rank_pdp_wall": {
+              "baseline": 52.4923425,
+              "baseline_minus_candidate": 3.804237999999998,
+              "candidate": 48.6881045
+            },
+            "rank_query_generation": {
+              "baseline": 3.6666715000000005,
+              "baseline_minus_candidate": -0.03156250000000016,
+              "candidate": 3.6982340000000007
+            },
+            "rank_relation_check": {
+              "baseline": 1.5080019999999998,
+              "baseline_minus_candidate": 0.08772800000000047,
+              "candidate": 1.4202739999999994
+            },
+            "target_descent": {
+              "baseline": 8.481714,
+              "baseline_minus_candidate": -0.04577999999999882,
+              "candidate": 8.527493999999999
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 61.302224499999994,
+              "baseline_minus_candidate": 3.7457589999999925,
+              "candidate": 57.5564655
+            },
+            "target_pdp_charged": {
+              "baseline": 52.7822775,
+              "baseline_minus_candidate": 3.791122999999999,
+              "candidate": 48.9911545
+            },
+            "target_query": {
+              "baseline": 0.013836,
+              "baseline_minus_candidate": -0.0004554999999999993,
+              "candidate": 0.014291499999999999
+            },
+            "target_recovery_check": {
+              "baseline": 0.014497,
+              "baseline_minus_candidate": 0.00025049999999999725,
+              "candidate": 0.014246500000000002
+            },
+            "target_relation_check": {
+              "baseline": 0.009899999999999999,
+              "baseline_minus_candidate": 0.0006209999999999983,
+              "candidate": 0.009279
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 47,
+              "candidate": 48
+            },
+            "target_state_probes": {
+              "baseline": 24,
+              "candidate": 24
+            }
+          },
+          "label": "T007",
+          "run_tags": [
+            "n41-T007-pair-1",
+            "n41-T007-pair-2",
+            "n41-T007-pair-3",
+            "n41-T007-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 62.309822,
+              "baseline_minus_candidate": 0.5740714999999952,
+              "candidate": 61.7357505
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.2124555,
+              "baseline_minus_candidate": -0.00916100000000064,
+              "candidate": 2.2216165000000005
+            },
+            "rank_pdp_wall": {
+              "baseline": 51.956527,
+              "baseline_minus_candidate": 4.522791000000005,
+              "candidate": 47.433735999999996
+            },
+            "rank_query_generation": {
+              "baseline": 3.645958,
+              "baseline_minus_candidate": 0.003147500000000303,
+              "candidate": 3.6428104999999995
+            },
+            "rank_relation_check": {
+              "baseline": 1.4574245000000008,
+              "baseline_minus_candidate": 0.003524000000001415,
+              "candidate": 1.4539004999999994
+            },
+            "target_descent": {
+              "baseline": 8.193697999999998,
+              "baseline_minus_candidate": -0.049064000000008434,
+              "candidate": 8.242762000000006
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 60.2556975,
+              "baseline_minus_candidate": 4.4600169999999935,
+              "candidate": 55.7956805
+            },
+            "target_pdp_charged": {
+              "baseline": 52.0245845,
+              "baseline_minus_candidate": 4.510012500000009,
+              "candidate": 47.514571999999994
+            },
+            "target_query": {
+              "baseline": 0.014260499999999999,
+              "baseline_minus_candidate": -0.0006960000000000022,
+              "candidate": 0.014956500000000001
+            },
+            "target_recovery_check": {
+              "baseline": 0.0136305,
+              "baseline_minus_candidate": 5.500000000000296e-06,
+              "candidate": 0.013625
+            },
+            "target_relation_check": {
+              "baseline": 0.009524,
+              "baseline_minus_candidate": -0.0002409999999999999,
+              "candidate": 0.009765
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 667,
+              "candidate": 668
+            },
+            "target_state_probes": {
+              "baseline": 334,
+              "candidate": 334
+            }
+          },
+          "label": "T008",
+          "run_tags": [
+            "n41-T008-pair-1",
+            "n41-T008-pair-2",
+            "n41-T008-pair-3",
+            "n41-T008-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 65.321164,
+              "baseline_minus_candidate": 0.12084199999999612,
+              "candidate": 65.200322
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.2198515,
+              "baseline_minus_candidate": -0.03776800000000069,
+              "candidate": 2.2576195000000006
+            },
+            "rank_pdp_wall": {
+              "baseline": 54.16731899999999,
+              "baseline_minus_candidate": 3.6941429999999897,
+              "candidate": 50.473176
+            },
+            "rank_query_generation": {
+              "baseline": 3.6786114999999984,
+              "baseline_minus_candidate": 0.02150799999999764,
+              "candidate": 3.6571035000000007
+            },
+            "rank_relation_check": {
+              "baseline": 1.5044924999999996,
+              "baseline_minus_candidate": 0.07013250000000015,
+              "candidate": 1.4343599999999994
+            },
+            "target_descent": {
+              "baseline": 7.967616000000003,
+              "baseline_minus_candidate": -0.04477849999999606,
+              "candidate": 8.0123945
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 62.853734,
+              "baseline_minus_candidate": 3.696069999999999,
+              "candidate": 59.157664000000004
+            },
+            "target_pdp_charged": {
+              "baseline": 54.852132,
+              "baseline_minus_candidate": 3.74131899999999,
+              "candidate": 51.11081300000001
+            },
+            "target_query": {
+              "baseline": 0.014687000000000002,
+              "baseline_minus_candidate": -0.00012549999999999714,
+              "candidate": 0.0148125
+            },
+            "target_recovery_check": {
+              "baseline": 0.015453000000000001,
+              "baseline_minus_candidate": -5.9999999999997555e-05,
+              "candidate": 0.015512999999999999
+            },
+            "target_relation_check": {
+              "baseline": 0.003846,
+              "baseline_minus_candidate": -0.0002850000000000001,
+              "candidate": 0.004131
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 1071,
+              "candidate": 1072
+            },
+            "target_state_probes": {
+              "baseline": 536,
+              "candidate": 536
+            }
+          },
+          "label": "T009",
+          "run_tags": [
+            "n41-T009-pair-1",
+            "n41-T009-pair-2",
+            "n41-T009-pair-3",
+            "n41-T009-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 63.97022,
+              "baseline_minus_candidate": -0.719996000000009,
+              "candidate": 64.690216
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.1913750000000003,
+              "baseline_minus_candidate": -0.02880550000000026,
+              "candidate": 2.2201805000000006
+            },
+            "rank_pdp_wall": {
+              "baseline": 54.262975499999996,
+              "baseline_minus_candidate": 2.910284500000003,
+              "candidate": 51.35269099999999
+            },
+            "rank_query_generation": {
+              "baseline": 3.663832000000003,
+              "baseline_minus_candidate": -0.06917799999999508,
+              "candidate": 3.733009999999998
+            },
+            "rank_relation_check": {
+              "baseline": 1.4992670000000001,
+              "baseline_minus_candidate": 0.031301000000000245,
+              "candidate": 1.4679659999999999
+            },
+            "target_descent": {
+              "baseline": 7.6677624999999985,
+              "baseline_minus_candidate": -0.10065500000001215,
+              "candidate": 7.768417500000011
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 62.925807,
+              "baseline_minus_candidate": 2.860850499999991,
+              "candidate": 60.06495650000001
+            },
+            "target_pdp_charged": {
+              "baseline": 55.2229825,
+              "baseline_minus_candidate": 2.9615115000000074,
+              "candidate": 52.26147099999999
+            },
+            "target_query": {
+              "baseline": 0.0142965,
+              "baseline_minus_candidate": -0.0001755000000000003,
+              "candidate": 0.014472
+            },
+            "target_recovery_check": {
+              "baseline": 0.015753,
+              "baseline_minus_candidate": 1.8999999999998185e-05,
+              "candidate": 0.015734
+            },
+            "target_relation_check": {
+              "baseline": 0.0050125,
+              "baseline_minus_candidate": 0.0001504999999999996,
+              "candidate": 0.004862
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 3954,
+              "candidate": 3954
+            },
+            "target_state_probes": {
+              "baseline": 1977,
+              "candidate": 1977
+            }
+          },
+          "label": "T010",
+          "run_tags": [
+            "n41-T010-pair-1",
+            "n41-T010-pair-2",
+            "n41-T010-pair-3",
+            "n41-T010-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 64.0874015,
+              "baseline_minus_candidate": 0.4439819999999983,
+              "candidate": 63.6434195
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.1934575,
+              "baseline_minus_candidate": -0.0027009999999996204,
+              "candidate": 2.1961584999999997
+            },
+            "rank_pdp_wall": {
+              "baseline": 51.675380000000004,
+              "baseline_minus_candidate": 3.626734500000005,
+              "candidate": 48.0486455
+            },
+            "rank_query_generation": {
+              "baseline": 3.658561999999999,
+              "baseline_minus_candidate": -0.028170500000000764,
+              "candidate": 3.6867324999999997
+            },
+            "rank_relation_check": {
+              "baseline": 1.4487229999999989,
+              "baseline_minus_candidate": 0.0011934999999989593,
+              "candidate": 1.4475295
+            },
+            "target_descent": {
+              "baseline": 7.465528499999996,
+              "baseline_minus_candidate": -0.002958000000008454,
+              "candidate": 7.4684865000000045
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 62.0631415,
+              "baseline_minus_candidate": 3.7801164999999983,
+              "candidate": 58.283025
+            },
+            "target_pdp_charged": {
+              "baseline": 54.559726000000005,
+              "baseline_minus_candidate": 3.7824985000000098,
+              "candidate": 50.777227499999995
+            },
+            "target_query": {
+              "baseline": 0.014277,
+              "baseline_minus_candidate": 4.0500000000000605e-05,
+              "candidate": 0.0142365
+            },
+            "target_recovery_check": {
+              "baseline": 0.014727,
+              "baseline_minus_candidate": 2.9999999999998778e-05,
+              "candidate": 0.014697000000000002
+            },
+            "target_relation_check": {
+              "baseline": 0.008883,
+              "baseline_minus_candidate": 0.0005055000000000007,
+              "candidate": 0.0083775
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 1575,
+              "candidate": 1576
+            },
+            "target_state_probes": {
+              "baseline": 788,
+              "candidate": 788
+            }
+          },
+          "label": "T011",
+          "run_tags": [
+            "n41-T011-pair-1",
+            "n41-T011-pair-2",
+            "n41-T011-pair-3",
+            "n41-T011-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 61.242294,
+              "baseline_minus_candidate": -0.015728499999994483,
+              "candidate": 61.258022499999996
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.187741999999999,
+              "baseline_minus_candidate": -0.03069550000000021,
+              "candidate": 2.2184374999999994
+            },
+            "rank_pdp_wall": {
+              "baseline": 51.684456,
+              "baseline_minus_candidate": 2.051384000000006,
+              "candidate": 49.63307199999999
+            },
+            "rank_query_generation": {
+              "baseline": 3.6451005000000025,
+              "baseline_minus_candidate": -0.006762999999994523,
+              "candidate": 3.651863499999997
+            },
+            "rank_relation_check": {
+              "baseline": 1.47036,
+              "baseline_minus_candidate": 0.027416000000000107,
+              "candidate": 1.4429439999999998
+            },
+            "target_descent": {
+              "baseline": 8.994713500000012,
+              "baseline_minus_candidate": -0.09936049999999774,
+              "candidate": 9.09407400000001
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 61.9935075,
+              "baseline_minus_candidate": 1.9826929999999976,
+              "candidate": 60.0108145
+            },
+            "target_pdp_charged": {
+              "baseline": 52.965509999999995,
+              "baseline_minus_candidate": 2.0822860000000034,
+              "candidate": 50.88322399999999
+            },
+            "target_query": {
+              "baseline": 0.0143105,
+              "baseline_minus_candidate": -2.6999999999999247e-05,
+              "candidate": 0.0143375
+            },
+            "target_recovery_check": {
+              "baseline": 0.0135155,
+              "baseline_minus_candidate": -0.00011000000000000072,
+              "candidate": 0.0136255
+            },
+            "target_relation_check": {
+              "baseline": 0.005458,
+              "baseline_minus_candidate": -9.549999999999923e-05,
+              "candidate": 0.005553499999999999
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 174551,
+              "candidate": 174551
+            },
+            "rank_target_s3_calls": {
+              "baseline": 348982,
+              "candidate": 349102
+            },
+            "target_s3_calls": {
+              "baseline": 326,
+              "candidate": 326
+            },
+            "target_state_probes": {
+              "baseline": 163,
+              "candidate": 163
+            }
+          },
+          "label": "T012",
+          "run_tags": [
+            "n41-T012-pair-1",
+            "n41-T012-pair-2",
+            "n41-T012-pair-3",
+            "n41-T012-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 63.070003500000006,
+              "baseline_minus_candidate": -0.4593244999999939,
+              "candidate": 63.529328
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.2296335000000003,
+              "baseline_minus_candidate": 0.030236000000000374,
+              "candidate": 2.1993975
+            },
+            "rank_pdp_wall": {
+              "baseline": 50.277435499999996,
+              "baseline_minus_candidate": 3.562519999999992,
+              "candidate": 46.714915500000004
+            },
+            "rank_query_generation": {
+              "baseline": 3.672020500000001,
+              "baseline_minus_candidate": -0.005573499999999232,
+              "candidate": 3.677594
+            },
+            "rank_relation_check": {
+              "baseline": 1.4443675000000002,
+              "baseline_minus_candidate": 0.0003590000000013305,
+              "candidate": 1.444008499999999
+            },
+            "target_descent": {
+              "baseline": 7.1858895,
+              "baseline_minus_candidate": -0.0033669999999972333,
+              "candidate": 7.189256499999997
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 57.802038499999995,
+              "baseline_minus_candidate": 3.5595889999999883,
+              "candidate": 54.242449500000006
+            },
+            "target_pdp_charged": {
+              "baseline": 50.5817815,
+              "baseline_minus_candidate": 3.5625989999999987,
+              "candidate": 47.0191825
+            },
+            "target_query": {
+              "baseline": 0.014196499999999999,
+              "baseline_minus_candidate": -2.450000000000195e-05,
+              "candidate": 0.014221000000000001
+            },
+            "target_recovery_check": {
+              "baseline": 0.0142415,
+              "baseline_minus_candidate": 5.000000000001531e-06,
+              "candidate": 0.0142365
+            },
+            "target_relation_check": {
+              "baseline": 0.005929500000000001,
+              "baseline_minus_candidate": 0.00037650000000000097,
+              "candidate": 0.005553
+            }
+          }
+        }
+      ]
+    },
+    "53": {
+      "counters": {
+        "rank_state_probes": {
+          "mean_baseline": 3849533,
+          "mean_candidate": 3849533,
+          "mean_candidate_minus_baseline": 0
+        },
+        "rank_target_s3_calls": {
+          "mean_baseline": 7698947,
+          "mean_candidate": 7699066,
+          "mean_candidate_minus_baseline": 119
+        },
+        "target_s3_calls": {
+          "mean_baseline": 49030.416666666664,
+          "mean_candidate": 49030.833333333336,
+          "mean_candidate_minus_baseline": 0.4166666666666667
+        },
+        "target_state_probes": {
+          "mean_baseline": 24515.416666666668,
+          "mean_candidate": 24515.416666666668,
+          "mean_candidate_minus_baseline": 0
+        }
+      },
+      "pdp_share_of_mean_online_difference": 0.9998053791126419,
+      "phase_timing_ms": {
+        "index_build": {
+          "descriptive_95pct_interval_ms": [
+            -1.0459007709451626,
+            0.21614493761182335
+          ],
+          "mean_baseline_minus_candidate_ms": -0.4148779166666697,
+          "mean_baseline_ms": 85.98175579166667,
+          "mean_candidate_ms": 86.39663370833334,
+          "sample_sd_paired_delta_ms": 0.9931585765951199,
+          "target_count": 12
+        },
+        "rank_linear_algebra_incremental": {
+          "descriptive_95pct_interval_ms": [
+            -0.01306345405809789,
+            0.05652028739143117
+          ],
+          "mean_baseline_minus_candidate_ms": 0.02172841666666664,
+          "mean_baseline_ms": 1.9511371666666668,
+          "mean_candidate_ms": 1.9294087500000001,
+          "sample_sd_paired_delta_ms": 0.05475846805199659,
+          "target_count": 12
+        },
+        "rank_pdp_wall": {
+          "descriptive_95pct_interval_ms": [
+            79.27220462821708,
+            105.78767353844958
+          ],
+          "mean_baseline_minus_candidate_ms": 92.52993908333333,
+          "mean_baseline_ms": 1117.1651488333334,
+          "mean_candidate_ms": 1024.63520975,
+          "sample_sd_paired_delta_ms": 20.866174007872388,
+          "target_count": 12
+        },
+        "rank_query_generation": {
+          "descriptive_95pct_interval_ms": [
+            -0.03815161263721534,
+            0.011742029303882903
+          ],
+          "mean_baseline_minus_candidate_ms": -0.013204791666666216,
+          "mean_baseline_ms": 5.002328875,
+          "mean_candidate_ms": 5.015533666666666,
+          "sample_sd_paired_delta_ms": 0.039263473640764913,
+          "target_count": 12
+        },
+        "rank_relation_check": {
+          "descriptive_95pct_interval_ms": [
+            -0.009609007631867752,
+            0.061453257631867264
+          ],
+          "mean_baseline_minus_candidate_ms": 0.025922124999999758,
+          "mean_baseline_ms": 1.7561196666666665,
+          "mean_candidate_ms": 1.7301975416666668,
+          "sample_sd_paired_delta_ms": 0.055921982651208485,
+          "target_count": 12
+        },
+        "target_descent": {
+          "descriptive_95pct_interval_ms": [
+            -0.05399463414310193,
+            0.09054680080967942
+          ],
+          "mean_baseline_minus_candidate_ms": 0.018276083333288746,
+          "mean_baseline_ms": 9.225628541666609,
+          "mean_candidate_ms": 9.20735245833332,
+          "sample_sd_paired_delta_ms": 0.11374593235680615,
+          "target_count": 12
+        },
+        "target_online_after_reusable_setup": {
+          "descriptive_95pct_interval_ms": [
+            81.79933664188268,
+            108.2158111081172
+          ],
+          "mean_baseline_minus_candidate_ms": 95.00757387499993,
+          "mean_baseline_ms": 1158.6056810833334,
+          "mean_candidate_ms": 1063.5981072083332,
+          "sample_sd_paired_delta_ms": 20.78827098072744,
+          "target_count": 12
+        },
+        "target_pdp_charged": {
+          "descriptive_95pct_interval_ms": [
+            81.7898664607065,
+            108.18830037262678
+          ],
+          "mean_baseline_minus_candidate_ms": 94.98908341666665,
+          "mean_baseline_ms": 1149.3272663333332,
+          "mean_candidate_ms": 1054.3381829166667,
+          "sample_sd_paired_delta_ms": 20.774074085066506,
+          "target_count": 12
+        },
+        "target_query": {
+          "descriptive_95pct_interval_ms": [
+            -0.0013236918449510365,
+            0.0005349418449510342
+          ],
+          "mean_baseline_minus_candidate_ms": -0.0003943750000000012,
+          "mean_baseline_ms": 0.022939249999999998,
+          "mean_candidate_ms": 0.023333625,
+          "sample_sd_paired_delta_ms": 0.0014626395679325159,
+          "target_count": 12
+        },
+        "target_recovery_check": {
+          "descriptive_95pct_interval_ms": [
+            -0.00026944357996493764,
+            0.0010682769132982718
+          ],
+          "mean_baseline_minus_candidate_ms": 0.0003994166666666671,
+          "mean_baseline_ms": 0.021406666666666668,
+          "mean_candidate_ms": 0.021007249999999998,
+          "sample_sd_paired_delta_ms": 0.0010527103511096174,
+          "target_count": 12
+        },
+        "target_relation_check": {
+          "descriptive_95pct_interval_ms": [
+            -0.00023790674807630085,
+            0.000656573414742967
+          ],
+          "mean_baseline_minus_candidate_ms": 0.00020933333333333307,
+          "mean_baseline_ms": 0.008440291666666667,
+          "mean_candidate_ms": 0.008230958333333333,
+          "sample_sd_paired_delta_ms": 0.0007039052858980047,
+          "target_count": 12
+        }
+      },
+      "target_count": 12,
+      "target_rows": [
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 35574,
+              "candidate": 35574
+            },
+            "target_state_probes": {
+              "baseline": 17787,
+              "candidate": 17787
+            }
+          },
+          "label": "T001",
+          "run_tags": [
+            "n53-T001-pair-1",
+            "n53-T001-pair-2",
+            "n53-T001-pair-3",
+            "n53-T001-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 88.577933,
+              "baseline_minus_candidate": -0.18048600000000192,
+              "candidate": 88.758419
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.9063665,
+              "baseline_minus_candidate": -0.048544500000000435,
+              "candidate": 1.9549110000000005
+            },
+            "rank_pdp_wall": {
+              "baseline": 1192.916651,
+              "baseline_minus_candidate": 106.62199550000014,
+              "candidate": 1086.2946554999999
+            },
+            "rank_query_generation": {
+              "baseline": 4.990651,
+              "baseline_minus_candidate": -0.025899499999997744,
+              "candidate": 5.0165504999999975
+            },
+            "rank_relation_check": {
+              "baseline": 1.8038829999999997,
+              "baseline_minus_candidate": 0.0003914999999989899,
+              "candidate": 1.8034915000000007
+            },
+            "target_descent": {
+              "baseline": 9.932053499999906,
+              "baseline_minus_candidate": -0.03663450000001589,
+              "candidate": 9.968687999999922
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1226.9633374999999,
+              "baseline_minus_candidate": 108.33661549999988,
+              "candidate": 1118.626722
+            },
+            "target_pdp_charged": {
+              "baseline": 1216.9782890000001,
+              "baseline_minus_candidate": 108.3731700000003,
+              "candidate": 1108.6051189999998
+            },
+            "target_query": {
+              "baseline": 0.023084,
+              "baseline_minus_candidate": -0.0002664999999999994,
+              "candidate": 0.0233505
+            },
+            "target_recovery_check": {
+              "baseline": 0.022149000000000002,
+              "baseline_minus_candidate": 8.550000000000224e-05,
+              "candidate": 0.0220635
+            },
+            "target_relation_check": {
+              "baseline": 0.007762,
+              "baseline_minus_candidate": 0.0002609999999999991,
+              "candidate": 0.007501000000000001
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 88939,
+              "candidate": 88940
+            },
+            "target_state_probes": {
+              "baseline": 44470,
+              "candidate": 44470
+            }
+          },
+          "label": "T002",
+          "run_tags": [
+            "n53-T002-pair-1",
+            "n53-T002-pair-2",
+            "n53-T002-pair-3",
+            "n53-T002-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 88.07753199999999,
+              "baseline_minus_candidate": -0.862860000000012,
+              "candidate": 88.940392
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.9333304999999994,
+              "baseline_minus_candidate": -0.011791500000001065,
+              "candidate": 1.9451220000000005
+            },
+            "rank_pdp_wall": {
+              "baseline": 1140.727236,
+              "baseline_minus_candidate": 57.74289099999987,
+              "candidate": 1082.984345
+            },
+            "rank_query_generation": {
+              "baseline": 5.008654,
+              "baseline_minus_candidate": -0.018045499999999493,
+              "candidate": 5.026699499999999
+            },
+            "rank_relation_check": {
+              "baseline": 1.7586995000000005,
+              "baseline_minus_candidate": 0.010363500000000414,
+              "candidate": 1.7483360000000001
+            },
+            "target_descent": {
+              "baseline": 8.81070799999998,
+              "baseline_minus_candidate": -0.12755049999990575,
+              "candidate": 8.938258499999886
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1211.9152829999998,
+              "baseline_minus_candidate": 60.48403549999966,
+              "candidate": 1151.4312475000002
+            },
+            "target_pdp_charged": {
+              "baseline": 1203.0523715,
+              "baseline_minus_candidate": 60.60968649999995,
+              "candidate": 1142.442685
+            },
+            "target_query": {
+              "baseline": 0.0237465,
+              "baseline_minus_candidate": 0.00019699999999999926,
+              "candidate": 0.0235495
+            },
+            "target_recovery_check": {
+              "baseline": 0.020880999999999997,
+              "baseline_minus_candidate": 3.99999999999949e-05,
+              "candidate": 0.020841000000000002
+            },
+            "target_relation_check": {
+              "baseline": 0.007575999999999999,
+              "baseline_minus_candidate": 0.001662499999999999,
+              "candidate": 0.0059135
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 16323,
+              "candidate": 16324
+            },
+            "target_state_probes": {
+              "baseline": 8162,
+              "candidate": 8162
+            }
+          },
+          "label": "T003",
+          "run_tags": [
+            "n53-T003-pair-1",
+            "n53-T003-pair-2",
+            "n53-T003-pair-3",
+            "n53-T003-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 87.749349,
+              "baseline_minus_candidate": 0.08301499999998896,
+              "candidate": 87.666334
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.9004064999999999,
+              "baseline_minus_candidate": -0.023848499999999717,
+              "candidate": 1.9242549999999996
+            },
+            "rank_pdp_wall": {
+              "baseline": 1141.036384,
+              "baseline_minus_candidate": 111.04450450000013,
+              "candidate": 1029.9918794999999
+            },
+            "rank_query_generation": {
+              "baseline": 5.004157499999999,
+              "baseline_minus_candidate": 0.011566499999998037,
+              "candidate": 4.992591000000001
+            },
+            "rank_relation_check": {
+              "baseline": 1.8028689999999996,
+              "baseline_minus_candidate": 0.10318449999999824,
+              "candidate": 1.6996845000000014
+            },
+            "target_descent": {
+              "baseline": 10.687858499999843,
+              "baseline_minus_candidate": -0.051762500000387845,
+              "candidate": 10.73962100000023
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1163.5512454999998,
+              "baseline_minus_candidate": 112.87388299999975,
+              "candidate": 1050.6773625
+            },
+            "target_pdp_charged": {
+              "baseline": 1152.8121,
+              "baseline_minus_candidate": 112.9213880000002,
+              "candidate": 1039.890712
+            },
+            "target_query": {
+              "baseline": 0.0228545,
+              "baseline_minus_candidate": 2.5999999999998247e-05,
+              "candidate": 0.0228285
+            },
+            "target_recovery_check": {
+              "baseline": 0.0226785,
+              "baseline_minus_candidate": 0.0035955000000000015,
+              "candidate": 0.019083
+            },
+            "target_relation_check": {
+              "baseline": 0.0057540000000000004,
+              "baseline_minus_candidate": 0.0006360000000000011,
+              "candidate": 0.005117999999999999
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 41407,
+              "candidate": 41408
+            },
+            "target_state_probes": {
+              "baseline": 20704,
+              "candidate": 20704
+            }
+          },
+          "label": "T004",
+          "run_tags": [
+            "n53-T004-pair-1",
+            "n53-T004-pair-2",
+            "n53-T004-pair-3",
+            "n53-T004-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 84.39600899999999,
+              "baseline_minus_candidate": 0.36250899999998865,
+              "candidate": 84.0335
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.013992,
+              "baseline_minus_candidate": 0.01579399999999964,
+              "candidate": 1.9981980000000004
+            },
+            "rank_pdp_wall": {
+              "baseline": 1108.0250090000002,
+              "baseline_minus_candidate": 85.06062800000018,
+              "candidate": 1022.964381
+            },
+            "rank_query_generation": {
+              "baseline": 5.0359314999999985,
+              "baseline_minus_candidate": 0.026221500000001008,
+              "candidate": 5.009709999999997
+            },
+            "rank_relation_check": {
+              "baseline": 1.7826434999999998,
+              "baseline_minus_candidate": 0.04060849999999894,
+              "candidate": 1.7420350000000009
+            },
+            "target_descent": {
+              "baseline": 8.86816949999973,
+              "baseline_minus_candidate": 0.04713399999955925,
+              "candidate": 8.821035500000171
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1142.82144,
+              "baseline_minus_candidate": 87.15606849999972,
+              "candidate": 1055.6653715000002
+            },
+            "target_pdp_charged": {
+              "baseline": 1133.8984525,
+              "baseline_minus_candidate": 87.10988450000013,
+              "candidate": 1046.788568
+            },
+            "target_query": {
+              "baseline": 0.022934499999999997,
+              "baseline_minus_candidate": -1.0000000000003062e-05,
+              "candidate": 0.0229445
+            },
+            "target_recovery_check": {
+              "baseline": 0.019735,
+              "baseline_minus_candidate": -0.0001694999999999995,
+              "candidate": 0.0199045
+            },
+            "target_relation_check": {
+              "baseline": 0.0121485,
+              "baseline_minus_candidate": -0.0007705000000000004,
+              "candidate": 0.012919
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 57264,
+              "candidate": 57264
+            },
+            "target_state_probes": {
+              "baseline": 28632,
+              "candidate": 28632
+            }
+          },
+          "label": "T005",
+          "run_tags": [
+            "n53-T005-pair-1",
+            "n53-T005-pair-2",
+            "n53-T005-pair-3",
+            "n53-T005-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 84.23236299999999,
+              "baseline_minus_candidate": -0.005188500000002705,
+              "candidate": 84.2375515
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.0126795,
+              "baseline_minus_candidate": 0.004212499999999952,
+              "candidate": 2.008467
+            },
+            "rank_pdp_wall": {
+              "baseline": 1091.7233435000003,
+              "baseline_minus_candidate": 72.64287350000029,
+              "candidate": 1019.08047
+            },
+            "rank_query_generation": {
+              "baseline": 5.035944500000001,
+              "baseline_minus_candidate": 0.023191000000002404,
+              "candidate": 5.012753499999999
+            },
+            "rank_relation_check": {
+              "baseline": 1.882028499999999,
+              "baseline_minus_candidate": 0.07625550000000003,
+              "candidate": 1.805772999999999
+            },
+            "target_descent": {
+              "baseline": 8.864859999999736,
+              "baseline_minus_candidate": 0.07637499999981578,
+              "candidate": 8.78848499999992
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1139.435972,
+              "baseline_minus_candidate": 78.35458850000009,
+              "candidate": 1061.0813835
+            },
+            "target_pdp_charged": {
+              "baseline": 1130.5152935,
+              "baseline_minus_candidate": 78.27858400000014,
+              "candidate": 1052.2367095
+            },
+            "target_query": {
+              "baseline": 0.023329499999999996,
+              "baseline_minus_candidate": 0.00034999999999999615,
+              "candidate": 0.0229795
+            },
+            "target_recovery_check": {
+              "baseline": 0.023841,
+              "baseline_minus_candidate": -0.0005504999999999989,
+              "candidate": 0.0243915
+            },
+            "target_relation_check": {
+              "baseline": 0.008648000000000001,
+              "baseline_minus_candidate": -0.00016999999999999828,
+              "candidate": 0.008818
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 23089,
+              "candidate": 23090
+            },
+            "target_state_probes": {
+              "baseline": 11545,
+              "candidate": 11545
+            }
+          },
+          "label": "T006",
+          "run_tags": [
+            "n53-T006-pair-1",
+            "n53-T006-pair-2",
+            "n53-T006-pair-3",
+            "n53-T006-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 82.23860049999999,
+              "baseline_minus_candidate": -2.4326420000000155,
+              "candidate": 84.6712425
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.8821155000000003,
+              "baseline_minus_candidate": 0.002363000000000781,
+              "candidate": 1.8797524999999995
+            },
+            "rank_pdp_wall": {
+              "baseline": 1030.7675135,
+              "baseline_minus_candidate": 86.90091499999994,
+              "candidate": 943.8665985
+            },
+            "rank_query_generation": {
+              "baseline": 4.992024499999999,
+              "baseline_minus_candidate": -0.043035500000000226,
+              "candidate": 5.03506
+            },
+            "rank_relation_check": {
+              "baseline": 1.6500689999999993,
+              "baseline_minus_candidate": -0.07097950000000042,
+              "candidate": 1.7210484999999998
+            },
+            "target_descent": {
+              "baseline": 9.149283000000175,
+              "baseline_minus_candidate": -0.03822599999979204,
+              "candidate": 9.187508999999967
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1054.3154055,
+              "baseline_minus_candidate": 88.005404,
+              "candidate": 966.3100015
+            },
+            "target_pdp_charged": {
+              "baseline": 1045.1122169999999,
+              "baseline_minus_candidate": 88.04341049999971,
+              "candidate": 957.0688065000002
+            },
+            "target_query": {
+              "baseline": 0.022758999999999998,
+              "baseline_minus_candidate": 0.00017,
+              "candidate": 0.022588999999999998
+            },
+            "target_recovery_check": {
+              "baseline": 0.021327,
+              "baseline_minus_candidate": 1.9999999999999185e-05,
+              "candidate": 0.021307
+            },
+            "target_relation_check": {
+              "baseline": 0.0098195,
+              "baseline_minus_candidate": 2.9500000000000012e-05,
+              "candidate": 0.00979
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 30940,
+              "candidate": 30940
+            },
+            "target_state_probes": {
+              "baseline": 15470,
+              "candidate": 15470
+            }
+          },
+          "label": "T007",
+          "run_tags": [
+            "n53-T007-pair-1",
+            "n53-T007-pair-2",
+            "n53-T007-pair-3",
+            "n53-T007-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 84.110004,
+              "baseline_minus_candidate": -0.18112249999998653,
+              "candidate": 84.29112649999999
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.9720890000000004,
+              "baseline_minus_candidate": 0.05068600000000023,
+              "candidate": 1.9214030000000002
+            },
+            "rank_pdp_wall": {
+              "baseline": 1100.2396455,
+              "baseline_minus_candidate": 61.127956999999924,
+              "candidate": 1039.1116885000001
+            },
+            "rank_query_generation": {
+              "baseline": 4.980603999999999,
+              "baseline_minus_candidate": 0.0013004999999992606,
+              "candidate": 4.979303499999999
+            },
+            "rank_relation_check": {
+              "baseline": 1.8658275000000009,
+              "baseline_minus_candidate": 0.13519850000000155,
+              "candidate": 1.7306289999999993
+            },
+            "target_descent": {
+              "baseline": 9.223355999999956,
+              "baseline_minus_candidate": 0.14733499999998578,
+              "candidate": 9.07602099999997
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1128.6343785,
+              "baseline_minus_candidate": 62.60968249999996,
+              "candidate": 1066.024696
+            },
+            "target_pdp_charged": {
+              "baseline": 1119.3556475,
+              "baseline_minus_candidate": 62.460717999999815,
+              "candidate": 1056.8949295000002
+            },
+            "target_query": {
+              "baseline": 0.02268,
+              "baseline_minus_candidate": 7.099999999999815e-05,
+              "candidate": 0.022609
+            },
+            "target_recovery_check": {
+              "baseline": 0.021668,
+              "baseline_minus_candidate": 0.0004564999999999986,
+              "candidate": 0.0212115
+            },
+            "target_relation_check": {
+              "baseline": 0.011027,
+              "baseline_minus_candidate": 0.0011020000000000005,
+              "candidate": 0.009925
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 58584,
+              "candidate": 58584
+            },
+            "target_state_probes": {
+              "baseline": 29292,
+              "candidate": 29292
+            }
+          },
+          "label": "T008",
+          "run_tags": [
+            "n53-T008-pair-1",
+            "n53-T008-pair-2",
+            "n53-T008-pair-3",
+            "n53-T008-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 85.4206525,
+              "baseline_minus_candidate": -1.183677000000003,
+              "candidate": 86.6043295
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.0050025000000002,
+              "baseline_minus_candidate": 0.08872950000000013,
+              "candidate": 1.9162730000000001
+            },
+            "rank_pdp_wall": {
+              "baseline": 1111.400217,
+              "baseline_minus_candidate": 116.54523900000004,
+              "candidate": 994.8549780000001
+            },
+            "rank_query_generation": {
+              "baseline": 4.9991755000000015,
+              "baseline_minus_candidate": -0.07573349999999746,
+              "candidate": 5.074908999999999
+            },
+            "rank_relation_check": {
+              "baseline": 1.6946335000000006,
+              "baseline_minus_candidate": 0.0012020000000005915,
+              "candidate": 1.6934315
+            },
+            "target_descent": {
+              "baseline": 10.009202999999934,
+              "baseline_minus_candidate": 0.0140159999999252,
+              "candidate": 9.995187000000008
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1157.2503795,
+              "baseline_minus_candidate": 118.31212750000009,
+              "candidate": 1038.938252
+            },
+            "target_pdp_charged": {
+              "baseline": 1147.189534,
+              "baseline_minus_candidate": 118.29765050000015,
+              "candidate": 1028.8918835
+            },
+            "target_query": {
+              "baseline": 0.0226795,
+              "baseline_minus_candidate": -0.00029950000000000115,
+              "candidate": 0.022979
+            },
+            "target_recovery_check": {
+              "baseline": 0.023675,
+              "baseline_minus_candidate": 0.0005600000000000015,
+              "candidate": 0.023115
+            },
+            "target_relation_check": {
+              "baseline": 0.005288,
+              "baseline_minus_candidate": 0.00020050000000000016,
+              "candidate": 0.0050875
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 153590,
+              "candidate": 153590
+            },
+            "target_state_probes": {
+              "baseline": 76795,
+              "candidate": 76795
+            }
+          },
+          "label": "T009",
+          "run_tags": [
+            "n53-T009-pair-1",
+            "n53-T009-pair-2",
+            "n53-T009-pair-3",
+            "n53-T009-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 89.0140375,
+              "baseline_minus_candidate": 1.090997999999999,
+              "candidate": 87.9230395
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 2.0121785,
+              "baseline_minus_candidate": 0.136614,
+              "candidate": 1.8755645
+            },
+            "rank_pdp_wall": {
+              "baseline": 1138.3155585,
+              "baseline_minus_candidate": 108.00396549999982,
+              "candidate": 1030.3115930000001
+            },
+            "rank_query_generation": {
+              "baseline": 5.056039500000002,
+              "baseline_minus_candidate": 0.053242500000001414,
+              "candidate": 5.002797
+            },
+            "rank_relation_check": {
+              "baseline": 1.718893,
+              "baseline_minus_candidate": -0.005757999999999264,
+              "candidate": 1.7246509999999993
+            },
+            "target_descent": {
+              "baseline": 9.310840000000237,
+              "baseline_minus_candidate": 0.25533700000038806,
+              "candidate": 9.055502999999849
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1249.2469959999999,
+              "baseline_minus_candidate": 116.18164499999989,
+              "candidate": 1133.065351
+            },
+            "target_pdp_charged": {
+              "baseline": 1239.8806014999998,
+              "baseline_minus_candidate": 115.92552499999965,
+              "candidate": 1123.9550765000001
+            },
+            "target_query": {
+              "baseline": 0.023121,
+              "baseline_minus_candidate": 0.00030749999999999875,
+              "candidate": 0.0228135
+            },
+            "target_recovery_check": {
+              "baseline": 0.0212265,
+              "baseline_minus_candidate": 0.0005304999999999997,
+              "candidate": 0.020696
+            },
+            "target_relation_check": {
+              "baseline": 0.011206999999999998,
+              "baseline_minus_candidate": -5.500000000000296e-05,
+              "candidate": 0.011262000000000001
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 15314,
+              "candidate": 15314
+            },
+            "target_state_probes": {
+              "baseline": 7657,
+              "candidate": 7657
+            }
+          },
+          "label": "T010",
+          "run_tags": [
+            "n53-T010-pair-1",
+            "n53-T010-pair-2",
+            "n53-T010-pair-3",
+            "n53-T010-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 88.18601949999999,
+              "baseline_minus_candidate": 0.6710824999999829,
+              "candidate": 87.514937
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.8826185,
+              "baseline_minus_candidate": -0.009109999999999951,
+              "candidate": 1.8917285
+            },
+            "rank_pdp_wall": {
+              "baseline": 1129.2786404999997,
+              "baseline_minus_candidate": 109.41370949999964,
+              "candidate": 1019.8649310000001
+            },
+            "rank_query_generation": {
+              "baseline": 4.945809999999998,
+              "baseline_minus_candidate": -0.07157000000000302,
+              "candidate": 5.017380000000001
+            },
+            "rank_relation_check": {
+              "baseline": 1.7269160000000001,
+              "baseline_minus_candidate": 0.02846549999999981,
+              "candidate": 1.6984505000000003
+            },
+            "target_descent": {
+              "baseline": 8.40798000000007,
+              "baseline_minus_candidate": -0.11689699999981862,
+              "candidate": 8.524876999999888
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1147.981803,
+              "baseline_minus_candidate": 109.68955649999998,
+              "candidate": 1038.2922465
+            },
+            "target_pdp_charged": {
+              "baseline": 1139.5233879999998,
+              "baseline_minus_candidate": 109.80705399999965,
+              "candidate": 1029.7163340000002
+            },
+            "target_query": {
+              "baseline": 0.022564,
+              "baseline_minus_candidate": -0.0004854999999999998,
+              "candidate": 0.0230495
+            },
+            "target_recovery_check": {
+              "baseline": 0.02042,
+              "baseline_minus_candidate": 3.950000000000134e-05,
+              "candidate": 0.0203805
+            },
+            "target_relation_check": {
+              "baseline": 0.007450999999999999,
+              "baseline_minus_candidate": -0.00015450000000000012,
+              "candidate": 0.007605499999999999
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 50128,
+              "candidate": 50128
+            },
+            "target_state_probes": {
+              "baseline": 25064,
+              "candidate": 25064
+            }
+          },
+          "label": "T011",
+          "run_tags": [
+            "n53-T011-pair-1",
+            "n53-T011-pair-2",
+            "n53-T011-pair-3",
+            "n53-T011-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 83.74616850000001,
+              "baseline_minus_candidate": -1.5372324999999876,
+              "candidate": 85.283401
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.9113465,
+              "baseline_minus_candidate": -0.02001300000000028,
+              "candidate": 1.9313595000000003
+            },
+            "rank_pdp_wall": {
+              "baseline": 1085.9323239999999,
+              "baseline_minus_candidate": 83.21217799999977,
+              "candidate": 1002.7201460000001
+            },
+            "rank_query_generation": {
+              "baseline": 4.9851065000000006,
+              "baseline_minus_candidate": -0.0332719999999993,
+              "candidate": 5.0183785
+            },
+            "rank_relation_check": {
+              "baseline": 1.6807344999999994,
+              "baseline_minus_candidate": -0.009048500000000903,
+              "candidate": 1.6897830000000003
+            },
+            "target_descent": {
+              "baseline": 8.826435499999974,
+              "baseline_minus_candidate": -0.06004149999987263,
+              "candidate": 8.886476999999847
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1125.4238679999999,
+              "baseline_minus_candidate": 85.12017650000007,
+              "candidate": 1040.3036914999998
+            },
+            "target_pdp_charged": {
+              "baseline": 1116.5501359999998,
+              "baseline_minus_candidate": 85.17951149999976,
+              "candidate": 1031.3706245
+            },
+            "target_query": {
+              "baseline": 0.022879499999999997,
+              "baseline_minus_candidate": 0.00017549999999999857,
+              "candidate": 0.022704
+            },
+            "target_recovery_check": {
+              "baseline": 0.02001,
+              "baseline_minus_candidate": 1.0000000000003062e-05,
+              "candidate": 0.019999999999999997
+            },
+            "target_relation_check": {
+              "baseline": 0.0044069999999999995,
+              "baseline_minus_candidate": 0.0005209999999999998,
+              "candidate": 0.0038859999999999997
+            }
+          }
+        },
+        {
+          "counters": {
+            "rank_state_probes": {
+              "baseline": 3849533,
+              "candidate": 3849533
+            },
+            "rank_target_s3_calls": {
+              "baseline": 7698947,
+              "candidate": 7699066
+            },
+            "target_s3_calls": {
+              "baseline": 17213,
+              "candidate": 17214
+            },
+            "target_state_probes": {
+              "baseline": 8607,
+              "candidate": 8607
+            }
+          },
+          "label": "T012",
+          "run_tags": [
+            "n53-T012-pair-1",
+            "n53-T012-pair-2",
+            "n53-T012-pair-3",
+            "n53-T012-pair-4"
+          ],
+          "timing_ms": {
+            "index_build": {
+              "baseline": 86.03240100000001,
+              "baseline_minus_candidate": -0.8029309999999867,
+              "candidate": 86.835332
+            },
+            "rank_linear_algebra_incremental": {
+              "baseline": 1.9815205000000002,
+              "baseline_minus_candidate": 0.07564950000000037,
+              "candidate": 1.9058709999999999
+            },
+            "rank_pdp_wall": {
+              "baseline": 1135.6192635000002,
+              "baseline_minus_candidate": 112.0424125000003,
+              "candidate": 1023.5768509999999
+            },
+            "rank_query_generation": {
+              "baseline": 4.993848,
+              "baseline_minus_candidate": -0.006423499999999471,
+              "candidate": 5.000271499999999
+            },
+            "rank_relation_check": {
+              "baseline": 1.7062389999999996,
+              "baseline_minus_candidate": 0.0011819999999991282,
+              "candidate": 1.7050570000000005
+            },
+            "target_descent": {
+              "baseline": 8.616795499999757,
+              "baseline_minus_candidate": 0.11022799999958366,
+              "candidate": 8.506567500000173
+            },
+            "target_online_after_reusable_setup": {
+              "baseline": 1155.7280645,
+              "baseline_minus_candidate": 112.96710350000012,
+              "candidate": 1042.760961
+            },
+            "target_pdp_charged": {
+              "baseline": 1147.0591655000003,
+              "baseline_minus_candidate": 112.86241850000033,
+              "candidate": 1034.196747
+            },
+            "target_query": {
+              "baseline": 0.022639,
+              "baseline_minus_candidate": -0.004968,
+              "candidate": 0.027607
+            },
+            "target_recovery_check": {
+              "baseline": 0.019269,
+              "baseline_minus_candidate": 0.00017550000000000204,
+              "candidate": 0.0190935
+            },
+            "target_relation_check": {
+              "baseline": 0.0101955,
+              "baseline_minus_candidate": -0.0007505000000000012,
+              "candidate": 0.010946000000000001
+            }
+          }
+        }
+      ]
+    }
+  },
+  "custody_audit_sha256": "25d6753157bd76f5ef9f1d6adb5f6412e8e46fe84a4b04994cc564b4a76691ec",
+  "kind": "modal_vm_s3_mechanism_diagnostic_v1",
+  "nested_timing_note": "rank_* costs are nested within online phases; index_build is reusable setup outside the online interval; do not add these diagnostics to the exclusive phases",
+  "raw_sha256": "85a5a7dcb150f9fdec38055dfbca6762bf70eab08e6f7c0c1194c676251dc2c6",
+  "s3_counter_note": "rank_target_s3_calls counts logical S3 queries; paired roots can share a generic inversion, but fallback frequency was not measured",
+  "scope": "Same 24 targets as the VM panel; descriptive paired phase attribution only",
+  "source_sha256": {
+    "baseline": "00c0801b2f3e5150237d61e72176465ae5cdeec5e2878b8053d279dbb2ad03fb",
+    "candidate": "edb605e0a65efb143116c02b918302cd25190b098d3542f4b0b64788d1af7d65"
+  },
+  "strict_host_isolation_receipt": null,
+  "uncertainty_status": "descriptive t intervals; N53 A/A and physical-host gates failed",
+  "workload_id": null
+}

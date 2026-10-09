@@ -14,6 +14,36 @@ fn integer(v: &Value) -> Result<BigUint, String> {
     )
 }
 
+fn coefficient_list_eq(a: &Value, b: &Value) -> Result<bool, String> {
+    let (Some(a), Some(b)) = (a.as_array(), b.as_array()) else {
+        return Ok(false);
+    };
+    if a.len() != b.len() {
+        return Ok(false);
+    }
+    for (x, y) in a.iter().zip(b) {
+        if integer(x)? != integer(y)? {
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
+fn zero_coefficients(v: &Value, degree: usize) -> Result<bool, String> {
+    let Some(values) = v.as_array() else {
+        return Ok(false);
+    };
+    if values.len() != degree {
+        return Ok(false);
+    }
+    for x in values {
+        if !integer(x)?.is_zero() {
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
 fn bind(model: &Value, rep: &Value, row: &Value) -> Result<(), String> {
     let field = &rep["field"];
     let curve = &rep["curve"];
@@ -45,21 +75,58 @@ fn bind(model: &Value, rep: &Value, row: &Value) -> Result<(), String> {
                 && eq(&c[4], &model["b"])?
         }
         Some(form) => {
-            if field["representation"] != "prime"
-                || field["degree"] != 1
-                || !eq(&field["characteristic"], &model["p"])?
-            {
+            let extension_degree = if model["k"].is_null() {
+                None
+            } else {
+                Some(
+                    model["k"]
+                        .as_str()
+                        .and_then(|s| s.parse::<usize>().ok())
+                        .ok_or("invalid extension degree")?,
+                )
+            };
+            if !eq(&field["characteristic"], &model["p"])? {
+                return Err("EC1 field differs from model".into());
+            }
+            if let Some(degree) = extension_degree {
+                let modulus = field["modulus"]
+                    .as_array()
+                    .ok_or("missing EC1 extension modulus")?;
+                let model_modulus = model["modulus"]
+                    .as_array()
+                    .ok_or("missing model extension modulus")?;
+                if field["representation"] != "polynomial"
+                    || field["degree"].as_u64() != Some(degree as u64)
+                    || modulus.len() != degree + 1
+                    || model_modulus.len() != degree
+                    || !integer(&modulus[degree])?.is_one()
+                    || !coefficient_list_eq(
+                        &Value::Array(modulus[..degree].to_vec()),
+                        &model["modulus"],
+                    )?
+                {
+                    return Err("EC1 field differs from model".into());
+                }
+            } else if field["representation"] != "prime" || field["degree"] != 1 {
                 return Err("EC1 field differs from model".into());
             }
             match form {
                 "y^2=x^3+a*x+b" => {
                     curve["model"] == "short Weierstrass"
                         && c.as_array().is_some_and(|a| a.len() == 5)
-                        && integer(&c[0])?.is_zero()
-                        && integer(&c[1])?.is_zero()
-                        && integer(&c[2])?.is_zero()
-                        && eq(&c[3], &model["a"])?
-                        && eq(&c[4], &model["b"])?
+                        && if let Some(degree) = extension_degree {
+                            zero_coefficients(&c[0], degree)?
+                                && zero_coefficients(&c[1], degree)?
+                                && zero_coefficients(&c[2], degree)?
+                                && coefficient_list_eq(&c[3], &model["a"])?
+                                && coefficient_list_eq(&c[4], &model["b"])?
+                        } else {
+                            integer(&c[0])?.is_zero()
+                                && integer(&c[1])?.is_zero()
+                                && integer(&c[2])?.is_zero()
+                                && eq(&c[3], &model["a"])?
+                                && eq(&c[4], &model["b"])?
+                        }
                 }
                 "B*y^2=x^3+A*x^2+x" => {
                     curve["model"] == "Montgomery"

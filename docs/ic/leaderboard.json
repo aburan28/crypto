@@ -92,8 +92,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "1140e62e4ba6ac3d3b912a9bfc306c76c40deb8cbb63e42bf0594b7c747ff00a"
-   "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed"
+   "sha256": "f8297bb893b0cb062b5b9e4a6f177ec4d1b1864485966695372cd53ad4441fba"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -102,8 +101,6 @@
   "curves_yaml": {
    "path": "docs/curves/ic/curves.yaml",
    "sha256": "566ed698a961aae8c81b7fb7863e808f9871d3080ee512afd111719783fab77e"
-   "sha256": "2342a3d22dd3a947dfc8ac2a791e2f42061dad4e7b723db6bd0abe7b851b64a6"
-   "sha256": "d11d19fcb65175b8a8ad363b2c15ea87ccc733331d5c20b36cb0954901108c92"
   }
  },
  "families": {
@@ -123,18 +120,12 @@
    "ref_short": "one-target rho",
    "rows": 6,
    "canonical_step_units": [
-    2.14227008107,
-    2.27340727571
+    4.60273174732,
+    5.39421535943
    ],
    "rho_step_units_as_built": [
-    3.98506501834,
-    4.97204654515
-    4.602731747316069,
-    5.394215359428946
-   ],
-   "rho_step_units_as_built": [
-    9.715071640681813,
-    11.820503447339632
+    9.71507164068,
+    11.8205034473
    ]
   },
   "B": {
@@ -210,24 +201,15 @@
   "koblitz": {
    "slug": "icv1-f2m47-t22705043-f4e44623",
    "log2_r": 36.64,
-   "ratio_rho": 4.94676916595,
-   "s": 4.26774899371,
+   "ratio_rho": 5.22592584414,
+   "s": 9.50680578078,
    "recipe": "aimed m = 3 collection, m = 3 descent; one target",
    "one_target": null,
-   "online_speedup": 9.76532164572,
+   "online_speedup": 10.1730121073,
    "largest": {
     "slug": "icv1-f2m61-t158598901-ab42b6c5",
     "log2_r": 47.21,
-    "ratio_rho": 31.5994057949
-   "ratio_rho": 5.2259258441371435,
-   "s": 9.506805780776906,
-   "recipe": "aimed m = 3 collection, m = 3 descent; one target",
-   "one_target": null,
-   "online_speedup": 10.173012107266377,
-   "largest": {
-    "slug": "icv1-f2m61-t158598901-ab42b6c5",
-    "log2_r": 47.21,
-    "ratio_rho": 20.970861959576446
+    "ratio_rho": 20.9708619596
    }
   },
   "koblitz_batch": {
@@ -3455,12 +3437,9 @@
    "legacy": "K_1 / GF(2^47)",
    "log2_r": 36.64,
    "cofactor": null,
-   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
-   "reference_s": 0.862734615369,
-   "floor_s": 0.129269482946,
    "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-   "reference_s": 1.8191620134530595,
-   "floor_s": 0.12926948294637178,
+   "reference_s": 1.81916201345,
+   "floor_s": 0.129269482946,
    "targets": 1,
    "recipes": [
     {
@@ -3471,60 +3450,34 @@
      "base_points": 5264,
      "columns": 56,
      "targets": "one public point per process, 64 per size",
-     "s": 4.26774899371,
-     "s_online": 0.0673166511807,
-     "s_setup": 4.20043234253,
+     "s": 9.50680578078,
+     "s_online": 0.138196330874,
+     "s_setup": 9.3686094499,
      "phases_s": {
-      "precomputation": 4.20043234253,
-      "descent": 0.0663887535348,
-      "verify": 0.000483669685547
+      "precomputation": 9.3686094499,
+      "descent": 0.137148925581,
+      "verify": 0.000439677473992
      },
-     "ratio_rho": 4.94676916595,
+     "ratio_rho": 5.22592584414,
      "ratio_rho_ci": [
-      4.5500424385,
-      5.40950674603
+      4.79514814303,
+      5.7211804288
      ],
-     "online_speedup": 9.76532164572,
+     "ratio_rho_section23": 4.94676916595,
+     "online_speedup_section23": 9.76532164572,
+     "online_speedup": 10.1730121073,
      "online_speedup_ci": [
-      7.82701730131,
-      12.4856601103
+      8.09343495575,
+      13.1131578378
      ],
-     "online_speedup_canonical_step": 4.34101280853,
-     "ic_online_over_precomputation_model": 2.42028690732,
-     "break_even_targets": 7.11874823355,
+     "online_speedup_canonical_step": 4.54740584323,
+     "ic_online_over_precomputation_model": 2.39134072934,
+     "break_even_targets": 7.39037805819,
      "construction_artefact": false,
-     "canonical_step_units": 2.16853986203,
-     "rho_step_units_as_built": 4.86695968803,
-     "cold_ratio_without_curve_construction": 6.31378924664,
-     "ratio_floor": 33.0143580405,
-     "s": 9.506805780776906,
-     "s_online": 0.13819633087430783,
-     "s_setup": 9.368609449902598,
-     "phases_s": {
-      "precomputation": 9.368609449902598,
-      "descent": 0.1371489255809661,
-      "verify": 0.0004396774739923872
-     },
-     "ratio_rho": 5.2259258441371435,
-     "ratio_rho_ci": [
-      4.795148143026125,
-      5.72118042879613
-     ],
-     "ratio_rho_section23": 4.946769165949517,
-     "online_speedup_section23": 9.765321645722155,
-     "online_speedup": 10.173012107266377,
-     "online_speedup_ci": [
-      8.093434955750006,
-      13.113157837804373
-     ],
-     "online_speedup_canonical_step": 4.547405843227763,
-     "ic_online_over_precomputation_model": 2.391340729336279,
-     "break_even_targets": 7.3903780581851075,
-     "construction_artefact": false,
-     "canonical_step_units": 4.668288423567654,
-     "rho_step_units_as_built": 10.453734304147051,
-     "cold_ratio_without_curve_construction": 6.586251457111585,
-     "ratio_floor": 73.54253737303847,
+     "canonical_step_units": 4.66828842357,
+     "rho_step_units_as_built": 10.4537343041,
+     "cold_ratio_without_curve_construction": 6.58625145711,
+     "ratio_floor": 73.542537373,
      "verified": true
     }
    ],
@@ -3536,60 +3489,34 @@
     "base_points": 5264,
     "columns": 56,
     "targets": "one public point per process, 64 per size",
-    "s": 4.26774899371,
-    "s_online": 0.0673166511807,
-    "s_setup": 4.20043234253,
+    "s": 9.50680578078,
+    "s_online": 0.138196330874,
+    "s_setup": 9.3686094499,
     "phases_s": {
-     "precomputation": 4.20043234253,
-     "descent": 0.0663887535348,
-     "verify": 0.000483669685547
+     "precomputation": 9.3686094499,
+     "descent": 0.137148925581,
+     "verify": 0.000439677473992
     },
-    "ratio_rho": 4.94676916595,
+    "ratio_rho": 5.22592584414,
     "ratio_rho_ci": [
-     4.5500424385,
-     5.40950674603
+     4.79514814303,
+     5.7211804288
     ],
-    "online_speedup": 9.76532164572,
+    "ratio_rho_section23": 4.94676916595,
+    "online_speedup_section23": 9.76532164572,
+    "online_speedup": 10.1730121073,
     "online_speedup_ci": [
-     7.82701730131,
-     12.4856601103
+     8.09343495575,
+     13.1131578378
     ],
-    "online_speedup_canonical_step": 4.34101280853,
-    "ic_online_over_precomputation_model": 2.42028690732,
-    "break_even_targets": 7.11874823355,
+    "online_speedup_canonical_step": 4.54740584323,
+    "ic_online_over_precomputation_model": 2.39134072934,
+    "break_even_targets": 7.39037805819,
     "construction_artefact": false,
-    "canonical_step_units": 2.16853986203,
-    "rho_step_units_as_built": 4.86695968803,
-    "cold_ratio_without_curve_construction": 6.31378924664,
-    "ratio_floor": 33.0143580405,
-    "s": 9.506805780776906,
-    "s_online": 0.13819633087430783,
-    "s_setup": 9.368609449902598,
-    "phases_s": {
-     "precomputation": 9.368609449902598,
-     "descent": 0.1371489255809661,
-     "verify": 0.0004396774739923872
-    },
-    "ratio_rho": 5.2259258441371435,
-    "ratio_rho_ci": [
-     4.795148143026125,
-     5.72118042879613
-    ],
-    "ratio_rho_section23": 4.946769165949517,
-    "online_speedup_section23": 9.765321645722155,
-    "online_speedup": 10.173012107266377,
-    "online_speedup_ci": [
-     8.093434955750006,
-     13.113157837804373
-    ],
-    "online_speedup_canonical_step": 4.547405843227763,
-    "ic_online_over_precomputation_model": 2.391340729336279,
-    "break_even_targets": 7.3903780581851075,
-    "construction_artefact": false,
-    "canonical_step_units": 4.668288423567654,
-    "rho_step_units_as_built": 10.453734304147051,
-    "cold_ratio_without_curve_construction": 6.586251457111585,
-    "ratio_floor": 73.54253737303847,
+    "canonical_step_units": 4.66828842357,
+    "rho_step_units_as_built": 10.4537343041,
+    "cold_ratio_without_curve_construction": 6.58625145711,
+    "ratio_floor": 73.542537373,
     "verified": true
    },
    "source": "research/ic_tool_program/rule/v3/analysis.json",
@@ -3609,7 +3536,7 @@
     "points": 5264,
     "recipe": "aimed m = 3 collection, m = 3 descent; one target",
     "variant": "koblitz_one_target",
-    "source": "research/ic_single_target_20260930/analysis.json",
+    "source": "research/ic_tool_program/rule/v3/analysis.json",
     "refs": [],
     "link_status": "no_curves_yaml_record"
    }
@@ -3621,12 +3548,9 @@
    "legacy": "K_0 / GF(2^57)",
    "log2_r": 38.0,
    "cofactor": null,
-   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
-   "reference_s": 4.09217289679,
-   "floor_s": 0.117383623846,
    "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-   "reference_s": 1.7994171396001315,
-   "floor_s": 0.11738362384644484,
+   "reference_s": 1.7994171396,
+   "floor_s": 0.117383623846,
    "targets": 1,
    "recipes": [
     {
@@ -3637,60 +3561,34 @@
      "base_points": 7296,
      "columns": 64,
      "targets": "one public point per process, 64 per size",
-     "s": 8.12117350521,
-     "s_online": 0.0423843111989,
-     "s_setup": 8.07878919401,
+     "s": 11.0145815141,
+     "s_online": 0.0815744933224,
+     "s_setup": 10.9330070207,
      "phases_s": {
-      "precomputation": 8.07878919401,
-      "descent": 0.0417219894783,
-      "verify": 0.000389873304511
+      "precomputation": 10.9330070207,
+      "descent": 0.0812847778717,
+      "verify": 0.000290196544956
      },
-     "ratio_rho": 1.98456265413,
+     "ratio_rho": 6.12119406427,
      "ratio_rho_ci": [
-      1.95204003493,
-      2.01869861827
+      5.65550428195,
+      6.66807987856
      ],
-     "online_speedup": 13.5377271583,
+     "ratio_rho_section23": 1.98456265413,
+     "online_speedup_section23": 13.5377271583,
+     "online_speedup": 16.2970290136,
      "online_speedup_ci": [
-      10.7255591738,
-      17.346473982
+      13.0060295767,
+      20.8228587503
      ],
-     "online_speedup_canonical_step": 5.96556165831,
-     "ic_online_over_precomputation_model": 3.28531413624,
-     "break_even_targets": 15.2027562212,
-     "construction_artefact": true,
-     "canonical_step_units": 2.25563246971,
-     "rho_step_units_as_built": 4.97204654515,
-     "cold_ratio_without_curve_construction": 8.21301496898,
-     "ratio_floor": 69.1848934212,
-     "s": 11.014581514064941,
-     "s_online": 0.08157449332238782,
-     "s_setup": 10.933007020742554,
-     "phases_s": {
-      "precomputation": 10.933007020742554,
-      "descent": 0.08128477787166705,
-      "verify": 0.0002901965449555733
-     },
-     "ratio_rho": 6.121194064269396,
-     "ratio_rho_ci": [
-      5.655504281946691,
-      6.6680798785640425
-     ],
-     "ratio_rho_section23": 1.9845626541276857,
-     "online_speedup_section23": 13.537727158347499,
-     "online_speedup": 16.297029013600017,
-     "online_speedup_ci": [
-      13.006029576740705,
-      20.822858750270225
-     ],
-     "online_speedup_canonical_step": 7.4189122919282005,
-     "ic_online_over_precomputation_model": 1.5087120599291393,
-     "break_even_targets": 8.761493671842066,
+     "online_speedup_canonical_step": 7.41891229193,
+     "ic_online_over_precomputation_model": 1.50871205993,
+     "break_even_targets": 8.76149367184,
      "construction_artefact": false,
-     "canonical_step_units": 5.371862787519074,
-     "rho_step_units_as_built": 11.820503447339632,
-     "cold_ratio_without_curve_construction": 8.098850678927207,
-     "ratio_floor": 93.8340558345144,
+     "canonical_step_units": 5.37186278752,
+     "rho_step_units_as_built": 11.8205034473,
+     "cold_ratio_without_curve_construction": 8.09885067893,
+     "ratio_floor": 93.8340558345,
      "verified": true
     }
    ],
@@ -3702,60 +3600,34 @@
     "base_points": 7296,
     "columns": 64,
     "targets": "one public point per process, 64 per size",
-    "s": 8.12117350521,
-    "s_online": 0.0423843111989,
-    "s_setup": 8.07878919401,
+    "s": 11.0145815141,
+    "s_online": 0.0815744933224,
+    "s_setup": 10.9330070207,
     "phases_s": {
-     "precomputation": 8.07878919401,
-     "descent": 0.0417219894783,
-     "verify": 0.000389873304511
+     "precomputation": 10.9330070207,
+     "descent": 0.0812847778717,
+     "verify": 0.000290196544956
     },
-    "ratio_rho": 1.98456265413,
+    "ratio_rho": 6.12119406427,
     "ratio_rho_ci": [
-     1.95204003493,
-     2.01869861827
+     5.65550428195,
+     6.66807987856
     ],
-    "online_speedup": 13.5377271583,
+    "ratio_rho_section23": 1.98456265413,
+    "online_speedup_section23": 13.5377271583,
+    "online_speedup": 16.2970290136,
     "online_speedup_ci": [
-     10.7255591738,
-     17.346473982
+     13.0060295767,
+     20.8228587503
     ],
-    "online_speedup_canonical_step": 5.96556165831,
-    "ic_online_over_precomputation_model": 3.28531413624,
-    "break_even_targets": 15.2027562212,
-    "construction_artefact": true,
-    "canonical_step_units": 2.25563246971,
-    "rho_step_units_as_built": 4.97204654515,
-    "cold_ratio_without_curve_construction": 8.21301496898,
-    "ratio_floor": 69.1848934212,
-    "s": 11.014581514064941,
-    "s_online": 0.08157449332238782,
-    "s_setup": 10.933007020742554,
-    "phases_s": {
-     "precomputation": 10.933007020742554,
-     "descent": 0.08128477787166705,
-     "verify": 0.0002901965449555733
-    },
-    "ratio_rho": 6.121194064269396,
-    "ratio_rho_ci": [
-     5.655504281946691,
-     6.6680798785640425
-    ],
-    "ratio_rho_section23": 1.9845626541276857,
-    "online_speedup_section23": 13.537727158347499,
-    "online_speedup": 16.297029013600017,
-    "online_speedup_ci": [
-     13.006029576740705,
-     20.822858750270225
-    ],
-    "online_speedup_canonical_step": 7.4189122919282005,
-    "ic_online_over_precomputation_model": 1.5087120599291393,
-    "break_even_targets": 8.761493671842066,
+    "online_speedup_canonical_step": 7.41891229193,
+    "ic_online_over_precomputation_model": 1.50871205993,
+    "break_even_targets": 8.76149367184,
     "construction_artefact": false,
-    "canonical_step_units": 5.371862787519074,
-    "rho_step_units_as_built": 11.820503447339632,
-    "cold_ratio_without_curve_construction": 8.098850678927207,
-    "ratio_floor": 93.8340558345144,
+    "canonical_step_units": 5.37186278752,
+    "rho_step_units_as_built": 11.8205034473,
+    "cold_ratio_without_curve_construction": 8.09885067893,
+    "ratio_floor": 93.8340558345,
     "verified": true
    },
    "source": "research/ic_tool_program/rule/v3/analysis.json",
@@ -3775,7 +3647,7 @@
     "points": 7296,
     "recipe": "aimed m = 3 collection, m = 2 descent; one target",
     "variant": "koblitz_one_target",
-    "source": "research/ic_single_target_20260930/analysis.json",
+    "source": "research/ic_tool_program/rule/v3/analysis.json",
     "refs": [],
     "link_status": "no_curves_yaml_record"
    }
@@ -3787,12 +3659,9 @@
    "legacy": "K_0 / GF(2^41)",
    "log2_r": 39.0,
    "cofactor": null,
-   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
-   "reference_s": 0.693739801856,
-   "floor_s": 0.138405392835,
    "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-   "reference_s": 1.458656645971443,
-   "floor_s": 0.13840539283493047,
+   "reference_s": 1.45865664597,
+   "floor_s": 0.138405392835,
    "targets": 1,
    "recipes": [
     {
@@ -3803,60 +3672,34 @@
      "base_points": 6560,
      "columns": 80,
      "targets": "one public point per process, 64 per size",
-     "s": 5.58064429862,
-     "s_online": 0.0665415801475,
-     "s_setup": 5.51410271847,
+     "s": 11.1691398617,
+     "s_online": 0.120637900786,
+     "s_setup": 11.0485019609,
      "phases_s": {
-      "precomputation": 5.51410271847,
-      "descent": 0.0674472099801,
-      "verify": 0.000218729485226
+      "precomputation": 11.0485019609,
+      "descent": 0.118766598641,
+      "verify": 0.000190900433026
      },
-     "ratio_rho": 8.04429021325,
+     "ratio_rho": 7.65714117337,
      "ratio_rho_ci": [
-      7.25958617224,
-      9.01066510256
+      6.89966798275,
+      8.61311766954
      ],
-     "online_speedup": 9.38384745663,
+     "ratio_rho_section23": 8.04429021325,
+     "online_speedup_section23": 9.38384745663,
+     "online_speedup": 10.9282843739,
      "online_speedup_ci": [
-      7.4308978775,
-      12.1269131397
+      8.62942295579,
+      14.1732285066
      ],
-     "online_speedup_canonical_step": 4.57339133194,
-     "ic_online_over_precomputation_model": 2.50089427235,
-     "break_even_targets": 9.88412830976,
+     "online_speedup_canonical_step": 5.11867870374,
+     "ic_online_over_precomputation_model": 2.20915919448,
+     "break_even_targets": 9.22455485015,
      "construction_artefact": false,
-     "canonical_step_units": 2.269717998,
-     "rho_step_units_as_built": 4.65292580378,
-     "cold_ratio_without_curve_construction": 8.89112612417,
-     "ratio_floor": 40.3210032811,
-     "s": 11.16913986167439,
-     "s_online": 0.1206379007855556,
-     "s_setup": 11.048501960888835,
-     "phases_s": {
-      "precomputation": 11.048501960888835,
-      "descent": 0.11876659864134673,
-      "verify": 0.00019090043302628871
-     },
-     "ratio_rho": 7.657141173367715,
-     "ratio_rho_ci": [
-      6.8996679827486975,
-      8.613117669541948
-     ],
-     "ratio_rho_section23": 8.044290213253069,
-     "online_speedup_section23": 9.383847456632276,
-     "online_speedup": 10.928284373853764,
-     "online_speedup_ci": [
-      8.629422955794224,
-      14.173228506591691
-     ],
-     "online_speedup_canonical_step": 5.118678703741787,
-     "ic_online_over_precomputation_model": 2.2091591944785334,
-     "break_even_targets": 9.22455485014717,
-     "construction_artefact": false,
-     "canonical_step_units": 4.602731747316069,
-     "rho_step_units_as_built": 9.715071640681813,
-     "cold_ratio_without_curve_construction": 8.415994096849225,
-     "ratio_floor": 80.69873314109438,
+     "canonical_step_units": 4.60273174732,
+     "rho_step_units_as_built": 9.71507164068,
+     "cold_ratio_without_curve_construction": 8.41599409685,
+     "ratio_floor": 80.6987331411,
      "verified": true
     }
    ],
@@ -3868,60 +3711,34 @@
     "base_points": 6560,
     "columns": 80,
     "targets": "one public point per process, 64 per size",
-    "s": 5.58064429862,
-    "s_online": 0.0665415801475,
-    "s_setup": 5.51410271847,
+    "s": 11.1691398617,
+    "s_online": 0.120637900786,
+    "s_setup": 11.0485019609,
     "phases_s": {
-     "precomputation": 5.51410271847,
-     "descent": 0.0674472099801,
-     "verify": 0.000218729485226
+     "precomputation": 11.0485019609,
+     "descent": 0.118766598641,
+     "verify": 0.000190900433026
     },
-    "ratio_rho": 8.04429021325,
+    "ratio_rho": 7.65714117337,
     "ratio_rho_ci": [
-     7.25958617224,
-     9.01066510256
+     6.89966798275,
+     8.61311766954
     ],
-    "online_speedup": 9.38384745663,
+    "ratio_rho_section23": 8.04429021325,
+    "online_speedup_section23": 9.38384745663,
+    "online_speedup": 10.9282843739,
     "online_speedup_ci": [
-     7.4308978775,
-     12.1269131397
+     8.62942295579,
+     14.1732285066
     ],
-    "online_speedup_canonical_step": 4.57339133194,
-    "ic_online_over_precomputation_model": 2.50089427235,
-    "break_even_targets": 9.88412830976,
+    "online_speedup_canonical_step": 5.11867870374,
+    "ic_online_over_precomputation_model": 2.20915919448,
+    "break_even_targets": 9.22455485015,
     "construction_artefact": false,
-    "canonical_step_units": 2.269717998,
-    "rho_step_units_as_built": 4.65292580378,
-    "cold_ratio_without_curve_construction": 8.89112612417,
-    "ratio_floor": 40.3210032811,
-    "s": 11.16913986167439,
-    "s_online": 0.1206379007855556,
-    "s_setup": 11.048501960888835,
-    "phases_s": {
-     "precomputation": 11.048501960888835,
-     "descent": 0.11876659864134673,
-     "verify": 0.00019090043302628871
-    },
-    "ratio_rho": 7.657141173367715,
-    "ratio_rho_ci": [
-     6.8996679827486975,
-     8.613117669541948
-    ],
-    "ratio_rho_section23": 8.044290213253069,
-    "online_speedup_section23": 9.383847456632276,
-    "online_speedup": 10.928284373853764,
-    "online_speedup_ci": [
-     8.629422955794224,
-     14.173228506591691
-    ],
-    "online_speedup_canonical_step": 5.118678703741787,
-    "ic_online_over_precomputation_model": 2.2091591944785334,
-    "break_even_targets": 9.22455485014717,
-    "construction_artefact": false,
-    "canonical_step_units": 4.602731747316069,
-    "rho_step_units_as_built": 9.715071640681813,
-    "cold_ratio_without_curve_construction": 8.415994096849225,
-    "ratio_floor": 80.69873314109438,
+    "canonical_step_units": 4.60273174732,
+    "rho_step_units_as_built": 9.71507164068,
+    "cold_ratio_without_curve_construction": 8.41599409685,
+    "ratio_floor": 80.6987331411,
     "verified": true
    },
    "source": "research/ic_tool_program/rule/v3/analysis.json",
@@ -3941,7 +3758,7 @@
     "points": 6560,
     "recipe": "aimed m = 3 collection, m = 2 descent; one target",
     "variant": "koblitz_one_target",
-    "source": "research/ic_single_target_20260930/analysis.json",
+    "source": "research/ic_tool_program/rule/v3/analysis.json",
     "refs": [],
     "link_status": "no_curves_yaml_record"
    }
@@ -3953,12 +3770,9 @@
    "legacy": "K_0 / GF(2^53)",
    "log2_r": 44.26,
    "cofactor": null,
-   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
-   "reference_s": 0.503188071298,
-   "floor_s": 0.121732630267,
    "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-   "reference_s": 1.282092451654807,
-   "floor_s": 0.12173263026670363,
+   "reference_s": 1.28209245165,
+   "floor_s": 0.121732630267,
    "targets": 1,
    "recipes": [
     {
@@ -3969,60 +3783,34 @@
      "base_points": 27984,
      "columns": 264,
      "targets": "one public point per process, 64 per size",
-     "s": 7.39881063707,
-     "s_online": 0.027721901714,
-     "s_setup": 7.37108873535,
+     "s": 16.9761829945,
+     "s_online": 0.0575665623583,
+     "s_setup": 16.9186164322,
      "phases_s": {
-      "precomputation": 7.37108873535,
-      "descent": 0.0277070570494,
-      "verify": 3.95912911579e-05
+      "precomputation": 16.9186164322,
+      "descent": 0.055662040206,
+      "verify": 3.69323536618e-05
      },
-     "ratio_rho": 14.7038673194,
+     "ratio_rho": 13.240997537,
      "ratio_rho_ci": [
-      13.0621272401,
-      16.6589377601
+      11.7549940689,
+      15.0126925443
      ],
-     "online_speedup": 17.4890575596,
+     "ratio_rho_section23": 14.7038673194,
+     "online_speedup_section23": 17.4890575596,
+     "online_speedup": 21.4667927643,
      "online_speedup_ci": [
-      13.616440402,
-      22.5957797705
+      16.8759922914,
+      27.6429495583
      ],
-     "online_speedup_canonical_step": 9.36731706132,
-     "ic_online_over_precomputation_model": 2.02101436217,
-     "break_even_targets": 16.1254850119,
+     "online_speedup_canonical_step": 10.5693173763,
+     "ic_online_over_precomputation_model": 1.77081309673,
+     "break_even_targets": 14.3596798177,
      "construction_artefact": false,
-     "canonical_step_units": 2.14227008107,
-     "rho_step_units_as_built": 3.98506501834,
-     "cold_ratio_without_curve_construction": 15.2409659815,
-     "ratio_floor": 60.7791897773,
-     "s": 16.97618299454087,
-     "s_online": 0.05756656235833082,
-     "s_setup": 16.91861643218254,
-     "phases_s": {
-      "precomputation": 16.91861643218254,
-      "descent": 0.05566204020596536,
-      "verify": 3.6932353661773056e-05
-     },
-     "ratio_rho": 13.24099753697916,
-     "ratio_rho_ci": [
-      11.754994068871016,
-      15.012692544275554
-     ],
-     "ratio_rho_section23": 14.703867319407847,
-     "online_speedup_section23": 17.489057559646973,
-     "online_speedup": 21.46679276428554,
-     "online_speedup_ci": [
-      16.875992291379884,
-      27.64294955831363
-     ],
-     "online_speedup_canonical_step": 10.569317376335677,
-     "ic_online_over_precomputation_model": 1.770813096729363,
-     "break_even_targets": 14.359679817729845,
-     "construction_artefact": false,
-     "canonical_step_units": 4.996464436013792,
-     "rho_step_units_as_built": 9.926991258196168,
-     "cold_ratio_without_curve_construction": 13.713188657480423,
-     "ratio_floor": 139.45466353062287,
+     "canonical_step_units": 4.99646443601,
+     "rho_step_units_as_built": 9.9269912582,
+     "cold_ratio_without_curve_construction": 13.7131886575,
+     "ratio_floor": 139.454663531,
      "verified": true
     }
    ],
@@ -4034,60 +3822,34 @@
     "base_points": 27984,
     "columns": 264,
     "targets": "one public point per process, 64 per size",
-    "s": 7.39881063707,
-    "s_online": 0.027721901714,
-    "s_setup": 7.37108873535,
+    "s": 16.9761829945,
+    "s_online": 0.0575665623583,
+    "s_setup": 16.9186164322,
     "phases_s": {
-     "precomputation": 7.37108873535,
-     "descent": 0.0277070570494,
-     "verify": 3.95912911579e-05
+     "precomputation": 16.9186164322,
+     "descent": 0.055662040206,
+     "verify": 3.69323536618e-05
     },
-    "ratio_rho": 14.7038673194,
+    "ratio_rho": 13.240997537,
     "ratio_rho_ci": [
-     13.0621272401,
-     16.6589377601
+     11.7549940689,
+     15.0126925443
     ],
-    "online_speedup": 17.4890575596,
+    "ratio_rho_section23": 14.7038673194,
+    "online_speedup_section23": 17.4890575596,
+    "online_speedup": 21.4667927643,
     "online_speedup_ci": [
-     13.616440402,
-     22.5957797705
+     16.8759922914,
+     27.6429495583
     ],
-    "online_speedup_canonical_step": 9.36731706132,
-    "ic_online_over_precomputation_model": 2.02101436217,
-    "break_even_targets": 16.1254850119,
+    "online_speedup_canonical_step": 10.5693173763,
+    "ic_online_over_precomputation_model": 1.77081309673,
+    "break_even_targets": 14.3596798177,
     "construction_artefact": false,
-    "canonical_step_units": 2.14227008107,
-    "rho_step_units_as_built": 3.98506501834,
-    "cold_ratio_without_curve_construction": 15.2409659815,
-    "ratio_floor": 60.7791897773,
-    "s": 16.97618299454087,
-    "s_online": 0.05756656235833082,
-    "s_setup": 16.91861643218254,
-    "phases_s": {
-     "precomputation": 16.91861643218254,
-     "descent": 0.05566204020596536,
-     "verify": 3.6932353661773056e-05
-    },
-    "ratio_rho": 13.24099753697916,
-    "ratio_rho_ci": [
-     11.754994068871016,
-     15.012692544275554
-    ],
-    "ratio_rho_section23": 14.703867319407847,
-    "online_speedup_section23": 17.489057559646973,
-    "online_speedup": 21.46679276428554,
-    "online_speedup_ci": [
-     16.875992291379884,
-     27.64294955831363
-    ],
-    "online_speedup_canonical_step": 10.569317376335677,
-    "ic_online_over_precomputation_model": 1.770813096729363,
-    "break_even_targets": 14.359679817729845,
-    "construction_artefact": false,
-    "canonical_step_units": 4.996464436013792,
-    "rho_step_units_as_built": 9.926991258196168,
-    "cold_ratio_without_curve_construction": 13.713188657480423,
-    "ratio_floor": 139.45466353062287,
+    "canonical_step_units": 4.99646443601,
+    "rho_step_units_as_built": 9.9269912582,
+    "cold_ratio_without_curve_construction": 13.7131886575,
+    "ratio_floor": 139.454663531,
     "verified": true
    },
    "source": "research/ic_tool_program/rule/v3/analysis.json",
@@ -4107,7 +3869,7 @@
     "points": 27984,
     "recipe": "aimed m = 3 collection, m = 2 descent; one target",
     "variant": "koblitz_one_target",
-    "source": "research/ic_single_target_20260930/analysis.json",
+    "source": "research/ic_tool_program/rule/v3/analysis.json",
     "refs": [],
     "link_status": "no_curves_yaml_record"
    }
@@ -4119,12 +3881,9 @@
    "legacy": "K_1 / GF(2^59)",
    "log2_r": 44.52,
    "cofactor": null,
-   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
-   "reference_s": 0.576507264163,
-   "floor_s": 0.115376918307,
    "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-   "reference_s": 1.351274353923881,
-   "floor_s": 0.11537691830657834,
+   "reference_s": 1.35127435392,
+   "floor_s": 0.115376918307,
    "targets": 1,
    "recipes": [
     {
@@ -4135,60 +3894,34 @@
      "base_points": 30208,
      "columns": 256,
      "targets": "one public point per process, 64 per size",
-     "s": 9.03281027772,
-     "s_online": 0.0307613351096,
-     "s_setup": 9.00204894261,
+     "s": 16.2570323477,
+     "s_online": 0.0487396731382,
+     "s_setup": 16.2082926745,
      "phases_s": {
-      "precomputation": 9.00204894261,
-      "descent": 0.0303758346829,
-      "verify": 3.68614819981e-05
+      "precomputation": 16.2082926745,
+      "descent": 0.0470689211541,
+      "verify": 3.63433656631e-05
      },
-     "ratio_rho": 15.6681638536,
+     "ratio_rho": 12.0308894345,
      "ratio_rho_ci": [
-      13.881155771,
-      17.8693261324
+      10.5753069113,
+      13.8637930092
      ],
-     "online_speedup": 16.8705054527,
+     "ratio_rho_section23": 15.6681638536,
+     "online_speedup_section23": 16.8705054527,
+     "online_speedup": 26.495706334,
      "online_speedup_ci": [
-      13.0451154894,
-      22.0919038815
+      20.5242029684,
+      34.4519574687
      ],
-     "online_speedup_canonical_step": 8.89539936904,
-     "ic_online_over_precomputation_model": 2.77252775486,
-     "break_even_targets": 18.4393424632,
+     "online_speedup_canonical_step": 13.3353740089,
+     "ic_online_over_precomputation_model": 1.42328048023,
+     "break_even_targets": 13.0433037943,
      "construction_artefact": false,
-     "canonical_step_units": 2.24649257807,
-     "rho_step_units_as_built": 4.25386084637,
-     "cold_ratio_without_curve_construction": 17.3170588679,
-     "ratio_floor": 78.2895782822,
-     "s": 16.25703234767737,
-     "s_online": 0.04873967313821335,
-     "s_setup": 16.208292674539155,
-     "phases_s": {
-      "precomputation": 16.208292674539155,
-      "descent": 0.04706892115407195,
-      "verify": 3.634336566310399e-05
-     },
-     "ratio_rho": 12.030889434458363,
-     "ratio_rho_ci": [
-      10.575306911346974,
-      13.863793009191626
-     ],
-     "ratio_rho_section23": 15.668163853624774,
-     "online_speedup_section23": 16.87050545272324,
-     "online_speedup": 26.49570633402399,
-     "online_speedup_ci": [
-      20.52420296840639,
-      34.451957468740744
-     ],
-     "online_speedup_canonical_step": 13.335374008867896,
-     "ic_online_over_precomputation_model": 1.4232804802325472,
-     "break_even_targets": 13.043303794294529,
-     "construction_artefact": false,
-     "canonical_step_units": 5.295833940775191,
-     "rho_step_units_as_built": 10.63018425373876,
-     "cold_ratio_without_curve_construction": 12.556406016684766,
-     "ratio_floor": 140.90367975056634,
+     "canonical_step_units": 5.29583394078,
+     "rho_step_units_as_built": 10.6301842537,
+     "cold_ratio_without_curve_construction": 12.5564060167,
+     "ratio_floor": 140.903679751,
      "verified": true
     }
    ],
@@ -4200,60 +3933,34 @@
     "base_points": 30208,
     "columns": 256,
     "targets": "one public point per process, 64 per size",
-    "s": 9.03281027772,
-    "s_online": 0.0307613351096,
-    "s_setup": 9.00204894261,
+    "s": 16.2570323477,
+    "s_online": 0.0487396731382,
+    "s_setup": 16.2082926745,
     "phases_s": {
-     "precomputation": 9.00204894261,
-     "descent": 0.0303758346829,
-     "verify": 3.68614819981e-05
+     "precomputation": 16.2082926745,
+     "descent": 0.0470689211541,
+     "verify": 3.63433656631e-05
     },
-    "ratio_rho": 15.6681638536,
+    "ratio_rho": 12.0308894345,
     "ratio_rho_ci": [
-     13.881155771,
-     17.8693261324
+     10.5753069113,
+     13.8637930092
     ],
-    "online_speedup": 16.8705054527,
+    "ratio_rho_section23": 15.6681638536,
+    "online_speedup_section23": 16.8705054527,
+    "online_speedup": 26.495706334,
     "online_speedup_ci": [
-     13.0451154894,
-     22.0919038815
+     20.5242029684,
+     34.4519574687
     ],
-    "online_speedup_canonical_step": 8.89539936904,
-    "ic_online_over_precomputation_model": 2.77252775486,
-    "break_even_targets": 18.4393424632,
+    "online_speedup_canonical_step": 13.3353740089,
+    "ic_online_over_precomputation_model": 1.42328048023,
+    "break_even_targets": 13.0433037943,
     "construction_artefact": false,
-    "canonical_step_units": 2.24649257807,
-    "rho_step_units_as_built": 4.25386084637,
-    "cold_ratio_without_curve_construction": 17.3170588679,
-    "ratio_floor": 78.2895782822,
-    "s": 16.25703234767737,
-    "s_online": 0.04873967313821335,
-    "s_setup": 16.208292674539155,
-    "phases_s": {
-     "precomputation": 16.208292674539155,
-     "descent": 0.04706892115407195,
-     "verify": 3.634336566310399e-05
-    },
-    "ratio_rho": 12.030889434458363,
-    "ratio_rho_ci": [
-     10.575306911346974,
-     13.863793009191626
-    ],
-    "ratio_rho_section23": 15.668163853624774,
-    "online_speedup_section23": 16.87050545272324,
-    "online_speedup": 26.49570633402399,
-    "online_speedup_ci": [
-     20.52420296840639,
-     34.451957468740744
-    ],
-    "online_speedup_canonical_step": 13.335374008867896,
-    "ic_online_over_precomputation_model": 1.4232804802325472,
-    "break_even_targets": 13.043303794294529,
-    "construction_artefact": false,
-    "canonical_step_units": 5.295833940775191,
-    "rho_step_units_as_built": 10.63018425373876,
-    "cold_ratio_without_curve_construction": 12.556406016684766,
-    "ratio_floor": 140.90367975056634,
+    "canonical_step_units": 5.29583394078,
+    "rho_step_units_as_built": 10.6301842537,
+    "cold_ratio_without_curve_construction": 12.5564060167,
+    "ratio_floor": 140.903679751,
     "verified": true
    },
    "source": "research/ic_tool_program/rule/v3/analysis.json",
@@ -4273,7 +3980,7 @@
     "points": 30208,
     "recipe": "aimed m = 3 collection, m = 2 descent; one target",
     "variant": "koblitz_one_target",
-    "source": "research/ic_single_target_20260930/analysis.json",
+    "source": "research/ic_tool_program/rule/v3/analysis.json",
     "refs": [],
     "link_status": "no_curves_yaml_record"
    }
@@ -4285,12 +3992,9 @@
    "legacy": "K_0 / GF(2^61)",
    "log2_r": 47.21,
    "cofactor": null,
-   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
-   "reference_s": 0.479407959297,
-   "floor_s": 0.113469730447,
    "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
-   "reference_s": 1.188870772843963,
-   "floor_s": 0.11346973044749432,
+   "reference_s": 1.18887077284,
+   "floor_s": 0.113469730447,
    "targets": 1,
    "recipes": [
     {
@@ -4301,60 +4005,34 @@
      "base_points": 39040,
      "columns": 320,
      "targets": "one public point per process, 64 per size",
-     "s": 15.1490066472,
-     "s_online": 0.0527047418744,
-     "s_setup": 15.0963019053,
+     "s": 24.9316448651,
+     "s_online": 0.0788302382875,
+     "s_setup": 24.8528146268,
      "phases_s": {
-      "precomputation": 15.0963019053,
-      "descent": 0.0531495992595,
-      "verify": 1.70831631849e-05
+      "precomputation": 24.8528146268,
+      "descent": 0.0789941377868,
+      "verify": 1.61074129732e-05
      },
-     "ratio_rho": 31.5994057949,
+     "ratio_rho": 20.9708619596,
      "ratio_rho_ci": [
-      28.1848475504,
-      35.7162809539
+      18.6000688982,
+      23.8358848261
      ],
-     "online_speedup": 8.83874129307,
+     "ratio_rho_section23": 31.5994057949,
+     "online_speedup_section23": 8.83874129307,
+     "online_speedup": 14.8183381084,
      "online_speedup_ci": [
-      6.76408546414,
-      11.8616989738
+      11.3442339569,
+      19.7790839135
      ],
-     "online_speedup_canonical_step": 4.68422803588,
-     "ic_online_over_precomputation_model": 8.04234914715,
-     "break_even_targets": 36.540505449,
+     "online_speedup_canonical_step": 7.38396410712,
+     "ic_online_over_precomputation_model": 3.5174587138,
+     "break_even_targets": 22.815339012,
      "construction_artefact": false,
-     "canonical_step_units": 2.27340727571,
-     "rho_step_units_as_built": 4.29425159437,
-     "cold_ratio_without_curve_construction": 32.5003579861,
-     "ratio_floor": 133.507029473,
-     "s": 24.931644865085715,
-     "s_online": 0.07883023828753016,
-     "s_setup": 24.852814626798185,
-     "phases_s": {
-      "precomputation": 24.852814626798185,
-      "descent": 0.07899413778679995,
-      "verify": 1.610741297317878e-05
-     },
-     "ratio_rho": 20.970861959576446,
-     "ratio_rho_ci": [
-      18.600068898222816,
-      23.835884826062138
-     ],
-     "ratio_rho_section23": 31.599405794913018,
-     "online_speedup_section23": 8.83874129306946,
-     "online_speedup": 14.81833810842446,
-     "online_speedup_ci": [
-      11.34423395690151,
-      19.779083913478527
-     ],
-     "online_speedup_canonical_step": 7.383964107123673,
-     "ic_online_over_precomputation_model": 3.517458713801748,
-     "break_even_targets": 22.815339011959953,
-     "construction_artefact": false,
-     "canonical_step_units": 5.394215359428946,
-     "rho_step_units_as_built": 10.762650516629304,
-     "cold_ratio_without_curve_construction": 21.331662219753902,
-     "ratio_floor": 219.72066706038663,
+     "canonical_step_units": 5.39421535943,
+     "rho_step_units_as_built": 10.7626505166,
+     "cold_ratio_without_curve_construction": 21.3316622198,
+     "ratio_floor": 219.72066706,
      "verified": true
     }
    ],
@@ -4366,60 +4044,34 @@
     "base_points": 39040,
     "columns": 320,
     "targets": "one public point per process, 64 per size",
-    "s": 15.1490066472,
-    "s_online": 0.0527047418744,
-    "s_setup": 15.0963019053,
+    "s": 24.9316448651,
+    "s_online": 0.0788302382875,
+    "s_setup": 24.8528146268,
     "phases_s": {
-     "precomputation": 15.0963019053,
-     "descent": 0.0531495992595,
-     "verify": 1.70831631849e-05
+     "precomputation": 24.8528146268,
+     "descent": 0.0789941377868,
+     "verify": 1.61074129732e-05
     },
-    "ratio_rho": 31.5994057949,
+    "ratio_rho": 20.9708619596,
     "ratio_rho_ci": [
-     28.1848475504,
-     35.7162809539
+     18.6000688982,
+     23.8358848261
     ],
-    "online_speedup": 8.83874129307,
+    "ratio_rho_section23": 31.5994057949,
+    "online_speedup_section23": 8.83874129307,
+    "online_speedup": 14.8183381084,
     "online_speedup_ci": [
-     6.76408546414,
-     11.8616989738
+     11.3442339569,
+     19.7790839135
     ],
-    "online_speedup_canonical_step": 4.68422803588,
-    "ic_online_over_precomputation_model": 8.04234914715,
-    "break_even_targets": 36.540505449,
+    "online_speedup_canonical_step": 7.38396410712,
+    "ic_online_over_precomputation_model": 3.5174587138,
+    "break_even_targets": 22.815339012,
     "construction_artefact": false,
-    "canonical_step_units": 2.27340727571,
-    "rho_step_units_as_built": 4.29425159437,
-    "cold_ratio_without_curve_construction": 32.5003579861,
-    "ratio_floor": 133.507029473,
-    "s": 24.931644865085715,
-    "s_online": 0.07883023828753016,
-    "s_setup": 24.852814626798185,
-    "phases_s": {
-     "precomputation": 24.852814626798185,
-     "descent": 0.07899413778679995,
-     "verify": 1.610741297317878e-05
-    },
-    "ratio_rho": 20.970861959576446,
-    "ratio_rho_ci": [
-     18.600068898222816,
-     23.835884826062138
-    ],
-    "ratio_rho_section23": 31.599405794913018,
-    "online_speedup_section23": 8.83874129306946,
-    "online_speedup": 14.81833810842446,
-    "online_speedup_ci": [
-     11.34423395690151,
-     19.779083913478527
-    ],
-    "online_speedup_canonical_step": 7.383964107123673,
-    "ic_online_over_precomputation_model": 3.517458713801748,
-    "break_even_targets": 22.815339011959953,
-    "construction_artefact": false,
-    "canonical_step_units": 5.394215359428946,
-    "rho_step_units_as_built": 10.762650516629304,
-    "cold_ratio_without_curve_construction": 21.331662219753902,
-    "ratio_floor": 219.72066706038663,
+    "canonical_step_units": 5.39421535943,
+    "rho_step_units_as_built": 10.7626505166,
+    "cold_ratio_without_curve_construction": 21.3316622198,
+    "ratio_floor": 219.72066706,
     "verified": true
    },
    "source": "research/ic_tool_program/rule/v3/analysis.json",
@@ -4439,7 +4091,7 @@
     "points": 39040,
     "recipe": "aimed m = 3 collection, m = 2 descent; one target",
     "variant": "koblitz_one_target",
-    "source": "research/ic_single_target_20260930/analysis.json",
+    "source": "research/ic_tool_program/rule/v3/analysis.json",
     "refs": [],
     "link_status": "no_curves_yaml_record"
    }
@@ -4483,14 +4135,6 @@
       "linear_algebra": 0.130023194588,
       "descent": 0.913995627223,
       "verify": 0.95678871767
-      "setup": 0.6237339814760795,
-      "constructions": 0.914304009959341,
-      "factor_base": 0.571524901844298,
-      "table": 0.5043462314056679,
-      "relations": 0.2581727942743142,
-      "linear_algebra": 0.13002319458753586,
-      "descent": 0.9139956272233088,
-      "verify": 0.9567887176698456
      },
      "ratio_rho": 14.8966497733,
      "ratio_rho_ci": [
@@ -4540,16 +4184,6 @@
      "verify": 0.95678871767
     },
     "ratio_rho": 14.8966497733,
-     "setup": 0.6237339814760795,
-     "constructions": 0.914304009959341,
-     "factor_base": 0.571524901844298,
-     "table": 0.5043462314056679,
-     "relations": 0.2581727942743142,
-     "linear_algebra": 0.13002319458753586,
-     "descent": 0.9139956272233088,
-     "verify": 0.9567887176698456
-    },
-    "ratio_rho": 14.896649773263793,
     "ratio_rho_ci": [
      13.779195739,
      16.0483916089
@@ -4627,14 +4261,6 @@
       "linear_algebra": 0.0365422242652,
       "descent": 0.305526892217,
       "verify": 0.212804977105
-      "setup": 0.16446116776150432,
-      "constructions": 0.2886116008534978,
-      "factor_base": 0.1684686994182842,
-      "table": 0.13652435255426154,
-      "relations": 0.11946648505974385,
-      "linear_algebra": 0.03654222426518232,
-      "descent": 0.3055268922172965,
-      "verify": 0.2128049771046404
      },
      "ratio_rho": 6.98829434731,
      "ratio_rho_ci": [
@@ -4684,16 +4310,6 @@
      "verify": 0.212804977105
     },
     "ratio_rho": 6.98829434731,
-     "setup": 0.16446116776150432,
-     "constructions": 0.2886116008534978,
-     "factor_base": 0.1684686994182842,
-     "table": 0.13652435255426154,
-     "relations": 0.11946648505974385,
-     "linear_algebra": 0.03654222426518232,
-     "descent": 0.3055268922172965,
-     "verify": 0.2128049771046404
-    },
-    "ratio_rho": 6.988294347307033,
     "ratio_rho_ci": [
      4.43690944604,
      10.2671831268
@@ -4771,14 +4387,6 @@
       "linear_algebra": 0.0124806681533,
       "descent": 0.150636566883,
       "verify": 0.0796071988998
-      "setup": 0.18135162380042724,
-      "constructions": 0.19199834315659717,
-      "factor_base": 0.1300108689672182,
-      "table": 0.06965563710625806,
-      "relations": 0.04060455824877867,
-      "linear_algebra": 0.012480668153261888,
-      "descent": 0.15063656688310414,
-      "verify": 0.07960719889983717
      },
      "ratio_rho": 7.19007959136,
      "ratio_rho_ci": [
@@ -4828,16 +4436,6 @@
      "verify": 0.0796071988998
     },
     "ratio_rho": 7.19007959136,
-     "setup": 0.18135162380042724,
-     "constructions": 0.19199834315659717,
-     "factor_base": 0.1300108689672182,
-     "table": 0.06965563710625806,
-     "relations": 0.04060455824877867,
-     "linear_algebra": 0.012480668153261888,
-     "descent": 0.15063656688310414,
-     "verify": 0.07960719889983717
-    },
-    "ratio_rho": 7.190079591360827,
     "ratio_rho_ci": [
      6.41014854132,
      8.02150907165
@@ -4915,14 +4513,6 @@
       "linear_algebra": 0.00489380583978,
       "descent": 0.161890971305,
       "verify": 0.0320968395889
-      "setup": 0.07562128195935067,
-      "constructions": 0.06214807047463206,
-      "factor_base": 0.04114115835264887,
-      "table": 0.024323611366407268,
-      "relations": 0.08316503750296374,
-      "linear_algebra": 0.004893805839784593,
-      "descent": 0.16189097130470326,
-      "verify": 0.032096839588935784
      },
      "ratio_rho": 5.2608015235,
      "ratio_rho_ci": [
@@ -4972,16 +4562,6 @@
      "verify": 0.0320968395889
     },
     "ratio_rho": 5.2608015235,
-     "setup": 0.07562128195935067,
-     "constructions": 0.06214807047463206,
-     "factor_base": 0.04114115835264887,
-     "table": 0.024323611366407268,
-     "relations": 0.08316503750296374,
-     "linear_algebra": 0.004893805839784593,
-     "descent": 0.16189097130470326,
-     "verify": 0.032096839588935784
-    },
-    "ratio_rho": 5.260801523504233,
     "ratio_rho_ci": [
      4.39987399454,
      6.15229021594
@@ -5059,14 +4639,6 @@
       "linear_algebra": 0.00196171820334,
       "descent": 0.123914832066,
       "verify": 0.0112494668687
-      "setup": 0.03395506914921843,
-      "constructions": 0.023034166887328986,
-      "factor_base": 0.019384788042774336,
-      "table": 0.014164518508571462,
-      "relations": 0.0971688146840351,
-      "linear_algebra": 0.001961718203342925,
-      "descent": 0.12391483206638415,
-      "verify": 0.011249466868672486
      },
      "ratio_rho": 4.87503150965,
      "ratio_rho_ci": [
@@ -5116,16 +4688,6 @@
      "verify": 0.0112494668687
     },
     "ratio_rho": 4.87503150965,
-     "setup": 0.03395506914921843,
-     "constructions": 0.023034166887328986,
-     "factor_base": 0.019384788042774336,
-     "table": 0.014164518508571462,
-     "relations": 0.0971688146840351,
-     "linear_algebra": 0.001961718203342925,
-     "descent": 0.12391483206638415,
-     "verify": 0.011249466868672486
-    },
-    "ratio_rho": 4.875031509653909,
     "ratio_rho_ci": [
      4.16354578263,
      5.62243303003
@@ -5203,14 +4765,6 @@
       "linear_algebra": 0.00152954904479,
       "descent": 0.0764827393211,
       "verify": 0.00668609429674
-      "setup": 0.022026209336272286,
-      "constructions": 0.01568087091378731,
-      "factor_base": 0.017038702571894413,
-      "table": 0.03705563654823104,
-      "relations": 0.05791232891756848,
-      "linear_algebra": 0.0015295490447882387,
-      "descent": 0.07648273932107358,
-      "verify": 0.0066860942967385
      },
      "ratio_rho": 3.89287844259,
      "ratio_rho_ci": [
@@ -5260,16 +4814,6 @@
      "verify": 0.00668609429674
     },
     "ratio_rho": 3.89287844259,
-     "setup": 0.022026209336272286,
-     "constructions": 0.01568087091378731,
-     "factor_base": 0.017038702571894413,
-     "table": 0.03705563654823104,
-     "relations": 0.05791232891756848,
-     "linear_algebra": 0.0015295490447882387,
-     "descent": 0.07648273932107358,
-     "verify": 0.0066860942967385
-    },
-    "ratio_rho": 3.8928784425876555,
     "ratio_rho_ci": [
      3.45804662622,
      4.35084612255
@@ -5347,14 +4891,6 @@
       "linear_algebra": 0.00110313180534,
       "descent": 0.0479080421854,
       "verify": 0.00434279154792
-      "setup": 0.02091842765016521,
-      "constructions": 0.008451489741607268,
-      "factor_base": 0.00938943287520636,
-      "table": 0.02906451601016619,
-      "relations": 0.119618594696474,
-      "linear_algebra": 0.0011031318053380608,
-      "descent": 0.047908042185413786,
-      "verify": 0.004342791547924642
      },
      "ratio_rho": 3.61567129773,
      "ratio_rho_ci": [
@@ -5404,16 +4940,6 @@
      "verify": 0.00434279154792
     },
     "ratio_rho": 3.61567129773,
-     "setup": 0.02091842765016521,
-     "constructions": 0.008451489741607268,
-     "factor_base": 0.00938943287520636,
-     "table": 0.02906451601016619,
-     "relations": 0.119618594696474,
-     "linear_algebra": 0.0011031318053380608,
-     "descent": 0.047908042185413786,
-     "verify": 0.004342791547924642
-    },
-    "ratio_rho": 3.6156712977275385,
     "ratio_rho_ci": [
      3.27910503471,
      3.96953155208
@@ -5617,14 +5143,6 @@
       "linear_algebra": 0.00025765445894,
       "descent": 0.0425194788319,
       "verify": 0.00103065050687
-      "setup": 0.016734336446242996,
-      "constructions": 0.002957858709388231,
-      "factor_base": 0.0035389964287900373,
-      "table": 0.03642880599049212,
-      "relations": 0.3849898071771096,
-      "linear_algebra": 0.00025765445893974597,
-      "descent": 0.042519478831920324,
-      "verify": 0.0010306505068741973
      },
      "ratio_rho": 9.20203675604,
      "ratio_rho_ci": [
@@ -5674,16 +5192,6 @@
      "verify": 0.00103065050687
     },
     "ratio_rho": 9.20203675604,
-     "setup": 0.016734336446242996,
-     "constructions": 0.002957858709388231,
-     "factor_base": 0.0035389964287900373,
-     "table": 0.03642880599049212,
-     "relations": 0.3849898071771096,
-     "linear_algebra": 0.00025765445893974597,
-     "descent": 0.042519478831920324,
-     "verify": 0.0010306505068741973
-    },
-    "ratio_rho": 9.202036756044834,
     "ratio_rho_ci": [
      8.23632802231,
      10.2358630463
@@ -6257,187 +5765,6 @@
   "board_curves": 24,
   "board_curves_in_yaml": 0,
   "board_curves_factor_base_reconciled": 0
- "n41_n53_counted_diagnostic": {
-  "source": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
-  "decision": "frozen_parameters_do_not_transfer",
-  "class": "accounting; counted lower bounds with native work unpriced, L0 wall exploratory, L2 host run pending",
-  "measured_runs": 640,
-  "measured_verified_runs": 206,
-  "isolation_levels": {
-   "L0": 640
-  },
-  "curves": [
-   {
-    "curve": "icv1-f2m41-tm2308219-7f48b14a",
-    "log2_r": 39.00000151433405,
-    "primary_workload_id": "W15dcf1a74cb8",
-    "arms": [
-     {
-      "arm": "rho-strong",
-      "measured": 80,
-      "verified": 80,
-      "timeouts": 0,
-      "errors": {},
-      "usable_points": null,
-      "folded_columns": null,
-      "mean_cold_s_lower_bound": 0.1571109102911619
-     },
-     {
-      "arm": "ic-k8",
-      "measured": 80,
-      "verified": 0,
-      "timeouts": 0,
-      "errors": {
-       "target-blind rank setup did not verify every base column": 80
-      },
-      "usable_points": null,
-      "folded_columns": null,
-      "mean_cold_s_lower_bound": null
-     },
-     {
-      "arm": "ic-k16",
-      "measured": 80,
-      "verified": 23,
-      "timeouts": 0,
-      "errors": {
-       "exhausted": 57
-      },
-      "usable_points": 1312,
-      "folded_columns": 16,
-      "mean_cold_s_lower_bound": 42.56858739277729
-     },
-     {
-      "arm": "ic-k16-control",
-      "measured": 80,
-      "verified": 23,
-      "timeouts": 0,
-      "errors": {
-       "exhausted": 57
-      },
-      "usable_points": 1312,
-      "folded_columns": 16,
-      "mean_cold_s_lower_bound": 42.56858739277729
-     }
-    ],
-    "k8_over_rho": {
-     "ratio_of_sums": null,
-     "ci95": null,
-     "pairs": 0
-    },
-    "k16_over_rho": {
-     "ratio_of_sums": 256.2364154308237,
-     "ci95": [
-      202.45868581141588,
-      332.75248237158803
-     ],
-     "pairs": 23
-    },
-    "k16_over_k8": {
-     "ratio_of_sums": null,
-     "ci95": null,
-     "pairs": 0
-    },
-    "h1": {
-     "ic-k16": {
-      "ci95": [
-       202.45868581141588,
-       332.75248237158803
-      ],
-      "ratio_of_sums": 256.2364154308237,
-      "verdict": "retained"
-     },
-     "ic-k8": {
-      "ci95": null,
-      "ratio_of_sums": null,
-      "verdict": "not_evaluable"
-     }
-    },
-    "h2_verdict": "not_evaluable"
-   },
-   {
-    "curve": "icv1-f2m53-tm56619371-dac20a85",
-    "log2_r": 44.258533022667656,
-    "primary_workload_id": "W32013b060ceb",
-    "arms": [
-     {
-      "arm": "rho-strong",
-      "measured": 80,
-      "verified": 80,
-      "timeouts": 0,
-      "errors": {},
-      "usable_points": null,
-      "folded_columns": null,
-      "mean_cold_s_lower_bound": 0.14140798998954648
-     },
-     {
-      "arm": "ic-k8",
-      "measured": 80,
-      "verified": 0,
-      "timeouts": 0,
-      "errors": {
-       "target-blind rank setup did not verify every base column": 80
-      },
-      "usable_points": null,
-      "folded_columns": null,
-      "mean_cold_s_lower_bound": null
-     },
-     {
-      "arm": "ic-k16",
-      "measured": 80,
-      "verified": 0,
-      "timeouts": 0,
-      "errors": {
-       "target-blind rank setup did not verify every base column": 80
-      },
-      "usable_points": null,
-      "folded_columns": null,
-      "mean_cold_s_lower_bound": null
-     },
-     {
-      "arm": "ic-k16-control",
-      "measured": 80,
-      "verified": 0,
-      "timeouts": 0,
-      "errors": {
-       "target-blind rank setup did not verify every base column": 80
-      },
-      "usable_points": null,
-      "folded_columns": null,
-      "mean_cold_s_lower_bound": null
-     }
-    ],
-    "k8_over_rho": {
-     "ratio_of_sums": null,
-     "ci95": null,
-     "pairs": 0
-    },
-    "k16_over_rho": {
-     "ratio_of_sums": null,
-     "ci95": null,
-     "pairs": 0
-    },
-    "k16_over_k8": {
-     "ratio_of_sums": null,
-     "ci95": null,
-     "pairs": 0
-    },
-    "h1": {
-     "ic-k16": {
-      "ci95": null,
-      "ratio_of_sums": null,
-      "verdict": "not_evaluable"
-     },
-     "ic-k8": {
-      "ci95": null,
-      "ratio_of_sums": null,
-      "verdict": "not_evaluable"
-     }
-    },
-    "h2_verdict": "not_evaluable"
-   }
-  ],
-  "online_speedup": null,
-  "fully_priced_cold_speedup": null
  },
  "exponents": {
   "prime": {
@@ -8423,25 +7750,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
-  },
-  {
-   "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
-   "family": "binary",
-   "field": "GF(2^113)",
-   "coefficients": "a = 0x3088250ca6e7c7fe649ce85820f7, b = 0xe8bee4d3e2260744188be0e9c723",
-   "order_bits": 114,
-   "standard": [
-    "sect113r1"
-   ],
-   "ec1": [
-    "EC1N113Csect113r1hf529f17bd191"
-   ],
-   "ec1_unresolved": null,
-   "legacy": [
-    "sect113r1"
-   ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
@@ -8455,7 +7766,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp6-tm7-fc20da94",
@@ -8978,7 +8291,9 @@
     "secp256k1",
     "x963/ansip256k1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp221-tm3509210517603025598879416729141978-c324b837",
@@ -8994,7 +8309,9 @@
    "legacy": [
     "other/M-221"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp448-t28312320572429821613362531907042076847709625476988141958474579766324-3537278c",
@@ -9014,7 +8331,9 @@
     "nist-800-186/Curve448",
     "other/Curve448"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp383-tm1329890207450988128841758359484337226464313875646092906354-f645ebd6",
@@ -9030,7 +8349,9 @@
    "legacy": [
     "other/M-383"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp383-tm2848646777738159098949497252265893762397593991823060136386-1ef4a61c",
@@ -9046,7 +8367,9 @@
    "legacy": [
     "other/Curve383187"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-tm221938542218978828286815502327069187962-5eb6d947",
@@ -9067,7 +8390,9 @@
     "nist-800-186/Curve25519",
     "other/Curve25519"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp511-tm85798038077085980992356252112544974736566053019478664231724326470621400496530-da465f1d",
@@ -9083,7 +8408,9 @@
    "legacy": [
     "other/M-511"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp446-tm28343567510342708887552-7a427f01",
@@ -9099,7 +8426,9 @@
    "legacy": [
     "bls/BLS12-446"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp377-t9586122913090633730-81d91d94",
@@ -9115,7 +8444,9 @@
    "legacy": [
     "bls/BLS12-377"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp581-tm5368710016-88dea8e1",
@@ -9131,7 +8462,9 @@
    "legacy": [
     "bls/BLS48-581-G1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp455-t75557872733115725645825-b740b33f",
@@ -9147,7 +8480,9 @@
    "legacy": [
     "bls/BLS12-455"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp158-t454233058419889982668807-a7cee044",
@@ -9163,7 +8498,9 @@
    "legacy": [
     "bn/bn158"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp350-t35917316178020966140770026648761406645010658995732487-6e1654f7",
@@ -9179,7 +8516,9 @@
    "legacy": [
     "bn/bn350"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp606-t12222215858006915839141401255556695821975177558367937484927312121315564820050836996405726215-9acd5f3a",
@@ -9195,7 +8534,9 @@
    "legacy": [
     "bn/bn606"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp254-t129607518034317099905336561907183648775-8181e611",
@@ -9212,7 +8553,9 @@
     "bn/bn254",
     "other/Fp254BNb"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp414-t154267229207681125708793071161652324726038701923943665681563655-ebea0e02",
@@ -9228,7 +8571,9 @@
    "legacy": [
     "bn/bn414"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp318-t548079839685593379889100768354473324754975588407-f4d63804",
@@ -9244,7 +8589,9 @@
    "legacy": [
     "bn/bn318"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp574-t186496302581962721809830439849867378820456264884631045871326327118225203759963374092295-5d71cb14",
@@ -9260,7 +8607,9 @@
    "legacy": [
     "bn/bn574"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp478-t662567649291894123450065105820326672097321614256273183056335502227537927-6422afbf",
@@ -9276,7 +8625,9 @@
    "legacy": [
     "bn/bn478"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp382-t2353932232174051770881173201777159236219815696568919523335-b80e1e2a",
@@ -9292,7 +8643,9 @@
    "legacy": [
     "bn/bn382"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp286-t8366863340207706741299716820480866394308615-195a9122",
@@ -9308,7 +8661,9 @@
    "legacy": [
     "bn/bn286"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp542-t2845711812853053972806387468884004947678235462567670984735634579507964130977906695-f8fcf71f",
@@ -9324,7 +8679,9 @@
    "legacy": [
     "bn/bn542"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp446-t10109980000181489923001201093401906549415298505746886291297633566727-278b8869",
@@ -9340,7 +8697,9 @@
    "legacy": [
     "bn/bn446"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp510-t43422033463993573283847164979847511362503473044959842495500254821277109321735-ee4a65f3",
@@ -9356,7 +8715,9 @@
    "legacy": [
     "bn/bn510"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp222-t1943310227059934816526534243778567-d3fef779",
@@ -9372,7 +8733,9 @@
    "legacy": [
     "bn/bn222"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp638-t800995136978371572363525747477255032258950408689114271367829691469194143147501961435441086332935-2ce55ebd",
@@ -9388,7 +8751,9 @@
    "legacy": [
     "bn/bn638"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t340282366920936614211651523200128901127-121ca9c1",
@@ -9404,7 +8769,9 @@
    "legacy": [
     "other/Fp256BN"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t115792089237316195423570985008687840101103879741288409693302319863988063823175-9e4bc1d2",
@@ -9420,7 +8787,9 @@
    "legacy": [
     "other/Fp512BN"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-tm2180728751409538655993507-410c12a9",
@@ -9439,7 +8808,9 @@
     "wap-wsg-idm-ecid-wtls9",
     "wtls/wap-wsg-idm-ecid-wtls9"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-t5192296858534689624111674181427015-0df4b5a2",
@@ -9455,7 +8826,9 @@
    "legacy": [
     "other/Fp224BN"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t6277101735386680763835754795021643429033562911502587034007-3daf17f4",
@@ -9471,7 +8844,9 @@
    "legacy": [
     "other/Fp384BN"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp112-tm138743339785140737-cbe1d29c",
@@ -9490,7 +8865,9 @@
     "wap-wsg-idm-ecid-wtls8",
     "wtls/wap-wsg-idm-ecid-wtls8"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp192-t146402144145231529258894028971-0a61824b",
@@ -9512,7 +8889,9 @@
     "secp192k1",
     "x963/ansip192k1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp638-tm121684554101595739501484314722271-a81b2097",
@@ -9528,7 +8907,9 @@
    "legacy": [
     "bls/BLS12-638"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp477-tm246288457138303-a443a69b",
@@ -9544,7 +8925,9 @@
    "legacy": [
     "bls/BLS24-477"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp381-tm15132376222941642751-961de9ba",
@@ -9560,7 +8943,9 @@
    "legacy": [
     "bls/BLS12-381"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp190-t29710571568175507457408237575-3623cc09",
@@ -9576,7 +8961,9 @@
    "legacy": [
     "bn/bn190"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp254-t126611883464401272108868536818127077377-702fee62",
@@ -9592,7 +8979,9 @@
    "legacy": [
     "other/Fp254BNa"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-tm9672873182660579502067895643393161-19ec5a97",
@@ -9614,7 +9003,9 @@
     "secp224k1",
     "x963/ansip224k1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-tm885929826233106195063767039-de9f34b7",
@@ -9630,7 +9021,9 @@
    "legacy": [
     "other/Tweedledee"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-t885929826233106195063767041-36a53c71",
@@ -9646,7 +9039,9 @@
    "legacy": [
     "other/Tweedledum"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-tm86663725065984043395317759-3f693e4d",
@@ -9662,7 +9057,9 @@
    "legacy": [
     "other/Pallas"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-t86663725065984043395317761-c6e97e85",
@@ -9678,7 +9075,9 @@
    "legacy": [
     "other/Vesta"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-tm2082454586705745521609279-77aaac0a",
@@ -9700,7 +9099,9 @@
     "secp160k1",
     "x963/ansip160k1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m173-tm118990531082834462588575939-e0f56426",
@@ -9719,7 +9120,9 @@
     "DSTU4145-173",
     "dstu4145/DSTU4145-173"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m257-tm549493087903001725763798196569983228979-1541e241",
@@ -9738,7 +9141,9 @@
     "DSTU4145-257",
     "dstu4145/DSTU4145-257"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m185-t11157211627747266908830216517-8dbe23c4",
@@ -9755,7 +9160,9 @@
     "Oakley Group 4",
     "oakley/Oakley Group 4"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m155-tm414891960790832521345347-b865721c",
@@ -9772,7 +9179,9 @@
     "Oakley Group 3",
     "oakley/Oakley Group 3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m208-t32421385432645202936390897948121-225f5036",
@@ -9791,7 +9200,9 @@
     "c2pnb208w1",
     "x962/c2pnb208w1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m113-t1267584991505179-9318c53d",
@@ -9810,7 +9221,9 @@
     "wap-wsg-idm-ecid-wtls1",
     "wtls/wap-wsg-idm-ecid-wtls1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m163-tm6224022517221266226059365-31d88d74",
@@ -9833,7 +9246,9 @@
     "nist/B-163",
     "secg/sect163r2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m409-tm6059503967182126918765909026644927652236777310526686418445029-86b19751",
@@ -9856,7 +9271,9 @@
     "nist/B-409",
     "secg/sect409r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m283-t2863663306391796106224371145726066910599667-6a731228",
@@ -9879,7 +9296,9 @@
     "nist/B-283",
     "secg/sect283r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m571-t99534385013609758659469819150465382236412396452349171016760770327496674607579419075443-58357d9f",
@@ -9902,7 +9321,9 @@
     "nist/B-571",
     "secg/sect571r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m307-t2833281535299466325038960383492079652813050003-0d180efa",
@@ -9921,7 +9342,9 @@
     "DSTU4145-307",
     "dstu4145/DSTU4145-307"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m431-t57433707327821439195582946117660639423082714303598267113724573283-5a9bd0cb",
@@ -9940,7 +9363,9 @@
     "DSTU4145-431",
     "dstu4145/DSTU4145-431"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m367-tm29919614407377426422224252239009944793385357330657729169-5613f811",
@@ -9959,7 +9384,9 @@
     "DSTU4145-367",
     "dstu4145/DSTU4145-367"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m179-t170443561202618430526296611-54da5c7e",
@@ -9978,7 +9405,9 @@
     "DSTU4145-179",
     "dstu4145/DSTU4145-179"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m163-tm6637329309425161870107289-653384de",
@@ -9997,7 +9426,9 @@
     "DSTU4145-163",
     "dstu4145/DSTU4145-163"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m233-tm206777407530349254000433718821372333-2bb37fd4",
@@ -10021,7 +9452,9 @@
     "nist/B-233",
     "secg/sect233r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m233-tm206777407530349254000433718821372333-65002b7a",
@@ -10040,7 +9473,9 @@
     "DSTU4145-233",
     "dstu4145/DSTU4145-233"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m167-t744409597681349541568451-8d4c1932",
@@ -10059,7 +9494,9 @@
     "DSTU4145-167",
     "dstu4145/DSTU4145-167"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m191-tm65396783579344579503573601949-86ea3d4e",
@@ -10078,7 +9515,9 @@
     "DSTU4145-191",
     "dstu4145/DSTU4145-191"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m163-t4927277371730230283198131-5500578d",
@@ -10097,7 +9536,9 @@
     "c2pnb163v2",
     "x962/c2pnb163v2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m239-t1688252296967058035833017058395749899-677552d4",
@@ -10116,7 +9557,9 @@
     "c2tnb239v3",
     "x962/c2tnb239v3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m193-tm214577892669885555631611261865-7d7aef6d",
@@ -10138,7 +9581,9 @@
     "sect193r2",
     "x963/ansit193r2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m193-tm123763275178439483174011368593-bd4a68b5",
@@ -10160,7 +9605,9 @@
     "sect193r1",
     "x963/ansit193r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m431-t1799562222397931009847908291975708857846270858398803555164615329-2fc909a8",
@@ -10179,7 +9626,9 @@
     "c2tnb431r1",
     "x962/c2tnb431r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m191-tm2867709611233468671243809609-a71ef20d",
@@ -10198,7 +9647,9 @@
     "c2tnb191v1",
     "x962/c2tnb191v1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
@@ -10211,7 +9662,8 @@
     "wap-wsg-idm-ecid-wtls4"
    ],
    "ec1": [
-    "EC1N113Cstandardhf529f17bd191"
+    "EC1N113Cstandardhf529f17bd191",
+    "EC1N113Csect113r1hf529f17bd191"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -10220,7 +9672,9 @@
     "wap-wsg-idm-ecid-wtls4",
     "wtls/wap-wsg-idm-ecid-wtls4"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m239-tm317806026669043444686057064183337243-1c7f8907",
@@ -10239,7 +9693,9 @@
     "c2tnb239v1",
     "x962/c2tnb239v1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m131-tm52073227371480044317-ecd1b011",
@@ -10258,7 +9714,9 @@
     "secg/sect131r2",
     "sect131r2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m191-tm99424717553083670833495147979-0036f99e",
@@ -10277,7 +9735,9 @@
     "c2tnb191v2",
     "x962/c2tnb191v2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m239-t775701775700413337265223005219721971-012b5b00",
@@ -10296,7 +9756,9 @@
     "c2tnb239v2",
     "x962/c2tnb239v2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m359-t892492397682618518080660149488378363069332596639535741-98bc4060",
@@ -10315,7 +9777,9 @@
     "c2tnb359v1",
     "x962/c2tnb359v1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m113-tm148884003161464613-d77a0def",
@@ -10334,7 +9798,9 @@
     "secg/sect113r2",
     "sect113r2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m191-tm21751307834701491275992758225-17fe9713",
@@ -10353,7 +9819,9 @@
     "c2tnb191v3",
     "x962/c2tnb191v3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m163-tm4590722519955900204932993-eb7e4d1d",
@@ -10375,7 +9843,9 @@
     "wtls/wap-wsg-idm-ecid-wtls5",
     "x962/c2pnb163v1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m131-tm80868651916585429657-35517338",
@@ -10394,7 +9864,9 @@
     "secg/sect131r1",
     "sect131r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m163-t4581356680384720711965167-d8d162ce",
@@ -10413,7 +9885,9 @@
     "c2pnb163v3",
     "x962/c2pnb163v3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m163-t1731532666194638619521227-c861cf8f",
@@ -10435,7 +9909,9 @@
     "sect163r1",
     "x963/ansit163r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m272-t114182707820475866940422329614334265958971-985955bd",
@@ -10454,7 +9930,9 @@
     "c2pnb272w1",
     "x962/c2pnb272w1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m368-tm15466245949934416937841361495935610942842793802409489935-43ee62b3",
@@ -10473,7 +9951,9 @@
     "c2pnb368w1",
     "x962/c2pnb368w1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m176-t38161931374797611715595947-5639a6d4",
@@ -10492,7 +9972,9 @@
     "c2pnb176w1",
     "x962/c2pnb176w1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m304-tm1949050066876782037155448244017940336576672053-02fbe089",
@@ -10511,7 +9993,9 @@
     "c2pnb304w1",
     "x962/c2pnb304w1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-tm84256526728449730591029627228991796228-3ff7fff5",
@@ -10530,7 +10014,9 @@
     "gost/id-tc26-gost-3410-2012-256-paramSetA",
     "id-tc26-gost-3410-2012-256-paramSetA"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp414-t266913126910041140166481421552787081431877817603289668716758056-2e80c05a",
@@ -10546,7 +10032,9 @@
    "legacy": [
     "other/Curve41417"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp448-t28312320572429821613362531907042076847709625476988141958474579766324-3d2274d2",
@@ -10566,7 +10054,9 @@
     "nist-800-186/E448",
     "other/Ed448"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp448-t28312320572429821613362531907042076847709625476988141958474579766324-53658426",
@@ -10587,7 +10077,9 @@
     "nist-800-186/Edwards448",
     "other/Ed448-Goldilocks"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t98513328673960770018330014639034783119468794885417684309186204259789288992276-0206fe7a",
@@ -10606,7 +10098,9 @@
     "gost/id-tc26-gost-3410-2012-512-paramSetC",
     "id-tc26-gost-3410-2012-512-paramSetC"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-tm119794558906020826009846838880889513832916010681565849916324082451839560751489-f21fca50",
@@ -10620,7 +10114,9 @@
    "legacy": [
     "other/ssc-512"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-tm35197163533674495870879651530057169373-68fd7b2c",
@@ -10639,7 +10135,9 @@
     "anssi/FRP256v1",
     "FRP256v1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t381257165022567524325218360739058995869-37304b30",
@@ -10653,7 +10151,9 @@
    "legacy": [
     "other/BADA55-R-256"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-t4460773185803614235113038911974753-e1f4ff20",
@@ -10672,7 +10172,9 @@
     "brainpool/brainpoolP224r1",
     "brainpoolP224r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-t651321219629903728864297-6507d78a",
@@ -10686,7 +10188,9 @@
    "legacy": [
     "other/ssc-160"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t4893961318881196714252176992726657045-cc6a107e",
@@ -10700,7 +10204,9 @@
    "legacy": [
     "nums/w-256-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t418276207993188399430123392999835439444-868c4e8c",
@@ -10714,7 +10220,9 @@
    "legacy": [
     "nums/ed-256-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t188730266966446886577384576996245946077-80e68e0d",
@@ -10733,7 +10241,9 @@
     "oscaa/SM2",
     "SM2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t426868306435604417333899392705351656559-e9588b91",
@@ -10747,7 +10257,9 @@
    "legacy": [
     "other/BADA55-VR-256"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t508360670408157092636158920390626029849-24346e19",
@@ -10763,7 +10275,9 @@
    "legacy": [
     "other/Tom-256"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t196221757141320814079428202834060788997-51c05000",
@@ -10782,7 +10296,9 @@
     "gost/id-GostR3410-2001-CryptoPro-A-ParamSet",
     "id-GostR3410-2001-CryptoPro-A-ParamSet"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t36904200015056198187214188655179355935-f355ae1b",
@@ -10798,7 +10314,9 @@
    "legacy": [
     "nums/numsp256d1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t348701241848424294714378569523362344080-0362fd2b",
@@ -10814,7 +10332,9 @@
    "legacy": [
     "nums/numsp256t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t70768315919305439621916119611169321777939510542063248003509925176674057912887-376f2b6f",
@@ -10828,7 +10348,9 @@
    "legacy": [
     "nums/w-512-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t92612225932029526595254953582299273133950294885929313389535604556760659601388-3fa412df",
@@ -10842,7 +10364,9 @@
    "legacy": [
     "nums/ed-512-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-t519972310379544251229703-a481858f",
@@ -10861,7 +10385,9 @@
     "brainpool/brainpoolP160t1",
     "brainpoolP160t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t74524470523323306179098763612522339584975451401095028492149363970074628368491-3351ff9f",
@@ -10877,7 +10403,9 @@
    "legacy": [
     "nums/numsp512d1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t97744483583712349266929640403245629889151353128602905529915952558174263790419-b856c63a",
@@ -10896,7 +10424,9 @@
     "gost/id-tc26-gost-3410-12-512-paramSetA",
     "id-tc26-gost-3410-12-512-paramSetA"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t159404720256826179419896581546807814173439533036908671852564932616668653549476-97fc6485",
@@ -10912,7 +10442,9 @@
    "legacy": [
     "nums/numsp512t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-t3747123853060838272219601178637605-8eef44cf",
@@ -10926,7 +10458,9 @@
    "legacy": [
     "other/BADA55-VPR-224"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp240-t3-292fa72c",
@@ -10942,7 +10476,9 @@
    "legacy": [
     "mnt/mnt5/1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-tm250855509121001538581751-eed0581b",
@@ -10964,7 +10500,9 @@
     "secp160r2",
     "x963/ansip160r2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-tm2364890543760230858433111-6b15890e",
@@ -10987,7 +10525,9 @@
     "secp160r1",
     "wap-wsg-idm-ecid-wtls7"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp320-tm1085868569802514034757079818015930522073462377917-0f792894",
@@ -11001,7 +10541,9 @@
    "legacy": [
     "other/ssc-320"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp320-t1829129012274291271856083956306349739816241699607-fbf419a7",
@@ -11020,7 +10562,9 @@
     "brainpool/brainpoolP320t1",
     "brainpoolP320t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t5973228999478432667446284273866865475630836211106699249391-975ab6a0",
@@ -11039,7 +10583,9 @@
     "brainpool/brainpoolP384r1",
     "brainpoolP384r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-tm221938542218978828286815502327069187962-36f15f4b",
@@ -11058,7 +10604,9 @@
     "nist-800-186/W-25519",
     "W-25519"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp383-t2113793218673198987988742457840023505747218554421793635005-14f5c5d7",
@@ -11072,7 +10620,9 @@
    "legacy": [
     "nums/w-383-mers"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp383-t1464839725173988384744564724586645286394096642238191820264-987d8f3e",
@@ -11086,7 +10636,9 @@
    "legacy": [
     "nums/ed-383-mers"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp112-t72213667414400864-3ecbdc5f",
@@ -11105,7 +10657,9 @@
     "secg/secp112r2",
     "secp112r2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-tm8254077619909260646185522759808830509245368802333014026297-359bbdd8",
@@ -11119,7 +10673,9 @@
    "legacy": [
     "other/Tom-384"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp251-t45330879683285730139092453152713398836-0733a7fc",
@@ -11135,7 +10691,9 @@
    "legacy": [
     "other/Curve1174"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-tm5342559675359700677494927007229677-97e798c3",
@@ -11149,7 +10707,9 @@
    "legacy": [
     "other/ssc-224"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-t661950337966252150745153098997235-d29026fd",
@@ -11163,7 +10723,9 @@
    "legacy": [
     "other/BADA55-VPR2-224"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t5973228999478432667446284273866865475630836211106699249391-05fe695b",
@@ -11182,7 +10744,9 @@
     "brainpool/brainpoolP384t1",
     "brainpoolP384t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp221-t1654906936176842234216578963930838-382ff3f7",
@@ -11198,7 +10762,9 @@
    "legacy": [
     "other/Curve22103"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-t4460773185803614235113038911974753-d0798e5e",
@@ -11217,7 +10783,9 @@
     "brainpool/brainpoolP224t1",
     "brainpoolP224t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp192-t75885465139255996133178324439-bdd2bc3f",
@@ -11236,7 +10804,9 @@
     "brainpool/brainpoolP192r1",
     "brainpoolP192r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-t3-c2687707",
@@ -11252,7 +10822,9 @@
    "legacy": [
     "mnt/mnt3/3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp240-t3-1c921d2f",
@@ -11268,7 +10840,9 @@
    "legacy": [
     "mnt/mnt5/2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-t4923084803502059616306225508536201-ba74de09",
@@ -11282,7 +10856,9 @@
    "legacy": [
     "other/BADA55-VR-224"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t1701501408490564654790464994852023194212354753680992833861-f71c5516",
@@ -11296,7 +10872,9 @@
    "legacy": [
     "nums/w-384-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t1037104558255063996430993021778302819497487464052100095380-382a043b",
@@ -11310,7 +10888,9 @@
    "legacy": [
     "nums/ed-384-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp128-t19023044537425668468-618c7c52",
@@ -11329,7 +10909,9 @@
     "secg/secp128r2",
     "secp128r2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp254-t27241143818186388543882977165641385921-50740db5",
@@ -11343,7 +10925,9 @@
    "legacy": [
     "nums/w-254-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp254-t108556614095926661953015356737202789604-4cb9e875",
@@ -11357,7 +10941,9 @@
    "legacy": [
     "nums/ed-254-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-t519972310379544251229703-b8575dce",
@@ -11376,7 +10962,9 @@
     "brainpool/brainpoolP160r1",
     "brainpoolP160r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t1830295516398814731693771933088720051240442793150265474531-6812454c",
@@ -11390,7 +10978,9 @@
    "legacy": [
     "other/ssc-384"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp522-t5133182737093516966116292369105062158447915857038956549678982449484591328997963-1e61c44a",
@@ -11404,7 +10994,9 @@
    "legacy": [
     "other/Tom-521"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp510-t32078124368993265643391527202163889449271294619270894863550237026710955845075-4a5a8504",
@@ -11418,7 +11010,9 @@
    "legacy": [
     "nums/w-510-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp510-t72717652038826374726059530590088862195220335511561317766691761739622989347132-ec2add45",
@@ -11432,7 +11026,9 @@
    "legacy": [
     "nums/ed-510-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp128-tm8476633335676313877-1c931050",
@@ -11451,7 +11047,9 @@
     "secg/secp128r1",
     "secp128r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp159-t3-55c158e7",
@@ -11467,7 +11065,9 @@
    "legacy": [
     "mnt/mnt2/1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp288-tm31717284756189777838455907167263484970467017-b051d78d",
@@ -11481,7 +11081,9 @@
    "legacy": [
     "other/ssc-288"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-cf66c6c9",
@@ -11505,7 +11107,9 @@
     "nist/P-384",
     "oakley/384-bit Random ECP Group"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t6672381345500934243292292194117280177175762633341936873929-fe235546",
@@ -11519,7 +11123,9 @@
    "legacy": [
     "other/BADA55-VR-384"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t1026898053860656322554647929255276885826089607448367308043-fc917784",
@@ -11535,7 +11141,9 @@
    "legacy": [
     "nums/numsp384d1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp384-t1878909691993642469748376292100438552038987804211114559024-098ac8c3",
@@ -11551,7 +11159,9 @@
    "legacy": [
     "nums/numsp384t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp159-t3-4900a99f",
@@ -11567,7 +11177,9 @@
    "legacy": [
     "mnt/mnt2/2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp112-tm4407293269000505-7a11ff60",
@@ -11589,7 +11201,9 @@
     "wap-wsg-idm-ecid-wtls6",
     "wtls/wap-wsg-idm-ecid-wtls6"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp240-t3-d65da34c",
@@ -11605,7 +11219,9 @@
    "legacy": [
     "mnt/mnt5/3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp192-t75885465139255996133178324439-0e200e9d",
@@ -11624,7 +11240,9 @@
     "brainpool/brainpoolP192t1",
     "brainpoolP192t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp448-t28312320572429821613362531907042076847709625476988141958474579766324-649c48bd",
@@ -11643,7 +11261,9 @@
     "nist-800-186/W-448",
     "W-448"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp192-tm68374409827948938044418153103-89450af8",
@@ -11657,7 +11277,9 @@
    "legacy": [
     "other/ssc-192"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp240-t3-5d0c27a2",
@@ -11673,7 +11295,9 @@
    "legacy": [
     "mnt/mnt4"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-t453928926765356815458045473019830493310-3d08d404",
@@ -11687,7 +11311,9 @@
    "legacy": [
     "bls/Bandersnatch"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-t43182373549099571680785400801115150922-89d626f9",
@@ -11703,7 +11329,9 @@
    "legacy": [
     "other/JubJub"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp320-t1829129012274291271856083956306349739816241699607-60ebe171",
@@ -11722,7 +11350,9 @@
     "brainpool/brainpoolP320r1",
     "brainpoolP320r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-t3-3b7296c6",
@@ -11738,7 +11368,9 @@
    "legacy": [
     "mnt/mnt3/2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t300418416528525664980082381967979838673-6ad773ce",
@@ -11757,7 +11389,9 @@
     "brainpool/brainpoolP256r1",
     "brainpoolP256r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-t161780446515958999764292222349558067737-14f01f35",
@@ -11771,7 +11405,9 @@
    "legacy": [
     "nums/w-255-mers"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-t186389866128205620941018110855087410992-98107d56",
@@ -11785,7 +11421,9 @@
    "legacy": [
     "nums/ed-255-mers"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp255-tm221938542218978828286815502327069187962-f864fecb",
@@ -11805,7 +11443,9 @@
     "nist-800-186/Edwards25519",
     "other/Ed25519"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-tm467140827435544800340052492131167243509-c96d2aed",
@@ -11824,7 +11464,9 @@
     "gost/id-GostR3410-2001-CryptoPro-B-ParamSet",
     "id-GostR3410-2001-CryptoPro-B-ParamSet"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp160-t3-50cb7013",
@@ -11840,7 +11482,9 @@
    "legacy": [
     "mnt/mnt3/1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp192-t128840479891808162805939905231-7976b179",
@@ -11859,7 +11503,9 @@
     "prime192v2",
     "x962/prime192v2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp192-t41351533396743040039645025261-5495245e",
@@ -11878,7 +11524,9 @@
     "prime192v3",
     "x962/prime192v3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t133911538952573548431982907995132016398065354869678696041884562716142492272779-e69cd968",
@@ -11897,7 +11545,9 @@
     "brainpool/brainpoolP512r1",
     "brainpoolP512r1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp511-t51678549499715432469390247103262106461146882586673900608813615929090325752961-86ec43f8",
@@ -11911,7 +11561,9 @@
    "legacy": [
     "nums/w-511-mers"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp511-t38925736360316473061851127539917683396647984622335777831652671274857142370780-4b842bd6",
@@ -11925,7 +11577,9 @@
    "legacy": [
     "nums/ed-511-mers"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-tm149097018916599106931901217895018650162542083271457414743815309640053273077069-aac01b1f",
@@ -11944,7 +11598,9 @@
     "gost/id-tc26-gost-3410-12-512-paramSetB",
     "id-tc26-gost-3410-12-512-paramSetB"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-f767e0d1",
@@ -11968,7 +11624,9 @@
     "nist/P-521",
     "oakley/521-bit Random ECP Group"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp511-t33317690176989408428354063686744165122149707869071609401230178415964786752661-6e80cdd8",
@@ -11987,7 +11645,9 @@
     "gost/gost512",
     "gost512"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-tm447942250905168602652181588181066248577-f512821f",
@@ -12006,7 +11666,9 @@
     "gost/gost256",
     "gost256"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t158633982881099435961745385353335106019-09cbae2d",
@@ -12025,7 +11687,9 @@
     "gost/id-GostR3410-2001-CryptoPro-C-ParamSet",
     "id-GostR3410-2001-CryptoPro-C-ParamSet"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp382-t4121212830778224615705967802929256988250492817320673387316-0e676ed0",
@@ -12041,7 +11705,9 @@
    "legacy": [
     "other/Curve67254"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp226-t300921746732130612121844277365056-c66da16f",
@@ -12057,7 +11723,9 @@
    "legacy": [
     "other/Curve4417"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t300418416528525664980082381967979838673-bd148c7d",
@@ -12076,7 +11744,9 @@
     "brainpool/brainpoolP256t1",
     "brainpoolP256t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp170-tm52213820118540299389901413-869d5d3c",
@@ -12092,7 +11762,9 @@
    "legacy": [
     "mnt/mnt1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp239-t543286227487037812274483689551665839-dbcebd3e",
@@ -12111,7 +11783,9 @@
     "prime239v3",
     "x962/prime239v3"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp239-tm1078211060294033492355314871841595491-312285e0",
@@ -12130,7 +11804,9 @@
     "prime239v2",
     "x962/prime239v2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp239-t506926255561332610517105435906892533-3a5a5c8a",
@@ -12149,7 +11825,9 @@
     "prime239v1",
     "x962/prime239v1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp512-t133911538952573548431982907995132016398065354869678696041884562716142492272779-c7f8a111",
@@ -12168,7 +11846,9 @@
     "brainpool/brainpoolP512t1",
     "brainpoolP512t1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t59929715926598057813127459560221398997-396a9121",
@@ -12182,7 +11862,9 @@
    "legacy": [
     "other/ssc-256"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp382-t2184274201430630331829688577284583194017827823101929639907-81d9b372",
@@ -12196,7 +11878,9 @@
    "legacy": [
     "nums/w-382-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp382-t4403250849178144456852012527173770264409251021165796791932-e59c6bd6",
@@ -12210,7 +11894,9 @@
    "legacy": [
     "nums/ed-382-mont"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp222-t726130336278594909943533816892560-a0ed2404",
@@ -12226,7 +11912,9 @@
    "legacy": [
     "other/E-222"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t608269349925928967247598157794165263400-b7ab6ffe",
@@ -12242,7 +11930,9 @@
    "legacy": [
     "other/MDC201601"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp521-t1350219053034006823156430521675130544287619844856204906474540600343116434623060-37726020",
@@ -12258,7 +11948,9 @@
    "legacy": [
     "other/E-521"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp382-t4121212830778224615705967802929256988250492817320673387316-1559a571",
@@ -12277,7 +11969,6 @@
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
-   "on_board": false
   },
   {
    "slug": "icv1-fp6k11-tm527622722-07ccd925",
@@ -12291,7 +11982,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp9k3-t1227-55c8d640",
@@ -12305,7 +11998,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp9k3-tm4575-aba104ba",
@@ -12319,7 +12014,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp10k3-t3589-bbd5cc8b",
@@ -12333,7 +12030,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp10k3-t41822-dfa3991d",
@@ -12347,7 +12046,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp11k3-tm30789-3c2726bc",
@@ -12361,7 +12062,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp12k5-tm296780010-475f4271",
@@ -12375,7 +12078,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp31k2-t1044939202-6687f4aa",
@@ -12389,7 +12094,9 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp36k2-tm52676205250-0d78f787",
@@ -12403,9 +12110,193 @@
    ],
    "ec1_unresolved": null,
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   }
  ],
+ "n41_n53_counted_diagnostic": {
+  "source": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+  "decision": "frozen_parameters_do_not_transfer",
+  "class": "accounting; counted lower bounds with native work unpriced, L0 wall exploratory, L2 host run pending",
+  "measured_runs": 640,
+  "measured_verified_runs": 206,
+  "isolation_levels": {
+   "L0": 640
+  },
+  "curves": [
+   {
+    "curve": "icv1-f2m41-tm2308219-7f48b14a",
+    "log2_r": 39.0000015143,
+    "primary_workload_id": "W15dcf1a74cb8",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.157110910291
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.5685873928
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.5685873928
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": 256.236415431,
+     "ci95": [
+      202.458685811,
+      332.752482372
+     ],
+     "pairs": 23
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": [
+       202.458685811,
+       332.752482372
+      ],
+      "ratio_of_sums": 256.236415431,
+      "verdict": "retained"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   },
+   {
+    "curve": "icv1-f2m53-tm56619371-dac20a85",
+    "log2_r": 44.2585330227,
+    "primary_workload_id": "W32013b060ceb",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.14140798999
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
+ },
  "phases": [
   {
    "id": "precomputation",
