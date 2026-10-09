@@ -1,0 +1,480 @@
+{
+  "arms": {
+    "hedged_0": {
+      "aa_p95_abs_log_ratio": 1.1954101213216424,
+      "exploratory_online_geomean_ratio": 0.9204694927138729,
+      "exploratory_online_min_ratio": 0.29826229366573853,
+      "online_ratio_above_one_count": 4,
+      "root_call_aa_p95_abs_log_ratio": 1.0786241154023837,
+      "root_call_geomean_ratio": 0.9446818343482617,
+      "target_count": 8
+    },
+    "hedged_1000": {
+      "aa_p95_abs_log_ratio": 1.6039370530066748,
+      "exploratory_online_geomean_ratio": 0.5969970100063456,
+      "exploratory_online_min_ratio": 0.1216429103442717,
+      "online_ratio_above_one_count": 2,
+      "root_call_aa_p95_abs_log_ratio": 0.9286421350545678,
+      "root_call_geomean_ratio": 0.7371152915816094,
+      "target_count": 8
+    },
+    "hedged_3000": {
+      "aa_p95_abs_log_ratio": 1.3338104016627723,
+      "exploratory_online_geomean_ratio": 0.4432427725023886,
+      "exploratory_online_min_ratio": 0.08783278544976561,
+      "online_ratio_above_one_count": 1,
+      "root_call_aa_p95_abs_log_ratio": 1.1114144177357053,
+      "root_call_geomean_ratio": 0.9090954232560574,
+      "target_count": 8
+    }
+  },
+  "blocks": [
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 0.6762391371010907,
+        "hedged_1000": 0.12369571397823814,
+        "hedged_3000": 0.9162613235150727,
+        "parallel": 0.5190116806119611
+      },
+      "label": "T025",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          5.648875,
+          11.108333
+        ],
+        "hedged_1000": [
+          8.833874999999999,
+          7.806042
+        ],
+        "hedged_3000": [
+          9.065583,
+          22.663290999999997
+        ],
+        "parallel": [
+          2.623833,
+          4.409
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 0.42937100822082547,
+        "hedged_1000": 0.4095878617317964,
+        "hedged_3000": 0.23728964550302065
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 0.6858428445091259,
+        "hedged_1000": 1.0103096642998999,
+        "hedged_3000": 1.0103096642998999
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          9146,
+          13346
+        ],
+        "hedged_1000": [
+          7500,
+          7500
+        ],
+        "hedged_3000": [
+          7500,
+          7500
+        ],
+        "parallel": [
+          5374,
+          10684
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 1.0054098775971405,
+        "hedged_1000": 0.9332852282831968,
+        "hedged_3000": 1.3338104016627723,
+        "parallel": 5.451845650531831
+      },
+      "label": "T026",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          8.036125,
+          2.940375
+        ],
+        "hedged_1000": [
+          5.016125,
+          12.755249999999998
+        ],
+        "hedged_3000": [
+          40.68025,
+          10.718083
+        ],
+        "parallel": [
+          581.52275,
+          2.493792
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 7.834093778289635,
+        "hedged_1000": 4.760853369438368,
+        "hedged_3000": 1.8237407575764515
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 0.5311823877965303,
+        "hedged_1000": 0.538760372974366,
+        "hedged_3000": 0.5634456736381174
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          18890,
+          26758
+        ],
+        "hedged_1000": [
+          20786,
+          23638
+        ],
+        "hedged_3000": [
+          24664,
+          18214
+        ],
+        "parallel": [
+          16374,
+          8710
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 0.17961114826631303,
+        "hedged_1000": 0.6188720176604847,
+        "hedged_3000": 0.2226955233710568,
+        "parallel": 0.7447229807215859
+      },
+      "label": "T027",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          20.998458,
+          17.546208
+        ],
+        "hedged_1000": [
+          9.72025,
+          18.048875
+        ],
+        "hedged_3000": [
+          16.391042000000002,
+          20.479625000000002
+        ],
+        "parallel": [
+          4.569792,
+          9.623332999999999
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 0.34548216694549877,
+        "hedged_1000": 0.5006649484805631,
+        "hedged_3000": 0.36194842569452607
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 0.36453023846043203,
+        "hedged_1000": 0.37798082021602025,
+        "hedged_3000": 0.5065178564968628
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          107250,
+          98008
+        ],
+        "hedged_1000": [
+          62150,
+          157306
+        ],
+        "hedged_3000": [
+          63142,
+          86222
+        ],
+        "parallel": [
+          15922,
+          87726
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 0.3868804002922213,
+        "hedged_1000": 1.6039370530066748,
+        "hedged_3000": 0.6114963219973566,
+        "parallel": 0.9203152400874087
+      },
+      "label": "T028",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          5.617999999999999,
+          8.271832999999999
+        ],
+        "hedged_1000": [
+          16.47475,
+          3.3131250000000003
+        ],
+        "hedged_3000": [
+          5.069208000000001,
+          9.343499999999999
+        ],
+        "parallel": [
+          8.911417,
+          3.55025
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 0.8251085832549596,
+        "hedged_1000": 0.7613327708587725,
+        "hedged_3000": 0.8172934164014238
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 1.6602410156539578,
+        "hedged_1000": 2.3557398390619237,
+        "hedged_3000": 5.519808190001736
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          25708,
+          29692
+        ],
+        "hedged_1000": [
+          22030,
+          17210
+        ],
+        "hedged_3000": [
+          8310,
+          8310
+        ],
+        "parallel": [
+          52196,
+          40310
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 0.816102571970555,
+        "hedged_1000": 1.0511605672417939,
+        "hedged_3000": 0.35849906434562495,
+        "parallel": 1.179817263329195
+      },
+      "label": "T029",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          5.857625,
+          2.5899579999999998
+        ],
+        "hedged_1000": [
+          27.878957999999997,
+          9.744584
+        ],
+        "hedged_3000": [
+          16.448667,
+          11.493082999999999
+        ],
+        "parallel": [
+          11.047125,
+          3.3951670000000003
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 1.5723457869980386,
+        "hedged_1000": 0.371565415453102,
+        "hedged_3000": 0.44542191301158224
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 1.1553200506628916,
+        "hedged_1000": 1.0996661074813414,
+        "hedged_3000": 1.0082026483240538
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          65476,
+          23912
+        ],
+        "hedged_1000": [
+          33420,
+          51710
+        ],
+        "hedged_3000": [
+          50272,
+          40896
+        ],
+        "parallel": [
+          58768,
+          35560
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 0.027490375084891747,
+        "hedged_1000": 0.446119527182638,
+        "hedged_3000": 0.6602339491050888,
+        "parallel": 1.755896075448047
+      },
+      "label": "T030",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          17.793916,
+          17.311417
+        ],
+        "hedged_1000": [
+          7.524167,
+          11.754541
+        ],
+        "hedged_3000": [
+          16.178959,
+          31.310249999999996
+        ],
+        "parallel": [
+          45.929667,
+          7.9344589999999995
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 1.0876852310157918,
+        "hedged_1000": 2.029893523092941,
+        "hedged_3000": 0.848177511922679
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 2.764749296166671,
+        "hedged_1000": 1.1047725609796986,
+        "hedged_3000": 1.907730502990354
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          39350,
+          31534
+        ],
+        "hedged_1000": [
+          62812,
+          123722
+        ],
+        "hedged_3000": [
+          88990,
+          29286
+        ],
+        "parallel": [
+          144990,
+          65418
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 1.1954101213216424,
+        "hedged_1000": 1.1635914813169626,
+        "hedged_3000": 0.11164884478468556,
+        "parallel": 0.4920006661422728
+      },
+      "label": "T031",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          2.962167,
+          0.896292
+        ],
+        "hedged_1000": [
+          25.251125,
+          7.8875
+        ],
+        "hedged_3000": [
+          20.667333,
+          18.484
+        ],
+        "parallel": [
+          2.1955,
+          1.342333
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 1.0535795309448,
+        "hedged_1000": 0.1216429103442717,
+        "hedged_3000": 0.08783278544976561
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 0.6021388401028921,
+        "hedged_1000": 0.05839996375376028,
+        "hedged_3000": 0.06013063396712509
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          6340,
+          2156
+        ],
+        "hedged_1000": [
+          37646,
+          38600
+        ],
+        "hedged_3000": [
+          33630,
+          40758
+        ],
+        "parallel": [
+          1180,
+          4200
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "hedged_0": 0.9253778029323874,
+        "hedged_1000": 0.060426564750490706,
+        "hedged_3000": 0.15737564987010957,
+        "parallel": 1.1621768404949802
+      },
+      "label": "T032",
+      "online_ms_by_arm": {
+        "hedged_0": [
+          12.116583,
+          4.802791
+        ],
+        "hedged_1000": [
+          9.330083,
+          9.91125
+        ],
+        "hedged_3000": [
+          7.018708999999999,
+          5.996666
+        ],
+        "parallel": [
+          1.2725410000000001,
+          4.068167
+        ]
+      },
+      "parallel_over_hedged_online_ratio": {
+        "hedged_0": 0.29826229366573853,
+        "hedged_1000": 0.23660739230839017,
+        "hedged_3000": 0.35071289126393834
+      },
+      "parallel_over_hedged_root_call_ratio": {
+        "hedged_0": 1.4957424800540002,
+        "hedged_1000": 2.5344855983222274,
+        "hedged_3000": 2.5344855983222274
+      },
+      "target_s3_calls_by_arm": {
+        "hedged_0": [
+          7934,
+          14860
+        ],
+        "hedged_1000": [
+          6408,
+          6408
+        ],
+        "hedged_3000": [
+          6408,
+          6408
+        ],
+        "parallel": [
+          12198,
+          21624
+        ]
+      }
+    }
+  ],
+  "controlled_speedup": null,
+  "kind": "s3_hedged_delay_tuning_analysis_v1",
+  "ledger_sha256": "ff0ff697de3698e289079f8a034003c975e0d02ed73d0e5f59bddc6a08a78e2b",
+  "parallel_baseline_aa_p95_abs_log_ratio": 5.451845650531831,
+  "plan_sha256": "44ca130e4a5748921809b2aa7ce7ef8ca0768b8d69a00b8849e582473127019d",
+  "run_count": 64,
+  "target_count": 8
+}
