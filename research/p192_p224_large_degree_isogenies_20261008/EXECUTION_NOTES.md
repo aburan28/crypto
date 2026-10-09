@@ -47,3 +47,33 @@ The actual construction CLI uses the default optimized release build (level
 3). An alternate level-1 build was not used for any recorded construction.
 macOS rejected the trial virtual-memory `ulimit`; the actual native supervisor
 uses the predeclared 8 GiB sampled resident-memory limit instead.
+
+The feature branch was rebased onto upstream 2fe5cec8a4a9d8d55c8e0abec9fe22852f3a3726,
+which includes the registry/dashboard repairs. The original registry input and
+failed replay remain frozen. The mandatory root check was rerun after rebasing
+and again failed with 643 compiler errors (`validation/lib-test-after-rebase.log`).
+No isogeny construction implementation changed in this rebase.
+
+The complete standalone release suite passed 110 tests
+(`validation/algorithms-tests-resume.log`), including the new API regressions.
+The current search example's two tests passed independently against the actual
+construction library (`validation/example-tests-resume.log`). A direct six-test
+API run also passed (`validation/api-tests.log`); its first manual build lacked
+Cargo's CLI/version compile-time environment, and that build failure is retained.
+The earlier incomplete test/build logs ended with the interrupted session; they
+are not counted as passing checks.
+
+The native `catalogue-covers` executable imports the unchanged root cover checker,
+model conversions, linkage graph, field arithmetic, and prime screen directly.
+Its baseline `--check` reproduced all 321 existing cover and graph records, with
+zero unsupported or invalid models (`validation/catalogue-covers-baseline.log`).
+The native `catalogue-views` executable performs incremental joins only; its
+rehearsal reproduced the existing alias map, leaderboard JSON/Markdown/HTML,
+and browser JSON byte for byte, preserving measurement bytes. New prime model
+rows use the exact registered identity, subgroup, mapped generator, and native
+cover certificates. The frozen IC measurement rows are not recalculated.
+
+Conductor recovered during this continuation. The existing T-65 task was
+reattached and the API, native study, and affected canonical view scopes were
+granted before the catalogue refresh. Earlier HTTP/service failures remain
+part of the execution record.
