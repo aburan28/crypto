@@ -43,6 +43,23 @@ at every `ℓ` measured.
 Phase columns are cumulative differences from the trace and are
 approximate.  The 47 row was timed before the change only.
 
+With rayon over 14 cores (Apple M4 Pro, 10 performance cores), level-wise
+parallel powers and parallel row sums and residual updates:
+
+| ℓ | total | j-series | powers | solve | peak RSS | checks |
+|--:|--:|--:|--:|--:|--:|--:|
+| 61 | 0.8 s | 0.18 s | 0.26 s | 0.36 s | | 1,839 |
+| 127 | 7.9 s | 1.2 s | 2.7 s | 4.0 s | | 8,010 |
+| 251 | 56 s | 3.8 s | 21 s | 31 s | | 31,384 |
+| 509 | 9.2 min | 18 s | 2.6 min | 6.4 min | 5.0 GB | 129,295 |
+
+The solve fits ℓ^3.9 from 251 to 509 and the powers ℓ^2.9.  Extrapolating
+the solve alone to ℓ = 1009 gives about 95 minutes and 40 GB of stored
+powers, so E5.3 (`Φ_1009` under one hour on one core) is **not met** by
+this construction and will not be by tuning it: the `O(ℓ⁴)` solve and the
+`O(ℓ³)` memory are both structural.  The next step for that target is the
+[BLS12] CRT construction, which never holds the powers.
+
 Reading against E5's registered windows: the old construction's fitted
 exponent from 31 to 61 is 4.75, inside the registered `≥ 4.5`.  The new
 construction fits 3.6 from 61 to 251 (powers 3.3, solve 3.9); the solve is
