@@ -77,3 +77,13 @@ Conductor recovered during this continuation. The existing T-65 task was
 reattached and the API, native study, and affected canonical view scopes were
 granted before the catalogue refresh. Earlier HTTP/service failures remain
 part of the execution record.
+
+Final replay adds an exact rational-map curve-equation substitution check,
+using the separate native polynomial implementation. It also checks numerator
+degree/normalization and coprimality with the verified kernel denominator.
+The known degree-three map test passes and mutations of its numerator and
+target coefficient are rejected (`validation/exact-map-tests.log`). This is
+an implementation verification of the supplied maps, not a proposed new
+algebraic rule. The degree-199 replay passes these stronger checks; the final
+whole-search replay applies them to every completed construction. Earlier
+partial replay records remain frozen as the checks that were performed then.

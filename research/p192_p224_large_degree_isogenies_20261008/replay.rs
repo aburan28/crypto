@@ -19,6 +19,7 @@ use field::{Fe, Field};
 #[allow(dead_code)]
 #[path = "../../src/hash/sha256.rs"]
 mod hash_sha256;
+mod map_identity;
 fn sha256_hex(bytes: &[u8]) -> String {
     hash_sha256::sha256(bytes)
         .iter()
@@ -158,6 +159,13 @@ fn main() {
                 den,
                 "denominator must equal kernel squared"
             );
+            assert_eq!(num.len(), ell as usize + 1);
+            assert_eq!(num.last(), Some(&f.one()));
+            assert_eq!(poly::degree(&poly::gcd(&f, &num, &den)), Some(0));
+            assert!(
+                map_identity::check(&f, &source, &cod, &num, &den),
+                "rational map fails exact curve-equation substitution"
+            );
             let gp = eval(&f, &num, &den, Some(g))
                 .expect("prime subgroup generator cannot lie in the small-degree kernel");
             assert!(cod.on_curve(&f, &gp.0, &gp.1));
@@ -197,7 +205,7 @@ fn main() {
             let row = json!({"source_icv1":source_slug,"source_ec1":standard["ec1"],"source_curve_uid":standard["curve_uid"],
                 "ell":ell,"index":index,"target_icv1":target_id["slug"],"target_ec1":ec1,"target_curve_uid":uid,
                 "kernel_degree":h.len()-1,"map_numerator_coefficients":num.len(),"map_denominator_coefficients":den.len(),
-                "certificate_sha256":sha256_hex(&bytes),"kernel_check":"PASS","codomain_check":"PASS","subgroup_check":"PASS",
+                "certificate_sha256":sha256_hex(&bytes),"kernel_check":"PASS","codomain_check":"PASS","subgroup_check":"PASS","exact_rational_map_check":"PASS",
                 "public_scalar_transport_checks":point_checks,"status":"PASS"});
             replayed.push(row);
             curves.push(json!({"name":target_id["slug"],"icv1":target_id["icv1"],"p":p.to_string(),"a":target_a.to_string(),"b":target_b.to_string(),

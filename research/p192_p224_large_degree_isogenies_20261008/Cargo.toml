@@ -25,6 +25,10 @@ name = "catalogue-views"
 path = "catalogue_views.rs"
 test = false
 
+[[bin]]
+name = "map-identity-checks"
+path = "map_identity_checks.rs"
+
 [dependencies]
 num-bigint = { version = "0.4", features = ["rand"] }
 num-traits = "0.2"
