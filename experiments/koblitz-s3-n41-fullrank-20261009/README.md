@@ -35,3 +35,31 @@ The T025 C400 correctness control matched the public scalar, reached rank
 timing is excluded from the paired panel. A controlled CPU wall-time ratio
 requires the repository's host-wide isolation receipt and noise gate; the
 panel records exploratory timing and A/A repeats on this local host.
+
+## Paired result
+
+The [raw ledger](local/raw_paired32.jsonl.gz) and [analysis](local/analysis.json)
+contain all 32 native verified solves. [Checked Sage replay](local/sage_replay.json)
+independently recovered every scalar and checked 924 distinct relation
+witnesses across three preparation traces using its
+[runtime receipt](local/sage_runtime_info.json).
+
+| Frozen N41 one-target measure | C244 baseline | Full-rank C400 |
+| --- | ---: | ---: |
+| Verified native and Sage runs | 16/16 | 16/16 |
+| Median online wall time | 0.419 ms | 0.141 ms |
+| Median target S3 calls | 1,139 | 175 |
+| Median target descent | 0.0327 ms | 0.00565 ms |
+| Median reusable preparation, supplementary | 0.239 s | 0.566 s |
+| Prepared rank | 243 | 400 |
+| Total online fallback attempts | 84 | 0 |
+| A/A p95 absolute log online ratio | 1.408 | 0.357 |
+
+The exploratory paired online geometric ratio is **3.317x**, with target
+bootstrap 95% interval `[1.440, 10.764]`; seven of eight target blocks
+favored C400, and four individually exceeded 2x. The geometric S3-call
+ratio is 4.233x. The A/A repeat spread exceeds the host-noise gate, and the
+host lacks an exclusive-core receipt. The controlled online ratio remains
+unknown. Factor-base size and full-rank recovery both changed in this
+declared comparison; the C244 full-rank correctness control separately
+confirmed direct recovery on the existing base without a timed comparison.

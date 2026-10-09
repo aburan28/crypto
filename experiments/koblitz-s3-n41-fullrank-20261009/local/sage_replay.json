@@ -1,0 +1,255 @@
+{
+  "all_scalars_independently_recovered": true,
+  "distinct_relation_traces_rank_checked": 3,
+  "distinct_relation_witnesses_group_checked": 924,
+  "factor_bases": {
+    "244": {
+      "base_digest": "994ebecce7d2a7ff0da957b7a58cbcf97ef5bf364b4cf17e12f58bfc61cda64a",
+      "base_point_count_checked": 20008,
+      "base_sha256": "fab2d4f4c828e8cea16d5ea4bc54070f22ef82e9161ace601f860262d89c96ab",
+      "frobenius_eigenvalue": 256851699273,
+      "representatives_subgroup_checked": 244
+    },
+    "400": {
+      "base_digest": "7b9e1288c3143a96a81bce4a51591c445cc0e497ee66211388ec351461d968c5",
+      "base_point_count_checked": 32800,
+      "base_sha256": "052fdefd839b79940516661338a2441404e97b86463827af96aa62ca10447fdf",
+      "frobenius_eigenvalue": 256851699273,
+      "representatives_subgroup_checked": 400
+    }
+  },
+  "freeze_sha256": "8ab4f5ed2cd4a300a42375adf46ec28f9f93f1bd26beb2bca96582c6091f65c8",
+  "kind": "s3_n41_fullrank_c400_oneworker_independent_sage_replay_v1",
+  "ledger_sha256": "46d8fef319e1e2f292cebdc13bd2d646cde3f97905050ca746c622835722e456",
+  "parent_plan_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "run_count": 32,
+  "runs": [
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T025",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422W1aa57f8a2e83R1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T025",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1W1aa57f8a2e83R1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T025",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1W1aa57f8a2e83R2"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T025",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422W1aa57f8a2e83R2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T026",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wb4d18a041539R1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T026",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wb4d18a041539R1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T026",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wb4d18a041539R2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T026",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wb4d18a041539R2"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T027",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wda93f4d44a87R1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T027",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wda93f4d44a87R1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T027",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wda93f4d44a87R2"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T027",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wda93f4d44a87R2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T028",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wa65a79f91046R1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T028",
+      "rank": 244,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wa65a79f91046R1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T028",
+      "rank": 244,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wa65a79f91046R2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T028",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wa65a79f91046R2"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T029",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422W41c844d8c2a7R1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T029",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1W41c844d8c2a7R1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T029",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1W41c844d8c2a7R2"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T029",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422W41c844d8c2a7R2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T030",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wfcde9f49489dR1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T030",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wfcde9f49489dR1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T030",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wfcde9f49489dR2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T030",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wfcde9f49489dR2"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T031",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422W4d6e6360e51dR1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T031",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1W4d6e6360e51dR1"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T031",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1W4d6e6360e51dR2"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T031",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422W4d6e6360e51dR2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T032",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wa52f57853ec8R1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T032",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wa52f57853ec8R1"
+    },
+    {
+      "columns": 244,
+      "independent_recovery": true,
+      "label": "T032",
+      "rank": 243,
+      "run_id": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422Wa52f57853ec8R2"
+    },
+    {
+      "columns": 400,
+      "independent_recovery": true,
+      "label": "T032",
+      "rank": 400,
+      "run_id": "IC1N41Ckb1fb32800PDP4rootRCsampleLAgaussTDdirectISO0h6023089a52e1Wa52f57853ec8R2"
+    }
+  ],
+  "runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "sage_version": "10.10.rc0",
+  "target_count": 8
+}
