@@ -12,7 +12,7 @@ mod kernel;
 #[path = "../../src/cryptanalysis/isogeny_walk/modpoly.rs"]
 mod modpoly;
 #[allow(dead_code)]
-#[path = "../../src/cryptanalysis/isogeny_walk/poly.rs"]
+#[path = "verification_poly.rs"]
 mod poly;
 use curve::Model;
 use field::{Fe, Field};

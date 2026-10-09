@@ -10,6 +10,15 @@ name = "replay-one"
 path = "replay_one.rs"
 test = false
 
+[[bin]]
+name = "verification-poly-checks"
+path = "verification_poly_checks.rs"
+
+[[bin]]
+name = "replay-control"
+path = "replay_control.rs"
+test = false
+
 [dependencies]
 num-bigint = { version = "0.4", features = ["rand"] }
 num-traits = "0.2"
