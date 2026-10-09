@@ -108,7 +108,10 @@ mod tests {
     fn tau_relation_and_c37_trace() {
         for modulus in [9, 81] {
             let tau = TauElt { a: 0, b: 1 };
-            assert_eq!(tau.mul(tau, modulus), TauElt { a: -2, b: -1 }.reduce(modulus));
+            assert_eq!(
+                tau.mul(tau, modulus),
+                TauElt { a: -2, b: -1 }.reduce(modulus)
+            );
             let pi = tau.pow(37, modulus);
             assert_eq!(pi.trace(modulus), (-534_059_i128).rem_euclid(modulus));
             assert_eq!(pi.norm(modulus), pow_mod(2, 37, modulus));
