@@ -74,7 +74,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
-use super::koblitz_fast_arith::FastBinaryCurve;
 use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
@@ -308,7 +307,7 @@ impl TargetSet {
             }
             (out, false)
         };
-        let points = match FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) {
+        let points = match kc.fast_binary_curve() {
             // One batched multi-scalar multiplication for the whole target
             // set (two inversions per scalar bit for all targets together
             // instead of ~1.5 per target per bit).  Bit-exact with the

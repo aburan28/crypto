@@ -835,6 +835,14 @@ fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
 }
 
 impl KoblitzCurve {
+    /// Word arithmetic with the curve's actual field-encoded coefficient.
+    /// A subfield model's `a` tag is a basis index, not that coefficient.
+    pub(crate) fn fast_binary_curve(&self) -> Option<FastBinaryCurve> {
+        let mut fast = FastBinaryCurve::new(&self.curve.irreducible, 0)?;
+        fast.a = fast.word(&self.curve.a);
+        Some(fast)
+    }
+
     /// Build `K_a` over `F_{2^n}`: pick a defining irreducible
     /// polynomial, count points, split off the largest prime-order
     /// subgroup, find a generator of it, and determine `λ`.
@@ -1761,7 +1769,7 @@ impl FrobeniusFactorBase {
     /// every invariant subspace and carries the 2-torsion point — these
     /// classes are non-trivial and constrain which `m` can work at all.
     pub fn cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
-        match FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) {
+        match kc.fast_binary_curve() {
             // One batched `[r]` for every point (was: one slow scalar mul
             // each).  Bit-exact, so the class list is unchanged.
             Some(fast) if kc.n <= 63 => {
@@ -1806,9 +1814,7 @@ impl FrobeniusFactorBase {
         } else {
             kc.extension_degree()
         };
-        let Some(fast) =
-            FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64).filter(|_| kc.n <= 63)
-        else {
+        let Some(fast) = kc.fast_binary_curve().filter(|_| kc.n <= 63) else {
             let mut classes = HashMap::new();
             for orbit in &self.signed_orbits {
                 let Some(&representative) = orbit.first() else {
@@ -1885,9 +1891,7 @@ impl FrobeniusFactorBase {
         // the walks on words; sets, keys, and the verdict match the
         // general-field version exactly.  Curves too wide for the
         // single-word field take the original slow path below.
-        let Some(fast) =
-            FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64).filter(|_| kc.n <= 63)
-        else {
+        let Some(fast) = kc.fast_binary_curve().filter(|_| kc.n <= 63) else {
             return self.m_can_decompose_slow(kc, &classes, m);
         };
         let class_pts: Vec<ArithFastPoint> =
@@ -3161,7 +3165,7 @@ pub fn saturate_factor_base_two_torsion(
     // collected abscissa set — and everything built from it — is
     // unchanged.  The at-most-one doubling case (P = T itself) takes the
     // exact slow path inside the batch.
-    let fast = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)?;
+    let fast = kc.fast_binary_curve()?;
     let (tx, ty) = match &t {
         BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y)),
         BinaryPoint::Infinity => return None,
