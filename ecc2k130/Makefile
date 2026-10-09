@@ -264,8 +264,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packednative131.h include/packedfusedsigma131.h include/packedblockinverse131.cuh include/packedblockinversereference131.cuh include/packedxonly23.cuh include/packedkernels.cuh include/packedengine.cuh
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedsigmascratch.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedsigmascratch.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packednative131.h include/packedfusedsigma131.h include/packedblockinverse131.cuh include/packedblockinversereference131.cuh include/packedxonly23.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
