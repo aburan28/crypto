@@ -94,22 +94,33 @@ def select_cpus():
         by_node.setdefault(node_for(cpu), []).append(cpu)
     choices = []
     for node, cpus in by_node.items():
-        seen, physical = set(), []
+        representatives = {}
         for cpu in cpus:
             siblings = tuple(cpu_list(read(f"/sys/devices/system/cpu/cpu{cpu}/topology/thread_siblings_list"))) or (cpu,)
-            if siblings not in seen and cpu != 0:
-                physical.append(cpu)
-                seen.add(siblings)
-        choices.append((len(physical), node, physical))
+            if siblings not in representatives or (representatives[siblings] == 0 and cpu != 0):
+                representatives[siblings] = cpu
+        physical = list(representatives.items())
+        # Keep the entire physical CPU-0 core for housekeeping/sampling.
+        benchmark = [(siblings, cpu) for siblings, cpu in physical
+                     if 0 not in siblings][:WORKERS + 1]
+        if len(benchmark) != WORKERS + 1:
+            continue
+        selected_siblings = {siblings for siblings, _ in benchmark}
+        sampler = next(((siblings, cpu) for siblings, cpu in physical
+                        if siblings not in selected_siblings), None)
+        if sampler is not None:
+            choices.append((len(physical), node, benchmark, sampler))
+    if not choices:
+        raise RuntimeError("VM did not expose 15 benchmark cores plus a separate sampler core on one NUMA node")
     choices.sort(key=lambda row: row[0], reverse=True)
-    _, node, physical = choices[0]
-    selected = physical[:WORKERS + 1]
-    if len(selected) != WORKERS + 1:
-        raise RuntimeError("VM did not expose 15 physical execution CPUs on one NUMA node")
-    sampler = next((cpu for cpu in allowed if cpu not in selected), None)
+    _, node, benchmark, sampler = choices[0]
+    selected = [cpu for _, cpu in benchmark]
+    sampler_siblings, sampler_cpu = sampler
     probe = command(["taskset", "-c", ",".join(map(str, selected)), "true"])
     return {"allowed": allowed, "selected": selected, "node": node,
-            "sampler_cpu": sampler, "by_node": by_node, "affinity_probe": probe,
+            "sampler_cpu": sampler_cpu, "sampler_siblings": sampler_siblings,
+            "selected_siblings": [siblings for siblings, _ in benchmark],
+            "by_node": by_node, "affinity_probe": probe,
             "distinct_physical_cpus": len(selected)}
 
 def interrupt_counts(cpus):
@@ -133,8 +144,19 @@ def steal_ticks(cpus):
     return {words[0]: int(words[8]) for line in (read("/proc/stat") or "").splitlines()
             if (words := line.split()) and words[0] in wanted and len(words) > 8}
 
+def frequency(cpus, current_only=False):
+    result = {}
+    for cpu in cpus:
+        base = f"/sys/devices/system/cpu/cpu{cpu}/cpufreq"
+        names = ("scaling_cur_freq",) if current_only else (
+            "scaling_driver", "scaling_governor", "scaling_min_freq", "scaling_max_freq",
+            "cpuinfo_min_freq", "cpuinfo_max_freq")
+        result[str(cpu)] = {name: read(f"{base}/{name}") for name in names}
+    return result
+
 def snapshot(cpus):
     return {"monotonic_ns": time.monotonic_ns(),
+            "cpufreq_cur_khz": frequency(cpus, current_only=True),
             "psi": {name: read(f"/proc/pressure/{name}") for name in ("cpu", "memory", "io")},
             "cgroup": {name: read(f"/sys/fs/cgroup/{name}") for name in
                        ("cpu.stat", "cpu.pressure", "memory.pressure", "io.pressure",
@@ -153,6 +175,8 @@ def host(selection):
             "self_cgroup": read("/proc/self/cgroup"),
             "perf_event_paranoid": read("/proc/sys/kernel/perf_event_paranoid"),
             "perf_version": command(["perf", "--version"]),
+            "frequency_by_cpu": frequency(selection["selected"]),
+            "numa_balancing": read("/proc/sys/kernel/numa_balancing"),
             "cpufreq_governor": read(f"/sys/devices/system/cpu/cpu{cpu}/cpufreq/scaling_governor"),
             "cpufreq_min": read(f"/sys/devices/system/cpu/cpu{cpu}/cpufreq/scaling_min_freq"),
             "cpufreq_max": read(f"/sys/devices/system/cpu/cpu{cpu}/cpufreq/scaling_max_freq"),
