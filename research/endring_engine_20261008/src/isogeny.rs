@@ -6,8 +6,10 @@
 //! Vélu's formulas (Washington, *Elliptic Curves*, Thm 12.16) give the
 //! codomain `E': y² = x³ + (a − 5t)x + (b − 7w)` and the map
 //!
-//!     x' = x + Σ_Q [ t_Q/(x − x_Q) + u_Q/(x − x_Q)² ]
-//!     y' = y − Σ_Q [ u_Q·2y/(x − x_Q)³ + t_Q(y − y_Q)/(x − x_Q)² − g_Q^x g_Q^y/(x − x_Q)² ]
+//! ```text
+//! x' = x + Σ_Q [ t_Q/(x − x_Q) + u_Q/(x − x_Q)² ]
+//! y' = y − Σ_Q [ u_Q·2y/(x − x_Q)³ + t_Q(y − y_Q)/(x − x_Q)² − g_Q^x g_Q^y/(x − x_Q)² ]
+//! ```
 //!
 //! over `Q ∈ F₂ ∪ R`, with `g_Q^x = 3x_Q² + a`, `g_Q^y = −2y_Q`,
 //! `t_Q = g_Q^x` for `Q ∈ F₂` and `2g_Q^x` otherwise, `u_Q = (g_Q^y)²`,
