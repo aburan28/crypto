@@ -3,7 +3,7 @@
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
-/// An element in Montgomery form (`x·R mod p`, `R = 2^256`).
+/// An element in Montgomery form (`x·R mod p`, `R = 2^(64*N)`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Element<const N: usize>(pub [u64; N]);
 
@@ -87,7 +87,7 @@ fn shr1<const N: usize>(a: &mut [u64; N], carry: bool) {
 }
 
 impl<const N: usize> PrimeField<N> {
-    /// The field of the odd prime `p < 2^256`.  Primality is the caller's
+    /// The field of the odd prime `p < 2^(64*N)`. Primality is the caller's
     /// claim; [`PrimeField<N>::new`] checks it with Miller–Rabin and refuses a
     /// composite.
     pub fn new(p: &BigUint) -> Option<Self> {
@@ -141,21 +141,25 @@ impl<const N: usize> PrimeField<N> {
         self.nonresidue
     }
 
+    #[inline(always)]
     pub fn zero(&self) -> Element<N> {
         Element::<N>([0; N])
     }
 
+    #[inline(always)]
     pub fn one(&self) -> Element<N> {
         self.one
     }
 
+    #[inline(always)]
     pub fn is_zero(&self, a: &Element<N>) -> bool {
         a.0 == [0; N]
     }
 
+    #[inline(always)]
     pub fn mul(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
         // CIOS Montgomery multiplication; the result is < 2p before the
-        // final subtraction for any odd p < 2^256.
+        // final subtraction for any odd p < 2^(64*N).
         let p = &self.p;
         let mut t = [0u64; 18];
         for i in 0..N {
@@ -190,10 +194,12 @@ impl<const N: usize> PrimeField<N> {
         }
     }
 
+    #[inline(always)]
     pub fn sqr(&self, a: &Element<N>) -> Element<N> {
         self.mul(a, a)
     }
 
+    #[inline(always)]
     pub fn add(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
         let (s, carry) = add_limbs(&a.0, &b.0);
         if carry || geq(&s, &self.p) {
@@ -203,6 +209,7 @@ impl<const N: usize> PrimeField<N> {
         }
     }
 
+    #[inline(always)]
     pub fn sub(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
         let (d, borrow) = sub_limbs(&a.0, &b.0);
         if borrow {
