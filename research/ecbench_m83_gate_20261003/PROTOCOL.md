@@ -2,6 +2,10 @@
 
 Preregistered 2026-10-03, before any of the sessions below ran.
 
+Editorial correction 2026-10-09: the three retired curve spellings in
+this note were replaced by their already specified ICV1 slugs. The
+curve parameters, hypotheses, thresholds and frozen specs did not change.
+
 ## Question
 
 AGENTS.md §8a makes `E_0: y² + xy = x³ + 1` over `GF(2^83)` the confidence
@@ -21,12 +25,12 @@ follows from it.
 
 | input | value |
 |:--|:--|
-| curve | `icv1-f2m83-tm6151469093347-debefd74` (`K_0 / GF(2^83)`), modulus `z^83 + z^45 + z² + z + 1` = `0x800000000200000000007` |
+| curve | `icv1-f2m83-tm6151469093347-debefd74`, modulus `z^83 + z^45 + z² + z + 1` = `0x800000000200000000007` |
 | subgroup | `r = 2417851639230796216685689` (prime), cofactor `4`, `#E = 9671406556923184866742756` |
 | generator | `G = (0x477f77103dfad59850800, 0x2fa5e737d542c4e4fd5c3)`, the frozen generator of `research/ic_tool_program/conformance/v2/params/gate-m83-T001.json` |
 | Frobenius eigenvalue | `λ = 254512724090651164922414` (`π(G) = [λ]G`, derived by `WideInstance::explicit` with the narrow curve's own routine and checked) |
 | group | `koblitz_wide` (two-word field, affine arithmetic, the tuned walk ported statement for statement from `ic_boundary::rho_walk_with`) |
-| comparison curve | `K_0 / GF(2^61)` built twice: narrow (`koblitz`) and wide (`koblitz_explicit` from the narrow plan's facts) |
+| comparison curve | `icv1-f2m61-t158598901-ab42b6c5` built twice: narrow (`koblitz`) and wide (`koblitz_explicit` from the narrow plan's facts) |
 | method | `rho.signed_frobenius_budget`, `steps = 20 000 000` walk operations per run (m = 83) and the same budget on the n = 61 pair |
 | targets | 2 planted targets per curve (`target_seed` 83 and 61), 1 warm-up round, 3 measured rounds, measurement seed 2293761 |
 | host | this Mac (Apple silicon, arm64, PMULL); `--cpus none`, so every run is L0: counts only, wall time descriptive |
@@ -48,7 +52,7 @@ Specs: [`specs/steprate-m83.json`](specs/steprate-m83.json),
 
 ## Hypotheses
 
-- **H1 (sameness, already a test):** on `K_0 / GF(2^61)` the wide
+- **H1 (sameness, already a test):** on `icv1-f2m61-t158598901-ab42b6c5` the wide
   construction records the same workload ids, the same counts and the
   same answers as the narrow one, record for record.  (`tests/ecbench.rs`
   checks this at n = 41; the n = 61 sessions here check it at the largest

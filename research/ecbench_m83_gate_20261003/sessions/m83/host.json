@@ -1,0 +1,51 @@
+{
+  "schema": "ecbench.host/v1",
+  "env_class_id": "ECBENV2hd82681268e96",
+  "env_class_sha256": "d82681268e961ba8f35fdd074f131e764cafef9a4496b63904d80ad794a86038",
+  "stable": {
+    "os": "macos",
+    "arch": "aarch64",
+    "kernel_release": "25.6.0",
+    "cpu_vendor": null,
+    "cpu_model": null,
+    "cpu_signature": null,
+    "microcode": null,
+    "features": [
+      "aes",
+      "crc",
+      "dotprod",
+      "lse",
+      "neon",
+      "pmull",
+      "sha2",
+      "sha3"
+    ],
+    "flags_sha256": null,
+    "logical_cpus": 14,
+    "physical_cores": null,
+    "packages": null,
+    "numa_nodes": 1,
+    "topology": {
+      "cpus": [],
+      "nodes": []
+    },
+    "perf_levels": [],
+    "mem_total_kib": null,
+    "cpu_settings": {},
+    "transparent_hugepages": null,
+    "virtualization": {},
+    "rustc_vv": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8"
+  },
+  "build": {
+    "binary_path": "/Volumes/SSD990/crypto/.claude/worktrees/eloquent-ellis-53d3cb/target/release/ecbench",
+    "binary_sha256": "2a35592e82b3e97d180c1ed0d10cf50b9954f279691a910ae273f103b00a6ad9",
+    "git_commit": "24270e1e9efe90bbcbe7774143f487a1a7be200b",
+    "git_dirty": false,
+    "debug_assertions": false,
+    "target_os": "macos",
+    "target_arch": "aarch64",
+    "build_env": {}
+  },
+  "process_affinity": null,
+  "captured_unix_ms": 1791578689670
+}

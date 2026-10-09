@@ -1,0 +1,17 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "m = 83 gate step rate: icv1-f2m83-tm6151469093347-debefd74, 2e7 walk operations per run",
+  "description": "PROTOCOL.md of this directory. The gate curve in the two-word group, walked by the tuned signed-Frobenius rho for 20 000 000 walk operations per run. Every run ends exhausted by design; the diagnostic is the cost of a step and the walk's shape at this size.",
+  "workloads": {
+    "curves": [{"kind": "koblitz_explicit", "a": 0, "n": 83,
+                "modulus": "0x800000000200000000007",
+                "r": "2417851639230796216685689", "cofactor": "4",
+                "gx": "0x477f77103dfad59850800", "gy": "0x2fa5e737d542c4e4fd5c3"}],
+    "targets_per_curve": 2,
+    "target_seed": 83
+  },
+  "arms": [
+    {"name": "rho-frob-budget", "role": "reference", "method": {"id": "rho.signed_frobenius_budget", "params": {"steps": "20000000"}}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "seed": 2293761, "isolation_required": "L2", "timeout_seconds": 1800}
+}

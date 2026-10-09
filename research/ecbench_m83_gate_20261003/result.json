@@ -1,0 +1,52 @@
+{
+  "classification": "stage_diagnostic",
+  "gate_floor_steps": 151258823772.0635,
+  "illustrative_single_core_hours_at_m83": {
+    "floor": 196.41816236052236,
+    "overhead_3_percent": 202.31070723133803,
+    "overhead_8_percent": 212.13161534936418
+  },
+  "m83_over_n61_wide": 1.4009205067915005,
+  "measured_runs_per_arm": 6,
+  "median_ns_per_walk_operation": {
+    "m83": 4674.80419895,
+    "n61_narrow": 1304.9184547878313,
+    "n61_wide": 3336.9517944002464
+  },
+  "n61_step_for_step_identical": true,
+  "note": "L0 wall times and the hours projection are descriptive; no full m83 solve or wall-speed claim follows",
+  "per_run_ns_per_walk_operation": {
+    "m83": [
+      5092.0201646,
+      4615.44316665,
+      2665.4550458,
+      4696.736525,
+      4652.8718729,
+      6326.7464375
+    ],
+    "n61_narrow": [
+      1863.6013622647652,
+      1503.8479483125618,
+      1105.9889612631007,
+      964.656002194286,
+      973.6185337358294,
+      1994.5211732620642
+    ],
+    "n61_wide": [
+      2840.7673441620504,
+      3789.421267652135,
+      3609.6424594676746,
+      2802.0152556627754,
+      3064.2611293328177,
+      3771.1982988430955
+    ]
+  },
+  "schema": "ecbench.gate_table/v1",
+  "source_records_sha256": {
+    "m83": "28d5f10686587edd87ee4ae163e8b63c0b1d9f0c442f700858d9f3e314df8fdd",
+    "n61_narrow": "9b975025e3810aba8d154f28496d96f0afea7e0aabd6f76d9c3223082d68c650",
+    "n61_wide": "ed75a9d1e07d62acc46314d5f24d5d34c98dc367c404f7abb7d1083029a3e99d"
+  },
+  "wall_level": "L0",
+  "wide_over_narrow_n61": 2.557210975258072
+}
