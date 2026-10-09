@@ -241,3 +241,41 @@ witnesses, independent matrix recoveries, and all 24 public points. Sage
 replay time is outside the online intervals. The next confirmatory sample
 size remains unset; the 92-per-curve value is still only the earlier budget
 estimate.
+
+## Source-bound stage attribution, 2026-10-08
+
+[`../analyze_s3_mechanism.py`](../analyze_s3_mechanism.py) reads the complete
+VM ledger and its custody audit, checks the archived baseline/candidate
+source hashes, then pairs the two runs of each arm within each public target.
+Its [target-level output](vm_mechanism_analysis_20261008.json), SHA-256
+`a0a4e0da81e18b2f1e0806653cdc7aa76527a562cc9cb6ae552024509e998310`,
+retains all five exclusive online phases, nested rank-stage diagnostics, and S3/probe
+counters. The intervals below are unadjusted descriptive 95% t intervals over
+the **same 12 targets per curve**; the failed host and N53 A/A gates still
+prevent a controlled speedup claim.
+
+| Curve | Mean online baseline minus candidate | Charged target PDP difference | Rank PDP wall difference | Reusable index-build difference |
+| --- | ---: | ---: | ---: | ---: |
+| N41 | 3.280 ms (2.642–3.918) | 3.346 ms (2.706–3.987) | 3.310 ms (2.669–3.950) | −0.143 ms (−0.529–0.244) |
+| N53 | 95.008 ms (81.799–108.216) | 94.989 ms (81.790–108.188) | 92.530 ms (79.272–105.788) | −0.415 ms (−1.046–0.216) |
+
+Charged target PDP accounts for about 102% of the N41 mean online
+difference and 100% of N53's; the other exclusive phases offset N41 slightly.
+Rank PDP wall is nested inside charged PDP, and index build is reusable setup
+outside the online interval. The number of rank state probes is identical
+between arms for every paired target: 174,551 on N41 and 3,849,533 on N53.
+Mean logical rank S3 queries are 348,982/349,102 (baseline/candidate) on
+N41 and 7,698,947/7,699,066 on N53. The candidate therefore processes a
+comparable number of logical queries; its generic paired-root path shares an
+inversion. The actual exceptional fallback count was not measured, so these
+logical-query counts must not be relabeled as field-inversion counts.
+
+This attribution adds no target or timing runs and does not alter the
+confirmatory sample-size gate. To reproduce it from this checkout:
+
+```sh
+python3 experiments/koblitz-s3-fidelity-20261007/analyze_s3_mechanism.py \
+  experiments/koblitz-s3-fidelity-20261007/modal/vm_pilot_20261008.json.gz \
+  experiments/koblitz-s3-fidelity-20261007/modal/vm_analysis_20261008.json \
+  OTHER_VM_MECHANISM.json
+```
