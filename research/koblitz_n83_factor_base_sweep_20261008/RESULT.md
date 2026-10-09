@@ -173,6 +173,21 @@ the dense reference solver. This code path has not collected a natural N83
 relation set or verified all factor-base column logarithms, so earlier capped
 timings remain pinned to their original source.
 
+Factor-base-log precomputation now has an exact wide coefficient-rank gate as
+well. Its report records attained rank and dense-solve attempts; a
+rank-deficient collection returns an empty unverified table without spending
+time on a dense solve whose free-column values cannot certify the nonidentity
+representatives. Complete tables still require group verification of every
+column. The release library suite passed 2,249 tests (94 ignored), the N83
+exporter example passed 15 tests, the study and boundary Python suites passed
+8 and 16 tests, and the IC binary built with zero embedded tests. A public
+degree-9 CLI fixture records rank 1/3 with zero dense attempts under a one-trial
+cap, then rank 3/3 with one dense attempt and group-verified column logs under
+a six-trial cap. Its separate target solve re-verifies the retained small
+database and its public expected value. These receipts are in `verification/`
+under `wide-log-rank-*`; the initial compile error is retained and corrected in
+the passing runs. No retained N83 precomputation has been timed on this source.
+
 `SOLVER_GATES.md` pins the immediate source and capacity blockers. At `n=l=83`, the original native S4 encoder needs at least **593,364 SAT variables and 2,349,149 AND-definition clauses** from its unreduced x/e correspondence and default ordering. An experimental factored encoder now has a source-derived ceiling of **158,032 variables and 469,881 AND-definition clauses**, before finite-base domain constraints and ordering clauses. Its small-system equivalence and explicit-orbit group-lifting checks pass, but no N83 model construction, capacity or lifting receipt exists. The exact wide coordinate trie has a focused regression. The WDSat, FES and double-large-prime modules in the inspected main snapshot are absent from this isolated branch and cannot directly represent the primary N83 system as implemented there. A further enumeration cap would add another censored observation without addressing those backend gates.
 
 After the pilot, the exact enumerator gained a `u128` batched-add path for degree 83. Focused generic-arithmetic and retained-primary-base witness-order tests pass. These tests establish correctness for the checked cases; no cold workload has been rerun on the new source, so all earlier capped timings remain pinned to their original implementation. The exponential enumeration count, unvalidated N83 SAT/WDSat/FES capacity and missing large-prime partial producer still prevent a total-runtime factor-base ranking.

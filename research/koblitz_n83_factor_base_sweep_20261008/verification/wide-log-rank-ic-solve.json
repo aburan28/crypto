@@ -1,0 +1,43 @@
+{
+  "counts": {
+    "descent_trials": 1
+  },
+  "curve_a": 0,
+  "database": {
+    "columns": 3,
+    "reverified": true,
+    "source": "/private/tmp/n83-wide-log-rank-complete-db.json",
+    "spec": {
+      "index": 0,
+      "kind": "factor"
+    },
+    "summands_precomputed": 2
+  },
+  "degree": 9,
+  "elapsed_seconds": 0.002670417,
+  "evidence_scope": "synthetic_known_answer",
+  "limitations": [
+    "No imported target was used.",
+    "This run does not establish scaling or challenge readiness."
+  ],
+  "operation": "solve",
+  "resources": {
+    "cpu_seconds": 0.072862,
+    "peak_rss_bytes": 19070976,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "result": {
+    "expected": "53",
+    "recovered": "53",
+    "verified": true
+  },
+  "schema_version": 1,
+  "scope": "per-target individual logarithm: one relation over a reused, re-verified factor-base logarithm database",
+  "software": {
+    "arch": "aarch64",
+    "binary_blake3": "9d85e8e0f75c27883ec6e573ff71c4d7a4e2b49c0695947f243a6c0b9cb52914",
+    "os": "macos",
+    "version": "0.1.0"
+  },
+  "status": "complete"
+}

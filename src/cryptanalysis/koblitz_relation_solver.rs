@@ -474,6 +474,64 @@ impl U64RankTracker {
     }
 }
 
+/// Coefficient-only rank over a full-width prime subgroup order. This is the
+/// gate for the factor-base logarithm precomputation: a dense solve cannot
+/// determine every column before these rows have full coefficient rank.
+#[derive(Clone, Debug)]
+pub struct WideRankTracker {
+    modulus: BigUint,
+    cols: usize,
+    basis: Vec<(usize, Vec<BigUint>)>,
+}
+
+impl WideRankTracker {
+    pub fn new(modulus: &BigUint, cols: usize) -> Self {
+        assert!(modulus >= &BigUint::from(2u32), "prime subgroup order");
+        Self {
+            modulus: modulus.clone(),
+            cols,
+            basis: Vec::new(),
+        }
+    }
+
+    pub fn rank(&self) -> usize {
+        self.basis.len()
+    }
+
+    pub fn insert(&mut self, mut row: Vec<BigUint>) -> usize {
+        assert_eq!(row.len(), self.cols, "row width");
+        let modulus = &self.modulus;
+        for value in &mut row {
+            *value %= modulus;
+        }
+        for (lead, pivot) in &self.basis {
+            let factor = row[*lead].clone();
+            if factor.is_zero() {
+                continue;
+            }
+            for col in *lead..self.cols {
+                if !pivot[col].is_zero() {
+                    let term = (&factor * &pivot[col]) % modulus;
+                    row[col] = (&row[col] + modulus - term) % modulus;
+                }
+            }
+        }
+        if let Some(lead) = row.iter().position(|value| !value.is_zero()) {
+            let inverse = mod_inverse(&row[lead], modulus).expect("prime subgroup order");
+            for value in &mut row[lead..] {
+                *value = (&*value * &inverse) % modulus;
+            }
+            let position = self
+                .basis
+                .iter()
+                .position(|(existing, _)| *existing > lead)
+                .unwrap_or(self.basis.len());
+            self.basis.insert(position, (lead, row));
+        }
+        self.rank()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -705,6 +763,41 @@ mod tests {
                 gaussian_eliminate_mod_n(&mut matrix, &mut rhs_values, &modulus).unwrap(),
                 secret
             );
+        }
+    }
+
+    #[test]
+    fn wide_coefficient_rank_matches_dense_prefixes() {
+        let modulus = BigUint::parse_bytes(b"2417851639230796216685689", 10).unwrap();
+        let mut rng = StdRng::seed_from_u64(0x83_10_2026);
+        let sample = |rng: &mut StdRng| {
+            (BigUint::from(rng.gen::<u64>()) + (BigUint::from(rng.gen::<u64>()) << 64usize))
+                % &modulus
+        };
+        for cols in [1usize, 3, 7] {
+            let mut tracker = WideRankTracker::new(&modulus, cols);
+            let mut input_rows: Vec<Vec<BigUint>> = Vec::new();
+            for iteration in 0..(3 * cols + 5) {
+                let mut row: Vec<BigUint> = (0..cols).map(|_| sample(&mut rng)).collect();
+                if iteration == 0 {
+                    row[0] = BigUint::one() << 75usize;
+                } else if iteration % 7 == 0 {
+                    row.fill(BigUint::zero());
+                } else if iteration % 5 == 0 {
+                    row = input_rows.last().unwrap().clone();
+                }
+                let rank = tracker.insert(row.clone());
+                input_rows.push(row);
+                let mut dense = input_rows.clone();
+                let mut rhs = vec![BigUint::zero(); dense.len()];
+                gaussian_eliminate_mod_n(&mut dense, &mut rhs, &modulus).unwrap();
+                let reference_rank = dense
+                    .iter()
+                    .filter(|row| row.iter().any(|value| !value.is_zero()))
+                    .count();
+                assert_eq!(rank, reference_rank, "columns={cols}, row={iteration}");
+            }
+            assert_eq!(tracker.rank(), cols);
         }
     }
 

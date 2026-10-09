@@ -411,7 +411,9 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
             "evidence_scope":"synthetic_known_answer",
             "reason":"relations did not determine every column logarithm within the trial budget",
             "degree":c.n,"curve_a":c.a,"factor_base":factor_base_json(&spec,&fb,report.columns),
-            "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+            "counts":{"columns":report.columns,"rank":report.rank,
+                "trials":report.trials,"relations":report.relations,
+                "dense_solve_attempts":report.dense_solve_attempts},
             "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}));
     }
     let columns: Vec<LogColumn> = table
@@ -442,7 +444,9 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
         "subgroup_order":c.subgroup_order.to_string(),"cofactor":c.cofactor.to_string(),
         "factor_base":factor_base_json(&spec,&fb,report.columns),
-        "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+        "counts":{"columns":report.columns,"rank":report.rank,
+            "trials":report.trials,"relations":report.relations,
+            "dense_solve_attempts":report.dense_solve_attempts},
         "verified":true,"out":args.database.display().to_string(),
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
         "scope":"once-per-curve factor-base logarithm database; every column log certified by [x]G == point",

@@ -144,7 +144,7 @@ use crate::cryptanalysis::koblitz_fast_arith::{
     pack_fast, FastBinaryCurve, FastBinaryCurve128, FastPoint, FastPoint128,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{
-    to_u64_mod, RelationSolver, RowStatus, U64RankTracker,
+    to_u64_mod, RelationSolver, RowStatus, U64RankTracker, WideRankTracker,
 };
 use crate::cryptanalysis::sat::SolveResult;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
@@ -4648,6 +4648,10 @@ pub struct LogTableReport {
     pub trials: usize,
     /// Probes that decomposed into a usable relation.
     pub relations: usize,
+    /// Exact coefficient rank over the subgroup order.
+    pub rank: usize,
+    /// Dense modular solves attempted, including the final best-effort solve.
+    pub dense_solve_attempts: usize,
     /// Whether every column logarithm verified as `[x_o]G == R_o`.
     pub verified: bool,
 }
@@ -4706,7 +4710,8 @@ fn decompose_once(
 /// This is the once-per-curve cost a per-target descent then amortises.
 /// Returns `None` only for a degenerate factor base (no projected
 /// columns, or the field too wide for the pair table); an exhausted
-/// trial budget yields a report with `verified = false`.
+/// trial budget yields a report with `verified = false`; a rank-deficient
+/// collection returns an empty table instead of arbitrary free-column logs.
 pub fn solve_factor_base_logs(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -4747,11 +4752,12 @@ pub fn solve_factor_base_logs(
     // reach full column rank, so every earlier attempt is skipped. Skipped
     // attempts could never verify (underdetermined against random true
     // logs), hence trial counts, tables, and verdicts are unchanged.
-    // The native rank tracker is valid only when the entire modulus fits
-    // in one word. For wider subgroups, attempt the reference BigUint solve
-    // after enough rows instead of reducing coefficients modulo a low limb.
+    // Track coefficient rank over the entire modulus before attempting a
+    // dense solve. The word and wide trackers use the same prime-field
+    // criterion, without truncating the primary subgroup order.
     let r_mod = r.to_u64_digits().first().copied().unwrap_or(0);
-    let mut ranker = (r.bits() <= 64).then(|| U64RankTracker::new(r_mod, n_cols));
+    let mut word_ranker = (r.bits() <= 64).then(|| U64RankTracker::new(r_mod, n_cols));
+    let mut wide_ranker = (r.bits() > 64).then(|| WideRankTracker::new(r, n_cols));
 
     while report.trials < opts.max_trials {
         report.trials += 1;
@@ -4770,24 +4776,30 @@ pub fn solve_factor_base_logs(
         let relation = relation_from_decomposition_with_mode(
             kc, fb, &idxs, &a, &BigUint::zero(), opts.collapse_negation, Some(&projected),
         );
+        assert_eq!(relation.row.len(), n_cols, "projected relation width");
+        let rank = if let Some(ranker) = word_ranker.as_mut() {
+            let row: Vec<u64> = relation
+                .row
+                .iter()
+                .map(|coefficient| to_u64_mod(coefficient, r_mod))
+                .collect();
+            ranker.insert(row)
+        } else {
+            wide_ranker
+                .as_mut()
+                .expect("wide prime-order rank tracker")
+                .insert(relation.row.clone())
+        };
+        report.rank = rank;
         matrix.push(relation.row);
         rhs.push((&h * &a) % r);
         report.relations += 1;
 
-        // Rank gate for the dense attempt below (see declaration).
-        let full_rank = match (ranker.as_mut(), matrix.last()) {
-            (Some(ranker), Some(row)) if row.len() == n_cols => {
-                let urow: Vec<u64> = row.iter().map(|c| to_u64_mod(c, r_mod)).collect();
-                ranker.insert(urow) >= n_cols
-            }
-            // A wide modulus or unexpected shape uses the reference solve.
-            _ => true,
-        };
-
         // Attempt a solve once there are at least as many relations as
         // columns and at least one new row since the last attempt.
-        if full_rank && matrix.len() >= n_cols && matrix.len() > last_attempt {
+        if rank == n_cols && matrix.len() > last_attempt {
             last_attempt = matrix.len();
+            report.dense_solve_attempts += 1;
             let mut m = matrix.clone();
             let mut b = rhs.clone();
             if let Some(solution) = gaussian_eliminate_mod_n(&mut m, &mut b, r) {
@@ -4807,7 +4819,15 @@ pub fn solve_factor_base_logs(
         }
     }
     report.columns = n_cols;
-    // Best-effort table from whatever was collected; unverified.
+    // With a free projected column, the dense reference would assign it
+    // zero; its representative is nonidentity, so such a table cannot pass
+    // group verification. Preserve the rank receipt and skip that work.
+    if report.rank < n_cols {
+        return Some((FactorBaseLogTable { columns: Vec::new() }, report));
+    }
+    // Full coefficient rank was reached but the prior attempt did not
+    // verify. Retain a best-effort table for diagnostics only.
+    report.dense_solve_attempts += 1;
     let mut m = matrix.clone();
     let mut b = rhs.clone();
     let columns = gaussian_eliminate_mod_n(&mut m, &mut b, r)
@@ -6232,6 +6252,9 @@ mod tests {
             assert!(report.verified, "K_{a}/2^{n}: log table did not verify");
             assert!(table.verify(&kc));
             assert_eq!(table.len(), report.columns);
+            assert_eq!(report.rank, report.columns);
+            assert_eq!(report.dense_solve_attempts, 1);
+            assert!(report.relations >= report.rank);
             // Every column really is the log of its point.
             for (point, log) in &table.columns {
                 assert_eq!(&kc.mul(kc.generator(), log), point);
@@ -6254,6 +6277,22 @@ mod tests {
             let (zero, _) = individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
             assert!(zero.is_zero());
         }
+    }
+
+    #[test]
+    fn factor_base_log_preflight_skips_rank_deficient_dense_solve() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 2,
+            max_trials: 0,
+            ..KoblitzIcOptions::default()
+        };
+        let (table, report) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+        assert!(!report.verified);
+        assert_eq!(report.rank, 0);
+        assert_eq!(report.dense_solve_attempts, 0);
+        assert!(table.is_empty());
     }
 
     #[test]
