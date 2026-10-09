@@ -166,7 +166,14 @@ independently verified all 32 scalars and 2,926 distinct relation witnesses
 with its [runtime receipt](local/sage_runtime_info_c1200_fullrank.json).
 The 536,870,912-slot root table has 8,589,934,592 bytes of slot payload;
 retained indexed polynomial coordinates add 2,442,240,000 bytes. The local
-runner did not report peak RSS. A/A repeat spreads fail the host-noise gate,
+paired runner did not report peak RSS. A separate verified T025 run using
+[the RSS recorder](measure_c1200_rss.py) measured 26,739,802,112 bytes
+(24.903 GiB) of peak process RSS through macOS `getrusage(RUSAGE_CHILDREN)`.
+Its [receipt](local/memory_peak_c1200_t025.json) and
+[raw solver report](local/raw_memory_c1200_t025.json.gz) retain the binary,
+point, result, and report hashes. This leaves 7.097 GiB between that observed
+process RSS and the requested 32 GiB Modal VM memory; Linux allocation and VM
+overhead remain to be measured. A/A repeat spreads fail the host-noise gate,
 and this host has no exclusive-core receipt, so the controlled online ratio
 is unknown.
 
