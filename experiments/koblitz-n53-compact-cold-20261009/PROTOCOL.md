@@ -15,7 +15,7 @@ Use the binary curve `y^2 + xy = x^3 + 1` over the polynomial basis
 `[6322155974735900, 5110849281364254]`. Its verification scalar is
 `7948768810114`, obtained from SHA-256 of the ASCII string
 `n53-compact-cold-20261009|primary-target|v1`, reduced modulo `r-1` and
-increased by one. `verify_workload.py` reconstructs the point with independent
+increased by one. `koblitz_n53_compact_protocol verify-workload` reconstructs the point with independent
 polynomial-basis arithmetic; the strong rho preflight also produced the same
 point and scalar. Only `target_points.jsonl` is passed to the IC executable.
 The scalar is a replay sidecar and an input to rho's point construction, which
@@ -37,12 +37,18 @@ are recorded, both examples compile, and their example tests pass. Freeze the
 source and executable hashes in a receipt before collecting timings. This
 protocol fixes the input and decision rules; it is not a timing receipt.
 
-`run.py` implements two separate steps. After the final source builds, run
-`freeze --ic-binary <absolute path> --rho-binary <absolute path>` and save its
+The native Rust example `koblitz_n53_compact_protocol` implements two separate
+steps. Build it and `koblitz_n53_compact_replay` with Cargo. After the final
+source builds, run `koblitz_n53_compact_protocol verify-workload` and
+`koblitz_n53_compact_protocol preflight` in the intended execution context.
+The latter checks that the `/bin/ps` RSS monitor is usable there. Then run
+`koblitz_n53_compact_protocol freeze --ic-binary <absolute
+path> --rho-binary <absolute path>` and save its
 JSON output as `freeze.json`; commit and push that file to this PR **before**
 running either arm. The freeze records the source commit, hashes of both
-executables, the lockfile, the two source files, this runner, and all workload
-inputs. Then invoke `run --freeze <absolute freeze.json> --ic-binary <same
+executables, the lockfile, the two source files, both native protocol tools,
+their independent reference arithmetic, and all workload inputs. Then invoke
+`koblitz_n53_compact_protocol run --freeze <absolute freeze.json> --ic-binary <same
 executable> --rho-binary <same executable> --run-dir <new run directory>`.
 The runner rejects modified or uncommitted source, changed binaries or inputs,
 and a freeze file that differs from the committed version. It refuses an
@@ -76,14 +82,18 @@ against the in-process interval. A missing phase or failed replay leaves the
 end-to-end comparison unknown. CPU time on an unisolated host is diagnostic;
 a promoted timing ratio requires the repository's isolated-host receipt.
 
-After a successful run, invoke `replay.py --run-dir <run directory>
+After a successful run, invoke `koblitz_n53_compact_replay --run-dir <run directory>
 --workload workload.json --require-receipt --out <new verification.json>`.
 It independently replays every emitted rank relation, modular row and rank
 transition, every base orbit, the target group relation, and both final scalar
 multiplications. It also checks hashes of all raw files named in the receipt.
 Retain the raw relation trace, base dump, JSONL, resource receipts, and replay.
-The verifier passed a four-column n13 correctness smoke and rejected deliberate
-rank-row and target-scalar changes; that smoke is not an n53 measurement.
+The archived four-column n13 correctness smoke was produced and originally
+replayed by the historical Python path. Retain its provenance and raw files;
+replay it with the native verifier and reject deliberate rank-row, S3-root,
+and target-scalar changes before freezing a new run. That smoke is not an n53
+measurement. The historical Python scripts remain archived for audit and are
+not an execution path for new comparisons.
 After this primary cell is frozen and verified, write a separate protocol for
 the secondary multi-target amortization question; do not substitute that
 batch result for the one-target comparison.

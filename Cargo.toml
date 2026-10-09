@@ -14,6 +14,14 @@ path = "experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs"
 name = "s3_pair_candidate_frozen"
 path = "experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs"
 
+[[example]]
+name = "koblitz_n53_compact_replay"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_replay.rs"
+
+[[example]]
+name = "koblitz_n53_compact_protocol"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_run.rs"
+
 [[bin]]
 name = "crypto"
 path = "src/main.rs"
