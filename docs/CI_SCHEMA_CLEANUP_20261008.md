@@ -44,11 +44,12 @@ controls from starving each other's wall-clock budgets.
 
 ## Evidence and delivery
 
-Validation commands and raw success/failure logs are retained under the
-cleanup workspace's `logs/` directory. Rust validation uses toolchain 1.98
-with matching Cargo, rustc, rustfmt, and Clippy binaries. Local runs are native
-ARM64 correctness and compilation checks. GitHub Actions provides the
-repository's Linux checks and release build matrix.
+Validation commands and compressed raw success/failure logs are retained in
+[`docs/ci-schema-cleanup-20261009/evidence/`](ci-schema-cleanup-20261009/README.md).
+Final local validation uses Homebrew Rust 1.93.1 with matching Cargo, rustc,
+rustfmt, and Clippy binaries. Local runs are native ARM64 correctness and
+compilation checks. GitHub Actions provides the repository's Linux checks and
+release build matrix.
 
 The pull request's current check results and final commit identify the
 delivered revision. Performance promotion continues to require the repository's

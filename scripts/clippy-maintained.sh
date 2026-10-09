@@ -29,4 +29,4 @@ if [ "${1:-}" = "--print-targets" ]; then
     cat "$target_file"
     exit 0
 fi
-cargo clippy --lib --bins --tests --benches "${selected_examples[@]}" -- -D warnings
+cargo clippy --keep-going --lib --bins --tests --benches "${selected_examples[@]}" -- -D warnings

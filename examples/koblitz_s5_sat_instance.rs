@@ -5622,7 +5622,7 @@ fn main() {
                 .map(|bit| (encoding.problem_variables + bit + 1) as u32)
                 .collect()
         } else {
-            (1..=(4 * n) as u32).collect()
+            (1..=4 * n).collect()
         };
         priorities.extend(&theory_selectors);
         encoding.solver.set_branch_priority(&priorities);
