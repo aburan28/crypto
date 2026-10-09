@@ -154,7 +154,10 @@ Per AGENTS.md, open or update a PR in this task:
   host (`ecbench host`), the levels earned, the table and the decision;
 - the scoreboard and the thread's note in the same PR when the round measures an
   IC variant (§7). Mark extrapolations as such;
-- failures, timeouts and regressions included.
+- failures, timeouts and regressions included;
+- the session's run report, graph and PDF in `research/<topic>_<date>/reports/`,
+  and the graphs and PDF of the README's result (`research-visuals`, "Every
+  experiment run" and "Every result PR").
 
 CI (`.github/workflows/ecbench.yml`) re-audits every committed session with
 replays on Linux. A session whose counts do not reproduce there fails the PR.

@@ -153,11 +153,16 @@ existing evidence, review, and benchmark rules.
 
 ## Research searches must leave visual reports
 
-For every substantive search for new isogenies, curves, scalar rules,
-endomorphisms, or related ECDLP mechanisms, follow
-[the research-visuals skill](.agents/skills/research-visuals/SKILL.md).
-Deliver a source-linked report, an explanatory diagram, and a PDF
-containing the report and visual. Include negative and inconclusive findings.
+Every experiment run (ICMS or ecbench session, autolab or tournament round,
+benchmark, or other research run), every PR that lands a result, and every
+substantive search for new isogenies, curves, scalar rules, endomorphisms, or
+related ECDLP mechanisms follows
+[the research-visuals skill](.agents/skills/research-visuals/SKILL.md), on
+every runtime (Claude Code reads it at `.claude/skills/research-visuals/`).
+Deliver a source-linked report, a graph or explanatory diagram, and a PDF
+containing the report and visual. A run report is descriptive and sits beside
+the run's records, never inside a sealed or audited session directory.
+Include negative, failed, and inconclusive findings.
 Update every affected canonical graph, chart, and rendered copy in the same
 change as a new verified finding or correction; record why a graph was left
 unchanged when the search yields no graphable result. Keep proposed routes and

@@ -12,6 +12,10 @@ the existing tournament, independent certificate checker, portfolio selector,
 portable development driver, and frozen historical evidence. Extend these;
 do not create a parallel scoreboard or redefine historical protocols.
 
+Every autolab or tournament round leaves a run report, graph and PDF beside
+its records, and every PR that lands its result carries the result's graphs
+and PDF (`research-visuals`, "Every experiment run" and "Every result PR").
+
 ## Begin or resume
 
 **The current `AGENTS.md` requires native research execution and verification.**
