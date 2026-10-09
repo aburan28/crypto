@@ -1,0 +1,13 @@
+{
+  "architecture": "arm64",
+  "cpu_model_identifier": "Mac16,7",
+  "darwin_os_version": "26.6",
+  "host_isolation_receipt": null,
+  "host_wide_exclusive_partition_verified": false,
+  "memory_bytes": 51539607552,
+  "physical_cpu_count": 14,
+  "logical_cpu_count": 14,
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "source": ["uname -sm", "sw_vers -productVersion", "sysctl -n hw.model hw.physicalcpu hw.logicalcpu hw.memsize", "rustc --version"],
+  "target_query_workers_by_curve": {"41": 1, "53": 14}
+}
