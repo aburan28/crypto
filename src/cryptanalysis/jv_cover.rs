@@ -768,11 +768,15 @@ impl<'a> EllE<'a> {
 /// has a prime factor `ℓ` with `#E = 4cℓ` and small `c`. The DLP lives in
 /// the subgroup of order `ℓ`.
 fn small_cofactor_prime_part(order: u128, max_cofactor: u64) -> Option<(u64, u64)> {
-    if order % 4 != 0 {
+    if order % 4 != 0 || max_cofactor == 0 {
         return None;
     }
     let quarter = order / 4;
-    (1..=max_cofactor).find_map(|cofactor| {
+    // Keep the historical #E = 4l instance selection unchanged where l fits.
+    if quarter <= u64::MAX as u128 {
+        return is_prime_u64(quarter as u64).then_some((quarter as u64, 1));
+    }
+    (2..=max_cofactor).find_map(|cofactor| {
         let c = cofactor as u128;
         if quarter % c != 0 {
             return None;
@@ -2904,6 +2908,7 @@ mod tests {
         assert_eq!(small_cofactor_prime_part(order, 4096), Some((L, 64)));
         assert_eq!(small_cofactor_prime_part(order, 63), None);
         assert_eq!(small_cofactor_prime_part(order + 1, 4096), None);
+        assert_eq!(small_cofactor_prime_part(4 * 15, 4096), None);
     }
 
     fn weak(p: u64, seed: u64) -> (Fq3, E6, StdRng) {
