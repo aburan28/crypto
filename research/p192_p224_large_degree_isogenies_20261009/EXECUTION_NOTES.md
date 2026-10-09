@@ -58,3 +58,23 @@ oracle on both source fields and balanced/unbalanced lengths. This changes
 arithmetic cost, without skipping any torsion, subgroup, normalization or exact
 map-identity check. The copied implementation and equivalence test are frozen
 as verification_poly.rs and verification_poly_checks.rs.
+
+Both kernel constructions passed the native API checks: p224/1471 and
+p192/10453. Each returned one explicit map, with degree coverage PARTIAL.
+Independent P-224 replay passed every kernel and exact-map check. The initial
+eager P-192 replay was stopped before certification, with its process exit 143
+and raw construction retained. The old and memoized replay executables remain
+distinct. Memoized division recurrences, exact reciprocal reduction and block
+modular composition were added to preserve all checks at the larger degree;
+12 tests compare them with the original all-index, long-division, schoolbook
+and Horner routines, including a rejected mutated kernel. The known-answer
+degree-199 single-map control passed before target use. The first verifier
+test build lacked the existing modular-polynomial fixture module; that failure
+and the corrected passing build are preserved.
+
+P-192 degree-10453 replay then passed every original kernel, codomain, exact
+rational-map and subgroup check, including 20 fresh scalar transports. The
+kernel degrees are 5226 and 735; numerator/denominator coefficient counts are
+10454/10453 and 1472/1471. These are individual verified maps, with the other
+eigenline left unresolved at each degree. All four full-Hecke probes timed out
+within their declared bounds, and none is recast as a kernel-first success.

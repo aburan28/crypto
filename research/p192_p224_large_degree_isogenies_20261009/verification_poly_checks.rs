@@ -43,4 +43,26 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn reciprocal_remainder_matches_original_long_division() {
+        let p: BigUint = "26959946667150639794667015087019630673557916260026308143510066298881"
+            .parse()
+            .unwrap();
+        let f = field::Field::new(&p).unwrap();
+        for size in [128, 129, 191, 256] {
+            for extra in [0, 1, size / 2, size - 1] {
+                let mut modulus: Vec<_> =
+                    (0..size).map(|i| f.from_u64((17 * i + 3) as u64)).collect();
+                modulus[size - 1] = f.one();
+                let a: Vec<_> = (0..size + extra)
+                    .map(|i| f.from_u64((i * i + 31) as u64))
+                    .collect();
+                assert_eq!(
+                    optimized::rem(&f, &a, &modulus),
+                    reference::rem(&f, &a, &modulus)
+                );
+            }
+        }
+    }
 }

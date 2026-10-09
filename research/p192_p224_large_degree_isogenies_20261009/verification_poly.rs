@@ -145,6 +145,39 @@ pub fn divrem(f: &Field, a: &Poly, b: &Poly) -> (Poly, Poly) {
 }
 
 pub fn rem(f: &Field, a: &Poly, b: &Poly) -> Poly {
+    if b.len() >= 128 && a.len() >= b.len() && a.len() < 2 * b.len() {
+        let count = a.len() - b.len() + 1;
+        let reverse_b: Poly = b.iter().rev().copied().take(count).collect();
+        let mut inverse = vec![f.inv(&reverse_b[0]).expect("nonzero polynomial lead")];
+        while inverse.len() < count {
+            let next = (2 * inverse.len()).min(count);
+            let mut t = mul(
+                f,
+                &reverse_b[..reverse_b.len().min(next)].to_vec(),
+                &inverse,
+            );
+            t.resize(next, f.zero());
+            t.truncate(next);
+            for c in &mut t {
+                *c = f.neg(c);
+            }
+            t[0] = f.add(&t[0], &f.from_u64(2));
+            inverse = mul(f, &inverse, &t);
+            inverse.resize(next, f.zero());
+            inverse.truncate(next);
+        }
+        let reversed_a: Poly = a.iter().rev().copied().take(count).collect();
+        let mut q = mul(f, &reversed_a, &inverse);
+        q.resize(count, f.zero());
+        q.truncate(count);
+        q.reverse();
+        let result = sub(f, a, &mul(f, &q, b));
+        assert!(
+            result.len() < b.len(),
+            "reciprocal polynomial reduction failed"
+        );
+        return result;
+    }
     divrem(f, a, b).1
 }
 

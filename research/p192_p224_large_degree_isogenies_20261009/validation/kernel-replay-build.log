@@ -1,0 +1,76 @@
+   Compiling libc v0.2.190
+   Compiling zerocopy v0.8.62
+   Compiling cfg-if v1.0.5
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling autocfg v1.5.1
+   Compiling serde_core v1.0.229
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling arrayvec v0.7.8
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling cc v1.6.0
+   Compiling constant_time_eq v0.4.2
+   Compiling subtle v2.6.1
+   Compiling hex v0.4.3
+   Compiling num-traits v0.2.19
+   Compiling syn v3.0.6
+   Compiling blake3 v1.8.7
+   Compiling getrandom v0.2.17
+   Compiling rand_core v0.6.4
+   Compiling num-integer v0.1.47
+   Compiling serde_derive v1.0.229
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.8
+   Compiling num-bigint v0.4.8
+   Compiling p192-p224-kernel-first-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261009)
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `isogeny_algos`
+ --> kernel_first.rs:4:5
+  |
+4 | use isogeny_algos::{
+  |     ^^^^^^^^^^^^^ use of unresolved module or unlinked crate `isogeny_algos`
+  |
+  = help: if you wanted to use a crate named `isogeny_algos`, use `cargo add isogeny_algos` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `isogeny_algos`
+ --> extension.rs:2:5
+  |
+2 | use isogeny_algos::{
+  |     ^^^^^^^^^^^^^ use of unresolved module or unlinked crate `isogeny_algos`
+  |
+  = help: if you wanted to use a crate named `isogeny_algos`, use `cargo add isogeny_algos` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `isogeny_algos`
+ --> kernel_first.rs:4:5
+  |
+4 | use isogeny_algos::{
+  |     ^^^^^^^^^^^^^ use of unresolved module or unlinked crate `isogeny_algos`
+  |
+  = help: if you wanted to use a crate named `isogeny_algos`, use `cargo add isogeny_algos` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `isogeny_algos`
+ --> extension.rs:2:5
+  |
+2 | use isogeny_algos::{
+  |     ^^^^^^^^^^^^^ use of unresolved module or unlinked crate `isogeny_algos`
+  |
+  = help: if you wanted to use a crate named `isogeny_algos`, use `cargo add isogeny_algos` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `isogeny_algos`
+   --> kernel_first.rs:103:14
+    |
+103 |     let xs = isogeny_algos::kernel::xonly::multiples_x_fast(&f, &e, x, degree + 1)
+    |              ^^^^^^^^^^^^^ use of unresolved module or unlinked crate `isogeny_algos`
+    |
+    = help: if you wanted to use a crate named `isogeny_algos`, use `cargo add isogeny_algos` to add it to your `Cargo.toml`
+
+Some errors have detailed explanations: E0432, E0433.
+For more information about an error, try `rustc --explain E0432`.
+error: could not compile `p192-p224-kernel-first-replay` (bin "kernel-first") due to 5 previous errors
+warning: build failed, waiting for other jobs to finish...

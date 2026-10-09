@@ -15,8 +15,17 @@ name = "verification-poly-checks"
 path = "verification_poly_checks.rs"
 
 [[bin]]
+name = "verification-kernel-checks"
+path = "verification_kernel_checks.rs"
+
+[[bin]]
 name = "replay-control"
 path = "replay_control.rs"
+test = false
+
+[[bin]]
+name = "continuation-report"
+path = "report.rs"
 test = false
 
 [dependencies]
