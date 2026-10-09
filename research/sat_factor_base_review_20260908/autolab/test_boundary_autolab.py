@@ -115,17 +115,26 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertEqual(claim["hardware_accounting"]["status"], "counter_unavailable")
         self.assertEqual(lab.validate_claim(claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
         counted = panel.primary_claim_fields(
-            ic | {"online_hw_counts": {"instructions": 1000, "cycles": 1200, "error": None}},
-            rho | {"online_hw_counts": {"instructions": 2500, "cycles": 3000, "error": None}},
+            ic | {"online_hw_counts": {"instructions": 1000, "cycles": 1200,
+                                        "instructions_time_enabled_ns": 100,
+                                        "instructions_time_running_ns": 100, "error": None}},
+            rho | {"online_hw_counts": {"instructions": 2500, "cycles": 3000,
+                                         "instructions_time_enabled_ns": 200,
+                                         "instructions_time_running_ns": 200, "error": None}},
             claim["online_interval"],
         )["hardware_accounting"]
         self.assertEqual(counted["status"], "measured_common_counter")
         self.assertEqual(counted["rho_per_ic_instructions"], 2.5)
+        self.assertEqual(counted["ic_time_running_ns"], counted["ic_time_enabled_ns"])
         counted_claim = copy.deepcopy(claim)
         counted_claim["hardware_accounting"] = counted
         self.assertEqual(lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
         counted_claim["hardware_accounting"]["rho_per_ic_instructions"] = 3.0
         self.assertIn("hardware_accounting.rho_per_ic_instructions must match the counts",
+                      lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["validation_errors"])
+        counted_claim["hardware_accounting"]["rho_per_ic_instructions"] = 2.5
+        counted_claim["hardware_accounting"]["ic_time_running_ns"] = 99
+        self.assertIn("hardware_accounting.ic counter must run throughout its enabled interval",
                       lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["validation_errors"])
         zero_step_claim = copy.deepcopy(claim)
         zero_step_claim.update(panel.primary_claim_fields(

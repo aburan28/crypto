@@ -66,7 +66,9 @@ The CPU and NUMA IDs above must match the host's verified topology. Start the
 strict service on housekeeping CPUs before submitting. Its `probe` result must
 pass, and its completed job must retain `preflight.json`, `manifest.json`,
 `runs.jsonl`, `pairs.jsonl`, `summary.json`, and both raw stdout files. The
-manifest requires a positive online retired-instruction count for each arm;
+manifest requires a positive online retired-instruction count for each arm,
+with `time_running == time_enabled > 0` for the instruction event so a
+multiplexed or incomplete PMU reading cannot enter the paired comparison;
 the service rejects a failed replay, a mismatched target or scalar, a missing
 counter, an incomplete pair, changed artifacts, or a failed host/noise check.
 

@@ -115,8 +115,14 @@ def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
     rho_hw = rho_hw if isinstance(rho_hw, dict) else {}
     ic_instructions = ic_hw.get("instructions")
     rho_instructions = rho_hw.get("instructions")
-    complete_instructions = all(type(value) is int and value > 0 for value in
-                                (ic_instructions, rho_instructions))
+    def complete_counter(hw: dict[str, Any]) -> bool:
+        enabled = hw.get("instructions_time_enabled_ns")
+        running = hw.get("instructions_time_running_ns")
+        return (type(hw.get("instructions")) is int and hw["instructions"] > 0 and
+                type(enabled) is int and enabled > 0 and
+                type(running) is int and running == enabled and not hw.get("error"))
+
+    complete_instructions = complete_counter(ic_hw) and complete_counter(rho_hw)
     return {
         "timing_class": "single_target_online",
         "record_class": "verified_answer_exploratory_wall",
@@ -155,6 +161,10 @@ def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
             "ic_online_instructions": ic_instructions,
             "rho_online_instructions": rho_instructions,
             "rho_per_ic_instructions": rho_instructions / ic_instructions if complete_instructions else None,
+            "ic_time_enabled_ns": ic_hw.get("instructions_time_enabled_ns"),
+            "ic_time_running_ns": ic_hw.get("instructions_time_running_ns"),
+            "rho_time_enabled_ns": rho_hw.get("instructions_time_enabled_ns"),
+            "rho_time_running_ns": rho_hw.get("instructions_time_running_ns"),
             "ic_counter_error": ic_hw.get("error"),
             "rho_counter_error": rho_hw.get("error"),
         },

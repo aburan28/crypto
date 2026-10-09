@@ -130,6 +130,11 @@ def run_arm(args: argparse.Namespace) -> None:
         if args.require_hw:
             if type(instructions) is not int or instructions <= 0:
                 raise ValueError(f"{args.arm} online retired-instruction counter is unavailable")
+            enabled = hardware.get("instructions_time_enabled_ns")
+            running = hardware.get("instructions_time_running_ns")
+            if (type(enabled) is not int or enabled <= 0 or
+                    type(running) is not int or running != enabled or hardware.get("error")):
+                raise ValueError(f"{args.arm} online retired-instruction counter was multiplexed or incomplete")
         online_ms = float(record["online_ms"])
         if not math.isfinite(online_ms) or online_ms <= 0:
             raise ValueError("invalid online interval")

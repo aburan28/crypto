@@ -302,6 +302,14 @@ def hardware_accounting_errors(accounting: Any) -> list[str]:
             errors.append(f"hardware_accounting.{arm}_online_instructions must be positive when present")
     ratio = accounting.get("rho_per_ic_instructions")
     if status == "measured_common_counter":
+        for arm in ("ic", "rho"):
+            enabled = accounting.get(f"{arm}_time_enabled_ns")
+            running = accounting.get(f"{arm}_time_running_ns")
+            if (type(enabled) is not int or enabled <= 0 or
+                    type(running) is not int or running != enabled):
+                errors.append(f"hardware_accounting.{arm} counter must run throughout its enabled interval")
+            if accounting.get(f"{arm}_counter_error"):
+                errors.append(f"hardware_accounting.{arm} counter error must be null")
         if type(ic_count) is not int or ic_count <= 0 or type(rho_count) is not int or rho_count <= 0:
             errors.append("hardware_accounting measured status requires both online instruction counts")
         elif positive_cost(ratio) is None or not math.isclose(
