@@ -712,9 +712,6 @@ impl F6WidePairIndex {
 struct SignedPairSum {
     // No heap allocations per sum. `None` is the identity and is distinct
     // from every affine point even when the curve admits (0, 0).
-    point: Option<(u128, u128)>,
-    pair: (u32, u32),
-    neg_pair: (u32, u32),
     point: PackedPoint,
     pair: (usize, usize),
     neg_pair: (usize, usize),
@@ -755,33 +752,6 @@ impl F6SignedPairIndex {
             .collect::<Option<_>>()?;
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
-        let mut lookup = HashMap::with_capacity(capacity);
-        #[cfg(target_arch = "aarch64")]
-        let use_packed = curve.m == 83
-            && curve.irreducible.degree == 83
-            && curve.irreducible.low_terms == [0, 1, 2, 45]
-            && std::arch::is_aarch64_feature_detected!("aes");
-        for i in 0..points.len() {
-            #[cfg(target_arch = "aarch64")]
-            let row = if use_packed {
-                // SAFETY: the exact polynomial and ARM64 AES/PMULL feature
-                // were checked once above; all inputs were curve-checked.
-                unsafe { packed83::batch_add_fixed(curve, &points[i], &points[i..]) }?
-            } else {
-                batch_add_fixed(curve, &points[i], &points[i..])
-            };
-            #[cfg(not(target_arch = "aarch64"))]
-            let row = batch_add_fixed(curve, &points[i], &points[i..]);
-            for (offset, sum) in row.into_iter().enumerate() {
-                let x = x_key(&sum)?;
-                if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
-                    let j = i + offset;
-                    entry.insert(sums.len());
-                    sums.push(SignedPairSum {
-                        point: stored_point(&sum)?,
-                        pair: (i as u32, j as u32),
-                        neg_pair: (negatives[i], negatives[j]),
-                    });
         let mut lookup: FxMap<PointXKey, usize> =
             FxMap::with_capacity_and_hasher(capacity, Default::default());
         // Row `i` holds `points[i] + points[j]` for `j ≥ i`.  Rows are
@@ -856,11 +826,6 @@ impl F6SignedPairIndex {
 
     fn pair_at(&self, index: usize, residual: &BinaryPoint) -> Option<(usize, usize)> {
         let entry = &self.sums[index];
-        let residual = stored_point(residual)?;
-        if residual == entry.point {
-            Some((entry.pair.0 as usize, entry.pair.1 as usize))
-        } else if residual == entry.point.map(|(x, y)| (x, x ^ y)) {
-            Some((entry.neg_pair.0 as usize, entry.neg_pair.1 as usize))
         let residual = pack_point(residual)?;
         // -(x, y) = (x, x + y) on a binary curve; -O = O
         let negative = entry.point.map(|(x, y)| (x, x ^ y));
@@ -912,12 +877,6 @@ impl F6SignedPairIndex {
         if !self.curve.is_on_curve(target) {
             return None;
         }
-        const BATCH: usize = 256;
-        for chunk in self.sums.chunks(BATCH) {
-            let points: Vec<_> = chunk
-                .iter()
-                .map(|entry| restore_point(entry.point, self.curve.m))
-                .collect();
         self.search(|chunk| {
             let points = self.chunk_points(chunk);
             let (plus, minus) = batch_add_fixed_both_signs(&self.curve, target, &points);
@@ -977,35 +936,6 @@ impl F6SignedPairIndex {
         if !self.curve.is_on_curve(target) {
             return None;
         }
-        const BATCH: usize = 256;
-        for chunk in self.sums.chunks(BATCH) {
-            let points: Vec<_> = chunk
-                .iter()
-                .map(|entry| restore_point(entry.point, self.curve.m))
-                .collect();
-            let keys = batch_x_keys_fixed_both_signs(&self.curve, target, &points)?;
-            for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
-                if let Some(&index) = self.lookup.get(&minus_key) {
-                    let point = restore_point(entry.point, self.curve.m);
-                    let residual = point_add(&self.curve, target, &point_neg(&point));
-                    if let Some(pair) = self.pair_at(index, &residual) {
-                        if let Some(witness) = self.verify(target, entry.pair, pair) {
-                            return Some(witness);
-                        }
-                    }
-                }
-                if let Some(&index) = self.lookup.get(&plus_key) {
-                    let point = restore_point(entry.point, self.curve.m);
-                    let residual = point_add(&self.curve, target, &point);
-                    if let Some(pair) = self.pair_at(index, &residual) {
-                        if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
-                            return Some(witness);
-                        }
-                    }
-                }
-            }
-        }
-        None
         self.search(|chunk| {
             let points = self.chunk_points(chunk);
             // (Two-word coordinates always pack, so the keys always exist.)
@@ -1030,33 +960,6 @@ impl F6SignedPairIndex {
             if !self.curve.is_on_curve(target) {
                 return None;
             }
-            const BATCH: usize = 256;
-            for chunk in self.sums.chunks(BATCH) {
-                // SAFETY: the field polynomial and ARM64 AES/PMULL feature
-                // were checked above. The result is verified in the group.
-                let keys = unsafe { packed83::batch_x_keys_stored(&self.curve, target, chunk) }?;
-                for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
-                    if let Some(&index) = self.lookup.get(&minus_key) {
-                        let point = restore_point(entry.point, self.curve.m);
-                        let residual = point_add(&self.curve, target, &point_neg(&point));
-                        if let Some(pair) = self.pair_at(index, &residual) {
-                            if let Some(witness) = self.verify(target, entry.pair, pair) {
-                                return Some(witness);
-                            }
-                        }
-                    }
-                    if let Some(&index) = self.lookup.get(&plus_key) {
-                        let point = restore_point(entry.point, self.curve.m);
-                        let residual = point_add(&self.curve, target, &point);
-                        if let Some(pair) = self.pair_at(index, &residual) {
-                            if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
-                                return Some(witness);
-                            }
-                        }
-                    }
-                }
-            }
-            None
             self.search(|chunk| {
                 let points = self.chunk_points(chunk);
                 // SAFETY: `usable` checked the field polynomial and the CPU

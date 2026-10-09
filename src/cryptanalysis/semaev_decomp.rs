@@ -180,9 +180,6 @@ unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
     ((hi as u128) << 64) | (lo as u128)
 }
 
-#[cfg(target_arch = "aarch64")]
-#[target_feature(enable = "aes")]
-unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
 /// AArch64 carry-less multiply via `PMULL` (`vmull_p64`), the ARM
 /// counterpart of `pclmulqdq`.  Gated on the `aes` feature the same way
 /// `binary_ecc::f2m` gates its PMULL path, so Apple M-series and Graviton
@@ -294,12 +291,6 @@ impl Gf2 {
         red.into_boxed_slice()
     }
 
-        #[cfg(target_arch = "x86_64")]
-        let has_clmul = std::arch::is_x86_feature_detected!("pclmulqdq");
-        #[cfg(target_arch = "aarch64")]
-        let has_clmul = std::arch::is_aarch64_feature_detected!("aes");
-        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-        let has_clmul = false;
     /// Whether products are reduced by folding rather than by the table.
     /// When they are, [`Self::mul`] and [`Self::sqr`] call a
     /// `pclmulqdq` function, and loops that multiply many times run a
@@ -588,39 +579,6 @@ impl Gf2 {
         (_mm_cvtsi128_si64(x) as u64) >> s
     }
 
-    /// `a^{-1}` by Fermat: `a^(2^n − 2)`.  Zero maps to zero.
-    ///
-    /// Itoh-Tsujii addition chain on the exponent: `n − 1` squarings like
-    /// the naive square-and-multiply, but only `⌊log₂(n−1)⌋ + popcount(n−1)
-    /// − 1` multiplications instead of `n − 2` (7 vs 51 at `n = 53`).
-    /// The value computed is the same power by the same field operations,
-    /// so outputs are bit-identical to the naive loop — only faster.
-    pub fn inv(&self, a: u64) -> u64 {
-        if a == 0 {
-            return 0;
-        }
-        let e = self.n - 1;
-        if e == 0 {
-            return 1;
-        }
-        // Left-to-right binary method: invariant c = a^{2^k − 1} where k
-        // is the processed prefix of e, starting at k = 1 (c = a).
-        let mut c = a;
-        let mut k = 1u32;
-        let bits = 32 - e.leading_zeros();
-        for i in (0..bits - 1).rev() {
-            // Doubling step k → 2k: c · c^{2^k}.
-            c = self.mul(c, self.sqr_k(c, k));
-            k *= 2;
-            if (e >> i) & 1 == 1 {
-                // Increment k → k+1: c^2 · a.
-                c = self.mul(self.sqr(c), a);
-                k += 1;
-            }
-        }
-        debug_assert_eq!(k, e);
-        // c = a^{2^e − 1}, so c^2 = a^{2^{e+1} − 2} = a^{2^n − 2} = a^{-1}.
-        self.sqr(c)
     /// Itoh–Tsujii addition chain: with `β_k = a^{2^k − 1}`, walk the
     /// bits of `n − 1` using `β_{2k} = β_k^{2^k} · β_k` and
     /// `β_{k+1} = β_k² · a`, then square once.  That is `n − 1`
@@ -2244,6 +2202,8 @@ mod tests {
                 assert_eq!(gf.inv(a), acc, "n={n}: IT vs Fermat at a={a}");
             }
         }
+    }
+
     /// The quartic route must return exactly what the generic
     /// `rem_monic` route returns, every coefficient of the gcd, and the
     /// dispatch must hand every other degree to the generic route

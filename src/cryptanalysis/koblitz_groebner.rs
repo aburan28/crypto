@@ -2279,11 +2279,6 @@ fn tail_zero_assignments(
     valid
 }
 
-/// Reduce `system`, returning polynomials in the same ideal — either a
-/// Gröbner basis or the reduced Macaulay rows.  `None` means the F4
-/// matrix would have been too large.
-fn reduce_system(
-    system: &[F2BoolPoly],
 pub(crate) fn macaulay_rows_monos_with_mask(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -2335,43 +2330,6 @@ pub(crate) fn f5_row_counts(
 pub(crate) fn f5_rows_monos_with_f4_count(
     polys: &[F2BoolPoly],
     n_vars: usize,
-    opts: &SolveOptions,
-    mut accept: impl FnMut(u64) -> bool,
-) -> (Vec<u64>, SolveStats) {
-    let mut stats = SolveStats::default();
-    let mut out = Vec::new();
-    let mut stop = false;
-    let split_heuristic = match std::env::var("KIC_F4_SPLIT_HEURISTIC").as_deref() {
-        Ok("max_occurrence") => SplitHeuristic::MaxOccurrence,
-        Ok("max_nonlinear") => SplitHeuristic::MaxNonlinearOccurrence,
-        _ => SplitHeuristic::Lowest,
-    };
-    let tail_enum_bits = std::env::var("KIC_F4_TAIL_ENUM_BITS")
-        .ok()
-        .and_then(|value| value.parse::<usize>().ok())
-        .unwrap_or(0)
-        .min(20);
-    let batch_split_bits = std::env::var("KIC_F4_BATCH_SPLIT_BITS")
-        .ok()
-        .and_then(|value| value.parse::<usize>().ok())
-        .unwrap_or(0)
-        .min(20);
-    solve_rec(
-        equations.to_vec(),
-        equations,
-        vec![None; n_vars],
-        n_vars,
-        opts,
-        &mut stats,
-        &mut out,
-        &mut accept,
-        &mut stop,
-        split_heuristic,
-        tail_enum_bits,
-        batch_split_bits,
-        0,
-    );
-    (out, stats)
     degree: u32,
     multiplier_mask: u64,
     criterion: &F5Criterion,
@@ -2396,60 +2354,6 @@ pub(crate) fn f5_rows_monos_with_f4_count(
 pub(crate) fn f5_rows_packed_full_columns(
     polys: &[F2BoolPoly],
     n_vars: usize,
-    opts: &SolveOptions,
-    stats: &mut SolveStats,
-    out: &mut Vec<u64>,
-    accept: &mut impl FnMut(u64) -> bool,
-    stop: &mut bool,
-    split_heuristic: SplitHeuristic,
-    tail_enum_bits: usize,
-    batch_split_bits: usize,
-    deferred_decisions: usize,
-) {
-    if *stop || out.len() >= opts.max_solutions {
-        return;
-    }
-    // A branch that already assigned every Boolean variable needs no further
-    // Macaulay reduction. Verify it directly against the untouched source
-    // equations. On a complete depth-d refutation tree this removes all 2^d
-    // leaf matrices without changing the accepted root set.
-    if assignment.iter().all(Option::is_some) {
-        let mut point = 0u64;
-        for (variable, value) in assignment.iter().enumerate() {
-            if *value == Some(true) {
-                point |= 1u64 << variable;
-            }
-        }
-        if original.iter().all(|equation| equation.eval(point) == 0) {
-            out.push(point);
-            if accept(point) {
-                *stop = true;
-            }
-        }
-        return;
-    }
-    if stats.reductions >= opts.node_budget {
-        stats.exhausted = true;
-        return;
-    }
-
-    system.retain(|p| !p.is_zero());
-    if system.iter().any(is_constant_one) {
-        stats.infeasible_branches += 1;
-        return;
-    }
-    // Reduce, propagate, repeat until the algebra stops learning. A batched
-    // split branch skips this expensive loop until its decision countdown is
-    // exhausted; cheap zero/constant checks above still run at every node.
-    if deferred_decisions == 0 {
-        loop {
-        let reduced = match reduce_system(&system, n_vars, opts.engine, stats) {
-            Some(r) => r,
-            None => break, // no reduction available; split instead
-        };
-        if reduced.iter().any(is_constant_one) {
-            stats.infeasible_branches += 1;
-            return;
     degree: u32,
     criterion: &F5Criterion,
 ) -> Option<(usize, Vec<u64>, Vec<Vec<u64>>)> {
@@ -2534,49 +2438,8 @@ pub(crate) fn f5_rows_packed_full_columns(
         for (seen, &word) in used.iter_mut().zip(row) {
             *seen |= word;
         }
-        }
     }
 
-    let free_variables: Vec<usize> = assignment
-        .iter()
-        .enumerate()
-        .filter_map(|(variable, value)| value.is_none().then_some(variable))
-        .collect();
-    if tail_enum_bits > 0 && free_variables.len() <= tail_enum_bits {
-        stats.tail_enumerations += 1;
-        let mut fixed = 0u64;
-        for (variable, value) in assignment.iter().enumerate() {
-            if *value == Some(true) {
-                fixed |= 1u64 << variable;
-            }
-        }
-        let assignments = 1usize << free_variables.len();
-        let out_before = out.len();
-        let valid = tail_zero_assignments(original, &assignment, &free_variables);
-        for tail in 0..assignments {
-            let mut point = fixed;
-            for (bit, &variable) in free_variables.iter().enumerate() {
-                if (tail >> bit) & 1 == 1 {
-                    point |= 1u64 << variable;
-                }
-            }
-            stats.tail_assignments_tested += 1;
-            if valid[tail] {
-                out.push(point);
-                if accept(point) {
-                    *stop = true;
-                    return;
-                }
-                if out.len() >= opts.max_solutions {
-                    return;
-                }
-            }
-        }
-        if out.len() == out_before {
-            stats.infeasible_branches += 1;
-        }
-        return;
-    }
     let last_bits = full_cols % 64;
     let last_mask = if last_bits == 0 {
         u64::MAX
@@ -2592,12 +2455,6 @@ pub(crate) fn f5_rows_packed_full_columns(
     Some((full_count, cols, matrix))
 }
 
-    match choose_split_variable(&system, &assignment, split_heuristic) {
-        None => {
-            let mut pt = 0u64;
-            for (i, a) in assignment.iter().enumerate() {
-                if *a == Some(true) {
-                    pt |= 1 << i;
 /// Hand every non-empty Macaulay row (ascending monomial masks, odd
 /// multiplicities kept) to `visit`, in generator-then-multiplier order;
 /// returns the row count, or `None` once it exceeds the size limits.
@@ -7492,20 +7349,6 @@ mod tests {
                     .iter()
                     .map(|e| permute_poly(e, &perm))
                     .collect();
-                solve_rec(
-                    specialised,
-                    original,
-                    branch,
-                    n_vars,
-                    opts,
-                    stats,
-                    out,
-                    accept,
-                    stop,
-                    split_heuristic,
-                    tail_enum_bits,
-                    batch_split_bits,
-                    child_deferred,
                 for (rebuild_on_drop, support_local) in
                     [(false, false), (true, false), (false, true), (true, true)]
                 {
