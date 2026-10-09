@@ -28,9 +28,9 @@ on:
 
 concurrency:
   group: release-${{ github.ref }}
-  # Never cancel a release mid-upload: a half-uploaded release is worse than
-  # a redundant one.
-  cancel-in-progress: false
+  # Main releases finish their uploads. Superseded PR dry runs cannot
+  # publish and may be cancelled so the latest head gets tested promptly.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -210,6 +210,8 @@ jobs:
           grep -Fq '"degree_coverage": "PARTIAL"' search-result.json
           "./isogeny$ext" verify --input p224-1471 > verification.json
           grep -Fq '"exact_rational_map_check": "PASS"' verification.json
+          "./isogeny$ext" search --curve p192 --ell 73 --method modpoly --out p192-73 --timeout 180 > full-result.json
+          grep -Fq '"degree_coverage": "COMPLETE"' full-result.json
       - name: Stage the dedicated tool archive
         shell: bash
         run: |
@@ -379,6 +381,12 @@ jobs:
           The CUDA binary is compiled, not GPU-tested: GitHub runners have no GPU.
           NOTES
           printf '\nBuilt from commit %s.\n' "$GITHUB_SHA" >> /tmp/notes.md
+      - name: Pin the release tag to the built source commit
+        # ReleaseMe otherwise resolves the current branch tip when creating
+        # the tag; main may have advanced while the binaries were building.
+        run: |
+          git tag "${{ needs.meta.outputs.tag }}" "$GITHUB_SHA"
+          git push origin "refs/tags/${{ needs.meta.outputs.tag }}"
       - name: Publish with ReleaseMe
         # ReleaseMe v1.1.0, pinned to the verified immutable tag revision.
         uses: dev-build-deploy/release-me@cede87fd8a4829ef571dff6bde807ebbfcaeb3e9

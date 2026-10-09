@@ -70,7 +70,10 @@ Exit: 0 passed; 1 failed; 2 usage; 3 timeout/resource limit/incomplete construct
 ";
 
 fn sha256_hex(bytes: &[u8]) -> String {
-    isogeny_algos::sha256::sha256_hex(bytes)
+    hash_sha256::sha256(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 fn standard_order(name: &str) -> Int {
     supervisor::order(name)
@@ -328,9 +331,11 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
                 timeout,
             );
             let receipt: Value = serde_json::from_str(&receipt.dump()).unwrap();
-            let summary = json!({"schema":"large-degree-isogeny-search/v1","source_commit":env!("ISOGENY_GIT_COMMIT"),"tool":provenance(),
+            let summary = json!({"schema":"isogeny-search/v1","source_commit":env!("ISOGENY_GIT_COMMIT"),"tool":provenance(),
                 "executable_sha256":sha256_hex(&fs::read(&executable).map_err(|e| e.to_string())?),
-                "protocol_sha256":sha256_hex(if single {KERNEL_PROTOCOL} else {GENERAL_PROTOCOL}),"timeout_seconds":timeout,
+                "reference_protocol_sha256":sha256_hex(if single {KERNEL_PROTOCOL} else {GENERAL_PROTOCOL}),"timeout_seconds":timeout,
+                "execution_spec":{"curve":name,"ell":ell,"method":if single {"kernel"} else {"modpoly"},"seed":1,
+                    "construction_timeout_seconds":timeout,"resident_memory_limit_bytes":"8589934592","independent_replay":o.get("construct-only").is_none()},
                 "attempts":[{"curve":name,"ell":ell,"receipt":receipt}]});
             fs::write(
                 out.join("search.json"),
