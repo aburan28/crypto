@@ -152,7 +152,7 @@ impl<F: Field> Phi<F> {
     /// products, against the O(l^6) dense solve of `compute_linear_algebra`.
     pub fn compute_hecke(f: &F, ell: usize) -> Phi<F> {
         assert!(
-            f.char() > ell as u64 + 1 || f.char() == 0,
+            f.characteristic_exceeds(ell as u64 + 1) || f.char() == 0,
             "characteristic must exceed l + 1"
         );
         let l = ell;

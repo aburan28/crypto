@@ -412,7 +412,7 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
                 y,
                 10.,
                 &format!(
-                    "{} | degree {} | {} | receipt: evidence-v2/{}/ell-{}.receipt.json",
+                    "{} | degree {} | {} | receipt: evidence-v4/{}/ell-{}.receipt.json",
                     s.name,
                     a["ell"],
                     a["receipt"]["status"].as_str().unwrap(),
@@ -424,7 +424,7 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
         }
     }
     y -= 8.;
-    wrapped(&mut p1,&mut y,"Bounds: all primes from 67 through 4093 were screened. Every split degree through 257 was attempted, plus the first split prime at or above 509, 1009, 2003 and 4000 for each source. Each construction had a 180-second process budget. Other split primes are candidates without constructed maps.",11.);
+    wrapped(&mut p1,&mut y,"Bounds: all primes from 67 through 4093 were screened. Every split degree through 257 was attempted, plus the first split prime at or above 509, 1009, 2003 and 4000 for each source. Each construction had a 180-second budget and a sampled 8 GiB RSS cap. Other split primes remain candidates.",11.);
     wrapped(&mut p1,&mut y,"Verification: the existing walker's independent implementation checks squarefreeness, torsion, subgroup closure, and the Velu codomain. Exact rational-map substitution and 20 fresh public scalar-transport checks pass for every map; each mapped nonidentity generator satisfies the published prime order.",11.);
     wrapped(&mut p1,&mut y,"Interpretation boundary: a split Frobenius polynomial supplies candidate eigenlines. Only completed, independently replayed kernels and maps count as certified constructions. A timeout is a resource-bounded outcome, not a nonexistence result. ECDLP-cost changes were not measured.",11.);
     text(&mut p1, 42., y - 8., 13., "Sources and evidence");
@@ -432,9 +432,9 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
     for t in [
         "BMSS: https://arxiv.org/abs/cs/0609020",
         "New native algorithms: isogeny_algos/docs/USAGE.md",
-        "Frozen protocol: PROTOCOL.md; raw evidence: evidence-v2/",
-        "Search: evidence-v2/search.json; independent certification: evidence-v2/replay.json",
-        "Exact target models and generators: evidence-v2/curves.json",
+        "Frozen protocol: PROTOCOL.md; raw evidence: evidence-v4/",
+        "Search: evidence-v4/search.json; independent certification: evidence-v4/replay.json",
+        "Exact target models and generators: evidence-v4/curves.json",
     ] {
         wrapped(&mut p1, &mut y, t, 10.);
     }
@@ -473,12 +473,14 @@ fn pdf(path: &Path, stats: &[Stats], ops: &[Op]) {
     let mut p3 = String::new();
     text(&mut p3, 42., 790., 21., "Validation and reproduction");
     let mut y = 751.;
-    for t in ["P-192 preflight found a dispatcher bug: four Montgomery limbs were selected for a modulus requiring three. The fix selects the exact limb count and has P-192 and limb-boundary regression checks. The failed first attempt remains in evidence/.",
-        "The mandated root cargo test --release --lib was attempted on the base revision and failed to compile with 643 pre-existing errors. The standalone algorithms tests and independent replay have separate logs. This baseline failure leaves the repository-wide validation and publication gate unresolved.",
+    for t in ["Two native fixes were required: P-192 now selects exactly three Montgomery limbs, and P-224's Hecke precondition compares the full characteristic against a small integer rather than its low word (1). The final standalone release suite passes 111 tests, including both regressions; the supervisor's two tests also pass.",
+        "Evidence history: evidence/ retains the initial P-192 preflight failure. evidence-v2/ retains the first 40-degree search and all 16 original P-224 assertion failures. It also preserves an interrupted P-192 degree-149 invocation without a receipt, followed by the sealed retry. Those extra invocations are separate from the final distinct-degree counts.",
+        "Final evidence-v4/ reuses the 24 sealed P-192 trials byte for byte and executes fresh P-224 trials. evidence-v3/ retains a preflight RSS-monitor shutdown race. The corrected monitor samples every 25 ms and allows at most 100 ms of unavailable samples while the process exits; persistent unavailability fails closed.",
+        "The mandated root cargo test --release --lib failed to compile with 643 pre-existing errors both before and after the rebase. Independent replay and standalone tests pass separately. The repository-wide validation and pre-push publication gate remains unresolved; see validation/lib-test-after-rebase.log.",
         "Environment: Apple M4 Pro, 14 logical cores, 48 GiB RAM, macOS arm64. Elapsed values in process receipts are operational time-budget records on a shared host. No timing or speedup comparison is made.",
         "Reproduce from the feature branch: build isogeny_algos in release mode; run its p192_p224_large_degree_search example with the CLI path and a NEW output directory; build this study's replay binary; replay the directory against docs/curves/registry.json; then run the report binary.",
-        "Canonical views: this study adds exact curve models, not ECDLP measurements. The IC scoreboard, boundary ledger and progress timeline retain their existing performance results. Curve registration and roster views are updated separately where supported. See RESULTS.md for the exact status of each obligation.",
-        "The report source is report.rs. SEARCH-v2.log records progress. MANIFEST.json binds protocol, source files and evidence bytes. The editable vector visual is SEARCH.svg. Failures and timeouts are retained alongside completed maps."] {wrapped(&mut p3,&mut y,t,11.);}
+        "Canonical views: registered target models, native cover certificates, aliases, leaderboard rosters and browser identities are refreshed from the replay. Existing IC measurement bytes, the boundary ledger and progress timeline retain their performance results. See RESULTS.md for validation and delivery status.",
+        "Source: report.rs. Final progress: SEARCH-final.log. MANIFEST.json binds protocol, source, executable versions and evidence bytes. SEARCH.svg is editable. Failures and timeouts remain alongside the completed maps."] {wrapped(&mut p3,&mut y,t,11.);}
     let pages = vec![(595, 842, p1), (842, 595, p2), (595, 842, p3)];
     let mut objects = vec![
         String::new(),
@@ -521,7 +523,7 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     assert_eq!(args.len(), 2, "usage: report STUDY_DIR REGISTRY_JSON");
     let study = Path::new(&args[0]);
-    let evidence = study.join("evidence-v2");
+    let evidence = study.join("evidence-v4");
     let search = load(&evidence.join("search.json"));
     let replay = load(&evidence.join("replay.json"));
     assert_eq!(replay["status"], "PASS");
@@ -608,7 +610,7 @@ fn main() {
     register(
         Path::new(&args[1]),
         curves["curves"].as_array().unwrap(),
-        "research/p192_p224_large_degree_isogenies_20261008/evidence-v2/curves.json",
+        "research/p192_p224_large_degree_isogenies_20261008/evidence-v4/curves.json",
     );
     let mut md=String::from("# P-192 / P-224 large prime-degree isogeny search\n\nDated 2026-10-08. The requested search used the new native algorithms and extended prime-degree screening beyond 1009, through 4093. Construction and structural screening are reported separately.\n\n| Source | Prime degrees screened | Split | Inert | Repeated eigenvalue | Attempts | Completed degrees | Timeouts | Failed | Certified maps | Largest certified degree |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n");
     for s in &stats {
@@ -629,7 +631,7 @@ fn main() {
         )
         .unwrap();
     }
-    md.push_str("\nThe frozen [protocol](PROTOCOL.md) attempted every split prime from 67 through 257 plus the first split prime at or above 509, 1009, 2003 and 4000 for each source. Each child process had a 180-second construction budget. All remaining split primes are candidate degrees without constructed maps. Each accepted degree supplied two maps, with explicit monic kernel polynomials, codomains and rational x-maps.\n\nThe [independent replay](evidence-v2/replay.json) uses the existing walker's separate field, polynomial, division-polynomial torsion, subgroup-closure and Velu codomain implementations. Each map also passed 20 public scalar-transport checks on fresh deterministic points. The standard generator's image was nonidentity and satisfied the published prime group order. Exact registered target models, generators and EC1 representations are in [curves.json](evidence-v2/curves.json). This replay is independent by implementation on the same host.\n\n![Certified examples and coverage](SEARCH.svg)\n\n## Construction beyond 1009\n\n| Source | Degree | Outcome | Evidence |\n|---|---:|---|---|\n");
+    md.push_str("\nThe frozen [protocol](PROTOCOL.md) attempted every split prime from 67 through 257 plus the first split prime at or above 509, 1009, 2003 and 4000 for each source. Each child process had a 180-second construction budget. All remaining split primes are candidate degrees without constructed maps. Each accepted degree supplied two maps, with explicit monic kernel polynomials, codomains and rational x-maps.\n\nThe [independent replay](evidence-v4/replay.json) uses the existing walker's separate field, polynomial, division-polynomial torsion, subgroup-closure and Velu codomain implementations. Each map also passed 20 public scalar-transport checks on fresh deterministic points. The standard generator's image was nonidentity and satisfied the published prime group order. Exact registered target models, generators and EC1 representations are in [curves.json](evidence-v4/curves.json). This replay is independent by implementation on the same host.\n\n![Certified examples and coverage](SEARCH.svg)\n\n## Construction beyond 1009\n\n| Source | Degree | Outcome | Evidence |\n|---|---:|---|---|\n");
     for s in &stats {
         for a in &s.attempts {
             let ell = a["ell"].as_u64().unwrap();
@@ -637,7 +639,7 @@ fn main() {
                 let preset = a["curve"].as_str().unwrap();
                 writeln!(
                     md,
-                    "| {} | {} | {} | [receipt](evidence-v2/{}/ell-{}.receipt.json) |",
+                    "| {} | {} | {} | [receipt](evidence-v4/{}/ell-{}.receipt.json) |",
                     s.name,
                     ell,
                     a["receipt"]["status"].as_str().unwrap(),
@@ -648,7 +650,34 @@ fn main() {
             }
         }
     }
-    md.push_str("\nA split degree is a structural candidate. A failed or timed-out construction leaves its explicit map unresolved and does not prove nonexistence. The search measured no ECDLP-cost change. Process elapsed values are operational time-budget records on a shared host, not isolated benchmarks.\n\n## Validation, source and delivery status\n\nThe initial P-192 preflight exposed a limb-dispatch bug in the CLI; the failed launch remains in [evidence/](evidence/) and [SEARCH.log](SEARCH.log). The fix chooses the exact Montgomery limb width and adds P-192 order/map and limb-boundary regressions. The complete standalone test log is [algorithms-tests.log](validation/algorithms-tests.log).\n\nThe mandatory root release-library check was run on the unchanged base revision and failed to compile with 643 existing errors. Its [full log](validation/lib-test.log) is retained. The independent replay executable imports the original five walker modules directly, preserving the verifier while avoiding unrelated failing modules. The repository-wide validation/publication gate remains unresolved until the baseline compiles. See [execution notes](EXECUTION_NOTES.md).\n\nThe IC scoreboard, boundary ledger, progress timeline and isogeny-walk guide are unchanged: this result adds isogeny constructions and exact target models, with no new IC/rho ratio, boundary promotion or integration into the older walker. The target registry is updated natively from frozen replayed models. Roster/dashboard regeneration and publication are tracked separately.\n\nSources: [BMSS](https://arxiv.org/abs/cs/0609020), [native CLI/API](../../isogeny_algos/docs/USAGE.md), [existing walker](../../docs/isogeny-walk/README.md). The vector and PDF share editable [report.rs](report.rs) source; [SEARCH.pdf](SEARCH.pdf) includes the report and visual.\n\n## Reproduction\n\n```sh\ncargo build --manifest-path isogeny_algos/Cargo.toml --locked --release --bin isogeny-algos --example p192_p224_large_degree_search\nisogeny_algos/target/release/examples/p192_p224_large_degree_search isogeny_algos/target/release/isogeny-algos NEW_EVIDENCE_DIR c70c32d486a3ac7531fe27f7193d9f09caa58344\nCARGO_TARGET_DIR=target cargo build --manifest-path research/p192_p224_large_degree_isogenies_20261008/Cargo.toml --locked --release --offline\ntarget/release/replay NEW_EVIDENCE_DIR docs/curves/registry.json\n```\n\n[MANIFEST.json](MANIFEST.json) binds protocol, source and evidence bytes. Failed builds and preflight launches are retained; the successful rerun uses a separate directory.\n");
+    md.push_str(r#"
+A split degree is a structural candidate. A failed or timed-out construction leaves its explicit map unresolved and does not prove nonexistence. Construction beyond 1009 remains unresolved where the individual receipts time out. The search measured no ECDLP-cost change. Process elapsed values are operational time-budget records on a shared host, without isolated benchmark measurements.
+
+## Validation, source and delivery status
+
+Two native implementation fixes were required. The initial P-192 preflight exposed a limb-dispatch bug; the failed launch remains in [evidence/](evidence/) and [SEARCH.log](SEARCH.log). The dispatcher now chooses the exact Montgomery limb count. P-224's Hecke modular-polynomial precondition used the low-word characteristic accessor, whose value is 1 for this 224-bit prime. The precondition now uses an exact characteristic comparison. Its regression compares the Hecke polynomial with the separate linear-algebra route and requires two verified maps at a split degree. The final [standalone release suite](validation/algorithms-tests-p224-fix.log) passed all 111 tests. The [search example](validation/example-tests-final.log) passed both tests. The [exact map-identity tests](validation/exact-map-tests.log) passed, including rejection of a changed numerator and changed target coefficient.
+
+The final table counts distinct planned degrees. [evidence-v2/search.json](evidence-v2/search.json) preserves the first complete 40-degree search, including the 16 P-224 assertion failures before its fix. It also retains one interrupted P-192 degree-149 invocation without a completed receipt, separately from the sealed retry. Final [evidence-v4/](evidence-v4/) reuses all 24 sealed P-192 trials and their screen byte for byte after command/digest checks; the P-224 trials were executed fresh with the corrected CLI. The original CLI is preserved locally as `isogeny-algos-pre-p224-fix`, with its digest in the manifest.
+
+[evidence-v3/](evidence-v3/) preserves a P-224 preflight RSS-monitor shutdown race without reclassifying its receipt. The corrected supervisor retains the 180-second deadline and sampled 8 GiB RSS cap, samples every 25 ms, and allows at most 100 ms of transient unavailable samples while the child exits. Persistent unavailability fails closed. The final receipts include missing-sample counts and the grace interval. Brief memory growth between samples remains possible.
+
+The mandatory root release-library check failed to compile with 643 existing errors before and after rebasing onto upstream `2fe5cec8a4a9d8d55c8e0abec9fe22852f3a3726`. Its [original log](validation/lib-test.log) and [post-rebase log](validation/lib-test-after-rebase.log) are retained. The independent replay executable imports the original five walker modules directly; every completed map passes kernel checks, exact polynomial substitution, and fresh public subgroup transport. The repository-wide validation and pre-push publication gate remains unresolved until the baseline compiles. See [execution notes](EXECUTION_NOTES.md).
+
+The target registry is updated natively from frozen replayed models. Native cover certificates and the linked cover graph, aliases, leaderboard curve rosters, and browser curve identities are refreshed together. The catalogue tools reproduce the existing outputs exactly before extension. Existing IC measurement bytes are preserved. The boundary ledger, performance scoreboard, progress timeline, and older walker guide receive no new performance row: the experiment supplies maps and exact models without an IC/rho ratio or boundary promotion.
+
+Sources: [BMSS](https://arxiv.org/abs/cs/0609020), [native CLI/API](../../isogeny_algos/docs/USAGE.md), [existing walker](../../docs/isogeny-walk/README.md). The vector and PDF share editable [report.rs](report.rs) source; [SEARCH.pdf](SEARCH.pdf) includes the report and visual.
+
+## Reproduction
+
+```sh
+cargo build --manifest-path isogeny_algos/Cargo.toml --locked --release --bin isogeny-algos --example p192_p224_large_degree_search
+isogeny_algos/target/release/examples/p192_p224_large_degree_search isogeny_algos/target/release/isogeny-algos NEW_EVIDENCE_DIR c70c32d486a3ac7531fe27f7193d9f09caa58344
+cargo build --manifest-path research/p192_p224_large_degree_isogenies_20261008/Cargo.toml --locked --release --offline --bins
+research/p192_p224_large_degree_isogenies_20261008/target/release/replay NEW_EVIDENCE_DIR docs/curves/registry.json
+```
+
+[COMMANDS.md](COMMANDS.md) records the actual multi-phase execution and catalogue closeout. [MANIFEST.json](MANIFEST.json) binds the frozen protocol, source files, executable versions, canonical outputs, and evidence bytes. Failed builds and preflight launches remain preserved in their original directories.
+"#);
     fs::write(study.join("RESULTS.md"), md).unwrap();
     let ops = scene(&stats, &replay);
     fs::write(study.join("SEARCH.svg"), svg(&ops)).unwrap();
@@ -712,8 +741,14 @@ fn main() {
     let mut executables = vec![];
     for p in [
         "isogeny_algos/target/release/isogeny-algos",
+        "isogeny_algos/target/release/isogeny-algos-pre-p224-fix",
         "isogeny_algos/target/release/large-degree-search-supervised",
         "isogeny_algos/target/release/large-degree-search-resumable",
+        "isogeny_algos/target/release/large-degree-search-monitor-fixed",
+        "research/p192_p224_large_degree_isogenies_20261008/target/release/replay",
+        "research/p192_p224_large_degree_isogenies_20261008/target/release/report",
+        "research/p192_p224_large_degree_isogenies_20261008/target/release/catalogue-covers",
+        "research/p192_p224_large_degree_isogenies_20261008/target/release/catalogue-views",
     ] {
         let b = fs::read(p).unwrap();
         executables.push(json!({"path":p,"bytes":b.len(),"sha256":hash(&b),"optimization":"release, level 3","included_in_git":false}));
