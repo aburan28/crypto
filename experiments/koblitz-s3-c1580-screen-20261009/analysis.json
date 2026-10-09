@@ -1,0 +1,119 @@
+{
+  "aa_p95_absolute_log_ratio": {
+    "baseline": 1.2637539057011653,
+    "expanded": 1.5436443334020014
+  },
+  "controlled_speedup": null,
+  "freeze_sha256": "2004f666c82301ab10fe4cd7c5c46c0c5cc1403cef920cc576d1f94e263f24f6",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1580_paired_screen_analysis_v1",
+  "ledger_decompressed_sha256": "c46eb8b42d1fa528af623827610ff2791746d205bda1065e28597c4f7814b4ca",
+  "native_and_fixture_verified_count": 32,
+  "online_bootstrap95_target_resample": [
+    0.31358471591974957,
+    1.737820060102413
+  ],
+  "online_geomean_baseline_over_expanded": 0.8225983836653448,
+  "online_targets_at_least_2x": 1,
+  "raw_reports_archive_sha256": "dccf96f972e92ad600967513284e4f785b7e26d57b4c7ee4486678d0db89789e",
+  "root_call_bootstrap95_target_resample": [
+    0.329199321589913,
+    1.7998992609654956
+  ],
+  "root_call_geomean_baseline_over_expanded": 0.8288536855798526,
+  "root_call_targets_at_least_2x": 2,
+  "run_count": 32,
+  "screen_advance_root_call_geomean_ratio_min": 2,
+  "screen_advanced": false,
+  "target_count": 8,
+  "targets": [
+    {
+      "baseline_online_ms_geomean": 2.405749227112003,
+      "baseline_over_expanded_call_ratio": 0.9687074829931973,
+      "baseline_over_expanded_online_ratio": 1.7085206498477197,
+      "baseline_target_s3_calls": 2848,
+      "expanded_online_ms_geomean": 1.4080890548946114,
+      "expanded_target_s3_calls": 2940,
+      "label": "T101",
+      "point_sha256": "7daabc7f33592c3bbaaacb0e9ec6848bdf80c767748ad84358d5aebfd56282e8",
+      "workload_id": "bd2e6dd4f802"
+    },
+    {
+      "baseline_online_ms_geomean": 0.15189335732677714,
+      "baseline_over_expanded_call_ratio": 0.06705539358600583,
+      "baseline_over_expanded_online_ratio": 0.05078043241420277,
+      "baseline_target_s3_calls": 138,
+      "expanded_online_ms_geomean": 2.9911788873285396,
+      "expanded_target_s3_calls": 2058,
+      "label": "T102",
+      "point_sha256": "ebf5ee6d1cfe1ecfc5b59b51d45fb0216739aee350d46ec16799c2683db623d0",
+      "workload_id": "82adfe239866"
+    },
+    {
+      "baseline_online_ms_geomean": 0.2910478259667988,
+      "baseline_over_expanded_call_ratio": 1.427710843373494,
+      "baseline_over_expanded_online_ratio": 1.2145704856421164,
+      "baseline_target_s3_calls": 474,
+      "expanded_online_ms_geomean": 0.23963024740629052,
+      "expanded_target_s3_calls": 332,
+      "label": "T103",
+      "point_sha256": "77ed2fd8b4d89dc38b093cb224ff11c4327d46c860a9d00c58bf4f97d399fe62",
+      "workload_id": "b426ec6a0687"
+    },
+    {
+      "baseline_online_ms_geomean": 0.4568030313734794,
+      "baseline_over_expanded_call_ratio": 0.8293838862559242,
+      "baseline_over_expanded_online_ratio": 0.9540693661067191,
+      "baseline_target_s3_calls": 700,
+      "expanded_online_ms_geomean": 0.47879435982475815,
+      "expanded_target_s3_calls": 844,
+      "label": "T104",
+      "point_sha256": "0065ae76a2510aeb0438324e81e2fa8d5cc5ea80b42375d52a907d3dc177a308",
+      "workload_id": "0e87d974cb13"
+    },
+    {
+      "baseline_online_ms_geomean": 0.43054293570560415,
+      "baseline_over_expanded_call_ratio": 1.7035573122529644,
+      "baseline_over_expanded_online_ratio": 1.29037389417661,
+      "baseline_target_s3_calls": 862,
+      "expanded_online_ms_geomean": 0.3336575062845133,
+      "expanded_target_s3_calls": 506,
+      "label": "T105",
+      "point_sha256": "bb603a8578f118448568d73564b53e9099859739c16d0774a522b6ac28b17484",
+      "workload_id": "28e97031b974"
+    },
+    {
+      "baseline_online_ms_geomean": 0.2436044565479047,
+      "baseline_over_expanded_call_ratio": 0.20499479708636836,
+      "baseline_over_expanded_online_ratio": 0.2586197786008804,
+      "baseline_target_s3_calls": 394,
+      "expanded_online_ms_geomean": 0.9419405501999583,
+      "expanded_target_s3_calls": 1922,
+      "label": "T106",
+      "point_sha256": "b387c56b46cd4ef7c8841ef2f5b74491bbcc6f4c7f0e0f29076d0565635ba133",
+      "workload_id": "7de9e17e5b40"
+    },
+    {
+      "baseline_online_ms_geomean": 0.8057292703662936,
+      "baseline_over_expanded_call_ratio": 3.4162162162162164,
+      "baseline_over_expanded_online_ratio": 3.138349202348992,
+      "baseline_target_s3_calls": 1264,
+      "expanded_online_ms_geomean": 0.2567366530669121,
+      "expanded_target_s3_calls": 370,
+      "label": "T107",
+      "point_sha256": "8f53051ad01bc920fad53449c0d88761de67c32422049581cd369103d8a1fc9a",
+      "workload_id": "7f09c40d056b"
+    },
+    {
+      "baseline_online_ms_geomean": 0.8777328532771231,
+      "baseline_over_expanded_call_ratio": 2.427480916030534,
+      "baseline_over_expanded_online_ratio": 1.991154425301963,
+      "baseline_target_s3_calls": 1272,
+      "expanded_online_ms_geomean": 0.4408160623423334,
+      "expanded_target_s3_calls": 524,
+      "label": "T108",
+      "point_sha256": "59985d590a1e2578719e93167c5bb6744d913073d6e335366f248851ec1daeb2",
+      "workload_id": "a56ff24454f9"
+    }
+  ]
+}
