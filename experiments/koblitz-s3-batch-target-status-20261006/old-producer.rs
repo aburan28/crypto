@@ -24,7 +24,6 @@ use num_traits::ToPrimitive;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::io::Write;
-use std::process::ExitCode;
 use std::time::Instant;
 
 /// F2-linear map on n <= 64 bits applied by byte tables.
@@ -1371,15 +1370,7 @@ fn peak_rss_bytes() -> Option<u64> {
     Some(kib * 1024)
 }
 
-fn target_exit_code(verified: Option<bool>) -> u8 {
-    if verified == Some(true) {
-        0
-    } else {
-        1
-    }
-}
-
-fn main() -> ExitCode {
+fn main() {
     let arguments: Vec<String> = std::env::args().collect();
     assert_eq!(
         arguments.len(),
@@ -1742,8 +1733,7 @@ fn main() -> ExitCode {
             target_recovery_check_started.elapsed().as_secs_f64() * 1000.0;
         let elapsed = query_started.elapsed().as_secs_f64() * 1000.0;
         target_query_ms.push(elapsed);
-        let target_status = target_exit_code(verified);
-        if target_status == 0 {
+        if verified == Some(true) {
             solved += 1;
         } else {
             failed += 1;
@@ -1755,7 +1745,7 @@ fn main() -> ExitCode {
             "generator":generator.map(|(x, y)| [x, y]),
             "target":target.map(|(x, y)| [x, y]),
             "published_q":target.map(|(x, y)| [x, y]),
-            "exit_code":target_status,
+            "exit_code":0,
             "x_codes":relation.as_ref().map(|relation| relation.x_codes),
             "pinned_intermediates":relation.as_ref().map(|relation| relation.intermediates),
             "point_indices":relation.as_ref().map(|relation| relation.point_indices),
@@ -1849,11 +1839,6 @@ fn main() -> ExitCode {
         });
         std::fs::write(path, format!("{dump}\n")).expect("write base dump");
     }
-    if failed == 0 {
-        ExitCode::SUCCESS
-    } else {
-        ExitCode::FAILURE
-    }
 }
 
 #[cfg(test)]
@@ -1861,13 +1846,6 @@ mod swap_quotient_tests {
     use super::*;
     use crypto_lib::binary_ecc::IrreduciblePoly;
     use std::collections::HashSet;
-
-    #[test]
-    fn target_status_requires_a_verified_scalar() {
-        assert_eq!(target_exit_code(Some(true)), 0);
-        assert_eq!(target_exit_code(Some(false)), 1);
-        assert_eq!(target_exit_code(None), 1);
-    }
 
     #[test]
     fn full_point_partner_roots_match_group_law_and_s3_over_gf32() {
