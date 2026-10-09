@@ -566,6 +566,8 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         .unwrap()
         .starts_with("IC1N17Ckb1fb442PDP2mitmfrobeniusRCwalkLAincrementalgaussTDjointISO0h"));
     assert_eq!(claim["target_count"], 1);
+    assert_eq!(claim["timing_class"], "single_target_online");
+    assert_eq!(claim["ic_online_ms"], claim["ic_online_wall_ms"]);
     assert_eq!(claim["ic_target_hash"], claim["rho_target_hash"]);
     assert_eq!(
         claim["ic_resource_envelope"],
@@ -574,6 +576,7 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     let (ok, c, _) = check();
     assert!(!ok);
     assert_eq!(c["status"], "FAIL");
+    assert_eq!(c["pairing_errors"], serde_json::json!([]));
     assert_eq!(
         c["validation_errors"],
         serde_json::json!([
@@ -582,13 +585,7 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest"
         ])
     );
-    assert_eq!(
-        c["missing_stage_fields"],
-        serde_json::json!([
-            "ic_replay_certificate_sha256",
-            "rho_replay_certificate_sha256"
-        ])
-    );
+    assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
     assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
 
     // A replay on the session's own host class is not independent.
@@ -614,11 +611,12 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     );
     assert!(!ok && err.contains("own host class"), "{err}");
 
-    // The same receipt as another host class would record it.  The
-    // receipt is the auditor's word: a claim cites its digest and pointer
-    // so a reader can fetch it and rerun the audit.
+    // Synthetic receipt metadata exercises the class gate only.  A real
+    // independence assertion also needs the external runner's custody
+    // record; self-reported classes do not attest physical separation.
     let mut r: Value = serde_json::from_str(&std::fs::read_to_string(&receipt).unwrap()).unwrap();
     r["auditor_env_class_id"] = Value::from("ECBENV2h000000000000");
+    r["auditor_hardware_class_id"] = Value::from("ECBHW1h000000000000");
     let elsewhere = dir.join("receipt-elsewhere.json");
     std::fs::write(&elsewhere, serde_json::to_string_pretty(&r).unwrap()).unwrap();
     let (ok, _, err) = build(
@@ -635,6 +633,33 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     let (ok, c, err) = check();
     assert!(ok, "{c} {err}");
     assert_eq!(c["status"], "PASS");
+
+    // The current ledger names the five phases through
+    // `primary_ic_online_phase_keys`. Dropping their explicit older
+    // field list must never make the phase-sum check vacuous.
+    let mut bad_phase: Value =
+        serde_json::from_str(&std::fs::read_to_string(&claim_path).unwrap()).unwrap();
+    bad_phase["ic_online_phase_ms"]["T_target_query_ms"] = Value::from(
+        bad_phase["ic_online_phase_ms"]["T_target_query_ms"]
+            .as_f64()
+            .unwrap()
+            + 1.0,
+    );
+    let bad_phase_path = dir.join("bad-phase.json");
+    std::fs::write(&bad_phase_path, serde_json::to_string(&bad_phase).unwrap()).unwrap();
+    let (ok, out, err) = ecbench(&[
+        "claim",
+        "check",
+        "--report",
+        bad_phase_path.to_str().unwrap(),
+    ]);
+    assert!(!ok, "{err}");
+    let checked: Value = serde_json::from_str(&out).unwrap();
+    assert!(checked["validation_errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e.as_str() == Some("IC exclusive phase costs must sum to ic_online_wall_ms")));
 
     // The claim loads into the database beside its session, checked again.
     let (ok, sql, err) = ecbench(&["db", "sql", s, claim_path.to_str().unwrap()]);
