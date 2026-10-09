@@ -37,6 +37,23 @@ are recorded, both examples compile, and their example tests pass. Freeze the
 source and executable hashes in a receipt before collecting timings. This
 protocol fixes the input and decision rules; it is not a timing receipt.
 
+`run.py` implements two separate steps. After the final source builds, run
+`freeze --ic-binary <absolute path> --rho-binary <absolute path>` and save its
+JSON output as `freeze.json`; commit and push that file to this PR **before**
+running either arm. The freeze records the source commit, hashes of both
+executables, the lockfile, the two source files, this runner, and all workload
+inputs. Then invoke `run --freeze <absolute freeze.json> --ic-binary <same
+executable> --rho-binary <same executable> --run-dir <new run directory>`.
+The runner rejects modified or uncommitted source, changed binaries or inputs,
+and a freeze file that differs from the committed version. It refuses an
+existing run directory, records a preflight attempt, and preserves each arm's
+stdout, stderr, exit/resource status, and hashes. It always runs the frozen
+rho point after the IC arm, including when IC fails. The 16-GiB gate polls
+`/bin/ps` and also records the child's `wait4` peak. Before either arm begins,
+the runner checks that `/bin/ps` is usable in the actual execution context;
+a denial is a recorded preflight failure. This sandbox denied that check in
+ordinary execution, while an approved monitor preflight succeeded.
+
 For IC, invoke `koblitz_orbit_dlp_fast_online` with
 `construct:53:0:244 target_points.jsonl 20261009 <output.jsonl>` and set
 `KIC_DUMP_BASE` and `KIC_DUMP_RANK` to unique output paths. For rho, invoke
