@@ -27,6 +27,24 @@
 - Autolab runner: `research/sat_factor_base_review_20260908/autolab/`
 - Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
   `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
+
+## Reading discipline
+
+`research/` is 4.5 GB in 52,000 files. Read what the current step needs:
+
+- **Indexes before archives.** Status comes from the pointers above,
+  `docs/bounds/frontier.json`, and the ecbench database views; open a session
+  or note to act on it, not to find it.
+- **Locate, then read.** `rg -n` an exact id, slug, or term in the narrowest
+  directory, then read the matching range.
+- **Size before contents.** Check `wc -c` first. Read raw session outputs,
+  `*.jsonl`, logs and CSVs by key or range (`jq`, `rg`), never whole; a
+  session is read through its audit, replay or claim JSON.
+- **Paths, not contents,** in handoffs and subagent prompts.
+- **Off disk is not absent.** In a sparse checkout (`docs/sparse-checkout.md`)
+  a path `git ls-files` lists is materialized with
+  `scripts/sparse-checkout.sh add --path`, never reported missing.
+
 # AGENTS.md
 
 ## Preserve scope and report evidence
