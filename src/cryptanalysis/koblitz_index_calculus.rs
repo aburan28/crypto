@@ -1842,16 +1842,7 @@ impl FrobeniusFactorBase {
                         .entry(pack_fast(candidate))
                         .or_insert_with(|| from_fast_point(&fast, candidate));
                 }
-                current = match current {
-                    None => None,
-                    Some((mut x, mut y)) => {
-                        for _ in 0..kc.k {
-                            x = fast.gf.sqr(x);
-                            y = fast.gf.sqr(y);
-                        }
-                        Some((x, y))
-                    }
-                };
+                current = fast_frobenius(kc, &fast, current);
             }
         }
         classes.into_values().collect()
@@ -1903,18 +1894,11 @@ impl FrobeniusFactorBase {
         let identity = pack_fast(None);
         let mut layer: Vec<ArithFastPoint> = vec![None];
         let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
-        let frob = |p: ArithFastPoint| -> ArithFastPoint {
-            match p {
-                None => None,
-                Some(_) if !kc.frobenius_is_endomorphism => p,
-                Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
-            }
-        };
+        let frob = |p: ArithFastPoint| fast_frobenius(kc, &fast, p);
         for _ in 1..m {
             let reps = signed_frobenius_orbit_representatives_fast(
                 &fast,
-                kc.n,
-                kc.frobenius_is_endomorphism,
+                kc,
                 &layer,
             );
             // One batch for the reps × classes grid; replayed below in
@@ -1970,10 +1954,6 @@ impl FrobeniusFactorBase {
         classes: &[BinaryPoint],
         m: usize,
     ) -> bool {
-        let identity = pack_point(&BinaryPoint::Infinity);
-        let class_keys: HashSet<u64> = classes.iter().map(pack_point).collect();
-        let mut layer: Vec<BinaryPoint> = vec![BinaryPoint::Infinity];
-        let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
         match FastCurve::new(&kc.curve) {
             Some(fc) => fast_classes_can_cancel(kc, &fc, &classes, m),
             None => classes_can_cancel(kc, &classes, m),
@@ -2060,13 +2040,34 @@ fn signed_frobenius_orbit_representatives(
     reps
 }
 
+/// Apply the curve's q-power Frobenius to a word point.  For subfield
+/// curves q = 2^k; an isogenous model without this endomorphism is fixed.
+fn fast_frobenius(
+    kc: &KoblitzCurve,
+    fast: &FastBinaryCurve,
+    point: ArithFastPoint,
+) -> ArithFastPoint {
+    if !kc.frobenius_is_endomorphism {
+        return point;
+    }
+    match point {
+        None => None,
+        Some((mut x, mut y)) => {
+            for _ in 0..kc.k {
+                x = fast.gf.sqr(x);
+                y = fast.gf.sqr(y);
+            }
+            Some((x, y))
+        }
+    }
+}
+
 /// Word-level twin of [`signed_frobenius_orbit_representatives`]: same
 /// traversal over packed keys, so the representative sequence matches
 /// exactly while the arithmetic stays allocation-free.
 fn signed_frobenius_orbit_representatives_fast(
     fast: &FastBinaryCurve,
-    n: u32,
-    frobenius_is_endomorphism: bool,
+    kc: &KoblitzCurve,
     points: &[ArithFastPoint],
 ) -> Vec<ArithFastPoint> {
     let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
@@ -2077,14 +2078,10 @@ fn signed_frobenius_orbit_representatives_fast(
         }
         reps.push(p);
         let mut current = p;
-        for _ in 0..n {
+        for _ in 0..kc.n {
             seen.insert(pack_fast(current));
             seen.insert(pack_fast(FastBinaryCurve::neg(current)));
-            current = match current {
-                None => None,
-                Some(_) if !frobenius_is_endomorphism => current,
-                Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
-            };
+            current = fast_frobenius(kc, fast, current);
         }
     }
     reps
