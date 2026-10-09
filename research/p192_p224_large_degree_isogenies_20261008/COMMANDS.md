@@ -82,3 +82,16 @@ interrupted degree-149 invocation and earlier P-224 failures remain outside
 those final degree counts. Executable digests and source revisions are assigned
 to each evidence phase in `MANIFEST.json`. Closeout log paths are listed in
 `EXECUTION_NOTES.md`; incomplete builds and failed launches remain preserved.
+
+The dependent traits exporter was also attempted, and its existing root-library
+compilation failure is preserved in `validation/curve-traits-build.log`:
+
+```sh
+cargo run --locked --release --offline --bin curve_traits -- build
+research/p192_p224_large_degree_isogenies_20261008/target/release/report \
+  research/p192_p224_large_degree_isogenies_20261008 docs/curves/registry.json --check-manifest
+```
+
+The last command is read-only and checks every byte length and SHA-256 digest
+in the final manifest. The final manifest-generation invocation writes its
+status to the terminal so it cannot change a log after hashing that log.
