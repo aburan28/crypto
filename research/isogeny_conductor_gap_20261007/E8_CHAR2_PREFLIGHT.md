@@ -11,7 +11,11 @@ constructs a smooth-degree Kani representation from a given odd-degree
 isogeny. The question here is whether that proof, as written, instantiates
 for the degree-73 inert step in the C37 family over characteristic two.
 
-The input surface curve is `K0: y^2 + xy = x^3 + 1` over `F_(2^37)`, with
+The input surface curve is `K0: y^2 + xy = x^3 + 1` over `F_(2^37)`,
+registered as `icv1-f2m37-tm534059-32aad96b` with EC1 representation
+`EC1N37Ce0h0c51aa4aa7c3`. Its field modulus is `0x2000000053`, its
+prime-order subgroup has order `230603167`, cofactor `596`, and generator
+`(0x17262ad4f3, 0x82fe10673)` in that representation. It has
 `tau^2 + tau + 2 = 0`, trace `-534059`, and order `137439487532`. Its
 Frobenius-order conductor has a factor `73`. A curve at the inert 73-level
 is the intended other endpoint, but this preflight does not select an
@@ -78,8 +82,29 @@ flowchart LR
 
 ## Frozen-result receipt
 
-Pending execution after the protocol and source are committed. The receipt
-will report only the exact modular arithmetic and explicit hypothesis gate.
+Protocol and native source were committed at
+`0a5014e2ae64232eda5b609619e99ab8db660082`; a formatting-only source
+commit `8e7d9a6148dfdcce248392de715520ff7529b073` preceded the final run.
+On Rust 1.93.1, three native tests passed. The retained
+[`e8_char2_kani_preflight.json`](e8_char2_kani_preflight.json) is byte-identical
+to the preceding uncommitted development calculation; its SHA-256 is
+`6118d92f89aef25c0310e83f37405f56f414ed5b394578898ccdbe25f3c83a5e`.
+The final source SHA-256 is
+`76902d7be54f5948885ae3f5e4c1014a0194a97d62fcc44b78c38bb3e96f69f3`.
+The two-page [visual report](E8_CHAR2_PREFLIGHT.pdf) contains the source
+audit and branch diagram. It was rendered with the checked-in
+[`render_e8_pdf.swift`](render_e8_pdf.swift) on macOS; the PDF SHA-256 is
+`ea8a35fae95fffd41a3baf43f53c89de2448871e8d5220193357d6509f9164fd`.
+`pdfinfo`, `pdftotext`, and a two-page PNG render were checked after creation.
+
+For `M = 81`, the auxiliary degree is `m = 8`, so the cited Section 3
+coprimality hypothesis fails in characteristic two. The exact source-curve
+calculation gives `pi mod 9 = -tau`, of order `24`, and `pi mod 81 = 27-tau`,
+of order `216`. Full `K0[9]` is rational over `F_(2^(37*24))`; full
+`K0[81]` first appears at degree `216` over `F_(2^37)`. The split `M1=M2=9`
+uses the smaller torsion order, but no map or gluing step was implemented.
+The receipt stores `constructs_isogeny: false`, and the C37 prototype and
+`F_q` operation counts remain open.
 
 ## Remaining obligation
 
