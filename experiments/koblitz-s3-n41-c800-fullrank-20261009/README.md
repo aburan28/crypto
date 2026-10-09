@@ -33,3 +33,35 @@ The target labels were frozen after the C400 pilot and before C800 timing.
 The factor base size and full-rank recovery are declared differences from
 the baseline. Local wall-time ratios remain exploratory unless the CPU
 host-wide isolation and noise gates are met.
+
+## Frozen 24-target result
+
+The [raw ledger](local/raw_holdout96.jsonl.gz), [analysis](local/analysis.json),
+[checked Sage runtime](local/sage_runtime_info.json), and
+[independent Sage replay](local/sage_replay.json) retain the complete panel.
+All 96 native solves verified, and Sage independently recovered all 96
+scalars after checking both encoded factor bases, 1,736 distinct relation
+witnesses, and the two prepared relation matrices. C800 reached rank 800 on
+every run and used direct target recovery with zero fallback attempts.
+
+| One previously unseen N41 target at a time | C244 baseline | C800 full rank |
+| --- | ---: | ---: |
+| Verified native and Sage runs | 48/48 | 48/48 |
+| Usable factor-base points / folded columns | 20,008 / 244 | 65,600 / 800 |
+| Prepared rank | 243 | 800 |
+| Median online wall time | 0.536 ms | 0.150 ms |
+| Median target S3 calls | 1,234 | 71 |
+| Median reusable preparation, supplementary | 0.259 s | 2.486 s |
+| Root-table slot payload | 268,435,456 bytes | 2,147,483,648 bytes |
+| Additional retained indexed coordinates | 0 | 839,680,000 bytes |
+
+Across 24 paired target blocks, the exploratory geometric ratio of baseline
+to C800 online wall time is **3.514x**, with a target-bootstrap 95% interval
+`[2.661, 4.585]`. C800 was faster on 22 points; 19 point ratios were at
+least 2x. The geometric target S3-call ratio was 11.399x. The two repetitions
+of each arm had p95 absolute log time ratios of 0.885 and 0.889, respectively
+(about 2.42x within-arm spread). The macOS host has no exclusive-core
+isolation receipt, and its A/A spread exceeds the 0.10 noise gate. The
+controlled wall-time speedup is therefore unknown. The frozen rows remain
+useful for the target-work and correctness comparison; a host-isolated paired
+run is needed to promote the timing result.
