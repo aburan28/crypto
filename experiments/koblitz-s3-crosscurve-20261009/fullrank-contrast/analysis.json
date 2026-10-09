@@ -1,0 +1,85 @@
+{
+  "N53_over_N41_gain_ratio_hierarchical_bootstrap_95": [
+    0.5910342577368959,
+    3.722030538254892
+  ],
+  "N53_over_N41_geometric_gain_ratio": 1.4471316185135683,
+  "bootstrap_method": "20,000 deterministic independent target-block draws per curve, followed by two within-arm timing draws with replacement",
+  "controlled_speedup": null,
+  "curve_causal_effect": null,
+  "curves": {
+    "N41": {
+      "aa_noise_gate_pass": false,
+      "aa_p95_abs_log_online_ratio": {
+        "baseline": 0.8852497430152632,
+        "expanded": 0.8886584288913439
+      },
+      "candidate_ids": {
+        "baseline": "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h2d952e72a422",
+        "expanded": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0hb8875aea0063"
+      },
+      "estimated_between_target_log_variance": 0.3634800403768718,
+      "geometric_online_gain": 3.5140557314667724,
+      "hierarchical_bootstrap_95": [
+        2.609763282556579,
+        4.660307563704738
+      ],
+      "input_sha256": {
+        "analysis": "2ee26fb788033fd1aac12bebc9d8043086bebb0dbe49a4cdc664fa8a44718a9e",
+        "freeze": "3921be9034edbe5d6416413a4b2136ba071827b940227759470f11107d36bd11",
+        "ledger": "b992da14f858aec153c3b91f06af6998a2014ad35f2c402b306508012efb9616",
+        "replay": "d38f246e8c4520e47041c1f04cf934c20f6b225f7dd1e9c3fd24ab499615fe64"
+      },
+      "mean_log_gain": 1.2567708494760128,
+      "mean_within_target_log_variance_sum": 0.23785005783690294,
+      "observed_target_log_variance": 0.4824050692953233,
+      "run_count": 96,
+      "target_count": 24
+    },
+    "N53": {
+      "aa_noise_gate_pass": false,
+      "aa_p95_abs_log_online_ratio": {
+        "baseline": 0.9578335585811077,
+        "expanded": 1.3805059510540194
+      },
+      "candidate_ids": {
+        "baseline": "IC1N53Ckb1fb41976PDP4rootRCsampleLAgaussTDdirectISO0hfa76b5a1e71e",
+        "expanded": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0ha9dcb8b2531a"
+      },
+      "estimated_between_target_log_variance": 1.4033196941825141,
+      "geometric_online_gain": 5.085301158224391,
+      "hierarchical_bootstrap_95": [
+        2.186599461560911,
+        12.328852666896953
+      ],
+      "input_sha256": {
+        "analysis": "06bd2be2f6bf77264edb544e60fea18cf77e28274306aaa7a925cce4fbe14ca4",
+        "freeze": "e4493954d6a8867d6807067d6b608b265492dea4af77edf946bbf520c2fb1481",
+        "ledger": "38d5c802bcd19d6cc8ae8fec8fb6ffdd0f0bcd51c783a130a11ef3fe414f55c1",
+        "replay": "5c177b9f8464feb1d3992dbdf57006161e0facfebb71877d410a062d7aadcdf9"
+      },
+      "mean_log_gain": 1.626354252569692,
+      "mean_within_target_log_variance_sum": 0.4999191561271914,
+      "observed_target_log_variance": 1.6532792722461098,
+      "run_count": 32,
+      "target_count": 8
+    }
+  },
+  "independent_target_equal_allocation_plan": {
+    "2": {
+      "equal_independent_targets_per_curve": 123,
+      "one_target_solves_both_curves": 984
+    },
+    "4": {
+      "equal_independent_targets_per_curve": 112,
+      "one_target_solves_both_curves": 1792
+    },
+    "8": {
+      "equal_independent_targets_per_curve": 107,
+      "one_target_solves_both_curves": 3424
+    }
+  },
+  "kind": "s3_fullrank_crosscurve_descriptive_pilot_v1",
+  "power_assumptions": "two-sided alpha 0.05, power 0.80, observed positive log contrast persists, independent targets, k repeats per arm, stable host and unchanged target laws",
+  "power_method": "ceil((1.96+0.84)^2 * (v41(k)+v53(k)) / delta^2), with v(k)=estimated_between_target_variance+mean_within_target_variance_sum/k"
+}
