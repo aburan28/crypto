@@ -765,12 +765,27 @@ impl<'a> EllE<'a> {
 }
 
 /// `#E(F_{q³})` by baby-step giant-step on a random point, accepted when it
-/// is four times a prime (the group is then `Z/2 × Z/2ℓ` and the DLP lives
-/// in the subgroup of order `ℓ`).
-fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
-    // returns ℓ = #E/4 when #E = 4ℓ with ℓ prime;
-    // the order is near p⁶, which passes 2⁶⁴ at p = 1,622 while ℓ = #E/4 stays
-    // below it up to p = 2,039: the search runs in u128 (note §16)
+/// has a prime factor `ℓ` with `#E = 4cℓ` and small `c`. The DLP lives in
+/// the subgroup of order `ℓ`.
+fn small_cofactor_prime_part(order: u128, max_cofactor: u64) -> Option<(u64, u64)> {
+    if order % 4 != 0 {
+        return None;
+    }
+    let quarter = order / 4;
+    (1..=max_cofactor).find_map(|cofactor| {
+        let c = cofactor as u128;
+        if quarter % c != 0 {
+            return None;
+        }
+        let l = quarter / c;
+        (l <= u64::MAX as u128 && is_prime_u64(l as u64)).then_some((l as u64, cofactor))
+    })
+}
+
+fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<(u64, u64, u128)> {
+    // The full order is near p⁶ and is counted in u128. For p > 2039,
+    // #E/4 generally exceeds u64; accept a prime-order subgroup l with
+    // #E = 4*cofactor*l and a recorded cofactor no larger than 4096.
     let p = ec.f.f.p as u128;
     let q3 = p.pow(6);
     let two_sqrt = 2 * isqrt128(q3) + 2;
@@ -804,11 +819,9 @@ fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
         i += 1;
     }
     let m = found?;
-    if m % 4 != 0 || m / 4 > u64::MAX as u128 || !is_prime_u64((m / 4) as u64) {
-        return None;
-    }
+    let (l, cofactor) = small_cofactor_prime_part(m, 4096)?;
     let other = ec.random_point(rng);
-    ec.mul_u128(&other, m).inf.then_some((m / 4) as u64)
+    ec.mul_u128(&other, m).inf.then_some((l, cofactor, m))
 }
 
 fn isqrt128(n: u128) -> u128 {
@@ -1629,6 +1642,9 @@ pub struct Spec {
     pub alpha: E6,
     /// The prime order of the subgroup the logarithm lives in.
     pub l: u64,
+    /// Full curve order and the cofactor left after its rational 2-torsion.
+    pub order: u128,
+    pub subgroup_cofactor: u64,
     pub g: PtE6,
     pub q: PtE6,
     pub d: u64,
@@ -1682,14 +1698,14 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
             continue;
         }
         let ec = EllE::new(&f, &alpha);
-        let Some(l) = group_order_4_prime(&ec, &mut rng) else {
+        let Some((l, cofactor, order)) = group_order_4_prime(&ec, &mut rng) else {
             continue;
         };
         let Some(cov) = Cover::new(&f, &alpha) else {
             continue;
         };
         let g = loop {
-            let g = ec.mul(&ec.random_point(&mut rng), 4);
+            let g = ec.mul_u128(&ec.random_point(&mut rng), 4 * cofactor as u128);
             if !g.inf && ec.mul(&g, l).inf {
                 break g;
             }
@@ -1716,6 +1732,8 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
             p,
             alpha,
             l,
+            order,
+            subgroup_cofactor: cofactor,
             g,
             q,
             d,
@@ -1731,7 +1749,17 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
 /// only to report correctness; the route never reads it).  `None` when the
 /// cover refuses `α` or a transfer degenerates.  §18 builds this from the
 /// curve the walk reached and the transported points.
-pub fn spec_from_curve(p: u64, alpha: E6, l: u64, g: PtE6, q: PtE6, d: u64) -> Option<Spec> {
+pub fn spec_from_curve(
+    p: u64,
+    alpha: E6,
+    l: u64,
+    order: u128,
+    subgroup_cofactor: u64,
+    g: PtE6,
+    q: PtE6,
+    d: u64,
+) -> Option<Spec> {
+    assert_eq!(order, 4 * subgroup_cofactor as u128 * l as u128);
     let f = Fq3::new(p);
     let cov = Cover::new(&f, &alpha)?;
     f.reset_muls();
@@ -1750,6 +1778,8 @@ pub fn spec_from_curve(p: u64, alpha: E6, l: u64, g: PtE6, q: PtE6, d: u64) -> O
         p,
         alpha,
         l,
+        order,
+        subgroup_cofactor,
         g,
         q,
         d,
@@ -2865,6 +2895,16 @@ pub fn run_cover_dlp(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn prime_subgroup_selector_preserves_the_full_order() {
+        const L: u64 = (1_u64 << 61) - 1; // prime
+        assert_eq!(small_cofactor_prime_part(4 * L as u128, 4096), Some((L, 1)));
+        let order = 4 * 64_u128 * L as u128;
+        assert_eq!(small_cofactor_prime_part(order, 4096), Some((L, 64)));
+        assert_eq!(small_cofactor_prime_part(order, 63), None);
+        assert_eq!(small_cofactor_prime_part(order + 1, 4096), None);
+    }
 
     fn weak(p: u64, seed: u64) -> (Fq3, E6, StdRng) {
         let f = Fq3::new(p);
