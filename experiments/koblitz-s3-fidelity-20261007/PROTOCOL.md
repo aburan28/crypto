@@ -246,3 +246,12 @@ partition or PSI, so the strict claim gate still fails. See the
 for raw evidence and independent Sage replay. The repeated points do not
 increase the number of independent pilot targets or change the provisional
 sample size.
+
+On 2026-10-09 UTC, a read-only preflight of an already-configured alternate
+SSH host found a Docker cgroup v1 environment, no visible isolated cpuset
+partition, 16 logical CPUs across eight physical cores, and no `perf`
+executable. It did not start a timed run. This visible environment also
+fails the strict host gate; its [probe and exact commands](host_preflight/README.md)
+are preserved separately from Modal evidence. A physical-host `isolab`
+receipt and clean A/A pilot are still required before setting the
+confirmatory target count.
