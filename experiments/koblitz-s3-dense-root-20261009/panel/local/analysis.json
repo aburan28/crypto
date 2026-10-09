@@ -1,0 +1,125 @@
+{
+  "all_native_verified": true,
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "aa_noise_gate_pass": false,
+      "aa_p95_abs_log_online_ratio": {
+        "dense": 0.49387523906176917,
+        "original": 0.799127416824454
+      },
+      "all_non_timing_semantics_equal": true,
+      "arms": {
+        "dense": {
+          "candidate_id": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0hab6cf6576605",
+          "median_charged_phase_ms": {
+            "target_descent": 0.002187499999999995,
+            "target_pdp_charged": 0.07754149999999999,
+            "target_query": 0.0310205,
+            "target_recovery_check": 0.021542,
+            "target_relation_check": 0.005395499999999999
+          },
+          "median_index_build_ms_supplementary": 4784.7621874999995,
+          "median_online_ms": 0.1450415,
+          "median_reusable_setup_ms_supplementary": 5881.9982915,
+          "root_payload_bytes": 872415232,
+          "root_table_slots": 67108864
+        },
+        "original": {
+          "candidate_id": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0hb8875aea0063",
+          "median_charged_phase_ms": {
+            "target_descent": 0.005208000000000008,
+            "target_pdp_charged": 0.0821665,
+            "target_query": 0.027,
+            "target_recovery_check": 0.0203125,
+            "target_relation_check": 0.005646
+          },
+          "median_index_build_ms_supplementary": 5554.861854000001,
+          "median_online_ms": 0.147521,
+          "median_reusable_setup_ms_supplementary": 6769.130646,
+          "root_payload_bytes": 2147483648,
+          "root_table_slots": 134217728
+        }
+      },
+      "exploratory_original_over_dense_online_geomean": 0.7812470389592506,
+      "point_ratios": {
+        "T057": 0.9427700403678275,
+        "T058": 1.646847619409196,
+        "T059": 0.9186738834276749,
+        "T060": 0.26117582654884963
+      },
+      "points_dense_faster": 1,
+      "target_bootstrap_95": [
+        0.3599989023449725,
+        1.4232474186601531
+      ],
+      "target_count": 4
+    },
+    "53": {
+      "aa_noise_gate_pass": false,
+      "aa_p95_abs_log_online_ratio": {
+        "dense": 0.7034997434057012,
+        "original": 1.053923818557014
+      },
+      "all_non_timing_semantics_equal": true,
+      "arms": {
+        "dense": {
+          "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0hebadb4a47304",
+          "median_charged_phase_ms": {
+            "target_descent": 0.0075199999999999885,
+            "target_pdp_charged": 0.7671669999999999,
+            "target_query": 0.134417,
+            "target_recovery_check": 0.030271,
+            "target_relation_check": 0.010813
+          },
+          "median_index_build_ms_supplementary": 26778.8595625,
+          "median_online_ms": 0.9824375,
+          "median_reusable_setup_ms_supplementary": 31670.4086045,
+          "root_payload_bytes": 3489660928,
+          "root_table_slots": 268435456
+        },
+        "original": {
+          "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0ha9dcb8b2531a",
+          "median_charged_phase_ms": {
+            "target_descent": 0.022230000000000014,
+            "target_pdp_charged": 0.6392709999999999,
+            "target_query": 0.2537705,
+            "target_recovery_check": 0.031416999999999994,
+            "target_relation_check": 0.0114375
+          },
+          "median_index_build_ms_supplementary": 30446.8581875,
+          "median_online_ms": 1.2786875,
+          "median_reusable_setup_ms_supplementary": 37001.369000000006,
+          "root_payload_bytes": 8589934592,
+          "root_table_slots": 536870912
+        }
+      },
+      "exploratory_original_over_dense_online_geomean": 1.667153161809513,
+      "point_ratios": {
+        "T057": 1.813227496050181,
+        "T058": 4.740036701174574,
+        "T059": 0.5477658836130656,
+        "T060": 1.6408656421246248
+      },
+      "points_dense_faster": 3,
+      "target_bootstrap_95": [
+        0.7388551567974914,
+        3.6358380775342916
+      ],
+      "target_count": 4
+    }
+  },
+  "failure_rows": [],
+  "freeze_sha256": "873cdc0918fd8deba42996cd2d31606dc87bbe68651cedaceb900ace3dd10585",
+  "host": {
+    "controlled_speedup": null,
+    "host_exclusive_partition_receipt": null,
+    "kind": "s3_dense_root_oneworker_paired_screen_host_v1",
+    "logical_cpu_count": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O"
+  },
+  "kind": "s3_dense_root_oneworker_paired_screen_analysis_v1",
+  "raw_ledger_sha256": "34f7b8922d586fe00adfdad070dec76a37e297e34b9922eb6cb6fd9970e93ffa",
+  "run_count": 32
+}
