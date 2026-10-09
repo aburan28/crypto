@@ -256,8 +256,15 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
             .and_then(|r| r.get("status"))
             .and_then(Json::as_str)
             == Some("PASS");
-    let construction = args.first().is_some_and(|a| a == "isogenies");
-    let accepted = pass && (!construction || n == Some(2));
+    let construction = args
+        .first()
+        .is_some_and(|a| a == "isogenies" || a == "kernel-first");
+    let wanted = if args.first().is_some_and(|a| a == "kernel-first") {
+        1
+    } else {
+        2
+    };
+    let accepted = pass && (!construction || n == Some(wanted));
     let result = Json::obj(vec![
         (
             "command",
@@ -317,11 +324,11 @@ fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) -> Jso
 }
 fn main() {
     let a: Vec<String> = std::env::args().skip(1).collect();
-    assert_eq!(
-        a.len(),
-        6,
-        "usage: supervisor CLI OUT CURVE ELL SECONDS SOURCE_REV"
+    assert!(
+        a.len() == 6 || (a.len() == 7 && a[6] == "--single-map"),
+        "usage: supervisor CLI OUT CURVE ELL SECONDS SOURCE_REV [--single-map]"
     );
+    let single = a.len() == 7;
     let cli = fs::canonicalize(&a[0]).unwrap();
     let out = PathBuf::from(&a[1]);
     let name = a[2].as_str();
@@ -336,7 +343,11 @@ fn main() {
         &cli,
         &dir,
         &[
-            "isogenies".into(),
+            if single {
+                "kernel-first".into()
+            } else {
+                "isogenies".into()
+            },
             "--curve".into(),
             name.into(),
             "--ell".into(),
@@ -356,7 +367,11 @@ fn main() {
             ("source_commit", Json::str(&a[5])),
             (
                 "protocol_sha256",
-                Json::str(sha256_hex(include_bytes!("PROTOCOL.md"))),
+                Json::str(sha256_hex(if single {
+                    include_bytes!("KERNEL_PROTOCOL.md").as_slice()
+                } else {
+                    include_bytes!("PROTOCOL.md").as_slice()
+                })),
             ),
             ("timeout_seconds", Json::Num(timeout as i64)),
             (
