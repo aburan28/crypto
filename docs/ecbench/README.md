@@ -402,6 +402,20 @@ Two consequences to read every table with:
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
   are counted, not charged), exactly as in the rest of the repository.
+  The ratio of two such lower bounds is **not** a bound on the ratio of
+  full costs. Read it as a counted-work diagnostic until both arms have
+  complete, calibrated costs; do not infer an end-to-end speedup from it.
+
+`ecbench resources --dir SESSION --out resources.json` reports, for every
+measured attempt including failures, the native integer counters by phase,
+method counters, fork-to-reap and solve time, CPU time, peak resident memory,
+and solve-wide instructions and cycles when the host exposes a PMU. A PMU
+sum is null unless **every** measured run in that arm has the counter.
+These are separate units: a SAT conflict, table lookup and byte of memory
+do not have universal GAE prices. The resource vector shows where the
+counted `S` is incomplete. A full runtime comparison still requires
+matched L2/L3 runs and the A/A noise gate in §8; the Mac's L0 timings
+remain descriptive.
 
 ## 8. Statistics
 
