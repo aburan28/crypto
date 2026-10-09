@@ -1691,3 +1691,59 @@ group where it matters.  **Class if they hold: engineering**, on a variant whose
 already sub-rho.  A falsified G2.2 would mean the `D₃` structure that made E13 cheap is an
 artefact of `F_p` Möbius coefficients; a falsified G2.5 would mean the full-group arm, too, has a
 cost that grows as fast as rho in the measured range.
+
+### 9.1 Amendment, before E18 is built: the frontier is `k = 4`
+
+*Added 2026-10-09 while E17 was running and before any `k = 4` code of this goal existed; §9's
+table above is unchanged and binds E17.*
+
+§9 read its boundary from `RESEARCH_EXTENSION_FIELD_BOUNDARIES.md`, which predates
+`RESEARCH_RESIDUAL_WALKS.md` §11.15–§11.19.  Those sections close `k = 3` (best measured: the
+plain method at `528×` rho at `2^{33.1}`; double large primes at `1,989×`) and move the frontier
+to `k = 4` on `E(F_{p⁴})`, where the base has `|F| ∝ n^{1/4}`, so the linear algebra is
+`∝ n^{1/2}`, rho's exponent:
+
+- `r∞ = 0.518 ± 0.031` — the linear algebra over the rho walk, measured over eight curves to
+  `n = 2^{40.1}` (§11.19); past the handover a plain `k = 4` method beats rho by `1/r∞` and no
+  more;
+- the handover `n* ≈ 2^{151}`, set by the `S₅` solve `C₄ = 1.213·10¹²` (§11.17), with "every
+  factor `f` taken off `C₄` moves `n*` about `4 log₂ f` bits earlier", and the
+  Faugère–Gaudry–Huot–Renault symmetries named there as one of two levers.
+
+So G2's two levers have a second, larger target.  The `D_m` symmetry acts on `C₄` (E19, to be
+registered separately), and **a fold of the base acts on `r∞` itself**.  `r∞` is the linear
+algebra, `∝ N²` in the unknowns, against rho.  A fold by `w` points a column divides `N` by
+`w/2`, while the matched rho gains `√` of whatever automorphisms it can use and nothing from
+`τ_T`.  §11.15 lists levers on the linear-algebra constant as engineering, which they are, but
+at `k = 4` that constant *is* the asymptotic ratio to rho.
+
+One accounting point must be measured, not assumed.  `rho4` (`gaudry_quartic.rs`) walks
+without the negation map (`S = 1.319`, the `√(π/2)` of an unfolded walk), while every other panel
+in this program uses the negation-folded walk.  E18 measures both.
+
+**E18 — the folds on the `k = 4` linear algebra (registered here, before the code exists).**
+On curves over `F_{p⁴}` (`p ≤ 1033`, `n ≤ 2^{40}`, the sizes of §11.19), one relation stream
+from §11.19's meet-in-the-middle oracle feeds a control arm (`⟨−1⟩`, one column per abscissa,
+exactly §11.19's matrix) and a folded arm.  Each arm is filtered and solved by §11.7's Wiedemann,
+its logarithm verified by `[d]G = Q`, and priced against the rho matched to its group:
+
+- **`ψ` arm:** `j = 0`, `p ≡ 1 (mod 12)`, prime order, `ψ(x, y) = (ωx, y)` with `ω ∈ F_p`, which
+  keeps the base `x ∈ F_p`.  Columns are the `⟨ψ⟩`-orbits of abscissae, with coefficients
+  `±λ^k`.  The matched rho walks the classes `{±ψ^k P}`.
+- **`τ_T` arm:** the §9 construction over `F_{p⁴}`, `#E = h·n` with `h = 2` where the search
+  finds one (else `h ≤ 4`, recorded), base `x ∈ x₀ + F_p`, `P` and `P + T` in one column.  The
+  matched rho is the negation walk, since rho cannot use `τ_T`.
+
+| id | quantity | prediction | falsified by |
+|:--|:--|:--|:--|
+| G2.6 | negation-folded rho against `rho4`'s unfolded walk at `k = 4` | steps `÷ √2` (`1.41 ± 0.10`), so §11.19's `r∞` reads `≈ 0.73` against the negation walk | a ratio outside `[1.25, 1.6]` |
+| G2.7 | the `ψ` fold | columns `÷ 3.0 ± 0.1`; linear algebra `÷ ≈ 9` (with the filtering fraction recorded); `ψ`-folded rho `÷ √3` against the negation walk; `r_ψ` against the `ψ`-folded rho `≈ 0.518·√6/9 ≈ 0.14`, against `≈ 1.27` for the control on the same curves | `r_ψ > 0.30` at every size, or any unverified logarithm |
+| G2.8 | the `τ_T` fold | columns `÷ 2.0 ± 0.1`; linear algebra `÷ ≈ 4`; `r_τ` against the negation rho `≈ 0.518·√2·√h / 4` (`≈ 0.26` at `h = 2`), against `≈ 1.04` for the control | `r_τ > 0.50` at every size |
+
+**What this would and would not say.**  `r` is the ratio of the linear algebra to rho, not
+`S / rho S`: the relation phase is still the meet-in-the-middle oracle's here, and §11.17's
+`4.3·10⁸×` rho for the `S₅` solve is untouched by E18.  If G2.7 holds, the eventual advantage of
+a `k = 4` method over the rho an attacker would actually run on that curve moves from
+`1/0.73 ≈ 1.4×` (negation walk) to `≈ 7×` (`ψ`-folded base against `ψ`-folded walk).
+**Class: engineering**, the constant of an asymptote.  The handover `n*` also moves, through
+`1 − r∞` in §11.16's formula and through the halved relation count, but `C₄` still sets it.
