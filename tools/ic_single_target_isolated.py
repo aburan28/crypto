@@ -104,7 +104,9 @@ def run_arm(args: argparse.Namespace) -> None:
                      and equal_sum([float(record[key]) for key in IC_PHASES], float(record["online_ms"])))
             scalar = int(record["recovered_scalar"])
             certificate = {"base_hash": summary["base_hash"], "point_indices": indices,
-                           "relation_points": points, "x_codes": record["x_codes"]}
+                           "relation_points": points, "x_codes": record["x_codes"],
+                           "factor_base_representatives": base["factor_base_representatives"],
+                           "factor_base_point_count": len(base["factor_base_point_coordinates"])}
         else:
             record = require_one(rows(result.stdout), "rho_ks_batch_fixture")
             summary = require_one(rows(result.stdout), "rho_ks_batch_summary")
