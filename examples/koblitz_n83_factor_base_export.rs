@@ -20,6 +20,8 @@ use std::time::{Duration, Instant};
 
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs"]
 mod compact_cold;
+#[path = "../research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs"]
+mod primary_adapter;
 
 const STUDY: &str = "koblitz_n83_factor_base_sweep_20261008";
 const PREFIX: &str = "s3://crypto-autoresearcher/factor-bases/icv1/etc";
@@ -939,7 +941,15 @@ fn main() -> Result<()> {
         Some("probes")=>probes(Path::new(args.get(2).ok_or("probes directory budget_seconds")?),args.get(3).ok_or("budget")?.parse()?)?,
         Some("upload")=>upload(Path::new(args.get(2).ok_or("upload directory")?))?,
         Some("cold")=>compact_cold::run_cli(std::iter::once(args[0].clone()).chain(args[2..].iter().cloned()).collect()),
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered]".into()),
+        Some("primary-adapter-check")=>{
+            let panel=Path::new(args.get(2).ok_or("primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON")?);
+            let columns=args.get(3).ok_or("primary orbit columns")?.parse()?;
+            let output=Path::new(args.get(4).ok_or("new output JSON path")?);
+            let receipt=primary_adapter::check_panel(panel,columns)?;
+            write_new_json(output,&receipt)?;
+            println!("{receipt}");
+        },
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON".into()),
     }
     Ok(())
 }

@@ -53,7 +53,9 @@ Ordered-pair K=256 and K=64, plus exploratory unordered-pair K=64, each reached 
 
 `RANK_QUERY_SCREEN.md` and `pilot-01/rank-query-screen.json` derive a further necessary condition for a uniform-target oracle returning at most one full-smooth row per query. Even allowing dependent queries, the primary K=600 four-summand base requires at least 176,888,106 queries before the first-moment bound can permit a 50% chance of 600 rank rows; five summands require at least 8,880. These are exact query-count gates under the stated model, not predicted completion times. They do not apply to biased sampling, multirow solvers or large-prime partials. The current capped driver has not established uniform full-width primary sampling.
 
-The generic Koblitz IC driver now draws full-width scalars for subgroup orders above 64 bits. Its additive randomizer ranges uniformly over the entire subgroup, so `[a]G+[b]Q` is uniform for fixed nonzero `b`; its nonzero coefficient uses the full order. The existing at-most-64-bit random stream is unchanged. The factor-base-log precompute also disables its single-word rank gate for a wide modulus and falls back to BigUint elimination. This fixes two primary-arm adapter prerequisites, but the retained S3 bases, higher-arity solvers and complete cold pipeline are not yet integrated or measured on that path.
+The generic Koblitz IC driver now draws full-width scalars for subgroup orders above 64 bits. Its additive randomizer ranges uniformly over the entire subgroup, so `[a]G+[b]Q` is uniform for fixed nonzero `b`; its nonzero coefficient uses the full order. The existing at-most-64-bit random stream is unchanged. The factor-base-log precompute also disables its single-word rank gate for a wide modulus and falls back to BigUint elimination. This fixes two primary-arm adapter prerequisites.
+
+`primary_adapter.rs` reconstructs a generic `FrobeniusFactorBase` directly from the replayed primary `a=0` object. It checks the pinned curve and construction header, all point labels and coefficients, subgroup membership, Frobenius closure, distinctness and the stored point-set hash before exposing the orbits. This avoids the generic factor-base builder's single-word field path. The `primary-adapter-check` command accepted the retained hash-derived K=64 S3 object: **10,624 points, 128 ordinary Frobenius orbits and 64 signed orbits**, with a **5.222-second** process-wall adapter check charged to the local pilot. The receipt explicitly records `solver_stage_executed=false` and a null total runtime. A separate small-base test reaches the generic solver's zero-trial preflight, but neither check runs relation collection, rank, linear algebra or individual-log extraction on the primary arm. The total active pilot audit is approximately **3,536.070 seconds of 3,600**. Higher-arity solvers and a complete primary cold pipeline remain unmeasured.
 
 ## Subsequent total-runtime experiment
 
@@ -78,6 +80,8 @@ python3 research/koblitz_n83_factor_base_sweep_20261008/rank_query_screen.py
 python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_rank_query_screen.py -v
 target/release/examples/koblitz_n83_factor_base_export probes research/koblitz_n83_factor_base_sweep_20261008/pilot-01 600
 target/release/examples/koblitz_n83_factor_base_export upload research/koblitz_n83_factor_base_sweep_20261008/pilot-01
+adapter_output="$(mktemp -d)/primary-adapter.json"
+target/release/examples/koblitz_n83_factor_base_export primary-adapter-check research/koblitz_n83_factor_base_sweep_20261008/pilot-01 64 "$adapter_output"
 target/release/examples/koblitz_n83_factor_base_export cold research/koblitz_n83_factor_base_sweep_20261008/pilot-01 64 600
 # Exploratory pair-index mode, with a fresh immutable attempt directory:
 target/release/examples/koblitz_n83_factor_base_export cold research/koblitz_n83_factor_base_sweep_20261008/pilot-01 64 600 unordered
