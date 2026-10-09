@@ -112,7 +112,15 @@ class MeasurementSchemaTests(unittest.TestCase):
                "published_q": target, "automorphism_size": claim["rho_policy"]["automorphism_size"],
                "verified": True}
         claim.update(panel.primary_claim_fields(ic, rho, claim["online_interval"]))
+        self.assertEqual(claim["hardware_accounting"]["status"], "counter_unavailable")
         self.assertEqual(lab.validate_claim(claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        counted = panel.primary_claim_fields(
+            ic | {"online_hw_counts": {"instructions": 1000, "cycles": 1200, "error": None}},
+            rho | {"online_hw_counts": {"instructions": 2500, "cycles": 3000, "error": None}},
+            claim["online_interval"],
+        )["hardware_accounting"]
+        self.assertEqual(counted["status"], "measured_common_counter")
+        self.assertEqual(counted["rho_per_ic_instructions"], 2.5)
         for change, expected in (
             (lambda row: row["rho_online_phase_ms"].pop("recovery_check_ms"),
              "rho_online_phase_ms must contain exactly the declared phases"),

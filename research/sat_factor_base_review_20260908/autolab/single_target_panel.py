@@ -109,6 +109,14 @@ def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
     probes, steps = int(ic_record["probes"]), int(rho_record["walk_steps"])
     if min(ic_ms, rho_ms, probes, steps) <= 0:
         raise ValueError("a verified one-target claim needs positive online costs and counters")
+    ic_hw = ic_record.get("online_hw_counts")
+    rho_hw = rho_record.get("online_hw_counts")
+    ic_hw = ic_hw if isinstance(ic_hw, dict) else {}
+    rho_hw = rho_hw if isinstance(rho_hw, dict) else {}
+    ic_instructions = ic_hw.get("instructions")
+    rho_instructions = rho_hw.get("instructions")
+    complete_instructions = all(type(value) is int and value > 0 for value in
+                                (ic_instructions, rho_instructions))
     return {
         "timing_class": "single_target_online",
         "record_class": "verified_answer_exploratory_wall",
@@ -139,6 +147,16 @@ def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
             "rho_online_operations": steps,
             "rho_per_ic_native_counter": steps / probes,
             "ops_speedup_online": None,
+        },
+        "hardware_accounting": {
+            "status": "measured_common_counter" if complete_instructions else "counter_unavailable",
+            "unit": "calling-thread user instructions retired",
+            "method": "Linux perf_event_open around each producer's target online interval",
+            "ic_online_instructions": ic_instructions,
+            "rho_online_instructions": rho_instructions,
+            "rho_per_ic_instructions": rho_instructions / ic_instructions if complete_instructions else None,
+            "ic_counter_error": ic_hw.get("error"),
+            "rho_counter_error": rho_hw.get("error"),
         },
     }
 
@@ -489,12 +507,14 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     env=dict(rho_env, KIC_RHO_EXPLICIT_SCALAR=str(scalar)), stdout_path=out,
                     stderr_path=run / f"logs/identity_{arm}.stderr.txt", cpu=arguments.cpu)
                 outputs[arm] = (measured, lab.read_jsonl(out), [])
-            ic_new = [untimed(x, ("relation_checks",)) for x in outputs["ic"][1]]
+            ic_new = [untimed(x, ("relation_checks", "online_hw_counts", "online_hw_scope"))
+                      for x in outputs["ic"][1]]
             ic_old = [untimed(x) for x in outputs["frozen_ic"][1]]
             summary_keys = ("base_hash", "rank", "rank_attempts", "rank_relations", "rank_failures",
                             "regular_states", "root_table_entries", "targets_solved")
             ic_summaries = [o[2][-1] if o[2] else {} for o in (outputs["ic"], outputs["frozen_ic"])]
-            rho_new = [untimed(x, ("producer_version",)) for x in outputs["rho"][1]]
+            rho_new = [untimed(x, ("producer_version", "online_hw_counts", "online_hw_scope"))
+                       for x in outputs["rho"][1]]
             rho_old = [untimed(x, ("producer_version",)) for x in outputs["frozen_rho"][1]]
             report = {
                 "known_scalar": scalar, "K": k_choice, "rho_seed": beat["rho_seed_base"],
@@ -504,7 +524,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     ic_summaries[0].get(k) == ic_summaries[1].get(k) for k in summary_keys),
                 "rho_untimed_records_identical": bool(rho_new) and rho_new == rho_old,
                 "compared": "every record field except timers (*_ms, *_ns, *_event), the IC's new "
-                            "relation_checks counter and rho's producer_version",
+                            "relation_checks counter, rho's producer_version and online hardware counters",
             }
             report["identical"] = all(code == 0 for code in report["exit_codes"].values()) and all(
                 report[k] for k in ("ic_untimed_records_identical", "ic_setup_summary_identical",
