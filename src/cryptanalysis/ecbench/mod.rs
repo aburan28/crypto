@@ -19,6 +19,7 @@
 //! | [`runner`] | sessions: interleaved measured children, sealed append-only records |
 //! | [`signals`] | interruption: the host is restored and no child outlives the runner |
 //! | [`compare`] | paired ratios with bootstrap intervals; wall time gated by level |
+//! | [`resources`] | cold native-work, memory and PMU vectors without invented GAE prices |
 //! | [`claim`] | `vs_rho` claims: the IC1 identity, the claim report, the native checker |
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
@@ -37,6 +38,7 @@ pub mod isolab;
 pub mod isolation;
 pub mod methods;
 pub mod record;
+pub mod resources;
 pub mod runner;
 pub mod signals;
 pub mod spec;

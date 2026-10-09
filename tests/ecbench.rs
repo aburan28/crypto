@@ -143,6 +143,22 @@ fn a_session_runs_verifies_compares_and_loads() {
     assert_eq!(c["ops"]["status"], "ok");
     assert!(c["ops"]["ci95"].is_array());
 
+    // The resource vector includes every measured attempt, excludes the
+    // warm-ups, and preserves native work in its original units.
+    let (ok, stdout, err) = ecbench(&["resources", "--dir", out.to_str().unwrap()]);
+    assert!(ok, "resources failed: {err}");
+    let resources: Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(resources["schema"], "ecbench.resources/v1");
+    let arms = resources["arms"].as_array().unwrap();
+    assert_eq!(arms.len(), 4);
+    for arm in arms {
+        assert_eq!(arm["measured"], 8);
+        assert_eq!(arm["verified"], 8);
+        assert!(arm["process_wall_ns_sum"].as_u64().unwrap() > 0);
+        assert!(arm["peak_rss_kib"].as_u64().unwrap() > 0);
+        assert!(arm["method_counter_totals"].is_object());
+    }
+
     // Tampering with a record is caught.
     let tampered = dir.join("t");
     copy_dir(&out, &tampered);

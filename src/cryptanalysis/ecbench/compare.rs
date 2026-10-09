@@ -110,7 +110,8 @@ pub struct OpsResult {
     pub same_session: bool,
     /// Pooled over curves of different sizes; read `curves` for scaling.
     pub pooled_curves: u64,
-    /// Either arm left work unpriced: the ratio is between bounds.
+    /// Either arm left work unpriced. The displayed ratio is diagnostic:
+    /// dividing two lower bounds does not bound the full-cost ratio.
     pub bounded: bool,
     pub resamples: usize,
 }
@@ -408,7 +409,7 @@ pub fn compare(
         rows.len(),
         ops.pooled_curves,
         if ops.bounded {
-            ", bounded (unpriced work)"
+            ", diagnostic only (unpriced work; ratio does not bound full cost)"
         } else {
             ""
         },
