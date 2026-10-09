@@ -204,7 +204,10 @@ fn boolpolys_to_monomials(eqs: &[F2BoolPoly], v: u32) -> Vec<Vec<Vec<u32>>> {
 }
 
 fn sanity_s3() -> Value {
-    println!("── sanity: degree-general Macaulay vs quadratic path (S₃, seed 0x{:X}) ──", S3_SANITY_SEED);
+    println!(
+        "── sanity: degree-general Macaulay vs quadratic path (S₃, seed 0x{:X}) ──",
+        S3_SANITY_SEED
+    );
     let reference = run_sweep(3..=7, 4, S3_SANITY_SEED);
     let mut rng = StdRng::seed_from_u64(S3_SANITY_SEED);
     let mut checked = Vec::new();
@@ -221,12 +224,17 @@ fn sanity_s3() -> Value {
         let mono = boolpolys_to_monomials(&eqs, 2 * n);
         let (per_deg, fall) = measure_monomial_system(&mono, 2 * n, 2, 4);
         assert_eq!(fall, one.fall_degree, "fall mismatch at n={n}");
-        assert_eq!(per_deg.len(), one.per_degree.len(), "degree count mismatch at n={n}");
+        assert_eq!(
+            per_deg.len(),
+            one.per_degree.len(),
+            "degree count mismatch at n={n}"
+        );
         for (g, r) in per_deg.iter().zip(&one.per_degree) {
             assert_eq!(g.degree, r.degree);
             assert_eq!(
                 g.rows_constructed, r.rows_constructed,
-                "rows mismatch n={n} D={}", r.degree
+                "rows mismatch n={n} D={}",
+                r.degree
             );
             assert_eq!(g.cols, r.cols, "cols mismatch n={n} D={}", r.degree);
             assert_eq!(g.rank, r.rank, "rank mismatch n={n} D={}", r.degree);
@@ -291,10 +299,14 @@ fn eliminate_e(
                     debug_assert!(a < b, "BTreeSet monomials are sorted and squarefree");
                     let key = a | (b << 6);
                     let img = pair_cache.entry(key).or_insert_with(|| {
-                        let av: Vec<Vec<u32>> =
-                            singles[a as usize].iter().map(|&p| unpack_mono(p)).collect();
-                        let bv: Vec<Vec<u32>> =
-                            singles[b as usize].iter().map(|&p| unpack_mono(p)).collect();
+                        let av: Vec<Vec<u32>> = singles[a as usize]
+                            .iter()
+                            .map(|&p| unpack_mono(p))
+                            .collect();
+                        let bv: Vec<Vec<u32>> = singles[b as usize]
+                            .iter()
+                            .map(|&p| unpack_mono(p))
+                            .collect();
                         fast_mul_packed(&av, &bv)
                     });
                     for &p in img.iter() {
@@ -304,7 +316,7 @@ fn eliminate_e(
                 k => panic!("semaev equations are quadratic in e-space; got monomial of len {k}"),
             }
         }
-        let mut monos: Vec<Vec<u32>> = acc.into_keys().map(|p| unpack_mono(p)).collect();
+        let mut monos: Vec<Vec<u32>> = acc.into_keys().map(unpack_mono).collect();
         monos.sort();
         eqs.push(monos);
     }
@@ -337,7 +349,7 @@ fn fold_x1(eqs: &[Vec<Vec<u32>>], x1: u64) -> Vec<Vec<Vec<u32>>> {
                 }
                 toggle(&mut acc, pack_mono(&folded));
             }
-            let mut monos: Vec<Vec<u32>> = acc.into_keys().map(|p| unpack_mono(p)).collect();
+            let mut monos: Vec<Vec<u32>> = acc.into_keys().map(unpack_mono).collect();
             monos.sort();
             monos
         })
@@ -413,7 +425,9 @@ fn measure_variant(
             // The estimate grows with d; once over the cap, stay over.
             for dd in d..=d_max {
                 let est_dd = macaulay_memory_estimate_monomial(eqs, num_vars, dd);
-                skipped.push(json!({ "degree": dd, "estimate_bytes": est_dd, "reason": "memory_cap" }));
+                skipped.push(
+                    json!({ "degree": dd, "estimate_bytes": est_dd, "reason": "memory_cap" }),
+                );
             }
             break;
         }
@@ -471,12 +485,30 @@ fn main() {
     let mut i = 1;
     while i < argv.len() {
         match argv[i].as_str() {
-            "--draws" => { i += 1; draws = argv[i].parse().expect("--draws"); }
-            "--seed" => { i += 1; seed = parse_u64(&argv[i]); }
-            "--dmax-full" => { i += 1; dmax_full = argv[i].parse().expect("--dmax-full"); }
-            "--dmax-fix" => { i += 1; dmax_fix = argv[i].parse().expect("--dmax-fix"); }
-            "--mem-cap-gb" => { i += 1; mem_cap_gb = argv[i].parse().expect("--mem-cap-gb"); }
-            "--out" => { i += 1; out = argv[i].clone(); }
+            "--draws" => {
+                i += 1;
+                draws = argv[i].parse().expect("--draws");
+            }
+            "--seed" => {
+                i += 1;
+                seed = parse_u64(&argv[i]);
+            }
+            "--dmax-full" => {
+                i += 1;
+                dmax_full = argv[i].parse().expect("--dmax-full");
+            }
+            "--dmax-fix" => {
+                i += 1;
+                dmax_fix = argv[i].parse().expect("--dmax-fix");
+            }
+            "--mem-cap-gb" => {
+                i += 1;
+                mem_cap_gb = argv[i].parse().expect("--mem-cap-gb");
+            }
+            "--out" => {
+                i += 1;
+                out = argv[i].clone();
+            }
             other => panic!("unknown argument {other}"),
         }
         i += 1;
@@ -491,7 +523,10 @@ fn main() {
     let sanity = sanity_s3();
 
     // ── field setup (identical to the recorded baseline arm) ──
-    let irr = IrreduciblePoly { degree: N, low_terms: LOW_TERMS.to_vec() };
+    let irr = IrreduciblePoly {
+        degree: N,
+        low_terms: LOW_TERMS.to_vec(),
+    };
     let gf = Gf2::new(&irr);
     let b = F2mElement::one(N);
 
@@ -502,9 +537,16 @@ fn main() {
     let singles = build_singles(&probe1);
     let probe2 = weil_descend_s4(N, L, &irr, &b, &gf.to_element(0xABCD));
     let singles2 = build_singles(&probe2);
-    assert_eq!(singles, singles2, "correspondence images must not depend on x_R");
+    assert_eq!(
+        singles, singles2,
+        "correspondence images must not depend on x_R"
+    );
     let build_probe_ms = t0.elapsed().as_secs_f64() * 1e3;
-    println!("probe build: {:.0} ms each; e-vars: {}; x_R-independence ✓", build_probe_ms, singles.len());
+    println!(
+        "probe build: {:.0} ms each; e-vars: {}; x_R-independence ✓",
+        build_probe_ms,
+        singles.len()
+    );
 
     let mut pair_cache: HashMap<u64, Vec<u64>> = HashMap::new();
     let mut rng_main = SplitMix64::new(seed);
@@ -682,13 +724,21 @@ fn main() {
 
     // ── summary ──
     let falls_full: Vec<Option<u32>> = draw_records
-        .iter().map(|r| r["full"]["fall_degree"].as_u64().map(|v| v as u32)).collect();
+        .iter()
+        .map(|r| r["full"]["fall_degree"].as_u64().map(|v| v as u32))
+        .collect();
     let falls_fix: Vec<Option<u32>> = draw_records
-        .iter().map(|r| r["fix"]["fall_degree"].as_u64().map(|v| v as u32)).collect();
+        .iter()
+        .map(|r| r["fix"]["fall_degree"].as_u64().map(|v| v as u32))
+        .collect();
     let struct_full: Vec<u32> = draw_records
-        .iter().filter_map(|r| r["full"]["fall_structural"].as_u64().map(|v| v as u32)).collect();
+        .iter()
+        .filter_map(|r| r["full"]["fall_structural"].as_u64().map(|v| v as u32))
+        .collect();
     let struct_fix: Vec<u32> = draw_records
-        .iter().filter_map(|r| r["fix"]["fall_structural"].as_u64().map(|v| v as u32)).collect();
+        .iter()
+        .filter_map(|r| r["fix"]["fall_structural"].as_u64().map(|v| v as u32))
+        .collect();
 
     let ffd_stats = |falls: &[Option<u32>]| -> Value {
         let some: Vec<u32> = falls.iter().filter_map(|f| *f).collect();
@@ -706,9 +756,15 @@ fn main() {
     let median_decompose_ms = decompose_times[decompose_times.len() / 2];
 
     let verdict = if !struct_fix.is_empty() {
-        format!("L8_S4_SUBSPACE_X1FIXED_STRUCTURAL_FALL_D{}", struct_fix.iter().min().unwrap())
+        format!(
+            "L8_S4_SUBSPACE_X1FIXED_STRUCTURAL_FALL_D{}",
+            struct_fix.iter().min().unwrap()
+        )
     } else if !struct_full.is_empty() {
-        format!("L8_S4_SUBSPACE_FULL_STRUCTURAL_FALL_D{}", struct_full.iter().min().unwrap())
+        format!(
+            "L8_S4_SUBSPACE_FULL_STRUCTURAL_FALL_D{}",
+            struct_full.iter().min().unwrap()
+        )
     } else if falls_fix.iter().any(|f| f.is_some()) || falls_full.iter().any(|f| f.is_some()) {
         String::from("L8_S4_SUBSPACE_FALLS_ALL_KOSZUL_AMBIGUOUS")
     } else {
@@ -718,8 +774,13 @@ fn main() {
     let per_degree_table = |records: &[Value], variant: &str| -> Vec<Value> {
         let mut by_deg: HashMap<u64, Vec<(u64, u64, u64)>> = HashMap::new(); // deg -> (rows, cols, rank)
         for r in records {
-            for m in r[variant]["measured"].as_array().unwrap_or(&Vec::new()).clone() {
-                by_deg.entry(m["degree"].as_u64().unwrap())
+            for m in r[variant]["measured"]
+                .as_array()
+                .unwrap_or(&Vec::new())
+                .clone()
+            {
+                by_deg
+                    .entry(m["degree"].as_u64().unwrap())
                     .or_default()
                     .push((
                         m["rows"].as_u64().unwrap(),
@@ -730,31 +791,45 @@ fn main() {
         }
         let mut degs: Vec<u64> = by_deg.keys().copied().collect();
         degs.sort_unstable();
-        degs.iter().map(|d| {
-            let v = &by_deg[d];
-            let rows_min = v.iter().map(|t| t.0).min().unwrap();
-            let rows_max = v.iter().map(|t| t.0).max().unwrap();
-            let rank_min = v.iter().map(|t| t.2).min().unwrap();
-            let rank_max = v.iter().map(|t| t.2).max().unwrap();
-            let rank_mean = v.iter().map(|t| t.2).sum::<u64>() as f64 / v.len() as f64;
-            let deficit_rows_mean = rows_max as f64 - rank_mean;
-            json!({
-                "degree": d, "draws": v.len(),
-                "rows_min": rows_min, "rows_max": rows_max, "cols": v[0].1,
-                "rank_min": rank_min, "rank_max": rank_max, "rank_mean": rank_mean,
-                "mean_deficit_vs_rows": deficit_rows_mean,
+        degs.iter()
+            .map(|d| {
+                let v = &by_deg[d];
+                let rows_min = v.iter().map(|t| t.0).min().unwrap();
+                let rows_max = v.iter().map(|t| t.0).max().unwrap();
+                let rank_min = v.iter().map(|t| t.2).min().unwrap();
+                let rank_max = v.iter().map(|t| t.2).max().unwrap();
+                let rank_mean = v.iter().map(|t| t.2).sum::<u64>() as f64 / v.len() as f64;
+                let deficit_rows_mean = rows_max as f64 - rank_mean;
+                json!({
+                    "degree": d, "draws": v.len(),
+                    "rows_min": rows_min, "rows_max": rows_max, "cols": v[0].1,
+                    "rank_min": rank_min, "rank_max": rank_max, "rank_mean": rank_mean,
+                    "mean_deficit_vs_rows": deficit_rows_mean,
+                })
             })
-        }).collect()
+            .collect()
     };
 
     let created_at = std::process::Command::new("date")
         .args(["-u", "+%Y-%m-%dT%H:%M:%SZ"])
         .output()
         .ok()
-        .and_then(|o| if o.status.success() { String::from_utf8(o.stdout).ok() } else { None })
+        .and_then(|o| {
+            if o.status.success() {
+                String::from_utf8(o.stdout).ok()
+            } else {
+                None
+            }
+        })
         .map(|s| s.trim().to_string())
         .unwrap_or_else(|| {
-            format!("unix_{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs())
+            format!(
+                "unix_{}",
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs()
+            )
         });
 
     let summary = json!({

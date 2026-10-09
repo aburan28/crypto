@@ -3165,7 +3165,10 @@ mod tests {
         for trial in 0..120 {
             let (r, want) = planted(&jac, &base, &mut rng);
             let (found, cost) = nagao_decompose(&ctx, &base, &by_x, &r, &opts, &mut rng);
-            assert!(!cost.incomplete, "trial {trial}");
+            assert!(
+                !cost.incomplete && !cost.timed_out,
+                "trial {trial}: {cost:?}"
+            );
             assert!(
                 found.contains(&want),
                 "trial {trial}: missed {want:?}, {cost:?}"
@@ -3219,7 +3222,7 @@ mod tests {
             };
             let (fa, ca) = nagao_decompose(&ctx, &base, &by_x, &r, &full, &mut rng);
             let (fb, cb) = nagao_decompose(&ctx, &base, &by_x, &r, &stop, &mut rng);
-            if ca.degenerate || ca.incomplete || cb.incomplete {
+            if ca.degenerate || ca.incomplete || cb.incomplete || ca.timed_out || cb.timed_out {
                 continue;
             }
             n += 1;
@@ -3275,7 +3278,7 @@ mod tests {
             };
             let (fa, ca) = nagao_decompose(&ctx, &base, &by_x, &r, &stop, &mut rng);
             let (fb, cb) = nagao_decompose(&traced, &base, &by_x, &r, &stop, &mut rng);
-            if ca.degenerate || ca.incomplete || cb.incomplete {
+            if ca.degenerate || ca.incomplete || cb.incomplete || ca.timed_out || cb.timed_out {
                 continue;
             }
             n += 1;

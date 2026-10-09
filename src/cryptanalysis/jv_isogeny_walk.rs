@@ -2001,9 +2001,7 @@ fn uniform_curve_order(f: &Fq3, rng: &mut StdRng) -> Option<u128> {
         }
         let cubic: P6 = vec![b, a, E6::ZERO, E6::ONE];
         let roots = roots_q3(f, &cubic, rng);
-        let Some(r) = roots.first().copied() else {
-            return None;
-        };
+        let r = roots.first().copied()?;
         // x = X + r:  y² = X³ + 3r X² + (3r² + a) X
         let a2 = f.mul(&c(3), &r);
         let a4 = f.add(&f.mul(&c(3), &f.sq(&r)), &a);

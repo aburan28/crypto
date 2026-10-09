@@ -28,7 +28,6 @@
 
 use crate::binary_ecc::{BinaryPoint, IrreduciblePoly};
 use crate::cryptanalysis::semaev_decomp::{Gf2, Gf2_128};
-use crate::cryptanalysis::semaev_decomp::Gf2;
 
 /// Affine point on a binary curve with single-word coordinates.
 ///
@@ -389,12 +388,6 @@ pub fn artin_schreier_root(gf: &Gf2, n: u32, c: u64) -> Option<u64> {
     if n > 20 {
         return None;
     }
-    for v in 0..(1u64 << n) {
-        if (gf.sqr(v) ^ v) == c {
-            return Some(v);
-        }
-    }
-    None
     (0..(1u64 << n)).find(|&v| (gf.sqr(v) ^ v) == c)
 }
 
@@ -925,7 +918,6 @@ mod tests {
 
     #[test]
     fn s3_roots_match_slow_reference_on_generic_pairs() {
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Generic pairs only (both sides nonzero and unequal): the fast
         // kernel must agree with the slow one bit for bit, including
         // verdict and root order.  Degenerate pairs are covered by
@@ -954,7 +946,6 @@ mod tests {
     #[test]
     fn s3_roots_degenerate_pairs_are_exact() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Diagonal (x, x): linear, single root.  Zero side: x_3^2 = C/A,
         // single root.  (0, 0): genuinely rootless.  Each returned root
         // must vanish under S3; single-root cases are complete by degree
@@ -1015,7 +1006,6 @@ mod tests {
     #[test]
     fn s3_roots_satisfy_semaev_independently() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for n in [13u32, 41, 53] {
             let irr = find_irreducible_sparse(n).unwrap();
             let gf = Gf2::new(&irr);
@@ -1061,7 +1051,6 @@ mod tests {
     #[test]
     fn s3_roots_none_is_exact_on_tiny_field() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Exhaustive at n = 7: fast-None holds iff no x3 in F_{2^7}
         // zeroes S3, and fast-Some returns exactly the full root set.
         let n = 7u32;
@@ -1118,7 +1107,6 @@ mod tests {
     #[test]
     fn artin_schreier_root_matches_slow() {
         use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for n in [7u32, 9, 13, 23, 41, 53] {
             let irr = find_irreducible_sparse(n).unwrap();
             let gf = Gf2::new(&irr);
@@ -1147,7 +1135,6 @@ mod tests {
     #[test]
     fn fast_points_with_x_matches_slow() {
         use crate::cryptanalysis::koblitz_index_calculus::points_with_x as slow_points_with_x;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for (n, a) in [(7u32, 0u8), (9, 0), (13, 0), (23, 1), (41, 0), (53, 0)] {
             let (curve, fast) = toy_curve(n, a);
             let gf = Gf2::new(&curve.irreducible);
@@ -1194,12 +1181,18 @@ mod tests {
 mod wide_tests {
     use super::*;
     use crate::binary_ecc::curve::{point_add, point_double, point_neg, scalar_mul};
-    use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
+    use crate::binary_ecc::{BinaryPoint, F2mElement};
     use crate::cryptanalysis::binary_semaev::{binary_semaev_s3, solve_artin_schreier};
-    use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible_sparse_wide, KoblitzCurve};
+    use crate::cryptanalysis::koblitz_index_calculus::{
+        find_irreducible_sparse_wide, KoblitzCurve,
+    };
     use num_bigint::BigUint;
 
-    fn setup71() -> (KoblitzCurve, FastBinaryCurve128, crate::binary_ecc::IrreduciblePoly) {
+    fn setup71() -> (
+        KoblitzCurve,
+        FastBinaryCurve128,
+        crate::binary_ecc::IrreduciblePoly,
+    ) {
         let curve = KoblitzCurve::new(0, 71).expect("K_0/F_2^71 must construct");
         let irr = find_irreducible_sparse_wide(71).expect("n = 71 must resolve");
         let fast = FastBinaryCurve128::new(&irr, 0).expect("wide fast curve at n = 71");
@@ -1214,20 +1207,25 @@ mod wide_tests {
         let g = curve.generator().clone();
         let mut state = 0x9E37_79B9_7F4A_7C15u64 ^ 71;
         let mut next_scalar = || {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             BigUint::from(state >> 11) % &curve.subgroup_order + BigUint::from(1u32)
         };
         for _ in 0..60 {
             let (d1, d2) = (next_scalar(), next_scalar());
-            let (p1, p2) = (scalar_mul(&curve.curve, &g, &d1), scalar_mul(&curve.curve, &g, &d2));
+            let (p1, p2) = (
+                scalar_mul(&curve.curve, &g, &d1),
+                scalar_mul(&curve.curve, &g, &d2),
+            );
             let (w1, w2) = (
                 point_to_words_128(&fast, &p1).unwrap(),
                 point_to_words_128(&fast, &p2).unwrap(),
             );
             let expect = |p: &BinaryPoint| point_to_words_128(&fast, p).unwrap();
-            assert_eq!(fast.add(w1, w2), expect(&point_add(&curve.curve, &p1, &p2)), "add");
+            assert_eq!(
+                fast.add(w1, w2),
+                expect(&point_add(&curve.curve, &p1, &p2)),
+                "add"
+            );
             assert_eq!(
                 fast.add(w1, FastBinaryCurve128::neg(w2)),
                 expect(&point_add(&curve.curve, &p1, &point_neg(&p2))),
@@ -1258,13 +1256,9 @@ mod wide_tests {
         let mut state = 0x1234_5678u128 ^ ((71u128) << 64);
         let mut agree = 0usize;
         for _ in 0..120 {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let left = state & gf.mask;
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let right = state & gf.mask;
             let e = |w: u128| gf.to_element(w);
             let expected = solve_artin_schreier_s3_verdict(&e(left), &e(right), &e(b), &irr);
@@ -1325,9 +1319,7 @@ mod wide_tests {
         let mut state = 0xABCDu128;
         let mut hits = 0usize;
         for _ in 0..80 {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let c = state & gf.mask;
             let ec = gf.to_element(c);
             match artin_schreier_root_128(&gf, 71, c) {
@@ -1359,15 +1351,10 @@ mod wide_tests {
         let b = fast.gf.from_element(&curve.curve.b);
         let mut state = 0x55AAu128;
         for _ in 0..40 {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
-            let x = (state & fast.gf.mask) as u128;
-            let got: std::collections::HashSet<(u128, u128)> = fast
-                .points_with_x(b, x)
-                .into_iter()
-                .flatten()
-                .collect();
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            let x = state & fast.gf.mask;
+            let got: std::collections::HashSet<(u128, u128)> =
+                fast.points_with_x(b, x).into_iter().flatten().collect();
             let xe = fast.element(x);
             let want: std::collections::HashSet<(u128, u128)> = points_with_x(&curve.curve, &xe)
                 .into_iter()

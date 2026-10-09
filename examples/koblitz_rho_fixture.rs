@@ -640,16 +640,25 @@ fn solve_fixture(
     let signed_size = signed_automorphism_size(lambda, modulus, curve.n);
     let fixture_seed = std::env::var("KIC_RHO_WALK_SEED")
         .ok()
-        .map(|value| value.parse::<u64>().expect("KIC_RHO_WALK_SEED must be an integer"))
+        .map(|value| {
+            value
+                .parse::<u64>()
+                .expect("KIC_RHO_WALK_SEED must be an integer")
+        })
         .unwrap_or(fixture_seed);
     let fixed_target = std::env::var("KIC_RHO_FIXED_TARGET_SCALAR")
         .ok()
-        .map(|value| value.parse::<u64>().expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer"));
+        .map(|value| {
+            value
+                .parse::<u64>()
+                .expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer")
+        });
     let mut rng = StdRng::seed_from_u64(fixture_seed);
     let d0 = fixed_target.unwrap_or_else(|| rng.gen_range(1..modulus));
-    assert!((1..modulus).contains(&d0), "fixed target scalar must be in [1,r)");
-    let target_generation_started = Instant::now();
-    let q = curve.mul(curve.generator(), &BigUint::from(d0));
+    assert!(
+        (1..modulus).contains(&d0),
+        "fixed target scalar must be in [1,r)"
+    );
     let generated_scalar = rng.gen_range(1..modulus);
     let target_generation_started = Instant::now();
     let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
@@ -836,18 +845,25 @@ fn solve_fixture_packed(
     let generator = raw_point(curve.generator());
     let fixture_seed = std::env::var("KIC_RHO_WALK_SEED")
         .ok()
-        .map(|value| value.parse::<u64>().expect("KIC_RHO_WALK_SEED must be an integer"))
+        .map(|value| {
+            value
+                .parse::<u64>()
+                .expect("KIC_RHO_WALK_SEED must be an integer")
+        })
         .unwrap_or(fixture_seed);
     let fixed_target = std::env::var("KIC_RHO_FIXED_TARGET_SCALAR")
         .ok()
-        .map(|value| value.parse::<u64>().expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer"));
+        .map(|value| {
+            value
+                .parse::<u64>()
+                .expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer")
+        });
     let mut rng = StdRng::seed_from_u64(fixture_seed);
     let d0 = fixed_target.unwrap_or_else(|| rng.gen_range(1..modulus));
-    assert!((1..modulus).contains(&d0), "fixed target scalar must be in [1,r)");
-    let mut charges = Charges::default();
-    let target_generation_started = Instant::now();
-    let q = raw_scalar_mul(curve, generator, d0);
-    let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
+    assert!(
+        (1..modulus).contains(&d0),
+        "fixed target scalar must be in [1,r)"
+    );
     let generated_scalar = rng.gen_range(1..modulus);
     let target_generation_started = Instant::now();
     let (known_scalar, reference_q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
@@ -879,7 +895,6 @@ fn solve_fixture_packed(
         };
     let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
     let mut charges = Charges::default();
-    let started = Instant::now();
     let q = raw_point(&reference_q);
     charges.scalar_multiplications += 1;
     let started = Instant::now();
@@ -1212,10 +1227,10 @@ mod wide {
         inverse_mod, mul_mod, signed_automorphism_size, sub_mod, Charges, Quotient, JUMPS,
         MAX_RESTARTS, MAX_RESTARTS_LARGE, TASK_ID,
     };
+    use crypto_lib::binary_ecc::BinaryPoint;
     use crypto_lib::cryptanalysis::koblitz_fast_arith::{FastBinaryCurve128, FastPoint128};
     use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
     use crypto_lib::cryptanalysis::semaev_decomp::Gf2_128;
-    use crypto_lib::binary_ecc::BinaryPoint;
     use num_bigint::BigUint;
     use rand::{rngs::StdRng, Rng, SeedableRng};
     use std::collections::HashMap;
@@ -1241,7 +1256,6 @@ mod wide {
     pub(crate) struct WideBackend {
         pub(crate) fast: FastBinaryCurve128,
         pub(crate) gf: Gf2_128,
-        n: u32,
         mask: u128,
     }
 
@@ -1251,9 +1265,16 @@ mod wide {
             if n <= 63 || n > 127 {
                 return None;
             }
-            let fast = FastBinaryCurve128::new(&curve.curve.irreducible, curve.curve.a.raw_bits().first().copied().unwrap_or(0) as u128)?;
+            let fast = FastBinaryCurve128::new(
+                &curve.curve.irreducible,
+                curve.curve.a.raw_bits().first().copied().unwrap_or(0) as u128,
+            )?;
             let gf = Gf2_128::new(&curve.curve.irreducible);
-            Some(Self { fast, gf, n, mask: (1u128 << n) - 1 })
+            Some(Self {
+                fast,
+                gf,
+                mask: (1u128 << n) - 1,
+            })
         }
 
         #[inline(always)]
@@ -1309,11 +1330,19 @@ mod wide {
         }
     }
 
-    pub(crate) fn raw_add128(backend: &WideBackend, left: RawPoint128, right: RawPoint128) -> RawPoint128 {
+    pub(crate) fn raw_add128(
+        backend: &WideBackend,
+        left: RawPoint128,
+        right: RawPoint128,
+    ) -> RawPoint128 {
         backend.fast.add(left, right)
     }
 
-    pub(crate) fn raw_scalar_mul128(backend: &WideBackend, point: RawPoint128, scalar: u64) -> RawPoint128 {
+    pub(crate) fn raw_scalar_mul128(
+        backend: &WideBackend,
+        point: RawPoint128,
+        scalar: u64,
+    ) -> RawPoint128 {
         let mut result = None;
         for bit in (0..64 - scalar.leading_zeros()).rev() {
             result = raw_double128(backend, result);
@@ -1364,10 +1393,7 @@ mod wide {
                 }
             }
             if exponent + 1 < powers {
-                point = match point {
-                    None => None,
-                    Some((x, y)) => Some((backend.gf.sqr(x), backend.gf.sqr(y))),
-                };
+                point = point.map(|(x, y)| (backend.gf.sqr(x), backend.gf.sqr(y)));
                 multiplier = mul_mod(multiplier, lambda, modulus);
                 charges.frobenius_maps += 1;
             }
@@ -1392,7 +1418,7 @@ mod wide {
 
     pub(crate) fn raw_random_state128(
         backend: &WideBackend,
-        curve: &KoblitzCurve,
+        _curve: &KoblitzCurve,
         generator: RawPoint128,
         q: RawPoint128,
         rng: &mut StdRng,
@@ -1426,7 +1452,8 @@ mod wide {
     ) -> Vec<RawJump128> {
         (0..JUMPS)
             .map(|_| {
-                let state = raw_random_state128(backend, curve, generator, q, rng, modulus, charges);
+                let state =
+                    raw_random_state128(backend, curve, generator, q, rng, modulus, charges);
                 RawJump128 {
                     point: state.point,
                     a: state.a,
@@ -1460,11 +1487,19 @@ mod wide {
         let generator = raw_point128(&backend, curve.generator());
         let fixture_seed = std::env::var("KIC_RHO_WALK_SEED")
             .ok()
-            .map(|value| value.parse::<u64>().expect("KIC_RHO_WALK_SEED must be an integer"))
+            .map(|value| {
+                value
+                    .parse::<u64>()
+                    .expect("KIC_RHO_WALK_SEED must be an integer")
+            })
             .unwrap_or(fixture_seed);
         let fixed_target = std::env::var("KIC_RHO_FIXED_TARGET_SCALAR")
             .ok()
-            .map(|value| value.parse::<u64>().expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer"));
+            .map(|value| {
+                value
+                    .parse::<u64>()
+                    .expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer")
+            });
         let public_target = std::env::var("KIC_RHO_PUBLIC_TARGET_POINT")
             .ok()
             .map(|encoded| parse_point_coordinates128(&encoded));
@@ -1479,20 +1514,35 @@ mod wide {
             Some(fixed_target.unwrap_or_else(|| rng.gen_range(1..modulus)))
         };
         if let Some(d0) = d0 {
-            assert!((1..modulus).contains(&d0), "fixed target scalar must be in [1,r)");
+            assert!(
+                (1..modulus).contains(&d0),
+                "fixed target scalar must be in [1,r)"
+            );
         }
         let mut charges = Charges::default();
         let (q, target_generation_ms) = if let Some((x, y)) = public_target {
             (Some((x, y)), 0.0)
         } else {
             let target_generation_started = Instant::now();
-            let q = raw_scalar_mul128(&backend, generator, d0.expect("generated target needs a scalar"));
+            let q = raw_scalar_mul128(
+                &backend,
+                generator,
+                d0.expect("generated target needs a scalar"),
+            );
             let elapsed = target_generation_started.elapsed().as_secs_f64() * 1000.0;
             charges.scalar_multiplications += 1;
             (q, elapsed)
         };
         let started = Instant::now();
-        let jumps = raw_make_jumps128(&backend, curve, generator, q, &mut rng, modulus, &mut charges);
+        let jumps = raw_make_jumps128(
+            &backend,
+            curve,
+            generator,
+            q,
+            &mut rng,
+            modulus,
+            &mut charges,
+        );
         let setup_ms = started.elapsed().as_secs_f64() * 1000.0;
         let walk_started = Instant::now();
         let mut table: HashMap<(u8, u128, u128), (u64, u64)> = HashMap::new();
@@ -1503,9 +1553,11 @@ mod wide {
                     Quotient::Negation => 2.0,
                     Quotient::SignedFrobenius => signed_size as f64,
                 }))
-            .sqrt();
+        .sqrt();
         let safety = if curve.n >= 41 { 2_000 } else { 200 };
-        let max_steps = (ideal_steps.ceil() as u64).saturating_mul(safety).max(10_000);
+        let max_steps = (ideal_steps.ceil() as u64)
+            .saturating_mul(safety)
+            .max(10_000);
         let mut steps = 0u64;
         let mut restarts = 0u64;
         let mut recovered = None;
@@ -1516,8 +1568,24 @@ mod wide {
         };
 
         'restart: while restarts <= restart_cap && steps < max_steps {
-            let initial = raw_random_state128(&backend, curve, generator, q, &mut rng, modulus, &mut charges);
-            let mut state = raw_canonicalize128(&backend, curve, initial, mode, modulus, lambda, &mut charges);
+            let initial = raw_random_state128(
+                &backend,
+                curve,
+                generator,
+                q,
+                &mut rng,
+                modulus,
+                &mut charges,
+            );
+            let mut state = raw_canonicalize128(
+                &backend,
+                curve,
+                initial,
+                mode,
+                modulus,
+                lambda,
+                &mut charges,
+            );
             loop {
                 let key = raw_key128(state.point);
                 charges.table_queries += 1;
@@ -1549,7 +1617,15 @@ mod wide {
                     b: (state.b + jump.b) % modulus,
                 };
                 charges.group_additions += 1;
-                state = raw_canonicalize128(&backend, curve, state, mode, modulus, lambda, &mut charges);
+                state = raw_canonicalize128(
+                    &backend,
+                    curve,
+                    state,
+                    mode,
+                    modulus,
+                    lambda,
+                    &mut charges,
+                );
                 steps += 1;
                 if steps >= max_steps {
                     break 'restart;
@@ -1564,7 +1640,10 @@ mod wide {
         }
         let reference_q = curve.mul(curve.generator(), &BigUint::from(recovered));
         assert_eq!(raw_point128(&backend, &reference_q), q);
-        assert_eq!(curve.mul(curve.generator(), &BigUint::from(recovered)), reference_q);
+        assert_eq!(
+            curve.mul(curve.generator(), &BigUint::from(recovered)),
+            reference_q
+        );
         let validation_ms = validation_started.elapsed().as_secs_f64() * 1000.0;
         let table_entries = table.len();
         let generator_point_key = raw_key128(generator);
@@ -1635,14 +1714,19 @@ mod wide {
         fn wide_point_key_serializes_as_decimal_strings() {
             assert_eq!(
                 point_coordinates_json128((1, (1u128 << 100) + 7, (1u128 << 80) + 9)),
-                [((1u128 << 100) + 7).to_string(), ((1u128 << 80) + 9).to_string()]
+                [
+                    ((1u128 << 100) + 7).to_string(),
+                    ((1u128 << 80) + 9).to_string()
+                ]
             );
         }
 
         #[test]
         fn public_point_input_parses_decimal_string_coordinates() {
             assert_eq!(
-                parse_point_coordinates128("[\"1267650600228229401496703205383\",\"1208925819614629174706185\"]"),
+                parse_point_coordinates128(
+                    "[\"1267650600228229401496703205383\",\"1208925819614629174706185\"]"
+                ),
                 ((1u128 << 100) + 7, (1u128 << 80) + 9)
             );
         }
@@ -1665,7 +1749,10 @@ fn main() {
     // flow below stays byte-identical; the wide path only implements
     // the packed walk (the beat control) and re-parses its own args.
     if n > 63 {
-        assert_eq!(backend, "packed", "wide rungs only implement the packed walk");
+        assert_eq!(
+            backend, "packed",
+            "wide rungs only implement the packed walk"
+        );
         let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
         for fixture_index in 0..fixtures {
             // Same seed-derivation discipline as the `u64` batch path.
@@ -1680,7 +1767,10 @@ fn main() {
                 }
                 None => wide::fixture_seed(n, a, mode.name(), fixture_index),
             };
-            println!("{}", wide::solve_fixture_packed128(&curve, mode, fixture_index, seed));
+            println!(
+                "{}",
+                wide::solve_fixture_packed128(&curve, mode, fixture_index, seed)
+            );
         }
         return;
     }
@@ -1760,7 +1850,8 @@ fn main() {
 }
 
 #[cfg(test)]
-mod packed_tests {    use super::*;
+mod packed_tests {
+    use super::*;
 
     /// The strong backend recovers seeded and explicit scalars and reports the
     /// same JSON fields the stage verifiers read.
@@ -1890,7 +1981,10 @@ mod wide_packed_tests {
         for scalar in 0..128u64 {
             assert_eq!(
                 raw_scalar_mul128(&backend, generator, scalar),
-                raw_point128(&backend, &curve.mul(curve.generator(), &BigUint::from(scalar))),
+                raw_point128(
+                    &backend,
+                    &curve.mul(curve.generator(), &BigUint::from(scalar))
+                ),
                 "scalar {scalar}"
             );
         }
@@ -1909,15 +2003,18 @@ mod wide_packed_tests {
         );
         assert_eq!(
             raw_neg128(left),
-            raw_point128(&backend, &point_neg(&curve.mul(curve.generator(), &BigUint::from(37u64)))),
+            raw_point128(
+                &backend,
+                &point_neg(&curve.mul(curve.generator(), &BigUint::from(37u64)))
+            ),
             "neg"
         );
         // Square agrees with the general implementation on the x-word.
         if let Some((x, _)) = left {
             let reference = crypto_lib::binary_ecc::F2mElement::from_biguint(&BigUint::from(x), 71);
-            let back = backend.gf.from_element(
-                &reference.square(&curve.curve.irreducible),
-            );
+            let back = backend
+                .gf
+                .from_element(&reference.square(&curve.curve.irreducible));
             assert_eq!(backend.fast.gf.sqr(x), back, "square");
         }
     }

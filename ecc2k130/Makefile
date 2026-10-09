@@ -91,7 +91,6 @@ PACKED_UNROLL_INV ?= 0
 PACKED_PAIR_PRODUCTS ?= 0
 PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
-PACKED_ADD_COMBINE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
 # Bits: 1 inline single polynomial products, 2 inline paired products.
 PACKED_INLINE_POLY ?= 0
@@ -280,7 +279,6 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_FAST_CONVERT=$(PACKED_FAST_CONVERT) \
        -DECC_PACKED_POLY_CHAIN=$(PACKED_POLY_CHAIN) -DECC_PACKED_UNROLL_INV=$(PACKED_UNROLL_INV) \
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
-       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE)
        -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
        -DECC_PACKED_INLINE_POLY=$(PACKED_INLINE_POLY) \
@@ -576,12 +574,6 @@ test-packed:
 
 test-packed-network:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_ADD_COMBINE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-add
-	./build/test-packed-network
-	./build/test-packed-network-direct
-	./build/test-packed-network-add
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-generated
@@ -1173,9 +1165,6 @@ clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
-	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-add
-	rm -f build/test-packed-cuda
-	rm -f build/test-timing
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated build/test-packed-network-add
 	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host build/test-packed-pair-ilp-host build/test-packed-clmad-square-host
 	rm -f build/test-packed-top-hoist-host build/test-packed-onb-inv-host

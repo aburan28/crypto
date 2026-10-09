@@ -237,7 +237,7 @@ impl Fp64 {
         let mut m = s;
         let mut c = self.pow(self.to_mont(z), q);
         let mut t = self.pow(a, q);
-        let mut r = self.pow(a, (q + 1) / 2);
+        let mut r = self.pow(a, q.div_ceil(2));
         loop {
             if t == self.one {
                 return Some(r);
@@ -548,8 +548,9 @@ impl RhoConfig {
         let avail = std::thread::available_parallelism()
             .map(|n| n.get())
             .unwrap_or(1);
-        let expected = (std::f64::consts::PI * 2f64.powi(bits as i32) / if negation { 4.0 } else { 2.0 })
-            .sqrt();
+        let expected = (std::f64::consts::PI * 2f64.powi(bits as i32)
+            / if negation { 4.0 } else { 2.0 })
+        .sqrt();
         let walkers_total = (expected / 64.0).clamp(32.0, (avail * 1024) as f64) as usize;
         let threads = (walkers_total / 64).clamp(1, avail);
         let walkers = (walkers_total / threads).max(16);
@@ -695,9 +696,8 @@ fn rho_worker(
     let f = curve.f;
     let n = curve.n;
     let w = cfg.walkers;
-    let mut rng = StdRng::seed_from_u64(
-        cfg.seed ^ (tid as u64 + 1).wrapping_mul(0x9E37_79B9_7F4A_7C15),
-    );
+    let mut rng =
+        StdRng::seed_from_u64(cfg.seed ^ (tid as u64 + 1).wrapping_mul(0x9E37_79B9_7F4A_7C15));
     let step_cap: u32 = (40u64 << cfg.dp_bits).max(256).min(u32::MAX as u64) as u32;
 
     let mut xs = vec![0u64; w];
@@ -739,7 +739,9 @@ fn rho_worker(
         }
     };
     for i in 0..w {
-        restart(i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps);
+        restart(
+            i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps,
+        );
     }
 
     let mut local_steps = 0u64;
@@ -766,7 +768,9 @@ fn rho_worker(
         f.batch_inv(&mut d, &mut scratch);
         for i in 0..w {
             if reset[i] {
-                restart(i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps);
+                restart(
+                    i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps,
+                );
                 continue;
             }
             let t = &table[js[i]];
@@ -805,7 +809,9 @@ fn rho_worker(
                         prev[i] = u64::MAX;
                     }
                     None => {
-                        restart(i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps);
+                        restart(
+                            i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps,
+                        );
                         continue;
                     }
                 }
@@ -841,7 +847,9 @@ fn rho_worker(
                 steps[i] = 0;
             } else if steps[i] > step_cap {
                 // Probable fruitless cycle of length ≥ 4: abandon the trail.
-                restart(i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps);
+                restart(
+                    i, &mut rng, &mut xs, &mut ys, &mut as_, &mut bs, &mut prev, &mut steps,
+                );
             }
         }
         local_steps += w as u64;
@@ -1116,7 +1124,8 @@ pub fn collect_relations(
                             let Some(pjk) = curve.add(Some(fb.pts[j as usize]), Some(fk)) else {
                                 continue;
                             };
-                            let y = *y3.get_or_insert_with(|| f.sub(f.mul(lam, f.sub(r.x, x3)), r.y));
+                            let y =
+                                *y3.get_or_insert_with(|| f.sub(f.mul(lam, f.sub(r.x, x3)), r.y));
                             let tau = if y == pjk.y { 1i8 } else { -1 };
                             found.push(vec![(i as u32, eps), (j, tau), (k as u32, tau * sigma)]);
                         }
@@ -1372,7 +1381,9 @@ pub fn point_order_hasse(curve: &FastCurve, g: Pt) -> Option<u64> {
     }
     candidates.sort_unstable();
     candidates.dedup();
-    candidates.retain(|&t| t >= lo && t <= hi && curve.mul(Some(g), (p as i128 + 1 - t) as u64).is_none());
+    candidates.retain(|&t| {
+        t >= lo && t <= hi && curve.mul(Some(g), (p as i128 + 1 - t) as u64).is_none()
+    });
     if candidates.len() != 1 {
         return None;
     }
@@ -1415,7 +1426,11 @@ pub fn find_a3_curve(bits: u32, residue_mod_4: u64) -> Option<(FastCurve, Pt)> {
         }
         let name = format!(
             "a3-fast-{bits}bit-{}",
-            if residue_mod_4 == 3 { "p256class" } else { "cryptoproclass" }
+            if residue_mod_4 == 3 {
+                "p256class"
+            } else {
+                "cryptoproclass"
+            }
         );
         let curve = FastCurve::new(&name, p, a, b, order);
         let g = curve.lift_x(probe.canonical(g).0)?;
@@ -1445,7 +1460,13 @@ mod tests {
     #[test]
     fn montgomery_matches_biguint() {
         let mut rng = StdRng::seed_from_u64(7);
-        for &p in &[65_519u64, 1_048_571, 16_777_199, (1u64 << 61) - 1, 4_611_686_018_427_387_847] {
+        for &p in &[
+            65_519u64,
+            1_048_571,
+            16_777_199,
+            (1u64 << 61) - 1,
+            4_611_686_018_427_387_847,
+        ] {
             let f = Fp64::new(p);
             let pb = BigUint::from(p);
             for _ in 0..200 {
@@ -1454,9 +1475,18 @@ mod tests {
                 let (am, bm) = (f.to_mont(a), f.to_mont(b));
                 assert_eq!(f.from_mont(am), a);
                 let prod = ((BigUint::from(a) * BigUint::from(b)) % &pb).to_u64_digits();
-                assert_eq!(f.from_mont(f.mul(am, bm)), prod.first().copied().unwrap_or(0));
-                assert_eq!(f.from_mont(f.add(am, bm)), ((a as u128 + b as u128) % p as u128) as u64);
-                assert_eq!(f.from_mont(f.sub(am, bm)), ((a as u128 + p as u128 - b as u128) % p as u128) as u64);
+                assert_eq!(
+                    f.from_mont(f.mul(am, bm)),
+                    prod.first().copied().unwrap_or(0)
+                );
+                assert_eq!(
+                    f.from_mont(f.add(am, bm)),
+                    ((a as u128 + b as u128) % p as u128) as u64
+                );
+                assert_eq!(
+                    f.from_mont(f.sub(am, bm)),
+                    ((a as u128 + p as u128 - b as u128) % p as u128) as u64
+                );
                 if a != 0 {
                     let inv = f.inv(am);
                     assert_eq!(f.mul(inv, am), f.one);
@@ -1567,7 +1597,13 @@ mod tests {
             let (xr, _) = fc.canonical(r);
             let xi = fb.xs[rel.entries[0].0 as usize];
             let xj = fb.xs[rel.entries[1].0 as usize];
-            let s3 = semaev_s3(&c.fe(BigUint::from(xr)), &c.fe(BigUint::from(xi)), &c.fe(BigUint::from(xj)), &a_fe, &b_fe);
+            let s3 = semaev_s3(
+                &c.fe(BigUint::from(xr)),
+                &c.fe(BigUint::from(xi)),
+                &c.fe(BigUint::from(xj)),
+                &a_fe,
+                &b_fe,
+            );
             assert!(s3.is_zero(), "S3 must vanish on a found relation");
         }
     }
@@ -1581,7 +1617,10 @@ mod tests {
             let (fc, g) = ladder(bits);
             assert_eq!(point_order_hasse(&fc, g), Some(fc.n), "bits={bits}");
             let (gen, gg) = find_a3_curve(bits, 3).unwrap();
-            assert_eq!((gen.f.p, gen.n, gen.canonical(gg)), (fc.f.p, fc.n, fc.canonical(g)));
+            assert_eq!(
+                (gen.f.p, gen.n, gen.canonical(gg)),
+                (fc.f.p, fc.n, fc.canonical(g))
+            );
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();
         assert_eq!(gen.f.p, 268_435_399);

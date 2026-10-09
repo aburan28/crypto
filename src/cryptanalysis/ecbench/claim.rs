@@ -1349,7 +1349,7 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
         ("ic_resource_envelope", ic_env),
         ("rho_resource_envelope", rho_env),
     ] {
-        if !v.is_some_and(|o| !o.is_empty()) {
+        if v.is_none_or(|o| o.is_empty()) {
             err(format!("{key} must be a nonempty object"));
         }
     }

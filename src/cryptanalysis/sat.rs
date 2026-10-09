@@ -905,22 +905,22 @@ impl Solver {
             .iter()
             .take_while(|&&lit| self.lit_value(lit) != Some(false))
             .count();
-        let idx = self.clauses.len();
         let (l0, l1) = (lits[0], lits[1]);
-        self.clauses.push(lits);
-        self.watches[watch_index(l0)].push(Watcher {
+        let idx = self.push_clause(&lits);
+        let (w0, w1) = (self.watch_slot(l0), self.watch_slot(l1));
+        self.watches[w0].push(Watcher {
             cref: idx,
             blocker: l1,
         });
-        self.watches[watch_index(l1)].push(Watcher {
+        self.watches[w1].push(Watcher {
             cref: idx,
             blocker: l0,
         });
-        self.detached.resize(self.clauses.len(), false);
+        self.detached.resize(self.clause_at.len(), false);
         // Theory clauses are permanent propagation lemmas. Advancing this
         // boundary also retains any learnt clauses that preceded them, which
         // costs memory but cannot change an answer.
-        self.n_orig_clauses = self.clauses.len();
+        self.n_orig_clauses = self.clause_at.len();
         match non_false {
             0 => Some(Conflict::Clause(idx)),
             1 if self.lit_value(l0).is_none() => {
@@ -1878,9 +1878,7 @@ impl Solver {
                         }
                         let has_current_conflict = normalized.iter().any(|clause| {
                             !clause.is_empty()
-                                && clause
-                                    .iter()
-                                    .all(|&lit| self.lit_value(lit) == Some(false))
+                                && clause.iter().all(|&lit| self.lit_value(lit) == Some(false))
                         });
                         if has_current_conflict || normalized.iter().any(|clause| clause.len() < 2)
                         {
@@ -1890,7 +1888,6 @@ impl Solver {
                                     return SolveResult::Unsat;
                                 }
                             }
-                            self.detached.resize(self.clauses.len(), false);
                             self.detached.resize(self.clause_at.len(), false);
                         } else {
                             for clause in normalized {
@@ -1967,9 +1964,6 @@ impl Solver {
 
     /// Force every saved phase to a constant polarity (search-polarity lever).
     pub fn set_all_saved_phases(&mut self, value: bool) {
-        for phase in &mut self.saved_phase {
-            *phase = value;
-        }
         self.saved_phase.fill(value);
     }
 
@@ -2192,12 +2186,10 @@ impl Solver {
 /// [`parse_dimacs_xor`].  A solver that is already inconsistent also emits an
 /// explicit empty clause so root UNSAT survives export.
 pub fn to_dimacs_xor(solver: &Solver) -> String {
-    let constraints = solver.n_orig_clauses
-        + solver.xors.len()
-        + usize::from(solver.is_unsat);
+    let constraints = solver.n_orig_clauses + solver.xors.len() + usize::from(solver.is_unsat);
     let mut output = format!("p cnf {} {}\n", solver.n_vars, constraints);
-    for clause in solver.clauses.iter().take(solver.n_orig_clauses) {
-        for &literal in clause {
+    for &cref in solver.clause_at.iter().take(solver.n_orig_clauses) {
+        for &literal in clause_in(&solver.arena, cref) {
             output.push_str(&literal.to_string());
             output.push(' ');
         }

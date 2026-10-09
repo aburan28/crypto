@@ -340,6 +340,7 @@ fn poly_basemul_acc_scalar(r: &mut Poly, a: &Poly, b: &Poly) {
 mod avx2;
 
 #[inline(always)]
+#[cfg(target_arch = "x86_64")]
 fn use_avx2() -> bool {
     #[cfg(target_arch = "x86_64")]
     {
@@ -417,6 +418,7 @@ impl RejBuf {
     fn parse(&mut self, buf: &[u8]) {
         debug_assert_eq!(buf.len() % 3, 0);
         let mut n = self.n;
+        #[cfg(target_arch = "x86_64")]
         let mut buf = buf;
         #[cfg(target_arch = "x86_64")]
         if use_avx2() {
