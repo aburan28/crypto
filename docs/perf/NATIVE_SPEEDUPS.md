@@ -108,14 +108,30 @@ it touches nothing this change does.
   behind them.  `ecbench verify --replay-all` on an earlier session is
   the check.
 
-### Release profile
+### Release profile: measured, not adopted
 
 `Cargo.toml` has no `[profile.release]` section, so the default (16
 codegen units, no LTO) is what every one of the 56 workflows that run
-`cargo build --release` ships.  Fat LTO with one codegen unit is being
-measured against it on the same two child inputs (solve `Ir` and clean
-build time); the decision and its numbers follow in this section.
-`target-cpu=native` is not on the table, see §4.
+`cargo build --release` ships.  Fat LTO with one codegen unit, built
+from the same patched tree, on the same two child inputs:
+
+| | default profile | `lto = "fat"`, `codegen-units = 1` |
+|---|---|---|
+| prime child, solve Ir | 1,929,629 | 1,925,693 (−0.2 %) |
+| Koblitz child, solve Ir | 129,040,220 | 130,048,146 (+0.8 %) |
+| prework Ir (prime / Koblitz) | 9,073,090 / 13,468,941 | 8,534,955 / 12,955,592 (−6 % / −4 %) |
+| wall per child, median of 7 | 6 ms / 56 ms | 6 ms / 58 ms |
+| `ecbench` binary | 12.8 MB | 9.8 MB |
+| clean `cargo build --release --bin ecbench`, 4 cores | 5 min 08 s | 10 min 44 s |
+
+The hot loops are monomorphised and inlined inside one crate already,
+so cross-crate LTO has nothing left to fuse there; what it trims is
+setup and binary size.  Doubling every release build in CI for a
+sub-percent, sign-changing effect on the measured work is not worth
+it.  **Decision: leave the default profile.**  A future candidate that
+needs it can be measured the same way (`CARGO_PROFILE_RELEASE_LTO=fat
+CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1` on the command line, no manifest
+change).  `target-cpu=native` is not on the table, see §4.
 
 ## 4. TODO / feature list
 
