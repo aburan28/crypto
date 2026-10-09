@@ -27,3 +27,23 @@ The initial full worktree checkout hit the disk limit and Git removed its
 incomplete tracked checkout. The protocol and runner were preserved, then a
 sparse worktree was initialized for source, documentation and required fixtures.
 No existing worktree or historical evidence was deleted.
+
+The session interruption stopped the search during P-192 degree 149, before a
+completed receipt. No search child survived the interruption. The resumed
+native supervisor checks every sealed command and stdout/stderr digest before
+reusing its receipt. Unsealed output is moved to a numbered `interrupted/`
+directory with its byte hashes and an explicit unknown elapsed time before
+retrying the same degree. The frozen degree plan and resource limits are
+unchanged. The resume change affects orchestration, not the construction CLI.
+
+The first independent degree-73 replay failed to parse the base registry:
+the E-382 entry's final `trace` line was immediately followed by the next
+extension-curve entry's `slug`, without an object boundary. The original
+registry is frozen as `validation/registry-before-repair.json`; the repair
+adds the missing closing brace, comma, and opening brace, preserving both
+entries. The failed replay log is retained separately before rerunning it.
+
+The actual construction CLI uses the default optimized release build (level
+3). An alternate level-1 build was not used for any recorded construction.
+macOS rejected the trial virtual-memory `ulimit`; the actual native supervisor
+uses the predeclared 8 GiB sampled resident-memory limit instead.

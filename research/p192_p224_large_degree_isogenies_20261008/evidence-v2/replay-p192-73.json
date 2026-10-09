@@ -1,0 +1,46 @@
+{
+  "method": "existing walker kernel verifier, separate field and polynomial implementation",
+  "records": [
+    {
+      "certificate_sha256": "f794ac493da48c75fecbc6a55d60f5d33b8ffd65e7f313a12140daa3b766034e",
+      "codomain_check": "PASS",
+      "ell": 73,
+      "index": 0,
+      "kernel_check": "PASS",
+      "kernel_degree": 36,
+      "map_denominator_coefficients": 73,
+      "map_numerator_coefficients": 74,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:5531c4a08bdb64b6e86a6e30e9a08aa57edef7af15ac5f6d4d2a83a53bf2f646",
+      "source_ec1": "EC1P192Cp192h5531c4a08bdb",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:66d177365b05cfb729aa22741acb807d43149664f2707100a336702dae7217b7",
+      "target_ec1": "EC1P192Cfph66d177365b05",
+      "target_icv1": "icv1-fp192-t31607402316713927207482677199-2e516cfe"
+    },
+    {
+      "certificate_sha256": "f794ac493da48c75fecbc6a55d60f5d33b8ffd65e7f313a12140daa3b766034e",
+      "codomain_check": "PASS",
+      "ell": 73,
+      "index": 1,
+      "kernel_check": "PASS",
+      "kernel_degree": 36,
+      "map_denominator_coefficients": 73,
+      "map_numerator_coefficients": 74,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:5531c4a08bdb64b6e86a6e30e9a08aa57edef7af15ac5f6d4d2a83a53bf2f646",
+      "source_ec1": "EC1P192Cp192h5531c4a08bdb",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:dfcdfd985cd2a944d94e142208ab89f2f081b153355aefd9da454475403764b4",
+      "target_ec1": "EC1P192Cfphdfcdfd985cd2",
+      "target_icv1": "icv1-fp192-t31607402316713927207482677199-131dc964"
+    }
+  ],
+  "schema": "large-degree-isogeny-replay/v1",
+  "scope": "same-host independent implementation",
+  "status": "PASS"
+}
