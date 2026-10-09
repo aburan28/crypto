@@ -1,0 +1,48 @@
+{
+  "method": "existing walker kernel verifier, separate field and polynomial implementation",
+  "records": [
+    {
+      "certificate_sha256": "b9fecd027e08576b6c6769ffadff771a83ff3f2da7c2b996eee1a58aac6f2dc3",
+      "codomain_check": "PASS",
+      "ell": 199,
+      "exact_rational_map_check": "PASS",
+      "index": 0,
+      "kernel_check": "PASS",
+      "kernel_degree": 99,
+      "map_denominator_coefficients": 199,
+      "map_numerator_coefficients": 200,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:5531c4a08bdb64b6e86a6e30e9a08aa57edef7af15ac5f6d4d2a83a53bf2f646",
+      "source_ec1": "EC1P192Cp192h5531c4a08bdb",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:ec58611383c9eaf3570e48b91241457283e995dfe23c9204868a647dd2de1930",
+      "target_ec1": "EC1P192Cfphec58611383c9",
+      "target_icv1": "icv1-fp192-t31607402316713927207482677199-be2c363a"
+    },
+    {
+      "certificate_sha256": "b9fecd027e08576b6c6769ffadff771a83ff3f2da7c2b996eee1a58aac6f2dc3",
+      "codomain_check": "PASS",
+      "ell": 199,
+      "exact_rational_map_check": "PASS",
+      "index": 1,
+      "kernel_check": "PASS",
+      "kernel_degree": 99,
+      "map_denominator_coefficients": 199,
+      "map_numerator_coefficients": 200,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:5531c4a08bdb64b6e86a6e30e9a08aa57edef7af15ac5f6d4d2a83a53bf2f646",
+      "source_ec1": "EC1P192Cp192h5531c4a08bdb",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:2304f95fa97939414bb2bb76191f51a27e2ea1bc1b487facbaa255f7734ced11",
+      "target_ec1": "EC1P192Cfph2304f95fa979",
+      "target_icv1": "icv1-fp192-t31607402316713927207482677199-2983abd2"
+    }
+  ],
+  "schema": "large-degree-isogeny-replay/v1",
+  "scope": "same-host independent implementation",
+  "status": "PASS"
+}
