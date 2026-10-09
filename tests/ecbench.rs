@@ -239,6 +239,63 @@ fn run_spec(dir: &Path, out: &Path, extra: &[&str]) -> (bool, String) {
 }
 
 #[test]
+fn counted_ic_sat_replays_with_different_solver_wall_times() {
+    let dir = scratch("counted-sat");
+    let spec = dir.join("spec.json");
+    std::fs::write(
+        &spec,
+        r#"{
+  "schema":"ecbench.spec/v1",
+  "label":"counted SAT replay regression",
+  "workloads":{"curves":[{"kind":"koblitz","a":1,"n":17}],"targets_per_curve":2,"target_seed":41,"target_kind":"public"},
+  "arms":[
+    {"name":"rho","role":"reference","method":{"id":"rho.signed_frobenius_strong"}},
+    {"name":"sat-cnf","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=cnf","max_trials":"20000"}}},
+    {"name":"sat-xor","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native","max_trials":"20000"}}}
+  ],
+  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":60}
+}"#,
+    )
+    .unwrap();
+    let out = dir.join("session");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let records: Vec<Value> = std::fs::read_to_string(out.join("records.jsonl"))
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(records.len(), 6);
+    for r in records.iter().filter(|r| r["method"]["family"] == "ic") {
+        assert_eq!(r["outcome"]["status"], "verified");
+        assert_eq!(r["cost"]["lower_bound"], true);
+        assert!(r["cost"]["unpriced"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|u| u == "solver_conflicts_uncharged"));
+    }
+    let receipt = dir.join("audit.json");
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--out",
+        receipt.to_str().unwrap(),
+        "--exit-code",
+    ]);
+    assert!(ok, "{err}");
+    let audit: Value = serde_json::from_str(&std::fs::read_to_string(receipt).unwrap()).unwrap();
+    assert_eq!(audit["replays"].as_array().unwrap().len(), 6);
+    assert!(audit["replays"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .all(|r| r["reproduced"] == true));
+}
+
+#[test]
 fn two_sessions_queued_for_one_directory_cannot_both_write_it() {
     // Both start before either holds the lock; the second waits, then must
     // fail on the atomic mkdir instead of writing over the first.
