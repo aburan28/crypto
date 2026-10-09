@@ -41,3 +41,18 @@ The payload savings are structural and exact. Peak process memory and paired
 one-target timing need separate frozen measurements; T025 was a correctness
 control. The local CPU host has no exclusive-partition receipt for a
 controlled wall-time claim.
+
+## Peak process memory control
+
+The [RSS freeze](RSS_FREEZE.json) fixed the dense source, binary, point,
+workers, and resource cap before the run. The [verified receipt](local/peak_rss_n53_t025.json)
+and [raw report](local/raw_peak_rss_n53_t025.json.gz) measured **18,581,438,464
+bytes** of peak child-process RSS on N53 T025. The fresh 16-byte reference
+[receipt](../koblitz-s3-compact-root-20261009/local/reference_rss_repeat.json)
+measured **19,425,591,296 bytes**, an observed difference of **844,152,832
+bytes**. The 13-byte compact candidate's separate receipt measured
+17,988,763,648 bytes, and an older 16-byte reference run measured
+26,739,802,112 bytes. These single-run process peaks vary enough that the
+larger exact table-payload saving cannot yet be promoted to a stable
+peak-RSS reduction. The RSS runs are memory and correctness controls; they
+do not form a paired online timing panel.
