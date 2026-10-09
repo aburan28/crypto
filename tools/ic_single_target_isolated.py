@@ -121,6 +121,11 @@ def run_arm(args: argparse.Namespace) -> None:
         valid = valid and 0 <= scalar < curve.r and curve.mul(curve.g, scalar) == target_point
         if not valid:
             raise ValueError(f"{args.arm} producer record failed independent replay")
+        hardware = record.get("online_hw_counts")
+        instructions = hardware.get("instructions") if isinstance(hardware, dict) else None
+        if args.require_hw:
+            if type(instructions) is not int or instructions <= 0:
+                raise ValueError(f"{args.arm} online retired-instruction counter is unavailable")
         online_ms = float(record["online_ms"])
         if not math.isfinite(online_ms) or online_ms <= 0:
             raise ValueError("invalid online interval")
@@ -128,7 +133,8 @@ def run_arm(args: argparse.Namespace) -> None:
         print("certificate_json=" + json.dumps(certificate, sort_keys=True, separators=(",", ":")))
         print("summary_json=" + json.dumps(summary, sort_keys=True, separators=(",", ":")))
         print(f"online_ms={online_ms:.9f} verified=1 target_hash={point_hash(n, a, target)} "
-              f"scalar={scalar} arm={args.arm} n={n} a={a}")
+              f"scalar={scalar} arm={args.arm} n={n} a={a} "
+              f"online_instructions={instructions if instructions is not None else 'unavailable'}")
 
 
 def make_manifest(args: argparse.Namespace) -> None:
@@ -161,8 +167,10 @@ def make_manifest(args: argparse.Namespace) -> None:
         "candidate_configuration": {"K": args.k, "rank_seed": beat["ic_rank_seed"],
                                     "rho_seed": int(beat["rho_seed_base"]) + args.target_seed},
         "cases": [{"id": "n61-public-target-0",
-                   "candidate": [str(script), "arm", "--arm", "ic", "--binary", str(args.ic_binary), *common],
-                   "reference": [str(script), "arm", "--arm", "rho", "--binary", str(args.rho_binary), *common]}],
+                   "candidate": [str(script), "arm", "--arm", "ic", "--binary", str(args.ic_binary),
+                                 "--require-hw", *common],
+                   "reference": [str(script), "arm", "--arm", "rho", "--binary", str(args.rho_binary),
+                                 "--require-hw", *common]}],
     }
     args.output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     print(json.dumps({"manifest": str(args.output), "target": target,
@@ -179,6 +187,8 @@ def main() -> None:
     arm.add_argument("--x", type=int, required=True)
     arm.add_argument("--y", type=int, required=True)
     arm.add_argument("--target-seed", type=int, required=True)
+    arm.add_argument("--require-hw", action="store_true",
+                     help="fail the isolated run if online user-instruction counts are unavailable")
     frozen = sub.add_parser("manifest")
     frozen.add_argument("--ic-binary", type=Path, required=True)
     frozen.add_argument("--rho-binary", type=Path, required=True)
