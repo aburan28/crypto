@@ -19,10 +19,14 @@ relations, S3 pair roots, recovered representative logs, and target scalar.
 | `cargo clippy --release --example koblitz_n53_compact_replay --example koblitz_n53_compact_protocol -- -D warnings` | exit 0; repository toolchain emits the pre-existing unknown `chunks_exact_to_as_chunks` lint warning |
 | `rustfmt --check` on the three native files | exit 0 |
 | `koblitz_n53_compact_protocol preflight` in approved process-inspection context | `PASS`, sampled own RSS `1802240` bytes |
+| Committed-freeze `run` with deliberate ambient `KIC_SENTINEL=1` | exit 2, preflight failure receipt; no IC or rho arm files created |
 
 The ordinary sandbox denied `/bin/ps` with `Operation not permitted`; the
 native preflight rejected that context. This is the intended fail-closed
 behavior. The approved process-inspection context passed the same preflight.
+The deliberate ambient-variable attempt verified the committed freeze and
+binary hashes before writing
+[`validation/native-freeze-preflight-20261009/receipt.json`](validation/native-freeze-preflight-20261009/receipt.json).
 These checks establish input, replay, and control-path correctness. The n53
 timed comparison still requires the committed source/binary freeze, clean
 prerequisite PRs, full-rank producer result, independent replay, and paired
