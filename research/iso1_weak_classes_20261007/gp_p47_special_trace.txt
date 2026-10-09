@@ -1,0 +1,18 @@
+Independent p=47 two-element orbit check, 2026-10-08
+
+The only Frobenius/inversion orbit of size two consists of the two
+nonidentity cube roots of unity in F_(p^2). The p47 orbit CSV places
+two weighted representatives at each Hasse-boundary trace
+t=+/-207646 = +/-2*47^3. These rows are nonordinary and do not enter
+the ordinary-depth fit.
+
+Native PARI/GP command (exit status 0):
+  p=47;q=p^2;n=p^6;z=ffgen([p,6],'z);lam=random(z)^((n-1)/3);while(lam==0||lam==1,lam=random(z)^((n-1)/3));print(lam^3==1,",",lam^q==lam,",",n+1-ellcard(ellinit([0,-(1+lam),0,lam,0],z)))
+
+Output:
+  1,1,-207646
+
+The Legendre model and its quadratic twist give the two trace signs.
+The check confirms the special orbit's boundary trace with an independent
+field representation and point-count implementation. It does not certify
+the entire p47 census.

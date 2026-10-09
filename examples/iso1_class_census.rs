@@ -104,7 +104,14 @@ fn exact_order_by_squares(f: &Fq3, c: &Curve2) -> u128 {
     order
 }
 
-fn census(p: u64, output: &str, verify_trace: Option<i128>, derive_twists: bool) {
+fn census(
+    p: u64,
+    output: &str,
+    verify_trace: Option<i128>,
+    derive_twists: bool,
+    orbit_quotient: bool,
+) {
+    assert!(!orbit_quotient || derive_twists);
     let start = Instant::now();
     let f = Fq3::new(p);
     let q = p * p;
@@ -123,13 +130,14 @@ fn census(p: u64, output: &str, verify_trace: Option<i128>, derive_twists: bool)
         .into_iter()
         .flat_map(|(branch, val)| (0..q).map(move |a0| (branch, val, a0)))
         .collect();
-    let (mut weak, mut reps, muls, witness) = jobs
+    let (mut weak, mut reps, calls, muls, witness) = jobs
         .into_par_iter()
         .map(|(branch, val, a0)| {
             let f = Fq3::new(p);
             let mut weak = BTreeMap::<i128, u64>::new();
             let mut witness = None;
             let mut reps = 0_u64;
+            let mut calls = 0_u64;
             let mut rng = StdRng::seed_from_u64(
                 0x1501_u64
                     ^ p.wrapping_mul(0x9e3779b1)
@@ -148,22 +156,54 @@ fn census(p: u64, output: &str, verify_trace: Option<i128>, derive_twists: bool)
                     e: [E6::ZERO, alpha, f.sigma(&alpha)],
                 };
                 debug_assert!(c.weak_by_norms(&f));
+                // Hilbert 90 identifies these normalized alpha values with
+                // T = ker(N_{F_(q^3)/F_q}) minus 1 via lambda = sigma(alpha)/alpha.
+                // The trace is unchanged by q-Frobenius or lambda inversion;
+                // twist derivation makes the latter valid regardless of the
+                // square class of this particular alpha representative.
+                let weight = if orbit_quotient {
+                    let lambda = f.mul(&c.e[2], &f.inv(&alpha));
+                    let lambda_q = f.sigma(&lambda);
+                    let lambda_q2 = f.sigma(&lambda_q);
+                    let lambda_inv = f.mul(&lambda_q, &lambda_q2);
+                    let orbit = [
+                        lambda,
+                        lambda_q,
+                        lambda_q2,
+                        lambda_inv,
+                        f.sigma(&lambda_inv),
+                        f.sigma(&f.sigma(&lambda_inv)),
+                    ];
+                    debug_assert_ne!(lambda, E6::ONE);
+                    debug_assert_eq!(f.mul(&lambda, &lambda_inv), E6::ONE);
+                    if orbit.iter().any(|&x| x < lambda) {
+                        continue;
+                    }
+                    if lambda.in_fq() {
+                        2
+                    } else {
+                        6
+                    }
+                } else {
+                    1
+                };
                 let trace = q3 + 1 - curve_order(&f, &c, &mut rng) as i128;
+                calls += 1;
                 if Some(trace) == verify_trace && witness.is_none() {
                     witness = Some(c);
                 }
-                *weak.entry(trace).or_default() += 1;
-                reps += 1;
+                *weak.entry(trace).or_default() += weight;
+                reps += weight;
             }
-            (weak, reps, f.muls(), witness)
+            (weak, reps, calls, f.muls(), witness)
         })
         .reduce(
-            || (BTreeMap::new(), 0, 0, None),
-            |(mut a, na, ma, wa), (b, nb, mb, wb)| {
+            || (BTreeMap::new(), 0, 0, 0, None),
+            |(mut a, na, ca, ma, wa), (b, nb, cb, mb, wb)| {
                 for (t, c) in b {
                     *a.entry(t).or_default() += c;
                 }
-                (a, na + nb, ma + mb, wa.or(wb))
+                (a, na + nb, ca + cb, ma + mb, wa.or(wb))
             },
         );
     if derive_twists {
@@ -206,9 +246,19 @@ fn census(p: u64, output: &str, verify_trace: Option<i128>, derive_twists: bool)
             c.e
         );
     }
-    eprintln!("p={p} q={q} reps={reps} expected={} weak_classes={} ordinary_traces={ordinary} all_traces={} muls={} wall_s={:.3} method={} output={output}",
-        2*q*q+2*q, weak.len(), lim / 2 + 1, muls, start.elapsed().as_secs_f64(), if derive_twists { "twist-derived" } else { "full" });
+    eprintln!("p={p} q={q} reps={reps} expected={} point_counts={calls} weak_classes={} ordinary_traces={ordinary} all_traces={} muls={} wall_s={:.3} method={} output={output}",
+        2*q*q+2*q, weak.len(), lim / 2 + 1, muls, start.elapsed().as_secs_f64(), if orbit_quotient { "twist-orbit" } else if derive_twists { "twist-derived" } else { "full" });
     assert_eq!(reps, 2 * q * q + 2 * q);
+    assert_eq!(
+        calls,
+        if orbit_quotient {
+            (q * q + q + 4) / 6
+        } else if derive_twists {
+            q * q + q
+        } else {
+            2 * q * q + 2 * q
+        }
+    );
 }
 
 #[derive(Clone, Copy)]
@@ -382,8 +432,14 @@ fn probe_square_lambda(p: u64, n: u64) {
 fn visual(paths: &[String]) {
     assert!(paths.len() >= 2, "visual INPUT.csv ... OUTPUT.svg");
     let output = paths.last().unwrap();
-    let height = 250 + 58 * (paths.len() - 1);
+    let height = 280 + 58 * (paths.len() - 1);
     let mut svg = format!("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"920\" height=\"{height}\" viewBox=\"0 0 920 {height}\">\n<rect width=\"920\" height=\"{height}\" fill=\"#fbfcff\"/>\n<g font-family=\"Arial,Helvetica,sans-serif\" fill=\"#14233b\"><text x=\"36\" y=\"42\" font-size=\"23\" font-weight=\"700\">ISO-1: trace-level weak-class census</text><text x=\"36\" y=\"69\" font-size=\"14\">Ordinary full-2-torsion trace candidates over F_(p^6); corrected F_(p^2) square classes</text></g>\n<rect x=\"38\" y=\"91\" width=\"228\" height=\"56\" rx=\"8\" fill=\"#e9eef8\" stroke=\"#8fa2c1\"/><text x=\"51\" y=\"115\" font-size=\"14\" font-family=\"Arial\" fill=\"#14233b\">trace t, t ≡ 2 (mod 4)</text><text x=\"51\" y=\"134\" font-size=\"12\" font-family=\"Arial\" fill=\"#43536c\">class invariant: Δ = t² − 4p⁶</text>\n<path d=\"M 266 119 H 312\" stroke=\"#677a99\" stroke-width=\"2\"/><path d=\"M 312 119 L 304 115 M 312 119 L 304 123\" stroke=\"#677a99\" stroke-width=\"2\"/>\n<rect x=\"318\" y=\"91\" width=\"250\" height=\"56\" rx=\"8\" fill=\"#ffe7dd\" stroke=\"#d88470\"/><text x=\"330\" y=\"115\" font-size=\"14\" font-family=\"Arial\" fill=\"#14233b\">v₂(f_Frob) = 1</text><text x=\"330\" y=\"134\" font-size=\"12\" font-family=\"Arial\" fill=\"#43536c\">no weak reps at p = 11, 13, 17, 37</text>\n<rect x=\"580\" y=\"91\" width=\"301\" height=\"56\" rx=\"8\" fill=\"#e1f4ec\" stroke=\"#60ad87\"/><text x=\"592\" y=\"115\" font-size=\"14\" font-family=\"Arial\" fill=\"#14233b\">v₂(f_Frob) ≥ 2</text><text x=\"592\" y=\"134\" font-size=\"12\" font-family=\"Arial\" fill=\"#43536c\">mostly weak; residual zero rows remain</text>\n<text x=\"36\" y=\"185\" font-size=\"16\" font-family=\"Arial\" font-weight=\"700\" fill=\"#14233b\">Class labels by stratum</text>\n");
+    svg = svg.replace(
+        "no weak reps at p = 11, 13, 17, 37",
+        "proved absent for every odd p",
+    );
+    svg = svg.replace("y=\"185\"", "y=\"215\"");
+    svg.push_str("<rect x=\"38\" y=\"151\" width=\"843\" height=\"27\" rx=\"6\" fill=\"#e7efff\" stroke=\"#8fa2c1\"/><text x=\"49\" y=\"169\" font-size=\"12\" font-family=\"Arial\" fill=\"#14233b\">Proof: norm-one λ → fourth power → 2-isogenous full 4-torsion → t ≡ ±(p⁶ + 1) mod 16</text>\n");
     for (i, path) in paths[..paths.len() - 1].iter().enumerate() {
         let rows = read_rows(path);
         let p = rows.first().unwrap().p;
@@ -391,13 +447,13 @@ fn visual(paths: &[String]) {
         let low = rows.iter().filter(|r| r.depth == 1).count();
         let high_weak = rows.iter().filter(|r| r.depth >= 2 && r.weak).count();
         let high_zero = rows.iter().filter(|r| r.depth >= 2 && !r.weak).count();
-        let y = 207 + 58 * i;
+        let y = 237 + 58 * i;
         let w_low = 620.0 * low as f64 / n;
         let w_weak = 620.0 * high_weak as f64 / n;
         let w_zero = 620.0 * high_zero as f64 / n;
         svg.push_str(&format!("<text x=\"38\" y=\"{}\" font-size=\"16\" font-family=\"Arial\" fill=\"#14233b\">p = {p}</text><rect x=\"142\" y=\"{}\" width=\"{w_low:.2}\" height=\"28\" fill=\"#e99b84\"/><rect x=\"{:.2}\" y=\"{}\" width=\"{w_weak:.2}\" height=\"28\" fill=\"#65b991\"/><rect x=\"{:.2}\" y=\"{}\" width=\"{w_zero:.2}\" height=\"28\" fill=\"#e6bf64\"/><text x=\"776\" y=\"{}\" font-size=\"12\" font-family=\"Arial\" fill=\"#14233b\">{high_weak} / {}</text>\n", y + 20, y, 142.0 + w_low, y, 142.0 + w_low + w_weak, y, y + 20, rows.len()));
     }
-    let legend_y = 212 + 58 * (paths.len() - 1);
+    let legend_y = 242 + 58 * (paths.len() - 1);
     svg.push_str(&format!("<g font-family=\"Arial\" font-size=\"12\" fill=\"#14233b\"><rect x=\"142\" y=\"{legend_y}\" width=\"14\" height=\"14\" fill=\"#e99b84\"/><text x=\"163\" y=\"{}\">depth 1, zero</text><rect x=\"325\" y=\"{legend_y}\" width=\"14\" height=\"14\" fill=\"#65b991\"/><text x=\"346\" y=\"{}\">depth ≥ 2, weak</text><rect x=\"535\" y=\"{legend_y}\" width=\"14\" height=\"14\" fill=\"#e6bf64\"/><text x=\"556\" y=\"{}\">depth ≥ 2, zero</text></g></svg>\n", legend_y + 12, legend_y + 12, legend_y + 12));
     std::fs::write(output, svg).expect("write SVG");
 }
@@ -432,13 +488,17 @@ fn main() {
     let output = args.next().expect("output CSV");
     let rest: Vec<_> = args.collect();
     let derive_twists = rest.iter().any(|x| x == "--derive-twists");
-    let verify_trace = rest
+    let orbit_quotient = rest.iter().any(|x| x == "--orbit-quotient");
+    let positional: Vec<_> = rest
         .iter()
-        .find(|x| x.as_str() != "--derive-twists")
-        .map(|t| t.parse().expect("verify trace"));
+        .filter(|x| x.as_str() != "--derive-twists" && x.as_str() != "--orbit-quotient")
+        .collect();
     assert!(
-        rest.len() <= 1 + usize::from(derive_twists),
+        positional.len() <= 1
+            && rest.len()
+                == positional.len() + usize::from(derive_twists) + usize::from(orbit_quotient),
         "unexpected argument"
     );
-    census(p, &output, verify_trace, derive_twists);
+    let verify_trace = positional.first().map(|t| t.parse().expect("verify trace"));
+    census(p, &output, verify_trace, derive_twists, orbit_quotient);
 }

@@ -59,3 +59,24 @@ times p^(3/2) point-count work. The measured p=37 run and the
 extrapolated p=199 cost are in [REPORT.md](REPORT.md). This is a
 computational limit of this implementation, not a mathematical
 impossibility statement.
+
+## 2026-10-08 amendment: exact orbit quotient
+
+After the direct p=37,41,43 runs, the norm-one proof gave an exact
+sixfold orbit reduction. The projective normalized alpha values map
+bijectively to nonidentity elements of the norm-one torus by
+`lambda=alpha^q/alpha`. The transformations `lambda -> lambda^q` and
+`lambda -> lambda^-1` preserve the symmetric trace pair. They have
+six-element orbits except the two nonidentity cube roots of unity,
+which form one two-element orbit. `--derive-twists --orbit-quotient`
+selects the least encoded lambda in each orbit and weights its trace
+by six or two. The exact expected point-count call count is
+`(q²+q+4)/6`; the existing twist-derived count is `q²+q`.
+
+Validation before using this mode for further primes: compare its
+entire CSV byte for byte against a completed twist-derived run at a
+small p; check the representative and point-count call totals; retain
+any differences from historical full-mode data, including zero-label
+changes. This mode inherits the randomized point counter's uncertainty.
+Its operation-count reduction is exact; wall-time performance claims
+would require the repository's CPU isolation gate.

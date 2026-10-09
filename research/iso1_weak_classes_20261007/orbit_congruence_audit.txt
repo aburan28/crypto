@@ -1,0 +1,19 @@
+ISO-1 Frobenius/inversion orbit congruence audit, 2026-10-08
+
+For each corrected p, lambda = alpha^q / alpha maps normalized alpha/F_q^* bijectively onto T\{1}, where T is the norm-one torus of size q^2+q+1. The transformations lambda -> lambda^q and lambda -> lambda^-1 preserve the symmetric +/- trace count. Exactly one orbit has size 2: T intersect F_q^* consists of the three cube roots of unity, of which 1 is excluded. All other orbits have size 6. Thus each positive trace count is divisible by 6, except the trace pair containing the special size-2 orbit, whose count is 2 modulo 6.
+
+p=11 source=p11_orbit.csv positive_rows=542 exceptional=[(-1962, 92), (1962, 92)] nonconforming=[]
+p=13 source=p13_twist_derived.csv positive_rows=928 exceptional=[(-506, 182), (506, 182)] nonconforming=[]
+p=17 source=p17_orbit.csv positive_rows=2198 exceptional=[(-990, 68), (990, 68)] nonconforming=[]
+p=37 source=p37_twist_derived.csv positive_rows=24352 exceptional=[(-101194, 26), (101194, 26)] nonconforming=[]
+p=41 source=p41_twist_derived.csv positive_rows=33224 exceptional=[(-134642, 92), (134642, 92)] nonconforming=[]
+p=43 source=p43_twist_derived.csv positive_rows=38452 exceptional=[(-45290, 734), (45290, 734)] nonconforming=[]
+p=47 source=p47_orbit.csv positive_ordinary_rows=50382 exceptional_ordinary=[] nonconforming=[]; the special size-two orbit occurs at the nonordinary Hasse-boundary traces +/-207646, each with count 2.
+
+The old p=11 full-mode table had counts 101 at t=-2518 and 49 at t=2102;
+the orbit run has 102 and 48. The old p=17 full-mode table had 251 at
+t=-3742 and 37 at t=9154; the orbit run has 252 and 36. No positive/zero
+label changed. The p=37,41,43 twist-derived and p=47 orbit artifacts satisfy
+the congruence exactly, including the p=47 boundary exception. This
+structural check is not an independent proof that
+every trace assignment is correct.
