@@ -1,0 +1,1553 @@
+{
+  "all_native_verified": true,
+  "all_phase_sums_valid": true,
+  "blocks": [
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.0321352767435901,
+        "orbit": 0.39930596872484875
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 1.1398929328430538,
+      "baseline_over_orbit_s3_call_ratio": 1.6780487804878055,
+      "label": "T025",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          0.38075000000000003,
+          0.368709
+        ],
+        "orbit": [
+          0.40133399999999997,
+          0.26920900000000003
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ],
+          [
+            1436,
+            7886,
+            18803,
+            19577
+          ]
+        ],
+        "orbit": [
+          [
+            1395,
+            6580,
+            6354,
+            18842
+          ],
+          [
+            1395,
+            6580,
+            6354,
+            18842
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          1376,
+          1376
+        ],
+        "orbit": [
+          820,
+          820
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.051728446259508294,
+        "orbit": 0.9832797686228458
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 0.4392241215745988,
+      "baseline_over_orbit_s3_call_ratio": 0.5203252032520326,
+      "label": "T026",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          0.162834,
+          0.154625
+        ],
+        "orbit": [
+          0.590667,
+          0.220958
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ],
+          [
+            9810,
+            11691,
+            10800,
+            15946
+          ]
+        ],
+        "orbit": [
+          [
+            9762,
+            11361,
+            8039,
+            12208
+          ],
+          [
+            9762,
+            11361,
+            8039,
+            12208
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          384,
+          384
+        ],
+        "orbit": [
+          738,
+          738
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.686546316578668,
+        "orbit": 1.4390747915280795
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 0.6486871908269864,
+      "baseline_over_orbit_s3_call_ratio": 0.8919860627177704,
+      "label": "T027",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          0.29441599999999996,
+          0.584958
+        ],
+        "orbit": [
+          0.311542,
+          1.313708
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ],
+          [
+            14652,
+            18287,
+            8231,
+            12562
+          ]
+        ],
+        "orbit": [
+          [
+            14648,
+            17303,
+            1474,
+            13833
+          ],
+          [
+            14648,
+            17303,
+            1474,
+            13833
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          1024,
+          1024
+        ],
+        "orbit": [
+          1148,
+          1148
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.2981985626667666,
+        "orbit": 0.006614143819974698
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 21.30839823376991,
+      "baseline_over_orbit_s3_call_ratio": 0.1393728222996516,
+      "label": "T028",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          13.245792,
+          9.830416999999999
+        ],
+        "orbit": [
+          0.537292,
+          0.5337500000000001
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ],
+          [
+            10062,
+            4534,
+            7121,
+            19156
+          ]
+        ],
+        "orbit": [
+          [
+            10043,
+            4272,
+            16837,
+            18803
+          ],
+          [
+            10043,
+            4272,
+            16837,
+            18803
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          320,
+          320
+        ],
+        "orbit": [
+          2296,
+          2296
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.10703275685018852,
+        "orbit": 0.046959447310339734
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 0.3493997075662963,
+      "baseline_over_orbit_s3_call_ratio": 0.13008130081300812,
+      "label": "T029",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          0.09975,
+          0.089625
+        ],
+        "orbit": [
+          0.277042,
+          0.264333
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ],
+          [
+            13072,
+            16351,
+            12123,
+            12896
+          ]
+        ],
+        "orbit": [
+          [
+            13062,
+            16367,
+            8721,
+            15395
+          ],
+          [
+            13062,
+            16367,
+            8721,
+            15395
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          96,
+          96
+        ],
+        "orbit": [
+          738,
+          738
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.03084892576483401,
+        "orbit": 0.11941105230922906
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 1.9990324991351442,
+      "baseline_over_orbit_s3_call_ratio": 2.4030808729139936,
+      "label": "T030",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          0.876458,
+          0.8498330000000001
+        ],
+        "orbit": [
+          0.40670799999999996,
+          0.45829200000000003
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ],
+          [
+            9976,
+            6915,
+            6080,
+            14168
+          ]
+        ],
+        "orbit": [
+          [
+            9941,
+            3276,
+            736,
+            7384
+          ],
+          [
+            9941,
+            3276,
+            736,
+            7384
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          3744,
+          3744
+        ],
+        "orbit": [
+          1558,
+          1558
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.7551684916234334,
+        "orbit": 1.7425755572825623
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 0.48645639477464636,
+      "baseline_over_orbit_s3_call_ratio": 0.6197991391678619,
+      "label": "T031",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          1.0829579999999999,
+          0.508916
+        ],
+        "orbit": [
+          3.647375,
+          0.6385419999999999
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ],
+          [
+            14024,
+            8114,
+            6769,
+            8410
+          ]
+        ],
+        "orbit": [
+          [
+            14077,
+            6537,
+            429,
+            18563
+          ],
+          [
+            14077,
+            6537,
+            429,
+            18563
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          1728,
+          1728
+        ],
+        "orbit": [
+          2788,
+          2788
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.2665120902174157,
+        "orbit": 0.0030955749537591878
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 2.1205251721852387,
+      "baseline_over_orbit_s3_call_ratio": 2.601626016260163,
+      "label": "T032",
+      "n": 41,
+      "online_ms_by_arm": {
+        "baseline": [
+          0.45629200000000003,
+          0.349541
+        ],
+        "orbit": [
+          0.188042,
+          0.188625
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ],
+          [
+            2375,
+            7501,
+            11484,
+            15728
+          ]
+        ],
+        "orbit": [
+          [
+            2335,
+            6284,
+            1861,
+            12362
+          ],
+          [
+            2335,
+            6284,
+            1861,
+            12362
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          1280,
+          1280
+        ],
+        "orbit": [
+          492,
+          492
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.3561322181580935,
+        "orbit": 0.6603627949393096
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 0.6500230656008528,
+      "baseline_over_orbit_s3_call_ratio": 0.2901802485727086,
+      "label": "T025",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          3.13675,
+          2.196917
+        ],
+        "orbit": [
+          2.902833,
+          5.618417
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            7837,
+            20786,
+            784,
+            20369
+          ],
+          [
+            5970,
+            14896,
+            8243,
+            18096
+          ]
+        ],
+        "orbit": [
+          [
+            20771,
+            18448,
+            10545,
+            12706
+          ],
+          [
+            20771,
+            18448,
+            10545,
+            12706
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          11072,
+          31200
+        ],
+        "orbit": [
+          48018,
+          85436
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 4.869592375557922,
+        "orbit": 0.04160665261341126
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 17.24025385074202,
+      "baseline_over_orbit_s3_call_ratio": 0.5764984850020524,
+      "label": "T026",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          483.141667,
+          3.708834
+        ],
+        "orbit": [
+          2.506958,
+          2.404792
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            10420,
+            781,
+            17283,
+            25502
+          ],
+          [
+            4774,
+            17399,
+            9068,
+            20450
+          ]
+        ],
+        "orbit": [
+          [
+            3003,
+            2462,
+            15801,
+            25203
+          ],
+          [
+            3003,
+            2462,
+            15801,
+            25203
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          37760,
+          18112
+        ],
+        "orbit": [
+          52046,
+          39538
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.4819838964025346,
+        "orbit": 0.8343398878733049
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 1.5193214936225554,
+      "baseline_over_orbit_s3_call_ratio": 2.3148064265298336,
+      "label": "T027",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          7.915666,
+          4.888375
+        ],
+        "orbit": [
+          6.213709000000001,
+          2.69775
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            13368,
+            4582,
+            6100,
+            10522
+          ],
+          [
+            18929,
+            14026,
+            16814,
+            25302
+          ]
+        ],
+        "orbit": [
+          [
+            7802,
+            19216,
+            16158,
+            17939
+          ],
+          [
+            7802,
+            19216,
+            16158,
+            17939
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          110048,
+          54976
+        ],
+        "orbit": [
+          25122,
+          44944
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.3832191446096127,
+        "orbit": 1.0280829799109357
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 0.7521106677503392,
+      "baseline_over_orbit_s3_call_ratio": 0.2335290509685697,
+      "label": "T028",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          3.343417,
+          4.904791
+        ],
+        "orbit": [
+          3.220167,
+          9.002625
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ],
+          [
+            23888,
+            11938,
+            12566,
+            18330
+          ]
+        ],
+        "orbit": [
+          [
+            14563,
+            25766,
+            7099,
+            21213
+          ],
+          [
+            1704,
+            519,
+            4706,
+            5056
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          12480,
+          18592
+        ],
+        "orbit": [
+          27454,
+          154972
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 1.1870289598361856,
+        "orbit": 0.47496152757135385
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 6.8241661898384836,
+      "baseline_over_orbit_s3_call_ratio": 29.55301083714268,
+      "label": "T029",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          2.8006670000000002,
+          9.178709
+        ],
+        "orbit": [
+          0.585916,
+          0.942125
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            6290,
+            18514,
+            9059,
+            12184
+          ],
+          [
+            24888,
+            9695,
+            4563,
+            23254
+          ]
+        ],
+        "orbit": [
+          [
+            2626,
+            16902,
+            2109,
+            3760
+          ],
+          [
+            2626,
+            16902,
+            2109,
+            3760
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          45984,
+          92832
+        ],
+        "orbit": [
+          1590,
+          3074
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.32029501969881463,
+        "orbit": 0.2555896710641324
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 2.0463985766514488,
+      "baseline_over_orbit_s3_call_ratio": 2.176230285349227,
+      "label": "T030",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          4.949333,
+          6.817875
+        ],
+        "orbit": [
+          3.2255830000000003,
+          2.498084
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            15114,
+            12039,
+            3454,
+            8694
+          ],
+          [
+            15114,
+            12039,
+            3454,
+            8694
+          ]
+        ],
+        "orbit": [
+          [
+            9484,
+            19032,
+            5530,
+            21192
+          ],
+          [
+            9484,
+            19032,
+            5530,
+            21192
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          88288,
+          61472
+        ],
+        "orbit": [
+          32860,
+          34874
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 1.6239072678896318,
+        "orbit": 0.0723421127619536
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 1.185044850030663,
+      "baseline_over_orbit_s3_call_ratio": 0.4948929721568268,
+      "label": "T031",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          2.877166,
+          0.5671670000000001
+        ],
+        "orbit": [
+          1.117666,
+          1.039667
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ],
+          [
+            5331,
+            22434,
+            6145,
+            23675
+          ]
+        ],
+        "orbit": [
+          [
+            7214,
+            7288,
+            14284,
+            23839
+          ],
+          [
+            7214,
+            7288,
+            14284,
+            23839
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          5856,
+          1344
+        ],
+        "orbit": [
+          5512,
+          5830
+        ]
+      }
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "baseline": 0.12133896316842832,
+        "orbit": 0.6696656240141989
+      },
+      "all_four_verified": true,
+      "baseline_over_orbit_online_ratio": 0.12104167194296234,
+      "baseline_over_orbit_s3_call_ratio": 0.057789481062874286,
+      "label": "T032",
+      "n": 53,
+      "online_ms_by_arm": {
+        "baseline": [
+          1.016625,
+          0.900459
+        ],
+        "orbit": [
+          11.048250000000001,
+          5.655374999999999
+        ]
+      },
+      "statuses": [
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 1,
+          "verified": true
+        },
+        {
+          "arm": "orbit",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        },
+        {
+          "arm": "baseline",
+          "error": null,
+          "exit_code": 0,
+          "repetition": 2,
+          "verified": true
+        }
+      ],
+      "target_relation_indices_by_arm": {
+        "baseline": [
+          [
+            10618,
+            12755,
+            2747,
+            10920
+          ],
+          [
+            10618,
+            12755,
+            2747,
+            10920
+          ]
+        ],
+        "orbit": [
+          [
+            3195,
+            19482,
+            16247,
+            24866
+          ],
+          [
+            6890,
+            15360,
+            9537,
+            15957
+          ]
+        ]
+      },
+      "target_s3_calls_by_arm": {
+        "baseline": [
+          8544,
+          3296
+        ],
+        "orbit": [
+          112360,
+          75048
+        ]
+      }
+    }
+  ],
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "aa_p95_abs_log_ratio_by_arm": {
+        "baseline": 0.7551684916234334,
+        "orbit": 1.7425755572825623
+      },
+      "baseline_over_orbit_s3_call_geomean": 0.6954434764199054,
+      "controlled_speedup": null,
+      "exploratory_baseline_over_orbit_online_geomean": 1.2224208928983147,
+      "exploratory_target_bootstrap_95": [
+        0.5712829818388285,
+        3.185240306483757
+      ],
+      "median_charged_phase_ms_by_arm": {
+        "baseline": {
+          "target_descent": 0.032310999999999965,
+          "target_pdp_charged": 0.3280825,
+          "target_query": 0.023292,
+          "target_recovery_check": 0.021646000000000002,
+          "target_relation_check": 0.0046045
+        },
+        "orbit": {
+          "target_descent": 0.0336045,
+          "target_pdp_charged": 0.301604,
+          "target_query": 0.0244375,
+          "target_recovery_check": 0.021729,
+          "target_relation_check": 0.007708
+        }
+      },
+      "median_online_ms_by_arm": {
+        "baseline": 0.41852100000000003,
+        "orbit": 0.40402099999999996
+      },
+      "median_target_s3_calls_by_arm": {
+        "baseline": 1152.0,
+        "orbit": 984.0
+      },
+      "points_above_1x": 4,
+      "points_at_least_2x": 2,
+      "run_count": 32,
+      "target_count": 8,
+      "verified_target_blocks": 8
+    },
+    "53": {
+      "aa_p95_abs_log_ratio_by_arm": {
+        "baseline": 4.869592375557922,
+        "orbit": 1.0280829799109357
+      },
+      "baseline_over_orbit_s3_call_geomean": 0.7991412241596003,
+      "controlled_speedup": null,
+      "exploratory_baseline_over_orbit_online_geomean": 1.500165494227969,
+      "exploratory_target_bootstrap_95": [
+        0.5557981582330281,
+        4.044445068422116
+      ],
+      "median_charged_phase_ms_by_arm": {
+        "baseline": {
+          "target_descent": 0.07185400000000025,
+          "target_pdp_charged": 3.278354,
+          "target_query": 0.040854,
+          "target_recovery_check": 0.034854,
+          "target_relation_check": 0.0093335
+        },
+        "orbit": {
+          "target_descent": 0.03899899999999999,
+          "target_pdp_charged": 2.687834,
+          "target_query": 0.0389585,
+          "target_recovery_check": 0.033625,
+          "target_relation_check": 0.007500000000000001
+        }
+      },
+      "median_online_ms_by_arm": {
+        "baseline": 3.5261255,
+        "orbit": 2.8002915
+      },
+      "median_target_s3_calls_by_arm": {
+        "baseline": 24896.0,
+        "orbit": 37206.0
+      },
+      "points_above_1x": 5,
+      "points_at_least_2x": 3,
+      "run_count": 32,
+      "target_count": 8,
+      "verified_target_blocks": 8
+    }
+  },
+  "kind": "s3_all_frobenius_orientations_paired_analysis_v1",
+  "ledger_sha256": "b02c005f346854e3a7d6f7f65c56f9303b0b45e24115942389e093eff0f5c735",
+  "plan_sha256": "157ceb51830039add3a558dd19bda34b852e1f9ec2adceacc58359a384cb228d",
+  "run_count": 64
+}
