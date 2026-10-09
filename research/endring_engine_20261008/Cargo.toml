@@ -1,0 +1,20 @@
+[package]
+name = "endring-engine"
+version = "0.1.0"
+edition = "2021"
+description = "Supersingular endomorphism-ring engine: F_{p^2}, Velu isogenies, the quaternion order O_0, left ideals, the Deuring correspondence, RepresentInteger and KLPT, at toy parameters"
+
+[lib]
+name = "endring_engine"
+path = "src/lib.rs"
+
+[dependencies]
+num-bigint = "0.4"
+num-integer = "0.1"
+num-traits = "0.2"
+rand = "0.8"
+rand_chacha = "0.3"
+
+[lints.clippy]
+needless_range_loop = "allow"
+too_many_arguments = "allow"
