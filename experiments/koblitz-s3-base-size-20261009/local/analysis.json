@@ -1,0 +1,557 @@
+{
+  "all_native_verified": true,
+  "controlled_speedup": null,
+  "curves": {
+    "53": {
+      "244": {
+        "aa_p95_abs_log_online_ratio": 1.4727722939889751,
+        "actual_prepared_ranks": [
+          243
+        ],
+        "candidate_id": "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0he884cf865574",
+        "factor_base_points": 25864,
+        "folded_columns": 244,
+        "median_charged_phase_ms": {
+          "target_descent": 0.051042000000000906,
+          "target_pdp_charged": 6.560062,
+          "target_query": 0.0358125,
+          "target_recovery_check": 0.035062499999999996,
+          "target_relation_check": 0.012958
+        },
+        "median_online_ms": 6.6924585,
+        "median_reusable_setup_ms_supplementary": 3045.3802705,
+        "median_target_s3_calls": 29661.0,
+        "root_table_slots": 16777216,
+        "run_count": 16
+      },
+      "244_over_320": {
+        "exploratory_online_geomean": 1.1716018640698351,
+        "online_points_above_1x": 5,
+        "online_points_at_least_2x": 2,
+        "online_target_bootstrap_95": [
+          0.7424064274841939,
+          1.8533695221852053
+        ],
+        "reusable_setup_geomean_ratio_supplementary": 1.3773784492537444,
+        "s3_call_target_bootstrap_95": [
+          0.6854760439018919,
+          5.336222297733083
+        ],
+        "target_s3_call_geomean_ratio": 1.972380398982752
+      },
+      "244_over_396": {
+        "exploratory_online_geomean": 1.563057368789609,
+        "online_points_above_1x": 6,
+        "online_points_at_least_2x": 3,
+        "online_target_bootstrap_95": [
+          1.0362582357053685,
+          2.19688208105245
+        ],
+        "reusable_setup_geomean_ratio_supplementary": 0.8842930610984424,
+        "s3_call_target_bootstrap_95": [
+          1.269979115443121,
+          7.02377663771293
+        ],
+        "target_s3_call_geomean_ratio": 3.0175719031759516
+      },
+      "320": {
+        "aa_p95_abs_log_online_ratio": 2.196197544667389,
+        "actual_prepared_ranks": [
+          319
+        ],
+        "candidate_id": "IC1N53Ckb1fb33920PDP4rootRCsampleLAgaussTDdirectISO0he065e8af00b1",
+        "factor_base_points": 33920,
+        "folded_columns": 320,
+        "median_charged_phase_ms": {
+          "target_descent": 0.14383350000000072,
+          "target_pdp_charged": 4.2665625,
+          "target_query": 0.035729500000000004,
+          "target_recovery_check": 0.0369165,
+          "target_relation_check": 0.016146
+        },
+        "median_online_ms": 4.4303539999999995,
+        "median_reusable_setup_ms_supplementary": 2239.6297084999997,
+        "median_target_s3_calls": 16409.0,
+        "root_table_slots": 33554432,
+        "run_count": 16
+      },
+      "396": {
+        "aa_p95_abs_log_online_ratio": 1.7069438138672492,
+        "actual_prepared_ranks": [
+          396
+        ],
+        "candidate_id": "IC1N53Ckb1fb41976PDP4rootRCsampleLAgaussTDdirectISO0h5be6b5627281",
+        "factor_base_points": 41976,
+        "folded_columns": 396,
+        "median_charged_phase_ms": {
+          "target_descent": 0.09418749999999954,
+          "target_pdp_charged": 3.0087295000000003,
+          "target_query": 0.033916,
+          "target_recovery_check": 0.034708499999999996,
+          "target_relation_check": 0.014228999999999999
+        },
+        "median_online_ms": 3.3018539999999996,
+        "median_reusable_setup_ms_supplementary": 3623.614396,
+        "median_target_s3_calls": 7208.0,
+        "root_table_slots": 33554432,
+        "run_count": 16
+      }
+    }
+  },
+  "factor_base_is_controlled_variable": true,
+  "failure_rows": [],
+  "freeze_sha256": "af593053ec19055ff6e72732e99eafc8f69e6be2da893487127dd6643bad1d2b",
+  "kind": "s3_base_size_paired_analysis_v1",
+  "raw_ledger_sha256": "bc3d9063af05d15d6c3a20d849618ec4fcaac864023299bcdac6aaa51bf3b590",
+  "run_count": 48,
+  "target_blocks": {
+    "T025": {
+      "244": {
+        "online_ms": [
+          2.914583,
+          2.734292
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          3012.1615,
+          3062.4453329999997
+        ],
+        "target_s3_calls": [
+          8050,
+          4582
+        ]
+      },
+      "320": {
+        "online_ms": [
+          2.133,
+          2.432875
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          2352.728542,
+          2148.294875
+        ],
+        "target_s3_calls": [
+          634,
+          1576
+        ]
+      },
+      "396": {
+        "online_ms": [
+          2.4863340000000003,
+          11.987417
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          3374.576791,
+          3736.1182080000003
+        ],
+        "target_s3_calls": [
+          7056,
+          3314
+        ]
+      }
+    },
+    "T026": {
+      "244": {
+        "online_ms": [
+          5.707375,
+          6.427792
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          3090.461834,
+          2702.085375
+        ],
+        "target_s3_calls": [
+          45884,
+          34234
+        ]
+      },
+      "320": {
+        "online_ms": [
+          7.605125,
+          3.491625
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          1984.990875,
+          2167.932375
+        ],
+        "target_s3_calls": [
+          13808,
+          28932
+        ]
+      },
+      "396": {
+        "online_ms": [
+          4.038417,
+          1.666833
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          2860.864,
+          3562.407792
+        ],
+        "target_s3_calls": [
+          18970,
+          3186
+        ]
+      }
+    },
+    "T027": {
+      "244": {
+        "online_ms": [
+          3.441542,
+          7.258916
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          3159.323959,
+          3004.635583
+        ],
+        "target_s3_calls": [
+          28880,
+          46474
+        ]
+      },
+      "320": {
+        "online_ms": [
+          9.725,
+          17.10425
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          2259.1553329999997,
+          2281.0766249999997
+        ],
+        "target_s3_calls": [
+          38106,
+          79258
+        ]
+      },
+      "396": {
+        "online_ms": [
+          1.938542,
+          3.753958
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          3459.487042,
+          3795.746875
+        ],
+        "target_s3_calls": [
+          19770,
+          14208
+        ]
+      }
+    },
+    "T028": {
+      "244": {
+        "online_ms": [
+          6.957125,
+          10.160084
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          4324.675209000001,
+          3721.529917
+        ],
+        "target_s3_calls": [
+          32776,
+          11878
+        ]
+      },
+      "320": {
+        "online_ms": [
+          2.617875,
+          1.849208
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          2125.748708,
+          2757.394333
+        ],
+        "target_s3_calls": [
+          2454,
+          6448
+        ]
+      },
+      "396": {
+        "online_ms": [
+          2.497125,
+          3.188125
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          4163.860709,
+          4206.707958
+        ],
+        "target_s3_calls": [
+          12780,
+          22952
+        ]
+      }
+    },
+    "T029": {
+      "244": {
+        "online_ms": [
+          4.880958000000001,
+          7.600957999999999
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          3028.315208,
+          3147.384083
+        ],
+        "target_s3_calls": [
+          30442,
+          12720
+        ]
+      },
+      "320": {
+        "online_ms": [
+          4.902125,
+          8.1545
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          2235.212,
+          2640.5409170000003
+        ],
+        "target_s3_calls": [
+          15666,
+          52822
+        ]
+      },
+      "396": {
+        "online_ms": [
+          1.598291,
+          7.769333
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          3704.922417,
+          3811.491625
+        ],
+        "target_s3_calls": [
+          3942,
+          2014
+        ]
+      }
+    },
+    "T030": {
+      "244": {
+        "online_ms": [
+          9.894459,
+          9.077958
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          3014.1413749999997,
+          2947.48175
+        ],
+        "target_s3_calls": [
+          63552,
+          74956
+        ]
+      },
+      "320": {
+        "online_ms": [
+          11.495666,
+          1.937916
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          2194.811791,
+          2137.609125
+        ],
+        "target_s3_calls": [
+          18486,
+          17152
+        ]
+      },
+      "396": {
+        "online_ms": [
+          10.608125,
+          2.226042
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          3643.057917,
+          2783.030958
+        ],
+        "target_s3_calls": [
+          1952,
+          7360
+        ]
+      }
+    },
+    "T031": {
+      "244": {
+        "online_ms": [
+          3.7807090000000003,
+          10.644208
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          3234.621583,
+          3421.716708
+        ],
+        "target_s3_calls": [
+          3800,
+          12088
+        ]
+      },
+      "320": {
+        "online_ms": [
+          28.913792,
+          3.958583
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          3255.0915410000002,
+          2341.7538329999998
+        ],
+        "target_s3_calls": [
+          88882,
+          39428
+        ]
+      },
+      "396": {
+        "online_ms": [
+          18.827,
+          3.415583
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          3577.633625,
+          3357.126333
+        ],
+        "target_s3_calls": [
+          18432,
+          22334
+        ]
+      }
+    },
+    "T032": {
+      "244": {
+        "online_ms": [
+          11.549292,
+          2.648125
+        ],
+        "prepared_rank": [
+          243,
+          243
+        ],
+        "reusable_setup_ms": [
+          3023.0998329999998,
+          2935.406667
+        ],
+        "target_s3_calls": [
+          45314,
+          16656
+        ]
+      },
+      "320": {
+        "online_ms": [
+          1.2853750000000002,
+          11.556500000000002
+        ],
+        "prepared_rank": [
+          319,
+          319
+        ],
+        "reusable_setup_ms": [
+          2244.0474169999998,
+          1874.0921670000002
+        ],
+        "target_s3_calls": [
+          1654,
+          1272
+        ]
+      },
+      "396": {
+        "online_ms": [
+          5.740083,
+          1.325875
+        ],
+        "prepared_rank": [
+          396,
+          396
+        ],
+        "reusable_setup_ms": [
+          3821.9853329999996,
+          3604.170875
+        ],
+        "target_s3_calls": [
+          1390,
+          5390
+        ]
+      }
+    }
+  }
+}
