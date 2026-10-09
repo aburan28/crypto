@@ -132,3 +132,11 @@ and graphs and state the exact blocker in the report and the PR.
 - Review the report, vector visual, PDF, graph data, and any published copy
   together in the same PR as the finding. Apply existing validation and merge
   gates; a publication alone is not the source of truth.
+
+## Reports in S3
+
+Once a report is on `main`, `.github/workflows/reports-s3.yml` copies it to
+`s3://crypto-autoresearcher/reports/crypto/<repository path>` with a per-push
+manifest (`docs/reports-s3.md`). It takes everything under
+`docs/ic/measurement/reports/` and `research/**/reports/` and every PDF under
+`research/`, so keep reports at those paths. Sessions never upload to S3.
