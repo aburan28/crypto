@@ -1,0 +1,349 @@
+{
+  "aa_p95_abs_log_ratio_by_arm": {
+    "parallel": 1.8020746877896436,
+    "persistent": 2.2327931096539535,
+    "tiled": 1.8881182093703501
+  },
+  "all_tile_relations_and_root_counts_match": true,
+  "blocks": [
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 1.1788522670667256,
+        "persistent": 0.14543031215763816,
+        "tiled": 0.592893564916718
+      },
+      "label": "T025",
+      "online_ms_by_arm": {
+        "parallel": [
+          4.168541,
+          1.282375
+        ],
+        "persistent": [
+          12.251583,
+          10.593333
+        ],
+        "tiled": [
+          16.622999999999998,
+          9.187958
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.2029491069414719,
+      "parallel_over_persistent_root_call_ratio": 0.7971456232842327,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          7030,
+          5910
+        ],
+        "persistent": [
+          8086,
+          8086
+        ],
+        "tiled": [
+          8086,
+          8086
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 1.0848052730499012
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 1.8020746877896436,
+        "persistent": 0.4106180703259013,
+        "tiled": 0.03391528956579211
+      },
+      "label": "T026",
+      "online_ms_by_arm": {
+        "parallel": [
+          3.0715,
+          18.620082999999997
+        ],
+        "persistent": [
+          33.574374999999996,
+          22.267875
+        ],
+        "tiled": [
+          19.18525,
+          19.847083
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.27658123422168646,
+      "parallel_over_persistent_root_call_ratio": 0.7133061016152765,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          10358,
+          29524
+        ],
+        "persistent": [
+          24516,
+          24516
+        ],
+        "tiled": [
+          24516,
+          24516
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 0.7136556666068486
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 1.6475636335286739,
+        "persistent": 0.6785814121525363,
+        "tiled": 1.6937194596110206
+      },
+      "label": "T027",
+      "online_ms_by_arm": {
+        "parallel": [
+          5.272541,
+          27.387208
+        ],
+        "persistent": [
+          19.712209,
+          38.854333
+        ],
+        "tiled": [
+          13.752834,
+          74.810958
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.4342066657985356,
+      "parallel_over_persistent_root_call_ratio": 0.35450425005983655,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          47646,
+          9894
+        ],
+        "persistent": [
+          61246,
+          61246
+        ],
+        "tiled": [
+          61246,
+          61246
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 1.1590210723925343
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 1.299160077180786,
+        "persistent": 2.2327931096539535,
+        "tiled": 1.122150833286582
+      },
+      "label": "T028",
+      "online_ms_by_arm": {
+        "parallel": [
+          3.014291,
+          11.051042
+        ],
+        "persistent": [
+          86.677041,
+          9.29425
+        ],
+        "tiled": [
+          8.432417,
+          2.745416
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.20334569837884753,
+      "parallel_over_persistent_root_call_ratio": 1.6605200317522992,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          29262,
+          13828
+        ],
+        "persistent": [
+          12114,
+          12114
+        ],
+        "tiled": [
+          12114,
+          12114
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 0.16951998460953743
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 0.8867262921515661,
+        "persistent": 2.1788179732970483,
+        "tiled": 0.7948636704268709
+      },
+      "label": "T029",
+      "online_ms_by_arm": {
+        "parallel": [
+          31.729292,
+          13.072542
+        ],
+        "persistent": [
+          14.809917,
+          130.85829199999998
+        ],
+        "tiled": [
+          13.966,
+          30.922667
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.4626294521795618,
+      "parallel_over_persistent_root_call_ratio": 1.3441566382425354,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          27012,
+          71024
+        ],
+        "persistent": [
+          32586,
+          32586
+        ],
+        "tiled": [
+          32586,
+          32586
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 0.47206038325507677
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 0.5612525012468867,
+        "persistent": 1.5525584925529416,
+        "tiled": 1.625343328227412
+      },
+      "label": "T030",
+      "online_ms_by_arm": {
+        "parallel": [
+          23.484833000000002,
+          13.397958
+        ],
+        "persistent": [
+          59.135374999999996,
+          12.519292
+        ],
+        "tiled": [
+          66.623583,
+          13.114458
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.6519277716171524,
+      "parallel_over_persistent_root_call_ratio": 1.2882499698412542,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          29286,
+          59878
+        ],
+        "persistent": [
+          32506,
+          32506
+        ],
+        "tiled": [
+          32506,
+          32506
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 1.086364596107262
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 0.781585108748823,
+        "persistent": 0.3862262457153934,
+        "tiled": 1.7979461751481165
+      },
+      "label": "T031",
+      "online_ms_by_arm": {
+        "parallel": [
+          1.440417,
+          0.65925
+        ],
+        "persistent": [
+          58.839292,
+          86.57716599999999
+        ],
+        "tiled": [
+          8.672416,
+          52.35741599999999
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.013653179074161505,
+      "parallel_over_persistent_root_call_ratio": 0.05651936449855112,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          2300,
+          1886
+        ],
+        "persistent": [
+          36850,
+          36850
+        ],
+        "tiled": [
+          36850,
+          36850
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 0.29855458925689393
+    },
+    {
+      "aa_abs_log_ratio_by_arm": {
+        "parallel": 0.32843094246711374,
+        "persistent": 0.5132740848653082,
+        "tiled": 1.8881182093703501
+      },
+      "label": "T032",
+      "online_ms_by_arm": {
+        "parallel": [
+          6.642917,
+          4.78325
+        ],
+        "persistent": [
+          34.53125,
+          20.668083
+        ],
+        "tiled": [
+          9.730625,
+          1.4727919999999999
+        ]
+      },
+      "parallel_over_persistent_online_ratio": 0.21100109294129102,
+      "parallel_over_persistent_root_call_ratio": 1.2698345593908813,
+      "same_first_relation_and_root_calls_for_tile_implementations": true,
+      "target_s3_calls_by_arm": {
+        "parallel": [
+          14902,
+          7212
+        ],
+        "persistent": [
+          8164,
+          8164
+        ],
+        "tiled": [
+          8164,
+          8164
+        ]
+      },
+      "tiled_over_persistent_online_ratio": 0.14170488694072272
+    }
+  ],
+  "comparisons": {
+    "parallel_over_persistent_online_ratio": {
+      "count_above_one": 0,
+      "exploratory_geomean": 0.2134330019127157,
+      "minimum": 0.013653179074161505
+    },
+    "tiled_over_persistent_online_ratio": {
+      "count_above_one": 3,
+      "exploratory_geomean": 0.4895722690729911,
+      "minimum": 0.14170488694072272
+    }
+  },
+  "controlled_speedup": null,
+  "kind": "s3_persistent_tiled_paired_analysis_v1",
+  "ledger_sha256": "a8e6b9549f1d4cebf556c84a8548809d8be0567dd51ee91f486c53df789fccab",
+  "parallel_baseline_aa_p95_abs_log_ratio": 1.8020746877896436,
+  "plan_sha256": "e2c60f0275ee61ae474e6b73c51e7ea76f29e5366ef04ea37ff8ebdadcc550c2",
+  "run_count": 48,
+  "target_count": 8
+}
