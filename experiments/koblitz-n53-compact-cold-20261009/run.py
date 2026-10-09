@@ -25,6 +25,7 @@ SOURCE_FILES = (
     "examples/koblitz_orbit_dlp_fast_online.rs",
     "examples/koblitz_rho_fixture.rs",
     "experiments/koblitz-n53-compact-cold-20261009/PROTOCOL.md",
+    "experiments/koblitz-n53-compact-cold-20261009/replay.py",
     "experiments/koblitz-n53-compact-cold-20261009/run.py",
     "experiments/koblitz-n53-compact-cold-20261009/target_points.jsonl",
     "experiments/koblitz-n53-compact-cold-20261009/verify_workload.py",

@@ -1,0 +1,66 @@
+{
+  "binary_sha256": {
+    "koblitz_orbit_dlp_fast_online": "bf0440729a502ce71952de50646023955092ea7418231378d7144576289d0743",
+    "koblitz_rho_fixture": "9e526732244f10cf038bad10761c45f150e9af2aed13e4ca8a579d8cdca04d69"
+  },
+  "claim_class": "correctness_only",
+  "files_sha256": {
+    "base.jsonl": "f0684c41f14e0541e9beec187c3c9a023346bca60e1c7f4bad5dc478420a0408",
+    "ic-target.jsonl": "89ae09e1d7e17535aaaf9a990a19b53cce7949c18453f0e81c43cfa03a9af751",
+    "ic.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ic.stdout.jsonl": "6db05ad98c94ad0c7416dd92fb98c94538f8c9cf7d4483ea18eb9b193886bbf1",
+    "rank.jsonl": "381991a4c3bee597d35263e19ab1081e17fcb30823ca621516b572ebd3a6ab01",
+    "replay.json": "e447624a4e129b34ed15b4b8e9e29262d2c980701272d9e27c5fb171137147af",
+    "rho.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rho.stdout.jsonl": "9cf909880761de3c410ff3d21e8f36d9e1ab3c974b3e281a69d7ee9d84534bc5",
+    "target_scalar.txt": "10159baf262b43a92d95db59dae1f72c645127301661e0a3ce4e38b295a97c58"
+  },
+  "ic_argv": [
+    "koblitz_orbit_dlp_fast_online",
+    "construct:13:0:4",
+    "target_scalar.txt",
+    "20261009",
+    "ic-target.jsonl"
+  ],
+  "inputs": {
+    "a": 0,
+    "columns": 4,
+    "known_fixture_scalar": 7,
+    "n": 13,
+    "rank_seed": 20261009,
+    "target_point": [
+      384,
+      1476
+    ]
+  },
+  "kind": "n13_compact_orbit_replay_smoke",
+  "negative_controls": {
+    "intermediate_root_changed": "REJECTED",
+    "rank_row_changed": "REJECTED",
+    "target_scalar_changed": "REJECTED"
+  },
+  "producer_exit_codes": {
+    "ic": 0,
+    "rho": 0
+  },
+  "replay_status": "PASS",
+  "rho_argv": [
+    "koblitz_rho_fixture",
+    "13",
+    "0",
+    "signed_frobenius",
+    "1",
+    "strong",
+    "20261009",
+    "7"
+  ],
+  "source_sha256": {
+    "Cargo.lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "examples/koblitz_orbit_dlp_fast_online.rs": "ff6b7685a6dee8ad953b199cf71fb64c3f939626499b77438fa974b6b5b58bde",
+    "examples/koblitz_rho_fixture.rs": "a5f1146ff06700b0f7984214c8c54d2cd701018313357c42ec1bc49c81a81752"
+  },
+  "source_tree_commit": "c53f5e7f1f9c368516311f8cdac75eaf0e0478b6",
+  "source_tree_state": "local cleanup revision with the same one-line rho CLI fix as PR 1600 applied; formal n53 measurements do not use this tree",
+  "timing_use": "none; source tree is a local cleanup diagnostic and host isolation is unverified",
+  "verifier_sha256": "1c45020835debcc5caac6b3ebe48974715ec704516a07d67294add43fb6f1d7e"
+}

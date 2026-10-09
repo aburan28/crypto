@@ -76,10 +76,14 @@ against the in-process interval. A missing phase or failed replay leaves the
 end-to-end comparison unknown. CPU time on an unisolated host is diagnostic;
 a promoted timing ratio requires the repository's isolated-host receipt.
 
-Replay every emitted rank relation, modular row and rank transition, every
-base orbit, the target group relation, and both final scalar multiplications
-with an implementation independent of the Rust producer. Retain the raw
-relation trace, base dump, JSONL, resource receipts, and independent replay.
+After a successful run, invoke `replay.py --run-dir <run directory>
+--workload workload.json --require-receipt --out <new verification.json>`.
+It independently replays every emitted rank relation, modular row and rank
+transition, every base orbit, the target group relation, and both final scalar
+multiplications. It also checks hashes of all raw files named in the receipt.
+Retain the raw relation trace, base dump, JSONL, resource receipts, and replay.
+The verifier passed a four-column n13 correctness smoke and rejected deliberate
+rank-row and target-scalar changes; that smoke is not an n53 measurement.
 After this primary cell is frozen and verified, write a separate protocol for
 the secondary multi-target amortization question; do not substitute that
 batch result for the one-target comparison.
