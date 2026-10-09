@@ -890,22 +890,27 @@ fn price_arms(r: &Value, p: &Priced) -> (Arm, Arm) {
 
 /// The matched rho walks of a row, in `F_p` multiplications.
 fn price_walks(r: &Value, k_inv: f64) -> (Walk, Walk) {
+    (
+        price_walk(r, k_inv, "negation"),
+        price_walk(r, k_inv, "folded"),
+    )
+}
+
+/// One kind of matched walk of a row (`negation` or `folded`).
+fn price_walk(r: &Value, k_inv: f64, name: &str) -> Walk {
     let sqrt_r = fl(r, "r").sqrt();
     let walks = r["walks"].as_array().unwrap();
-    let walk = |name: &str| {
-        let tot: Vec<f64> = walks
-            .iter()
-            .map(|w| fl(w, &format!("{name}_fp_muls")) + k_inv * fl(w, &format!("{name}_fp_invs")))
-            .collect();
-        let gae: Vec<f64> = walks.iter().map(|w| fl(&w[name], "gae")).collect();
-        Walk {
-            total: mean(&tot),
-            s: mean(&tot) / sqrt_r,
-            per_op: mean(&tot) / mean(&gae).max(1.0),
-            verified: walks.iter().all(|w| bool_at(&w[name], "verified")),
-        }
-    };
-    (walk("negation"), walk("folded"))
+    let tot: Vec<f64> = walks
+        .iter()
+        .map(|w| fl(w, &format!("{name}_fp_muls")) + k_inv * fl(w, &format!("{name}_fp_invs")))
+        .collect();
+    let gae: Vec<f64> = walks.iter().map(|w| fl(&w[name], "gae")).collect();
+    Walk {
+        total: mean(&tot),
+        s: mean(&tot) / sqrt_r,
+        per_op: mean(&tot) / mean(&gae).max(1.0),
+        verified: walks.iter().all(|w| bool_at(&w[name], "verified")),
+    }
 }
 
 fn unit(v: &Value, k_inv: f64) -> f64 {
@@ -1667,6 +1672,163 @@ fn e16(o: &mut String, rows: &[&Value]) {
     );
 }
 
+fn e17_ok(r: &Value) -> bool {
+    ["d3", "s3"]
+        .iter()
+        .map(|k| at(r, k))
+        .filter(|v| !v.is_null())
+        .all(|v| bool_at(v, "stream.folded.verified") && bool_at(v, "stream.control.verified"))
+        && bool_at(r, "rho_all_verified")
+}
+
+/// E17 (goal G2): the D₃ oracle and the `τ_T` fold on the full group
+/// `E(F_{p³})`, `r ≈ p³/h`: the solve constant against S₃, agreement
+/// with the pair table, every phase of the `D₃` arm against the matched
+/// negation rho, the fitted exponents, and the model `S/rho S = A·r^a +
+/// B·r^b` (relation part, linear algebra) the fits imply.
+fn e17(o: &mut String, rows: &[&Value]) {
+    let rows = sorted(rows, &["log2_r", "seed"]);
+    o.push_str("### E17 — the D₃ oracle and the τ_T fold on the full group E(F_{p³}): solve constant and agreement\n\n");
+    o.push_str("| p | log2 r | h | cols ⟨−1, τ_T⟩ / ⟨−1⟩ | ratio | D₃ calls | D₃ muls per call | R(q₃) degree max | D₃ unsolved | S₃ muls per call | S₃ / D₃ | agreement D₃ / S₃ disagreements, all (non-degenerate) of targets; pair-table hits, cancelling | correct |\n");
+    o.push_str("|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|:--|:--|\n");
+    let mut ratios = Vec::new();
+    for r in &rows {
+        let d3 = e13_arm(r, "d3", "fold4").unwrap();
+        let s3 = e13_arm(r, "s3", "fold4");
+        let ag = at(r, "agreement");
+        let agr = if truthy(ag) {
+            format!(
+                "{} ({}) / {} ({}) of {}; {}, {}",
+                py_str(at(ag, "d3_disagreements")),
+                py_str(at(ag, "d3_disagreements_nondegenerate")),
+                py_str(at(ag, "s3_disagreements")),
+                py_str(at(ag, "s3_disagreements_nondegenerate")),
+                py_str(at(ag, "targets")),
+                py_str(at(ag, "pair_table_hits")),
+                py_str(at(ag, "pair_table_cancelling")),
+            )
+        } else {
+            "—".into()
+        };
+        let cols = (fl(r, "columns.fold4"), fl(r, "columns.control"));
+        if let Some(s) = &s3 {
+            ratios.push(s.muls_per_call / d3.muls_per_call);
+        }
+        let _ = writeln!(
+            o,
+            "| {} | {:.1} | {} | {:.0} / {:.0} | {:.2} | {:.0} | {:.0} | {} | {} | {} | {} | {} | {} |",
+            py_str(at(r, "p")),
+            fl(r, "log2_r"),
+            py_str(at(r, "cofactor")),
+            cols.0,
+            cols.1,
+            cols.1 / cols.0,
+            d3.calls,
+            d3.muls_per_call,
+            py_str(at(r, "d3.solver.resultant_degree_max")),
+            py_str(at(r, "d3.solver.unsolved")),
+            s3.as_ref().map_or("—".into(), |s| format!("{:.0}", s.muls_per_call)),
+            s3.as_ref().map_or("—".into(), |s| format!("{:.1}", s.muls_per_call / d3.muls_per_call)),
+            agr,
+            yes(e17_ok(r)),
+        );
+    }
+    if !ratios.is_empty() {
+        let _ = writeln!(
+            o,
+            "\nS₃ / D₃ muls per call over {} rows: {}.\n",
+            ratios.len(),
+            mean_range(&ratios)
+        );
+    }
+    o.push_str("### E17 — every phase of the D₃ arm (base ⟨−1, τ_T⟩) and of the S₃ arm on the same base, beside the matched negation rho (F_p multiplications)\n\n");
+    o.push_str("| p | log2 r | h | cols | rel to pinned | set-up | base | group arithmetic | solver | linear algebra | total D₃ | S D₃ | rho S | S / rho S, D₃ | S / rho S, S₃ |\n");
+    o.push_str("|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    let mut fits: BTreeMap<&str, Vec<(f64, f64)>> = BTreeMap::new();
+    let (mut rel_gap, mut la_gap) = (Vec::new(), Vec::new());
+    for r in &rows {
+        let d3 = e13_arm(r, "d3", "fold4").unwrap();
+        let Some(sq) = d3.square else {
+            continue;
+        };
+        let s3 = e13_arm(r, "s3", "fold4");
+        let k = fl(r, "inversion_in_multiplications");
+        let rho = price_walk(r, k, "negation");
+        let rr = fl(r, "r");
+        for (name, v) in [
+            ("solver", d3.phases[3]),
+            ("group arithmetic", d3.phases[2]),
+            ("linear algebra", d3.phases[4]),
+            ("total", d3.total),
+            ("rho (total)", rho.total),
+            ("S / rho S, D₃", d3.s / rho.s),
+        ] {
+            fits.entry(name).or_default().push((rr, v));
+        }
+        if let Some(s) = &s3 {
+            fits.entry("S / rho S, S₃")
+                .or_default()
+                .push((rr, s.s / rho.s));
+        }
+        rel_gap.push((rr, (d3.total - d3.phases[4]) / rho.total));
+        la_gap.push((rr, d3.phases[4] / rho.total));
+        let _ = writeln!(
+            o,
+            "| {} | {:.1} | {} | {:.0} | {:.0} | {} | {} | {} | {} | {} | {} | {:.0} | {:.2} | {:.1} | {} |",
+            py_str(at(r, "p")),
+            fl(r, "log2_r"),
+            py_str(at(r, "cofactor")),
+            d3.columns,
+            sq,
+            g3(d3.phases[1]),
+            g3(d3.phases[0]),
+            g3(d3.phases[2]),
+            g3(d3.phases[3]),
+            g3(d3.phases[4]),
+            g3(d3.total),
+            d3.s,
+            rho.s,
+            d3.s / rho.s,
+            s3.as_ref().map_or("—".into(), |s| format!("{:.0}", s.s / rho.s)),
+        );
+    }
+    o.push_str("\n#### E17 — fitted exponents against r (least squares, log–log), rows with the logarithm pinned\n\n");
+    o.push_str("| quantity | exponent | rows |\n|:--|--:|--:|\n");
+    for (name, pts) in &fits {
+        let _ = writeln!(
+            o,
+            "| {} | {} | {} |",
+            name,
+            fmt_f(fit_exponent(pts)),
+            pts.len()
+        );
+    }
+    // The model the fits imply: S/rho S = A·r^a (everything but the linear
+    // algebra) + B·r^b (the linear algebra), each fitted on its own.
+    let fit_line = |pts: &[(f64, f64)]| -> Option<(f64, f64)> {
+        let a = fit_exponent(pts)?;
+        let lx: Vec<f64> = pts.iter().map(|p| p.0.log2()).collect();
+        let ly: Vec<f64> = pts.iter().map(|p| p.1.log2()).collect();
+        Some((a, mean(&ly) - a * mean(&lx)))
+    };
+    if let (Some((a, ca)), Some((b, cb))) = (fit_line(&rel_gap), fit_line(&la_gap)) {
+        let _ = writeln!(
+            o,
+            "\nModel (extrapolation, not measurement): S / rho S = 2^{{{ca:.2}}}·r^{{{a:.3}}} (relation part) + 2^{{{cb:.2}}}·r^{{{b:.3}}} (linear algebra)."
+        );
+        if a < 0.0 && b > 0.0 {
+            // d/dlog r of A r^a + B r^b = 0  ⇒  log2 r* = (log2(−aA) − log2(bB)) / (b − a).
+            let l_star = ((-a).log2() + ca - b.log2() - cb) / (b - a);
+            let s_star = 2f64.powf(ca + a * l_star) + 2f64.powf(cb + b * l_star);
+            let _ = writeln!(
+                o,
+                "Its minimum: S / rho S = {s_star:.3} at r ≈ 2^{l_star:.1}; the relation part alone reaches 1 at r ≈ 2^{:.1}.",
+                -ca / a
+            );
+        }
+    }
+}
+
 fn e13_ok(r: &Value) -> bool {
     ["d3_fold12", "d3_fold6", "s3_fold12", "s3_fold6"]
         .iter()
@@ -2099,7 +2261,7 @@ fn main() {
     }
     let mut o = String::new();
     type Printer = fn(&mut String, &[&Value]);
-    let printers: [(&str, Printer); 16] = [
+    let printers: [(&str, Printer); 17] = [
         ("e1", e1),
         ("e2", e2),
         ("e3", e3),
@@ -2114,6 +2276,7 @@ fn main() {
         ("e12p", |o, r| e12(o, r, true)),
         ("e13", e13),
         ("e13", e16),
+        ("e17", e17),
         ("e14", e14),
         ("e15", e15),
     ];

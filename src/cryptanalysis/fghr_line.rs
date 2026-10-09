@@ -122,13 +122,14 @@ impl FghrInstance {
 /// E13 and the full-group line of E17 (`fghr_full`).
 pub trait YLine {
     /// `x` above the line's parameter `t`, on the field's counted
-    /// arithmetic.
-    fn x_at(&self, t: u64) -> Fp3El;
+    /// arithmetic; `None` where `t` is the Möbius map's pole (`Y = 1`,
+    /// the point at infinity), which only a line through `1` meets.
+    fn x_at(&self, t: u64) -> Option<Fp3El>;
 }
 
 impl YLine for FghrInstance {
-    fn x_at(&self, t: u64) -> Fp3El {
-        self.x_of_y(self.sub.curve.f.scale(self.yline, t))
+    fn x_at(&self, t: u64) -> Option<Fp3El> {
+        Some(self.x_of_y(self.sub.curve.f.scale(self.yline, t)))
     }
 }
 
@@ -1183,11 +1184,14 @@ fn lift_triples(
 ) -> Option<Vec<usize>> {
     let f = &ctx.group.f;
     for t in triples {
-        let xs = [
-            f.pack(inst.x_at(t[0])),
-            f.pack(inst.x_at(t[1])),
-            f.pack(inst.x_at(t[2])),
-        ];
+        // A solution at the pole has a summand at infinity: not a
+        // decomposition into three base points.
+        let (Some(x1), Some(x2), Some(x3)) = (inst.x_at(t[0]), inst.x_at(t[1]), inst.x_at(t[2]))
+        else {
+            counters.lift_failures += 1;
+            continue;
+        };
+        let xs = [f.pack(x1), f.pack(x2), f.pack(x3)];
         if let Some(idx) = lift_abscissae(ctx.group, fb, ops, &xs, target) {
             return Some(idx);
         }

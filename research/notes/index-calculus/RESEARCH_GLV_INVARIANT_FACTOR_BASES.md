@@ -1747,3 +1747,90 @@ a `k = 4` method over the rho an attacker would actually run on that curve moves
 `1/0.73 ≈ 1.4×` (negation walk) to `≈ 7×` (`ψ`-folded base against `ψ`-folded walk).
 **Class: engineering**, the constant of an asymptote.  The handover `n*` also moves, through
 `1 − r∞` in §11.16's formula and through the halved relation count, but `C₄` still sets it.
+
+### 9.2 E17 — the `D₃` oracle and the `τ_T` fold on the full group, measured
+
+**Runner:** `E17_S3_BITS=10 cargo run --release --example glv_invariant_experiments -- --exp e17
+--bits 6,7,8,9,10,11,12,13 --seeds 3 --rho-runs 8 --json experiments/23_glv_invariant_e17.json`.
+**Data:** `experiments/23_glv_invariant_e17.{json,log}` (2026-10-09, `24` rows, `294 s`).
+**Tables:** `cargo run --release --example glv_invariant_experiment_tables --
+experiments/23_glv_invariant_e17.json` (the E17 printer).  **Source:** `src/cryptanalysis/fghr_full.rs`,
+`src/cryptanalysis/fghr_line.rs` (`YLine`, `s4_in_y_ext`, `fghr_polynomials_on`).
+
+`24` non-subfield curves over `F_{p³}`, `p = 37`–`4549`, `r = 2^{13.3}`–`2^{33.5}`, cofactor
+`h ∈ {4, 8}` (`T` is rational, so `h` is even, and the search took the first `h ≤ 8`).  One
+relation stream fed the `⟨−1, τ_T⟩` base and the `⟨−1⟩` control; the `S₃` Macaulay oracle ran the
+same base and targets to `p = 2^{10}`; both oracles were checked against the exhaustive pair table
+on `200` targets per curve to `p = 2^8`.  **Every planted logarithm was recovered, every
+algebraic decomposition re-added to its target, and all `192` rho walks verified.**
+
+**The solve constant and the fold.**
+
+| p | log₂ r | h | cols `⟨−1, τ_T⟩` / `⟨−1⟩` | D₃ muls per call | S₃ muls per call | S₃ / D₃ |
+|--:|--:|--:|:--|--:|--:|--:|
+| 43 | 13.3 | 8 | 12 / 24 | 12537 | 539418 | 43.0 |
+| 67 | 15.2 | 8 | 17 / 34 | 13043 | 535231 | 41.0 |
+| 211 | 20.2 | 8 | 58 / 116 | 15451 | 570788 | 36.9 |
+| 337 | 23.2 | 4 | 88 / 176 | 15835 | 578450 | 36.5 |
+| 823 | 26.1 | 8 | 216 / 432 | 17566 | 591700 | 33.7 |
+| 1723 | 29.3 | 8 | 431 / 862 | 18867 | — | — |
+| 4549 | 33.5 | 8 | 1188 / 2376 | 19471 | — | — |
+
+(Seven of the `24` rows; the printer gives all.)  Over the `15` rows with both oracles,
+**`S₃ / D₃ = 37.99` (`33.68`–`43.03`)**.  `R(q₃)` has degree `16` on every call of every row.  The
+`D₃` cost grows from `1.25·10⁴` to `1.95·10⁴` over `p = 2^{5.2}`–`2^{12.2}`, which is the
+`log p` of Cantor–Zassenhaus.  The column ratio is **`2.00` on all `24` rows**.  Agreement with
+the pair table: **`0` disagreements in `1800` targets** for both oracles once one
+degenerate target is set apart.  In that one (`p = 67`, `k = 67`) the target is itself a base
+point, the pair table's "decomposition" is `P + (−P) + R`, and `S₄` has a one-dimensional
+component there that no zero-dimensional solver returns.  `S₃` misses it exactly as `D₃` does.
+
+**End to end, against the matched negation rho** (`F_p` multiplications, the `D₃` arm's phases):
+
+| p | log₂ r | h | set-up | group arithmetic | solver | linear algebra | S / rho S, D₃ | S / rho S, S₃ |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 43 | 13.3 | 8 | 1.37e+06 | 8.74e+05 | 3.18e+06 | 251 | 285 | 7241 |
+| 211 | 20.2 | 8 | 1.37e+06 | 7.36e+06 | 2.08e+07 | 2.09e+03 | 303 | 7898 |
+| 823 | 26.1 | 8 | 1.37e+06 | 9.88e+07 | 2.39e+08 | 2.7e+04 | 455 | 7449 |
+| 1723 | 29.3 | 8 | 1.37e+06 | 1.81e+08 | 4.15e+08 | 1.86e+05 | 298 | — |
+| 3037 | 32.7 | 4 | 1.37e+06 | 3.63e+08 | 7.94e+08 | 8.99e+05 | 180 | — |
+| 4549 | 33.5 | 8 | 1.37e+06 | 6.44e+08 | 1.29e+09 | 2.91e+06 | 236 | — |
+
+Fitted against `r` over the `24` rows: solver `r^{0.44}`, group arithmetic `r^{0.47}`, linear
+algebra `r^{0.68}`, total `r^{0.43}`, matched rho `r^{0.44}`, **`S / rho S` `r^{−0.01}`** (`S₃`
+arm: `r^{+0.03}`).
+
+**Reading, against §9's predictions.**
+
+- **G2.1 holds**, with the degenerate target counted apart and frozen in the file
+  (`pair_table_cancelling`), never dropped.
+- **G2.2 holds:** the `D₃` structure that made E13 cheap is not an artefact of `F_p` Möbius
+  coefficients.  On the full group it divides the `S₄` solve by `38`, E13's `33`–`41`.
+- **G2.3 holds exactly:** `τ_T` halves the columns on every curve.
+- **G2.4 is falsified.**  `S / rho S` is `180`–`377` at `r ≥ 2^{28}` against the `≤ 50`
+  predicted; the falsifier was `> 100`.  Within the harness the two levers buy `÷ 25`–`40` end to
+  end (the `S₃` arm on the same base is `5,961`–`14,502`).
+- **G2.5 is falsified.**  The fitted slope is `−0.01`, not `≤ −0.10`.  The cause is three costs of
+  this harness that the prediction did not price.  None of them is a property of the oracle:
+  1. **The stop rule.**  The rows stop at the folded arm's full rank, so every column must
+     appear, and a weight-3 stream reaches that after `≈ (N/3) ln N` relations.  Measured, the
+     relations at full rank are `1.1×` the columns at `N ≈ 10` and `1.5`–`2.8×` at `N ≥ 100`.  §11's pipeline filters
+     to a square core and stops at the pinned logarithm instead.
+  2. **Fresh targets.**  Each target is `aG + bQ`, two scalar multiplications.  That is a third of
+     the total (`r^{0.47}`), where a walk-generated residual costs one addition.
+  3. **The rho fit.**  The matched rho fits `r^{0.44}`, not `1/2`, because set-up is still a
+     visible share at these sizes (as in E8, E11 and E16).
+  The `ln N` and the scalar multiplications add `≈ 0.1` to the relation phase's exponent and the
+  rho fit removes `0.06`, which accounts for the predicted `−1/6` reading as `−0.01`.
+
+The cofactor costs a further constant.  With `h = 8`, rho on `r ≈ p³/8` is `√8` cheaper than on a
+prime-order curve with the same base.  A cross-harness comparison is therefore only context: the
+best `k = 3` method of `RESEARCH_RESIDUAL_WALKS.md` §11 is the plain method at `528×` rho at
+`2^{33.1}`, on prime-order curves with filtering and walk-generated residuals.  This arm is at
+`236`–`265×` at `2^{33.1}`–`2^{33.5}`.
+
+**Class: engineering.**  The solve constant is `÷ 38`, and the fold halves the columns exactly
+and the linear algebra by four.  No exponent moved, and §11.15's verdict on `k = 3` stands: the
+plain method is bounded away from rho at every size.  What E17 establishes for the goal is that
+both levers survive the move to a non-subfield curve, which is the precondition for using them at
+`k = 4` (§9.1).

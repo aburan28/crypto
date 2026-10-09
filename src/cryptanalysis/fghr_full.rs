@@ -98,8 +98,9 @@ impl FullFghrInstance {
 }
 
 impl YLine for FullFghrInstance {
-    fn x_at(&self, t: u64) -> Fp3El {
-        self.x_of_y(self.curve.f.from_fp(t))
+    /// The line `Y ∈ F_p` passes through the pole `Y = 1`.
+    fn x_at(&self, t: u64) -> Option<Fp3El> {
+        (t % self.p != 1).then(|| self.x_of_y(self.curve.f.from_fp(t)))
     }
 }
 
@@ -157,7 +158,9 @@ pub fn generate_full_fghr_instance(
             continue;
         };
         if order % 2 != 0 {
-            return Err(format!("#E = {order} is odd although T = (x₀, 0) is rational"));
+            return Err(format!(
+                "#E = {order} is odd although T = (x₀, 0) is rational"
+            ));
         }
         let Some(&(r, _)) = factor_u64(order).last() else {
             continue;
@@ -253,7 +256,7 @@ pub fn full_line_base(
     let f = &curve.f;
     let mut seed = Vec::with_capacity(2 * inst.p as usize);
     for t in 2..inst.p - 1 {
-        seed.extend(curve.lift_x(inst.x_at(t)));
+        seed.extend(curve.lift_x(inst.x_at(t).expect("t ≠ 1")));
     }
     let neg = Negation { r: inst.r };
     let tau = Translation { t: inst.t };
@@ -285,9 +288,7 @@ pub fn full_line_base(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::fghr_line::{
-        fghr_polynomials_on, FghrOracle, Mobius, YLineS4Oracle,
-    };
+    use crate::cryptanalysis::fghr_line::{fghr_polynomials_on, FghrOracle, Mobius, YLineS4Oracle};
     use crate::cryptanalysis::ic_boundary::OracleCounters;
     use crate::cryptanalysis::ic_framework::plugins::MitmOracle;
     use crate::cryptanalysis::ic_framework::stages::{DecompositionOracle, InstanceCtx, Params};
@@ -351,8 +352,16 @@ mod tests {
                 });
                 assert_eq!(sum, pt);
             }
-            assert_eq!(a.is_some(), m.is_some(), "D₃ against the pair table at k = {k}");
-            assert_eq!(b.is_some(), m.is_some(), "S₃ against the pair table at k = {k}");
+            assert_eq!(
+                a.is_some(),
+                m.is_some(),
+                "D₃ against the pair table at k = {k}"
+            );
+            assert_eq!(
+                b.is_some(),
+                m.is_some(),
+                "S₃ against the pair table at k = {k}"
+            );
             hits += m.is_some() as u32;
             found += a.is_some() as u32;
         }
