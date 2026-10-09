@@ -20,13 +20,12 @@ Counts of `r_min ≤ R` over all Elkies `ℓ ≤ 2²⁰` against the model:
 
 | R | P-192 | model | P-224 | model | P-256 | model |
 |--:|--:|--:|--:|--:|--:|--:|
-| 4 | — | — | — | — | 4 | 7.6 |
-| 12 | — | — | — | — | 19 | 20.1 |
-| 48 | — | — | — | — | 59 | 61.2 |
+| 4 | 3 | 6.4 | 2 | 5.0 | 4 | 7.6 |
+| 12 | 16 | 17.7 | 11 | 14.3 | 19 | 20.1 |
+| 48 | 45 | 57.7 | 48 | 52.5 | 59 | 61.2 |
 
-(P-256 shown; the other curves' counts are in the summary file with the
-same shape: the ratio rises from about 0.4 at R = 2–4 to about 0.9 by
-R = 12.)
+The ratio rises from about 0.4 at R = 2–4 to about 0.9 by R = 12 on every
+curve.
 
 ## Reading
 
