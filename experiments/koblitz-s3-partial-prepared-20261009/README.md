@@ -296,8 +296,9 @@ inventory selected 1,243 files totaling 52,252,236 bytes: Cargo metadata,
 the Rust `src/` tree, three required documentation subtrees, the frozen
 reference and partial S3 examples, the rank-243 plan, 24 fresh public points,
 and three full-rank stress public points. No credential-named files or common
-private-key/API-token patterns were found in that set. The 32-vCPU, 16-GiB VM
-runner checks for 15 distinct physical execution CPUs on one NUMA node, pins
+private-key/API-token patterns were found in that set. The VM requests 16
+physical cores and 16 GiB, and checks for 15 distinct benchmark cores plus a
+separate physical monitoring core on one NUMA node. It pins
 the 14-worker processes, records affinity masks, guest topology, cgroup,
 PSI, IRQ and steal snapshots, paired ABBA/BAAB order, a rank-243 A/A timing
 control, and whole-process `perf stat` cycles/instructions when available.
@@ -306,3 +307,26 @@ points; `--count 24` covers all 27 frozen points. The runner has passed local
 syntax, remote-code compilation, source/point hash, and upload-inventory
 checks. No Modal job or upload has been started; the third-party source and
 fixture upload awaits explicit approval following automatic review rejection.
+
+The VM runner now reserves the physical CPU-0 core for monitoring, keeps all
+15 benchmark CPUs on distinct other SMT cores, and records the selected sibling
+sets. Modal's [`cpu` setting](https://modal.com/docs/guide/sandbox-resources)
+specifies physical cores. Frequency policy and current frequency are recorded
+for every selected benchmark CPU. The local
+[`analyze_modal_fidelity.py`](analyze_modal_fidelity.py) checks 14 guest-level
+conditions per run: correctness, phase accounting, physical-core selection,
+observed thread masks and worker count, NUMA bind, no CPU quota, zero
+throttling, steal ticks, selected-CPU interrupts and OOM events, fixed frequency,
+at most 1% cgroup CPU PSI, and at most 0.1% memory and I/O PSI. Its score is
+the *minimum* run's passed-check fraction on a 0–100 scale; missing checks
+score zero and remain listed. It also requires the rank-243 A/A p95 absolute
+log ratio to be at most `log(1.10)`, recomputes every paired online ratio,
+reports descriptive target bootstrap intervals and a pilot target count for
+testing a geometric mean above 2×, and parses whole-process `perf` IPC when
+available. The guest score is a diagnostic; the host-wide isolation receipt
+remains a separate gate for a controlled wall-time claim. Run it after either
+Modal panel output is downloaded:
+
+```sh
+python3 experiments/koblitz-s3-partial-prepared-20261009/analyze_modal_fidelity.py --input /private/tmp/modal-rank243-panel.json.gz --output /private/tmp/modal-rank243-fidelity.json
+```

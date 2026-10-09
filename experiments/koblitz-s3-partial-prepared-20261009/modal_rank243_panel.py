@@ -289,7 +289,7 @@ def run(count: int, output: Path, region: str | None) -> None:
     with application.run():
         sandbox = modal.Sandbox.create(
             "python3", "-c", code, str(count), app=application,
-            image=image(), cpu=32, memory=16384, timeout=1800, region=region,
+            image=image(), cpu=16, memory=16384, timeout=1800, region=region,
             volumes={"/results": volume}, experimental_options={"vm_runtime": True},
         )
         print(json.dumps({"sandbox_id": sandbox.object_id}), flush=True)
