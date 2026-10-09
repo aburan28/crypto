@@ -16,3 +16,9 @@ python3 experiments/koblitz-s3-c1580-20261009/run_feasibility.py \
 ```
 
 If the control passes, fix its actual base, candidate ID, and fresh one-target workloads before a matched comparison with C1200. Report all target-dependent attempts, exclusive phase costs, scalar replay, resource use, and failures; the local CPU host still requires an isolation receipt for a controlled wall-time claim.
+
+## Feasibility result and exact identity
+
+The [receipt](local/feasibility_receipt.json) and [raw report](local/feasibility_report.json.gz) show verified scalar recovery with full rank 1,580 before target input, zero online fallback, 167,480 distinct subgroup-usable base points, and 132,309,200 indexed states. The actual base digest is `5be73166ac72caba26766e1f8a62f957fb54adb88aabac784f483c8b8610aa4f`; its last scanned `x` is 3,180. Every shard stayed within the declared capacity step: 268,435,456 total 13-byte root slots. The observed peak RSS was **20,308,869,120 bytes**, below the 32 GiB envelope. T025 required 1,048 target S3 root calls, versus 3,272 in the compact-state C1200 control; this known-point count is a feasibility diagnostic.
+
+The exact candidate is [`IC1N53Ckb1fb167480PDP4rootRCsampleLAgaussTDdirectISO0h2090cce30506`](identities/candidates/IC1N53Ckb1fb167480PDP4rootRCsampleLAgaussTDdirectISO0h2090cce30506.json). The 24 previously unused N53 targets T101–T124 retain their [one-target workload manifests](identities/workloads/); the first eight are reserved for a paired screen, with the remainder held for later confirmation.
