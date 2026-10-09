@@ -28,3 +28,15 @@ Next step for E2a as registered: replace `bnfinit`/`bnfisprincipal` by
 (baby-step giant-step on each cyclic factor, or PARI's `qfbsolve`-free
 route through `bnfinit` on a *reduced* precision setting), re-freeze the
 instrument, and rerun under the same cap.
+
+## Appendix: the unregistered `quadclassunit` run, 2026-10-09
+
+`quadclassunit(D_π)` with `parisizemax = 2³³` did not return within its
+two-hour cap either (exit 124, no output).  `time` reports 24 CPU-minutes
+over the two wall hours, so the process was mostly not computing; the
+likely cause is PARI stack growth and reallocation under the 8 GB
+ceiling rather than the arithmetic itself, but this was not diagnosed.
+No class number for P-256's Frobenius order is available from this
+session, and E2.1 remains untested.  Before any rerun: fix `parisize` at
+the start instead of letting the stack grow, run on an otherwise idle
+machine, and record CPU time as well as wall time in the instrument.
