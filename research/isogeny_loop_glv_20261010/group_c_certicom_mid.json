@@ -30,7 +30,7 @@
   "selftest_disc": -71,
   "json": "research/isogeny_loop_glv_20261010/group_c_certicom_mid.json"
  },
- "seconds": 366.0,
+ "seconds": 370.8,
  "results": [
   {
    "curve": {
@@ -90,7 +90,7 @@
        "2",
        "2"
       ],
-      "bnf_seconds": 347.75
+      "bnf_seconds": 347.93
      },
      "primes": [
       {
@@ -554,7 +554,7 @@
       "chain_length": 221,
       "within_radius": false
      },
-     "seconds": 349.55
+     "seconds": 349.74
     }
    ],
    "sqrtDK_mod_r": "1550031797834347859189517660797271478744",
@@ -573,13 +573,552 @@
     "q": "649037107316853453566312041152512",
     "char2": true,
     "n": 109,
-    "trace": "-9735556609752801806430390996181013",
-    "order": "10384593717069655259996703037333526",
-    "r": "5192296858534827629998351518666763",
+    "trace": -2935710378893333,
+    "order": "649037107316853456502022420045846",
+    "r": "324518553658426728251011210022923",
     "cofactor": 2,
     "a": "420436860822086608542499872378083"
    },
-   "error": "not ordinary / not an elliptic curve trace"
+   "frobenius": {
+    "delta": "-2587530033838671777462230372761159",
+    "delta_bits": 111,
+    "factorization": [
+     [
+      "7",
+      3
+     ],
+     [
+      "31",
+      1
+     ],
+     [
+      "241",
+      1
+     ],
+     [
+      "2777",
+      1
+     ],
+     [
+      "2027561",
+      1
+     ],
+     [
+      "2220311",
+      1
+     ],
+     [
+      "80769784409",
+      1
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-52806735384462689335963885158391",
+    "DK_bits": 106,
+    "conductor_f": "7",
+    "conductor_factorization": [
+     [
+      "7",
+      1
+     ]
+    ],
+    "factor_seconds": 0.001
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-52806735384462689335963885158391",
+     "class_group": {
+      "h": "4179122101391424",
+      "hK": "4179122101391424",
+      "cyc_K": [
+       "130597565668482",
+       "2",
+       "2",
+       "2",
+       "2",
+       "2"
+      ],
+      "bnf_seconds": 5.39
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [
+        109030995191118,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "order_in_ClK": 109,
+       "frobenius_eigenvalue_mod_l": 1,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 1/2"
+      },
+      {
+       "ell": 5,
+       "cost_M": 37.5,
+       "dlog": [
+        65298782834256,
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       "order_in_ClK": 43532521889494,
+       "frobenius_eigenvalue_mod_l": 3,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 13,
+       "cost_M": 97.5,
+       "dlog": [
+        88024959940010,
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       "order_in_ClK": 130597565668482,
+       "frobenius_eigenvalue_mod_l": 4,
+       "sqrtDK_mod_l": 7,
+       "generator": "x - 7"
+      },
+      {
+       "ell": 19,
+       "cost_M": 142.5,
+       "dlog": [
+        75994018099342,
+        0,
+        1,
+        1,
+        0,
+        0
+       ],
+       "order_in_ClK": 130597565668482,
+       "frobenius_eigenvalue_mod_l": 5,
+       "sqrtDK_mod_l": 5,
+       "generator": "x - 5"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [
+        45556374691973,
+        0,
+        1,
+        0,
+        1,
+        0
+       ],
+       "order_in_ClK": 130597565668482,
+       "frobenius_eigenvalue_mod_l": 5,
+       "sqrtDK_mod_l": 3,
+       "generator": "x - 3"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [
+        105882985297200,
+        1,
+        0,
+        0,
+        0,
+        0
+       ],
+       "order_in_ClK": 43532521889494,
+       "frobenius_eigenvalue_mod_l": 19,
+       "sqrtDK_mod_l": 19,
+       "generator": "x - 19"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [
+        114928923251291,
+        1,
+        1,
+        1,
+        0,
+        1
+       ],
+       "order_in_ClK": 130597565668482,
+       "frobenius_eigenvalue_mod_l": 15,
+       "sqrtDK_mod_l": 19,
+       "generator": "x - 19"
+      },
+      {
+       "ell": 61,
+       "cost_M": 457.5,
+       "dlog": [
+        29209993064358,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "order_in_ClK": 43532521889494,
+       "frobenius_eigenvalue_mod_l": 32,
+       "sqrtDK_mod_l": 1,
+       "generator": "x - 1"
+      },
+      {
+       "ell": 83,
+       "cost_M": 622.5,
+       "dlog": [
+        49168968900843,
+        0,
+        0,
+        1,
+        0,
+        1
+       ],
+       "order_in_ClK": 3957501989954,
+       "frobenius_eigenvalue_mod_l": 77,
+       "sqrtDK_mod_l": 21,
+       "generator": "x - 21"
+      },
+      {
+       "ell": 89,
+       "cost_M": 667.5,
+       "dlog": [
+        100050057788935,
+        1,
+        0,
+        0,
+        1,
+        0
+       ],
+       "order_in_ClK": 130597565668482,
+       "frobenius_eigenvalue_mod_l": 62,
+       "sqrtDK_mod_l": 43,
+       "generator": "x - 43"
+      },
+      {
+       "ell": 97,
+       "cost_M": 727.5,
+       "dlog": [
+        55181644882751,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "order_in_ClK": 130597565668482,
+       "frobenius_eigenvalue_mod_l": 49,
+       "sqrtDK_mod_l": 36,
+       "generator": "x - 36"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 109,
+       "degree_bits": 109.0,
+       "cost_M": 218.0,
+       "ratio_to_saving": 0.495
+      },
+      {
+       "ell": 5,
+       "loop_length": 43532521889494,
+       "degree_bits": 101079385616515.2,
+       "cost_M": 1632469570856025.0,
+       "ratio_to_saving": 3710158115581.875
+      },
+      {
+       "ell": 83,
+       "loop_length": 3957501989954,
+       "degree_bits": 25229231235590.7,
+       "cost_M": 2463544988746365.0,
+       "ratio_to_saving": 5598965883514.466
+      },
+      {
+       "ell": 13,
+       "loop_length": 130597565668482,
+       "degree_bits": 483268419092190.3,
+       "cost_M": 1.2733262652676996e+16,
+       "ratio_to_saving": 28939233301538.63
+      },
+      {
+       "ell": 43,
+       "loop_length": 43532521889494,
+       "degree_bits": 236218989212258.9,
+       "cost_M": 1.4039238309361816e+16,
+       "ratio_to_saving": 31907359794004.13
+      },
+      {
+       "ell": 19,
+       "loop_length": 130597565668482,
+       "degree_bits": 554768992391900.1,
+       "cost_M": 1.8610153107758684e+16,
+       "ratio_to_saving": 42295802517633.375
+      }
+     ],
+     "relation_search": {
+      "rank": 11,
+      "exhaustive_within_radius": true,
+      "radius_M": 440.0,
+      "lll_upper_bound_M": 218.0,
+      "loops_within_radius": 4,
+      "candidates": 24
+     },
+     "loops": [
+      {
+       "cost_M": 218.0,
+       "ratio_to_saving": 0.495,
+       "exponents": {
+        "2": 109
+       },
+       "chain_length": 109,
+       "degree": "649037107316853453566312041152512",
+       "degree_bits": 109.0,
+       "alpha": "(-2935710378893333 + -7*sqrt(-52806735384462689335963885158391))/2",
+       "trace": "-2935710378893333",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-2935710378893334",
+       "frobenius_power": 1,
+       "lambda": "324518553658426725315300831129589",
+       "lambda_conj": "1",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         2935710378893334,
+         1
+        ],
+        "b2": [
+         133222636925195,
+         110541746894242177
+        ],
+        "max_abs_entry_bits": 57,
+        "half_bits": 55,
+        "ratio_to_sqrt_r": 6.136299629213703
+       }
+      },
+      {
+       "cost_M": 218.0,
+       "ratio_to_saving": 0.495,
+       "exponents": {
+        "2": -109
+       },
+       "chain_length": 109,
+       "degree": "649037107316853453566312041152512",
+       "degree_bits": 109.0,
+       "alpha": "(2935710378893333 + -7*sqrt(-52806735384462689335963885158391))/2",
+       "trace": "2935710378893333",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-1",
+       "frobenius_power": -1,
+       "lambda": "324518553658426728251011210022922",
+       "lambda_conj": "2935710378893334",
+       "lambda_is_pm1": true,
+       "glv": {
+        "b1": [
+         1,
+         1
+        ],
+        "b2": [
+         -162259276829213364125505605011461,
+         162259276829213364125505605011462
+        ],
+        "max_abs_entry_bits": 108,
+        "half_bits": 55,
+        "ratio_to_sqrt_r": 9007199254740992.0
+       }
+      },
+      {
+       "cost_M": 436.0,
+       "ratio_to_saving": 0.991,
+       "exponents": {
+        "2": 218
+       },
+       "chain_length": 218,
+       "degree": "421249166674228746791672110734681729275580381602196445017243910144",
+       "degree_bits": 218.0,
+       "alpha": "(-1289455819204964870329606290456135 + 20549972652253331*sqrt(-52806735384462689335963885158391))/2",
+       "trace": "-1289455819204964870329606290456135",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-640418711888111413827583870410290",
+       "frobenius_power": 2,
+       "lambda": "8618395428742042674438549635556",
+       "lambda_conj": "1",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -9868359632095261,
+         -13717444722666343
+        ],
+        "b2": [
+         16111623277120347,
+         -10488901481200582
+        ],
+        "max_abs_entry_bits": 54,
+        "half_bits": 55,
+        "ratio_to_sqrt_r": 0.8943747563172815
+       }
+      },
+      {
+       "cost_M": 436.0,
+       "ratio_to_saving": 0.991,
+       "exponents": {
+        "2": -218
+       },
+       "chain_length": 218,
+       "degree": "421249166674228746791672110734681729275580381602196445017243910144",
+       "degree_bits": 218.0,
+       "alpha": "(-1289455819204964870329606290456135 + -20549972652253331*sqrt(-52806735384462689335963885158391))/2",
+       "trace": "-1289455819204964870329606290456135",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-649037107316853456502022420045845",
+       "frobenius_power": -2,
+       "lambda": "1",
+       "lambda_conj": "8618395428742042674438549635556",
+       "lambda_is_pm1": true,
+       "glv": {
+        "b1": [
+         -1,
+         1
+        ],
+        "b2": [
+         -162259276829213364125505605011462,
+         -162259276829213364125505605011461
+        ],
+        "max_abs_entry_bits": 108,
+        "half_bits": 55,
+        "ratio_to_sqrt_r": 9007199254740992.0
+       }
+      },
+      {
+       "cost_M": 15836.5,
+       "ratio_to_saving": 35.992,
+       "exponents": {
+        "2": 47,
+        "5": 7,
+        "13": -1,
+        "19": -6,
+        "23": 2,
+        "43": -6,
+        "53": 1,
+        "61": 5,
+        "83": 10,
+        "89": 5
+       },
+       "chain_length": 90,
+       "degree": "87214198050919499462096704274533037035055017154640215474502857329884528640000000",
+       "degree_bits": 265.6,
+       "alpha": "(10420974939179329201471723484763788666949 + -2133025970118977351280617*sqrt(-52806735384462689335963885158391))/2",
+       "trace": "10420974939179329201471723484763788666949",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "271171584783785347584128533480269",
+       "lambda_conj": "149443103868429981066179679357919",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -12104306778468067,
+         11044614487899016
+        ],
+        "b2": [
+         -7852083146718105,
+         -19645513512512929
+        ],
+        "max_abs_entry_bits": 55,
+        "half_bits": 55,
+        "ratio_to_sqrt_r": 1.0905450716088243
+       }
+      },
+      {
+       "cost_M": 15836.5,
+       "ratio_to_saving": 35.992,
+       "exponents": {
+        "2": -47,
+        "5": -7,
+        "13": 1,
+        "19": 6,
+        "23": -2,
+        "43": 6,
+        "53": -1,
+        "61": -5,
+        "83": -10,
+        "89": -5
+       },
+       "chain_length": 90,
+       "degree": "87214198050919499462096704274533037035055017154640215474502857329884528640000000",
+       "degree_bits": 265.6,
+       "alpha": "(10420974939179329201471723484763788666949 + 2133025970118977351280617*sqrt(-52806735384462689335963885158391))/2",
+       "trace": "10420974939179329201471723484763788666949",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "149443103868429981066179679357919",
+       "lambda_conj": "271171584783785347584128533480269",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -3376624165377034,
+         16408568679430035
+        ],
+        "b2": [
+         -17607509450073113,
+         -10544414725887352
+        ],
+        "max_abs_entry_bits": 54,
+        "half_bits": 55,
+        "ratio_to_sqrt_r": 0.9774131198888099
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 15836.5,
+      "ratio_to_saving": 35.992,
+      "exponents": {
+       "2": 47,
+       "5": 7,
+       "13": -1,
+       "19": -6,
+       "23": 2,
+       "43": -6,
+       "53": 1,
+       "61": 5,
+       "83": 10,
+       "89": 5
+      },
+      "chain_length": 90,
+      "within_radius": false
+     },
+     "seconds": 5.48,
+     "note": "binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered)."
+    }
+   ],
+   "sqrtDK_mod_r": "278158760278651481777396805575839",
+   "budget": {
+    "log2_r": 109,
+    "half_bits": 55,
+    "doublings_saved_cost_M": 440.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
   },
   {
    "curve": {
@@ -634,7 +1173,7 @@
        "2",
        "2"
       ],
-      "bnf_seconds": 13.79
+      "bnf_seconds": 10.86
      },
      "primes": [
       {
@@ -1112,7 +1651,7 @@
       "chain_length": 104,
       "within_radius": false
      },
-     "seconds": 13.85
+     "seconds": 10.91
     }
    ],
    "sqrtDK_mod_r": "564538252084441507433499384021042",
@@ -1131,13 +1670,504 @@
     "q": "158456325028528675187087900672",
     "char2": true,
     "n": 97,
-    "trace": "-40406362882274812426727982906625",
-    "order": "40564819207303341101915070807298",
-    "r": "20282409603651670550957535403649",
+    "trace": -254020568235265,
+    "order": "158456325028528929207656135938",
+    "r": "79228162514264464603828067969",
     "cofactor": 2,
     "a": "151759946635783345666111607832"
    },
-   "error": "not ordinary / not an elliptic curve trace"
+   "frobenius": {
+    "delta": "-569298851027547778831961982463",
+    "delta_bits": 99,
+    "factorization": [
+     [
+      "7",
+      2
+     ],
+     [
+      "17",
+      1
+     ],
+     [
+      "23",
+      1
+     ],
+     [
+      "73",
+      1
+     ],
+     [
+      "8807",
+      1
+     ],
+     [
+      "83383",
+      1
+     ],
+     [
+      "554292620947889",
+      1
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-11618343898521383241468611887",
+    "DK_bits": 94,
+    "conductor_f": "7",
+    "conductor_factorization": [
+     [
+      "7",
+      1
+     ]
+    ],
+    "factor_seconds": 0.0
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-11618343898521383241468611887",
+     "class_group": {
+      "h": "34460986396224",
+      "hK": "34460986396224",
+      "cyc_K": [
+       "2153811649764",
+       "2",
+       "2",
+       "2",
+       "2"
+      ],
+      "bnf_seconds": 1.9
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [
+        1798543748772,
+        0,
+        0,
+        0,
+        0
+       ],
+       "order_in_ClK": 97,
+       "frobenius_eigenvalue_mod_l": 0,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 3/2"
+      },
+      {
+       "ell": 19,
+       "cost_M": 142.5,
+       "dlog": [
+        717937216601,
+        0,
+        0,
+        0,
+        0
+       ],
+       "order_in_ClK": 2153811649764,
+       "frobenius_eigenvalue_mod_l": 8,
+       "sqrtDK_mod_l": 7,
+       "generator": "x - 7"
+      },
+      {
+       "ell": 29,
+       "cost_M": 217.5,
+       "dlog": [
+        1854339934309,
+        1,
+        1,
+        0,
+        0
+       ],
+       "order_in_ClK": 2153811649764,
+       "frobenius_eigenvalue_mod_l": 24,
+       "sqrtDK_mod_l": 3,
+       "generator": "x - 3"
+      },
+      {
+       "ell": 31,
+       "cost_M": 232.5,
+       "dlog": [
+        1660689188032,
+        1,
+        0,
+        1,
+        0
+       ],
+       "order_in_ClK": 1076905824882,
+       "frobenius_eigenvalue_mod_l": 12,
+       "sqrtDK_mod_l": 12,
+       "generator": "x - 12"
+      },
+      {
+       "ell": 41,
+       "cost_M": 307.5,
+       "dlog": [
+        693884940448,
+        1,
+        0,
+        0,
+        1
+       ],
+       "order_in_ClK": 1076905824882,
+       "frobenius_eigenvalue_mod_l": 20,
+       "sqrtDK_mod_l": 19,
+       "generator": "x - 19"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [
+        1115033949971,
+        1,
+        1,
+        0,
+        1
+       ],
+       "order_in_ClK": 2153811649764,
+       "frobenius_eigenvalue_mod_l": 16,
+       "sqrtDK_mod_l": 9,
+       "generator": "x - 9"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [
+        558372237622,
+        0,
+        1,
+        0,
+        1
+       ],
+       "order_in_ClK": 1076905824882,
+       "frobenius_eigenvalue_mod_l": 17,
+       "sqrtDK_mod_l": 15,
+       "generator": "x - 15"
+      },
+      {
+       "ell": 89,
+       "cost_M": 667.5,
+       "dlog": [
+        1064379187344,
+        0,
+        1,
+        1,
+        0
+       ],
+       "order_in_ClK": 358968608294,
+       "frobenius_eigenvalue_mod_l": 43,
+       "sqrtDK_mod_l": 21,
+       "generator": "x - 21"
+      },
+      {
+       "ell": 97,
+       "cost_M": 727.5,
+       "dlog": [
+        1336635773057,
+        0,
+        1,
+        1,
+        1
+       ],
+       "order_in_ClK": 2153811649764,
+       "frobenius_eigenvalue_mod_l": 4,
+       "sqrtDK_mod_l": 49,
+       "generator": "x - 49"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 97,
+       "degree_bits": 97.0,
+       "cost_M": 194.0,
+       "ratio_to_saving": 0.495
+      },
+      {
+       "ell": 89,
+       "loop_length": 358968608294,
+       "degree_bits": 2324585017396.9,
+       "cost_M": 239611546036245.0,
+       "ratio_to_saving": 611253943970.013
+      },
+      {
+       "ell": 31,
+       "loop_length": 1076905824882,
+       "degree_bits": 5335202864264.5,
+       "cost_M": 250380604285065.0,
+       "ratio_to_saving": 638726031339.452
+      },
+      {
+       "ell": 19,
+       "loop_length": 2153811649764,
+       "degree_bits": 9149235765807.8,
+       "cost_M": 306918160091370.0,
+       "ratio_to_saving": 782954490029.005
+      },
+      {
+       "ell": 41,
+       "loop_length": 1076905824882,
+       "degree_bits": 5769578960881.5,
+       "cost_M": 331148541151215.0,
+       "ratio_to_saving": 844766686610.242
+      },
+      {
+       "ell": 53,
+       "loop_length": 1076905824882,
+       "degree_bits": 6168430901979.9,
+       "cost_M": 428070065390595.0,
+       "ratio_to_saving": 1092015472935.191
+      }
+     ],
+     "relation_search": {
+      "rank": 9,
+      "exhaustive_within_radius": true,
+      "radius_M": 392.0,
+      "lll_upper_bound_M": 194.0,
+      "loops_within_radius": 4,
+      "candidates": 20
+     },
+     "loops": [
+      {
+       "cost_M": 194.0,
+       "ratio_to_saving": 0.495,
+       "exponents": {
+        "2": 97
+       },
+       "chain_length": 97,
+       "degree": "158456325028528675187087900672",
+       "degree_bits": 97.0,
+       "alpha": "(254020568235265 + -7*sqrt(-11618343898521383241468611887))/2",
+       "trace": "254020568235265",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-1",
+       "frobenius_power": 1,
+       "lambda": "79228162514264464603828067968",
+       "lambda_conj": "254020568235266",
+       "lambda_is_pm1": true,
+       "glv": {
+        "b1": [
+         1,
+         1
+        ],
+        "b2": [
+         -39614081257132232301914033984,
+         39614081257132232301914033985
+        ],
+        "max_abs_entry_bits": 96,
+        "half_bits": 49,
+        "ratio_to_sqrt_r": 140737488355328.12
+       }
+      },
+      {
+       "cost_M": 194.0,
+       "ratio_to_saving": 0.495,
+       "exponents": {
+        "2": -97
+       },
+       "chain_length": 97,
+       "degree": "158456325028528675187087900672",
+       "degree_bits": 97.0,
+       "alpha": "(-254020568235265 + -7*sqrt(-11618343898521383241468611887))/2",
+       "trace": "-254020568235265",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-254020568235266",
+       "frobenius_power": -1,
+       "lambda": "79228162514264210583259832703",
+       "lambda_conj": "1",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         254020568235266,
+         1
+        ],
+        "b2": [
+         -44498130895443,
+         311896643113111
+        ],
+        "max_abs_entry_bits": 49,
+        "half_bits": 49,
+        "ratio_to_sqrt_r": 1.1080794703599068
+       }
+      },
+      {
+       "cost_M": 388.0,
+       "ratio_to_saving": 0.99,
+       "exponents": {
+        "2": 194
+       },
+       "chain_length": 194,
+       "degree": "25108406941546723055343157692830665664409421777856138051584",
+       "degree_bits": 194.0,
+       "alpha": "(-252386200970490428457786181119 + -1778143977646855*sqrt(-11618343898521383241468611887))/2",
+       "trace": "-252386200970490428457786181119",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-158456325028528929207656135937",
+       "frobenius_power": 2,
+       "lambda": "1",
+       "lambda_conj": "64526449086567429957526090756",
+       "lambda_is_pm1": true,
+       "glv": {
+        "b1": [
+         -1,
+         1
+        ],
+        "b2": [
+         -39614081257132232301914033985,
+         -39614081257132232301914033984
+        ],
+        "max_abs_entry_bits": 96,
+        "half_bits": 49,
+        "ratio_to_sqrt_r": 140737488355328.12
+       }
+      },
+      {
+       "cost_M": 388.0,
+       "ratio_to_saving": 0.99,
+       "exponents": {
+        "2": -194
+       },
+       "chain_length": 194,
+       "degree": "25108406941546723055343157692830665664409421777856138051584",
+       "degree_bits": 194.0,
+       "alpha": "(-252386200970490428457786181119 + 1778143977646855*sqrt(-11618343898521383241468611887))/2",
+       "trace": "-252386200970490428457786181119",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-93929875941961499250130045182",
+       "frobenius_power": -2,
+       "lambda": "64526449086567429957526090756",
+       "lambda_conj": "1",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         48652961078299,
+         -238340244077743
+        ],
+        "b2": [
+         308818722661121,
+         115598982154134
+        ],
+        "max_abs_entry_bits": 49,
+        "half_bits": 49,
+        "ratio_to_sqrt_r": 1.0971445002678621
+       }
+      },
+      {
+       "cost_M": 21601.0,
+       "ratio_to_saving": 55.105,
+       "exponents": {
+        "2": 38,
+        "19": -8,
+        "29": 4,
+        "41": -12,
+        "43": 14,
+        "53": -8,
+        "89": 10,
+        "97": 2
+       },
+       "chain_length": 96,
+       "degree": "100548543731682407336088567002688091946301587143890074256106148186168685418566813041854864394243420396191744",
+       "degree_bits": 355.5,
+       "alpha": "(-311291575950641544164559198770259061061040821037231049 + 5126080311390555689464743844290752753535*sqrt(-11618343898521383241468611887))/2",
+       "trace": "-311291575950641544164559198770259061061040821037231049",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-62636514152531960461323334192662211843714893665335607",
+       "frobenius_power": null,
+       "lambda": "15170137646665787252270977095",
+       "lambda_conj": "23599858010910925650364530993",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -189558628930583,
+         41533971376868
+        ],
+        "b2": [
+         -141590513070421,
+         -386937522237627
+        ],
+        "max_abs_entry_bits": 49,
+        "half_bits": 49,
+        "ratio_to_sqrt_r": 1.3746782280947896
+       }
+      },
+      {
+       "cost_M": 21601.0,
+       "ratio_to_saving": 55.105,
+       "exponents": {
+        "2": -38,
+        "19": 8,
+        "29": -4,
+        "41": 12,
+        "43": -14,
+        "53": 8,
+        "89": -10,
+        "97": -2
+       },
+       "chain_length": 96,
+       "degree": "100548543731682407336088567002688091946301587143890074256106148186168685418566813041854864394243420396191744",
+       "degree_bits": 355.5,
+       "alpha": "(-311291575950641544164559198770259061061040821037231049 + -5126080311390555689464743844290752753535*sqrt(-11618343898521383241468611887))/2",
+       "trace": "-311291575950641544164559198770259061061040821037231049",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": "-248655061798109583703235864577596849217325927371895442",
+       "frobenius_power": null,
+       "lambda": "23599858010910925650364530993",
+       "lambda_conj": "15170137646665787252270977095",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -64240751748311,
+         -241403301106650
+        ],
+        "b2": [
+         278736137097949,
+         -185868604525129
+        ],
+        "max_abs_entry_bits": 48,
+        "half_bits": 49,
+        "ratio_to_sqrt_r": 0.9902696870438945
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 21601.0,
+      "ratio_to_saving": 55.105,
+      "exponents": {
+       "2": 38,
+       "19": -8,
+       "29": 4,
+       "41": -12,
+       "43": 14,
+       "53": -8,
+       "89": 10,
+       "97": 2
+      },
+      "chain_length": 96,
+      "within_radius": false
+     },
+     "seconds": 1.91,
+     "note": "binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered)."
+    }
+   ],
+   "sqrtDK_mod_r": "67909853583655291663362377583",
+   "budget": {
+    "log2_r": 97,
+    "half_bits": 49,
+    "doublings_saved_cost_M": 392.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
   },
   {
    "curve": {
@@ -1192,7 +2222,7 @@
        "2",
        "2"
       ],
-      "bnf_seconds": 2.53
+      "bnf_seconds": 2.76
      },
      "primes": [
       {
@@ -1252,7 +2282,7 @@
        "cost_M": 217.5,
        "dlog": [
         24269226415813,
-        1,
+        0,
         1
        ],
        "order_in_ClK": 31023514552522,
@@ -1317,7 +2347,7 @@
        "cost_M": 397.5,
        "dlog": [
         4933816524175,
-        1,
+        0,
         1
        ],
        "order_in_ClK": 31023514552522,
@@ -1343,7 +2373,7 @@
        "cost_M": 727.5,
        "dlog": [
         21247009078375,
-        0,
+        1,
         1
        ],
        "order_in_ClK": 31023514552522,
@@ -1680,7 +2710,7 @@
       "chain_length": 37,
       "within_radius": false
      },
-     "seconds": 2.54
+     "seconds": 2.78
     }
    ],
    "sqrtDK_mod_r": "5183464182745",
