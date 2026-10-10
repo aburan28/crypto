@@ -17,18 +17,20 @@ verified scalar replay, no fallback, table slots within the declared step,
 and observed peak RSS within the envelope. Failed runs and raw reports are
 preserved before any candidate identity is generated.
 
-The first launch ended without a result after its controlling turn was
-interrupted. [`attempt1_observation.json`](attempt1_observation.json) records
-the missing process handle, process, and output receipt; its result and peak
-memory remain unknown. A second launch uses the unchanged frozen protocol.
+The first two launches ended without result receipts after their controlling
+turns were interrupted. [`attempt1_observation.json`](attempt1_observation.json)
+and [`attempt2_observation.json`](attempt2_observation.json) retain what was
+observed; both results and peak memory remain unknown. The third launch uses
+the unchanged frozen source, binary, and runner with receipt paths on the
+persistent SSD volume.
 
 Run the committed protocol with:
 
 ```sh
 python3 experiments/koblitz-s3-c2800-prefix-20261009/run_feasibility.py \
   --binary target/release/examples/s3_partial_prepared_fullrank_c2800prefix_targetspan \
-  --receipt /private/tmp/s3-c2800prefix-feasibility-receipt.json \
-  --raw /private/tmp/s3-c2800prefix-feasibility-report.json.gz
+  --receipt /Volumes/SSD990/llm/tmp/s3-c2800prefix-feasibility-receipt.json \
+  --raw /Volumes/SSD990/llm/tmp/s3-c2800prefix-feasibility-report.json.gz
 ```
 
 Then run [`record_feasibility.py`](record_feasibility.py) to preserve the

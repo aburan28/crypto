@@ -1,0 +1,17 @@
+{
+  "candidate_id": null,
+  "exit_code": null,
+  "kind": "s3_n53_c2800prefix_feasibility_attempt_observation_v1",
+  "observed_at_utc": "2026-10-10 02:09:38 UTC",
+  "peak_rss_bytes": null,
+  "raw_report_sha256": null,
+  "status": "result_unknown_after_interrupted_turn",
+  "target_online_ms": null,
+  "verification": null,
+  "workload_id": null,
+  "observations": [
+    "The second frozen feasibility command was launched detached as runner PID 13911 and candidate PID 13915; both were confirmed live during execution.",
+    "On continuation, process inspection found neither process and no receipt or compressed report at the specified /private/tmp paths.",
+    "An empty report.json placeholder remained in the persistent runner temporary directory. No terminal status, scalar, or peak RSS can be inferred."
+  ]
+}

@@ -15,8 +15,8 @@ PLAN = HERE / "FEASIBILITY_FREEZE.json"
 PARENT = ROOT / "experiments/koblitz-s3-crosscurve-20261009/FREEZE.json"
 OLD = ROOT / "experiments/koblitz-s3-c2200-prefix-20261009/identities/candidates/IC1N53Ckb1fb233200PDP4rootRCsampleLAgaussTDdirectISO0hd2accd16723d.json"
 TEMPLATE = ROOT / "experiments/koblitz-s3-c1800-20261009/identities/workloads/W25901ccca0ba.json"
-TEMP_RECEIPT = Path("/private/tmp/s3-c2800prefix-feasibility-receipt.json")
-TEMP_REPORT = Path("/private/tmp/s3-c2800prefix-feasibility-report.json.gz")
+TEMP_RECEIPT = Path("/Volumes/SSD990/llm/tmp/s3-c2800prefix-feasibility-receipt.json")
+TEMP_REPORT = Path("/Volumes/SSD990/llm/tmp/s3-c2800prefix-feasibility-report.json.gz")
 
 
 def sha(raw):
