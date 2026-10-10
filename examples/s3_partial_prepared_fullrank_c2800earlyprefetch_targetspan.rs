@@ -1,0 +1,3473 @@
+#![recursion_limit = "512"]
+
+//! Natural-factor-base orbit-slice IC experiment with parallel, sharded index
+//! construction and parallel relation batches.
+//!
+//! The factor base is the deterministic low-x scan, filtered into the declared
+//! prime-order subgroup and folded into signed Frobenius orbits. Its logarithms
+//! are not supplied. The S3 index samples one query-seeded global Frobenius
+//! orientation per state. Ordinary known-scalar subgroup queries prepare a
+//! fixed target-independent rank before the public target is read. The public
+//! target is then decomposed and recovered from that span; any extra relation
+//! queries required to span its row are charged to this target online.
+//! Independent known-scalar relation targets are searched in parallel batches
+//! before their matrix rows are inserted.
+//! Indexed states retain polynomial point coordinates only. Normal-basis
+//! coordinates needed by reusable relation collection and root insertion are
+//! reconstructed there, leaving the online target path and table keys intact.
+//! For N53/C2800, target extraction first visits the embedded C1200 state
+//! sequence in exactly the C1200 point-seeded order, querying the full C2800
+//! root table. A complete C2800 traversal follows if the prefix has no hit.
+//!
+//! The final worker argument controls both the S3-root index builder and the
+//! relation collector. Index states are merged in their original
+//! left/right/relative order before root-table insertion, preserving the
+//! serial builder's deterministic duplicate tie-breaking. Canonical roots are
+//! assigned to hash shards with independent open-addressed tables.
+//! Root scatter and insertion process consecutive bounded state chunks. The
+//! full root-entry list is never retained alongside the states and table;
+//! shard insertion still uses the serial first-witness order.
+//!
+//! Usage: <n> <a> <orbit_columns> <relation_seed> <target_point.json> <out.jsonl> <workers> <prepare_rank> <target_workers>
+
+use crypto_lib::cryptanalysis::koblitz_fast_arith::{s3_x_roots, FastBinaryCurve, FastPoint};
+use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
+use crypto_lib::cryptanalysis::semaev_decomp::Gf2;
+use num_bigint::BigUint;
+use num_traits::ToPrimitive;
+use serde_json::json;
+use std::collections::HashMap;
+use std::io::Write;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread;
+use std::time::Instant;
+
+/// F2-linear map on n <= 64 bits applied by byte tables.
+struct Linear {
+    tables: Vec<[u64; 256]>,
+}
+
+impl Linear {
+    fn from_images(images: &[u64]) -> Self {
+        let chunks = images.len().div_ceil(8);
+        let mut tables = vec![[0u64; 256]; chunks];
+        for (chunk, table) in tables.iter_mut().enumerate() {
+            for byte in 1usize..256 {
+                let low = byte & (byte - 1);
+                let bit = chunk * 8 + byte.trailing_zeros() as usize;
+                let image = images.get(bit).copied().unwrap_or(0);
+                table[byte] = table[low] ^ image;
+            }
+        }
+        Self { tables }
+    }
+
+    #[inline(always)]
+    fn apply(&self, v: u64) -> u64 {
+        let mut acc = 0u64;
+        for (chunk, table) in self.tables.iter().enumerate() {
+            acc ^= table[((v >> (8 * chunk)) & 0xff) as usize];
+        }
+        acc
+    }
+}
+
+struct NormalBasis {
+    n: u32,
+    mask: u64,
+    to_normal: Linear,
+    to_poly: Linear,
+}
+
+impl NormalBasis {
+    fn new(gf: &Gf2) -> Self {
+        let n = gf.n as usize;
+        let mask = if n == 64 { u64::MAX } else { (1u64 << n) - 1 };
+        for candidate in 2u64.. {
+            let mut conjugates = Vec::with_capacity(n);
+            let mut value = candidate & mask;
+            for _ in 0..n {
+                conjugates.push(value);
+                value = gf.sqr(value);
+            }
+            let Some(inverse_columns) = invert_columns(&conjugates, n) else {
+                continue;
+            };
+            let basis = Self {
+                n: gf.n,
+                mask,
+                to_normal: Linear::from_images(&inverse_columns),
+                to_poly: Linear::from_images(&conjugates),
+            };
+            return basis;
+        }
+        unreachable!()
+    }
+
+    #[inline(always)]
+    fn rotate(&self, v: u64, k: u32) -> u64 {
+        if k == 0 {
+            return v;
+        }
+        ((v << k) | (v >> (self.n - k))) & self.mask
+    }
+
+    /// Smallest rotation of `v` and the shift that produces it.
+    #[inline(always)]
+    fn canonical(&self, v: u64) -> (u64, u32) {
+        let mut best = v;
+        let mut best_shift = 0;
+        let mut current = v;
+        for shift in 1..self.n {
+            current = ((current << 1) | (current >> (self.n - 1))) & self.mask;
+            if current < best {
+                best = current;
+                best_shift = shift;
+            }
+        }
+        (best, best_shift)
+    }
+}
+
+/// Columns `c_i` form matrix M (poly = M * normal). Returns the images of the
+/// poly basis vectors under M^{-1}, or None when M is singular.
+fn invert_columns(columns: &[u64], n: usize) -> Option<Vec<u64>> {
+    // Row r of [M | I]: low n bits are M[r][i] over normal index i.
+    let mut rows: Vec<u128> = (0..n)
+        .map(|r| {
+            let mut row = 0u128;
+            for (i, &column) in columns.iter().enumerate() {
+                if (column >> r) & 1 == 1 {
+                    row |= 1u128 << i;
+                }
+            }
+            row | (1u128 << (64 + r))
+        })
+        .collect();
+    for pivot in 0..n {
+        let found = (pivot..n).find(|&r| (rows[r] >> pivot) & 1 == 1)?;
+        rows.swap(pivot, found);
+        for r in 0..n {
+            if r != pivot && (rows[r] >> pivot) & 1 == 1 {
+                rows[r] ^= rows[pivot];
+            }
+        }
+    }
+    // Row i now reads x_i = sum_r Minv[i][r] y_r in its high half.
+    let mut images = vec![0u64; n];
+    for (i, row) in rows.iter().enumerate() {
+        let high = (row >> 64) as u64;
+        for (r, image) in images.iter_mut().enumerate() {
+            if (high >> r) & 1 == 1 {
+                *image |= 1u64 << i;
+            }
+        }
+    }
+    Some(images)
+}
+
+/// Table-driven S3 root solver: S3(u, v, t) = 0 as a quadratic in v.
+struct S3Solver {
+    square: Linear,
+    half_trace: Linear,
+    trace_mask: u64,
+    b: u64,
+}
+
+impl S3Solver {
+    fn new(gf: &Gf2, b: u64) -> Self {
+        let n = gf.n as usize;
+        assert!(n % 2 == 1, "half-trace solver needs odd n");
+        let unit: Vec<u64> = (0..n).map(|bit| 1u64 << bit).collect();
+        let half_trace_images: Vec<u64> = unit
+            .iter()
+            .map(|&e| {
+                let mut acc = e;
+                let mut power = e;
+                for _ in 0..(n - 1) / 2 {
+                    power = gf.sqr(gf.sqr(power));
+                    acc ^= power;
+                }
+                acc
+            })
+            .collect();
+        let mut trace_mask = 0u64;
+        for (bit, &e) in unit.iter().enumerate() {
+            let mut acc = e;
+            let mut power = e;
+            for _ in 1..n {
+                power = gf.sqr(power);
+                acc ^= power;
+            }
+            if acc & 1 == 1 {
+                trace_mask |= 1u64 << bit;
+            }
+        }
+        Self {
+            square: Linear::from_images(&unit.iter().map(|&e| gf.sqr(e)).collect::<Vec<_>>()),
+            half_trace: Linear::from_images(&half_trace_images),
+            trace_mask,
+            b,
+        }
+    }
+
+    /// Same roots, in the same order, as `s3_x_roots` on the generic branch.
+    #[inline(always)]
+    fn roots(&self, gf: &Gf2, basis: &NormalBasis, left: u64, right: u64) -> Option<[u64; 2]> {
+        let s = left ^ right;
+        let a = self.square.apply(s);
+        let p = gf.mul(left, right);
+        let ps = self.square.apply(p);
+        if a == 0 || ps == 0 {
+            return s3_x_roots(gf, self.b, left, right);
+        }
+        let inv_combined = invert(gf, basis, gf.mul(a, ps));
+        let q = gf.mul(p, gf.mul(ps, inv_combined));
+        let c = ps ^ self.b;
+        let d = gf.mul(gf.mul(c, a), gf.mul(a, inv_combined));
+        if (d & self.trace_mask).count_ones() & 1 == 1 {
+            return None;
+        }
+        let first = gf.mul(q, self.half_trace.apply(d));
+        Some([first, first ^ q])
+    }
+
+    /// Solve both S3 queries for one indexed state with one generic inversion.
+    /// Exceptional pairs retain the scalar path and result order.
+    #[inline(always)]
+    fn roots_pair(
+        &self,
+        gf: &Gf2,
+        basis: &NormalBasis,
+        left: [u64; 2],
+        right: u64,
+    ) -> [Option<[u64; 2]>; 2] {
+        let a = [
+            self.square.apply(left[0] ^ right),
+            self.square.apply(left[1] ^ right),
+        ];
+        let p = [gf.mul(left[0], right), gf.mul(left[1], right)];
+        let ps = [self.square.apply(p[0]), self.square.apply(p[1])];
+        if a[0] == 0 || ps[0] == 0 || a[1] == 0 || ps[1] == 0 {
+            return [
+                self.roots(gf, basis, left[0], right),
+                self.roots(gf, basis, left[1], right),
+            ];
+        }
+        let denominator = [gf.mul(a[0], ps[0]), gf.mul(a[1], ps[1])];
+        let inverse_product = invert(gf, basis, gf.mul(denominator[0], denominator[1]));
+        let inverse = [
+            gf.mul(inverse_product, denominator[1]),
+            gf.mul(inverse_product, denominator[0]),
+        ];
+        std::array::from_fn(|i| {
+            let q = gf.mul(p[i], gf.mul(ps[i], inverse[i]));
+            let c = ps[i] ^ self.b;
+            let d = gf.mul(gf.mul(c, a[i]), gf.mul(a[i], inverse[i]));
+            if (d & self.trace_mask).count_ones() & 1 == 1 {
+                return None;
+            }
+            let first = gf.mul(q, self.half_trace.apply(d));
+            Some([first, first ^ q])
+        })
+    }
+
+    /// The indexed x roots are lifted to curve points during reusable setup.
+    /// For each root U, x(U+Q) and x(U-Q) are the two S3 answers. The two
+    /// denominators share one inversion; exceptional x coincidences retain
+    /// the scalar S3 path.
+    #[inline(always)]
+    fn roots_pair_group(
+        &self,
+        gf: &Gf2,
+        basis: &NormalBasis,
+        left: [(u64, u64); 2],
+        target: (u64, u64),
+    ) -> [Option<[u64; 2]>; 2] {
+        let denominator = [left[0].0 ^ target.0, left[1].0 ^ target.0];
+        if denominator[0] == 0 || denominator[1] == 0 {
+            return [
+                self.roots(gf, basis, left[0].0, target.0),
+                self.roots(gf, basis, left[1].0, target.0),
+            ];
+        }
+        let inverse_product = invert(gf, basis, gf.mul(denominator[0], denominator[1]));
+        let inverse = [
+            gf.mul(inverse_product, denominator[1]),
+            gf.mul(inverse_product, denominator[0]),
+        ];
+        self.roots_pair_group_from_inverse(gf, left, target, inverse)
+    }
+
+    /// Finish both x-coordinate answers after their denominators were
+    /// inverted, either directly or with a batch of neighboring states.
+    #[inline(always)]
+    fn roots_pair_group_from_inverse(
+        &self,
+        gf: &Gf2,
+        left: [(u64, u64); 2],
+        target: (u64, u64),
+        inverse: [u64; 2],
+    ) -> [Option<[u64; 2]>; 2] {
+        std::array::from_fn(|i| {
+            let lambda_plus = gf.mul(left[i].1 ^ target.1, inverse[i]);
+            let lambda_minus = lambda_plus ^ gf.mul(target.0, inverse[i]);
+            let common = left[i].0 ^ target.0; // frozen curves have a2 = 0
+            let plus = self.square.apply(lambda_plus) ^ lambda_plus ^ common;
+            let minus = self.square.apply(lambda_minus) ^ lambda_minus ^ common;
+            Some([plus, minus])
+        })
+    }
+}
+
+/// Itoh-Tsujii inversion with the `a^(2^k)` steps done as normal-basis rotations.
+#[inline(always)]
+fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
+    let e = gf.n - 1;
+    let mut c = a;
+    let mut k = 1u32;
+    let bits = 32 - e.leading_zeros();
+    for i in (0..bits - 1).rev() {
+        let raised = basis
+            .to_poly
+            .apply(basis.rotate(basis.to_normal.apply(c), k));
+        c = gf.mul(c, raised);
+        k *= 2;
+        if (e >> i) & 1 == 1 {
+            c = gf.mul(gf.sqr(c), a);
+            k += 1;
+        }
+    }
+    gf.sqr(c)
+}
+
+/// Montgomery simultaneous inversion of up to eight nonzero pair products.
+/// The same normal-basis Itoh-Tsujii kernel supplies the single inverse.
+#[inline(always)]
+fn invert_batch8(gf: &Gf2, basis: &NormalBasis, values: &mut [u64], prefix: &mut [u64; 8]) {
+    debug_assert!(values.len() <= 8);
+    if values.is_empty() {
+        return;
+    }
+    debug_assert!(values.iter().all(|&value| value != 0));
+    prefix[0] = values[0];
+    for i in 1..values.len() {
+        prefix[i] = gf.mul(prefix[i - 1], values[i]);
+    }
+    let mut accumulator = invert(gf, basis, prefix[values.len() - 1]);
+    for i in (1..values.len()).rev() {
+        let inverse = gf.mul(accumulator, prefix[i - 1]);
+        accumulator = gf.mul(accumulator, values[i]);
+        values[i] = inverse;
+    }
+    values[0] = accumulator;
+}
+
+/// Lift both S3 x roots to y coordinates using one shared inversion. The
+/// frozen b=1, a2=0 curve equation is y²+xy=x³+1. Synthetic index tests
+/// also use x values outside this curve, so they retain the scalar S3 path.
+fn lift_root_ys(
+    gf: &Gf2,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    roots: [u64; 2],
+) -> Option<[u64; 2]> {
+    assert_eq!(solver.b, 1);
+    let inverse = if roots[0] != 0 && roots[1] != 0 {
+        let product_inverse = invert(gf, basis, gf.mul(roots[0], roots[1]));
+        [
+            gf.mul(product_inverse, roots[1]),
+            gf.mul(product_inverse, roots[0]),
+        ]
+    } else {
+        std::array::from_fn(|i| {
+            if roots[i] == 0 {
+                0
+            } else {
+                invert(gf, basis, roots[i])
+            }
+        })
+    };
+    let mut result = [0u64; 2];
+    for i in 0..2 {
+        let x = roots[i];
+        if x == 0 {
+            result[i] = 1;
+            continue;
+        }
+        let c = x ^ solver.square.apply(inverse[i]);
+        if (c & solver.trace_mask).count_ones() & 1 == 1 {
+            return None;
+        }
+        let y = gf.mul(x, solver.half_trace.apply(c));
+        debug_assert_eq!(gf.sqr(y) ^ gf.mul(x, y), gf.mul(gf.sqr(x), x) ^ 1);
+        result[i] = y;
+    }
+    Some(result)
+}
+
+/// Thirteen-byte root slot. Frozen N41/N53 bases use fewer than 4096 columns;
+/// two 12-bit column indices and two 8-bit shifts fit in a 40-bit value.
+/// The copied fields avoid references to unaligned packed members.
+#[repr(C, packed)]
+#[derive(Clone, Copy)]
+struct RootSlot {
+    key: u64,
+    value_low: u32,
+    value_high: u8,
+}
+
+impl RootSlot {
+    const EMPTY: Self = Self {
+        key: u64::MAX,
+        value_low: 0,
+        value_high: 0,
+    };
+
+    #[inline(always)]
+    fn new(key: u64, value: u64) -> Self {
+        debug_assert!(value < (1u64 << 40));
+        Self {
+            key,
+            value_low: value as u32,
+            value_high: (value >> 32) as u8,
+        }
+    }
+
+    #[inline(always)]
+    fn value(self) -> u64 {
+        self.value_low as u64 | ((self.value_high as u64) << 32)
+    }
+}
+
+impl PartialEq for RootSlot {
+    fn eq(&self, other: &Self) -> bool {
+        let left = *self;
+        let right = *other;
+        left.key == right.key && left.value() == right.value()
+    }
+}
+
+impl Eq for RootSlot {}
+
+impl std::fmt::Debug for RootSlot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let slot = *self;
+        let key = slot.key;
+        f.debug_struct("RootSlot")
+            .field("key", &key)
+            .field("value", &slot.value())
+            .finish()
+    }
+}
+
+const _: () = assert!(std::mem::size_of::<RootSlot>() == 13);
+
+/// Open-addressing u64 -> u40 table; keys are < 2^63 so u64::MAX marks empty.
+/// Key and value share a slot so a probe touches one cache line.
+struct RootTable {
+    slots: Vec<RootSlot>,
+    shard_bits: u32,
+    len: usize,
+}
+
+impl RootTable {
+    fn with_capacity(entries: usize, shard_bits: u32) -> Self {
+        // At most one new key is inserted per input root. Reserve at least
+        // one empty slot even if every input root is distinct, so unsuccessful
+        // open-addressing searches always terminate. The observed duplicate
+        // roots leave considerably more space in the frozen N41/N53 bases.
+        let minimum = entries
+            .checked_add(1)
+            .unwrap_or_else(|| panic!("root shard capacity overflow: entries={entries}"));
+        let slots = minimum
+            .checked_next_power_of_two()
+            .unwrap_or_else(|| panic!("root shard slot overflow: entries={entries}"))
+            .max(16);
+        debug_assert!(slots > entries);
+        let mut storage = Vec::new();
+        storage.try_reserve_exact(slots).unwrap_or_else(|error| {
+            panic!("root shard allocation failed: entries={entries} slots={slots} error={error}")
+        });
+        storage.resize(slots, RootSlot::EMPTY);
+        Self {
+            slots: storage,
+            shard_bits,
+            len: 0,
+        }
+    }
+
+    #[inline(always)]
+    fn hash(key: u64) -> u64 {
+        key.wrapping_mul(0x9E37_79B9_7F4A_7C15)
+    }
+
+    #[inline(always)]
+    fn shard(hash: u64, shard_bits: u32) -> usize {
+        (hash >> (64 - shard_bits)) as usize
+    }
+
+    #[inline(always)]
+    fn slot(&self, hash: u64) -> usize {
+        ((hash >> self.shard_bits) as usize) & (self.slots.len() - 1)
+    }
+
+    fn grow(&mut self) {
+        let next = self
+            .slots
+            .len()
+            .checked_mul(2)
+            .expect("root shard growth overflow");
+        let mut storage = Vec::new();
+        storage
+            .try_reserve_exact(next)
+            .unwrap_or_else(|error| panic!("root shard growth failed: slots={next} error={error}"));
+        storage.resize(next, RootSlot::EMPTY);
+        let old = std::mem::replace(&mut self.slots, storage);
+        self.len = 0;
+        for stored in old {
+            if stored.key != u64::MAX {
+                self.insert_if_absent_hashed(stored.key, stored.value(), Self::hash(stored.key));
+            }
+        }
+    }
+
+    fn insert_if_absent_hashed(&mut self, key: u64, value: u64, hash: u64) {
+        if self.len + 1 >= self.slots.len() {
+            self.grow();
+        }
+        let mask = self.slots.len() - 1;
+        let mut slot = self.slot(hash);
+        loop {
+            let stored = self.slots[slot];
+            if stored.key == u64::MAX {
+                self.slots[slot] = RootSlot::new(key, value);
+                self.len += 1;
+                return;
+            }
+            if stored.key == key {
+                return;
+            }
+            slot = (slot + 1) & mask;
+        }
+    }
+
+    #[inline(always)]
+    fn get_hashed(&self, key: u64, hash: u64) -> Option<u64> {
+        let mask = self.slots.len() - 1;
+        let mut slot = self.slot(hash);
+        loop {
+            let stored = self.slots[slot];
+            if stored.key == key {
+                return Some(stored.value());
+            }
+            if stored.key == u64::MAX {
+                return None;
+            }
+            slot = (slot + 1) & mask;
+        }
+    }
+}
+
+// A C2800 witness is an index into the already retained state array plus one
+// bit selecting which polynomial root supplied the key. The full key is
+// reconstructed only when a 24-bit hash tag matches, so tag collisions are
+// checked exactly rather than treated as matches.
+const COMPACT_STATE_MASK: u32 = (1 << 30) - 1;
+
+fn compact_witness(state_index: usize, root_index: usize) -> u32 {
+    assert!(state_index < (1 << 30) && root_index < 2);
+    state_index as u32 | ((root_index as u32) << 30)
+}
+
+fn compact_key_and_value(witness: u32, states: &[State], basis: &NormalBasis) -> (u64, u64) {
+    let state = &states[(witness & COMPACT_STATE_MASK) as usize];
+    let root_index = ((witness >> 30) & 1) as usize;
+    let root = basis.to_normal.apply(state.poly_roots[root_index]);
+    let (key, shift) = basis.canonical(root);
+    (key, pack(state.left, state.right, state.relative, shift))
+}
+
+#[repr(C, packed)]
+#[derive(Clone, Copy)]
+struct CompactRootSlot {
+    tag_low: u16,
+    tag_high: u8,
+    witness: u32,
+}
+
+impl CompactRootSlot {
+    const EMPTY: Self = Self {
+        tag_low: 0,
+        tag_high: 0,
+        witness: u32::MAX,
+    };
+
+    #[inline(always)]
+    fn tag(hash: u64) -> u32 {
+        ((hash >> 30) & 0x00ff_ffff) as u32
+    }
+
+    #[inline(always)]
+    fn new(hash: u64, witness: u32) -> Self {
+        let tag = Self::tag(hash);
+        Self {
+            tag_low: tag as u16,
+            tag_high: (tag >> 16) as u8,
+            witness,
+        }
+    }
+
+    #[inline(always)]
+    fn matches_tag(self, tag: u32) -> bool {
+        (self.tag_low as u32 | ((self.tag_high as u32) << 16)) == tag
+    }
+}
+
+const _: () = assert!(std::mem::size_of::<CompactRootSlot>() == 7);
+
+struct CompactRootTable {
+    slots: Vec<CompactRootSlot>,
+    shard_bits: u32,
+    len: usize,
+}
+
+impl CompactRootTable {
+    fn with_capacity(entries: usize, shard_bits: u32) -> Self {
+        let slots = entries
+            .checked_add(1)
+            .and_then(usize::checked_next_power_of_two)
+            .expect("compact root shard capacity overflow")
+            .max(16);
+        let mut storage = Vec::new();
+        storage
+            .try_reserve_exact(slots)
+            .expect("compact root shard allocation failed");
+        storage.resize(slots, CompactRootSlot::EMPTY);
+        Self {
+            slots: storage,
+            shard_bits,
+            len: 0,
+        }
+    }
+
+    // The full-key construction uses fast exact duplicate checks. Keeping
+    // every witness in its existing probe slot makes this conversion linear
+    // and leaves first-witness and missing-key probe order unchanged.
+    fn from_full(full: RootTable) -> Self {
+        let slot_count = full.slots.len();
+        let shard_bits = full.shard_bits;
+        let len = full.len;
+        let mut slots = Vec::new();
+        slots
+            .try_reserve_exact(slot_count)
+            .expect("compact conversion allocation failed");
+        for stored in full.slots {
+            let key = stored.key;
+            if key == u64::MAX {
+                slots.push(CompactRootSlot::EMPTY);
+            } else {
+                let witness = u32::try_from(stored.value()).expect("compact witness fits u32");
+                slots.push(CompactRootSlot::new(RootTable::hash(key), witness));
+            }
+        }
+        assert_eq!(slots.len(), slot_count);
+        Self {
+            slots,
+            shard_bits,
+            len,
+        }
+    }
+
+    #[inline(always)]
+    fn slot(&self, hash: u64) -> usize {
+        ((hash >> self.shard_bits) as usize) & (self.slots.len() - 1)
+    }
+
+    fn grow(&mut self, states: &[State], basis: &NormalBasis) {
+        let next = self
+            .slots
+            .len()
+            .checked_mul(2)
+            .expect("compact root shard growth overflow");
+        let mut storage = Vec::new();
+        storage
+            .try_reserve_exact(next)
+            .expect("compact root shard growth allocation failed");
+        storage.resize(next, CompactRootSlot::EMPTY);
+        let old = std::mem::replace(&mut self.slots, storage);
+        self.len = 0;
+        for slot in old {
+            if slot.witness != u32::MAX {
+                let (key, _) = compact_key_and_value(slot.witness, states, basis);
+                self.insert_if_absent_hashed(
+                    key,
+                    slot.witness,
+                    RootTable::hash(key),
+                    states,
+                    basis,
+                );
+            }
+        }
+    }
+
+    fn insert_if_absent_hashed(
+        &mut self,
+        key: u64,
+        witness: u32,
+        hash: u64,
+        states: &[State],
+        basis: &NormalBasis,
+    ) {
+        if self.len + 1 >= self.slots.len() {
+            self.grow(states, basis);
+        }
+        let tag = CompactRootSlot::tag(hash);
+        let mask = self.slots.len() - 1;
+        let mut slot_index = self.slot(hash);
+        loop {
+            let slot = self.slots[slot_index];
+            if slot.witness == u32::MAX {
+                self.slots[slot_index] = CompactRootSlot::new(hash, witness);
+                self.len += 1;
+                return;
+            }
+            if slot.matches_tag(tag) && compact_key_and_value(slot.witness, states, basis).0 == key
+            {
+                return;
+            }
+            slot_index = (slot_index + 1) & mask;
+        }
+    }
+
+    #[inline(always)]
+    fn get_hashed(
+        &self,
+        key: u64,
+        hash: u64,
+        states: &[State],
+        basis: &NormalBasis,
+    ) -> Option<u64> {
+        let tag = CompactRootSlot::tag(hash);
+        let mask = self.slots.len() - 1;
+        let mut slot_index = self.slot(hash);
+        loop {
+            let slot = self.slots[slot_index];
+            if slot.witness == u32::MAX {
+                return None;
+            }
+            if slot.matches_tag(tag) {
+                let (stored_key, value) = compact_key_and_value(slot.witness, states, basis);
+                if stored_key == key {
+                    return Some(value);
+                }
+            }
+            slot_index = (slot_index + 1) & mask;
+        }
+    }
+}
+
+// The 53-bit key is permuted by reversible right-xor mixing and an odd
+// multiplication modulo 2^53. Its
+// shard, home slot, and remainder uniquely determine the key. Linear-probe
+// displacement recovers the home slot from an occupied slot position. The
+// remaining bits hold a state ordinal. Only a complete key match reads that
+// state to reconstruct its first matching Frobenius-shift witness.
+struct QuotientRootTable {
+    slots: Vec<u64>,
+    len: usize,
+    shard_id: u64,
+    field_bits: u32,
+    shard_bits: u32,
+    state_index_bits: u32,
+    columns: usize,
+    n: usize,
+}
+
+impl QuotientRootTable {
+    const MULTIPLIER: u64 = 0x9E37_79B9_7F4A_7C15;
+
+    #[inline(always)]
+    fn mask(bits: u32) -> u64 {
+        assert!(bits < 64);
+        (1u64 << bits) - 1
+    }
+
+    fn with_capacity(
+        entries: usize,
+        shard_id: usize,
+        field_bits: u32,
+        shard_bits: u32,
+        state_index_bits: u32,
+        columns: usize,
+        n: usize,
+    ) -> Self {
+        let slot_count = entries
+            .checked_add(1)
+            .and_then(usize::checked_next_power_of_two)
+            .expect("quotient root capacity overflow")
+            .max(16);
+        let mut slots = Vec::new();
+        slots
+            .try_reserve_exact(slot_count)
+            .expect("quotient root allocation failed");
+        slots.resize(slot_count, 0);
+        let table = Self {
+            slots,
+            len: 0,
+            shard_id: shard_id as u64,
+            field_bits,
+            shard_bits,
+            state_index_bits,
+            columns,
+            n,
+        };
+        assert!(field_bits < 64 && shard_bits < field_bits);
+        assert!(table.shard_id <= Self::mask(shard_bits));
+        assert!(table.remainder_bits() > 0 && table.displacement_bits() > 0);
+        assert!(columns > 0 && n > 0);
+        table
+    }
+
+    #[inline(always)]
+    fn slot_bits(&self) -> u32 {
+        self.slots.len().trailing_zeros()
+    }
+
+    #[inline(always)]
+    fn witness_bits(&self) -> u32 {
+        self.state_index_bits
+    }
+
+    #[inline(always)]
+    fn remainder_bits(&self) -> u32 {
+        self.field_bits - self.shard_bits - self.slot_bits()
+    }
+
+    #[inline(always)]
+    fn displacement_bits(&self) -> u32 {
+        64 - self.witness_bits() - self.remainder_bits()
+    }
+
+    #[inline(always)]
+    fn hash_key(key: u64, field_bits: u32) -> u64 {
+        debug_assert!(key <= Self::mask(field_bits));
+        let shift = field_bits / 2;
+        let mut mixed = key ^ (key >> shift);
+        mixed = mixed.wrapping_mul(Self::MULTIPLIER) & Self::mask(field_bits);
+        mixed ^ (mixed >> shift)
+    }
+
+    #[inline(always)]
+    fn home_remainder(&self, hash: u64) -> (usize, u64) {
+        assert_eq!(hash & Self::mask(self.shard_bits), self.shard_id);
+        let home = ((hash >> self.shard_bits) as usize) & (self.slots.len() - 1);
+        let remainder = hash >> (self.shard_bits + self.slot_bits());
+        (home, remainder)
+    }
+
+    #[inline(always)]
+    fn encode(&self, witness: u64, remainder: u64, displacement: usize) -> u64 {
+        let witness_plus_one = witness + 1;
+        assert!(witness_plus_one <= Self::mask(self.witness_bits()));
+        assert!(remainder <= Self::mask(self.remainder_bits()));
+        assert!((displacement as u64) <= Self::mask(self.displacement_bits()));
+        witness_plus_one
+            | (remainder << self.witness_bits())
+            | ((displacement as u64) << (self.witness_bits() + self.remainder_bits()))
+    }
+
+    #[inline(always)]
+    fn decode(&self, word: u64) -> (u64, u64, usize) {
+        assert_ne!(word, 0);
+        let witness = (word & Self::mask(self.witness_bits())) - 1;
+        let remainder = (word >> self.witness_bits()) & Self::mask(self.remainder_bits());
+        let displacement = (word >> (self.witness_bits() + self.remainder_bits())) as usize;
+        (witness, remainder, displacement)
+    }
+
+    fn grow(&mut self) {
+        let old = std::mem::take(&mut self.slots);
+        let old_len = old.len();
+        let old_slot_bits = old_len.trailing_zeros();
+        let old_remainder_bits = self.field_bits - self.shard_bits - old_slot_bits;
+        let next = old_len
+            .checked_mul(2)
+            .expect("quotient root shard growth overflow");
+        self.slots
+            .try_reserve_exact(next)
+            .expect("quotient root growth allocation failed");
+        self.slots.resize(next, 0);
+        let old_count = self.len;
+        self.len = 0;
+        for (position, word) in old.into_iter().enumerate() {
+            if word == 0 {
+                continue;
+            }
+            let witness = (word & Self::mask(self.witness_bits())) - 1;
+            let remainder = (word >> self.witness_bits()) & Self::mask(old_remainder_bits);
+            let displacement = (word >> (self.witness_bits() + old_remainder_bits)) as usize;
+            let old_home = position.wrapping_sub(displacement) & (old_len - 1);
+            let hash = self.shard_id
+                | ((old_home as u64) << self.shard_bits)
+                | (remainder << (self.shard_bits + old_slot_bits));
+            self.insert_hashed(hash, witness);
+        }
+        assert_eq!(self.len, old_count);
+    }
+
+    fn insert_hashed(&mut self, hash: u64, witness: u64) {
+        loop {
+            if self.len + 1 >= self.slots.len() {
+                self.grow();
+            }
+            let (home, remainder) = self.home_remainder(hash);
+            let mask = self.slots.len() - 1;
+            let max_distance = Self::mask(self.displacement_bits()) as usize;
+            for distance in 0..=max_distance.min(mask) {
+                let position = (home + distance) & mask;
+                let word = self.slots[position];
+                if word == 0 {
+                    self.slots[position] = self.encode(witness, remainder, distance);
+                    self.len += 1;
+                    return;
+                }
+                let (_, stored_remainder, stored_distance) = self.decode(word);
+                let stored_home = position.wrapping_sub(stored_distance) & mask;
+                if stored_home == home && stored_remainder == remainder {
+                    return;
+                }
+            }
+            self.grow();
+        }
+    }
+
+    #[inline(always)]
+    fn get_hashed(&self, hash: u64) -> Option<u64> {
+        let (home, remainder) = self.home_remainder(hash);
+        let mask = self.slots.len() - 1;
+        for distance in 0..self.slots.len() {
+            let position = (home + distance) & mask;
+            let word = self.slots[position];
+            if word == 0 {
+                return None;
+            }
+            let (witness, stored_remainder, stored_distance) = self.decode(word);
+            let stored_home = position.wrapping_sub(stored_distance) & mask;
+            if stored_home == home && stored_remainder == remainder {
+                return Some(witness);
+            }
+        }
+        None
+    }
+
+    #[inline(always)]
+    fn unpack_witness(&self, witness: u64, key: u64, states: &[State], basis: &NormalBasis) -> u64 {
+        let state_index = witness as usize;
+        debug_assert!(state_index < self.columns * self.columns * self.n);
+        let stride = self.columns * self.n;
+        let left = state_index / stride;
+        let right = (state_index % stride) / self.n;
+        let relative = state_index % self.n;
+        let state = &states[state_index];
+        debug_assert_eq!(
+            (
+                state.left as usize,
+                state.right as usize,
+                state.relative as usize
+            ),
+            (left, right, relative)
+        );
+        for &poly_root in &state.poly_roots {
+            let root = basis.to_normal.apply(poly_root);
+            let (canonical, shift) = basis.canonical(root);
+            if canonical == key {
+                return pack(left as u16, right as u16, relative as u16, shift);
+            }
+        }
+        panic!("exact quotient key must match the retained state witness")
+    }
+}
+
+enum RootShard {
+    Full(RootTable),
+    Compact(CompactRootTable),
+    Quotient(QuotientRootTable),
+}
+
+impl RootShard {
+    fn len(&self) -> usize {
+        match self {
+            Self::Full(table) => table.len,
+            Self::Compact(table) => table.len,
+            Self::Quotient(table) => table.len,
+        }
+    }
+
+    fn slots_len(&self) -> usize {
+        match self {
+            Self::Full(table) => table.slots.len(),
+            Self::Compact(table) => table.slots.len(),
+            Self::Quotient(table) => table.slots.len(),
+        }
+    }
+
+    fn insert_if_absent_hashed(
+        &mut self,
+        key: u64,
+        value: u64,
+        hash: u64,
+        states: &[State],
+        basis: &NormalBasis,
+    ) {
+        match self {
+            Self::Full(table) => table.insert_if_absent_hashed(key, value, hash),
+            Self::Compact(table) => table.insert_if_absent_hashed(
+                key,
+                u32::try_from(value).expect("compact witness fits u32"),
+                hash,
+                states,
+                basis,
+            ),
+            Self::Quotient(table) => table.insert_hashed(hash, value),
+        }
+    }
+
+    fn get_hashed(
+        &self,
+        key: u64,
+        hash: u64,
+        states: &[State],
+        basis: &NormalBasis,
+    ) -> Option<u64> {
+        match self {
+            Self::Full(table) => table.get_hashed(key, hash),
+            Self::Compact(table) => table.get_hashed(key, hash, states, basis),
+            Self::Quotient(table) => table
+                .get_hashed(hash)
+                .map(|w| table.unpack_witness(w, key, states, basis)),
+        }
+    }
+}
+
+/// Deterministic hash partition over independent open-addressed root tables.
+/// The low hash bits select a shard, and the following bits select its slot.
+struct ShardedRootTable {
+    shards: Vec<RootShard>,
+    shard_mask: usize,
+    shard_bits: u32,
+    len: usize,
+    slots: usize,
+    input_entries_per_shard: Vec<usize>,
+    slots_per_shard: Vec<usize>,
+    quotient_roots: bool,
+    field_bits: u32,
+}
+
+#[inline(always)]
+fn prefetch_read_first_slot(ptr: *const u8) {
+    #[cfg(target_arch = "x86_64")]
+    unsafe {
+        std::arch::x86_64::_mm_prefetch(ptr.cast::<i8>(), std::arch::x86_64::_MM_HINT_T0);
+    }
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+        std::arch::asm!("prfm pldl1keep, [{address}]", address = in(reg) ptr,
+                        options(nostack, preserves_flags));
+    }
+    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+    {
+        let _ = ptr;
+    }
+}
+
+impl ShardedRootTable {
+    #[inline(always)]
+    fn prefetch(&self, key: u64) {
+        let hash = if self.quotient_roots {
+            QuotientRootTable::hash_key(key, self.field_bits)
+        } else {
+            RootTable::hash(key)
+        };
+        let shard = if self.quotient_roots {
+            (hash as usize) & self.shard_mask
+        } else {
+            RootTable::shard(hash, self.shard_bits) & self.shard_mask
+        };
+        let ptr = match &self.shards[shard] {
+            RootShard::Full(table) => table.slots.as_ptr()
+                .wrapping_add(table.slot(hash)).cast::<u8>(),
+            RootShard::Compact(table) => table.slots.as_ptr()
+                .wrapping_add(table.slot(hash)).cast::<u8>(),
+            RootShard::Quotient(table) => table.slots.as_ptr()
+                .wrapping_add(table.home_remainder(hash).0).cast::<u8>(),
+        };
+        prefetch_read_first_slot(ptr);
+    }
+
+    fn get(&self, key: u64, states: &[State], basis: &NormalBasis) -> Option<u64> {
+        let hash = if self.quotient_roots {
+            QuotientRootTable::hash_key(key, self.field_bits)
+        } else {
+            RootTable::hash(key)
+        };
+        let shard = if self.quotient_roots {
+            (hash as usize) & self.shard_mask
+        } else {
+            RootTable::shard(hash, self.shard_bits) & self.shard_mask
+        };
+        self.shards[shard].get_hashed(key, hash, states, basis)
+    }
+}
+
+#[repr(C)]
+struct State {
+    left: u16,
+    right: u16,
+    relative: u16,
+    group_lift_valid: bool,
+    poly_roots: [u64; 2],
+    poly_ys: [u64; 2],
+}
+
+const _: () = assert!(std::mem::size_of::<State>() == 40);
+
+// The frozen C2800 geometry has a state for every (left, right, relative)
+// triple. Fill disjoint left-row ranges in the final allocation so worker
+// chunks never coexist with a second full-size state vector.
+fn fill_regular_states<F>(
+    left_count: usize,
+    right_count: usize,
+    relative_count: usize,
+    workers: usize,
+    make_state: F,
+) -> Vec<State>
+where
+    F: Fn(usize, usize, usize) -> State + Sync,
+{
+    let row_len = right_count
+        .checked_mul(relative_count)
+        .expect("state row overflow");
+    let total = left_count
+        .checked_mul(row_len)
+        .expect("state count overflow");
+    let mut states = Vec::with_capacity(total);
+    states.resize_with(total, || State {
+        left: 0,
+        right: 0,
+        relative: 0,
+        group_lift_valid: false,
+        poly_roots: [0; 2],
+        poly_ys: [0; 2],
+    });
+    if total == 0 {
+        return states;
+    }
+    let lefts_per_worker = left_count.div_ceil(workers.max(1).min(left_count));
+    let chunk_len = lefts_per_worker * row_len;
+    thread::scope(|scope| {
+        let handles = states
+            .chunks_mut(chunk_len)
+            .enumerate()
+            .map(|(worker, chunk)| {
+                let make_state = &make_state;
+                scope.spawn(move || {
+                    let first_left = worker * lefts_per_worker;
+                    for (offset, state) in chunk.iter_mut().enumerate() {
+                        let left = first_left + offset / row_len;
+                        let rem = offset % row_len;
+                        *state = make_state(left, rem / relative_count, rem % relative_count);
+                    }
+                })
+            })
+            .collect::<Vec<_>>();
+        for handle in handles {
+            handle.join().expect("direct state worker panicked");
+        }
+    });
+    states
+}
+
+struct Index {
+    states: Vec<State>,
+    table: ShardedRootTable,
+    shifted: Vec<Vec<u64>>,
+}
+
+fn pack(left: u16, right: u16, relative: u16, shift: u32) -> u64 {
+    debug_assert!(left < 4096 && right < 4096 && relative < 256 && shift < 256);
+    (left as u64) | ((right as u64) << 12) | ((relative as u64) << 24) | ((shift as u64) << 32)
+}
+
+fn unpack(value: u64) -> (usize, usize, usize, u32) {
+    (
+        (value & 0xfff) as usize,
+        ((value >> 12) & 0xfff) as usize,
+        ((value >> 24) & 0xff) as usize,
+        ((value >> 32) & 0xff) as u32,
+    )
+}
+
+fn build_index(
+    gf: &Gf2,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    reps: &[u64],
+    workers: usize,
+) -> (Index, f64, f64, f64, f64, f64) {
+    build_index_with_root_layout(gf, basis, solver, reps, workers, false)
+}
+
+fn build_index_with_root_layout(
+    gf: &Gf2,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    reps: &[u64],
+    workers: usize,
+    compact_roots: bool,
+) -> (Index, f64, f64, f64, f64, f64) {
+    let n = gf.n as usize;
+    let quotient_roots = n == 53 && reps.len() == 2800 && !compact_roots;
+    let shifted_started = Instant::now();
+    let shifted: Vec<Vec<u64>> = reps
+        .iter()
+        .map(|&code| {
+            let mut row = Vec::with_capacity(n);
+            let mut value = code;
+            for _ in 0..n {
+                row.push(value);
+                value = gf.sqr(value);
+            }
+            row
+        })
+        .collect();
+    let shifted_generation_ms = shifted_started.elapsed().as_secs_f64() * 1000.0;
+    let state_generation_started = Instant::now();
+    let (states, state_generation_ms, state_merge_ms) = if n == 53 && reps.len() == 2800 {
+        let states = fill_regular_states(
+            reps.len(),
+            reps.len(),
+            n,
+            workers,
+            |left, right, relative| {
+                let roots = solver
+                    .roots(gf, basis, shifted[left][0], shifted[right][relative])
+                    .expect("frozen N53 C2800 state must be regular");
+                let ys = lift_root_ys(gf, basis, solver, roots);
+                State {
+                    left: left as u16,
+                    right: right as u16,
+                    relative: relative as u16,
+                    group_lift_valid: ys.is_some(),
+                    poly_roots: roots,
+                    poly_ys: ys.unwrap_or([0; 2]),
+                }
+            },
+        );
+        (
+            states,
+            state_generation_started.elapsed().as_secs_f64() * 1000.0,
+            0.0,
+        )
+    } else {
+        let worker_count = workers.max(1).min(reps.len().max(1));
+        let lefts_per_worker = reps.len().div_ceil(worker_count);
+        let mut state_chunks = Vec::with_capacity(worker_count);
+        thread::scope(|scope| {
+            let shifted = &shifted;
+            let handles: Vec<_> = (0..worker_count)
+                .map(|worker| {
+                    let first_left = worker * lefts_per_worker;
+                    let end_left = (first_left + lefts_per_worker).min(reps.len());
+                    scope.spawn(move || {
+                        let mut states = Vec::new();
+                        for left in first_left..end_left {
+                            for right in 0..reps.len() {
+                                for relative in 0..n {
+                                    if let Some(roots) = solver.roots(
+                                        gf,
+                                        basis,
+                                        shifted[left][0],
+                                        shifted[right][relative],
+                                    ) {
+                                        let ys = lift_root_ys(gf, basis, solver, roots);
+                                        states.push(State {
+                                            left: left as u16,
+                                            right: right as u16,
+                                            relative: relative as u16,
+                                            group_lift_valid: ys.is_some(),
+                                            poly_roots: roots,
+                                            poly_ys: ys.unwrap_or([0; 2]),
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        states
+                    })
+                })
+                .collect();
+            for handle in handles {
+                state_chunks.push(handle.join().expect("index worker panicked"));
+            }
+        });
+        let state_generation_ms = state_generation_started.elapsed().as_secs_f64() * 1000.0;
+        // Worker chunks cover consecutive left ranges; appending in spawn order
+        // retains serial state order and first-witness root insertion.
+        let state_merge_started = Instant::now();
+        let state_count = state_chunks.iter().map(Vec::len).sum();
+        let mut states = Vec::with_capacity(state_count);
+        for mut chunk in state_chunks {
+            states.append(&mut chunk);
+        }
+        let state_merge_ms = state_merge_started.elapsed().as_secs_f64() * 1000.0;
+        (states, state_generation_ms, state_merge_ms)
+    };
+
+    const SHARD_COUNT: usize = 64;
+    const SCATTER_CHUNK_STATES: usize = 1 << 22;
+    let shard_bits = SHARD_COUNT.trailing_zeros();
+    let shard_mask = SHARD_COUNT - 1;
+
+    // Reserve one uniformly sized shard table before scattering. The frozen
+    // N53 base fits this capacity; an unexpectedly skewed shard grows while
+    // retaining an empty slot, so the construction remains exact for other
+    // inputs too. Only one bounded state chunk's root entries is retained.
+    let initial_entries_per_shard = states.len().saturating_mul(2).div_ceil(SHARD_COUNT);
+    let mut shards = (0..SHARD_COUNT)
+        .map(|shard| {
+            if quotient_roots {
+                RootShard::Quotient(QuotientRootTable::with_capacity(
+                    initial_entries_per_shard,
+                    shard,
+                    n as u32,
+                    shard_bits,
+                    29,
+                    reps.len(),
+                    n,
+                ))
+            } else {
+                RootShard::Full(RootTable::with_capacity(
+                    initial_entries_per_shard,
+                    shard_bits,
+                ))
+            }
+        })
+        .collect::<Vec<_>>();
+    let mut input_entries_per_shard = vec![0usize; SHARD_COUNT];
+    let mut root_scatter_ms = 0.0;
+    let mut root_shard_insert_ms = 0.0;
+    let table_workers = workers.clamp(1, SHARD_COUNT);
+    for (block_number, state_block) in states.chunks(SCATTER_CHUNK_STATES).enumerate() {
+        let block_start = block_number * SCATTER_CHUNK_STATES;
+        let scatter_started = Instant::now();
+        let scatter_workers = workers.max(1).min(state_block.len());
+        let states_per_worker = state_block.len().div_ceil(scatter_workers);
+        let mut worker_entries: Vec<Vec<Vec<(u64, u64)>>> = Vec::with_capacity(scatter_workers);
+        thread::scope(|scope| {
+            let handles: Vec<_> = (0..scatter_workers)
+                .map(|worker| {
+                    let first = worker * states_per_worker;
+                    let end = (first + states_per_worker).min(state_block.len());
+                    scope.spawn(move || {
+                        let mut entries = (0..SHARD_COUNT).map(|_| Vec::new()).collect::<Vec<_>>();
+                        for (offset, state) in state_block[first..end].iter().enumerate() {
+                            for (root_index, &poly_root) in state.poly_roots.iter().enumerate() {
+                                let root = basis.to_normal.apply(poly_root);
+                                let (canonical, shift) = basis.canonical(root);
+                                let hash = if quotient_roots {
+                                    QuotientRootTable::hash_key(canonical, n as u32)
+                                } else {
+                                    RootTable::hash(canonical)
+                                };
+                                let shard = if quotient_roots {
+                                    (hash as usize) & shard_mask
+                                } else {
+                                    RootTable::shard(hash, shard_bits) & shard_mask
+                                };
+                                let state_index = block_start + first + offset;
+                                let value = if quotient_roots {
+                                    debug_assert!(state_index < (1 << 29));
+                                    state_index as u64
+                                } else if compact_roots {
+                                    compact_witness(state_index, root_index) as u64
+                                } else {
+                                    pack(state.left, state.right, state.relative, shift)
+                                };
+                                entries[shard].push((canonical, value));
+                            }
+                        }
+                        entries
+                    })
+                })
+                .collect();
+            for handle in handles {
+                worker_entries.push(handle.join().expect("root scatter worker panicked"));
+            }
+        });
+        root_scatter_ms += scatter_started.elapsed().as_secs_f64() * 1000.0;
+
+        for (shard, count) in input_entries_per_shard.iter_mut().enumerate() {
+            *count += worker_entries
+                .iter()
+                .map(|entries| entries[shard].len())
+                .sum::<usize>();
+        }
+        // Consecutive state blocks and worker ranges are inserted in their
+        // original enumeration order within each shard. Equal keys therefore
+        // keep the same first witness as the complete-scatter construction.
+        let insert_started = Instant::now();
+        let shards_per_worker = SHARD_COUNT.div_ceil(table_workers);
+        let states_ref: &[State] = &states;
+        thread::scope(|scope| {
+            for (worker, tables) in shards.chunks_mut(shards_per_worker).enumerate() {
+                let first_shard = worker * shards_per_worker;
+                let entries = &worker_entries;
+                scope.spawn(move || {
+                    for (offset, table) in tables.iter_mut().enumerate() {
+                        let shard = first_shard + offset;
+                        for worker_chunk in entries {
+                            for &(key, value) in &worker_chunk[shard] {
+                                table.insert_if_absent_hashed(
+                                    key,
+                                    value,
+                                    if quotient_roots {
+                                        QuotientRootTable::hash_key(key, n as u32)
+                                    } else {
+                                        RootTable::hash(key)
+                                    },
+                                    states_ref,
+                                    basis,
+                                );
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        root_shard_insert_ms += insert_started.elapsed().as_secs_f64() * 1000.0;
+    }
+    if compact_roots {
+        let conversion_started = Instant::now();
+        for shard in &mut shards {
+            let placeholder = RootShard::Full(RootTable::with_capacity(0, shard_bits));
+            let old = std::mem::replace(shard, placeholder);
+            let RootShard::Full(full) = old else {
+                unreachable!("all construction shards hold full keys");
+            };
+            *shard = RootShard::Compact(CompactRootTable::from_full(full));
+        }
+        // The conversion is part of the reusable root-table construction.
+        root_shard_insert_ms += conversion_started.elapsed().as_secs_f64() * 1000.0;
+    }
+    let len = shards.iter().map(RootShard::len).sum();
+    let slots = shards.iter().map(RootShard::slots_len).sum();
+    let slots_per_shard = shards.iter().map(RootShard::slots_len).collect();
+    let table = ShardedRootTable {
+        shards,
+        shard_mask,
+        shard_bits,
+        len,
+        slots,
+        input_entries_per_shard,
+        slots_per_shard,
+        quotient_roots,
+        field_bits: n as u32,
+    };
+    (
+        Index {
+            states,
+            table,
+            shifted,
+        },
+        state_generation_ms,
+        shifted_generation_ms,
+        state_merge_ms,
+        root_scatter_ms,
+        root_shard_insert_ms,
+    )
+}
+
+struct Relation {
+    point_indices: [usize; 4],
+    x_codes: [u64; 4],
+    probes: u64,
+    relation_check_ms: f64,
+}
+
+struct Base {
+    points: Vec<FastPoint>,
+    labels: Vec<(usize, u64)>,
+    by_x: HashMap<u64, Vec<usize>>,
+    columns: usize,
+}
+
+fn lift(
+    fast: &FastBinaryCurve,
+    base: &Base,
+    codes: &[u64; 4],
+    target: FastPoint,
+) -> Option<[usize; 4]> {
+    let choices: Vec<&Vec<usize>> = codes
+        .iter()
+        .map(|code| base.by_x.get(code))
+        .collect::<Option<_>>()?;
+    for &a in choices[0] {
+        for &b in choices[1] {
+            let ab = fast.add(base.points[a], base.points[b]);
+            for &c in choices[2] {
+                let abc = fast.add(ab, base.points[c]);
+                for &d in choices[3] {
+                    if fast.add(abc, base.points[d]) == target {
+                        return Some([a, b, c, d]);
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+fn extract_with_cancel(
+    gf: &Gf2,
+    fast: &FastBinaryCurve,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    index: &Index,
+    base: &Base,
+    target: FastPoint,
+    start: usize,
+    cancel: Option<&AtomicBool>,
+) -> (Option<Relation>, u64, u64) {
+    let Some((target_x, target_y)) = target else {
+        return (None, 0, 0);
+    };
+    let n = gf.n;
+    let mut probes = 0u64;
+    let mut state_probes = 0u64;
+    let mut target_s3_calls = 0u64;
+    let mut relation_check_ms = 0.0;
+    // Callers provide a rotating, target-dependent origin so rank-stage rows
+    // do not concentrate on the same early columns.
+    let start = start % index.states.len().max(1);
+    let target_seed = target_x ^ target_y.rotate_left(29) ^ 0xD6E8_FEB8_6659_FD93;
+    for (offset, state) in index.states[start..]
+        .iter()
+        .chain(&index.states[..start])
+        .enumerate()
+    {
+        if cancel.is_some_and(|flag| flag.load(Ordering::Acquire)) {
+            return (None, state_probes, target_s3_calls);
+        }
+        state_probes += 1;
+        // Frobenius closure makes each quotient state represent n global
+        // orientations. Sample one orientation per state; ordinary relations
+        // are therefore sampled with probability about 1/n.
+        let mut orientation_seed = target_seed
+            ^ (offset as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15)
+            ^ ((state.left as u64) << 32)
+            ^ ((state.right as u64) << 16)
+            ^ state.relative as u64;
+        let shift = (splitmix64(&mut orientation_seed) % n as u64) as usize;
+        let left_x = index.shifted[state.left as usize][shift];
+        let right_x =
+            index.shifted[state.right as usize][(shift + state.relative as usize) % n as usize];
+        let absolute = state.poly_roots.map(|root| {
+            basis
+                .to_poly
+                .apply(basis.rotate(basis.to_normal.apply(root), shift as u32))
+        });
+        let absolute_ys = state.poly_ys.map(|y| {
+            basis
+                .to_poly
+                .apply(basis.rotate(basis.to_normal.apply(y), shift as u32))
+        });
+        let partner_sets = if state.group_lift_valid {
+            solver.roots_pair_group(
+                gf,
+                basis,
+                [(absolute[0], absolute_ys[0]), (absolute[1], absolute_ys[1])],
+                (target_x, target_y),
+            )
+        } else {
+            solver.roots_pair(gf, basis, absolute, target_x)
+        };
+        target_s3_calls += 2;
+        for possible_partners in partner_sets {
+            let Some(partners) = possible_partners else {
+                continue;
+            };
+            for partner in partners {
+                probes += 1;
+                let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+                let Some(value) = index.table.get(canonical, &index.states, basis) else {
+                    continue;
+                };
+                let (left2, right2, relative2, stored_shift) = unpack(value);
+                let left_shift2 = ((stored_shift + n - partner_shift) % n) as usize;
+                let right_shift2 = (left_shift2 + relative2) % n as usize;
+                let codes = [
+                    left_x,
+                    right_x,
+                    index.shifted[left2][left_shift2],
+                    index.shifted[right2][right_shift2],
+                ];
+                let relation_check_started = Instant::now();
+                let point_indices = lift(fast, base, &codes, target);
+                relation_check_ms += relation_check_started.elapsed().as_secs_f64() * 1000.0;
+                if let Some(point_indices) = point_indices {
+                    if cancel.is_some_and(|flag| {
+                        flag.compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+                            .is_err()
+                    }) {
+                        return (None, state_probes, target_s3_calls);
+                    }
+                    return (
+                        Some(Relation {
+                            point_indices,
+                            x_codes: codes,
+                            probes,
+                            relation_check_ms,
+                        }),
+                        state_probes,
+                        target_s3_calls,
+                    );
+                }
+            }
+        }
+    }
+    (None, state_probes, target_s3_calls)
+}
+
+fn extract(
+    gf: &Gf2,
+    fast: &FastBinaryCurve,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    index: &Index,
+    base: &Base,
+    target: FastPoint,
+    start: usize,
+) -> (Option<Relation>, u64, u64) {
+    extract_with_cancel(gf, fast, basis, solver, index, base, target, start, None)
+}
+
+#[derive(Clone, Copy, Default)]
+struct PreparedTargetState {
+    left_x: u64,
+    right_x: u64,
+    shift: u32,
+    shifted_target: (u64, u64),
+    absolute: [u64; 2],
+    absolute_ys: [u64; 2],
+    denominator: [u64; 2],
+    group_lift_valid: bool,
+    regular_pair: bool,
+}
+
+#[derive(Clone, Copy, Default)]
+struct PreparedPartner {
+    lane: usize,
+    canonical: u64,
+    partner_shift: u32,
+}
+
+/// Map the stable C1200 logical sequence into a larger left/right/relative
+/// state array. The complete index is searched after the prefix if needed.
+struct TargetSearchSchedule {
+    full_columns: usize,
+    prefix_columns: usize,
+    n: usize,
+    full_len: usize,
+    prefix_len: usize,
+    start_full: usize,
+    start_prefix: usize,
+}
+
+impl TargetSearchSchedule {
+    fn new(full_columns: usize, prefix_columns: usize, n: usize, start: usize) -> Self {
+        assert!(prefix_columns > 0 && prefix_columns <= full_columns && n > 0);
+        let full_len = full_columns * full_columns * n;
+        let prefix_len = prefix_columns * prefix_columns * n;
+        Self {
+            full_columns,
+            prefix_columns,
+            n,
+            full_len,
+            prefix_len,
+            start_full: start % full_len,
+            start_prefix: start % prefix_len,
+        }
+    }
+
+    fn total_len(&self) -> usize {
+        self.full_len
+            + if self.prefix_columns < self.full_columns {
+                self.prefix_len
+            } else {
+                0
+            }
+    }
+
+    #[inline]
+    fn physical_index(&self, offset: usize) -> usize {
+        if self.prefix_columns < self.full_columns && offset < self.prefix_len {
+            let logical = (self.start_prefix + offset) % self.prefix_len;
+            let prefix_row = self.prefix_columns * self.n;
+            let full_row = self.full_columns * self.n;
+            (logical / prefix_row) * full_row + logical % prefix_row
+        } else {
+            let full_offset = if self.prefix_columns < self.full_columns {
+                offset - self.prefix_len
+            } else {
+                offset
+            };
+            (self.start_full + full_offset) % self.full_len
+        }
+    }
+}
+
+/// All inverse Frobenius target orientations are computed once per target.
+/// The online search uses phi^(-s)(Q) with the unrotated indexed root point,
+/// then rotates each partner by s before looking it up in the root table.
+fn target_conjugates(gf: &Gf2, target: FastPoint) -> Vec<(u64, u64)> {
+    let Some((mut x, mut y)) = target else {
+        return Vec::new();
+    };
+    let original = (x, y);
+    let mut conjugates = Vec::with_capacity(gf.n as usize);
+    for _ in 0..gf.n {
+        conjugates.push((x, y));
+        x = gf.sqr(x);
+        y = gf.sqr(y);
+    }
+    debug_assert_eq!((x, y), original);
+    conjugates
+}
+
+/// Search in the same state and witness order as `extract_with_cancel`, but
+/// share one field inversion across up to eight ordinary S3 states. Only
+/// target extraction uses this path; reusable relation preparation and its
+/// witness trace follow the original extractor.
+fn extract_target_batch8_with_cancel(
+    gf: &Gf2,
+    fast: &FastBinaryCurve,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    index: &Index,
+    base: &Base,
+    target: FastPoint,
+    start: usize,
+    target_conjugates: &[(u64, u64)],
+    cancel: Option<&AtomicBool>,
+) -> (Option<Relation>, u64, u64) {
+    let Some((target_x, target_y)) = target else {
+        return (None, 0, 0);
+    };
+    if index.states.is_empty() {
+        return (None, 0, 0);
+    }
+    let n = gf.n;
+    assert_eq!(target_conjugates.len(), n as usize);
+    let prefix_columns = if n == 53 && base.columns == 2800 {
+        1200
+    } else {
+        base.columns
+    };
+    let schedule = TargetSearchSchedule::new(base.columns, prefix_columns, n as usize, start);
+    assert_eq!(schedule.full_len, index.states.len());
+    let target_seed = target_x ^ target_y.rotate_left(29) ^ 0xD6E8_FEB8_6659_FD93;
+    let mut partner_probes = 0u64;
+    let mut state_probes = 0u64;
+    let mut target_s3_calls = 0u64;
+    let mut relation_check_ms = 0.0;
+    let mut prefix = [1u64; 8];
+    let mut offset = 0usize;
+    while offset < schedule.total_len() {
+        let count = (schedule.total_len() - offset).min(8);
+        let mut prepared = [PreparedTargetState::default(); 8];
+        let mut products = [1u64; 8];
+        let mut regular_count = 0usize;
+        for lane in 0..count {
+            if cancel.is_some_and(|flag| flag.load(Ordering::Acquire)) {
+                return (None, state_probes, target_s3_calls);
+            }
+            let state = &index.states[schedule.physical_index(offset + lane)];
+            let mut orientation_seed = target_seed
+                ^ ((offset + lane) as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15)
+                ^ ((state.left as u64) << 32)
+                ^ ((state.right as u64) << 16)
+                ^ state.relative as u64;
+            let shift = (splitmix64(&mut orientation_seed) % n as u64) as u32;
+            let left_x = index.shifted[state.left as usize][shift as usize];
+            let right_x = index.shifted[state.right as usize]
+                [(shift as usize + state.relative as usize) % n as usize];
+            let shifted_target = target_conjugates[((n - shift) % n) as usize];
+            let absolute = state.poly_roots;
+            let absolute_ys = state.poly_ys;
+            let denominator = [
+                absolute[0] ^ shifted_target.0,
+                absolute[1] ^ shifted_target.0,
+            ];
+            let regular_pair = state.group_lift_valid && denominator[0] != 0 && denominator[1] != 0;
+            if regular_pair {
+                products[lane] = gf.mul(denominator[0], denominator[1]);
+                regular_count += 1;
+            }
+            prepared[lane] = PreparedTargetState {
+                left_x,
+                right_x,
+                shift,
+                shifted_target,
+                absolute,
+                absolute_ys,
+                denominator,
+                group_lift_valid: state.group_lift_valid,
+                regular_pair,
+            };
+        }
+        if cancel.is_some_and(|flag| flag.load(Ordering::Acquire)) {
+            return (None, state_probes, target_s3_calls);
+        }
+        if regular_count != 0 {
+            invert_batch8(gf, basis, &mut products[..count], &mut prefix);
+        }
+        let mut lookups = [PreparedPartner::default(); 32];
+        let mut lookup_count = 0usize;
+        for lane in 0..count {
+            if cancel.is_some_and(|flag| flag.load(Ordering::Acquire)) {
+                return (None, state_probes, target_s3_calls);
+            }
+            state_probes += 1;
+            let item = prepared[lane];
+            let partner_sets = if item.regular_pair {
+                let inverse_product = products[lane];
+                let inverse = [
+                    gf.mul(inverse_product, item.denominator[1]),
+                    gf.mul(inverse_product, item.denominator[0]),
+                ];
+                solver.roots_pair_group_from_inverse(
+                    gf,
+                    [
+                        (item.absolute[0], item.absolute_ys[0]),
+                        (item.absolute[1], item.absolute_ys[1]),
+                    ],
+                    item.shifted_target,
+                    inverse,
+                )
+            } else if item.group_lift_valid {
+                solver.roots_pair_group(
+                    gf,
+                    basis,
+                    [
+                        (item.absolute[0], item.absolute_ys[0]),
+                        (item.absolute[1], item.absolute_ys[1]),
+                    ],
+                    item.shifted_target,
+                )
+            } else {
+                solver.roots_pair(gf, basis, item.absolute, item.shifted_target.0)
+            };
+            target_s3_calls += 2;
+            for possible_partners in partner_sets {
+                let Some(partners) = possible_partners else {
+                    continue;
+                };
+                for partner in partners {
+                    let partner_normal = basis.to_normal.apply(partner);
+                    let (canonical, partner_shift) =
+                        basis.canonical(basis.rotate(partner_normal, item.shift));
+                    lookups[lookup_count] = PreparedPartner {
+                        lane,
+                        canonical,
+                        partner_shift,
+                    };
+                    lookup_count += 1;
+                    // Start the random root-table fetch before deriving the
+                    // remaining S3 partners in this batch. The later lookup
+                    // pass still checks witnesses in the original order.
+                    index.table.prefetch(canonical);
+                }
+            }
+        }
+        // Candidate lookup and group lifting retain the original state/root
+        // order; only the independent root calculations run ahead of them.
+        for candidate in &lookups[..lookup_count] {
+            if cancel.is_some_and(|flag| flag.load(Ordering::Acquire)) {
+                return (None, state_probes, target_s3_calls);
+            }
+            partner_probes += 1;
+            let Some(value) = index.table.get(candidate.canonical, &index.states, basis) else {
+                continue;
+            };
+            let item = prepared[candidate.lane];
+            let (left2, right2, relative2, stored_shift) = unpack(value);
+            let left_shift2 = ((stored_shift + n - candidate.partner_shift) % n) as usize;
+            let right_shift2 = (left_shift2 + relative2) % n as usize;
+            let codes = [
+                item.left_x,
+                item.right_x,
+                index.shifted[left2][left_shift2],
+                index.shifted[right2][right_shift2],
+            ];
+            let relation_check_started = Instant::now();
+            let point_indices = lift(fast, base, &codes, target);
+            relation_check_ms += relation_check_started.elapsed().as_secs_f64() * 1000.0;
+            if let Some(point_indices) = point_indices {
+                if cancel.is_some_and(|flag| {
+                    flag.compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+                        .is_err()
+                }) {
+                    return (None, state_probes, target_s3_calls);
+                }
+                return (
+                    Some(Relation {
+                        point_indices,
+                        x_codes: codes,
+                        probes: partner_probes,
+                        relation_check_ms,
+                    }),
+                    state_probes,
+                    target_s3_calls,
+                );
+            }
+        }
+        offset += count;
+    }
+    (None, state_probes, target_s3_calls)
+}
+
+/// Independent target orientations search concurrently. The first verified
+/// relation stops the other workers, and all completed work remains charged
+/// to this one target.
+fn extract_target_parallel(
+    gf: &Gf2,
+    fast: &FastBinaryCurve,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    index: &Index,
+    base: &Base,
+    target: FastPoint,
+    start: usize,
+    workers: usize,
+) -> (Option<Relation>, u64, u64, Option<usize>) {
+    assert!(workers > 0);
+    let conjugates = target_conjugates(gf, target);
+    if workers == 1 || index.states.is_empty() {
+        let (relation, probes, calls) = extract_target_batch8_with_cancel(
+            gf,
+            fast,
+            basis,
+            solver,
+            index,
+            base,
+            target,
+            start,
+            &conjugates,
+            None,
+        );
+        let winner_worker = relation.as_ref().map(|_| 0);
+        return (relation, probes, calls, winner_worker);
+    }
+    let cancel = AtomicBool::new(false);
+    let spacing = (index.states.len() / workers).max(1);
+    let results = thread::scope(|scope| {
+        let conjugates = &conjugates;
+        let handles: Vec<_> = (0..workers)
+            .map(|worker| {
+                let worker_start = start.wrapping_add(worker * spacing) % index.states.len();
+                let cancel = &cancel;
+                scope.spawn(move || {
+                    extract_target_batch8_with_cancel(
+                        gf,
+                        fast,
+                        basis,
+                        solver,
+                        index,
+                        base,
+                        target,
+                        worker_start,
+                        conjugates,
+                        Some(cancel),
+                    )
+                })
+            })
+            .collect();
+        handles
+            .into_iter()
+            .map(|handle| handle.join().expect("target query worker panicked"))
+            .collect::<Vec<_>>()
+    });
+    let mut winner = None;
+    let mut winner_worker = None;
+    let mut total_probes = 0u64;
+    let mut total_calls = 0u64;
+    for (worker, (relation, probes, calls)) in results.into_iter().enumerate() {
+        total_probes += probes;
+        total_calls += calls;
+        if let Some(relation) = relation {
+            assert!(
+                winner.is_none(),
+                "exactly one worker claims the first relation"
+            );
+            winner = Some(relation);
+            winner_worker = Some(worker);
+        }
+    }
+    (winner, total_probes, total_calls, winner_worker)
+}
+
+/// Frobenius-closed signed-orbit base from a deterministic public x-scan.
+///
+/// Each accepted x lifts to a point, is projected into the order-r subgroup by
+/// the cofactor, and contributes its whole signed Frobenius orbit. Point logs
+/// are unknown; the label of member `phi^k(+-R_j)` is `(j, +-lambda^k)`.
+fn construct_base(
+    fast: &FastBinaryCurve,
+    curve: &KoblitzCurve,
+    b: u64,
+    columns: usize,
+    r: u64,
+) -> (
+    Vec<FastPoint>,
+    Vec<(usize, u64)>,
+    Vec<Option<[u64; 2]>>,
+    u64,
+) {
+    let gf = &fast.gf;
+    let n = fast.n as usize;
+    let lambda = curve.lambda.to_u64().unwrap();
+    let mut seen = std::collections::HashSet::new();
+    let mut points = Vec::with_capacity(columns * 2 * n);
+    let mut labels = Vec::with_capacity(columns * 2 * n);
+    let mut reps = Vec::with_capacity(columns);
+    let mut scanned = 0u64;
+    let mut raw_x = 1u64;
+    while reps.len() < columns {
+        scanned += 1;
+        for point in fast.points_with_x(b, raw_x) {
+            let Some((px, py)) = fast.scalar_mul(point, &curve.cofactor) else {
+                continue;
+            };
+            if px <= 1 {
+                continue;
+            }
+            let mut key = px;
+            let mut x = px;
+            for _ in 1..n {
+                x = gf.sqr(x);
+                key = key.min(x);
+            }
+            if !seen.insert(key) {
+                continue;
+            }
+            let column = reps.len();
+            reps.push(Some([px, py]));
+            let (mut cx, mut cy) = (px, py);
+            let mut coefficient = 1u64;
+            for _ in 0..n {
+                points.push(Some((cx, cy)));
+                labels.push((column, coefficient));
+                points.push(Some((cx, cx ^ cy)));
+                labels.push((column, (r - coefficient) % r));
+                cx = gf.sqr(cx);
+                cy = gf.sqr(cy);
+                coefficient = mulmod(coefficient, lambda, r);
+            }
+            if reps.len() == columns {
+                break;
+            }
+        }
+        raw_x += 1;
+    }
+    let rep = reps[0].map(|[x, y]| (x, y));
+    assert_eq!(
+        fast.scalar_mul(rep, &BigUint::from(lambda)),
+        rep.map(|(x, y)| (gf.sqr(x), gf.sqr(y))),
+        "Frobenius must act as lambda on the subgroup"
+    );
+    (points, labels, reps, scanned)
+}
+
+fn mulmod(a: u64, b: u64, r: u64) -> u64 {
+    ((a as u128 * b as u128) % r as u128) as u64
+}
+
+fn powmod(mut a: u64, mut e: u64, r: u64) -> u64 {
+    let mut acc = 1u64;
+    while e > 0 {
+        if e & 1 == 1 {
+            acc = mulmod(acc, a, r);
+        }
+        a = mulmod(a, a, r);
+        e >>= 1;
+    }
+    acc
+}
+
+/// Incremental row echelon mod prime r over K unknowns plus a right-hand side.
+struct Echelon {
+    r: u64,
+    columns: usize,
+    pivots: Vec<Option<Vec<u64>>>,
+    rank: usize,
+}
+
+impl Echelon {
+    fn insert(&mut self, mut row: Vec<u64>) -> bool {
+        for column in 0..self.columns {
+            if row[column] == 0 {
+                continue;
+            }
+            if let Some(pivot) = &self.pivots[column] {
+                let factor = row[column];
+                for (value, &p) in row.iter_mut().zip(pivot.iter()).skip(column) {
+                    *value = (*value + self.r - mulmod(factor, p, self.r)) % self.r;
+                }
+            } else {
+                let inverse = powmod(row[column], self.r - 2, self.r);
+                for value in row.iter_mut().skip(column) {
+                    *value = mulmod(*value, inverse, self.r);
+                }
+                self.pivots[column] = Some(row);
+                self.rank += 1;
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Recover the right-hand-side combination for a coefficient vector that
+    /// lies in the span of the currently inserted relation rows.
+    fn span_value(&self, coefficients: &[u64]) -> Option<u64> {
+        if coefficients.len() != self.columns {
+            return None;
+        }
+        let mut remainder = coefficients.to_vec();
+        let mut value = 0u64;
+        for column in 0..self.columns {
+            let factor = remainder[column];
+            if factor == 0 {
+                continue;
+            }
+            let pivot = self.pivots[column].as_ref()?;
+            for index in column..self.columns {
+                remainder[index] =
+                    (remainder[index] + self.r - mulmod(factor, pivot[index], self.r)) % self.r;
+            }
+            value = (value + mulmod(factor, pivot[self.columns], self.r)) % self.r;
+        }
+        if remainder.iter().all(|&entry| entry == 0) {
+            Some(value)
+        } else {
+            None
+        }
+    }
+
+    fn solve(&self) -> Vec<u64> {
+        let mut solution = vec![0u64; self.columns];
+        for column in (0..self.columns).rev() {
+            let pivot = self.pivots[column].as_ref().expect("full rank");
+            let mut value = pivot[self.columns];
+            for other in column + 1..self.columns {
+                value = (value + self.r - mulmod(pivot[other], solution[other], self.r)) % self.r;
+            }
+            solution[column] = value;
+        }
+        solution
+    }
+}
+
+#[cfg(test)]
+mod target_span_tests {
+    use super::Echelon;
+
+    #[test]
+    fn recovers_rhs_for_a_spanned_vector_and_rejects_an_unspanned_one() {
+        let mut echelon = Echelon {
+            r: 101,
+            columns: 3,
+            pivots: vec![None; 3],
+            rank: 0,
+        };
+        assert!(echelon.insert(vec![1, 2, 0, 5]));
+        assert!(echelon.insert(vec![0, 1, 4, 7]));
+        assert_eq!(echelon.span_value(&[1, 4, 8]), Some(19));
+        assert_eq!(echelon.span_value(&[0, 0, 1]), None);
+    }
+}
+
+#[cfg(test)]
+mod group_root_tests {
+    use super::{
+        lift_root_ys, BigUint, FastBinaryCurve, FastPoint, Gf2, KoblitzCurve, NormalBasis, S3Solver,
+    };
+
+    #[test]
+    fn lifted_group_sums_match_s3_root_sets_on_both_curves() {
+        for n in [41, 53] {
+            let curve = KoblitzCurve::new(0, n).unwrap();
+            let fast = FastBinaryCurve::new(&curve.curve.irreducible, 0).unwrap();
+            let gf = Gf2::new(&curve.curve.irreducible);
+            let basis = NormalBasis::new(&gf);
+            let solver = S3Solver::new(&gf, 1);
+            let generator: FastPoint = match curve.generator() {
+                crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => {
+                    Some((fast.word(x), fast.word(y)))
+                }
+                crypto_lib::binary_ecc::BinaryPoint::Infinity => unreachable!(),
+            };
+            for k in 1..33u64 {
+                let p = fast.scalar_mul(generator, &BigUint::from(k + 1)).unwrap();
+                let q = fast
+                    .scalar_mul(generator, &BigUint::from(3 * k + 5))
+                    .unwrap();
+                let target = fast
+                    .scalar_mul(generator, &BigUint::from(7 * k + 11))
+                    .unwrap();
+                let roots = solver.roots(&gf, &basis, p.0, q.0).unwrap();
+                let ys = lift_root_ys(&gf, &basis, &solver, roots).unwrap();
+                let group = solver.roots_pair_group(
+                    &gf,
+                    &basis,
+                    [(roots[0], ys[0]), (roots[1], ys[1])],
+                    target,
+                );
+                for i in 0..2 {
+                    let scalar = solver.roots(&gf, &basis, roots[i], target.0).unwrap();
+                    let mut actual = group[i].unwrap();
+                    let mut expected = scalar;
+                    actual.sort_unstable();
+                    expected.sort_unstable();
+                    assert_eq!(actual, expected);
+                }
+            }
+        }
+    }
+}
+
+fn relation_row(base: &Base, relation: &Relation, rhs: u64, r: u64) -> Vec<u64> {
+    let mut row = vec![0u64; base.columns + 1];
+    for &index in &relation.point_indices {
+        let (column, coefficient) = base.labels[index];
+        row[column] = (row[column] + coefficient) % r;
+    }
+    row[base.columns] = rhs % r;
+    row
+}
+
+fn peak_rss_bytes() -> Option<u64> {
+    let output = std::process::Command::new("ps")
+        .args(["-o", "rss=", "-p", &std::process::id().to_string()])
+        .output()
+        .ok()?;
+    let kib: u64 = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .parse()
+        .ok()?;
+    Some(kib * 1024)
+}
+
+fn splitmix64(state: &mut u64) -> u64 {
+    *state = state.wrapping_add(0x9E37_79B9_7F4A_7C15);
+    let mut z = *state;
+    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    z ^ (z >> 31)
+}
+
+fn point_hash(point: FastPoint) -> u64 {
+    let (x, y) = point.expect("point must be affine");
+    let mut hash = x ^ y.rotate_left(29) ^ 0x9E37_79B9_7F4A_7C15;
+    hash = (hash ^ (hash >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    hash = (hash ^ (hash >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    hash ^ (hash >> 31)
+}
+
+fn main() {
+    let arguments: Vec<String> = std::env::args().collect();
+    assert_eq!(
+        arguments.len(),
+        10,
+        "usage: <n> <a> <orbit_columns> <relation_seed> <target_point.json> <out.jsonl> <workers> <prepare_rank> <target_workers>"
+    );
+    let process_started = Instant::now();
+    let n: u32 = arguments[1].parse().unwrap();
+    let a: u8 = arguments[2].parse().unwrap();
+    let columns: usize = arguments[3].parse().unwrap();
+    assert!(
+        columns > 0 && columns < 4096,
+        "compact root labels require fewer than 4096 columns"
+    );
+    let relation_seed: u64 = arguments[4].parse().unwrap();
+    let relation_workers: usize = arguments[7].parse().unwrap();
+    let prepare_rank: usize = arguments[8].parse().unwrap();
+    let target_workers: usize = arguments[9].parse().unwrap();
+    assert!(
+        relation_workers > 0,
+        "relation worker count must be positive"
+    );
+    assert!((1..=relation_workers).contains(&target_workers));
+    let mut out = std::fs::File::create(&arguments[6]).unwrap();
+
+    // Input loading and output setup are outside both online clocks.
+    let cold_started = Instant::now();
+    let setup_started = Instant::now();
+    let curve = KoblitzCurve::new(a, n).expect("admitted Koblitz rung");
+    let r = curve.subgroup_order.to_u64().unwrap();
+    let fast = FastBinaryCurve::new(&curve.curve.irreducible, a as u64).unwrap();
+    let gf = Gf2::new(&curve.curve.irreducible);
+    let b = gf.from_element(&curve.curve.b);
+    assert_eq!(a, 0, "group-lifted S3 path is frozen for a2=0");
+    assert_eq!(b, 1, "group-lifted S3 path is frozen for b=1");
+    let generator: FastPoint = match curve.generator() {
+        crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+        crypto_lib::binary_ecc::BinaryPoint::Infinity => panic!("generator must be affine"),
+    };
+    assert_eq!(
+        fast.scalar_mul(generator, &BigUint::from(r)),
+        None,
+        "G must have order r"
+    );
+    assert_eq!(fast.scalar_mul(generator, &BigUint::from(1u64)), generator);
+    let curve_setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+
+    // The base is defined by the public low-x construction and subgroup
+    // filtering. No base logarithm is supplied to this solver.
+    let base_started = Instant::now();
+    let (points, labels, representatives, scanned_x) = construct_base(&fast, &curve, b, columns, r);
+    let mut by_x: HashMap<u64, Vec<usize>> = HashMap::new();
+    for (index, point) in points.iter().enumerate() {
+        if let Some((x, _)) = point {
+            by_x.entry(*x).or_default().push(index);
+        }
+    }
+    let base = Base {
+        points,
+        labels,
+        by_x,
+        columns: representatives.len(),
+    };
+    assert!(prepare_rank > 0 && prepare_rank <= base.columns);
+    let base_build_ms = base_started.elapsed().as_secs_f64() * 1000.0;
+
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(b"koblitz-natural-xscan-signed-frobenius-base-v1");
+    for (point, &(column, coefficient)) in base.points.iter().zip(&base.labels) {
+        let (x, y) = point.unwrap();
+        for word in [x, y, column as u64, coefficient] {
+            hasher.update(&word.to_le_bytes());
+        }
+    }
+    let base_digest_started = Instant::now();
+    let base_hash = hasher.finalize().to_hex().to_string();
+    let base_digest_ms = base_digest_started.elapsed().as_secs_f64() * 1000.0;
+
+    let basis_started = Instant::now();
+    let basis = NormalBasis::new(&gf);
+    let solver = S3Solver::new(&gf, b);
+    for probe in 1..2048u64 {
+        let x = probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask;
+        assert_eq!(
+            basis
+                .to_poly
+                .apply(basis.rotate(basis.to_normal.apply(x), 1)),
+            gf.sqr(x)
+        );
+        let y = (probe * 0x9E37_79B9) & basis.mask;
+        assert_eq!(solver.roots(&gf, &basis, x, y), s3_x_roots(&gf, b, x, y));
+    }
+    let basis_ms = basis_started.elapsed().as_secs_f64() * 1000.0;
+
+    let representative_x_started = Instant::now();
+    let rep_x: Vec<u64> = representatives
+        .iter()
+        .map(|point| point.expect("representative point")[0])
+        .collect();
+    let representative_x_ms = representative_x_started.elapsed().as_secs_f64() * 1000.0;
+    let index_started = Instant::now();
+    let (
+        index,
+        index_state_generation_ms,
+        index_shifted_generation_ms,
+        index_state_merge_ms,
+        index_root_scatter_ms,
+        index_root_shard_insert_ms,
+    ) = build_index(&gf, &basis, &solver, &rep_x, relation_workers);
+    let group_lift_valid_states = index
+        .states
+        .iter()
+        .filter(|state| state.group_lift_valid)
+        .count();
+    assert_eq!(
+        group_lift_valid_states,
+        index.states.len(),
+        "every frozen subgroup index state must lift to curve points"
+    );
+    let index_ms = index_started.elapsed().as_secs_f64() * 1000.0;
+    let index_charged_subphases_ms = index_state_generation_ms
+        + index_shifted_generation_ms
+        + index_state_merge_ms
+        + index_root_scatter_ms
+        + index_root_shard_insert_ms;
+    let index_unattributed_overhead_ms = (index_ms - index_charged_subphases_ms).max(0.0);
+    assert!(index_ms + 0.02 >= index_charged_subphases_ms);
+
+    let preparation_started = Instant::now();
+    // Reach the frozen rank threshold from a fixed seed before reading Q.
+    // Prepared rows can serve any later target whose coefficient row is in
+    // their span; a miss triggers target-charged relation collection.
+    let rank_started = Instant::now();
+    let mut echelon = Echelon {
+        r,
+        columns: base.columns,
+        pivots: vec![None; base.columns],
+        rank: 0,
+    };
+    let mut relation_rng = relation_seed;
+    let mut used_relation_scalars = std::collections::HashSet::new();
+    let max_relation_attempts = base.columns.saturating_mul(8).max(base.columns + 32);
+    let mut rank_attempts = 0usize;
+    let mut rank_failures = 0usize;
+    let mut rank_verified_relations = 0usize;
+    let mut rank_new_rows = 0usize;
+    let mut rank_dependent_rows = 0usize;
+    let mut rank_state_probes = 0u64;
+    let mut rank_target_s3_calls = 0u64;
+    let mut rank_attempts_completed = 0usize;
+    let mut rank_query_generation_ms = 0.0;
+    let mut rank_pdp_ms = 0.0;
+    let mut rank_pdp_wall_ms = 0.0;
+    let mut rank_relation_check_ms = 0.0;
+    let mut rank_matrix_build_ms = 0.0;
+    let mut rank_linear_algebra_ms = 0.0;
+    let mut target_span_check_ms = 0.0;
+    let mut target_span_checks = 0usize;
+    let mut target_span_value = None;
+    let mut target_span_relation_prefix = None;
+    let mut target_span_attempt_prefix = None;
+    let mut rank_witnesses = Vec::new();
+
+    while echelon.rank < prepare_rank && rank_attempts < max_relation_attempts {
+        let mut batch =
+            Vec::with_capacity(relation_workers.min(max_relation_attempts - rank_attempts));
+        while batch.len() < relation_workers && rank_attempts + batch.len() < max_relation_attempts
+        {
+            let query_generation_started = Instant::now();
+            let relation_scalar = splitmix64(&mut relation_rng) % (r - 1) + 1;
+            if !used_relation_scalars.insert(relation_scalar) {
+                rank_query_generation_ms +=
+                    query_generation_started.elapsed().as_secs_f64() * 1000.0;
+                continue;
+            }
+            let relation_target = fast
+                .scalar_mul(generator, &BigUint::from(relation_scalar))
+                .expect("nonzero relation target");
+            let relation_hash = point_hash(Some(relation_target));
+            rank_query_generation_ms += query_generation_started.elapsed().as_secs_f64() * 1000.0;
+            batch.push((relation_scalar, relation_target, relation_hash));
+        }
+        if batch.is_empty() {
+            break;
+        }
+        rank_attempts += batch.len();
+
+        let batch_pdp_started = Instant::now();
+        let batch_results = thread::scope(|scope| {
+            let handles: Vec<_> = batch
+                .iter()
+                .copied()
+                .map(|(relation_scalar, relation_target, relation_hash)| {
+                    let gf = &gf;
+                    let fast = &fast;
+                    let basis = &basis;
+                    let solver = &solver;
+                    let index = &index;
+                    let base = &base;
+                    scope.spawn(move || {
+                        let pdp_started = Instant::now();
+                        let (relation, state_probes, s3_calls) = extract(
+                            gf,
+                            fast,
+                            basis,
+                            solver,
+                            index,
+                            base,
+                            Some(relation_target),
+                            relation_hash as usize,
+                        );
+                        let extraction_ms = pdp_started.elapsed().as_secs_f64() * 1000.0;
+                        (
+                            relation_scalar,
+                            relation,
+                            state_probes,
+                            s3_calls,
+                            extraction_ms,
+                        )
+                    })
+                })
+                .collect();
+            handles
+                .into_iter()
+                .map(|handle| handle.join().expect("relation worker panicked"))
+                .collect::<Vec<_>>()
+        });
+        rank_pdp_wall_ms += batch_pdp_started.elapsed().as_secs_f64() * 1000.0;
+
+        for (relation_scalar, relation, state_probes, s3_calls, extraction_ms) in batch_results {
+            rank_attempts_completed += 1;
+            rank_state_probes += state_probes;
+            rank_target_s3_calls += s3_calls;
+            let relation_check_ms = relation
+                .as_ref()
+                .map(|found| found.relation_check_ms)
+                .unwrap_or(0.0);
+            rank_relation_check_ms += relation_check_ms;
+            rank_pdp_ms += (extraction_ms - relation_check_ms).max(0.0);
+
+            let Some(relation) = relation else {
+                rank_failures += 1;
+                continue;
+            };
+            rank_verified_relations += 1;
+            let matrix_started = Instant::now();
+            let row = relation_row(&base, &relation, relation_scalar, r);
+            rank_matrix_build_ms += matrix_started.elapsed().as_secs_f64() * 1000.0;
+            let la_started = Instant::now();
+            let new_rank = echelon.insert(row);
+            rank_linear_algebra_ms += la_started.elapsed().as_secs_f64() * 1000.0;
+            if new_rank {
+                rank_new_rows += 1;
+            } else {
+                rank_dependent_rows += 1;
+            }
+            rank_witnesses.push(json!({
+                "relation_scalar": relation_scalar,
+                "point_indices": relation.point_indices,
+                "x_codes": relation.x_codes,
+                "state_probes": state_probes,
+                "target_s3_calls": s3_calls,
+                "partner_probes": relation.probes,
+                "rank_gain": new_rank
+            }));
+        }
+    }
+    let rank_collection_ms = rank_started.elapsed().as_secs_f64() * 1000.0;
+    let prepared_rank = echelon.rank;
+    let prepared_rank_reached = prepared_rank >= prepare_rank;
+    let rank_complete = echelon.rank == base.columns;
+    let final_la_started = Instant::now();
+    let logs = if rank_complete {
+        Some(echelon.solve())
+    } else {
+        None
+    };
+    let final_linear_algebra_ms = final_la_started.elapsed().as_secs_f64() * 1000.0;
+
+    let log_certificate_started = Instant::now();
+    if let Some(logs) = &logs {
+        for (column, representative) in representatives.iter().enumerate() {
+            let [x, y] = representative.expect("representative point");
+            assert_eq!(
+                fast.scalar_mul(generator, &BigUint::from(logs[column])),
+                Some((x, y)),
+                "recovered base log must replay"
+            );
+        }
+    }
+    let log_certificate_ms = log_certificate_started.elapsed().as_secs_f64() * 1000.0;
+    let prepared_relations_ms = preparation_started.elapsed().as_secs_f64() * 1000.0;
+
+    // All rank queries, row insertion, final LA, and base-log certificates are
+    // target independent and charged to reusable preparation. Input loading
+    // stays outside the online interval, after preparation is complete.
+    let reusable_setup_ms = cold_started.elapsed().as_secs_f64() * 1000.0;
+    let setup_charged_subphases_ms = curve_setup_ms
+        + base_build_ms
+        + base_digest_ms
+        + basis_ms
+        + representative_x_ms
+        + index_ms
+        + prepared_relations_ms;
+    let setup_timer_boundary_residual_ms = reusable_setup_ms - setup_charged_subphases_ms;
+    assert!(setup_timer_boundary_residual_ms >= -0.02);
+    let target_input_started = Instant::now();
+    let target_raw: [u64; 2] =
+        serde_json::from_slice(&std::fs::read(&arguments[5]).expect("read public target point"))
+            .expect("target point must be [x,y]");
+    let target_input_load_ms = target_input_started.elapsed().as_secs_f64() * 1000.0;
+    let target: FastPoint = Some((target_raw[0], target_raw[1]));
+    let target_online_started = Instant::now();
+
+    let target_validation_started = Instant::now();
+    let [qx, qy] = target_raw;
+    let lhs = gf.sqr(qy) ^ gf.mul(qx, qy);
+    let rhs = gf.mul(gf.sqr(qx), qx) ^ gf.mul(gf.from_element(&curve.curve.a), gf.sqr(qx)) ^ b;
+    assert_eq!(lhs, rhs, "Q must lie on the declared curve");
+    assert_eq!(
+        fast.scalar_mul(target, &BigUint::from(r)),
+        None,
+        "Q must lie in the declared subgroup"
+    );
+    let target_validation_ms = target_validation_started.elapsed().as_secs_f64() * 1000.0;
+    let target_hash_started = Instant::now();
+    let target_hash = point_hash(target);
+    let target_query_hash_ms = target_hash_started.elapsed().as_secs_f64() * 1000.0;
+    let target_query_started = Instant::now();
+    let (target_relation, target_state_probes, target_s3_calls, target_winner_worker) =
+        extract_target_parallel(
+            &gf,
+            &fast,
+            &basis,
+            &solver,
+            &index,
+            &base,
+            target,
+            target_hash as usize,
+            target_workers,
+        );
+    let target_extract_ms = target_query_started.elapsed().as_secs_f64() * 1000.0;
+    let target_relation_check_ms = target_relation
+        .as_ref()
+        .map(|relation| relation.relation_check_ms)
+        .unwrap_or(0.0);
+    let target_pdp_ms = (target_extract_ms - target_relation_check_ms).max(0.0);
+    let target_coefficients = target_relation
+        .as_ref()
+        .map(|relation| relation_row(&base, relation, 0, r)[..base.columns].to_vec());
+
+    let span_started = Instant::now();
+    let mut target_full_rank_direct_recovery = false;
+    if let Some(coefficients) = &target_coefficients {
+        if let (Some(logs), Some(relation)) = (logs.as_ref(), target_relation.as_ref()) {
+            // A full-rank reusable system already fixes every factor-base
+            // log. The four verified target labels give its scalar directly;
+            // reducing a length-B target row against the echelon matrix is
+            // unnecessary online work.
+            target_span_value = Some(relation.point_indices.iter().fold(0u64, |acc, &index| {
+                let (column, coefficient) = base.labels[index];
+                (acc + mulmod(coefficient, logs[column], r)) % r
+            }));
+            target_full_rank_direct_recovery = true;
+        } else {
+            target_span_checks = 1;
+            target_span_value = echelon.span_value(coefficients);
+        }
+        if target_span_value.is_some() {
+            target_span_relation_prefix = Some(rank_verified_relations);
+            target_span_attempt_prefix = Some(rank_attempts_completed);
+        }
+    }
+    target_span_check_ms = span_started.elapsed().as_secs_f64() * 1000.0;
+
+    // The prepared rank is frozen independently of Q. Any additional rows
+    // needed for this particular target are collected inside the online
+    // interval, continuing the same scalar stream without repeats.
+    let fallback_collection_started = Instant::now();
+    let mut fallback_attempts = 0usize;
+    let mut fallback_attempts_completed = 0usize;
+    let mut fallback_failures = 0usize;
+    let mut fallback_verified_relations = 0usize;
+    let mut fallback_new_rows = 0usize;
+    let mut fallback_dependent_rows = 0usize;
+    let mut fallback_state_probes = 0u64;
+    let mut fallback_s3_calls = 0u64;
+    let mut fallback_query_generation_ms = 0.0;
+    let mut fallback_pdp_ms = 0.0;
+    let mut fallback_pdp_wall_ms = 0.0;
+    let mut fallback_relation_check_ms = 0.0;
+    let mut fallback_matrix_build_ms = 0.0;
+    let mut fallback_linear_algebra_ms = 0.0;
+    let mut fallback_span_relation_prefix = None;
+    let mut fallback_span_attempt_prefix = None;
+    let mut fallback_witnesses = Vec::new();
+    while target_coefficients.is_some()
+        && target_span_value.is_none()
+        && rank_attempts + fallback_attempts < max_relation_attempts
+    {
+        let remaining = max_relation_attempts - rank_attempts - fallback_attempts;
+        let mut batch = Vec::with_capacity(relation_workers.min(remaining));
+        while batch.len() < relation_workers && batch.len() < remaining {
+            let query_generation_started = Instant::now();
+            let relation_scalar = splitmix64(&mut relation_rng) % (r - 1) + 1;
+            if !used_relation_scalars.insert(relation_scalar) {
+                fallback_query_generation_ms +=
+                    query_generation_started.elapsed().as_secs_f64() * 1000.0;
+                continue;
+            }
+            let relation_target = fast
+                .scalar_mul(generator, &BigUint::from(relation_scalar))
+                .expect("nonzero relation target");
+            let relation_hash = point_hash(Some(relation_target));
+            fallback_query_generation_ms +=
+                query_generation_started.elapsed().as_secs_f64() * 1000.0;
+            batch.push((relation_scalar, relation_target, relation_hash));
+        }
+        if batch.is_empty() {
+            break;
+        }
+        fallback_attempts += batch.len();
+        let batch_pdp_started = Instant::now();
+        let batch_results = thread::scope(|scope| {
+            let handles: Vec<_> = batch
+                .iter()
+                .copied()
+                .map(|(relation_scalar, relation_target, relation_hash)| {
+                    let gf = &gf;
+                    let fast = &fast;
+                    let basis = &basis;
+                    let solver = &solver;
+                    let index = &index;
+                    let base = &base;
+                    scope.spawn(move || {
+                        let pdp_started = Instant::now();
+                        let (relation, state_probes, s3_calls) = extract(
+                            gf,
+                            fast,
+                            basis,
+                            solver,
+                            index,
+                            base,
+                            Some(relation_target),
+                            relation_hash as usize,
+                        );
+                        (
+                            relation_scalar,
+                            relation,
+                            state_probes,
+                            s3_calls,
+                            pdp_started.elapsed().as_secs_f64() * 1000.0,
+                        )
+                    })
+                })
+                .collect();
+            handles
+                .into_iter()
+                .map(|handle| handle.join().expect("fallback relation worker panicked"))
+                .collect::<Vec<_>>()
+        });
+        fallback_pdp_wall_ms += batch_pdp_started.elapsed().as_secs_f64() * 1000.0;
+
+        for (relation_scalar, relation, state_probes, s3_calls, extraction_ms) in batch_results {
+            fallback_attempts_completed += 1;
+            fallback_state_probes += state_probes;
+            fallback_s3_calls += s3_calls;
+            let relation_check_ms = relation
+                .as_ref()
+                .map(|found| found.relation_check_ms)
+                .unwrap_or(0.0);
+            fallback_relation_check_ms += relation_check_ms;
+            fallback_pdp_ms += (extraction_ms - relation_check_ms).max(0.0);
+            let Some(relation) = relation else {
+                fallback_failures += 1;
+                continue;
+            };
+            fallback_verified_relations += 1;
+            let matrix_started = Instant::now();
+            let row = relation_row(&base, &relation, relation_scalar, r);
+            fallback_matrix_build_ms += matrix_started.elapsed().as_secs_f64() * 1000.0;
+            let la_started = Instant::now();
+            let new_rank = echelon.insert(row);
+            fallback_linear_algebra_ms += la_started.elapsed().as_secs_f64() * 1000.0;
+            if new_rank {
+                fallback_new_rows += 1;
+            } else {
+                fallback_dependent_rows += 1;
+            }
+            fallback_witnesses.push(json!({
+                "relation_scalar": relation_scalar,
+                "point_indices": relation.point_indices,
+                "x_codes": relation.x_codes,
+                "state_probes": state_probes,
+                "target_s3_calls": s3_calls,
+                "partner_probes": relation.probes,
+                "rank_gain": new_rank
+            }));
+            if new_rank && target_span_value.is_none() {
+                let check_started = Instant::now();
+                target_span_value = echelon.span_value(target_coefficients.as_ref().unwrap());
+                target_span_check_ms += check_started.elapsed().as_secs_f64() * 1000.0;
+                target_span_checks += 1;
+                if target_span_value.is_some() {
+                    fallback_span_relation_prefix =
+                        Some(rank_verified_relations + fallback_verified_relations);
+                    fallback_span_attempt_prefix =
+                        Some(rank_attempts_completed + fallback_attempts_completed);
+                }
+            }
+        }
+    }
+    let fallback_collection_ms = if fallback_attempts > 0 {
+        fallback_collection_started.elapsed().as_secs_f64() * 1000.0
+    } else {
+        0.0
+    };
+    let final_rank = echelon.rank;
+    let final_rank_complete = final_rank == base.columns;
+
+    let descent_started = Instant::now();
+    let recovered = target_span_value.or_else(|| {
+        target_relation.as_ref().and_then(|relation| {
+            logs.as_ref().map(|logs| {
+                relation.point_indices.iter().fold(0u64, |acc, &index| {
+                    let (column, coefficient) = base.labels[index];
+                    (acc + mulmod(coefficient, logs[column], r)) % r
+                })
+            })
+        })
+    });
+    let target_descent_work_ms = target_span_check_ms
+        + descent_started.elapsed().as_secs_f64() * 1000.0
+        + fallback_matrix_build_ms
+        + fallback_linear_algebra_ms;
+    let recovery_check_started = Instant::now();
+    let verified = recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
+    let target_recovery_check_ms = recovery_check_started.elapsed().as_secs_f64() * 1000.0;
+    let target_query_ms =
+        target_validation_ms + target_query_hash_ms + fallback_query_generation_ms;
+    let cold_after_launch_ms = cold_started.elapsed().as_secs_f64() * 1000.0;
+    let online_elapsed_ms = target_online_started.elapsed().as_secs_f64() * 1000.0;
+    // Prepared relation collection is reusable setup. Charge every fallback
+    // batch's wall interval to this target. Checks inside parallel workers
+    // remain a diagnostic inside that interval, as in the frozen reference.
+    let target_pdp_charged_ms = target_pdp_ms + fallback_pdp_wall_ms;
+    let target_descent_charged_ms = (online_elapsed_ms
+        - target_query_ms
+        - target_pdp_charged_ms
+        - target_relation_check_ms
+        - target_recovery_check_ms)
+        .max(0.0);
+    let online_phase_sum_ms = target_query_ms
+        + target_pdp_charged_ms
+        + target_relation_check_ms
+        + target_descent_charged_ms
+        + target_recovery_check_ms;
+    assert!((online_phase_sum_ms - online_elapsed_ms).abs() < 0.02);
+
+    let record = json!({
+        "kind":"unknown_log_orbit_slice_ic_run",
+        "schema_version":"1.0",
+        "n":n, "a":a, "subgroup_order":r,
+        "relation_seed":relation_seed,
+        "factor_base_scan_start_x":1,
+        "factor_base_scanned_x":scanned_x,
+        "orbit_columns":base.columns,
+        "factor_base_points":base.points.len(),
+        "factor_base_digest":base_hash,
+        "regular_states":index.states.len(),
+        "index_precomputed_poly_point_bytes":index.states.len() * 32,
+        "index_state_struct_bytes":std::mem::size_of::<State>(),
+        "index_state_payload_bytes":index.states.len() * std::mem::size_of::<State>(),
+        "group_lift_valid_states":group_lift_valid_states,
+        "group_lift_fallback_states":index.states.len() - group_lift_valid_states,
+        "root_table_entries":index.table.len,
+        "root_table_slots":index.table.slots,
+        "root_table_slot_bytes":if index.table.quotient_roots {
+            std::mem::size_of::<u64>()
+        } else {
+            std::mem::size_of::<RootSlot>()
+        },
+        "root_table_value_bits":if index.table.quotient_roots { 29 } else { 40 },
+        "root_table_layout":if index.table.quotient_roots {
+            "packed_8_byte_mixed_key_remainder_displacement12_state_index29_exact_hit_reconstruction"
+        } else {
+            "packed_13_byte_u64_key_u40_value_slots"
+        },
+        "root_table_construction_policy":if index.table.quotient_roots {
+            "direct_exact_mixed_quotient_insert"
+        } else {
+            "full_key_shard_insert"
+        },
+        "root_table_capacity_policy":"uniform_initial_next_power_of_two_with_exact_growth_per_shard",
+        "root_scatter_policy":"ordered_state_chunks_parallel_scatter_and_shard_insert",
+        "root_scatter_chunk_state_limit":1 << 22,
+        "root_table_shards":64,
+        "root_table_input_entries_per_shard":index.table.input_entries_per_shard,
+        "root_table_slots_per_shard":index.table.slots_per_shard,
+        "index_build_workers":relation_workers,
+        "target":target.map(|(x,y)| [x,y]),
+        "orientation_policy":"one target-seeded pseudorandom global Frobenius shift per S3 state",
+        "rank_attempt_limit":max_relation_attempts,
+        "prepare_rank_requested":prepare_rank,
+        "prepared_rank":prepared_rank,
+        "prepared_rank_reached":prepared_rank_reached,
+        "relation_collection_workers":relation_workers,
+        "target_query_workers":target_workers,
+        "target_query_batch_width":8,
+        "target_conjugate_count":n,
+        "target_query_orientation_policy":"precomputed_inverse_frobenius_target_conjugates_with_unrotated_index_points",
+        "target_query_inversion_policy":"one normal-basis field inversion per eight regular state pair products",
+        "relation_query_inversion_policy":"one field inversion per indexed state pair",
+        "target_query_winner_worker":target_winner_worker,
+        "target_parallel_policy":"independent_rotating_starts_first_verified_relation_cooperative_cancel_and_worker_drain",
+        "target_search_schedule":if n == 53 && base.columns == 2800 {
+            "c1200_embedded_state_prefix_then_complete_c2800"
+        } else {
+            "native_rotating_state_order"
+        },
+        "target_search_prefix_columns":if n == 53 && base.columns == 2800 { 1200 } else { base.columns },
+        "relation_collection_batching":"fixed-size batches of target-independent known-scalar queries until the frozen preparation rank; target-charged continuation only when the target row is not spanned",
+        "rank_attempts":rank_attempts,
+        "rank_attempts_completed":rank_attempts_completed,
+        "rank_failures":rank_failures,
+        "rank_verified_relations":rank_verified_relations,
+        "rank_new_rows":rank_new_rows,
+        "rank_dependent_rows":rank_dependent_rows,
+        "rank":prepared_rank,
+        "rank_complete":rank_complete,
+        "final_rank":final_rank,
+        "final_rank_complete":final_rank_complete,
+        "total_attempts":rank_attempts + fallback_attempts,
+        "total_verified_relations":rank_verified_relations + fallback_verified_relations,
+        "total_new_rows":rank_new_rows + fallback_new_rows,
+        "total_s3_calls":rank_target_s3_calls + fallback_s3_calls + target_s3_calls,
+        "fallback_attempts":fallback_attempts,
+        "fallback_attempts_completed":fallback_attempts_completed,
+        "fallback_failures":fallback_failures,
+        "fallback_verified_relations":fallback_verified_relations,
+        "fallback_new_rows":fallback_new_rows,
+        "fallback_dependent_rows":fallback_dependent_rows,
+        "fallback_state_probes":fallback_state_probes,
+        "fallback_s3_calls":fallback_s3_calls,
+        "fallback_relation_witnesses":fallback_witnesses,
+        "target_span_stop_relation_prefix":null,
+        "target_span_stop_attempt_prefix":null,
+        "target_span_prepared_relation_prefix":target_span_relation_prefix,
+        "target_span_prepared_attempt_prefix":target_span_attempt_prefix,
+        "target_span_online_relation_prefix":fallback_span_relation_prefix,
+        "target_span_online_attempt_prefix":fallback_span_attempt_prefix,
+        "target_span_checks":target_span_checks,
+        "target_span_recovered_scalar":target_span_value,
+        "target_full_rank_direct_recovery":target_full_rank_direct_recovery,
+        "target_recovery_policy":if target_full_rank_direct_recovery {
+            "precomputed_full_factor_base_logs_direct_four_label_sum"
+        } else {
+            "partial_rank_target_span_or_fallback"
+        },
+        "rank_state_probes":rank_state_probes,
+        "rank_target_s3_calls":rank_target_s3_calls,
+        "rank_relation_witnesses":rank_witnesses,
+        "solved_base_logs":logs,
+        "target_relation_found":target_relation.is_some(),
+        "target_relation_indices":target_relation.as_ref().map(|relation| relation.point_indices),
+        "target_relation_probes":target_relation.as_ref().map(|relation| relation.probes),
+        "target_state_probes":target_state_probes,
+        "target_s3_calls":target_s3_calls,
+        "recovered_scalar":recovered,
+        "group_verified":verified,
+        "timing_ms":{
+            "curve_setup_and_checks":curve_setup_ms,
+            "factor_base_construct":base_build_ms,
+            "factor_base_digest":base_digest_ms,
+            "normal_basis_and_selftest":basis_ms,
+            "representative_x_conversion":representative_x_ms,
+            "index_build":index_ms,
+            "index_state_generation":index_state_generation_ms,
+            "index_shifted_points_generation":index_shifted_generation_ms,
+            "index_state_merge":index_state_merge_ms,
+            "index_root_scatter_parallel":index_root_scatter_ms,
+            "index_root_shard_insert_parallel":index_root_shard_insert_ms,
+            "index_unattributed_overhead":index_unattributed_overhead_ms,
+            "rank_query_generation":rank_query_generation_ms,
+            "rank_pdp":rank_pdp_ms,
+            "rank_pdp_worker_time_sum":rank_pdp_ms,
+            "rank_pdp_wall":rank_pdp_wall_ms,
+            "rank_relation_check":rank_relation_check_ms,
+            "rank_matrix_build":rank_matrix_build_ms,
+            "rank_linear_algebra_incremental":rank_linear_algebra_ms,
+            "rank_linear_algebra_final":final_linear_algebra_ms,
+            "rank_collection_total":rank_collection_ms,
+            "base_log_certificate":log_certificate_ms,
+            "prepared_relations":prepared_relations_ms,
+            "fallback_collection_total":fallback_collection_ms,
+            "fallback_query_generation":fallback_query_generation_ms,
+            "fallback_pdp_worker_time_sum":fallback_pdp_ms,
+            "fallback_pdp_wall":fallback_pdp_wall_ms,
+            "fallback_relation_check_worker_time_sum":fallback_relation_check_ms,
+            "fallback_matrix_build":fallback_matrix_build_ms,
+            "fallback_linear_algebra_incremental":fallback_linear_algebra_ms,
+            "reusable_setup_total":reusable_setup_ms,
+            "setup_phase_sum":setup_charged_subphases_ms + setup_timer_boundary_residual_ms,
+            "setup_timer_boundary_residual":setup_timer_boundary_residual_ms,
+            "target_query":target_query_ms,
+            "target_point_validation":target_validation_ms,
+            "target_query_hash":target_query_hash_ms,
+            "target_pdp":target_pdp_ms,
+            "target_pdp_charged":target_pdp_charged_ms,
+            "target_relation_check":target_relation_check_ms,
+            "target_descent_work_diagnostic":target_descent_work_ms,
+            "target_full_rank_direct_recovery":if target_full_rank_direct_recovery {
+                target_span_check_ms
+            } else {
+                0.0
+            },
+            "target_descent":target_descent_charged_ms,
+            "target_recovery_check":target_recovery_check_ms,
+            "target_online_after_reusable_setup":online_elapsed_ms,
+            "target_online_phase_sum":online_phase_sum_ms,
+            "target_input_load_outside_online":target_input_load_ms,
+            "cold_after_launch":cold_after_launch_ms
+        },
+        "peak_rss_bytes":peak_rss_bytes(),
+        "threads":relation_workers + 1,
+        "rank_stage":"target-independent known-scalar queries to a fixed partial rank; target-charged continuation on span misses",
+        "linear_algebra":"incremental Gaussian elimination modulo subgroup order",
+        "target_count":1
+    });
+    let _process_after_launch_ms = process_started.elapsed().as_secs_f64() * 1000.0;
+    writeln!(out, "{record}").unwrap();
+    println!("{record}");
+
+    if let Ok(path) = std::env::var("KIC_DUMP_BASE") {
+        let dump = json!({
+            "kind":"unknown_log_orbit_factor_base",
+            "n":n,"a":a,"subgroup_order":r,
+            "factor_base_scan_start_x":1,"factor_base_scanned_x":scanned_x,
+            "orbit_columns":base.columns,"base_hash":base_hash,
+            "representative_points":representatives.iter().map(|point| point.map(|[x,y]| [x,y])).collect::<Vec<_>>(),
+            "factor_base_point_coordinates":base.points.iter().map(|p| p.map(|(x,y)| [x,y])).collect::<Vec<_>>(),
+            "factor_base_point_labels":base.labels
+        });
+        std::fs::write(path, format!("{dump}\n")).expect("write base dump");
+    }
+}
+
+#[cfg(test)]
+mod batch_inverse_tests {
+    use super::*;
+
+    #[test]
+    fn batch8_matches_individual_normal_basis_inverses() {
+        for n in [13, 41, 53] {
+            let curve = KoblitzCurve::new(0, n).expect("Koblitz test curve");
+            let gf = Gf2::new(&curve.curve.irreducible);
+            let basis = NormalBasis::new(&gf);
+            let mut seed = 0xBA7C_8120_2610_0901u64 ^ n as u64;
+            for len in 1..=8 {
+                for _ in 0..32 {
+                    let original = (0..len)
+                        .map(|_| (splitmix64(&mut seed) & basis.mask).max(1))
+                        .collect::<Vec<_>>();
+                    let expected = original
+                        .iter()
+                        .map(|&value| invert(&gf, &basis, value))
+                        .collect::<Vec<_>>();
+                    let mut actual = original.clone();
+                    let mut prefix = [1u64; 8];
+                    invert_batch8(&gf, &basis, &mut actual, &mut prefix);
+                    assert_eq!(actual, expected, "degree {n}, batch length {len}");
+                    for (&value, &inverse) in original.iter().zip(&actual) {
+                        assert_eq!(gf.mul(value, inverse), 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod pair_root_tests {
+    use super::*;
+
+    #[test]
+    fn shared_inversion_preserves_both_ordered_s3_answers() {
+        for n in [13, 53] {
+            let curve = KoblitzCurve::new(0, n).expect("Koblitz test curve");
+            let gf = Gf2::new(&curve.curve.irreducible);
+            let basis = NormalBasis::new(&gf);
+            let solver = S3Solver::new(&gf, gf.from_element(&curve.curve.b));
+            let mut seed = 0x5A17_2026_1006_0001u64;
+            for i in 0..4096 {
+                let right = splitmix64(&mut seed) & basis.mask;
+                let mut left = [
+                    splitmix64(&mut seed) & basis.mask,
+                    splitmix64(&mut seed) & basis.mask,
+                ];
+                // Exercise the zero and diagonal fallbacks as well as the
+                // ordinary two-inversion path.
+                if i % 16 == 0 {
+                    left[0] = right;
+                }
+                if i % 16 == 1 {
+                    left[1] = 0;
+                }
+                let expected = [
+                    solver.roots(&gf, &basis, left[0], right),
+                    solver.roots(&gf, &basis, left[1], right),
+                ];
+                assert_eq!(solver.roots_pair(&gf, &basis, left, right), expected);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod parallel_index_tests {
+    use super::*;
+
+    #[test]
+    fn direct_fill_preserves_serial_triple_order_across_worker_counts() {
+        let make = |left: usize, right: usize, relative: usize| State {
+            left: left as u16,
+            right: right as u16,
+            relative: relative as u16,
+            group_lift_valid: true,
+            poly_roots: [(left * 100 + right * 10 + relative) as u64, 0],
+            poly_ys: [0; 2],
+        };
+        let serial = fill_regular_states(5, 3, 4, 1, make);
+        for workers in [2, 3, 5, 8] {
+            let parallel = fill_regular_states(5, 3, 4, workers, make);
+            assert_eq!(parallel.len(), serial.len());
+            for (actual, expected) in parallel.iter().zip(&serial) {
+                assert_eq!(
+                    (actual.left, actual.right, actual.relative),
+                    (expected.left, expected.right, expected.relative)
+                );
+                assert_eq!(actual.poly_roots, expected.poly_roots);
+            }
+        }
+    }
+
+    #[test]
+    fn sharded_index_matches_serial_root_map_and_worker_order() {
+        let curve = KoblitzCurve::new(0, 13).expect("N13 Koblitz test curve");
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let b = gf.from_element(&curve.curve.b);
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, b);
+        let reps: Vec<u64> = (1..=9).collect();
+
+        let serial = build_index(&gf, &basis, &solver, &reps, 1).0;
+        let parallel = build_index(&gf, &basis, &solver, &reps, 4).0;
+
+        assert!(!serial.states.is_empty());
+        assert_eq!(serial.states.len(), parallel.states.len());
+        for (left, right) in serial.states.iter().zip(&parallel.states) {
+            assert_eq!(left.left, right.left);
+            assert_eq!(left.right, right.right);
+            assert_eq!(left.relative, right.relative);
+            assert_eq!(left.poly_roots, right.poly_roots);
+            assert_eq!(left.poly_ys, right.poly_ys);
+            assert_eq!(left.group_lift_valid, right.group_lift_valid);
+        }
+        assert_eq!(serial.table.len, parallel.table.len);
+        assert_eq!(serial.table.slots, parallel.table.slots);
+        for (left, right) in serial.table.shards.iter().zip(&parallel.table.shards) {
+            match (left, right) {
+                (RootShard::Full(left), RootShard::Full(right)) => {
+                    assert_eq!(left.slots, right.slots)
+                }
+                _ => panic!("small control must use full-key root shards"),
+            }
+        }
+
+        let mut serial_root_map = HashMap::new();
+        for state in &serial.states {
+            for &poly_root in &state.poly_roots {
+                let root = basis.to_normal.apply(poly_root);
+                let (canonical, shift) = basis.canonical(root);
+                serial_root_map
+                    .entry(canonical)
+                    .or_insert_with(|| pack(state.left, state.right, state.relative, shift));
+            }
+        }
+        assert_eq!(serial.table.len, serial_root_map.len());
+        for (key, value) in serial_root_map {
+            assert_eq!(serial.table.get(key, &serial.states, &basis), Some(value));
+            assert_eq!(
+                parallel.table.get(key, &parallel.states, &basis),
+                Some(value)
+            );
+        }
+        assert_eq!(serial.shifted, parallel.shifted);
+    }
+
+    #[test]
+    fn compact_shards_match_full_key_index_on_small_n13_base() {
+        let curve = KoblitzCurve::new(0, 13).expect("N13 Koblitz curve");
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, gf.from_element(&curve.curve.b));
+        let reps = (1..=9u64).collect::<Vec<_>>();
+        let full = build_index_with_root_layout(&gf, &basis, &solver, &reps, 4, false).0;
+        let compact = build_index_with_root_layout(&gf, &basis, &solver, &reps, 4, true).0;
+        assert_eq!(full.states.len(), compact.states.len());
+        assert_eq!(full.table.len, compact.table.len);
+        assert_eq!(full.table.slots, compact.table.slots);
+        assert!(compact
+            .table
+            .shards
+            .iter()
+            .all(|shard| matches!(shard, RootShard::Compact(_))));
+        for state in &full.states {
+            for &poly_root in &state.poly_roots {
+                let root = basis.to_normal.apply(poly_root);
+                let key = basis.canonical(root).0;
+                assert_eq!(
+                    full.table.get(key, &full.states, &basis),
+                    compact.table.get(key, &compact.states, &basis)
+                );
+            }
+        }
+        let absent = (0..=basis.mask)
+            .find(|&key| full.table.get(key, &full.states, &basis).is_none())
+            .unwrap();
+        assert_eq!(compact.table.get(absent, &compact.states, &basis), None);
+    }
+}
+
+#[cfg(test)]
+mod target_search_schedule_tests {
+    use super::*;
+
+    #[test]
+    fn embedded_prefix_preserves_small_index_order_and_full_fallback() {
+        let full = TargetSearchSchedule::new(5, 3, 7, 143);
+        let small = TargetSearchSchedule::new(3, 3, 7, 143);
+        assert_eq!(full.total_len(), 5 * 5 * 7 + 3 * 3 * 7);
+        for offset in 0..small.total_len() {
+            let small_position = small.physical_index(offset);
+            let left = small_position / (3 * 7);
+            let rem = small_position % (3 * 7);
+            assert_eq!(full.physical_index(offset), left * (5 * 7) + rem);
+        }
+        let mut fallback = (small.total_len()..full.total_len())
+            .map(|offset| full.physical_index(offset))
+            .collect::<Vec<_>>();
+        fallback.sort_unstable();
+        assert_eq!(fallback, (0..5 * 5 * 7).collect::<Vec<_>>());
+    }
+}
+
+#[cfg(test)]
+mod n53_shard_capacity_control {
+    use super::*;
+
+    #[test]
+    fn exact_n53_base_builds_sharded_index_and_reports_distribution() {
+        let curve = KoblitzCurve::new(0, 53).expect("N53 Koblitz curve");
+        let r = curve.subgroup_order.to_u64().unwrap();
+        let fast = FastBinaryCurve::new(&curve.curve.irreducible, 0).unwrap();
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let b = gf.from_element(&curve.curve.b);
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, b);
+        let (_, _, representatives, _) = construct_base(&fast, &curve, b, 244, r);
+        let rep_x: Vec<u64> = representatives
+            .iter()
+            .map(|point| point.expect("representative point")[0])
+            .collect();
+
+        let (index, _, _, _, _, _) = build_index(&gf, &basis, &solver, &rep_x, 14);
+        assert_eq!(index.states.len(), 3_155_408);
+        assert_eq!(index.table.len, 3_154_661);
+        assert_eq!(index.table.slots_per_shard.len(), 64);
+        assert_eq!(index.table.input_entries_per_shard.len(), 64);
+        assert!(index
+            .table
+            .input_entries_per_shard
+            .iter()
+            .all(|&count| count > 0));
+        eprintln!(
+            "N53 shard input entries: {:?}; slots: {:?}",
+            index.table.input_entries_per_shard, index.table.slots_per_shard
+        );
+    }
+}
+
+#[cfg(test)]
+mod dense_capacity_tests {
+    use super::*;
+
+    #[test]
+    fn every_input_root_can_be_distinct_and_a_missing_probe_still_terminates() {
+        let mut table = RootTable::with_capacity(15, 6);
+        assert_eq!(table.slots.len(), 16);
+        for key in 0..15u64 {
+            table.insert_if_absent_hashed(key, key + 100, RootTable::hash(key));
+        }
+        assert_eq!(table.len, 15);
+        for key in 0..15u64 {
+            assert_eq!(table.get_hashed(key, RootTable::hash(key)), Some(key + 100));
+        }
+        assert_eq!(table.get_hashed(99, RootTable::hash(99)), None);
+    }
+
+    #[test]
+    fn skewed_shard_growth_preserves_first_witness_and_missing_probe() {
+        let mut table = RootTable::with_capacity(1, 6);
+        for key in 0..40u64 {
+            table.insert_if_absent_hashed(key, key + 100, RootTable::hash(key));
+        }
+        table.insert_if_absent_hashed(17, 999, RootTable::hash(17));
+        assert_eq!(table.len, 40);
+        assert_eq!(table.slots.len(), 64);
+        assert_eq!(table.get_hashed(17, RootTable::hash(17)), Some(117));
+        assert_eq!(table.get_hashed(99, RootTable::hash(99)), None);
+    }
+}
+
+#[cfg(test)]
+mod quotient_root_tests {
+    use super::*;
+
+    #[test]
+    fn exact_key_and_first_witness_survive_shard_growth() {
+        let mut shards = (0..4)
+            .map(|shard| QuotientRootTable::with_capacity(1, shard, 13, 2, 8, 4, 13))
+            .collect::<Vec<_>>();
+        let mut expected = HashMap::new();
+        for key in 0..300u64 {
+            let hash = QuotientRootTable::hash_key(key, 13);
+            let witness = (key * 17) % 200;
+            let shard = (hash & 3) as usize;
+            shards[shard].insert_hashed(hash, witness);
+            shards[shard].insert_hashed(hash, (witness + 1) % 200);
+            expected.insert(key, witness);
+        }
+        assert_eq!(shards.iter().map(|s| s.len).sum::<usize>(), 300);
+        assert!(shards.iter().any(|s| s.slots.len() > 16));
+        for key in 0..(1 << 13) {
+            let hash = QuotientRootTable::hash_key(key, 13);
+            let shard = (hash & 3) as usize;
+            let witness = shards[shard].get_hashed(hash);
+            assert_eq!(witness, expected.get(&key).copied(), "key {key}");
+        }
+    }
+
+    #[test]
+    fn matched_key_reconstructs_first_root_shift_from_retained_state() {
+        let curve = KoblitzCurve::new(0, 13).expect("N13 Koblitz curve");
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let basis = NormalBasis::new(&gf);
+        let states = (0..100usize)
+            .map(|index| State {
+                left: (index / 52) as u16,
+                right: ((index % 52) / 13) as u16,
+                relative: (index % 13) as u16,
+                group_lift_valid: false,
+                poly_roots: [
+                    ((7 * index + 1) as u64) & basis.mask,
+                    ((11 * index + 3) as u64) & basis.mask,
+                ],
+                poly_ys: [0; 2],
+            })
+            .collect::<Vec<_>>();
+        let table = QuotientRootTable::with_capacity(1, 0, 13, 2, 8, 4, 13);
+        for (index, state) in states.iter().enumerate() {
+            for &poly_root in &state.poly_roots {
+                let root = basis.to_normal.apply(poly_root);
+                let key = basis.canonical(root).0;
+                let first_shift = state
+                    .poly_roots
+                    .iter()
+                    .find_map(|&candidate| {
+                        let normalized = basis.to_normal.apply(candidate);
+                        let (canonical, shift) = basis.canonical(normalized);
+                        (canonical == key).then_some(shift)
+                    })
+                    .unwrap();
+                assert_eq!(
+                    table.unpack_witness(index as u64, key, &states, &basis),
+                    pack(state.left, state.right, state.relative, first_shift),
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn mixed_shards_balance_on_exact_n53_c244_roots() {
+        let curve = KoblitzCurve::new(0, 53).expect("N53 Koblitz curve");
+        let r = curve.subgroup_order.to_u64().unwrap();
+        let fast = FastBinaryCurve::new(&curve.curve.irreducible, 0).unwrap();
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let b = gf.from_element(&curve.curve.b);
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, b);
+        let (_, _, representatives, _) = construct_base(&fast, &curve, b, 244, r);
+        let reps = representatives
+            .iter()
+            .map(|point| point.expect("representative point")[0])
+            .collect::<Vec<_>>();
+        let index = build_index(&gf, &basis, &solver, &reps, 4).0;
+        let mut input_per_shard = [0u64; 64];
+        for state in &index.states {
+            for &poly_root in &state.poly_roots {
+                let root = basis.to_normal.apply(poly_root);
+                let key = basis.canonical(root).0;
+                let hash = QuotientRootTable::hash_key(key, 53);
+                input_per_shard[(hash & 63) as usize] += 1;
+            }
+        }
+        let minimum = *input_per_shard.iter().min().unwrap();
+        let maximum = *input_per_shard.iter().max().unwrap();
+        assert!(
+            minimum > 0 && maximum < minimum * 5 / 4,
+            "mixed shard input counts: {input_per_shard:?}"
+        );
+    }
+}
+
+#[cfg(test)]
+mod compact_root_tests {
+    use super::*;
+
+    #[test]
+    fn exact_reconstruction_preserves_first_witness_through_growth() {
+        let curve = KoblitzCurve::new(0, 13).expect("N13 Koblitz curve");
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let basis = NormalBasis::new(&gf);
+        let states = (0..80usize)
+            .map(|i| State {
+                left: i as u16,
+                right: 0,
+                relative: 0,
+                group_lift_valid: false,
+                poly_roots: [
+                    ((67 * i + 3) as u64) & basis.mask,
+                    ((103 * i + 11) as u64) & basis.mask,
+                ],
+                poly_ys: [0; 2],
+            })
+            .collect::<Vec<_>>();
+        let mut table = CompactRootTable::with_capacity(1, 6);
+        let mut expected = HashMap::new();
+        for (state_index, state) in states.iter().enumerate() {
+            for root_index in 0..2 {
+                let root = basis.to_normal.apply(state.poly_roots[root_index]);
+                let (key, shift) = basis.canonical(root);
+                expected
+                    .entry(key)
+                    .or_insert_with(|| pack(state.left, state.right, state.relative, shift));
+                table.insert_if_absent_hashed(
+                    key,
+                    compact_witness(state_index, root_index),
+                    RootTable::hash(key),
+                    &states,
+                    &basis,
+                );
+            }
+        }
+        assert!(table.slots.len() > 16);
+        assert_eq!(table.len, expected.len());
+        for (&key, &value) in &expected {
+            assert_eq!(
+                table.get_hashed(key, RootTable::hash(key), &states, &basis),
+                Some(value)
+            );
+        }
+        let missing = (0..=basis.mask)
+            .find(|key| !expected.contains_key(key))
+            .unwrap();
+        assert_eq!(
+            table.get_hashed(missing, RootTable::hash(missing), &states, &basis),
+            None
+        );
+        let existing = *expected.keys().next().unwrap();
+        assert_eq!(
+            table.get_hashed(missing, RootTable::hash(existing), &states, &basis),
+            None
+        );
+    }
+}
