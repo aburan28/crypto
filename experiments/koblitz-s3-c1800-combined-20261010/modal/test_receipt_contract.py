@@ -74,6 +74,7 @@ def synthetic_receipt() -> dict:
             "sampled_peak_rss_bytes": 25_000_000_000,
             "sampled_numa_pages": {"N0": 1000},
             "max_threads_seen": 14,
+            "affinity": list(range(16)),
             "thread_affinity_masks_seen": ["0-15"],
             "before": before, "after": after,
             "perf": perf, "report": report,
@@ -128,6 +129,49 @@ class ReceiptContractTest(unittest.TestCase):
         self.assertEqual(result["status"], "incomplete_or_invalid")
         self.assertFalse(result["rows"][0]["verified_native_and_fixture"])
         self.assertEqual(result["curves"], {})
+
+    def test_interleaved_smt_selection_passes_affinity_check(self) -> None:
+        receipt = synthetic_receipt()
+        host = receipt["guest"]["host"]
+        for cpu in range(16):
+            host["topology"]["cpus"][str(cpu)]["core_id"] = str(cpu % 8)
+            host["topology"]["cpus"][str(cpu)]["thread_siblings_list"] = (
+                f"{cpu % 8},{cpu % 8 + 8}")
+        host["selected_cpus"] = remote_pilot.choose_cpus(
+            list(range(16)), host["topology"], 16)
+        self.assertNotEqual(host["selected_cpus"], sorted(host["selected_cpus"]))
+        result = self.call_analyzer(receipt)
+        self.assertTrue(all(row["guest_quality"]["checks"][
+            "observed_thread_affinity"] for row in result["rows"]))
+
+    def test_cpu_selection_keeps_whole_siblings_with_extra_cores(self) -> None:
+        cpus = {str(cpu): {
+            "physical_package_id": "0", "core_id": str(cpu % 16),
+            "thread_siblings_list": f"{cpu % 16},{cpu % 16 + 16}"}
+            for cpu in range(32)}
+        selected = remote_pilot.choose_cpus(
+            list(range(32)), {"cpus": cpus, "numa_nodes": {"node0": "0-31"}}, 16)
+        self.assertEqual(len(selected), 16)
+        self.assertEqual(len({cpus[str(cpu)]["core_id"] for cpu in selected}), 8)
+        self.assertEqual(set(selected), set(range(8)) | set(range(16, 24)))
+
+    def test_cpu_selection_prefers_one_numa_node(self) -> None:
+        cpus = {str(cpu): {
+            "physical_package_id": "0", "core_id": str(cpu % 16),
+            "thread_siblings_list": f"{cpu % 16},{cpu % 16 + 16}"}
+            for cpu in range(32)}
+        selected = remote_pilot.choose_cpus(list(range(32)), {
+            "cpus": cpus,
+            "numa_nodes": {"node0": "0-3,16-19", "node1": "4-11,20-27"},
+        }, 16)
+        self.assertEqual(set(selected), set(range(4, 12)) | set(range(20, 28)))
+
+    def test_initial_affinity_mismatch_fails_quality_check(self) -> None:
+        receipt = synthetic_receipt()
+        receipt["guest"]["rows"][0]["affinity"] = list(range(15))
+        result = self.call_analyzer(receipt)
+        self.assertFalse(result["rows"][0]["guest_quality"]["checks"][
+            "observed_thread_affinity"])
 
     def test_failed_producer_is_preserved(self) -> None:
         receipt = synthetic_receipt()

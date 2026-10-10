@@ -106,7 +106,11 @@ def guest_quality(row: dict, host: dict, verified: bool) -> dict:
     pages_one_node = (observed_nodes == {nodes[0].replace("node", "N")}
                       if one_node and observed_nodes else None)
     masks = row["thread_affinity_masks_seen"]
-    affinity = (all(cpu_list(mask) == selected for mask in masks) if masks else None)
+    initial_affinity = row.get("affinity")
+    selected_sorted = sorted(selected)
+    affinity = (initial_affinity == selected_sorted and
+                all(cpu_list(mask) == selected_sorted for mask in masks)
+                if initial_affinity is not None and masks else None)
     quota = row["before"]["cgroup"].get("cpu.max")
     throttled = counter_delta(row, "cpu.stat", "nr_throttled")
     throttle_us = counter_delta(row, "cpu.stat", "throttled_usec")

@@ -58,23 +58,49 @@ def topology(allowed: list[int]) -> dict:
     return {"cpus": cores, "numa_nodes": nodes}
 
 
+def cpu_list(raw: str | None) -> list[int]:
+    cpus = set()
+    for item in (raw or "").strip().split(","):
+        pieces = item.split("-", 1)
+        if pieces and all(piece.isdigit() for piece in pieces):
+            cpus.update(range(int(pieces[0]), int(pieces[-1]) + 1))
+    return sorted(cpus)
+
+
 def choose_cpus(allowed: list[int], topo: dict, count: int) -> list[int]:
-    selected = []
-    seen = set()
-    for cpu in allowed:
-        entry = topo["cpus"][str(cpu)]
-        identity = (entry["physical_package_id"], entry["core_id"])
-        if identity not in seen:
-            seen.add(identity)
-            selected.append(cpu)
+    allowed_set = set(allowed)
+
+    def complete_sibling_groups(pool: set[int]) -> list[int]:
+        selected = []
+        seen = set()
+        for cpu in sorted(pool):
+            if cpu in seen:
+                continue
+            entry = topo["cpus"].get(str(cpu), {})
+            identity = (entry.get("physical_package_id"), entry.get("core_id"))
+            siblings = cpu_list(entry.get("thread_siblings_list"))
+            if (None in identity or not siblings or cpu not in siblings
+                    or any(sibling in seen for sibling in siblings)
+                    or not set(siblings).issubset(pool)
+                    or len(selected) + len(siblings) > count):
+                continue
+            if any((topo["cpus"].get(str(sibling), {}).get("physical_package_id"),
+                    topo["cpus"].get(str(sibling), {}).get("core_id")) != identity
+                   for sibling in siblings):
+                continue
+            selected.extend(siblings)
+            seen.update(siblings)
+            if len(selected) == count:
+                break
+        return selected
+
+    # Keep a whole SMT core and its memory node together when the guest
+    # exposes more CPUs than the requested execution set.
+    for cpulist in topo["numa_nodes"].values():
+        selected = complete_sibling_groups(set(cpu_list(cpulist)) & allowed_set)
         if len(selected) == count:
             return selected
-    for cpu in allowed:
-        if cpu not in selected:
-            selected.append(cpu)
-        if len(selected) == count:
-            return selected
-    return selected
+    return complete_sibling_groups(allowed_set)
 
 
 def per_cpu_ticks(cpus: list[int]) -> dict:
