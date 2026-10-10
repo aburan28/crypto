@@ -39,6 +39,19 @@ def main() -> None:
     args = parser.parse_args()
     manifest_path = HERE / "HELDOUT_GENERATION.json"
     manifest = json.loads(manifest_path.read_text())
+    amendment_path = HERE / "HELDOUT_GENERATION_AMENDMENT.json"
+    amendment = json.loads(amendment_path.read_text())
+    assert amendment["original_generation_rule_sha256"] == sha(manifest_path)
+    failed_path = HERE / "inputs/generation_attempt1/heldout_generation_receipt.json"
+    failed = json.loads(failed_path.read_text())
+    assert sha(failed_path) == amendment["failed_attempt_receipt_sha256"]
+    assert (failed["status"], failed["exit_code"]) == (
+        amendment["failed_attempt_status"], amendment["failed_attempt_exit_code"]
+    )
+    assert set(amendment["overrides"]) == {
+        "generator_source_sha256", "generator_binary_sha256"
+    }
+    manifest.update(amendment["overrides"])
     frozen = json.loads((HERE / "FROZEN.json").read_text())
     pilot = HERE / "PILOT_ANALYSIS.json"
     assert sha(pilot) == manifest["pilot_analysis_sha256"]
@@ -49,6 +62,9 @@ def main() -> None:
     assert sha(ROOT / "examples/koblitz_orbit_dlp_fast_online.rs") == frozen["source_sha256"]
     committed = git("show", "HEAD:research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/HELDOUT_GENERATION.json")
     assert committed.returncode == 0 and committed.stdout == manifest_path.read_text(), "generation rule is not committed"
+    committed_amendment = git("show", "HEAD:research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/HELDOUT_GENERATION_AMENDMENT.json")
+    assert (committed_amendment.returncode == 0
+            and committed_amendment.stdout == amendment_path.read_text()), "amendment is not committed"
     head, upstream = git("rev-parse", "HEAD"), git("rev-parse", "@{u}")
     assert head.returncode == upstream.returncode == 0 and head.stdout == upstream.stdout, "generation rule is not pushed"
     command = [str(args.generator_binary.resolve()) if word == "{generator_binary}" else word
@@ -71,6 +87,7 @@ def main() -> None:
     receipt = {
         "schema": "n53-rank-restart-heldout-generation-receipt-v1",
         "manifest_sha256": sha(manifest_path),
+        "amendment_sha256": sha(amendment_path),
         "head_commit": head.stdout.strip(),
         "generator_binary_sha256": sha(args.generator_binary),
         "command": command,

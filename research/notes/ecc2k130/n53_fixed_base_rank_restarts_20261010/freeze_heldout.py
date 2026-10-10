@@ -22,10 +22,15 @@ def sha(path: Path) -> str:
 def main() -> None:
     rule_path = HERE / "HELDOUT_GENERATION.json"
     rule = json.loads(rule_path.read_text())
+    amendment_path = HERE / "HELDOUT_GENERATION_AMENDMENT.json"
+    amendment = json.loads(amendment_path.read_text())
+    assert amendment["original_generation_rule_sha256"] == sha(rule_path)
+    rule.update(amendment["overrides"])
     receipt_path = HERE / "inputs/heldout_generation_receipt.json"
     receipt = json.loads(receipt_path.read_text())
     assert receipt["status"] == "ELIGIBLE" and not receipt["prior_committed_matches"]
     assert receipt["manifest_sha256"] == sha(rule_path)
+    assert receipt["amendment_sha256"] == sha(amendment_path)
     assert rule["rank_seeds"] == list(RANK_SEEDS)
     assert rule["rho_seeds"] == list(RHO_SEEDS)
     assert rule["selected_rank_probe_cap"] == 400000
@@ -65,6 +70,7 @@ def main() -> None:
     write_frozen(HERE / "HELDOUT_FROZEN.json", {
         "schema": "n53-rank-restart-heldout-freeze-v1",
         "generation_rule_sha256": sha(rule_path),
+        "generation_amendment_sha256": sha(amendment_path),
         "generation_receipt_sha256": sha(receipt_path),
         "fixture_verifier_only_sha256": sha(fixture_path),
         "public_point_sha256": sha(q_path),

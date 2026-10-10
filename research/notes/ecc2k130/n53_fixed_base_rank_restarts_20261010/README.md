@@ -35,6 +35,11 @@ the first result of every cell. It writes each process's raw files and
 independent rank/target replay receipts under `runs/pilot/`.
 `PILOT_RESULT.md` and `PILOT_ANALYSIS.json` give the paired audit and the
 preregistered 400,000-probe cap selection for the held-out step.
+`HELDOUT_GENERATION.json` pins the new public-point rule and paired seeds.
+Its first execution stopped at a contradictory CLI backend assertion before
+generating Q; `inputs/generation_attempt1/` retains the empty fixture, stderr,
+and failure receipt. `HELDOUT_GENERATION_AMENDMENT.json` pins the minimal
+strong-backend gate repair and unchanged hash seed before the second attempt.
 
 The final cap=1 n13 control in `controls/n13_cap1_seed12/` reached rank 2/2 in five
 attempts, three of which were capped. Its trace accounts for all five probes;
