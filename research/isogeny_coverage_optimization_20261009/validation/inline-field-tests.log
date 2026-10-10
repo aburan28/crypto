@@ -1,0 +1,81 @@
+   Compiling isogeny-cli v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/tools/isogeny-cli)
+warning: field `hw` is never read
+  --> /Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/isogeny_algos/src/gf2n.rs:17:5
+   |
+12 | pub struct GF2n {
+   |            ---- field in this struct
+...
+17 |     hw: bool,
+   |     ^^
+   |
+   = note: `GF2n` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `isogeny_algos` (lib) generated 1 warning
+warning: multiple methods are never used
+   --> src/bin/../verification_field.rs:135:12
+    |
+ 89 | impl<const N: usize> PrimeField<N> {
+    | ---------------------------------- methods in this implementation
+...
+135 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+140 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+222 |     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+236 |     pub fn from_i64(&self, v: i64) -> Element<N> {
+    |            ^^^^^^^^
+...
+245 |     pub fn from_u128(&self, v: u128) -> Element<N> {
+    |            ^^^^^^^^^
+...
+321 |     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+338 |     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^^
+...
+368 |     pub fn hex(&self, a: &Element<N>) -> String {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `modulus`, `neg`, `from_i64`, `from_u128`, `div`, and `hex` are never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:125:12
+    |
+ 85 | impl Field {
+    | ---------- methods in this implementation
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: `isogeny-cli` (bin "field_checks" test) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 2.73s
+     Running unittests src/bin/field_checks.rs (/private/tmp/isogeny-cli-build/release/deps/field_checks-32e0e6e5b35e58d9)
+
+running 3 tests
+test original::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test tests::small_and_full_width_fields ... ok
+test tests::wider_standard_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

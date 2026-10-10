@@ -1,0 +1,95 @@
+{
+  "rows": [
+    {
+      "baseline": [
+        2471560507,
+        2471560507,
+        2471560507,
+        2471560507,
+        2471560507
+      ],
+      "baseline_median": 2471560507,
+      "candidate1": [
+        78735743,
+        78735743,
+        78735743,
+        78735743,
+        78735743
+      ],
+      "candidate2": [
+        78735743,
+        78735743,
+        78735743,
+        78735743,
+        78735743
+      ],
+      "candidate_median": 78735743,
+      "case": "screen-p224",
+      "instruction_ratio": 31.390578317143714,
+      "reduction_percent": 96.81433075269639,
+      "unit": "Callgrind Ir, native ARM Linux",
+      "wall_time_claim": false
+    },
+    {
+      "baseline": [
+        50199483972,
+        50199483972,
+        50199483972,
+        50199483972,
+        50199483966
+      ],
+      "baseline_median": 50199483972,
+      "candidate1": [
+        49944361778,
+        49944361778,
+        49944361778,
+        49944361772,
+        49944361772
+      ],
+      "candidate2": [
+        47033190934,
+        47033190946,
+        47033190946,
+        47033190946,
+        47033190946
+      ],
+      "candidate_median": 47033190946,
+      "case": "verify-p224",
+      "instruction_ratio": 1.06732039571024,
+      "reduction_percent": 6.307421462272556,
+      "unit": "Callgrind Ir, native ARM Linux",
+      "wall_time_claim": false
+    },
+    {
+      "baseline": [
+        12332948394,
+        12331354876,
+        12331509351,
+        12331726241,
+        12331464518
+      ],
+      "baseline_median": 12331509351,
+      "candidate1": [
+        12461765582,
+        12462378029,
+        12461649353,
+        12462129000,
+        12461697756
+      ],
+      "candidate2": [
+        12477942149,
+        12477218937,
+        12477077763,
+        12477986141,
+        12477584697
+      ],
+      "candidate_median": 12477584697,
+      "case": "search-p192",
+      "instruction_ratio": 0.9882929790061756,
+      "reduction_percent": -1.184569883881692,
+      "unit": "Callgrind Ir, native ARM Linux",
+      "wall_time_claim": false
+    }
+  ],
+  "schema": "isogeny-profile-summary/v1"
+}

@@ -1,0 +1,145 @@
+   Compiling isogeny-cli v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/tools/isogeny-cli)
+warning: field `hw` is never read
+  --> /Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/isogeny_algos/src/gf2n.rs:17:5
+   |
+12 | pub struct GF2n {
+   |            ---- field in this struct
+...
+17 |     hw: bool,
+   |     ^^
+   |
+   = note: `GF2n` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `isogeny_algos` (lib) generated 1 warning
+warning: multiple methods are never used
+   --> src/bin/../verification_field.rs:135:12
+    |
+ 89 | impl<const N: usize> PrimeField<N> {
+    | ---------------------------------- methods in this implementation
+...
+135 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+140 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+222 |     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+236 |     pub fn from_i64(&self, v: i64) -> Element<N> {
+    |            ^^^^^^^^
+...
+245 |     pub fn from_u128(&self, v: u128) -> Element<N> {
+    |            ^^^^^^^^^
+...
+321 |     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+338 |     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^^
+...
+368 |     pub fn hex(&self, a: &Element<N>) -> String {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `modulus`, `neg`, `from_i64`, `from_u128`, `div`, and `hex` are never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:125:12
+    |
+ 85 | impl Field {
+    | ---------- methods in this implementation
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: `isogeny-cli` (bin "field_checks" test) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 21.44s
+     Running unittests src/bin/field_checks.rs (/private/tmp/isogeny-cli-build/release/deps/field_checks-32e0e6e5b35e58d9)
+
+running 3 tests
+test original::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test tests::small_and_full_width_fields ... ok
+test tests::wider_standard_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running unittests src/main.rs (/private/tmp/isogeny-cli-build/release/deps/isogeny-72eb5090f1a1450d)
+
+running 58 tests
+test hash_sha256::tests::sha256_abc ... ok
+test hash_sha256::tests::sha224_abc ... ok
+test hash_sha256::tests::sha224_empty ... ok
+test hash_sha256::tests::sha256_block_boundary_55 ... ok
+test constructor::extension::tests::small_extension_arithmetic ... ok
+test constructor::extension::tests::rejects_a_reducible_modulus ... ok
+test hash_sha256::tests::sha256_empty ... ok
+test constructor::extension::tests::extension_point_count_matches_the_known_base_trace ... ok
+test hash_sha256::tests::sha256_fips180_112byte ... ok
+test hash_sha256::tests::sha256_fips180_56byte ... ok
+test hash_sha256::tests::sha256_hello_world ... ok
+test hash_sha256::tests::sha256_two_blocks_64 ... ok
+test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test hash_sha256::tests::sha256_million_a ... ok
+test cli_tests::usage_failures_precede_output_creation ... ok
+test hash_sha256::tests::streaming_matches_one_shot_at_every_split ... ok
+test cli_tests::degree_three_screening_uses_the_characteristic_three_residue_field ... ok
+test catalog::tests::common_standard_names_resolve_without_merging_different_models ... ok
+test map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test cli_tests::known_small_extension_candidates_have_exact_eigenvalue_orders ... ok
+test modular_polynomial::tests::phi_2_basic_properties ... ok
+test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... ok
+test modular_polynomial::tests::phi_3_basic_properties ... ok
+test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n10::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test hash_sha256::tests::streaming_million_a ... ok
+test replay::n10::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n1::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n1::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n1::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n2::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n10::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test catalog::tests::all_models_are_accounted_for_with_operation_capabilities ... ok
+test replay::n2::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n2::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n3::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n3::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n4::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n4::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n3::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n5::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n5::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n4::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n6::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n6::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n5::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test constructor::extension::tests::large_prime_extension_arithmetic ... ok
+test replay::n7::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n7::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n6::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n8::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n8::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n9::map_identity::tests::known_degree_three_map_passes_and_coefficient_mutations_fail ... ok
+test replay::n9::modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test replay::n8::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n7::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test replay::n9::modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+
+test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

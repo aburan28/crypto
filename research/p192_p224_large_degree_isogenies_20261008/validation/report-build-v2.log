@@ -1,0 +1,27 @@
+   Compiling p192-p224-large-degree-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261008)
+error[E0308]: mismatched types
+   --> report.rs:154:39
+    |
+154 |             r["ell"].as_u64() == Some(s.max)
+    |                                  ---- ^^^^^ expected `u64`, found `Option<u64>`
+    |                                  |
+    |                                  arguments to this enum variant are incorrect
+    |
+    = note: expected type `u64`
+               found enum `std::option::Option<u64>`
+help: the type constructed contains `std::option::Option<u64>` due to the type of the argument passed
+   --> report.rs:154:34
+    |
+154 |             r["ell"].as_u64() == Some(s.max)
+    |                                  ^^^^^-----^
+    |                                       |
+    |                                       this argument influences the type of `Some`
+note: tuple variant defined here
+   --> /private/tmp/rust-20260226-8162-ogcg3q/rustc-1.93.1-src/library/core/src/option.rs:608:5
+help: consider using `Option::expect` to unwrap the `std::option::Option<u64>` value, panicking if the value is an `Option::None`
+    |
+154 |             r["ell"].as_u64() == Some(s.max.expect("REASON"))
+    |                                            +++++++++++++++++
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `p192-p224-large-degree-replay` (bin "report") due to 1 previous error

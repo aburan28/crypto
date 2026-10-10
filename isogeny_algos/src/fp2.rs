@@ -64,6 +64,9 @@ impl<F: Field> Field for Fp2<F> {
     fn char(&self) -> u64 {
         self.base.char()
     }
+    fn characteristic_exceeds(&self, n: u64) -> bool {
+        self.base.characteristic_exceeds(n)
+    }
     fn size(&self) -> u128 {
         let p = self.base.size();
         p.checked_mul(p)
