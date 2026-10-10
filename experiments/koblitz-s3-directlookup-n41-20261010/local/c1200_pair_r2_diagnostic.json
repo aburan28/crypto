@@ -1,0 +1,40 @@
+{
+  "binary_sha256": {
+    "direct": "de5ff28493f1d4e012b160e1178a8f1737b73342f9fe617c9d9e5676b8eae9b8",
+    "prefetch": "d10625fe3aba0e7b61c44f001f119c1bb3b7f4fdde4ee558df1501f1f1ab1164"
+  },
+  "candidate_id": null,
+  "controlled_speedup": null,
+  "factor_base_digest": "01503e8fcc1b9e474a6724f8db64bdc9aff70524a64123fe4450d3fe6babdde8",
+  "factor_base_points": 98400,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n41_c1200_directlookup_t220_single_pair_diagnostic_v1",
+  "online_ms": {
+    "direct": 0.11441599999999999,
+    "prefetch": 0.13825
+  },
+  "online_prefetch_over_direct_diagnostic": 1.2083100265697106,
+  "pdp_prefetch_over_direct_diagnostic": 1.4135878281726366,
+  "prepared_rank": 1200,
+  "report_sha256": {
+    "direct": "bde2205460c3379af956c0bf0ba56a17c87b48ec3f2b19a5a477fc350e6d7261",
+    "prefetch": "d453cba3f564b03b41c3626aaa4e6b336f7e29ed7258d3d5bf227c2badc6b8e5"
+  },
+  "reusable_setup_ms": {
+    "direct": 160736.122834,
+    "prefetch": 34998.503458
+  },
+  "s3_calls": {
+    "direct": 2,
+    "prefetch": 16
+  },
+  "sage_replay_sha256": "228bbf5f9071424513b3d5a55dc3934c571868588dbb279336002c1375160b72",
+  "scalar": 254961180376,
+  "source_sha256": "288c570e5ebaca6353c6de3b86ca37bc1ce842eb4938459ed32f50965ed7bb1d",
+  "status": "verified_one_target_pair",
+  "target_count": 1,
+  "target_pdp_charged_ms": {
+    "direct": 0.06920899999999999,
+    "prefetch": 0.097833
+  }
+}

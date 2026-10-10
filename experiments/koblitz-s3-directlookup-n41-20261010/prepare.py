@@ -37,7 +37,8 @@ def replace_source(value, before: str, after: str):
 
 
 def main(direct_binary: Path, prefetch_binary: Path, probe: Path,
-         timeout_seconds: int, rss_envelope_bytes: int) -> None:
+         timeout_seconds: int, rss_envelope_bytes: int,
+         preview: bool) -> None:
     freeze_path = HERE / "FREEZE.json"
     assert not freeze_path.exists(), "The freeze is immutable"
     assert platform.system() == "Darwin" and platform.machine() == "arm64"
@@ -75,9 +76,12 @@ def main(direct_binary: Path, prefetch_binary: Path, probe: Path,
     assert new_source_sha != baseline["source_sha256"]
     assert new_binary_sha != baseline["binary_sha256"]
     source_commit = subprocess.check_output(
-        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
+        ["git", "-C", str(ROOT), "log", "-1", "--format=%H", "--",
+         f"examples/{DIRECT_NAME}.rs"], text=True).strip()
+    assert len(source_commit) == 40
     committed_source = subprocess.check_output(
-        ["git", "-C", str(ROOT), "show", f"HEAD:examples/{DIRECT_NAME}.rs"])
+        ["git", "-C", str(ROOT), "show",
+         f"{source_commit}:examples/{DIRECT_NAME}.rs"])
     assert sha(committed_source) == new_source_sha
     candidate = json.loads(old_manifest_path.read_bytes())
     old_candidate_id = candidate.pop("candidate_id")
@@ -96,8 +100,11 @@ def main(direct_binary: Path, prefetch_binary: Path, probe: Path,
     candidate_id = old_candidate_id.rsplit("h", 1)[0] + "h" + sha(canonical(candidate))[:12]
     candidate["candidate_id"] = candidate_id
     manifest_path = HERE / "identities/candidates" / f"{candidate_id}.json"
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_bytes(canonical(candidate) + b"\n")
+    manifest_bytes = canonical(candidate) + b"\n"
+    if not preview:
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        assert not manifest_path.exists()
+        manifest_path.write_bytes(manifest_bytes)
 
     direct = copy.deepcopy(baseline)
     direct.update({
@@ -106,7 +113,7 @@ def main(direct_binary: Path, prefetch_binary: Path, probe: Path,
         "source_sha256": new_source_sha,
         "candidate_id": candidate_id,
         "candidate_manifest_relative": os.path.relpath(manifest_path, HERE),
-        "candidate_manifest_sha256": sha(manifest_path.read_bytes()),
+        "candidate_manifest_sha256": sha(manifest_bytes),
     })
     for key in ("columns", "factor_base_points", "factor_base_digest",
                 "prepare_rank", "root_table_slots"):
@@ -156,8 +163,10 @@ def main(direct_binary: Path, prefetch_binary: Path, probe: Path,
         "preparer_sha256": sha(Path(__file__).read_bytes()),
     }
     assert freeze["planned_run_count"] == 24
-    freeze_path.write_text(json.dumps(freeze, indent=2, sort_keys=True) + "\n")
-    print(json.dumps({"freeze_sha256": sha(freeze_path.read_bytes()),
+    freeze_bytes = (json.dumps(freeze, indent=2, sort_keys=True) + "\n").encode()
+    if not preview:
+        freeze_path.write_bytes(freeze_bytes)
+    print(json.dumps({"freeze_sha256": sha(freeze_bytes), "preview": preview,
                       "candidate_id": candidate_id,
                       "selected_targets": [LABELS[0], LABELS[-1]],
                       "planned_runs": len(order)}, sort_keys=True))
@@ -170,7 +179,8 @@ if __name__ == "__main__":
     parser.add_argument("--probe", type=Path, required=True)
     parser.add_argument("--per-run-timeout-seconds", type=int, required=True)
     parser.add_argument("--rss-envelope-bytes", type=int, required=True)
+    parser.add_argument("--preview", action="store_true")
     args = parser.parse_args()
     main(args.direct_binary.resolve(), args.prefetch_binary.resolve(),
          args.probe.resolve(), args.per_run_timeout_seconds,
-         args.rss_envelope_bytes)
+         args.rss_envelope_bytes, args.preview)
