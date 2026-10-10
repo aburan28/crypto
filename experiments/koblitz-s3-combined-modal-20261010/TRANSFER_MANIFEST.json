@@ -1,0 +1,43 @@
+{
+  "controlled_speedup": null,
+  "cpu_physical_cores_request_and_limit": [
+    8,
+    8
+  ],
+  "file_count": 3,
+  "files": [
+    {
+      "bytes": 1776688,
+      "content": "private_repo_derived_linux_executable",
+      "local_path": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_c2800mixed_targetspan",
+      "remote_path": "/opt/s3/baseline",
+      "sha256": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb"
+    },
+    {
+      "bytes": 1793272,
+      "content": "private_repo_derived_linux_executable",
+      "local_path": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_prefetch_projective_targetspan",
+      "remote_path": "/opt/s3/expanded",
+      "sha256": "b97ef592c51e9ccf5e5ca296771dc55aa235ed422a20fcf9b5218026e329dac7"
+    },
+    {
+      "bytes": 2416,
+      "content": "two_public_ec_points_and_candidate_expectations_no_fixture_scalars",
+      "local_path": "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-prepared-20261009/experiments/koblitz-s3-combined-modal-20261010/public_bundle.json",
+      "remote_path": "/opt/s3/public_bundle.json",
+      "sha256": "1309376a738fc2e6bb69bc08f34ee4adab4edc50656f031b08fc694cbe297e91"
+    }
+  ],
+  "guest_network_blocked": true,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_modal_combined_transfer_inventory_v1",
+  "memory_mib_request_and_limit": [
+    32768,
+    32768
+  ],
+  "modal_creation_attempted": false,
+  "pilot_freeze_sha256": "cabeead3de7ec95a3dcb73724d9de556fd5d417584c9e45defefeddcdd7e9a39",
+  "sandbox_creation_attempts_allowed": 1,
+  "sandbox_timeout_seconds": 1200,
+  "transferred_bytes": 3572376
+}
