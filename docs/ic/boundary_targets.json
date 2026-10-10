@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
-  "updated": "2026-10-08",
+  "updated": "2026-10-10",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Primary vs_rho claims use exactly one unseen target paired on the identical public point and resource envelope. Headline time is verified online wall after reusable IC preparation; exclude process launch, input loading, target generation, and target-independent setup. Multi-target averages, batch throughput, and shared-table amortization are secondary only and require a separate declared question after the primary one-target result. Never combine best component costs from different runs into a synthetic win. A new CPU wall-time speedup requires a qualifying host-isolation receipt; rows without one remain exploratory. Raw IC probes and rho walk steps use different units. An equal-budget precomputed-rho or multi-target study is secondary and cannot replace the one-target rho pair.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
@@ -415,6 +415,34 @@
       },
       "unknowns_formula": "m*l + (m-2)*n",
       "automorphism_discount_default": "sqrt(2n) with A=2*n",
+      "route_assessments": {
+        "compact_s3_w64_disjoint_cold_v2_20261001": {
+          "status": "measured_fixed_policy_no_go",
+          "question": "Complete fresh-process CPU cost of the exact compact-orbit W64 policies against matched 32-walk signed-Frobenius normal-basis rho on orbit-disjoint public points",
+          "metric": "median of blockwise geometric-mean compact child CPU divided by same-block rho child CPU; two-sided paired log-ratio t interval",
+          "primary_online_vs_rho_row_promoted": false,
+          "source_commit": "38c173072e16f580237447c93b085634275ba048",
+          "input_freeze_sha256": "da958a3f1117dd1b88703fed2055c5c9f64255516e1e920f35d193bf53c6a88d",
+          "evidence_manifest_sha256": "350779eb61b5c9b14f065f4f2b3563166de0aaa6ed1da91f3d5308a8fc6fac97",
+          "evidence": "research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/RESULT.md",
+          "verification": {
+            "cold_children_exited_zero": 135,
+            "full_rank_traces_independently_replayed": 90,
+            "target_logs_independently_replayed": 46170,
+            "second_host_replay": "passed_without_retiming",
+            "all_preregistered_aa_and_quiet_host_gates": "passed"
+          },
+          "cells": [
+            {"n": 37, "target_count": 1, "orbit_columns": 7, "policy": "unfiltered", "paired_cpu_ratio_median": 2.810, "paired_cpu_ratio_95pct": [2.718, 2.874], "complete_cpu_reduction_to_median_parity_pct": 64.4},
+            {"n": 37, "target_count": 1024, "orbit_columns": 42, "policy": "unfiltered", "paired_cpu_ratio_median": 3.031, "paired_cpu_ratio_95pct": [2.998, 3.047], "complete_cpu_reduction_to_median_parity_pct": 67.0},
+            {"n": 41, "target_count": 1, "orbit_columns": 85, "policy": "unfiltered", "paired_cpu_ratio_median": 13.378, "paired_cpu_ratio_95pct": [9.367, 18.491], "complete_cpu_reduction_to_median_parity_pct": 92.5},
+            {"n": 41, "target_count": 1024, "orbit_columns": 255, "policy": "blocked_prefilter", "paired_cpu_ratio_median": 1.314, "paired_cpu_ratio_95pct": [1.288, 1.359], "complete_cpu_reduction_to_median_parity_pct": 23.9},
+            {"n": 53, "target_count": 1, "orbit_columns": 220, "policy": "unfiltered", "paired_cpu_ratio_median": 22.675, "paired_cpu_ratio_95pct": [17.904, 31.595], "complete_cpu_reduction_to_median_parity_pct": 95.6},
+            {"n": 53, "target_count": 1024, "orbit_columns": 440, "policy": "blocked_prefilter", "paired_cpu_ratio_median": 1.605, "paired_cpu_ratio_95pct": [1.566, 1.666], "complete_cpu_reduction_to_median_parity_pct": 37.7}
+          ],
+          "next_experiment": "Compare factor-base selection at fixed useful K=255 for n41 and K=440 for n53 on new disjoint points, charging natural relation yield, novel rank, full-rank collection, target descent and matched rho; require a separate equal-useful-size ordinary-query PDP/rank panel for the degree-263 descendant"
+        }
+      },
       "records": {
         "factor_base": {
           "status": "record",

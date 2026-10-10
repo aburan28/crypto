@@ -1,0 +1,93 @@
+\section{Introduction}
+\label{sec:intro}
+
+In 1997 Certicom published a list of elliptic-curve discrete
+logarithm challenges~\cite{certicom1997}. The Koblitz challenges
+ECC2K-95, ECC2K-108 and ECC2K-130 ask for $k$ with $Q=[k]P$ on
+$y^2+xy=x^3+1$ over $\FF_{2^{97}}$, $\FF_{2^{109}}$ and $\FF_{2^{131}}$.
+Harley's group solved ECC2K-95 in 1998~\cite{harley1998} and ECC2K-108
+in 2000; ECC2K-130 is open. In 2009 a consortium of twenty authors
+published the arithmetic, the iteration function and the per-platform
+throughput of a planned attack~\cite{bailey2009,bailey2009sharcs,bos2010cell,fan2010fpga}
+and estimated the work at $2^{60.9}$ iterations. The attack did not
+complete.
+
+This paper is a measured account of a second attempt, built from
+scratch on hardware that did not exist in 2009 and documented to a
+standard the first attempt's reports set: every rate paired against
+an adjacent control on the same allocation, every boundary written
+down before the kernel was tuned toward it, every claim footnoted to a
+file in the repository that holds it. The work is not an advance on
+the generic-group floor and the paper does not say it is. What it
+reports is the cost of one step, measured on GPUs, CPUs and an FPGA,
+the number of steps, measured on toy curves of the same family and
+extrapolated, and a campaign that walked $2^{56.4}$ of the $2^{60.9}$
+before its fleet was taken away.
+
+\paragraph{Contributions.}
+\begin{itemize}[leftmargin=1.2em,itemsep=0.3em]
+\item A code generator that builds every field routine from one
+  symmetric-vector model of $\FF_{2^{131}}$ and checks it before
+  emitting it; a bitsliced backend at every word width from 64 to 512
+  lanes and a packed CUDA backend with native carry-less products;
+  bit-for-bit compatible records across all of them and a VHDL engine
+  (Sections~\ref{sec:curve}, \ref{sec:arith}).
+\item Three iteration functions on the $\langle\sigma,-1\rangle$
+  classes, with the walk constant measured on toy Koblitz curves and
+  extrapolated: $2^{60.91}$--$2^{60.92}$ iterations for the campaign's
+  walk, with the table walk's fruitless cycles measured, priced and
+  repaired (Section~\ref{sec:walk}).
+\item A GPU ledger of sixteen paired rungs from $0.85$ to
+  $14.64$~B/s on one RTX~PRO~6000, a table walk at $20.08$~B/s, a
+  twelve-SKU survey, a roofline, and a floor derived from the
+  carry-less unit before tuning that rules out $28$~B/s on one card;
+  with every declined candidate and its ratio (Section~\ref{sec:gpu}).
+\item A pipelined-Karatsuba FPGA engine measured at $8.25$~G steps/s
+  on one AWS F2, within a pre-board estimate of $5$--$12$
+  (Section~\ref{sec:fpga}).
+\item A live campaign: configuration, the calibration of the
+  distinguished-point interval (and the retraction of a wrong one),
+  the storage and replay protocol, fleet economics, and the state at
+  $367$~M points (Section~\ref{sec:campaign}).
+\item The structural alternatives priced in the same unit and found
+  wanting: index calculus on the Koblitz curve at $10^7\times$ rho, and
+  point decomposition $35$--$51$ bits short of its budget
+  (Section~\ref{sec:alternatives}).
+\end{itemize}
+
+\paragraph{Method.} The reporting rule of the repository, stated
+here once, governs every section~\cite{ecdlppaper}. A change is
+measured as a ratio to a boundary that was written down first: a
+floor from a counting or pipe argument that the method cannot cross,
+or a reference, the best existing method on the same instance in the
+same unit. Every change is classified by what moved: an
+\emph{advance} lowers the ratio to the floor; \emph{engineering}
+lowers the cost with the ratio to the floor flat; \emph{relabelling}
+lowers a headline while the total rises; \emph{accounting} changes a
+number without changing the algorithm. All four are committed, and
+every row in this paper is one of the last three. A rate quoted
+without its paired control, its hardware and its geometry is the
+unit mistake this paper tries hardest not to make, and
+Sections~\ref{sec:ledger} and \ref{sec:campaign-interval} each record
+one instance where an earlier draft of the repository made it.
+
+\paragraph{Two repositories.} The campaign lives in a study
+repository, \thisrepo, whose notes this paper cites by path. A
+sibling library, \sibling, holds an independent C golden model of the
+same field, a digit-serial FPGA core with no vendor timing, an import
+of the $20$~B/s GPU client with its own host re-walk, and the
+boundary ledger for index calculus; its companion
+paper~\cite{ecdlppaper} places ECC2K-130 among other discrete-logarithm
+measurements in the unit $S=\text{ops}/\sqrt n$. Paths prefixed
+\texttt{cryptanalysis:} are in that library; two evidence records cited
+in Section~\ref{sec:alternatives} live in a third repository, the
+research ledger, and are prefixed \texttt{autoresearcher:}.
+
+\paragraph{What is not claimed.} No logarithm has been recovered on
+the challenge curve and none is expected from the corpus so far. No
+rate in this paper is quoted for hardware that was not measured; the
+L40S collection rate, the RTX~PRO~4500 collection rate under the
+bridge map and the G7e instance family are unmeasured and are said to
+be. Projections (the $7.2$--$7.4$~B/s fused build on the 4500, the
+table walk's $0.81$--$0.86$ cost per solve, the 136- and 144-engine F2
+images) are labelled as projections where they appear.

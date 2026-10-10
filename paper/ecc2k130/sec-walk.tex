@@ -1,0 +1,209 @@
+\section{The walk}
+\label{sec:walk}
+
+Pollard's rho~\cite{pollard1978} in the parallel collision-search
+form of van Oorschot and Wiener~\cite{vanoorschot1999} walks many
+pseudo-random trails through the group, reports the distinguished
+points it passes, and solves the logarithm when two trails meet. On a
+Koblitz curve the Frobenius $\sigma$ and negation generate a group of
+automorphisms of order $2m=262$ that act on $\langle P\rangle$, and a
+walk defined on the orbits of that group needs $\sqrt{262}\approx16.2$
+times fewer steps~\cite{wienerzuccherato1998,glv2000,duursma1999}.
+The expected number of classes visited before a collision on
+$N=(\ell-1)/262$ classes is $\sqrt{\pi N/2}$, which is $2^{60.809}$
+here.\art{ecc2k130/WALK-CONSTANT.md, §1} Every walk in this paper is
+a map on those classes; what differs between them is how the class
+action is respected and how much each step costs.
+
+\subsection{The $\sigma$-walk}
+\label{sec:walk-sigma}
+
+The campaign walks the map of Bailey et al.~\cite{bailey2009}:
+\begin{align*}
+  j &= 3 + \bigl((\HW(x_R) \gg 1) \bmod 8\bigr) \in [3,10],\\
+  R' &= \sigma^j(R) + R,\\
+  \text{distinguished} &\iff \HW(x_R)\le w,
+\end{align*}
+with $w=34$ in the client's default and $w=32$ in the live campaign.
+Because the weight is a class invariant, $f(\sigma R)=\sigma f(R)$ and
+$f(-R)=-f(R)$, so the map descends to classes without any canonical
+representative being computed inside the loop. The division by two
+in the selector is load-bearing: $x$-coordinates of subgroup points
+have even weight, and a selector on the raw weight would use only
+four of the eight branches.\art{gpu/ecc2k/README.md}
+
+One step is one affine addition: one inversion, two multiplications
+and a free Frobenius, since $\sigma^j$ is wiring. As a scalar the step
+is $R\mapsto[1+s^j]R$ where $s$ is the root of $s^2+s+2=0$ that
+$\sigma$ realises on $\langle P\rangle$. The $\sigma^j$ selection is
+branch-free: three conditional squarings, each one \texttt{LOP3} per
+word, and $j$ is never materialised.\art{ecc2k130/README.md, ``Iteration function''}
+
+No coefficients are tracked. A walk is identified by its seed, and a
+report is the pair (seed, canonical endpoint), 32 bytes. The start
+point is $R_0 = Q + \sum_i c_i\,\sigma^i(P)$ with $c$ a 128-bit string
+from a PRF of the seed, computed with the same arithmetic and merged
+into finished lanes under a mask; tracking a linear combination in
+the loop would cost a 129-bit modular multiplication per step, which
+this walk cannot afford. Collision resolution re-walks both trails
+counting how often each branch $1+s^j$ was applied, which gives
+$\text{endpoint} = [\mu](\alpha_0 P + Q)$ with $\mu=\prod_j(1+s^j)^{n_j}$,
+matches the two endpoints up to Frobenius and negation, and solves
+for $k$ modulo $\ell$.\art{ecc2k130/README.md, ``Distinguished points and restarts''}
+The $\sigma$-walk has no fruitless cycles: $1+s^j$ is never a root of
+unity, so a trail cannot return to its own point.
+
+The client can also carry the eight branch counters as it goes
+(\texttt{WITNESS=1}). That is eight counters and not a coefficient,
+because the product $\mu$ commutes and nothing is multiplied per step.
+It turns a report into something a third party checks with one
+double scalar multiplication, about $200$ group operations, instead
+of re-walking the $2^{25.27}$ steps a weight-34 report represents, an
+asymmetry of $2^{17.4}$. On the bitsliced CPU walk it costs $6.0\%$
+measured ($40.026$ to $37.762$~M~it/s, against $33.8\%$ predicted); on
+the packed GPU walk it cost $34.7\%$ ($14.003$ to $9.150$~B/s), above
+the $2\%$ the note had set as its abandonment threshold, so the
+campaign builds pin \texttt{WITNESS=0} and the record stays 32
+bytes.\art{ecc2k130/CAIRN-WITNESS.md}\art{ecc2k130/benchmarks/witness-cost/}
+A later fused kernel narrows the packed cost ($9.347867$ to
+$11.800903$~B/s in the witness-carrying mode) without closing
+it.\art{ecc2k130/benchmarks/sigma-fused/RESULTS.md}
+
+\subsection{The $r$-adding table walk}
+\label{sec:walk-table}
+
+The $\sigma$-walk pays for $\sigma^j$ in the basis conversions around
+it on a GPU (Section~\ref{sec:arith-packed}). An $r$-adding walk on
+the same classes removes that cost:
+\begin{align*}
+  h(R) &= (\HW(x)/2) \bmod 8,\\
+  k(R) &= \Bigl(\textstyle\sum_e L(e)\,x_e\Bigr)\cdot \HW(x)^{-1} \bmod 131,\\
+  \varepsilon(R) &= \text{bit $p(R)$ of } y,\\
+  R' &= R + (-1)^{\varepsilon}\,\sigma^{k}(T_h),
+\end{align*}
+with $T_h=[a_h]P+[b_h]Q$ and a $131\times8$-point table ($48.7$~KB) in
+shared memory. $k$ shifts by one under $\sigma$ and $\varepsilon$
+flips under negation, so the walk descends to classes; the step is
+one affine addition with a table operand whose Frobenius power is a
+lookup rather than a conversion.\art{ecc2k130/ITERATION-FUNCTION.md, §4}
+
+Unlike the $\sigma$-walk, an adding walk on classes has fruitless
+cycles~\cite{bls2011}. Their source here is $\tau^2+\tau+2=0$: four-step
+patterns in which the table points' Frobenius powers satisfy a
+$\tau$-relation, and six-step pairwise patterns. The first cycle rule
+let 24 four-step and 4 six-step patterns through; the count observed
+against the count predicted was $1{,}145$ against $1{,}312$
+($0.87\pm0.03$) for the $\tau$-relation class and 126 against 166 for
+the pairwise class.\art{ecc2k130/WALK-CONSTANT.md, §5} At the
+campaign's trail length of $2^{28.41}$ steps those cycles trapped
+$53.7\%$ of trails, a loss of $8.634\times$ with the $2^{30}$ iteration
+guard. A revised rule (v2) brings residual trapping to
+$2.0\cdot10^{-5}$ of trails at a $1.0048\times$ iteration cost from
+merge parting; a third revision (v3, Section~\ref{sec:walk-cycles})
+replaces history-dependent exits with a raw-cycle anchor.
+
+\subsection{The $x$-only doubling-and-bridge map}
+\label{sec:walk-bridge}
+
+On the power-capped RTX~PRO~4500 a third map pays. The common
+transition is $R' = R + \sigma(R)$, which as a scalar is $[1+s]$, and
+on this curve $(1+s)$ has norm 2 and the step can be computed from
+$x$ alone. That scalar alone does not generate the group, so a sparse
+bridge $R' = R + \sigma^3(R)$ is taken when $\HW(x) \bmod 72 = 14$;
+the two scalar multipliers together generate the full group, which
+the earlier $[2]/[3]$ map had failed to do (``the scalar subgroup
+defect'').\art{ecc2k130/README.md, ``ECC2K-130 and ECC2K-95''}
+A frozen study of $2{,}000$ trials on $\mathrm{GF}(2^{23})$, where
+both the modulus-32 control and the bridge predicate select only
+weight 14, gives a mean-work ratio of $1.006696$ for the bridge map
+against the control, so the map's throughput gain
+(Section~\ref{sec:g7}) is not paid back in extra iterations. The map
+passes an independent $2{,}048$-point affine
+checkpoint.\art{ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md}
+
+\subsection{The walk constant, measured}
+\label{sec:walk-constant}
+
+Throughput is half of a rate. The other half is the number of
+iterations a walk needs, which for a non-random map differs from the
+random-mapping $\sqrt{\pi N/2}$ by a constant $c$. The repository
+measures $c$ as iterations divided by a random mapping's iterations
+on the class set, on toy Koblitz curves of the same family, with the
+device walk and a host emulation measured separately and an
+$r$-adding control with 256 branches alongside.\art{ecc2k130/WALK-CONSTANT.md, §4}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Walk constant $c$ on toy Koblitz curves, ECC2K-130 branch
+  distribution ($H=8$). Floor $c=1$. The adding-walk control with 256
+  branches measures $1.0002\pm0.0012$ at $n=23$. The injective-branch
+  model $1/\sqrt{1-\sum p^2}$ predicts $1.070$ for the $\sigma$-walk
+  at $n=131$.}
+\label{tab:walkconst}
+\begin{tabular}{@{}rlll@{}}
+\toprule
+$n$ & measured on & table walk & $\sigma$-walk \\
+\midrule
+23 & host emulation & $1.0037\pm0.0012$ & $1.0995\pm0.0013$ \\
+23 & device & $1.0076\pm0.0037$ & $1.0948\pm0.0040$ \\
+31 & device & $1.0035$ & $1.0964$ \\
+37 & device ($W=16$) & $1.0036$ & $1.0949$ \\
+41 & device & $1.0125\pm0.0059$ & $1.0910\pm0.0064$ \\
+59 & device & $0.9949$ & $1.0817$ \\
+\midrule
+\multicolumn{2}{@{}l}{pooled / extrapolated to $n=131$} & $1.0035\pm0.0006$ & $[1.070,\,1.082]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The $\sigma$-walk is a one-to-one map on each branch and pays the
+injective-branch penalty $1/\sqrt{1-\sum_j p_j^2}$, which with the
+weight distribution at $n=131$ ($\sum p_j^2=0.127$) is $1.070$; the
+measurements in Table~\ref{tab:walkconst} drift from $1.0995$ at $n=23$
+toward it, and the extrapolation to $n=131$ is $[1.070,1.082]$. The
+table walk is not injective per branch and sits at $1.0035\pm0.0006$
+pooled. The ratio $c_t/c_\sigma$ is $0.928$--$0.938$. Expected work
+for the campaign's $\sigma$-walk is therefore
+\[
+  2^{60.809}\times[1.070,\,1.082] = 2^{60.91}\text{--}2^{60.92}
+\]
+iterations, with a further $1.185\times$ (that is, $2^{61.15}$--$2^{61.17}$)
+under the original $2^{30}$ restart guard, since a guard at four trail
+lengths discards $15.6\%$ of steps. Bailey et al.'s $2^{60.9}$
+stands.\art{ecc2k130/WALK-CONSTANT.md, §6} The guard was raised to
+$2^{32}$, twelve trail lengths at weight 32, which discards $0.007\%$
+of steps ($1.00007\times$).\art{ecc2k130/benchmarks/max-iters/README.md}
+
+On $\mathrm{GF}(2^{41})$ with 128 walks, cutoff 13 and 64 planted
+logarithms, the $\sigma$-walk needed $164{,}200\pm9{,}900$ iterations
+per solve and the table walk $157{,}800\pm7{,}500$, ratio
+$0.96\pm0.07$, against a bare prediction of $102{,}600$ with about
+$1.5\times$ harness overhead from the distinguished-point
+tail.\art{ecc2k130/ITERATION-FUNCTION.md, §6.2}
+
+\subsection{Cost per solve, not rate}
+\label{sec:walk-cycles}
+
+Putting rate and constant together is where the table walk's story
+changes. Its throughput advantage of Section~\ref{sec:tablewalk} is
+$1.09$--$1.17\times$; its walk constant is $0.93\times$; but its
+as-built cycle rule trapped half of all campaign-length trails, so
+the cost per solve of the as-built kernel was $4.85$--$6.26\times$ the
+$\sigma$-walk's. With rule v2 the projection is $0.81$--$0.86\times$,
+and the switch deadline (the fraction of the campaign after which
+switching no longer pays) is $15$--$22\%$. That projection has not been
+tested: the paired rate of the v2 kernel that would test it is
+declared in the note and has not been run.\art{ecc2k130/WALK-CONSTANT.md, §11}
+The campaign therefore still walks the $\sigma$-map, and the
+$20$~B/s table-walk rows of Section~\ref{sec:tablewalk} are rates, not
+costs per solve.
+
+Rule v3 then replaced the history-dependent exits with a raw-cycle
+probe of at most eight steps and a least-key anchor exit, checked by
+$19{,}200$ refused $\tau$-cycles in a dedicated test, a $4{,}096$-point
+host probe with no mismatch and planted logarithms $8/8$; its scatter
+check against the predicted cycle counts gives $\chi^2=8.79$ on 15
+degrees of freedom (the v1 rule: $23.30$).\art{ecc2k130/CYCLE-ESCAPE-V3.md}
+V3 requires a new table corpus; the campaign's $\sigma$-walk corpus is
+unaffected.
