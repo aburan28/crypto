@@ -53,7 +53,7 @@ def main():
     (LOCAL / "feasibility_report.json.gz").write_bytes(report_gz)
     if not (receipt["exit_code"] == 0 and receipt["error"] is None
             and receipt["scalar_verified"] and receipt["full_rank_before_target"]
-            and receipt["memory_within_envelope"] and receipt["root_slots_within_declared_step"]
+            and receipt["root_slots_within_declared_step"]
             and report is not None):
         print(json.dumps({"feasibility_passed": False,
                           "receipt": str(LOCAL / "feasibility_receipt.json")}, sort_keys=True))
@@ -66,7 +66,7 @@ def main():
     assert sha(gzip.decompress(OLD_REPORT.read_bytes())) == plan["reference_raw_report_sha256"]
     old_fields = dict(old_report)
     new_fields = dict(report)
-    for key in ("timing_ms", "root_table_capacity_policy",
+    for key in ("timing_ms", "peak_rss_bytes", "root_table_capacity_policy",
                 "root_scatter_policy", "root_scatter_chunk_state_limit"):
         old_fields.pop(key, None)
         new_fields.pop(key, None)
@@ -75,7 +75,7 @@ def main():
         "kind": "s3_n53_c2800stream_old_vs_bounded_scatter_semantic_control_v1",
         "old_raw_sha256": plan["reference_raw_report_sha256"],
         "new_raw_sha256": receipt["raw_report_sha256"],
-        "excluded_fields": ["timing_ms", "root_table_capacity_policy",
+        "excluded_fields": ["timing_ms", "peak_rss_bytes", "root_table_capacity_policy",
                             "root_scatter_policy", "root_scatter_chunk_state_limit"],
         "non_timing_fields_equal": semantic_equal,
         "old_only_keys": sorted(set(old_fields) - set(new_fields)),
@@ -83,9 +83,11 @@ def main():
         "differing_keys": sorted(key for key in old_fields.keys() & new_fields.keys()
                                  if old_fields[key] != new_fields[key]),
     }, indent=2, sort_keys=True) + "\n")
-    if not semantic_equal:
+    if not semantic_equal or not receipt["memory_within_envelope"]:
         print(json.dumps({"feasibility_passed": False,
-                          "semantic_comparison": str(LOCAL / "semantic_comparison.json")},
+                          "semantic_comparison": str(LOCAL / "semantic_comparison.json"),
+                          "memory_within_envelope": receipt["memory_within_envelope"],
+                          "peak_rss_bytes": receipt["peak_rss_bytes"]},
                          sort_keys=True))
         return
 

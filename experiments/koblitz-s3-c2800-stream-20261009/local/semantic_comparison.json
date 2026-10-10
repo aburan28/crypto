@@ -1,0 +1,16 @@
+{
+  "differing_keys": [],
+  "excluded_fields": [
+    "timing_ms",
+    "peak_rss_bytes",
+    "root_table_capacity_policy",
+    "root_scatter_policy",
+    "root_scatter_chunk_state_limit"
+  ],
+  "kind": "s3_n53_c2800stream_old_vs_bounded_scatter_semantic_control_v1",
+  "new_only_keys": [],
+  "new_raw_sha256": "794c2ec1ffafe6ed13b794330af14a3460b0da8c5e9982a4039c176489a70c0f",
+  "non_timing_fields_equal": true,
+  "old_only_keys": [],
+  "old_raw_sha256": "4d65f2fbfcaf3802954db16ebba173edbdaeb2201a57a8e481600fd8547a7ba8"
+}
