@@ -352,6 +352,57 @@ fn checked_primary_relation_row(
     Ok(row)
 }
 
+/// The container sees only a supervisor-made source snapshot, never the
+/// checkout's Git metadata or unrelated files. The outer supervisor must
+/// independently attest a clean checkout at this commit and retain the
+/// snapshot hashes; this worker checks that the three files it executes
+/// match its compiled bytes.
+fn checked_primary_probe_source(root: &Path) -> Result<()> {
+    for (path, compiled) in [
+        (
+            "examples/koblitz_n83_factor_base_export.rs",
+            include_bytes!("../../examples/koblitz_n83_factor_base_export.rs").as_slice(),
+        ),
+        (
+            "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs",
+            include_bytes!("primary_adapter.rs").as_slice(),
+        ),
+        (
+            "research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs",
+            include_bytes!("compact_cold.rs").as_slice(),
+        ),
+    ] {
+        if blake3::hash(&fs::read(root.join(path))?) != blake3::hash(compiled) {
+            return Err("compiled S3 probe source differs from frozen source".into());
+        }
+    }
+    Ok(())
+}
+
+fn frozen_primary_probe_source() -> Result<(String, &'static str)> {
+    if let Some(path) = std::env::var_os("ICV1_FROZEN_SOURCE_DIR") {
+        let root = std::path::PathBuf::from(path);
+        let attestation: Value =
+            serde_json::from_slice(&fs::read(root.join("attestation.json"))?)?;
+        let commit = attestation["source_commit"]
+            .as_str()
+            .ok_or("source snapshot lacks a commit")?;
+        if attestation["schema"] != "n83.primary-probe-source-attestation/v1"
+            || attestation["status_clean"] != true
+            || commit.len() != 40
+            || !commit.bytes().all(|byte| byte.is_ascii_hexdigit())
+        {
+            return Err("invalid supervised source attestation".into());
+        }
+        checked_primary_probe_source(&root)?;
+        Ok((commit.to_owned(), "supervised_snapshot"))
+    } else {
+        let commit = frozen_v2_source_commit()?;
+        checked_primary_probe_source(Path::new(env!("CARGO_MANIFEST_DIR")))?;
+        Ok((commit, "clean_checkout"))
+    }
+}
+
 /// Probe the published primary point with a replayed retained base through
 /// the point-only wide compact index. A hit is also converted to a full-width
 /// relation row and independently replayed. This is one relation diagnostic,
@@ -371,22 +422,7 @@ pub(super) fn s3_probe_cli(
         return Err("S3 probe supports retained primary K=64/256/600 bases".into());
     }
     let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
-    let source_commit = frozen_v2_source_commit()?;
-    let checkout = Path::new(env!("CARGO_MANIFEST_DIR"));
-    for (path, compiled) in [
-        (
-            "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs",
-            include_bytes!("primary_adapter.rs").as_slice(),
-        ),
-        (
-            "research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs",
-            include_bytes!("compact_cold.rs").as_slice(),
-        ),
-    ] {
-        if blake3::hash(&fs::read(checkout.join(path))?) != blake3::hash(compiled) {
-            return Err("compiled S3 probe source differs from checked-out source".into());
-        }
-    }
+    let (source_commit, source_attestation_mode) = frozen_primary_probe_source()?;
     let started = Instant::now();
     let (base, row, manifest_hash) = load_panel_selected(root, columns, policy, seed)?;
     let base_import_ms = started.elapsed().as_secs_f64() * 1000.0;
@@ -466,6 +502,8 @@ pub(super) fn s3_probe_cli(
         "panel_manifest_blake3":manifest_hash,
         "public_corpus_canonical_json_blake3":corpus_hash,
         "source_commit":source_commit,
+        "source_attestation_mode":source_attestation_mode,
+        "source_exporter_blake3":blake3::hash(include_bytes!("../../examples/koblitz_n83_factor_base_export.rs")).to_hex().to_string(),
         "source_adapter_blake3":blake3::hash(include_bytes!("primary_adapter.rs")).to_hex().to_string(),
         "source_compact_blake3":blake3::hash(include_bytes!("compact_cold.rs")).to_hex().to_string(),
         "memory_cgroup_limit_bytes":memory_limit_bytes,
@@ -801,6 +839,30 @@ mod tests {
     use crypto_lib::cryptanalysis::koblitz_relation_solver::WideRankTracker;
     use std::collections::HashMap;
     use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn supervised_source_snapshot_rejects_a_changed_compiled_file() {
+        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let snapshot = std::env::temp_dir().join(format!("n83-probe-source-{nonce}"));
+        let checkout = Path::new(env!("CARGO_MANIFEST_DIR"));
+        for relative in [
+            "examples/koblitz_n83_factor_base_export.rs",
+            "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs",
+            "research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs",
+        ] {
+            let destination = snapshot.join(relative);
+            fs::create_dir_all(destination.parent().unwrap()).unwrap();
+            fs::copy(checkout.join(relative), destination).unwrap();
+        }
+        assert!(checked_primary_probe_source(&snapshot).is_ok());
+        fs::write(
+            snapshot.join("research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs"),
+            b"changed source",
+        )
+        .unwrap();
+        assert!(checked_primary_probe_source(&snapshot).is_err());
+        fs::remove_dir_all(snapshot).unwrap();
+    }
 
     #[test]
     fn small_primary_export_maps_to_generic_orbits_and_zero_trial_preflight() {

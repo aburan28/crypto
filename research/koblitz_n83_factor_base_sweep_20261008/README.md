@@ -73,6 +73,21 @@ For a construction-only capacity gate, `build_union_s4_encoding` is the common m
 
 The Linux capacity worker cross-build passed with the existing Redis native-TLS behavior expressed as a default Cargo feature, and `--no-default-features` used only for this network-disabled worker. `verification/capacity-worker-startup/` retains an expected producer failure on an empty manifest: the binary reached input parsing after checking the cgroup cap. The cross-build and startup checks did not import a retained base. The exact host build command and executable hash are in `verification/sat-capacity-linux-build-command.txt`; the Homebrew-target and OpenSSL cross-build failures remain separately retained. A future K=64 construction invocation must supply a new wall and memory grant, use that Linux executable, and pass the replayed `pilot-01` panel to `sat_capacity_supervisor.py` with a new output directory. The Docker image is resolved to its immutable local ID and never pulled during the run.
 
+`compact_probe_supervisor.py` is the corresponding outer wall and memory
+guard for `primary-s3-probe`. It freezes the exporter, compact index and
+primary adapter source files from a clean commit; the Linux worker checks
+those files against its compiled bytes without mounting Git metadata or the
+full checkout. The supervisor uses a locally pinned Docker image, no
+network, a one-CPU limit, hard memory, zero swap, an exact candidate-state
+cap and a new output directory. Config, copied source, stdout, stderr,
+worker receipt when present, and an outer status survive a hit, miss, wall
+cap, resource exit or producer failure. The synthetic process tests cover
+those classification paths and malformed/changed-source rejection; they do
+not exercise Docker or a retained N83 index. The compact worker still needs
+a Linux rebuild from the committed source and a container startup smoke.
+The earlier one-hour pilot is exhausted, so this source path has not been
+used to measure relation yield.
+
 ## Subsequent total-runtime experiment
 
 Freeze the exact public target corpora, resource envelope and native backend versions before the first relation measurement. Use disjoint tuning and holdout targets, with validation-only known-answer scalars kept out of solver input. Keep one result per independent one-target workload. Preserve every phase cost, operation unit, cap, failed attempt, OOM and timeout. Baseline and candidate receive the same target and budget; randomize/interleave their order with A/A controls. Require at least five paired rounds and a paired 95% interval outside the measured noise floor for a runtime improvement. Run the admitted measurements on an L2-capable host; local macOS L0 timings cannot establish that comparison.

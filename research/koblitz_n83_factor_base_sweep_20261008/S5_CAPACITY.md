@@ -47,17 +47,27 @@ retained primary policy/seed/size through `primary_adapter.rs`. It
 constructs the same wide compact index under a state cap and a mandatory
 Linux cgroup memory cap,
 and independently re-adds any returned witness in the generic curve
-group. It has not been run on a retained N83 base; an external wall
-supervisor remains required before that experiment.
+group. It has not been run on a retained N83 base. An outer wall supervisor
+is now source-ready for that experiment.
 
 The current study branch has a separate exact wide relation-rank and
-factor-log gate. The new point-only probe does not yet feed it rows. A
+factor-log gate. A checked compact hit now yields a full-width signed-orbit
+row, but the probe does not accumulate natural rows or measure rank. A
 public `a=0`, n=71 small-order fixture exercises both ordered and
 Frobenius-unordered index modes on planted four-sums, checks every returned
 point sum with generic curve arithmetic, and rejects a state cap before
-allocation. That fixture validates checked cases, not N83 yield or index
-capacity. A retained K=64 construction under a memory/wall guard and a
-natural relation/rank receipt are later gates. A full cold comparison comes
+allocation. The compact worker can check the three compiled Rust sources
+against a supervisor-made snapshot bound to a clean Git commit. The
+`compact_probe_supervisor.py` source pins a local container image, mounts
+the panel, worker, source snapshot and output directory, enforces cgroup memory and zero
+swap plus a process-wall cap, and retains a fail-closed outer receipt. Its
+synthetic process tests cover a miss, a hit, wall expiry, memory exit,
+malformed receipt and mutated source. These checks validate guard logic,
+not container behavior, N83 yield or index capacity. A Linux worker rebuild
+from the committed source and a container startup smoke remain required.
+A retained K=64
+probe under the guard and a natural relation/rank receipt are later gates.
+A full cold comparison comes
 only after all phases, including failed work and I/O, are charged.
 
 ## Source-derived index size, not a timing projection
@@ -116,8 +126,9 @@ and independently replays the resulting row on the original curve. A small
 public fixture verifies sign, phase, high-limb coefficients, malformed labels,
 and insertion into the exact wide rank tracker. This is a correctness gate;
 it has not produced a retained N83 relation or measured natural rank.
-The smallest useful next empirical gate is a wall-supervised, retained K=64
-primary probe, followed by natural relation accumulation and rank measurement;
+The smallest useful next empirical gate is a retained K=64 primary probe
+through the new supervisor, followed by natural relation accumulation and
+rank measurement;
 K=1,182 and larger need an explicit memory strategy before construction.
 The balanced-S5 SAT example is an alternative source of four-summand algebra
 and domain constraints, not a directly executable N83 backend.
