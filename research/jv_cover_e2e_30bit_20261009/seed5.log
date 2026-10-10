@@ -1,0 +1,10 @@
+| p | seed | moves | l | non-weak C | walk found | path (2/odd) | walk | transport | model | route muls | reach share | solved | correct | verified on C | S | S/rho (e2e) | S/rho (route only) | e2e/route |
+|---:|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|
+| 251 | 5 | 8 | 2^45.8 | true | true | 3/1 | 1.03e8 | 9.47e3 | 3.53e4 | 3.064e10 | 0.0033 | true | true | true | 1.175e1 | 8.6305 | 12.4025 | 0.6959 |
+p=251 seed=5 moves=8: stage=ok 126 s
+| 503 | 5 | 8 | 2^51.8 | true | true | 4/0 | 3.15e4 | 4.41e3 | 7.20e4 | 4.130e10 | 0.0000 | true | true | true | 1.961e0 | 1.4407 | 0.1334 | 10.7987 |
+p=503 seed=5 moves=8: stage=ok 111 s
+| 1009 | 5 | 8 | 2^57.9 | true | true | 1/0 | 1.01e4 | 1.10e3 | 1.48e5 | 1.353e10 | 0.0000 | true | true | true | 7.956e-2 | 0.0585 | 0.0246 | 2.3718 |
+p=1009 seed=5 moves=8: stage=ok 52 s
+| 1511 | 5 | 8 | 2^61.4 | true | true | 0/2 | 3.27e7 | 4.40e3 | 2.42e5 | 8.463e9 | 0.0039 | true | true | true | 1.488e-2 | 0.0109 | 0.0186 | 0.5866 |
+p=1511 seed=5 moves=8: stage=ok 57 s
