@@ -58,3 +58,59 @@ path = "../large_population_20261009/emit_replay.rs"
 [[bin]]
 name = "iso1_quadratic_scope_records"
 path = "../large_population_20261009/scope_records.rs"
+
+[[bin]]
+name = "iso1_two_branch_run"
+path = "../two_branch_20261009/run.rs"
+
+[[bin]]
+name = "iso1_two_branch_inputs"
+path = "../two_branch_20261009/inputs.rs"
+
+[[bin]]
+name = "iso1_two_branch_check"
+path = "../two_branch_20261009/check.rs"
+
+[[bin]]
+name = "iso1_two_branch_batch"
+path = "../two_branch_20261009/batch.rs"
+
+[[bin]]
+name = "iso1_two_branch_exact"
+path = "../two_branch_20261009/exact.rs"
+
+[[bin]]
+name = "iso1_two_branch_algebra"
+path = "../two_branch_20261009/algebra.rs"
+
+[[bin]]
+name = "iso1_two_branch_emit_replay"
+path = "../two_branch_20261009/emit_replay.rs"
+
+[[bin]]
+name = "iso1_two_branch_records"
+path = "../two_branch_20261009/records.rs"
+
+[[bin]]
+name = "iso1_two_branch_present"
+path = "../two_branch_20261009/present.rs"
+
+[[bin]]
+name = "iso1_two_branch_archive"
+path = "../two_branch_20261009/archive.rs"
+
+[[bin]]
+name = "iso1_odd_degree_inputs"
+path = "../two_branch_20261009/general_inputs.rs"
+
+[[bin]]
+name = "iso1_odd_degree_batch"
+path = "../two_branch_20261009/general_batch.rs"
+
+[[bin]]
+name = "iso1_odd_degree_emit_replay"
+path = "../two_branch_20261009/general_replay.rs"
+
+[[bin]]
+name = "iso1_two_branch_seal"
+path = "../two_branch_20261009/seal.rs"

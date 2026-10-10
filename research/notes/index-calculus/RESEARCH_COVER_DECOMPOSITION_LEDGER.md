@@ -1375,6 +1375,18 @@ The bounded degree-2/3 searches test 32,484 vertices and find zero norm-one witn
 
 The direct weak-model density bound is 3/(p²−1), from the three norm-fiber conditions; its degree-3/5/7 geometric sums have certified polynomial records. A CM preflight on an admitted 192-bit source obtains f_pi=8, then `polclass` reports an integer-conversion overflow on the 188-bit fundamental discriminant. The report retains the source law, all 512 field/model identities and raw receipts, 1,326 independent model replays, 72 route replays, proofs, SVGs, and a compiled PDF. Canonical dashboard context is refreshed; IC/rho ratios keep their earlier workloads and values.
 
+### 18.6.3 Exact support of both genus-3 branches (2026-10-09)
+
+The [two-branch theorem supplement](../../iso1_weak_classes_20261007/two_branch_20261009/REPORT.md) proves complete cubic and nonsplit-quadratic torus normalizations and an exact CM intersection criterion for ordinary trace pairs with D_K < -4. Cubic quotient orders satisfy c | f_pi/4; quadratic orders occupy the 2-volcano floor v2(c)=v2(f_pi). Each reduced CM factor has degree dividing six, so the reciprocal-variable decision polynomial has degree at most 18. Building the CM support retains a separate cost.
+
+At p=37 the combined family covers 48,630 of 49,284 ordinary trace classes: 24,352 cubic, 48,164 quadratic, 23,886 in both, and 654 exact zeros. Seven complete censuses extend from p7 through p37. Independent all-x replay verifies all 409 p7 parameter models with 48,118,441 evaluations; the cubic counts match the historical native p7, p13 and p37 rows. Two independent quadratic CM implementations agree on five classes, including the positive quadratic class at trace magnitude 610.
+
+From the 64 frozen independent p7 source fixtures, all 63 positive fixtures now have explicit verified routes after degree-11 and degree-19 follow-ups; the remaining trace-474 fixture is a combined-family zero. Independent coordinate replay checks 230 retained route edges and 117 literal conversions across successful variants. Their repeated-policy costs and all earlier caps remain recorded.
+
+The expanded 512-source 192–252-bit panel visits 46,356 vertices and evaluates 75,996 degree-2 and 53,604 degree-3 edges. Its 383 restricted closures and 129 vertex caps leave all large-field class labels unresolved. A generalized quadratic-base Hilbert-90 reconstruction passes 16 degree-10/14 controls, including eight section-gcd-5 cases. The specified compositum covers have genera 25 and 161 at these degrees. The selected CM support and an explicit large-field positive route remain the next construction requirements. Seven identity records, all source/phase receipts, canonical model records, source-linked diagrams and a reviewed PDF accompany the result; IC/rho ratio points retain their earlier workloads.
+
+The separate cubic worker has now completed p61 and p67. It records respectively 111,084/223,260 and 147,496/296,274 positive ordinary rows, zero depth-1 positives, and 546/640 higher-depth zeros. Each prime has 5,000 positive independent PARI controls and a replay-verified compressed archive. These retain diagnostic status for the probabilistic counter. The finite continuation stopped before p71 at the storage preflight; the stopped queue receipt remains intact. After storage became available, a fresh finite queue resumed at p71 with the same frozen runtime, four CPU threads, the original per-prime storage guard and the authorized range through p199; its restart receipt records 38,786,592,768 available bytes and the running service.
+
 ### 18.7 Historical candidate R-v2, registered before its held-out test and now falsified (2026-10-08)
 
 Scope correction, 2026-10-09: the earlier weak-row labels, conductor

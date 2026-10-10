@@ -80,6 +80,25 @@ jobs:
           ISO1_P=7 ISO1_N=3 ISO1_SEED=202610090013 ISO1_BUDGET=256 ISO1_MODE=population gp -q -f -s 256M "$pop/sample.gp" > population_smoke.txt 2> population_smoke.stderr
           test ! -s population_smoke.stderr
           test "$(tail -n 1 population_smoke.txt)" = 'COMPLETE|7|3|202610090013|population'
+      - name: Two-branch class decisions and independently saved maps
+        run: |
+          study=research/iso1_weak_classes_20261007
+          dual="$study/two_branch_20261009"
+          cargo test --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --lib
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_seal -- "$dual" --check
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_check -- "$dual"
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_algebra -- "$dual/identity_certificates.json"
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_exact -- "$dual/p7_run1/stdout.txt" > exact_two_branch.txt
+          cmp exact_two_branch.txt "$dual/exact_p7_run1.txt"
+          ISO1_INPUTS="$dual/replay_inputs.gp" gp -q -f -s 256M "$dual/replay.gp" > two_branch_maps.txt 2> two_branch_maps.stderr
+          test ! -s two_branch_maps.stderr
+          test "$(tail -n 1 two_branch_maps.txt)" = 'ALGEBRA_COMPLETE|saved_routes=230|literal_models=117'
+          gp -q -f -s 256M "$dual/cm_microfactor.gp" > quadratic_microfactor.txt 2> quadratic_microfactor.stderr
+          test ! -s quadratic_microfactor.stderr
+          cmp quadratic_microfactor.txt "$dual/cm_microfactor_run1/stdout.txt"
+          ISO1_P=7 ISO1_BRUTE=1 gp -q -f -s 256M "$dual/torus_census.gp" > two_tori.txt 2> two_tori.stderr
+          test ! -s two_tori.stderr
+          test "$(tail -n 1 two_tori.txt)" = 'TWO_BRANCH_COMPLETE|p=7|plus_orbits=213|minus_orbits=196|ordinary_classes=294|plus_support=126|minus_support=210|overlap=88|combined_zero=46|brute_alpha=117600'
       - name: Replay every p7 orbit by exact field enumeration
         env:
           RAYON_NUM_THREADS: '2'
