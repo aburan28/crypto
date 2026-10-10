@@ -17,6 +17,12 @@ and asserts that every parsed JSON value, including all measurements, is identic
 it also preserves measurement-board bytes. HTML and Markdown required no changes.
 No experimental value, curve identity, graph edge or ledger promotion changes.
 
+After that byte-order repair, the browser's recorded leaderboard checksum must track
+the new canonical bytes. The native helper's `--browser-sources` mode refreshes the
+four catalogue/cover/leaderboard digests and asserts that every other browser value
+is identical. This is a downstream provenance repair, with no experiment or row
+promotion. The hosted leaderboard check passed at repair head `8e15a1919`.
+
 Run the native formatter with `canonical-roster docs/ic/leaderboard.json`, or validate
 its formatting using `canonical-roster docs/ic/leaderboard.json --check`. Unknown
 roster fields fail closed for review. The historical profile, source archives and

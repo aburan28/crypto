@@ -5,6 +5,9 @@ use serde::{
 };
 use serde_json::{value::RawValue, Value};
 use std::{fmt, fs};
+#[path = "../../src/hash/sha256.rs"]
+#[allow(dead_code)]
+mod sha;
 struct Object(Vec<(String, Box<RawValue>)>);
 impl<'de> Deserialize<'de> for Object {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
@@ -40,6 +43,51 @@ fn main() {
     let before = fs::read_to_string(path).unwrap();
     let reference: Value = serde_json::from_str(&before).unwrap();
     let mut doc: Object = serde_json::from_str(&before).unwrap();
+    if args.get(2).is_some_and(|arg| arg == "--browser-sources") {
+        let mut sources: Object = serde_json::from_str(doc.raw("sources")).unwrap();
+        let mut expected = reference;
+        for source in [
+            "docs/curves/registry.json",
+            "docs/curves/covers.json",
+            "docs/curves/cover-links.yaml",
+            "docs/ic/leaderboard.json",
+        ] {
+            let checksum: String = sha::sha256(&fs::read(source).unwrap())
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect();
+            sources.0.iter_mut().find(|(k, _)| k == source).unwrap().1 =
+                RawValue::from_string(serde_json::to_string(&checksum).unwrap()).unwrap();
+            expected["sources"][source] = Value::String(checksum);
+        }
+        let value = format!(
+            "{{\n  {}\n }}",
+            sources
+                .0
+                .iter()
+                .map(|(k, v)| format!("{}: {}", serde_json::to_string(k).unwrap(), v.get()))
+                .collect::<Vec<_>>()
+                .join(",\n  ")
+        );
+        doc.0.iter_mut().find(|(k, _)| k == "sources").unwrap().1 =
+            RawValue::from_string(value).unwrap();
+        let after = format!(
+            "{{\n {}\n}}\n",
+            doc.0
+                .iter()
+                .map(|(k, v)| format!("{}: {}", serde_json::to_string(k).unwrap(), v.get()))
+                .collect::<Vec<_>>()
+                .join(",\n ")
+        );
+        assert_eq!(
+            serde_json::from_str::<Value>(&after).unwrap(),
+            expected,
+            "browser content changed beyond its source hashes"
+        );
+        fs::write(path, after).unwrap();
+        println!("Browser source hashes refreshed; every other value preserved");
+        return;
+    }
     let board = doc.raw("board").to_owned();
     let rows: Vec<Box<RawValue>> = serde_json::from_str(doc.raw("roster")).unwrap();
     let order = [
