@@ -233,10 +233,34 @@ merge.**
   completed successfully. Pending, cancelled, timed-out, or failed checks are
   not a pass. A skipped job counts as inapplicable only when its conditions or
   path filters justify that status; required checks must still be satisfied.
-- Fix failures caused by the change and resolve routine merge conflicts
-  autonomously, then rerun the affected validation. Any new commit requires
-  checking CI again for the new head. Do not bypass branch protections, required
-  reviews, unresolved blocking review feedback, or required checks.
+- Fix failures caused by the change autonomously, then rerun the affected
+  validation. Offload merge conflicts to GitHub Copilot (next bullet) rather
+  than resolving them yourself. Any new commit requires checking CI again for
+  the new head. Do not bypass branch protections, required reviews, unresolved
+  blocking review feedback, or required checks.
+- **Merge conflicts go to Copilot first.** When a PR you maintain reports a
+  merge conflict (`mergeable_state` `dirty`, or a conflict notice), post one PR
+  comment asking `@copilot` to resolve it by merging the base branch into the
+  PR head, without rebasing or force-pushing, and to keep the PR's scope
+  unchanged (the GitHub MCP tools also expose Copilot assignment if a comment is
+  not enough). This standing instruction authorizes that comment; do not ask
+  again. Then:
+  - Do not edit the conflicted files yourself while Copilot's request is
+    pending; two resolvers on one branch create a second conflict.
+  - When Copilot pushes, review its diff against both sides, regenerate
+    lockfiles and generated files with the repo's tooling rather than by hand,
+    and rerun the affected validation (`cargo check`, the touched tests). A
+    resolution is not done until the PR head merges cleanly and CI is checked
+    on the new head. Report Copilot's result as unverified until you have done
+    this.
+  - Resolve it yourself (merge the base in, never rebase or force-push a shared
+    branch) only if Copilot declines or cannot act on the PR, pushes a
+    resolution that fails validation, or has not responded after a reasonable
+    wait; say in the PR why you stepped in.
+  - Conflicts in frozen evidence, ledger rows, or claim files are never
+    resolved by picking a side: report them to the user.
+  - If Copilot is unavailable in the session (no GitHub MCP access, plan
+    limits), say so and fall back to resolving it yourself.
 - If a documentation-only change legitimately triggers no CI, verify the
   workflow filters, inspect the diff, and run any relevant local validation.
   State that no CI applied; do not claim that nonexistent checks passed.
