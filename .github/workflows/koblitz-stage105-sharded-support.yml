@@ -1,11 +1,9 @@
 name: Koblitz Stage 105 n53 sharded support table
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage105_sharded_support.py"
-      - ".github/workflows/koblitz-stage105-sharded-support.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

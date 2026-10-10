@@ -1,11 +1,9 @@
 name: Koblitz Stage 47 n53 parallel width
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage47_n53_width.py"
-      - ".github/workflows/koblitz-stage47-n53-width.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

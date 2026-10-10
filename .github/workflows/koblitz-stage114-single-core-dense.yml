@@ -1,10 +1,9 @@
 name: Koblitz Stage 114 n53 single-core dense support
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage114_single_core_dense.py"
-      - ".github/workflows/koblitz-stage114-single-core-dense.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

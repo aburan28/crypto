@@ -161,7 +161,7 @@ fn hex_digest(digest: [u8; 32]) -> String {
 pub fn digest_reader<R: Read>(mut reader: R) -> Result<FileDigest, String> {
     let mut state = Sha256::new();
     let mut bytes = 0u64;
-    let mut buffer = [0u8; 1024 * 1024];
+    let mut buffer = vec![0u8; 1024 * 1024];
     loop {
         let read = reader
             .read(&mut buffer)
