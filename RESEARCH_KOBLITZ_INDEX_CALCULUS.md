@@ -78,7 +78,7 @@ kernel dimension must come out equal to `deg f_j`.
 13  0   12        8012       2003    4    4005      309
 ```
 
-For `K_0 / F_2^9`: `x^9 − 1` has the single non-trivial factor
+For `icv1-f2m9-t5-81e744be`: `x^9 − 1` has the single non-trivial factor
 `x^6 + x^3 + 1`, giving `F(X) = X + X^8 + X^64`, a 64-element invariant
 subspace, `|F| = 55` points in `7` orbits, and `λ = 22` on the
 order-127 subgroup.  Every random `(a, b)` decomposed on the first try;
@@ -156,7 +156,7 @@ The algebraic path, for `m = 2`:
    back to points — `S₃` fixes the summands only up to sign — and the
    group identity re-checked, so no spurious relation can escape.
 
-For `K_0 / F_2^9`: 12 unknowns, 9 equations, degree 2.
+For `icv1-f2m9-t5-81e744be`: 12 unknowns, 9 equations, degree 2.
 
 ```
   matrix-F4 at degree 2:    8 reduced rows in  33.02µs
@@ -171,7 +171,7 @@ For `K_0 / F_2^9`: 12 unknowns, 9 equations, degree 2.
 the Macaulay linear algebra this module adds.  Same verdicts, measured
 on the same end-to-end DLP:
 
-| engine | time to solve `Q = [53]G` on `K_0 / F_2^9` |
+| engine | time to solve `Q = [53]G` on `icv1-f2m9-t5-81e744be` |
 |--------|--------------------------------------------|
 | matrix-F4 | 21.5 ms |
 | Buchberger | 85.5 s |
@@ -195,10 +195,10 @@ growth blow up on different systems.  Measured over 24 targets:
 
 | instance | search | SAT | verdict |
 |---|---|---|---|
-| `K_0/F_2^9`, m=2 | 0.58 ms | 79 ms | 24/24 agree |
-| `K_1/F_2^9`, m=2 | 0.46 ms | 30 ms | 24/24 agree |
-| `K_0/F_2^7`, m=2 | 0.10 ms | 4.5 ms | 24/24 refuted (UNSAT) |
-| `K_0/F_2^9`, m=3 | 0.58 ms | 3.44 s | 24/24 agree |
+| `icv1-f2m9-t5-81e744be`, m=2 | 0.58 ms | 79 ms | 24/24 agree |
+| `icv1-f2m9-tm5-4a3ea183`, m=2 | 0.46 ms | 30 ms | 24/24 agree |
+| `icv1-f2m7-t13-616700dd`, m=2 | 0.10 ms | 4.5 ms | 24/24 refuted (UNSAT) |
+| `icv1-f2m9-t5-81e744be`, m=3 | 0.58 ms | 3.44 s | 24/24 agree |
 
 Zero spurious models in every run — each model is re-checked against the
 original equations before it is used, and the lifted points are
@@ -217,7 +217,7 @@ new code.
 
 ### Where the algebra wins, and where it does not
 
-It refutes.  On `K_0 / F_2^7` the invariant subspace has 8 elements but
+It refutes.  On `icv1-f2m7-t13-616700dd` the invariant subspace has 8 elements but
 only one is the abscissa of a curve point, so **no** target decomposes.
 All 28 targets are closed by an F4 infeasibility certificate, with zero
 branches searched — an answer exhaustive search cannot give in kind, only
@@ -281,10 +281,10 @@ Measured on toy curves:
 
 | curve | dim | \|F\| | orbits | m | vars | search | F4 | SAT |
 |:------|----:|------:|-------:|--:|-----:|-------:|---:|----:|
-| K_1/2^7 | 3 | 15 | 3 | 2 | 6 | 11 µs | 198 µs | 144 µs |
-| K_1/2^7 | 6 | 71 | 11 | 2 | 12 | 4.7 µs | 1.4 ms | 448 µs |
-| K_0/2^9 | 8 | 253 | 29 | 2 | 16 | 8.1 µs | 3.9 ms | 5.3 ms |
-| K_1/2^15 | 10 | 1057 | 73 | 2 | 20 | 64 µs | 17 ms | 32 ms |
+| icv1-f2m7-tm13-ac10a42c | 3 | 15 | 3 | 2 | 6 | 11 µs | 198 µs | 144 µs |
+| icv1-f2m7-tm13-ac10a42c | 6 | 71 | 11 | 2 | 12 | 4.7 µs | 1.4 ms | 448 µs |
+| icv1-f2m9-t5-81e744be | 8 | 253 | 29 | 2 | 16 | 8.1 µs | 3.9 ms | 5.3 ms |
+| icv1-f2m15-t275-b7f03703 | 10 | 1057 | 73 | 2 | 20 | 64 µs | 17 ms | 32 ms |
 
 ### The cofactor class decides which `m` can work
 
@@ -292,7 +292,7 @@ A separate constraint, and not a size one.  `x = 0` lies in every
 invariant subspace, so the 2-torsion point is always in `F`; more
 generally the base can sit entirely off `⟨G⟩`.  A target `R ∈ ⟨G⟩` has
 `[r]R = O`, so a decomposition needs the summands' `h`-torsion classes to
-cancel.  On `K_1 / F_2^7` (cofactor 2) **no** factor-base point is in
+cancel.  On `icv1-f2m7-tm13-ac10a42c` (cofactor 2) **no** factor-base point is in
 `⟨G⟩`, so odd `m` decomposes *nothing* — at any `|F|`:
 
 ```
@@ -360,7 +360,7 @@ identical base, so `ic run --factor-base` replays it and `ic search`
 validates the best few by real child runs on fresh known-answer fixtures
 before selecting the fastest one that verified every holdout.
 
-What it finds.  On `K_1 / F_2^15` (r = 211, h = 154) the legacy base —
+What it finds.  On `icv1-f2m15-t275-b7f03703` (r = 211, h = 154) the legacy base —
 factor index 0, 31 points — yields **no relation at all** in 20 000
 trials: `ic run --degree 15 --curve-a 1` was simply unsolvable.  The
 search scores 86 candidates on all 210 targets in 8 s and validates a
@@ -424,10 +424,10 @@ counts them) and changes no verdict.  It also does not pay:
 
 | instance | targets | conflicts off | conflicts on |
 |:---------|--------:|--------------:|-------------:|
-| `K_0/2^9`, m = 3 | 8 | 5 512 | 6 412 |
-| `K_1/2^9`, m = 2 | 16 | 428 | 823 |
-| `K_0/2^7`, m = 2 | 16 | 70 | 79 |
-| `K_1/2^15`, m = 3 | 8 | 0 | 0 |
+| `icv1-f2m9-t5-81e744be`, m = 3 | 8 | 5 512 | 6 412 |
+| `icv1-f2m9-tm5-4a3ea183`, m = 2 | 16 | 428 | 823 |
+| `icv1-f2m7-t13-616700dd`, m = 2 | 16 | 70 | 79 |
+| `icv1-f2m15-t275-b7f03703`, m = 3 | 8 | 0 | 0 |
 
 The degree-2 Macaulay rows and the trace row already leave these
 systems nearly propagation-closed, and the auxiliaries add decisions
@@ -443,22 +443,22 @@ projection.
 
 | curve | solver | columns main → branch | relations main → branch | wall main | wall branch |
 |:------|:-------|:---------------------:|:-----------------------:|----------:|------------:|
-| `K_0/2^9` | enumerate | 7 → 3 | 11 → 4 | 0.010 s | 0.009 s |
-| `K_0/2^9` | groebner | 7 → 3 | 11 → 4 | 0.026 s | 0.012 s |
-| `K_0/2^9` | sat | 7 → 3 | 11 → 4 | 0.014 s | 0.009 s |
-| `K_1/2^11` | enumerate | 91 → 45 | 95 → 16 | 0.035 s | 0.028 s |
-| `K_1/2^11` | groebner | 91 → 45 | 95 → 16 | 0.84 s | 0.071 s |
-| `K_1/2^11` | sat | 91 → 45 | 95 → 32 | 0.216 s | 0.063 s |
-| `K_0/2^13` | enumerate | 309 → 77 | 313 → 12 | 0.140 s | 0.119 s |
-| `K_0/2^13` | groebner | 309 → 77 | 313 → 12 | 6.78 s | 0.223 s |
-| `K_0/2^13` | sat | 309 → 77 | 313 → 20 | 2.17 s | 0.249 s |
-| `K_1/2^17` | enumerate | 13 → 6 | 17 → 7 | 0.063 s | 0.032 s |
-| `K_1/2^17` | groebner | 13 → 6 | 17 → 7 | 1.33 s | 0.222 s |
-| `K_1/2^17` | sat | 13 → 6 | 17 → 7 | 0.555 s | 0.095 s |
-| `K_1/2^23` | enumerate | 91 → 45 | 95 → 23 | 4.31 s | 0.495 s |
-| `K_1/2^23` | groebner | 91 → 45 | 95 → 27 | 206 s | 20.6 s |
-| `K_1/2^23` | sat | 91 → 45 | 95 → 23 | > 900 s (killed) | 137 s |
-| `K_1/2^23` | pair-table (new) | — | 23 | — | 6.2 s |
+| `icv1-f2m9-t5-81e744be` | enumerate | 7 → 3 | 11 → 4 | 0.010 s | 0.009 s |
+| `icv1-f2m9-t5-81e744be` | groebner | 7 → 3 | 11 → 4 | 0.026 s | 0.012 s |
+| `icv1-f2m9-t5-81e744be` | sat | 7 → 3 | 11 → 4 | 0.014 s | 0.009 s |
+| `icv1-f2m11-t67-05f5aa36` | enumerate | 91 → 45 | 95 → 16 | 0.035 s | 0.028 s |
+| `icv1-f2m11-t67-05f5aa36` | groebner | 91 → 45 | 95 → 16 | 0.84 s | 0.071 s |
+| `icv1-f2m11-t67-05f5aa36` | sat | 91 → 45 | 95 → 32 | 0.216 s | 0.063 s |
+| `icv1-f2m13-t181-515ee569` | enumerate | 309 → 77 | 313 → 12 | 0.140 s | 0.119 s |
+| `icv1-f2m13-t181-515ee569` | groebner | 309 → 77 | 313 → 12 | 6.78 s | 0.223 s |
+| `icv1-f2m13-t181-515ee569` | sat | 309 → 77 | 313 → 20 | 2.17 s | 0.249 s |
+| `icv1-f2m17-tm101-00378d4e` | enumerate | 13 → 6 | 17 → 7 | 0.063 s | 0.032 s |
+| `icv1-f2m17-tm101-00378d4e` | groebner | 13 → 6 | 17 → 7 | 1.33 s | 0.222 s |
+| `icv1-f2m17-tm101-00378d4e` | sat | 13 → 6 | 17 → 7 | 0.555 s | 0.095 s |
+| `icv1-f2m23-tm5197-1f85e9e1` | enumerate | 91 → 45 | 95 → 23 | 4.31 s | 0.495 s |
+| `icv1-f2m23-tm5197-1f85e9e1` | groebner | 91 → 45 | 95 → 27 | 206 s | 20.6 s |
+| `icv1-f2m23-tm5197-1f85e9e1` | sat | 91 → 45 | 95 → 23 | > 900 s (killed) | 137 s |
+| `icv1-f2m23-tm5197-1f85e9e1` | pair-table (new) | — | 23 | — | 6.2 s |
 
 Three things the table says.  The relation count is what moved: with
 signed, projected columns and the exact stopping rule the run needs
@@ -472,7 +472,7 @@ what the trial count gives (9× at `n = 23`).  And the pair table does
 `|F|` additions for enumeration.  It pays when trials are many or
 `m ≥ 3`, where enumeration is `|F|²` per trial and the table is `|F|`
 lookups — which is exactly the regime past the old cap below.  On the
-cofactor-2 curves `K_1/2^11`, `K_1/2^17` and `K_1/2^23` three summands
+cofactor-2 curves `icv1-f2m11-t67-05f5aa36`, `icv1-f2m17-tm101-00378d4e` and `icv1-f2m23-tm5197-1f85e9e1` three summands
 are inadmissible (no cofactor-class cancellation), and every solver
 reports that up front instead of searching.
 
@@ -481,11 +481,11 @@ reports that up front instead of searching.
 `MAX_N` is 40 (was 24); `KoblitzCurve::new` uses the sparse irreducible
 search, which a test pins equal to the exhaustive one for every `n ≤ 24`,
 so no existing fixture changes.  Above 23 only four Koblitz curves have a
-prime-order subgroup larger than their cofactor — `K_1/2^29`
-(r = 42 457), `K_0/2^31` (r = 1 439 393, h = 1492), `K_0/2^37` and
-`K_0/2^39` — and the constructor rejects the rest, as it did before.
+prime-order subgroup larger than their cofactor — `icv1-f2m29-tm40309-30c52b96`
+(r = 42 457), `icv1-f2m31-tm90707-c95f16f5` (r = 1 439 393, h = 1492), `icv1-f2m37-tm534059-32aad96b` and
+`icv1-f2m39-t1481485-829ef1d1` — and the constructor rejects the rest, as it did before.
 
-On `K_0/2^31` (h = 1492) the single-factor family cannot be used at all
+On `icv1-f2m31-tm90707-c95f16f5` (h = 1492) the single-factor family cannot be used at all
 in `ic` (`ord_31(2) = 5` gives 63–65-point bases whose three-summand
 coverage is 0 on every one of them), so this is the first instance the
 search is *necessary* for rather than merely better.  `ic search
@@ -552,7 +552,7 @@ individual-logarithm relation.  Both stages are now implemented.
   column logs known, `d = log_G Q` is one modular inverse, re-checked as
   `[d]G == Q`.  No relation matrix — one decomposition and a lookup.
 
-Measured on `K_0/2^31` (r = 1 439 393) over the search-selected
+Measured on `icv1-f2m31-tm90707-c95f16f5` (r = 1 439 393) over the search-selected
 dimension-11 base (35 projected columns, `m = 3`):
 
 | stage | work | wall |
@@ -600,11 +600,11 @@ Same machine, same commands, `ic run --solver pair-table --summands 2`:
 
 | curve | stage | before | after |
 |:------|:------|-------:|------:|
-| `K_0/2^13` (\|F\| = 4005, 8.0M sums) | pair-table build | 2.93 s | 0.21–0.34 s (~11×) |
-| `K_1/2^23` (\|F\| = 2071, 2.1M sums) | whole process (CPU) | 14.1 s | 0.20 s (~70×) |
-| `K_1/2^23` | relation sampling (56 trials) | 76 ms | ~2 ms (~30×) |
+| `icv1-f2m13-t181-515ee569` (\|F\| = 4005, 8.0M sums) | pair-table build | 2.93 s | 0.21–0.34 s (~11×) |
+| `icv1-f2m23-tm5197-1f85e9e1` (\|F\| = 2071, 2.1M sums) | whole process (CPU) | 14.1 s | 0.20 s (~70×) |
+| `icv1-f2m23-tm5197-1f85e9e1` | relation sampling (56 trials) | 76 ms | ~2 ms (~30×) |
 
-`m = 3` at `K_0/2^13` verifies in ~0.13 s table + 1 ms collection;
+`m = 3` at `icv1-f2m13-t181-515ee569` verifies in ~0.13 s table + 1 ms collection;
 `ic search --degree 15` scores 142 candidates on the full 210-target
 subgroup in 6 s.  Gates green: 99 `koblitz_*` lib tests, 14
 `ic_framework`, 4 `ic_progress`, 5 new `koblitz_fast_arith` — zero
@@ -692,7 +692,7 @@ word-keyed index, and batches each recursion level (`target + (−P_i)`
 for all `i`) through one Montgomery inversion. Visit order and first
 witness are unchanged; the slow recursion stays as the cross-check.
 
-Microbench, 56 deterministic targets at `K_1/2^23`, `m = 2`
+Microbench, 56 deterministic targets at `icv1-f2m23-tm5197-1f85e9e1`, `m = 2`
 (stashed-baseline binary, same machine): 480–482 ms → 5.1–5.3 ms
 (**~93×**, identical 23/56 found). End-to-end `ic run --solver
 enumerate` at n = 23: 216 ms → 81–95 ms relation collection (the rest is
