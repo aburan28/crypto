@@ -1,0 +1,154 @@
+{
+  "freeze_sha256": "613867d794d7fa68235faa915246d2d5ff40c9bd5e3efcae892a71dfb4fbcec1",
+  "generator_order_verified": true,
+  "kind": "s3_n53_c1800_batch32_pair_sage_replay_v1",
+  "replay_source_sha256": "cb3330d4d638fa515154dd6234a53ef26695d09d409c8c55a49c23451b07c95d",
+  "runs": [
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T205",
+      "recovered_scalar": 7380136779495,
+      "report_raw_sha256": "ea5e58de9b6b2a160f75f0823b7ea2f2209294e7647da5ca34b23d8c06d5eaa0",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "d642f61a45c8"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T205",
+      "recovered_scalar": 7380136779495,
+      "report_raw_sha256": "4fdf40e1c2accbbc229ef02815f0fce8c0f7b957213b42cb49fcb4efe9a6bbe0",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "d642f61a45c8"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T206",
+      "recovered_scalar": 7387318818665,
+      "report_raw_sha256": "3ffafde5cd2b885d8c68bee8a15852b5b897ca4e626e37cb4cd9dccfef9fe10a",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "2ab48980c617"
+    },
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T206",
+      "recovered_scalar": 7387318818665,
+      "report_raw_sha256": "a9616d5f5f0769748625477d22ec8e8fd71e3a9dd1f9f31880522361e9a9adb0",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "2ab48980c617"
+    },
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T207",
+      "recovered_scalar": 893059138296,
+      "report_raw_sha256": "f5261c9c0c025a69c766567b1246cf0d5cd3195b684682ef444a0a55fb3d6d0b",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "87accdf15294"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T207",
+      "recovered_scalar": 893059138296,
+      "report_raw_sha256": "9af4f9231b00010c11a37c746807032c3aefd0d3fa12e12751c30d5a54115235",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "87accdf15294"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T208",
+      "recovered_scalar": 13705498609328,
+      "report_raw_sha256": "d0a19adfd523882d5a1f3b66b984a06892f2f5763b8d5da89980be78728e27b8",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "896ff0429f5c"
+    },
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T208",
+      "recovered_scalar": 13705498609328,
+      "report_raw_sha256": "6d4e51c3b0f2103bb11036276b53d4f8488d72f0c000e2a19f4a2381a6fc21d7",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "896ff0429f5c"
+    },
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T209",
+      "recovered_scalar": 17019609223767,
+      "report_raw_sha256": "7e248e20d4c9a94d1b2e6b12dbe48e826ee152140d9d274e2e9f6aa42a047f65",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "c840f6d92ed3"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T209",
+      "recovered_scalar": 17019609223767,
+      "report_raw_sha256": "e4dab6585b8eafc855e4a82c43fca1398a2b184e2eda2faf898605617c41aeea",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "c840f6d92ed3"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T210",
+      "recovered_scalar": 18156529668413,
+      "report_raw_sha256": "9c98c4a1e507cd442092fc00a847e0c9521c353757bfa9ff1d571e394d15842a",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "1a0725e85c53"
+    },
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T210",
+      "recovered_scalar": 18156529668413,
+      "report_raw_sha256": "33fd09297e387775cdef66263287185e765d5910560d6ec3fac1889d9fd96fe8",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "1a0725e85c53"
+    },
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T211",
+      "recovered_scalar": 12621264708608,
+      "report_raw_sha256": "bddd4a29d36bf38953fdbbadc6f693f15f0646700cf6e55a9b689d7190b27f80",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "a03acca96bf1"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T211",
+      "recovered_scalar": 12621264708608,
+      "report_raw_sha256": "1bb86a2ffd97decedf9c6ed8310d552b85b5d994e3764f8e10938561a1cf4f7f",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "a03acca96bf1"
+    },
+    {
+      "arm": "candidate",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "label": "T212",
+      "recovered_scalar": 4619066374817,
+      "report_raw_sha256": "2610bcddc843983852c3a70575dc36979b4ea4fa98251857a8e92d6e86c1ea9e",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "aba81823a9d0"
+    },
+    {
+      "arm": "baseline",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "label": "T212",
+      "recovered_scalar": 4619066374817,
+      "report_raw_sha256": "2890aac3e300118dbbb016cb1f0ec82db66ec44df425e971a2374ed1825910b0",
+      "scalar_times_generator_equals_public_target": true,
+      "workload_id": "aba81823a9d0"
+    }
+  ],
+  "runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "verified_run_count": 16
+}

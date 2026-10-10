@@ -1,0 +1,204 @@
+{
+  "advance_online_geomean_ratio_min": "1.10",
+  "analyzer_sha256": "c6a7042b75b87f155ad5d467a89762435eb281a207748fde8d4529f6a67609e1",
+  "arms": {
+    "baseline": {
+      "binary_sha256": "d10625fe3aba0e7b61c44f001f119c1bb3b7f4fdde4ee558df1501f1f1ab1164",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700",
+      "candidate_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/identities/candidates/IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h1ab23390e700.json",
+      "candidate_manifest_sha256": "07849c5be59e2170328d44f8ade1261bd619a9336f67f9407385b859022454aa",
+      "columns": 1800,
+      "factor_base_digest": "0c3597d24ca943d7bb081ee30078596ffc433766356a8042ba8180c2ced78030",
+      "factor_base_points": 190800,
+      "prepare_rank": 1800,
+      "report_target_query_inversion_policy": "one normal-basis field inversion per eight regular state pair products",
+      "root_table_capacity_policy": "uniform_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_layout": "packed_13_byte_u64_key_u40_value_slots",
+      "root_table_slots": 536870912,
+      "source_relative": "examples/s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan.rs",
+      "source_sha256": "79f77fef1857c9aed10b8d8913ea796e501f9b0afd615345746c453f8d4907b2",
+      "target_query_batch_width": 8,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c1800",
+      "target_workers": 1
+    },
+    "candidate": {
+      "binary_sha256": "180493c3aaa371784890b3ec1bff8b9365feeba9772e277e466e1474a8100175",
+      "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+      "candidate_manifest_relative": "experiments/koblitz-s3-c1800-batch32-20261010/identities/candidates/IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee.json",
+      "candidate_manifest_sha256": "bca607587f4a1bc10494e99326725444f0f26f5d55df56a90ae5f154741f7ce8",
+      "columns": 1800,
+      "factor_base_digest": "0c3597d24ca943d7bb081ee30078596ffc433766356a8042ba8180c2ced78030",
+      "factor_base_points": 190800,
+      "prepare_rank": 1800,
+      "report_target_query_inversion_policy": "one normal-basis field inversion per 32 regular state pair products",
+      "root_table_capacity_policy": "uniform_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_layout": "packed_13_byte_u64_key_u40_value_slots",
+      "root_table_slots": 536870912,
+      "source_relative": "examples/s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan_batch32.rs",
+      "source_sha256": "aa575e1b9540e1ea8cb77a49aeaa1b4ec0ef8a36bc5ea7e8a48b5d64a446bd18",
+      "target_query_batch_width": 32,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c1800",
+      "target_workers": 1
+    }
+  },
+  "comparison_variable": "target_state_inversion_and_prefetch_batch_width_8_vs_32",
+  "control_freeze_sha256": "73f403b61bb4ee5cce7b18c4d7952c01f067d312ea09a375c0f84d48c88cef7d",
+  "control_receipt_sha256": "c304b250696903abf60f96dab063a96ff39acc221cc099437d195065f281407b",
+  "controlled_speedup": null,
+  "generated_targets_sha256": "c9219eab33105992da638e344648c11375b4fc2f94afab0e5ded378380c1503c",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1800_batch32_pair_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "paired_runner_sha256": "4d7f2dfb0f25575eea38862ead005848fa52cc61b5e041a0e87ee353555a24df",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "reference_freeze_sha256": "925dd5e98f56cf624d8a74f821edead3dea045206808c3b0d2a6a1514ced63a6",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 1,
+  "run_order": "baseline_candidate_even_target_candidate_baseline_odd_target",
+  "single_runner_sha256": "74872cf63934b728da1c4b98558d77dc8b0c1d2caa17251e78192d214c75d55f",
+  "target_labels": [
+    "T205",
+    "T206",
+    "T207",
+    "T208",
+    "T209",
+    "T210",
+    "T211",
+    "T212"
+  ],
+  "target_workers": 1,
+  "targets": [
+    {
+      "fixture_scalar": 7380136779495,
+      "label": "T205",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T205/public_target.json",
+      "point_sha256": "c7ddebc262aa32eab9665b2d8c5661339195360f2a35dc5083ed85777ef4ae9f",
+      "public_point": [
+        3972666425999055,
+        1236852798481438
+      ],
+      "scalar_derivation_sha256": "9d1b48917a791626ce490cc3682f0a0cb163c9047e27adeb395a46dd2ff3f016",
+      "workload_id": "d642f61a45c8",
+      "workload_identity_sha256": "d642f61a45c8f3f60e99a1681260267500c3050f5c185a3255c300ea6b1e6a46",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/Wd642f61a45c8.json",
+      "workload_manifest_sha256": "61713da99d2336f8fc4731e7d3bd5c315fcb79cc15a034027a2a547fa43cbd3f"
+    },
+    {
+      "fixture_scalar": 7387318818665,
+      "label": "T206",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T206/public_target.json",
+      "point_sha256": "9c14ec37cab42ac60ceab92100b91c39ae9bb1aa6ca77616a356ae71a7b0b32b",
+      "public_point": [
+        7529082058463352,
+        9005527665656830
+      ],
+      "scalar_derivation_sha256": "899999821f625f95ff89dc2e91816b46f274a4d1873c4a5c65939a0625454c98",
+      "workload_id": "2ab48980c617",
+      "workload_identity_sha256": "2ab48980c617c387666998b740d4fad5f20ce73734445cdc87fcfe728b11545f",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/W2ab48980c617.json",
+      "workload_manifest_sha256": "5afd6cfc638fc97d749f4eee89cda70edf3e9fecebb01c7cefc1247fbf7c9f0c"
+    },
+    {
+      "fixture_scalar": 893059138296,
+      "label": "T207",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T207/public_target.json",
+      "point_sha256": "59281806b177e026d1f6a5fb42f6939518e7c7c64bb9259b98c6f67085abbea9",
+      "public_point": [
+        5783671215966753,
+        2979928184221313
+      ],
+      "scalar_derivation_sha256": "d616cdb9896261184aad695072948e16acc2bd0b36a06c6dd98e9cd7e1295607",
+      "workload_id": "87accdf15294",
+      "workload_identity_sha256": "87accdf15294133b2053c17e1c95d95ecd9ee9788c13accc8b53e5f776a9ffc8",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/W87accdf15294.json",
+      "workload_manifest_sha256": "6b3038a5e5a88a22444c386b16db12905c7a7297d85b67bbdf36d8aa12abe986"
+    },
+    {
+      "fixture_scalar": 13705498609328,
+      "label": "T208",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T208/public_target.json",
+      "point_sha256": "918011d7aa55f7d2d1aec76ffc3c2ef85706c0be9ff2cce92a618eb77ed67711",
+      "public_point": [
+        5574700240170661,
+        8041728454208419
+      ],
+      "scalar_derivation_sha256": "421c1f7b89950519c5a33fa8b81151e860b98a23dfe9239718182a66ad2b61af",
+      "workload_id": "896ff0429f5c",
+      "workload_identity_sha256": "896ff0429f5ca4b41139b34fcb2e9bcdc0419f51487fe6113f14cc8c8cde6ba2",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/W896ff0429f5c.json",
+      "workload_manifest_sha256": "8235adce30b60a7c89a1913286806a34bbe527df52b2fe1a93796e3c7ad1c3ad"
+    },
+    {
+      "fixture_scalar": 17019609223767,
+      "label": "T209",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T209/public_target.json",
+      "point_sha256": "8a6da3a15c6ac1869bc26179b191b6dc9942d507a0434bdbb126bc95f692e4b3",
+      "public_point": [
+        102791216835184,
+        8311482706610656
+      ],
+      "scalar_derivation_sha256": "b904b50472c0184573acd537049301ccf1767d71f08fd88ea1826164c07e0f86",
+      "workload_id": "c840f6d92ed3",
+      "workload_identity_sha256": "c840f6d92ed3691e19a92ceca50b525950f180efe5216da2d05cd3c74e367a3b",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/Wc840f6d92ed3.json",
+      "workload_manifest_sha256": "27a613dd92fcd845a7a8ea4850248befeaa70a19bf5e09c3dd7c4d9f8a6db1d4"
+    },
+    {
+      "fixture_scalar": 18156529668413,
+      "label": "T210",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T210/public_target.json",
+      "point_sha256": "f2a4e3a8989bac4b3ae4f6a4cf1af2c9d39ea1fe3705b31c5db67dba14cb7620",
+      "public_point": [
+        7181576603632038,
+        5497118525457883
+      ],
+      "scalar_derivation_sha256": "b305654389726a8458a960d0fb8db93f542929f0a788b96507578b5894095eac",
+      "workload_id": "1a0725e85c53",
+      "workload_identity_sha256": "1a0725e85c533990a442e8576a7889526c9bf9892380e7f40f069cc8c16ad5b7",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/W1a0725e85c53.json",
+      "workload_manifest_sha256": "1e4cdbe59eb442a0fc2528c93146897699c759df5d4cf9fd37b004cd3476f1c6"
+    },
+    {
+      "fixture_scalar": 12621264708608,
+      "label": "T211",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T211/public_target.json",
+      "point_sha256": "30ff2b1458ff7603d107a7b340f4c8696b36ecc6c8d94b18b6a3046faf8a4491",
+      "public_point": [
+        3569405558734972,
+        1910812440296329
+      ],
+      "scalar_derivation_sha256": "3ae17ebd374c7d92dd0bf00f552e822e7b928c2a2a7a53c29d40662ace98f8af",
+      "workload_id": "a03acca96bf1",
+      "workload_identity_sha256": "a03acca96bf183270ef81932c4ad3d640088427e107326aecc73887475896afe",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/Wa03acca96bf1.json",
+      "workload_manifest_sha256": "514170c1d8cdd5fa11d89b9f471879578107a71358de852f57aab15cf0e2a095"
+    },
+    {
+      "fixture_scalar": 4619066374817,
+      "label": "T212",
+      "n": 53,
+      "point_file_relative": "experiments/koblitz-s3-c1800-combined-20261010/fixtures/T212/public_target.json",
+      "point_sha256": "fd6c8ea81a13dfaa821dd41382469b3461194279ade5c3443c68e5bcab51ec32",
+      "public_point": [
+        4624913986802756,
+        4301386612470340
+      ],
+      "scalar_derivation_sha256": "bd9ad4d24c43a113ccfbc57e61c6dd65d371389b0d63b68b5c301d305458c160",
+      "workload_id": "aba81823a9d0",
+      "workload_identity_sha256": "aba81823a9d00a7cc1a9d36e1c216f238ca88ef58eacfea7d535f60d2d5f0022",
+      "workload_manifest_relative": "experiments/koblitz-s3-c1800-combined-20261010/workloads/Waba81823a9d0.json",
+      "workload_manifest_sha256": "b4768e0dd3ccd8b10c0b5f6e66a6e7e9ae56149ddc798574a0e2fa7b1864cb3c"
+    }
+  ],
+  "timeout_seconds_per_run": 180
+}

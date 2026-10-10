@@ -1,0 +1,86 @@
+{
+  "architecture": "arm64",
+  "archive": {
+    "report.json": {
+      "gzip_bytes": 361523,
+      "gzip_sha256": "a71634796869a4a3e15a16433deb5e8828f8ddbd1bbb7c427ce662e612ea9a46",
+      "raw_bytes": 1212319,
+      "raw_sha256": "e4dab6585b8eafc855e4a82c43fca1398a2b184e2eda2faf898605617c41aeea"
+    },
+    "stderr.txt": {
+      "gzip_bytes": 20,
+      "gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout.bin": {
+      "gzip_bytes": 361523,
+      "gzip_sha256": "a71634796869a4a3e15a16433deb5e8828f8ddbd1bbb7c427ce662e612ea9a46",
+      "raw_bytes": 1212319,
+      "raw_sha256": "e4dab6585b8eafc855e4a82c43fca1398a2b184e2eda2faf898605617c41aeea"
+    }
+  },
+  "argv": [
+    "/private/tmp/crypto-s3-release-examples-20261010/s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan_batch32",
+    "53",
+    "0",
+    "1800",
+    "20260928",
+    "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-prepared-20261009/experiments/koblitz-s3-c1800-combined-20261010/fixtures/T209/public_target.json",
+    "/private/tmp/s3-c1800-batch32-pair-20261010/T209_candidate_R1/report.json",
+    "14",
+    "1800",
+    "1"
+  ],
+  "arm": "candidate",
+  "binary_sha256": "180493c3aaa371784890b3ec1bff8b9365feeba9772e277e466e1474a8100175",
+  "candidate_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06bee",
+  "controlled_speedup": null,
+  "error": null,
+  "exit_code": 0,
+  "finished_unix_ns": 1791629904462263000,
+  "freeze_sha256": "613867d794d7fa68235faa915246d2d5ff40c9bd5e3efcae892a71dfb4fbcec1",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1800_batch32_pair_run_v1",
+  "label": "T209",
+  "memory_within_envelope": true,
+  "online_ms": 0.234166,
+  "outer_wall_ns": 25810487000,
+  "peak_rss_bytes": 25142607872,
+  "peak_rss_method": "fresh helper RUSAGE_CHILDREN ru_maxrss",
+  "phase_accounting_ok": true,
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "point_sha256": "8a6da3a15c6ac1869bc26179b191b6dc9942d507a0434bdbb126bc95f692e4b3",
+  "prepared_rank": 1800,
+  "repetition": 1,
+  "resource_counters": {
+    "involuntary_context_switches": 188967,
+    "major_page_faults": 0,
+    "minor_page_faults": 1594566,
+    "system_cpu_seconds": 4.385982,
+    "user_cpu_seconds": 137.289504,
+    "voluntary_context_switches": 22
+  },
+  "reusable_setup_ms": 24968.018291,
+  "run_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0hd14498b06beeWc840f6d92ed3R1",
+  "source_sha256": "aa575e1b9540e1ea8cb77a49aeaa1b4ec0ef8a36bc5ea7e8a48b5d64a446bd18",
+  "started_unix_ns": 1791629878651776000,
+  "stdout_matches_report": true,
+  "target_phase_ms": {
+    "target_descent": 0.017665000000000024,
+    "target_pdp_charged": 0.18225,
+    "target_query": 0.006792,
+    "target_recovery_check": 0.005791999999999999,
+    "target_relation_check": 0.021667000000000002
+  },
+  "target_relation_indices": [
+    72129,
+    13926,
+    117663,
+    133213
+  ],
+  "target_relation_probes": 1115,
+  "target_s3_calls": 576,
+  "verified_native_and_fixture": true,
+  "workload_id": "c840f6d92ed3"
+}
