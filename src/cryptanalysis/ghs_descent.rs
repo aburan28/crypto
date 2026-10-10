@@ -17,9 +17,9 @@
 //!
 //! The descent depends on the magic-number case:
 //!
-//! ## Case `m = 1` (curve already over `k`)
+//! ## Case `m = 1` with a curve defined over `k`
 //!
-//! `√b ∈ k`, so `b ∈ k` and `E` is *itself* defined over `k`.  The
+//! When both `a` and `b` lie in `k`, `E` is itself defined over `k`.  The
 //! "descent" is trivial: view `E` as a curve over the larger field
 //! and use the **trace homomorphism**
 //! ```text
@@ -29,7 +29,7 @@
 //! and the original DLP transports: if `Q = d·P`, then
 //! `Tr(Q) = d·Tr(P)`.
 //!
-//! This case is fully implemented and tested end-to-end:
+//! This subfield-defined case is implemented and tested end-to-end:
 //! [`descend_m1`] and [`solve_via_descent_m1`].
 //!
 //! ## Case `m ≥ 2`
@@ -199,10 +199,10 @@ pub fn sigma_point(p: &Pt, tower: &FieldTower) -> Pt {
 
 // ── m = 1 descent: trace map ────────────────────────────────────────
 
-/// Trace homomorphism `E(K) → E(k)` for the case `m = 1` (where `b ∈ k`).
+/// Trace homomorphism `E(K) → E(k)` when **both** curve coefficients lie in `k`.
 ///
 /// Returns `Tr(P) = P ⊕ σ(P) ⊕ σ²(P) ⊕ … ⊕ σ^{n-1}(P)`.  Because
-/// `E` is `σ`-stable (its defining `b` is `σ`-fixed), each `σ^i(P)`
+/// `E` is `σ`-stable (both `a` and `b` are `σ`-fixed), each `σ^i(P)`
 /// is again a point on `E`, and the sum is `σ`-fixed, hence in
 /// `E(k)`.
 pub fn trace_map(curve: &ECurve, tower: &FieldTower, p: &Pt) -> Pt {
@@ -215,16 +215,16 @@ pub fn trace_map(curve: &ECurve, tower: &FieldTower, p: &Pt) -> Pt {
     acc
 }
 
-/// **`m = 1` descent**: take a curve over `K` whose `b` already lies
-/// in the subfield `k = F_{2^l}` and (a) verify that the magic
-/// number is `1`, and (b) return the same curve, viewed as its own
+/// **`m = 1` trace descent**: take a curve over `K` whose `a` and `b` lie
+/// in the subfield `k = F_{2^l}` and return the same curve, viewed as its own
 /// "descended" version.  The descent map is then [`trace_map`].
 ///
-/// Returns `None` if `b ∉ k` (i.e., the trapdoor magic number for
-/// this factorisation is `> 1`, so `m = 1` descent doesn't apply).
+/// Returns `None` if either coefficient is outside `k`. A GHS magic
+/// number of one alone does not license this trace map for an arbitrary
+/// `a`: Frobenius conjugation must preserve the exact curve model.
 pub fn descend_m1(tc: &TrapdoorCurve) -> Option<DescentM1> {
     let tower = FieldTower::new(tc.big_n, tc.n, tc.l, tc.big_irr.clone());
-    if !tower.is_in_subfield(&tc.b, tc.l) {
+    if !tower.is_in_subfield(&tc.a, tc.l) || !tower.is_in_subfield(&tc.b, tc.l) {
         return None;
     }
     let curve = ECurve::new(tc.big_n, tc.big_irr.clone(), tc.a.clone(), tc.b.clone());
@@ -336,6 +336,11 @@ pub struct DescentM2Affine {
 /// see [`DescentM2Affine`] for the smooth-model caveat.
 pub fn descend_m2_affine(tc: &TrapdoorCurve) -> Option<DescentM2Affine> {
     let tower = FieldTower::new(tc.big_n, tc.n, tc.l, tc.big_irr.clone());
+    // The polynomial below was derived for a = 1. Other a-coefficients
+    // require a separate change of variables and cannot use this model.
+    if tc.a != F2mElement::one(tc.big_n) {
+        return None;
+    }
     // β = √b, β' = σ(β).
     let beta = tc.sqrt_b.clone();
     let beta_p = tower.frobenius(&beta);
@@ -439,6 +444,9 @@ pub struct DescentM2Abstract {
 /// factorisation.
 pub fn descend_m2_abstract(tc: &TrapdoorCurve) -> Option<DescentM2Abstract> {
     let tower = FieldTower::new(tc.big_n, tc.n, tc.l, tc.big_irr.clone());
+    if !tower.is_in_subfield(&tc.a, tc.l) {
+        return None;
+    }
     let beta_0 = tc.sqrt_b.clone();
     let beta_1 = tower.frobenius(&beta_0);
     let beta_2 = tower.frobenius(&beta_1);
@@ -559,6 +567,30 @@ mod tests {
         // Tr(Q) should equal d·Tr(P).
         let recomputed_tq = curve.scalar_mul(&tp, &d_true);
         assert_eq!(recomputed_tq, tq, "trace descent commutes with scalar mul");
+    }
+
+    #[test]
+    fn m1_trace_requires_both_coefficients_in_the_subfield() {
+        let irr = f64_irr();
+        let tower = FieldTower::new(6, 3, 2, irr.clone());
+        let a = F2mElement::from_biguint(&BigUint::from(2u8), 6);
+        let b = F2mElement::one(6);
+        assert!(!tower.is_in_subfield(&a, 2));
+        assert!(tower.is_in_subfield(&b, 2));
+        let tc = TrapdoorCurve {
+            big_n: 6,
+            n: 3,
+            l: 2,
+            big_irr: irr,
+            a,
+            b,
+            sqrt_b: F2mElement::one(6),
+            row: Default::default(),
+            full_audit: None,
+        };
+        assert!(descend_m1(&tc).is_none());
+        assert!(descend_m2_abstract(&tc).is_none());
+        assert!(descend_m2_affine(&tc).is_none());
     }
 
     /// **Full end-to-end pipeline** for an `m = 1` trapdoor on the

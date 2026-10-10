@@ -23,8 +23,9 @@
 //!   `Φ_l(X, j(E))` root extraction). Explicit Vélu isogeny morphism
 //!   in characteristic 2 is **not** implemented — see Step 4 caveat.
 //!
-//! - Step 2: **complete for `m = 1`** (trace map; the descent target
-//!   is `E` itself viewed over the subfield). **Symbolic only for
+//! - Step 2: **complete for the subfield-defined `m = 1` case** (both
+//!   coefficients fixed by Frobenius; the target is `E` over the
+//!   subfield). **Symbolic only for
 //!   `m = 2`** (σ-fixed generators produced, smooth-model conversion
 //!   not implemented).
 //!

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Binary-curve ECDLP comparison</title>
+<style>
+@page { size: A4; margin: 15mm; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; line-height: 1.29; color: #18324a; }
+h1 { font-size: 19pt; color: #173c60; margin-bottom: 3mm; }
+h2 { font-size: 13pt; color: #173c60; margin-top: 6mm; margin-bottom: 2mm; }
+p { margin: 2mm 0; }
+table { border-collapse: collapse; width: 100%; font-size: 8.3pt; margin: 3mm 0 5mm; page-break-inside: avoid; }
+th,td { border: 1px solid #c4d2dd; padding: 2mm; vertical-align: top; }
+th { background: #eaf2f8; text-align: left; }
+.figure { width: 100%; margin: 3mm 0; }
+.note { color: #4b6070; font-size: 9pt; }
+.newpage { page-break-before: always; }
+code { font-family: Consolas, monospace; font-size: 8pt; }
+</style></head><body>
+<h1>Exact binary-curve ECDLP comparison</h1>
+<p>9 October 2026 · Source: <code>research/ghs_curve_comparison_20261009/RESULT.md</code></p>
+<p><strong>Question.</strong> How do ECDLP costs and characteristic-two GHS structure vary across exact binary-curve models, including models over the same field? The executable methods here are generic Pollard rho and BSGS. The higher-genus GHS solver is not implemented, so this report assigns it no ECDLP cost.</p>
+<img class="figure" src="figures/costs.svg" alt="Counted operations on five exact binary curves">
+<h2 class="newpage">Measured one-target ECDLP work</h2>
+<p>Five registered models; eight independent targets each; one cold run per method and target. The native <code>ecbench</code> session <code>ECBS1hd395a1344225</code> verified all 80 scalars and exact replay reproduced all 80 records. Unit: <code>S = counted group-addition equivalents / sqrt(r)</code>. Every figure is a counted lower bound because some native work, including hash-table work, is unpriced. The host earned L0; wall time is excluded.</p>
+<table><thead><tr><th>Curve ID suffix</th><th>Prime r</th><th>rho.negation mean S</th><th>bsgs.negation mean S</th><th>BSGS / rho</th><th>BSGS entries</th></tr></thead><tbody>
+<tr><td>t181-515ee569</td><td>2,003</td><td>2.949</td><td>1.137</td><td>0.385</td><td>24</td></tr>
+<tr><td>t11-f036dc01</td><td>4,091</td><td>2.605</td><td>1.030</td><td>0.395</td><td>33</td></tr>
+<tr><td>tm275-2d22ff5d</td><td>751</td><td>3.676</td><td>1.286</td><td>0.350</td><td>15</td></tr>
+<tr><td>t5-d9fb183e</td><td>8,191</td><td>2.344</td><td>1.225</td><td>0.523</td><td>47</td></tr>
+<tr><td>tm185-565c1669</td><td>16,477</td><td>1.844</td><td>1.134</td><td>0.615</td><td>66</td></tr>
+</tbody></table>
+<p>Full IDs are <code>icv1-f2m13-t181-515ee569</code>, <code>icv1-f2m13-t11-f036dc01</code>, <code>icv1-f2m15-tm275-2d22ff5d</code>, <code>icv1-f2m15-t5-d9fb183e</code>, and <code>icv1-f2m15-tm185-565c1669</code>, in row order. The normalized ratios are paired on the same target. BSGS is a memory tradeoff; no physical speed ratio is claimed.</p>
+<p>At degree 15, the mean absolute rho count rises from 100.75 on the <code>r=751</code> model to 212.125 and 236.75 on the <code>r=8,191</code> and <code>r=16,477</code> models. Mean BSGS counts are 35.25, 110.875, and 145.625. These are descriptive eight-target, one-round observations, not a scaling fit.</p>
+<div class="newpage"></div>
+<h2>GHS screening and checked trace</h2>
+<img class="figure" src="figures/route.svg" alt="GHS screening and transport branches">
+<table><thead><tr><th>Model</th><th>Best magic / genus</th><th>Checked trace outcome</th><th>Current status</th></tr></thead><tbody>
+<tr><td>13-bit Koblitz control</td><td>1 / 0</td><td>Generator killed</td><td>No subgroup transfer by trace</td></tr>
+<tr><td>13-bit non-Koblitz</td><td>13 / 4095</td><td>Curve not subfield-defined</td><td>No genus ≤ 4 row</td></tr>
+<tr><td>15-bit Koblitz control</td><td>1 / 0</td><td>Generator killed</td><td>No subgroup transfer by trace</td></tr>
+<tr><td>15-bit non-Koblitz, b=0x2493</td><td>3 / 3</td><td>Curve not subfield-defined</td><td>Higher-genus model/map pending</td></tr>
+<tr><td>15-bit non-Koblitz, b=0x702a</td><td>3 / 3</td><td>Curve not subfield-defined</td><td>Higher-genus model/map pending</td></tr>
+</tbody></table>
+<p>A low GHS genus is a structural diagnostic. The Koblitz traces kill the tested prime subgroup generators; the genus-three cases require a smooth Jacobian model, point map and solver before any ECDLP cost can be measured. The separately frozen four-size Koblitz panel had 107 verified and 13 exhausted records; all exhaustions belonged to the signed-Frobenius rho arm. Its audit passed with 107 deterministic verified replays. The incomplete arm is retained as a diagnostic.</p>
+<h2>Standard and wide-field context</h2>
+<p>Exact checks of SEC 2's <code>sect113r1</code> and <code>sect113r2</code> give magic 113 and genus <code>2^112−1</code> for their only proper tower, with no genus-four candidate. Neither curve model meets the checked trace precondition over F₂. Their subgroup orders give a derived generic square-root scale near <code>2^56</code> operations; no ECDLP solver was run at that size. The earlier binary F₂¹⁹² fixture transports an order-two point. NIST P-192 is a prime-field curve with derived generic scale near <code>2^96</code> operations and is outside this binary GHS screen.</p>
+<h2>Evidence and remaining gates</h2>
+<p>Session <code>ECBS1hd395a1344225</code>: audit SHA-256 <code>22cf241164e32af826128fdfc2e0ad1c770768b071c71d54d34e52409b67b973</code>. Earlier panel <code>ECBS1h5a490d269b02</code>: audit SHA-256 <code>bff5841f0732c0289aedc8fb37a6a89ab6d35a5662b0ef6cd7bfaa7b75aaa071</code>. The Markdown report links the sealed sessions, per-curve intervals, commands, screen JSON, trace JSON, protocols, host and source hashes.</p>
+<p><strong>Next construction gate:</strong> for a specific genus-three model, construct and verify the smooth Jacobian, point transfer and subgroup order, then measure a complete index-calculus pipeline against rho on the same target. Until that gate passes, the ECDLP difference demonstrated here is the measured generic-method difference across exact subgroups.</p>
+</body></html>

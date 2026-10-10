@@ -23,6 +23,8 @@ use std::cell::Cell;
 use std::collections::{BTreeSet, HashMap};
 use std::time::Instant;
 
+use num_bigint::BigUint;
+use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
@@ -243,8 +245,14 @@ impl Fq3 {
         assert!(!p.is_multiple_of(3));
         let f = Fq::new(p);
         let q1 = f.order();
-        let s = (1..p * p)
-            .map(|k| E2([k % p, (k / p) % p]))
+        // When p ≡ 2 (mod 3), every nonzero element of F_p is a cube.
+        // Search the non-base-field slice first instead of spending p
+        // exponentiations on elements that cannot work.
+        let base_limit = if p % 3 == 1 { p } else { 1 };
+        let base_candidates = (1..base_limit).map(|x| E2([x, 0]));
+        let extension_candidates = (1..p).flat_map(|y| (0..p).map(move |x| E2([x, y])));
+        let s = base_candidates
+            .chain(extension_candidates)
             .find(|s| *s != E2::ZERO && f.pow(s, q1 / 3) != E2::ONE)
             .expect("a non-cube");
         let zeta = f.pow(&s, q1 / 3);
@@ -288,11 +296,34 @@ impl Fq3 {
         }
         acc
     }
+    /// Exponentiation when `p^6` exceeds `u128`.
+    pub fn pow_big(&self, a: &E6, exponent: &BigUint) -> E6 {
+        let mut e = exponent.clone();
+        let mut base = *a;
+        let mut acc = E6::ONE;
+        while !e.is_zero() {
+            if (&e & BigUint::one()) == BigUint::one() {
+                acc = self.mul(&acc, &base);
+            }
+            e >>= 1;
+            if !e.is_zero() {
+                base = self.sq(&base);
+            }
+        }
+        acc
+    }
+    pub fn order_big(&self) -> BigUint {
+        BigUint::from(self.f.p).pow(6) - 1u8
+    }
     fn order(&self) -> u128 {
         (self.f.p as u128).pow(6) - 1
     }
     pub fn is_square(&self, a: &E6) -> bool {
-        *a == E6::ZERO || self.pow(a, self.order() / 2) == E6::ONE
+        *a == E6::ZERO
+            || match (self.f.p as u128).checked_pow(6) {
+                Some(q) => self.pow(a, (q - 1) / 2) == E6::ONE,
+                None => self.pow_big(a, &(self.order_big() >> 1)) == E6::ONE,
+            }
     }
     pub fn random(&self, rng: &mut StdRng) -> E6 {
         E6(core::array::from_fn(|_| self.f.random(rng)))
@@ -303,6 +334,9 @@ impl Fq3 {
         }
         if !self.is_square(a) {
             return None;
+        }
+        if (self.f.p as u128).checked_pow(6).is_none() {
+            return self.sqrt_big(a, rng);
         }
         let q1 = self.order();
         let s = q1.trailing_zeros();
@@ -323,6 +357,45 @@ impl Fq3 {
             while tt != E6::ONE {
                 tt = self.sq(&tt);
                 i += 1;
+            }
+            let mut b = cc;
+            for _ in 0..(m - i - 1) {
+                b = self.sq(&b);
+            }
+            m = i;
+            cc = self.sq(&b);
+            t = self.mul(&t, &cc);
+            r = self.mul(&r, &b);
+        }
+        Some(r)
+    }
+    fn sqrt_big(&self, a: &E6, rng: &mut StdRng) -> Option<E6> {
+        let q1 = self.order_big();
+        let mut odd = q1.clone();
+        let mut s = 0u32;
+        while (&odd & BigUint::one()).is_zero() {
+            odd >>= 1;
+            s += 1;
+        }
+        let z = loop {
+            let z = self.random(rng);
+            if z != E6::ZERO && !self.is_square(&z) {
+                break z;
+            }
+        };
+        let mut m = s;
+        let mut cc = self.pow_big(&z, &odd);
+        let mut t = self.pow_big(a, &odd);
+        let mut r = self.pow_big(a, &((&odd + 1u8) >> 1));
+        while t != E6::ONE {
+            let mut i = 0;
+            let mut tt = t;
+            while tt != E6::ONE && i < m {
+                tt = self.sq(&tt);
+                i += 1;
+            }
+            if i == m {
+                return None;
             }
             let mut b = cc;
             for _ in 0..(m - i - 1) {
@@ -611,6 +684,22 @@ impl<'a, F: Fld> Hyp<'a, F> {
         }
         acc
     }
+    /// Scalar multiplication without a fixed-width group-order limit.
+    pub fn mul_big(&self, a: &Div<F::E>, scalar: &BigUint) -> Div<F::E> {
+        let mut k = scalar.clone();
+        let mut acc = self.identity();
+        let mut base = a.clone();
+        while !k.is_zero() {
+            if (&k & BigUint::one()) == BigUint::one() {
+                acc = self.add(&acc, &base);
+            }
+            k >>= 1;
+            if !k.is_zero() {
+                base = self.add(&base, &base);
+            }
+        }
+        acc
+    }
 }
 
 // ── The weak curve y² = x³ + a₂x² + a₄x over F_{q³}, a₂ = −(α+σα), a₄ = α·σα
@@ -733,6 +822,22 @@ impl<'a> EllE<'a> {
             }
             k >>= 1;
             if k > 0 {
+                base = self.add(&base, &base);
+            }
+        }
+        acc
+    }
+    /// Scalar multiplication for subgroup orders above `u128`.
+    pub fn mul_big(&self, pt: &PtE6, scalar: &BigUint) -> PtE6 {
+        let mut k = scalar.clone();
+        let mut acc = PtE6::INF;
+        let mut base = *pt;
+        while !k.is_zero() {
+            if (&k & BigUint::one()) == BigUint::one() {
+                acc = self.add(&acc, &base);
+            }
+            k >>= 1;
+            if !k.is_zero() {
                 base = self.add(&base, &base);
             }
         }
@@ -2913,6 +3018,55 @@ mod tests {
         let s = f.sq(&a);
         let r = f.sqrt(&s, &mut rng).unwrap();
         assert_eq!(f.sq(&r), s);
+    }
+
+    #[test]
+    fn tower_field_and_curve_scalars_beyond_u64() {
+        for (p, seed) in [(524_309u64, 113u64), (4_820_937_851, 192)] {
+            let (f, alpha, mut rng) = weak(p, seed);
+            let a = f.random(&mut rng);
+            let square = f.sq(&a);
+            let root = f.sqrt(&square, &mut rng).expect("square root");
+            assert_eq!(f.sq(&root), square);
+            assert_eq!(
+                f.pow_big(&a, &BigUint::from(131_071u64)),
+                f.pow(&a, 131_071)
+            );
+            let ec = EllE::new(&f, &alpha);
+            let point = ec.random_point(&mut rng);
+            let k = (BigUint::one() << 190) + 17u8;
+            let mut high = point;
+            for _ in 0..190 {
+                high = ec.add(&high, &high);
+            }
+            assert_eq!(ec.mul_big(&point, &(BigUint::one() << 190)), high);
+            assert_eq!(ec.mul_big(&point, &k), ec.add(&high, &ec.mul(&point, 17)));
+        }
+    }
+
+    #[test]
+    fn jacobian_scalar_beyond_u128() {
+        let (f, alpha, mut rng) = weak(53, 5);
+        let ec = EllE::new(&f, &alpha);
+        let cov = Cover::new(&f, &alpha).expect("cover");
+        let divisor = (0..20)
+            .find_map(|_| cov.transfer(&f, &ec.random_point(&mut rng)))
+            .expect("transferred point");
+        let jac = Hyp {
+            f: &f.f,
+            h: cov.hx.clone(),
+            g: 3,
+        };
+        let mut high = divisor.clone();
+        for _ in 0..130 {
+            high = jac.add(&high, &high);
+        }
+        assert_eq!(jac.mul_big(&divisor, &(BigUint::one() << 130)), high);
+        let scalar = (BigUint::one() << 130) + 3u8;
+        assert_eq!(
+            jac.mul_big(&divisor, &scalar),
+            jac.add(&high, &jac.mul(&divisor, 3))
+        );
     }
 
     #[test]

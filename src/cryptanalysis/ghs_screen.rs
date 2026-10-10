@@ -142,7 +142,7 @@ pub fn screen_curve(
     })
 }
 
-fn validate_input(input: &GhsCurveInput) -> Result<IrreduciblePoly, GhsScreenError> {
+pub(crate) fn validate_input(input: &GhsCurveInput) -> Result<IrreduciblePoly, GhsScreenError> {
     let degree = input.absolute_degree;
     if !(2..=MAX_FIELD_DEGREE).contains(&degree) {
         return Err(GhsScreenError::new(format!(
