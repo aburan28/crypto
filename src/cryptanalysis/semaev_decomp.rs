@@ -427,7 +427,7 @@ impl Gf2 {
 
     #[inline(always)]
     fn clmul(&self, a: u64, b: u64) -> u128 {
-        #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+        #[cfg(target_arch = "x86_64")]
         if self.has_clmul {
             // SAFETY: guarded by the runtime feature detection recorded
             // in `has_clmul` at construction.
@@ -844,7 +844,7 @@ impl Gf2_128 {
             bits |= 1u128 << t;
         }
         // z^t mod irr ladders for the two reduction tables.
-        let red_lo_positions = ((128 - n as usize) + 7) / 8;
+        let red_lo_positions = (128 - n as usize).div_ceil(8);
         let pow = bits ^ (1u128 << n); // z^n ≡ the low terms
         let mut red_lo = vec![0u128; red_lo_positions * 256];
         // Byte k of the folded part sits at absolute position n + 8k:
@@ -985,8 +985,8 @@ impl Gf2_128 {
     pub fn sqr(&self, a: u128) -> u128 {
         let lo64 = a as u64;
         let hi64 = (a >> 64) as u64;
-        let lo = (spread32(lo64) as u128) | ((spread32((lo64 >> 32) as u64) as u128) << 64);
-        let hi = (spread32(hi64) as u128) | ((spread32((hi64 >> 32) as u64) as u128) << 64);
+        let lo = (spread32(lo64) as u128) | ((spread32(lo64 >> 32) as u128) << 64);
+        let hi = (spread32(hi64) as u128) | ((spread32(hi64 >> 32) as u128) << 64);
         self.reduce(lo, hi)
     }
 
@@ -1065,13 +1065,17 @@ impl Gf2_128 {
 #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 #[inline(always)]
 unsafe fn clmul_u128(a: u128, b: u128) -> (u128, u128) {
+    #[cfg(target_arch = "x86_64")]
+    let clmul = clmul_u64;
+    #[cfg(target_arch = "aarch64")]
+    let clmul = clmul_u64_neon;
     let a0 = a as u64;
     let a1 = (a >> 64) as u64;
     let b0 = b as u64;
     let b1 = (b >> 64) as u64;
-    let z0 = clmul_u64(a0, b0);
-    let z2 = clmul_u64(a1, b1);
-    let z1 = clmul_u64(a0 ^ a1, b0 ^ b1) ^ z0 ^ z2;
+    let z0 = clmul(a0, b0);
+    let z2 = clmul(a1, b1);
+    let z1 = clmul(a0 ^ a1, b0 ^ b1) ^ z0 ^ z2;
     let lo = z0 ^ (z1 << 64);
     let hi = z2 ^ (z1 >> 64);
     (hi, lo)
@@ -2157,13 +2161,8 @@ mod tests {
         }
     }
 
-    /// Itoh-Tsujii inversion: exhaustive inverse law on tiny fields,
-    /// zero maps to zero, and agreement with Fermat `a^(2^n − 2)` on
-    /// random inputs at large `n` (computed independently here, not via
-    /// `inv`, so a chain bug cannot hide).
     #[test]
     fn itoh_tsujii_inverse_is_correct() {
-        use crate::binary_ecc::F2mElement;
         // Exhaustive at n = 7.
         let irr7 = IrreduciblePoly {
             degree: 7,
@@ -3800,7 +3799,6 @@ mod reference_994784af {
 #[cfg(test)]
 mod wide_tests {
     use super::*;
-    use crate::binary_ecc::F2mElement;
 
     fn wide_tests_irr() -> crate::binary_ecc::IrreduciblePoly {
         let irr = crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide(71)

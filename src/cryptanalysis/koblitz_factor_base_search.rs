@@ -80,10 +80,9 @@ use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     build_standard_subspace_factor_base, build_subgroup_orbit_factor_base,
-    cofactor_project_factor_base, from_fast_point, groebner_decompose, invariant_factors,
+    cofactor_project_factor_base, groebner_decompose, invariant_factors,
     projected_signed_orbit_count, restrict_factor_base_to_orbits, saturate_factor_base_two_torsion,
-    span_f2, to_fast_point, top_factor_indices, FactorBaseDomain, FrobeniusFactorBase,
-    KoblitzCurve, PairSumTable,
+    span_f2, top_factor_indices, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
 
 // ── Specifications ─────────────────────────────────────────────────
@@ -313,13 +312,26 @@ impl TargetSet {
             // set (two inversions per scalar bit for all targets together
             // instead of ~1.5 per target per bit).  Bit-exact with the
             // per-target scalar muls, so the census sees identical points.
-            Some(fast) if kc.n <= 63 => {
-                let base = to_fast_point(&fast, g);
+            Some(fast)
+                if kc.n <= 63
+                    && kc.curve.b == F2mElement::one(kc.n)
+                    && kc.curve.a == F2mElement::from_biguint(&BigUint::from(kc.a), kc.n) =>
+            {
+                let base = match g {
+                    BinaryPoint::Infinity => None,
+                    BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+                };
                 let bases = vec![base; scalars.len()];
                 let ks: Vec<BigUint> = scalars.iter().map(|&k| BigUint::from(k)).collect();
                 fast.batch_scalar_mul(&bases, &ks)
                     .into_iter()
-                    .map(|p| from_fast_point(&fast, p))
+                    .map(|p| match p {
+                        None => BinaryPoint::Infinity,
+                        Some((x, y)) => BinaryPoint::Affine {
+                            x: fast.element(x),
+                            y: fast.element(y),
+                        },
+                    })
                     .collect()
             }
             _ => scalars
@@ -841,7 +853,11 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),
-        FactorBaseSpec::FrobeniusUnion { .. } | FactorBaseSpec::Pruned { .. } => None,
+        FactorBaseSpec::FrobeniusUnion { .. }
+        | FactorBaseSpec::Pruned { .. }
+        | FactorBaseSpec::StandardSubspace { .. }
+        | FactorBaseSpec::CofactorProjected { .. }
+        | FactorBaseSpec::SubgroupOrbits { .. } => None,
     }
 }
 
@@ -1563,9 +1579,11 @@ mod tests {
         let kc = KoblitzCurve::new(0, 41).unwrap();
         assert_eq!(order_of_2_mod_n(41), Some(20));
         let targets = TargetSet::new(&kc, 8, 4096, 11);
-        let mut opts = SearchOptions::default();
-        opts.m = 2;
-        opts.max_abscissae = 2048;
+        let opts = SearchOptions {
+            m: 2,
+            max_abscissae: 2048,
+            ..SearchOptions::default()
+        };
         for spec in [
             FactorBaseSpec::Factor { index: 1 },
             FactorBaseSpec::Divisor {
@@ -1598,7 +1616,7 @@ mod tests {
         assert!(candidates[0]
             .skipped
             .as_ref()
-            .map_or(true, |s| { !s.contains("exceed the cap") }));
+            .is_none_or(|s| { !s.contains("exceed the cap") }));
     }
 
     #[test]

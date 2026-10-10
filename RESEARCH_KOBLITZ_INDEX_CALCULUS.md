@@ -65,7 +65,7 @@ The root space is computed as the kernel of the `F_2`-linear map
 `v ↦ F_j(v)` written in the polynomial basis — self-checking, since the
 kernel dimension must come out equal to `deg f_j`.
 
-## Measured on the toys
+## Measured small-field results
 
 `cargo run --release --example koblitz_index_calculus_demo`:
 
@@ -277,7 +277,7 @@ This matters more than it sounds.  The summand count a decomposition
 needs is `m ≈ n/dim`, and `m ≥ 3` is what forces the chained system and
 its `(m − 2)·n` extra unknowns.  A big enough invariant subspace buys
 `m = 2` — **no chaining, a quadratic system, `≈ 2·dim ≈ n` unknowns**.
-Measured on toy curves:
+Measured on registered small-field curves:
 
 | curve | dim | \|F\| | orbits | m | vars | search | F4 | SAT |
 |:------|----:|------:|-------:|--:|-----:|-------:|---:|----:|
@@ -519,10 +519,10 @@ negation-invariant because the classes are), which is what took the run
 to 10 s.  The naive walk is kept as a test reference
 (`orbit_generated_admissibility_walk_matches_the_naive_one`).  This is
 a 31-bit prime-order subgroup solved by index calculus over a
-materialised base; it is still a toy, and Pollard rho would take
-milliseconds on it — the point is that the pipeline now reaches the
-sizes the scaling note's step 0 asked for, with the factor base chosen
-by measurement rather than by hand.
+materialised base, with the factor base chosen by measurement. This
+establishes the scaling note's step-0 rung. The pair table dominates the
+10.9 s run; the next comparison needs its cost reduced and a frozen
+single-target rho solve on the same point.
 
 ## The CADO-style split: factor-base logs, then descent — 2026-09-10
 

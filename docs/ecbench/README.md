@@ -502,6 +502,12 @@ defines for the primary IC question: one index-calculus run against one
 strong-rho run (`rho.signed_frobenius_strong`) on one public target,
 compared on their one-target online windows (§3), keyed by
 `(candidate_id, workload_id, run_id)` in the repository's IC1 convention.
+The ledger calls its one-run ratio `online_speedup`; a checker `PASS`
+certifies the report's pairing, timing fields and provenance conditions,
+not a statistically established runtime gain. That requires at least five
+admitted matched pairs, an A/A noise interval, and a paired 95% interval
+excluding no improvement (§8). The cold end-to-end operation comparison
+is a separate requirement.
 
 ```bash
 ./target/release/ecbench claim build --dir SESSION --ic ic --rho rho-strong --workload W... --out claim.json --exit-code
@@ -533,6 +539,12 @@ field the schema requires, from the session's own files:
   refused, as `identity.py` refuses it.
 - **The windows** are the records' online windows, the IC one split into
   the five exclusive phases, both arms' start and stop events named.
+- **Wall isolation.** A `vs_rho` wall comparison requires both runs to
+  earn at least L2, even if the session spec lowers `isolation_required`
+  for diagnostic runs. A stricter L3 spec still requires L3. The builder
+  writes the effective floor and the native checker validates it, so an
+  L0 session cannot become a passing wall claim by supplying a replay
+  receipt. Operation-count comparisons remain available at every level.
 - **The envelope** is the session's (binary, host class, CPU, NUMA node,
   one thread, timeout), identical for both arms by construction.
 - **Independence.** The schema requires `independent_validation` and a

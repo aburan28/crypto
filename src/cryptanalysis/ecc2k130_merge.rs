@@ -174,7 +174,7 @@ pub fn campaign_contract(config: &Obj) -> Result<Json, String> {
     }
     let curve = curve.expect("checked above");
     for key in ["dpWeight", "maxIters", "workers", "batch"] {
-        if !c.get(key).and_then(Json::as_int).is_some_and(|v| v >= 0) {
+        if c.get(key).and_then(Json::as_int).is_none_or(|v| v < 0) {
             return Err(format!("invalid {key}"));
         }
     }

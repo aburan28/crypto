@@ -652,9 +652,7 @@ pub fn j0_index_calculus_dlp_staged(
             }
             None
         };
-        let Some((batch, trials)) = batch_and_trials else {
-            return None;
-        };
+        let (batch, trials) = batch_and_trials?;
         trials_total += trials;
         trials_per_relation.push(trials);
         if let Some(first) = batch.into_iter().next() {
@@ -678,9 +676,12 @@ pub fn j0_index_calculus_dlp_staged(
         rhs.push(rel.coef_a.clone() % &curve.n);
     }
     let la_started = Instant::now();
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
     let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
-    let x = solution[m].clone();
+    let x = solution.values[m].clone();
 
     let verify_started = Instant::now();
     let a_fe = curve.a_fe();

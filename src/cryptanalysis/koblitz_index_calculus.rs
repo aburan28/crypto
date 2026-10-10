@@ -167,11 +167,10 @@ use crate::utils::mod_inverse;
 /// Largest extension degree this module will build a curve for.  The
 /// factor base and the point-counting/factoring helpers are all
 /// materialised, so this is a deliberate guard rail, not a limit of
-/// the mathematics.  Field elements are packed in a `u64` word through
-/// `n = 63` and in a `u128` word past it, so the absolute limit is
-/// `n < 128`.  Past `n ≈ 24` the generator is found by deterministic
-/// sampling rather than a full abscissa sweep; point counting still
-/// uses the closed Koblitz recurrence (no `2^n` scan).
+/// the mathematics.  Field elements are packed in a `u64`, so the
+/// absolute limit is `n < 64`.  Past `n ≈ 24` the generator is found
+/// by deterministic sampling rather than a full abscissa sweep; point
+/// counting still uses the closed Koblitz recurrence (no `2^n` scan).
 /// Curve construction costs trial division to `√#E ≈ 2^{n/2}` and a
 /// sparse irreducible search; both are still cheap at the
 /// boundary-ledger rungs through `n = 53`.  What actually bounds a run
@@ -245,113 +244,6 @@ fn poly_x_pow_2k(k: u32, f: u64) -> u64 {
 }
 
 /// Distinct prime divisors of `n` (trial division; `n` is tiny here).
-fn prime_divisors(mut n: u32) -> Vec<u32> {
-    let mut out = Vec::new();
-    let mut d = 2u32;
-    while d * d <= n {
-        if n.is_multiple_of(d) {
-            out.push(d);
-            while n.is_multiple_of(d) {
-                n /= d;
-            }
-        }
-        d += 1;
-    }
-    if n > 1 {
-        out.push(n);
-    }
-    out
-}
-
-/// **Rabin's irreducibility test** for a degree-`d` polynomial of
-/// `F_2[x]`: `f` is irreducible iff `x^(2^d) ≡ x (mod f)` and
-/// `gcd(x^(2^(d/p)) − x, f) = 1` for every prime `p | d`.
-pub fn is_irreducible_f2(f: u64) -> bool {
-    let d = match poly_deg(f) {
-        Some(d) if d >= 1 => d,
-        _ => return false,
-    };
-    if f & 1 == 0 && d > 1 {
-        return false; // divisible by x
-    }
-    if poly_x_pow_2k(d, f) != poly_rem(0b10, f) {
-        return false;
-    }
-    for p in prime_divisors(d) {
-        let t = poly_x_pow_2k(d / p, f) ^ 0b10;
-        if poly_deg(poly_gcd(poly_rem(t, f), f)) != Some(0) {
-            return false;
-        }
-    }
-    true
-}
-
-/// Smallest (as an integer bitmask) irreducible polynomial of degree
-/// `n` over `F_2`, which for every `n` in range is a trinomial or
-/// pentanomial.  Returned as an [`IrreduciblePoly`].
-pub fn find_irreducible(n: u32) -> Option<IrreduciblePoly> {
-    if n == 0 || n >= 64 {
-        return None;
-    }
-    let hi = 1u64 << n;
-    for low in 0..hi {
-        let f = hi | low;
-        if is_irreducible_f2(f) {
-            let low_terms = (0..n).filter(|i| (low >> i) & 1 == 1).collect();
-            return Some(IrreduciblePoly {
-                degree: n,
-                low_terms,
-            });
-        }
-    }
-    None
-}
-
-/// **Sparse irreducible search**: the smallest-mask irreducible
-/// polynomial of degree `n` over `F_2` among those with at most four
-/// terms below `z^n` — i.e. trinomials and pentanomials.
-///
-/// [`find_irreducible`] scans all `2^n` masks, which is fine to `n ≈ 24`
-/// and hopeless beyond.  For every degree in range the smallest
-/// irreducible polynomial *is* sparse, so this returns the same answer
-/// far faster (a test pins the agreement for `n ≤ 20`), and it is what
-/// the measurement harness uses to reach `n = 63`.
-pub fn find_irreducible_sparse(n: u32) -> Option<IrreduciblePoly> {
-    if n == 0 || n >= 64 {
-        return None;
-    }
-    if n == 1 {
-        return Some(IrreduciblePoly {
-            degree: 1,
-            low_terms: vec![0],
-        });
-    }
-    // An irreducible polynomial of degree ≥ 1 has a non-zero constant
-    // term, so bit 0 is always set; try 0, 1, 2 further bits below n.
-    let mut candidates: Vec<u64> = Vec::new();
-    candidates.push(1);
-    for i in 1..n {
-        candidates.push(1 | (1 << i));
-        for j in (i + 1)..n {
-            candidates.push(1 | (1 << i) | (1 << j));
-            for k in (j + 1)..n {
-                candidates.push(1 | (1 << i) | (1 << j) | (1 << k));
-            }
-        }
-    }
-    candidates.sort_unstable();
-    let hi = 1u64 << n;
-    for low in candidates {
-        if is_irreducible_f2(hi | low) {
-            return Some(IrreduciblePoly {
-                degree: n,
-                low_terms: (0..n).filter(|i| (low >> i) & 1 == 1).collect(),
-            });
-        }
-    }
-    None
-}
-
 // ── F_2[x] helpers on `u128` bitmasks (degrees 64..=127) ──────────
 //
 // Twin of the `u64` helpers above with identical Rabin semantics; the
@@ -463,6 +355,113 @@ pub fn find_irreducible_sparse_wide(n: u32) -> Option<IrreduciblePoly> {
     let hi = 1u128 << n;
     for low in candidates {
         if is_irreducible_f2_wide(hi | low) {
+            return Some(IrreduciblePoly {
+                degree: n,
+                low_terms: (0..n).filter(|i| (low >> i) & 1 == 1).collect(),
+            });
+        }
+    }
+    None
+}
+
+fn prime_divisors(mut n: u32) -> Vec<u32> {
+    let mut out = Vec::new();
+    let mut d = 2u32;
+    while d * d <= n {
+        if n.is_multiple_of(d) {
+            out.push(d);
+            while n.is_multiple_of(d) {
+                n /= d;
+            }
+        }
+        d += 1;
+    }
+    if n > 1 {
+        out.push(n);
+    }
+    out
+}
+
+/// **Rabin's irreducibility test** for a degree-`d` polynomial of
+/// `F_2[x]`: `f` is irreducible iff `x^(2^d) ≡ x (mod f)` and
+/// `gcd(x^(2^(d/p)) − x, f) = 1` for every prime `p | d`.
+pub fn is_irreducible_f2(f: u64) -> bool {
+    let d = match poly_deg(f) {
+        Some(d) if d >= 1 => d,
+        _ => return false,
+    };
+    if f & 1 == 0 && d > 1 {
+        return false; // divisible by x
+    }
+    if poly_x_pow_2k(d, f) != poly_rem(0b10, f) {
+        return false;
+    }
+    for p in prime_divisors(d) {
+        let t = poly_x_pow_2k(d / p, f) ^ 0b10;
+        if poly_deg(poly_gcd(poly_rem(t, f), f)) != Some(0) {
+            return false;
+        }
+    }
+    true
+}
+
+/// Smallest (as an integer bitmask) irreducible polynomial of degree
+/// `n` over `F_2`, which for every `n` in range is a trinomial or
+/// pentanomial.  Returned as an [`IrreduciblePoly`].
+pub fn find_irreducible(n: u32) -> Option<IrreduciblePoly> {
+    if n == 0 || n >= 64 {
+        return None;
+    }
+    let hi = 1u64 << n;
+    for low in 0..hi {
+        let f = hi | low;
+        if is_irreducible_f2(f) {
+            let low_terms = (0..n).filter(|i| (low >> i) & 1 == 1).collect();
+            return Some(IrreduciblePoly {
+                degree: n,
+                low_terms,
+            });
+        }
+    }
+    None
+}
+
+/// **Sparse irreducible search**: the smallest-mask irreducible
+/// polynomial of degree `n` over `F_2` among those with at most four
+/// terms below `z^n` — i.e. trinomials and pentanomials.
+///
+/// [`find_irreducible`] scans all `2^n` masks, which is fine to `n ≈ 24`
+/// and hopeless beyond.  For every degree in range the smallest
+/// irreducible polynomial *is* sparse, so this returns the same answer
+/// far faster (a test pins the agreement for `n ≤ 20`), and it is what
+/// the measurement harness uses to reach `n = 63`.
+pub fn find_irreducible_sparse(n: u32) -> Option<IrreduciblePoly> {
+    if n == 0 || n >= 64 {
+        return None;
+    }
+    if n == 1 {
+        return Some(IrreduciblePoly {
+            degree: 1,
+            low_terms: vec![0],
+        });
+    }
+    // An irreducible polynomial of degree ≥ 1 has a non-zero constant
+    // term, so bit 0 is always set; try 0, 1, 2 further bits below n.
+    let mut candidates: Vec<u64> = Vec::new();
+    candidates.push(1);
+    for i in 1..n {
+        candidates.push(1 | (1 << i));
+        for j in (i + 1)..n {
+            candidates.push(1 | (1 << i) | (1 << j));
+            for k in (j + 1)..n {
+                candidates.push(1 | (1 << i) | (1 << j) | (1 << k));
+            }
+        }
+    }
+    candidates.sort_unstable();
+    let hi = 1u64 << n;
+    for low in candidates {
+        if is_irreducible_f2(hi | low) {
             return Some(IrreduciblePoly {
                 degree: n,
                 low_terms: (0..n).filter(|i| (low >> i) & 1 == 1).collect(),
@@ -644,39 +643,6 @@ pub fn koblitz_point_count(a: u8, n: u32) -> BigUint {
     BigUint::from(count as u128)
 }
 
-/// Trial-division factorisation into `(prime, exponent)` pairs.  Only
-/// ever called on `#E` for toy `n`.
-///
-/// When the value fits in 128 bits (every admitted `n ≤ 127`: group
-/// orders are `≈ 2^n`), the trial loop runs natively with no
-/// allocations.  The factor list is identical to the [`BigUint`] loop
-/// below, so every `n ≤ 63` fixture is unaffected.
-fn factorise(mut v: BigUint) -> Vec<(BigUint, u32)> {
-    if let Some(small) = biguint_to_u128(&v) {
-        return factorise_u128(small)
-            .into_iter()
-            .map(|(p, e)| (BigUint::from(p), e))
-            .collect();
-    }
-    let mut out: Vec<(BigUint, u32)> = Vec::new();
-    let mut d = BigUint::from(2u32);
-    while &d * &d <= v {
-        let mut e = 0;
-        while (&v % &d).is_zero() {
-            v /= &d;
-            e += 1;
-        }
-        if e > 0 {
-            out.push((d.clone(), e));
-        }
-        d += BigUint::one();
-    }
-    if v > BigUint::one() {
-        out.push((v, 1));
-    }
-    out
-}
-
 /// `#E(F_{q^e}) = q^e + 1 − s_e` from the trace `t` of the `q`-power
 /// Frobenius (`s_0 = 2`, `s_1 = t`, `s_i = t·s_{i−1} − q·s_{i−2}`).
 pub fn subfield_group_order(trace: i128, q: u64, e: u32) -> BigUint {
@@ -735,6 +701,22 @@ fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
         out.push((v, 1));
     }
     out
+}
+
+fn factorise(v: BigUint) -> Vec<(BigUint, u32)> {
+    if let Some(v) = v.to_u64() {
+        return factorise_u64(v)
+            .into_iter()
+            .map(|(p, e)| (BigUint::from(p), e))
+            .collect();
+    }
+    if let Some(v) = biguint_to_u128(&v) {
+        return factorise_u128(v)
+            .into_iter()
+            .map(|(p, e)| (BigUint::from(p), e))
+            .collect();
+    }
+    factorise_big(v)
 }
 
 /// Deterministic Miller–Rabin for every `u64`: the first twelve primes
@@ -844,114 +826,6 @@ impl KoblitzCurve {
             return None;
         }
         Self::subfield(1, n, u64::from(a), 1)
-    }
-
-    /// Build an **isogenous member of the class of `K_a`**: the model
-    /// `y² + xy = x³ + a x² + b` over `F_{2^n}` with `b` arbitrary (in
-    /// practice `b ∉ F_2`, a floor curve of the isogeny volcano).
-    ///
-    /// Isogenous curves have equal point counts, so `#E` is taken from the
-    /// Koblitz recurrence for the class and then **certified** on sampled
-    /// points: every sample is killed by `#E`, and some sample realises the
-    /// full 2-part of `#E`.  With `r > 2√q` (every admitted rung) `#E` is
-    /// the only multiple of `r` in the Hasse interval, so the certificate
-    /// pins `#E`; a `b` whose curve is not in the class fails it and yields
-    /// `None`.
-    ///
-    /// The 2-power Frobenius is **not** an endomorphism of such a model:
-    /// `frobenius_is_endomorphism` is false, [`KoblitzCurve::frobenius`]
-    /// is the identity, `λ = 1`, and the factor-base machinery folds only
-    /// by negation.  `modulus` fixes the field representation (`None`
-    /// selects the same sparse search as [`KoblitzCurve::new`], so toy
-    /// classes built on that modulus can pass `b` verbatim).
-    pub fn isogenous_model(
-        a: u8,
-        n: u32,
-        b: F2mElement,
-        modulus: Option<IrreduciblePoly>,
-    ) -> Option<Self> {
-        if a > 1 || n < 3 || n > MAX_N {
-            return None;
-        }
-        let irreducible = match modulus {
-            Some(m) => {
-                if m.degree != n {
-                    return None;
-                }
-                m
-            }
-            None if n <= 63 => find_irreducible_sparse(n)?,
-            None => find_irreducible_sparse_wide(n)?,
-        };
-        let a_fe = if a == 0 {
-            F2mElement::zero(n)
-        } else {
-            F2mElement::one(n)
-        };
-        if b.is_zero() {
-            return None; // singular
-        }
-        let mut curve = BinaryCurve {
-            m: n,
-            irreducible,
-            a: a_fe,
-            b,
-            generator: BinaryPoint::Infinity,
-            order: BigUint::zero(),
-            cofactor: BigUint::one(),
-        };
-        let group_order = koblitz_point_count(a, n);
-
-        // Certify the class order on sampled points.
-        let half_order = &group_order >> 1u32;
-        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
-        let mut state = 0x2545_f491_4f6c_dd1du64 ^ (n as u64) ^ ((a as u64) << 32);
-        let mut samples = 0usize;
-        // Every sample must be killed by `#E`; with `r > 2√q` (every admitted
-        // rung) `#E` is the only multiple of `r` in the Hasse interval, so a
-        // point of order `r` plus this check pins `#E`.  The second check,
-        // that some sample realises the full 2-part of `#E`, is a cheap extra
-        // guard against a twist of the same `r`-part.
-        let mut saw_full_two_part = false;
-        let mut tries = 0u32;
-        while samples < 16 && tries < 4096 {
-            tries += 1;
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1442695040888963407);
-            let x = F2mElement::from_biguint(&BigUint::from(state & mask), n);
-            for p in points_with_x(&curve, &x) {
-                samples += 1;
-                if scalar_mul(&curve, &p, &group_order) != BinaryPoint::Infinity {
-                    return None;
-                }
-                if scalar_mul(&curve, &p, &half_order) != BinaryPoint::Infinity {
-                    saw_full_two_part = true;
-                }
-            }
-        }
-        if samples < 8 || !saw_full_two_part {
-            return None;
-        }
-
-        let (r, cofactor) = attach_prime_subgroup(&mut curve, a, n, &group_order)?;
-        let trace: i64 = if a == 0 { -1 } else { 1 };
-        Some(Self {
-            a,
-            n,
-            curve,
-            trace,
-            group_order,
-            subgroup_order: r,
-            cofactor,
-            lambda: BigUint::one(),
-            frobenius_is_endomorphism: false,
-            k: 1,
-            q: 2,
-            a_index: u64::from(a),
-            b_index: 1,
-            subfield_basis: vec![F2mElement::one(n)],
-        })
     }
 
     /// The pinned K_1 model over GF(2^83) used by the two-word IC stage
@@ -1183,15 +1057,125 @@ impl KoblitzCurve {
             subgroup_order: r,
             cofactor,
             lambda,
-            frobenius_is_endomorphism: true,
             k,
             q,
             a_index,
             b_index,
             subfield_basis,
+            frobenius_is_endomorphism: true,
         })
     }
 
+    /// Build an **isogenous member of the class of `K_a`**: the model
+    /// `y² + xy = x³ + a x² + b` over `F_{2^n}` with `b` arbitrary (in
+    /// practice `b ∉ F_2`, a floor curve of the isogeny volcano).
+    ///
+    /// Isogenous curves have equal point counts, so `#E` is taken from the
+    /// Koblitz recurrence for the class and then **certified** on sampled
+    /// points: every sample is killed by `#E`, and some sample realises the
+    /// full 2-part of `#E`.  With `r > 2√q` (every admitted rung) `#E` is
+    /// the only multiple of `r` in the Hasse interval, so the certificate
+    /// pins `#E`; a `b` whose curve is not in the class fails it and yields
+    /// `None`.
+    ///
+    /// The 2-power Frobenius is **not** an endomorphism of such a model:
+    /// `frobenius_is_endomorphism` is false, [`KoblitzCurve::frobenius`]
+    /// is the identity, `λ = 1`, and the factor-base machinery folds only
+    /// by negation.  `modulus` fixes the field representation (`None`
+    /// selects the same sparse search as [`KoblitzCurve::new`], so toy
+    /// classes built on that modulus can pass `b` verbatim).
+    pub fn isogenous_model(
+        a: u8,
+        n: u32,
+        b: F2mElement,
+        modulus: Option<IrreduciblePoly>,
+    ) -> Option<Self> {
+        if a > 1 || !(3..=MAX_N).contains(&n) {
+            return None;
+        }
+        let irreducible = match modulus {
+            Some(m) => {
+                if m.degree != n {
+                    return None;
+                }
+                m
+            }
+            None if n <= 63 => find_irreducible_sparse(n)?,
+            None => find_irreducible_sparse_wide(n)?,
+        };
+        let a_fe = if a == 0 {
+            F2mElement::zero(n)
+        } else {
+            F2mElement::one(n)
+        };
+        if b.is_zero() {
+            return None; // singular
+        }
+        let mut curve = BinaryCurve {
+            m: n,
+            irreducible,
+            a: a_fe,
+            b,
+            generator: BinaryPoint::Infinity,
+            order: BigUint::zero(),
+            cofactor: BigUint::one(),
+        };
+        let group_order = koblitz_point_count(a, n);
+
+        // Certify the class order on sampled points.
+        let half_order = &group_order >> 1u32;
+        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
+        let mut state = 0x2545_f491_4f6c_dd1du64 ^ (n as u64) ^ ((a as u64) << 32);
+        let mut samples = 0usize;
+        // Every sample must be killed by `#E`; with `r > 2√q` (every admitted
+        // rung) `#E` is the only multiple of `r` in the Hasse interval, so a
+        // point of order `r` plus this check pins `#E`.  The second check,
+        // that some sample realises the full 2-part of `#E`, is a cheap extra
+        // guard against a twist of the same `r`-part.
+        let mut saw_full_two_part = false;
+        let mut tries = 0u32;
+        while samples < 16 && tries < 4096 {
+            tries += 1;
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            let x = F2mElement::from_biguint(&BigUint::from(state & mask), n);
+            for p in points_with_x(&curve, &x) {
+                samples += 1;
+                if scalar_mul(&curve, &p, &group_order) != BinaryPoint::Infinity {
+                    return None;
+                }
+                if scalar_mul(&curve, &p, &half_order) != BinaryPoint::Infinity {
+                    saw_full_two_part = true;
+                }
+            }
+        }
+        if samples < 8 || !saw_full_two_part {
+            return None;
+        }
+
+        let (r, cofactor) = attach_prime_subgroup(&mut curve, a, n, &group_order)?;
+        let trace: i64 = if a == 0 { -1 } else { 1 };
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda: BigUint::one(),
+            frobenius_is_endomorphism: false,
+            k: 1,
+            q: 2,
+            a_index: u64::from(a),
+            b_index: 0,
+            subfield_basis: vec![F2mElement::one(n)],
+        })
+    }
+}
+
+impl KoblitzCurve {
     /// The `2`-power Frobenius `π(x, y) = (x², y²)`; the identity on an
     /// isogenous model where squaring would leave the curve.
     ///
@@ -1212,6 +1196,9 @@ impl KoblitzCurve {
 
     /// `x ↦ x^q`, the Frobenius on abscissae.
     pub fn frobenius_x(&self, x: &F2mElement) -> F2mElement {
+        if !self.frobenius_is_endomorphism {
+            return x.clone();
+        }
         x.square_k_times(self.k, &self.curve.irreducible)
     }
 
@@ -1240,7 +1227,7 @@ impl KoblitzCurve {
     pub fn curve_id(&self) -> curve_id::CurveId {
         let modulus = curve_id::modulus_integer(&self.curve.irreducible);
         let (a, b) = (self.curve.a.to_biguint(), self.curve.b.to_biguint());
-        let end = (self.k == 1).then_some(-7);
+        let end = (self.k == 1 && self.frobenius_is_endomorphism).then_some(-7);
         curve_id::binary(self.n, &modulus, &a, &b, &self.group_order, end)
             .expect("a constructed curve is non-singular and inside the Hasse interval")
     }
@@ -1968,6 +1955,9 @@ fn fast_classes_can_cancel(
     classes: &[BinaryPoint],
     m: usize,
 ) -> bool {
+    if !kc.frobenius_is_endomorphism {
+        return classes_can_cancel(kc, classes, m);
+    }
     let classes: Vec<FastPoint> = classes.iter().map(|c| fc.lift(c)).collect();
     let class_keys: FxSet<u64> = classes.iter().map(|c| c.pack()).collect();
     let mut seeds: Vec<FastPoint> = Vec::with_capacity(classes.len());
@@ -2047,22 +2037,27 @@ pub fn q_linearised_kernel_basis(
 /// Kernel basis of an `F_2`-linear map on `F_{2^n}` given by its action
 /// on the polynomial basis.
 fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2mElement> {
-    // Column i = F(z^i), packed into the low n bits of a u64.
-    let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    if n == 0 || n > 128 {
+        return Vec::new();
+    }
+    // Column i = F(z^i), retaining both words for the wide-field path.
+    let mut rows: Vec<(u128, u128)> = Vec::with_capacity(n as usize);
     for i in 0..n {
         let basis = F2mElement::from_bit_positions(&[i], n);
         let img = image(&basis);
-        let img_bits = img.raw_bits().first().copied().unwrap_or(0);
-        rows.push((img_bits, 1u64 << i));
+        let words = img.raw_bits();
+        let img_bits = u128::from(words.first().copied().unwrap_or(0))
+            | (u128::from(words.get(1).copied().unwrap_or(0)) << 64);
+        rows.push((img_bits, 1u128 << i));
     }
 
     // Gaussian elimination on the image halves; whatever reduces to
     // zero contributes its preimage to the kernel basis.
-    let mut pivots: Vec<(u64, u64)> = Vec::new();
-    let mut kernel_basis: Vec<u64> = Vec::new();
+    let mut pivots: Vec<(u128, u128)> = Vec::new();
+    let mut kernel_basis: Vec<u128> = Vec::new();
     for (mut img, mut pre) in rows {
         for &(pimg, ppre) in &pivots {
-            let lead = 1u64 << (63 - pimg.leading_zeros());
+            let lead = 1u128 << (127 - pimg.leading_zeros());
             if img & lead != 0 {
                 img ^= pimg;
                 pre ^= ppre;
@@ -2997,6 +2992,9 @@ fn orbit_maps_packed(
     curve: &FastCurve,
     points: &[BinaryPoint],
 ) -> Option<OrbitMaps> {
+    if !kc.frobenius_is_endomorphism {
+        return orbit_maps_bigint(kc, points);
+    }
     let fast: Vec<FastPoint> = points.iter().map(|p| curve.lift(p)).collect();
     let mut index_of: HashMap<u64, usize> = HashMap::with_capacity(points.len() * 2);
     for (i, p) in fast.iter().enumerate() {
@@ -4776,6 +4774,9 @@ impl PairSumTable {
         byte_budget: u128,
         bulk: bool,
     ) -> Option<Self> {
+        if !kc.frobenius_is_endomorphism {
+            return None;
+        }
         if matches!(
             fb.domain,
             FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
@@ -5016,6 +5017,9 @@ impl PairSumTable {
         fb: &FrobeniusFactorBase,
         parts: FoldedParts,
     ) -> Result<Self, String> {
+        if !kc.frobenius_is_endomorphism {
+            return Err("Frobenius folding requires an endomorphism of this model".into());
+        }
         if fb.points.is_empty() || fb.points.len() > u32::MAX as usize {
             return Err(format!("a base of {} points", fb.points.len()));
         }
@@ -7958,6 +7962,9 @@ fn projected_signed_orbit_map_fast(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
 ) -> Option<ProjectedSignedOrbitMap> {
+    if !kc.frobenius_is_endomorphism {
+        return None;
+    }
     let fc = FastCurve::new(&kc.curve)?;
     let (projected, _) = project_by_frobenius_orbits(kc, &fc, fb);
     let mut representatives: Vec<FastPoint> = Vec::new();
@@ -18344,6 +18351,11 @@ mod isogenous_model_tests {
         assert_ne!(g, BinaryPoint::Infinity);
         assert_eq!(kc.frobenius(&g), g);
         assert_eq!(kc.mul(&g, &kc.subgroup_order), BinaryPoint::Infinity);
+        let targets =
+            crate::cryptanalysis::koblitz_factor_base_search::TargetSet::new(&kc, 8, 0, 20261008);
+        for (point, &scalar) in targets.points.iter().zip(&targets.scalars) {
+            assert_eq!(*point, kc.mul(&g, &BigUint::from(scalar)));
+        }
         // Squaring really leaves the curve: `(x², y²)` is not a point of `E_b`.
         if let BinaryPoint::Affine { x, y } = &g {
             let irr = &kc.curve.irreducible;

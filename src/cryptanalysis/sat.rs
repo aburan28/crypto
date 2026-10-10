@@ -1964,9 +1964,6 @@ impl Solver {
 
     /// Force every saved phase to a constant polarity (search-polarity lever).
     pub fn set_all_saved_phases(&mut self, value: bool) {
-        for phase in &mut self.saved_phase {
-            *phase = value;
-        }
         self.saved_phase.fill(value);
     }
 
