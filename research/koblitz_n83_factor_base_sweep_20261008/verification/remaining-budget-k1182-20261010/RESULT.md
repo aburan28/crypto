@@ -1,0 +1,9 @@
+# K1182 finite-domain admission
+
+The guarded K1182 signed-Frobenius m=5, identity-mask-0 worker returned `UNKNOWN_domain_clause_cap`. Its exact finite-domain preflight required **32,142,830 clauses**, above the frozen 12,000,000-clause admission cap. It required 84,743 source-bounded variables and saw 98,106 distinct legal x-coordinates from 196,212 stored points. The worker did not install a SAT model or execute search, relation generation, rank, or target solving. This is censored construction evidence, not a solver verdict or runtime ranking.
+
+The clean source revision was `032e4a6953a96ee7005f4a5a9ed4d3934c144629`. The source-matched static Linux worker compiled successfully with SHA-256 `8fab524044f7e809e5b246307cd5f45c5effa3c9b07a50d8f96feafdd80ea498`. The exact public-x-hash, seed 2026100801 object retained its S3 round-trip and independent generic-arithmetic replay receipts. Its point-set BLAKE3 was `429cde4bc514bf1026e4993e269192f858cb7410ade777178a1c0db7dbf0001a`.
+
+The one-CPU Docker worker used a 4 GiB hard memory limit, zero swap, no network and a read-only root. During preflight the cgroup peak was 232,259,584 bytes. The outer process took 6.399 seconds, exited 0, found no changed source/config/binary and reported no cleanup error. A subsequent exact-name Docker query exited 0 and found no retained container. `verification.json` rechecked the receipt hashes, compiled-source snapshot, binary and cap inequalities on the same host. The small peak is **not** a memory estimate for constructing the 32-million-clause model.
+
+The round conservatively charged 285 seconds for preparation, rebuild and worker work, bringing the cumulative two-hour charge to **6,339.092994294 of 7,200 seconds**. The immutable earlier budget receipt is unchanged. This result does not establish a best factor base or a completed cold index-calculus runtime.

@@ -1,0 +1,5 @@
+CARGO_BUILD_JOBS=4 CARGO_PROFILE_RELEASE_CODEGEN_UNITS=256 CARGO_TARGET_DIR=/private/tmp/n83-chain-search-linux-target RUSTC=/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc CARGO_ZIGBUILD_CACHE_DIR=/private/tmp/n83-two-hour-extension-20261010-163701/cargo-zigbuild-cache ZIG_LOCAL_CACHE_DIR=/private/tmp/n83-two-hour-extension-20261010-163701/zig-cache ZIG_GLOBAL_CACHE_DIR=/private/tmp/n83-two-hour-extension-20261010-163701/zig-cache gtimeout 720 cargo zigbuild --release --no-default-features --target x86_64-unknown-linux-musl --example koblitz_n83_factor_base_export --locked --offline
+
+Frozen clean source revision: 032e4a6953a96ee7005f4a5a9ed4d3934c144629
+Built Linux worker SHA-256: 8fab524044f7e809e5b246307cd5f45c5effa3c9b07a50d8f96feafdd80ea498
+Build exit: 0; release compile line: 1m 02s. Full preparation and build wall are included in budget.json.
