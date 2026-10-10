@@ -1,0 +1,74 @@
+{
+  "all_native_and_sage_verified": true,
+  "controlled_speedup": null,
+  "hierarchical_bootstrap": {
+    "draws": 100000,
+    "geometric_ratio_95": [
+      1.5952343817316712,
+      6.429375989783645
+    ],
+    "resampled_fraction_ratio_at_least_2": 0.90973,
+    "seed": 20261010,
+    "unit": "resample target, then two process timings per arm"
+  },
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1800_combined_robustness_v1",
+  "leave_one_target_out": [
+    {
+      "omitted_label": "T205",
+      "remaining_target_geometric_ratio": 2.5994086310947213
+    },
+    {
+      "omitted_label": "T206",
+      "remaining_target_geometric_ratio": 3.043964763408726
+    },
+    {
+      "omitted_label": "T207",
+      "remaining_target_geometric_ratio": 3.564641732903202
+    },
+    {
+      "omitted_label": "T208",
+      "remaining_target_geometric_ratio": 3.8805434920152306
+    },
+    {
+      "omitted_label": "T209",
+      "remaining_target_geometric_ratio": 3.0065207435987156
+    },
+    {
+      "omitted_label": "T210",
+      "remaining_target_geometric_ratio": 3.601068845328818
+    },
+    {
+      "omitted_label": "T211",
+      "remaining_target_geometric_ratio": 3.2904899616882406
+    },
+    {
+      "omitted_label": "T212",
+      "remaining_target_geometric_ratio": 3.169014405971057
+    }
+  ],
+  "leave_one_target_out_ratio_range": [
+    2.5994086310947213,
+    3.8805434920152306
+  ],
+  "point_count": 8,
+  "run_count": 32,
+  "sample_size_planning": {
+    "between_target_log_variance": 0.6831523896381992,
+    "caveat": "local host variance may not transfer to the confirmation host",
+    "combined_log_standard_deviation": 1.0076971751993955,
+    "estimated_distinct_targets_for_80_percent_power": 34,
+    "estimated_distinct_targets_for_expected_two_sided_95_lower_above_2": 17,
+    "log_ratio_mean": 1.1777443655915358,
+    "model": "normal_approximation_to_empirical_target_plus_repeat_log_ratio_law",
+    "process_runs_per_target": 4,
+    "threshold_log_ratio": 0.6931471805599453,
+    "within_target_repeat_log_variance": 0.33230120726664175
+  },
+  "source_analysis_sha256": "53d37cd00f13ffbf87db3e99bc5caba1ddd3c2aae3557503eeee1709497fa167",
+  "target_only_bootstrap95": [
+    1.8684789072667096,
+    5.842810014690338
+  ],
+  "targets_with_ratio_at_least_2": 5
+}

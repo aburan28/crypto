@@ -37,15 +37,17 @@ The geometric mean C1200/C1800 target S3-call ratio is **2.628×**, with a
 target-bootstrap interval of **[1.307, 5.818]×**. S3-call counts are a
 deterministic stage diagnostic; wall time includes the complete online path.
 
-For planning a new independent target panel, these eight target-level log
-ratios have mean 1.178 and sample standard deviation 0.884. If that effect
-and variance persisted in a qualified environment, a normal approximation
-places the expected two-sided 95% lower bound above `ln(2)` at about **16
-distinct targets**. About **27 distinct targets** would give 80% power by
-`n ≈ ((1.96 + 0.84) × 0.884 / (1.178 − ln(2)))²`, with two runs per arm and
-target still needed to expose run noise. This is a sample-size estimate from
-local exploratory data; the Modal pilot and any host-isolation preflight
-must establish the variance and fidelity for the actual confirmation host.
+The [repeat-aware robustness analysis](robustness.json) resamples both target
+identities and the two timings per arm without dropping any run. Its 95%
+interval is **[1.595, 6.429]×**; omitting any one target leaves a geometric
+ratio between **2.599× and 3.881×**. The empirical log-ratio variance has
+0.683 between-target and 0.332 within-target-repeat components. If the
+observed effect and both variance components persisted on a qualified host,
+a normal approximation calls for about **17 distinct targets** for an
+expected two-sided 95% lower bound above 2× and **34 distinct targets** for
+80% power, with two runs per arm and target. These are planning estimates
+from exploratory data; the Modal pilot and host-isolation preflight must
+establish the variance and fidelity for the actual confirmation host.
 
 [`CONFIRM_FREEZE.json`](CONFIRM_FREEZE.json) fixes the two candidate IDs,
 source and binary hashes, all eight public points and workload IDs, the
