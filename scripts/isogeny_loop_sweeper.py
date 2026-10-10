@@ -323,7 +323,8 @@ class ClassGroupCtx:
         return Bg
 
 
-def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_cap=None, node_cap=20_000_000):
+def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_cap=None, node_cap=20_000_000,
+                      minimum_only=False):
     """Cheapest nonzero vectors of the relation lattice in the weighted 1-norm
     sum_i w_i |e_i|.
 
@@ -352,6 +353,9 @@ def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_
     best = min(cands.values())
     lll_best = best
     R = best if radius_cap is None else radius_cap
+    if minimum_only:
+        # enumerating up to the LLL bound is enough to certify the minimum
+        R = min(R, best)
     exhaustive = False
     if dlogs is not None:
         m = len(cyc)
@@ -627,12 +631,19 @@ def analyse_order(DK, g, t, fpi, r, s, char2, args, saving, cv):
         if in_zpi:
             d_ = B2 // fpi
             scalar_on_EFq = (A2 - d_ * t) // 2 + d_
+        # in characteristic 2 the loop {2: m*n} is pi^m (m > 0) or pi-bar^|m| (m < 0):
+        # the Frobenius / Verschiebung chain, which acts on E(F_q) as 1 or q^|m|.
+        nz = [(pd["ell"], int(x)) for pd, x in zip(primes, e) if x]
+        frob_power = None
+        if char2 and len(nz) == 1 and nz[0][0] == 2 and nz[0][1] % cv["n"] == 0:
+            frob_power = nz[0][1] // cv["n"]
         entry = dict(cost_M=cost, ratio_to_saving=round(cost / saving, 3),
                      exponents={pd["ell"]: int(x) for pd, x in zip(primes, e) if x},
                      chain_length=sum(abs(x) for x in e), degree=str(norm), degree_bits=round(math.log2(norm), 1),
                      alpha=f"({A2} + {B2}*sqrt({DK}))/2", trace=str(trace),
                      in_order_Og=(2 * a1).numerator % (2 * g) == 0 if g > 1 else True,
-                     in_Z_pi=in_zpi, acts_as_integer=str(scalar_on_EFq) if in_zpi else None)
+                     in_Z_pi=in_zpi, Z_pi_is_OK=(fpi == 1), acts_as_integer=str(scalar_on_EFq) if in_zpi else None,
+                     frobenius_power=frob_power)
         if s is not None:
             inv2 = pow(2, -1, r)
             lam = ((2 * a0).numerator * inv2 + (2 * a1).numerator * inv2 * s) % r
@@ -646,6 +657,18 @@ def analyse_order(DK, g, t, fpi, r, s, char2, args, saving, cv):
             entry["glv"] = glv_basis(r, lam)
         loops.append(entry)
     res["loops"] = loops
+    # cheapest loop that is not a Frobenius/Verschiebung power (binary curves):
+    # from the exhaustive list under the radius, else from the LLL basis vectors
+    genuine = None
+    for cost, e in ranked:
+        nz = [(pd["ell"], int(x)) for pd, x in zip(primes, e) if x]
+        if char2 and len(nz) == 1 and nz[0][0] == 2 and nz[0][1] % cv["n"] == 0:
+            continue
+        genuine = dict(cost_M=cost, ratio_to_saving=round(cost / saving, 3),
+                       exponents={pd["ell"]: int(x) for pd, x in zip(primes, e) if x},
+                       chain_length=sum(abs(x) for x in e), within_radius=cost <= R)
+        break
+    res["cheapest_non_frobenius_loop"] = genuine
     res["seconds"] = round(time.time() - t0, 2)
     # Koblitz / Frobenius sanity: is the cheapest loop the Frobenius itself?
     if cv.get("family") == "koblitz" and loops and s is not None:
@@ -698,7 +721,8 @@ def analyse_disc(DK, args, saving_bits=None):
     B = ctx.relation_lattice(primes)
     ranked, exhaustive, R, lll_best = weighted_shortest(B, [pd["cost"] for pd in primes], args.enum_cap,
                                               dlogs=[pd["dlog"] for pd in primes], cyc=ctx.cyc,
-                                              radius_cap=args.radius_factor * saving)
+                                              radius_cap=args.radius_factor * saving, node_cap=2_000_000,
+                                              minimum_only=True)
     best = []
     for cost, e in ranked[: args.top]:
         a0, a1, _ = ctx.generator(primes, e)
@@ -1013,12 +1037,24 @@ def md_curve_report(out):
         if od.get("note"):
             lines.append(f"- {od['note']}")
         lines.append("")
-        lines.append("| rank | cost M | cost / saving | loop (prime: exponent) | chain length | degree bits | alpha | in Z[pi] (acts as integer) | lambda is ±1 | GLV max |k_i| bits |")
+        lines.append("| rank | cost M | cost / saving | loop (prime: exponent) | chain length | degree bits | alpha | Frobenius power / in Z[pi] | lambda is ±1 | GLV max |k_i| bits |")
         lines.append("|--:|--:|--:|:--|--:|--:|:--|:--|:--|--:|")
         for i, lp in enumerate(od["loops"]):
             g = lp.get("glv", {})
-            zp = f"yes ({lp['acts_as_integer'][:12]}{'…' if len(lp['acts_as_integer']) > 12 else ''})" if lp.get("in_Z_pi") else "no"
+            if lp.get("frobenius_power") is not None:
+                m_ = lp["frobenius_power"]
+                zp = f"pi^{m_}" if m_ > 0 else f"pi-bar^{-m_}"
+                zp += f" (acts as {lp['acts_as_integer'][:12]}{'…' if len(lp['acts_as_integer']) > 12 else ''})"
+            elif lp.get("Z_pi_is_OK"):
+                zp = "Z[pi] = O_K"
+            else:
+                zp = f"yes ({lp['acts_as_integer'][:12]}{'…' if len(lp['acts_as_integer']) > 12 else ''})" if lp.get("in_Z_pi") else "no"
             lines.append(f"| {i+1} | {lp['cost_M']:.1f} | {lp['ratio_to_saving']} | {lp['exponents']} | {lp['chain_length']} | {lp['degree_bits']} | {lp['alpha']} | {zp} | {lp.get('lambda_is_pm1')} | {g.get('max_abs_entry_bits', '')} |")
+        gl = od.get("cheapest_non_frobenius_loop")
+        if gl:
+            lines.append("")
+            lines.append(f"cheapest loop that is not a Frobenius/Verschiebung power: {gl['cost_M']:.1f} M ({gl['ratio_to_saving']}x saving), {gl['exponents']}, chain length {gl['chain_length']}"
+                         + ("" if gl["within_radius"] else " — above the enumeration radius, from the LLL basis (upper bound, not necessarily the cheapest)"))
         sp = od["single_prime_loops"][:3]
         if sp:
             lines.append("")

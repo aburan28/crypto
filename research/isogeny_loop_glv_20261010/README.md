@@ -17,6 +17,8 @@ budget, dlogs, eigenvalues, GLV bases), `*.log` the stderr progress lines.
 | `scan_D3-3000_bits128.{md,json}` | same with `--bits 128` |
 | `scan_D3-3000_bits128_char2.{md,json}` | same with `--bits 128 --char2` |
 
+Scan and disc modes enumerate only up to the LLL bound (enough to certify the minimum) and list prime-norm loops only (the automorphisms of D = −3, −4 are not loops).
+
 Defaults in force: primes ℓ ≤ 100, projective cost model (7.5ℓ M per ℓ-step, 2 M for
 ℓ = 2 in characteristic 2), doubling 8 M, enumeration radius = the GLV saving 8⌈log₂r/2⌉,
 `--max-disc-bits 140` (above it only the heuristic estimate is printed), maximal order.

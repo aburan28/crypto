@@ -71,7 +71,10 @@ projective coordinates); a loop is worthwhile iff cost(α) ≪ 8ℓ'.
 5. **Per loop.** α = (A + B√D_K)/2 (via `bnfisprincipal` with generator), N(α) checked
    against ∏ℓ^{|e|}, λ and λ̄ on E(F_q)[r] (√D_K mod r is fixed by π ≡ 1), the
    Gauss-reduced GLV basis and its max |k_i| in bits, whether α ∈ Z[π] (then α = c + dπ
-   acts on all of E(F_q) as the integer c + d, which is reported), whether λ = ±1.
+   acts on all of E(F_q) as the integer c + d, which is reported; when f_π = 1 this is
+   vacuous because Z[π] = O_K), whether the loop is a Frobenius/Verschiebung power
+   π^m (binary curves: the loop {2: m·n}), whether λ = ±1, and the cheapest loop that
+   is not a Frobenius power (from the exhaustive list, else as an LLL upper bound).
 6. **Above `--max-disc-bits` (140)** the class group is not computed and a Gaussian-
    heuristic estimate of the shortest relation is printed instead (det Λ = h ≈ √|D|/π).
 7. **`selftest`** builds a crater curve for D = −71 (h = 7) over a 31-bit prime, walks
@@ -85,7 +88,9 @@ projective coordinates); a loop is worthwhile iff cost(α) ≪ 8ℓ'.
    sign of the final isomorphism u, so λ is determined up to sign and is fixed with one
    test point.
 8. **`scan`** ranks a range of fundamental discriminants by cheapest loop (for choosing
-   D before the CM method); **`disc`** analyses one discriminant.
+   D before the CM method; the enumeration radius is the LLL bound, which certifies the
+   minimum); **`disc`** analyses one discriminant.  Both list prime-norm loops only, so
+   the degree-1 automorphisms of D = −3, −4 do not appear (they beat every loop).
 
 Commands used for every number below are in `research/isogeny_loop_glv_20261010/README.md`.
 
@@ -185,7 +190,37 @@ the measurements above quantify it on the actual challenge curves.
 
 ### 4.5 Scan of fundamental discriminants (for choosing a CM curve)
 
-SCANPLACEHOLDER
+`scan --scan-from 3 --scan-to 3000` (primes ≤ 100, projective model; 911 fundamental
+discriminants, 3.0 s in total; the enumeration radius is the LLL bound, which certifies
+each minimum).  Prime-norm loops only, so the automorphisms of D = −3, −4 are not listed.
+
+| budget | loops with cost ≤ 0.1 × saving | ≤ 0.25 × | ≤ 0.5 × | ≤ 1 × | of |
+|:--|--:|--:|--:|--:|--:|
+| 256-bit r (saving 1024 M) | 73 | 815 | 909 | 911 | 911 |
+| 128-bit r (saving 512 M) | 10 | 232 | 815 | 909 | 911 |
+
+Every fundamental discriminant down to −3000 has a loop cheaper than the doublings a
+256-bit GLV split saves (the most expensive minima: D = -1848: 645 M, D = -1320: 555 M, D = -708: 465 M, D = -232: 442 M, D = -760: 435 M),
+which is the paper's "moderate D" regime made explicit.  The cheapest loops among
+discriminants with class number ≥ 20 (the ones the single-prime construction of
+the paper's Section 3 would miss):
+
+| D_K | h | cheapest loop | degree | cost M | ratio (256-bit) |
+|--:|--:|:--|--:|--:|--:|
+| -431 | 21 | {'2': 2, '3': 3} | 108 | 97.5 | 0.095 |
+| -455 | 20 | {'2': 4, '3': -2} | 144 | 105.0 | 0.103 |
+| -479 | 25 | {'2': 3, '3': 1, '5': -1} | 120 | 105.0 | 0.103 |
+| -503 | 21 | {'2': 7} | 128 | 105.0 | 0.103 |
+| -551 | 26 | {'2': 4, '3': 2} | 144 | 105.0 | 0.103 |
+| -599 | 25 | {'2': 1, '3': 4} | 162 | 105.0 | 0.103 |
+| -623 | 22 | {'2': 1, '3': -4} | 162 | 105.0 | 0.103 |
+| -647 | 23 | {'2': 1, '3': -4} | 162 | 105.0 | 0.103 |
+
+The `--char2` scan (`scan_D3-3000_bits128_char2.*`) charges 2 M per 2-step; in
+characteristic 2 a 2-loop of length m is the 2^m-Frobenius of a curve with j ∈ F_{2^m},
+so that ranking is a ranking of subfield (Koblitz-type) curve families by the subfield
+degree, D = −7 (m = 1, the Koblitz curves) first.
+
 
 ## 5. Requirement status
 

@@ -29,7 +29,7 @@
   "selftest_disc": -71,
   "json": "research/isogeny_loop_glv_20261010/group_d_certicom_small.json"
  },
- "seconds": 4.7,
+ "seconds": 4.8,
  "results": [
   {
    "curve": {
@@ -88,7 +88,7 @@
        "1422282178960",
        "2"
       ],
-      "bnf_seconds": 0.78
+      "bnf_seconds": 0.75
      },
      "primes": [
       {
@@ -314,7 +314,9 @@
        "trace": "-24754338902521",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": false,
        "acts_as_integer": "1",
+       "frobenius_power": 1,
        "lambda": "1",
        "lambda_conj": "309485009821332691555329795",
        "lambda_is_pm1": true,
@@ -345,7 +347,9 @@
        "trace": "-24754338902521",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": false,
        "acts_as_integer": "-24754338902522",
+       "frobenius_power": -1,
        "lambda": "309485009821332691555329795",
        "lambda_conj": "1",
        "lambda_is_pm1": false,
@@ -376,7 +380,9 @@
        "trace": "625162744784515688158968783",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": false,
        "acts_as_integer": "618970019642714891788464633",
+       "frobenius_power": 2,
        "lambda": "309485009821357445894232316",
        "lambda_conj": "6192725141800796370504150",
        "lambda_is_pm1": true,
@@ -407,7 +413,9 @@
        "trace": "-625162744784515688158968783",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": false,
        "acts_as_integer": "-6192725141800796370504150",
+       "frobenius_power": -2,
        "lambda": "303292284679556649523728167",
        "lambda_conj": "1",
        "lambda_is_pm1": false,
@@ -448,7 +456,9 @@
        "trace": "-146945006753407888836599",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "220967236494244143308141238",
        "lambda_conj": "88370828320359894697254480",
        "lambda_is_pm1": false,
@@ -489,7 +499,9 @@
        "trace": "146945006753407888836599",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "221114181500997551196977837",
        "lambda_conj": "88517773327113302586091079",
        "lambda_is_pm1": false,
@@ -508,7 +520,26 @@
        }
       }
      ],
-     "seconds": 0.8,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 7345.5,
+      "ratio_to_saving": 20.404,
+      "exponents": {
+       "2": 39,
+       "7": 4,
+       "13": 3,
+       "17": 2,
+       "29": 1,
+       "53": 3,
+       "59": 5,
+       "61": 1,
+       "67": -1,
+       "79": 1,
+       "89": -2
+      },
+      "chain_length": 62,
+      "within_radius": false
+     },
+     "seconds": 0.77,
      "note": "binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered)."
     }
    ],
@@ -569,7 +600,7 @@
        "1735232808576",
        "2"
       ],
-      "bnf_seconds": 2.58
+      "bnf_seconds": 2.43
      },
      "primes": [
       {
@@ -742,7 +773,9 @@
        "trace": "-19190937844801229773774433580439186331862755310374759325554",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "4171168574081929058931281709603813868429420797977961365257",
+       "frobenius_power": null,
        "lambda": "338574086532835435868323861",
        "lambda_conj": "176300170939548012860650502",
        "lambda_is_pm1": false,
@@ -780,7 +813,9 @@
        "trace": "-19190937844801229773774433580439186331862755310374759325554",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-23362106418883158832705715290043000200292176108352720690811",
+       "frobenius_power": null,
        "lambda": "176300170939548012860650502",
        "lambda_conj": "338574086532835435868323861",
        "lambda_is_pm1": false,
@@ -818,7 +853,9 @@
        "trace": "-48993474654438463056255758847296478756064874195684613",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-10739781452455777552989808126841085447815691532257446",
+       "frobenius_power": null,
        "lambda": "260602585251106709699735127",
        "lambda_conj": "13855165410199016585630412",
        "lambda_is_pm1": false,
@@ -856,7 +893,9 @@
        "trace": "-48993474654438463056255758847296478756064874195684613",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-38253693201982685503265950720455393308249182663427167",
+       "frobenius_power": null,
        "lambda": "13855165410199016585630412",
        "lambda_conj": "260602585251106709699735127",
        "lambda_is_pm1": false,
@@ -893,7 +932,9 @@
        "trace": "-4868617607173878472992141123056665945058509189405311",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-3229989901862789547058304757945091269467330878487587",
+       "frobenius_power": null,
        "lambda": "128100420805753558454190404",
        "lambda_conj": "257714682663239366121781339",
        "lambda_is_pm1": false,
@@ -930,7 +971,9 @@
        "trace": "4868617607173878472992141123056665945058509189405311",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "1638627705311088925933836365111574675591178310917724",
+       "frobenius_power": null,
        "lambda": "158648632892885092164113644",
        "lambda_conj": "288262894750370899831704579",
        "lambda_is_pm1": false,
@@ -949,7 +992,23 @@
        }
       }
      ],
-     "seconds": 2.59
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 17790.0,
+      "ratio_to_saving": 49.417,
+      "exponents": {
+       "5": 18,
+       "11": 26,
+       "29": -8,
+       "37": -31,
+       "43": -3,
+       "71": 2,
+       "83": 3,
+       "97": 1
+      },
+      "chain_length": 92,
+      "within_radius": false
+     },
+     "seconds": 2.44
     }
    ],
    "sqrtDK_mod_r": "416363315556092311653806394",
@@ -1014,7 +1073,7 @@
        "2",
        "2"
       ],
-      "bnf_seconds": 0.62
+      "bnf_seconds": 0.82
      },
      "primes": [
       {
@@ -1201,7 +1260,9 @@
        "trace": "-594370931797",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "1",
+       "frobenius_power": 1,
        "lambda": "1",
        "lambda_conj": "302231454903360108210645",
        "lambda_is_pm1": true,
@@ -1232,7 +1293,9 @@
        "trace": "-594370931797",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-594370931798",
+       "frobenius_power": -1,
        "lambda": "302231454903360108210645",
        "lambda_conj": "1",
        "lambda_is_pm1": false,
@@ -1263,7 +1326,9 @@
        "trace": "855649015049395149056967",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "604462909807908958284885",
+       "frobenius_power": 2,
        "lambda": "302231454903954479142442",
        "lambda_conj": "251186105241486190772082",
        "lambda_is_pm1": true,
@@ -1294,7 +1359,9 @@
        "trace": "855649015049395149056967",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "251186105241486190772082",
+       "frobenius_power": -2,
        "lambda": "251186105241486190772082",
        "lambda_conj": "302231454903954479142442",
        "lambda_is_pm1": false,
@@ -1332,7 +1399,9 @@
        "trace": "36613568408669065082099913",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "17742904475725080604365147",
+       "frobenius_power": null,
        "lambda": "213480091295720814103453",
        "lambda_conj": "132313728898806770903300",
        "lambda_is_pm1": false,
@@ -1370,7 +1439,9 @@
        "trace": "-36613568408669065082099913",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-18870663932943984477734766",
+       "frobenius_power": null,
        "lambda": "169917726005147708239143",
        "lambda_conj": "88751363608233665038990",
        "lambda_is_pm1": false,
@@ -1389,7 +1460,23 @@
        }
       }
      ],
-     "seconds": 0.63,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 7500.0,
+      "ratio_to_saving": 23.438,
+      "exponents": {
+       "2": 15,
+       "11": -1,
+       "17": 8,
+       "19": 7,
+       "23": 1,
+       "41": 12,
+       "59": 2,
+       "83": -1
+      },
+      "chain_length": 47,
+      "within_radius": false
+     },
+     "seconds": 0.83,
      "note": "binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered)."
     }
    ],
@@ -1460,7 +1547,7 @@
        "2",
        "2"
       ],
-      "bnf_seconds": 0.66
+      "bnf_seconds": 0.73
      },
      "primes": [
       {
@@ -1692,7 +1779,9 @@
        "trace": "75173770348006859281",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "57027744953221063337",
+       "frobenius_power": null,
        "lambda": "57027744953221063337",
        "lambda_conj": "18146025394785795944",
        "lambda_is_pm1": false,
@@ -1731,7 +1820,9 @@
        "trace": "-75173770348006859281",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-18146025394785795944",
+       "frobenius_power": null,
        "lambda": "466579668806552857091273",
        "lambda_conj": "466540787086994421823880",
        "lambda_is_pm1": false,
@@ -1772,7 +1863,9 @@
        "trace": "27304444481944508878",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "18377483845715754831",
+       "frobenius_power": null,
        "lambda": "18377483845715754831",
        "lambda_conj": "8926960636228754047",
        "lambda_is_pm1": false,
@@ -1813,7 +1906,9 @@
        "trace": "27304444481944508878",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "8926960636228754047",
+       "frobenius_power": null,
        "lambda": "8926960636228754047",
        "lambda_conj": "18377483845715754831",
        "lambda_is_pm1": false,
@@ -1852,7 +1947,9 @@
        "trace": "1044243993623181497677",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "2262286709142843895904",
+       "frobenius_power": null,
        "lambda": "2262286709142843895904",
        "lambda_conj": "465379772116427980488990",
        "lambda_is_pm1": false,
@@ -1891,7 +1988,9 @@
        "trace": "1044243993623181497677",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-1218042715519662398227",
+       "frobenius_power": null,
        "lambda": "465379772116427980488990",
        "lambda_conj": "2262286709142843895904",
        "lambda_is_pm1": false,
@@ -1910,7 +2009,24 @@
        }
       }
      ],
-     "seconds": 0.67
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 6517.5,
+      "ratio_to_saving": 20.367,
+      "exponents": {
+       "5": 4,
+       "19": -11,
+       "23": -2,
+       "31": 6,
+       "37": -1,
+       "43": 1,
+       "61": -1,
+       "73": -1,
+       "97": 2
+      },
+      "chain_length": 29,
+      "within_radius": false
+     },
+     "seconds": 0.75
     }
    ],
    "sqrtDK_mod_r": "466597814831194544020334",

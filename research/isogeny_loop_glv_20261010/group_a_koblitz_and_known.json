@@ -34,7 +34,7 @@
   "selftest_disc": -71,
   "json": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
  },
- "seconds": 17.0,
+ "seconds": 17.7,
  "results": [
   {
    "curve": {
@@ -82,7 +82,7 @@
       1
      ]
     ],
-    "factor_seconds": 0.0
+    "factor_seconds": 0.001
    },
    "orders": [
     {
@@ -252,7 +252,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "484053659726015834510287614412464621173",
        "lambda_conj": "196511074115861092422032515080945363957",
        "lambda_is_pm1": false,
@@ -283,7 +285,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "196511074115861092422032515080945363957",
        "lambda_conj": "484053659726015834510287614412464621173",
        "lambda_is_pm1": false,
@@ -314,7 +318,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "484053659726015834510287614412464621171",
        "lambda_conj": "196511074115861092422032515080945363955",
        "lambda_is_pm1": false,
@@ -345,7 +351,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "196511074115861092422032515080945363955",
        "lambda_conj": "484053659726015834510287614412464621171",
        "lambda_is_pm1": false,
@@ -376,7 +384,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "196511074115861092422032515080945363954",
        "lambda_conj": "484053659726015834510287614412464621170",
        "lambda_is_pm1": false,
@@ -407,7 +417,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "484053659726015834510287614412464621170",
        "lambda_conj": "196511074115861092422032515080945363954",
        "lambda_is_pm1": false,
@@ -426,7 +438,16 @@
        }
       }
      ],
-     "seconds": 0.07,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.004,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.1,
      "tau": {
       "mu": -1,
       "lambda_tau": "196511074115861092422032515080945363956",
@@ -662,7 +683,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "254512724090651164922415",
        "lambda_conj": "2163338915140145051763275",
        "lambda_is_pm1": false,
@@ -693,7 +716,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2163338915140145051763275",
        "lambda_conj": "254512724090651164922415",
        "lambda_is_pm1": false,
@@ -724,7 +749,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "254512724090651164922413",
        "lambda_conj": "2163338915140145051763273",
        "lambda_is_pm1": false,
@@ -755,7 +782,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2163338915140145051763273",
        "lambda_conj": "254512724090651164922413",
        "lambda_is_pm1": false,
@@ -786,7 +815,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2163338915140145051763272",
        "lambda_conj": "254512724090651164922412",
        "lambda_is_pm1": false,
@@ -817,7 +848,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "254512724090651164922412",
        "lambda_conj": "2163338915140145051763272",
        "lambda_is_pm1": false,
@@ -836,7 +869,16 @@
        }
       }
      ],
-     "seconds": 0.01,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.006,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.02,
      "tau": {
       "mu": -1,
       "lambda_tau": "2163338915140145051763274",
@@ -1072,7 +1114,9 @@
        "trace": "-1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "5571781283898602",
        "lambda_conj": "2998004823950456",
        "lambda_is_pm1": false,
@@ -1103,7 +1147,9 @@
        "trace": "-1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2998004823950456",
        "lambda_conj": "5571781283898602",
        "lambda_is_pm1": false,
@@ -1134,7 +1180,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2998004823950455",
        "lambda_conj": "5571781283898601",
        "lambda_is_pm1": false,
@@ -1165,7 +1213,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "5571781283898601",
        "lambda_conj": "2998004823950455",
        "lambda_is_pm1": false,
@@ -1196,7 +1246,9 @@
        "trace": "5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2998004823950459",
        "lambda_conj": "5571781283898605",
        "lambda_is_pm1": false,
@@ -1227,7 +1279,9 @@
        "trace": "5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "5571781283898605",
        "lambda_conj": "2998004823950459",
        "lambda_is_pm1": false,
@@ -1246,7 +1300,16 @@
        }
       }
      ],
-     "seconds": 0.0,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.009,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.01,
      "tau": {
       "mu": 1,
       "lambda_tau": "5571781283898603",
@@ -1482,7 +1545,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "23986389105595106179003010551",
        "lambda_conj": "15627692151536968054775696641",
        "lambda_is_pm1": false,
@@ -1513,7 +1578,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "15627692151536968054775696641",
        "lambda_conj": "23986389105595106179003010551",
        "lambda_is_pm1": false,
@@ -1544,7 +1611,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "23986389105595106179003010549",
        "lambda_conj": "15627692151536968054775696639",
        "lambda_is_pm1": false,
@@ -1575,7 +1644,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "15627692151536968054775696639",
        "lambda_conj": "23986389105595106179003010549",
        "lambda_is_pm1": false,
@@ -1606,7 +1677,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "15627692151536968054775696638",
        "lambda_conj": "23986389105595106179003010548",
        "lambda_is_pm1": false,
@@ -1637,7 +1710,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "23986389105595106179003010548",
        "lambda_conj": "15627692151536968054775696638",
        "lambda_is_pm1": false,
@@ -1656,7 +1731,16 @@
        }
       }
      ],
-     "seconds": 0.02,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.005,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.04,
      "tau": {
       "mu": -1,
       "lambda_tau": "15627692151536968054775696640",
@@ -1890,7 +1974,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "138423345589698157369693034392981",
        "lambda_conj": "186095208068728544117755622068487",
        "lambda_is_pm1": false,
@@ -1921,7 +2007,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "186095208068728544117755622068487",
        "lambda_conj": "138423345589698157369693034392981",
        "lambda_is_pm1": false,
@@ -1952,7 +2040,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "138423345589698157369693034392979",
        "lambda_conj": "186095208068728544117755622068485",
        "lambda_is_pm1": false,
@@ -1983,7 +2073,9 @@
        "trace": "-3",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "186095208068728544117755622068485",
        "lambda_conj": "138423345589698157369693034392979",
        "lambda_is_pm1": false,
@@ -2014,7 +2106,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "186095208068728544117755622068484",
        "lambda_conj": "138423345589698157369693034392978",
        "lambda_is_pm1": false,
@@ -2045,7 +2139,9 @@
        "trace": "-5",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "138423345589698157369693034392978",
        "lambda_conj": "186095208068728544117755622068484",
        "lambda_is_pm1": false,
@@ -2064,7 +2160,16 @@
        }
       }
      ],
-     "seconds": 0.03,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.005,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.04,
      "tau": {
       "mu": 1,
       "lambda_tau": "186095208068728544117755622068487",
@@ -2150,7 +2255,7 @@
       1
      ]
     ],
-    "factor_seconds": 0.006
+    "factor_seconds": 0.009
    },
    "orders": [
     {
@@ -2329,7 +2434,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2637848147848204714792320558262846500054591612627143416755301512854167554282",
        "lambda_conj": "113154241089467990708778664450425061352782972666447760965849861628663993940056",
        "lambda_is_pm1": false,
@@ -2360,7 +2467,9 @@
        "trace": "1",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "113154241089467990708778664450425061352782972666447760965849861628663993940056",
        "lambda_conj": "2637848147848204714792320558262846500054591612627143416755301512854167554282",
        "lambda_is_pm1": false,
@@ -2391,7 +2500,9 @@
        "trace": "-7",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "78074008874160198520644763525212887401909906723592317393988542598630163514315",
        "lambda_conj": "37718080363155996902926221483475020450927657555482586988616620542887997980015",
        "lambda_is_pm1": false,
@@ -2422,7 +2533,9 @@
        "trace": "7",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "78074008874160198520644763525212887401909906723592317393988542598630163514322",
        "lambda_conj": "37718080363155996902926221483475020450927657555482586988616620542887997980022",
        "lambda_is_pm1": false,
@@ -2453,7 +2566,9 @@
        "trace": "-13",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "2637848147848204714792320558262846500054591612627143416755301512854167554275",
        "lambda_conj": "113154241089467990708778664450425061352782972666447760965849861628663993940049",
        "lambda_is_pm1": false,
@@ -2484,7 +2599,9 @@
        "trace": "-13",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "113154241089467990708778664450425061352782972666447760965849861628663993940049",
        "lambda_conj": "2637848147848204714792320558262846500054591612627143416755301512854167554275",
        "lambda_is_pm1": false,
@@ -2503,6 +2620,15 @@
        }
       }
      ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 52.5,
+      "ratio_to_saving": 0.051,
+      "exponents": {
+       "7": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
      "seconds": 0.09
     }
    ],
@@ -2800,7 +2926,9 @@
        "trace": "9",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "25745384436187293773257686313148572361251961181400080445531962069440031481859",
        "lambda_conj": "32150660182470803938527806191195381565850171978855746374536882426647700584853",
        "lambda_is_pm1": false,
@@ -2832,7 +2960,9 @@
        "trace": "9",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "32150660182470803938527806191195381565850171978855746374536882426647700584853",
        "lambda_conj": "25745384436187293773257686313148572361251961181400080445531962069440031481859",
        "lambda_is_pm1": false,
@@ -2864,7 +2994,9 @@
        "trace": "19",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "25745384436187293773257686313148572361251961181400080445531962069440031481864",
        "lambda_conj": "32150660182470803938527806191195381565850171978855746374536882426647700584858",
        "lambda_is_pm1": false,
@@ -2896,7 +3028,9 @@
        "trace": "19",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "32150660182470803938527806191195381565850171978855746374536882426647700584858",
        "lambda_conj": "25745384436187293773257686313148572361251961181400080445531962069440031481864",
        "lambda_is_pm1": false,
@@ -2928,7 +3062,9 @@
        "trace": "-32",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "51490768872374587546515372626297144722503922362800160891063924138880062963693",
        "lambda_conj": "6405275746283510165270119878046809204598210797455665929004920357207669102978",
        "lambda_is_pm1": false,
@@ -2960,7 +3096,9 @@
        "trace": "-32",
        "in_order_Og": true,
        "in_Z_pi": false,
+       "Z_pi_is_OK": false,
        "acts_as_integer": null,
+       "frobenius_power": null,
        "lambda": "6405275746283510165270119878046809204598210797455665929004920357207669102978",
        "lambda_conj": "51490768872374587546515372626297144722503922362800160891063924138880062963693",
        "lambda_is_pm1": false,
@@ -2979,7 +3117,17 @@
        }
       }
      ],
-     "seconds": 0.08
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 127.5,
+      "ratio_to_saving": 0.125,
+      "exponents": {
+       "5": 2,
+       "7": -1
+      },
+      "chain_length": 3,
+      "within_radius": true
+     },
+     "seconds": 0.1
     }
    ],
    "sqrtDK_mod_r": "51490768872374587546515372626297144722503922362800160891063924138880062963709",
@@ -3040,7 +3188,7 @@
     "DK_bits": 258,
     "conductor_f": "1",
     "conductor_factorization": [],
-    "factor_seconds": 2.307
+    "factor_seconds": 2.712
    },
    "orders": [],
    "sqrtDK_mod_r": "115792089237316195423570985008687907852877541151357922411298727602245008061328",
@@ -3158,7 +3306,7 @@
        "2",
        "2"
       ],
-      "bnf_seconds": 13.99
+      "bnf_seconds": 13.98
      },
      "primes": [
       {
@@ -3384,7 +3532,9 @@
        "trace": "-122610772499221213",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "1",
+       "frobenius_power": 1,
        "lambda": "1",
        "lambda_conj": "5192296858534827567225110079609489",
        "lambda_is_pm1": true,
@@ -3415,7 +3565,9 @@
        "trace": "122610772499221213",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "122610772499221214",
+       "frobenius_power": -1,
        "lambda": "122610772499221214",
        "lambda_conj": "5192296858534827689835882578830702",
        "lambda_is_pm1": false,
@@ -3446,7 +3598,9 @@
        "trace": "5735785901283529615487293807689015",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "10384593717069655379671765157661405",
+       "frobenius_power": 2,
        "lambda": "5192296858534827689835882578830702",
        "lambda_conj": "543489042748701925651411228858313",
        "lambda_is_pm1": true,
@@ -3477,7 +3631,9 @@
        "trace": "-5735785901283529615487293807689015",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "4648807815786125764184471349972390",
+       "frobenius_power": -2,
        "lambda": "4648807815786125764184471349972390",
        "lambda_conj": "1",
        "lambda_is_pm1": false,
@@ -3515,7 +3671,9 @@
        "trace": "-1065723873266962895222904821159719152965",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "-745666678891528340478774578829627178615",
+       "frobenius_power": null,
        "lambda": "4265259516798886246354198828909918",
        "lambda_conj": "1176281510758885043395711611389273",
        "lambda_is_pm1": false,
@@ -3553,7 +3711,9 @@
        "trace": "1065723873266962895222904821159719152965",
        "in_order_Og": true,
        "in_Z_pi": true,
+       "Z_pi_is_OK": true,
        "acts_as_integer": "320057194375434554744130242330091974350",
+       "frobenius_power": null,
        "lambda": "4016015347775942646440170967441430",
        "lambda_conj": "927037341735941443481683749920785",
        "lambda_is_pm1": false,
@@ -3572,7 +3732,23 @@
        }
       }
      ],
-     "seconds": 14.21,
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 9594.5,
+      "ratio_to_saving": 21.041,
+      "exponents": {
+       "2": 16,
+       "11": -14,
+       "13": 3,
+       "17": -26,
+       "23": 3,
+       "41": -4,
+       "53": 6,
+       "89": -1
+      },
+      "chain_length": 73,
+      "within_radius": false
+     },
+     "seconds": 14.28,
      "note": "binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered)."
     }
    ],
