@@ -4,7 +4,7 @@ use crypto_lib::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::koblitz_fast_arith::{FastBinaryCurve128, FastPoint128};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    frobenius_eigenvalue, koblitz_point_count,
+    frobenius_eigenvalue, koblitz_point_count, ChainS3Limits,
 };
 use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use num_bigint::BigUint;
@@ -1204,7 +1204,18 @@ fn main() -> Result<()> {
             )?;
             println!("{summary}");
         },
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS | v2-replay-one PANEL_DIR BUDGET_SECONDS | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-s3-probe PANEL_DIR K POLICY SEED ordered|unordered MAX_STATES MEMORY_MIB NEW_OUTPUT_JSON | primary-chain-build PANEL_DIR K POLICY SEED M IDENTITY_MASK MAX_VARIABLES MAX_DOMAIN_CLAUSES MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
+        Some("primary-chain-cold")=>{
+            if args.len()!=16 { return Err("primary-chain-cold PANEL_DIR FIXTURE_DIR K POLICY SEED M MAX_TRIALS MAX_VARIABLES MAX_DOMAIN_CLAUSES MAX_MODELS CONFLICT_BUDGET BUDGET_SECONDS MEMORY_MIB NEW_RUN_DIR (requires verified hard cgroup memory and external wall caps)".into()); }
+            let summary=primary_adapter::run_chain_cli(
+                Path::new(&args[2]),Path::new(&args[3]),args[4].parse()?,&args[5],args[6].parse()?,
+                args[7].parse()?,args[8].parse()?,ChainS3Limits {
+                    max_variables:args[9].parse()?, max_domain_clauses:args[10].parse()?,
+                    max_models:args[11].parse()?, conflict_budget:args[12].parse()?,
+                },args[13].parse()?,args[14].parse()?,Path::new(&args[15]),
+            )?;
+            println!("{summary}");
+        },
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS | v2-replay-one PANEL_DIR BUDGET_SECONDS | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-s3-probe PANEL_DIR K POLICY SEED ordered|unordered MAX_STATES MEMORY_MIB NEW_OUTPUT_JSON | primary-chain-build PANEL_DIR K POLICY SEED M IDENTITY_MASK MAX_VARIABLES MAX_DOMAIN_CLAUSES MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR | primary-chain-cold PANEL_DIR FIXTURE_DIR K POLICY SEED M MAX_TRIALS MAX_VARIABLES MAX_DOMAIN_CLAUSES MAX_MODELS CONFLICT_BUDGET BUDGET_SECONDS MEMORY_MIB NEW_RUN_DIR".into()),
     }
     Ok(())
 }

@@ -52,7 +52,7 @@ replay and rank novelty before the backend can enter a versioned sweep.
 
 `chain_capacity_supervisor.py` now accepts a replayed primary panel object,
 K=64/256/600, a frozen policy and seed, arity five or six, and one
-intermediate-identity mask. It freezes a clean source commit and the four
+intermediate-identity mask. It freezes a clean source commit and the five
 source files used by the worker, hashes a Linux ELF binary, and launches the
 worker without network under a hard Docker memory ceiling, zero swap and an
 external process-wall deadline. The worker independently checks the cgroup
@@ -96,5 +96,59 @@ the run before a rank or target claim. The factor-base-log and individual-log
 entry points use the same strategy dispatch. A public degree-7
 explicit-orbit fixture checks a complete relation-to-rank-to-verified-target
 path; this validates plumbing and does not measure the retained degree-83
-capacity or cold runtime. The N83 primary CLI still does not offer this
-strategy until a hard-memory, process-wall guarded search receipt exists.
+capacity or cold runtime.
+
+## Guarded retained-base search path
+
+The separate `primary-chain-cold` worker command now selects exactly one
+replayed primary public-x object by policy and seed. It accepts the retained
+v1 K=64/256/600 panel or a separately replayed v2 one-object panel at
+K=1,182/2,048/4,096/8,192/16,627. The v2 manifest must bind the frozen size
+design and its matching replay receipt. The public target corpus and
+known-answer sidecar are supplied separately from the original public panel,
+so a v2 object does not have to copy or alter those fixtures. It rejects
+unsupported arity and zero or excessive SAT caps before making a run directory,
+checks the declared Linux cgroup memory limit and zero swap, and checks a
+clean source snapshot against the compiled exporter, adapter, S3 circuit,
+generic index-calculus driver and v2 size design. It passes explicit variable, finite-domain
+clause, model and conflict limits to `DecompositionStrategy::ChainedS3`.
+The public fixture is the only target solver input; the known-answer sidecar
+is opened only after a candidate scalar is produced. Progress events and
+separate rank, solver-model, group-rejected-model and failure counts are
+retained. A solver cap is `UNKNOWN_solver_cap`, not a refutation.
+
+`chain_search_supervisor.py` is the outer entry point. It freezes the source
+files, panel and public-fixture hashes, and binary hash, pins a locally present Docker image ID, disables
+network, limits CPU, memory, swap and wall time, and retains an outer receipt
+for success, timeout, resource exit, changed inputs or malformed worker
+output. Synthetic tests cover the guard and reject a false total-runtime or
+rank claim. `PASS_verified_target_only` is a checked target result within this
+stage; column-log replay, fully charged factor-base precompute, artifact I/O,
+matched rho and independent-host replay remain outside it. The local pilot
+budget is exhausted, so no retained N83 search has been launched through this
+new path.
+
+After a separate compute grant, a first capacity receipt and a source-matched
+Linux worker, the guarded preflight command is:
+
+```sh
+python3 research/koblitz_n83_factor_base_sweep_20261008/chain_search_supervisor.py \
+  --panel /absolute/retained/pilot-01 \
+  --fixtures /absolute/retained/pilot-01 --columns 64 \
+  --policy public_x_hash --seed 2026100801 --summands 5 \
+  --max-trials 0 --max-variables 100000 --max-domain-clauses 1000000 \
+  --max-models 1 --conflict-budget 10000 \
+  --wall-seconds 60 --memory-mib 4096 --binary /absolute/linux/worker \
+  --output-dir /absolute/new/search-receipt-directory
+```
+
+Only after that preflight and the independent capacity gate pass should a
+new, separately bounded run raise `--max-trials` above zero. Its negative
+and capped outcomes remain evidence about this source and base only; they do
+not identify the minimum-runtime factor base.
+
+For a larger v2 base, point `--panel` at its own freshly replayed one-object
+directory and leave `--fixtures` at the frozen public corpus directory. The
+guard accepts no run until both panel and fixture receipts are present. The
+larger base must first pass construction, generic replay and upload/download
+verification under a new allocation; none has been built yet.

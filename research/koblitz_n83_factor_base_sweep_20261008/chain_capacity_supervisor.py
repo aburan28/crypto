@@ -33,6 +33,7 @@ SOURCES = (
     f"research/{STUDY}/primary_adapter.rs",
     "src/cryptanalysis/binary_semaev_chain_sat.rs",
     "src/cryptanalysis/koblitz_index_calculus.rs",
+    f"research/{STUDY}/size-frontier-v2.json",
 )
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 

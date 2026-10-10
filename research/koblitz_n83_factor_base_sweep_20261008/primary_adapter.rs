@@ -6,7 +6,8 @@
 
 use super::{
     compact_cold, curve, frozen_v2_source_commit, general, load_object, parse_point, point_json,
-    point_set_hash, words, write_new_json, Result, SEEDS, STUDY,
+    point_set_hash, v2_design_hash, v2_row_is_declared, words, write_new_json,
+    Result, PREFIX, SEEDS, STUDY, V2_SIZES, V2_SUBDIR,
 };
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -16,7 +17,7 @@ use crypto_lib::cryptanalysis::binary_semaev_chain_sat::{
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_union_s4_encoding, koblitz_index_calculus_dlp_with_factor_base_and_progress,
     koblitz_point_count, point_key, DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase,
-    KoblitzCurve, KoblitzIcOptions, SatDecompositionOptions,
+    ChainS3Limits, KoblitzCurve, KoblitzIcOptions, SatDecompositionOptions,
 };
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -230,18 +231,40 @@ fn load_panel_selected(
     let manifest_hash = blake3::hash(&manifest_bytes).to_hex().to_string();
     let manifest: Value = serde_json::from_slice(&manifest_bytes)?;
     let replay: Value = serde_json::from_slice(&fs::read(root.join("replay.json"))?)?;
-    if manifest["schema"] != "n83.factor-base-panel/v1"
+    let storage: Value = serde_json::from_slice(&fs::read(root.join("upload-receipt.json"))?)?;
+    let v2 = manifest["schema"] == "n83.factor-base-panel/v2-size-frontier";
+    let expected_count = if v2 { 1 } else { 54 };
+    let storage_prefix = if v2 {
+        format!("{PREFIX}/{STUDY}/{V2_SUBDIR}")
+    } else {
+        PREFIX.to_owned()
+    };
+    let panel_shape_valid = if v2 {
+        manifest["status"] == "completed_factor_base_object"
+            && manifest["size_design_blake3"] == v2_design_hash()
+            && manifest["expected_base_count"] == 1
+            && manifest["completed_base_count"] == 1
+    } else {
+        manifest["schema"] == "n83.factor-base-panel/v1"
+            && manifest["status"] == "completed_factor_base_panel"
+            && manifest["expected_base_count"] == 54
+            && manifest["completed_base_count"] == 54
+    };
+    if !panel_shape_valid
         || manifest["study"] != STUDY
-        || manifest["status"] != "completed_factor_base_panel"
-        || manifest["completed_base_count"] != 54
-        || replay["schema"] != "n83.factor-base-replay/v1"
+        || replay["schema"] != if v2 { "n83.factor-base-replay/v2-size-frontier" } else { "n83.factor-base-replay/v1" }
         || replay["status"] != "PASS"
         || replay["panel_manifest_blake3"] != manifest_hash
+        || storage["schema"] != if v2 { "n83.factor-base-storage/v2-size-frontier" } else { "n83.factor-base-storage/v1" }
+        || storage["status"] != "PASS"
+        || storage["manifest_blake3"] != manifest_hash
+        || storage["bucket"] != "crypto-autoresearcher"
+        || storage["prefix"] != storage_prefix
     {
         return Err("panel or replay receipt is not complete and bound".into());
     }
     let rows = manifest["bases"].as_array().ok_or("panel base rows")?;
-    if rows.len() != 54 {
+    if rows.len() != expected_count || (v2 && !v2_row_is_declared(&rows[0])) {
         return Err("panel base count mismatch".into());
     }
     let mut rows = rows.iter().filter(|row| {
@@ -254,12 +277,33 @@ fn load_panel_selected(
     if rows.next().is_some() {
         return Err("ambiguous primary base selection".into());
     }
+    let expected_uri = if v2 {
+        format!("{storage_prefix}/a0/{}", row["object"].as_str().ok_or("object path")?)
+    } else {
+        format!("{PREFIX}/{STUDY}/a0/{}", row["object"].as_str().ok_or("object path")?)
+    };
+    if row["s3_uri"] != expected_uri {
+        return Err("selected base S3 destination mismatch".into());
+    }
     let checks = replay["checks"].as_array().ok_or("replay checks")?;
-    if !checks
-        .iter()
-        .any(|check| check["object"] == row["object"] && check["status"] == "PASS")
+    let matching: Vec<_> = checks.iter().filter(|check| check["object"] == row["object"]).collect();
+    if matching.len() != 1
+        || matching[0]["status"] != "PASS"
+        || matching[0]["points_checked"].as_u64() != Some(166 * columns as u64)
+        || matching[0]["representatives_checked"].as_u64() != Some(columns as u64)
     {
         return Err("selected object lacks a successful replay".into());
+    }
+    let stored = storage["objects"].as_array().ok_or("storage object rows")?;
+    if stored.len() != expected_count
+        || stored.iter().filter(|item| item["s3_uri"] == row["s3_uri"]).count() != 1
+        || !stored.iter().any(|item| {
+            item["s3_uri"] == row["s3_uri"]
+                && item["compressed_blake3"] == row["compressed_blake3"]
+                && item["downloaded_hash_matches"] == true
+        })
+    {
+        return Err("selected object lacks a matching S3 round-trip receipt".into());
     }
     let base = from_record(row, &load_object(root, row)?)?;
     Ok((base, row.clone(), manifest_hash))
@@ -410,11 +454,12 @@ fn frozen_primary_probe_source() -> Result<(String, &'static str)> {
 /// The outer guard freezes these sources at a clean commit before launching
 /// the Linux worker. The worker compares the snapshot to its compiled bytes.
 fn frozen_chain_source() -> Result<(String, &'static str)> {
-    let files: [(&str, &[u8]); 4] = [
+    let files: [(&str, &[u8]); 5] = [
         ("examples/koblitz_n83_factor_base_export.rs", include_bytes!("../../examples/koblitz_n83_factor_base_export.rs")),
         ("research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs", include_bytes!("primary_adapter.rs")),
         ("src/cryptanalysis/binary_semaev_chain_sat.rs", include_bytes!("../../src/cryptanalysis/binary_semaev_chain_sat.rs")),
         ("src/cryptanalysis/koblitz_index_calculus.rs", include_bytes!("../../src/cryptanalysis/koblitz_index_calculus.rs")),
+        ("research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json", include_bytes!("size-frontier-v2.json")),
     ];
     let (root, commit, mode) = if let Some(path) = std::env::var_os("ICV1_FROZEN_SOURCE_DIR") {
         let root = std::path::PathBuf::from(path);
@@ -789,12 +834,67 @@ pub(super) fn run_cli(
     budget_seconds: u64,
     run_dir: &Path,
 ) -> Result<Value> {
-    if ![64, 256, 600].contains(&columns) || !(2..=6).contains(&m) {
+    run_with_config(root, columns, m, strategy_name, max_trials, budget_seconds, run_dir, None)
+}
+
+struct ChainRunConfig<'a> {
+    policy: &'a str,
+    seed: u64,
+    fixture_root: &'a Path,
+    limits: ChainS3Limits,
+    memory_limit_bytes: u64,
+    source_commit: String,
+    source_attestation_mode: &'static str,
+}
+
+/// Execute one replay-bound primary chained-S3 search only inside a verified
+/// hard-memory cgroup. The outer supervisor owns the separate wall deadline.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn run_chain_cli(
+    root: &Path, fixture_root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
+    max_trials: usize, limits: ChainS3Limits, budget_seconds: u64,
+    memory_mib: u64, run_dir: &Path,
+) -> Result<Value> {
+    if ![64, 256, 600].contains(&columns) && !V2_SIZES.contains(&columns)
+        || !fixture_root.join("probe-corpus.json").is_file()
+        || !fixture_root.join("probe-validation.json").is_file()
+        || !["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+        || !SEEDS.contains(&seed)
+        || !(5..=6).contains(&m)
+        || max_trials > 1000
+        || limits.max_variables == 0 || limits.max_variables > i32::MAX as u32
+        || limits.max_domain_clauses == 0 || limits.max_domain_clauses > i32::MAX as usize
+        || limits.max_models == 0 || limits.max_models > 1_000_000
+        || limits.conflict_budget == 0 || limits.conflict_budget > 10_000_000_000
+        || budget_seconds == 0 || budget_seconds > 7200
+        || memory_mib < 128 || memory_mib > 65536
+    {
+        return Err("primary chained-S3 search caps or base selection outside supported domain".into());
+    }
+    let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
+    let (source_commit, source_attestation_mode) = frozen_chain_source()?;
+    let config = ChainRunConfig {
+        policy, seed, fixture_root, limits, memory_limit_bytes, source_commit,
+        source_attestation_mode,
+    };
+    run_with_config(root, columns, m, "chain-s3", max_trials, budget_seconds, run_dir, Some(&config))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_with_config(
+    root: &Path, columns: usize, m: usize, strategy_name: &str,
+    max_trials: usize, budget_seconds: u64, run_dir: &Path,
+    chain: Option<&ChainRunConfig<'_>>,
+) -> Result<Value> {
+    if ![64, 256, 600].contains(&columns)
+        && !(chain.is_some() && V2_SIZES.contains(&columns))
+        || !(2..=6).contains(&m) {
         return Err("unsupported primary K or summand count".into());
     }
     let strategy = match strategy_name {
         "enumerate" => DecompositionStrategy::Enumerate,
         "sat-m3" => return Err("primary SAT S4 model replay and resource-capacity gate is incomplete for F2^83".into()),
+        "chain-s3" if chain.is_some() && (5..=6).contains(&m) => DecompositionStrategy::ChainedS3,
         _ => return Err("primary strategy must be enumerate".into()),
     };
     if budget_seconds == 0 || budget_seconds > 86_400 {
@@ -807,10 +907,23 @@ pub(super) fn run_cli(
         &json!({
             "schema":"n83.primary-cold-config/v1", "study":STUDY,
             "panel_dir":root.to_string_lossy(),
+            "fixture_dir":chain.map(|config| config.fixture_root.to_string_lossy().to_string()),
             "curve_a":0, "fixture":0, "orbit_columns":columns,
             "summands":m, "strategy":strategy_name, "max_trials":max_trials,
             "budget_seconds":budget_seconds, "allow_direct_relation":false,
-            "source_adapter_blake3":blake3::hash(include_bytes!("primary_adapter.rs")).to_hex().to_string()
+            "source_adapter_blake3":blake3::hash(include_bytes!("primary_adapter.rs")).to_hex().to_string(),
+            "source_commit":chain.map(|config| config.source_commit.as_str()),
+            "source_attestation_mode":chain.map(|config| config.source_attestation_mode),
+            "policy":chain.map(|config| config.policy),
+            "seed":chain.map(|config| config.seed),
+            "chain_s3_limits":chain.map(|config| json!({
+                "max_variables":config.limits.max_variables,
+                "max_domain_clauses":config.limits.max_domain_clauses,
+                "max_models":config.limits.max_models,
+                "conflict_budget":config.limits.conflict_budget,
+            })),
+            "memory_cgroup_limit_bytes":chain.map(|config| config.memory_limit_bytes),
+            "memory_cgroup_swap_limit_bytes":chain.map(|_| 0),
         }),
     )?;
     let cap_path = run_dir.join("cap.json");
@@ -832,10 +945,15 @@ pub(super) fn run_cli(
     });
 
     let import_start = Instant::now();
-    let (base, row, manifest_hash) = load_panel(root, columns)?;
+    let (base, row, manifest_hash) = if let Some(config) = chain {
+        load_panel_selected(root, columns, config.policy, config.seed)?
+    } else {
+        load_panel(root, columns)?
+    };
     let base_import_ms = import_start.elapsed().as_secs_f64() * 1000.0;
     let target_start = Instant::now();
-    let (target, corpus_hash) = public_target(root, &base.curve)?;
+    let fixture_root = chain.map_or(root, |config| config.fixture_root);
+    let (target, corpus_hash) = public_target(fixture_root, &base.curve)?;
     let target_validation_ms = target_start.elapsed().as_secs_f64() * 1000.0;
 
     let mut options = KoblitzIcOptions::default();
@@ -844,6 +962,9 @@ pub(super) fn run_cli(
     options.max_trials = max_trials;
     options.seed = 2026100901;
     options.allow_direct_relation = false;
+    if let Some(config) = chain {
+        options.chain_s3_limits = config.limits;
+    }
     let mut events = OpenOptions::new()
         .write(true)
         .create_new(true)
@@ -885,11 +1006,16 @@ pub(super) fn run_cli(
     let candidate_valid = match &report.log {
         Some(candidate) => {
             base.curve.mul(base.curve.generator(), candidate) == target
-                && candidate_matches_validation(root, &corpus_hash, candidate).unwrap_or(false)
+                && candidate_matches_validation(fixture_root, &corpus_hash, candidate).unwrap_or(false)
         }
         None => false,
     };
     let post_solver_validation_ms = verification_start.elapsed().as_secs_f64() * 1000.0;
+    let memory_cgroup_peak_bytes = if chain.is_some() {
+        Some(fs::read_to_string("/sys/fs/cgroup/memory.peak")?.trim().parse::<u64>()?)
+    } else {
+        None
+    };
     let status = if report.inconsistent_relations != 0
         || report.verification_failures != 0
         || report.sat_invalid_models != 0
@@ -903,9 +1029,32 @@ pub(super) fn run_cli(
         "INADMISSIBLE_cofactor_class"
     } else if max_trials == 0 {
         "PREFLIGHT_ONLY"
+    } else if chain.is_some() && report.sat_unknowns != 0 {
+        "UNKNOWN_solver_cap"
     } else {
         "UNKNOWN_trial_cap"
     };
+    let report_details = json!({
+        "factor_base_size":report.factor_base_size,
+        "orbit_count":report.orbit_count,
+        "trials":report.trials, "relations":report.relations,
+        "independent_relations":report.independent_relations,
+        "dependent_relations":report.dependent_relations,
+        "inconsistent_relations":report.inconsistent_relations,
+        "verification_failures":report.verification_failures,
+        "sat_unknowns":report.sat_unknowns,
+        "sat_invalid_models":report.sat_invalid_models,
+        "sat_group_rejected_models":report.sat_group_rejected_models,
+        "sat_calls":report.sat_calls,
+        "sat_refutations":report.sat_refutations,
+        "sat_models":report.sat_models,
+        "sat_conflicts":report.sat_conflicts,
+        "linear_solve_attempts":report.linear_solve_attempts,
+        "relation_collection_ns":report.relation_collection_ns.to_string(),
+        "linear_algebra_ns":report.linear_algebra_ns.to_string(),
+        "m_cofactor_admissible":report.m_cofactor_admissible,
+        "direct_relations_skipped":report.direct_relations_skipped
+    });
     let summary = json!({
         "schema":"n83.primary-cold-result/v1", "study":STUDY,
         "status":status, "curve_a":0, "fixture":0,
@@ -913,29 +1062,29 @@ pub(super) fn run_cli(
         "panel_manifest_blake3":manifest_hash,
         "public_corpus_canonical_json_blake3":corpus_hash,
         "orbit_columns":columns, "summands":m, "strategy":strategy_name,
+        "policy":row["policy"], "seed":row["seed"],
         "max_trials":max_trials, "sampler_seed":options.seed,
         "budget_seconds":budget_seconds,
+        "fixture_dir":chain.map(|config| config.fixture_root.to_string_lossy().to_string()),
+        "source_commit":chain.map(|config| config.source_commit.as_str()),
+        "source_attestation_mode":chain.map(|config| config.source_attestation_mode),
+        "source_chain_blake3":chain.map(|_| blake3::hash(include_bytes!("../../src/cryptanalysis/binary_semaev_chain_sat.rs")).to_hex().to_string()),
+        "source_index_calculus_blake3":chain.map(|_| blake3::hash(include_bytes!("../../src/cryptanalysis/koblitz_index_calculus.rs")).to_hex().to_string()),
+        "chain_s3_limits":chain.map(|config| json!({
+            "max_variables":config.limits.max_variables,
+            "max_domain_clauses":config.limits.max_domain_clauses,
+            "max_models":config.limits.max_models,
+            "conflict_budget":config.limits.conflict_budget,
+        })),
+        "memory_cgroup_limit_bytes":chain.map(|config| config.memory_limit_bytes),
+        "memory_cgroup_swap_limit_bytes":chain.map(|_| 0),
+        "memory_cgroup_peak_bytes":memory_cgroup_peak_bytes,
+        "process_usage":if chain.is_some() { process_usage() } else { Value::Null },
         "base_import_ms":base_import_ms, "target_validation_ms":target_validation_ms,
         "solver_ms":solver_ms, "post_solver_validation_ms":post_solver_validation_ms,
         "pre_summary_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
-        "solver_stage_executed":report.trials>0,
-        "report":{
-            "factor_base_size":report.factor_base_size,
-            "orbit_count":report.orbit_count,
-            "trials":report.trials, "relations":report.relations,
-            "independent_relations":report.independent_relations,
-            "dependent_relations":report.dependent_relations,
-            "inconsistent_relations":report.inconsistent_relations,
-            "verification_failures":report.verification_failures,
-            "sat_unknowns":report.sat_unknowns,
-            "sat_invalid_models":report.sat_invalid_models,
-            "sat_group_rejected_models":report.sat_group_rejected_models,
-            "linear_solve_attempts":report.linear_solve_attempts,
-            "relation_collection_ns":report.relation_collection_ns.to_string(),
-            "linear_algebra_ns":report.linear_algebra_ns.to_string(),
-            "m_cofactor_admissible":report.m_cofactor_admissible,
-            "direct_relations_skipped":report.direct_relations_skipped
-        },
+        "solver_stage_executed":if chain.is_some() {report.sat_calls>0} else {report.trials>0},
+        "report":report_details,
         "verified_log":if candidate_valid { report.log.as_ref().map(ToString::to_string) } else { None },
         "column_log_verification":false,
         "total_index_calculus_runtime_ms":Value::Null,
@@ -1198,6 +1347,64 @@ mod tests {
         let error = run_cli(&root, 64, 3, "sat-m3", 1, 1, &rejected_run).unwrap_err();
         assert!(error.to_string().contains("gate is incomplete for F2^83"));
         assert!(!rejected_run.exists());
+        let unguarded_chain = root.join("unguarded-chain");
+        assert!(run_cli(&root, 64, 5, "chain-s3", 1, 1, &unguarded_chain).is_err());
+        assert!(!unguarded_chain.exists());
+        let invalid_caps = root.join("invalid-chain-caps");
+        let error = run_chain_cli(
+            &root, &root, 64, "public_x_hash", SEEDS[0], 5, 1,
+            ChainS3Limits { max_variables: 0, max_domain_clauses: 1,
+                max_models: 1, conflict_budget: 1 },
+            1, 256, &invalid_caps,
+        ).unwrap_err();
+        assert!(error.to_string().contains("outside supported domain"));
+        assert!(!invalid_caps.exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn v2_primary_selection_requires_replay_and_s3_receipts_before_object_import() {
+        let suffix = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let root = std::env::temp_dir().join(format!("n83-v2-import-gate-{suffix}"));
+        fs::create_dir(&root).unwrap();
+        let digest = "a".repeat(64);
+        let object = format!("objects/{digest}.jsonl.gz");
+        let uri = format!(
+            "s3://crypto-autoresearcher/factor-bases/icv1/etc/{STUDY}/v2-size-frontier/a0/{object}"
+        );
+        let manifest = json!({
+            "schema":"n83.factor-base-panel/v2-size-frontier", "study":STUDY,
+            "status":"completed_factor_base_object", "expected_base_count":1,
+            "completed_base_count":1, "size_design_blake3":v2_design_hash(),
+            "bases":[{"a":0,"policy":"public_x_hash","seed":SEEDS[0],
+                "columns":1182,"object":object,"s3_uri":uri,
+                "compressed_blake3":digest,"plain_blake3":"b".repeat(64)}],
+        });
+        write_new_json(&root.join("manifest.json"), &manifest).unwrap();
+        let manifest_hash = blake3::hash(&fs::read(root.join("manifest.json")).unwrap())
+            .to_hex().to_string();
+        write_new_json(&root.join("replay.json"), &json!({
+            "schema":"n83.factor-base-replay/v2-size-frontier", "status":"PASS",
+            "panel_manifest_blake3":manifest_hash,
+            "checks":[{"object":object,"points_checked":166*1182,
+                "representatives_checked":1182,"status":"PASS"}],
+        })).unwrap();
+        let storage = json!({
+            "schema":"n83.factor-base-storage/v2-size-frontier", "status":"PASS",
+            "bucket":"crypto-autoresearcher",
+            "prefix":format!("{PREFIX}/{STUDY}/{V2_SUBDIR}"),
+            "manifest_blake3":manifest_hash,
+            "objects":[{"s3_uri":uri,"compressed_blake3":digest,
+                "downloaded_hash_matches":true}],
+        });
+        write_new_json(&root.join("upload-receipt.json"), &storage).unwrap();
+        let error = load_panel_selected(&root, 1182, "public_x_hash", SEEDS[0]).err().unwrap();
+        assert!(error.to_string().contains("No such file"), "{error}");
+        let mut bad = storage;
+        bad["objects"][0]["downloaded_hash_matches"] = json!(false);
+        fs::write(root.join("upload-receipt.json"), serde_json::to_vec(&bad).unwrap()).unwrap();
+        let error = load_panel_selected(&root, 1182, "public_x_hash", SEEDS[0]).err().unwrap();
+        assert!(error.to_string().contains("S3 round-trip"), "{error}");
         fs::remove_dir_all(root).unwrap();
     }
 }
