@@ -29,7 +29,7 @@ use crate::cryptanalysis::ecbench::canonical::sha256_hex;
 use crate::cryptanalysis::ecbench::methods::{dump_factor_base, FactorBaseFacts, ResolvedMethod};
 use crate::cryptanalysis::ecbench::record::Record;
 use crate::cryptanalysis::ecbench::runner::{read_records, read_session, PlanDoc, Session};
-use crate::cryptanalysis::ecbench::spec::Spec;
+use crate::cryptanalysis::ecbench::spec::{Level, Spec};
 use crate::cryptanalysis::ecbench::workload::{Instance, PUBLIC_TARGET_LAW};
 use crate::cryptanalysis::ic_boundary::{BinaryGroup, BinaryInstance, CountedGroup, GroupOps};
 use crate::cryptanalysis::koblitz_fast::FastPoint;
@@ -928,7 +928,9 @@ fn build_from_session(
         return Err("the one-target online phases do not cover the measured interval".into());
     }
     let target_hash = id_sha256(&json!([target.0, target.1]))?;
-    let required = spec.measurement.isolation_required;
+    // The configurable session floor may admit diagnostic L0/L1 timings.
+    // A one-target wall comparison has a non-configurable L2 minimum.
+    let required = spec.measurement.isolation_required.max(Level::L2);
     let levels = (ic.isolation.level, rho.isolation.level);
     let admissible = levels.0 >= required && levels.1 >= required;
     let speedup = rho_ms / ic_ms;
@@ -1477,6 +1479,34 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
     if let (Some(a), Some(b)) = (ic_env, rho_env) {
         if a != b {
             err("IC and rho resource envelopes must match exactly".into());
+        }
+    }
+    match get("isolation_levels").and_then(Value::as_object) {
+        None => err("isolation_levels must be an object".into()),
+        Some(levels) => {
+            let required = levels
+                .get("required")
+                .and_then(Value::as_str)
+                .and_then(Level::parse);
+            if required.is_none_or(|r| r < Level::L2) {
+                err("isolation_levels.required must be L2 or L3".into());
+            }
+            let required = required.unwrap_or(Level::L2).max(Level::L2);
+            for arm in ["ic", "rho"] {
+                let level = levels
+                    .get(arm)
+                    .and_then(Value::as_str)
+                    .and_then(Level::parse);
+                match level {
+                    Some(level) if level >= required => {}
+                    Some(level) => err(format!(
+                        "isolation_levels.{arm} {} is below required {}",
+                        level.name(),
+                        required.name()
+                    )),
+                    None => err(format!("isolation_levels.{arm} must be L0, L1, L2 or L3")),
+                }
+            }
         }
     }
     let ic_ms = positive_cost(get("ic_online_wall_ms"));

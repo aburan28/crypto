@@ -502,9 +502,9 @@ fn first_workload(spec: &Path) -> String {
 fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     // One public target, the strong rho reference, an IC pipeline and the
     // plain signed-Frobenius rho: the claim builds from the IC and strong
-    // rho runs, the checker fails it on the independent replay alone, a
-    // receipt from the session's own host class is refused, and a receipt
-    // from another host class (simulated by its recorded class) passes.
+    // rho runs, the checker requires an independent replay and L2 wall
+    // isolation. A receipt from the session's own host class is refused;
+    // a simulated other-host receipt cannot promote this L0 diagnostic.
     let dir = scratch("claim");
     let spec = r#"{
       "schema": "ecbench.spec/v1",
@@ -582,7 +582,9 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         serde_json::json!([
             "independent_validation must be true",
             "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
-            "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest"
+            "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+            "isolation_levels.ic L0 is below required L2",
+            "isolation_levels.rho L0 is below required L2"
         ])
     );
     assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
@@ -629,10 +631,47 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "--exit-code",
         ],
     );
-    assert!(ok, "{err}");
+    assert!(!ok && err.contains("below required L2"), "{err}");
     let (ok, c, err) = check();
-    assert!(ok, "{c} {err}");
-    assert_eq!(c["status"], "PASS");
+    assert!(!ok, "{c} {err}");
+    assert_eq!(c["status"], "FAIL");
+    assert!(c["validation_errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e.as_str() == Some("isolation_levels.ic L0 is below required L2")));
+
+    // Schema-only test: edited levels exercise the checker, but this
+    // report is no evidence that the test host earned L2.
+    let mut simulated_l2: Value =
+        serde_json::from_str(&std::fs::read_to_string(&claim_path).unwrap()).unwrap();
+    simulated_l2["isolation_levels"]["ic"] = Value::from("L2");
+    simulated_l2["isolation_levels"]["rho"] = Value::from("L2");
+    let simulated_path = dir.join("simulated-l2.json");
+    std::fs::write(
+        &simulated_path,
+        serde_json::to_string(&simulated_l2).unwrap(),
+    )
+    .unwrap();
+    let (ok, checked, err) = ecbench(&[
+        "claim",
+        "check",
+        "--report",
+        simulated_path.to_str().unwrap(),
+    ]);
+    assert!(ok, "{checked} {err}");
+    let mut invalid_floor = simulated_l2;
+    invalid_floor["isolation_levels"]["required"] = Value::from("L0");
+    let invalid_path = dir.join("invalid-floor.json");
+    std::fs::write(
+        &invalid_path,
+        serde_json::to_string(&invalid_floor).unwrap(),
+    )
+    .unwrap();
+    let (ok, checked, err) =
+        ecbench(&["claim", "check", "--report", invalid_path.to_str().unwrap()]);
+    assert!(!ok, "{checked} {err}");
+    assert!(checked.contains("isolation_levels.required must be L2 or L3"));
 
     // The current ledger names the five phases through
     // `primary_ic_online_phase_keys`. Dropping their explicit older
@@ -668,7 +707,7 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         sql.contains("INSERT OR REPLACE INTO claims VALUES ("),
         "{sql}"
     );
-    assert!(sql.contains("'PASS'"));
+    assert!(sql.contains("'FAIL'"));
 
     // A receipt for other bytes is refused.
     let mut r2 = r.clone();

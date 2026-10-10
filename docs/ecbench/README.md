@@ -533,6 +533,12 @@ field the schema requires, from the session's own files:
   refused, as `identity.py` refuses it.
 - **The windows** are the records' online windows, the IC one split into
   the five exclusive phases, both arms' start and stop events named.
+- **Wall isolation.** A `vs_rho` wall comparison requires both runs to
+  earn at least L2, even if the session spec lowers `isolation_required`
+  for diagnostic runs. A stricter L3 spec still requires L3. The builder
+  writes the effective floor and the native checker validates it, so an
+  L0 session cannot become a passing wall claim by supplying a replay
+  receipt. Operation-count comparisons remain available at every level.
 - **The envelope** is the session's (binary, host class, CPU, NUMA node,
   one thread, timeout), identical for both arms by construction.
 - **Independence.** The schema requires `independent_validation` and a
