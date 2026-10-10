@@ -97,41 +97,84 @@
     "vs_rho": {
       "required": [
         "n_or_bits",
-        "timing_class",
-        "ic_cost",
-        "rho_cost",
-        "automorphism_discount",
-        "all_stages_charged_same_series",
-        "verdict",
-        "claim_boundary",
-        "independent_replay_pointer",
+        "candidate_id",
+        "candidate_manifest_sha256",
+        "workload_id",
+        "workload_manifest_sha256",
+        "run_id",
         "target_count",
-        "paired_target",
-        "ic_verified",
-        "rho_verified",
-        "ic_online_ms",
-        "rho_online_ms",
+        "ic_target_hash",
+        "rho_target_hash",
+        "timing_class",
+        "ic_online_wall_ms",
+        "rho_online_wall_ms",
         "online_speedup",
         "ic_online_phase_ms",
-        "rho_online_phase_ms",
-        "ic_online_interval",
-        "rho_online_interval"
+        "online_interval",
+        "same_resource_envelope",
+        "independent_validation",
+        "ic_replay_certificate_sha256",
+        "rho_replay_certificate_sha256",
+        "ic_resource_envelope",
+        "rho_resource_envelope",
+        "ic_scalar_verified",
+        "rho_scalar_verified",
+        "rho_policy",
+        "verdict",
+        "claim_boundary",
+        "independent_replay_pointer"
       ],
       "timing_class_enum": [
-        "algorithmic_charged",
-        "projection_matched",
-        "whole_process_wall",
-        "single_target_online"
+        "single_target_online_wall"
       ],
+      "ic_online_phase_fields": [
+        "T_target_query_ms",
+        "T_target_PDP_ms",
+        "T_target_relation_check_ms",
+        "T_target_descent_ms",
+        "T_target_recovery_check_ms"
+      ],
+      "online_interval_event_fields": [
+        "ic_start_event",
+        "ic_stop_event",
+        "rho_start_event",
+        "rho_stop_event"
+      ],
+      "online_interval_stage_fields": [
+        "ic_included_stages",
+        "rho_included_stages"
+      ],
+      "rho_policy_integer_fields": [
+        "worker_count",
+        "distinguished_point_memory_bytes"
+      ],
+      "rho_policy_minimums": {
+        "worker_count": 1,
+        "distinguished_point_memory_bytes": 0
+      },
+      "rho_policy_string_fields": [
+        "walk_policy",
+        "collision_policy"
+      ],
+      "notes": "Schema completeness only; scientific replay, source/manifest binding and matched resources must be independently audited. Historical batch and whole-process rows remain supplementary and cannot satisfy this primary single-target online claim.",
+      "rho_reference_minimum": {
+        "since": "2026-10-01",
+        "single_target": "koblitz_rho_fixture <n> <a> signed_frobenius 1 strong [batch_seed] [scalar] (library crypto_lib::cryptanalysis::koblitz_strong_rho)",
+        "batch": [
+          "koblitz_rho_batch_ks_strong rung 3",
+          "koblitz_rho_batch_ks_v3 normal_basis backend"
+        ],
+        "other_rho_admissible_if": "measured per-step cost (instructions or ns per step, same target) no worse than the strong reference",
+        "inadmissible": [
+          "koblitz_rho_fixture packed",
+          "koblitz_rho_fixture reference",
+          "koblitz_rho_batch_ks (unmodified)",
+          "koblitz_rho_batch_ks_matched_arith"
+        ],
+        "evidence": "research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md"
+      },
       "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control",
       "operation_accounting_contract": "Retain raw IC probes and rho walk steps as distinct counters. Report a calibrated operation ratio only when both arms and all included phases share a fixed operation boundary. S=total_operations/sqrt(r) requires a complete operation ledger. The primary speedup is verified one-target online wall time, subject to CPU isolation.",
-      "primary_ic_online_phase_keys": [
-        "target_query",
-        "target_PDP",
-        "target_relation_check",
-        "target_descent",
-        "target_recovery_check"
-      ],
       "controlled_cpu_speedup_requires": "Qualifying host-isolation receipt, matched resource envelope, and five exclusive IC target phase costs; claim-check PASS alone is insufficient."
     }
   },
