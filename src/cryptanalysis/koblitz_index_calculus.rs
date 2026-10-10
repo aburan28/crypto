@@ -149,7 +149,6 @@ use crate::cryptanalysis::ec_index_calculus::{
 use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
-use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
     solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
@@ -798,7 +797,7 @@ fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
     let mut d = 2u128;
     while d * d <= v {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -3403,32 +3402,6 @@ pub fn pack_point(p: &BinaryPoint) -> u64 {
             let sign = u64::from(yb > (xb ^ yb));
             ((xb + 1) << 1) | sign
         }
-    }
-}
-
-/// Project a general point to single-word coordinates for the fast field
-/// of [`crate::cryptanalysis::koblitz_fast_arith`].
-pub(crate) fn to_fast_point(
-    fast: &FastBinaryCurve,
-    p: &BinaryPoint,
-) -> crate::cryptanalysis::koblitz_fast_arith::FastPoint {
-    match p {
-        BinaryPoint::Infinity => None,
-        BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
-    }
-}
-
-/// Lift single-word coordinates back to a general point.
-pub(crate) fn from_fast_point(
-    fast: &FastBinaryCurve,
-    p: crate::cryptanalysis::koblitz_fast_arith::FastPoint,
-) -> BinaryPoint {
-    match p {
-        None => BinaryPoint::Infinity,
-        Some((x, y)) => BinaryPoint::Affine {
-            x: fast.element(x),
-            y: fast.element(y),
-        },
     }
 }
 
