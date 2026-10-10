@@ -1,0 +1,17 @@
+{
+  "candidate_id": null,
+  "exit_code": null,
+  "kind": "s3_n53_c2800prefix_feasibility_attempt_observation_v1",
+  "observed_at_utc": "2026-10-10 01:59:47 UTC",
+  "peak_rss_bytes": null,
+  "raw_report_sha256": null,
+  "status": "result_unknown_after_interrupted_turn",
+  "target_online_ms": null,
+  "verification": null,
+  "workload_id": null,
+  "observations": [
+    "The first frozen feasibility command was started in unified exec session 88921 and had produced no result when its turn was interrupted.",
+    "On continuation, the session handle returned Unknown process id 88921.",
+    "Process inspection found no matching runner or candidate process and no matching output receipt or raw report in /private/tmp."
+  ]
+}

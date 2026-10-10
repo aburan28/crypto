@@ -17,6 +17,11 @@ verified scalar replay, no fallback, table slots within the declared step,
 and observed peak RSS within the envelope. Failed runs and raw reports are
 preserved before any candidate identity is generated.
 
+The first launch ended without a result after its controlling turn was
+interrupted. [`attempt1_observation.json`](attempt1_observation.json) records
+the missing process handle, process, and output receipt; its result and peak
+memory remain unknown. A second launch uses the unchanged frozen protocol.
+
 Run the committed protocol with:
 
 ```sh
