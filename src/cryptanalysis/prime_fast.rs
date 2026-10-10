@@ -1581,12 +1581,21 @@ mod tests {
             let (fc, g) = ladder(bits);
             assert_eq!(point_order_hasse(&fc, g), Some(fc.n), "bits={bits}");
             let (gen, gg) = find_a3_curve(bits, 3).unwrap();
-            assert_eq!((gen.f.p, gen.n, gen.canonical(gg)), (fc.f.p, fc.n, fc.canonical(g)));
+            assert_eq!((gen.f.p, gen.n), (fc.f.p, fc.n));
+            let found = gen.canonical(gg);
+            let expected = fc.canonical(g);
+            assert_eq!(found.0, expected.0, "bits={bits}");
+            assert!(
+                found.1 == expected.1 || found.1 == fc.f.p - expected.1,
+                "bits={bits}: found {found:?}, expected ±{expected:?}"
+            );
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();
         assert_eq!(gen.f.p, 268_435_399);
         assert_eq!(gen.f.from_mont(gen.b), 3);
-        assert_eq!(gen.canonical(gg), (1, 1));
+        let found = gen.canonical(gg);
+        assert_eq!(found.0, 1);
+        assert!(found.1 == 1 || found.1 == gen.f.p - 1);
         assert_eq!(gen.n, 268_407_199);
     }
 

@@ -1,0 +1,29 @@
+{
+  "schema": "n83.extension-report-data/v1",
+  "capacity_rows": [
+    {"label": "K64 factored S4", "peak_bytes": 642768896},
+    {"label": "K64 chained S3, m5", "peak_bytes": 736542720},
+    {"label": "K64 chained S3, m6", "peak_bytes": 841170944},
+    {"label": "K256 chained S3, m5", "peak_bytes": 1960288256}
+  ],
+  "observation_rows": [
+    {"gate": "K64 factored S4", "observation": "127,404 SAT variables; 1,490,138 clauses; 1,074 XOR rows; 642,768,896-byte cgroup peak", "outcome": "Construction PASS; search false"},
+    {"gate": "K64 chained S3, m5", "observation": "84,743 variables; 2,100,012 clauses; 1,851,925 finite-domain clauses; 736,542,720-byte peak", "outcome": "Construction PASS"},
+    {"gate": "K64 chained S3, m6", "observation": "105,908 variables; 2,532,398 clauses; 2,222,310 finite-domain clauses; 841,170,944-byte peak", "outcome": "Construction PASS"},
+    {"gate": "K256 chained S3, m5", "observation": "84,743 variables; 7,443,537 clauses; 7,195,450 finite-domain clauses; 1,960,288,256-byte peak", "outcome": "Construction PASS after separate 8-million-clause gate"},
+    {"gate": "K1182 base", "observation": "196,212 signed-Frobenius records in 1,182 columns; 5,956,114 compressed bytes", "outcome": "Construction, generic replay, S3 round-trip PASS"}
+  ],
+  "search_rows": [
+    {"case": "K64 m5", "observation": "One SAT call; 10,000-conflict limit reached; zero models, relations and rank rows. UNKNOWN_solver_cap."},
+    {"case": "K64 m6", "observation": "Docker daemon EOF; container later exited 255 without worker summary. PRODUCER_FAILURE; no solver verdict. Original cleanup field invalid, corrected recovery audit PASS."},
+    {"case": "K256 m5, 3M gate", "observation": "Exact domain required 7,195,450 clauses; UNKNOWN_domain_clause_cap before model construction."},
+    {"case": "K256 m5, 8M gate", "observation": "Construction and zero-trial preflight PASS. One SAT call; 10,000-conflict limit reached; zero models, relations and rank rows. UNKNOWN_solver_cap."}
+  ],
+  "requirement_rows": [
+    {"requirement": "Review prior art", "status": "Source-pinned study inventory and current-source integration audit retained."},
+    {"requirement": "Every combination", "status": "57,024,000 finite tuples addressable; most unexecuted. Values outside the grid remain unsearched."},
+    {"requirement": "All named techniques", "status": "Splitting, symmetry, WDSat, Gray, FES, double large primes and Frobenius in explicit axes and gates. Most backend combinations lack N83 execution."},
+    {"requirement": "Store factor bases in S3", "status": "54 historical objects plus one K1182 object with generic replay and verified compressed-byte round-trip."},
+    {"requirement": "Best complete cold runtime", "status": "Pending natural rank, complete relation collection, full-width solve, target verification, all charged phases and matched control."}
+  ]
+}

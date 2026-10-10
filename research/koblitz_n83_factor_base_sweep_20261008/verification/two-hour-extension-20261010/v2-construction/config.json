@@ -1,0 +1,19 @@
+{
+  "schema": "n83.native-v2-stage-config/v1",
+  "stage": "construct",
+  "source_commit": "85e14930ff0aab0d50e8fb12ee7ca382e5e2f8e2",
+  "binary_sha256": "6d261e864678a2c921cd4213998c2af38adc6b4fd5a71dd09646476340a6840a",
+  "container_image_id": "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31",
+  "worker_wall_seconds": 600,
+  "outer_wall_seconds": 610,
+  "cpu_limit": 1,
+  "cpuset": "0",
+  "memory_limit_bytes": 4294967296,
+  "swap_limit_bytes": 0,
+  "curve_a": 0,
+  "policy": "public_x_hash",
+  "columns": 1182,
+  "seed": 2026100801,
+  "total_index_calculus_runtime_ms": null,
+  "selected_best_total_runtime": null
+}

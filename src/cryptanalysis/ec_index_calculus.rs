@@ -1525,9 +1525,12 @@ pub fn ec_index_calculus_dlp_staged(
     }
 
     let la_started = Instant::now();
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
+    let x = solution.values[m].clone();
     let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
-    let x = solution[m].clone();
 
     let verify_started = Instant::now();
     let a_fe = curve.a_fe();
@@ -1630,9 +1633,12 @@ pub fn ec_index_calculus_dlp_s4_staged(
     }
 
     let la_started = Instant::now();
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
+    let x = solution.values[m].clone();
     let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
-    let x = solution[m].clone();
 
     let verify_started = Instant::now();
     let a_fe = curve.a_fe();

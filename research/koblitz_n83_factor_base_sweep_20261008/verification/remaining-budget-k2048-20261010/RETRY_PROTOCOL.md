@@ -1,0 +1,7 @@
+# One K2048 retry with the previously verified local image
+
+Frozen after the first run's terminal producer failure and image diagnosis, before this retry. The cumulative charge is 6,440.092994294 of 7,200 seconds, leaving 759.907005706. The retry stops by 720 conservatively charged seconds from its recorded start, including preparation, construction, replay, S3 publication and cleanup. No second retry is authorized by this protocol.
+
+Keep the same source bytes, a=0, `public_x_hash`, seed 2026100801, K2048, 4 GiB zero-swap and one-CPU no-network resource envelope. Pass `--image sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31` to `v2_object_supervisor.py`; this exact local image was used by the earlier successful K1182 construction and was checked to contain Git. The supervisor's exact-checkout `safe.directory` setting stays enabled. Use a new output directory and the same 240-second construction cap; preserve the failed first run untouched. The exporter source-match and clean-commit checks are mandatory.
+
+Only after a passing construction, run `v2-replay-one` under 240 seconds; only after a passing point-by-point replay, run the native `upload` under 120 seconds. Require the declared S3 destination and downloaded compressed-hash match. Stop on any failure or cap, preserve all receipts and charge all phases against the remaining two-hour total. No SAT search, relation, rank, target solve or runtime ranking is attempted.

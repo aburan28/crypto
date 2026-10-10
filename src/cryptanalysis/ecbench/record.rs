@@ -733,8 +733,11 @@ mod tests {
             legacy.nested[0].to_bits(),
             legacy_json_float(current.nested[0]).unwrap().to_bits()
         );
-        assert_ne!(legacy.gae.to_bits(), current.gae.to_bits());
-        assert_ne!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
+        // Some serde_json feature sets already use the legacy decimal
+        // parser. Pin the historical bit patterns instead of assuming the
+        // current parser differs from them.
+        assert_eq!(legacy.gae.to_bits(), 0x40aebc070c740167);
+        assert_eq!(legacy.nested[0].to_bits(), 0x3fd7d28fc1f47dbf);
         assert_eq!(legacy.integer, 17);
     }
 

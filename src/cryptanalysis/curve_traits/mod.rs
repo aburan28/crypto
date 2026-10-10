@@ -106,6 +106,25 @@ pub enum Model {
     },
     /// `y² = x³ + ax + b` over `GF(p)`.
     Prime { p: BigUint, a: BigUint, b: BigUint },
+    /// `y² = x³ + ax + b` over `GF(p^k)`, with coefficients in the
+    /// polynomial basis recorded by the registry. Arithmetic certificates
+    /// for this model are not implemented here.
+    PrimeExtension {
+        p: BigUint,
+        k: u32,
+        a: Vec<BigUint>,
+        b: Vec<BigUint>,
+        modulus: Vec<BigUint>,
+    },
+    /// A registered prime-field model without a native group-arithmetic
+    /// certificate here. Preserve its equation and coefficients, and mark
+    /// its order check as not evaluated instead of treating it as a short
+    /// Weierstrass curve.
+    PrimeOther {
+        p: BigUint,
+        form: String,
+        parameters: BTreeMap<String, BigUint>,
+    },
 }
 
 impl Model {
@@ -113,7 +132,8 @@ impl Model {
     pub fn q(&self) -> BigUint {
         match self {
             Model::Binary { n, .. } => BigUint::one() << *n,
-            Model::Prime { p, .. } => p.clone(),
+            Model::Prime { p, .. } | Model::PrimeOther { p, .. } => p.clone(),
+            Model::PrimeExtension { p, k, .. } => p.pow(*k),
         }
     }
 
@@ -121,7 +141,8 @@ impl Model {
     pub fn size_bits(&self) -> u64 {
         match self {
             Model::Binary { n, .. } => u64::from(*n),
-            Model::Prime { p, .. } => p.bits(),
+            Model::Prime { p, .. } | Model::PrimeOther { p, .. } => p.bits(),
+            Model::PrimeExtension { p, k, .. } => p.pow(*k).bits(),
         }
     }
 }
@@ -189,11 +210,61 @@ fn parse_model(model_json: &str) -> Result<Model, String> {
                 modulus,
             })
         }
-        "y^2=x^3+a*x+b" => Ok(Model::Prime {
-            p: num("p")?,
-            a: num("a")?,
-            b: num("b")?,
-        }),
+        "y^2=x^3+a*x+b" => {
+            let k = m["k"].as_str().map_or(Ok(1), |s| {
+                s.parse::<u32>().map_err(|_| format!("bad k: {s}"))
+            })?;
+            if k > 1 {
+                let coefficients = |key: &str| -> Result<Vec<BigUint>, String> {
+                    let entries = m[key]
+                        .as_array()
+                        .ok_or_else(|| format!("missing coefficient array {key}"))?;
+                    if entries.len() != k as usize {
+                        return Err(format!(
+                            "{key} has {} coefficients, expected {k}",
+                            entries.len()
+                        ));
+                    }
+                    entries
+                        .iter()
+                        .map(|v| {
+                            v.as_str()
+                                .and_then(parse_uint)
+                                .ok_or_else(|| format!("bad {key} coefficient: {v}"))
+                        })
+                        .collect()
+                };
+                Ok(Model::PrimeExtension {
+                    p: num("p")?,
+                    k,
+                    a: coefficients("a")?,
+                    b: coefficients("b")?,
+                    modulus: coefficients("modulus")?,
+                })
+            } else {
+                Ok(Model::Prime {
+                    p: num("p")?,
+                    a: num("a")?,
+                    b: num("b")?,
+                })
+            }
+        }
+        form @ ("B*y^2=x^3+A*x^2+x" | "a*x^2+y^2=1+d*x^2*y^2" | "x^2+y^2=c^2*(1+d*x^2*y^2)") => {
+            let names: &[&str] = match form {
+                "B*y^2=x^3+A*x^2+x" => &["A", "B"],
+                "a*x^2+y^2=1+d*x^2*y^2" => &["a", "d"],
+                _ => &["c", "d"],
+            };
+            let parameters = names
+                .iter()
+                .map(|&key| num(key).map(|value| (key.to_string(), value)))
+                .collect::<Result<_, _>>()?;
+            Ok(Model::PrimeOther {
+                p: num("p")?,
+                form: form.to_string(),
+                parameters,
+            })
+        }
         other => Err(format!("unknown form {other}")),
     }
 }
@@ -216,11 +287,12 @@ fn parse_representation(rep: &Value, model: &Model) -> Option<Representation> {
                 return None;
             }
         }
-        Model::Prime { .. } => {
+        Model::Prime { .. } | Model::PrimeOther { .. } => {
             if field["degree"].as_u64()? != 1 {
                 return None;
             }
         }
+        Model::PrimeExtension { .. } => return None,
     }
     let gen = curve["generator"].as_array()?;
     let coord = |v: &Value| parse_uint(v.as_str()?);
@@ -719,7 +791,9 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
     let q = c.model.q();
     let characteristic = match &c.model {
         Model::Binary { .. } => BigUint::from(2u8),
-        Model::Prime { p, .. } => p.clone(),
+        Model::Prime { p, .. } | Model::PrimeOther { p, .. } | Model::PrimeExtension { p, .. } => {
+            p.clone()
+        }
     };
     let (status, method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
@@ -739,12 +813,15 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
         field: FieldInfo {
             kind: match c.model {
                 Model::Binary { .. } => "binary",
-                Model::Prime { .. } => "prime",
+                Model::Prime { .. } | Model::PrimeOther { .. } | Model::PrimeExtension { .. } => {
+                    "prime"
+                }
             }
             .into(),
             degree: match &c.model {
                 Model::Binary { n, .. } => *n,
-                Model::Prime { .. } => 1,
+                Model::Prime { .. } | Model::PrimeOther { .. } => 1,
+                Model::PrimeExtension { k, .. } => *k,
             },
             size_bits: c.model.size_bits(),
         },
@@ -1012,6 +1089,41 @@ mod tests {
             .filter(|c| !c.representations.is_empty())
             .count();
         assert!(with_gen >= 80, "only {with_gen} representations parsed");
+    }
+
+    #[test]
+    fn other_prime_models_parse_without_an_unchecked_order_certificate() {
+        let curves = read_registry(REGISTRY).unwrap();
+        let mut count = 0;
+        let mut extension_count = 0;
+        for curve in &curves {
+            if let Model::PrimeOther {
+                form, parameters, ..
+            } = &curve.model
+            {
+                count += 1;
+                assert!(!form.is_empty() && !parameters.is_empty());
+                let (status, _) =
+                    certify::check_order(&curve.model, &curve.order, &curve.representations)
+                        .unwrap();
+                assert_eq!(status, Status::NotEvaluated);
+            }
+            if let Model::PrimeExtension {
+                k, a, b, modulus, ..
+            } = &curve.model
+            {
+                extension_count += 1;
+                assert!(*k > 1 && a.len() == *k as usize);
+                assert_eq!(b.len(), a.len());
+                assert_eq!(modulus.len(), a.len());
+                let (status, _) =
+                    certify::check_order(&curve.model, &curve.order, &curve.representations)
+                        .unwrap();
+                assert_eq!(status, Status::NotEvaluated);
+            }
+        }
+        assert_eq!(count, 30);
+        assert_eq!(extension_count, 9);
     }
 
     #[test]

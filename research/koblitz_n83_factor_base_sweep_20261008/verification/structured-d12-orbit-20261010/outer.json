@@ -1,0 +1,46 @@
+{
+  "schema": "n83.structured-orbit-outer/v1",
+  "status": "PASS",
+  "source_commit": "67b251de4c921a8dd2ba34ad52f6afbc8bdabc3c",
+  "start_utc": "2026-10-10T18:43:35.095366+00:00",
+  "active_wall_seconds": 39.69190237500152,
+  "stages": [
+    {
+      "stage": "build",
+      "status": "PASS",
+      "exit_code": 0,
+      "wall_seconds": 9.775992875001975,
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--example",
+        "koblitz_n83_structured_orbit_export"
+      ]
+    },
+    {
+      "stage": "construct",
+      "status": "PASS",
+      "exit_code": 0,
+      "wall_seconds": 10.215163959001075,
+      "command": [
+        "target/release/examples/koblitz_n83_structured_orbit_export",
+        "construct",
+        "/private/tmp/n83_structured_d12_object"
+      ]
+    },
+    {
+      "stage": "replay",
+      "status": "PASS",
+      "exit_code": 0,
+      "wall_seconds": 19.700474415993085,
+      "command": [
+        "target/release/examples/koblitz_n83_structured_orbit_export",
+        "replay",
+        "/private/tmp/n83_structured_d12_object"
+      ]
+    }
+  ],
+  "total_index_calculus_runtime_ms": null
+}

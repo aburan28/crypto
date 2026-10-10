@@ -1,0 +1,1614 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008)
+error[E0428]: the name `invalid_curve_attack` is defined multiple times
+   --> src/cryptanalysis/mod.rs:190:1
+    |
+176 | pub mod invalid_curve_attack;
+    | ----------------------------- previous definition of the module `invalid_curve_attack` here
+...
+190 | pub mod invalid_curve_attack;
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `invalid_curve_attack` redefined here
+    |
+    = note: `invalid_curve_attack` must be defined only once in the type namespace of this module
+
+error[E0428]: the name `projected_signed_orbit_map` is defined multiple times
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8475:1
+     |
+5420 | / fn projected_signed_orbit_map(
+5421 | |     kc: &KoblitzCurve,
+5422 | |     fb: &FrobeniusFactorBase,
+5423 | | ) -> ProjectedSignedOrbitMap {
+...    |
+5521 | | }
+     | |_- previous definition of the value `projected_signed_orbit_map` here
+...
+8475 | / fn projected_signed_orbit_map(
+8476 | |     kc: &KoblitzCurve,
+8477 | |     fb: &FrobeniusFactorBase,
+8478 | | ) -> Arc<ProjectedSignedOrbitMap> {
+...    |
+8481 | |     })
+8482 | | }
+     | |_^ `projected_signed_orbit_map` redefined here
+     |
+     = note: `projected_signed_orbit_map` must be defined only once in the value namespace of this module
+
+error[E0428]: the name `multi_key_hnp` is defined multiple times
+   --> src/cryptanalysis/mod.rs:237:1
+    |
+234 | pub mod multi_key_hnp;
+    | ---------------------- previous definition of the module `multi_key_hnp` here
+...
+237 | pub mod multi_key_hnp;
+    | ^^^^^^^^^^^^^^^^^^^^^^ `multi_key_hnp` redefined here
+    |
+    = note: `multi_key_hnp` must be defined only once in the type namespace of this module
+
+error[E0428]: the name `preprocessing_rho` is defined multiple times
+   --> src/cryptanalysis/mod.rs:275:1
+    |
+271 | pub mod preprocessing_rho;
+    | -------------------------- previous definition of the module `preprocessing_rho` here
+...
+275 | pub mod preprocessing_rho;
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^ `preprocessing_rho` redefined here
+    |
+    = note: `preprocessing_rho` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `build_frobenius_factor_base` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:83:5
+   |
+79 |     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
+   |                                 --------------------------- previous import of the value `build_frobenius_factor_base` here
+...
+83 |     build_frobenius_factor_base, build_frobenius_factor_base_from_divisor,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^--
+   |     |
+   |     `build_frobenius_factor_base` reimported here
+   |     help: remove unnecessary import
+   |
+   = note: `build_frobenius_factor_base` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `build_frobenius_factor_base_from_divisor` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:83:34
+   |
+80 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
+   |     ---------------------------------------- previous import of the value `build_frobenius_factor_base_from_divisor` here
+...
+83 |     build_frobenius_factor_base, build_frobenius_factor_base_from_divisor,
+   |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
+   |                                  |
+   |                                  `build_frobenius_factor_base_from_divisor` reimported here
+   |                                  help: remove unnecessary import
+   |
+   = note: `build_frobenius_factor_base_from_divisor` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `build_frobenius_union_factor_base` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:84:5
+   |
+80 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
+   |                                               --------------------------------- previous import of the value `build_frobenius_union_factor_base` here
+...
+84 |     build_frobenius_union_factor_base, build_standard_subspace_factor_base,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^--
+   |     |
+   |     `build_frobenius_union_factor_base` reimported here
+   |     help: remove unnecessary import
+   |
+   = note: `build_frobenius_union_factor_base` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `projected_signed_orbit_count` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:86:24
+   |
+81 |     from_fast_point, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+   |                      ---------------------------- previous import of the value `projected_signed_orbit_count` here
+...
+86 |     invariant_factors, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^--
+   |                        |
+   |                        `projected_signed_orbit_count` reimported here
+   |                        help: remove unnecessary import
+   |
+   = note: `projected_signed_orbit_count` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `restrict_factor_base_to_orbits` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:86:54
+   |
+81 |     from_fast_point, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+   |                                                    ------------------------------ previous import of the value `restrict_factor_base_to_orbits` here
+...
+86 |     invariant_factors, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+   |                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
+   |                                                      |
+   |                                                      `restrict_factor_base_to_orbits` reimported here
+   |                                                      help: remove unnecessary import
+   |
+   = note: `restrict_factor_base_to_orbits` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `saturate_factor_base_two_torsion` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:87:5
+   |
+82 |     saturate_factor_base_two_torsion, span_f2, to_fast_point, FactorBaseDomain,
+   |     -------------------------------- previous import of the value `saturate_factor_base_two_torsion` here
+...
+87 |     saturate_factor_base_two_torsion, span_f2, top_factor_indices, FactorBaseDomain,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^--
+   |     |
+   |     `saturate_factor_base_two_torsion` reimported here
+   |     help: remove unnecessary import
+   |
+   = note: `saturate_factor_base_two_torsion` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `span_f2` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:87:39
+   |
+82 |     saturate_factor_base_two_torsion, span_f2, to_fast_point, FactorBaseDomain,
+   |                                       ------- previous import of the value `span_f2` here
+...
+87 |     saturate_factor_base_two_torsion, span_f2, top_factor_indices, FactorBaseDomain,
+   |                                       ^^^^^^^--
+   |                                       |
+   |                                       `span_f2` reimported here
+   |                                       help: remove unnecessary import
+   |
+   = note: `span_f2` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `build_frobenius_factor_base_from_divisor` is defined multiple times
+   --> src/cryptanalysis/mod.rs:379:5
+    |
+368 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base, cyclotomic_cosets,
+    |     ---------------------------------------- previous import of the value `build_frobenius_factor_base_from_divisor` here
+...
+379 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `build_frobenius_factor_base_from_divisor` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `build_frobenius_factor_base_from_divisor` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `build_frobenius_union_factor_base` is defined multiple times
+   --> src/cryptanalysis/mod.rs:379:47
+    |
+368 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base, cyclotomic_cosets,
+    |                                               --------------------------------- previous import of the value `build_frobenius_union_factor_base` here
+...
+379 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
+    |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
+    |                                               |
+    |                                               `build_frobenius_union_factor_base` reimported here
+    |                                               help: remove unnecessary import
+    |
+    = note: `build_frobenius_union_factor_base` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `cyclotomic_cosets` is defined multiple times
+   --> src/cryptanalysis/mod.rs:380:39
+    |
+368 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base, cyclotomic_cosets,
+    |                                                                                  ----------------- previous import of the value `cyclotomic_cosets` here
+...
+380 |     build_subgroup_orbit_factor_base, cyclotomic_cosets, enumerate_decompose, factor_x_n_minus_1,
+    |                                       ^^^^^^^^^^^^^^^^^--
+    |                                       |
+    |                                       `cyclotomic_cosets` reimported here
+    |                                       help: remove unnecessary import
+    |
+    = note: `cyclotomic_cosets` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `enumerate_decompose` is defined multiple times
+   --> src/cryptanalysis/mod.rs:380:58
+    |
+369 |     enumerate_decompose, factor_x_n_minus_1, find_irreducible, find_irreducible_sparse,
+    |     ------------------- previous import of the value `enumerate_decompose` here
+...
+380 |     build_subgroup_orbit_factor_base, cyclotomic_cosets, enumerate_decompose, factor_x_n_minus_1,
+    |                                                          ^^^^^^^^^^^^^^^^^^^--
+    |                                                          |
+    |                                                          `enumerate_decompose` reimported here
+    |                                                          help: remove unnecessary import
+    |
+    = note: `enumerate_decompose` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `factor_x_n_minus_1` is defined multiple times
+   --> src/cryptanalysis/mod.rs:380:79
+    |
+369 |     enumerate_decompose, factor_x_n_minus_1, find_irreducible, find_irreducible_sparse,
+    |                          ------------------ previous import of the value `factor_x_n_minus_1` here
+...
+380 |     build_subgroup_orbit_factor_base, cyclotomic_cosets, enumerate_decompose, factor_x_n_minus_1,
+    |                                                                               ^^^^^^^^^^^^^^^^^^-
+    |                                                                               |
+    |                                                                               `factor_x_n_minus_1` reimported here
+    |                                                                               help: remove unnecessary import
+    |
+    = note: `factor_x_n_minus_1` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `find_irreducible` is defined multiple times
+   --> src/cryptanalysis/mod.rs:381:5
+    |
+369 |     enumerate_decompose, factor_x_n_minus_1, find_irreducible, find_irreducible_sparse,
+    |                                              ---------------- previous import of the value `find_irreducible` here
+...
+381 |     find_irreducible, find_irreducible_sparse, frobenius_eigenvalue, frobenius_eigenvalue_q,
+    |     ^^^^^^^^^^^^^^^^--
+    |     |
+    |     `find_irreducible` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `find_irreducible` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `find_irreducible_sparse` is defined multiple times
+   --> src/cryptanalysis/mod.rs:381:23
+    |
+369 |     enumerate_decompose, factor_x_n_minus_1, find_irreducible, find_irreducible_sparse,
+    |                                                                ----------------------- previous import of the value `find_irreducible_sparse` here
+...
+381 |     find_irreducible, find_irreducible_sparse, frobenius_eigenvalue, frobenius_eigenvalue_q,
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^--
+    |                       |
+    |                       `find_irreducible_sparse` reimported here
+    |                       help: remove unnecessary import
+    |
+    = note: `find_irreducible_sparse` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `frobenius_eigenvalue` is defined multiple times
+   --> src/cryptanalysis/mod.rs:381:48
+    |
+370 |     frobenius_eigenvalue, groebner_decompose, individual_log, invariant_subspace_basis,
+    |     -------------------- previous import of the value `frobenius_eigenvalue` here
+...
+381 |     find_irreducible, find_irreducible_sparse, frobenius_eigenvalue, frobenius_eigenvalue_q,
+    |                                                ^^^^^^^^^^^^^^^^^^^^--
+    |                                                |
+    |                                                `frobenius_eigenvalue` reimported here
+    |                                                help: remove unnecessary import
+    |
+    = note: `frobenius_eigenvalue` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `groebner_decompose` is defined multiple times
+   --> src/cryptanalysis/mod.rs:382:5
+    |
+370 |     frobenius_eigenvalue, groebner_decompose, individual_log, invariant_subspace_basis,
+    |                           ------------------ previous import of the value `groebner_decompose` here
+...
+382 |     groebner_decompose, individual_log, individual_log_with_pair_table, invariant_factors,
+    |     ^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `groebner_decompose` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `groebner_decompose` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `individual_log` is defined multiple times
+   --> src/cryptanalysis/mod.rs:382:25
+    |
+370 |     frobenius_eigenvalue, groebner_decompose, individual_log, invariant_subspace_basis,
+    |                                               -------------- previous import of the value `individual_log` here
+...
+382 |     groebner_decompose, individual_log, individual_log_with_pair_table, invariant_factors,
+    |                         ^^^^^^^^^^^^^^--
+    |                         |
+    |                         `individual_log` reimported here
+    |                         help: remove unnecessary import
+    |
+    = note: `individual_log` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `invariant_subspace_basis` is defined multiple times
+   --> src/cryptanalysis/mod.rs:383:5
+    |
+370 |     frobenius_eigenvalue, groebner_decompose, individual_log, invariant_subspace_basis,
+    |                                                               ------------------------ previous import of the value `invariant_subspace_basis` here
+...
+383 |     invariant_subspace_basis, is_irreducible_f2, koblitz_index_calculus_dlp,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `invariant_subspace_basis` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `invariant_subspace_basis` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `is_irreducible_f2` is defined multiple times
+   --> src/cryptanalysis/mod.rs:383:31
+    |
+371 |     is_irreducible_f2, koblitz_index_calculus_dlp, koblitz_index_calculus_dlp_with_factor_base,
+    |     ----------------- previous import of the value `is_irreducible_f2` here
+...
+383 |     invariant_subspace_basis, is_irreducible_f2, koblitz_index_calculus_dlp,
+    |                               ^^^^^^^^^^^^^^^^^--
+    |                               |
+    |                               `is_irreducible_f2` reimported here
+    |                               help: remove unnecessary import
+    |
+    = note: `is_irreducible_f2` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `koblitz_index_calculus_dlp` is defined multiple times
+   --> src/cryptanalysis/mod.rs:383:50
+    |
+371 |     is_irreducible_f2, koblitz_index_calculus_dlp, koblitz_index_calculus_dlp_with_factor_base,
+    |                        -------------------------- previous import of the value `koblitz_index_calculus_dlp` here
+...
+383 |     invariant_subspace_basis, is_irreducible_f2, koblitz_index_calculus_dlp,
+    |                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^-
+    |                                                  |
+    |                                                  `koblitz_index_calculus_dlp` reimported here
+    |                                                  help: remove unnecessary import
+    |
+    = note: `koblitz_index_calculus_dlp` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `koblitz_index_calculus_dlp_with_factor_base` is defined multiple times
+   --> src/cryptanalysis/mod.rs:384:5
+    |
+371 |     is_irreducible_f2, koblitz_index_calculus_dlp, koblitz_index_calculus_dlp_with_factor_base,
+    |                                                    ------------------------------------------- previous import of the value `koblitz_index_calculus_dlp_with_factor_base` here
+...
+384 |     koblitz_index_calculus_dlp_with_factor_base,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
+    |     |
+    |     `koblitz_index_calculus_dlp_with_factor_base` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `koblitz_index_calculus_dlp_with_factor_base` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `koblitz_index_calculus_dlp_with_factor_base_and_progress` is defined multiple times
+   --> src/cryptanalysis/mod.rs:385:5
+    |
+372 |     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    |     -------------------------------------------------------- previous import of the value `koblitz_index_calculus_dlp_with_factor_base_and_progress` here
+...
+385 |     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `koblitz_index_calculus_dlp_with_factor_base_and_progress` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `koblitz_index_calculus_dlp_with_factor_base_and_progress` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `koblitz_point_count` is defined multiple times
+   --> src/cryptanalysis/mod.rs:385:63
+    |
+372 |     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    |                                                               ------------------- previous import of the value `koblitz_point_count` here
+...
+385 |     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    |                                                               ^^^^^^^^^^^^^^^^^^^-
+    |                                                               |
+    |                                                               `koblitz_point_count` reimported here
+    |                                                               help: remove unnecessary import
+    |
+    = note: `koblitz_point_count` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `koblitz_speedup_model` is defined multiple times
+   --> src/cryptanalysis/mod.rs:387:5
+    |
+373 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |     --------------------- previous import of the value `koblitz_speedup_model` here
+...
+387 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |     ^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `koblitz_speedup_model` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `koblitz_speedup_model` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `linearised_kernel` is defined multiple times
+   --> src/cryptanalysis/mod.rs:387:28
+    |
+373 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |                            ----------------- previous import of the value `linearised_kernel` here
+...
+387 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |                            ^^^^^^^^^^^^^^^^^--
+    |                            |
+    |                            `linearised_kernel` reimported here
+    |                            help: remove unnecessary import
+    |
+    = note: `linearised_kernel` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `linearised_kernel_basis` is defined multiple times
+   --> src/cryptanalysis/mod.rs:387:47
+    |
+373 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |                                               ----------------------- previous import of the value `linearised_kernel_basis` here
+...
+387 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |                                               ^^^^^^^^^^^^^^^^^^^^^^^--
+    |                                               |
+    |                                               `linearised_kernel_basis` reimported here
+    |                                               help: remove unnecessary import
+    |
+    = note: `linearised_kernel_basis` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `order_of_2_mod_n` is defined multiple times
+   --> src/cryptanalysis/mod.rs:387:72
+    |
+373 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |                                                                        ---------------- previous import of the value `order_of_2_mod_n` here
+...
+387 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |                                                                        ^^^^^^^^^^^^^^^^-
+    |                                                                        |
+    |                                                                        `order_of_2_mod_n` reimported here
+    |                                                                        help: remove unnecessary import
+    |
+    = note: `order_of_2_mod_n` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `pack_point` is defined multiple times
+   --> src/cryptanalysis/mod.rs:388:5
+    |
+374 |     pack_point, point_key, points_with_x, restrict_factor_base_to_orbits, sat_decompose,
+    |     ---------- previous import of the value `pack_point` here
+...
+388 |     pack_point, point_key, points_with_x, probe_scalar, q_linearised_kernel_basis,
+    |     ^^^^^^^^^^--
+    |     |
+    |     `pack_point` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `pack_point` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `point_key` is defined multiple times
+   --> src/cryptanalysis/mod.rs:388:17
+    |
+374 |     pack_point, point_key, points_with_x, restrict_factor_base_to_orbits, sat_decompose,
+    |                 --------- previous import of the value `point_key` here
+...
+388 |     pack_point, point_key, points_with_x, probe_scalar, q_linearised_kernel_basis,
+    |                 ^^^^^^^^^--
+    |                 |
+    |                 `point_key` reimported here
+    |                 help: remove unnecessary import
+    |
+    = note: `point_key` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `points_with_x` is defined multiple times
+   --> src/cryptanalysis/mod.rs:388:28
+    |
+374 |     pack_point, point_key, points_with_x, restrict_factor_base_to_orbits, sat_decompose,
+    |                            ------------- previous import of the value `points_with_x` here
+...
+388 |     pack_point, point_key, points_with_x, probe_scalar, q_linearised_kernel_basis,
+    |                            ^^^^^^^^^^^^^--
+    |                            |
+    |                            `points_with_x` reimported here
+    |                            help: remove unnecessary import
+    |
+    = note: `points_with_x` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `restrict_factor_base_to_orbits` is defined multiple times
+   --> src/cryptanalysis/mod.rs:389:5
+    |
+374 |     pack_point, point_key, points_with_x, restrict_factor_base_to_orbits, sat_decompose,
+    |                                           ------------------------------ previous import of the value `restrict_factor_base_to_orbits` here
+...
+389 |     restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `restrict_factor_base_to_orbits` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `restrict_factor_base_to_orbits` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `sat_decompose` is defined multiple times
+   --> src/cryptanalysis/mod.rs:389:37
+    |
+374 |     pack_point, point_key, points_with_x, restrict_factor_base_to_orbits, sat_decompose,
+    |                                                                           ------------- previous import of the value `sat_decompose` here
+...
+389 |     restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
+    |                                     ^^^^^^^^^^^^^--
+    |                                     |
+    |                                     `sat_decompose` reimported here
+    |                                     help: remove unnecessary import
+    |
+    = note: `sat_decompose` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `saturate_factor_base_two_torsion` is defined multiple times
+   --> src/cryptanalysis/mod.rs:389:52
+    |
+375 |     saturate_factor_base_two_torsion, solve_factor_base_logs, span_f2, subspace_basis_for_divisor,
+    |     -------------------------------- previous import of the value `saturate_factor_base_two_torsion` here
+...
+389 |     restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
+    |                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
+    |                                                    |
+    |                                                    `saturate_factor_base_two_torsion` reimported here
+    |                                                    help: remove unnecessary import
+    |
+    = note: `saturate_factor_base_two_torsion` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `solve_factor_base_logs` is defined multiple times
+   --> src/cryptanalysis/mod.rs:390:5
+    |
+375 |     saturate_factor_base_two_torsion, solve_factor_base_logs, span_f2, subspace_basis_for_divisor,
+    |                                       ---------------------- previous import of the value `solve_factor_base_logs` here
+...
+390 |     solve_factor_base_logs, solve_factor_base_logs_from_relations, span_f2, subfield_group_order,
+    |     ^^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `solve_factor_base_logs` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `solve_factor_base_logs` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `span_f2` is defined multiple times
+   --> src/cryptanalysis/mod.rs:390:68
+    |
+375 |     saturate_factor_base_two_torsion, solve_factor_base_logs, span_f2, subspace_basis_for_divisor,
+    |                                                               ------- previous import of the value `span_f2` here
+...
+390 |     solve_factor_base_logs, solve_factor_base_logs_from_relations, span_f2, subfield_group_order,
+    |                                                                    ^^^^^^^--
+    |                                                                    |
+    |                                                                    `span_f2` reimported here
+    |                                                                    help: remove unnecessary import
+    |
+    = note: `span_f2` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `subspace_basis_for_divisor` is defined multiple times
+   --> src/cryptanalysis/mod.rs:391:5
+    |
+375 |     saturate_factor_base_two_torsion, solve_factor_base_logs, span_f2, subspace_basis_for_divisor,
+    |                                                                        -------------------------- previous import of the value `subspace_basis_for_divisor` here
+...
+391 |     subspace_basis_for_divisor, subspace_basis_for_factors, top_factor_indices,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `subspace_basis_for_divisor` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `subspace_basis_for_divisor` must be defined only once in the value namespace of this module
+
+error: couldn't read `/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008/research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json`: No such file or directory (os error 2)
+   --> src/cryptanalysis/binary_field_basis.rs:281:62
+    |
+281 |           let frozen: serde_json::Value = serde_json::from_str(include_str!(concat!(
+    |  ______________________________________________________________^
+282 | |             env!("CARGO_MANIFEST_DIR"),
+283 | |             "/research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json"
+284 | |         )))
+    | |__________^
+
+error: couldn't read `/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008/research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b00.points.jsonl`: No such file or directory (os error 2)
+   --> src/cryptanalysis/binary_field_basis.rs:349:22
+    |
+349 |           let points = include_str!(concat!(
+    |  ______________________^
+350 | |             env!("CARGO_MANIFEST_DIR"),
+351 | |             "/research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b00.points.jsonl"
+352 | |         ));
+    | |__________^
+
+error: couldn't read `/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008/research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz`: No such file or directory (os error 2)
+    --> src/cryptanalysis/binary_velu.rs:1134:21
+     |
+1134 |           let bytes = include_bytes!(concat!(
+     |  _____________________^
+1135 | |             env!("CARGO_MANIFEST_DIR"),
+1136 | |             "/research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz"
+1137 | |         ));
+     | |__________^
+
+error: couldn't read `/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008/research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json`: No such file or directory (os error 2)
+    --> src/cryptanalysis/binary_velu.rs:1233:62
+     |
+1233 |           let frozen: serde_json::Value = serde_json::from_str(include_str!(concat!(
+     |  ______________________________________________________________^
+1234 | |             env!("CARGO_MANIFEST_DIR"),
+1235 | |             "/research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json"
+1236 | |         )))
+     | |__________^
+
+error: couldn't read `/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008/research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b00.points.jsonl`: No such file or directory (os error 2)
+    --> src/cryptanalysis/binary_velu.rs:1314:22
+     |
+1314 |           let points = include_str!(concat!(
+     |  ______________________^
+1315 | |             env!("CARGO_MANIFEST_DIR"),
+1316 | |             "/research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b00.points.jsonl"
+1317 | |         ));
+     | |__________^
+
+error: couldn't read `/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008/research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json`: No such file or directory (os error 2)
+    --> src/cryptanalysis/binary_velu.rs:1410:71
+     |
+1410 |           let frozen_manifest: serde_json::Value = serde_json::from_str(include_str!(concat!(
+     |  _______________________________________________________________________^
+1411 | |             env!("CARGO_MANIFEST_DIR"),
+1412 | |             "/research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json"
+1413 | |         )))
+     | |__________^
+
+error: couldn't read `src/cryptanalysis/../../research/f4_linear_algebra_20260914/contract.json`: No such file or directory (os error 2)
+   --> src/cryptanalysis/f4_rref_tests.rs:808:60
+    |
+808 |       let contract: serde_json::Value = serde_json::from_str(include_str!(
+    |  ____________________________________________________________^
+809 | |         "../../research/f4_linear_algebra_20260914/contract.json"
+810 | |     ))
+    | |_____^
+
+error[E0428]: the name `SolveStats` is defined multiple times
+    --> src/cryptanalysis/koblitz_groebner.rs:4992:1
+     |
+2147 | pub struct SolveStats {
+     | --------------------- previous definition of the type `SolveStats` here
+...
+4992 | pub struct SolveStats {
+     | ^^^^^^^^^^^^^^^^^^^^^ `SolveStats` redefined here
+     |
+     = note: `SolveStats` must be defined only once in the type namespace of this module
+
+error[E0428]: the name `ProjectedSignedOrbitMap` is defined multiple times
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8357:1
+     |
+5405 | struct ProjectedSignedOrbitMap {
+     | ------------------------------ previous definition of the type `ProjectedSignedOrbitMap` here
+...
+8357 | struct ProjectedSignedOrbitMap {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ProjectedSignedOrbitMap` redefined here
+     |
+     = note: `ProjectedSignedOrbitMap` must be defined only once in the type namespace of this module
+
+error: couldn't read `src/cryptanalysis/../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/sat-preparation.json`: No such file or directory (os error 2)
+   --> src/cryptanalysis/prepared_sat_control.rs:620:24
+    |
+620 | ...&str = include_str!("../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/sat-preparation.json");
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: couldn't read `src/cryptanalysis/../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/manifest.json`: No such file or directory (os error 2)
+   --> src/cryptanalysis/prepared_sat_control.rs:621:28
+    |
+621 | ... = include_str!("../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/manifest.json");
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: couldn't read `src/cryptanalysis/../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.anf`: No such file or directory (os error 2)
+   --> src/cryptanalysis/prepared_sat_control.rs:622:23
+    |
+622 | ... = include_str!("../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.anf");
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: couldn't read `src/cryptanalysis/../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.xor.cnf`: No such file or directory (os error 2)
+   --> src/cryptanalysis/prepared_sat_control.rs:623:23
+    |
+623 | ... = include_str!("../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.xor.cnf");
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: couldn't read `src/cryptanalysis/../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/result.json`: No such file or directory (os error 2)
+   --> src/cryptanalysis/prepared_sat_control.rs:624:25
+    |
+624 | ... = include_str!("../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/result.json");
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0252]: the name `FactorBaseDomain` is defined multiple times
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:87:68
+   |
+82 |     saturate_factor_base_two_torsion, span_f2, to_fast_point, FactorBaseDomain,
+   |                                                               ---------------- previous import of the type `FactorBaseDomain` here
+...
+87 |     saturate_factor_base_two_torsion, span_f2, top_factor_indices, FactorBaseDomain,
+   |                                                                    ^^^^^^^^^^^^^^^^-
+   |                                                                    |
+   |                                                                    `FactorBaseDomain` reimported here
+   |                                                                    help: remove unnecessary import
+   |
+   = note: `FactorBaseDomain` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `Gf2` is defined multiple times
+  --> src/cryptanalysis/koblitz_fast_arith.rs:31:5
+   |
+30 | use crate::cryptanalysis::semaev_decomp::{Gf2, Gf2_128};
+   |                                           --- previous import of the type `Gf2` here
+31 | use crate::cryptanalysis::semaev_decomp::Gf2;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Gf2` reimported here
+   |
+   = note: `Gf2` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `FastPoint` is defined multiple times
+   --> src/cryptanalysis/koblitz_index_calculus.rs:157:76
+    |
+151 | use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
+    |                                                                   --------- previous import of the type `FastPoint` here
+...
+157 | use crate::cryptanalysis::koblitz_fast_arith::{pack_fast, FastBinaryCurve, FastPoint};
+    |                                                                            ^^^^^^^^^ `FastPoint` reimported here
+    |
+    = note: `FastPoint` must be defined only once in the type namespace of this module
+help: you can use `as` to change the binding name of the import
+    |
+157 | use crate::cryptanalysis::koblitz_fast_arith::{pack_fast, FastBinaryCurve, FastPoint as OtherFastPoint};
+    |                                                                                      +++++++++++++++++
+
+error[E0252]: the name `IncrementalRelationSolver` is defined multiple times
+   --> src/cryptanalysis/koblitz_index_calculus.rs:161:53
+    |
+159 |     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+    |                 ------------------------- previous import of the type `IncrementalRelationSolver` here
+160 | };
+161 | use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+    |                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^--
+    |                                                     |
+    |                                                     `IncrementalRelationSolver` reimported here
+    |                                                     help: remove unnecessary import
+    |
+    = note: `IncrementalRelationSolver` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `RowStatus` is defined multiple times
+   --> src/cryptanalysis/koblitz_index_calculus.rs:161:80
+    |
+159 |     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+    |                                            --------- previous import of the type `RowStatus` here
+160 | };
+161 | use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+    |                                                                                ^^^^^^^^^ `RowStatus` reimported here
+    |
+    = note: `RowStatus` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `DecompositionStrategy` is defined multiple times
+   --> src/cryptanalysis/mod.rs:392:69
+    |
+376 |     DecompositionStrategy, FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase,
+    |     --------------------- previous import of the type `DecompositionStrategy` here
+...
+392 |     verify_collected_relation, CollectedRelation, CollectionReport, DecompositionStrategy,
+    |                                                                     ^^^^^^^^^^^^^^^^^^^^^-
+    |                                                                     |
+    |                                                                     `DecompositionStrategy` reimported here
+    |                                                                     help: remove unnecessary import
+    |
+    = note: `DecompositionStrategy` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `FactorBaseDomain` is defined multiple times
+   --> src/cryptanalysis/mod.rs:393:5
+    |
+376 |     DecompositionStrategy, FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase,
+    |                            ---------------- previous import of the type `FactorBaseDomain` here
+...
+393 |     FactorBaseDomain, FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase,
+    |     ^^^^^^^^^^^^^^^^--
+    |     |
+    |     `FactorBaseDomain` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `FactorBaseDomain` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `FactorBaseLogTable` is defined multiple times
+   --> src/cryptanalysis/mod.rs:393:44
+    |
+376 |     DecompositionStrategy, FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase,
+    |                                              ------------------ previous import of the type `FactorBaseLogTable` here
+...
+393 |     FactorBaseDomain, FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase,
+    |                                            ^^^^^^^^^^^^^^^^^^--
+    |                                            |
+    |                                            `FactorBaseLogTable` reimported here
+    |                                            help: remove unnecessary import
+    |
+    = note: `FactorBaseLogTable` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `FrobeniusFactorBase` is defined multiple times
+   --> src/cryptanalysis/mod.rs:393:64
+    |
+376 |     DecompositionStrategy, FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase,
+    |                                                                  ------------------- previous import of the type `FrobeniusFactorBase` here
+...
+393 |     FactorBaseDomain, FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase,
+    |                                                                ^^^^^^^^^^^^^^^^^^^-
+    |                                                                |
+    |                                                                `FrobeniusFactorBase` reimported here
+    |                                                                help: remove unnecessary import
+    |
+    = note: `FrobeniusFactorBase` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `IndividualLogReport` is defined multiple times
+   --> src/cryptanalysis/mod.rs:394:5
+    |
+377 |     IndividualLogReport, KoblitzCurve, KoblitzIcOptions, KoblitzIcReport, KoblitzRelation,
+    |     ------------------- previous import of the type `IndividualLogReport` here
+...
+394 |     IndividualLogReport, IndividualLogSolver, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    |     ^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `IndividualLogReport` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `IndividualLogReport` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `KoblitzCurve` is defined multiple times
+   --> src/cryptanalysis/mod.rs:394:47
+    |
+377 |     IndividualLogReport, KoblitzCurve, KoblitzIcOptions, KoblitzIcReport, KoblitzRelation,
+    |                          ------------ previous import of the type `KoblitzCurve` here
+...
+394 |     IndividualLogReport, IndividualLogSolver, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    |                                               ^^^^^^^^^^^^--
+    |                                               |
+    |                                               `KoblitzCurve` reimported here
+    |                                               help: remove unnecessary import
+    |
+    = note: `KoblitzCurve` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `KoblitzIcOptions` is defined multiple times
+   --> src/cryptanalysis/mod.rs:394:77
+    |
+377 |     IndividualLogReport, KoblitzCurve, KoblitzIcOptions, KoblitzIcReport, KoblitzRelation,
+    |                                        ---------------- previous import of the type `KoblitzIcOptions` here
+...
+394 |     IndividualLogReport, IndividualLogSolver, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    |                                                                             ^^^^^^^^^^^^^^^^-
+    |                                                                             |
+    |                                                                             `KoblitzIcOptions` reimported here
+    |                                                                             help: remove unnecessary import
+    |
+    = note: `KoblitzIcOptions` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `KoblitzIcReport` is defined multiple times
+   --> src/cryptanalysis/mod.rs:395:5
+    |
+377 |     IndividualLogReport, KoblitzCurve, KoblitzIcOptions, KoblitzIcReport, KoblitzRelation,
+    |                                                          --------------- previous import of the type `KoblitzIcReport` here
+...
+395 |     KoblitzIcReport, KoblitzRankRecord, KoblitzRelation, KoblitzRelationAttemptDisposition,
+    |     ^^^^^^^^^^^^^^^--
+    |     |
+    |     `KoblitzIcReport` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `KoblitzIcReport` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `KoblitzRelation` is defined multiple times
+   --> src/cryptanalysis/mod.rs:395:41
+    |
+377 |     IndividualLogReport, KoblitzCurve, KoblitzIcOptions, KoblitzIcReport, KoblitzRelation,
+    |                                                                           --------------- previous import of the type `KoblitzRelation` here
+...
+395 |     KoblitzIcReport, KoblitzRankRecord, KoblitzRelation, KoblitzRelationAttemptDisposition,
+    |                                         ^^^^^^^^^^^^^^^--
+    |                                         |
+    |                                         `KoblitzRelation` reimported here
+    |                                         help: remove unnecessary import
+    |
+    = note: `KoblitzRelation` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `KoblitzSpeedup` is defined multiple times
+   --> src/cryptanalysis/mod.rs:397:54
+    |
+378 |     KoblitzSpeedup, LogTableReport, PairSumTable, SatDecompositionOptions, SatDecompositionStats,
+    |     -------------- previous import of the type `KoblitzSpeedup` here
+...
+397 |     KoblitzSignedRhoOptions, KoblitzSignedRhoReport, KoblitzSpeedup, LinearAlgebra, LogTableReport,
+    |                                                      ^^^^^^^^^^^^^^--
+    |                                                      |
+    |                                                      `KoblitzSpeedup` reimported here
+    |                                                      help: remove unnecessary import
+    |
+    = note: `KoblitzSpeedup` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `LogTableReport` is defined multiple times
+   --> src/cryptanalysis/mod.rs:397:85
+    |
+378 |     KoblitzSpeedup, LogTableReport, PairSumTable, SatDecompositionOptions, SatDecompositionStats,
+    |                     -------------- previous import of the type `LogTableReport` here
+...
+397 |     KoblitzSignedRhoOptions, KoblitzSignedRhoReport, KoblitzSpeedup, LinearAlgebra, LogTableReport,
+    |                                                                                     ^^^^^^^^^^^^^^-
+    |                                                                                     |
+    |                                                                                     `LogTableReport` reimported here
+    |                                                                                     help: remove unnecessary import
+    |
+    = note: `LogTableReport` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `PairSumTable` is defined multiple times
+   --> src/cryptanalysis/mod.rs:398:5
+    |
+378 |     KoblitzSpeedup, LogTableReport, PairSumTable, SatDecompositionOptions, SatDecompositionStats,
+    |                                     ------------ previous import of the type `PairSumTable` here
+...
+398 |     PairSumTable, RelationCollector, RelationWorkUnit, SatDecompositionOptions,
+    |     ^^^^^^^^^^^^--
+    |     |
+    |     `PairSumTable` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `PairSumTable` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `SatDecompositionOptions` is defined multiple times
+   --> src/cryptanalysis/mod.rs:398:56
+    |
+378 |     KoblitzSpeedup, LogTableReport, PairSumTable, SatDecompositionOptions, SatDecompositionStats,
+    |                                                   ----------------------- previous import of the type `SatDecompositionOptions` here
+...
+398 |     PairSumTable, RelationCollector, RelationWorkUnit, SatDecompositionOptions,
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^-
+    |                                                        |
+    |                                                        `SatDecompositionOptions` reimported here
+    |                                                        help: remove unnecessary import
+    |
+    = note: `SatDecompositionOptions` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `SatDecompositionStats` is defined multiple times
+   --> src/cryptanalysis/mod.rs:399:5
+    |
+378 |     KoblitzSpeedup, LogTableReport, PairSumTable, SatDecompositionOptions, SatDecompositionStats,
+    |                                                                            --------------------- previous import of the type `SatDecompositionStats` here
+...
+399 |     SatDecompositionStats, MAX_SUBFIELD_DEGREE, PRECOMPUTE_BATCH_TRIALS,
+    |     ^^^^^^^^^^^^^^^^^^^^^--
+    |     |
+    |     `SatDecompositionStats` reimported here
+    |     help: remove unnecessary import
+    |
+    = note: `SatDecompositionStats` must be defined only once in the type namespace of this module
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5729:27
+     |
+5729 |     pub fn folded_storage(&self) -> Option<FoldedStorage<'_>> {
+     |                           ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5849:15
+     |
+5849 |     fn key_of(&self, p: FastPoint) -> u64 {
+     |               ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5865:16
+     |
+5865 |     fn keys_of(&self, points: &[FastPoint], out: &mut Vec<u64>) {
+     |                ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5911:17
+     |
+5911 |     pub fn tier(&self) -> &'static str {
+     |                 ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5924:22
+     |
+5924 |     pub fn is_folded(&self) -> bool {
+     |                      ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5929:23
+     |
+5929 |     pub fn is_compact(&self) -> bool {
+     |                       ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5934:33
+     |
+5934 |     pub fn is_witnessed_compact(&self) -> bool {
+     |                                 ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5939:16
+     |
+5939 |     pub fn len(&self) -> usize {
+     |                ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5947:21
+     |
+5947 |     pub fn is_empty(&self) -> bool {
+     |                     ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5971:18
+     |
+5971 |     pub fn curve(&self) -> &FastCurve {
+     |                  ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5987:18
+     |
+5987 |     fn bucket_of(&self, key: u64) -> usize {
+     |                  ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5997:20
+     |
+5997 |     fn filter_word(&self, key: u64) -> usize {
+     |                    ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6005:17
+     |
+6005 |     fn admitted(&self, key: u64) -> bool {
+     |                 ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6016:19
+     |
+6016 |     pub fn lookup(&self, key: u64) -> &[(u64, u32, u32)] {
+     |                   ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6028:25
+     |
+6028 |     fn compact_contains(&self, key: u64) -> bool {
+     |                         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6046:25
+     |
+6046 |     fn candidate_orbits(&self, key: u64, out: &mut Vec<u32>) {
+     |                         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6074:21
+     |
+6074 |     fn recover_pair(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+     |                     ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6117:26
+     |
+6117 |     pub fn contains_pair(&self, target: FastPoint) -> bool {
+     |                          ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6124:22
+     |
+6124 |     pub fn probe_key(&self, target: FastPoint) -> u64 {
+     |                      ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6131:25
+     |
+6131 |     pub fn prefetch_key(&self, key: u64) {
+     |                         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6138:24
+     |
+6138 |     fn prefetch_bucket(&self, key: u64) {
+     |                        ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6147:25
+     |
+6147 |     pub fn contains_key(&self, key: u64) -> bool {
+     |                         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6166:28
+     |
+6166 |     fn recover_pair_tagged(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+     |                            ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6206:22
+     |
+6206 |     pub fn pairs_for(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+     |                      ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6213:22
+     |
+6213 |     fn pairs_for_key(&self, target: FastPoint, key: u64, out: &mut Vec<(u32, u32)>) {
+     |                      ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6255:24
+     |
+6255 |     fn lookup_admitted(&self, key: u64) -> &[(u64, u32, u32)] {
+     |                        ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6276:9
+     |
+6276 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6292:27
+     |
+6292 |     pub fn decompose_fast(&self, target: FastPoint, m: usize) -> Option<Vec<usize>> {
+     |                           ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6328:9
+     |
+6328 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6347:9
+     |
+6347 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6371:9
+     |
+6371 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6398:9
+     |
+6398 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6520:9
+     |
+6520 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6532:9
+     |
+6532 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error: `self` parameter is only allowed in associated functions
+    --> src/cryptanalysis/koblitz_index_calculus.rs:6553:9
+     |
+6553 |         &self,
+     |         ^^^^^ not semantically valid as function parameter
+     |
+     = note: associated functions are those in `impl` or `trait` definitions
+
+error[E0432]: unresolved imports `super::koblitz_index_calculus::from_fast_point`, `super::koblitz_index_calculus::to_fast_point`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:81:5
+   |
+81 |     from_fast_point, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+   |     ^^^^^^^^^^^^^^^ no `from_fast_point` in `cryptanalysis::koblitz_index_calculus`
+82 |     saturate_factor_base_two_torsion, span_f2, to_fast_point, FactorBaseDomain,
+   |                                                ^^^^^^^^^^^^^ no `to_fast_point` in `cryptanalysis::koblitz_index_calculus`
+
+error[E0425]: cannot find function `gaussian_eliminate_mod_n` in this scope
+   --> src/cryptanalysis/ec_index_calculus_j0.rs:681:20
+    |
+681 |     let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+    |
+help: consider importing this function through its public re-export
+    |
+ 92 + use crate::cryptanalysis::gaussian_eliminate_mod_n;
+    |
+
+error[E0425]: cannot find value `low_start` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:1886:30
+     |
+1886 |     let low_width = n_cols - low_start;
+     |                              ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `pivot_row` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:1888:52
+     |
+1888 |     let mut low = Vec::with_capacity(matrix.rows - pivot_row);
+     |                                                    ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `pivot_row` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:1889:31
+     |
+1889 |     for source in matrix.data[pivot_row * words..].chunks_exact(words) {
+     |                               ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `low_start` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:1891:23
+     |
+1891 |         for column in low_start..n_cols {
+     |                       ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `low_start` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:1893:39
+     |
+1893 |                 let target = column - low_start;
+     |                                       ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `word_ops` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:1901:53
+     |
+1901 |     let rank = rref_f2_counted(&mut low, low_width, word_ops);
+     |                                                     ^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `deferred_decisions` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:5938:16
+     |
+5938 |             if deferred_decisions > 0 {
+     |                ^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `deferred_decisions` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:5941:37
+     |
+5941 |             let child_deferred = if deferred_decisions > 0 {
+     |                                     ^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `deferred_decisions` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:5942:17
+     |
+5942 |                 deferred_decisions - 1
+     |                 ^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `batch_split_bits` in this scope
+    --> src/cryptanalysis/koblitz_groebner.rs:5944:17
+     |
+5944 |                 batch_split_bits.saturating_sub(1)
+     |                 ^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `q` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1140:21
+     |
+1140 |         let trace = q as i128 + 1 - subfield_point_count(&curve, &subfield_basis, k) as i128;
+     |                     ^ not found in this scope
+
+error[E0425]: cannot find value `subfield_basis` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1140:67
+     |
+1140 |         let trace = q as i128 + 1 - subfield_point_count(&curve, &subfield_basis, k) as i128;
+     |                                                                   ^^^^^^^^^^^^^^ not found in this scope
+     |
+note: these functions exist but are inaccessible
+    --> src/cryptanalysis/curve_traits/subfield.rs:166:1
+     |
+ 166 | fn subfield_basis(n: u32, k: u32, irr: &IrreduciblePoly) -> (Vec<F2mElement>, F2mElement) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `crate::cryptanalysis::curve_traits::subfield::subfield_basis`: not accessible
+     |
+    ::: src/cryptanalysis/descent_lowgamma.rs:132:1
+     |
+ 132 | fn subfield_basis(n: u32, d: u32, irr: &IrreduciblePoly) -> Option<Vec<F2mElement>> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `crate::cryptanalysis::descent_lowgamma::subfield_basis`: not accessible
+
+error[E0425]: cannot find value `k` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1140:83
+     |
+1140 |         let trace = q as i128 + 1 - subfield_point_count(&curve, &subfield_basis, k) as i128;
+     |                                                                                   ^ help: a tuple variant with a similar name exists: `Ok`
+     |
+    --> /private/tmp/rust-20260226-8162-ogcg3q/rustc-1.93.1-src/library/core/src/result.rs:561:5
+     |
+     = note: similarly named tuple variant `Ok` defined here
+
+error[E0425]: cannot find value `q` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1141:55
+     |
+1141 |         let group_order = subfield_group_order(trace, q, ext);
+     |                                                       ^ not found in this scope
+
+error[E0425]: cannot find value `ext` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1141:58
+     |
+1141 |         let group_order = subfield_group_order(trace, q, ext);
+     |                                                          ^^^ not found in this scope
+
+error[E0425]: cannot find value `k` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1169:12
+     |
+1169 |         if k > 1 {
+     |            ^ help: a tuple variant with a similar name exists: `Ok`
+     |
+    --> /private/tmp/rust-20260226-8162-ogcg3q/rustc-1.93.1-src/library/core/src/result.rs:561:5
+     |
+     = note: similarly named tuple variant `Ok` defined here
+
+error[E0425]: cannot find value `k` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1170:33
+     |
+1170 |             state ^= (u64::from(k) << 40) ^ (b_index << 48);
+     |                                 ^ help: a tuple variant with a similar name exists: `Ok`
+     |
+    --> /private/tmp/rust-20260226-8162-ogcg3q/rustc-1.93.1-src/library/core/src/result.rs:561:5
+     |
+     = note: similarly named tuple variant `Ok` defined here
+
+error[E0425]: cannot find value `b_index` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1170:46
+     |
+1170 |             state ^= (u64::from(k) << 40) ^ (b_index << 48);
+     |                                              ^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `q` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1205:60
+     |
+1205 |         let lambda = frobenius_eigenvalue_q(&curve, trace, q, k, &r)?;
+     |                                                            ^ not found in this scope
+
+error[E0425]: cannot find value `k` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1205:63
+     |
+1205 |         let lambda = frobenius_eigenvalue_q(&curve, trace, q, k, &r)?;
+     |                                                               ^ help: a tuple variant with a similar name exists: `Ok`
+     |
+    --> /private/tmp/rust-20260226-8162-ogcg3q/rustc-1.93.1-src/library/core/src/result.rs:561:5
+     |
+     = note: similarly named tuple variant `Ok` defined here
+
+error[E0411]: cannot find struct, variant or union type `Self` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1207:14
+     |
+1133 | fn attach_prime_subgroup(
+     |    --------------------- `Self` not allowed in a function
+...
+1207 |         Some(Self {
+     |              ^^^^ `Self` is only available in impls, traits, and type definitions
+
+error[E0425]: cannot find value `k` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1216:13
+     |
+1216 |             k,
+     |             ^ help: a tuple variant with a similar name exists: `Ok`
+     |
+    --> /private/tmp/rust-20260226-8162-ogcg3q/rustc-1.93.1-src/library/core/src/result.rs:561:5
+     |
+     = note: similarly named tuple variant `Ok` defined here
+
+error[E0425]: cannot find value `q` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1217:13
+     |
+1217 |             q,
+     |             ^ not found in this scope
+
+error[E0425]: cannot find value `a_index` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1218:13
+     |
+1218 |             a_index,
+     |             ^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `b_index` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1219:13
+     |
+1219 |             b_index,
+     |             ^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `subfield_basis` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1220:13
+     |
+1220 |             subfield_basis,
+     |             ^^^^^^^^^^^^^^ not found in this scope
+     |
+note: these functions exist but are inaccessible
+    --> src/cryptanalysis/curve_traits/subfield.rs:166:1
+     |
+ 166 | fn subfield_basis(n: u32, k: u32, irr: &IrreduciblePoly) -> (Vec<F2mElement>, F2mElement) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `crate::cryptanalysis::curve_traits::subfield::subfield_basis`: not accessible
+     |
+    ::: src/cryptanalysis/descent_lowgamma.rs:132:1
+     |
+ 132 | fn subfield_basis(n: u32, d: u32, irr: &IrreduciblePoly) -> Option<Vec<F2mElement>> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `crate::cryptanalysis::descent_lowgamma::subfield_basis`: not accessible
+
+error[E0411]: cannot find type `Self` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5549:10
+     |
+5542 |     fn assemble_folded(
+     |        --------------- `Self` not allowed in a function
+...
+5549 |     ) -> Self {
+     |          ^^^^ `Self` is only available in impls, traits, and type definitions
+
+error[E0411]: cannot find struct, variant or union type `Self` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5561:9
+     |
+5542 |     fn assemble_folded(
+     |        --------------- `Self` not allowed in a function
+...
+5561 |         Self {
+     |         ^^^^ `Self` is only available in impls, traits, and type definitions
+
+error[E0411]: cannot find type `Self` in this scope
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5613:17
+     |
+5609 |     pub fn from_folded_parts(
+     |            ----------------- `Self` not allowed in a function
+...
+5613 |     ) -> Result<Self, String> {
+     |                 ^^^^ `Self` is only available in impls, traits, and type definitions
+
+warning: unused imports: `FactorBaseDomain`, `build_frobenius_factor_base_from_divisor`, `build_frobenius_factor_base`, `build_frobenius_union_factor_base`, `projected_signed_orbit_count`, `restrict_factor_base_to_orbits`, `saturate_factor_base_two_torsion`, and `span_f2`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:83:5
+   |
+83 |     build_frobenius_factor_base, build_frobenius_factor_base_from_divisor,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+84 |     build_frobenius_union_factor_base, build_standard_subspace_factor_base,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+85 |     build_subgroup_orbit_factor_base, cofactor_project_factor_base, groebner_decompose,
+86 |     invariant_factors, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+87 |     saturate_factor_base_two_torsion, span_f2, top_factor_indices, FactorBaseDomain,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^                      ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::semaev_decomp::Gf2`
+  --> src/cryptanalysis/koblitz_fast_arith.rs:31:5
+   |
+31 | use crate::cryptanalysis::semaev_decomp::Gf2;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `BinaryCurve`
+    --> src/cryptanalysis/koblitz_fast_arith.rs:1197:29
+     |
+1197 |     use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
+     |                             ^^^^^^^^^^^
+
+warning: unused import: `FastPoint`
+   --> src/cryptanalysis/koblitz_index_calculus.rs:151:67
+    |
+151 | use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
+    |                                                                   ^^^^^^^^^
+
+warning: unused imports: `U64RankTracker` and `to_u64_mod`
+   --> src/cryptanalysis/koblitz_index_calculus.rs:159:5
+    |
+159 |     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+    |     ^^^^^^^^^^                                        ^^^^^^^^^^^^^^
+
+warning: unused imports: `IncrementalRelationSolver` and `RowStatus`
+   --> src/cryptanalysis/koblitz_index_calculus.rs:161:53
+    |
+161 | use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+    |                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^
+
+warning: unused import: `crate::binary_ecc::F2mElement`
+    --> src/cryptanalysis/semaev_decomp.rs:2159:13
+     |
+2159 |         use crate::binary_ecc::F2mElement;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::binary_ecc::F2mElement`
+    --> src/cryptanalysis/semaev_decomp.rs:3798:9
+     |
+3798 |     use crate::binary_ecc::F2mElement;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `DecompositionStrategy`, `FactorBaseDomain`, `FactorBaseLogTable`, `FrobeniusFactorBase`, `IndividualLogReport`, `KoblitzCurve`, `KoblitzIcOptions`, `KoblitzIcReport`, `KoblitzRelation`, `KoblitzSpeedup`, `LogTableReport`, `PairSumTable`, `SatDecompositionOptions`, `SatDecompositionStats`, `build_frobenius_factor_base_from_divisor`, `build_frobenius_union_factor_base`, `cyclotomic_cosets`, `enumerate_decompose`, `factor_x_n_minus_1`, `find_irreducible_sparse`, `find_irreducible`, `frobenius_eigenvalue`, `groebner_decompose`, `individual_log`, `invariant_subspace_basis`, `is_irreducible_f2`, `koblitz_index_calculus_dlp_with_factor_base_and_progress`, `koblitz_index_calculus_dlp_with_factor_base`, `koblitz_index_calculus_dlp`, `koblitz_point_count`, `koblitz_speedup_model`, `linearised_kernel_basis`, `linearised_kernel`, `order_of_2_mod_n`, `pack_point`, `point_key`, `points_with_x`, `restrict_factor_base_to_orbits`, `sat_decompose`, `saturate_factor_base_two_torsion`, `solve_factor_base_logs`, `span_f2`, and `subspace_basis_for_divisor`
+   --> src/cryptanalysis/mod.rs:379:5
+    |
+379 |     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+380 |     build_subgroup_orbit_factor_base, cyclotomic_cosets, enumerate_decompose, factor_x_n_minus_1,
+    |                                       ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^
+381 |     find_irreducible, find_irreducible_sparse, frobenius_eigenvalue, frobenius_eigenvalue_q,
+    |     ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^
+382 |     groebner_decompose, individual_log, individual_log_with_pair_table, invariant_factors,
+    |     ^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+383 |     invariant_subspace_basis, is_irreducible_f2, koblitz_index_calculus_dlp,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+384 |     koblitz_index_calculus_dlp_with_factor_base,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+385 |     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^
+386 |     koblitz_signed_frobenius_rho_reference, koblitz_signed_frobenius_rho_with_progress,
+387 |     koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    |     ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+388 |     pack_point, point_key, points_with_x, probe_scalar, q_linearised_kernel_basis,
+    |     ^^^^^^^^^^  ^^^^^^^^^  ^^^^^^^^^^^^^
+389 |     restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+390 |     solve_factor_base_logs, solve_factor_base_logs_from_relations, span_f2, subfield_group_order,
+    |     ^^^^^^^^^^^^^^^^^^^^^^                                         ^^^^^^^
+391 |     subspace_basis_for_divisor, subspace_basis_for_factors, top_factor_indices,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+392 |     verify_collected_relation, CollectedRelation, CollectionReport, DecompositionStrategy,
+    |                                                                     ^^^^^^^^^^^^^^^^^^^^^
+393 |     FactorBaseDomain, FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase,
+    |     ^^^^^^^^^^^^^^^^                       ^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^
+394 |     IndividualLogReport, IndividualLogSolver, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    |     ^^^^^^^^^^^^^^^^^^^                       ^^^^^^^^^^^^                  ^^^^^^^^^^^^^^^^
+395 |     KoblitzIcReport, KoblitzRankRecord, KoblitzRelation, KoblitzRelationAttemptDisposition,
+    |     ^^^^^^^^^^^^^^^                     ^^^^^^^^^^^^^^^
+396 |     KoblitzRelationAttemptRecord, KoblitzSignedRhoCharges, KoblitzSignedRhoEvent,
+397 |     KoblitzSignedRhoOptions, KoblitzSignedRhoReport, KoblitzSpeedup, LinearAlgebra, LogTableReport,
+    |                                                      ^^^^^^^^^^^^^^                 ^^^^^^^^^^^^^^
+398 |     PairSumTable, RelationCollector, RelationWorkUnit, SatDecompositionOptions,
+    |     ^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^^^^^^^^^^
+399 |     SatDecompositionStats, MAX_SUBFIELD_DEGREE, PRECOMPUTE_BATCH_TRIALS,
+    |     ^^^^^^^^^^^^^^^^^^^^^
+
+error[E0119]: conflicting implementations of trait `Clone` for type `koblitz_groebner::SolveStats`
+    --> src/cryptanalysis/koblitz_groebner.rs:4991:10
+     |
+2146 | #[derive(Clone, Debug, Default)]
+     |          ----- first implementation here
+...
+4991 | #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+     |          ^^^^^ conflicting implementation for `koblitz_groebner::SolveStats`
+
+error[E0119]: conflicting implementations of trait `Clone` for type `koblitz_index_calculus::ProjectedSignedOrbitMap`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8356:10
+     |
+5404 | #[derive(Clone, Debug)]
+     |          ----- first implementation here
+...
+8356 | #[derive(Clone, Debug)]
+     |          ^^^^^ conflicting implementation for `koblitz_index_calculus::ProjectedSignedOrbitMap`
+
+error[E0119]: conflicting implementations of trait `Debug` for type `koblitz_groebner::SolveStats`
+    --> src/cryptanalysis/koblitz_groebner.rs:4991:17
+     |
+2146 | #[derive(Clone, Debug, Default)]
+     |                 ----- first implementation here
+...
+4991 | #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+     |                 ^^^^^ conflicting implementation for `koblitz_groebner::SolveStats`
+
+error[E0119]: conflicting implementations of trait `Debug` for type `koblitz_index_calculus::ProjectedSignedOrbitMap`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8356:17
+     |
+5404 | #[derive(Clone, Debug)]
+     |                 ----- first implementation here
+...
+8356 | #[derive(Clone, Debug)]
+     |                 ^^^^^ conflicting implementation for `koblitz_index_calculus::ProjectedSignedOrbitMap`
+
+error[E0119]: conflicting implementations of trait `Default` for type `koblitz_groebner::SolveStats`
+    --> src/cryptanalysis/koblitz_groebner.rs:4991:24
+     |
+2146 | #[derive(Clone, Debug, Default)]
+     |                        ------- first implementation here
+...
+4991 | #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+     |                        ^^^^^^^ conflicting implementation for `koblitz_groebner::SolveStats`
+

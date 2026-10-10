@@ -93,6 +93,15 @@ pub fn check_order(
     order: &BigUint,
     reps: &[Representation],
 ) -> Result<Outcome, String> {
+    if matches!(
+        model,
+        Model::PrimeOther { .. } | Model::PrimeExtension { .. }
+    ) {
+        return Ok((
+            Status::NotEvaluated,
+            "point arithmetic for this prime model is not implemented",
+        ));
+    }
     let q = model.q();
     if model.size_bits() <= COUNT_MAX_BITS {
         let counted = match model {
@@ -105,6 +114,9 @@ pub fn check_order(
                 a.to_u64().expect("reduced"),
                 b.to_u64().expect("reduced"),
             ),
+            Model::PrimeOther { .. } | Model::PrimeExtension { .. } => {
+                unreachable!("handled before point counting")
+            }
         };
         if BigUint::from(counted) != *order {
             return Err(format!(
@@ -196,6 +208,7 @@ fn generator_certificate(
             };
             g.scalar_mul_vartime(r, &FieldElement::new(a.clone(), p.clone())) == Point::Infinity
         }
+        Model::PrimeOther { .. } | Model::PrimeExtension { .. } => return Ok(None),
     };
     if !killed {
         return Err(format!("[r]G ≠ O for the recorded generator and r = {r}"));

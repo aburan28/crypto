@@ -1,0 +1,11 @@
+flowchart TD
+  P[Exact degree-83 curves and public inputs] --> G[Finite grid: 45,360,000 addressed tuples]
+  G --> A[Audit: domain, capacity, subgroup and resource gates]
+  A --> F[54-base native construction pilot]
+  F --> V[Generic arithmetic replay: all points and orbit coefficients]
+  V --> S[Content-addressed S3 objects and download hash receipts]
+  A --> R[Future natural relation and rank screening]
+  R --> C[Complete cold pipeline on identical one-target workloads]
+  C --> H[Disjoint holdouts, matched controls, independent replay]
+  H --> W[Select minimum complete total runtime]
+  S -. Artifact correctness does not establish runtime .-> C

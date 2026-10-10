@@ -1,0 +1,18 @@
+redis v1.7.1
+├── redis feature "acl"
+│   └── redis feature "default"
+│       └── crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008)
+│           ├── crypto feature "default" (command-line)
+│           └── crypto feature "redis-native-tls"
+│               └── crypto feature "default" (command-line)
+├── redis feature "default" (*)
+├── redis feature "geospatial"
+│   └── redis feature "default" (*)
+├── redis feature "num-bigint"
+│   └── redis feature "default" (*)
+├── redis feature "script"
+│   └── redis feature "default" (*)
+├── redis feature "streams"
+│   └── redis feature "default" (*)
+└── redis feature "tls-native-tls"
+    └── crypto feature "redis-native-tls" (*)

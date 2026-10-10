@@ -1,0 +1,9 @@
+{
+  "schema": "n83.structured-orbit-tamper-control/v1",
+  "test": "flip first compressed byte without changing manifest",
+  "expected": "replay rejects compressed object before arithmetic",
+  "exit_code": 1,
+  "stderr_tail": "Error: \"compressed object\"\n",
+  "wall_seconds": 0.09139399999548914,
+  "status": "PASS"
+}

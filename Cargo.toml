@@ -80,6 +80,11 @@ name = "crypto_lib"
 path = "src/lib.rs"
 
 [features]
+# Keep the existing Redis TLS behavior in normal builds. The isolated,
+# network-disabled N83 capacity worker can omit its unused native OpenSSL
+# dependency when cross-building a static Linux binary.
+default = ["redis-native-tls"]
+redis-native-tls = ["redis/tls-native-tls"]
 f4-four-tables = []
 f4-five-tables = []
 f4-wide-tables = []
@@ -149,7 +154,7 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
-redis = { version = "1.7.0", features = ["tls-native-tls"] }
+redis = "1.7.0"
 
 [[bench]]
 name = "pqc_speed"
