@@ -74,8 +74,6 @@ enum Action {
     Logs(experiment::LogsArgs),
     /// Recover a target's logarithm by descent, reusing a saved database.
     Solve(experiment::SolveArgs),
-    /// Persist and resume index calculus on fixed K_0 parameters through degree 131.
-    Fixed(fixed::FixedArgs),
     /// Run or resume a staged select → collect → logs → solve pipeline from a parameter file (or act as a collection worker).
     Workflow(workflow::WorkflowArgs),
     /// Persist and resume index calculus on fixed K_0 parameters through degree 131.
@@ -140,7 +138,6 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
         Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
         Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
-        Some(Action::Fixed(args)) => fixed::run(args.clone()),
         Some(Action::Workflow(args)) => workflow::run(args.clone(), cli.json),
         Some(Action::Fixed(args)) => fixed::run(args.clone()),
         Some(Action::Boundary(args)) => boundary::run(args.clone(), cli.json),

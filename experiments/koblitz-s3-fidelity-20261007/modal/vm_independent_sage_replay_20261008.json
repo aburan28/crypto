@@ -1,0 +1,302 @@
+{
+  "all_factor_base_points_and_labels_checked": true,
+  "all_target_scalars_independently_recovered": true,
+  "curves": [
+    {
+      "factor_base_digest": "994ebecce7d2a7ff0da957b7a58cbcf97ef5bf364b4cf17e12f58bfc61cda64a",
+      "factor_base_fixture": "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-pair-query-20261006/experiments/koblitz-s3-fidelity-20261007/modal/n41_base_dump.json",
+      "factor_base_fixture_sha256": "fab2d4f4c828e8cea16d5ea4bc54070f22ef82e9161ace601f860262d89c96ab",
+      "factor_base_points_checked": 20008,
+      "field_modulus_powers": [
+        41,
+        3,
+        0
+      ],
+      "fixtures_sha256": "16fa23c01e6e6b0ae133079c84777ddfb49f6683415c01dc8c67ce8906cafbc3",
+      "folded_columns_checked": 244,
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "n": 41,
+      "relation_witnesses_group_checked": 3024,
+      "subgroup_order": 549756390943,
+      "targets": [
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T001",
+          "matrix_rank": 243,
+          "public_target_sha256": "ad9283278c0a54d3a39e877327d9e3270835a68c4322e02f5f6817859ca9e4bc",
+          "recovered_scalar": 133290198418,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "124345ebe584f6a638798c22d2394f0c7724368e96cb99069cb0a7c2b08707f5"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T002",
+          "matrix_rank": 243,
+          "public_target_sha256": "e0a22e338f348ee642c93a9fba8a86ea019aad4612d2a7f993283d6c071231e7",
+          "recovered_scalar": 379629404922,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "f59f3eb182e517638afe3a806310e5cdcafe73aa6c45bf882b8dc7cd2ed00315"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T003",
+          "matrix_rank": 243,
+          "public_target_sha256": "af8a3e8100722b2739520a6b1e9cedff850abeec799e17d4adf25d39ea73a45e",
+          "recovered_scalar": 344115423077,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "78f33ad0a6bf1b9f670fff7cb0a8c5b86f7ba0a019fc359ddca702224807d271"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T004",
+          "matrix_rank": 243,
+          "public_target_sha256": "51996ce1165b370b4be1c45b040eef9b6a5046bc8fd3cee4c9ce9a9c222b5098",
+          "recovered_scalar": 357210516231,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "c504d42de6e0b3ddd3664e03b2c5be8aacb3479839dbef6529cb32655a31c2cd"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T005",
+          "matrix_rank": 243,
+          "public_target_sha256": "331299ad30be73894b4e996c06fe1eb184c610f2d1c52bf4f22c9b257b41988c",
+          "recovered_scalar": 154716918408,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "eb5815fe88571e2156b4eea1bcfb36756730464e21695b26f5e9581de9c753be"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T006",
+          "matrix_rank": 243,
+          "public_target_sha256": "9f370694f830110d989c94772e694b392b97d494f8ece6c22febca03a1ea0318",
+          "recovered_scalar": 195233671682,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "79d508c525a56e0594f4230056fd5f861948af0a4c019c35937c557a3feeac26"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T007",
+          "matrix_rank": 243,
+          "public_target_sha256": "84590bc64b283856abd6ce6de67e2059bd37d366b70f1e335817bea52b5f1a2f",
+          "recovered_scalar": 51204966640,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "19a760a30b2b4999a808d8fb7e3ff7dc7a74e93503a886af227ea315d82bb44d"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T008",
+          "matrix_rank": 243,
+          "public_target_sha256": "a6b8f54c27902d89956d454aa07d24009779e5f0e4bfe29c6c967b794b5fbb3d",
+          "recovered_scalar": 457924038005,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "d8c6f797df332530a6bf2565ea3cd88c28488da644ad1d7670924304b1e84939"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T009",
+          "matrix_rank": 243,
+          "public_target_sha256": "7732a1a886c3efba1b322a73bdb33a2f66ef0725aa06081bcd1ae81e4a68aa01",
+          "recovered_scalar": 526550710172,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "0e152d955887cc719353057d6bebd196d3dc636549566602dcfba77e731ab6f4"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 242,
+          "label": "T010",
+          "matrix_rank": 243,
+          "public_target_sha256": "4f925340bf77313c9d90d7de3c93274665d6f8686778263b18f18adb9668650c",
+          "recovered_scalar": 476181703236,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "cf9f95edb6a6eca57843bc344f991d9267adab7ed8c626763271b12f4a639305"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T011",
+          "matrix_rank": 243,
+          "public_target_sha256": "944432693e76b6884b016bb636eef217fc3ddbd56c97030f3ff934335f277f4d",
+          "recovered_scalar": 207134223116,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "0b6196e87cb3b17fcaea9ad41759a006c18b7779e4d2ae422a4829f6d201e9e9"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T012",
+          "matrix_rank": 243,
+          "public_target_sha256": "abac5ce32fa8fda36caf6c43bcf55c231773799b82f445761a09852694626fd2",
+          "recovered_scalar": 171760292096,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "dc1f34cdb33901d815e39c8dc2b58ac4f6b2a0df98be2928cc45065ee0f09080"
+        }
+      ]
+    },
+    {
+      "factor_base_digest": "ca9bd9d1c64bc068e78186dfe3215884573ca799d90d50f5f69efb62c5fbbf82",
+      "factor_base_fixture": "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-pair-query-20261006/experiments/koblitz-s3-pair-query-20261007-v4/fb244_preflight.json",
+      "factor_base_fixture_sha256": "b4a1ea4a68d305bc7dd86e2dca56cb2d078f48ef9721d0f1ea28526419d99dca",
+      "factor_base_points_checked": 25864,
+      "field_modulus_powers": [
+        53,
+        6,
+        2,
+        1,
+        0
+      ],
+      "fixtures_sha256": "5f18351f40dd13e97dcf8921b7784f110abe963c418601df78a1cceac18c5112",
+      "folded_columns_checked": 244,
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "n": 53,
+      "relation_witnesses_group_checked": 2856,
+      "subgroup_order": 21044858204113,
+      "targets": [
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T001",
+          "matrix_rank": 237,
+          "public_target_sha256": "23fa30e0c4f05a7b2744491590c9a40e3abd32df0f1d5f2e9f16c4d1d9c25660",
+          "recovered_scalar": 14670575928188,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "6f4ced64059564ce9fafefda88911ff6586516bdebd2c81ccfeb830f72dffaa8"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T002",
+          "matrix_rank": 237,
+          "public_target_sha256": "634d1bbcd1df8dc2b95e10aaff6110510fd82ca810792bdeeae949655f2677e7",
+          "recovered_scalar": 2870639215557,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "680b7e816ea1d861a87d6e541d7357eb13fc9eddef1f86ffdbdfcbc4339a4ce3"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T003",
+          "matrix_rank": 237,
+          "public_target_sha256": "e80390b16ccb39ee28211d7d0753f203c005da949fc5f42f543bb15cc56370bb",
+          "recovered_scalar": 428069317639,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "74c921b3050fa3b48b5eac0b01cbffd7cf15b1f5f1653683aec57efb763b9246"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T004",
+          "matrix_rank": 237,
+          "public_target_sha256": "93f57c735d2e89dde9119dbb31cd56e3d349e2573f780c6cac26530bc984b3fb",
+          "recovered_scalar": 20760262443929,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "f99552600a4d26457a4042358597f1f31bb2da54152eb73408875e9b32cb6f83"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T005",
+          "matrix_rank": 237,
+          "public_target_sha256": "3f548e41c7b0d5b4ef1fdcd8e193b5c8c3bcfe3e5b205de0e37b0d3f62ee2aae",
+          "recovered_scalar": 20601613183419,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "05add67077e28a43045c54df76e4afde3e0b7708284107d2e789e101146a9317"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T006",
+          "matrix_rank": 237,
+          "public_target_sha256": "fa67aade14c1a04916b898109cafeac7738d532dfd50ae41f2fcc75cb0f2cec5",
+          "recovered_scalar": 17973556866106,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "c36db848161e2faaf0a316674d4ac211f63628f818963c9074fea9018a0187c0"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T007",
+          "matrix_rank": 237,
+          "public_target_sha256": "dd0be47c2095c33eb54ce93d6256519a115ea544550bed032ca7b1ed9296b0b3",
+          "recovered_scalar": 20092716364253,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "3d8a22ef06dd3c50ceb93a3591a9b2672febb312dd750cf040d5262bab4972f5"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T008",
+          "matrix_rank": 237,
+          "public_target_sha256": "506cf47a0b6ded90e0e81106917fc90f5cb97f02349adf5fb33e42bd909677aa",
+          "recovered_scalar": 20060692586424,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "dc6f8697b4e9ca2cb26a4670027e6593fe928a143bbe3eda28ab356ba678b7be"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T009",
+          "matrix_rank": 237,
+          "public_target_sha256": "a7c789d957470f4e2f1b492ba69fd23d434f64fca88b49e4fec51b19c27cb497",
+          "recovered_scalar": 8852546444268,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "1890b9b5a34e4211bc31b60aa7a5013a7fbab383b25aef9141c3568c498bc20f"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T010",
+          "matrix_rank": 237,
+          "public_target_sha256": "d72babd37ff125d19c1669a0fc1734203313a86c67a5e15cafd9a82e943ac453",
+          "recovered_scalar": 1747174738776,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "4da9653012f655ef6c7eb73d6eb1cd28aedb1efcef0d3413dce2545e4a98f125"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T011",
+          "matrix_rank": 237,
+          "public_target_sha256": "e25124382ca6d275c9e179c7c33491f82732baae7716ecfc5812395e0f8b5770",
+          "recovered_scalar": 2808751536225,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "7145880137dbf285e38c28e4f68f43f1216c6460b44a687a095cce25b153009d"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T012",
+          "matrix_rank": 237,
+          "public_target_sha256": "bfe13bb2612484b4fb10bff30904a846830db1c9e0a276ac6a81197ac08391a0",
+          "recovered_scalar": 3209507283552,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "94273e87b6ae970590a640af9244b39132ce2c612896d934ce2c6f26d2f4e9a1"
+        }
+      ]
+    }
+  ],
+  "kind": "modal_two_curve_independent_sage_replay_v1",
+  "panel_sha256": "85a5a7dcb150f9fdec38055dfbca6762bf70eab08e6f7c0c1194c676251dc2c6",
+  "relation_witnesses_group_checked": 5880,
+  "replay_script_sha256": "966c1316126ea0e038d3d82eb2ab18b635772e38ad8446596e3fc91ddc6d50af",
+  "replay_wall_ns": 707202469209,
+  "run_count_with_exact_raw_hash_checked": 146,
+  "sage_runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "sage_version": "10.10.rc0",
+  "scope": "all distinct public points, full factor bases, one semantic relation trace per target, rank and target scalar; no host timing certification",
+  "target_count": 24
+}

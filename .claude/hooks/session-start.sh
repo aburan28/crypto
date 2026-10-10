@@ -28,6 +28,13 @@ echo "== $(date -u +%FT%TZ) session start"
 project=crypto
 repo="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
 
+# Optional sparse checkout (docs/sparse-checkout.md): CRYPTO_SPARSE_PROFILE=harness
+# in the environment leaves ~4 GB of research archives off disk. Never fatal.
+if [ -n "${CRYPTO_SPARSE_PROFILE:-}" ]; then
+  (cd "$repo" && scripts/sparse-checkout.sh apply) \
+    || echo "sparse profile '$CRYPTO_SPARSE_PROFILE' not applied; checkout stays full"
+fi
+
 # Conductor, through the Go module proxy. The release installer cannot download
 # here (the session's GitHub proxy answers 403), and @latest resolves to v0.1.0,
 # whose go.mod declares the wrong module path.
