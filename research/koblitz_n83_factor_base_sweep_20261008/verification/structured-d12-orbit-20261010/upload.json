@@ -1,0 +1,156 @@
+{
+  "schema": "n83.structured-orbit-upload/v1",
+  "status": "PASS",
+  "source_commit": "67b251de4c921a8dd2ba34ad52f6afbc8bdabc3c",
+  "object": "objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+  "object_sha256": "c5de0b26e84ad80bfb7be6a214b89c9682e356effb6079c7abf28cd1151ffb03",
+  "object_blake3": "aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389",
+  "object_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+  "points_replayed_after_download": 332166,
+  "s3_head": {
+    "ContentLength": 10058074,
+    "LastModified": "2026-10-10T18:44:58+00:00"
+  },
+  "started_utc": "2026-10-10T18:44:52.141760+00:00",
+  "active_wall_seconds": 37.974145833002694,
+  "stages": [
+    {
+      "name": "s3-head-before",
+      "exit_code": 254,
+      "wall_seconds": 2.5095795830056886,
+      "command": [
+        "aws",
+        "s3api",
+        "head-object",
+        "--bucket",
+        "crypto-autoresearcher",
+        "--key",
+        "factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+        "--output",
+        "json"
+      ]
+    },
+    {
+      "name": "s3-upload-object",
+      "exit_code": 0,
+      "wall_seconds": 4.190213166999456,
+      "command": [
+        "aws",
+        "s3",
+        "cp",
+        "/private/tmp/n83_structured_d12_object/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+        "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+        "--no-progress",
+        "--only-show-errors"
+      ]
+    },
+    {
+      "name": "s3-download-object",
+      "exit_code": 0,
+      "wall_seconds": 3.228099166000902,
+      "command": [
+        "aws",
+        "s3",
+        "cp",
+        "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+        "/private/tmp/n83_structured_d12_roundtrip/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+        "--no-progress",
+        "--only-show-errors"
+      ]
+    },
+    {
+      "name": "s3-generic-replay",
+      "exit_code": 0,
+      "wall_seconds": 15.524538000005123,
+      "command": [
+        "target/release/examples/koblitz_n83_structured_orbit_export",
+        "replay",
+        "/private/tmp/n83_structured_d12_roundtrip"
+      ]
+    },
+    {
+      "name": "s3-upload-manifest",
+      "exit_code": 0,
+      "wall_seconds": 2.8487437500007218,
+      "command": [
+        "aws",
+        "s3",
+        "cp",
+        "/private/tmp/n83_structured_d12_object/manifest.json",
+        "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/manifests/bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca.json",
+        "--no-progress",
+        "--only-show-errors"
+      ]
+    },
+    {
+      "name": "s3-download-manifest",
+      "exit_code": 0,
+      "wall_seconds": 2.5009009159985,
+      "command": [
+        "aws",
+        "s3",
+        "cp",
+        "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/manifests/bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca.json",
+        "/private/tmp/n83_structured_d12_roundtrip/manifest-download.json",
+        "--no-progress",
+        "--only-show-errors"
+      ]
+    },
+    {
+      "name": "manifest-digest",
+      "sha256": "bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/manifests/bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca.json"
+    },
+    {
+      "name": "s3-upload-replay",
+      "exit_code": 0,
+      "wall_seconds": 2.115136665997852,
+      "command": [
+        "aws",
+        "s3",
+        "cp",
+        "/private/tmp/n83_structured_d12_object/replay.json",
+        "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/replays/071a85c8ec9a9cd9d21d9e33bd023bd43a8a50047a71c85db1623eb9e9735548.json",
+        "--no-progress",
+        "--only-show-errors"
+      ]
+    },
+    {
+      "name": "s3-download-replay",
+      "exit_code": 0,
+      "wall_seconds": 2.3026099589988007,
+      "command": [
+        "aws",
+        "s3",
+        "cp",
+        "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/replays/071a85c8ec9a9cd9d21d9e33bd023bd43a8a50047a71c85db1623eb9e9735548.json",
+        "/private/tmp/n83_structured_d12_roundtrip/replay-download.json",
+        "--no-progress",
+        "--only-show-errors"
+      ]
+    },
+    {
+      "name": "replay-digest",
+      "sha256": "071a85c8ec9a9cd9d21d9e33bd023bd43a8a50047a71c85db1623eb9e9735548",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/replays/071a85c8ec9a9cd9d21d9e33bd023bd43a8a50047a71c85db1623eb9e9735548.json"
+    },
+    {
+      "name": "s3-head-after",
+      "exit_code": 0,
+      "wall_seconds": 2.7364507500024047,
+      "command": [
+        "aws",
+        "s3api",
+        "head-object",
+        "--bucket",
+        "crypto-autoresearcher",
+        "--key",
+        "factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/objects/aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389.jsonl.gz",
+        "--output",
+        "json"
+      ]
+    }
+  ],
+  "total_index_calculus_runtime_ms": null,
+  "manifest_sha256": "bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca"
+}
