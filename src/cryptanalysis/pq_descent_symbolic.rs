@@ -352,7 +352,7 @@ impl SymbolicDescent {
     /// The free target abscissa a fiber-combined solution names: the word
     /// held in bits `m·n' … m·n' + n − 1`.  Meaningless on a plain descent.
     pub fn lift_target(&self, v: u64) -> u64 {
-        let base = (self.summands * self.n_prime) as u32;
+        let base = self.summands * self.n_prime;
         (0..self.n).fold(0u64, |acc, k| acc | (((v >> (base + k)) & 1) << k))
     }
 }
