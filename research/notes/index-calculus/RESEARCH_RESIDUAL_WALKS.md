@@ -2562,6 +2562,15 @@ of the eight curves lands at `0.453–0.614`, inside the band too.  So a plain `
 of rho.  Past the handover such a method would beat rho by **`1/r∞ ≈ 1.9×`**
 and no more.  That replaces the derived `1.6–3×`.
 
+*Accounting note (2026-10-10, `RESEARCH_GLV_INVARIANT_FACTOR_BASES.md` §9.3, E18).*  `r∞` here is
+against `rho4`, which walks without the negation map, the `S ≈ 1.3` convention of the table above.
+E18 measures the negation-folded walk on the same harness `1.31`–`1.32×` cheaper in `F_p`
+multiplications, and reproduces this `r∞` on different curves (`0.554 ± 0.027`).  Against the
+negation walk the same linear algebra reads **`0.733 ± 0.036`**: an edge of `1.36×`, not `1.9×`.
+The extrapolated handover moves accordingly, to `≈ 2^{156}`.  On `j = 0` curves the matched walk
+is `ψ`-folded, the plain method is `1.23×` it and never hands over, and a `ψ`-folded base is
+`0.138×`.  The figures above are unchanged; this says which rho they are against.
+
 **2. The inputs, measured against what §11.16 derived.**
 
 | input | derived | measured | effect on `r∞` |
