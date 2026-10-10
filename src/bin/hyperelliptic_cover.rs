@@ -10,6 +10,8 @@
 
 #[path = "curve_cover_check/checker.rs"]
 mod checker;
+#[path = "curve_cover_check/models.rs"]
+mod models;
 
 use clap::{Parser, Subcommand};
 use crypto_lib::binary_ecc::{
