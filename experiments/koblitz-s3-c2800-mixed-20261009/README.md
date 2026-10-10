@@ -75,6 +75,8 @@ bootstrap interval **0.621–1.967×**), with one of eight points at or above
 twofold. The largest measured process RSS was 25,814,581,248 bytes. The
 baseline and expanded median reusable setup times were 30.976 and 179.971 s,
 respectively; these are recorded separately from the online interval.
+Median charged PDP time per target S3 call was 0.805 and 2.523 microseconds
+for C1200 and C2800, respectively, on the same contended host.
 This Mac screen lacks a host-level isolation receipt, so its timing ratio is
 an exploratory diagnostic. The [ledger](local/raw_paired.jsonl.gz) and
 [raw reports](local/raw_reports.tar.gz) retain every measured row. The
