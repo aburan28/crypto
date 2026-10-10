@@ -24,6 +24,23 @@ The bounded, source-pinned K=64 factored S4 construction gate passed under a one
 
 The local Docker server exposed 7,529,156,608 bytes of VM memory at the guard check, less than the 48 GiB macOS host. The static x86-64 Linux worker ran inside an arm64 container under emulation. Its future construction wall time is therefore only a resource-capacity diagnostic; it cannot be used as a matched macOS index-calculus timing or a factor-base ranking.
 
+## Source-domain versus quotient-column gate
+
+The standard dimension-18 geometric subspace in [prior art](PRIOR_ART.md#earlier-n83-geometric-subspace-comparator) avoids an explicit 83-bit SAT membership table, but it pays for 130,722 sign-folded columns. The retained signed-Frobenius bases use explicit x-coordinate tables and quotient to far fewer columns. The following **nominal five-multiset capacities** use `comb(M+4,5) / 2417851639230796216685689`, where `M` is the exact count of nonidentity subgroup-usable points. They are counting ceilings before duplicate sums, torsion conditions, solver success or rank; they are not empirical probabilities or relation yields.
+
+| Base | Usable points `M` | Quotient columns | Nominal m=5 capacity | Solver gate |
+| --- | ---: | ---: | ---: | --- |
+| Retained K=64 | 10,624 | 64 | 0.000000467 | 1,851,925 domain clauses; one trial capped at 10,000 conflicts |
+| Retained K=256 | 42,496 | 256 | 0.000478 | 7,195,450 domain clauses; one trial capped at 10,000 conflicts |
+| Retained K=1,182 | 196,212 | 1,182 | 1.0024 | 32,142,830 required domain clauses exceeded the frozen 12M cap |
+| Retained K=2,048 | 339,968 | 2,048 | 15.653 | Read-only preflight: 55,017,910 required m=5 domain clauses; model/search unexecuted |
+| Earlier dimension-12 projected Frobenius closure | 332,166 | 2,001 | 13.937 | Structured source plus phase proposed; SAT and S3 publication unmeasured |
+| Standard subspace, dimension 18 | 261,444 | 130,722 | 4.2102 | Compact source equations; four ordinary 120-second SAT calls timed out |
+
+The K=64 and K=256 five-sum counting ceilings are tiny, so their capped one-trial searches primarily test solver execution and cannot rank a useful large base. Conversely, the dimension-18 subspace's 130,722 columns require at least that many independent logarithm equations for a full-column solve, over 63 times the retained K=2,048 column count. This is a rank-size obligation, not a lower bound on runtime. The K=2,048 base has a larger count ceiling and smaller matrix, but the current explicit-domain encoder exceeds its clause cap and cannot supply a solver runtime. The earlier dimension-12 orbit closure sits close to K=2,048 on both support and column count. Its source x-coordinate and Frobenius phase might admit a compact exact membership circuit, provided all 83 phases, signs, torsion lifts and exceptional points are covered and every model passes the original curve-group check. That circuit and its resource cost remain unmeasured. A next executable gate should construct and S3-replay this candidate, then produce verified natural relations for it and K=2,048 on the same target, measure independent rank per charged relation, and account for full cold cost. The geometric prior art used a different public target from this sweep, so its solver timeouts cannot serve as the matched comparison.
+
+The K=2,048 count came from a read-only S3 stream of the retained object in `verification/remaining-budget-k2048-20261010/manifest.json`. Its 10,313,647 compressed bytes matched SHA-256 `aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a`. Decompression gave the expected 339,968 point records and 169,984 distinct x-coordinates. An independent sorted-prefix traversal, matching `finite_domain_clause_count`'s missing-child recurrence, counted 11,003,582 clauses per summand and **55,017,910** for m=5. The Python stream and traversal took 40.071 seconds of process wall. This was an exploratory exact count, not a frozen solver timing or model-construction memory measurement; the full 12-million-clause admission cap would reject it before installing a model. A conservative 120-second charge for this check and its preparation brings the local two-hour pilot audit to **6,802.092994294 of 7,200 seconds**, leaving **397.907005706 seconds**. The prior immutable budget receipts remain unchanged.
+
 ## Current-main applicability audit (2026-10-09)
 
 The refreshed `origin/main` source snapshot is
