@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>com.aburan.iso1.census.20261009.resume71</string>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><false/>
+<key>ProgramArguments</key><array>
+<string>/usr/bin/env</string><string>PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+<string>ISO1_QUEUE_RUNTIME_MANIFEST_DIR=/Users/adamburan/Library/Application Support/crypto-iso1/runtime-20261009/research/iso1_weak_classes_20261007/census_runtime</string>
+<string>/Users/adamburan/Library/Application Support/crypto-iso1/runtime-20261009/bin/iso1_census_queue</string>
+<string>/Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run5</string>
+<string>71</string><string>73</string><string>79</string><string>83</string><string>89</string><string>97</string><string>101</string><string>103</string><string>107</string><string>109</string><string>113</string><string>127</string><string>131</string><string>137</string><string>139</string><string>149</string><string>151</string><string>157</string><string>163</string><string>167</string><string>173</string><string>179</string><string>181</string><string>191</string><string>193</string><string>197</string><string>199</string>
+</array>
+<key>StandardOutPath</key><string>/Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run5/service.stdout</string>
+<key>StandardErrorPath</key><string>/Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run5/service.stderr</string>
+</dict></plist>

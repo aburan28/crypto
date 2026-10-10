@@ -1,0 +1,26 @@
+
+running 21 tests
+test identity_certificate_source::tests::degree_bound_is_checked_syntactically_not_trusted ... ok
+test identity_certificate_source::tests::canonical_bytes_are_sorted_and_round_trip ... ok
+test identity_certificate_source::tests::field_arithmetic_agrees_with_u128_reference ... ok
+test sha256_source::tests::sha224_abc ... ok
+test sha256_source::tests::sha224_empty ... ok
+test sha256_source::tests::sha256_abc ... ok
+test sha256_source::tests::sha256_block_boundary_55 ... ok
+test sha256_source::tests::sha256_empty ... ok
+test sha256_source::tests::sha256_fips180_112byte ... ok
+test identity_certificate_source::tests::committed_schoenhage_certificate_still_checks ... ok
+test sha256_source::tests::sha256_fips180_56byte ... ok
+test identity_certificate_source::tests::the_identity_without_its_error_term_is_false_and_cannot_be_issued ... ok
+test identity_certificate_source::tests::tampering_with_the_digest_is_detected ... ok
+test identity_certificate_source::tests::points_depend_on_the_id_so_the_author_cannot_pre_pick_them ... ok
+test sha256_source::tests::sha256_hello_world ... ok
+test identity_certificate_source::tests::swapping_the_statement_under_a_sealed_id_is_malformed ... ok
+test sha256_source::tests::sha256_two_blocks_64 ... ok
+test identity_certificate_source::tests::schoenhage_identity_certifies_and_checks ... ok
+test sha256_source::tests::streaming_matches_one_shot_at_every_split ... ok
+test sha256_source::tests::streaming_million_a ... ok
+test sha256_source::tests::sha256_million_a ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

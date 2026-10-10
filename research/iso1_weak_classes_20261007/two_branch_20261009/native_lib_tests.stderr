@@ -1,0 +1,8 @@
+   Compiling iso1-report-check-runtime v0.1.0 (/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/report_check_runtime)
+error: couldn't read `../../../src/cryptanalysis/../../docs/identity-certificates/schoenhage-10mult.json`: No such file or directory (os error 2)
+   --> ../../../src/cryptanalysis/identity_certificate.rs:832:20
+    |
+832 |         let text = include_str!("../../docs/identity-certificates/schoenhage-10mult.json");
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: could not compile `iso1-report-check-runtime` (lib test) due to 1 previous error

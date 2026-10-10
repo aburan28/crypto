@@ -1,0 +1,707 @@
+[
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h40099ec00a503c89",
+    "statement": {
+      "name": "ISO-1 cleared duplication x-coordinate",
+      "source": "research/iso1_weak_classes_20261007/large_population_20261009/REPORT.tex; one-edge full-4-torsion theorem",
+      "variables": [
+        "x",
+        "a",
+        "b"
+      ],
+      "degree_bound": 4,
+      "lhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 3
+                      },
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "var",
+                            "args": "x"
+                          },
+                          {
+                            "op": "var",
+                            "args": "x"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 2
+                      },
+                      {
+                        "op": "var",
+                        "args": "a"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 3
+                      },
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "var",
+                            "args": "x"
+                          },
+                          {
+                            "op": "var",
+                            "args": "x"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 2
+                      },
+                      {
+                        "op": "var",
+                        "args": "a"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "neg",
+            "args": {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 4
+                },
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x"
+                        },
+                        {
+                          "op": "var",
+                          "args": "x"
+                        },
+                        {
+                          "op": "var",
+                          "args": "x"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "a"
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "x"
+                            },
+                            {
+                              "op": "var",
+                              "args": "x"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "b"
+                        },
+                        {
+                          "op": "var",
+                          "args": "x"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "a"
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "const",
+                          "args": 2
+                        },
+                        {
+                          "op": "var",
+                          "args": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "rhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  }
+                ]
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "b"
+                }
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  }
+                ]
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "b"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "3821b738fb1da8807895c0fbebf5373d4c5ba77801495b903c676e5740df96f2",
+    "independence": "Exact duplication and geometric-sum polynomial identities; the torsion and norm-fiber arguments have separate deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hc1132e34bb8c94e8",
+    "statement": {
+      "name": "ISO-1 degree-3 norm-fiber cardinality",
+      "source": "research/iso1_weak_classes_20261007/large_population_20261009/REPORT.tex; direct weak-model union bound",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 3,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "5407249b9e2d118b83f16b02266276faf75fee7499a38cc1ca8c9dcf4fe6997c",
+    "independence": "Exact duplication and geometric-sum polynomial identities; the torsion and norm-fiber arguments have separate deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h547a8ae22b837173",
+    "statement": {
+      "name": "ISO-1 degree-5 norm-fiber cardinality",
+      "source": "research/iso1_weak_classes_20261007/large_population_20261009/REPORT.tex; direct weak-model union bound",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 5,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "8f64c6988f0772039f490fa3b02f92ba83a7b93057cf80c852ca37612021c04a",
+    "independence": "Exact duplication and geometric-sum polynomial identities; the torsion and norm-fiber arguments have separate deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hcacc5ce8020b68ac",
+    "statement": {
+      "name": "ISO-1 degree-7 norm-fiber cardinality",
+      "source": "research/iso1_weak_classes_20261007/large_population_20261009/REPORT.tex; direct weak-model union bound",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 7,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "2c418469cc3046fd9ab9c7eddaf957016dfd59ea7fe0ee25e867f73034973e7f",
+    "independence": "Exact duplication and geometric-sum polynomial identities; the torsion and norm-fiber arguments have separate deductive proofs.",
+    "proof": null
+  }
+]

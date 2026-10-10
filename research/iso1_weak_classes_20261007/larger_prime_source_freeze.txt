@@ -1,0 +1,20 @@
+census_binary=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/census_runtime/target/release/iso1_class_census sha256=51f14c7022addcee5711d4de3ad67baf632eb84e83c76ce077b9c974be3ff216
+audit_binary=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/census_runtime/target/release/iso1_census_audit sha256=18c89d29af06b7426f6fc0c7c5bc7541e6e5c606ee7c2f8a4cf189836529e435
+queue_binary=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/census_runtime/target/release/iso1_census_queue sha256=5f40eee46c5ca05eb51b217550022474a23143ddf676973223d83eff93885270
+RAYON_NUM_THREADS=4
+Host: correctness campaign; wall time is resource accounting.
+cc952dad18e15da25bd0bde6ef64baa2f96cdd1ec1d968dc30f7eb11b9338147 /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/examples/iso1_class_census.rs
+f9c3a389993a4e13360c4d43a7d5a67ccc669f72130615d71c25f5dd035ba2a5 /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/census_runtime/src/field_kernel.rs
+bc6b2b339fd8125b6e5e615e6f49e319167009fc65cf7faa923b27ac8ca4f4fe /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/census_runtime/src/point_count_kernel.rs
+ab04318e66376df14d3916189af40e3fbc2a8f1b4f6cf9bdd7930f425f3034ef /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/census_runtime/src/scalar_kernel.rs
+3d61b299e963aff4f6ad1f6c2c55508c45133296a3f3d0387816e1f461087af2 /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/census_runtime/Cargo.lock
+11b7b5d614f6ee426c4c6786e9ff006d0404915bc73dc2198e0684000cf456d1 /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/gp_large_prime_control.gp
+uname -a Darwin Adams-MacBook-Pro.local 25.6.0 Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041 arm64
+
+rustc --version rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)
+
+gp --version                   GP/PARI CALCULATOR Version 2.17.3 (released)
+         arm64 running darwin (aarch64/GMP-6.3.0 kernel) 64-bit version
+      compiled: Nov 11 2025, Apple clang version 17.0.0 (clang-1700.4.4.1)
+                           threading engine: pthread
+                (readline v8.3 disabled, extended help enabled)

@@ -1,0 +1,128 @@
+name: ISO-1 theorem and exact census replay
+on:
+  pull_request:
+    paths:
+      - 'examples/iso1_class_census.rs'
+      - 'examples/iso1_report_check.rs'
+      - 'examples/iso1_theorem_check.rs'
+      - 'research/iso1_weak_classes_20261007/**'
+      - 'research/weak_curve_catalog_20261010/**'
+      - 'docs/curves/weak-families/**'
+      - 'src/hash/sha256.rs'
+      - 'src/cryptanalysis/identity_certificate.rs'
+      - '.github/workflows/iso1-theorem.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install independent point counter
+        run: sudo apt-get update && sudo apt-get install -y pari-gp
+      - name: Native polynomial replay and mutation controls
+        run: |
+          cargo test --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bins
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_theorem_check -- research/iso1_weak_classes_20261007/theorem_identity_certificates.json
+      - name: Native census checks
+        run: |
+          cargo test --release --locked --manifest-path research/iso1_weak_classes_20261007/census_runtime/Cargo.toml --bins
+          cargo build --release --locked --manifest-path research/iso1_weak_classes_20261007/census_runtime/Cargo.toml --bins
+      - name: Weak-curve catalogue and immutable model/class joins
+        run: |
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin weak_curve_catalog -- check .
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_two_branch_seal -- docs/curves/weak-families --check
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_two_branch_seal -- research/weak_curve_catalog_20261010 --check
+      - name: Exact algebra and generalized finite-field controls
+        run: |
+          study=research/iso1_weak_classes_20261007
+          gp -q -f "$study/theorem_algebra_check.gp" > algebra.txt 2> algebra.stderr
+          test ! -s algebra.stderr
+          cmp algebra.txt "$study/theorem_algebra_check.txt"
+          gp -q -f "$study/generalized_theorem_check.gp" > generalized.txt 2> generalized.stderr
+          test ! -s generalized.stderr
+          cmp generalized.txt "$study/generalized_theorem_check.txt"
+          gp -q -f "$study/census_field_receipt.gp" > fields.txt 2> fields.stderr
+          test ! -s fields.stderr
+          cmp fields.txt "$study/census_field_receipt.txt"
+          gp -q -f "$study/p7_counterexample_check.gp" > counterexample.txt 2> counterexample.stderr
+          test ! -s counterexample.stderr
+          cmp counterexample.txt "$study/p7_counterexample_check.txt"
+          gp -q -f "$study/larger_fields_20261009/orbit_exact.gp" > prime_orbit.txt 2> prime_orbit.stderr
+          test ! -s prime_orbit.stderr
+          cmp prime_orbit.txt "$study/larger_fields_20261009/orbit_exact.txt"
+      - name: Prime-degree orbit replay and larger-degree smoke
+        run: |
+          study=research/iso1_weak_classes_20261007
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_prime_degree_check -- "$study/larger_fields_20261009/orbit_identity_certificate.json"
+          ISO1_P=13 ISO1_A=2 ISO1_N=5 ISO1_SAMPLES=2 ISO1_SEED=20261009 ISO1_MODE=count gp -q -f -s 256M "$study/larger_fields_20261009/control.gp" > degree5.txt 2> degree5.stderr
+          test ! -s degree5.stderr
+          test "$(tail -n 1 degree5.txt)" = 'COMPLETE|13|2|5|2'
+          gp -q -f -s 256M "$study/larger_fields_20261009/replay_models.gp" > models.txt 2> models.stderr
+          test ! -s models.stderr
+          cmp models.txt "$study/larger_fields_20261009/model_coordinate_replay.txt"
+      - name: Large-population receipts, one-edge theorem and saved routes
+        run: |
+          study=research/iso1_weak_classes_20261007
+          pop="$study/large_population_20261009"
+          for run in validation_p7_run1 pilot_run1 positive_controls_run1 population_run1; do
+            cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_population_check -- "$pop" "$pop/$run"
+          done
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_population_structure -- "$pop/identity_certificates.json"
+          gp -q -f -s 256M "$pop/structure_exact.gp" > population_algebra.txt 2> population_algebra.stderr
+          test ! -s population_algebra.stderr
+          cmp population_algebra.txt "$pop/structure_exact.txt"
+          gp -q -f -s 256M "$pop/torsion_exact.gp" > one_edge.txt 2> one_edge.stderr
+          test ! -s one_edge.stderr
+          cmp one_edge.txt "$pop/torsion_exact.txt"
+          ISO1_POPULATION_STUDY="$pop" gp -q -f -s 256M "$pop/replay_models.gp" > population_models.txt 2> population_models.stderr
+          test ! -s population_models.stderr
+          cmp population_models.txt "$pop/model_replay.txt"
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_population_structure -- --quartic "$pop/quartic_identity_certificate.json"
+          ISO1_POPULATION_STUDY="$pop" gp -q -f -s 256M "$pop/quadratic_replay.gp" > quadratic.txt 2> quadratic.stderr
+          test ! -s quadratic.stderr
+          cmp quadratic.txt "$pop/quadratic_replay.txt"
+          ISO1_P=7 ISO1_N=3 ISO1_SEED=202610090013 ISO1_BUDGET=256 ISO1_MODE=population gp -q -f -s 256M "$pop/sample.gp" > population_smoke.txt 2> population_smoke.stderr
+          test ! -s population_smoke.stderr
+          test "$(tail -n 1 population_smoke.txt)" = 'COMPLETE|7|3|202610090013|population'
+      - name: Two-branch class decisions and independently saved maps
+        run: |
+          study=research/iso1_weak_classes_20261007
+          dual="$study/two_branch_20261009"
+          cargo test --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --lib
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_seal -- "$dual" --check
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_check -- "$dual"
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_algebra -- "$dual/identity_certificates.json"
+          cargo run --release --locked --manifest-path "$study/report_check_runtime/Cargo.toml" --bin iso1_two_branch_exact -- "$dual/p7_run1/stdout.txt" > exact_two_branch.txt
+          cmp exact_two_branch.txt "$dual/exact_p7_run1.txt"
+          ISO1_INPUTS="$dual/replay_inputs.gp" gp -q -f -s 256M "$dual/replay.gp" > two_branch_maps.txt 2> two_branch_maps.stderr
+          test ! -s two_branch_maps.stderr
+          test "$(tail -n 1 two_branch_maps.txt)" = 'ALGEBRA_COMPLETE|saved_routes=230|literal_models=117'
+          gp -q -f -s 256M "$dual/cm_microfactor.gp" > quadratic_microfactor.txt 2> quadratic_microfactor.stderr
+          test ! -s quadratic_microfactor.stderr
+          cmp quadratic_microfactor.txt "$dual/cm_microfactor_run1/stdout.txt"
+          ISO1_P=7 ISO1_BRUTE=1 gp -q -f -s 256M "$dual/torus_census.gp" > two_tori.txt 2> two_tori.stderr
+          test ! -s two_tori.stderr
+          test "$(tail -n 1 two_tori.txt)" = 'TWO_BRANCH_COMPLETE|p=7|plus_orbits=213|minus_orbits=196|ordinary_classes=294|plus_support=126|minus_support=210|overlap=88|combined_zero=46|brute_alpha=117600'
+      - name: Replay every p7 orbit by exact field enumeration
+        env:
+          RAYON_NUM_THREADS: '2'
+          ISO1_P: '7'
+        run: |
+          study=research/iso1_weak_classes_20261007
+          runtime="$study/census_runtime/target/release"
+          "$runtime/iso1_class_census" 7 p7.csv --derive-twists --absolute-orbit-quotient --exact-squares
+          cmp p7.csv "$study/p7_exact_absolute.csv"
+          gp -q -f "$study/gp_full_absolute_orbit.gp" > p7_gp.csv 2> p7_gp.stderr
+          test ! -s p7_gp.stderr
+          "$runtime/iso1_census_audit" p7.csv orbits p7_gp.csv
+      - name: Replay the p13 orbit reduction against the retained census
+        env:
+          RAYON_NUM_THREADS: '2'
+        run: |
+          study=research/iso1_weak_classes_20261007
+          runtime="$study/census_runtime/target/release"
+          "$runtime/iso1_class_census" 13 p13.csv --derive-twists --absolute-orbit-quotient
+          cmp p13.csv "$study/p13_twist_derived.csv"

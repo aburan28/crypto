@@ -1,0 +1,30 @@
+[package]
+name = "iso1-census-runtime"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[lib]
+name = "crypto_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "iso1_class_census"
+path = "../../../examples/iso1_class_census.rs"
+
+[[bin]]
+name = "iso1_census_audit"
+path = "src/audit.rs"
+
+[[bin]]
+name = "iso1_census_queue"
+path = "src/queue.rs"
+
+[dependencies]
+rand = "0.8"
+rayon = "1.10"
+
+[dev-dependencies]
+hex = "0.4"

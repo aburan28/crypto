@@ -1,0 +1,30 @@
+ISO-1 corrected exhaustive normalized-representative census, continuation 2026-10-08
+
+Source: examples/iso1_class_census.rs at f70c6abc5fd1ee4a1dfa88475bd4d357e80b4501
+Host: arm64 macOS, contended; RAYON_NUM_THREADS=4
+Executable SHA-256: 923d687011fd804adb2fae9c105509f4b2b337b0187a7b0d43d9cdba67864b55
+Counter: randomized two-point baby-step/giant-step curve_order; labels are probabilistic.
+The prior chat's process sessions ended before stdout/stderr could be recovered.
+The wall durations and process exit statuses are therefore unavailable; neither
+is inferred from CSV modification times. Both CSVs are complete, closed files.
+
+p=41, q=1681
+Command: RAYON_NUM_THREADS=4 target/release/examples/iso1_class_census 41 research/iso1_weak_classes_20261007/p41_twist_derived.csv --derive-twists
+CSV SHA-256: 3da8253329e2003dc9505566d2a6dbc458fc0eea49d4ebd5bdcd08a540f42375
+Hasse candidate rows: 68,922; ordinary rows: 67,240; nonordinary/boundary: 1,682.
+Weak ordinary rows: 33,224; zero ordinary rows: 34,016.
+Depth-1 weak/rows: 0/33,620; depth-at-least-2 zero/rows: 396/33,620.
+Sum of representative counts: 5,654,884 = 2q^2+2q.
+
+p=43, q=1849
+Command: RAYON_NUM_THREADS=4 target/release/examples/iso1_class_census 43 research/iso1_weak_classes_20261007/p43_twist_derived.csv --derive-twists
+CSV SHA-256: f1e73aa3ad114063ea61f68fd58ba5fc83b85b3882aef8c996d34eed6349cab8
+Hasse candidate rows: 79,508; ordinary rows: 77,658; nonordinary/boundary: 1,850.
+Weak ordinary rows: 38,452; zero ordinary rows: 39,206.
+Depth-1 weak/rows: 0/38,830; depth-at-least-2 zero/rows: 376/38,828.
+Sum of representative counts: 6,841,300 = 2q^2+2q.
+
+Validation: p=13 full four-branch and twist-derived CSVs matched byte for byte
+in the prior round. Independent PARI/GP positive-label controls for p=41,43
+are recorded in gp_p41_p43_validation_receipt.txt. They do not certify
+individual zero labels or every representative's randomized point count.
