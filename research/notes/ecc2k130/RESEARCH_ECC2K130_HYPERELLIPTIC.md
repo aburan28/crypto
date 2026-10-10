@@ -8,7 +8,8 @@ which agrees to 0.0048 on every value this note cites)
 field register; this note is the genus register), `research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md` and
 `research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md` §8 (the genus-2 gluing machinery, applied to a prime
 field), `research/ghs-c2pnb/ghs_poc.py` (GHS magic numbers and the Hess isogeny
-shift, on the curves where that attack lands), `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` (the
+shift, swept on the ANSI X9.62 composite-degree curves, where the shift is only a
+hypothetical), `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` (the
 same barrier from the factor-base side).
 
 > **Correction, 2026-10-06 (accounting).**  This note said the genus *any*
@@ -21,6 +22,15 @@ same barrier from the factor-base side).
 > No modelled or measured number below changed.  See
 > `research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`, which also
 > closes cyclic covers below genus 1300.
+
+> **Correction, 2026-10-09 (attribution).**  §3 said the Hess/Menezes-Teske
+> isogeny walk is "exactly how `c2pnb176w1` fell, at `m′ = 5`, genus 16 over
+> `F_2^16`".  No paper read for this repository reports that curve broken, and
+> neither Menezes-Teske paper mentions it.  The source of the `m′ = 5` figure is
+> Maurer-Menezes-Teske (2002) §6, where it is a hypothetical isogenous instance
+> `(n, m) = (8, 5)`, genus 16 over `F_2^22`, that the authors judge infeasible to
+> find.  The trichotomy argument for `F_2^131` does not use the example and
+> stands; no number computed in this note changed.
 
 The question.  `E : y² + xy = x³ + 1` over `F_2^131` has genus 1.  Curves of
 higher genus have Jacobians, Jacobians admit index calculus, and in the
@@ -180,9 +190,17 @@ the script asserts `m ∈ {1, 130, 131}` and the exact `Tr(b)` correspondence on
 every sample, not just the distribution.
 
 **This closes the Hess/Menezes-Teske route too.**  That attack raises a magic
-number of 1 by walking to an isogenous curve with `b′ ∉ F_2` — which is exactly
-how `c2pnb176w1` fell, at `m′ = 5`, genus 16 over `F_2^16`
-(`research/ghs-c2pnb/ghs_poc.py`).  Here the walk has nowhere to land: the
+number of 1 by walking to an isogenous curve with `b′ ∉ F_2`.  The worked example
+in the literature is the ANSI X9.62 curve `c2pnb176w1`, and it is a hypothetical,
+not a break.  Maurer–Menezes–Teske (LMS J. Comput. Math. 5 (2002), §6, Remark 26
+and Table 4) find that an isogenous curve with `(n, m) = (8, 5)` would descend to
+genus 16 over `F_2^22`, at Enge–Gaudry cost `2^61`–`2^65` against rho `2^87` in
+their units.  About `2^110` of the roughly `2^176` isomorphism classes have those
+parameters, a density of roughly `2^-66`, so the walk costs more than rho (about `2^88`
+operations on the `N·2^(v+15)` model of Menezes–Teske 2005, our arithmetic) and
+the authors judge finding such a curve infeasible.  Neither Menezes–Teske paper
+mentions `c2pnb176w1`, and `research/ghs-c2pnb/ghs_poc.py` only sweeps
+hypothetical `m′`.  Here the walk has nowhere to land: the
 trichotomy is a statement about the *field*, not about one curve, so every
 curve in every isogeny class over `F_2^131` has magic number 1, 130 or 131.
 
@@ -388,7 +406,10 @@ obstacle, and it acts on the genus exactly as it acts on the field.**
 - F. Hess, *Generalising the GHS attack on the elliptic curve discrete
   logarithm problem*, LMS J. Comput. Math. 7 (2004).
 - A. Menezes, E. Teske, *Cryptographic implications of Hess' generalized GHS
-  attack*, AAECC 16 (2006).
+  attack*, AAECC 16 (2006).  Does not discuss the X9.62 curves.
+- M. Maurer, A. Menezes, E. Teske, *Analysis of the GHS Weil descent attack on
+  the ECDLP over characteristic two finite fields of composite degree*, LMS J.
+  Comput. Math. 5 (2002) 127–174, §6 (the X9.62 curves).
 - C. Diem, *On the discrete logarithm problem in elliptic curves*,
   Compositio Math. 147 (2011).
 - P. Gaudry, *An algorithm for solving the discrete log problem on hyperelliptic
