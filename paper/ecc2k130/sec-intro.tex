@@ -21,7 +21,7 @@ file in the repository that holds it. The work is not an advance on
 the generic-group floor and the paper does not say it is. What it
 reports is the cost of one step, measured on GPUs, CPUs and an FPGA,
 the number of steps, measured on toy curves of the same family and
-extrapolated, and a campaign that walked $2^{56.4}$ of the $2^{60.9}$
+extrapolated, and a campaign that has walked $2^{56.7}$ of the $2^{60.9}$, most of it
 before its fleet was taken away.
 
 \paragraph{Contributions.}
@@ -38,17 +38,19 @@ before its fleet was taken away.
   walk, with the table walk's fruitless cycles measured, priced and
   repaired (Section~\ref{sec:walk}).
 \item A GPU ledger of sixteen paired rungs from $0.85$ to
-  $14.64$~B/s on one RTX~PRO~6000, a table walk at $20.08$~B/s, a
+  $14.64$~B/s on one RTX~PRO~6000, the campaign build; later
+  $\sigma$-walk builds at $15.44$ and $15.88$; a table walk at
+  $20.08$~B/s, a rate whose cost per solve is not yet measured; a
   twelve-SKU survey, a roofline, and a floor derived from the
   carry-less unit before tuning that rules out $28$~B/s on one card;
   with every declined candidate and its ratio (Section~\ref{sec:gpu}).
 \item A pipelined-Karatsuba FPGA engine measured at $8.25$~G steps/s
   on one AWS F2, within a pre-board estimate of $5$--$12$
   (Section~\ref{sec:fpga}).
-\item A live campaign: configuration, the calibration of the
+\item The campaign: configuration, the calibration of the
   distinguished-point interval (and the retraction of a wrong one),
   the storage and replay protocol, fleet economics, and the state at
-  $367$~M points (Section~\ref{sec:campaign}).
+  $486$~M points and $2^{56.68}$ iterations (Section~\ref{sec:campaign}).
 \item The structural alternatives priced in the same unit and found
   wanting: index calculus on the Koblitz curve at $10^7\times$ rho, and
   point decomposition $35$--$51$ bits short of its budget
@@ -56,35 +58,47 @@ before its fleet was taken away.
 \end{itemize}
 
 \paragraph{Method.} The reporting rule of the repository, stated
-here once, governs every section~\cite{ecdlppaper}. A change is
-measured as a ratio to a boundary that was written down first: a
-floor from a counting or pipe argument that the method cannot cross,
-or a reference, the best existing method on the same instance in the
-same unit. Every change is classified by what moved: an
-\emph{advance} lowers the ratio to the floor; \emph{engineering}
-lowers the cost with the ratio to the floor flat; \emph{relabelling}
-lowers a headline while the total rises; \emph{accounting} changes a
-number without changing the algorithm. All four are committed, and
-every row in this paper is one of the last three. A rate quoted
+here once, governs every section. A change is measured as a ratio to
+a boundary that was written down before the change was attempted: a
+\emph{floor}, from a counting, generic-group or hardware-pipe argument
+that the method cannot cross, or a \emph{reference}, the best existing
+method on the same instance in the same unit. Every cost the method
+incurs is inside the ratio: precomputation, verification, the
+inversion a batch shares, the work left in flight when a collision
+lands. A number that prices one phase is a stage diagnostic, never a
+speed. Every change is classified by what moved: an \emph{advance}
+lowers the ratio to the floor; \emph{engineering} lowers the cost with
+the ratio to the floor flat; \emph{relabelling} lowers a headline
+while the total rises; \emph{accounting} changes a number without
+changing the algorithm. All four are committed, and every row in this
+paper is one of the last three. The same rule, applied across Pollard
+rho, baby-step giant-step, kangaroo and prime-field index calculus,
+is the subject of a companion draft in the sibling
+library~\cite{ecdlppaper}; this paper does not depend on it. A rate quoted
 without its paired control, its hardware and its geometry is the
 unit mistake this paper tries hardest not to make, and
 Sections~\ref{sec:ledger} and \ref{sec:campaign-interval} each record
 one instance where an earlier draft of the repository made it.
 
-\paragraph{Two repositories.} The campaign lives in a study
-repository, \thisrepo, whose notes this paper cites by path. A
-sibling library, \sibling, holds an independent C golden model of the
-same field, a digit-serial FPGA core with no vendor timing, an import
-of the $20$~B/s GPU client with its own host re-walk, and the
-boundary ledger for index calculus; its companion
-paper~\cite{ecdlppaper} places ECC2K-130 among other discrete-logarithm
-measurements in the unit $S=\text{ops}/\sqrt n$. Paths prefixed
-\texttt{cryptanalysis:} are in that library; two evidence records cited
-in Section~\ref{sec:alternatives} live in a third repository, the
-research ledger, and are prefixed \texttt{autoresearcher:}.
+\paragraph{Availability.} Every number in this paper carries a
+footnote naming the file it came from. The campaign lives in a public
+study repository, \thisrepo\ (\url{https://github.com/aburan28/crypto}),
+whose notes are cited by path relative to its root. A public sibling
+library, \sibling\ (\url{https://github.com/aburan28/cryptanalysis}),
+holds an independent C golden model of the same field, a digit-serial
+FPGA core with no vendor timing, an import of the $20$~B/s GPU client
+with its own host re-walk, and the boundary ledger for index
+calculus; its paths are prefixed \texttt{cryptanalysis:}. Two evidence
+records cited in Section~\ref{sec:alternatives} live in a third public
+repository, the research ledger
+(\url{https://github.com/aburan28/crypto-autoresearcher}), prefixed
+\texttt{autoresearcher:}. The campaign's live aggregates are published
+at \url{https://aburan28.github.io/crypto/status/}; the snapshot this
+paper reports is committed beside the paper source.
 
 \paragraph{What is not claimed.} No logarithm has been recovered on
-the challenge curve and none is expected from the corpus so far. No
+the challenge curve and none is expected from the corpus so far;
+collection is paused and the paper says so. No
 rate in this paper is quoted for hardware that was not measured; the
 L40S collection rate, the RTX~PRO~4500 collection rate under the
 bridge map and the G7e instance family are unmeasured and are said to
