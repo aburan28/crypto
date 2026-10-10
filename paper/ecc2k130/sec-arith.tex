@@ -1,0 +1,105 @@
+\section{Field arithmetic: two representations, one model}
+\label{sec:arith}
+
+A step is dominated by field multiplication: two products for the
+addition and, with $W$ walks sharing one inversion by Montgomery's
+trick~\cite{montgomery1987}, $3(W-1)/W$ more for the product tree,
+plus $1/W$ of an Itoh--Tsujii inversion~\cite{itoh1988} that costs
+eight multiplications along the chain
+$1,2,4,8,16,32,64,128,130$ in a basis where squaring is free. Going
+from $W=4$ to $W=32$ is worth $60\%$ on the CPU client because it
+drives the amortised inversion from $25\%$ to $3\%$ of the
+multiplication budget.\art{ecc2k130/README.md, ``Throughput''} The
+representation of a multiplication is therefore the design decision,
+and the repository carries two.
+
+\subsection{Bitsliced: 32 walks in the bits of a word}
+\label{sec:arith-bitsliced}
+
+The original client is bitsliced in the sense of
+Biham~\cite{biham1997}: one word operation advances $W$ walks at once,
+one per bit lane, and a field operation is a straight-line program of
+word-wide Boolean instructions generated from the field model. The
+device uses 32-bit words; the host picks the widest it has (AVX-512
+gives 512 lanes, AVX2 256, NEON 128), and the arithmetic source is
+identical at every width.\art{ecc2k130/README.md, ``Word width''}
+
+Multiplication follows Bernstein and Lange~\cite{bernsteinlange2010onb}:
+convert both operands from the normal basis to the optimal polynomial
+basis $\{1,c,c^2,\ldots\}$ with $c=\gamma_1$, multiply as polynomials,
+and convert the 261-coefficient product back. Both conversions are
+generated from the substitution $c=z+1/z$, which splits by parity as
+$H(c)=H_{\mathrm{even}}(c^2)+c\,H_{\mathrm{odd}}(c^2)$; since squaring
+is an index permutation this gives an $O(K\log K)$ conversion. The
+generated \texttt{multPrep} is 331 instructions and the double-size
+inverse conversion 903, against 325 and 909 for the hand-designed
+chains in the literature.\art{ecc2k130/README.md, ``Findings''}
+
+Two findings from this backend change the standard accounting. First,
+three-input logic fusion (\texttt{LOP3} on NVIDIA, \texttt{vpternlogd}
+on AVX-512, \texttt{BSL}/\texttt{EOR3} on Arm with \texttt{FEAT\_SHA3})
+is worth $1.65\times$: a 131-bit multiplication is $14{,}554$ two-input
+bit operations but $8{,}859$ instructions once $x\oplus y\oplus z$ and
+$x\oplus(y\wedge z)$ are single instructions. Because the fused form
+charges nothing for the XOR that accompanies an AND, schoolbook leaves
+beat Karatsuba leaves~\cite{karatsuba1962}: full recursion costs
+$18{,}819$ bit operations and $14{,}770$ instructions, while stopping at
+a 17-bit schoolbook leaf costs more bit operations and fewer
+instructions. A search over balanced and unbalanced splits found
+nothing below $8{,}859$; Toom-3 over $\FF_2$, the source of Bernstein's
+$11{,}961$-bit-operation chain~\cite{bernstein2009batch}, is not
+implemented. Second, code size rather than arithmetic is the wall:
+inlining everything produced $285{,}096$ PTX instructions for one
+kernel and \texttt{ptxas} had not finished register allocation after
+five minutes; marking the multiplication, inversion, conversions,
+leaf, weight tree and $\sigma^j$ as real subroutines brings it to
+$36{,}553$ lines and a $2.4$~s assembly.\art{ecc2k130/README.md, ``Findings''}
+
+The Hamming-weight tree is 268 instructions against 654 bit
+operations, because a full adder is two \texttt{LOP3}s. The whole
+bitsliced iteration is about $60{,}000$ instructions per 32 walks on
+$\mathrm{GF}(2^{131})$; on the GPU that is the $0.85$~B/s control of
+Section~\ref{sec:ledger}, and its instruction-count ceiling on the
+RTX~PRO~6000 is $17.6$~B/s ($27.1$~T lane-operations/s over about
+$1{,}540$ lane-operations per update).\art{ecc2k130/THROUGHPUT-CEILING.md}
+
+\subsection{Packed: one walk per thread, carry-less products}
+\label{sec:arith-packed}
+
+The packed backend holds one walk's coordinates in five 32-bit words
+per thread and multiplies with carry-less instructions. Coordinates
+live in $\FF_2[c]/(m)$ with $c=\gamma_1$, so a 131-bit product is a
+two-way Karatsuba over $64\times64$ carry-less multiplies, six
+\texttt{CLMAD}, followed by a reduction; the normal basis, where the
+weight, the branch selection and the distinguished-point test live,
+is reached through the same Bernstein--Lange conversions, realised as
+shift-and-mask networks and, for the Frobenius powers, as Bene\v{s}
+permutation networks. Until CUDA~13.3 the carry-less product was
+emulated from $32\times32$ integer multiplies; the native
+\texttt{clmad.lo}/\texttt{hi} instructions on Blackwell are the single
+largest rung of Section~\ref{sec:ledger} and the reason the campaign
+preset requires that compiler.\art{ecc2k130/NATIVE-CARRYLESS.md}
+
+The accounting unit changes with the representation. In the packed
+kernel the shipping walk issues $4.81$ products per update at batch 16
+and about $2{,}324$ static ALU slots; the step count that matters is
+the \texttt{CLMAD} count, and Section~\ref{sec:floor} prices it. The
+reduction \texttt{reducePolynomial131} alone is $440.6$
+lane-instructions per update, $29\%$ of the integer work of the
+$20$~B/s build.\art{ecc2k130/ROOFLINE.md}
+
+\subsection{Both at once, and bit-for-bit}
+\label{sec:arith-compat}
+
+The two backends, the CPU client at every word width, the VHDL
+engine and the sibling library's imported kernel are kept bit-for-bit
+compatible: a distinguished-point record written by any of them
+re-walks under any other, and every GPU report is re-walked on the
+host reference before a rate is recorded. The host check re-slices
+packed words into the same permuted type-II basis and compares
+vectors, not classes.\art{ecc2k130/README.md, ``Validation''} The
+exceptional case $\sigma^j(R)=\pm R$, which makes the addition's
+denominator zero, is handled identically everywhere: the walk raises
+an exception and the lane is reseeded, because dividing would produce
+a point that is not on the curve and would then be reported as
+distinguished.

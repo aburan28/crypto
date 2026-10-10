@@ -1,0 +1,43 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+Four statements survive the accounting.
+
+First, ECC2K-130 is an arithmetic problem at a known exponent, and the
+exponent did not move. Index calculus on the curve, priced end to
+end, is $10^7$ times rho at the challenge size with four-summand
+relations; the best measured decomposition is $35$--$51$ bits short of
+the per-call budget; the Frobenius-stable subspaces that the
+literature's construction needs do not exist at $n=131$. The number
+the campaign walks toward is still $\sqrt{\pi\ell/(2\cdot262)}$ class
+steps.
+
+Second, the cost of a step on a GPU was measured against a floor
+written first. Sixteen paired rungs took one RTX~PRO~6000 from
+$0.85$ to $14.64$ billion complete iterations per second with the
+campaign's $\sigma$-walk, a table walk reached $20.08$, and the
+roofline of that build puts the logic pipe at $91\%$ and the
+carry-less unit at $73\%$ of saturation. Twenty-eight on one card is
+below both pipes for any walk that performs one affine addition per
+step; thirty is a two-card number. A $17.0$~B/s target declared before
+a build declined a $16.56$~B/s result, which is what a declared target
+is for.
+
+Third, the step count is measured, not assumed. The campaign's
+$\sigma$-walk costs $2^{60.91}$--$2^{60.92}$ iterations, the 2009
+estimate within its own precision; the table walk's cheaper constant
+was paid back several times over by fruitless cycles until the rule
+was fixed, and its projected $0.81$--$0.86$ cost per solve awaits the
+paired run that would confirm it. An FPGA engine designed from the
+same model measured $8.25$~G steps/s on one F2 against a pre-board
+central estimate of $8$, level with the GPU on cost per solve.
+
+Fourth, the campaign is a corpus, and the corpus is honest. One
+report per $2^{28.41}$ iterations at cutoff 32, a figure that replaced
+a wrong $2^{27.9}$ and says so; $367$ million points and $2^{56.38}$
+iterations with no collision, $4.4\%$ of the expected work, every
+record re-walkable from its seed and every rate in this paper
+re-walked before it was recorded. The fleet that produced it was
+reclaimed on 2026-09-18 and collection continues at a small scale.
+Whether the remaining $95.6\%$ is walked is a question of money, not of
+mathematics; this paper's contribution is to have priced it.
