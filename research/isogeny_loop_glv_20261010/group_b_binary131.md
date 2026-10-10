@@ -37,3 +37,22 @@ cheapest loop that is not a Frobenius/Verschiebung power: 82224.5 M (155.728x sa
 
 single-prime loops (paper Section 3): l = 2: length 131, 262 M (0.496x saving); l = 73: length 938534851461085405, 513847831174944260096 M (9.731966499525459e+17x saving); l = 7: length 21586301583604964315, 1133280833139260653568 M (2.1463652142789028e+18x saving)
 
+### sect131r2 (binary, q bits 132, log2 r = 131)
+- Delta = t^2 - 4q: 133 bits, D_K = -8177414732588172345452162194056298770103 (133 bits), conductor f_pi = 1
+- GLV budget: the split saves ~66 doublings = 528.0 M (projective step model, doubling 8.0 M)
+- order O_1 (D = -8177414732588172345452162194056298770103): h = 36455758083233680152, Cl(O_K) = ['9113939520808420038', '2', '2'] (bnfinit 128.54 s); 15 split primes <= bound; loops within 528 M: 4 (exhaustive: True); LLL upper bound 262 M
+- binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered).
+
+| rank | cost M | cost / saving | loop (prime: exponent) | chain length | degree bits | alpha | Frobenius power / in Z[pi] | lambda is ±1 | GLV max |k_i| bits |
+|--:|--:|--:|:--|--:|--:|:--|:--|:--|--:|
+| 1 | 262.0 | 0.496 | {2: 131} | 131 | 131.0 | (-52073227371480044317 + 1*sqrt(-8177414732588172345452162194056298770103))/2 | pi^1 (acts as 1) | True | 130 |
+| 2 | 262.0 | 0.496 | {2: -131} | 131 | 131.0 | (52073227371480044317 + 1*sqrt(-8177414732588172345452162194056298770103))/2 | pi-bar^1 (acts as 520732273714…) | False | 65 |
+| 3 | 524.0 | 0.992 | {2: 262} | 262 | 262.0 | (-2732896861853156930038168475148007386807 + -52073227371480044317*sqrt(-8177414732588172345452162194056298770103))/2 | pi^2 (acts as -27222589353…) | True | 130 |
+| 4 | 524.0 | 0.992 | {2: -262} | 262 | 262.0 | (-2732896861853156930038168475148007386807 + 52073227371480044317*sqrt(-8177414732588172345452162194056298770103))/2 | pi-bar^2 (acts as -10637926485…) | False | 66 |
+| 5 | 19806.0 | 37.511 | {2: 3, 17: -12, 19: 4, 29: 1, 31: -3, 41: -4, 43: 9, 47: -12, 53: 2, 61: -7, 67: -4, 71: 1, 79: -1, 83: -1, 89: 1} | 65 | 328.2 | (31258749621761170526298488139374743738497508317695 + 439009110461427351350719960709*sqrt(-8177414732588172345452162194056298770103))/2 | Z[pi] = O_K | False | 66 |
+| 6 | 19806.0 | 37.511 | {2: -3, 17: 12, 19: -4, 29: -1, 31: 3, 41: 4, 43: -9, 47: 12, 53: -2, 61: 7, 67: 4, 71: -1, 79: 1, 83: 1, 89: -1} | 65 | 328.2 | (31258749621761170526298488139374743738497508317695 + -439009110461427351350719960709*sqrt(-8177414732588172345452162194056298770103))/2 | Z[pi] = O_K | False | 67 |
+
+cheapest loop that is not a Frobenius/Verschiebung power: 19806.0 M (37.511x saving), {2: 3, 17: -12, 19: 4, 29: 1, 31: -3, 41: -4, 43: 9, 47: -12, 53: 2, 61: -7, 67: -4, 71: 1, 79: -1, 83: -1, 89: 1}, chain length 65 — above the enumeration radius, from the LLL basis (upper bound, not necessarily the cheapest)
+
+single-prime loops (paper Section 3): l = 2: length 131, 262 M (0.496x saving); l = 79: length 17976212072600434, 10650905653015756800 M (2.017216979737833e+16x saving); l = 67: length 26964318108900651, 13549569849722576896 M (2.5662064109323064e+16x saving)
+

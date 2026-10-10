@@ -148,16 +148,16 @@ already τ-adic.
 
 ### 4.3 Random binary curves: only the Frobenius and Verschiebung loops exist under budget
 
-| curve | n | log₂\|D_K\| | f_π | h | Cl(O_K) | loops within budget | cheapest genuine loop (LLL upper bound) |
+| curve | n | log₂\|D_K\| | f_π | h | Cl(O_K) | loops within budget (exhaustive) | cheapest loop that is not a Frobenius power (LLL upper bound) |
 |:--|--:|--:|--:|--:|:--|:--|--:|
-| ECC2-79 | 79 | 81 | 1 | 5.5·10¹¹ | [1.4·10¹¹, 2, 2] | {2: ±79}, {2: ±158} only | — (all in Z[π]) |
-| ECC2-89 | 89 | 85 | 7 | 2.8·10¹² | [1.4·10¹², 2] | {2: ±89}, {2: ±178} only | — |
+| ECC2-79 | 79 | 81 | 1 | 5.5·10¹¹ | [1.4·10¹¹, 2, 2] | {2: ±79}, {2: ±158} only | 7500 M, 23× saving |
+| ECC2-89 | 89 | 85 | 7 | 2.8·10¹² | [1.4·10¹², 2] | {2: ±89}, {2: ±178} only | 7346 M, 20× saving |
 | ECC2-97 | 97 | GROUPC | | | | | |
 | ECC2-109 | 109 | GROUPC | | | | | |
-| sect113r1 | 113 | 115 | 1 | 1.2·10¹⁷ | [3.0·10¹⁶, 2, 2] | {2: ±113} only | — (bnfinit 13 s)
-| ECC2-131 | 131 | 132 | 1 | 2.4·10¹⁹ | [3.0·10¹⁸, 2, 2, 2] | {2: ±131} only | GROUPB_ECC2131 |
-| sect131r1 | 131 | GROUPB | | | | | |
-| sect131r2 | 131 | GROUPB | | | | | |
+| sect113r1 | 113 | 115 | 1 | 1.2·10¹⁷ | [3.0·10¹⁶, 2, 2] | {2: ±113} only | 9595 M, 21× saving (bnfinit 13 s) |
+| ECC2-131 | 131 | 132 | 1 | 2.4·10¹⁹ | [3.0·10¹⁸, 2, 2, 2] | {2: ±131} only | 21450 M, 41× saving (bnfinit 156 s) |
+| sect131r1 | 131 | 132 | 1 | 2.2·10¹⁹ | [2.2·10¹⁹] (cyclic) | {2: ±131} only | 82225 M, 156× saving (bnfinit 243 s) |
+| sect131r2 | 131 | 133 | 1 | 3.6·10¹⁹ | [9.1·10¹⁸, 2, 2] | {2: ±131} only | 19806 M, 38× saving (bnfinit 129 s) |
 
 In characteristic 2 the only 2-isogenies are the Frobenius F (inseparable) and the
 Verschiebung V, so the 2-loops are {2: +n} = π (acts as 1 on E(F_q): useless) and
