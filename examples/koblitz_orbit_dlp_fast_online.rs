@@ -25,6 +25,7 @@
 //!
 //! Usage: <base_header.jsonl> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
 
+use crypto_lib::cryptanalysis::ecbench::isolation::HwCounters;
 use crypto_lib::cryptanalysis::koblitz_fast_arith::{s3_x_roots, FastBinaryCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use crypto_lib::cryptanalysis::semaev_decomp::Gf2;
@@ -1023,6 +1024,8 @@ fn main() -> ExitCode {
                 (target, Some(scalar), elapsed)
             }
         };
+        let online_counters = HwCounters::open();
+        online_counters.start();
         let mut clock = PhaseClock::start();
         let online_started = clock.last;
         // The scan origin must be a function of the public target point only;
@@ -1048,6 +1051,7 @@ fn main() -> ExitCode {
         let verified = recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
         let recovery_check_phase = clock.lap();
         let online_stopped = clock.last;
+        let online_hw_counts = online_counters.stop();
         let online = online_stopped - online_started;
         if target_inputs.len() == 1 {
             single_target_phases = Some((
@@ -1088,6 +1092,8 @@ fn main() -> ExitCode {
             "online_start_ns":(online_started - process_started).as_nanos() as u64,
             "online_stop_ns":(online_stopped - process_started).as_nanos() as u64,
             "online_ms":elapsed,
+            "online_hw_counts":online_hw_counts,
+            "online_hw_scope":"calling thread, user space, target query through recovery check",
             "target_query_ms":ms(query_phase),
             "target_pdp_ms":ms(split.pdp),
             "target_relation_check_ms":ms(split.relation_check),

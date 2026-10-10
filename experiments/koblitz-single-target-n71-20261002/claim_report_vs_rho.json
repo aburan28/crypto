@@ -144,9 +144,10 @@
     "ideal_steps": 7809419.337339054
   },
   "operation_accounting": {
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "generated_by": "research/sat_factor_base_review_20260908/autolab/op_accounting.py",
-    "unit_assumption": "one IC probe (S3 quadratic solve plus root-table lookup) and one rho walk step (one group addition plus class canonicalisation) are each counted as one operation; not yet calibrated on a common backend (plan step 1.2)",
+    "unit_assumption": "IC probes (S3 quadratic solve plus root-table lookup) and rho walk steps (group addition plus class canonicalisation) are distinct native counters; no common operation calibration or complete total-work boundary is recorded",
+    "comparison_status": "native_counters_only",
     "operation_units": {
       "ic": "target probes",
       "rho": "walk steps"
@@ -155,7 +156,9 @@
     "ic_online_operations_basis": "deterministic probes to the first relation for the frozen target (identical on every run)",
     "rho_online_operations": 7809419.337339054,
     "rho_online_operations_basis": "expected walk sqrt(pi*r/(4n)) on signed-Frobenius classes; measured walks are under runs",
-    "ops_speedup_online": 536.5823373188852,
+    "rho_per_ic_native_counter": 536.5823373188852,
+    "ops_speedup_online": null,
+    "total_work_S": null,
     "ic_rank_probes_mean_per_relation": [
       2244765.26
     ],
@@ -163,15 +166,15 @@
     "ic_rank_probes_source": [
       "runs/pilot-R1-concurrent-session/ic.stdout.txt"
     ],
-    "ic_rank_probes_note": "each rank relation runs the same extraction on a random subgroup point, so the rank mean estimates the online probes of a random target; per-relation counts are not retained, so no confidence interval is available",
-    "ops_speedup_online_mean_target": 3.4789469867949823,
-    "target_luck_factor": 154.23699738903392,
+    "ic_rank_probes_note": "guided rank queries and target extraction use different input laws and scan starts; this mean is a rank-stage diagnostic, not an estimate of unseen-target cost; per-relation counts are not retained, so no confidence interval is available",
+    "rho_expected_steps_per_rank_mean_probe": 3.4789469867949823,
+    "rank_mean_to_frozen_probe_ratio": 154.23699738903392,
     "precompute_rank_probes": 1346859155.9999998,
     "precompute_rank_probes_note": "rank_probes_mean x rank_attempts; the S3 root-index build is not counted in probes",
-    "ops_speedup_total_mean_target": 0.005788597315798639,
+    "rho_expected_steps_per_rank_plus_target_probe": 0.005788597315798639,
     "wall_speedup_median_all_runs": 2864.119728641919,
     "wall_speedup_median_uncontended_runs": 2864.119728641919,
-    "ops_speedup_measured_walk_median": 235.26034079978012,
+    "rho_steps_per_ic_probe_measured_median": 235.26034079978012,
     "ic_to_rho_rate_ratio_median": 7.395499945974243,
     "ic_rank_threads": [
       1
@@ -193,7 +196,7 @@
         "rho_walk_ms": 70724.96112499999,
         "rho_online_ms": 70747.419459,
         "wall_speedup": 4893.50341482161,
-        "ops_speedup_measured_walk": 701.5768860794284,
+        "rho_steps_per_ic_probe_measured": 701.5768860794284,
         "ic_probes_per_s": 1006680.5156135429,
         "rho_steps_per_s": 144372.64916913025,
         "ic_to_rho_rate_ratio": 6.97279243268739,
@@ -214,7 +217,7 @@
         "rho_walk_ms": 29216.614083,
         "rho_online_ms": 29237.532790999998,
         "wall_speedup": 2864.119728641919,
-        "ops_speedup_measured_walk": 235.26034079978012,
+        "rho_steps_per_ic_probe_measured": 235.26034079978012,
         "ic_probes_per_s": 1425715.323814393,
         "rho_steps_per_s": 117192.87492633442,
         "ic_to_rho_rate_ratio": 12.16554611114861,
@@ -235,7 +238,7 @@
         "rho_walk_ms": 18179.512042,
         "rho_online_ms": 18201.214167,
         "wall_speedup": 1532.8252132421871,
-        "ops_speedup_measured_walk": 207.017452246805,
+        "rho_steps_per_ic_probe_measured": 207.017452246805,
         "ic_probes_per_s": 1225673.0759189685,
         "rho_steps_per_s": 165732.28109969312,
         "ic_to_rho_rate_ratio": 7.395499945974243,
@@ -246,5 +249,8 @@
         "rho_peak_rss_bytes": null
       }
     ]
-  }
+  },
+  "record_class": "verified_answer_exploratory_wall",
+  "controlled_online_speedup": null,
+  "host_isolation_receipt": null
 }

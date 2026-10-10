@@ -746,9 +746,9 @@ impl F6SignedPairIndex {
         if point_index.len() != points.len() {
             return None;
         }
-        let negatives: Vec<u32> = points
+        let negatives: Vec<usize> = points
             .iter()
-            .map(|point| u32::try_from(*point_index.get(&key(&point_neg(point))?)?).ok())
+            .map(|point| point_index.get(&key(&point_neg(point))?).copied())
             .collect::<Option<_>>()?;
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
@@ -848,10 +848,10 @@ impl F6SignedPairIndex {
     fn verify(
         &self,
         target: &BinaryPoint,
-        first: (u32, u32),
+        first: (usize, usize),
         second: (usize, usize),
     ) -> Option<[usize; 4]> {
-        let indices = [first.0 as usize, first.1 as usize, second.0, second.1];
+        let indices = [first.0, first.1, second.0, second.1];
         let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
             point_add(&self.curve, &acc, &self.points[index])
         });

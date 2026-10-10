@@ -1483,13 +1483,9 @@ pub fn ec_index_calculus_dlp_staged(
     while relations.len() < target {
         let found = 'attempt: {
             for _ in 0..max_relation_attempts {
-                if let Some(found) = find_one_relation_counted(
-                    curve,
-                    g,
-                    q,
-                    &fb,
-                    max_trials_per_relation,
-                ) {
+                if let Some(found) =
+                    find_one_relation_counted(curve, g, q, &fb, max_trials_per_relation)
+                {
                     break 'attempt Some(found);
                 }
                 attempts_exhausted += 1;
@@ -1788,7 +1784,11 @@ mod tests {
                 // c_{k-1} - r·c_k (with c_{-1} = c_len = 0).
                 let mut fixed = vec![BigUint::from(0u32); poly.len() + 1];
                 for k in 0..=poly.len() {
-                    let prev = if k > 0 { poly[k - 1].clone() } else { BigUint::from(0u32) };
+                    let prev = if k > 0 {
+                        poly[k - 1].clone()
+                    } else {
+                        BigUint::from(0u32)
+                    };
                     let cur = poly.get(k).cloned().unwrap_or(BigUint::from(0u32));
                     let term = (BigUint::from(*r) * cur) % &p;
                     let neg = if term.is_zero() {
@@ -1800,13 +1800,14 @@ mod tests {
                 }
                 poly = fixed;
             }
-            let coeffs: Vec<FieldElement> =
-                poly.iter().map(|c| FieldElement::new(c % &p, p.clone())).collect();
+            let coeffs: Vec<FieldElement> = poly
+                .iter()
+                .map(|c| FieldElement::new(c % &p, p.clone()))
+                .collect();
             let found = find_roots_fp_fast(&coeffs, &p);
             let mut found_sorted: Vec<BigUint> = found.iter().map(|f| f.value.clone()).collect();
             found_sorted.sort();
-            let mut expect: Vec<BigUint> =
-                roots.iter().map(|r| BigUint::from(*r)).collect();
+            let mut expect: Vec<BigUint> = roots.iter().map(|r| BigUint::from(*r)).collect();
             expect.sort();
             expect.dedup();
             assert_eq!(found_sorted, expect, "roots {roots:?}");
@@ -1823,14 +1824,18 @@ mod tests {
         let q = g.scalar_mul(&BigUint::from(190u32), &a_fe);
         let fb = build_factor_base(&curve, 10);
         assert!(!fb.is_empty());
-        let (x, _trials) = find_one_relation_s4_counted(&curve, &g, &q, &fb, 5000)
-            .expect("an S4 relation exists on the tiny curve");
-        let _ = x; // one relation suffices; full solve below.
-        let staged = ec_index_calculus_dlp_s4_staged(&curve, &g, &q, 10, 6, 5000, 64);
-        let (s4_x, report) = staged.expect("S4 staged solve succeeds on the tiny curve");
+        let (_relation, _trials) = (0..64)
+            .find_map(|_| find_one_relation_s4_counted(&curve, &g, &q, &fb, 5000))
+            .expect("an S4 relation exists within 64 bounded attempts");
+        // Independent random relation sets can leave the target column free.
+        let (s4_x, report) = (0..64)
+            .find_map(|_| ec_index_calculus_dlp_s4_staged(&curve, &g, &q, 10, 6, 5000, 64))
+            .expect("S4 staged solve succeeds within 64 bounded attempts");
         assert_eq!(g.scalar_mul(&s4_x, &a_fe), q);
-        let plain = ec_index_calculus_dlp(&curve, &g, &q, 10, 6, 5000);
-        assert_eq!(s4_x, plain.expect("2-decomp solve also succeeds"));
+        let plain_x = (0..64)
+            .find_map(|_| ec_index_calculus_dlp(&curve, &g, &q, 10, 6, 5000))
+            .expect("2-decomp solve succeeds within 64 bounded attempts");
+        assert_eq!(s4_x, plain_x);
         assert!(report.relations_collected >= 10);
         assert!(report.trials_per_relation_median >= 1.0);
     }
@@ -1844,10 +1849,14 @@ mod tests {
         let a_fe = curve.a_fe();
         let g = curve.generator();
         let q = g.scalar_mul(&BigUint::from(190u32), &a_fe);
-        let plain = ec_index_calculus_dlp(&curve, &g, &q, 8, 4, 5000);
-        let staged = ec_index_calculus_dlp_staged(&curve, &g, &q, 8, 4, 5000, 64);
-        let (staged_x, report) = staged.expect("staged solve succeeds on the tiny curve");
-        let plain_x = plain.expect("plain solve succeeds on the tiny curve");
+        // A bounded fresh relation set may leave the target column free.
+        // Retry the randomized collection while keeping both correctness checks.
+        let plain_x = (0..64)
+            .find_map(|_| ec_index_calculus_dlp(&curve, &g, &q, 8, 4, 5000))
+            .expect("plain solve succeeds on the small curve within 64 attempts");
+        let (staged_x, report) = (0..64)
+            .find_map(|_| ec_index_calculus_dlp_staged(&curve, &g, &q, 8, 4, 5000, 64))
+            .expect("staged solve succeeds on the small curve within 64 attempts");
         assert_eq!(staged_x, plain_x);
         assert_eq!(g.scalar_mul(&staged_x, &a_fe), q);
         assert_eq!(report.factor_base_size, 8);

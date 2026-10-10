@@ -225,9 +225,9 @@ def missing_fields(report: dict[str, Any], keys: list[str]) -> list[str]:
 def operation_accounting_errors(accounting: Any) -> list[str]:
     """Check the operation-count block that sits next to the wall ratio.
 
-    A wall ratio mixes the algorithmic comparison with the speed of each
-    arm's implementation, so a vs_rho claim must also state both arms'
-    online operation counts, their units, and their ratio.
+    Native IC probes and rho steps have different costs.  Keep both counts
+    and their units, while requiring a calibration receipt before reporting
+    an operation speedup.
     """
     if not isinstance(accounting, dict):
         return ["operation_accounting must be an object"]
@@ -235,8 +235,8 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     ic_ops = accounting.get("ic_online_operations")
     rho_ops = accounting.get("rho_online_operations")
     for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
-        if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
-            errors.append(f"operation_accounting.{name} must be positive")
+        if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+            errors.append(f"operation_accounting.{name} must be nonnegative and finite")
     units = accounting.get("operation_units")
     if not isinstance(units, dict) or not all(
         isinstance(units.get(arm), str) and units[arm].strip() for arm in ("ic", "rho")
@@ -245,16 +245,79 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     assumption = accounting.get("unit_assumption")
     if not isinstance(assumption, str) or not assumption.strip():
         errors.append("operation_accounting.unit_assumption must state how the units compare")
+    status = accounting.get("comparison_status")
+    if status not in ("native_counters_only", "calibrated_common_unit"):
+        errors.append("operation_accounting.comparison_status must name the calibration state")
+    raw_quotient = accounting.get("rho_per_ic_native_counter")
+    if not errors:
+        if ic_ops == 0:
+            if raw_quotient is not None:
+                errors.append("operation_accounting.rho_per_ic_native_counter must be null for zero IC probes")
+        elif raw_quotient is not None:
+            expected = float(rho_ops) / float(ic_ops)
+            if type(raw_quotient) not in (int, float) or not math.isfinite(raw_quotient) or raw_quotient < 0 or not math.isclose(
+                float(raw_quotient), expected, rel_tol=1e-8, abs_tol=1e-12
+            ):
+                errors.append("operation_accounting.rho_per_ic_native_counter does not match the raw counts")
     ratio = accounting.get("ops_speedup_online")
-    if not isinstance(ratio, (int, float)) or isinstance(ratio, bool):
-        errors.append("operation_accounting.ops_speedup_online is required")
-    elif not errors:
-        expected = float(rho_ops) / float(ic_ops)
-        if abs(float(ratio) - expected) > max(1e-12, expected * 1e-8):
-            errors.append(
-                "operation_accounting.ops_speedup_online does not equal "
-                "rho_online_operations / ic_online_operations"
-            )
+    if ratio is not None:
+        calibrated = (
+            status == "calibrated_common_unit"
+            and isinstance(units, dict)
+            and units.get("ic") == units.get("rho")
+            and isinstance(accounting.get("calibration_receipt"), str)
+            and bool(accounting["calibration_receipt"].strip())
+        )
+        if not calibrated:
+            errors.append("operation_accounting.ops_speedup_online requires a calibrated common unit and receipt")
+        elif positive_cost(ic_ops) is None or positive_cost(rho_ops) is None:
+            errors.append("operation_accounting calibrated counts must be positive")
+        elif positive_cost(ratio) is None:
+            errors.append("operation_accounting.ops_speedup_online must be positive and finite")
+        elif not errors:
+            expected = float(rho_ops) / float(ic_ops)
+            if not math.isclose(float(ratio), expected, rel_tol=1e-8, abs_tol=1e-12):
+                errors.append("operation_accounting.ops_speedup_online does not match calibrated counts")
+    elif status == "calibrated_common_unit":
+        errors.append("operation_accounting.ops_speedup_online is required for calibrated counts")
+    return errors
+
+
+def hardware_accounting_errors(accounting: Any) -> list[str]:
+    """Check the optional common retired-instruction counter for a paired target."""
+    if not isinstance(accounting, dict):
+        return ["hardware_accounting must be an object"]
+    errors = []
+    status = accounting.get("status")
+    if status not in ("measured_common_counter", "counter_unavailable"):
+        errors.append("hardware_accounting.status is invalid")
+    if accounting.get("unit") != "calling-thread user instructions retired":
+        errors.append("hardware_accounting.unit must name the measured unit")
+    if not isinstance(accounting.get("method"), str) or not accounting["method"].strip():
+        errors.append("hardware_accounting.method must describe the counter boundary")
+    ic_count = accounting.get("ic_online_instructions")
+    rho_count = accounting.get("rho_online_instructions")
+    for arm, count in (("ic", ic_count), ("rho", rho_count)):
+        if count is not None and (type(count) is not int or count <= 0):
+            errors.append(f"hardware_accounting.{arm}_online_instructions must be positive when present")
+    ratio = accounting.get("rho_per_ic_instructions")
+    if status == "measured_common_counter":
+        for arm in ("ic", "rho"):
+            enabled = accounting.get(f"{arm}_time_enabled_ns")
+            running = accounting.get(f"{arm}_time_running_ns")
+            if (type(enabled) is not int or enabled <= 0 or
+                    type(running) is not int or running != enabled):
+                errors.append(f"hardware_accounting.{arm} counter must run throughout its enabled interval")
+            if accounting.get(f"{arm}_counter_error"):
+                errors.append(f"hardware_accounting.{arm} counter error must be null")
+        if type(ic_count) is not int or ic_count <= 0 or type(rho_count) is not int or rho_count <= 0:
+            errors.append("hardware_accounting measured status requires both online instruction counts")
+        elif positive_cost(ratio) is None or not math.isclose(
+            float(ratio), rho_count / ic_count, rel_tol=1e-9, abs_tol=1e-12
+        ):
+            errors.append("hardware_accounting.rho_per_ic_instructions must match the counts")
+    elif status == "counter_unavailable" and ratio is not None:
+        errors.append("hardware_accounting.rho_per_ic_instructions must be null when unavailable")
     return errors
 
 
@@ -291,24 +354,26 @@ def validate_claim(
             pairing_errors.append("IC target recovery is not verified")
         if report.get("rho_verified") is not True:
             pairing_errors.append("rho target recovery is not verified")
-        if not isinstance(report.get("ic_online_ms"), (int, float)) or report.get("ic_online_ms", 0) <= 0:
+        if positive_cost(report.get("ic_online_ms")) is None:
             pairing_errors.append("positive ic_online_ms is required")
-        if not isinstance(report.get("rho_online_ms"), (int, float)) or report.get("rho_online_ms", 0) <= 0:
+        if positive_cost(report.get("rho_online_ms")) is None:
             pairing_errors.append("positive rho_online_ms is required")
-        if not isinstance(report.get("online_speedup"), (int, float)) or report.get("online_speedup", 0) <= 0:
+        if positive_cost(report.get("online_speedup")) is None:
             pairing_errors.append("positive same-target online_speedup is required")
-        elif isinstance(report.get("ic_online_ms"), (int, float)) and isinstance(report.get("rho_online_ms"), (int, float)):
+        elif positive_cost(report.get("ic_online_ms")) is not None and positive_cost(report.get("rho_online_ms")) is not None:
             expected = float(report["rho_online_ms"]) / float(report["ic_online_ms"])
-            if abs(float(report["online_speedup"]) - expected) > max(1e-9, expected * 1e-8):
+            if not math.isclose(float(report["online_speedup"]), expected, rel_tol=1e-8, abs_tol=1e-9):
                 pairing_errors.append("online_speedup does not equal rho_online_ms / ic_online_ms")
         for arm in ("ic", "rho"):
             phases = report.get(f"{arm}_online_phase_ms")
             total = report.get(f"{arm}_online_ms")
             if not isinstance(phases, dict) or not phases:
                 pairing_errors.append(f"{arm}_online_phase_ms must record exclusive phases")
-            elif isinstance(total, (int, float)):
-                phase_sum = sum(float(value) for value in phases.values())
-                if abs(phase_sum - float(total)) > max(0.02, float(total) * 1e-8):
+            elif any(type(value) not in (int, float) or not math.isfinite(value) or value < 0 for value in phases.values()):
+                pairing_errors.append(f"{arm}_online_phase_ms must contain finite nonnegative costs")
+            elif positive_cost(total) is not None:
+                phase_sum = math.fsum(float(value) for value in phases.values())
+                if not math.isclose(phase_sum, float(total), rel_tol=1e-8, abs_tol=0.02):
                     pairing_errors.append(f"{arm} online phase costs do not sum to online time")
             else:
                 pairing_errors.append(f"{arm}_online_ms is missing")
@@ -316,7 +381,6 @@ def validate_claim(
             pairing_errors.append("same-target charged intervals are not confirmed")
         if field_present(report, "operation_accounting"):
             pairing_errors.extend(operation_accounting_errors(report["operation_accounting"]))
-    ok = not missing_stage and not missing_global and not pairing_errors
     validation_errors: list[str] = []
 
     if stage == "vs_rho":
@@ -360,8 +424,34 @@ def validate_claim(
             validation_errors.append("IC and rho target hashes must be nonempty strings")
         elif target_hashes[0] != target_hashes[1]:
             validation_errors.append("IC and rho target hashes must match")
-        if report.get("timing_class") not in stage_schema.get("timing_class_enum", []):
-            validation_errors.append("timing_class must be single_target_online_wall")
+        timing_classes = stage_schema.get("timing_class_enum", [])
+        if "primary_ic_online_phase_keys" in stage_schema:
+            if report.get("timing_class") != "single_target_online":
+                validation_errors.append("timing_class must be single_target_online for a primary vs_rho claim")
+        elif report.get("timing_class") not in timing_classes:
+            validation_errors.append(f"timing_class must be one of {timing_classes}")
+        record_class = report.get("record_class")
+        if record_class not in stage_schema.get("record_class_enum", []):
+            validation_errors.append("record_class must identify exploratory or controlled wall evidence")
+        if "hardware_accounting" in report:
+            validation_errors.extend(hardware_accounting_errors(report["hardware_accounting"]))
+        controlled_speedup = report.get("controlled_online_speedup")
+        if controlled_speedup is None:
+            if record_class == "verified_answer_controlled_wall":
+                validation_errors.append("controlled wall record requires controlled_online_speedup")
+        else:
+            if record_class != "verified_answer_controlled_wall":
+                validation_errors.append("controlled_online_speedup requires a controlled wall record")
+            measured_speedup = positive_cost(report.get("online_speedup"))
+            if positive_cost(controlled_speedup) is None or measured_speedup is None or not math.isclose(
+                float(controlled_speedup), measured_speedup, rel_tol=1e-9, abs_tol=1e-12
+            ):
+                validation_errors.append("controlled_online_speedup must equal the paired online ratio")
+            receipt = report.get("host_isolation_receipt")
+            if not isinstance(receipt, dict) or receipt.get("status") != "PASS" or not isinstance(
+                receipt.get("path"), str
+            ) or not receipt["path"].strip():
+                validation_errors.append("controlled_online_speedup requires a host-isolation receipt")
         if report.get("same_resource_envelope") is not True:
             validation_errors.append("same_resource_envelope must be true")
         for key in ("ic_scalar_verified", "rho_scalar_verified"):
@@ -392,12 +482,36 @@ def validate_claim(
             validation_errors.append("online times and speedup must be positive finite numbers")
         elif not math.isclose(speedup, rho_ms / ic_ms, rel_tol=1e-9, abs_tol=1e-12):
             validation_errors.append("online_speedup must equal rho_online_wall_ms / ic_online_wall_ms")
+        for arm, wall_ms in (("ic", ic_ms), ("rho", rho_ms)):
+            for alias in (f"{arm}_cost", f"{arm}_online_ms"):
+                alias_ms = positive_cost(report.get(alias))
+                if alias_ms is None or wall_ms is None or not math.isclose(
+                    alias_ms, wall_ms, rel_tol=1e-9, abs_tol=1e-12
+                ):
+                    validation_errors.append(f"{alias} must equal {arm}_online_wall_ms")
+
+        discount = report.get("automorphism_discount")
+        policy = report.get("rho_policy")
+        if not isinstance(discount, dict) or type(discount.get("A")) is not int or discount["A"] < 1:
+            validation_errors.append("automorphism_discount.A must be a positive integer")
+        elif isinstance(policy, dict) and discount["A"] != policy.get("automorphism_size"):
+            validation_errors.append("automorphism_discount.A must match rho_policy.automorphism_size")
 
         phase_costs = report.get("ic_online_phase_ms")
-        phase_fields = stage_schema.get("ic_online_phase_fields", [])
+        phase_fields = stage_schema.get("ic_online_phase_fields")
+        if phase_fields is None:
+            primary_keys = stage_schema.get("primary_ic_online_phase_keys", [])
+            phase_fields = [f"T_{key}_ms" for key in primary_keys]
+        if not phase_fields:
+            validation_errors.append("ledger must specify IC online phase fields")
         if not isinstance(phase_costs, dict):
             validation_errors.append("ic_online_phase_ms must be an object")
         else:
+            unexpected = set(phase_costs) - set(phase_fields)
+            if unexpected:
+                validation_errors.append(
+                    f"ic_online_phase_ms has unexpected fields: {sorted(unexpected)}"
+                )
             phase_values = []
             for key in phase_fields:
                 value = phase_costs.get(key)
@@ -408,6 +522,21 @@ def validate_claim(
             if len(phase_values) == len(phase_fields) and ic_ms is not None:
                 if not math.isclose(math.fsum(phase_values), ic_ms, rel_tol=1e-6, abs_tol=1e-3):
                     validation_errors.append("IC exclusive phase costs must sum to ic_online_wall_ms")
+
+        rho_phases = report.get("rho_online_phase_ms")
+        rho_phase_fields = stage_schema.get("rho_online_phase_fields", [])
+        if not isinstance(rho_phases, dict):
+            validation_errors.append("rho_online_phase_ms must be an object")
+        elif rho_phase_fields:
+            if set(rho_phases) != set(rho_phase_fields):
+                validation_errors.append("rho_online_phase_ms must contain exactly the declared phases")
+            elif all(type(rho_phases[key]) in (int, float) and math.isfinite(rho_phases[key])
+                     and rho_phases[key] >= 0 for key in rho_phase_fields) and rho_ms is not None:
+                if not math.isclose(math.fsum(float(rho_phases[key]) for key in rho_phase_fields),
+                                    rho_ms, rel_tol=1e-6, abs_tol=1e-3):
+                    validation_errors.append("rho exclusive phase costs must sum to rho_online_wall_ms")
+            else:
+                validation_errors.append("rho_online_phase_ms must contain finite nonnegative costs")
 
         interval = report.get("online_interval")
         interval_fields = (
@@ -450,7 +579,7 @@ def validate_claim(
                 if not isinstance(value, str) or not value.strip():
                     validation_errors.append(f"rho_policy.{key} must be a nonempty string")
 
-    ok = not missing_stage and not missing_global and not validation_errors
+    ok = not missing_stage and not missing_global and not pairing_errors and not validation_errors
     return {
         "schema_version": ledger.get("schema_version"),
         "stage": stage,
@@ -720,13 +849,6 @@ def _run_once(
     # Peak RSS after wait is cumulative for this process's children; treat as
     # an observed upper bound for single-producer launches.
     peak_rss = children_rss_bytes(int(usage_after.ru_maxrss))
-    return {
-        "command": command,
-        "exit_code": completed.returncode,
-        "whole_process_wall_ms": elapsed_ms,
-        "children_cpu_user_ms": cpu_user_ms,
-        "children_cpu_system_ms": cpu_system_ms,
-        "children_peak_rss_bytes": peak_rss,
     return completed, elapsed_ms, cpu_user_ms, cpu_system_ms
 
 
@@ -913,7 +1035,13 @@ def exclusive_precomputation_ms(row: dict[str, Any] | None) -> float | None:
         return None
     return sum(values)
 def positive_cost(value):
-    return float(value) if type(value) in (int, float) and math.isfinite(value) and value > 0 else None
+    if type(value) not in (int, float) or value <= 0:
+        return None
+    try:
+        result = float(value)
+    except (OverflowError, ValueError):
+        return None
+    return result if math.isfinite(result) else None
 
 
 def extract_ic_cost(rows: list[dict[str, Any]], timing_class: str) -> float | None:
@@ -1069,6 +1197,7 @@ def draft_vs_rho_claim(
         and rho_row.get("verified") is True
         and rho_row.get("recovered_fixture_scalar") == rho_scalar
         and rho_online is not None
+    )
     direct_rows = parse_json_lines(direct_obs["stdout"])
     rho_rows = parse_json_lines(rho_obs["stdout"])
     producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
@@ -1115,17 +1244,15 @@ def draft_vs_rho_claim(
     ):
         operation_accounting = {
             "schema_version": "1.0",
-            "unit_assumption": (
-                "one IC target relation trial and one rho walk step are each counted "
-                "as one operation; uncalibrated, so compare the ratio only together "
-                "with a measured per-operation cost"
-            ),
+            "unit_assumption": "IC target trials and rho walk steps are distinct uncalibrated counters",
+            "comparison_status": "native_counters_only",
             "operation_units": {"ic": "target relation trials", "rho": "walk steps"},
             "ic_online_operations": ic_operations,
             "ic_online_operations_basis": "target_trials of the one online target",
             "rho_online_operations": rho_operations,
             "rho_online_operations_basis": "measured walk steps of this run",
-            "ops_speedup_online": float(rho_operations) / float(ic_operations),
+            "rho_per_ic_native_counter": float(rho_operations) / float(ic_operations),
+            "ops_speedup_online": None,
         }
     claim = {
         "schema_version": 2,
@@ -1632,46 +1759,6 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         else:
             raise AutolabError(f"unsupported launch stage: {stage}")
 
-            {k: direct_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
-        )
-
-        rho_obs = run_timed(rho_cmd, env=env, cwd=REPO, repeats=repeats)
-        rho_obs["seed"] = rho_seed
-        (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
-        (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
-        write_json(
-            run / "receipts/rho.resource.json",
-            {k: rho_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
-        )
-
-        claim = draft_vs_rho_claim(
-            beat=beat,
-            beat_id=beat_id,
-            run=run,
-            direct_obs=direct_obs,
-            rho_obs=rho_obs,
-            binaries=binaries,
-        )
-        write_json(run / "artifacts/claim_draft.json", claim)
-        validation = validate_claim(claim, stage="vs_rho", ledger=ledger)
-        write_json(run / "artifacts/claim_check.json", validation)
-
-        producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
-        status = "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
-        if validation["status"] != "PASS":
-            status = "SCHEMA_INCOMPLETE"
-        if producers_ok and claim['comparison_integrity']['status'] != 'MATCHED':
-            status = 'INVALID_COMPARISON'
-        elif producers_ok and not claim['all_stages_charged_same_series']:
-            status = 'ACCOUNTING_INCOMPLETE'
-        state.update(
-            status=status,
-            phase="analysis",
-            updated_at=now(),
-            direct_exit_code=direct_obs["exit_code"],
-            rho_exit_code=rho_obs["exit_code"],
-            claim_check=validation["status"],
-        )
         write_json(run / "state.json", state)
         write_json(
             run / "artifacts/candidate.json",
@@ -2521,7 +2608,6 @@ def parser() -> argparse.ArgumentParser:
     launch_parser.add_argument(
         "--fixtures",
         type=int,
-        help="Online target count (default from beat); vs_rho primary runs require exactly 1",
         help="Compatibility option; the only accepted value is 1 target per workload",
     )
     launch_parser.add_argument(

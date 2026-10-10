@@ -102,6 +102,75 @@ def input_law(beat: dict[str, Any]) -> str:
             "of digest byte 8; Q = [h]P. No scalar is known to either arm.")
 
 
+def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
+                         interval: dict[str, Any]) -> dict[str, Any]:
+    """Build the paired one-target fields from the two verified producer rows."""
+    ic_ms, rho_ms = float(ic_record["online_ms"]), float(rho_record["online_ms"])
+    probes, steps = int(ic_record["probes"]), int(rho_record["walk_steps"])
+    if min(ic_ms, rho_ms) <= 0 or min(probes, steps) < 0:
+        raise ValueError("a verified one-target claim needs positive online costs and nonnegative counters")
+    ic_hw = ic_record.get("online_hw_counts")
+    rho_hw = rho_record.get("online_hw_counts")
+    ic_hw = ic_hw if isinstance(ic_hw, dict) else {}
+    rho_hw = rho_hw if isinstance(rho_hw, dict) else {}
+    ic_instructions = ic_hw.get("instructions")
+    rho_instructions = rho_hw.get("instructions")
+    def complete_counter(hw: dict[str, Any]) -> bool:
+        enabled = hw.get("instructions_time_enabled_ns")
+        running = hw.get("instructions_time_running_ns")
+        return (type(hw.get("instructions")) is int and hw["instructions"] > 0 and
+                type(enabled) is int and enabled > 0 and
+                type(running) is int and running == enabled and not hw.get("error"))
+
+    complete_instructions = complete_counter(ic_hw) and complete_counter(rho_hw)
+    return {
+        "timing_class": "single_target_online",
+        "record_class": "verified_answer_exploratory_wall",
+        "ic_cost": ic_ms, "rho_cost": rho_ms,
+        "ic_online_ms": ic_ms, "rho_online_ms": rho_ms,
+        "ic_online_wall_ms": ic_ms, "rho_online_wall_ms": rho_ms,
+        "online_speedup": rho_ms / ic_ms,
+        "controlled_online_speedup": None,
+        "automorphism_discount": {
+            "A": int(rho_record["automorphism_size"]),
+            "formula": "sqrt(A) for signed Frobenius classes",
+        },
+        "all_stages_charged_same_series": True,
+        "paired_target": {
+            "ic_public_q": ic_record["target"],
+            "rho_public_q": rho_record["published_q"],
+            "same_public_point": ic_record["target"] == rho_record["published_q"],
+        },
+        "ic_verified": ic_record["group_verified"] is True,
+        "rho_verified": rho_record["verified"] is True,
+        "ic_online_interval": f"{interval['ic_start_event']} -> {interval['ic_stop_event']}",
+        "rho_online_interval": f"{interval['rho_start_event']} -> {interval['rho_stop_event']}",
+        "operation_accounting": {
+            "unit_assumption": "IC root-index probes and rho walk steps are distinct native counters",
+            "comparison_status": "native_counters_only",
+            "operation_units": {"ic": "root-index probes", "rho": "walk steps"},
+            "ic_online_operations": probes,
+            "rho_online_operations": steps,
+            "rho_per_ic_native_counter": steps / probes if probes else None,
+            "ops_speedup_online": None,
+        },
+        "hardware_accounting": {
+            "status": "measured_common_counter" if complete_instructions else "counter_unavailable",
+            "unit": "calling-thread user instructions retired",
+            "method": "Linux perf_event_open around each producer's target online interval",
+            "ic_online_instructions": ic_instructions,
+            "rho_online_instructions": rho_instructions,
+            "rho_per_ic_instructions": rho_instructions / ic_instructions if complete_instructions else None,
+            "ic_time_enabled_ns": ic_hw.get("instructions_time_enabled_ns"),
+            "ic_time_running_ns": ic_hw.get("instructions_time_running_ns"),
+            "rho_time_enabled_ns": rho_hw.get("instructions_time_enabled_ns"),
+            "rho_time_running_ns": rho_hw.get("instructions_time_running_ns"),
+            "ic_counter_error": ic_hw.get("error"),
+            "rho_counter_error": rho_hw.get("error"),
+        },
+    }
+
+
 def untimed(record: dict[str, Any], extra_skip: tuple[str, ...] = ()) -> dict[str, Any]:
     """Drop timers (`*_ms*`, `*_ns`, `*_event`), as `boundary_autolab.untimed_digest` does."""
     return {k: v for k, v in record.items()
@@ -448,12 +517,14 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     env=dict(rho_env, KIC_RHO_EXPLICIT_SCALAR=str(scalar)), stdout_path=out,
                     stderr_path=run / f"logs/identity_{arm}.stderr.txt", cpu=arguments.cpu)
                 outputs[arm] = (measured, lab.read_jsonl(out), [])
-            ic_new = [untimed(x, ("relation_checks",)) for x in outputs["ic"][1]]
+            ic_new = [untimed(x, ("relation_checks", "online_hw_counts", "online_hw_scope"))
+                      for x in outputs["ic"][1]]
             ic_old = [untimed(x) for x in outputs["frozen_ic"][1]]
             summary_keys = ("base_hash", "rank", "rank_attempts", "rank_relations", "rank_failures",
                             "regular_states", "root_table_entries", "targets_solved")
             ic_summaries = [o[2][-1] if o[2] else {} for o in (outputs["ic"], outputs["frozen_ic"])]
-            rho_new = [untimed(x, ("producer_version",)) for x in outputs["rho"][1]]
+            rho_new = [untimed(x, ("producer_version", "online_hw_counts", "online_hw_scope"))
+                       for x in outputs["rho"][1]]
             rho_old = [untimed(x, ("producer_version",)) for x in outputs["frozen_rho"][1]]
             report = {
                 "known_scalar": scalar, "K": k_choice, "rho_seed": beat["rho_seed_base"],
@@ -463,7 +534,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     ic_summaries[0].get(k) == ic_summaries[1].get(k) for k in summary_keys),
                 "rho_untimed_records_identical": bool(rho_new) and rho_new == rho_old,
                 "compared": "every record field except timers (*_ms, *_ns, *_event), the IC's new "
-                            "relation_checks counter and rho's producer_version",
+                            "relation_checks counter, rho's producer_version and online hardware counters",
             }
             report["identical"] = all(code == 0 for code in report["exit_codes"].values()) and all(
                 report[k] for k in ("ic_untimed_records_identical", "ic_setup_summary_identical",
@@ -641,6 +712,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             ic_cold_ms = ic_record["online_stop_ns"] / 1e6
             rho_cold_ms = rho_record["online_stop_ns"] / 1e6
             claim = {
+                **primary_claim_fields(ic_record, rho_record, online_interval),
                 "schema_version": 2, "task_id": lab.TASK_ID, "beat_id": beat_id, "autolab_run_id": run.name,
                 "stage": "vs_rho", "status": "PENDING_INDEPENDENT_VALIDATION",
                 "regime": beat["regime"], "result_class": beat["result_class"],
@@ -650,8 +722,6 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 "workload_id": work["workload_id"], "workload_manifest_sha256": work["record_sha256"],
                 "run_id": run_key, "rho_reference_uid": rho_uid["candidate_uid"],
                 "target_count": 1, "ic_target_hash": target_hash, "rho_target_hash": target_hash,
-                "timing_class": "single_target_online_wall",
-                "ic_online_wall_ms": ic_ms, "rho_online_wall_ms": rho_ms, "online_speedup": speedup,
                 "ic_online_phase_ms": {schema: float(ic_record[field]) for schema, field in PHASE_FIELDS.items()},
                 "rho_online_phase_ms": {"walk_and_collision_ms": rho_record["walk_and_collision_ms"],
                                         "recovery_check_ms": rho_record["recovery_check_ms"]},

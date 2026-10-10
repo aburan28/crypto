@@ -1119,6 +1119,10 @@ mod tests {
 pub struct HwCounts {
     pub instructions: Option<u64>,
     pub cycles: Option<u64>,
+    pub instructions_time_enabled_ns: Option<u64>,
+    pub instructions_time_running_ns: Option<u64>,
+    pub cycles_time_enabled_ns: Option<u64>,
+    pub cycles_time_running_ns: Option<u64>,
     pub error: Option<String>,
 }
 
@@ -1132,12 +1136,14 @@ pub struct HwCounters {
 #[cfg(target_os = "linux")]
 fn perf_open(config: u64) -> Result<libc::c_int, String> {
     // struct perf_event_attr, PERF_ATTR_SIZE_VER5 (112 bytes): type at 0,
-    // size at 4, config at 8, flags at 40 (disabled bit 0, exclude_kernel
+    // size at 4, config at 8, read_format at 32, flags at 40 (disabled bit 0, exclude_kernel
     // bit 5, exclude_hv bit 6).  The rest stays zero.
     let mut attr = [0u8; 112];
     attr[0..4].copy_from_slice(&0u32.to_ne_bytes()); // PERF_TYPE_HARDWARE
     attr[4..8].copy_from_slice(&112u32.to_ne_bytes());
     attr[8..16].copy_from_slice(&config.to_ne_bytes());
+    // PERF_FORMAT_TOTAL_TIME_ENABLED | PERF_FORMAT_TOTAL_TIME_RUNNING.
+    attr[32..40].copy_from_slice(&3u64.to_ne_bytes());
     let flags: u64 = 1 | (1 << 5) | (1 << 6);
     attr[40..48].copy_from_slice(&flags.to_ne_bytes());
     // SAFETY: a valid attr buffer of the size it declares; pid 0 = this
@@ -1207,17 +1213,28 @@ impl HwCounters {
         };
         #[cfg(target_os = "linux")]
         for (fd, config) in &self.fds {
-            let mut value = 0u64;
-            // SAFETY: an open perf fd; DISABLE = 0x2401; an 8-byte read.
+            let mut values = [0u64; 3];
+            // SAFETY: an open perf fd; DISABLE = 0x2401; the requested
+            // read_format returns value, time_enabled, and time_running.
             let n = unsafe {
                 libc::ioctl(*fd, 0x2401, 0);
-                libc::read(*fd, &mut value as *mut u64 as *mut libc::c_void, 8)
+                libc::read(*fd, values.as_mut_ptr() as *mut libc::c_void, 24)
             };
-            if n == 8 {
+            if n == 24 {
                 match config {
-                    1 => out.instructions = Some(value),
-                    _ => out.cycles = Some(value),
+                    1 => {
+                        out.instructions = Some(values[0]);
+                        out.instructions_time_enabled_ns = Some(values[1]);
+                        out.instructions_time_running_ns = Some(values[2]);
+                    }
+                    _ => {
+                        out.cycles = Some(values[0]);
+                        out.cycles_time_enabled_ns = Some(values[1]);
+                        out.cycles_time_running_ns = Some(values[2]);
+                    }
                 }
+            } else {
+                out.error = Some(format!("perf counter read returned {n} bytes, expected 24"));
             }
             // SAFETY: closing the fd this struct owns.
             unsafe {

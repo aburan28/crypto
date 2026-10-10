@@ -1671,10 +1671,6 @@ fn f4_solver_linear_tail(
     f4_linear_tail_from_echelon(matrix, pivot_row, n_cols, low_start, word_ops)
 }
 
-/// Original full-width Gauss-Jordan kernel, retained as the default and as the
-/// exact control for optimized row-reduction experiments.
-fn rref_f2_full(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
-    let words = n_cols.div_ceil(64);
 fn f4_solver_linear_tail_flat(
     matrix: &mut FlatF2Matrix,
     n_cols: usize,
@@ -1710,6 +1706,49 @@ fn f4_solver_linear_tail_flat(
         }
         pivot_row += 1;
         if pivot_row == matrix.rows {
+            break;
+        }
+    }
+
+    let low_width = n_cols - low_start;
+    let low_words = low_width.div_ceil(64).max(1);
+    let mut low = Vec::with_capacity(matrix.rows - pivot_row);
+    for source in matrix.data[pivot_row * words..].chunks_exact(words) {
+        let mut row = vec![0u64; low_words];
+        for column in low_start..n_cols {
+            if source[column / 64] & (1u64 << (column % 64)) != 0 {
+                let target = column - low_start;
+                row[target / 64] |= 1u64 << (target % 64);
+            }
+        }
+        if row.iter().any(|&word| word != 0) {
+            low.push(row);
+        }
+    }
+    let rank = rref_f2_counted(&mut low, low_width, word_ops);
+    (low, rank)
+}
+
+fn rref_f2_full(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+    let words = n_cols.div_ceil(64);
+    let mut pivot_row = 0usize;
+    for c in 0..n_cols {
+        let (w, bit) = (c / 64, 1u64 << (c % 64));
+        let piv = (pivot_row..matrix.len()).find(|&r| matrix[r][w] & bit != 0);
+        let piv = match piv {
+            Some(p) => p,
+            None => continue,
+        };
+        matrix.swap(pivot_row, piv);
+        for r in 0..matrix.len() {
+            if r != pivot_row && matrix[r][w] & bit != 0 {
+                for k in 0..words {
+                    matrix[r][k] ^= matrix[pivot_row][k];
+                }
+            }
+        }
+        pivot_row += 1;
+        if pivot_row == matrix.len() {
             break;
         }
     }
@@ -1776,8 +1815,7 @@ fn rref_f2_m4ri(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
                 // Bring this candidate into echelon form with respect to the
                 // pivots already selected in the current block.
                 for (index, &pivot_column) in pivot_columns.iter().enumerate() {
-                    let (pivot_word, pivot_bit) =
-                        (pivot_column / 64, 1u64 << (pivot_column % 64));
+                    let (pivot_word, pivot_bit) = (pivot_column / 64, 1u64 << (pivot_column % 64));
                     if matrix[row][pivot_word] & pivot_bit != 0 {
                         for (target, source) in matrix[row][pivot_word..words]
                             .iter_mut()
@@ -1862,44 +1900,6 @@ fn rref_f2_m4ri(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
         pivot_row += block_rows;
     }
     pivot_row
-}
-
-/// Reduced row echelon form over `F_2`; returns the rank, with the pivot rows
-/// moved to the front. The optimized kernel is opt-in until a retained paired
-/// benchmark dominates the full-width control.
-fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
-    if std::env::var("KIC_F4_RREF_FULL").as_deref() == Ok("1") {
-        rref_f2_full(matrix, n_cols)
-    } else if std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1") {
-        rref_f2_suffix(matrix, n_cols)
-    } else if std::env::var("KIC_F4_RREF_M4RI").as_deref() == Ok("1")
-        || (matrix.len() >= 128 && n_cols >= 256)
-    {
-        rref_f2_m4ri(matrix, n_cols)
-    } else {
-        rref_f2_full(matrix, n_cols)
-    }
-}
-
-// ── Macaulay profile / first fall degree ───────────────────────────
-
-    let low_width = n_cols - low_start;
-    let low_words = low_width.div_ceil(64).max(1);
-    let mut low = Vec::with_capacity(matrix.rows - pivot_row);
-    for source in matrix.data[pivot_row * words..].chunks_exact(words) {
-        let mut row = vec![0u64; low_words];
-        for column in low_start..n_cols {
-            if source[column / 64] & (1u64 << (column % 64)) != 0 {
-                let target = column - low_start;
-                row[target / 64] |= 1u64 << (target % 64);
-            }
-        }
-        if row.iter().any(|&word| word != 0) {
-            low.push(row);
-        }
-    }
-    let rank = rref_f2_counted(&mut low, low_width, word_ops);
-    (low, rank)
 }
 
 fn f4_echelon_column(
@@ -2138,39 +2138,6 @@ pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> 
         rows_monos.par_iter().map(pack).collect()
     } else {
         rows_monos.iter().map(pack).collect()
-    }
-}
-
-/// Statistics from a solve, so callers can report what the algebra
-/// actually cost.
-#[derive(Clone, Debug, Default)]
-pub struct SolveStats {
-    /// Algebraic reductions performed (F4 passes or Gröbner bases).
-    pub reductions: usize,
-    /// Branches closed by the reduction producing the constant `1` —
-    /// the infeasibility certificates that replace exhaustive search.
-    pub infeasible_branches: usize,
-    /// Variables fixed by propagation rather than by splitting.
-    pub propagations: usize,
-    /// Splitting decisions made.
-    pub splits: usize,
-    /// Number of algebraically reduced nodes closed by direct enumeration of
-    /// the remaining small Boolean cube.
-    pub tail_enumerations: usize,
-    /// Complete assignments checked inside those tail cubes.
-    pub tail_assignments_tested: usize,
-    /// Split nodes that deliberately deferred F4 until the configured batch
-    /// of Boolean decisions was complete.
-    pub deferred_splits: usize,
-    /// True if the node budget ran out, so results may be incomplete.
-    pub exhausted: bool,
-}
-
-impl SolveStats {
-    /// Comparable search effort including assignments checked by the hybrid
-    /// tail enumerator.
-    pub fn effort(&self) -> usize {
-        self.splits + self.tail_assignments_tested
     }
 }
 
@@ -4999,6 +4966,12 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
+    /// Small Boolean cubes closed by direct enumeration.
+    pub tail_enumerations: usize,
+    /// Assignments checked inside those cubes.
+    pub tail_assignments_tested: usize,
+    /// Split nodes that deferred an F4 reduction.
+    pub deferred_splits: usize,
     /// True if the node budget ran out or the input was unsupported, so
     /// results may be incomplete. Check `unsupported` to distinguish them.
     pub exhausted: bool,
@@ -5056,6 +5029,13 @@ pub struct SolveStats {
     /// this base, so the solve used plain inherited F4 instead.
     #[serde(default)]
     pub geometric_fallbacks: usize,
+}
+
+impl SolveStats {
+    /// Search effort including hybrid tail assignments.
+    pub fn effort(&self) -> usize {
+        self.splits + self.tail_assignments_tested
+    }
 }
 
 /// Reduce `system`, returning polynomials in the same ideal — either a
@@ -5935,14 +5915,6 @@ fn solve_rec(
         }
         Some(free) => {
             stats.splits += 1;
-            if deferred_decisions > 0 {
-                stats.deferred_splits += 1;
-            }
-            let child_deferred = if deferred_decisions > 0 {
-                deferred_decisions - 1
-            } else {
-                batch_split_bits.saturating_sub(1)
-            };
             for value in [false, true] {
                 let mut branch = assignment.clone();
                 branch[free] = Some(value);
@@ -8329,8 +8301,8 @@ mod reference_equivalence_tests {
             let mut pivot_row = 0usize;
             for column in 0..n_cols {
                 let (word, bit) = (column / 64, 1u64 << (column % 64));
-                let Some(pivot) = (pivot_row..matrix.len())
-                    .find(|&row| matrix[row][word] & bit != 0)
+                let Some(pivot) =
+                    (pivot_row..matrix.len()).find(|&row| matrix[row][word] & bit != 0)
                 else {
                     continue;
                 };
@@ -8372,10 +8344,7 @@ mod reference_equivalence_tests {
                 let mut suffix = input.clone();
                 let mut m4ri = input;
                 let rank = reference(&mut expected, columns);
-                assert_eq!(
-                    rref_f2_suffix(&mut suffix, columns),
-                    rank
-                );
+                assert_eq!(rref_f2_suffix(&mut suffix, columns), rank);
                 assert_eq!(suffix, expected);
                 assert_eq!(rref_f2_m4ri(&mut m4ri, columns), rank);
                 assert_eq!(m4ri, expected);

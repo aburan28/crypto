@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import copy
 import io
 import os
 import stat
@@ -15,15 +16,18 @@ from unittest import mock
 
 import boundary_autolab as lab
 import op_accounting
+import single_target_panel as panel
 
 
 def valid_operation_accounting(ic_ops: float = 100.0, rho_ops: float = 400.0) -> dict:
     return {
-        "unit_assumption": "one probe and one rho step each count as one operation",
+        "unit_assumption": "IC probes and rho steps are distinct native counters",
+        "comparison_status": "native_counters_only",
         "operation_units": {"ic": "target probes", "rho": "walk steps"},
         "ic_online_operations": ic_ops,
         "rho_online_operations": rho_ops,
-        "ops_speedup_online": rho_ops / ic_ops,
+        "rho_per_ic_native_counter": rho_ops / ic_ops,
+        "ops_speedup_online": None,
     }
 
 
@@ -81,11 +85,6 @@ class LedgerContractTests(unittest.TestCase):
             self.assertEqual(
                 json.loads((run / "state.json").read_text()), original_state
             )
-        self.assertFalse(report["commands"].get("n37_full"))
-        self.assertTrue(report["primary_speedup_contract"])
-        for row in report["beats"]:
-            self.assertFalse(row["primary_speedup_eligible"])
-            self.assertTrue(row["primary_speedup_blocker"])
 
 
 class MeasurementSchemaTests(unittest.TestCase):
@@ -99,13 +98,83 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertIn("timing_class", result["missing_stage_fields"])
         self.assertTrue(result["missing_global_provenance"])
 
+    def test_single_target_producer_fields_complete_archived_claim(self) -> None:
+        run = (lab.REPO / "research/sat_factor_base_review_20260908/autolab/evidence"
+               / "20261001-koblitz-n61-single-target/autolab_runs"
+               / "20261001T200614Z-d687d78737")
+        claim = json.loads((run / "artifacts/claim_draft.json").read_text())
+        workload = json.loads((run / "artifacts/manifests/workloads"
+                               / f"{claim['workload_id']}.json").read_text())
+        target = workload["record"]["targets"][0]
+        ic = {"online_ms": claim["ic_online_wall_ms"], "probes": claim["counts"]["ic_probes"],
+              "target": target, "group_verified": True}
+        rho = {"online_ms": claim["rho_online_wall_ms"], "walk_steps": claim["counts"]["rho_walk_steps"],
+               "published_q": target, "automorphism_size": claim["rho_policy"]["automorphism_size"],
+               "verified": True}
+        claim.update(panel.primary_claim_fields(ic, rho, claim["online_interval"]))
+        self.assertEqual(claim["hardware_accounting"]["status"], "counter_unavailable")
+        self.assertEqual(lab.validate_claim(claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        counted = panel.primary_claim_fields(
+            ic | {"online_hw_counts": {"instructions": 1000, "cycles": 1200,
+                                        "instructions_time_enabled_ns": 100,
+                                        "instructions_time_running_ns": 100, "error": None}},
+            rho | {"online_hw_counts": {"instructions": 2500, "cycles": 3000,
+                                         "instructions_time_enabled_ns": 200,
+                                         "instructions_time_running_ns": 200, "error": None}},
+            claim["online_interval"],
+        )["hardware_accounting"]
+        self.assertEqual(counted["status"], "measured_common_counter")
+        self.assertEqual(counted["rho_per_ic_instructions"], 2.5)
+        self.assertEqual(counted["ic_time_running_ns"], counted["ic_time_enabled_ns"])
+        counted_claim = copy.deepcopy(claim)
+        counted_claim["hardware_accounting"] = counted
+        self.assertEqual(lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        counted_claim["hardware_accounting"]["rho_per_ic_instructions"] = 3.0
+        self.assertIn("hardware_accounting.rho_per_ic_instructions must match the counts",
+                      lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["validation_errors"])
+        counted_claim["hardware_accounting"]["rho_per_ic_instructions"] = 2.5
+        counted_claim["hardware_accounting"]["ic_time_running_ns"] = 99
+        self.assertIn("hardware_accounting.ic counter must run throughout its enabled interval",
+                      lab.validate_claim(counted_claim, stage="vs_rho", ledger=self.ledger)["validation_errors"])
+        zero_step_claim = copy.deepcopy(claim)
+        zero_step_claim.update(panel.primary_claim_fields(
+            ic, rho | {"walk_steps": 0}, claim["online_interval"]))
+        self.assertEqual(zero_step_claim["operation_accounting"]["rho_per_ic_native_counter"], 0)
+        self.assertEqual(lab.validate_claim(zero_step_claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        zero_probe_claim = copy.deepcopy(claim)
+        zero_probe_claim.update(panel.primary_claim_fields(
+            ic | {"probes": 0}, rho, claim["online_interval"]))
+        self.assertIsNone(zero_probe_claim["operation_accounting"]["rho_per_ic_native_counter"])
+        self.assertEqual(lab.validate_claim(zero_probe_claim, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        for change, expected in (
+            (lambda row: row["rho_online_phase_ms"].pop("recovery_check_ms"),
+             "rho_online_phase_ms must contain exactly the declared phases"),
+            (lambda row: row["online_interval"].pop("rho_start_event"),
+             "online_interval.rho_start_event is missing or invalid"),
+            (lambda row: row.update(ic_cost=row["ic_cost"] + 1),
+             "ic_cost must equal ic_online_wall_ms"),
+            (lambda row: row["automorphism_discount"].update(A=1),
+             "automorphism_discount.A must match rho_policy.automorphism_size"),
+            (lambda row: row.update(controlled_online_speedup=row["online_speedup"]),
+             "controlled_online_speedup requires a controlled wall record"),
+            (lambda row: row.update(record_class="verified_answer_controlled_wall"),
+             "controlled wall record requires controlled_online_speedup"),
+        ):
+            with self.subTest(expected=expected):
+                malformed = copy.deepcopy(claim)
+                change(malformed)
+                result = lab.validate_claim(malformed, stage="vs_rho", ledger=self.ledger)
+                self.assertEqual(result["status"], "FAIL")
+                self.assertIn(expected, result["validation_errors"])
+
     def test_vs_rho_single_target_online_claim_passes(self) -> None:
         report = {
             "n": 37,
             "n_or_bits": 37,
             "timing_class": "single_target_online",
-            "ic_cost": 1.0,
-            "rho_cost": 2.0,
+            "record_class": "verified_answer_exploratory_wall",
+            "ic_cost": 10.0,
+            "rho_cost": 20.0,
             "automorphism_discount": {"A": 74, "formula": "sqrt(2*n)"},
             "all_stages_charged_same_series": True,
             "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
@@ -116,7 +185,6 @@ class MeasurementSchemaTests(unittest.TestCase):
             "target_count": 1,
             "ic_target_hash": "target-abc",
             "rho_target_hash": "target-abc",
-            "timing_class": "single_target_online_wall",
             "ic_online_wall_ms": 10.0,
             "rho_online_wall_ms": 20.0,
             "online_speedup": 2.0,
@@ -148,11 +216,11 @@ class MeasurementSchemaTests(unittest.TestCase):
                 "walk_policy": "signed_frobenius",
                 "collision_policy": "distinguished_point",
                 "distinguished_point_memory_bytes": 0,
+                "automorphism_size": 74,
             },
             "verdict": "DRAFT",
             "claim_boundary": "single public target only",
             "independent_replay_pointer": "research/example",
-            "target_count": 1,
             "paired_target": {
                 "ic_public_q": [17, 23],
                 "rho_public_q": [17, 23],
@@ -160,15 +228,11 @@ class MeasurementSchemaTests(unittest.TestCase):
             },
             "ic_verified": True,
             "rho_verified": True,
-            "ic_online_ms": 1.0,
-            "rho_online_ms": 2.0,
-            "online_speedup": 2.0,
-            "ic_online_phase_ms": {"target_pdp": 1.0},
-            "rho_online_phase_ms": {"target_walk": 2.0},
+            "ic_online_ms": 10.0,
+            "rho_online_ms": 20.0,
+            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
             "ic_online_interval": "target work only",
             "rho_online_interval": "target walk through replay",
-            "fixture_hash": "abc",
-            "executable_or_source_hash": "def",
             "fixture_hash": "target-abc",
             "executable_or_source_hash": {"direct": "def", "rho": "ghi"},
             "host_id": {"node": "test"},
@@ -182,7 +246,7 @@ class MeasurementSchemaTests(unittest.TestCase):
 
         del report["operation_accounting"]
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
-        self.assertEqual(result["status"], "FAIL")
+        self.assertEqual(result["status"], "FAIL", result)
         self.assertIn("operation_accounting", result["missing_stage_fields"])
 
         report["operation_accounting"] = valid_operation_accounting()
@@ -190,8 +254,7 @@ class MeasurementSchemaTests(unittest.TestCase):
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "FAIL")
         self.assertIn(
-            "operation_accounting.ops_speedup_online does not equal "
-            "rho_online_operations / ic_online_operations",
+            "operation_accounting.ops_speedup_online requires a calibrated common unit and receipt",
             result["pairing_errors"],
         )
 
@@ -204,10 +267,38 @@ class MeasurementSchemaTests(unittest.TestCase):
             result["pairing_errors"],
         )
 
+        report["operation_accounting"] = valid_operation_accounting()
+        report["ic_online_phase_ms"]["T_target_query_ms"] = "invalid"
+        result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(result["status"], "FAIL")
+        self.assertIn(
+            "ic_online_phase_ms must contain finite nonnegative costs",
+            result["pairing_errors"],
+        )
+
+    def test_operation_accounting_rejects_nonfinite_counts_and_ratios(self) -> None:
+        for key, value in (
+            ("ic_online_operations", float("nan")),
+            ("rho_online_operations", float("inf")),
+            ("rho_per_ic_native_counter", float("nan")),
+        ):
+            with self.subTest(key=key):
+                accounting = valid_operation_accounting()
+                accounting[key] = value
+                self.assertTrue(lab.operation_accounting_errors(accounting))
+
+        accounting = valid_operation_accounting()
+        accounting["comparison_status"] = "calibrated_common_unit"
+        accounting["operation_units"] = {"ic": "group additions", "rho": "group additions"}
+        accounting["calibration_receipt"] = "calibration.json"
+        accounting["ops_speedup_online"] = float("inf")
+        self.assertTrue(lab.operation_accounting_errors(accounting))
+
     def test_vs_rho_different_public_points_fail(self) -> None:
         report = {
             "n_or_bits": 41,
             "timing_class": "single_target_online",
+            "record_class": "verified_answer_exploratory_wall",
             "ic_cost": 10.0,
             "rho_cost": 20.0,
             "automorphism_discount": {"A": 82, "formula": "sqrt(2*n)"},
@@ -227,7 +318,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "rho_online_ms": 20.0,
             "online_speedup": 2.0,
             "ic_online_phase_ms": {"target_pdp": 10.0},
-            "rho_online_phase_ms": {"target_walk": 20.0},
+            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
             "ic_online_interval": "target work only",
             "rho_online_interval": "target walk through replay",
             "fixture_hash": "abc",
@@ -245,6 +336,11 @@ class MeasurementSchemaTests(unittest.TestCase):
         import copy
 
         base = {
+            "n_or_bits": 37,
+            "ic_cost": 10.0,
+            "rho_cost": 20.0,
+            "automorphism_discount": {"A": 74, "formula": "sqrt(2*n)"},
+            "all_stages_charged_same_series": True,
             "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
             "candidate_manifest_sha256": "123456789abc0000000000000000000000000000000000000000000000000000",
             "workload_id": "abcdef123456",
@@ -253,9 +349,12 @@ class MeasurementSchemaTests(unittest.TestCase):
             "target_count": 1,
             "ic_target_hash": "target-abc",
             "rho_target_hash": "target-abc",
-            "timing_class": "single_target_online_wall",
+            "timing_class": "single_target_online",
+            "record_class": "verified_answer_exploratory_wall",
             "ic_online_wall_ms": 10.0,
             "rho_online_wall_ms": 20.0,
+            "ic_online_ms": 10.0,
+            "rho_online_ms": 20.0,
             "online_speedup": 2.0,
             "ic_online_phase_ms": {
                 "T_target_query_ms": 1.0,
@@ -280,11 +379,22 @@ class MeasurementSchemaTests(unittest.TestCase):
             "rho_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
             "ic_scalar_verified": True,
             "rho_scalar_verified": True,
+            "ic_verified": True,
+            "rho_verified": True,
+            "paired_target": {
+                "ic_public_q": [17, 23],
+                "rho_public_q": [17, 23],
+                "same_public_point": True,
+            },
+            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
+            "ic_online_interval": "first target query through independent replay",
+            "rho_online_interval": "first target walk through independent replay",
             "rho_policy": {
                 "worker_count": 1,
                 "walk_policy": "walk",
                 "collision_policy": "collision",
                 "distinguished_point_memory_bytes": 0,
+                "automorphism_size": 74,
             },
             "verdict": "DRAFT",
             "claim_boundary": "single public target only",
@@ -295,6 +405,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "resource_caps": {},
             "seeds": 1,
             "claim_boundary_non_claims": ["not key recovery"],
+            "operation_accounting": valid_operation_accounting(),
         }
         variants = []
         batched = copy.deepcopy(base)
@@ -334,10 +445,11 @@ class MeasurementSchemaTests(unittest.TestCase):
         missing_relation_check = copy.deepcopy(base)
         missing_relation_check["online_interval"]["ic_included_stages"].remove("target_relation_check")
         variants.append(missing_relation_check)
-        for report in variants:
+        self.assertEqual(lab.validate_claim(base, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        for index, report in enumerate(variants):
             result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
-            self.assertEqual(result["status"], "FAIL", result)
-            self.assertTrue(result["validation_errors"])
+            self.assertEqual(result["status"], "FAIL", f"variant {index}: {result}")
+            self.assertTrue(result["validation_errors"] or result["pairing_errors"])
 
     def test_decomposition_requires_ffd(self) -> None:
         report = {
@@ -476,7 +588,8 @@ class HelperTests(unittest.TestCase):
             accounting = claim["operation_accounting"]
             self.assertEqual(accounting["ic_online_operations"], 1)
             self.assertEqual(accounting["rho_online_operations"], 12)
-            self.assertEqual(accounting["ops_speedup_online"], 12.0)
+            self.assertEqual(accounting["rho_per_ic_native_counter"], 12.0)
+            self.assertIsNone(accounting["ops_speedup_online"])
             self.assertEqual(lab.operation_accounting_errors(accounting), [])
             self.assertEqual(
                 claim["independent_replay_pointer"],
@@ -518,7 +631,7 @@ class HelperTests(unittest.TestCase):
         args = lab.parser().parse_args([
             'launch', '--beat', 'koblitz.vs_rho.n37_wall', '--fixtures', '2'
         ])
-        with self.assertRaisesRegex(lab.AutolabError, 'exactly one target'):
+        with self.assertRaisesRegex(lab.AutolabError, 'exactly one online target'):
             lab.launch(args)
 
     def test_seed_is_deterministic(self) -> None:
@@ -652,35 +765,29 @@ class OperationAccountingTests(unittest.TestCase):
             self.assertEqual(lab.operation_accounting_errors(block), [], name)
             claim = json.loads((lab.REPO / cfg["dir"] / "claim_report_vs_rho.json").read_text())
             self.assertEqual(claim.get("operation_accounting"), block, f"{name}: rerun op_accounting.py --write")
-            self.assertFalse(
-                any("S unknown" in item for item in claim["claim_boundary_non_claims"]), name
-            )
+            self.assertEqual(claim.get("record_class"), "verified_answer_exploratory_wall", name)
+            self.assertIn("controlled_online_speedup", claim, name)
+            self.assertIsNone(claim["controlled_online_speedup"], name)
+            self.assertIsNone(claim.get("host_isolation_receipt"), name)
+            self.assertIsNone(block["total_work_S"], name)
+            self.assertIsNone(block["ops_speedup_online"], name)
 
-    def test_n73_separates_contended_runs_and_lucky_target(self) -> None:
+    def test_n73_separates_contended_runs_and_native_counter_ratios(self) -> None:
         block = op_accounting.account_rung("n73")
         self.assertEqual(block["ic_online_operations"], 457561)
         self.assertEqual(block["host_contention"]["contended_runs"], ["R2", "R3"])
         self.assertAlmostEqual(block["wall_speedup_median_uncontended_runs"], 184.8588, places=3)
-        self.assertGreater(block["target_luck_factor"], 100)
-        self.assertLess(block["ops_speedup_online_mean_target"], 1)
+        self.assertGreater(block["rank_mean_to_frozen_probe_ratio"], 100)
+        self.assertIn("not an estimate of unseen-target cost", block["ic_rank_probes_note"])
+        self.assertLess(block["rho_expected_steps_per_rank_mean_probe"], 1)
         expected = op_accounting.expected_rho_steps(86020738150056119, 73)
-        self.assertAlmostEqual(block["ops_speedup_online"], expected / 457561)
+        self.assertAlmostEqual(block["rho_per_ic_native_counter"], expected / 457561)
 
-    def test_strip_s_unknown_keeps_the_rest_of_the_non_claim(self) -> None:
-        strip = op_accounting.strip_s_unknown
-        self.assertIsNone(strip("total operation-count comparison absent; S unknown"))
-        self.assertEqual(
-            strip("not an asymptotic sub-rho claim (both arms remain sqrt-class; "
-                  "total operation-count boundary not comparable, S unknown)"),
-            "not an asymptotic sub-rho claim (both arms remain sqrt-class)",
-        )
-        self.assertEqual(
-            strip("not an asymptotic sub-rho claim (total operation-count boundary not comparable, S unknown)"),
-            "not an asymptotic sub-rho claim",
-        )
-        self.assertEqual(strip("not key recovery"), "not key recovery")
-            self.assertIn("target_count", result["missing_stage_fields"])
-            self.assertEqual(json.loads(out.read_text())["status"], "FAIL")
+    def test_native_counters_do_not_promote_total_work(self) -> None:
+        block = op_accounting.account_rung("n73")
+        self.assertEqual(block["comparison_status"], "native_counters_only")
+        self.assertIsNone(block["total_work_S"])
+        self.assertIsNone(block["ops_speedup_online"])
 
 
 class TimingTests(unittest.TestCase):
