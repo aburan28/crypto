@@ -30,9 +30,12 @@ events ran for at least 99% of their enabled intervals; a scaled diagnostic
 remains in the raw receipt when coverage is lower. The analyzer records
 multiplexing as a failed fidelity check and unavailable perf access as
 unavailable. Three synthetic tests cover scaled counts, short reads, and
-the fidelity gate. A guest CPU allocation does not by
-itself supply the host-wide exclusive partition required by the
-`cryptanalysis/docs/ISOLATED_BENCHMARKS.md` rule.
+the fidelity gate. [Modal's Sandbox resource guide](https://modal.com/docs/guide/sandbox-resources)
+describes a CPU request as a guaranteed minimum allocation and allows
+bursting when host capacity is available. That allocation does not establish
+the host-wide exclusive CPU partition required by the cryptanalysis isolated
+benchmark rule, so this pilot retains `controlled_speedup: null` unless an
+independent host-level isolation receipt is supplied.
 
 At [Modal's published Sandbox rates](https://modal.com/pricing), the fixed
 request/limit has a CPU-and-memory base rate of
