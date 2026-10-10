@@ -30,7 +30,10 @@ events ran for at least 99% of their enabled intervals; a scaled diagnostic
 remains in the raw receipt when coverage is lower. The analyzer records
 multiplexing as a failed fidelity check and unavailable perf access as
 unavailable. Three synthetic tests cover scaled counts, short reads, and
-the fidelity gate. [Modal's Sandbox resource guide](https://modal.com/docs/guide/sandbox-resources)
+the fidelity gate. Three analyzer-contract tests pass four archived T205
+reports through a synthetic guest receipt and check complete, invalid-scalar,
+and failed-producer outcomes. These are schema checks, not remote timing
+evidence. [Modal's Sandbox resource guide](https://modal.com/docs/guide/sandbox-resources)
 describes a CPU request as a guaranteed minimum allocation and allows
 bursting when host capacity is available. That allocation does not establish
 the host-wide exclusive CPU partition required by the cryptanalysis isolated
