@@ -1,0 +1,21 @@
+ECC2K-130 is the Certicom Koblitz challenge $y^2+xy=x^3+1$ over
+$\FF_{2^{131}}$, open since 1997, with an expected cost of $2^{60.9}$
+iterations of a Frobenius-class Pollard rho. This paper reports a
+measured campaign against it on commodity hardware: a type-II
+optimal-normal-basis field with one generated golden model, two
+iteration functions and a third for power-capped parts, a bitsliced
+CPU client, a packed CUDA client taken from $0.85$ to $14.64$ billion
+complete iterations per second on one RTX~PRO~6000 by sixteen paired rungs and to $20.08$ on a table walk, and a VHDL engine
+measured at $8.25$~G steps/s on one AWS F2 FPGA against a pre-board
+estimate of $5$--$12$. The walk constant is measured, not assumed:
+$2^{60.91}$--$2^{60.92}$ iterations for the campaign's $\sigma$-walk,
+so the 2009 budget stands. A carry-less-unit floor written before
+tuning rules out $28$~B/s on one GPU, and a pre-declared target of
+$17.0$~B/s declined a $16.56$~B/s table walk. The live campaign at
+cutoff 32, one report per $2^{28.41}$ iterations, had stored $367$
+million points and $2^{56.38}$ iterations with no collision when its
+fleet was reclaimed. Index calculus on the curve, priced in the same
+unit, sits $10^7$ times above rho at the challenge size and the best
+measured point decomposition is $35$--$51$ bits short of its budget.
+Every number is footnoted to a repository artefact; nothing here is
+an advance on the generic-group floor, and the paper says so.

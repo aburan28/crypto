@@ -1,0 +1,57 @@
+\appendix
+\section{Reproduction}
+\label{app:repro}
+
+All commands run from the repository root unless a directory is
+named. CUDA rows need the card named in the row; the host checks do
+not.
+
+\paragraph{Field, walk and solver.}
+{\small\begin{verbatim}
+cd ecc2k130 && make generate && make test        # 52 checks, GF(2^23..131)
+make break-small   # planted logs, GF(2^41)
+python3 ecc2k130/examples/rho_toy.py   # the walk on GF(2^23)
+\end{verbatim}}
+
+\paragraph{GPU rates (RTX PRO 6000 unless noted).}
+{\small\begin{verbatim}
+make -C ecc2k130 bench-rtx-pro6000   # audited sigma preset, 14.64 B/s
+make -C ecc2k130 audit-rtx-pro6000   # same, with DP34 collection
+make -C ecc2k130 gpu-rtx-pro6000-20b   # one-block table walk, 20.08 B/s
+make -C ecc2k130 gpu-rtx-pro6000-sigma-fused      # 15.44 B/s
+make -C ecc2k130 gpu-b200-19b   # B200 autosweep arm, 19.40 B/s
+make -C ecc2k130 bench-local-packed   # RTX PRO 4500 bridge map, 12.50 B/s
+python3 ecc2k130/benchmark_instance.py   # concurrent-instance accounting
+\end{verbatim}}
+Every rate is a paired comparison; the candidate/control pairs,
+raw samples and re-walk logs are in the \texttt{ecc2k130/benchmarks/}
+directory each note links.
+
+\paragraph{Walk constant and cycles.}
+{\small\begin{verbatim}
+make -C ecc2k130 test-cycle-rule   # 19,200 tau-cycles refused
+# scatter runs and c measurements: ecc2k130/WALK-CONSTANT.md, section 4 and 11.6
+\end{verbatim}}
+
+\paragraph{FPGA.}
+{\small\begin{verbatim}
+cd hdl/ecc2k130 && python3 ecc2k_ref.py check && make   # vectors, testbenches
+make rate   # 6,144 steps, clk/step
+cd aws && NENG=128 CLK_MHZ=333 ./build_afi.sh push && ./build_afi.sh launch
+\end{verbatim}}
+
+\paragraph{Campaign.}
+{\small\begin{verbatim}
+cat ecc2k130/aws/campaign.json   # frozen configuration
+ecc2k130/benchmarks/dp-interval/   # 2^28.41 calibration, raw TSV
+ecc2k130/CERTIFICATION.md   # storage and replay protocol
+research/ecc2k130_rho_audit_20260925/   # live snapshot and audit
+\end{verbatim}}
+
+\paragraph{Alternatives.}
+{\small\begin{verbatim}
+cd ecc2k130/codegen && \
+  python3 indexcalc.py --m 11 --points 3 --weight 3 --trials 5
+RESEARCH_ECC2K130_IC_FEASIBILITY.md   # compact-orbit ladder, n=131
+cryptanalysis:experiments/pdp-scaling/   # decomposition budget
+\end{verbatim}}

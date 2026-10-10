@@ -1,0 +1,55 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{The 2009 attempt.} Bailey et al.~\cite{bailey2009} fixed
+the iteration function this campaign walks, $R\mapsto\sigma^j(R)+R$
+with $j$ from the weight of $x$, the weight-34 distinguished-point
+rule, and the $2^{60.9}$ budget, and reported per-platform rates on
+Core~2 (533 cycles per iteration with 128-bit vectors), Cell, GPUs,
+FPGAs~\cite{fan2010fpga} and ASIC estimates; their SHARCS
+paper~\cite{bailey2009sharcs} priced the whole Certicom ECC2 list.
+Bos, Kleinjung, Niederhagen and Schwabe's Cell
+implementation~\cite{bos2010cell} is the bitsliced lineage this
+client's CPU and first GPU backends belong to. The type-II
+optimal-polynomial-basis multiplication of Bernstein and
+Lange~\cite{bernsteinlange2010onb} is used verbatim; the conversion
+networks generated here match their hand-designed chains to within a
+few instructions (Section~\ref{sec:arith-bitsliced}). Bernstein's bit
+operation counts for binary multiplication~\cite{bernstein2009batch}
+are the reference the three-input-logic finding is measured against.
+Bernstein et al.'s later FPGA designs~\cite{bernstein2016fpga} are the
+calibration for the pre-board estimate of Section~\ref{sec:fpga},
+which the measurement then met.
+
+\paragraph{Rho on automorphism classes.} The $\sqrt{2m}$ saving from
+Frobenius and negation on Koblitz curves is due to Wiener and
+Zuccherato~\cite{wienerzuccherato1998} and Gallant, Lambert and
+Vanstone~\cite{glv2000}, generalised by Duursma, Gaudry and
+Morain~\cite{duursma1999}. Teske's $r$-adding walks~\cite{teske2001}
+and the Bernstein--Lange--Schwabe treatment of fruitless cycles under
+the negation map~\cite{bls2011} are the background to
+Section~\ref{sec:walk-table}; the cycle classes measured there are the
+$\tau$-relation analogue, and the measured walk constants of
+Table~\ref{tab:walkconst} are, to our knowledge, the first reported
+for this branch distribution on this family. The distinguished-point
+method is van Oorschot and Wiener's~\cite{vanoorschot1999}. The 112-bit
+prime-field record of Bos et al.~\cite{bos2012ps3} is the nearest
+completed computation in scale.
+
+\paragraph{Index calculus on binary curves.} Semaev's summation
+polynomials~\cite{semaev2004}, Gaudry's and Diem's index
+calculus~\cite{gaudry2009,diem2011}, the Faug\`ere--Perret--Petit--Renault
+and Petit--Quisquater analyses of Weil-descent
+systems~\cite{faugere2012,petitquisquater2012} and Galbraith and
+Gebregiyorgis's characteristic-two
+algorithms~\cite{galbraithgebregiyorgis2014} are the methods
+Section~\ref{sec:alternatives} prices on this curve. The structural
+closure at $n=131$ (no Frobenius-stable subspace of intermediate
+dimension) is elementary once the normal basis is in view, and the
+measured ladder confirms that the surviving weight-bounded bases do
+not reach the budget.
+
+\paragraph{Measurement discipline.} The companion
+paper~\cite{ecdlppaper} states the boundary-unit-table-class rule and
+applies it across rho, baby-step giant-step, kangaroo and prime-field
+index calculus; this paper is its ECC2K-130 chapter at full length.
