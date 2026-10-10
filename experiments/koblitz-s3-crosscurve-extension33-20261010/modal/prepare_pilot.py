@@ -90,6 +90,7 @@ def make() -> tuple[dict, dict]:
         "public_target_count": 4,
         "planned_run_count": 16,
         "paired_order": "ABBA_or_BAAB_by_frozen_curve_and_target_index",
+        "operation_count_boundary": study["operation_count_boundary"],
         "single_target_wall_gain_threshold": 2,
         "host_exclusive_partition_receipt": None,
         "controlled_speedup": None,

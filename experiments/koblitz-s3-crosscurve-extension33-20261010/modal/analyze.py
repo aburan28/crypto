@@ -183,6 +183,16 @@ def idle_noise(host: dict) -> dict:
             "selected_cpu_interrupts": difference(row, "interrupts", selected)}
 
 
+def online_root_calls(report: dict, arm: str) -> int | None:
+    rank_calls = report.get("rank_target_s3_calls" if arm == "reference" else
+                            "fallback_s3_calls")
+    target_calls = report.get("target_s3_calls")
+    if not all(isinstance(value, int) and value >= 0
+               for value in (rank_calls, target_calls)):
+        return None
+    return rank_calls + target_calls
+
+
 def analyze(receipt_path: Path) -> tuple[dict, list[dict]]:
     plan = json.loads(PLAN.read_bytes())
     assert plan["analyzer_sha256"] == sha(Path(__file__).read_bytes())
@@ -231,12 +241,14 @@ def analyze(receipt_path: Path) -> tuple[dict, list[dict]]:
                         and report.get("recovered_scalar") == target["fixture_scalar"]
                         and report.get("group_verified") is True
                         and report.get("target") == case["public_point"]
-                        and report.get("factor_base_points") == case["factor_base_points"])
+                        and report.get("factor_base_points") == case["factor_base_points"]
+                        and online_root_calls(report, arm) is not None)
         quality = guest_quality(row, guest["host"], verified)
         summaries.append({
             "n": n, "label": label, "arm": arm, "run_id": row["run_id"],
             "verified_native_and_fixture": verified, "phase_ok": phases_ok,
             "online_ms": timing.get("target_online_after_reusable_setup"),
+            "online_root_calls": online_root_calls(report, arm),
             "target_s3_calls": report.get("target_s3_calls"),
             "setup_ms": timing.get("reusable_setup_total"),
             "fallback_attempts": report.get("fallback_attempts", 0),
@@ -265,7 +277,7 @@ def analyze(receipt_path: Path) -> tuple[dict, list[dict]]:
             assert all(len(rows) == 2 for rows in arms.values())
             times = {arm: [row["online_ms"] for row in rows]
                      for arm, rows in arms.items()}
-            calls = {arm: [row["target_s3_calls"] for row in rows]
+            calls = {arm: [row["online_root_calls"] for row in rows]
                      for arm, rows in arms.items()}
             assert all(value > 0 for rows in (*times.values(), *calls.values())
                        for value in rows)

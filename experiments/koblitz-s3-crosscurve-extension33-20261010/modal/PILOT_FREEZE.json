@@ -1,5 +1,5 @@
 {
-  "analyzer_sha256": "17916e96b56f7e5c8a52803faf0dec76d7b39da32a8064e04b9162efa076978a",
+  "analyzer_sha256": "4166512e8b6912d0fe7a8c034dfd8debb1d7ad85dd8172ab7ca4ee29e3a8b8a0",
   "binary_bytes": {
     "prepared": 1672288,
     "reference": 1650536
@@ -24,6 +24,7 @@
   "memory_request_mib": 32768,
   "minimum_run_seconds": 30,
   "modal_sdk_version": "1.2.4",
+  "operation_count_boundary": "reference_rank_target_s3_calls_plus_target_s3_calls_over_prepared_fallback_s3_calls_plus_target_s3_calls",
   "paired_order": "ABBA_or_BAAB_by_frozen_curve_and_target_index",
   "per_run_timeout_seconds": 120,
   "pilot_runner_sha256": "aa734aa70702c2a1f1fb4ec33ab8c0e284238dc2f0060bd8718549589a44d601",
@@ -32,7 +33,7 @@
     28
   ],
   "planned_run_count": 16,
-  "prepare_script_sha256": "e8c2647a34340c1031358ca720c5cb37c0cc8e49df01b148821e28e305b06185",
+  "prepare_script_sha256": "29867b8b71bba6e3a86e2c6e83739989204d0bb9b9332b93e185cd2c80453b15",
   "public_bundle_sha256": "e429dbbbe67560f340c0950f31cfe0520f1065db01b1975a9b7383cbcf32fdbd",
   "public_target_count": 4,
   "region": null,

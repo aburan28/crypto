@@ -35,8 +35,11 @@ topology, NUMA pages, cgroup quota/throttling, PSI, steal ticks, interrupts,
 RSS, and process cycles/instructions when perf access is available. The
 [analyzer](analyze.py) checks the recovered scalars against local fixtures,
 every charged online phase, candidate/workload/run IDs, and the bundle and
-binary identities. Its quality score retains failed and unavailable counters
-separately. Passing the pilot requires 16 verified solves, ≥2× exploratory
+binary identities. The online S3 operation count adds target-dependent rank
+calls to final target calls in the reference arm, and fallback calls to final
+target calls in the prepared arm. Its quality score retains failed and
+unavailable counters separately. Passing the pilot requires 16 verified
+solves, ≥2× exploratory
 online wall gain on both curves, and the declared A/A noise gate before a
 larger Modal panel is considered. The prior [guest-only Modal host
 probe](../../koblitz-s3-modal-host-probe-20261009/RESULT.md) could not attest
