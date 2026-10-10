@@ -63,6 +63,31 @@ exclusive physical CPU partition receipt. The
 run; a ≥2× controlled single-target wall-time result needs the frozen panel
 run on an auditable isolated host.
 
+## How many matched targets for a curve difference?
+
+The [sample-size calculation](local/sample_size.json) uses the observed
+standard deviation of the 33 paired **log gain differences** and a
+two-sided normal approximation at 5% significance and 80% power. These are
+exploratory totals of *distinct matched target indices*, conditional on the
+current variance and effect size; they are not a reason to rerun the same
+point thousands of times.
+
+| Curve-gain difference to resolve | Root-call pairs, total | Exploratory wall pairs, total |
+| --- | ---: | ---: |
+| 1.25× | 623 | 431 |
+| 1.5× | 189 | 131 |
+| 2× | 65 | 45 |
+| Current observed effect, 1.064× root / 1.396× wall | 8,088 | 193 |
+
+The frozen panel contains 200 indices per curve. A persistent 1.5×
+root-call difference could be tested near its end; the presently observed
+1.064× difference would need a wider target panel under this approximation.
+The wall estimates mix target variation with this host's substantial timing
+noise and must be recalculated after an isolated-host pilot. Repetitions on
+the same target help quantify that noise; new indices test a curve-wide
+effect. The [calculation code](sample_size.py) preserves the exact formula,
+input hashes, and every estimate.
+
 ## Artifacts and reproduction
 
 The [extension raw archive](local/raw_extension.tar.gz) contains the 72-run
