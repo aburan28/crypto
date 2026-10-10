@@ -1,0 +1,351 @@
+{
+  "addressSignatureChecks": {
+    "geometries": [
+      {
+        "batch": 1,
+        "logicalAddresses": 1,
+        "tailSignaturesDistinct": true,
+        "workers": 1
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 3,
+        "tailSignaturesDistinct": true,
+        "workers": 3
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 8,
+        "tailSignaturesDistinct": true,
+        "workers": 8
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 255,
+        "tailSignaturesDistinct": true,
+        "workers": 255
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 256,
+        "tailSignaturesDistinct": true,
+        "workers": 256
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 257,
+        "tailSignaturesDistinct": true,
+        "workers": 257
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 511,
+        "tailSignaturesDistinct": true,
+        "workers": 511
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 512,
+        "tailSignaturesDistinct": true,
+        "workers": 512
+      },
+      {
+        "batch": 1,
+        "logicalAddresses": 513,
+        "tailSignaturesDistinct": true,
+        "workers": 513
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 4,
+        "tailSignaturesDistinct": true,
+        "workers": 1
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 12,
+        "tailSignaturesDistinct": true,
+        "workers": 3
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 32,
+        "tailSignaturesDistinct": true,
+        "workers": 8
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 1020,
+        "tailSignaturesDistinct": true,
+        "workers": 255
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 1024,
+        "tailSignaturesDistinct": true,
+        "workers": 256
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 1028,
+        "tailSignaturesDistinct": true,
+        "workers": 257
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 2044,
+        "tailSignaturesDistinct": true,
+        "workers": 511
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 2048,
+        "tailSignaturesDistinct": true,
+        "workers": 512
+      },
+      {
+        "batch": 4,
+        "logicalAddresses": 2052,
+        "tailSignaturesDistinct": true,
+        "workers": 513
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 16,
+        "tailSignaturesDistinct": true,
+        "workers": 1
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 48,
+        "tailSignaturesDistinct": true,
+        "workers": 3
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 128,
+        "tailSignaturesDistinct": true,
+        "workers": 8
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 4080,
+        "tailSignaturesDistinct": true,
+        "workers": 255
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 4096,
+        "tailSignaturesDistinct": true,
+        "workers": 256
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 4112,
+        "tailSignaturesDistinct": true,
+        "workers": 257
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 8176,
+        "tailSignaturesDistinct": true,
+        "workers": 511
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 8192,
+        "tailSignaturesDistinct": true,
+        "workers": 512
+      },
+      {
+        "batch": 16,
+        "logicalAddresses": 8208,
+        "tailSignaturesDistinct": true,
+        "workers": 513
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 32,
+        "tailSignaturesDistinct": true,
+        "workers": 1
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 96,
+        "tailSignaturesDistinct": true,
+        "workers": 3
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 256,
+        "tailSignaturesDistinct": true,
+        "workers": 8
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 8160,
+        "tailSignaturesDistinct": true,
+        "workers": 255
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 8192,
+        "tailSignaturesDistinct": true,
+        "workers": 256
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 8224,
+        "tailSignaturesDistinct": true,
+        "workers": 257
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 16352,
+        "tailSignaturesDistinct": true,
+        "workers": 511
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 16384,
+        "tailSignaturesDistinct": true,
+        "workers": 512
+      },
+      {
+        "batch": 32,
+        "logicalAddresses": 16416,
+        "tailSignaturesDistinct": true,
+        "workers": 513
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 64,
+        "tailSignaturesDistinct": true,
+        "workers": 1
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 192,
+        "tailSignaturesDistinct": true,
+        "workers": 3
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 512,
+        "tailSignaturesDistinct": true,
+        "workers": 8
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 16320,
+        "tailSignaturesDistinct": true,
+        "workers": 255
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 16384,
+        "tailSignaturesDistinct": true,
+        "workers": 256
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 16448,
+        "tailSignaturesDistinct": true,
+        "workers": 257
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 32704,
+        "tailSignaturesDistinct": true,
+        "workers": 511
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 32768,
+        "tailSignaturesDistinct": true,
+        "workers": 512
+      },
+      {
+        "batch": 64,
+        "logicalAddresses": 32832,
+        "tailSignaturesDistinct": true,
+        "workers": 513
+      }
+    ],
+    "meaning": "Across-round tail signatures distinguish every logical address for each enumerated geometry. Signature checks include B64 to cover the new source guard; planned device execution remains a separate task."
+  },
+  "apiAndControl": {
+    "controlRequirement": "When compiling against the old control header, define ECC_PACKED_COMPACT_STATE=0 explicitly because that header predates the macro. The successor default0 and invalid-mode parent guards remain to be checked against the actual completed prototype.",
+    "domain": "Canonical131-bit field payload plus3denominator metadata bits, encoded tail0..63 only.",
+    "parentGuards": "The test requires TILE256 and production guards require threads256 plus polynomial state, denominator cache and polynomial chains.",
+    "staticAssessment": "No apparent CUDA C++ API misuse found. Typed cudaMalloc, checked memcpy/memset, launch error checks and synchronization are conventionally formed. Actual compiler acceptance is untested."
+  },
+  "compiled": false,
+  "correctionsVerified": {
+    "P131TwentyByteStaticAssertion": true,
+    "largeWorkerPattern": "Across rounds0/1/2, six-bit digits identify low worker bits, high worker bits and slot. Rounds3/4/5 complement those digits;6/7 add mixed patterns.",
+    "oldHighBytePermutationNowDetected": true,
+    "oldPermutationTailMismatchesForBatch16": 73728,
+    "positiveBoundedBatchStaticAssertion": true,
+    "singleWorkerHighByteSlotPermutationNowDetected": true,
+    "singleWorkerPattern": "(round+slot)&63 covers every tail value per slot and gives distinct across-round slot signatures."
+  },
+  "counts": {
+    "all64TailValuesPerSlot": true,
+    "batch16Records": 297344,
+    "casesPerBuild": 128,
+    "recordsPerBatchUnit": 18584,
+    "workerSizes": [
+      1,
+      3,
+      8,
+      255,
+      256,
+      257,
+      511,
+      512,
+      513
+    ]
+  },
+  "findings": [],
+  "gpuExecuted": false,
+  "kind": "corrected synthetic GPU storage-test static review",
+  "layout": {
+    "allPhysicalSlotsInBounds": true,
+    "bothLogicalCanariesComparedAfterReads": true,
+    "bothPhysicalCanariesComparedAfterStores": true,
+    "encoderIndependentOfProductionIndexAndSizeHelpers": true,
+    "guardBytesEachSide": 256,
+    "lowPlaneAndTailPlaneNonoverlapping": true,
+    "lowRecords16ByteAligned": true,
+    "mode0BytesPerSlotTile": 5120,
+    "mode0FormulaMatchesProductionTILE256": true,
+    "mode1BytesPerSlotTile": 4352,
+    "mode1LowBytes": 4096,
+    "mode1TailBytes": 256,
+    "mode1TransferWordsPerSlotTile": 1088,
+    "partialTilePaddingIncludedInFullImageComparison": true,
+    "readInputComesFromIndependentHostEncoding": true
+  },
+  "limits": [
+    "No CUDA compile, device execution, vector-lowering evidence or timing result.",
+    "Input/output canaries detect writes in the checked regions; otherwise invisible reads of allocated input padding or guards are not proven absent.",
+    "Read phase does not copy the physical input back afterward to check input immutability; load takes a const input pointer.",
+    "Actual production accessor behavior, including uint4 instruction selection and device-memory errors, remains untested here.",
+    "This component test does not validate engine allocation/auto-worker accounting, transfer/checkpoint hooks, full-walk equivalence or performance.",
+    "The upcoming compact implementation was not edited or used by this review; final source binding is still required."
+  ],
+  "method": "Read the CUDA C++ test and current control layout; independently enumerated address/tail formulas locally. No production accessors were compiled or executed. No CUDA or CPU remote jobs were launched.",
+  "originalReview": {
+    "findingResolved": true,
+    "originalSourceSha256": "0073397cebf9a6f9737a33b5309e2ffa02f2a95d557ee344e0f4f1281ecd6e59",
+    "path": "/private/tmp/ecc2k-compact-state-device-test-review-20260912/review.json",
+    "sha256": "634dd93db0c126d075b7e547e59fc46abf9232debdbbef7c11083f0588c0ee05"
+  },
+  "remoteJobs": 0,
+  "source": "/private/tmp/ecc2k-compact-state-device-test-prep-20260912/testpackedstatecuda.cu",
+  "sourceEditsByReviewer": 0,
+  "sourceSha256": "6c4956263002e12cefcb360fa6dfdbfe6fd5514b4de411358d20f3e982c24eba",
+  "status": "static_review_pass_preparation_only",
+  "valid": true
+}

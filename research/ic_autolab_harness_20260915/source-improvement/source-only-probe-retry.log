@@ -1,0 +1,97 @@
+{
+  "out": "/app/probes/20260915T204411-3c25af",
+  "status": "complete",
+  "scope": "development only; no promotion",
+  "comparison": {
+    "candidate": "candidate",
+    "eligible": true,
+    "candidate_over_baseline": 0.8436527060749484,
+    "speedup": 1.1853218662125196,
+    "ci95": [
+      0.835778388997037,
+      0.8532053535333673
+    ],
+    "per_cell": {
+      "n13a0": 0.8330171859195141,
+      "n17a1": 0.8526981412546292,
+      "n19a0": 0.8463473602843516,
+      "n23a0": 0.8426687601639634
+    },
+    "native_wall_candidate_over_baseline": 0.7866826802175326,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 8,
+    "independent_curve_blocks": 4
+  },
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "eligible": true,
+    "candidate_over_baseline": 0.07689521148309256,
+    "speedup": 13.00471096590815,
+    "ci95": [
+      0.06792529329568286,
+      0.08394077153512185
+    ],
+    "per_cell": {
+      "n13a0": 0.07666995728177181,
+      "n17a1": 0.06522173678732812,
+      "n19a0": 0.0838779522473943,
+      "n23a0": 0.08335502436922501
+    },
+    "native_wall_candidate_over_baseline": 0.19751198371413664,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 8,
+    "independent_curve_blocks": 4
+  },
+  "changed_files": [
+    "src/cryptanalysis/koblitz_index_calculus.rs"
+  ],
+  "candidate_config": {
+    "solver": "pair_table",
+    "linear_algebra": "sparse",
+    "batch_trials": 16,
+    "max_trials": 4096,
+    "summands": 3
+  },
+  "unit": "valgrind-3.22-amd64-Ir",
+  "total_profile_native_pairs": 72,
+  "failures": [],
+  "phase_totals": {
+    "incumbent": {
+      "collection_and_decomposition": 79811043,
+      "curve_and_targets": 161857278,
+      "factor_base_and_tables": 2100559608,
+      "final_verification": 41875627,
+      "individual_log": 139777520,
+      "log_certification": 357870393,
+      "reporting_and_cleanup": 39851515,
+      "rho_solve": 0,
+      "startup_and_input": 9360258,
+      "verify_filter_and_linear_algebra": 1236165374
+    },
+    "candidate": {
+      "collection_and_decomposition": 79813107,
+      "curve_and_targets": 161829474,
+      "factor_base_and_tables": 1456091095,
+      "final_verification": 41862836,
+      "individual_log": 139764450,
+      "log_certification": 357767850,
+      "reporting_and_cleanup": 39829613,
+      "rho_solve": 0,
+      "startup_and_input": 9359490,
+      "verify_filter_and_linear_algebra": 1235885135
+    },
+    "rho": {
+      "collection_and_decomposition": 0,
+      "curve_and_targets": 161857278,
+      "factor_base_and_tables": 0,
+      "final_verification": 40697391,
+      "individual_log": 0,
+      "log_certification": 0,
+      "reporting_and_cleanup": 1844664,
+      "rho_solve": 113867170,
+      "startup_and_input": 9360378,
+      "verify_filter_and_linear_algebra": 0
+    }
+  },
+  "wall_seconds": 161.1079306602478
+}

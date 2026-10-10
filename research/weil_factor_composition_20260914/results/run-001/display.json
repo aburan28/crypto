@@ -1,0 +1,1034 @@
+{
+  "ledger": [
+    [
+      "ambient_f4",
+      "engineering diagnostic",
+      "null",
+      "null",
+      "null",
+      "null",
+      "33 verified DLPs / 120 attempts"
+    ],
+    [
+      "charts_f4",
+      "engineering diagnostic",
+      "null",
+      "null",
+      "null",
+      "null",
+      "480 verified stage queries; 177 witnesses"
+    ],
+    [
+      "charts_linear",
+      "engineering diagnostic",
+      "null",
+      "null",
+      "null",
+      "null",
+      "96 verified DLPs / 120 attempts"
+    ],
+    [
+      "enumerate",
+      "engineering diagnostic",
+      "null",
+      "null",
+      "null",
+      "null",
+      "96 verified DLPs / 120 attempts"
+    ],
+    [
+      "pair_table",
+      "engineering diagnostic",
+      "null",
+      "null",
+      "null",
+      "null",
+      "96 verified DLPs / 120 attempts"
+    ],
+    [
+      "rho",
+      "engineering diagnostic",
+      "null",
+      "null",
+      "null",
+      "null",
+      "60 verified DLPs / 60 attempts"
+    ]
+  ],
+  "census_rows": [
+    [
+      0,
+      "7/1",
+      "power_span",
+      2,
+      "17,937",
+      7,
+      "3\u20134",
+      "3.750",
+      29,
+      2,
+      "70/70",
+      42,
+      672
+    ],
+    [
+      1,
+      "9/1",
+      "power_span",
+      3,
+      "17,937",
+      9,
+      "5\u20137",
+      "6.200",
+      3,
+      0,
+      "0/126",
+      0,
+      1728
+    ],
+    [
+      2,
+      "9/1",
+      "scaled_subfield",
+      3,
+      "17,937",
+      9,
+      "3\u20133",
+      "3.000",
+      55,
+      2,
+      "126/126",
+      54,
+      1728
+    ],
+    [
+      3,
+      "9/1",
+      "subfield_control",
+      3,
+      "17,937",
+      1,
+      "3\u20133",
+      "3.000",
+      3,
+      0,
+      "0/126",
+      0,
+      192
+    ],
+    [
+      4,
+      "11/1",
+      "power_span",
+      3,
+      "17,937",
+      11,
+      "5\u20139",
+      "8.000",
+      23,
+      1,
+      "198/990",
+      44,
+      2112
+    ],
+    [
+      5,
+      "11/1",
+      "random",
+      3,
+      17,
+      11,
+      "6\u20139",
+      "8.500",
+      89,
+      4,
+      "814/990",
+      198,
+      2112
+    ],
+    [
+      5,
+      "11/1",
+      "random",
+      3,
+      937,
+      11,
+      "6\u20139",
+      "8.333",
+      45,
+      2,
+      "352/990",
+      66,
+      2112
+    ],
+    [
+      6,
+      "13/1",
+      "power_span",
+      3,
+      "17,937",
+      13,
+      "5\u20139",
+      "8.143",
+      81,
+      3,
+      "858/2002",
+      182,
+      2496
+    ],
+    [
+      7,
+      "15/3",
+      "power_span",
+      3,
+      "17,937",
+      5,
+      "5\u20139",
+      "7.333",
+      33,
+      3,
+      "60/660",
+      20,
+      960
+    ],
+    [
+      8,
+      "15/3",
+      "scaled_subfield",
+      3,
+      "17,937",
+      5,
+      "3\u20133",
+      "3.000",
+      41,
+      4,
+      "70/660",
+      20,
+      960
+    ],
+    [
+      9,
+      "15/3",
+      "subfield_control",
+      5,
+      "17,937",
+      1,
+      "5\u20135",
+      "5.000",
+      33,
+      3,
+      "30/660",
+      30,
+      480
+    ]
+  ],
+  "fresh_stage": [
+    {
+      "case": 0,
+      "variant": "ambient_f4",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 1914,
+      "median_cold_ms": 66.262138
+    },
+    {
+      "case": 0,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 228,
+      "median_cold_ms": 1.081171
+    },
+    {
+      "case": 0,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 57,
+      "median_cold_ms": 0.728417
+    },
+    {
+      "case": 0,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 0,
+      "median_cold_ms": 0.464307
+    },
+    {
+      "case": 1,
+      "variant": "ambient_f4",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 46368,
+      "median_cold_ms": 4450.65208
+    },
+    {
+      "case": 1,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 1575,
+      "median_cold_ms": 15.239142
+    },
+    {
+      "case": 1,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 813,
+      "median_cold_ms": 4.302198
+    },
+    {
+      "case": 1,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": 0.658852
+    },
+    {
+      "case": 2,
+      "variant": "ambient_f4",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 9957,
+      "median_cold_ms": 958.729819
+    },
+    {
+      "case": 2,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 279,
+      "median_cold_ms": 2.734425
+    },
+    {
+      "case": 2,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 42,
+      "median_cold_ms": 1.166577
+    },
+    {
+      "case": 2,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 24,
+      "reductions": 0,
+      "median_cold_ms": 0.89595
+    },
+    {
+      "case": 3,
+      "variant": "ambient_f4",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 46368,
+      "median_cold_ms": 4562.311218
+    },
+    {
+      "case": 3,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 24,
+      "median_cold_ms": 0.61089
+    },
+    {
+      "case": 3,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": 0.483049
+    },
+    {
+      "case": 3,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": 0.579371
+    },
+    {
+      "case": 4,
+      "variant": "ambient_f4",
+      "complete": 0,
+      "witnesses": 6,
+      "reductions": 14553,
+      "median_cold_ms": null
+    },
+    {
+      "case": 4,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 9,
+      "reductions": 1761,
+      "median_cold_ms": 18.958683
+    },
+    {
+      "case": 4,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 9,
+      "reductions": 846,
+      "median_cold_ms": 5.204259
+    },
+    {
+      "case": 4,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 9,
+      "reductions": 0,
+      "median_cold_ms": 1.425427
+    },
+    {
+      "case": 5,
+      "variant": "ambient_f4",
+      "complete": 0,
+      "witnesses": 0,
+      "reductions": 22839,
+      "median_cold_ms": null
+    },
+    {
+      "case": 5,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 3,
+      "reductions": 1794,
+      "median_cold_ms": 23.394546
+    },
+    {
+      "case": 5,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 3,
+      "reductions": 1077,
+      "median_cold_ms": 6.871107
+    },
+    {
+      "case": 5,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 3,
+      "reductions": 0,
+      "median_cold_ms": 2.370104
+    },
+    {
+      "case": 6,
+      "variant": "ambient_f4",
+      "complete": 0,
+      "witnesses": 3,
+      "reductions": 1125,
+      "median_cold_ms": null
+    },
+    {
+      "case": 6,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 12,
+      "reductions": 2457,
+      "median_cold_ms": 16.240456
+    },
+    {
+      "case": 6,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 12,
+      "reductions": 378,
+      "median_cold_ms": 4.089046
+    },
+    {
+      "case": 6,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 12,
+      "reductions": 0,
+      "median_cold_ms": 3.395931
+    },
+    {
+      "case": 7,
+      "variant": "ambient_f4",
+      "complete": 0,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": null
+    },
+    {
+      "case": 7,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 6,
+      "reductions": 324,
+      "median_cold_ms": 3.194578
+    },
+    {
+      "case": 7,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 6,
+      "reductions": 18,
+      "median_cold_ms": 1.644375
+    },
+    {
+      "case": 7,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 6,
+      "reductions": 0,
+      "median_cold_ms": 2.428605
+    },
+    {
+      "case": 8,
+      "variant": "ambient_f4",
+      "complete": 0,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": null
+    },
+    {
+      "case": 8,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 6,
+      "reductions": 297,
+      "median_cold_ms": 4.036862
+    },
+    {
+      "case": 8,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 6,
+      "reductions": 6,
+      "median_cold_ms": 1.70177
+    },
+    {
+      "case": 8,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 6,
+      "reductions": 0,
+      "median_cold_ms": 3.038019
+    },
+    {
+      "case": 9,
+      "variant": "ambient_f4",
+      "complete": 0,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": null
+    },
+    {
+      "case": 9,
+      "variant": "charts_f4",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 24,
+      "median_cold_ms": 1.843432
+    },
+    {
+      "case": 9,
+      "variant": "charts_linear",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": 1.572788
+    },
+    {
+      "case": 9,
+      "variant": "enumerate",
+      "complete": 3,
+      "witnesses": 0,
+      "reductions": 0,
+      "median_cold_ms": 2.789718
+    }
+  ],
+  "dlp_rows": [
+    [
+      0,
+      "ambient_f4",
+      "12/12",
+      0,
+      0,
+      "14.126"
+    ],
+    [
+      0,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "0.666"
+    ],
+    [
+      0,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "0.539"
+    ],
+    [
+      0,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "0.602"
+    ],
+    [
+      1,
+      "ambient_f4",
+      "0/12",
+      12,
+      0,
+      "\u2014"
+    ],
+    [
+      1,
+      "charts_linear",
+      "0/12",
+      0,
+      12,
+      "\u2014"
+    ],
+    [
+      1,
+      "enumerate",
+      "0/12",
+      0,
+      12,
+      "\u2014"
+    ],
+    [
+      1,
+      "pair_table",
+      "0/12",
+      0,
+      12,
+      "\u2014"
+    ],
+    [
+      2,
+      "ambient_f4",
+      "12/12",
+      0,
+      0,
+      "148.014"
+    ],
+    [
+      2,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "1.211"
+    ],
+    [
+      2,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "1.046"
+    ],
+    [
+      2,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "1.169"
+    ],
+    [
+      3,
+      "ambient_f4",
+      "0/12",
+      12,
+      0,
+      "\u2014"
+    ],
+    [
+      3,
+      "charts_linear",
+      "0/12",
+      0,
+      12,
+      "\u2014"
+    ],
+    [
+      3,
+      "enumerate",
+      "0/12",
+      0,
+      12,
+      "\u2014"
+    ],
+    [
+      3,
+      "pair_table",
+      "0/12",
+      0,
+      12,
+      "\u2014"
+    ],
+    [
+      4,
+      "ambient_f4",
+      "0/12",
+      12,
+      0,
+      "\u2014"
+    ],
+    [
+      4,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "6.249"
+    ],
+    [
+      4,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "2.556"
+    ],
+    [
+      4,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "1.665"
+    ],
+    [
+      5,
+      "ambient_f4",
+      "9/12",
+      3,
+      0,
+      "2582.867"
+    ],
+    [
+      5,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "3.371"
+    ],
+    [
+      5,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "2.129"
+    ],
+    [
+      5,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "1.970"
+    ],
+    [
+      6,
+      "ambient_f4",
+      "0/12",
+      12,
+      0,
+      "\u2014"
+    ],
+    [
+      6,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "4.605"
+    ],
+    [
+      6,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "3.867"
+    ],
+    [
+      6,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "2.776"
+    ],
+    [
+      7,
+      "ambient_f4",
+      "0/12",
+      12,
+      0,
+      "\u2014"
+    ],
+    [
+      7,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "3.690"
+    ],
+    [
+      7,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "5.188"
+    ],
+    [
+      7,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "3.173"
+    ],
+    [
+      8,
+      "ambient_f4",
+      "0/12",
+      12,
+      0,
+      "\u2014"
+    ],
+    [
+      8,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "4.529"
+    ],
+    [
+      8,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "5.898"
+    ],
+    [
+      8,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "3.843"
+    ],
+    [
+      9,
+      "ambient_f4",
+      "0/12",
+      12,
+      0,
+      "\u2014"
+    ],
+    [
+      9,
+      "charts_linear",
+      "12/12",
+      0,
+      0,
+      "6.684"
+    ],
+    [
+      9,
+      "enumerate",
+      "12/12",
+      0,
+      0,
+      "12.466"
+    ],
+    [
+      9,
+      "pair_table",
+      "12/12",
+      0,
+      0,
+      "6.477"
+    ],
+    [
+      0,
+      "rho",
+      "12/12",
+      0,
+      0,
+      "0.215"
+    ],
+    [
+      1,
+      "rho",
+      "12/12",
+      0,
+      0,
+      "0.301"
+    ],
+    [
+      4,
+      "rho",
+      "12/12",
+      0,
+      0,
+      "0.414"
+    ],
+    [
+      6,
+      "rho",
+      "12/12",
+      0,
+      0,
+      "0.431"
+    ],
+    [
+      7,
+      "rho",
+      "12/12",
+      0,
+      0,
+      "0.597"
+    ]
+  ],
+  "prime_rows": [
+    [
+      8,
+      "power_span",
+      15,
+      22,
+      64,
+      "62.197"
+    ],
+    [
+      8,
+      "frobenius_span",
+      36,
+      43,
+      64,
+      "62.727"
+    ],
+    [
+      8,
+      "random",
+      36,
+      64,
+      64,
+      "63.576"
+    ],
+    [
+      16,
+      "power_span",
+      31,
+      46,
+      131,
+      "127.364"
+    ],
+    [
+      16,
+      "frobenius_span",
+      129,
+      131,
+      131,
+      "130.970"
+    ],
+    [
+      16,
+      "random",
+      131,
+      131,
+      131,
+      "131.000"
+    ],
+    [
+      32,
+      "power_span",
+      63,
+      94,
+      131,
+      "129.409"
+    ],
+    [
+      32,
+      "frobenius_span",
+      131,
+      131,
+      131,
+      "131.000"
+    ],
+    [
+      32,
+      "random",
+      131,
+      131,
+      131,
+      "131.000"
+    ],
+    [
+      44,
+      "power_span",
+      87,
+      130,
+      131,
+      "130.318"
+    ],
+    [
+      44,
+      "frobenius_span",
+      131,
+      131,
+      131,
+      "131.000"
+    ],
+    [
+      44,
+      "random",
+      131,
+      131,
+      131,
+      "131.000"
+    ]
+  ],
+  "status_rows": [
+    [
+      "native",
+      84,
+      0
+    ],
+    [
+      "stage",
+      207,
+      33
+    ],
+    [
+      "dlp",
+      393,
+      87
+    ],
+    [
+      "rho",
+      60,
+      0
+    ]
+  ],
+  "source_comparison": "comparison.json",
+  "total_calibrated_operations": null,
+  "S": null,
+  "rho_ratio": null,
+  "floor_ratio": null
+}

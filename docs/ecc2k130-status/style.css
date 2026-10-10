@@ -1,0 +1,698 @@
+/* ECC2K-130 campaign dashboard.
+   A deliberately single-look dark console page; the landing page at
+   ../assets/site.css shares the same palette. */
+
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --bg-lift: #1c2748;
+  --panel: #141a2f;
+  --panel-2: #18203a;
+  --ink: #e8edf7;
+  --muted: #a7b3d0;
+  --line: #2a3354;
+  --line-soft: #202844;
+  --good: #4fe8ae;
+  --warn: #f8cd78;
+  --bad: #ff8b96;
+  --idle: #94a1c4;
+  --data: #6f92ff;
+  --link: #a9c0ff;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 0 20px 56px;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, var(--bg-lift) 0%, var(--bg) 55%) no-repeat,
+    var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--sans);
+}
+
+main { max-width: 1100px; margin: 0 auto; }
+
+a { color: var(--link); }
+a:hover { color: #ffffff; }
+
+:focus-visible {
+  outline: 2px solid var(--good);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Clip, do not park off the left edge. left:-9999px made iOS grow a
+   horizontal scrollport, so "Skip to status" was the first thing on the
+   page — in the copy buffer and on a sideways pan. :focus (not
+   :focus-visible) also un-hid it when a WebView focused the first link. */
+.skip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.skip:focus-visible {
+  width: auto;
+  height: auto;
+  margin: 0;
+  clip: auto;
+  clip-path: none;
+  overflow: visible;
+  left: 12px;
+  top: 12px;
+  z-index: 10;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+/* Skip target: focusable so the hash move lands, no ring on the jump. */
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- nav ---- */
+
+.topbar {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 0 6px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.topbar nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.topbar a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+}
+.topbar a:hover { color: var(--ink); }
+.topbar a[aria-current="page"] {
+  color: var(--ink);
+  border-bottom-color: var(--good);
+}
+
+/* ---- masthead ---- */
+
+.kicker {
+  margin: 28px 0 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+h1 {
+  margin: 8px 0 6px;
+  font-size: clamp(26px, 4.4vw, 34px);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.sub { color: var(--muted); max-width: 72ch; }
+
+h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+section { margin: 34px 0; }
+
+.mac-control {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+.mac-control .note { margin: 8px 0 14px; }
+.mac-control .mac-row { margin: 16px 0 10px; }
+.mac-control .card { background: var(--panel-2); }
+.mac-source { margin: 10px 0; color: var(--muted); font-size: 13px; }
+
+/* ---- banner + freshness ---- */
+
+.banner {
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  font-weight: 600;
+  margin: 20px 0 0;
+}
+.banner.COLLECTING { color: var(--good); border-color: #24503f; }
+.banner.COLLISION_RECORDED { color: var(--bad); background: #2a1520; border-color: #5c2634; }
+.banner.IDLE_OR_STALE,
+.banner.INGEST_BEHIND { color: var(--warn); border-color: #54452a; }
+.banner.EMPTY,
+.banner.UNREACHABLE { color: var(--idle); }
+.banner a { color: inherit; }
+
+.freshness {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+button {
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--data); }
+button:disabled { opacity: 0.55; cursor: progress; }
+
+/* ---- operations panel ---- */
+
+/* The headline figure of the page: one derived number, then the two bars
+   that place it against the expected cost of a collision. */
+.ops {
+  margin: 22px 0 0;
+  padding: 18px 20px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.ops h2 {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.ops-value {
+  margin: 4px 0 0;
+  font-size: clamp(40px, 9vw, 76px);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--good);
+}
+.ops-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.ops .note { margin-top: 14px; }
+
+/* The rate block and the ETA are the same shape on purpose: one is the walk
+   measured between two snapshots, the other is that rate divided into the
+   work still expected, so they read as a pair. */
+.eta,
+.rate {
+  margin-top: 18px;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.eta-label,
+.rate-label {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.eta-value,
+.rate-value {
+  margin: 4px 0 0;
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.rate-value { color: var(--good); }
+.eta-sub,
+.rate-sub {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 62rem;
+}
+
+
+/* The collision-odds panel: the chance a collision has already happened,
+   which is the only thing rho accumulates, drawn against the calendar. */
+.odds {
+  margin-top: 18px;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.odds-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 14px;
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.odds-now {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 650;
+  color: var(--good);
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+.odds-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 80ch;
+}
+.odds-chart { margin-top: 12px; }
+/* Odds chart is drawn to be read at phone width: no forced min-width, so the
+   dates under the curve stay in view instead of living off-screen to the right. */
+.chart.odds-chart { overflow: visible; }
+/* Specificity has to beat `.chart svg` below, which sets min-width: 560px;
+   a bare `.odds-chart svg` ties and loses on source order, leaving the curve
+   560px wide and spilling out of the card on a phone. */
+.chart.odds-chart svg {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.chart .line.alt { stroke: var(--data); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: 0.85; }
+.chart .guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
+.odds-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 14px;
+  margin: 12px 0 0;
+}
+.odds-tiles div { min-width: 0; }
+.odds-tiles dt {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.odds-tiles dd {
+  margin: 4px 0 0;
+  font-size: clamp(17px, 2.4vw, 22px);
+  font-weight: 650;
+  color: var(--ink);
+}
+.odds .meter-foot { margin-top: 12px; max-width: 86ch; }
+
+.meter-foot {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 1em;
+}
+
+/* ---- cards ---- */
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 12px;
+  margin: 18px 0 0;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px 12px;
+}
+.card.alert { border-color: #5c2634; background: #21172a; }
+.card .label {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.card .value {
+  font-size: clamp(24px, 3.2vw, 30px);
+  margin-top: 6px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+.card .foot {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11.5px;
+  min-height: 1em;
+}
+.card .foot .warn, td .warn { color: var(--warn); }
+
+/* ---- charts ---- */
+
+.chart {
+  margin-top: 14px;
+  overflow-x: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.chart svg {
+  display: block;
+  width: 100%;
+  min-width: 560px;
+  height: auto;
+  font-family: var(--mono);
+}
+.chart .bar { fill: var(--data); }
+.chart .bar:hover { fill: #9cb4ff; }
+.chart .line { fill: none; stroke: var(--good); stroke-width: 2; stroke-linejoin: round; }
+.chart .area { fill: rgba(79, 232, 174, 0.13); stroke: none; }
+.chart .dot { fill: var(--good); }
+.chart .axis { stroke: var(--line); stroke-width: 1; }
+.chart .grid { stroke: var(--line-soft); stroke-width: 1; }
+.chart .tick { fill: var(--muted); font-size: 10.5px; }
+
+/* ---- figure ---- */
+
+/* The walk-forest drawing is generated in the page's own palette on a
+   transparent ground, so it sits straight on the panel. Fit the 1000×900
+   figure to the column: a 640px min-width made the caption lay out at that
+   width too, so a phone clipped every line and the drawing ate the screen.
+   Trails stay visible at ~360px because the SVG thickens its own strokes
+   when its box is under 720px. */
+.figure {
+  margin: 14px 0 0;
+  padding: 12px 12px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  min-width: 0;
+}
+.figure-frame {
+  overflow: hidden;
+  max-width: 100%;
+}
+.figure img {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 1000px;
+  height: auto;
+  margin: 0 auto;
+}
+.figure figcaption {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+.figure figcaption .mono { color: var(--ink); }
+
+/* The explorable version of the same forest: a canvas that replaces the
+   image once the graph has loaded, a control row above it and a readout
+   under it. The tip follows the pointer inside the canvas. */
+.forest { position: relative; }
+.forest-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.forest-controls select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 8px;
+  max-width: 100%;
+}
+.forest-canvas {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: grab;
+  touch-action: none;
+}
+.forest-canvas:active { cursor: grabbing; }
+.forest-readout {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 1.2em;
+  overflow-wrap: anywhere;
+}
+.forest-tip {
+  position: absolute;
+  z-index: 2;
+  max-width: 320px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  pointer-events: none;
+  overflow-wrap: anywhere;
+}
+
+/* ---- tables ---- */
+
+.scroll {
+  overflow-x: auto;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: var(--mono);
+}
+th, td {
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+tr:last-child th,
+tr:last-child td { border-bottom: 0; }
+thead th {
+  color: var(--muted);
+  font-weight: 500;
+  background: var(--panel-2);
+  position: sticky;
+  top: 0;
+}
+tbody th { color: var(--muted); font-weight: 500; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 18px;
+  white-space: normal;
+}
+.chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  color: var(--good);
+  border: 1px solid #24503f;
+  background: rgba(79, 232, 174, 0.09);
+  vertical-align: 1px;
+}
+time { border-bottom: 1px dotted var(--line); }
+
+/* The coordinate-system table has prose cells; let those wrap so the
+   numeric columns stay in view at desktop width. */
+.coords th[scope="row"], .coords td.wrap { white-space: normal; }
+.coords th[scope="row"] { min-width: 16ch; }
+.coords td.wrap { min-width: 14ch; }
+
+/* ---- misc ---- */
+
+.mono { font-family: var(--mono); }
+.note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 80ch;
+  margin: 6px 0 0;
+  overflow-wrap: break-word;
+}
+details.alt { margin-top: 14px; }
+details.alt summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: var(--mono);
+}
+details.alt summary:hover { color: var(--ink); }
+
+/* ── Contribute ─────────────────────────────────────────────────────────── */
+
+.join {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.join-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 16px 18px 18px;
+  min-width: 0;
+}
+.join-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.join-card h3 {
+  margin: 4px 0 10px;
+  font-size: 17px;
+  color: var(--ink);
+}
+.join-card p { font-size: 14px; color: var(--muted); max-width: 62ch; }
+.join-card p strong { color: var(--ink); font-weight: 600; }
+
+.dl-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+.dl {
+  display: inline-block;
+  padding: 9px 16px;
+  border: 1px solid #2f6a52;
+  border-radius: 8px;
+  background: #14382c;
+  color: var(--good);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+.dl:hover, .dl:focus-visible {
+  background: #17503c;
+  border-color: var(--good);
+  color: #ffffff;
+}
+.dl-sub {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+pre.cmd {
+  margin: 12px 0 0;
+  padding: 11px 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  /* The installer one-liner is longer than a card, and a hidden horizontal
+     scroll would hide the end of it. Soft-wrap instead: it is visual only,
+     so the command still copies as one line. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+pre.cmd code { font: inherit; color: inherit; }
+
+footer {
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 82ch;
+}
+footer h2 { color: var(--ink); font-size: 14px; }
+
+.transcript {
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: auto;
+  font: 13px/1.5 var(--mono);
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+@media (max-width: 720px) {
+  body { padding: 0 14px 40px; }
+  th, td { padding: 8px 10px; }
+  thead th { position: static; }
+  .odds { padding: 12px 12px 10px; }
+  .odds-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .figure { padding: 8px; }
+  .figure figcaption { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

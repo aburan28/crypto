@@ -1,0 +1,80 @@
+{{- if .Values.redis.enabled }}
+{{- if not .Values.redis.existingSecret }}
+{{- $name := include "taskq.redisSecret" . }}
+{{- $old := lookup "v1" "Secret" .Release.Namespace $name }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $name }}
+  labels: {{- include "taskq.labels" . | nindent 4 }}
+  annotations: {"helm.sh/resource-policy": keep}
+type: Opaque
+data:
+  # Reuse the live password on upgrade; a new random one would lock out every worker.
+  redis-password: {{ if $old }}{{ index $old.data "redis-password" }}{{ else }}{{ randAlphaNum 32 | b64enc }}{{ end }}
+---
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "taskq.name" . }}-redis
+  labels: {{- include "taskq.labels" . | nindent 4 }}
+data:
+  redis.conf: |
+    # Redis is the queue's system of record: AOF, fsync every second, no eviction.
+    appendonly yes
+    appendfsync everysec
+    save 900 1
+    maxmemory-policy noeviction
+    dir /data
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "taskq.name" . }}-redis
+  labels: {{- include "taskq.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "taskq.name" . }}-redis
+  replicas: 1
+  selector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name }}, app.kubernetes.io/component: redis}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/instance: {{ .Release.Name }}, app.kubernetes.io/component: redis}
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          args: ["/etc/redis/redis.conf", "--requirepass", "$(REDIS_PASSWORD)"]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom: {secretKeyRef: {name: {{ include "taskq.redisSecret" . }}, key: redis-password}}
+          ports: [{name: redis, containerPort: 6379}]
+          readinessProbe:
+            exec: {command: ["sh", "-c", "redis-cli -a \"$REDIS_PASSWORD\" --no-auth-warning ping | grep -q PONG"]}
+            periodSeconds: 5
+          resources: {{- toYaml .Values.redis.resources | nindent 12 }}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+            - {name: conf, mountPath: /etc/redis}
+      volumes:
+        - name: conf
+          configMap: {name: {{ include "taskq.name" . }}-redis}
+  volumeClaimTemplates:
+    - metadata: {name: data}
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- with .Values.redis.storageClassName }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources: {requests: {storage: {{ .Values.redis.storage }}}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "taskq.name" . }}-redis
+  labels: {{- include "taskq.labels" . | nindent 4 }}
+spec:
+  selector: {app.kubernetes.io/instance: {{ .Release.Name }}, app.kubernetes.io/component: redis}
+  ports: [{name: redis, port: 6379, targetPort: redis}]
+{{- end }}

@@ -1,0 +1,25 @@
+{
+  "base_logs_verified": 42,
+  "complete_batch": false,
+  "five_hits": 146,
+  "independent_rank": 42,
+  "input_sha256": {
+    "base": "bd4bd8af982bcc65234ae1fae1ad52eb0ed41a1c203bf4d2556fd8e87f788a4c",
+    "fixture": "124c13b3daba0477b471466f95c4a9e6f9ce9fe01d5ea67b6582469cfb9d5697",
+    "frozen": "da958a3f1117dd1b88703fed2055c5c9f64255516e1e920f35d193bf53c6a88d",
+    "points": "187ec04fe50326bbb2f17dadf76056841f04af37a8abb8ff7f502fcd531711ad"
+  },
+  "method": "Iterative source-curve reachable sets through 3 factors; complete 2+3 and 3+3 membership; full source pullback group-law witness replay; independent dense modular solve; source scalar checks and post-solve fixture equality",
+  "raw_result_sha256": "2cc0275cfe5b2fc0bef4f84bd3dce9105b7d9576ed26340c8a5b404a16cd9d7e",
+  "reachable_source_sums_at_most": [
+    1,
+    85,
+    3613,
+    102391
+  ],
+  "relation_misses": 7,
+  "relation_probes": 49,
+  "schema": "n37-native-m6-source-replay-v1",
+  "six_hits": 917,
+  "verified_target_logs": 917
+}

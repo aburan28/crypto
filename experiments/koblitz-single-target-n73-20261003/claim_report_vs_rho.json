@@ -12,7 +12,10 @@
   "not an asymptotic sub-rho claim",
   "not key recovery or deployed-curve security impact",
   "multi-target amortized results remain secondary",
-  "total operation-count comparison absent; S unknown"
+  "not compared against Pollard rho with precomputation (Bernstein-Lange distinguished-point tables) at equal precompute and memory",
+  "single frozen target: IC online probes are deterministic per target, so repeated paired runs sample timing noise, not the target distribution",
+  "wall-clock speedup includes implementation speed; operation counts are in operation_accounting",
+  "runs flagged host_contended in operation_accounting shared the host with unrelated processes and are exploratory"
  ],
  "curve": {
   "a": 0,
@@ -42,6 +45,117 @@
   184.8588383342762,
   2094.667646891953
  ],
+ "operation_accounting": {
+  "generated_by": "research/sat_factor_base_review_20260908/autolab/op_accounting.py",
+  "host_contention": {
+   "contended_runs": [
+    "R2",
+    "R3"
+   ],
+   "source": "README.md: R2/R3 ran while an unrelated verification process shared the host"
+  },
+  "ic_online_operations": 457561,
+  "ic_online_operations_basis": "deterministic probes to the first relation for the frozen target (identical on every run)",
+  "ic_rank_probes_mean_per_relation": [
+   56896974.775,
+   61530369.92666667,
+   65475673.415
+  ],
+  "ic_rank_probes_mean_pooled": 61301006.038888894,
+  "ic_rank_probes_note": "each rank relation runs the same extraction on a random subgroup point, so the rank mean estimates the online probes of a random target; per-relation counts are not retained, so no confidence interval is available",
+  "ic_rank_probes_source": [
+   "runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR1/ic_summary.jsonl",
+   "runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR2/ic_summary.jsonl",
+   "runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR3/ic_summary.jsonl"
+  ],
+  "ic_rank_threads": [
+   1
+  ],
+  "ic_to_rho_rate_ratio_median": 13.087157362605156,
+  "operation_units": {
+   "ic": "target probes",
+   "rho": "walk steps"
+  },
+  "ops_speedup_measured_walk_median": 90.89713939780707,
+  "ops_speedup_online": 66.48690130045642,
+  "ops_speedup_online_mean_target": 0.4962693928161436,
+  "ops_speedup_total_mean_target": 0.0008257394223230343,
+  "precompute_rank_probes": 36780603623.333336,
+  "precompute_rank_probes_note": "rank_probes_mean x rank_attempts; the S3 root-index build is not counted in probes",
+  "rho_online_operations": 30421813.04593814,
+  "rho_online_operations_basis": "expected walk sqrt(pi*r/(4n)) on signed-Frobenius classes; measured walks are under runs",
+  "runs": [
+   {
+    "exploratory": false,
+    "host_contended": false,
+    "ic_online_ms": 249.023875,
+    "ic_peak_rss_bytes": 5630296064,
+    "ic_probes": 457561,
+    "ic_probes_per_s": 1837418.1993593988,
+    "ic_rank_threads": null,
+    "ic_target_threads": null,
+    "ic_to_rho_rate_ratio": 8.005778913070449,
+    "ops_speedup_measured_walk": 23.082843598995545,
+    "rho_ideal_steps_recorded": 30421813.04593814,
+    "rho_online_ms": 46034.26425,
+    "rho_peak_rss_bytes": 2187935744,
+    "rho_steps_per_s": 229511.4840555465,
+    "rho_threads": null,
+    "rho_walk_ms": 46018.6515,
+    "rho_walk_steps": 10561809,
+    "run": "R1",
+    "wall_speedup": 184.8588383342762
+   },
+   {
+    "exploratory": true,
+    "host_contended": true,
+    "ic_online_ms": 326.15937499999995,
+    "ic_peak_rss_bytes": 5043765248,
+    "ic_probes": 457561,
+    "ic_probes_per_s": 1402875.5113968442,
+    "ic_rank_threads": null,
+    "ic_target_threads": null,
+    "ic_to_rho_rate_ratio": 21.832824671307925,
+    "ops_speedup_measured_walk": 95.92737361794384,
+    "rho_ideal_steps_recorded": 30421813.04593814,
+    "rho_online_ms": 683195.490543,
+    "rho_peak_rss_bytes": 5007884288,
+    "rho_steps_per_s": 64255.337205197415,
+    "rho_threads": null,
+    "rho_walk_ms": 683096.952084,
+    "rho_walk_steps": 43892625,
+    "run": "R2",
+    "wall_speedup": 2094.667646891953
+   },
+   {
+    "exploratory": true,
+    "host_contended": true,
+    "ic_online_ms": 543.8117500000001,
+    "ic_peak_rss_bytes": 5628755968,
+    "ic_probes": 457561,
+    "ic_probes_per_s": 841395.9426216885,
+    "ic_rank_threads": null,
+    "ic_target_threads": null,
+    "ic_to_rho_rate_ratio": 13.087157362605156,
+    "ops_speedup_measured_walk": 90.89713939780707,
+    "rho_ideal_steps_recorded": 30421813.04593814,
+    "rho_online_ms": 646995.649916,
+    "rho_peak_rss_bytes": 5199986688,
+    "rho_steps_per_s": 64291.726561328556,
+    "rho_threads": null,
+    "rho_walk_ms": 646910.3914999999,
+    "rho_walk_steps": 41590986,
+    "run": "R3",
+    "wall_speedup": 1189.7419463922945
+   }
+  ],
+  "schema_version": "1.0",
+  "target_luck_factor": 133.973406909437,
+  "thread_note": "ic_target_threads and rho_threads were not recorded by these run drivers (null)",
+  "unit_assumption": "one IC probe (S3 quadratic solve plus root-table lookup) and one rho walk step (one group addition plus class canonicalisation) are each counted as one operation; not yet calibrated on a common backend (plan step 1.2)",
+  "wall_speedup_median_all_runs": 1189.7419463922945,
+  "wall_speedup_median_uncontended_runs": 184.8588383342762
+ },
  "paired_runs": [
   {
    "ic_online_ms": 249.023875,

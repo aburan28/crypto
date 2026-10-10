@@ -1,0 +1,72 @@
+{
+  "kind": "preblackwell complete-scalar-iteration throughput",
+  "family": "g4dn",
+  "gpu": "Tesla T4",
+  "cc": "75",
+  "valid": true,
+  "packedClmad": false,
+  "batch": 16,
+  "blockThreads": 256,
+  "minBlocks": 2,
+  "workers": "automatic",
+  "automaticThreads": 20480,
+  "steps": 1024,
+  "launches": 32,
+  "repeats": 3,
+  "sms": 40,
+  "sourceSha256": "7e230da07324777f38a2ad7a85712ebc1eb74e47a6d91db661581a63e6b65c19",
+  "binarySha256": "f08e088876fc5fbc745fcc2e8e6fb7a029f2cd4ca995e25d1be1e4738d2b0637",
+  "activeBackend": "packed-poly131",
+  "cudaImageVersion": "13.3.1",
+  "gpuUuid": "GPU-114f13d1-aa33-6d14-a1d7-1940e61bb66d",
+  "gpuState": "name, uuid, driver_version, pstate, clocks.current.sm [MHz], clocks.current.memory [MHz], power.limit [W], temperature.gpu\nTesla T4, GPU-114f13d1-aa33-6d14-a1d7-1940e61bb66d, 580.95.05, P8, 300 MHz, 405 MHz, 70.00 W, 32",
+  "compiler": "nvcc 13.3.73",
+  "ratesM": [
+    540.11,
+    533.211,
+    529.717
+  ],
+  "minRateM": 529.717,
+  "maxRateM": 540.11,
+  "medianM": 533.211,
+  "medianB": 0.533211,
+  "prior": {
+    "kind": "qualitative-upper",
+    "B": 2.0
+  },
+  "ratioToPrior": 0.2666055,
+  "ratioTo6000": 0.035275095079371294,
+  "perSmM": 13.330275,
+  "samples": [
+    {
+      "valid": true,
+      "rateM": 540.11,
+      "packedClmad": false,
+      "expectedPackedClmad": false,
+      "registers": 128,
+      "localBytes": 64,
+      "deviceLine": "Tesla T4, 40 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 20480
+    },
+    {
+      "valid": true,
+      "rateM": 533.211,
+      "packedClmad": false,
+      "expectedPackedClmad": false,
+      "registers": 128,
+      "localBytes": 64,
+      "deviceLine": "Tesla T4, 40 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 20480
+    },
+    {
+      "valid": true,
+      "rateM": 529.717,
+      "packedClmad": false,
+      "expectedPackedClmad": false,
+      "registers": 128,
+      "localBytes": 64,
+      "deviceLine": "Tesla T4, 40 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 20480
+    }
+  ]
+}

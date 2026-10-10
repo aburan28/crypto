@@ -1,0 +1,23 @@
+{
+  "python_selector_tests": {
+    "passed": 8,
+    "command": "/home/ubuntu/crypto-venv/bin/python -m unittest discover -s ecc2k130/codegen -p test_indexcalc_selector.py -v"
+  },
+  "python_fixed_tests": {
+    "passed": 10,
+    "command": "/home/ubuntu/crypto-venv/bin/python -m unittest discover -s ecc2k130/codegen -p test_indexcalc_fixed.py -v"
+  },
+  "rust_tests": {
+    "passed": 23,
+    "suites": {
+      "ic_fixed": 3,
+      "ic_framework": 16,
+      "ic_progress": 4
+    },
+    "command": "cargo test --test ic_fixed --test ic_framework --test ic_progress"
+  },
+  "degree131_guard": "degree131-guard.json",
+  "query_audit": "query-audit-v2.json",
+  "AA": "aa.json",
+  "first_label_failure": "audit-rejection-01.json"
+}

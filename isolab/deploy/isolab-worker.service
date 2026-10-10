@@ -1,0 +1,19 @@
+[Unit]
+Description=isolab worker (experiment execution with enforced fidelity)
+After=network-online.target isolab-hub.service
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/isolab/worker.env
+ExecStart=/opt/isolab/bin/isolab worker --cpus ${ISOLAB_CPUS} --state-dir /var/lib/isolab $ISOLAB_WORKER_EXTRA
+Restart=always
+RestartSec=5
+# The worker must be root: it writes cgroups, moves other threads and IRQs, and sets the governor.
+User=root
+KillMode=mixed
+TimeoutStopSec=60
+LimitNOFILE=65536
+LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target

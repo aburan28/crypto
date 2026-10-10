@@ -38,10 +38,7 @@ fn ecb_dec(ct: &[u8], key: &AesKey) -> Vec<u8> {
 }
 
 fn profile_for(email: &str) -> String {
-    let sanitised: String = email
-        .chars()
-        .filter(|c| *c != '&' && *c != '=')
-        .collect();
+    let sanitised: String = email.chars().filter(|c| *c != '&' && *c != '=').collect();
     format!("email={}&uid=10&role=user", sanitised)
 }
 
@@ -58,7 +55,7 @@ pub fn run() -> Report {
     // "email=" is 6 bytes; pad to 16 with 10 chars, then start the
     // payload block.
     let mut crafted_email = String::from("AAAAAAAAAA"); // 10 chars → fills block 0 after "email="
-    crafted_email.push_str(&"admin".to_string());
+    crafted_email.push_str("admin");
     crafted_email.push_str(&"\x0b".repeat(11));
     let ct1 = oracle_encrypt(&crafted_email);
     let admin_block = ct1[16..32].to_vec();

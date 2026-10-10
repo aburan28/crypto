@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 250, in <module>
+    main()
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 234, in main
+    frozen, binaries = preflight()
+                       ^^^^^^^^^^^
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 142, in preflight
+    assert platform.python_version() == frozen["python_version"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

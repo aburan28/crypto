@@ -25,7 +25,7 @@ struct HS {
         dps.resize(cap); n=0;
         c.X=X.data();c.Y=Y.data();c.D=D.data();c.steps=st.data();c.restarts=rs.data();
         c.nthreads=T;c.kang_per_thread=W;c.jumps=h.jumps.data();c.Qshift=h.Qshift;c.prm=h.prm;
-        c.dp_out=dps.data();c.dp_count=&n;c.dp_cap=cap;
+        c.dp_out=dps.data();c.dp_count=&n;c.dp_cap=cap;c.idx_base=0;
         for(uint32_t t=0;t<T;t++) kg_init_thread(c,t);
     }
 };

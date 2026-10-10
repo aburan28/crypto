@@ -1,5 +1,5 @@
 //! EDS-Residue **bias census** — step 1 of the research program in
-//! `RESEARCH_EDS_RESIDUE.md`.
+//! `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`.
 //!
 //! ```bash
 //! cargo run --release --example eds_census

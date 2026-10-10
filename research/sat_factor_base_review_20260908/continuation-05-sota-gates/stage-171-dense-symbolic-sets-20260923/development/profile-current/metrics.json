@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Volumes/SSD990/kic-f4-stage171-dev/profile-current.sh"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 17.29991141600476,
+    "user_seconds": 156.384947,
+    "system_seconds": 3.22948,
+    "total_core_seconds": 159.614427,
+    "single_core_seconds": 159.614427,
+    "peak_rss_bytes": 2827485184,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

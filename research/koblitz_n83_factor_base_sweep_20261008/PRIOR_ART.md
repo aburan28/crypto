@@ -4,7 +4,7 @@ Initial inspected source revision: `c70c32d486a3ac7531fe27f7193d9f09caa58344`; r
 
 A follow-up source audit on study-branch revision `c26ae1e3953823436cb0143d8eb77261cd784783` checked the balanced-S5 and wide compact-orbit implementations. `S5_CAPACITY.md` records their exact degree, subgroup-width, polynomial-basis and retained-object transfer gates.
 
-`SOLVER_GATES.md` distinguishes modules present in that inspected main snapshot from modules actually present on the isolated study branch. In particular, the WDSat, FES and original double-large-prime files named below are absent from this branch, and their pinned implementations have width or system-shape limits that bar direct N83 execution. This branch now has a separate full-width large-prime row eliminator, documented in `WIDE_LP_ADAPTER.md`; it has no N83 partial-relation producer. The native S4 SAT source is present but its full retained-base model and capacity have not been validated.
+The source-availability comparison in `SOLVER_GATES.md` describes the pinned pre-merge study branch. On the current integration branch, the upstream WDSat, FES and original double-large-prime files are present alongside the study's full-width large-prime row eliminator. Their recorded width and system-shape limits still bar direct N83 use. The wide eliminator has no retained-base partial-relation producer, and the native S4 SAT source has no validated full retained-base model or capacity receipt.
 
 | Source | Existing work | Consequence for this design |
 | --- | --- | --- |

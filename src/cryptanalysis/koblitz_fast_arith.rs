@@ -1036,6 +1036,9 @@ mod tests {
                     assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
                     assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
                 }
+                assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
+                assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
+                assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
             }
         }
     }
@@ -1224,10 +1227,16 @@ mod wide_tests {
     use crate::binary_ecc::curve::{point_add, point_double, point_neg, scalar_mul};
     use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
     use crate::cryptanalysis::binary_semaev::{binary_semaev_s3, solve_artin_schreier};
-    use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible_sparse_wide, KoblitzCurve};
+    use crate::cryptanalysis::koblitz_index_calculus::{
+        find_irreducible_sparse_wide, KoblitzCurve,
+    };
     use num_bigint::BigUint;
 
-    fn setup71() -> (KoblitzCurve, FastBinaryCurve128, crate::binary_ecc::IrreduciblePoly) {
+    fn setup71() -> (
+        KoblitzCurve,
+        FastBinaryCurve128,
+        crate::binary_ecc::IrreduciblePoly,
+    ) {
         let curve = KoblitzCurve::new(0, 71).expect("K_0/F_2^71 must construct");
         let irr = find_irreducible_sparse_wide(71).expect("n = 71 must resolve");
         let fast = FastBinaryCurve128::new(&irr, 0).expect("wide fast curve at n = 71");
@@ -1242,20 +1251,25 @@ mod wide_tests {
         let g = curve.generator().clone();
         let mut state = 0x9E37_79B9_7F4A_7C15u64 ^ 71;
         let mut next_scalar = || {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             BigUint::from(state >> 11) % &curve.subgroup_order + BigUint::from(1u32)
         };
         for _ in 0..60 {
             let (d1, d2) = (next_scalar(), next_scalar());
-            let (p1, p2) = (scalar_mul(&curve.curve, &g, &d1), scalar_mul(&curve.curve, &g, &d2));
+            let (p1, p2) = (
+                scalar_mul(&curve.curve, &g, &d1),
+                scalar_mul(&curve.curve, &g, &d2),
+            );
             let (w1, w2) = (
                 point_to_words_128(&fast, &p1).unwrap(),
                 point_to_words_128(&fast, &p2).unwrap(),
             );
             let expect = |p: &BinaryPoint| point_to_words_128(&fast, p).unwrap();
-            assert_eq!(fast.add(w1, w2), expect(&point_add(&curve.curve, &p1, &p2)), "add");
+            assert_eq!(
+                fast.add(w1, w2),
+                expect(&point_add(&curve.curve, &p1, &p2)),
+                "add"
+            );
             assert_eq!(
                 fast.add(w1, FastBinaryCurve128::neg(w2)),
                 expect(&point_add(&curve.curve, &p1, &point_neg(&p2))),
@@ -1318,13 +1332,9 @@ mod wide_tests {
         let mut state = 0x1234_5678u128 ^ ((71u128) << 64);
         let mut agree = 0usize;
         for _ in 0..120 {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let left = state & gf.mask;
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let right = state & gf.mask;
             let e = |w: u128| gf.to_element(w);
             let expected = solve_artin_schreier_s3_verdict(&e(left), &e(right), &e(b), &irr);
@@ -1385,9 +1395,7 @@ mod wide_tests {
         let mut state = 0xABCDu128;
         let mut hits = 0usize;
         for _ in 0..80 {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let c = state & gf.mask;
             let ec = gf.to_element(c);
             match artin_schreier_root_128(&gf, 71, c) {
@@ -1419,15 +1427,10 @@ mod wide_tests {
         let b = fast.gf.from_element(&curve.curve.b);
         let mut state = 0x55AAu128;
         for _ in 0..40 {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1);
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let x = (state & fast.gf.mask) as u128;
-            let got: std::collections::HashSet<(u128, u128)> = fast
-                .points_with_x(b, x)
-                .into_iter()
-                .flatten()
-                .collect();
+            let got: std::collections::HashSet<(u128, u128)> =
+                fast.points_with_x(b, x).into_iter().flatten().collect();
             let xe = fast.element(x);
             let want: std::collections::HashSet<(u128, u128)> = points_with_x(&curve.curve, &xe)
                 .into_iter()

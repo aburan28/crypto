@@ -1,0 +1,151 @@
+{
+  "schema": "ecc2k130_block_both2_confirm5_independent_audit.v1",
+  "generatedAtUtc": "2026-10-02T01:39:30Z",
+  "scope": {
+    "task": "Preregister, dispatch, and independently audit a five-pair block-v3 both2 A/B with matched A/A noise control",
+    "benchmarkOnly": true,
+    "searchSolverOrKeyRecovery": false,
+    "protocolCommit": "d9f575c6bd7ed5748d867df996dfa3fb8dc3f16f",
+    "protocolTree": "450f624916774c119380d3a54b6f601c983ed3df",
+    "artifact": "/private/tmp/ecc2k-block-both2-confirm5-gpu-20261001/results.tgz",
+    "extractedResults": "/private/tmp/ecc2k-block-both2-confirm5-gpu-20261001/results"
+  },
+  "verdict": {
+    "valid": true,
+    "recommendation": "PROMOTE_BLOCK_V3_BOTH2_ENGINEERING",
+    "reason": "All five candidate/control ratios are at least 1.005 and their median is 1.0066249686020445. The matched same-binary A/A median is 1.0000465897672288, all five A/A ratios stay within 0.5 percent of one, and the full correctness, exact-work, marker, provenance, and corpus gates pass.",
+    "abPairedMedian": 1.0066249686020445,
+    "abMedianPercentFaster": 0.6624968602044534,
+    "aaPairedMedian": 1.0000465897672288,
+    "aaMedianPercentFromOne": 0.004658976722882624,
+    "olderRoofline1_040Condition": false,
+    "olderRooflineDisposition": "PARTIAL_UNDER_OLDER_PROTOCOL",
+    "claimBoundary": "This promotes two arithmetic knobs as bounded same-walk GPU engineering. It is not an ECDLP break, natural-relation result, collision-time measurement, extraction result, or end-to-end speedup claim."
+  },
+  "frozenDecisionGates": {
+    "abAllAtLeast1_005": true,
+    "abMedianAtLeast1_005": true,
+    "aaAllWithin0_5Percent": true,
+    "aaMedianWithin0_2Percent": true,
+    "correctnessAndCorpus": true,
+    "exactWorkAndMarkers": true,
+    "olderRooflineRatioAtLeast1_040": false
+  },
+  "timing": {
+    "unit": "millions of complete scalar updates per second from one final finished marker",
+    "updatesPerMeasuredSample": 100931731456,
+    "ab": [
+      {"pair":1,"order":"control,candidate","controlMps":5069.008,"candidateMps":5095.344,"ratio":1.0051954938717793},
+      {"pair":2,"order":"candidate,control","controlMps":5069.321,"candidateMps":5103.107,"ratio":1.0066647979088323},
+      {"pair":3,"order":"control,candidate","controlMps":5064.024,"candidateMps":5097.573,"ratio":1.0066249686020445},
+      {"pair":4,"order":"candidate,control","controlMps":5069.412,"candidateMps":5107.611,"ratio":1.0075351934307173},
+      {"pair":5,"order":"control,candidate","controlMps":5067.662,"candidateMps":5100.95,"ratio":1.0065687095942861}
+    ],
+    "aa": [
+      {"pair":1,"order":"aa1,aa2","aa1Mps":5066.121,"aa2Mps":5066.386,"ratio":1.0000523082650414},
+      {"pair":2,"order":"aa2,aa1","aa1Mps":5062.685,"aa2Mps":5070.638,"ratio":1.0015709055570314},
+      {"pair":3,"order":"aa1,aa2","aa1Mps":5064.629,"aa2Mps":5064.386,"ratio":0.9999520201775887},
+      {"pair":4,"order":"aa2,aa1","aa1Mps":5065.49,"aa2Mps":5065.726,"ratio":1.0000465897672288},
+      {"pair":5,"order":"aa1,aa2","aa1Mps":5069.888,"aa2Mps":5064.674,"ratio":0.9989715749144754}
+    ],
+    "excludedWarmupsMps": {"control":6327.296,"candidate":6435.566},
+    "sampleCount": 22,
+    "totalTimedUpdatesIncludingWarmups": 2069100494848,
+    "allRawLogHashesMatchSamplesTsv": true,
+    "allLogsHaveExactExpectedWork": true,
+    "allLogsHaveOneFinishedMarkerAndZeroDrops": true,
+    "allLogsHaveRequiredArmAndCommonMarkers": true,
+    "allLogsHaveNoMismatchOrOverflowMarker": true
+  },
+  "correctness": {
+    "producerReplayWorkPerArm": 887095296,
+    "producerReplayFormula": "96256 threads * 16 slots * 96 steps * 6 launches",
+    "control": {"distinguishedPoints":1480278,"stored":1480278,"verified":300,"dropped":0,"logSha256":"0fe5bc0656c1fd5b5f82f04f77636eb19f0d463647580c952b1e0e0cc6d59a12"},
+    "candidate": {"distinguishedPoints":1480278,"stored":1480278,"verified":300,"dropped":0,"logSha256":"6cae081b052f822440159fb489f92e7bb3a3d7212076803ee96875b9f2653358"},
+    "corpus": {
+      "magic": "ECC2KDT3",
+      "version": 3,
+      "recordBytes": 32,
+      "recordsPerArm": 1480278,
+      "uniqueRecordsPerArm": 1480278,
+      "duplicatesPerArm": 0,
+      "sortedRecordMultisetSha256": "2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01",
+      "sameHeader": true,
+      "sameSortedRecordMultiset": true,
+      "controlRawSha256": "863c6bbdb6612173bd14190a41fca5942d3d53f188e675ac67ddecca65117f6f",
+      "candidateRawSha256": "d589a2e1a2c0ae00d5a667dc7a2f60c713627c3f1811bdd63d1d7d127d4cd350"
+    },
+    "first300IndependentHostReplay": {
+      "control": {"checked":300,"matched":300,"zeroStep":300,"nonzeroStep":0,"mismatches":0},
+      "candidate": {"checked":300,"matched":300,"zeroStep":300,"nonzeroStep":0,"mismatches":0},
+      "finding": "The literal producer prefix remains all zero-step starts."
+    },
+    "spread300IndependentHostReplay": {
+      "selection": "index_i=floor(i*(1480278-1)/299), i=0..299, separately in each raw corpus",
+      "control": {"checked":300,"matched":300,"zeroStep":1,"nonzeroStep":299,"totalSteps":62684,"medianSteps":176,"maximumSteps":575,"mismatches":0},
+      "candidate": {"checked":300,"matched":300,"zeroStep":1,"nonzeroStep":299,"totalSteps":63353,"medianSteps":176,"maximumSteps":575,"mismatches":0}
+    },
+    "prefixHelperSha256": "c6ec4cf7a28411ca7e9828057539645bbefd0e015d3bc8c05f3a29e3872dffb6",
+    "spreadHelperSha256": "bb67f38afb17d8e99899e3648071eee60a18dfd50c89501e3a954d6046edcd59"
+  },
+  "resources": {
+    "control": {"registersPerThread":128,"stackAndRuntimeLocalBytesPerThread":400,"spillStoreBytes":0,"spillLoadBytes":0,"staticSharedBytesPerBlock":1040,"dynamicTableBytesPerBlock":48732,"userSharedBytesPerBlock":49772,"buildLogSha256":"946c1ab28a9635df493cad70135fca688df72eb9faf312bfefc27bdf2360e68f"},
+    "candidate": {"registersPerThread":128,"stackAndRuntimeLocalBytesPerThread":400,"spillStoreBytes":0,"spillLoadBytes":0,"staticSharedBytesPerBlock":1040,"dynamicTableBytesPerBlock":57052,"userSharedBytesPerBlock":58092,"buildLogSha256":"1f125712b5747f64225e6190a9fc66afc58e92917a2745b04d1226f79c60e131"},
+    "driverReservedSharedBytesPerBlock": 1024
+  },
+  "provenance": {
+    "protocolCommittedBeforeDispatch": true,
+    "commit": "d9f575c6bd7ed5748d867df996dfa3fb8dc3f16f",
+    "tree": "450f624916774c119380d3a54b6f601c983ed3df",
+    "checkoutCleanAtDispatch": true,
+    "sourceManifestEntries": 12,
+    "sourceManifestAllMatchCommit": true,
+    "sourceManifestSha256": "736edff915e7e7dd818217f43c1a08ae4bb8e4893265ef07f42c8d63fb080642",
+    "protocolSha256": "234c7e843b691c6828ec6773b76f9aea0a253a9a97ae406e1f24083294d87b87",
+    "gpuJobSha256": "3209ef9c07802d87aaea008e6a820e3c160e9a8a7e5527248152cc95ef6d2904",
+    "corpusHelperSourceSha256": "5cdb44d517c1da821a71c5bf8206b8a33511f4611e03edd348cb27d9e1c5729b",
+    "summarizerSourceSha256": "afa832a6363d421029e2721f2d49954d23d64da7501345a01babdcc14ebbd3a8",
+    "controlBinaryBytes": 5062432,
+    "candidateBinaryBytes": 5078984,
+    "controlBinarySha256": "1fc67c6aea1394a31b27c3abb150425668aadabfcde14b57f37e0a1b7db13658",
+    "candidateBinarySha256": "9d9b2479d55cb837165635d3d0b1140e66b8351a822cd84c5861722cbeb13f6d",
+    "binariesRetainedAndHashesRecomputed": true
+  },
+  "summarizerReadback": {
+    "nativeSelfTestPassed": true,
+    "retainedResultSha256": "4a4f5ec23e50b72470a11e08485ab4bfce9f942e52a5a145545aba4acb71c169",
+    "independentlyRecompiledResultByteIdentical": true,
+    "samplesTsvSha256": "358621ad84946dc85945338e3a7bf29037619bc48afe419f71fa87095fedf2d4",
+    "logManifestSha256": "833586e542dbe0785edfca356e58c550987f243301a320e3b78e9f5553202228"
+  },
+  "corrections": [
+    {
+      "id": "CORR-20261002-LOG-MANIFEST-SHA256",
+      "initialAuditSha256": "ac69a465e0560d1e0e7e836cc32195e3b2af9b0c76c0b25342bc86d56b6d4abd",
+      "field": "summarizerReadback.logManifestSha256",
+      "initialValue": "833586e542dbe078d3380868ac936d0233a39570f81f321db5753be6a41c7223",
+      "correctedValue": "833586e542dbe0785edfca356e58c550987f243301a320e3b78e9f5553202228",
+      "effect": "Manifest transcription only; per-log hashes, exact-work checks, ratios, gates and disposition are unchanged."
+    }
+  ],
+  "immutableArtifact": {
+    "resultsTgzBytes": 68633856,
+    "resultsTgzSha256": "63023fd84d5a9baff4ec5ee0b5b42478b5073c9b3637d491b56af02cc407b150",
+    "launchJsonBytes": 646,
+    "launchJsonSha256": "8f36c89bd9ce064107f58f0557c57a94c6bda2ced782e222cbcf7be207c31261",
+    "archiveFileCount": 44,
+    "freshExtractionMatchesProvidedDirectory": true,
+    "provider": "modal",
+    "gpu": "RTX-PRO-6000",
+    "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.95.05",
+    "cudaCompiler": "13.3.73",
+    "functionCallId": "fc-01M3X2N99RKE1RC883G491GEKE",
+    "volume": "ecc2k130-jobs",
+    "token": "fb6d3522021344edacde6ac26d8ebd23",
+    "startedAt": "2026-10-02T01:11:33Z",
+    "finishedAt": "2026-10-02T01:33:54Z",
+    "seconds": 861.9342513084412,
+    "exitCode": 0
+  }
+}

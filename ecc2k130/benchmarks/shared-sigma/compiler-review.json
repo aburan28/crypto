@@ -1,0 +1,355 @@
+{
+  "valid": true,
+  "status": "Independent retained CPU source/code/resource review passed; runtime shared-memory accounting remains unmeasured",
+  "reviewedAtUtc": "2026-09-12T09:48:33.888355+00:00",
+  "ownerTerminal": {
+    "session": 77187,
+    "app": "ap-lWIl7GOHlfbiBroWpq3srF",
+    "exitCode": 0
+  },
+  "rawPath": "/private/tmp/ecc2k-shared-sigma-cpu-20260912/compile-result.json",
+  "rawSha256": "d7ec0fe66c1d187ffcf1eb340fb1af99fe3e3aa29124436bc4744eecfe4ce6cb",
+  "rawBytes": 10465216,
+  "hostReceiptSha256": "9bcebec2029b228ed4b864cfe83042bebc3c5b8c4be7e058e6610113b31bc349",
+  "hostSourceManifestSha256": "61e10ab6dde7fac5c966420cafef49f32eafa6f77a7cef217c342b9fd2d23533",
+  "hostSourceFiles": 160,
+  "uploadedSourceFiles": 32,
+  "uploadedSourceManifestSha256": "0a58158771446450a5e6f80f4dae2bea7a038338eeaa0064444f280768d31b81",
+  "driverFreezeSha256": "d1b4906d7df84d21466a3ad59ac243073c5d92d02fa1ec24432a3d02942ecfa7",
+  "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "compilerVersion": "13.3.73",
+  "ptxVersion": "9.3",
+  "architecture": "sm_120",
+  "batch": 16,
+  "threads": 256,
+  "minBlocks": 2,
+  "weightedPrefix": 2,
+  "compactState": 1,
+  "nativeClmad": 1,
+  "stateTile": 256,
+  "compilerAttempts": 2,
+  "all14CommandsSucceededWithoutWarnings": true,
+  "controlWholeCubinMatchesPriorCompact1": true,
+  "controlEveryNativeEncodingMatchesPriorCompact1": true,
+  "initEveryNativeEncodingIdenticalAcrossModes": true,
+  "actualELFTextBytesCheckedAgainstEverySASSInstruction": true,
+  "rows": {
+    "shared0": {
+      "cubinSha256": "bc7ac573730f8e012eeccfc72c1a897743acec63ab3d362c69f0fa63bdf393b4",
+      "cubinBytes": 162312,
+      "ptxSha256": "f126c7e9932b5579b378f8c23f66e2a1774ea6dc73f0e7c0cc8caa1c94e928ec",
+      "walkResources": {
+        "registers": 108,
+        "stackBytes": 0,
+        "sharedBytes": 0,
+        "localBytes": 0
+      },
+      "initResources": {
+        "registers": 98,
+        "stackBytes": 0,
+        "sharedBytes": 0,
+        "localBytes": 0
+      },
+      "walkCode": {
+        "instructionSlots": 4416,
+        "nonNop": 4345,
+        "callerNonNop": 1614,
+        "textBytesSha256": "b725c7b12d8a54b7fed7fdf0700d4d0a39a52b5be2ee5066650a6f2bdcb1fdbb"
+      },
+      "initCode": {
+        "instructionSlots": 3048,
+        "nonNop": 3016,
+        "callerNonNop": 1220,
+        "textBytesSha256": "5490e4505de8bfc2745ab8fd20976dcff86273673539f75f06f455a3e4217f2f"
+      },
+      "ptxasZeroStackSpillRecords": 17,
+      "allActualLocalLoadStoreInstructions": 0,
+      "pairedSigmaHelperNonNop": 505,
+      "pairedSigmaHelperLoads": {
+        "count": 56,
+        "opcode": "LDG.E.CONSTANT"
+      },
+      "selectedPath": {
+        "callerVisits": 10305,
+        "helperCalls": {
+          "23sigmaWalkNetworkPair131ENS0_4P131ES1_i": 16,
+          "20mulPolynomialPair131ENS0_4P131ES1_S1_": 30,
+          "6mul131ENS0_4P131ES1_": 8,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+          "16mulPolynomial131ENS0_4P131ES1_": 17
+        },
+        "fieldProductsPerWorkerStep": 85,
+        "clmadPerWorkerStep": 510,
+        "pairedSigmaCallsPerWorkerStep": 16,
+        "pairedSigmaLoadInstructions": 896,
+        "pairedSigmaMemorySpace": "global-read-only",
+        "inverseGlobalMaskLoadInstructions": 112,
+        "selectedVisitsPerWorkerStep": 35084,
+        "selectedVisitsPerScalarStep": 2192.75,
+        "traceHash": "43017190a49299dab73b0c898ef8de893e2eb21bc8285db84aa81d1fce7fb993"
+      },
+      "resolvedCallerCallSites": 18,
+      "entryHelperSummaries": {
+        "16mulPolynomial131ENS0_4P131ES1_": {
+          "nonNop": 167,
+          "nativeCLMAD": {
+            "CLMAD.LO": 3,
+            "CLMAD.HI": 3
+          }
+        },
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+          "nonNop": 251,
+          "nativeCLMAD": {}
+        },
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+          "nonNop": 267,
+          "nativeCLMAD": {}
+        },
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+          "nonNop": 272,
+          "nativeCLMAD": {}
+        },
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+          "nonNop": 297,
+          "nativeCLMAD": {}
+        },
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+          "nonNop": 297,
+          "nativeCLMAD": {}
+        },
+        "20mulPolynomialPair131ENS0_4P131ES1_S1_": {
+          "nonNop": 322,
+          "nativeCLMAD": {
+            "CLMAD.LO": 6,
+            "CLMAD.HI": 6
+          }
+        },
+        "23sigmaWalkNetworkPair131ENS0_4P131ES1_i": {
+          "nonNop": 505,
+          "nativeCLMAD": {}
+        },
+        "6mul131ENS0_4P131ES1_": {
+          "nonNop": 353,
+          "nativeCLMAD": {
+            "CLMAD.LO": 3,
+            "CLMAD.HI": 3
+          }
+        }
+      }
+    },
+    "shared1": {
+      "cubinSha256": "908ee02ee31a9e46061a6d796c594081e67c1b9cc5285bbd13ced20b47c07e83",
+      "cubinBytes": 164528,
+      "ptxSha256": "2744fa2b3d1903743e157881fb498afea89c8737db9d01a95ca2c057cf5136a1",
+      "walkResources": {
+        "registers": 104,
+        "stackBytes": 0,
+        "sharedBytes": 2816,
+        "localBytes": 0
+      },
+      "initResources": {
+        "registers": 98,
+        "stackBytes": 0,
+        "sharedBytes": 0,
+        "localBytes": 0
+      },
+      "walkCode": {
+        "instructionSlots": 4528,
+        "nonNop": 4449,
+        "callerNonNop": 1721,
+        "textBytesSha256": "e02d6f11db0c88895dec3acfc141661237879ef2a052ddbffed9a4e8672ac30b"
+      },
+      "initCode": {
+        "instructionSlots": 3048,
+        "nonNop": 3016,
+        "callerNonNop": 1220,
+        "textBytesSha256": "5490e4505de8bfc2745ab8fd20976dcff86273673539f75f06f455a3e4217f2f"
+      },
+      "ptxasZeroStackSpillRecords": 17,
+      "allActualLocalLoadStoreInstructions": 0,
+      "pairedSigmaHelperNonNop": 502,
+      "pairedSigmaHelperLoads": {
+        "count": 56,
+        "opcode": "LDS"
+      },
+      "selectedPath": {
+        "callerVisits": 10305,
+        "helperCalls": {
+          "29sigmaWalkNetworkPairShared131ENS0_4P131ES1_i": 16,
+          "20mulPolynomialPair131ENS0_4P131ES1_S1_": 30,
+          "6mul131ENS0_4P131ES1_": 8,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+          "16mulPolynomial131ENS0_4P131ES1_": 17
+        },
+        "fieldProductsPerWorkerStep": 85,
+        "clmadPerWorkerStep": 510,
+        "pairedSigmaCallsPerWorkerStep": 16,
+        "pairedSigmaLoadInstructions": 896,
+        "pairedSigmaMemorySpace": "shared",
+        "inverseGlobalMaskLoadInstructions": 112,
+        "selectedVisitsPerWorkerStep": 35036,
+        "selectedVisitsPerScalarStep": 2189.75,
+        "traceHash": "58e343f08474613d7d7fffc47ddd4961ac3f8d2a39b8cd2e4aa3a0eca9746ace"
+      },
+      "resolvedCallerCallSites": 18,
+      "entryHelperSummaries": {
+        "16mulPolynomial131ENS0_4P131ES1_": {
+          "nonNop": 167,
+          "nativeCLMAD": {
+            "CLMAD.LO": 3,
+            "CLMAD.HI": 3
+          }
+        },
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+          "nonNop": 251,
+          "nativeCLMAD": {}
+        },
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+          "nonNop": 267,
+          "nativeCLMAD": {}
+        },
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+          "nonNop": 272,
+          "nativeCLMAD": {}
+        },
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+          "nonNop": 297,
+          "nativeCLMAD": {}
+        },
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+          "nonNop": 297,
+          "nativeCLMAD": {}
+        },
+        "20mulPolynomialPair131ENS0_4P131ES1_S1_": {
+          "nonNop": 322,
+          "nativeCLMAD": {
+            "CLMAD.LO": 6,
+            "CLMAD.HI": 6
+          }
+        },
+        "29sigmaWalkNetworkPairShared131ENS0_4P131ES1_i": {
+          "nonNop": 502,
+          "nativeCLMAD": {}
+        },
+        "6mul131ENS0_4P131ES1_": {
+          "nonNop": 353,
+          "nativeCLMAD": {
+            "CLMAD.LO": 3,
+            "CLMAD.HI": 3
+          }
+        }
+      }
+    }
+  },
+  "sharedAllocation": {
+    "declaredMaskTableDimensions": [
+      56,
+      8
+    ],
+    "declaredMaskTableBytes": 1792,
+    "ptxDeclaredSharedBytes": 1792,
+    "compiledWalkSharedSectionBytes": 2816,
+    "cuobjdumpWalkSharedBytes": 2816,
+    "sassUserTableBase": 1024,
+    "sassUserTableRangeInclusive": [
+      1024,
+      2815
+    ],
+    "reservedCapSymbol": {
+      "name": ".nv.reservedSmem.cap",
+      "value": 1024,
+      "size": 4,
+      "binding": "weak",
+      "section": "undefined"
+    },
+    "arithmeticExplanation": "The table occupies1792 bytes after the0x400 base;1024+1792=2816 agrees exactly with the per-kernel ELF NOBITS size and cuobjdump report.",
+    "otherReservedSections": "Both cubins contain .nv.shared.reserved.0 with64 bytes and .nv.reservedSmem.offset0 value64. This is a separate reserved ELF observation, not another user table; its runtime role is not decoded here and it is not added to2816.",
+    "notASpillArray": true,
+    "systemReservationInterpretation": "Actual reserved-cap symbol, SASS base and1KiB delta align with the documented system reservation. This does not establish a general cuobjdump-to-runtime conversion rule.",
+    "runtimeSharedSizeBytes": null,
+    "runtimeDeviceReservedSharedBytes": null,
+    "physicalSharedPartitionBytes": null
+  },
+  "staging": {
+    "sourceWordCopiesPerBlockPerLaunch": 448,
+    "logicalGlobalLoadAndSharedStoreBytesEach": 1792,
+    "staticGlobalLoadSites": 5,
+    "staticSharedStoreSites": 5,
+    "barrierSite": "0x730 BAR.SYNC.DEFER_BLOCKING 0x0",
+    "firstPartialThreadExitSite": "0x750 @P0 EXIT",
+    "barrierBeforeEveryExit": true,
+    "loopBankConflictOrLatencyMeasured": false
+  },
+  "runtimePlanning": {
+    "requiredEvidenceBeforeFixingRuntimeExpectation": [
+      "Query cudaFuncGetAttributes on the actual loaded walk and init functions and record numRegs,localSizeBytes,sharedSizeBytes independently of offline resource fields.",
+      "Record cudaDeviceGetAttribute(cudaDevAttrReservedSharedMemoryPerBlock) or cudaDeviceProp.reservedSharedMemPerBlock separately.",
+      "Use the actual function and launch geometry in occupancy APIs; do not infer realized residency, bank conflicts or carveout from this inventory."
+    ],
+    "uncertainty": "Do not assert1792 or2816 as cudaFuncAttributes.sharedSizeBytes solely from this CPU artifact. Do not blindly add/subtract1024 or the separate64-byte ELF section."
+  },
+  "localReviewArtifacts": {
+    "audit.py": {
+      "path": "/private/tmp/ecc2k-shared-sigma-cpu-independent-review-20260912/audit.py",
+      "sha256": "f77fc41545ffa495dacaf01cfb2eafb844c1e664c88ad745004ad4939f265558"
+    },
+    "native-code-review.json": {
+      "path": "/private/tmp/ecc2k-shared-sigma-cpu-independent-review-20260912/native-code-review.json",
+      "sha256": "21527a7365af33c354a7a6210897890c357720b6318d50a0e7e7205cefaad8d3"
+    },
+    "call_ledger.py": {
+      "path": "/private/tmp/ecc2k-shared-sigma-cpu-independent-review-20260912/call_ledger.py",
+      "sha256": "dde2ffb6366f4aad643da6e92e1a64685042ce92a0ee44bbbecf5230fc96bf41"
+    },
+    "call-ledger.json": {
+      "path": "/private/tmp/ecc2k-shared-sigma-cpu-independent-review-20260912/call-ledger.json",
+      "sha256": "666687761d2375e136a3f8e50c1abbd3eb25ab13df52c46d2f6b23a4216f93a7"
+    },
+    "artifact-retrieval.json": {
+      "path": "/private/tmp/ecc2k-shared-sigma-cpu-independent-review-20260912/artifact-retrieval.json",
+      "sha256": "9cf8afa91a194997fc72a4511cfc02f7e67537894ab92cc05e5573832c694864"
+    }
+  },
+  "documentation": [
+    {
+      "title": "CUDA13.0.3 Programming Guide, compute capability12.0 shared memory",
+      "url": "https://docs.nvidia.com/cuda/archive/13.0.3/cuda-c-programming-guide/index.html#compute-capability-12-0",
+      "supports": "CC12.0 documents1KB reserved for system use; user shared capacity and carveout are separate concepts."
+    },
+    {
+      "title": "PTX9.0 special registers, sections10.29 through10.31",
+      "url": "https://docs.nvidia.com/cuda/archive/13.0.3/parallel-thread-execution/index.html",
+      "supports": "Reserved-region metadata is separate from user memory; total_smem_size excludes system reservation and aggr_smem_size includes it."
+    },
+    {
+      "title": "CUDA13.0.2 cudaFuncAttributes",
+      "url": "https://docs.nvidia.com/cuda/archive/13.0.2/cuda-runtime-api/structcudaFuncAttributes.html",
+      "supports": "sharedSizeBytes describes static per-block shared requirements and excludes user-requested dynamic bytes; the entry does not explicitly define system-reservation inclusion."
+    },
+    {
+      "title": "CUDA13.0.2 runtime device attribute types",
+      "url": "https://docs.nvidia.com/cuda/archive/13.0.2/cuda-runtime-api/group__CUDART__TYPES.html",
+      "supports": "cudaDevAttrReservedSharedMemoryPerBlock exposes driver-reserved shared bytes per block separately."
+    }
+  ],
+  "findings": [],
+  "limitations": [
+    "No compiler, CUDA executable, GPU job, benchmark or host arithmetic suite was rerun by this audit. Two existing cubins were downloaded read-only for byte-level ELF inspection.",
+    "Host receipt and source closure were rehashed and bound; the source/probe correctness review is a separate agent task.",
+    "The selected-path2192.75 to2189.75 non-NOP visits/scalar excludes per-launch448-word staging, the block barrier, cold report/guard/reseed paths and runtime overhead; it is not a measured gain.",
+    "B16 selected path has17 ordinary polynomial calls,30 paired polynomial calls,8 normal inverse products and16 paired sigma calls:85 field products and510 CLMAD instructions per worker step in both modes. Static symbol counts are not execution frequencies.",
+    "896 shared mask-load instructions replace896 global-read-only mask loads per worker step;112 inverse global mask loads remain. These are instruction/operand byte inventories, not observed DRAM traffic or bank conflicts.",
+    "The loaded function sharedSizeBytes, driver reservation, physical allocation, occupancy and device synchronization correctness are not measured by CPU compilation.",
+    "An initial independent parser check included a separate reserved ELF section in the per-kernel section inventory and failed. It was corrected to select the exact named kernel section; no producer files or bytes changed."
+  ],
+  "performanceGainEstablished": false,
+  "gpuAdmissionGrantedByThisReceipt": false
+}

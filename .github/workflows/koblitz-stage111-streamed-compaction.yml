@@ -1,0 +1,66 @@
+name: Koblitz Stage 111 n53 streamed compaction
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage111_streamed_compaction.py"
+      - ".github/workflows/koblitz-stage111-streamed-compaction.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate streamed-compaction controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage111_streamed_compaction.py
+          python3 scripts/run_koblitz_stage111_streamed_compaction.py self-test
+          cargo test --release --example koblitz_rank_fixture
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-streamed-compaction:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage111_streamed_compaction.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage111-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare retained-all and streamed dense compaction
+        run: |
+          python3 scripts/run_koblitz_stage111_streamed_compaction.py run \
+            --build "$RUNNER_TEMP/stage111-build" \
+            --output "$RUNNER_TEMP/stage111-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage111_streamed_compaction.py verify \
+            --build "$RUNNER_TEMP/stage111-build" \
+            --output "$RUNNER_TEMP/stage111-run" \
+            > "$RUNNER_TEMP/stage111-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage111-streamed-compaction-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage111-build
+            ${{ runner.temp }}/stage111-run
+            ${{ runner.temp }}/stage111-verification.json

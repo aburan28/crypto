@@ -18,6 +18,17 @@ def main():
     if claim.get("median_online_speedup", 0) < 1.2:
         raise SystemExit("median online speedup below the win threshold")
 
+    # Fail closed on the ledger's own vs_rho measurement schema
+    # (docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md, F10).
+    sys.path.insert(0, str(ROOT / "research/sat_factor_base_review_20260908/autolab"))
+    import boundary_autolab as lab
+    check = lab.validate_claim(claim, stage="vs_rho", ledger=lab.load_ledger(lab.load_protocol()))
+    if check["status"] != "PASS":
+        raise SystemExit("claim-check FAIL, not promoting: " + json.dumps({
+            key: check[key]
+            for key in ("missing_stage_fields", "missing_global_provenance", "pairing_errors")
+        }))
+
     d = json.loads(LEDGER.read_text())
     records = d["regimes"]["koblitz"]["records"]
     vs = records["vs_rho"]

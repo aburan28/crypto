@@ -1,0 +1,78 @@
+{
+  "valid": true,
+  "status": "completed_valid_unqualified_no_promotion",
+  "owner": "/root/weighted_public_audit",
+  "session": 15541,
+  "app": "ap-8wtaL9FddF0MIdQZJffxYc",
+  "exitCode": 0,
+  "rawPath": "/private/tmp/ecc2k-vector4-sigma-walk-20260912/result.json",
+  "rawSha256": "ab570300f07c31577132c545ecd47b1181b1254122526e12c14947f3dc5a62df",
+  "rawBytes": 4481399,
+  "returnReceiptSha256": "84f3807a8d6d5e9f93344f17dd3e3043ae521429071088a643d9b2c1eadd777b",
+  "independentReviewPath": "/private/tmp/ecc2k-vector4-sigma-owner-review-20260912/final-review.json",
+  "independentReviewSha256": "d127b49033c84af20304b4d578e2445faee8d72350f9f2ac438e981b65b1d811",
+  "independentAuditorSha256": "d14c750dc2613a297815691533cb4832683f2f3c300c0b0b508c0cd1d8584ff4",
+  "predispatchReviewSha256": "3608fa937bb73648754042eb2a2ca294e4358a69c6fce17154127a21cfa849c1",
+  "frozenDriverSha256": "e79952054f2dd5c7b2b372ec6bc1a806564c1d125fe53a8d44c56ecf2b19d840",
+  "driverFreezeSha256": "7bd95d57a210c336a37c0053d66c5c8cddd6f9417b5966bab2457172d3ce81a0",
+  "prebuildSha256": "740f1b2300d1070d9f44d50ef33d874d4f8d1c47d1d9b91d06a28c301a99ce76",
+  "logPath": "/private/tmp/ecc2k-vector4-sigma-walk-run-20260912.log",
+  "logSha256": "dc75f40f6f46426ced04e3e1471383f8df8c8fca4f8dddfc63ed58ac599c0d08",
+  "screenB": [
+    14.640971,
+    14.682739999999999,
+    14.573526
+  ],
+  "thresholdB": 14.714175854999997,
+  "candidateAboveMaximumBracketControlPercent": 0.2852884552534185,
+  "controlDriftPercent": -0.460659337416891,
+  "timedRows": 5,
+  "updatesEach": 201863462912,
+  "totalTimedUpdatesIncludingExcludedWarmups": 1009317314560,
+  "excludedWarmups": 2,
+  "confirmedPairedBenchmarkSamples": 0,
+  "timedDp34Samples": 0,
+  "timedCorpusEvidenceStatus": "not_collected_because_candidate_unqualified",
+  "validation": {
+    "arithmeticModes": 2,
+    "arithmeticSuitesEach": 6,
+    "storageCasesEach": 128,
+    "storageRecordsEach": 297344,
+    "sharedProbeEach": {
+      "scenarios": 21,
+      "inputPairs": 21036,
+      "snapshots": 114,
+      "words": 51072
+    },
+    "integrationModes": 2,
+    "normalizedSlots": [
+      64,
+      16384
+    ],
+    "nestedLayoutClients": 10,
+    "checkpointChildren": 28,
+    "checkpointSuccesses": 26,
+    "expectedRejections": 2,
+    "checkpointComparisons": 12,
+    "allBeforeTiming": true
+  },
+  "runtimeResources": {
+    "control": {
+      "registers": 104,
+      "localBytes": 0,
+      "sharedBytes": 1792
+    },
+    "vector1": {
+      "registers": 104,
+      "localBytes": 0,
+      "sharedBytes": 1792
+    }
+  },
+  "goal26Satisfied": false,
+  "recommendedDisposition": "Keep existing scalar shared-mask preset; retain this exact vector4 experiment as an unqualified finite screen. Do not claim a slowdown or a confirmed gain from this screen alone.",
+  "mixedOpProbeStatus": "frozen, CUDA-uncompiled and GPU-unrun",
+  "oneGpuSubmissionOnly": true,
+  "retries": 0,
+  "sourceOrRunnerEdits": false,
+  "reviewerRepair": "Only the root-authorized additive fixed-width hex serialization correction; original failed reviewer attempt remains retained."
+}

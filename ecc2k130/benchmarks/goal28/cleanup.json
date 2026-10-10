@@ -1,0 +1,65 @@
+{
+  "instances": [
+    {
+      "instanceId": "i-045a96ec82e193dc0",
+      "state": "not returned by EC2",
+      "terminationRequestedFor": [
+        "i-045a96ec82e193dc0"
+      ],
+      "sourceSha256": "37afb901fdc9de5f5f25dd16834f0a43567c5a39acc0dcebe4ea6bc869f20bb7",
+      "resultPrefix": "benchmarks/native/8d9c143e067f4b6eb3ad8b18f948727e"
+    },
+    {
+      "instanceId": "i-0e8b9704f5cc4b45f",
+      "state": "terminated",
+      "terminationRequestedFor": [
+        "i-0e8b9704f5cc4b45f"
+      ],
+      "sourceSha256": "bf61645eb996b3cd5bba7253b4122907bf0bb08e83ba884ab2667f560d13ef8f",
+      "resultPrefix": "benchmarks/native/87382498ea18407fb3df98a900414821"
+    },
+    {
+      "instanceId": "i-0e2397aa2a17c0652",
+      "state": "terminated",
+      "terminationRequestedFor": [
+        "i-0e2397aa2a17c0652"
+      ],
+      "sourceSha256": "8968ee36e2c4c93318ad5ced1cc825bb091ebf46752e04bbba1486b3256d5f67",
+      "resultPrefix": "benchmarks/native/dad2b8d70cf54022ab3a1bc9c81316cf"
+    },
+    {
+      "instanceId": "i-049237b8b44c1f13d",
+      "state": "terminated",
+      "terminationRequestedFor": [
+        "i-049237b8b44c1f13d"
+      ],
+      "sourceSha256": "d5d0c59ae97e69afbf5d1ac9741e693e31981c287c8367b639f885ab95aa4c89",
+      "resultPrefix": "benchmarks/native/957acd57e203416db735934cae92c614"
+    },
+    {
+      "instanceId": "i-08e0c4f1583f72e9d",
+      "state": "terminated",
+      "terminationRequestedFor": [
+        "i-08e0c4f1583f72e9d"
+      ],
+      "sourceSha256": "2983a3d8392dde6e086aa2bf24c47d12f5e9e13f34d6e3620afc1895cf49baa2",
+      "resultPrefix": "benchmarks/native/26f32e87b63a4dfe8a6e3c72bbb01185"
+    },
+    {
+      "instanceId": "i-0a9ae169f7e4dcef3",
+      "state": "terminated",
+      "terminationRequestedFor": [
+        "i-0a9ae169f7e4dcef3"
+      ],
+      "sourceSha256": "fb170c62ca72f53c7c51510056f7f6fb3ae83feee2df2ee800f91b48886b895f",
+      "resultPrefix": "benchmarks/native/c32676aca81b4c56b25d1f9985f128eb"
+    }
+  ],
+  "allCurrentlyReturnedInstancesTerminated": true,
+  "notReturnedIds": [
+    "i-045a96ec82e193dc0"
+  ],
+  "nonterminatedInstanceIds": [],
+  "noNonterminatedInstancesFound": true,
+  "method": "Read-only exact-instance-ID EC2 verification after each controller finally requested termination."
+}

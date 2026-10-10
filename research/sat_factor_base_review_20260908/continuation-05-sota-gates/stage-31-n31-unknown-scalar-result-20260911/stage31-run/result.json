@@ -1,0 +1,466 @@
+{
+  "factor_base_log_source": "relation collection and group-certified linear algebra inside the workflow",
+  "factor_base_logs_known_by_construction": false,
+  "factor_base_recipe": {
+    "bytes": 218,
+    "path": "/home/runner/work/_temp/stage30/stage30-search/factor-base.json",
+    "sha256": "23b37e218d82a54452883b745e9a83fe51bb9c67b50cd4011d807be9ac632a6c"
+  },
+  "full_cost_gate_passed": false,
+  "koblitz_index_calculus_sota": false,
+  "outer_resources": {
+    "average_parallelism": 3.884977720068505,
+    "process_tree_rss_samples": 6787,
+    "sample_interval_seconds": 0.02,
+    "sampled_peak_process_tree_rss_bytes": 203698176,
+    "total_core_seconds": 965.5037729999999,
+    "wall_seconds": 248.522344932
+  },
+  "params": {
+    "bytes": 1105,
+    "path": "/home/runner/work/_temp/stage31-run/params.json",
+    "sha256": "14837bb90b97705ea3b4aae4633666283ce1cad4a9ed9cc37933a18f1cca9eb4"
+  },
+  "process_receipt": {
+    "command": [
+      "/home/runner/work/crypto/crypto/target/release/ic",
+      "--json",
+      "workflow",
+      "--params",
+      "/home/runner/work/_temp/stage31-run/params.json",
+      "--dir",
+      "/home/runner/work/_temp/stage31-run/workflow"
+    ],
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 157622272,
+      "single_core_seconds": 905.399079,
+      "system_seconds": 0.250344,
+      "total_core_seconds": 905.399079,
+      "user_seconds": 905.148735,
+      "wall_seconds": 248.48423623400004
+    },
+    "orphan_group_terminated": false,
+    "returncode": 0,
+    "timed_out": false,
+    "watchdog_seconds": 3600.0
+  },
+  "public_target_seeds": [
+    31001,
+    31002,
+    31003,
+    31004,
+    31005
+  ],
+  "schema": "koblitz_stage31_n31_unknown_scalar_result.v1",
+  "status": "complete_public_unknown_scalar_panel",
+  "target_scalars_constructed_or_supplied": false,
+  "workflow_result": {
+    "artifacts": {
+      "baseline": "baseline.json",
+      "factor_base": "factor_base.json",
+      "logs": "logs.json",
+      "relations": "relations",
+      "solutions": "solutions.json",
+      "state": "state.json"
+    },
+    "curve_a": 0,
+    "curve_b": 1,
+    "degree": 31,
+    "elapsed_seconds": 248.479423618,
+    "evidence_scope": "synthetic_known_answer",
+    "factor_base": {
+      "abscissae": 1986,
+      "columns": 32,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "family": "two_torsion_saturated",
+      "points": 3971,
+      "signed_orbits": 66,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            5
+          ],
+          "kind": "divisor"
+        }
+      }
+    },
+    "failure": null,
+    "limitations": [
+      "No imported target was used.",
+      "This run does not establish scaling or challenge readiness."
+    ],
+    "name": "k0n31-public-unknown-scalar-stage31",
+    "operation": "workflow",
+    "params_digest": "1591e92319c465f5fb6409f6aef7c4846c9ffdd172f20a14213b743bd7f46d7b",
+    "resources": {
+      "cpu_seconds": 905.3956049999999,
+      "peak_rss_bytes": 157622272,
+      "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+    },
+    "resumed": false,
+    "run_directory": "/home/runner/work/_temp/stage31-run/workflow",
+    "run_number": 1,
+    "schema_version": 1,
+    "scope": "resumable staged pipeline: select \u2192 collect \u2192 logs \u2192 solve; completed stages, work units and solved targets are reused on rerun after re-verification against the reconstructed curve",
+    "software": {
+      "arch": "x86_64",
+      "binary_blake3": "d3c031f4609dd2396ecc3b8ebdbbc8436df6d6800a8b64a03d6c97ef25c751cf",
+      "os": "linux",
+      "version": "0.1.0"
+    },
+    "solutions": {
+      "count": 5,
+      "items": [
+        {
+          "descent_trials": 1,
+          "elapsed_seconds": 0.751574908,
+          "expected": "not_constructed",
+          "index": 0,
+          "recovered": "387577",
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31001,
+            "target_scalar_constructed": false,
+            "x": "2120207720",
+            "y": "1880876365"
+          },
+          "verified": true
+        },
+        {
+          "descent_trials": 1,
+          "elapsed_seconds": 0.760236745,
+          "expected": "not_constructed",
+          "index": 1,
+          "recovered": "157369",
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31002,
+            "target_scalar_constructed": false,
+            "x": "111379212",
+            "y": "555577684"
+          },
+          "verified": true
+        },
+        {
+          "descent_trials": 1,
+          "elapsed_seconds": 0.737489284,
+          "expected": "not_constructed",
+          "index": 2,
+          "recovered": "88334",
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 1,
+            "public_hash_seed": 31003,
+            "target_scalar_constructed": false,
+            "x": "673639366",
+            "y": "1091840695"
+          },
+          "verified": true
+        },
+        {
+          "descent_trials": 1,
+          "elapsed_seconds": 0.742004113,
+          "expected": "not_constructed",
+          "index": 3,
+          "recovered": "1049842",
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31004,
+            "target_scalar_constructed": false,
+            "x": "985859144",
+            "y": "1812606916"
+          },
+          "verified": true
+        },
+        {
+          "descent_trials": 2,
+          "elapsed_seconds": 0.825431856,
+          "expected": "not_constructed",
+          "index": 4,
+          "recovered": "1409351",
+          "target": {
+            "kind": "public_hash_to_curve_cofactor",
+            "public_hash_counter": 0,
+            "public_hash_seed": 31005,
+            "target_scalar_constructed": false,
+            "x": "2048889642",
+            "y": "1570827429"
+          },
+          "verified": true
+        }
+      ],
+      "verified": 5
+    },
+    "solver": "pair_table",
+    "stages": [
+      {
+        "ran": true,
+        "stage": "select",
+        "status": "complete"
+      },
+      {
+        "elapsed_seconds": 240.919700027,
+        "ran": true,
+        "relations_now": 11312,
+        "relations_total": 11312,
+        "stage": "collect",
+        "status": "complete",
+        "trials_now": 16384,
+        "trials_total": 16384,
+        "units": {
+          "ignored": 0,
+          "indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "max": 64,
+          "present": 4,
+          "ran_now": 4,
+          "requested": 4,
+          "trials_per_unit": 4096
+        },
+        "worker": false
+      },
+      {
+        "columns": 32,
+        "duplicates": 56,
+        "elapsed_seconds": 2.57654377,
+        "linear_algebra": {
+          "attempts": 1,
+          "mode": "sparse",
+          "seconds": 0.010947887,
+          "sparse": {
+            "attempts": 1,
+            "core_dimension": 4,
+            "core_nonzeros": 44,
+            "filter": {
+              "columns_in": 32,
+              "columns_out": 4,
+              "dependent_rows_dropped": 3,
+              "duplicates_removed": 0,
+              "excess_rows_removed": 11192,
+              "merged_columns": 18,
+              "nonzeros_in": 32808,
+              "nonzeros_out": 44,
+              "rows_in": 11256,
+              "rows_out": 33,
+              "singletons_removed": 10,
+              "uncovered_columns": 0
+            },
+            "reconstructed_columns": 28,
+            "wiedemann": {
+              "block_m": 4,
+              "block_n": 4,
+              "dimension": 5,
+              "extra_steps": 0,
+              "generator_degree": 1,
+              "products": 14,
+              "sequence_length": 12
+            }
+          }
+        },
+        "ran": true,
+        "rejected": 0,
+        "relations": 11256,
+        "relations_loaded": 11312,
+        "stage": "logs",
+        "status": "complete",
+        "trials": 16384,
+        "units_extended": 0,
+        "units_used": 4,
+        "verification_seconds": 1.814407807
+      },
+      {
+        "already_solved": 0,
+        "elapsed_seconds": 3.827528261,
+        "failed_now": 0,
+        "pair_table_seconds": 0.0,
+        "ran": true,
+        "solved_now": 5,
+        "stage": "solve",
+        "status": "complete",
+        "targets": 5
+      },
+      {
+        "ran": true,
+        "stage": "baseline",
+        "status": "complete",
+        "vs_rho": {
+          "automorphism_discount": {
+            "family": "signed Frobenius classes, A = 2n",
+            "n": 31,
+            "sqrt_2n": 7.874007874011811
+          },
+          "claim_boundary": "public_hash_unknown_scalar",
+          "elapsed_seconds": 0.297816427,
+          "ic": {
+            "amortised_seconds_per_target": 49.489658460799994,
+            "descent_seconds_per_target": 0.7633473812,
+            "descent_seconds_total": 3.816736906,
+            "descent_trials_total": 6,
+            "pair_table_seconds": 0.0,
+            "precompute_seconds": 243.631555398,
+            "verified": 5
+          },
+          "n": 31,
+          "ratio": {
+            "amortised": 0.0011841628094164196,
+            "charged": 0.07677214128628232
+          },
+          "rho": {
+            "iterations_total": 1444,
+            "max_iterations_per_restart": 268435456,
+            "seconds_per_target": 0.058603813000000005,
+            "seconds_total": 0.293019065,
+            "seed": 5931241263826122831,
+            "verified": 5
+          },
+          "subgroup_order": "1439393",
+          "targets": 5,
+          "targets_detail": [
+            {
+              "index": 0,
+              "iterations": 844,
+              "recovered": "387577",
+              "restarts": 6,
+              "seconds": 0.161167545,
+              "target": {
+                "kind": "public_hash_to_curve_cofactor",
+                "public_hash_counter": 0,
+                "public_hash_seed": 31001,
+                "target_scalar_constructed": false,
+                "x": "2120207720",
+                "y": "1880876365"
+              },
+              "verified": true,
+              "walk_group_additions": 2532
+            },
+            {
+              "index": 1,
+              "iterations": 69,
+              "recovered": "157369",
+              "restarts": 1,
+              "seconds": 0.020674619,
+              "target": {
+                "kind": "public_hash_to_curve_cofactor",
+                "public_hash_counter": 0,
+                "public_hash_seed": 31002,
+                "target_scalar_constructed": false,
+                "x": "111379212",
+                "y": "555577684"
+              },
+              "verified": true,
+              "walk_group_additions": 207
+            },
+            {
+              "index": 2,
+              "iterations": 101,
+              "recovered": "88334",
+              "restarts": 1,
+              "seconds": 0.024586252,
+              "target": {
+                "kind": "public_hash_to_curve_cofactor",
+                "public_hash_counter": 1,
+                "public_hash_seed": 31003,
+                "target_scalar_constructed": false,
+                "x": "673639366",
+                "y": "1091840695"
+              },
+              "verified": true,
+              "walk_group_additions": 303
+            },
+            {
+              "index": 3,
+              "iterations": 162,
+              "recovered": "1049842",
+              "restarts": 2,
+              "seconds": 0.042827913,
+              "target": {
+                "kind": "public_hash_to_curve_cofactor",
+                "public_hash_counter": 0,
+                "public_hash_seed": 31004,
+                "target_scalar_constructed": false,
+                "x": "985859144",
+                "y": "1812606916"
+              },
+              "verified": true,
+              "walk_group_additions": 486
+            },
+            {
+              "index": 4,
+              "iterations": 268,
+              "recovered": "1409351",
+              "restarts": 1,
+              "seconds": 0.043762736,
+              "target": {
+                "kind": "public_hash_to_curve_cofactor",
+                "public_hash_counter": 0,
+                "public_hash_seed": 31005,
+                "target_scalar_constructed": false,
+                "x": "2048889642",
+                "y": "1570827429"
+              },
+              "verified": true,
+              "walk_group_additions": 804
+            }
+          ],
+          "timing_class": {
+            "amortised": "select + collect + logs + pair-table wall divided over the targets, plus descent",
+            "charged": "algorithmic_charged: per-target descent wall (one decomposition and a lookup) against the \u03c1 walk on the same target in the same process",
+            "whole_process": "the same precompute counted once against the \u03c1 total"
+          },
+          "verdict": {
+            "amortised_crossover": false,
+            "charged_crossover": false,
+            "charged_margin": -12.025558272121303,
+            "whole_process_crossover": false
+          }
+        }
+      }
+    ],
+    "state": {
+      "collect": {
+        "artifact": "relations",
+        "elapsed_seconds": 240.919195582,
+        "status": "complete"
+      },
+      "logs": {
+        "artifact": "logs.json",
+        "elapsed_seconds": 2.5759038739999998,
+        "status": "complete"
+      },
+      "name": "k0n31-public-unknown-scalar-stage31",
+      "params_digest": "1591e92319c465f5fb6409f6aef7c4846c9ffdd172f20a14213b743bd7f46d7b",
+      "relations_collected": 11312,
+      "runs": 1,
+      "schema_version": 1,
+      "select": {
+        "artifact": "factor_base.json",
+        "elapsed_seconds": 0.136455942,
+        "status": "complete"
+      },
+      "solve": {
+        "artifact": "solutions.json",
+        "elapsed_seconds": 3.826987511,
+        "status": "complete"
+      },
+      "solved_targets": 5,
+      "total_targets": 5,
+      "units_collected": 4
+    },
+    "status": "complete",
+    "stop_after": null,
+    "subfield": 1,
+    "summands": 3
+  }
+}

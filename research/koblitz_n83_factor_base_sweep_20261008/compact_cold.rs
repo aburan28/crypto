@@ -70,6 +70,11 @@ fn pinned_a1_curve() -> KoblitzCurve {
         cofactor: h,
         lambda,
         frobenius_is_endomorphism: true,
+        k: 1,
+        q: 2,
+        a_index: 1,
+        b_index: 1,
+        subfield_basis: vec![F2mElement::one(83)],
     }
 }
 

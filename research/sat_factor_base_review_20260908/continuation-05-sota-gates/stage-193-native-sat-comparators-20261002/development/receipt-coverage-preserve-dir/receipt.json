@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "bytes": 665,
+    "path": "metrics.json",
+    "sha256": "f0a057ecb0a78d1c3be9ba1c1050f5d7c87a78dd318e071fe3249d96c91dd8f7"
+  },
+  "process": {
+    "command": [
+      "/bin/mkdir",
+      "-p",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/superseded-receipt-coverage"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1228800,
+    "pid": 88438,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.001067,
+    "timed_out": false,
+    "total_core_seconds": 0.00163,
+    "user_seconds": 0.000563,
+    "wall_seconds": 0.031240083,
+    "watchdog_seconds": 30
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

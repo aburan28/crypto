@@ -171,7 +171,6 @@ def main():
             "not an asymptotic sub-rho claim",
             "not key recovery or deployed-curve security impact",
             "multi-target amortized results remain secondary",
-            "total operation-count comparison absent; S unknown",
         ],
         "evidence": [
             str(p.relative_to(HERE.parents[2])) for p in sorted(RUNS.glob(BASE_RUN_ID + "R*"))
@@ -179,6 +178,11 @@ def main():
     }
     out = HERE / "claim_report_vs_rho.json"
     out.write_text(json.dumps(report, indent=1, sort_keys=True) + "\n")
+    # Operation-count accounting (probes vs rho steps, mean-target estimate,
+    # contention flags); see research/.../autolab/op_accounting.py.
+    sys.path.insert(0, str(HERE.parents[1] / "research/sat_factor_base_review_20260908/autolab"))
+    import op_accounting
+    op_accounting.apply_to_claim("n73", op_accounting.account_rung("n73"))
     with open(HERE / "single-target-results.csv", "w", newline="") as fh:
         writer = csv.DictWriter(
             fh,

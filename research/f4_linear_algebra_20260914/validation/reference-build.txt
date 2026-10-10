@@ -1,0 +1,5 @@
+Rust 1.90.0; Cargo.lock = dependencies.lock.txt
+cargo clean --release -p crypto
+cargo build --release --locked --features redis-cache --bin ic --example f4_linear_algebra_bench
+   Compiling crypto v0.1.0 (/workspace/scratch/1b5e041dd49b/crypto-la-reference)
+    Finished `release` profile [optimized] target(s) in 39.73s

@@ -1,0 +1,109 @@
+name: n37 sparse four-policy PDP replay
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/n37-four-policy-sparse16.yml'
+      - 'examples/n37_four_policy_sparse16_*.rs'
+      - 'examples/support/n37_policy_common.rs'
+      - 'research/notes/ecc2k130/n37_four_policy_sparse16_20261004/**'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz'
+      - 'docs/index-calculus-scoreboard.html'
+      - 'docs/ic-current-state.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            src
+            examples/n37_four_policy_sparse16_prepare.rs
+            examples/n37_four_policy_sparse16_inputs_replay.rs
+            examples/n37_four_policy_sparse16_pdp.rs
+            examples/n37_four_policy_sparse16_pdp_replay.rs
+            examples/support/n37_policy_common.rs
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json
+            research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz
+            research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl
+            research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz
+            research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
+            research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
+            research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+      - name: Restore the measured Cargo manifest and lockfile
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+          cp "$note/SOURCE_Cargo.toml" Cargo.toml
+      - name: Restore the measured source tree, manifest and lockfile
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+          measured=7039ab0b2940ac55809da62c91361b8082625716
+          git fetch --no-tags --depth=1 origin "$measured"
+          rm -rf src
+          git checkout "$measured" -- Cargo.toml src \
+            examples/n37_four_policy_sparse16_prepare.rs \
+            examples/n37_four_policy_sparse16_inputs_replay.rs \
+            examples/n37_four_policy_sparse16_pdp.rs \
+            examples/n37_four_policy_sparse16_pdp_replay.rs \
+            examples/support/n37_policy_common.rs \
+            docs/curves/registry.json docs/ecbench/schema.sql \
+            docs/ic/calibration.json docs/ic/boundary_targets.json
+          cmp Cargo.toml "$note/SOURCE_Cargo.toml"
+          cp "$note/Cargo.lock" Cargo.lock
+      - name: Check source lock and formatting
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+          sha256sum --check "$note/SOURCE_LOCK.sha256"
+          rustfmt --edition 2021 --check examples/n37_four_policy_sparse16_prepare.rs examples/n37_four_policy_sparse16_inputs_replay.rs examples/n37_four_policy_sparse16_pdp.rs examples/n37_four_policy_sparse16_pdp_replay.rs
+      - name: Build native producers and independent replays
+        run: cargo build --release --locked --example n37_four_policy_sparse16_prepare --example n37_four_policy_sparse16_inputs_replay --example n37_four_policy_sparse16_pdp --example n37_four_policy_sparse16_pdp_replay
+      - name: Replay frozen target generation with the general curve law
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+          target/release/examples/n37_four_policy_sparse16_inputs_replay "$note/inputs" "$RUNNER_TEMP/input.replay.json"
+          cmp "$RUNNER_TEMP/input.replay.json" "$note/INPUT_REPLAY.json"
+      - name: Reproduce and independently replay the exact PDP result
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+          printf '%s  %s\n' 'dbafb183d4edf27813dd15bc22aed6e1fe9809887aa3cd54bedf589120d43357' "$note/RESULT.json.gz" | sha256sum --check
+          gzip -dc "$note/RESULT.json.gz" > "$RUNNER_TEMP/archived.json"
+          printf '%s  %s\n' 'a17e6b2cad2f33e6f9df950bed272eb6dcc85bd13594625527250e61e7c0e1f7' "$RUNNER_TEMP/archived.json" | sha256sum --check
+          target/release/examples/n37_four_policy_sparse16_pdp_replay "$RUNNER_TEMP/archived.json" "$RUNNER_TEMP/archived.replay.json"
+          cmp "$RUNNER_TEMP/archived.replay.json" "$note/REPLAY_INITIAL.json"
+          target/release/examples/n37_four_policy_sparse16_pdp "$RUNNER_TEMP/linux.json"
+          jq -Sc 'del(.host,.peak_rss_before_output_bytes,.total_ms_descriptive,.shared_input_ms_descriptive) | .policies |= map(del(.phase_ms_descriptive))' "$RUNNER_TEMP/archived.json" > "$RUNNER_TEMP/archived.canonical"
+          jq -Sc 'del(.host,.peak_rss_before_output_bytes,.total_ms_descriptive,.shared_input_ms_descriptive) | .policies |= map(del(.phase_ms_descriptive))' "$RUNNER_TEMP/linux.json" > "$RUNNER_TEMP/linux.canonical"
+          cmp "$RUNNER_TEMP/archived.canonical" "$RUNNER_TEMP/linux.canonical"
+          target/release/examples/n37_four_policy_sparse16_pdp_replay "$RUNNER_TEMP/linux.json" "$RUNNER_TEMP/linux.replay.json"
+      - name: Reject paired witness, row, hit, decision and target mutations
+        run: bash research/notes/ecc2k130/n37_four_policy_sparse16_20261004/mutation_audit.sh "$RUNNER_TEMP/mutations"
+      - name: Retain Linux receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n37-four-policy-sparse16-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/input.replay.json
+            ${{ runner.temp }}/archived.replay.json
+            ${{ runner.temp }}/linux.replay.json
+            ${{ runner.temp }}/mutations
+          if-no-files-found: warn
+          retention-days: 30

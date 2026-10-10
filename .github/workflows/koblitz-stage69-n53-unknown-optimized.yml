@@ -1,0 +1,65 @@
+name: Koblitz Stage 69 n53 optimized unknown scalar
+
+on:
+  pull_request:
+    paths:
+      - "scripts/run_koblitz_stage57_n53_unknown.py"
+      - ".github/workflows/koblitz-stage69-n53-unknown-optimized.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate optimized unknown-scalar controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage57_n53_unknown.py
+          python3 scripts/run_koblitz_stage57_n53_unknown.py self-test
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-unknown-optimized:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage57_n53_unknown.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage69-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Run optimized direct and rho without expected scalar
+        run: |
+          python3 scripts/run_koblitz_stage57_n53_unknown.py run \
+            --build "$RUNNER_TEMP/stage69-build" \
+            --output "$RUNNER_TEMP/stage69-run" \
+            --timeout 1800 \
+            --optimized
+          python3 scripts/run_koblitz_stage57_n53_unknown.py verify \
+            --build "$RUNNER_TEMP/stage69-build" \
+            --output "$RUNNER_TEMP/stage69-run" \
+            > "$RUNNER_TEMP/stage69-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage69-n53-unknown-optimized-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage69-build
+            ${{ runner.temp }}/stage69-run
+            ${{ runner.temp }}/stage69-verification.json

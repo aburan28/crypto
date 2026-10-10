@@ -1,0 +1,75 @@
+{
+  "bootstrap_draws": 2000,
+  "cells": [
+    "n13a0",
+    "n17a1",
+    "n19a0",
+    "n23a0",
+    "n23a1",
+    "n31a0"
+  ],
+  "ci_level": 0.95,
+  "comparison_kind": "fixed-support",
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "confirmation_cases": 96,
+  "confirmation_ratio": 0.8,
+  "created_unix": 1789897970.8606336,
+  "curve_diversity_limit": "One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.",
+  "equivalent_suite_reason": "Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; the final suite has 96 inputs.",
+  "evaluator_sha256": {
+    "oracle.py": "9b760afa8fedfacf801596e0d263e5a4197f2e8a5649476edc3305bbe8df0cbc",
+    "tournament.py": "f9feaafced8e775aabf0afea55a4d6754500ee3179758fa0c4bbd8ce44875161"
+  },
+  "evidence_scope": "bounded public-hash ECDLP configuration tournament",
+  "family_wide_or_scaling_claim": false,
+  "holdout_cells": [
+    "n19a1",
+    "n29a1"
+  ],
+  "host": {
+    "machine": "x86_64",
+    "node": "vm",
+    "processor": "x86_64",
+    "release": "6.18.44-fc-v37",
+    "system": "Linux",
+    "version": "#1 SMP PREEMPT_DYNAMIC @0"
+  },
+  "limits": {
+    "cpu": 3,
+    "max_profiled_jobs": 3000,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 60.0,
+    "worker_threads": 1
+  },
+  "max_cell_ratio": 1.1,
+  "metric_class": "implementation_instruction_cost",
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "native_timings": "paired native reruns retained; no runtime claim from profiled elapsed time",
+  "no_regression_ratio": 0.98,
+  "objective": "rho",
+  "parity_margin": 1.1,
+  "pinned_files": {
+    "calibration.json": "d63ed8f9e1d29df6beac7328adf4c5d038cdf7f08dc3be8bd7f3a61892651c2b",
+    "candidates.json": "b0480411fbc4e57fe309782bca44234c9f629428519b8415112107122e3b7aea",
+    "fixtures.json": "41762d462068f836493fe624cbe0ab50b8b689022bfbc45ddbc049707b0d8621",
+    "source-manifest.json": "223053514a5925327258bf596f8bd5fcd230fdaefb49e73385c38dc2c4632cfe",
+    "source_candidates/block/source-manifest.json": "277be375827618ccf3ea0c9d2136d0feeb84731c23b26db5c421f102cc56d9b7",
+    "source_candidates/block/worker": "58fc767da7bf92c37b0e56f7194527d855b69c0f248abb19a39e78937f673ae9",
+    "source_candidates/both/source-manifest.json": "4229767c29e1b728bdfe3a7b59e9edefb413e701848f4062e2d05eb84db0a582",
+    "source_candidates/both/worker": "9be9379b7b757b96089005629fe9be984997e238c2cc22469bbaf7acd60b2b28",
+    "source_candidates/column/source-manifest.json": "a0835f94974706c039a3d15506409ed16d4fabc7fc46b12e03a8c9aede84d194",
+    "source_candidates/column/worker": "42a391f4208a6a56e9b163402d362e1e761edc0d36c47c59938e39ea2722bd51",
+    "worker": "7ca9953d59630bee2d691efeeb6bcdccddad4b3c7b0f0e7c0586bd1bf0752521"
+  },
+  "profile": "pilot",
+  "profiler_version": "valgrind-3.22.0",
+  "repetitions": 3,
+  "require_native_progress": false,
+  "schema_version": 1,
+  "seed": 2026091818,
+  "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+  "support_contract": "Identical factor-base support across implementation arms.",
+  "target_count": 1,
+  "unit": "valgrind-3.22-amd64-Ir",
+  "workload": "complete cold batch with all setup charged once and every target verified"
+}

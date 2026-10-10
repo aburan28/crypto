@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "status": "REGISTERED_BEFORE_EXECUTION",
+  "experiment": "static-cms-wide-s4-fresh-natural-paired-n17a1-20260929",
+  "parent_pr": 974,
+  "parent_exact_result_sha256": "a7119332e6b50dfd9bceb3b15dcf6d62bf579ff065bb5026e49ec0a5db09329c",
+  "parent_recovery_archive_file": "goal_20260924/generic-backend-recovery-pilot/evidence.tar.gz",
+  "parent_recovery_archive_sha256": "e0ce19fc28c58e2dc1cae9649a16af74099016fff8183e5ce69f65b39c804f02",
+  "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "exporter_source_sha256": "67acaff696500679a6239d47e74bba52b41c0c64fd0c7413ae7fbd7e00505b11",
+  "cms_path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/bin/cryptominisat5",
+  "cms_executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+  "cms_build_receipt_sha256": "c2a9be07fb510e378b935433c8c091dd4f515e2f05e24154f8ef00e83fc191f4",
+  "cms_build_bundle_seal_sha256": "ac457996498d8748b94cfed360e8c1dcc0f53bc04c8a7e134e5ac526b8a0702b",
+  "cms_build_verifier_sha256": "ff4b27ab39aae12bc114ad6ab69f0eecfb2f2934e26acb54e0beb06c95552838",
+  "process_meter_sha256": "0f579085a226f0a9efa8ccb02720c57df1bf7d3b47868ef16aee55d38b27cfca",
+  "cms_parser_sha256": "794adfac8151df2887f600944ed899f826bd25adbfec12a10c61200c7e278bb6",
+  "curve_cell": "n17a1",
+  "field_degree": 17,
+  "curve_a": 1,
+  "irreducible_low_terms": [
+    0,
+    3
+  ],
+  "factor_base": {
+    "kind": "standard_subspace",
+    "dimension": 6
+  },
+  "summands": 3,
+  "source_encoding": "wide-symmetrised-S4-circuit-XOR-DIMACS",
+  "export_nonce": 2026092934,
+  "export_only": true,
+  "export_timeout_seconds": 60,
+  "cms_timeout_seconds": 120,
+  "cms_conflict_budget": 1000000,
+  "cms_threads": 1,
+  "cms_random_seed": 1,
+  "cms_max_models_per_query": 1,
+  "selection": "first 32 trial-keyed uniform nonzero subgroup scalars from independently replayed StdRng08 query law at the frozen fresh algorithm seed; no outcome screening",
+  "schedule": [
+    {
+      "trial": 0,
+      "probe_scalar": 35945,
+      "point": [
+        106593,
+        92483
+      ]
+    },
+    {
+      "trial": 1,
+      "probe_scalar": 54266,
+      "point": [
+        107099,
+        100029
+      ]
+    },
+    {
+      "trial": 2,
+      "probe_scalar": 13150,
+      "point": [
+        39013,
+        29598
+      ]
+    },
+    {
+      "trial": 3,
+      "probe_scalar": 5063,
+      "point": [
+        120219,
+        128262
+      ]
+    },
+    {
+      "trial": 4,
+      "probe_scalar": 1288,
+      "point": [
+        12119,
+        115467
+      ]
+    },
+    {
+      "trial": 5,
+      "probe_scalar": 52141,
+      "point": [
+        78451,
+        6659
+      ]
+    },
+    {
+      "trial": 6,
+      "probe_scalar": 5760,
+      "point": [
+        7267,
+        81765
+      ]
+    },
+    {
+      "trial": 7,
+      "probe_scalar": 50518,
+      "point": [
+        99909,
+        74583
+      ]
+    },
+    {
+      "trial": 8,
+      "probe_scalar": 23282,
+      "point": [
+        85947,
+        45003
+      ]
+    },
+    {
+      "trial": 9,
+      "probe_scalar": 31899,
+      "point": [
+        93173,
+        84250
+      ]
+    },
+    {
+      "trial": 10,
+      "probe_scalar": 20367,
+      "point": [
+        59089,
+        110957
+      ]
+    },
+    {
+      "trial": 11,
+      "probe_scalar": 10667,
+      "point": [
+        124323,
+        74074
+      ]
+    },
+    {
+      "trial": 12,
+      "probe_scalar": 62057,
+      "point": [
+        90213,
+        76758
+      ]
+    },
+    {
+      "trial": 13,
+      "probe_scalar": 37921,
+      "point": [
+        73277,
+        42863
+      ]
+    },
+    {
+      "trial": 14,
+      "probe_scalar": 22544,
+      "point": [
+        117941,
+        88799
+      ]
+    },
+    {
+      "trial": 15,
+      "probe_scalar": 46520,
+      "point": [
+        89499,
+        126697
+      ]
+    },
+    {
+      "trial": 16,
+      "probe_scalar": 5233,
+      "point": [
+        119819,
+        127777
+      ]
+    },
+    {
+      "trial": 17,
+      "probe_scalar": 15024,
+      "point": [
+        47087,
+        109710
+      ]
+    },
+    {
+      "trial": 18,
+      "probe_scalar": 12322,
+      "point": [
+        16035,
+        11659
+      ]
+    },
+    {
+      "trial": 19,
+      "probe_scalar": 33092,
+      "point": [
+        125393,
+        34439
+      ]
+    },
+    {
+      "trial": 20,
+      "probe_scalar": 14798,
+      "point": [
+        54339,
+        48276
+      ]
+    },
+    {
+      "trial": 21,
+      "probe_scalar": 59700,
+      "point": [
+        102253,
+        85949
+      ]
+    },
+    {
+      "trial": 22,
+      "probe_scalar": 48400,
+      "point": [
+        125077,
+        89862
+      ]
+    },
+    {
+      "trial": 23,
+      "probe_scalar": 3345,
+      "point": [
+        47543,
+        91060
+      ]
+    },
+    {
+      "trial": 24,
+      "probe_scalar": 6317,
+      "point": [
+        65145,
+        65776
+      ]
+    },
+    {
+      "trial": 25,
+      "probe_scalar": 23464,
+      "point": [
+        69957,
+        60682
+      ]
+    },
+    {
+      "trial": 26,
+      "probe_scalar": 9767,
+      "point": [
+        31677,
+        5856
+      ]
+    },
+    {
+      "trial": 27,
+      "probe_scalar": 45123,
+      "point": [
+        129433,
+        44299
+      ]
+    },
+    {
+      "trial": 28,
+      "probe_scalar": 49947,
+      "point": [
+        33815,
+        93694
+      ]
+    },
+    {
+      "trial": 29,
+      "probe_scalar": 58399,
+      "point": [
+        33119,
+        128019
+      ]
+    },
+    {
+      "trial": 30,
+      "probe_scalar": 61449,
+      "point": [
+        50401,
+        91214
+      ]
+    },
+    {
+      "trial": 31,
+      "probe_scalar": 34373,
+      "point": [
+        95079,
+        20847
+      ]
+    }
+  ],
+  "stop": "execute exactly 32 frozen ordinary SAT queries once each in order; retain every failed attempt and zero-yield outcome; no retry or adaptive extension",
+  "claim_boundary": "source-receipted natural-query SAT PDP stage only; no complete IC solve or online speedup",
+  "algorithm_seed": 2026092935
+}

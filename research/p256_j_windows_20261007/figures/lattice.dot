@@ -1,0 +1,65 @@
+digraph p256_j_continuation {
+  graph [
+    rankdir=TB,
+    bgcolor="transparent",
+    fontname="Helvetica",
+    label="Verified global-row continuation (representative endpoints)",
+    labelloc=t,
+    fontsize=18,
+    nodesep=0.55,
+    ranksep=0.72,
+    pad=0.25
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#f7f9fc",
+    color="#355070",
+    fontname="Helvetica",
+    fontsize=10,
+    margin="0.12,0.08"
+  ];
+  edge [color="#557a95", fontname="Helvetica", fontsize=10, penwidth=1.5];
+
+  root [
+    fillcolor="#e8f3ff",
+    label="P-256  E(0,0)\nurn:ec-record:1:sha256:\n0523b774e0666cf37ff4dc9cf452eae0\n24192a7f89bdad10ca226d6e64d4dd70"
+  ];
+  boundary [
+    fillcolor="#fff4db",
+    label="context only  E(0,999)\nurn:ec-record:1:sha256:\n77894f0e744087d7683dbfce11676abf\n34285793082434bacba355c39a914569"
+  ];
+  start [
+    fillcolor="#e7f8ee",
+    label="first emitted  E(0,1000)\nurn:ec-record:1:sha256:\nadc878d9f7a2dd6c7f2888e247a1177\n98ff89c3a64f9adb053c411f177214807"
+  ];
+  row0 [
+    fillcolor="#e7f8ee",
+    label="row endpoint  E(999,1000)\nurn:ec-record:1:sha256:\n56f8bf23cf42271aa1048e20d9ac5e94\ne57ffdbd4e74249e1e9eaaafac9f8b9a"
+  ];
+  spine_end [
+    fillcolor="#e7f8ee",
+    label="last spine  E(0,1063)\nurn:ec-record:1:sha256:\n6de41bbf5d7552d4e82035a6e8735e47\n54c58df05f3ca10121280b7b403b3f70"
+  ];
+  terminal [
+    fillcolor="#dff5e8",
+    penwidth=2,
+    label="terminal endpoint  E(999,1063)\nurn:ec-record:1:sha256:\nf9a29595a0aabd3ffd7a0fcd9b3e1e78\n362a8ea002ca29ae16dc69af9f541622"
+  ];
+
+  root -> boundary [label="999 replayed degree-13 edges\n(prior certificate)"];
+  boundary -> start [label="degree 13\nnew incoming certificate", color="#c67c00", penwidth=2];
+  start -> row0 [label="999 replayed degree-11 edges"];
+  start -> spine_end [label="63 replayed degree-13 edges"];
+  spine_end -> terminal [label="999 replayed degree-11 edges"];
+  row0 -> terminal [style=dashed, arrowhead=none, label="64 complete rows total", color="#7a7a7a"];
+
+  note [
+    shape=note,
+    fillcolor="#ffffff",
+    color="#8b8b8b",
+    fontsize=9,
+    label="Each solid segment denotes a chain of individually replayed\nsmall-degree isogenies. The terminal path has composite degree\n13^1063 * 11^999 (7,390 bits), but no single large-degree\nkernel polynomial or rational map was materialized."
+  ];
+  terminal -> note [style=dotted, arrowhead=none, color="#8b8b8b"];
+}

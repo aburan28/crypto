@@ -1,0 +1,167 @@
+{
+  "S": null,
+  "common_ops": null,
+  "floor_ratio": null,
+  "format": "fixed-ic-selector-v1",
+  "model_sha256": "da5c8278080cfa46e29357ad1d77db099bb98131e0bf72a211d8b46559bda90a",
+  "performance_promoted": false,
+  "rho_ratio": null,
+  "splits": {
+    "confirmation": {
+      "hindsight_oracle": {
+        "elapsed_ns": 161004856,
+        "ns_per_rank_gain": 8944714.222222222,
+        "penalized_loss_ns": 244544090.07407403,
+        "queries": 43,
+        "rank_gains": 18,
+        "verified": 18
+      },
+      "pairs": {
+        "elapsed_ns": 161004856,
+        "ns_per_rank_gain": 8944714.222222222,
+        "penalized_loss_ns": 244544090.07407403,
+        "queries": 43,
+        "rank_gains": 18,
+        "verified": 18
+      },
+      "sat-medium": {
+        "elapsed_ns": 5575444361,
+        "ns_per_rank_gain": 309746908.9444444,
+        "penalized_loss_ns": 5658983595.074073,
+        "queries": 43,
+        "rank_gains": 18,
+        "verified": 18
+      },
+      "sat-short": {
+        "elapsed_ns": 2355086227,
+        "ns_per_rank_gain": 130838123.72222222,
+        "penalized_loss_ns": 2438625461.074074,
+        "queries": 43,
+        "rank_gains": 18,
+        "verified": 18
+      },
+      "selector": {
+        "elapsed_ns": 161004856,
+        "ns_per_rank_gain": 8944714.222222222,
+        "penalized_loss_ns": 244544090.07407403,
+        "queries": 43,
+        "rank_gains": 18,
+        "verified": 18
+      }
+    },
+    "train": {
+      "hindsight_oracle": {
+        "elapsed_ns": 451111864,
+        "ns_per_rank_gain": 3341569.362962963,
+        "penalized_loss_ns": 651606025.7777777,
+        "queries": 195,
+        "rank_gains": 135,
+        "verified": 136
+      },
+      "pairs": {
+        "elapsed_ns": 451111864,
+        "ns_per_rank_gain": 3341569.362962963,
+        "penalized_loss_ns": 651606025.7777777,
+        "queries": 195,
+        "rank_gains": 135,
+        "verified": 136
+      },
+      "sat-medium": {
+        "elapsed_ns": 19014877426,
+        "ns_per_rank_gain": 140850943.8962963,
+        "penalized_loss_ns": 19215371587.77777,
+        "queries": 195,
+        "rank_gains": 135,
+        "verified": 136
+      },
+      "sat-short": {
+        "elapsed_ns": 9244356249,
+        "ns_per_rank_gain": 68476712.95555556,
+        "penalized_loss_ns": 9444850410.777775,
+        "queries": 195,
+        "rank_gains": 135,
+        "verified": 136
+      },
+      "selector": {
+        "elapsed_ns": 451111864,
+        "ns_per_rank_gain": 3341569.362962963,
+        "penalized_loss_ns": 651606025.7777777,
+        "queries": 195,
+        "rank_gains": 135,
+        "verified": 136
+      }
+    },
+    "validation": {
+      "hindsight_oracle": {
+        "elapsed_ns": 132431756,
+        "ns_per_rank_gain": 4271992.129032258,
+        "penalized_loss_ns": 195921573.89629626,
+        "queries": 50,
+        "rank_gains": 31,
+        "verified": 31
+      },
+      "pairs": {
+        "elapsed_ns": 132431756,
+        "ns_per_rank_gain": 4271992.129032258,
+        "penalized_loss_ns": 195921573.89629626,
+        "queries": 50,
+        "rank_gains": 31,
+        "verified": 31
+      },
+      "sat-medium": {
+        "elapsed_ns": 5465531799,
+        "ns_per_rank_gain": 176307477.38709676,
+        "penalized_loss_ns": 5529021616.8962965,
+        "queries": 50,
+        "rank_gains": 31,
+        "verified": 31
+      },
+      "sat-short": {
+        "elapsed_ns": 2540208356,
+        "ns_per_rank_gain": 81942205.03225806,
+        "penalized_loss_ns": 2603698173.8962965,
+        "queries": 50,
+        "rank_gains": 31,
+        "verified": 31
+      },
+      "selector": {
+        "elapsed_ns": 132431756,
+        "ns_per_rank_gain": 4271992.129032258,
+        "penalized_loss_ns": 195921573.89629626,
+        "queries": 50,
+        "rank_gains": 31,
+        "verified": 31
+      }
+    }
+  },
+  "training": {
+    "best_static_arm": "pairs",
+    "dataset_sha256": "f294ec691b91b8959f7730ed815b26fd9bbbd091a4bf8305022c1ec4bfad01a2",
+    "natural_orbits": 116,
+    "natural_queries": 195,
+    "penalty_ns": 3341569.362962963,
+    "planted_excluded": 16
+  },
+  "training_elapsed_ns": 215730056,
+  "validation": {
+    "candidate": {
+      "elapsed_ns": 132431756,
+      "ns_per_rank_gain": 4271992.129032258,
+      "penalized_loss_ns": 195921573.89629626,
+      "queries": 50,
+      "rank_gains": 31,
+      "verified": 31
+    },
+    "constant": {
+      "elapsed_ns": 132431756,
+      "ns_per_rank_gain": 4271992.129032258,
+      "penalized_loss_ns": 195921573.89629626,
+      "queries": 50,
+      "rank_gains": 31,
+      "verified": 31
+    },
+    "decision": "constant_no_routing_gain",
+    "gate": 0.05,
+    "tree_loss_improvement": 0.0
+  }
+}

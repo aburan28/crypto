@@ -40,10 +40,14 @@
 //!   demo runs the `m = 1` path end-to-end.
 //!
 //! For the `c2pnb176w1` target specifically: direct magic is 1 (so the
-//! `m = 1` pipeline is trivial / useless), and the Menezes-Teske
-//! attack reaches `m' = 5` via the isogeny walk. Running step 2 at
-//! `m' = 5` requires the genus-16 smooth-model construction and a
-//! genus-16 index calculus over `F_{2^16}` — both research-grade and
+//! `m = 1` pipeline is trivial / useless). Maurer-Menezes-Teske
+//! (LMS J. Comput. Math. 5 (2002), Section 6, Remark 26 and Table 4)
+//! list a hypothetical isogenous instance with `m' = 5` (genus 16 over
+//! `F_{2^22}`) and judge finding such a curve infeasible; no source read
+//! for this repository reports the isogeny walk reaching it, and neither
+//! Menezes-Teske paper discusses `c2pnb176w1`. Running step 2 at
+//! `m' = 5` would require the genus-16 smooth-model construction and a
+//! genus-16 index calculus — both research-grade and
 //! not implemented here. What this module *does* do for `c2pnb176w1`
 //! is enumerate `2`- and `3`-isogenous neighbours and report their
 //! magic numbers, so you can see the magic spectrum the Hess search
@@ -55,7 +59,7 @@ use crate::cryptanalysis::binary_isogeny::{
 };
 use crate::cryptanalysis::ec_trapdoor::{magic_number_full, FieldTower, TrapdoorCurve};
 use crate::cryptanalysis::ghs_descent::{
-    brute_force_ecdlp, descend_m1, descend_m2_abstract, sigma_point, ECurve, Pt,
+    brute_force_ecdlp, descend_m1, descend_m2_abstract, ECurve, Pt,
 };
 use num_bigint::BigUint;
 
@@ -463,7 +467,7 @@ mod tests {
             row: DescentRow::default(),
             full_audit: None,
         };
-        let curve = ECurve::new(big_n, irr.clone(), a, b);
+        let _curve = ECurve::new(big_n, irr.clone(), a, b);
         // Trivial DLP: q = 1·p.
         let p = Pt::Inf;
         let q = Pt::Inf;

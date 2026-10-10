@@ -1,0 +1,35 @@
+{
+ "schema_version": 2,
+ "name": "C102: icv1-f2m127-t24589614856193402413-a00e5890, its 95-bit subgroup, paired at F0",
+ "field": {
+  "kind": "binary",
+  "degree": 127,
+  "modulus": "0x80000000000000000000000000000003"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "38030500514909642861048567999",
+  "cofactor": "4473808684",
+  "generator": {
+   "x": "0x77cd6364d18b1972a248d29e7a4b1256",
+   "y": "0x19805612cab84ceaa8e28420bd1a5851"
+  }
+ },
+ "target": {
+  "known_log": "12345"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

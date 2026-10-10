@@ -31,11 +31,17 @@ prime. Everything else is bookkeeping.
 | Jacobian + affine addition | 11 | 7M + 4S |
 | 256-bit scalar multiplication | ~1050 | 4-bit window: 256 dbl + 64 add + table |
 | **Pollard-rho step, batch W** | **6 + 270/W** | 3 for the affine add, 3 for Montgomery's trick |
+| Pollard-rho step, fold 6 | 7 + 270/W | + 1 for βx; β²x = −(x + βx) is additions |
 
-The last row is the one that matters for cryptanalysis, and it is why the
-kernels batch. An unbatched affine rho step costs one inversion — 276
+The last rows are the ones that matter for cryptanalysis, and they are why
+the kernels batch. An unbatched affine rho step costs one inversion — 276
 multiplies — while at W = 64 the same step costs about 10. That is a 27x
-difference and it dwarfs every microarchitectural concern below.
+difference and it dwarfs every microarchitectural concern below. Folding
+the walk by the full Aut(E) = Z/6 of secp256k1 (fold 6, the default) adds
+one multiply and two 256-bit compares to the step and takes sqrt(3) = 1.73x
+fewer steps than the negation map alone: about 10% more work per step for
+42% fewer steps, measured on the toy j = 0 curve in `make test` (see the
+README's step-count table).
 
 At W = 8 the step costs 39.8 multiplies; at W = 16, 22.9; at W = 32, 14.4;
 at W = 64, 10.2; at W = 128, 8.1. Doubling W past 32 buys progressively
@@ -209,7 +215,8 @@ residue, so dropping it and carrying field elements in `[0, 2^256)`
 instead of `[0, p)` is arithmetically sound — the reduction accepts any
 512-bit input, so unreduced values feed straight back in. What it breaks
 is uniqueness of representation: `eq`, `is_zero`, distinguished-point
-detection and the negation map's canonical-x comparison all assume the
+detection, the cycle hashes and the folding's canonical comparisons (y for
+the negation map, x against βx and β²x for the Z/6 orbit) all assume the
 canonical form. Only `2^32 + 977` of the `2^256` representable values are
 non-canonical, so a walk would disagree with the reference roughly once in
 `2^224` steps — which is precisely what makes it dangerous to adopt
@@ -224,7 +231,10 @@ There is no 64-bit integer multiplier to address.
 
 ## 3. Occupancy is the binding constraint
 
-Measured with `./ptx_stats.sh`, `k_rho_walk_lowmem<8>`, block size 128:
+Measured with `./ptx_stats.sh`, `k_rho_walk_lowmem<8>`, block size 128,
+before the walk gained the fold-6 multiplication and the five-word
+fruitless-cycle ring (`RHO_CYCLE_DEPTH`); expect a few more registers and
+words of state per walk, and re-measure before quoting:
 
 | Arch | `RHO_MIN_BLOCKS` | Registers | Stack | Resident threads/SM |
 |---|---|---|---|---|
@@ -321,10 +331,16 @@ Datacenter Blackwell (`sm_100`) carries the Hopper-class 228 KB of shared
 memory per SM, against 164 KB on Ampere and 100 KB on consumer parts
 (`sm_120`), so it can hold an r = 2^11 table resident where Ampere cannot.
 Bigger tables matter twice over: the walk is closer to random, and — the
-reason it is worth real shared memory — **fruitless cycles scale as 1/R**.
-With the negation map on, a 2-cycle forms with probability about 1/(2R) per
-step, so going from r_bits = 8 to 11 cuts the escape rate eightfold. The
-cycle counter in `bench rho` reports the measured rate.
+reason it is worth real shared memory — **fruitless cycles scale as powers
+of 1/R**. A 2-cycle forms with probability 1/(fold·R) per step (1/(2R) for
+the negation map, 1/(6R) for fold 6), a 3-cycle under fold 6 with
+1/(18R²), a 4-cycle with (R−1)/(fold²R³), and so on; the walk detects and
+escapes lengths up to `RHO_CYCLE_DEPTH + 1` = 6 itself (see the README),
+and everything longer — O(1/R⁴) and below — runs until `max_steps`. Going
+from r_bits = 8 to 11 cuts the escape work eightfold and the undetected
+residue by 8⁴. `bench rho` reports the detected cycles by length and the
+number of walks that reached `max_steps`; the latter is the one to watch,
+and it should be near zero.
 
 **The `inf` word is load-bearing.** A 17-word stride is odd, hence
 invertible mod 32, so 32 lanes reading 32 different table entries hit 32
@@ -432,6 +448,10 @@ does and does not establish.
 3. `./bench rho --variant reg` vs `--variant lowmem` vs `--variant ref`,
    sweeping `--w 8 16 32` and `RHO_MIN_BLOCKS`. The model says lowmem at
    W = 32 with four blocks per SM; the model has not been tested.
-4. `./bench rho --neg 1 --rbits 8` vs `--rbits 11`, watching the reported
-   cycle-escape percentage. This is where the shared-memory capacity of
-   `sm_100` should show up as a real advantage over `sm_120`.
+4. `./bench rho --rbits 8` vs `--rbits 11`, watching the reported cycle
+   counts by length and the walks aborted at `max_steps`. This is where the
+   shared-memory capacity of `sm_100` should show up as a real advantage
+   over `sm_120`.
+5. `./bench rho --fold 6` vs `--fold 2` (secp256k1 defaults to 6): the
+   fold-6 step should cost about 10% more; on a toy curve `--solve` then
+   shows the sqrt(3) fewer steps.

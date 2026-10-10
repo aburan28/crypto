@@ -1,0 +1,24 @@
+{
+  "status": "VERIFIED",
+  "base_commit": "90bb7a02863416c4fcf3d1c0ac9d6ae5421c1e3d",
+  "arithmetic_source_sha256": "ec223182eaf53befa39f86cad381bde46fe56b2343244c0ee11492bb33316f0a",
+  "worker_source_sha256": "565e096d6514533966aa936131f911bca98a7920190ffe6493631ec55c1a7c9b",
+  "restored_files": 134096,
+  "restored_final_audit": {
+    "status": "VERIFIED",
+    "trial_receipts": 1356,
+    "source_files": 450
+  },
+  "rust_tests": 9,
+  "harness_tests": 16,
+  "tournament_tests": 15,
+  "evidence_restoration_tests": 10,
+  "complete_worker_outcomes": 120,
+  "both_cost_ledgers_match_original_resource_hashes": true,
+  "canonical_scoreboard_sha256": "88eaba58940ed45401c246cdc782cb5a4947590fe75676feab2917af284a6485",
+  "manifest_sha256": "090c5ed7589577d74243496ea91f37994cbc78f6b66a154c9e9fef0f2726c636",
+  "scope": "The source port is functionally tested on current main; numerical results remain bound to archived source snapshots.",
+  "implementation_and_review_docs_whitespace": "passed",
+  "frozen_artifact_whitespace": "Original profiler dumps and generated reports preserved byte-for-byte.",
+  "multipart_development_restoration": "VERIFIED: original archive hash and all 21572 restored file hashes match"
+}

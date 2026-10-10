@@ -1,0 +1,63 @@
+{
+  "valid": true,
+  "kind": "Local portable-driver assertion-mode repair validation",
+  "basedOnCommit": "14a6f488b23a52f8ac5eb5bcca70f094b10c1ad8",
+  "originalDriverHashes": {
+    "capacity_gate.py": "8178f632e8e30bdd0458f2b5f4c9704ee3b8062b774507c7d9bcbe30371b2da6",
+    "check_mapping.py": "8cde142669f75bdfa5504c00145a71d957af5626070a50d0ef15d0ad41d77c8b",
+    "compile.py": "d8901d69889aa7488a862d597b3a0dba83ed0d54a790e2aaad7ec5d9ba18a876",
+    "compile_capacity.py": "b4a36707f06d7d83295e01bff2b104d1b3a2e8d856b34e0b6c35f45a83180230",
+    "reference.py": "993600d014e1e94403f2b74663edbadb630eba240fea90a9c083ec7d31685c3a",
+    "run_capacity.py": "3c2a47e9baf9d13c8e8944fc77c403264614d6b69d51db45eb0395fd4af50211",
+    "validate.py": "4b625774a53c1338016cca1fb22fd7563b419b6a6c869bfc5023dcf9f2799b17"
+  },
+  "repairedSourceHashes": {
+    "capacity_gate.py": "d0bd1c5d02b9508ea0d66170a56672e7d0dafef537ca2dad682e6a68243eefc0",
+    "check_mapping.py": "15c398d0d2bc071deaf6cc6f5f06e8bfff1dd5293db6f4d7acef7e80bc7712ed",
+    "compile.py": "803756d5bd5f9bf48c24df975eb8aeec5cd4cab44bf20da034bbc2f7672be29d",
+    "compile_capacity.py": "6f1a58f92f12750c85361ed0a2c1a9d639f9ca1dc1cb96aedd2b3a615c95c55b",
+    "reference.py": "0b19c37d2356f56b7e52869175a84d3f1573970b29eb31e295f39e2df1cba9ed",
+    "run_capacity.py": "899c021264b1005a7e261c3bfb99ec8dc9fbe65b4c079fd467ea860f62e96b66",
+    "validate.py": "58596985cce029d6caeac4756c247c2d2df1f29c206a50cc8b188986173a76e4",
+    "test_assertion_mode.py": "1aa422d00b5719b45e0236e76beda8651f39ff942c5931319d03e83e9e5498b1",
+    "test_capacity_gate.py": "b278fe1b5da3ba183b9cf06114b1a94320c1a71f61f68f6b12b2756a3c7277a9",
+    "probe.cu": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9",
+    "bench.cu": "92d60c77acb0e69aa99bbb2a605f9269f7357c3ec0cada624bfabb614e9f39ba"
+  },
+  "unittestMethodsPassed": 6,
+  "optimizationModeSubprocessCases": 36,
+  "optimizationModes": [
+    "-O",
+    "-OO",
+    "PYTHONOPTIMIZE=1",
+    "PYTHONOPTIMIZE=2"
+  ],
+  "rejectedEntryPoints": [
+    "capacity_gate.py",
+    "check_mapping.py",
+    "compile.py",
+    "compile_capacity.py",
+    "reference.py",
+    "run_capacity.py",
+    "validate.py"
+  ],
+  "importedModulesRejected": [
+    "capacity_gate",
+    "reference"
+  ],
+  "expectedFailure": "RuntimeError: This benchmark requires Python assertions",
+  "rejectsBeforeImportsOrModalSetup": true,
+  "normalModeAstPreservedAfterRemovingOnlyNewGuard": true,
+  "mappingReferenceAndSymbolicCasesPass": true,
+  "cudaSourcesByteIdentical": true,
+  "historicalEvidenceUnchanged": true,
+  "modalHelpImportChecks": [
+    "compile_capacity.py",
+    "run_capacity.py"
+  ],
+  "cudaCompilerJobs": 0,
+  "gpuJobs": 0,
+  "limits": [
+    "This is a local reproduction-tool repair, with no additional GPU performance claim."
+  ]
+}

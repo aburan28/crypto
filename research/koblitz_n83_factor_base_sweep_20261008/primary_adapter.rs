@@ -1,8 +1,7 @@
 //! Replay-bound bridge from the stored primary N83 points to the generic IC base.
 //!
-//! The library's explicit-orbit constructor currently requires a u64 field.
-//! This bridge uses the verified JSONL orbit order directly and checks every
-//! point and signed-Frobenius label before building the public structure.
+//! This bridge checks every JSONL point and signed-Frobenius label, then
+//! independently rebuilds the orbit maps in the same point order.
 
 use super::{
     compact_cold, curve, frozen_v2_source_commit, general, load_object, parse_point, point_json,
@@ -15,9 +14,10 @@ use crypto_lib::cryptanalysis::binary_semaev_chain_sat::{
     chain_s3_max_variables, finite_domain_clause_count, ChainedS3Encoding,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    build_union_s4_encoding, koblitz_index_calculus_dlp_with_factor_base_and_progress,
-    koblitz_point_count, point_key, DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase,
-    ChainS3Limits, KoblitzCurve, KoblitzIcOptions, SatDecompositionOptions,
+    build_explicit_frobenius_point_factor_base, build_union_s4_encoding,
+    koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count, point_key,
+    DecompositionStrategy, FrobeniusFactorBase, ChainS3Limits, KoblitzCurve, KoblitzIcOptions,
+    SatDecompositionOptions,
 };
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -195,24 +195,22 @@ fn from_record(row: &Value, bytes: &[u8]) -> Result<PrimaryBase> {
         lambda: pinned.lambda,
         frobenius_is_endomorphism: true,
         curve: pinned.curve,
+        k: 1,
+        q: 2,
+        a_index: 0,
+        b_index: 1,
+        subfield_basis: vec![F2mElement::one(83)],
     };
-    let factor_base = FrobeniusFactorBase {
-        domain: FactorBaseDomain::ExplicitFrobeniusOrbits {
-            representatives: columns,
-        },
-        ell: 83,
-        f_j: 0,
-        linearised_exponents: Vec::new(),
-        subspace: x_values.into_values().collect(),
-        subspace_basis: (0..83)
-            .map(|bit| F2mElement::from_bit_positions(&[bit], 83))
-            .collect(),
-        points,
-        orbits,
-        orbit_of,
-        signed_orbits,
-        signed_orbit_of,
-    };
+    let factor_base = build_explicit_frobenius_point_factor_base(&curve, points)
+        .ok_or("primary point set is not a complete Frobenius base")?;
+    if factor_base.subspace != x_values.into_values().collect::<Vec<_>>()
+        || factor_base.orbits != orbits
+        || factor_base.orbit_of != orbit_of
+        || factor_base.signed_orbits != signed_orbits
+        || factor_base.signed_orbit_of != signed_orbit_of
+    {
+        return Err("primary orbit maps differ from the stored labels".into());
+    }
     Ok(PrimaryBase { curve, factor_base })
 }
 

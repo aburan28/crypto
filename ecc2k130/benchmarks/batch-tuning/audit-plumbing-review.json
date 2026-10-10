@@ -1,0 +1,61 @@
+{
+  "valid": true,
+  "kind": "Exact-head independent review of public packed audit batch forwarding",
+  "repository": "/private/tmp/ecc2k-generated-product-pr-20260910",
+  "branch": "codex/ecc2k130-clmad-batch-tuning",
+  "head": "18f329ec8ef69a4fd388d5dba47467c5db7aa086",
+  "scopeFiles": {
+    "ecc2k130/packed_audit.py": "c97622f13858c0e778ffac11f97b949493c485f5fb1fea1c77065d58edac3d64",
+    "ecc2k130/codegen/testdirectbuild.py": "dcfea7e0f80739f20198d3b9fe66ae51d5b79167668a8e683a800a9ce7be056a",
+    "ecc2k130/codegen/testpackedauditreport.py": "8aa2eb67869291ed971ab2f5aaaaa44e98e0a1d9a0a1ab322d3adca045b27c72"
+  },
+  "cleanBeforeAndAfter": true,
+  "additionalReadOnlyCallPathBindings": {
+    "ecc2k130/modal_app.py": "ce617ab7b5a0f7f44b14dd6e6d9bc0be5100140ca24028bcd8f247b29c62f447",
+    "ecc2k130/Makefile": "3641857d3db3531ab30af158397d350aafa54888749ffe1720624f8467c9842d",
+    "ecc2k130/codegen/benchreport.py": "987c68e73c8257d5ed1f0779dc7937862ae9eba89354e4f785a83fa0c6a659c2"
+  },
+  "hostTests": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "codegen/testdirectbuild.py"
+      ],
+      "exitCode": 0,
+      "tests": 29,
+      "logPath": "/private/tmp/ecc2k-public-batch-audit-review-20260911/testdirectbuild.log",
+      "logSha256": "804bc01ab5f949cbe4c2c3fa315635f72f1623e319fe3f36fa1c1aaf555acd1a"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "codegen/testpackedauditreport.py"
+      ],
+      "exitCode": 0,
+      "tests": 5,
+      "logPath": "/private/tmp/ecc2k-public-batch-audit-review-20260911/testpackedauditreport.log",
+      "logSha256": "9f169aa04896ef0203477ff61d8d57406ec0dab00b71ec15cf38cdae22509147"
+    }
+  ],
+  "totalHostTests": 34,
+  "findings": [],
+  "checks": [
+    "main appends batch=32 without reordering existing parameters and forwards the selected batch to runAudit.remote.",
+    "runAudit rejects nonpositive batch before build, records it, forwards it to client.buildFor, and includes the same BATCH in the arithmetic Make invocation.",
+    "The existing buildFor includes batch in its baked-binary identity and real make-B command. test-packed-cuda recompiles its executable through the shared DEFS with BATCH.",
+    "Every benchmark and DP34 collection sample calls checkScalarCounts with the requested batch and workers. One exact runtime backend row must bindactualBatch,workers,walks,steps andDP weight before count acceptance.",
+    "B8/770048,B16/385024,B32/192512 preserve6,160,384 walks and201,863,462,912 scalar updates; completed B32 output cannot satisfy a B8/B16 request merely because its total count matches.",
+    "The default32 helper API and omitted batch call signatures retain existing behavior; new requestedBatch/actualBatch result fields are additive.",
+    "Tests exercise extracted actual helper/runAudit functions without importing Modal. The nondefault forwarding fixture fails its mocked build when the requested batch differs and inspects the actual arithmetic command.",
+    "Count tests cover both benchmark/DP34, explicit andautomaticworkers, wrong geometry with identical total work, missing/duplicate/wrong markers, partial/inflated work, drops andnonfinite rates."
+  ],
+  "limits": [
+    "This review ran only the two relevant host-only test scripts. It did not compile CUDA, execute a client, poll a live job, or launch a GPU.",
+    "Source forwarding and parser validation do not themselves establish arithmetic correctness or throughput for a new batch; the separately frozen GPU panel provides that evidence.",
+    "The public native audit records collection counts/sizes; this change does not add independent corpus-multiset hashing or a cross-batch checkpoint import format.",
+    "Only the named three-file batch-forwarding change and necessary existing call paths were reviewed."
+  ],
+  "frozenOriginalAuditorSha256": "2a628b34e2528726510c951a0c51e5a14acc5d6e68d0302b587e494155eca2f9"
+}

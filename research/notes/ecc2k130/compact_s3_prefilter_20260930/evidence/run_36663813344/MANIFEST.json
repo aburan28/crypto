@@ -1,0 +1,141 @@
+{
+  "cases": {
+    "n41_L1024": {
+      "host_path": "hosts/n41_L1024.json",
+      "host_sha256": "2aa05a317c3c52a3160e738ad2d3cef525fc5ba98215126acfeeb1b2149cd56a",
+      "k": 255,
+      "paired": {
+        "filter_to_off_geo": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8133569067269925,
+            0.8502205254776525
+          ],
+          "cpu_ratio_median": 0.8284070546278489,
+          "wall_ratio_95pct_log_t_interval": [
+            0.8114461089889633,
+            0.8509480878985096
+          ],
+          "wall_ratio_median": 0.8287108891075287
+        },
+        "filter_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.432434142941487,
+            1.4988693893572878
+          ],
+          "cpu_ratio_median": 1.456716829191052,
+          "wall_ratio_95pct_log_t_interval": [
+            1.4295743081235008,
+            1.5011069477417314
+          ],
+          "wall_ratio_median": 1.4567899619375824
+        },
+        "off_b_to_off_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.00081579349887,
+            1.0143989006472063
+          ],
+          "cpu_ratio_median": 1.0078372518634668,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9928541435239137,
+            1.0186201205193854
+          ],
+          "wall_ratio_median": 1.0069726880088472
+        },
+        "off_geo_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.753009661175214,
+            1.7710931394687068
+          ],
+          "cpu_ratio_median": 1.7639047204033018,
+          "wall_ratio_95pct_log_t_interval": [
+            1.7470737133504008,
+            1.77887073930124
+          ],
+          "wall_ratio_median": 1.7578989018793474
+        }
+      },
+      "raw_bytes": 7865234,
+      "raw_path": "raw/n41_L1024.tar.gz",
+      "raw_sha256": "1ad279b4630576e636e35b4c754e972f29a6c99e09612855e29e759df2cc5c17",
+      "receipt_path": "receipts/n41_L1024.json",
+      "receipt_sha256": "2a37f1415cdbea10f5bb472d3930876f07e4ae78251ff14b0696992424c625ee",
+      "second_host_replay_path": "second_host_replay/n41_L1024.json",
+      "second_host_replay_sha256": "f9a1a4ada9f5574e18690a91b03d2d0e1e5ec287ea3dd902d132d238f08a4f23",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    },
+    "n53_L1024": {
+      "host_path": "hosts/n53_L1024.json",
+      "host_sha256": "b9fd5f7afa04217a6da802c51060706df2651cef8fc549fb6c78be6ef2711a60",
+      "k": 440,
+      "paired": {
+        "filter_to_off_geo": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8538112576807912,
+            0.970706081454305
+          ],
+          "cpu_ratio_median": 0.9171765782396964,
+          "wall_ratio_95pct_log_t_interval": [
+            0.8536438360685548,
+            0.9707480332011543
+          ],
+          "wall_ratio_median": 0.9171740939073315
+        },
+        "filter_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.4120559515162492,
+            1.5985559550310242
+          ],
+          "cpu_ratio_median": 1.5217972308238308,
+          "wall_ratio_95pct_log_t_interval": [
+            1.4113363544089428,
+            1.598387763072481
+          ],
+          "wall_ratio_median": 1.5215918337682295
+        },
+        "off_b_to_off_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.9892303118962743,
+            1.0351206942214721
+          ],
+          "cpu_ratio_median": 1.0063648555541311,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9882119664775947,
+            1.0353095317601966
+          ],
+          "wall_ratio_median": 1.0063423259310793
+        },
+        "off_geo_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.6378680644504302,
+            1.662842844918571
+          ],
+          "cpu_ratio_median": 1.6481466094657333,
+          "wall_ratio_95pct_log_t_interval": [
+            1.6373708802183058,
+            1.6625793579787769
+          ],
+          "wall_ratio_median": 1.6490436857993038
+        }
+      },
+      "raw_bytes": 16447453,
+      "raw_path": "raw/n53_L1024.tar.gz",
+      "raw_sha256": "fb26603e22b750fc790b048a2f5d8c873920f8f614b7fbe1e298221d16a21022",
+      "receipt_path": "receipts/n53_L1024.json",
+      "receipt_sha256": "ea154f6bae537c888e523259e745c1d8e255fd91f0fb1ab50d5150629f76ba74",
+      "second_host_replay_path": "second_host_replay/n53_L1024.json",
+      "second_host_replay_sha256": "95b78112e00ce8ce097b501e1c6f846487c91997330ab3307f9ecc4ba3c6057f",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    }
+  },
+  "extraction": "tar -xzf raw/n41_L1024.tar.gz -C DEST; repeat for n53",
+  "frozen_sha256": "3e9f67cc2cd6de5a8458badb3525983d561d9c3449c05118819fb424c5093b2b",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36663813344",
+  "independent_replay": "python3 verify_panel.py --n 41 --run-dir DEST/n41_L1024 --out NEW_RECEIPT.json",
+  "schema": "compact-s3-prefilter-hosted-archive-v1",
+  "second_host_replay_host_path": "second_host_replay/HOST.json",
+  "second_host_replay_host_sha256": "b70ce3f1bee82fc2b4ad7a8fd621e1bf407cf0f4cf042b2c35c8018e1d31f2d4",
+  "source_head": "91669769d6baaa46f00fa3a98c5d84debe282f73",
+  "source_head_kind": "PR head; Actions checked out the exact head SHA, not a synthetic merge"
+}

@@ -1,0 +1,514 @@
+{
+  "budget": {
+    "batch_trials": 1,
+    "max_trials": 1,
+    "note": "Dispatch/yield diagnostic; KIC_* unset for exclusive-phase pin",
+    "rayon_num_threads": 1,
+    "timeout_seconds": 180
+  },
+  "build": {
+    "build_sha256": "de3cb8b896f31f03668f1d0eb14302fef2b1e0bc0be303e7f4021a70dd085335",
+    "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+    "worker_sha256": "ed8e5a2f7aa5924e81587b9b0ed5bb11935166e226db640b720bc28842faf798"
+  },
+  "comparison_kind": "factor-base-policy",
+  "host": {
+    "logical_cpus": 4,
+    "machine": "x86_64",
+    "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "system": "Linux"
+  },
+  "inventory_control_sha256": "be3053b4b637311e8255f294807fde412510fbda2464e678a6a16fdea397d403",
+  "prior_attempts": [
+    {
+      "kind": "env-error",
+      "path": "runs-env-error"
+    },
+    {
+      "kind": "max64-timeout-no-receipt",
+      "note": "max_trials=64 hit 300s with empty stdout on n17a1 f4/f5",
+      "path": "runs-max64-timeout"
+    }
+  ],
+  "promotion_eligible": false,
+  "reviewed_generic_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "rows": [
+    {
+      "cell": "n17a1",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f4",
+        "engines": [
+          {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 8.542872667312622
+      },
+      "report_status": "incomplete",
+      "solver": "f4",
+      "stdout_sha256": "f3427ec0a886c21c9483e6b11830f7734459f8e6b836b621cd4fc749ce6fe9aa",
+      "target": [
+        "853",
+        "39791"
+      ]
+    },
+    {
+      "cell": "n17a1",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f5",
+        "engines": [
+          {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 5.432307958602905
+      },
+      "report_status": "incomplete",
+      "solver": "f5",
+      "stdout_sha256": "12280ff18b9b821933752eee4fabbc7124406e1fb86eeac88af95ba99921a3d5",
+      "target": [
+        "853",
+        "39791"
+      ]
+    },
+    {
+      "cell": "n19a0",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f4",
+        "engines": [
+          {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 15.36390209197998
+      },
+      "report_status": "incomplete",
+      "solver": "f4",
+      "stdout_sha256": "f2efb7c2fdfc072df062fe2ca859e540c4e78e5433b63358f197bde6b4a41d89",
+      "target": [
+        "319974",
+        "349085"
+      ]
+    },
+    {
+      "cell": "n19a0",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f5",
+        "engines": [
+          {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 10.147493839263916
+      },
+      "report_status": "incomplete",
+      "solver": "f5",
+      "stdout_sha256": "ef9a8b52cbc0cb3bc52aff937b840b40f737b4617bcb2ee9d62cef80f6468603",
+      "target": [
+        "319974",
+        "349085"
+      ]
+    },
+    {
+      "cell": "n23a0",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f4",
+        "engines": [
+          {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 23.795565843582153
+      },
+      "report_status": "incomplete",
+      "solver": "f4",
+      "stdout_sha256": "76fd9e28aa4da0635232d5643d28b2e1eb7d6c4ece20336ca354c20ea0e882cc",
+      "target": [
+        "6400420",
+        "2778193"
+      ]
+    },
+    {
+      "cell": "n23a0",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f5",
+        "engines": [
+          {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 13.009166240692139
+      },
+      "report_status": "incomplete",
+      "solver": "f5",
+      "stdout_sha256": "eb4323f4bac86780b79f501bbb0b54d46a4fd5f450f92d0f0bcac47cf756c0a1",
+      "target": [
+        "6400420",
+        "2778193"
+      ]
+    },
+    {
+      "cell": "n23a1",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f4",
+        "engines": [
+          {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 23.44532060623169
+      },
+      "report_status": "incomplete",
+      "solver": "f4",
+      "stdout_sha256": "1bd704bba2b3cc080a3260c060ee5a7fb68e1f3d56db54c93d895f89bb28557f",
+      "target": [
+        "7866841",
+        "6652704"
+      ]
+    },
+    {
+      "cell": "n23a1",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f5",
+        "engines": [
+          {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 14.208628177642822
+      },
+      "report_status": "incomplete",
+      "solver": "f5",
+      "stdout_sha256": "caee33799f20f897fa366b89693d09e7b58209bb37be280d062459b4319059f4",
+      "target": [
+        "7866841",
+        "6652704"
+      ]
+    },
+    {
+      "cell": "n31a0",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f4",
+        "engines": [
+          {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 128.77278113365173
+      },
+      "report_status": "incomplete",
+      "solver": "f4",
+      "stdout_sha256": "1ba3f6d8fba3f2f423196ec009fce5cb548c9aa02c0f9a3dae0a5385cdeef714",
+      "target": [
+        "1051205724",
+        "1465730584"
+      ]
+    },
+    {
+      "cell": "n31a0",
+      "classification": {
+        "accepted_relations": 0,
+        "collection_blocks": 1,
+        "collector_dispatch": {
+          "collection_window": null,
+          "field_kernel": "pclmulqdq",
+          "pair_table": false,
+          "query_rule": "trial-keyed-sample",
+          "strategy": "Groebner"
+        },
+        "descent_dispatch": null,
+        "effective_solver": "f5",
+        "engines": [
+          {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          }
+        ],
+        "online_wall_ns": null,
+        "outcome_sample": [
+          "incomplete"
+        ],
+        "rejected_relations": 0,
+        "solutions": 0,
+        "status": "incomplete",
+        "trials": 1,
+        "unsupported_false": 1,
+        "unsupported_true": 0
+      },
+      "parse_error": null,
+      "process": {
+        "exit_code": 2,
+        "process_status": "EXITED",
+        "timeout_seconds": 180,
+        "wall_seconds": 42.05838108062744
+      },
+      "report_status": "incomplete",
+      "solver": "f5",
+      "stdout_sha256": "35e091be7d2638f2573d4a94f12120e47d94af71f2332e960ef667bbc40d02cd",
+      "target": [
+        "1051205724",
+        "1465730584"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "series": "dispatch-mt1",
+  "solvers": [
+    "f4",
+    "f5"
+  ],
+  "status": "MEASURED_DIAGNOSTIC"
+}

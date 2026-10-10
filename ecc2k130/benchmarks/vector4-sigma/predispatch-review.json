@@ -1,0 +1,142 @@
+{
+  "valid": true,
+  "status": "fixed_one_gpu_comparison_admitted",
+  "owner": "/root/weighted_public_audit",
+  "inputHashes": {
+    "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/vector4-sigma-walk-prebuild-handoff.json": "5ab1560d13017f934f447ef272a762724ce873cc2f846c65fd94372829baabcf",
+    "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/vector4-sigma-walk-prebuild-review.json": "e634aa9087e5354dc4974b3f10e9ef807b2c9da85485d1099e9eecf091fe9f57",
+    "/private/tmp/ecc2k-vector4-sigma-walk-20260912/plan/full-client-build.json": "740f1b2300d1070d9f44d50ef33d874d4f8d1c47d1d9b91d06a28c301a99ce76",
+    "/private/tmp/ecc2k-vector4-sigma-walk-20260912/run.py": "e79952054f2dd5c7b2b372ec6bc1a806564c1d125fe53a8d44c56ecf2b19d840",
+    "/private/tmp/ecc2k-vector4-sigma-walk-20260912/driver-freeze.json": "7bd95d57a210c336a37c0053d66c5c8cddd6f9417b5966bab2457172d3ce81a0",
+    "/private/tmp/ecc2k-vector4-sigma-cpu-review-20260912/review.json": "a703f24ad8623a8020733f62849560a20dbbcf3a8edf652b165fd0477c47e12c",
+    "/private/tmp/ecc2k-vector4-sigma-cpu-review-20260912/supplemental-review.json": "4a8c4b3ff3fc4790534af359102f8f2400359dd92c81f40a6a9ba21b0c93871c",
+    "/private/tmp/ecc2k-vector4-sigma-cpu-review-20260912/artifact-manifest.json": "b4eb32c108d370905afa9f8082f12ff105a192bc1dee993d3e62a9f77509350e"
+  },
+  "sourceFiles": 160,
+  "sourceCanonicalSha256": "5b629d80a63f176807f05e8fc202aee0968291ec7691923a233752b9e9705c21",
+  "runtimeSourceDelta": [
+    "src/testpackedcuda.cu",
+    "src/testsharedsigmacuda.cu"
+  ],
+  "fullClientNativeBytesEqualReviewedCpuElf": {
+    "control": {
+      "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+        "slots": 4528,
+        "encodingSha256": "54a0d24cd6f8d1d9fe625c4f2e583b002af42dde15cb5b7b3375be84f666a837",
+        "nativeTextBytesSha256": "e02d6f11db0c88895dec3acfc141661237879ef2a052ddbffed9a4e8672ac30b"
+      },
+      "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+        "slots": 3048,
+        "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+        "nativeTextBytesSha256": "5490e4505de8bfc2745ab8fd20976dcff86273673539f75f06f455a3e4217f2f"
+      }
+    },
+    "vector1": {
+      "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+        "slots": 4408,
+        "encodingSha256": "c8e8635da4e4ed859ba094c45a5b1e4878c76bbe76bd67283bcbb77bc860674c",
+        "nativeTextBytesSha256": "84ff77d60b7d69fb4178613f2ce8a29a785921f63c85e3bab1a1ab873eb488a3"
+      },
+      "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+        "slots": 3048,
+        "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+        "nativeTextBytesSha256": "5490e4505de8bfc2745ab8fd20976dcff86273673539f75f06f455a3e4217f2f"
+      }
+    }
+  },
+  "binaryHashes": {
+    "binaries": {
+      "control": "6d34c5b89d55c5dd6929ef1ea5c1491b8166d87fc4e131edf3556defdbb74b86",
+      "vector1": "cb811b960216068a7c5759a6011157aebae41acf0312986b1e449d3e2938e607"
+    },
+    "arithmeticBinaries": {
+      "control": "58018c37760387d85ff4bbcaa978909e2ee5cd95c0064eb7473cae06db8416c4",
+      "vector1": "adb9181adef77d9497297201f255b0b347d86c3d27e66c7d83448398713d8b4b"
+    },
+    "storageBinaries": {
+      "control": "71c39283f8f34096c64b64ea0fa7974d37b380253422a438059970c1f57c05da",
+      "vector1": "5d9ed14dfb41b5fb5a5904fe8c4e68a33c157bcafe414bb6b47390d84856965a"
+    },
+    "sharedProbeBinaries": {
+      "control": "cd08ae35b53e85ac017c7162493998c3f27858c841c1e8b83eae071bc24ac2a7",
+      "vector1": "15aa741d05796503862416f6867d6d1efc2c66de6e5ff70c44dee0144e92cf2f"
+    }
+  },
+  "probeReview": {
+    "physicalCells": 448,
+    "bijectionAndIndependentPhysicalExpectation": true,
+    "disjointTypedMemberWrites": true,
+    "poisonBarrierBeforeActualInitializer": true,
+    "initializerBarrierBeforePartialReturn": true,
+    "scenarios": 21,
+    "inputPairs": 21036,
+    "snapshots": 114,
+    "maskWords": 51072,
+    "mixedIndexRepeat": true
+  },
+  "runtimeGates": {
+    "bothSharedSigma": 1,
+    "vectorModes": [
+      0,
+      1
+    ],
+    "perModeCalibrationRequired": true,
+    "compiledSharedExtent": 2816,
+    "observedFunctionSharedAllowed": [
+      1792,
+      2816
+    ],
+    "driverReservedRequired": 1024,
+    "arithmeticSuites": 6,
+    "storageCases": 128,
+    "storageRecords": 297344,
+    "normalizedSlots": [
+      64,
+      16384
+    ],
+    "checkpointChildren": 28,
+    "checkpointSuccesses": 26,
+    "checkpointRejections": 2,
+    "checkpointComparisons": 12
+  },
+  "timing": {
+    "gpuCount": 1,
+    "batch": 16,
+    "blockThreads": 256,
+    "minBlocks": 2,
+    "workers": 385024,
+    "steps": 1024,
+    "launches": 32,
+    "updatesEach": 201863462912,
+    "excludedWarmups": 2,
+    "screen": "control/vector1/control",
+    "qualification": "strictly greater than1.005 times maximum bracket control",
+    "rowsUnqualified": 5,
+    "rowsQualified": 17,
+    "confirmationPairsIfQualified": 3,
+    "collectionPairsIfQualified": 3,
+    "allSixFreshCorporaMustMatch": true
+  },
+  "driverReview": "Reviewed source/binary/native-only/runtime-calibration/correctness/count/checkpoint/state/corpus/binding gates and process-group timeout handling; no search/solver CLI is used.",
+  "executionPlan": {
+    "modalEnvironment": "/private/tmp/ecc2k-modal-1.5.5-20260909",
+    "entrypoint": "run.py::main",
+    "log": "/private/tmp/ecc2k-vector4-sigma-walk-run-20260912.log",
+    "logOutsideUploadedSource": true,
+    "existingFrozenImageAndCpuPrebuild": true,
+    "manualBuildOrCompileOnlyNotCalled": true,
+    "maxGpuSubmissions": 1,
+    "retries": 0,
+    "editsOrFallbackAfterFailure": false
+  },
+  "scopeLimits": [
+    "Source and CPU code establish eligibility, not GPU correctness or speed.",
+    "Runtime must preserve the exact gate sequence and bindings; a failure will be retained without repair/relaunch.",
+    "Timing provides finite complete-scalar rates on one allocation, not an attack or complexity claim."
+  ],
+  "findings": [],
+  "goalBillionCompleteScalarUpdatesPerSecond": 26,
+  "goalAchieved": false,
+  "gpuSubmitted": false,
+  "reviewScriptSha256": "812d79844569cf1c0162129577f943783b24f9e19f952f6979e5726c2ede6d6f"
+}

@@ -126,7 +126,7 @@ impl NpPoly {
     /// relation `x^P = x + 1`.
     pub fn mul(&self, other: &Self) -> Self {
         // Full schoolbook product in Z[x]: degree up to 2P − 2.
-        let mut prod = vec![0i64; 2 * P - 1];
+        let mut prod = [0i64; 2 * P - 1];
         for i in 0..P {
             for j in 0..P {
                 prod[i + j] += self.0[i] as i64 * other.0[j] as i64;
@@ -409,7 +409,10 @@ mod tests {
         let kp = ntru_prime_keygen();
         let zero = NtruPrimeCiphertext { c: NpPoly::zero() };
 
-        assert_eq!(ntru_prime_decapsulate(&zero, &kp.sk), rejection_key(&kp.sk, &zero));
+        assert_eq!(
+            ntru_prime_decapsulate(&zero, &kp.sk),
+            rejection_key(&kp.sk, &zero)
+        );
     }
 
     #[test]

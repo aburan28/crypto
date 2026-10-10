@@ -1,0 +1,49 @@
+{
+  "id": "nagao-coefficient-pullback-20260914-v1",
+  "hypothesis": "Intersect the conditioned function equation with quadratic-support image space before generating coefficients, reducing rejected function candidates without losing any admissible relation.",
+  "scope": "Exploratory point-decomposition stage; not an end-to-end ECDLP or novelty-in-the-literature claim.",
+  "curve": "y^2+xy=x^3+1 over type-II normal-basis binary fields",
+  "domain": "Three distinct nonzero x values in span of first d basis vectors, each different from target x; exact signed sum required.",
+  "panels": [
+    {
+      "n": 11,
+      "d": 5
+    },
+    {
+      "n": 23,
+      "d": 7
+    },
+    {
+      "n": 29,
+      "d": 8
+    }
+  ],
+  "targets_per_stratum": 2,
+  "strata": [
+    "uniform",
+    "known_decomposable"
+  ],
+  "seed": 2026091401,
+  "modes": [
+    "first",
+    "enumerate"
+  ],
+  "variants": [
+    "quadratic-image",
+    "coefficient-pullback",
+    "s4-symmetric",
+    "chained-s3"
+  ],
+  "repetitions": 1,
+  "seconds_per_instance": 3,
+  "budget_semantics": "Existing cooperative all-phase deadlines, including setup and checking; record any overrun. No hard wall-time or RAM guarantee.",
+  "validation": "All 43 affine five-bit targets: exact projected-set equality to independent group pair oracle; compare full valid coefficient sets between image baseline and pullback. Larger outputs checked against exact pair oracle; completed enumerations must be equal.",
+  "rejection_rule": "Any lost/invalid relation fails correctness. If pullback is slower or uses more field operations on the complete paired panel, retain it as a negative result and do not promote it.",
+  "exploratory_target": "At least 20 percent fewer all-phase counted field API operations per verified relation versus quadratic-image on complete, equal-output cells; inspect multiplications, additions and squarings separately. This is not the normalized full-cost gate.",
+  "boundary": "The method still scans O(2^(2d)) conditioned (h2,z) branches; each image has rank d-1, with at most two image preimages per nonzero-target branch. The generic uniform-target support bound remains unchanged.",
+  "full_dlp_S": null,
+  "rho_ratio": null,
+  "operation_conversion": "None measured between field API operations and SAT counters or rho. No cross-engine operation ratio or end-to-end speedup will be claimed.",
+  "benchmark_adapter": "WDSat frozen corpus uses a=1 and a different polynomial protocol. This a=0 function-coefficient chart instead uses the repository's matched S3/S4 adapters under the parent accounting contract; fixed regression evidence remains untouched.",
+  "holdout_policy": "Exclude exact targets in all existing solver_02 through solver_09 raw records. These new targets become development data after this run. Single-run timing is diagnostic only."
+}

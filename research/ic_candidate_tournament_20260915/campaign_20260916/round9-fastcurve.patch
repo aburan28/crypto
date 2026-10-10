@@ -1,0 +1,285 @@
+diff -ruN a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+--- a/src/cryptanalysis/koblitz_index_calculus.rs	2026-09-16 13:15:40.801950611 +0000
++++ b/src/cryptanalysis/koblitz_index_calculus.rs	2026-09-16 14:43:59.581859170 +0000
+@@ -499,7 +499,7 @@
+     let irr = &curve.irreducible;
+     let mut count = 1u64; // O
+     for x in span_f2(basis, n) {
+-        for p in points_with_x(curve, &x) {
++        for p in factor_base_points_with_x(curve, &x) {
+             if let BinaryPoint::Affine { y, .. } = &p {
+                 if y.square_k_times(k, irr) == *y {
+                     count += 1;
+@@ -513,6 +513,26 @@
+ /// Trial-division factorisation into `(prime, exponent)` pairs.  Only
+ /// ever called on `#E` for toy `n`.
+ fn factorise(mut v: BigUint) -> Vec<(BigUint, u32)> {
++    // The same trial division in one word when the value fits.
++    if let Some(mut w) = v.to_u64_digits().first().copied().filter(|_| v.bits() <= 64) {
++        let mut out: Vec<(BigUint, u32)> = Vec::new();
++        let mut d = 2u64;
++        while d.checked_mul(d).is_some_and(|dd| dd <= w) {
++            let mut e = 0;
++            while w % d == 0 {
++                w /= d;
++                e += 1;
++            }
++            if e > 0 {
++                out.push((BigUint::from(d), e));
++            }
++            d += 1;
++        }
++        if w > 1 {
++            out.push((BigUint::from(w), 1));
++        }
++        return out;
++    }
+     let mut out: Vec<(BigUint, u32)> = Vec::new();
+     let mut d = BigUint::from(2u32);
+     while &d * &d <= v {
+@@ -532,6 +552,75 @@
+     out
+ }
+ 
++/// The deterministic abscissa sequence a generator is searched along:
++/// every `i < 2^n` in order when exhaustive, otherwise a fixed LCG.
++#[derive(Clone, Copy)]
++struct GeneratorSearch {
++    exhaustive: bool,
++    budget: u64,
++    mask: u64,
++    state: u64,
++    n: u32,
++}
++
++impl GeneratorSearch {
++    fn abscissae(self) -> impl Iterator<Item = u64> {
++        let mut state = self.state;
++        (0..self.budget).map(move |i| {
++            if self.exhaustive {
++                i
++            } else {
++                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
++                state & self.mask
++            }
++        })
++    }
++}
++
++/// The first point of the search sequence whose cofactor multiple is a
++/// non-trivial point of order `r`, in the general arithmetic.
++fn find_generator_general(
++    curve: &BinaryCurve,
++    cofactor: &BigUint,
++    r: &BigUint,
++    search: &GeneratorSearch,
++) -> Option<BinaryPoint> {
++    for raw in search.abscissae() {
++        let x = F2mElement::from_biguint(&BigUint::from(raw), search.n);
++        for p in points_with_x(curve, &x) {
++            let cand = scalar_mul(curve, &p, cofactor);
++            if cand != BinaryPoint::Infinity && scalar_mul(curve, &cand, r) == BinaryPoint::Infinity {
++                return Some(cand);
++            }
++        }
++    }
++    None
++}
++
++/// [`find_generator_general`] in single-word arithmetic: the same
++/// abscissae in the same order, the same lifts in the same order
++/// (`factor_base_points_with_x` reproduces `points_with_x`), the same
++/// tests, so the same generator.  `None` when the field is too wide or
++/// the search fails, and the general search then decides.
++fn find_generator_fast(
++    curve: &BinaryCurve,
++    cofactor: &BigUint,
++    r: &BigUint,
++    search: &GeneratorSearch,
++) -> Option<BinaryPoint> {
++    let fc = FastCurve::new(curve)?;
++    for raw in search.abscissae() {
++        let x = F2mElement::from_biguint(&BigUint::from(raw), search.n);
++        for p in factor_base_points_with_x(curve, &x) {
++            let cand = fc.mul(fc.lift(&p), cofactor);
++            if !cand.infinity && fc.mul(cand, r).infinity {
++                return Some(fc.lower(cand));
++            }
++        }
++    }
++    None
++}
++
+ impl KoblitzCurve {
+     /// Build `K_a` over `F_{2^n}`: pick a defining irreducible
+     /// polynomial, count points, split off the largest prime-order
+@@ -636,30 +725,11 @@
+         if k > 1 {
+             state ^= (u64::from(k) << 40) ^ (b_index << 48);
+         }
+-        for i in 0..budget {
+-            let raw = if exhaustive {
+-                i
+-            } else {
+-                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+-                state & mask
+-            };
+-            let x = F2mElement::from_biguint(&BigUint::from(raw), n);
+-            let pts = points_with_x(&curve, &x);
+-            let mut found = false;
+-            for p in pts {
+-                let cand = scalar_mul(&curve, &p, &cofactor);
+-                if cand != BinaryPoint::Infinity {
+-                    // Confirm order divides r (reject accidental torsion).
+-                    if scalar_mul(&curve, &cand, &r) == BinaryPoint::Infinity {
+-                        generator = cand;
+-                        found = true;
+-                        break;
+-                    }
+-                }
+-            }
+-            if found {
+-                break;
+-            }
++        let search = GeneratorSearch { exhaustive, budget, mask, state, n };
++        if let Some(found) = find_generator_fast(&curve, &cofactor, &r, &search)
++            .or_else(|| find_generator_general(&curve, &cofactor, &r, &search))
++        {
++            generator = found;
+         }
+         if generator == BinaryPoint::Infinity {
+             return None;
+@@ -789,7 +859,7 @@
+ 
+ /// Exact odd-degree point lifting for factor-base construction. General callers,
+ /// target generation and rho retain the independent general implementation.
+-fn factor_base_points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
++pub fn factor_base_points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+     if curve.m % 2 == 0 {
+         return points_with_x(curve, x);
+     }
+@@ -816,6 +886,63 @@
+ }
+ 
+ #[cfg(test)]
++mod tournament_construction_equivalence {
++    use super::*;
++
++    /// The single-word generator search and eigenvalue check return
++    /// exactly what the general arithmetic returns, on every cell the
++    /// worker accepts and on a subfield curve.
++    #[test]
++    fn fast_construction_matches_general() {
++        let mut checked = 0;
++        let mut curves: Vec<KoblitzCurve> = (5..=31).step_by(2)
++            .flat_map(|n| [0u8, 1].into_iter().filter_map(move |a| KoblitzCurve::new(a, n)))
++            .collect();
++        curves.extend(KoblitzCurve::subfield(3, 15, 2, 1));
++        for kc in &curves {
++            let mask = if kc.n >= 64 { u64::MAX } else { (1u64 << kc.n) - 1 };
++            let exhaustive = kc.n <= 24;
++            let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ (kc.n as u64) ^ ((kc.a as u64) << 32);
++            if kc.k > 1 {
++                state ^= (u64::from(kc.k) << 40) ^ (kc.b_index << 48);
++            }
++            let search = GeneratorSearch {
++                exhaustive,
++                budget: if exhaustive { 1u64 << kc.n } else { 1u64 << 20 },
++                mask,
++                state,
++                n: kc.n,
++            };
++            let general = find_generator_general(&kc.curve, &kc.cofactor, &kc.subgroup_order, &search);
++            let fast = find_generator_fast(&kc.curve, &kc.cofactor, &kc.subgroup_order, &search);
++            assert_eq!(general, fast, "generator on {}", kc.label());
++            assert_eq!(general.as_ref(), Some(kc.generator()), "constructed generator on {}", kc.label());
++            // both eigenvalue candidates, checked in both arithmetics
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let g = fc.lift(kc.generator());
++            let pi = fc.frobenius_k(g, kc.k);
++            let pi_general = kc.frobenius(kc.generator());
++            for candidate in [kc.lambda.clone(), (&kc.subgroup_order - &kc.lambda) % &kc.subgroup_order,
++                              (&kc.lambda + BigUint::one()) % &kc.subgroup_order] {
++                let fast_ok = fc.mul(g, &candidate) == pi;
++                let general_ok = scalar_mul(&kc.curve, kc.generator(), &candidate) == pi_general;
++                assert_eq!(fast_ok, general_ok, "eigenvalue check on {}", kc.label());
++            }
++            assert_eq!(fc.mul(g, &kc.lambda), pi, "lambda on {}", kc.label());
++            // one-word and big-integer trial division agree
++            let big = &kc.group_order * BigUint::from(1u64 << 40);
++            let small = factorise(kc.group_order.clone());
++            let product = small.iter().fold(BigUint::one(), |acc, (p, e)| acc * p.pow(*e));
++            assert_eq!(product, kc.group_order);
++            assert_eq!(factorise(big.clone()).iter().fold(BigUint::one(), |acc, (p, e)| acc * p.pow(*e)), big);
++            assert_eq!(small.last().map(|(p, _)| p.clone()), Some(kc.subgroup_order.clone()));
++            checked += 1;
++        }
++        assert!(checked >= 15, "{checked}");
++    }
++}
++
++#[cfg(test)]
+ mod tournament_lift_equivalence {
+     use super::*;
+     #[test]
+@@ -875,6 +1002,14 @@
+             y: y.square_k_times(k, &curve.irreducible),
+         },
+     };
++    // The same two candidates in the same order; the check runs in
++    // single-word arithmetic where the field fits (tested equal to the
++    // general check), otherwise in the general arithmetic.
++    let fast = FastCurve::new(curve).map(|fc| {
++        let g_fast = fc.lift(g);
++        let pi_fast = fc.lift(&pi_g);
++        (fc, g_fast, pi_fast)
++    });
+     for sign in [true, false] {
+         let num = if sign {
+             (&t + &s) % r
+@@ -882,7 +1017,11 @@
+             (&t + r - &s) % r
+         };
+         let lambda = (num * &inv2) % r;
+-        if scalar_mul(curve, g, &lambda) == pi_g {
++        let matches = match &fast {
++            Some((fc, g_fast, pi_fast)) => fc.mul(*g_fast, &lambda) == *pi_fast,
++            None => scalar_mul(curve, g, &lambda) == pi_g,
++        };
++        if matches {
+             return Some(lambda);
+         }
+     }
+diff -ruN a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-16 13:15:40.812908930 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-16 14:43:59.582611037 +0000
+@@ -2,8 +2,9 @@
+ //! Uses the production research library; JSON stdin contains no known scalar.
+ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+ use crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
++use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
+ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+-    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x,
++    factor_base_points_with_x, koblitz_signed_frobenius_rho_with_progress, point_key,
+     DecompositionStrategy, FactorBaseLogSolver, IndividualLogSolver, KoblitzCurve,
+     KoblitzIcOptions, KoblitzSignedRhoOptions, LinearAlgebra, PairSumTable,
+     RelationCollector, RelationWorkUnit,
+@@ -89,10 +90,16 @@
+         let digest = h.finalize();
+         let x = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap()) & ((1u64 << c.n) - 1);
+         let x = F2mElement::from_biguint(&BigUint::from(x), c.n);
+-        let mut lifts = points_with_x(&c.curve, &x);
++        // The exact single-word lift (tested equal to `points_with_x`, order
++        // included) and cofactor multiple; the general path where it does not fit.
++        let mut lifts = factor_base_points_with_x(&c.curve, &x);
+         lifts.sort_by_key(point_key);
+         if lifts.is_empty() { continue; }
+-        let q = c.mul(&lifts[usize::from(digest.as_bytes()[8] & 1) % lifts.len()], &c.cofactor);
++        let chosen = &lifts[usize::from(digest.as_bytes()[8] & 1) % lifts.len()];
++        let q = match FastCurve::new(&c.curve) {
++            Some(fc) => fc.lower(fc.mul(fc.lift(chosen), &c.cofactor)),
++            None => c.mul(chosen, &c.cofactor),
++        };
+         if q != BinaryPoint::Infinity { return Ok(q); }
+     }
+     Err("hash-to-curve exhausted".into())

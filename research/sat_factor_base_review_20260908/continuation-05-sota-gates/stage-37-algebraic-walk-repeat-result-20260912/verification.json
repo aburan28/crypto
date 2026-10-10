@@ -1,0 +1,174 @@
+{
+  "amortised_crossover": false,
+  "archive": {
+    "bytes": 1738964,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage37-algebraic-walk-repeat-34694400320.tar.gz",
+    "sha256": "f97578b9dbd9f4322fe57ed50f5920bc1bc95277897ea8452a7c929caa7af879"
+  },
+  "artifact": {
+    "digest": "sha256:b1eec6f64f5dd70ee01a512892519f237397449a69c6970b1ba6dc96b7fbe744",
+    "expires_at": "2026-12-11T12:42:21Z",
+    "id": 10297933814,
+    "name": "koblitz-stage35-algebraic-walk-34694400320",
+    "size_in_bytes": 1786169
+  },
+  "claim_boundary": "two project-authored hosted runs with Koblitz-path-equivalent source; finite post-precomputation online crossover only",
+  "full_cost_gate_passed": false,
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "mathematical_equivalence": {
+    "descent_trials": 2417575,
+    "factor_base_exact": true,
+    "factor_base_logs_exact": true,
+    "params_digest": "829abaa661dccf1ef3782826afe1d91cd5e3123875bcdab59413faf911e15e3d",
+    "public_targets_recovered_logs_and_walked_probe_counts_exact": true,
+    "rho_iterations": 425616,
+    "rho_recovered_logs_iterations_restarts_and_group_additions_exact": true
+  },
+  "online_ic_speedup_over_rho": {
+    "maximum": 2.0487670078822084,
+    "minimum": 1.4556578795159096,
+    "primary": 2.0487670078822084,
+    "repeat": 1.4556578795159096
+  },
+  "primary": {
+    "charged_sequential_wall_seconds_available": 105.117902093,
+    "charged_total_core_seconds_available": 308.81072,
+    "descent_trials": 2417575,
+    "factor_base": {
+      "abscissae": 2380,
+      "columns": 29,
+      "dimension": 41,
+      "domain": "two_torsion_saturation",
+      "family": "two_torsion_saturated",
+      "points": 4759,
+      "signed_orbits": 60,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ]
+        }
+      }
+    },
+    "full_available_wall_over_same_targets_rho": 208.5295271781092,
+    "full_cost_gate_passed": false,
+    "ic_over_rho_amortised_wall_ratio": 28.85710565214139,
+    "ic_over_rho_online_wall_ratio": 0.4880984495321851,
+    "independent_external_reproduction_satisfied": false,
+    "inventory_sha256": "bb3820e9e47e49ac877bb13b9ec757be4b4279033985afa07a1eac9870d8a1dd",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_complete": false,
+    "maximum_sampled_process_tree_rss_bytes": 1642135552,
+    "relations": 39,
+    "rho_iterations": 425616,
+    "rho_over_ic_amortised_wall_ratio": 0.034653510024689305,
+    "rho_over_ic_online_wall_ratio": 2.0487670078822084,
+    "sat_conflicts": null,
+    "schema": "koblitz_stage35_verification.v1",
+    "scientific_outer_core_seconds": 15.802432,
+    "single_core_elapsed_seconds": 15.831464483000005,
+    "source_commit": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+    "status": "n41_algebraic_walk_build_and_run_verified",
+    "targets_verified": 5
+  },
+  "repeat": {
+    "charged_sequential_wall_seconds_available": 107.08770154399998,
+    "charged_total_core_seconds_available": 324.777411,
+    "descent_trials": 2417575,
+    "factor_base": {
+      "abscissae": 2380,
+      "columns": 29,
+      "dimension": 41,
+      "domain": "two_torsion_saturation",
+      "family": "two_torsion_saturated",
+      "points": 4759,
+      "signed_orbits": 60,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ]
+        }
+      }
+    },
+    "full_available_wall_over_same_targets_rho": 219.06734470075386,
+    "full_cost_gate_passed": false,
+    "ic_over_rho_amortised_wall_ratio": 32.13631899354624,
+    "ic_over_rho_online_wall_ratio": 0.6869746072013554,
+    "independent_external_reproduction_satisfied": false,
+    "inventory_sha256": "592649417d1e6e1793ccce41372c90e8180b96f4a873bd490531d75b03312f27",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_complete": false,
+    "maximum_sampled_process_tree_rss_bytes": 1640382464,
+    "relations": 39,
+    "rho_iterations": 425616,
+    "rho_over_ic_amortised_wall_ratio": 0.031117440681393053,
+    "rho_over_ic_online_wall_ratio": 1.4556578795159096,
+    "sat_conflicts": null,
+    "schema": "koblitz_stage35_verification.v1",
+    "scientific_outer_core_seconds": 16.978633,
+    "single_core_elapsed_seconds": 16.996640506999995,
+    "source_commit": "467b6b652c39730c6069442613e2397a6f173c48",
+    "status": "n41_algebraic_walk_build_and_run_verified",
+    "targets_verified": 5
+  },
+  "schema": "koblitz_stage37_repeat_result.v1",
+  "source_equivalence": {
+    "changed_paths": [
+      "RESEARCH_AUTOLAB_LOG.md",
+      "RESEARCH_QUASI_SUBFIELD.md",
+      "examples/quasi_subfield_census.rs",
+      "examples/quasi_subfield_reach.rs",
+      "src/cryptanalysis/mod.rs",
+      "src/cryptanalysis/quasi_subfield.rs"
+    ],
+    "changed_paths_relevant_to_koblitz_run": false,
+    "classification": "koblitz_path_equivalent_not_whole_tree_identical",
+    "primary_commit": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+    "relevant_git_objects": {
+      "Cargo.toml": "0f882035f44d002c3891fe4b32944291d4fadc8c",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock": "963356efc1b2860e1ab9ba68870fabc9e8a55f33",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-35-n41-algebraic-walk-params.json": "50a9ba8b7c7be999c3420eb140cbc2307d194664",
+      "scripts/process_meter.py": "15ef3ce9eaa2c92ac4b93ef755524aa6f53cf502",
+      "scripts/run_koblitz_stage33_n41_unknown_scalar.py": "094717c54f20bb6c955f1740369b77810e2a573a",
+      "scripts/run_koblitz_stage35_algebraic_walk.py": "c76bf2e644037b1183bb4791085d7de13970a112",
+      "src/bin/ic": "3f5acca0eb3c369df59c18cb49ae9931fc31c656",
+      "src/bin/ic.rs": "0237beb331eb92c54cca61984b56668e627cf5dd",
+      "src/binary_ecc": "5846b2d3c511510560444a737ba400dbbb8b500f",
+      "src/cryptanalysis/koblitz_factor_base_search.rs": "1310690becca4bcf95d9feeb072b477d2ffb0af5",
+      "src/cryptanalysis/koblitz_fast.rs": "d0aa77a8d31c9aee847f8f19f0639647797e71b8",
+      "src/cryptanalysis/koblitz_groebner.rs": "d4ecaf1c0654193f64a954dfc17d980184e8c786",
+      "src/cryptanalysis/koblitz_index_calculus.rs": "83dc64df14108b65a933d31e9e557e851a0bf405",
+      "src/cryptanalysis/koblitz_sparse_la.rs": "bb847346cb8e28539218ca6f0fab1a3826e338b3"
+    },
+    "repeat_commit": "467b6b652c39730c6069442613e2397a6f173c48"
+  },
+  "status": "two_hosted_runs_koblitz_path_equivalent_online_crossover",
+  "unaffiliated_reproduction": false,
+  "whole_process_crossover": false,
+  "whole_tree_exact_replicate": false,
+  "workflow": {
+    "head_sha": "467b6b652c39730c6069442613e2397a6f173c48",
+    "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34694400320/job/103555369724",
+    "production_job_wall_seconds": 119.0,
+    "run_id": 34694400320,
+    "url": "https://github.com/aburan28/crypto/actions/runs/34694400320",
+    "workflow_wall_seconds": 171.0
+  }
+}

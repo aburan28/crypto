@@ -6,7 +6,7 @@
 //! cargo run --release --example coordinate_search -- 2       # m = 2 (S₃)
 //! ```
 //!
-//! See `RESEARCH_EXOTIC_COORDINATES.md` for what the columns mean.
+//! See `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md` for what the columns mean.
 
 use crypto_lib::cryptanalysis::coordinate_search::{
     detect_symmetries, format_report, linearising_frame, scan_subfield_frames, search, Curve,

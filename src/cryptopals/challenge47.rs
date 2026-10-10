@@ -52,7 +52,9 @@ pub fn run() -> Report {
     // We don't run the full attack here (it takes thousands of queries
     // and several seconds even for small moduli); we sanity-check the
     // PKCS conformance test and the mathematical machinery.
-    let pt = vec![0x00u8, 0x02, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, b'h', b'i'];
+    let pt = vec![
+        0x00u8, 0x02, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, b'h', b'i',
+    ];
     assert!(is_pkcs_conformant(&pt, pt.len()));
     let mut bad = pt.clone();
     bad[1] = 0x03;

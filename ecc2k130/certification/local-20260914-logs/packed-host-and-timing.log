@@ -1,0 +1,20 @@
+mkdir -p build
+g++ -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
+g++ -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
+g++ -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-generated
+./build/test-packed-network
+packed arithmetic direct reduction: 0
+PASS: 2526 host polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference
+./build/test-packed-network-direct
+packed arithmetic direct reduction: 1
+PASS: 2526 host polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference
+./build/test-packed-network-generated
+packed arithmetic direct reduction: 1
+PASS: 2526 host polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference
+mkdir -p build
+g++ -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
+./build/test-timing
+PASS: final timing waits for pending reseeds; no-reseed, checkpoint/resume, and interrupted-run controls retain their counts

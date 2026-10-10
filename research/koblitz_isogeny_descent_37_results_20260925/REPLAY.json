@@ -1,0 +1,17 @@
+{
+  "schema": "ecc2k130-n37-degree73-archive-replay-v1",
+  "status": "PASS",
+  "raw_sha256": "eb4773d556886672e8b80735fc486c16b73765fd5069ff81133100bfc3eafa90",
+  "summary_sha256": "e467c8dde86d37be51a3ea356385d5f22594585a2237f2685001523546eb0260",
+  "source_file_sha256": {
+    "experiment.py": "cc7e0836b769e0707f4f724902421340f6774c7d71aec15102c7f6923969c626",
+    "contract.json": "ba5e9844517ca00d1a798b2caf4552ac37ffab73e875dfcba1e04d5fa89ed8c0",
+    "matrix.py": "70e27fe281e0c6aa795bbb8073f189bc473b704560059768dd100c12c2aa9daf"
+  },
+  "cases": 128,
+  "paired_workloads": 64,
+  "solver_replays": 512,
+  "rejected_algebraic_roots": 0,
+  "classification": "registered criterion failed",
+  "full_dlp_speedup": null
+}

@@ -1,0 +1,20 @@
+exists, compared as is: research/ic_m4_exponent_audit_20260928/baseline/head-1722bad1/chain-reference
+exists, compared as is: research/ic_m4_exponent_audit_20260928/baseline/head-1722bad1/holdout-reference
+exists, compared as is: research/ic_m4_exponent_audit_20260928/baseline/head-1722bad1/chain-candidate
+exists, compared as is: research/ic_m4_exponent_audit_20260928/baseline/head-1722bad1/holdout-candidate
+      chain         reference K_0/2^9   m=3  not in the rerun
+      chain         reference K_0/2^13  m=3  not in the rerun
+NAMED chain         reference K_0/2^9   m=4  frozen   2,868,312  rerun     595,511  DIFF word_ops,f4_calls,verdict_digest,matrix_rows,matrix_cols,reductions,exhausted
+      chain         candidate K_0/2^9   m=3  not in the rerun
+      chain         candidate K_0/2^13  m=3  not in the rerun
+NAMED chain         candidate K_0/2^9   m=4  frozen     917,450  rerun     294,112  DIFF word_ops,verdict_digest,matrix_rows,matrix_cols,exhausted
+      chain-holdout reference K_1/2^9   m=4  not in the rerun
+      chain-holdout reference K_0/2^15  m=4  not in the rerun
+NAMED chain-holdout reference K_1/2^15  m=4  frozen 345,384,853  rerun  83,790,974  DIFF word_ops,f4_calls,matrix_rows,matrix_cols,reductions,splits,infeasible_branches
+      chain-holdout reference K_0/2^13  m=3  not in the rerun
+      chain-holdout candidate K_1/2^9   m=4  not in the rerun
+      chain-holdout candidate K_0/2^15  m=4  not in the rerun
+NAMED chain-holdout candidate K_1/2^15  m=4  frozen  39,537,587  rerun  27,620,511  DIFF word_ops,matrix_rows,matrix_cols
+      chain-holdout candidate K_0/2^13  m=3  not in the rerun
+
+named cells reproduce exactly: False; every row of both ladders: False

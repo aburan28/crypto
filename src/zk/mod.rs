@@ -56,7 +56,7 @@
 //!   non-interactive via Fiat-Shamir) but **not succinct**.  A
 //!   Schnorr proof for a 256-bit DLP is ~64 bytes; a SNARK proof
 //!   for the same statement could be ~200 bytes but with a much
-//!   more complex prover.  See `RESEARCH_P256.md`'s ZK section for
+//!   more complex prover.  See `research/notes/cm-isogeny/RESEARCH_P256.md`'s ZK section for
 //!   the roadmap toward Bulletproofs, KZG, Groth16, PLONK, STARKs.
 //!
 //! - **Not pairing-based.**  No pairings (BLS12-381, BN254) yet —

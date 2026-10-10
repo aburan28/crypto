@@ -1,0 +1,55 @@
+{
+  "accounting_note": "Container CPU time includes compiler/profiler/checker work. Solver Ir is complete worker user-space instruction cost; kernel/device/profiler implementation and external audit are separate research overhead.",
+  "additional_search_history_audit_host_cpu_seconds": 21.757233,
+  "benchmark_agent_reported_inference_cost_usd": 0,
+  "campaigns": [
+    {
+      "container_cpu_hours": 1.1190866899999998,
+      "container_cpu_seconds": 4028.712084,
+      "host_child_cpu_seconds": 70.138115,
+      "outcome": "retained",
+      "peak_memory_bytes": 2434670592,
+      "run": "autolab-20260915T193057Z",
+      "wall_seconds": 4417.016766786575
+    },
+    {
+      "container_cpu_hours": 0.44452687055555556,
+      "container_cpu_seconds": 1600.296734,
+      "host_child_cpu_seconds": 60.759722000000004,
+      "outcome": "promoted",
+      "peak_memory_bytes": 1822347264,
+      "run": "autolab-20260915T205319Z",
+      "wall_seconds": 1556.741367340088
+    }
+  ],
+  "inference_cost_scope": "provider zero-price catalog and completed event costs; unfinished requests not independently invoiced",
+  "local_cpu_price_usd_per_hour": null,
+  "measured_container_cpu_hours": 1.6942664908333334,
+  "measured_container_cpu_seconds": 6099.359367,
+  "measured_host_orchestration_report_child_cpu_seconds": 130.897837,
+  "new_cloud_resources": false,
+  "recorded_utc": "2026-09-15T21:22:12.259827+00:00",
+  "schema_version": 1,
+  "solver_cost_unit": "valgrind-3.22-amd64-Ir",
+  "source_development": {
+    "container_cpu_hours": 0.13065293027777777,
+    "container_cpu_seconds": 470.350549,
+    "peak_memory_bytes": 1601720320
+  },
+  "source_development_and_final_verification_model_calls": 0,
+  "source_sha256": {
+    "runs/autolab-20260915T193057Z/jobs/autolab-20260915T193057Z/task__7skVSKF/verifier/resources.json": "2cdca8ddef73396e564ab98777be14a85e2d9bcee3135a5f1e655b9f4aa3f6c2",
+    "runs/autolab-20260915T193057Z/launch.json": "bd4b27b2ac6213103f189fc66fca58c05068114e84581184fe26d35e4d365f3a",
+    "runs/autolab-20260915T193057Z/status.json": "d29f79b0afe7efba1cf9a89ec056c7d1cb661b15824e61ee8d9ba10db40b1441",
+    "runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/resources.json": "8d73b8ab14149f31f21ab793727a6446c56dc93a0a56ffa7242b475f379dc4c1",
+    "runs/autolab-20260915T205319Z/launch.json": "c51023c767c401a42adbe603c74153606424acbe0b77a351802590b62c1ac946",
+    "runs/autolab-20260915T205319Z/status.json": "706bc79e721b6cd0d3cd5b881c0376cea9452e4b36880a2f604f12e267ba53e9"
+  },
+  "total_research_dollar_cost": null,
+  "unmetered_or_unpriced": [
+    "Initial toolchain and image setup",
+    "Host source-test compilation and source-development audit",
+    "Additional orchestration, storage and electricity",
+    "This assistant session billing"
+  ]
+}

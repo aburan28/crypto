@@ -1,0 +1,118 @@
+{
+  "impossible_algebraic_cells": 0,
+  "interpretation": "Static encoder check only; dispatch, natural yield, complete recovery and cost remain unmeasured.",
+  "layout": "m*ell+(m-2)*n",
+  "max_boolean_variables": 64,
+  "rows": [
+    {
+      "basis_length": 6,
+      "boolean_variables": 35,
+      "candidate": "f4_d6",
+      "cell": "n17a1",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 37,
+      "candidate": "f4_d6",
+      "cell": "n19a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 41,
+      "candidate": "f4_d6",
+      "cell": "n23a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 41,
+      "candidate": "f4_d6",
+      "cell": "n23a1",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 49,
+      "candidate": "f4_d6",
+      "cell": "n31a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 35,
+      "candidate": "f5_d6",
+      "cell": "n17a1",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 37,
+      "candidate": "f5_d6",
+      "cell": "n19a0",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 41,
+      "candidate": "f5_d6",
+      "cell": "n23a0",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 41,
+      "candidate": "f5_d6",
+      "cell": "n23a1",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    },
+    {
+      "basis_length": 6,
+      "boolean_variables": 49,
+      "candidate": "f5_d6",
+      "cell": "n31a0",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "WITHIN_LAYOUT_CAP_ONLY",
+      "summands": 3
+    }
+  ],
+  "schema_version": 1,
+  "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "source_objects": {
+    "examples/ic_tournament_worker.rs": "745247f3d89d46cdffb6d1f28778971caae7aa21",
+    "src/cryptanalysis/koblitz_factor_base_search.rs": "8aacd0b9c0c4b4e8702c97d631319afdaa4e22e6",
+    "src/cryptanalysis/koblitz_groebner.rs": "91ee5d6cfd99166697895aac62dbabb1f4d9778c",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "16a102a9be61630da2d1c49bcabcc55eaf5ab2f0",
+    "src/cryptanalysis/polynomial_reuse.rs": "f79411c0f2309090b4ba7ddfd9b80bb202859796"
+  },
+  "status": "PASS_STATIC_LAYOUT_ONLY"
+}

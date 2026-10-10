@@ -1,0 +1,57 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index cd730af6..3884008a 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -3825,14 +3825,22 @@ impl PairSumTable {
+     /// `out` is cleared first.
+     pub fn pairs_for(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+         let key = self.key_of(target);
+-        self.pairs_for_key(target, key, out)
++        self.pairs_for_key(target, key, false, out)
+     }
+ 
+     /// [`Self::pairs_for`] for a target whose key is already in hand, so
+     /// that a scan canonicalising a row at a time does not do it twice.
+-    fn pairs_for_key(&self, target: FastPoint, key: u64, out: &mut Vec<(u32, u32)>) {
++    /// `already_admitted` skips a redundant presence-filter hash and
++    /// load when the caller just performed that exact check.
++    fn pairs_for_key(
++        &self,
++        target: FastPoint,
++        key: u64,
++        already_admitted: bool,
++        out: &mut Vec<(u32, u32)>,
++    ) {
+         out.clear();
+-        if !self.admitted(key) {
++        if !already_admitted && !self.admitted(key) {
+             return;
+         }
+         if self.is_compact() {
+@@ -4024,7 +4032,7 @@ impl PairSumTable {
+                 } else {
+                     offset - tail
+                 };
+-                self.pairs_for_key(*rest, keys[within], &mut pairs);
++                self.pairs_for_key(*rest, keys[within], true, &mut pairs);
+                 for &(i, j) in &pairs {
+                     if !sink(&[i as usize, j as usize, k]) {
+                         return;
+@@ -4151,7 +4159,7 @@ impl PairSumTable {
+                             continue;
+                         }
+                         let k = b * BLOCK + offset;
+-                        self.pairs_for_key(*rest, keys[offset], &mut pairs);
++                        self.pairs_for_key(*rest, keys[offset], true, &mut pairs);
+                         for &(i, j) in &pairs {
+                             if (!sorted || j as usize <= k) && !sink(&[i as usize, j as usize, k]) {
+                                 return;
+@@ -4218,7 +4226,7 @@ impl PairSumTable {
+                         if !self.admitted(keys[k]) {
+                             continue;
+                         }
+-                        self.pairs_for_key(*rest, keys[k], &mut pairs);
++                        self.pairs_for_key(*rest, keys[k], true, &mut pairs);
+                         for &(i, j) in &pairs {
+                             if (!sorted || j as usize <= k)
+                                 && !sink(&[i as usize, j as usize, k, l])

@@ -63,7 +63,7 @@
 //!
 //! Building a key-recovery attack on top (Rønjom 2017's 5-round
 //! result) is structurally a matter of layering byte-position
-//! filters across many yoyo iterations; that is `DEFERRED.md`
+//! filters across many yoyo iterations; that is `docs/DEFERRED.md`
 //! material.
 
 use super::reduced::ReducedAes128;
@@ -89,9 +89,7 @@ pub fn exchange_bytes(
     let mut b = *s2;
     for (i, &pos) in support.iter().enumerate() {
         if (swap_mask >> i) & 1 == 1 {
-            let t = a[pos];
-            a[pos] = b[pos];
-            b[pos] = t;
+            std::mem::swap(&mut a[pos], &mut b[pos]);
         }
     }
     (a, b)

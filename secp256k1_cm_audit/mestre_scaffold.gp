@@ -2,7 +2,7 @@
 \\ Mestre algorithm scaffolding — the easy pieces
 \\ ============================================================
 \\
-\\ Companion to RESEARCH_MESTRE_HOWE.md.  Implements one piece of
+\\ Companion to research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md.  Implements one piece of
 \\ the Mestre reconstruction pipeline that PARI can compute
 \\ directly: Igusa-Clebsch invariants and Igusa invariants of a
 \\ KNOWN genus-2 curve C: y² = h(x).
@@ -112,7 +112,7 @@ print("");
 \\ What's needed beyond this scaffold
 \\ ------------------------------------------------------------
 print("================================================================");
-print("Out-of-scope for this scaffold (RESEARCH_MESTRE_HOWE.md §7)");
+print("Out-of-scope for this scaffold (research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md §7)");
 print("================================================================");
 print("");
 print("  1. Full I_2, I_4, I_6 polynomial formulas in (a_i).");
@@ -129,7 +129,7 @@ print("     resolution.  Implemented in Magma but not in PARI.");
 print("");
 print("Status: scaffold demonstrates the framework.  Full Howe-cover");
 print("construction for secp256k1 remains the open implementation");
-print("task documented in RESEARCH_MESTRE_HOWE.md and acknowledged in");
-print("RESEARCH_SECP256K1_CM.md §8.10 errata.");
+print("task documented in research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md and acknowledged in");
+print("research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md §8.10 errata.");
 print("");
 print("================================================================");

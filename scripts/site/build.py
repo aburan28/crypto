@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Assemble the published GitHub Pages site for aburan28/crypto.
+
+The ECC2K-130 workflow uploads the directory this script writes, every 3
+minutes.
+Everything it publishes already exists in the repository; the script only
+copies and lays out, so the repository file stays canonical (AGENTS.md §7)
+and no published page is ever the only copy of a figure.
+
+Layout, and why each path is where it is:
+
+    /                     landing page
+    /assets/site.css      landing-page styles
+    /assets/rho-gpu*      the opt-in browser WebGPU Pollard rho engine
+    /browser/             docs/browser/, the lab browser over curves, methods,
+                          factor bases, candidates, rounds and sessions
+    /scoreboard/          docs/index-calculus-scoreboard.html, the cost ledger
+    /scoreboard/ic-leaderboard.html  docs/ic-leaderboard.html, curve by curve
+    /scoreboard/ic-current-state.html  docs/ic-current-state.html, where things stand
+    /scoreboard/ic-measurement.html  docs/ic-measurement.html, the IC measurement standard
+    /status/              the ECC2K-130 distinguished-point dashboard
+    /status/walk-forest.svg  the walk-forest figure the dashboard shows
+    /status/walk-forest*.json, walk-forest.js  the same forests as an explorable graph
+    /status/status.json   snapshot, next to the page that reads it
+    /status/history.json  published history, likewise
+    /status.json          same bytes at the root
+    /history.json         same bytes at the root
+
+The two root-level JSON copies are a compatibility contract, not a
+convenience: the publish workflow reads the previous
+https://aburan28.github.io/crypto/history.json to merge history forward, so
+moving that file loses every published snapshot before the move. The copies
+under /status/ let the dashboard use relative fetches and so keep working
+when opened straight from the working tree.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import os
+import shutil
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+
+BASE_URL = "https://aburan28.github.io/crypto"
+
+# (source relative to repo root, destination relative to the site root).
+PAGES = (
+    ("docs/site/index.html", "index.html"),
+    ("research/polynomial_reuse_20260914/RESULTS.md", "research/polynomial_reuse_20260914/RESULTS.md"),
+    ("research/polynomial_reuse_20260914/results/run-001/summary.json", "research/polynomial_reuse_20260914/results/run-001/summary.json"),
+    ("research/polynomial_reuse_20260914/contract.json", "research/polynomial_reuse_20260914/contract.json"),
+    ("docs/algorithm-lab.html", "scoreboard/algorithm-lab.html"),
+    ("docs/algorithm-lab/core.js", "scoreboard/algorithm-lab/core.js"),
+    ("docs/algorithm-lab/ui.js", "scoreboard/algorithm-lab/ui.js"),
+    ("docs/algorithm-lab/style.css", "scoreboard/algorithm-lab/style.css"),
+    ("docs/algorithm-lab/README.md", "scoreboard/algorithm-lab/README.md"),
+    ("docs/performance-gains.html", "scoreboard/performance-gains.html"),
+    ("docs/performance-gains/summary.png", "scoreboard/performance-gains/summary.png"),
+    ("docs/performance-gains/summary.pdf", "scoreboard/performance-gains/summary.pdf"),
+    ("docs/performance-gains/summary.svg", "scoreboard/performance-gains/summary.svg"),
+    ("docs/performance-gains/data.json", "scoreboard/performance-gains/data.json"),
+    ("docs/performance-gains/comparisons.csv", "scoreboard/performance-gains/comparisons.csv"),
+    ("docs/site/404.html", "404.html"),
+    ("docs/site/favicon.svg", "favicon.svg"),
+    ("docs/site/assets/site.css", "assets/site.css"),
+    # The browser rho engine: page controller, worker, host arithmetic, shader.
+    # The worker fetches the shader by a relative URL, so all four have to land
+    # in one directory together (test_build.py pins that).
+    ("docs/site/assets/rho-gpu.js", "assets/rho-gpu.js"),
+    ("docs/site/assets/rho-gpu-worker.js", "assets/rho-gpu-worker.js"),
+    ("docs/site/assets/rho-gpu-host.js", "assets/rho-gpu-host.js"),
+    ("docs/site/assets/rho-gpu.wgsl", "assets/rho-gpu.wgsl"),
+    ("docs/index-calculus-scoreboard.html", "scoreboard/index.html"),
+    # Evidence linked from the scoreboard with ../ecc2k130/benchmarks/...
+    # must be copied at that same site-relative path or the published links 404.
+    ("ecc2k130/benchmarks/g7-12b-batch32-split/RESULTS.md", "ecc2k130/benchmarks/g7-12b-batch32-split/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-batch32-split/comparison.json", "ecc2k130/benchmarks/g7-12b-batch32-split/comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-batch32-split/validation-audit.json", "ecc2k130/benchmarks/g7-12b-batch32-split/validation-audit.json"),
+    ("ecc2k130/benchmarks/g7-12b-direct-delta34/RESULTS.md", "ecc2k130/benchmarks/g7-12b-direct-delta34/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-direct-delta34/comparison.json", "ecc2k130/benchmarks/g7-12b-direct-delta34/comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-direct-delta34/validation-audit.json", "ecc2k130/benchmarks/g7-12b-direct-delta34/validation-audit.json"),
+    ("ecc2k130/benchmarks/g7-12b-larger-batch-xcache/RESULTS.md", "ecc2k130/benchmarks/g7-12b-larger-batch-xcache/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-larger-batch-xcache/comparison-followup.json", "ecc2k130/benchmarks/g7-12b-larger-batch-xcache/comparison-followup.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-23-bridge/RESULTS.md", "ecc2k130/benchmarks/g7-12b-xonly-23-bridge/RESULTS.md"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison-recompute.json", "ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison-recompute.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison.json", "ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-comparison.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-confirmation.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/bridge13-pipeline-mod72-confirmation.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-arith4-build.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-arith4-build.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-comparison.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-comparison.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-validation.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/poly15-validation.json"),
+    ("ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/production-mod72-final.json", "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/production-mod72-final.json"),
+    # Beside the scoreboard, whose relative link to it then resolves both in
+    # the working tree (docs/) and when published (/scoreboard/).
+    ("docs/ic-leaderboard.html", "scoreboard/ic-leaderboard.html"),
+    ("docs/ic-measurement.html", "scoreboard/ic-measurement.html"),
+    ("docs/ic-current-state.html", "scoreboard/ic-current-state.html"),
+    # The lab browser: a searchable index over curves, methods, factor bases,
+    # candidate identities, rounds and sessions.  Its data file is generated
+    # by scripts/build_lab_browser.py and sits beside the page so the
+    # relative fetch resolves in the working tree and when published.
+    ("docs/browser/index.html", "browser/index.html"),
+    ("docs/browser/browser.js", "browser/browser.js"),
+    ("docs/browser/browser.css", "browser/browser.css"),
+    ("docs/browser/data.json", "browser/data.json"),
+    ("docs/ecc2k130-status/index.html", "status/index.html"),
+    ("docs/ecc2k130-status/style.css", "status/style.css"),
+    # The walk-forest figure the dashboard shows, generated by walk_forest.py
+    # from docs/ecc2k130-status/walk-forest/; beside the page so the relative
+    # src resolves in the working tree as well as when published.  The trails
+    # and corpus it is drawn from stay in the repository, linked absolutely.
+    ("docs/ecc2k130-status/walk-forest.svg", "status/walk-forest.svg"),
+    # The same forests as graphs, for the page's explorer, with the script
+    # that draws them; all beside the page so its relative fetches resolve.
+    ("docs/ecc2k130-status/walk-forest.json", "status/walk-forest.json"),
+    ("docs/ecc2k130-status/walk-forest-gf2-23.json", "status/walk-forest-gf2-23.json"),
+    ("docs/ecc2k130-status/walk-forest.js", "status/walk-forest.js"),
+    ("docs/ecc2k130-status/how.html", "status/how.html"),
+    ("docs/ecc2k130-status/rho-toy.js", "status/rho-toy.js"),
+)
+
+# Snapshot data, published twice: beside the dashboard and at the root.
+DATA = (
+    ("docs/ecc2k130-status/status.json", ("status/status.json", "status.json")),
+    ("docs/ecc2k130-status/history.json", ("status/history.json", "history.json")),
+    ("docs/ecc2k130-status/mac-control.json", ("status/mac-control.json",)),
+)
+
+# Pages worth listing for crawlers. Data files and the 404 stay out.
+SITEMAP = ("/", "/browser/", "/scoreboard/", "/scoreboard/ic-leaderboard.html", "/scoreboard/ic-measurement.html", "/scoreboard/ic-current-state.html", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/", "/status/how.html")
+
+
+def copy(src_rel: str, dest_rel: str, out_dir: str, root: str = ROOT) -> str:
+    src = os.path.join(root, src_rel)
+    if not os.path.exists(src):
+        raise SystemExit(f"missing site source: {src_rel}")
+    dest = os.path.join(out_dir, dest_rel)
+    os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+    shutil.copyfile(src, dest)
+    return dest
+
+
+def render_robots() -> str:
+    return "\n".join(
+        (
+            "User-agent: *",
+            "Allow: /",
+            f"Sitemap: {BASE_URL}/sitemap.xml",
+            "",
+        )
+    )
+
+
+def render_sitemap(lastmod: str) -> str:
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for path in SITEMAP:
+        lines += ["  <url>", f"    <loc>{BASE_URL}{path}</loc>", f"    <lastmod>{lastmod}</lastmod>", "  </url>"]
+    lines += ["</urlset>", ""]
+    return "\n".join(lines)
+
+
+def write(text: str, dest_rel: str, out_dir: str) -> str:
+    dest = os.path.join(out_dir, dest_rel)
+    os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+    with open(dest, "w", encoding="utf-8") as fh:
+        fh.write(text)
+    return dest
+
+
+def build(out_dir: str, root: str = ROOT, lastmod: str | None = None) -> list[str]:
+    """Write the site into out_dir and return the paths published, sorted."""
+    if os.path.exists(out_dir):
+        shutil.rmtree(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
+
+    written = [copy(src, dest, out_dir, root) for src, dest in PAGES]
+    for src, dests in DATA:
+        written += [copy(src, dest, out_dir, root) for dest in dests]
+
+    stamp = lastmod or dt.datetime.now(dt.timezone.utc).date().isoformat()
+    written.append(write(render_robots(), "robots.txt", out_dir))
+    written.append(write(render_sitemap(stamp), "sitemap.xml", out_dir))
+    # Pages is served by Actions here, so Jekyll never runs; the marker keeps
+    # that true if the source is ever switched back to a branch.
+    written.append(write("", ".nojekyll", out_dir))
+    return sorted(os.path.relpath(path, out_dir) for path in written)
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="Assemble the GitHub Pages site.")
+    parser.add_argument("--out", default="_site", help="output directory (recreated)")
+    parser.add_argument("--root", default=ROOT, help="repository root to read sources from")
+    parser.add_argument("--lastmod", default=None, help="sitemap lastmod date (default: today, UTC)")
+    args = parser.parse_args(argv)
+
+    published = build(os.path.abspath(args.out), os.path.abspath(args.root), args.lastmod)
+    for path in published:
+        print(path)
+    print(f"{len(published)} files -> {args.out}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

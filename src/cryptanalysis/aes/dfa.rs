@@ -50,7 +50,6 @@
 
 use super::reduced::{ReducedAes128, RoundOps};
 use super::visualize::{format_recovery_progress, format_state_grid};
-use crate::symmetric::aes::{key_expansion, AesKey};
 
 // ── AES inverse S-box (FIPS PUB 197) ─────────────────────────────────
 
@@ -167,7 +166,11 @@ pub fn inject_fault_round_8(
 /// differ between `correct` and `faulted`.  For a fault at round
 /// 8, every byte differs (with overwhelming probability).
 pub fn count_active_ct_bytes(correct: &[u8; 16], faulted: &[u8; 16]) -> usize {
-    correct.iter().zip(faulted.iter()).filter(|(a, b)| a != b).count()
+    correct
+        .iter()
+        .zip(faulted.iter())
+        .filter(|(a, b)| a != b)
+        .count()
 }
 
 fn bytes_to_state(block: &[u8; 16]) -> [[u8; 4]; 4] {
@@ -349,6 +352,7 @@ pub fn format_dfa_visualization(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::symmetric::aes::{key_expansion, AesKey};
 
     /// **Fault injection produces a different ciphertext** when the
     /// fault is non-zero.

@@ -2,7 +2,7 @@
 
 The main-branch large-prime collector inspected for this study uses u64 field
 coordinates and relation coefficients. It cannot import the primary F2^83
-curve or its 81-bit subgroup order. The isolated study branch now contains
+curve or its 81-bit subgroup order. The integrated source contains
 src/cryptanalysis/koblitz_large_prime.rs, a separate exact BigUint row
 eliminator for zero, one or two residual points. This is an algebra and
 verification component, not a relation-discovery backend or a measured

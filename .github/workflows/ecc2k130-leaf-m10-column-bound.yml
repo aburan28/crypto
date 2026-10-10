@@ -1,0 +1,34 @@
+name: ECC2K-130 leaf m10 column-budget bound
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-leaf-m10-column-bound.yml'
+      - 'research/notes/ecc2k130/leaf_m10_column_budget_20260930/**'
+      - 'docs/index-calculus-scoreboard.html'
+
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  derive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            research/notes/ecc2k130/leaf_m10_column_budget_20260930
+            research/notes/ecc2k130/leaf_m10_support_outcome_20260930/ANALYSIS.json
+            research/notes/ecc2k130/m10_export_capacity_20260925/inputs/balanced_m10_result.json
+            research/notes/ecc2k130/m10_export_capacity_20260925/inputs/unequal_m10_result.json
+            .github/workflows/ecc2k130-leaf-m10-column-bound.yml
+      - name: Recompute exact integer capacity bound and compare archive
+        run: |
+          python3 research/notes/ecc2k130/leaf_m10_column_budget_20260930/bound.py
+          git diff --exit-code -- research/notes/ecc2k130/leaf_m10_column_budget_20260930/BOUND.json

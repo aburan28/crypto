@@ -1,0 +1,16 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "pilot timing estimate only; throwaway seed, not the frozen panel",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 41}, {"kind": "koblitz", "a": 0, "n": 53}],
+    "targets_per_curve": 1,
+    "target_seed": 999001,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"lanes": "32", "dp_bits": "8", "step_cap_factor": "2000"}}},
+    {"name": "ic-k8", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k16", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 999002, "isolation_required": "L2", "timeout_seconds": 600}
+}

@@ -1,0 +1,42 @@
+--- a/src/cryptanalysis/gaudry_cubic.rs
++++ b/src/cryptanalysis/gaudry_cubic.rs
+@@ -1214,20 +1214,31 @@
+     /// The three `F_p`-components of `H(e₁, e₂, e₃, x_R)` as sparse
+     /// coefficient maps over the monomials of total degree ≤ 4.
+     pub fn weil_restrict(&self, f: &Fp3, x_r: &E3) -> [HashMap<[u8; 3], u64>; 3] {
+-        let mut out = [HashMap::new(), HashMap::new(), HashMap::new()];
++        // e1/e2/e3 each have exponent at most four. Use a small fixed
++        // accumulator, then insert each nonzero coefficient only once.
++        let mut coefficients = [Fp3::ZERO; 125];
+         let mut pow = [Fp3::ONE; 5];
+         for i in 1..5 {
+             pow[i] = f.mul(&pow[i - 1], x_r);
+         }
+         for (&e, &c) in &self.terms {
++            debug_assert!(e[0] + e[1] + e[2] <= 4);
++            let slot = e[0] as usize * 25 + e[1] as usize * 5 + e[2] as usize;
+             let v = f.mul(&c, &pow[e[3] as usize]);
+-            for k in 0..3 {
+-                let entry = out[k].entry([e[0], e[1], e[2]]).or_insert(0);
+-                *entry = am(*entry, v.0[k], f.p);
+-            }
+-        }
+-        for o in out.iter_mut() {
+-            o.retain(|_, v| *v != 0);
++            coefficients[slot] = f.add(&coefficients[slot], &v);
++        }
++        let mut out = std::array::from_fn(|_| HashMap::with_capacity(35));
++        for a in 0..=4u8 {
++            for b in 0..=(4 - a) {
++                for c in 0..=(4 - a - b) {
++                    let value = coefficients[a as usize * 25 + b as usize * 5 + c as usize];
++                    for k in 0..3 {
++                        if value.0[k] != 0 {
++                            out[k].insert([a, b, c], value.0[k]);
++                        }
++                    }
++                }
++            }
+         }
+         out
+     }

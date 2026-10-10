@@ -1,0 +1,4 @@
+interface:
+  display_name: "IC Tournament Operator"
+  short_description: "Run and resume verified IC candidate tournaments"
+  default_prompt: "Use $ic-run-tournament to execute a bounded end-to-end IC tournament and report its verified result."

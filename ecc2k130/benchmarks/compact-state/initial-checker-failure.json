@@ -1,0 +1,28 @@
+{
+  "valid": false,
+  "status": "Terminal artifact failed or is incomplete; evidence preserved",
+  "rawSha256": "3ca122fd091eb92b20b71d3568934a241136d91aa025426d109d670d510f84d9",
+  "auditorSha256": "7bd4fed468ba5c42cd078546e4706a0da2bd698cf9064a00f1e303ec75d7be95",
+  "findings": [
+    "progress report/drop accounting"
+  ],
+  "goalEvaluation": {
+    "repeatedConfirmationAvailable": false,
+    "achievementEstablished": false
+  },
+  "producerReportedValid": true,
+  "producerError": null,
+  "producerCompatibilityGatesComplete": true,
+  "observedTimedAttempts": 17,
+  "observedWarmups": 2,
+  "observedScreens": 3,
+  "failedCommands": [],
+  "ownerTerminalConfirmation": {
+    "session": 79881,
+    "app": "ap-ES20aKv9ORAjHHKMPsgo20",
+    "exitCode": 0,
+    "artifact": "/private/tmp/ecc2k-compact-state-walk-20260912/result.json",
+    "sha256": "3ca122fd091eb92b20b71d3568934a241136d91aa025426d109d670d510f84d9"
+  },
+  "rawArtifactPreserved": true
+}

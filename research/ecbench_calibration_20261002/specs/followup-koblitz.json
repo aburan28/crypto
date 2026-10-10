@@ -1,0 +1,40 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "calibration follow-up: plain rho on the largest Koblitz curve, 64 fresh targets",
+  "description": "Preregistered in ../PROTOCOL-2.md. Fresh targets (target_seed 20261003) for the cell whose round-1 prediction failed.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 41
+      }
+    ],
+    "targets_per_curve": 64,
+    "target_seed": 20261003
+  },
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "rho-plain",
+      "role": "baseline",
+      "method": {
+        "id": "rho.plain"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261003,
+    "isolation_required": "L2",
+    "timeout_seconds": 900
+  }
+}

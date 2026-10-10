@@ -1,0 +1,334 @@
+{
+  "provenance": {
+    "command": [
+      "/workspace/scratch/41f49cc08ea1/nagao-venv/bin/python",
+      "research/nagao_relations/solver_03/run.py"
+    ],
+    "python": "3.12.14",
+    "pycryptosat": "5.14.7",
+    "commit": "f1a06cf2aa66543f71c1459cafb22966f5debce7",
+    "dirty": "?? research/nagao_relations/solver_03/stderr.log\n?? research/nagao_relations/solver_03/stdout.log\n",
+    "sha256": {
+      "research/nagao_relations/solver_03/run.py": "2014dc65ae3770c426904acfc2bdacd9664629fc79520abae68cc2888bbbd64d",
+      "research/nagao_relations/solver_03/support.py": "012bc76f5d7845f0e56e83127675f8289c9930d436f5da8509029aa1caf5ccee",
+      "research/nagao_relations/solver_03/contract.json": "14d4db465dc16730e32cfd386019db262e17acaa598fa1361072e3fd840cc848",
+      "ecc2k130/codegen/decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+      "ecc2k130/codegen/cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879",
+      "ecc2k130/codegen/field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+      "ecc2k130/codegen/curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+      "ecc2k130/codegen/ir.py": "48fce7b23c6603eda336645ff9c6c04226be9d2488bb2ca1679d32b3859f9343",
+      "ecc2k130/codegen/build.py": "eeeb25eb6482b233c8d4ae56f5cc564d331897aaa4647ac2e83c6ccdbf8479a5",
+      "ecc2k130/codegen/nagaodecomp.py": "bb51628284100957ec22a8da294204943a08358ee46713d6d254d721143fc446",
+      "ecc2k130/codegen/nagaocompare.py": "57b27ec7098196d07734568c2b2bc76a7532fd2ac753a835c2f8cd3104a7fa5a",
+      "ecc2k130/codegen/nagaoannihilator.py": "7cf9d7f9fc6f2d7f9154e32a8dacd16429a50d9e2a745a84aa2335fb513b1b73",
+      "ecc2k130/codegen/indexcalc.py": "1be6ee84858db71349a034241b92d842e0c79ee6a0fabaefbc497d586ada71a7"
+    }
+  },
+  "validation": {
+    "support": {
+      "checked_coefficient_pairs": 992,
+      "target": [
+        6,
+        10
+      ],
+      "all_remainder_and_nonzero_vectors_match": true,
+      "zero_b_rejected": true
+    },
+    "hybrid": {
+      "coefficient_root_triples": 7936,
+      "all_vectors_match": true
+    }
+  },
+  "groups": [
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "chained-s3",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 2,
+      "unsat": 2,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.018884441000409424,
+      "cnf_variables": 417
+    },
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "chained-s3",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 4,
+      "unsat": 0,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.01644990900240373,
+      "cnf_variables": 399
+    },
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "rr-norm",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 2,
+      "unsat": 2,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.025137910000921693,
+      "cnf_variables": 591
+    },
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "rr-norm",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 4,
+      "unsat": 0,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.026056921000417788,
+      "cnf_variables": 555
+    },
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "support-fair",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 2,
+      "unsat": 2,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.3621857319958508,
+      "cnf_variables": 957
+    },
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "support-fair",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 4,
+      "unsat": 0,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.18861181999818655,
+      "cnf_variables": 903
+    },
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "hybrid",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 2,
+      "unsat": 2,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.223401808001654,
+      "cnf_variables": 833
+    },
+    {
+      "n": 5,
+      "d": 3,
+      "variant": "hybrid",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 4,
+      "unsat": 0,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.1323191620031139,
+      "cnf_variables": 779
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "chained-s3",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 3,
+      "unsat": 1,
+      "timeout": 0,
+      "diagnostic_total_seconds": 1.4118512960012595,
+      "cnf_variables": 1357
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "chained-s3",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 4,
+      "unsat": 0,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.5343684340004984,
+      "cnf_variables": 1384
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "rr-norm",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 3,
+      "unsat": 1,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.4988048730047012,
+      "cnf_variables": 1797
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "rr-norm",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 4,
+      "unsat": 0,
+      "timeout": 0,
+      "diagnostic_total_seconds": 0.5775268349971157,
+      "cnf_variables": 1827
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "support-fair",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 0,
+      "unsat": 0,
+      "timeout": 4,
+      "diagnostic_total_seconds": 12.25982182000007,
+      "cnf_variables": 4287
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "support-fair",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 0,
+      "unsat": 0,
+      "timeout": 4,
+      "diagnostic_total_seconds": 12.11381972199888,
+      "cnf_variables": 4344
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "hybrid",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 1,
+      "unsat": 0,
+      "timeout": 3,
+      "diagnostic_total_seconds": 9.907889815003728,
+      "cnf_variables": 3130
+    },
+    {
+      "n": 9,
+      "d": 4,
+      "variant": "hybrid",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 1,
+      "unsat": 0,
+      "timeout": 3,
+      "diagnostic_total_seconds": 9.53835881699706,
+      "cnf_variables": 3187
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "chained-s3",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 0,
+      "unsat": 0,
+      "timeout": 4,
+      "diagnostic_total_seconds": 12.094737444000202,
+      "cnf_variables": 1831
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "chained-s3",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 2,
+      "unsat": 0,
+      "timeout": 2,
+      "diagnostic_total_seconds": 9.56035238500408,
+      "cnf_variables": 1996
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "rr-norm",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 2,
+      "unsat": 1,
+      "timeout": 1,
+      "diagnostic_total_seconds": 8.457712419000018,
+      "cnf_variables": 2512
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "rr-norm",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 3,
+      "unsat": 0,
+      "timeout": 1,
+      "diagnostic_total_seconds": 5.508646180998767,
+      "cnf_variables": 2622
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "support-fair",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 0,
+      "unsat": 0,
+      "timeout": 4,
+      "diagnostic_total_seconds": 12.436774205001711,
+      "cnf_variables": 7972
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "support-fair",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 0,
+      "unsat": 0,
+      "timeout": 4,
+      "diagnostic_total_seconds": 12.224922812998557,
+      "cnf_variables": 8247
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "hybrid",
+      "stratum": "uniform",
+      "attempted": 4,
+      "sat": 0,
+      "unsat": 0,
+      "timeout": 4,
+      "diagnostic_total_seconds": 12.17395451399716,
+      "cnf_variables": 5043
+    },
+    {
+      "n": 11,
+      "d": 5,
+      "variant": "hybrid",
+      "stratum": "known_decomposable",
+      "attempted": 4,
+      "sat": 0,
+      "unsat": 0,
+      "timeout": 4,
+      "diagnostic_total_seconds": 12.163185060002434,
+      "cnf_variables": 5318
+    }
+  ],
+  "errors": [],
+  "limits": "Verified SAT/UNSAT decisions, incomplete cases, source-CNF sizes, construction/loading/solve/verification diagnostic times, first-verified relation, rejected candidates, branch count. Full attack S and rho ratio null."
+}

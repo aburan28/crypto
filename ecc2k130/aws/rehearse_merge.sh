@@ -22,6 +22,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# The certification path has a frozen collision pair, independent of SIMD
+# width, batch size and a lucky birthday window. Random exploration is opt-in.
+if [ "${ECC_RANDOM_REHEARSAL:-0}" != "1" ]; then
+    make -C .. cpu build/test-production
+    exec python3 -m unittest test_certification.Certification.test_exact_known_cross_corpus_collision_and_idempotence -v
+fi
+
 CURVE=${CURVE:-41}
 WORKERS=${WORKERS:-16}
 DPW=${DPW:-18}
@@ -58,7 +65,7 @@ while [ "$attempt" -lt "$ATTEMPTS" ]; do
         continue
     fi
     # Detect only, then solve, so both code paths run.
-    python3 merge.py --work "$DIR/work" --local "$DIR/dp" --curve "$CURVE" --dp-weight "$DPW" \
+    python3 merge.py --legacy --work "$DIR/work" --local "$DIR/dp" --curve "$CURVE" --dp-weight "$DPW" \
         --client "$CLIENT" --buckets 64 --detect-only > "$DIR/detect.json" 2> "$DIR/detect.log"
     n=$(python3 -c "import json;print(json.load(open('$DIR/detect.json'))['collisions'])")
     pts=$(python3 -c "import json;print(json.load(open('$DIR/detect.json'))['corpus'])")
@@ -68,14 +75,14 @@ while [ "$attempt" -lt "$ATTEMPTS" ]; do
     fi
     # A second pass must be incremental: nothing new to ingest, the collision
     # already recorded, so only the solve step should run now.
-    python3 merge.py --work "$DIR/work" --local "$DIR/dp" --curve "$CURVE" --dp-weight "$DPW" \
+    python3 merge.py --legacy --work "$DIR/work" --local "$DIR/dp" --curve "$CURVE" --dp-weight "$DPW" \
         --client "$CLIENT" > "$DIR/solve.json" 2> "$DIR/solve.log" || true
     if python3 -c "import json,sys; s=json.load(open('$DIR/work/state.json'))['solved']; sys.exit(0 if s and s['verified'] else 1)"; then
         echo "  steps=$STEPS: $WORKERS workers, $pts points, none solved alone"
         echo "  merge found $n cross-corpus collision(s)"
         python3 -c "import json; s=json.load(open('$DIR/work/state.json'))['solved']; print('  k =', s['k'], '(verified; planted match: %s)' % s['matchesPublished'])"
         # The solved state must short-circuit a further pass.
-        python3 merge.py --work "$DIR/work" --local "$DIR/dp" --curve "$CURVE" --client "$CLIENT" >/dev/null 2>&1
+        python3 merge.py --legacy --work "$DIR/work" --local "$DIR/dp" --curve "$CURVE" --dp-weight "$DPW" --client "$CLIENT" >/dev/null 2>&1
         echo "REHEARSAL PASSED: cross-corpus collision recovered through merge.py"
         exit 0
     fi

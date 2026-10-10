@@ -14,7 +14,7 @@ use num_traits::{One, Zero};
 
 use crate::binary_ecc::curve::point_neg;
 use crate::binary_ecc::{BinaryPoint, F2mElement};
-use crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n;
+use crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n_particular;
 use crate::cryptanalysis::koblitz_index_calculus::{point_key, FrobeniusFactorBase, KoblitzCurve};
 use crate::utils::mod_inverse;
 
@@ -319,9 +319,6 @@ impl<'a> WideLargePrimeEliminator<'a> {
     ) -> Result<Option<WideSolvedLogs>, &'static str> {
         let orbit_count = self.base.signed_orbits.len();
         let columns = orbit_count + 1;
-        if relations.len() < columns {
-            return Ok(None);
-        }
         let modulus = &self.reducer.modulus;
         let mut matrix = Vec::with_capacity(relations.len());
         let mut rhs = Vec::with_capacity(relations.len());
@@ -348,34 +345,15 @@ impl<'a> WideLargePrimeEliminator<'a> {
             matrix.push(row);
             rhs.push(relation.coef_a.clone());
         }
-        let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus)
-            .ok_or("completed-row matrix has a noninvertible pivot")?;
-        for (row, value) in matrix.iter().zip(&rhs) {
-            if row.iter().all(BigUint::is_zero) && !value.is_zero() {
-                return Err("completed-row matrix is inconsistent");
-            }
-        }
-        // The generic eliminator returns values for free columns. Require an
-        // actual unit pivot for each column before accepting its solution.
-        let mut unit_pivots = vec![false; columns];
-        for row in &matrix {
-            let mut nonzero_column = None;
-            for (column, value) in row.iter().enumerate() {
-                if !value.is_zero() {
-                    if nonzero_column.is_some() {
-                        nonzero_column = None;
-                        break;
-                    }
-                    nonzero_column = Some(column);
-                }
-            }
-            if let Some(column) = nonzero_column {
-                unit_pivots[column] |= row[column] == BigUint::one();
-            }
-        }
-        if unit_pivots.iter().any(|&pivot| !pivot) {
+        if relations.len() < columns {
             return Ok(None);
         }
+        let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, modulus)
+            .ok_or("completed-row matrix has a noninvertible pivot")?;
+        if solution.rank < columns || solution.determined.iter().any(|&determined| !determined) {
+            return Ok(None);
+        }
+        let solution = solution.values;
         for (orbit, log) in solution[..orbit_count].iter().enumerate() {
             let index = *self.base.signed_orbits[orbit]
                 .first()

@@ -1,0 +1,167 @@
+{
+  "PDP_yield": null,
+  "full_ECDLP_cost": null,
+  "hosted_replay_sha256": "6441b335a55465420048b170e62e61fd7bd359d4dd8178dcd639ca2c7f4d235c",
+  "mac_replay_sha256": "6441b335a55465420048b170e62e61fd7bd359d4dd8178dcd639ca2c7f4d235c",
+  "method_crossover": null,
+  "raw_masks_replayed_on_each_host": 294912,
+  "result_sha256": "71c6a748a3d65f61e26d139713498aa6731cf64b53c066886ed663f2489ea1d5",
+  "rows": [
+    {
+      "arms": {
+        "balanced": {
+          "necessary_tuple_capacity_over_q": "1.532944670412",
+          "physical_tuple_product": "1043268081613366923392350363142874173649",
+          "physical_tuple_ratio_to_source": "1.000000000000",
+          "projected_columns_disjoint_across_slots": true,
+          "projected_union_ratio_to_source": "1.000000000000",
+          "uncompressed_projected_sign_union": 39880
+        },
+        "unequal": {
+          "necessary_tuple_capacity_over_q": "3.098750509013",
+          "physical_tuple_product": "2108900315408742840629516059380574909125",
+          "physical_tuple_ratio_to_source": "1.000000000000",
+          "projected_columns_disjoint_across_slots": true,
+          "projected_union_ratio_to_source": "1.000000000000",
+          "uncompressed_projected_sign_union": 43954
+        }
+      },
+      "curve": "source",
+      "high_slot_physical_points": 16125,
+      "high_slot_projected_sign_classes": 8062,
+      "low_slot_counts_constant": true,
+      "low_slot_physical_max": 7977,
+      "low_slot_physical_min": 7977,
+      "low_slot_physical_points": [
+        7977,
+        7977,
+        7977,
+        7977,
+        7977,
+        7977,
+        7977,
+        7977,
+        7977,
+        7977
+      ],
+      "low_slot_projected_sign_classes": [
+        3988,
+        3988,
+        3988,
+        3988,
+        3988,
+        3988,
+        3988,
+        3988,
+        3988,
+        3988
+      ],
+      "source_low_slot_count_transfer_holds": true
+    },
+    {
+      "arms": {
+        "balanced": {
+          "necessary_tuple_capacity_over_q": "1.960481898991",
+          "physical_tuple_product": "1334234841788902171362588446833961996535",
+          "physical_tuple_ratio_to_source": "1.278899321568",
+          "projected_columns_disjoint_across_slots": true,
+          "projected_union_ratio_to_source": "1.024949849549",
+          "uncompressed_projected_sign_union": 40875
+        },
+        "unequal": {
+          "necessary_tuple_capacity_over_q": "3.913502172585",
+          "physical_tuple_product": "2663391564474617606406915353845719840597",
+          "physical_tuple_ratio_to_source": "1.262929093905",
+          "projected_columns_disjoint_across_slots": true,
+          "projected_union_ratio_to_source": "1.022250534650",
+          "uncompressed_projected_sign_union": 44932
+        }
+      },
+      "curve": "leaf_1_0",
+      "high_slot_physical_points": 16259,
+      "high_slot_projected_sign_classes": 8129,
+      "low_slot_counts_constant": false,
+      "low_slot_physical_max": 8339,
+      "low_slot_physical_min": 8063,
+      "low_slot_physical_points": [
+        8145,
+        8189,
+        8223,
+        8233,
+        8063,
+        8339,
+        8121,
+        8183,
+        8161,
+        8103
+      ],
+      "low_slot_projected_sign_classes": [
+        4072,
+        4094,
+        4111,
+        4116,
+        4031,
+        4169,
+        4060,
+        4091,
+        4080,
+        4051
+      ],
+      "source_low_slot_count_transfer_holds": false
+    },
+    {
+      "arms": {
+        "balanced": {
+          "necessary_tuple_capacity_over_q": "2.018269953413",
+          "physical_tuple_product": "1373563353665728741818015662172737006025",
+          "physical_tuple_ratio_to_source": "1.316596738531",
+          "projected_columns_disjoint_across_slots": true,
+          "projected_union_ratio_to_source": "1.027933801404",
+          "uncompressed_projected_sign_union": 40994
+        },
+        "unequal": {
+          "necessary_tuple_capacity_over_q": "4.036787213523",
+          "physical_tuple_product": "2747295015547811573666887593878885694075",
+          "physical_tuple_ratio_to_source": "1.302714497918",
+          "projected_columns_disjoint_across_slots": true,
+          "projected_union_ratio_to_source": "1.025503935933",
+          "uncompressed_projected_sign_union": 45075
+        }
+      },
+      "curve": "leaf_1_4",
+      "high_slot_physical_points": 16323,
+      "high_slot_projected_sign_classes": 8161,
+      "low_slot_counts_constant": false,
+      "low_slot_physical_max": 8323,
+      "low_slot_physical_min": 8087,
+      "low_slot_physical_points": [
+        8161,
+        8095,
+        8323,
+        8233,
+        8243,
+        8167,
+        8235,
+        8297,
+        8157,
+        8087
+      ],
+      "low_slot_projected_sign_classes": [
+        4080,
+        4047,
+        4161,
+        4116,
+        4121,
+        4083,
+        4117,
+        4148,
+        4078,
+        4043
+      ],
+      "source_low_slot_count_transfer_holds": false
+    }
+  ],
+  "sample_point_images_checked_on_each_host": 264,
+  "schema": "ecc2k130-leaf-m10-support-analysis-v1",
+  "status": "PASS_DIAGNOSTIC"
+}

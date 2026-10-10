@@ -1,0 +1,34 @@
+diff -ruN a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-16 10:20:36.794481385 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-16 10:53:02.678604097 +0000
+@@ -69,7 +69,11 @@
+ fn point(p: &BinaryPoint) -> Value {
+     match p {
+         BinaryPoint::Infinity => Value::Null,
+-        BinaryPoint::Affine { x, y } => json!([x.to_biguint().to_string(), y.to_biguint().to_string()]),
++        BinaryPoint::Affine { x, y } => match (x.raw_bits(), y.raw_bits()) {
++            // Same decimal text as the general conversion, without a BigUint.
++            ([xw], [yw]) => json!([xw.to_string(), yw.to_string()]),
++            _ => json!([x.to_biguint().to_string(), y.to_biguint().to_string()]),
++        },
+     }
+ }
+ 
+@@ -225,6 +229,16 @@
+     };
+     let report = result.unwrap_or_else(|reason|json!({"schema_version":1,"status":"error","reason":reason}));
+     let success = matches!(report["status"].as_str(),Some("complete"|"fixture"));
+-    println!("{}", report);
++    // One serialisation into a buffer and one write: the same bytes as
++    // `println!("{}", report)`, without a fragment-by-fragment formatter.
++    let mut text = serde_json::to_vec(&report).expect("serialize report");
++    text.push(b'\n');
++    {
++        use std::io::Write;
++        let stdout = std::io::stdout();
++        let mut lock = stdout.lock();
++        lock.write_all(&text).expect("stdout");
++        lock.flush().expect("stdout");
++    }
+     if !success { std::process::exit(2); }
+ }

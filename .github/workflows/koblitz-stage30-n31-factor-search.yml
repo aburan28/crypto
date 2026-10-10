@@ -1,0 +1,49 @@
+name: Koblitz Stage 30 n31 factor search
+
+on:
+  pull_request:
+    paths:
+      - "scripts/run_koblitz_stage30_n31_search.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE30_N31_FACTOR_SEARCH.md"
+      - ".github/workflows/koblitz-stage30-n31-factor-search.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/run_koblitz_stage30_n31_search.py self-test
+
+  search:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and charge the exact search binary
+        run: |
+          mkdir "$RUNNER_TEMP/stage30-build"
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          /usr/bin/time -v -o "$RUNNER_TEMP/stage30-build/build.time" cargo build --release --locked --bin ic
+      - name: Run the fixed n31 search
+        run: |
+          python3 scripts/run_koblitz_stage30_n31_search.py run \
+            --ic target/release/ic \
+            --output "$RUNNER_TEMP/stage30-search" \
+            --timeout 3600
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage30-n31-search-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage30-build
+            ${{ runner.temp }}/stage30-search

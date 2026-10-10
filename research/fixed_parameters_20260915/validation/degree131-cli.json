@@ -1,0 +1,107 @@
+{
+  "accounting": {
+    "S": null,
+    "elapsed_ns": 1914468662,
+    "logical_calls": {
+      "field.add": 43391,
+      "field.frob": 9418,
+      "field.fromCoords": 72,
+      "field.inv": 8148,
+      "field.mul": 31038,
+      "field.toCoords": 238,
+      "field.trace": 65,
+      "group.add": 1794,
+      "group.dbl": 6368,
+      "group.frob": 3669,
+      "group.mul": 49,
+      "group.neg": 3668,
+      "group.onCurve": 48,
+      "group.pointFromX": 65,
+      "polynomial.xor": 4206596
+    },
+    "note": "nested logical call categories must not be summed; SAT internal operations are uncalibrated",
+    "orchestration_ns": 85520749,
+    "phases": {
+      "factor_base": {
+        "calls": {
+          "field.add": 40899,
+          "field.frob": 9416,
+          "field.fromCoords": 65,
+          "field.inv": 7627,
+          "field.mul": 28947,
+          "field.toCoords": 107,
+          "field.trace": 65,
+          "group.add": 1656,
+          "group.dbl": 5980,
+          "group.frob": 3668,
+          "group.mul": 46,
+          "group.neg": 3668,
+          "group.onCurve": 46,
+          "group.pointFromX": 65,
+          "polynomial.xor": 3934866
+        },
+        "ns": 1719076322
+      },
+      "parameter_validation": {
+        "calls": {
+          "field.add": 2492,
+          "field.frob": 2,
+          "field.fromCoords": 7,
+          "field.inv": 521,
+          "field.mul": 2091,
+          "field.toCoords": 131,
+          "group.add": 138,
+          "group.dbl": 388,
+          "group.frob": 1,
+          "group.mul": 3,
+          "group.onCurve": 2,
+          "polynomial.xor": 271730
+        },
+        "ns": 109871591
+      }
+    },
+    "rho_ratio": null,
+    "scope": "through result assembly, including artifact reads, work commits and certificate checks; excludes final report archival/output and connection close; external benchmark wall time includes these",
+    "total_common_operations": null
+  },
+  "attempts_saved": 0,
+  "coverage_ceiling": {
+    "denominator": "680564733841876926932320129493409985128",
+    "fraction": 1.2095460623607e-29,
+    "kind": "counting_bound_on_uniform_nonzero_targets",
+    "numerator": "8231743940"
+  },
+  "cumulative_measured_ns": 1914468662,
+  "degree": 131,
+  "identity": "085dcd7df25069494eb1406c78178c3523fa4184b95cf3b8cf8d3f8abd816c71",
+  "logs_available": false,
+  "operation": "fixed",
+  "orbit_columns": 14,
+  "pair_table": null,
+  "previous_invocations": 0,
+  "relations_saved": 0,
+  "reuse": {
+    "base_builds": 1
+  },
+  "schema_version": 1,
+  "signed_base_points": 3668,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "fdd1cab4dbc2ad8e843e236727d043068b753450acb75b4d6de13c5417c077b3",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "solver": "pairs",
+  "source_sha256": {
+    "cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879",
+    "curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+    "decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+    "field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+    "indexcalc_e2e.py": "7c8371c9dab3914c14867f8ed934b9362fb2df41b6245b703b7ea6d5524fb80a",
+    "indexcalc_fixed.py": "297fd14ce17067e39dead9e6bf8d27a25173caf1f966969a2c91b5bd4f297386"
+  },
+  "stage": "select",
+  "status": "stopped",
+  "subgroup_order": "680564733841876926932320129493409985129",
+  "targets": {}
+}

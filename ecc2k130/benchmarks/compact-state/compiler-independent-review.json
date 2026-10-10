@@ -1,0 +1,233 @@
+{
+  "bindings": {
+    "all158HostSourceFilesRehashed": true,
+    "all32UploadedFilesMatchFullManifestAndRemoteReceipt": true,
+    "all8DriverFilesRehashed": true,
+    "canonicalHostSourceSha256": "aa6bb5a5d3cf02c2dd70263858919cb73c0fee689ab7b5fe35827de16da52cf9",
+    "compileDriverSha256": "0980cd3e818169a602915cda124f523cb0733f5e3d30d27c445d061f8404ac7d",
+    "driverFreezeSha256": "e274582652294913dffd8af9f90dce4f631268d5809b91b96b846394a538e2ce",
+    "hostReceiptSha256": "b4cf0f933b2c9aacad237960f5cb3a5ecd392e539fc9c4bc090027994e49d0a6",
+    "hostSourceManifestSha256": "8807022f1ab1c64b69c6ce2b21f3dd9991322b066d04c6239a9d3b3f7198dda1",
+    "probeEqualsFrozenDriver": true,
+    "sourceUnchangedAfterCompileReportedAndLocallyReverified": true
+  },
+  "compilation": {
+    "architecture": "sm_120",
+    "attempts": 2,
+    "flags": {
+      "BATCH": 16,
+      "MINBLOCKS": 2,
+      "PACKED_BY_VALUE": 1,
+      "PACKED_CACHE_DENOM": 1,
+      "PACKED_CLMAD": 1,
+      "PACKED_DIRECT_REDUCE": 1,
+      "PACKED_GENERATED_PRODUCT": 1,
+      "PACKED_PAIR_PRODUCTS": 1,
+      "PACKED_PERM_SIGMA": 3,
+      "PACKED_POLY_CHAIN": 1,
+      "PACKED_POLY_STATE": 1,
+      "PACKED_SINGLE_PRODUCT": 1,
+      "PACKED_STATE_TILE": 256,
+      "PACKED_UNROLL_INV": 1,
+      "PACKED_WEIGHTED_PREFIX": 2,
+      "SMEM_SPILL": 0,
+      "THREADS": 256
+    },
+    "generatedExecutableRun": false,
+    "gpuAllocated": false,
+    "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+    "probeOnly": true,
+    "successfulCommandRecords": 14,
+    "toolVersion": "13.3.73",
+    "varyingFlag": "PACKED_COMPACT_STATE=0/1"
+  },
+  "controlReference": {
+    "cubinSha256": "3f13927e27c3c7ede49ff83c88e0a3722f2d063f06d2092e1531751935441395",
+    "currentControlBinaryRehashedToPriorIdentity": true,
+    "path": "/private/tmp/ecc2k-weighted-prefix-cpu-20260912/compile-result.json",
+    "rawSha256": "030baf7ef38c0ccd0b01d6ea97f0b56a2ea5866823517fad553851780884e3f2",
+    "retainedSassResourcesSymbolsAndNvdisasmExactlyEqual": true,
+    "row": "weighted2"
+  },
+  "findings": [],
+  "interpretation": {
+    "completeCodeCoverage": "Every128-bit instruction encoding in every executable ELF section was compared byte-for-byte with the retained cuobjdump output. All18 function symbols match the binary symbol table; all direct helper call targets resolve within complete symbol-bounded sections.",
+    "resourceCoverage": "Entry resources report zero stack/local/shared. All17 explicitly printed ptxas function-property rows report zero stack/spill. The compiler division helper is included in the complete init text and symbol/call review but has no separate ptxas property line; complete sections contain no LDL/STL/LDS/STS instructions.",
+    "tailWrites": "All emitted tail stores use STG.E.U8 at the tail-plane offset. No widened word-sized load/merge/store to preserve neighboring tail bytes was found. No helper performs hidden global stores; the existing walk report/guard ATOMG and REDG each remain one static instruction in both modes.",
+    "vectorWidths": "Compact walk caller contains8 LDG.E.128 and8 LDG.E.U8 plus5 STG.E.128 and5 STG.E.U8; init contains2 stores of each width. These are static instruction counts."
+  },
+  "limits": [
+    "Compiler evidence only: no speed, device correctness, hardware concurrency, residency or memory-sanitizer result is established.",
+    "The artifact is the isolated packed-kernel cubin probe, not a complete client executable; full-client compilation may differ and needs its own identity/resource check.",
+    "Register growth100 to108 does not determine a throughput outcome. Static instruction counts do not account for loop trips, predicates, scheduling, cache behavior or execution latency.",
+    "Direct byte-store lowering supports the intended neighboring-byte ownership but does not replace an actual device race/memory test.",
+    "Identical arithmetic source may receive different register assignments and schedules in the compact build.",
+    "No throughput target, production promotion or cryptanalytic conclusion follows from this result."
+  ],
+  "raw": {
+    "bytes": 10441594,
+    "path": "/private/tmp/ecc2k-compact-state-cpu-20260912/compile-result.json",
+    "remoteArtifact": "/data/compact-state-cpu/1789191463005371774/result.json",
+    "sha256": "f8e4852045e50b6edbf71742326ac5003fe3eaf2502f0188387258513266e625"
+  },
+  "rootReview": {
+    "path": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/compact-state-cpu-review.json",
+    "sha256": "720902d4cf8a2a5e294898b4359a6d700b9247e1402f4141ca16d5d1b8d5bee4"
+  },
+  "rows": {
+    "compact0": {
+      "all18FunctionSymbolsMatchRetainedReadelf": true,
+      "allReportedStackAndSpillPropertiesZero": true,
+      "binaryRetrievedReadOnlyAndRehashed": true,
+      "cubinBytes": 163976,
+      "cubinSha256": "3f13927e27c3c7ede49ff83c88e0a3722f2d063f06d2092e1531751935441395",
+      "elfClass": "ELF64 little endian",
+      "elfFlags": "0x6007802",
+      "elfMachine": 190,
+      "functions": {
+        "init": {
+          "allEncodedTextBytesVerified": true,
+          "allHelperSymbolsAndDirectTargetsResolved": true,
+          "callerBytes": 19584,
+          "callerMemoryOpcodes": {
+            "LDG.E": 1,
+            "LDG.E.64": 1,
+            "STG.E": 11,
+            "STG.E.64": 2
+          },
+          "callerNonNop": 1222,
+          "directCallSites": 16,
+          "encodedTextSha256": "5b8e67a411a67b4ba258f6b40c980f3264574e7963d6355b5be73d9ae3d5140d",
+          "fullInstructions": 3048,
+          "fullSectionBytes": 48768,
+          "helperCount": 7,
+          "normalizedAssemblySha256": "a2a6fb93564c1ea869e6969da05fe72dfeafa045fafb4e6151f7fd0d5832f3e0",
+          "resources": {
+            "localBytes": 0,
+            "registers": 98,
+            "sharedBytes": 0,
+            "stackBytes": 0
+          },
+          "symbol": "_ZN12eccPacked1314initE10WalkParamsIjEb",
+          "wholeSectionHasNoLocalOrSharedAccessInstructions": true
+        },
+        "walk": {
+          "allEncodedTextBytesVerified": true,
+          "allHelperSymbolsAndDirectTargetsResolved": true,
+          "callerBytes": 26704,
+          "callerMemoryOpcodes": {
+            "ATOMG.E.ADD.STRONG.GPU": 1,
+            "LDG.E": 41,
+            "LDG.E.64": 3,
+            "REDG.E.ADD.STRONG.GPU": 1,
+            "STG.E": 27,
+            "STG.E.64": 8
+          },
+          "callerNonNop": 1667,
+          "directCallSites": 18,
+          "encodedTextSha256": "b0e06ed3b7f4e4e2623acd86c515070e58f651d5b0636275aa222a1b0b59e2c8",
+          "fullInstructions": 4480,
+          "fullSectionBytes": 71680,
+          "helperCount": 9,
+          "normalizedAssemblySha256": "36ac348c7937ecf8e2f2310bcd1ead052797a8abdf5c59eade071b0e0d1d748e",
+          "resources": {
+            "localBytes": 0,
+            "registers": 100,
+            "sharedBytes": 0,
+            "stackBytes": 0
+          },
+          "symbol": "_ZN12eccPacked1314walkE10WalkParamsIjEPj",
+          "wholeSectionHasNoLocalOrSharedAccessInstructions": true
+        }
+      },
+      "ptxSha256": "08c96546d2220b7eae29364b35e162ac04fa92bb56b8f9e6fad4cdc6f69279c7",
+      "ptxVersion": "9.3",
+      "reportedPtxasPropertyRows": 17
+    },
+    "compact1": {
+      "all18FunctionSymbolsMatchRetainedReadelf": true,
+      "allReportedStackAndSpillPropertiesZero": true,
+      "binaryRetrievedReadOnlyAndRehashed": true,
+      "cubinBytes": 162312,
+      "cubinSha256": "bc7ac573730f8e012eeccfc72c1a897743acec63ab3d362c69f0fa63bdf393b4",
+      "elfClass": "ELF64 little endian",
+      "elfFlags": "0x6007802",
+      "elfMachine": 190,
+      "functions": {
+        "init": {
+          "allEncodedTextBytesVerified": true,
+          "allHelperSymbolsAndDirectTargetsResolved": true,
+          "callerBytes": 19552,
+          "callerMemoryOpcodes": {
+            "LDG.E": 1,
+            "LDG.E.64": 1,
+            "STG.E": 1,
+            "STG.E.128": 2,
+            "STG.E.64": 2,
+            "STG.E.U8": 2
+          },
+          "callerNonNop": 1220,
+          "directCallSites": 16,
+          "encodedTextSha256": "5490e4505de8bfc2745ab8fd20976dcff86273673539f75f06f455a3e4217f2f",
+          "fullInstructions": 3048,
+          "fullSectionBytes": 48768,
+          "helperCount": 7,
+          "normalizedAssemblySha256": "9ed80cb3d810ddc0f23dbbf2b7578e17201861c30287edd80c2be9924c4b6929",
+          "resources": {
+            "localBytes": 0,
+            "registers": 98,
+            "sharedBytes": 0,
+            "stackBytes": 0
+          },
+          "symbol": "_ZN12eccPacked1314initE10WalkParamsIjEb",
+          "wholeSectionHasNoLocalOrSharedAccessInstructions": true
+        },
+        "walk": {
+          "allEncodedTextBytesVerified": true,
+          "allHelperSymbolsAndDirectTargetsResolved": true,
+          "callerBytes": 25856,
+          "callerMemoryOpcodes": {
+            "ATOMG.E.ADD.STRONG.GPU": 1,
+            "LDG.E": 1,
+            "LDG.E.128": 8,
+            "LDG.E.64": 3,
+            "LDG.E.U8": 8,
+            "REDG.E.ADD.STRONG.GPU": 1,
+            "STG.E": 2,
+            "STG.E.128": 5,
+            "STG.E.64": 8,
+            "STG.E.U8": 5
+          },
+          "callerNonNop": 1614,
+          "directCallSites": 18,
+          "encodedTextSha256": "b725c7b12d8a54b7fed7fdf0700d4d0a39a52b5be2ee5066650a6f2bdcb1fdbb",
+          "fullInstructions": 4416,
+          "fullSectionBytes": 70656,
+          "helperCount": 9,
+          "normalizedAssemblySha256": "018822ee693ab773b859bca99e9ec2c434ff64ca330a1fb26311cb747b88cef8",
+          "resources": {
+            "localBytes": 0,
+            "registers": 108,
+            "sharedBytes": 0,
+            "stackBytes": 0
+          },
+          "symbol": "_ZN12eccPacked1314walkE10WalkParamsIjEPj",
+          "wholeSectionHasNoLocalOrSharedAccessInstructions": true
+        }
+      },
+      "ptxSha256": "f126c7e9932b5579b378f8c23f66e2a1774ea6dc73f0e7c0cc8caa1c94e928ec",
+      "ptxVersion": "9.3",
+      "reportedPtxasPropertyRows": 17
+    }
+  },
+  "run": {
+    "app": "ap-41GBxFpYGF7zdUJAhtBhBU",
+    "completionPresentInRetainedLog": true,
+    "logSha256": "f51df14ee7b441a06dbb0595547b54594912973b1877562e18933f6af937f695",
+    "ownerReportedExitCode": 0,
+    "ownerSession": 61073
+  },
+  "scope": "Independent CPU-only compiler-artifact audit. No compiler rerun, generated program execution, GPU allocation, source edit or new remote job by this reviewer. Two existing cubins were retrieved read-only to verify their bytes.",
+  "totalInstructionEncodingsVerified": 14992,
+  "valid": true
+}

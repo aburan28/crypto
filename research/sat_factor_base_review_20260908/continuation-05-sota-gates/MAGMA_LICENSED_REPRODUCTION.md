@@ -72,6 +72,11 @@ Return the complete output directory without editing it, together with:
 - a source-pinned novelty review following `EXTERNAL_NOVELTY_REVIEW_TEMPLATE.json`;
 - an explicit `CONCUR`, `QUALIFIED`, or `BREAKS` verdict and the narrowest supported claim.
 
+Use [the external evidence guide](EXTERNAL_REVIEW_EVIDENCE.md) to distinguish
+new executions, retained-output replays and source reviews, and to bind each
+gate assessment to backend/instance evidence. The template also asks reviewers
+to assess parameter and sampling differences and the 2025 SATIC prior art.
+
 Executable hashes and strict version probes bind the observed tools; they do not authenticate license entitlement or reviewer independence. A successful licensed-host matrix closes only the missing Magma execution/accounting portion. It does not by itself establish independent methodology, novelty, end-to-end index-calculus scaling, or a SOTA result.
 
 Primary documentation: [Magma direct F4 and Boolean polynomial rings](https://magma.maths.usyd.edu.au/magma/handbook/text/1314) and the [Magma SAT/minisat interface](https://magma.maths.usyd.edu.au/magma/handbook/text/1318).

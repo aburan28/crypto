@@ -1,0 +1,41 @@
+{
+  "matched": {
+    "hybrid-image": {
+      "attempts": 48,
+      "resolved_within_budget": 35,
+      "verified_relations": 53
+    },
+    "chained-s3": {
+      "attempts": 48,
+      "resolved_within_budget": 0,
+      "verified_relations": 0
+    },
+    "s4-symmetric": {
+      "attempts": 48,
+      "resolved_within_budget": 0,
+      "verified_relations": 0
+    }
+  },
+  "supplemental_completions": 8,
+  "supplemental_attempts": 8,
+  "supplemental_max_seconds": 20.723362417000317,
+  "audit": {
+    "matched_trials": 144,
+    "supplemental_trials": 8,
+    "independent_oracle_instances": 24,
+    "signed_certificates_replayed": 99,
+    "source_and_instance_hashes_match": true,
+    "dimension_target_identity": true,
+    "summary_aggregates_match": true,
+    "validation_failures": 0,
+    "curve_addition_call_count": null,
+    "curve_doubling_call_count": null,
+    "counter_note": "Only field additions, multiplications, squarings and inversionCalls are instrumented. Inherited curve-call fields in the raw CountedField report are zero placeholders, not measurements; they are excluded from all aggregates.",
+    "raw_sha256": "acf3a7f960f9762a0baa6a167201450fa7c569d028f1b6acc95092718d9f24e0"
+  },
+  "classification": "engineering diagnostic",
+  "common_operation_speedup": null,
+  "full_dlp_S": null,
+  "rho_ratio": null,
+  "floor_ratio": null
+}

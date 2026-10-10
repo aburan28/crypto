@@ -1,0 +1,208 @@
+{
+  "curves": [
+    {
+      "a": 1,
+      "curve": {
+        "coefficients": [
+          1,
+          1,
+          0,
+          0,
+          1
+        ],
+        "cofactor": 1318,
+        "generator": [
+          "0x6adb56a256c5",
+          "0x4338047135e3"
+        ],
+        "model": "binary Weierstrass",
+        "subgroup_order": "106781081677",
+        "target_group": "prime-order subgroup"
+      },
+      "field": {
+        "characteristic": 2,
+        "degree": 47,
+        "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+        "modulus_exponents": [
+          47,
+          5,
+          0
+        ],
+        "representation": "polynomial"
+      },
+      "group_order": "140737465650286",
+      "n": 47
+    },
+    {
+      "a": 0,
+      "curve": {
+        "coefficients": [
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "cofactor": 523492,
+        "generator": [
+          "0x152b73c20219bc",
+          "0xffeaa680a84eeb"
+        ],
+        "model": "binary Weierstrass",
+        "subgroup_order": "275295876199",
+        "target_group": "prime-order subgroup"
+      },
+      "field": {
+        "characteristic": 2,
+        "degree": 57,
+        "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+        "modulus_exponents": [
+          57,
+          4,
+          0
+        ],
+        "representation": "polynomial"
+      },
+      "group_order": "144115188823166908",
+      "n": 57
+    },
+    {
+      "a": 0,
+      "curve": {
+        "coefficients": [
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "cofactor": 4,
+        "generator": [
+          "0x1deeba21c88",
+          "0x17ccbb7d40e"
+        ],
+        "model": "binary Weierstrass",
+        "subgroup_order": "549756390943",
+        "target_group": "prime-order subgroup"
+      },
+      "field": {
+        "characteristic": 2,
+        "degree": 41,
+        "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+        "modulus_exponents": [
+          41,
+          3,
+          0
+        ],
+        "representation": "polynomial"
+      },
+      "group_order": "2199025563772",
+      "n": 41
+    },
+    {
+      "a": 0,
+      "curve": {
+        "coefficients": [
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "cofactor": 428,
+        "generator": [
+          "0xb447205ea953",
+          "0x1c2c3312123e9e"
+        ],
+        "model": "binary Weierstrass",
+        "subgroup_order": "21044858204113",
+        "target_group": "prime-order subgroup"
+      },
+      "field": {
+        "characteristic": 2,
+        "degree": 53,
+        "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+        "modulus_exponents": [
+          53,
+          6,
+          2,
+          1,
+          0
+        ],
+        "representation": "polynomial"
+      },
+      "group_order": "9007199311360364",
+      "n": 53
+    },
+    {
+      "a": 1,
+      "curve": {
+        "coefficients": [
+          1,
+          1,
+          0,
+          0,
+          1
+        ],
+        "cofactor": 22894,
+        "generator": [
+          "0x4637772649759e9",
+          "0x23c2d5da728b130"
+        ],
+        "model": "binary Weierstrass",
+        "subgroup_order": "25179555920633",
+        "target_group": "prime-order subgroup"
+      },
+      "field": {
+        "characteristic": 2,
+        "degree": 59,
+        "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+        "modulus_exponents": [
+          59,
+          7,
+          4,
+          2,
+          0
+        ],
+        "representation": "polynomial"
+      },
+      "group_order": "576460753246971902",
+      "n": 59
+    },
+    {
+      "a": 0,
+      "curve": {
+        "coefficients": [
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "cofactor": 14156,
+        "generator": [
+          "0x5cc1d6ba365013e",
+          "0x171d9a59a2d31eb9"
+        ],
+        "model": "binary Weierstrass",
+        "subgroup_order": "162888033982417",
+        "target_group": "prime-order subgroup"
+      },
+      "field": {
+        "characteristic": 2,
+        "degree": 61,
+        "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+        "modulus_exponents": [
+          61,
+          5,
+          2,
+          1,
+          0
+        ],
+        "representation": "polynomial"
+      },
+      "group_order": "2305843009055095052",
+      "n": 61
+    }
+  ]
+}

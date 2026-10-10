@@ -1,0 +1,1006 @@
+{
+  "targetB": 25,
+  "class": "engineering",
+  "unit": "B complete scalar updates/s",
+  "verification": {
+    "0-0": true,
+    "0-1937": true,
+    "1-0": true,
+    "1-1937": true,
+    "2-0": true,
+    "2-1937": true,
+    "3-0": true,
+    "3-1937": true
+  },
+  "runs": {
+    "verify-0-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "verify-0-1937": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "verify-1-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "verify-1-1937": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "verify-2-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "verify-2-1937": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "verify-3-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "verify-3-1937": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "bench-0-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-1-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-2-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-3-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-3-1": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-2-1": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-1-1": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-0-1": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "bench-0-2": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "bench-1-2": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "bench-2-2": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "bench-3-2": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+        "--curve",
+        "131",
+        "--packed",
+        "--bench",
+        "--steps",
+        "1024",
+        "--launches",
+        "32",
+        "--verify",
+        "0",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    }
+  },
+  "sourceHashes": {
+    "include/packed131.h": "6286ffc02961bddf9779e35afacb7abeee944f49c655461642e4a4e97aab8589",
+    "include/packedkernels.cuh": "cb52c964ea1d5ca14e90c4efcba5ddf4496a733e22fdecb9d5b43333b45c9925",
+    "Makefile": "bd7dbd157996b9c4f5f43876dfa0b094e8604a46c6688faf7d03b46eba0a4645"
+  },
+  "gpu": "name, uuid, clocks.current.sm [MHz], power.limit [W]\nNVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-c2cb23e6-a474-1d96-06a6-a5cac9511ca2, 2340 MHz, 600.00 W\n",
+  "binaryHashes": {
+    "0": "7dcdd0e9c0d02fd51e1c2e0c06da6da4ac216e04b2e8f8e6d92a1242ed0d2b03",
+    "1": "688557cf629b46a6484492f70ef9ff71c6d3a7808bbc892a1f12bee57d7ff91d",
+    "2": "59c729d443c6d91857b5b889752535ca2dee7e2c10527188dab642a0f5da03ca",
+    "3": "15d533744ee1eefae6d45fc70e2dc56165fa692d272595e69003d0cc9eaff586"
+  },
+  "contention": [
+    "verify-0-0"
+  ],
+  "samples": {
+    "0": [
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17289.346 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17291.657 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17291.599 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17291.599
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17311.192 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17305.240 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17305.175 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17305.175
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "1937"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17303.288 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17295.929 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17295.877 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17295.877
+      }
+    ],
+    "1": [
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17296.013 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17296.808 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17296.764 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17296.764
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17301.018 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17296.866 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17296.817 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17296.817
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "1937"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17291.457 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17295.869 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17295.732 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17295.732
+      }
+    ],
+    "2": [
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17935.907 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17933.642 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17933.590 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17933.59
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17947.380 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17941.747 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17941.670 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17941.67
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "1937"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17941.566 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17940.368 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17940.329 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17940.329
+      }
+    ],
+    "3": [
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 98 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17970.523 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17965.564 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17965.474 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17965.474
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "0"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 98 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17945.862 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17946.343 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17946.263 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17946.263
+      },
+      {
+        "command": [
+          "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+          "--curve",
+          "131",
+          "--packed",
+          "--bench",
+          "--steps",
+          "1024",
+          "--launches",
+          "32",
+          "--verify",
+          "0",
+          "--run-id",
+          "1937"
+        ],
+        "returncode": 0,
+        "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 98 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17945.317 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17943.693 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17943.631 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+        "valid": true,
+        "rate": 17943.631
+      }
+    ]
+  },
+  "summary": {
+    "0": {
+      "valid": true,
+      "rate": 17295.877,
+      "minRate": 17291.599,
+      "maxRate": 17305.175,
+      "samples": [
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17289.346 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17291.657 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17291.599 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17291.599
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17311.192 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17305.240 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17305.175 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17305.175
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "1937"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17303.288 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17295.929 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17295.877 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17295.877
+        }
+      ]
+    },
+    "1": {
+      "valid": true,
+      "rate": 17296.764,
+      "minRate": 17295.732,
+      "maxRate": 17296.817,
+      "samples": [
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17296.013 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17296.808 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17296.764 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17296.764
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17301.018 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17296.866 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17296.817 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17296.817
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "1937"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 110 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17291.457 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped\n       2.9 s   17295.869 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17295.732 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17295.732
+        }
+      ]
+    },
+    "2": {
+      "valid": true,
+      "rate": 17940.329,
+      "minRate": 17933.59,
+      "maxRate": 17941.67,
+      "samples": [
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17935.907 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17933.642 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17933.590 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17933.59
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17947.380 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17941.747 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17941.670 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17941.67
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-2",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "1937"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17941.566 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17940.368 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17940.329 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17940.329
+        }
+      ]
+    },
+    "3": {
+      "valid": true,
+      "rate": 17946.263,
+      "minRate": 17943.631,
+      "maxRate": 17965.474,
+      "samples": [
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 98 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17970.523 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17965.564 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17965.474 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17965.474
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "0"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 98 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17945.862 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17946.343 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17946.263 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17946.263
+        },
+        {
+          "command": [
+            "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-3",
+            "--curve",
+            "131",
+            "--packed",
+            "--bench",
+            "--steps",
+            "1024",
+            "--launches",
+            "32",
+            "--verify",
+            "0",
+            "--run-id",
+            "1937"
+          ],
+          "returncode": 0,
+          "raw": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked L2 persist window: 83886080 of 104726528 field bytes, cap 83886080\npacked kernel: 98 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked pair ilp: 1\npacked top hoist: 0\npacked onb inv: 0\npacked from reduced: 0\npacked slot unroll: 2\npacked slot prefetch: 0\npacked slot pipeline: 0\npacked L2 persist: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table pivot bytes: 1, table shared bytes 48732\npacked table global: 0\npacked table addend global: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch\n       2.0 s   17945.317 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped\n       2.8 s   17943.693 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped\n  finished: 17943.631 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "valid": true,
+          "rate": 17943.631
+        }
+      ]
+    }
+  },
+  "table": {
+    "0": {
+      "B/s": 17.295877,
+      "ratioToBaseline": 1.0,
+      "ratioToTarget": 0.69183508,
+      "valid": true
+    },
+    "1": {
+      "B/s": 17.296764,
+      "ratioToBaseline": 1.000051283898469,
+      "ratioToTarget": 0.69187056,
+      "valid": true
+    },
+    "2": {
+      "B/s": 17.940329000000002,
+      "ratioToBaseline": 1.0372604407397208,
+      "ratioToTarget": 0.7176131600000001,
+      "valid": true
+    },
+    "3": {
+      "B/s": 17.946263,
+      "ratioToBaseline": 1.0376035282859608,
+      "ratioToTarget": 0.7178505199999999,
+      "valid": true
+    }
+  }
+}

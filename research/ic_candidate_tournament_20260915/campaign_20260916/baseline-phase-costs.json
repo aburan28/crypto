@@ -1,0 +1,42 @@
+{
+  "source": "round-0002/development/batch16",
+  "trials": 36,
+  "phases": {
+    "collection_and_decomposition": {
+      "mean_Ir": 3018435.5833333335,
+      "mean_fraction": 0.01849876686064508
+    },
+    "curve_and_targets": {
+      "mean_Ir": 6685520,
+      "mean_fraction": 0.037834202290448087
+    },
+    "factor_base_and_tables": {
+      "mean_Ir": 87522722.8888889,
+      "mean_fraction": 0.5108842280917464
+    },
+    "final_verification": {
+      "mean_Ir": 1729777.638888889,
+      "mean_fraction": 0.010120448566437934
+    },
+    "individual_log": {
+      "mean_Ir": 5803644.194444444,
+      "mean_fraction": 0.034718181807439005
+    },
+    "log_certification": {
+      "mean_Ir": 14909016.361111112,
+      "mean_fraction": 0.08706260707479013
+    },
+    "reporting_and_cleanup": {
+      "mean_Ir": 1638659.138888889,
+      "mean_fraction": 0.01061244947914402
+    },
+    "startup_and_input": {
+      "mean_Ir": 388733.0833333333,
+      "mean_fraction": 0.002790304848685707
+    },
+    "verify_filter_and_linear_algebra": {
+      "mean_Ir": 47704718.027777776,
+      "mean_fraction": 0.2874788109806637
+    }
+  }
+}

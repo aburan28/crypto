@@ -1,6 +1,6 @@
 # N83 solver availability and capacity gates
 
-This is a source audit, not a timed solver result. The backend-availability comparison distinguishes the inspected main snapshot `c70c32d486a3ac7531fe27f7193d9f09caa58344` from the isolated study branch at `001acc47870e935a17f4d8155c2cb934ace58284`. The latter builds the retained primary base and exact enumeration runner; subsequent study-branch code adds a wide-word enumeration path. The inspected main snapshot contains additional backends that are absent from this isolated branch. Reproduce the availability distinction with `git ls-tree -r --name-only REV -- src/cryptanalysis` at each pinned revision; `verification/solver-gates-source-check.log` records the corresponding blob identities and source-width assertions. A path in the prior-art inventory is not proof that this branch can execute it.
+This is a source audit, not a timed solver result. The backend-availability comparison distinguishes the inspected main snapshot `c70c32d486a3ac7531fe27f7193d9f09caa58344` from the isolated study branch at `001acc47870e935a17f4d8155c2cb934ace58284`. The latter builds the retained primary base and exact enumeration runner; subsequent study-branch code adds a wide-word enumeration path. The inspected main snapshot contained additional backends absent from that pinned study revision. Reproduce this historical distinction with `git ls-tree -r --name-only REV -- src/cryptanalysis` at each pinned revision; `verification/solver-gates-source-check.log` records the corresponding blob identities and source-width assertions. The current integrated-source status is recorded at the end of this document. A path in the prior-art inventory is not proof that an N83 run can execute it.
 
 | Backend | Pinned source fact | N83 consequence |
 | --- | --- | --- |
@@ -102,3 +102,28 @@ build and startup receipt, release library and touched-example tests, the
 study and boundary Python suites, and independent replay before any N83
 backend or runtime claim. This source integration uses no part of the
 exhausted one-hour N83 experimental allowance.
+
+### Source integration status (2026-10-10)
+
+The isolated integration branch merges upstream `845fd323015e28d32b73fa25e551f830d5826e6c`
+with the study code using the upstream Koblitz driver as the structural base.
+The six content conflicts were resolved by contract. The merged library
+compiles, the 83-bit coordinate trie retains high bits, and the main-branch
+WDSat, FES, Crossbred and batched dispatch remain in the source. Their width
+and system-shape limits above still apply; an available enum variant is not an
+N83 solver result.
+
+The generic driver now feeds full-width coefficients to `RelationSolver`, and
+its chained-S3 branch requires explicit nonzero variable, domain, model and
+conflict caps before search. Its zero-cap path retains an inconclusive report.
+The one-shot factor-base-log path samples the full subgroup and checks every
+relation in the original group before exact coefficient-rank gating and dense
+solve. One-shot descent likewise samples full-width `a,b`, retains decimal
+coefficients in its witness and verifies the resulting logarithm in the group.
+The older distributed work-unit collector, streamed log solver and observed
+descent ledger still encode scalars as `u64`; they reject a subgroup wider than
+64 bits. Sparse LA still rejects the 81-bit primary modulus. A deterministic
+N83 one-orbit known-answer test exercises the split precompute/descent
+arithmetic, while the retained S3 bases have not supplied a natural relation
+or complete single-target cold runtime. The source merge does not promote a
+factor-base winner or reset the exhausted local-pilot clock.

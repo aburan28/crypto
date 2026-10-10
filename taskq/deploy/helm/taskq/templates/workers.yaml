@@ -1,0 +1,129 @@
+{{- if and .Values.keda.enabled (not .Values.redis.enabled) (not .Values.keda.external.address) }}
+{{- fail "keda.enabled with an external Redis needs keda.external.address (and passwordSecret)" }}
+{{- end }}
+{{- range $pool := .Values.pools }}
+{{- $img := merge (default dict $pool.image) $.Values.image }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "taskq.name" $ }}-worker-{{ $pool.name }}
+  labels:
+    {{- include "taskq.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: worker
+    taskq/pool: {{ $pool.name }}
+spec:
+  {{- if not (and $.Values.keda.enabled $pool.keda) }}
+  replicas: {{ $pool.replicas | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels: {app.kubernetes.io/instance: {{ $.Release.Name }}, taskq/pool: {{ $pool.name }}}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/component: worker
+        taskq/pool: {{ $pool.name }}
+    spec:
+      terminationGracePeriodSeconds: {{ $.Values.worker.terminationGracePeriodSeconds }}
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, fsGroup: 10001}
+      {{- with $pool.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $pool.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: worker
+          image: "{{ $img.repository }}:{{ $img.tag }}"
+          imagePullPolicy: {{ $img.pullPolicy | default "IfNotPresent" }}
+          args:
+            - worker
+            {{- range $pool.queues }}
+            - --queue
+            - {{ . | quote }}
+            {{- end }}
+            {{- range $k, $v := $pool.labels }}
+            - --label
+            - "{{ $k }}={{ $v }}"
+            {{- end }}
+            - --repos
+            - /etc/taskq/repos.yaml
+            - --lease-seconds
+            - {{ $.Values.worker.leaseSeconds | quote }}
+            - --max-trees
+            - {{ $.Values.worker.maxTrees | quote }}
+            {{- range $.Values.worker.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          env:
+            {{- include "taskq.redisEnv" $ | nindent 12 }}
+            - {name: TASKQ_ARTIFACT_DIR, value: /results/artifacts}
+            - {name: TASKQ_RESULT_DIR, value: /results/results}
+            - {name: TASKQ_CACHE_DIR, value: /var/cache/taskq}
+            - {name: TASKQ_IMAGE, value: "{{ $img.repository }}:{{ $img.tag }}"}
+            - name: POD_NAME
+              valueFrom: {fieldRef: {fieldPath: metadata.name}}
+            - name: NODE_NAME
+              valueFrom: {fieldRef: {fieldPath: spec.nodeName}}
+            {{- with $.Values.worker.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources: {{- toYaml $pool.resources | nindent 12 }}
+          volumeMounts:
+            - {name: repos, mountPath: /etc/taskq}
+            - {name: cache, mountPath: /var/cache/taskq}
+            - {name: results, mountPath: /results}
+      volumes:
+        - name: repos
+          configMap: {name: {{ include "taskq.name" $ }}-repos}
+        - name: cache
+          emptyDir: {sizeLimit: {{ $pool.cacheSize | default "50Gi" }}}
+        - name: results
+          persistentVolumeClaim: {claimName: {{ include "taskq.resultsClaim" $ }}}
+{{- if and $.Values.keda.enabled $pool.keda }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "taskq.name" $ }}-worker-{{ $pool.name }}
+  labels: {{- include "taskq.labels" $ | nindent 4 }}
+spec:
+  scaleTargetRef: {name: {{ include "taskq.name" $ }}-worker-{{ $pool.name }}}
+  minReplicaCount: {{ $pool.keda.minReplicas | default 0 }}
+  maxReplicaCount: {{ $pool.keda.maxReplicas | default 10 }}
+  pollingInterval: {{ $.Values.keda.pollingInterval }}
+  cooldownPeriod: {{ $.Values.keda.cooldownPeriod }}
+  triggers:
+    {{- range $pool.queues }}
+    - type: redis-streams
+      metadata:
+        {{- if $.Values.redis.enabled }}
+        address: {{ include "taskq.name" $ }}-redis:6379
+        {{- else }}
+        address: {{ $.Values.keda.external.address }}
+        enableTLS: {{ $.Values.keda.external.enableTLS | quote }}
+        {{- end }}
+        stream: "{{ $.Values.namespace | default "taskq" }}:q:{{ . }}"
+        consumerGroup: workers
+        lagCount: {{ $pool.keda.lagCount | default 1 | quote }}
+        activationLagCount: "0"
+      authenticationRef: {name: {{ include "taskq.name" $ }}-redis}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- if .Values.keda.enabled }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ include "taskq.name" . }}-redis
+  labels: {{- include "taskq.labels" . | nindent 4 }}
+spec:
+  secretTargetRef:
+    {{- if .Values.redis.enabled }}
+    - {parameter: password, name: {{ include "taskq.redisSecret" . }}, key: redis-password}
+    {{- else }}
+    - {parameter: password, name: {{ .Values.keda.external.passwordSecret.name }}, key: {{ .Values.keda.external.passwordSecret.key }}}
+    {{- end }}
+{{- end }}
