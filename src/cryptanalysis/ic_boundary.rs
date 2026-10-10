@@ -118,6 +118,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     find_irreducible_sparse, koblitz_signed_frobenius_rho_reference,
     saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
+    ProjectedFactorBase,
 };
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
@@ -3724,6 +3725,13 @@ pub enum ColumnFold {
     /// One column per signed Frobenius orbit; `(−1)^s π^k(rep)` carries
     /// `(−1)^s λ^k`.  Koblitz only.
     SignedFrobeniusOrbit,
+    /// One column per signed Frobenius orbit *of the cofactor
+    /// projections* `[h]P`: two raw orbits whose projections coincide
+    /// or are signed Frobenius translates of each other share a column
+    /// (for a base closed under translation by the 2-torsion point `T`,
+    /// `P` and `P + T` do).  A point with `[h]P = O` carries
+    /// coefficient `0`.  Koblitz only.
+    ProjectedSignedFrobeniusOrbit,
 }
 
 /// A materialised factor base with its column map.  Both `P` and `−P`
@@ -3958,6 +3966,10 @@ pub fn koblitz_factor_base(
     let mut out = FactorBase::empty(description);
     let mut abscissa_col: FastMap<usize> = fast_map(fb.points.len());
     let mut key_to_index: FastMap<usize> = fast_map(fb.points.len());
+    let projected = match fold {
+        ColumnFold::ProjectedSignedFrobeniusOrbit => Some(ProjectedFactorBase::new(kc, fb)),
+        _ => None,
+    };
     for (i, p) in fb.points.iter().enumerate() {
         let fp = inst.fast.lift(p);
         key_to_index.insert(fp.pack(), i);
@@ -3967,6 +3979,15 @@ pub fn koblitz_factor_base(
                 let (orbit, k, negated) = fb.signed_orbit_of[i];
                 let c = powmod(lambda, k as u64, r);
                 (orbit, if negated { submod(0, c, r) } else { c })
+            }
+            ColumnFold::ProjectedSignedFrobeniusOrbit => {
+                match projected.as_ref().and_then(|map| map.location_of(i)) {
+                    Some((orbit, k, negated)) => {
+                        let c = powmod(lambda, u64::from(k), r);
+                        (orbit, if negated { submod(0, c, r) } else { c })
+                    }
+                    None => (0, 0),
+                }
             }
             ColumnFold::Abscissa => {
                 let next = abscissa_col.len();
@@ -3996,8 +4017,20 @@ pub fn koblitz_factor_base(
     out.abscissa_list.sort_unstable();
     out.columns = match fold {
         ColumnFold::SignedFrobeniusOrbit => fb.signed_orbits.len(),
+        ColumnFold::ProjectedSignedFrobeniusOrbit => {
+            projected.as_ref().map_or(0, |map| map.columns())
+        }
         ColumnFold::Abscissa => abscissa_col.len(),
     };
+    if let Some(map) = projected.as_ref() {
+        let c = map.cost();
+        out.cost
+            .count("cofactor_multiplications", c.cofactor_multiplications);
+        out.cost.count(
+            "frobenius_coordinate_squarings",
+            c.derived_frobenius_coordinate_squarings + c.canonical_frobenius_coordinate_squarings,
+        );
+    }
     if !fb.uses_ambient_basis() {
         out.dimension = Some(fb.ell);
         out.subspace_basis = Some(

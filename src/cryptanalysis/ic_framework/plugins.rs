@@ -170,10 +170,19 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzTraceZeroBase<'_> {
     }
 
     fn parameters(&self) -> &[(&str, &str)] {
-        &[(
-            "divisor",
-            "`;`-separated factors of x^n - 1; the resulting invariant subspace must lie in the absolute-trace kernel",
-        )]
+        &[
+            (
+                "divisor",
+                "`;`-separated factors of x^n - 1; the resulting invariant subspace must lie in the absolute-trace kernel",
+            ),
+            (
+                "projected",
+                "1 to fold by the signed Frobenius orbits of the cofactor projections [h]P instead of \
+                 of the raw points: orbits whose projections coincide or are Frobenius translates \
+                 share one column (on a base closed under +T, P and P + T do), which is the column \
+                 count the relation matrix actually has to determine",
+            ),
+        ]
     }
 
     fn build(
@@ -195,13 +204,19 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzTraceZeroBase<'_> {
                 "divisor {idx:?} is not trace-zero: at least one abscissa has absolute trace one"
             ));
         }
+        let fold = if params.flag("projected") {
+            ColumnFold::ProjectedSignedFrobeniusOrbit
+        } else {
+            ColumnFold::SignedFrobeniusOrbit
+        };
         koblitz_factor_base(
             self.instance,
             &frob,
-            ColumnFold::SignedFrobeniusOrbit,
+            fold,
             format!(
-                "trace-zero invariant subspace, divisor {idx:?}, dimension {}",
-                frob.ell
+                "trace-zero invariant subspace, divisor {idx:?}, dimension {}{}",
+                frob.ell,
+                if params.flag("projected") { ", columns merged by cofactor projection" } else { "" }
             ),
         )
         .ok_or_else(|| "the trace-zero subspace produced no usable factor base".into())
@@ -238,6 +253,13 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
                 "no_fold",
                 "1 to give every abscissa its own column: the control that shows what the fold buys",
             ),
+            (
+                "projected",
+                "1 to fold by the signed Frobenius orbits of the cofactor projections [h]P instead of \
+                 of the raw points: orbits whose projections coincide or are Frobenius translates \
+                 share one column (on a base closed under +T, P and P + T do), which is the column \
+                 count the relation matrix actually has to determine",
+            ),
         ]
     }
 
@@ -257,6 +279,8 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
             .ok_or_else(|| format!("no invariant subspace for divisor {idx:?} on this curve"))?;
         let fold = if params.flag("no_fold") {
             ColumnFold::Abscissa
+        } else if params.flag("projected") {
+            ColumnFold::ProjectedSignedFrobeniusOrbit
         } else {
             ColumnFold::SignedFrobeniusOrbit
         };
@@ -1105,6 +1129,13 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzSymmetrisedBase<'_> {
                 "no_fold",
                 "1 to give every abscissa its own column: the control that shows what the fold buys",
             ),
+            (
+                "projected",
+                "1 to fold by the signed Frobenius orbits of the cofactor projections [h]P instead of \
+                 of the raw points: orbits whose projections coincide or are Frobenius translates \
+                 share one column (on a base closed under +T, P and P + T do), which is the column \
+                 count the relation matrix actually has to determine",
+            ),
         ]
     }
 
@@ -1130,6 +1161,8 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzSymmetrisedBase<'_> {
             .ok_or("the u-frame base has no Frobenius-orbit view; this is a bug")?;
         let fold = if params.flag("no_fold") {
             ColumnFold::Abscissa
+        } else if params.flag("projected") {
+            ColumnFold::ProjectedSignedFrobeniusOrbit
         } else {
             ColumnFold::SignedFrobeniusOrbit
         };
