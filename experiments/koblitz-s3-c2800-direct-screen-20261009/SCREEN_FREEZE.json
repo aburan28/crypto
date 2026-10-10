@@ -1,0 +1,62 @@
+{
+  "arms": {
+    "baseline": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0h78c2fc9eed5a",
+      "candidate_manifest": "experiments/koblitz-s3-c2800-direct-screen-20261009/identities/candidates/IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0h78c2fc9eed5a.json",
+      "columns": 1200,
+      "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+      "factor_base_points": 127200,
+      "prepare_rank": 1200,
+      "root_scatter_chunk_state_limit": 4194304,
+      "root_scatter_policy": "ordered_state_chunks_parallel_scatter_and_shard_insert",
+      "root_table_capacity_policy": "uniform_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_slots": 268435456,
+      "state_generation_policy": "variable_yield_worker_chunks_serial_append",
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "native_rotating_state_order"
+    },
+    "expanded": {
+      "candidate_id": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hf4206807ca48",
+      "candidate_manifest": "experiments/koblitz-s3-c2800-direct-20261009/identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hf4206807ca48.json",
+      "columns": 2800,
+      "factor_base_digest": "c9ee1efcb17aeb1ced5a354a01bbf562a2c0dda6867fc6839047ad97fc804755",
+      "factor_base_points": 296800,
+      "prepare_rank": 2800,
+      "root_scatter_chunk_state_limit": 4194304,
+      "root_scatter_policy": "ordered_state_chunks_parallel_scatter_and_shard_insert",
+      "root_table_capacity_policy": "uniform_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_slots": 1073741824,
+      "state_generation_policy": "direct_parallel_preallocated_all_regular_n53_c2800",
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c2800"
+    }
+  },
+  "binary_sha256": "5bd3cc392bd4922ea9896b29a16d785d0c1b26c5cca7cac1827c140f5e61bf86",
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1200_c2800direct_paired_call_screen_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 1,
+  "resource_probe": "/usr/bin/time -l per child; full-process RSS, instructions, cycles, and context switches",
+  "run_order": "AB_even_target_BA_odd_target",
+  "runner_sha256": "a028b6ed3856068eacfce0aeaf5865620c113b9b4e19758ef17de67892cf3d3f",
+  "screen_advance_root_call_geomean_ratio_min": 3,
+  "source_commit": "54737edf4712491da08f6a682c18708a8b5f675c",
+  "source_sha256": "c12cce16ec3bd28aec23bc2867d5cf1575f3839a39c08f85f68943d392e5e1b7",
+  "stop_after_first_invalid_or_over_budget_run": true,
+  "target_labels": [
+    "T157",
+    "T158",
+    "T159",
+    "T160",
+    "T161",
+    "T162",
+    "T163",
+    "T164"
+  ],
+  "target_workers": 1,
+  "timeout_seconds_per_run": 600
+}
