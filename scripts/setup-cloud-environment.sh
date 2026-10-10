@@ -101,8 +101,8 @@ if ! sage_works; then
   # its Sage executable through a bare symlink.
   micromamba_path="$(command -v micromamba)"
   sage_wrapper="$(mktemp "$bin_dir/.sage.XXXXXX")"
-  printf '#!/usr/bin/env bash\nexec %q run -p %q %q "$@"\n' \
-    "$micromamba_path" "$sage_prefix" "$sage_prefix/bin/sage" > "$sage_wrapper"
+  printf '#!/usr/bin/env bash\nexport MAMBA_ROOT_PREFIX=%q\nexec %q run -p %q %q "$@"\n' \
+    "$MAMBA_ROOT_PREFIX" "$micromamba_path" "$sage_prefix" "$sage_prefix/bin/sage" > "$sage_wrapper"
   chmod 755 "$sage_wrapper"
   mv -f "$sage_wrapper" "$bin_dir/sage"
   hash -r
