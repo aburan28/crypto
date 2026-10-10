@@ -34,3 +34,40 @@ python3 experiments/koblitz-s3-targetkernel-n41-20261010/analyze.py \
   --ledger /private/tmp/s3-n41-targetkernel24-20261010/raw.jsonl \
   --output experiments/koblitz-s3-targetkernel-n41-20261010/local/analysis.json
 ```
+
+## Result
+
+All 48 fresh-process runs reached rank 1,200, verified their group result,
+and recovered the frozen scalar. Checked Sage independently replayed every
+scalar on the exact N41 curve. Both arms used the same 98,400-point base
+digest and recorded 2,534 verified preparation relations in every run.
+
+| N41 fixed-base measure | Earlier kernel | Improved kernel |
+| --- | ---: | ---: |
+| Median target S3 calls | 28 | 32 |
+| Median target query, ms | 0.035750 | 0.0122295 |
+| Median charged target PDP, ms | 0.029209 | 0.026271 |
+| Median target relation check, ms | 0.0118745 | 0.012375 |
+| Median target descent/direct recovery, ms | 0.011395 | 0.0084585 |
+| Median scalar recovery check, ms | 0.030521 | 0.0031665 |
+| Median online wall time, ms | 0.1187085 | 0.0600625 |
+| Median reusable setup wall time, ms | 5,591.654 | 5,436.365 |
+| Maximum observed peak RSS, GiB | 8.28 | 8.27 |
+
+The paired earlier/improved geometric online ratio is **1.941596**, with a
+20,000-resample target-bootstrap 95% interval of **[1.781468, 2.120575]**.
+The frozen 2× point and lower-endpoint gates did not pass. The S3-call ratio
+was **0.804884**, so this online gain arose despite more calls in the
+improved arm on average. The largest phase reductions appear in target
+query and scalar recovery checking; the source change includes projective
+scalar operations and late root-slot prefetch. The full target-kernel package
+is measured here, with fixed base and rank.
+
+The independently listed phase medians need not add to the median total;
+each raw run has a checked five-phase sum. `local/raw_targetkernel24.tar.zst`
+contains every report, stdout, stderr, and ledger, with SHA-256
+`37859e44847ad2b19161659a6ea2fca77fd95b03105cd65895b058e53821408c`.
+`local/analysis.json`, `local/sage_runtime_info.json`, and
+`local/sage_replay.json` bind the analysis and independent scalar checks to
+the frozen inputs. These CPU timings remain exploratory under the
+host-isolation gate.
