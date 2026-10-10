@@ -69,6 +69,7 @@ def analyze(run_dir: Path, output: Path) -> dict:
     targets = []
     ratios = []
     pdp_ratios = []
+    setup_ratios = []
     same_witness = True
     semantic_differences = {}
     allowed = {"timing_ms", "peak_rss_bytes", "target_state_probes",
@@ -90,8 +91,11 @@ def analyze(run_dir: Path, output: Path) -> dict:
                          and a.get("target_relation_probes") == b.get("target_relation_probes"))
         ratio = baseline["target_online_ms"] / prefetch["target_online_ms"]
         pdp_ratio = baseline["target_pdp_charged_ms"] / prefetch["target_pdp_charged_ms"]
+        setup_ratio = (a["timing_ms"]["reusable_setup_total"] /
+                       b["timing_ms"]["reusable_setup_total"])
         ratios.append(ratio)
         pdp_ratios.append(pdp_ratio)
+        setup_ratios.append(setup_ratio)
         targets.append({
             "label": label, "workload_id": baseline["workload_id"],
             "baseline_online_ms": baseline["target_online_ms"],
@@ -100,9 +104,14 @@ def analyze(run_dir: Path, output: Path) -> dict:
             "prefetch_pdp_charged_ms": prefetch["target_pdp_charged_ms"],
             "baseline_s3_calls": baseline["target_s3_calls"],
             "prefetch_s3_calls": prefetch["target_s3_calls"],
+            "baseline_reusable_setup_ms": a["timing_ms"]["reusable_setup_total"],
+            "prefetch_reusable_setup_ms": b["timing_ms"]["reusable_setup_total"],
             "baseline_peak_rss_bytes": baseline["peak_rss_bytes"],
             "prefetch_peak_rss_bytes": prefetch["peak_rss_bytes"],
             "online_ratio": ratio, "pdp_ratio": pdp_ratio,
+            "reusable_setup_negative_control_ratio": setup_ratio,
+            "reusable_setup_negative_control_within_10_percent":
+                .90 <= setup_ratio <= 1.10,
             "first_witness_equal": (a.get("target_relation_indices") ==
                                     b.get("target_relation_indices") and
                                     a.get("target_relation_probes") ==
@@ -125,6 +134,10 @@ def analyze(run_dir: Path, output: Path) -> dict:
         "online_bootstrap95_target_resample": bootstrap(ratios) if valid else None,
         "pdp_geomean_baseline_over_prefetch": geometric(pdp_ratios) if valid else None,
         "pdp_bootstrap95_target_resample": bootstrap(pdp_ratios) if valid else None,
+        "setup_negative_control_geomean_ratio":
+            geometric(setup_ratios) if valid else None,
+        "setup_negative_control_all_within_10_percent":
+            all(.90 <= ratio <= 1.10 for ratio in setup_ratios) if valid else None,
         "exploratory_threshold_met": (geometric(ratios) >=
                                       float(plan["exploratory_geomean_speedup_threshold"])
                                       if valid else None),
