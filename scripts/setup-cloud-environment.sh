@@ -88,6 +88,7 @@ if ! sage_works; then
     micromamba create -y -p "$sage_prefix" -c conda-forge sage
   fi
   ln -sfn "$sage_prefix/bin/sage" "$bin_dir/sage"
+  hash -r
 fi
 
 if ! sage_works; then
