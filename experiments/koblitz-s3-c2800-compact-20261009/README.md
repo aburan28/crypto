@@ -31,3 +31,9 @@ python3 experiments/koblitz-s3-c2800-compact-20261009/run_feasibility.py \
   --receipt /Volumes/SSD990/llm/tmp/s3-c2800compact-feasibility-receipt.json \
   --raw /Volumes/SSD990/llm/tmp/s3-c2800compact-feasibility-report.json.gz
 ```
+
+[`record_feasibility.py`](record_feasibility.py) archives every completed
+outcome and compares the algorithmic fields with the direct-fill T025 report.
+It excludes timing, RSS, and the declared slot representation only. A passing
+control generates a content-hashed candidate manifest and previously unused
+T165–T172 workload manifests for the next paired screen.
