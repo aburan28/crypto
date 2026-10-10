@@ -1,0 +1,14 @@
+{
+  "schema": "n53-pair-symmetry-generation-failure-v1",
+  "status": "OUTPUT_DIRECTORY_MISSING",
+  "exit_code": 1,
+  "head_commit": "434fc0feeb503e86c3956f4004cdfbb4bb69ae84",
+  "command": ["python3", "research/notes/ecc2k130/n53_pair_symmetry_20261010/generate_heldout.py", "--generator-binary", "target/release/examples/koblitz_rho_fixture"],
+  "error_type": "FileNotFoundError",
+  "failed_path": "research/notes/ecc2k130/n53_pair_symmetry_20261010/inputs/heldout_generation_receipt.json",
+  "failure_stage": "attempted output write after the fixture generator ran",
+  "generator_stdout_retained": false,
+  "point_eligibility_checked": false,
+  "timed_ic_or_rho_cells_started": false,
+  "repair": "create inputs directory before invoking the generator, then rerun the deterministic frozen command after publishing this failure receipt"
+}

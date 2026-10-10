@@ -63,6 +63,7 @@ def main() -> None:
                           "head": head.stdout.strip()}, sort_keys=True))
         return
 
+    (HERE / "inputs").mkdir(parents=True, exist_ok=True)
     fixture_path = HERE / "inputs/heldout_fixture_verifier_only.jsonl"
     point_path = HERE / "inputs/heldout_q.jsonl"
     stderr_path = HERE / "inputs/heldout_generation.stderr"
