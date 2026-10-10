@@ -37,3 +37,25 @@ outcome and compares the algorithmic fields with the direct-fill T025 report.
 It excludes timing, RSS, and the declared slot representation only. A passing
 control generates a content-hashed candidate manifest and previously unused
 T165–T172 workload manifests for the next paired screen.
+
+## T025 feasibility result
+
+The control completed and passed the frozen correctness and resource gates.
+The [receipt](local/feasibility_receipt.json) records **20,883,161,088 bytes
+peak RSS**, 3,515,744,256 bytes below the direct-fill control's peak, and
+640.495 seconds whole-process wall time on this contended host. The [raw
+report](local/feasibility_report.json.gz) records 415,520,000 regular states,
+1,073,741,824 seven-byte slots, 296,800 usable factor-base points, rank
+2,800, 498 target S3 calls, zero fallback attempts, and independent scalar
+replay. The [semantic comparison](local/semantic_comparison.json) matches
+every compared algorithmic field with the direct-fill control. The exact
+candidate is
+`IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hc1a500559579`;
+its [manifest](identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hc1a500559579.json)
+and T165–T172 workload manifests are preserved.
+
+T025 target-online diagnostics were 13.047 ms for this layout and 0.716 ms
+for the direct-fill layout. Both are unisolated single observations. The
+large per-hit lookup cost motivates a representation that recovers the full
+key and witness directly from a compact slot without accessing the large
+state array during target search.
