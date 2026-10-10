@@ -3823,6 +3823,14 @@ pub(crate) fn echelon_f2_counted(
     n_cols: usize,
     word_ops: &mut u64,
 ) -> usize {
+    // Same gate as `rref_f2_counted`: the Four Russians kernel of
+    // `gf2_elim` for matrices from 128 × 256, where its tables pay for
+    // themselves (`gf2_elim_bench`), and the legacy kernels below it.  The
+    // inherited engine's root, the only echelon on the solving path,
+    // previously never reached it.  `KIC_F4_KERNEL=legacy` is the control.
+    if !legacy_rref_kernel() && !suffix_kernel_forced() && matrix.len() >= 128 && n_cols >= 256 {
+        return crate::cryptanalysis::gf2_elim::echelon_counted(matrix, n_cols, word_ops);
+    }
     if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
@@ -4707,6 +4715,13 @@ pub struct SolveStats {
     /// Fixed summand x-coordinate checks performed by the IC node oracle.
     #[serde(default)]
     pub geometric_support_checks: u64,
+    /// Partially assigned summands tested against the base's subspace
+    /// codes by the IC node oracle, and how many of those tests refuted
+    /// the branch.
+    #[serde(default)]
+    pub geometric_partial_support_checks: u64,
+    #[serde(default)]
+    pub geometric_partial_support_refutations: u64,
     /// Exact residual-point hash lookups performed by the IC node oracle.
     #[serde(default)]
     pub geometric_residual_lookups: u64,
@@ -5424,6 +5439,13 @@ fn solve_with_policy_and_oracle(
     (out, stats)
 }
 
+/// `KIC_F4_EARLY_ORACLE=0` makes a child specialise its bases before asking
+/// the node oracle, as it did before; a same-binary control, read once.
+fn early_oracle_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_F4_EARLY_ORACLE").as_deref() != Ok("0"))
+}
+
 #[allow(clippy::too_many_arguments)]
 fn solve_rec(
     system: Vec<F2BoolPoly>,
@@ -5461,6 +5483,31 @@ fn solve_rec(
         return;
     }
 
+    // The node oracle decides from the assignment alone, so a child asks it
+    // before paying for its bases: specialising the parent's reduced rows
+    // is most of a node's work under the inherited engine, and a branch the
+    // oracle refutes or closes never needs them.  The first pass of the
+    // loop below then skips the call it has already made; nothing between
+    // here and there changes the assignment or the definitions.
+    let mut oracle_decided = false;
+    if parent.is_some() && early_oracle_enabled() {
+        let defined_mask = defined
+            .iter()
+            .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+        match node_oracle(&assignment, defined_mask) {
+            NodeOracleDecision::Continue => oracle_decided = true,
+            NodeOracleDecision::Refute => {
+                stats.geometric_refutations += 1;
+                return;
+            }
+            NodeOracleDecision::Witness => {
+                stats.geometric_witnesses += 1;
+                *stop = true;
+                return;
+            }
+        }
+    }
+
     // Under the inherited engine the node's bases are its parent's,
     // specialised by the branch assignment; the root starts with none and
     // builds them at its first reduction.  A system that already contains
@@ -5479,19 +5526,23 @@ fn solve_rec(
 
     // Reduce, propagate, repeat until the algebra stops learning.
     loop {
-        let defined_mask = defined
-            .iter()
-            .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
-        match node_oracle(&assignment, defined_mask) {
-            NodeOracleDecision::Continue => {}
-            NodeOracleDecision::Refute => {
-                stats.geometric_refutations += 1;
-                return;
-            }
-            NodeOracleDecision::Witness => {
-                stats.geometric_witnesses += 1;
-                *stop = true;
-                return;
+        if std::mem::take(&mut oracle_decided) {
+            // Already asked above, on this same assignment.
+        } else {
+            let defined_mask = defined
+                .iter()
+                .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+            match node_oracle(&assignment, defined_mask) {
+                NodeOracleDecision::Continue => {}
+                NodeOracleDecision::Refute => {
+                    stats.geometric_refutations += 1;
+                    return;
+                }
+                NodeOracleDecision::Witness => {
+                    stats.geometric_witnesses += 1;
+                    *stop = true;
+                    return;
+                }
             }
         }
         drop_zeros(&mut system);
