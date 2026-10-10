@@ -1,0 +1,28 @@
+{
+  "file_count": 3,
+  "files": [
+    {
+      "bytes": 1776688,
+      "remote_path": "/opt/s3/baseline",
+      "sha256": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb"
+    },
+    {
+      "bytes": 1793552,
+      "remote_path": "/opt/s3/expanded",
+      "sha256": "47223962d292361ed21bbf0ff577cfe3564c74a84773b16b3b467a5c1e24b8dd"
+    },
+    {
+      "bytes": 1446,
+      "remote_path": "/opt/s3/public_bundle.json",
+      "sha256": "623a6dfde05f4fd3a892276a6d85e57ff4dac93cf6fa241f1d306c18993abadc"
+    }
+  ],
+  "fixture_scalars_in_bundle": false,
+  "kind": "s3_modal_c1800_transfer_manifest_v1",
+  "pilot_freeze_sha256": "11f85e90058d89c551a470a528be23671acc339950cff266d28c21f4fe634e8d",
+  "remote_runner_sent_as_sandbox_command": true,
+  "remote_runner_source_bytes": 15982,
+  "remote_runner_source_sha256": "66e0e743ff3069e8632fd7a9e3326901fb003b73d934b00cdd5ad43ce249174f",
+  "source_repository_transferred": false,
+  "transferred_bytes": 3571686
+}

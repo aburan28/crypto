@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+    "build",
+    "--offline",
+    "--locked",
+    "--release",
+    "--target",
+    "x86_64-unknown-linux-gnu",
+    "--example",
+    "s3_partial_prepared_fullrank_c2800mixed_targetspan",
+    "--example",
+    "s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan"
+  ],
+  "binaries": {
+    "s3_partial_prepared_fullrank_c2800mixed_targetspan": {
+      "bytes": 1776688,
+      "file": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_c2800mixed_targetspan: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.0.0, stripped",
+      "path": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_c2800mixed_targetspan",
+      "sha256": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb"
+    },
+    "s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan": {
+      "bytes": 1793552,
+      "file": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.0.0, stripped",
+      "path": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan",
+      "sha256": "47223962d292361ed21bbf0ff577cfe3564c74a84773b16b3b467a5c1e24b8dd"
+    }
+  },
+  "cargo_build_jobs": 8,
+  "cargo_lock_sha256": "4ddc5ef76119493b41352c64a551fbd3fea3b5789644949ee775975b38150bca",
+  "exit_code": 0,
+  "finished_unix_ns": 1791627225401863000,
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "kind": "s3_modal_c1800_combined_cross_build_v1",
+  "library_source_tree_git_oid": "0a574800502e67882d8f8f88a846c1e80ee795fd",
+  "log_sha256": "15842ef4fca0ced2824bdbb122dddd2f1da1b1a92dd6eba9139297fcd771356d",
+  "rust_sysroot": "/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8",
+  "source_sha256": {
+    "s3_partial_prepared_fullrank_c2800mixed_targetspan": "a398b36071cd59f7d6775c8f4e2b03a6bf867319ba1636378d186f7fb738c679",
+    "s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan": "79f77fef1857c9aed10b8d8913ea796e501f9b0afd615345746c453f8d4907b2"
+  },
+  "started_unix_ns": 1791627217948929000,
+  "target": "x86_64-unknown-linux-gnu",
+  "zig": "0.16.0"
+}

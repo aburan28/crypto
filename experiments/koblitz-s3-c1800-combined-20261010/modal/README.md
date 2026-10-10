@@ -1,0 +1,43 @@
+# Bounded Modal pilot for the N53 C1800 combined target path
+
+This prepared pilot runs C1200 packed and C1800 prefix plus prefetch/projective
+target code on the same public T205 point in ABBA order. It checks Linux
+x86-64 execution, exact scalar recovery, factor-base and rank identities,
+five exclusive online phases, and guest CPU/memory fidelity counters before
+a larger confirmation panel. The point belongs to the committed eight-point
+local panel; this four-run pilot is an environment and correctness check.
+
+The [transfer manifest](TRANSFER_MANIFEST.json) inventories exactly two
+source-derived Linux x86-64 executables and one 1,446-byte public-point JSON
+bundle, totaling **3,571,686 bytes** in the image. The 15,982-byte guest
+runner source is also sent as the Sandbox command text. The bundle contains
+candidate/workload IDs and expected public outputs but no fixture scalar.
+The repository, local run archive, caches, and credentials are outside the
+transfer. [`build/receipt.json`](build/receipt.json) records the source,
+compiler, lockfile, binary, and ELF hashes; the binaries are currently in
+`/private/tmp/s3-modal-combined-build` and can be rebuilt from the frozen
+source if that temporary directory is cleared.
+
+[`PILOT_FREEZE.json`](PILOT_FREEZE.json) fixes one Sandbox creation attempt,
+eight physical CPU cores requested and capped, 32 GiB memory requested and
+capped, a 1,200-second Sandbox limit, a 1,080-second workload deadline,
+240 seconds per run, no explicit region, VM runtime, and blocked guest
+networking. The guest records affinity, physical-core/SMT topology, NUMA
+placement, PSI, cgroup throttling, steal ticks, interrupts, memory, and
+instructions/cycles when perf access is available. The analyzer retains
+unavailable counters as unavailable. A guest CPU allocation does not by
+itself supply the host-wide exclusive partition required by the
+`cryptanalysis/docs/ISOLATED_BENCHMARKS.md` rule.
+
+At [Modal's published Sandbox rates](https://modal.com/pricing), the fixed
+request/limit has a CPU-and-memory base rate of
+`8 × $0.00003942 + 32 × $0.00000667 = $0.00052880` per second, or
+**$0.63456** at 1,200 seconds, with any separately billed image, storage,
+or other usage outside that figure. [Modal's resource guide](https://modal.com/docs/guide/sandbox-resources)
+defines CPU requests as physical cores and describes request/limit billing.
+
+`python3 pilot_modal.py --preview` validates every frozen hash and transfer
+byte count without creating a Sandbox. The preview passed. No Sandbox has
+been created and no source-derived file or guest runner has been sent to
+Modal. The owner authorization required by the prior automatic approval
+review is pending.
