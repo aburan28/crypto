@@ -1,0 +1,30 @@
+{
+  "checked": {
+    "direct": {
+      "online_ms_diagnostic": 0.7188329999999999,
+      "pdp_ms_diagnostic": 0.653916,
+      "recovered_scalar": 254961180376,
+      "report_sha256": "9c75b695149fbf4bd9aeda540638282d4ff1e7e744f54ac3d753ede92b0847c7",
+      "s3_calls": 1170,
+      "sage_scalar_replay": true
+    },
+    "prefetch": {
+      "online_ms_diagnostic": 0.40299999999999997,
+      "pdp_ms_diagnostic": 0.384917,
+      "recovered_scalar": 254961180376,
+      "report_sha256": "20f4646e287a5be82f29be554c206a9ca3eb4099a3de7288c83082ea2015e46a",
+      "s3_calls": 1184,
+      "sage_scalar_replay": true
+    }
+  },
+  "kind": "s3_n41_c244_directlookup_t220_sage_correctness_v1",
+  "parent_freeze_sha256": "a034a635129f4be80e6b81c8807fa92fdd985b3cf0f5e0fbe2a4b5c7ab10e6ce",
+  "replay_script_sha256": "d3edd38945df8ce299d41bd766afb0c40d3d9282a623cbe558d54a6a4b02b7c8",
+  "runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "sage_version": "10.10.rc0",
+  "target": [
+    894799855104,
+    217979605451
+  ],
+  "workload_id": "40fa95d0b2e6"
+}

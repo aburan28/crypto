@@ -1,0 +1,15 @@
+{
+  "binary_store": "/Volumes/SSD990/llm/tmp/s3-directlookup-binaries-20261010",
+  "build_command": "CARGO_TARGET_DIR=/private/tmp/s3-rank243-batch8-build TMPDIR=/Volumes/SSD990/llm/tmp cargo build --release --offline --locked --example s3_partial_prepared_fullrank_projective_directlookup_targetspan",
+  "build_exit_code": 0,
+  "cargo_lock_sha256": "4ddc5ef76119493b41352c64a551fbd3fea3b5789644949ee775975b38150bca",
+  "cargo_version": "cargo 1.93.1 (Homebrew)",
+  "direct_binary_sha256": "de5ff28493f1d4e012b160e1178a8f1737b73342f9fe617c9d9e5676b8eae9b8",
+  "host_architecture": "arm64",
+  "host_os": "Darwin",
+  "kind": "s3_n41_directlookup_release_build_v1",
+  "library_source_tree_git_oid": "0a574800502e67882d8f8f88a846c1e80ee795fd",
+  "prefetch_binary_sha256": "d10625fe3aba0e7b61c44f001f119c1bb3b7f4fdde4ee558df1501f1f1ab1164",
+  "rustc_version": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "source_sha256": "288c570e5ebaca6353c6de3b86ca37bc1ce842eb4938459ed32f50965ed7bb1d"
+}
