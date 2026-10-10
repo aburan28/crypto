@@ -136,7 +136,13 @@ Modal profile:
 modal run experiments/koblitz-s3-fidelity-20261007/modal_app.py::probe --output OTHER_PROBE.json.gz
 modal run experiments/koblitz-s3-fidelity-20261007/modal_app.py::pilot --output OTHER_PILOT.json.gz
 python3 experiments/koblitz-s3-fidelity-20261007/modal_vm_profile.py --output OTHER_VM_PROFILE.json
+python3 experiments/koblitz-s3-fidelity-20261007/modal_vm_panel.py --count 12 --region eu-west --output OTHER_VM_PILOT.json.gz
 python3 experiments/koblitz-s3-fidelity-20261007/analyze_modal.py OTHER_PILOT.json.gz OTHER_ANALYSIS.json
+python3 experiments/koblitz-s3-fidelity-20261007/analyze_modal.py OTHER_VM_PILOT.json.gz OTHER_VM_ANALYSIS.json
+/Volumes/SSD990/cryptanalysis/sage --runtime-info > OTHER_RUNTIME_INFO.json
+/Volumes/SSD990/cryptanalysis/sage -python experiments/koblitz-s3-fidelity-20261007/replay_modal_sage.py \
+  --panel OTHER_VM_PILOT.json.gz --runtime-info OTHER_RUNTIME_INFO.json \
+  --receipt OTHER_VM_SAGE_REPLAY.json
 ```
 
 Both runners refuse to overwrite existing evidence. For the Sage replay use
@@ -148,7 +154,128 @@ request does not substitute for a host-level exclusive partition receipt.
 
 The next confirmatory sample size remains **unset**. The prior planning value
 of 92 independent targets per curve uses noisy historical N53 variance and
-is only a budget estimate. The much lower variance inside either Modal panel
+is only a budget estimate. The much lower variance inside any Modal panel
 cannot replace a clean pilot because the host and A/A gates failed. A future
 qualifying physical-host pilot must pass its predeclared A/A and isolation
 checks before the power calculator freezes the new target count.
+
+## Follow-up VM paired pilot, 2026-10-08
+
+The new [`../modal_vm_panel.py`](../modal_vm_panel.py) ran the **same** 12
+targets per curve in one Modal VM Sandbox (`sb-QXEf3K8h88u4XnYtRorGJ7`).
+It requested 16 CPU cores and 8192 MiB in OCI `eu-west`, pinned the solver
+to guest CPUs 1–15, pinned the sampler to guest CPU 16, and bound memory to
+guest NUMA node 0. This was a third timing replication of the existing 24
+distinct points, not 24 new statistical units. The VM panel used image
+`im-BmwZ79t7Tkcc1SG9HC8BKi`, baseline binary SHA-256
+`8769b58bd54cd15322456972f587cb577b0cac11d7a179b7cf7cabfddede81b1`,
+and candidate binary SHA-256
+`b5fdd31128bf3b9d151e6b470bf7b11770221e1d52aa268aeddca02fd8c741a3`.
+The frozen baseline and candidate source SHA-256 values match the first
+panel, but the binaries differ after the intervening `main` merge. Interpret
+each panel only within its own binary and host pairing.
+
+The [complete VM ledger](vm_pilot_20261008.json.gz) is 5,616,998 bytes,
+SHA-256 `85a5a7dcb150f9fdec38055dfbca6762bf70eab08e6f7c0c1194c676251dc2c6`.
+All 146 solver invocations exited successfully; exact raw text hashes,
+stdout identity, unchanged binary hashes, fixture scalar recovery and
+exclusive online phase sums passed. All six runs within each target block
+had the same semantic witness; all 24 target traces also matched the
+previous Sage-verified Function panel. The [analysis](vm_analysis_20261008.json)
+retains each paired time, A/A control, host snapshot, descriptive interval
+and failed claim gate. A separate [VM smoke](vm_smoke_20261008.json.gz)
+used one point per curve before the CPU 0 exclusion. The first full VM
+attempt lost its large stdout transfer, so no raw evidence from that attempt
+is used; its [failure record](vm_transfer_failure_20261008.json) is retained.
+A temporary Modal Volume then transferred the full rerun by size and SHA-256
+and was deleted after validation.
+
+| Curve | Exploratory geometric mean baseline/candidate online ratio | Descriptive 95% t interval | Candidate faster targets | A/A p95 ratio | A/A gate (<1.05) |
+| --- | ---: | ---: | ---: | ---: | --- |
+| N41 | 1.0559 | 1.0449–1.0670 | 12/12 | 1.0340 | Pass |
+| N53 | 1.0895 | 1.0768–1.1024 | 12/12 | 1.0563 | **Fail** |
+
+The descriptive N53/N41 ratio of paired ratios is 1.0318, with a Welch
+interval 1.0166–1.0473. Its inferential status remains **unknown** under the
+protocol because N53 failed the fixed A/A noise threshold and the VM has no
+host-level isolation receipt. The single N53 A/A outlier was target T010,
+where the two baseline intervals were 1189.895 and 1126.472 ms. The slower
+run had one guest steal tick; that observation does not establish its cause.
+
+The VM exposed an AMD EPYC 9J45 CPU model, guest SMT and NUMA topology,
+thread affinity masks `1-15` for all runs, memory placement and per-run
+interrupt/steal/cgroup snapshots. The guest cgroup reported no CPU
+throttling. **Twenty-three of 146** run windows showed increasing guest CPU
+steal ticks. The VM did not expose CPU/memory PSI, an exclusive host cpuset
+partition, host IRQ routing, fixed frequency, or proof that no other tenant
+shared the physical cores. These are missing host-level claim requirements.
+The reported 32 VM vCPUs and guest NUMA node are not a physical-host
+isolation receipt. The `physical_smt_topology_known` and `numa_node_known`
+checks therefore remain false in the VM analysis even though the *guest*
+equivalents are visible.
+
+Four separate whole-process `perf stat` passes on the VM completed with
+100% enabled/running event time. They include reusable setup and one target;
+they cannot be assigned to the target-online interval:
+
+| Curve | Arm | Instructions, billions | Cycles, billions | IPC |
+| --- | --- | ---: | ---: | ---: |
+| N41 | Baseline | 7.764 | 3.721 | 2.09 |
+| N41 | Candidate | 7.626 | 3.703 | 2.06 |
+| N53 | Baseline | 31.774 | 22.900 | 1.39 |
+| N53 | Candidate | 28.280 | 20.935 | 1.35 |
+
+Mean online wall times in the unprofiled VM pairs were 61.928/58.649 ms
+for N41 baseline/candidate and 1158.606/1063.598 ms for N53. Their charged
+target PDP means were 53.622/50.275 ms and 1149.327/1054.338 ms,
+respectively. Reusable index build was about 63 ms on N41 and 86 ms on N53
+in this VM. Each target's exclusive phase costs, relation counts and peak
+memory remain in the raw ledger.
+
+The checked Sage launcher was run with [`--runtime-info`](vm_sage_runtime_info_20261008.json)
+before the VM replay. Its separate receipt
+[`vm_independent_sage_replay_20261008.json`](vm_independent_sage_replay_20261008.json)
+has SHA-256 `9472443c3ffc101bc0af25621726d685dff6531c6625e5bdef4d01ac8929c22c`
+and binds the VM ledger hash, all 45,872 factor-base points, 5,880 relation
+witnesses, independent matrix recoveries, and all 24 public points. Sage
+replay time is outside the online intervals. The next confirmatory sample
+size remains unset; the 92-per-curve value is still only the earlier budget
+estimate.
+
+## Source-bound stage attribution, 2026-10-08
+
+[`../analyze_s3_mechanism.py`](../analyze_s3_mechanism.py) reads the complete
+VM ledger and its custody audit, checks the archived baseline/candidate
+source hashes, then pairs the two runs of each arm within each public target.
+Its [target-level output](vm_mechanism_analysis_20261008.json), SHA-256
+`a0a4e0da81e18b2f1e0806653cdc7aa76527a562cc9cb6ae552024509e998310`,
+retains all five exclusive online phases, nested rank-stage diagnostics, and S3/probe
+counters. The intervals below are unadjusted descriptive 95% t intervals over
+the **same 12 targets per curve**; the failed host and N53 A/A gates still
+prevent a controlled speedup claim.
+
+| Curve | Mean online baseline minus candidate | Charged target PDP difference | Rank PDP wall difference | Reusable index-build difference |
+| --- | ---: | ---: | ---: | ---: |
+| N41 | 3.280 ms (2.642–3.918) | 3.346 ms (2.706–3.987) | 3.310 ms (2.669–3.950) | −0.143 ms (−0.529–0.244) |
+| N53 | 95.008 ms (81.799–108.216) | 94.989 ms (81.790–108.188) | 92.530 ms (79.272–105.788) | −0.415 ms (−1.046–0.216) |
+
+Charged target PDP accounts for about 102% of the N41 mean online
+difference and 100% of N53's; the other exclusive phases offset N41 slightly.
+Rank PDP wall is nested inside charged PDP, and index build is reusable setup
+outside the online interval. The number of rank state probes is identical
+between arms for every paired target: 174,551 on N41 and 3,849,533 on N53.
+Mean logical rank S3 queries are 348,982/349,102 (baseline/candidate) on
+N41 and 7,698,947/7,699,066 on N53. The candidate therefore processes a
+comparable number of logical queries; its generic paired-root path shares an
+inversion. The actual exceptional fallback count was not measured, so these
+logical-query counts must not be relabeled as field-inversion counts.
+
+This attribution adds no target or timing runs and does not alter the
+confirmatory sample-size gate. To reproduce it from this checkout:
+
+```sh
+python3 experiments/koblitz-s3-fidelity-20261007/analyze_s3_mechanism.py \
+  experiments/koblitz-s3-fidelity-20261007/modal/vm_pilot_20261008.json.gz \
+  experiments/koblitz-s3-fidelity-20261007/modal/vm_analysis_20261008.json \
+  OTHER_VM_MECHANISM.json
+```

@@ -863,7 +863,6 @@ def build() -> dict:
                  "factor_base_link_status", "no_curves_yaml_record")}
             for c in roster(names, measured)],
         "n41_n53_counted_diagnostic": n41_n53_diagnostic,
-        "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
 
@@ -1530,7 +1529,7 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{esc(VARIANTS.get(vname, vname))}</td>')
         for r in ladder:
             v = next((x for x in r["recipes"] if x["variant"] == vname), None)
-            best = v is r["best"]
+            best = v == r["best"]
             cell = times(v["ratio_rho"]) if v else "—"
             P.append(f'<td class="n">{"<strong>" + cell + "</strong>" if best else cell}</td>')
         P.append('</tr>')

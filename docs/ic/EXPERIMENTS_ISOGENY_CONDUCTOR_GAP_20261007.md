@@ -52,7 +52,7 @@ disks at 100%. Set `TMPDIR` to the session scratchpad, keep artifacts under
 ## E0. Smoke test of a one-level descent at a toy rung (done, see status)
 
 **Angles:** V2, V9. **Script:** `research/isogeny_conductor_gap_20261007/v2_descend_toy.py`.
-Builds `K_0/F_{2^23}`, finds a point of order 967 in `E(F_{q^21})`, rejects the
+Builds `icv1-f2m23-t5197-69e76b73`, finds a point of order 967 in `E(F_{q^21})`, rejects the
 two τ-eigenlines by a Weil-pairing test, computes the Vélu 967-isogeny,
 checks `j(E') ∈ F_q \ F_2`, descends to `E_1/F_q` by the minimal polynomial of
 `j'`, picks the twist of the right order, and checks that `φ(G)` keeps the
@@ -100,6 +100,56 @@ replicated on a second subspace fails this. (2) Relations per target with
 factor is the deliverable. (3) Rho operation ratio floor/crater `= √(2n) ± 20%`.
 **Cost:** 3 classes × ≤ 4 curves × 3 solvers × 64 targets, each call seconds
 to minutes at these `n`; one to two days of wall on the loaded host.
+
+**Result, first panel, 2026-10-08 (T23 only; `e1_floor_panel.py`,
+`e1_t23_panel.jsonl`, 34 cells, all DLPs verified).** The production
+pipeline (`ic run`, legacy dimension-11 subspace base, `m = 2`) on the
+crater curve `E0` and on one curve from each of the first two floor orbits
+(`O00-000`, `b = 6998741`; `O01-000`, `b = 4926473`), which required the
+Rust extension `KoblitzCurve::isogenous_model` (commit 5 of the PR). Each
+`ic run` collects relations until the factor-base logs are determined and
+recovers one random known-answer logarithm; medians over 4 seeds (SAT on
+the floor: 1 seed each).
+
+| curve | solver | points | columns | trials | relations | trials / relation | total wall s | wall s / relation |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| E0 (crater) | enumerate | 2025 | 44 | 70 | 29 | 2.41 | 0.07 | — |
+| E0 (crater) | groebner | 2025 | 44 | 70 | 29 | 2.41 | 23.3 | 0.80 |
+| E0 (crater) | sat | 2025 | 44 | 77 | 30.5 | 2.52 | 97.2 | 3.19 |
+| O00-000 (floor) | enumerate | 2033 | 1016 | 1316 | 523 | 2.52 | 1.12 | — |
+| O00-000 (floor) | groebner | 2033 | 1016 | 1148 | 459.5 | 2.50 | 315.9 | 0.69 |
+| O00-000 (floor) | sat | 2033 | 1016 | 1218 | 483 | 2.52 | 697.0 | 1.44 |
+| O01-000 (floor) | enumerate | 1981 | 990 | 1232 | 469 | 2.63 | 0.82 | — |
+| O01-000 (floor) | groebner | 1981 | 990 | 1218 | 460 | 2.65 | 280.3 | 0.61 |
+| O01-000 (floor) | sat | 1981 | 990 | 1414 | 508 | 2.78 | 1114.7 | 2.19 |
+
+Readings against the predictions:
+
+1. *Per-call statistics are level-blind.* Trials per relation (the
+   decomposition success rate under the same base and `m`) is 2.41–2.52 on
+   the crater and 2.50–2.78 on the floor; the per-relation Gröbner cost is
+   0.80 s on the crater against 0.61–0.69 s on the floor, and SAT is within
+   a factor 2.2 with the floor never slower. Nothing in the solver sees the
+   level, as LEADS §3.2 found with the exact oracle. Host load varied
+   between the crater cells (run first, load ≈ 60) and the floor cells, so
+   the sub-2× wall differences are not interpretable.
+2. *The crater's advantage is orbit folding and nothing else.* Columns 44
+   against 990–1016 (the `2n = 46`-fold signed-Frobenius folding, less the
+   cofactor-projection merges), relations needed 29 against 460–520, total
+   wall 7–15× lower. This is the `2n` factor of V3's prediction realized in
+   relations, not the `(2n)²` in linear algebra (the LA stage is
+   milliseconds at this size).
+3. *The realized τ-slot factor in this pipeline is 1.0.* `ic run` folds
+   columns but decomposes every target over the plain base, so the
+   `log₂(m!)` ordered-slot gain in trials per relation that LEADS measures
+   with the exact oracle (6.1 ≈ 3! at `n = 19`) is not implemented here;
+   trials per relation are equal across levels. Implementing ordered τ-slots
+   in `ic run` is the next step if that gain is to be measured under real
+   solvers.
+4. *Not done in this panel:* the rho control, per-call first-fall degree
+   and SAT-conflict distributions (the run report carries only totals),
+   T19 and C37. The driver takes `--only-curves`; T19/C37 need their
+   class files wired in the same way.
 
 ## E2. Floor curves at the landed rungs n = 41, 61, 83, and the production pipeline on them (new)
 
