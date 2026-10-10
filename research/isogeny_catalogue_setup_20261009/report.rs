@@ -64,7 +64,7 @@ fn main() {
         let mut files = vec![];
         entries(study, study, &mut files);
         let mut sources = vec![];
-        entries(Path::new("tools/isogeny-cli"), Path::new("."), &mut sources);
+        entries(Path::new("tools/isogeny-cli"), Path::new(""), &mut sources);
         let manifest =
             json!({"schema":"isogeny-setup-manifest/v1","files":files,"tool_sources":sources});
         fs::write(
@@ -155,6 +155,7 @@ fn main() {
     }
     writeln!(report,"\nThe preregistered complete-search threshold was at least 1% fewer instructions; outcome: **{acceptance}**. Screening includes setup/output. Verification excludes construction. Full search includes the constructor child, executable/receipt hashing, output and independent replay. No stage ratio is an end-to-end solver gain.\n").unwrap();
     report.push_str("All catalogue JSON, normalized candidate lists, independent certificate records and complete-search map bytes match. Runtime SHA-256 matches the unchanged repository implementation at padding/block boundaries and for a 1 MiB input. The build-generated catalogue index preserves curve parameters, subgroup data and operation capabilities; the complete public inventory remains embedded. The candidate uses pinned RustCrypto SHA-256 with runtime CPU detection and a portable fallback. Constructor and independent-verifier arithmetic are unchanged.\n\nThe 349-model inventory, 174 prime-field construction models and 146 replay models remain. Montgomery/Edwards, binary and extension map adapters are still open requirements. The earlier high-degree maps and their coverage labels remain frozen. No new curve/map finding changes canonical graphs; the catalogue, cover graph and IC performance ledger remain unchanged.\n\nThe root gate still reports 643 compiler errors. Hosted CI was queued without an assigned runner at the start of this round. Merge and ReleaseMe publication require their applicable gates; local passing tests do not satisfy hosted checks.\n\n[Protocol](PROTOCOL.md), [summary](PROFILE_SUMMARY.json), [diagram](COMMAND_SETUP.svg), [PDF](REPORT.pdf), validation logs, and compact evidence archives carry the receipts. Source/executable hashes and toolchain versions identify the paired builds.\n");
+    report.push_str("\nThe Docker connection was interrupted during verification round 3. The interrupted counter was empty and its instruction cost is unmeasured. Completed commands were retained; unfinished commands resumed with byte-identical executables and unchanged compiler/Valgrind receipts. The interrupted directory and driver log are preserved separately. These medians describe completed commands; no measured campaign-total or wall-time improvement is claimed. See [interruption receipt](INTERRUPTION.json).\n");
     fs::write(study.join("RESULTS.md"), &report).unwrap();
     let mut ops = vec![
         Op::Text(
@@ -271,7 +272,8 @@ fn main() {
         "Receipt hashes are checked against the unchanged SHA-256 implementation. Runtime CPU detection preserves a portable fallback. The compact index retains exact curve/subgroup inputs.".into(),
         "Inventory and support remain 349 models, 174 prime construction models and 146 replay models. Montgomery/Edwards, binary and extension map adapters remain open.".into(),
         "Root compilation retains 643 errors; hosted CI, merge and ReleaseMe publication remain pending. No new map changes canonical graphs or the IC performance ledger.".into(),
-        "Receipts: PROTOCOL.md, PROFILE_SUMMARY.json, MANIFEST.json, validation logs and compact raw evidence archives. The next page contains the editable vector diagram.".into()] {
+        "An external Docker interruption has an empty counter. Its work is unmeasured and preserved separately. Medians describe completed commands; no campaign-total gain is claimed.".into(),
+        "Receipts: PROTOCOL.md, PROFILE_SUMMARY.json, MANIFEST.json, INTERRUPTION.json, validation logs and compact raw evidence archives. The next page contains the editable vector diagram.".into()] {
         wrapped(&mut page,&mut y,&line,11.);
     }
     emit_pdf(
