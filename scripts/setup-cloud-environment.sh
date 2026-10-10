@@ -28,10 +28,10 @@ if ! command -v apt-get >/dev/null 2>&1; then
 fi
 
 packages=(
-  build-essential ca-certificates clang cmake curl git jq
+  build-essential bzip2 ca-certificates clang cmake curl git jq
   libgmp-dev libmpfr-dev libpq-dev libssl-dev pkg-config ripgrep
   python3 python3-pip python3-venv python3-sympy python3-pytest
-  sagemath pari-gp shellcheck git-lfs
+  pari-gp shellcheck git-lfs
 )
 if ! command -v go >/dev/null 2>&1; then
   packages+=(golang-go)
@@ -47,6 +47,48 @@ done
 if (("${#missing[@]}" > 0)); then
   run_root env DEBIAN_FRONTEND=noninteractive apt-get update
   run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${missing[@]}"
+fi
+
+# Some minimal images do not expose the APT sagemath package. Prefer it when
+# available, then fall back to the Sage project's conda-forge installation.
+sage_works() {
+  command -v sage >/dev/null 2>&1 &&
+    sage -python -c 'from sage.all import GF; assert GF(256).cardinality() == 256' >/dev/null 2>&1
+}
+
+if ! sage_works; then
+  run_root env DEBIAN_FRONTEND=noninteractive apt-get update
+  if apt-cache show sagemath >/dev/null 2>&1; then
+    run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends sagemath || true
+  fi
+fi
+
+if ! sage_works; then
+  case "$(uname -m)" in
+    x86_64) mamba_platform=linux-64 ;;
+    aarch64|arm64) mamba_platform=linux-aarch64 ;;
+    *) echo "No micromamba build selected for architecture $(uname -m)" >&2; exit 1 ;;
+  esac
+  if ! command -v micromamba >/dev/null 2>&1; then
+    (
+      download_dir="$(mktemp -d)"
+      trap 'rm -rf "$download_dir"' EXIT
+      curl -fsSL "https://micro.mamba.pm/api/micromamba/$mamba_platform/latest" -o "$download_dir/micromamba.tar.bz2"
+      tar -xjf "$download_dir/micromamba.tar.bz2" -C "$download_dir" bin/micromamba
+      install -m 755 "$download_dir/bin/micromamba" "$bin_dir/micromamba"
+    )
+  fi
+  export MAMBA_ROOT_PREFIX="${MAMBA_ROOT_PREFIX:-$HOME/.local/share/micromamba}"
+  sage_prefix="$MAMBA_ROOT_PREFIX/envs/sage"
+  if [[ ! -x "$sage_prefix/bin/sage" ]]; then
+    micromamba create -y -p "$sage_prefix" -c conda-forge sage
+  fi
+  ln -sfn "$sage_prefix/bin/sage" "$bin_dir/sage"
+fi
+
+if ! sage_works; then
+  echo "SageMath installation finished without a working sage command" >&2
+  exit 1
 fi
 
 if ! command -v cargo >/dev/null 2>&1; then
