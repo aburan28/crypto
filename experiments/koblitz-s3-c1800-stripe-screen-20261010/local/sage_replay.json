@@ -1,0 +1,39 @@
+{
+  "all_scalars_independently_replayed": true,
+  "diagnostic_sha256": "3d50df9582186c5e392bed4654e95e77bc37f9bdddb7e2cc2f7f557497557eb6",
+  "kind": "s3_c1800_stripe_call_diagnostic_sage_replay_v1",
+  "replay_script_sha256": "5764d0aa236834c018ccc1fb0efdc17a7cfe04eab3239d58a4db3887b1831025",
+  "run_count": 4,
+  "runs": [
+    {
+      "label": "T205",
+      "recovered_scalar": 7380136779495,
+      "report_sha256": "9ed99e9b6cdb84142dc66e18fb3342fba932a03afb35e186e3f2676ba68245b9",
+      "run_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h57c66f00aeabWd642f61a45c8R1",
+      "sage_scalar_replay": true
+    },
+    {
+      "label": "T209",
+      "recovered_scalar": 17019609223767,
+      "report_sha256": "0ca8a75d6bd613d213d45b768aeb3d73acc5e1244456fa3dff0210a3523aca3d",
+      "run_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h57c66f00aeabWc840f6d92ed3R1",
+      "sage_scalar_replay": true
+    },
+    {
+      "label": "T211",
+      "recovered_scalar": 12621264708608,
+      "report_sha256": "5a747beae70cdda5e94118e747168aa1b6cd0559ac9146659b1fcce3d998fd7f",
+      "run_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h57c66f00aeabWa03acca96bf1R1",
+      "sage_scalar_replay": true
+    },
+    {
+      "label": "T212",
+      "recovered_scalar": 4619066374817,
+      "report_sha256": "8d5d136c4cfcb76d9bb59d09ab8ea81b9149630003a6a73df48c63bcb6140040",
+      "run_id": "IC1N53Ckb1fb190800PDP4rootRCsampleLAgaussTDdirectISO0h57c66f00aeabWaba81823a9d0R1",
+      "sage_scalar_replay": true
+    }
+  ],
+  "sage_runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "sage_version": "10.10.rc0"
+}
