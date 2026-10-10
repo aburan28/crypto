@@ -2409,7 +2409,13 @@ fn main() {
         let text = fs::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
         let v: Value = serde_json::from_str(&text).unwrap_or_else(|e| panic!("{path}: {e}"));
         // `{"rows": [...]}` (this binary's runners) or a bare array (`quartic_folds`).
-        rows.extend(v["rows"].as_array().or(v.as_array()).cloned().unwrap_or_default());
+        rows.extend(
+            v["rows"]
+                .as_array()
+                .or(v.as_array())
+                .cloned()
+                .unwrap_or_default(),
+        );
     }
     let mut by: BTreeMap<String, Vec<&Value>> = BTreeMap::new();
     for r in &rows {
