@@ -1,0 +1,17 @@
+{
+  "differing_keys": [],
+  "excluded_fields": [
+    "timing_ms",
+    "peak_rss_bytes",
+    "root_table_slot_bytes",
+    "root_table_value_bits",
+    "root_table_layout",
+    "root_table_construction_policy"
+  ],
+  "kind": "s3_n53_c2800convert_full_key_vs_converted_tag_semantic_control_v1",
+  "new_only_keys": [],
+  "new_raw_sha256": "07d5e0cad8513e184808f4b4c850c3216b0e99a44d20b6c8d999ef14d1400b9d",
+  "non_timing_fields_equal": true,
+  "old_only_keys": [],
+  "old_raw_sha256": "32cd6d60dbdd97b40283e6c5480e38902205169e838fa0c7efa896d79ff17650"
+}

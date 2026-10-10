@@ -33,3 +33,16 @@ compares all algorithmic fields with the direct-fill reference, except the
 declared slot format and construction policy. It assigns a content-hashed
 candidate ID and freezes unused T165–T172 workloads only after the rank,
 scalar, table geometry, semantic, and memory gates pass.
+
+The T025 control passed those gates. The 415,520,000 ordered regular states
+produced 415,077,662 distinct roots in 1,073,741,824 slots; prepared rank
+reached 2,800, and 498 target S3 calls recovered scalar 429728658711 with
+group replay. The [semantic comparison](local/semantic_comparison.json) is
+equal to the full-key direct reference for every field outside the declared
+layout and timing fields. Peak whole-process RSS was 18,463,309,824 bytes,
+within the frozen 32 GiB envelope. The whole-process interval was 471.875 s;
+the target online interval was 9.499 ms on this contended host and is a
+diagnostic. The candidate manifest is
+[`IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h1bc6d6637960`](identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h1bc6d6637960.json).
+The [receipt](local/feasibility_receipt.json) and
+[compressed report](local/feasibility_report.json.gz) retain the raw result.
