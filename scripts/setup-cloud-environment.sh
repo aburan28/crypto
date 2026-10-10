@@ -46,7 +46,17 @@ for package in "${packages[@]}"; do
 done
 if (("${#missing[@]}" > 0)); then
   run_root env DEBIAN_FRONTEND=noninteractive apt-get update
-  run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${missing[@]}"
+  available=()
+  for package in "${missing[@]}"; do
+    if apt-cache show "$package" >/dev/null 2>&1; then
+      available+=("$package")
+    else
+      echo "APT package unavailable, skipping: $package" >&2
+    fi
+  done
+  if (("${#available[@]}" > 0)); then
+    run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${available[@]}"
+  fi
 fi
 
 # Some minimal images do not expose the APT sagemath package. Prefer it when
