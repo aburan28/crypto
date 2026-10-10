@@ -1,0 +1,45 @@
+{
+  "arms": {
+    "baseline": {
+      "binary_sha256": "0f805070787361a6dc250985ce64c4380b3b781aa7c374f99df66cfee5d530f4",
+      "candidate_id": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hbbd5b5a111fb",
+      "candidate_manifest": "experiments/koblitz-s3-c2800-mixed-20261009/identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hbbd5b5a111fb.json",
+      "factor_base_digest": "c9ee1efcb17aeb1ced5a354a01bbf562a2c0dda6867fc6839047ad97fc804755",
+      "source_relative": "examples/s3_partial_prepared_fullrank_c2800mixed_targetspan.rs",
+      "source_sha256": "a398b36071cd59f7d6775c8f4e2b03a6bf867319ba1636378d186f7fb738c679"
+    },
+    "prefetch": {
+      "binary_sha256": "c143593cfe045321500aa635d67eab7841013b405a565e2476de420d016ea24a",
+      "candidate_id": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h9d7b111b5b0f",
+      "candidate_manifest": "experiments/koblitz-s3-c2800-prefetch-20261010/identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h9d7b111b5b0f.json",
+      "factor_base_digest": "c9ee1efcb17aeb1ced5a354a01bbf562a2c0dda6867fc6839047ad97fc804755",
+      "source_relative": "examples/s3_partial_prepared_fullrank_c2800prefetch_targetspan.rs",
+      "source_sha256": "43705e308be40c6340c67c96312bb77ebe4fa4bc07ec16ef2a769bdf8a276422"
+    }
+  },
+  "control_receipt_sha256": "69e56a43815cb7a802d4dea6fb6fd0800a45d5b9e82052c2981daef9ead9eee6",
+  "controlled_speedup": null,
+  "exploratory_geomean_speedup_threshold": "2",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c2800_prefetch_paired_screen_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "pair_order": "baseline_prefetch_for_even_target_index_else_prefetch_baseline",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 1,
+  "runner_sha256": "7d61508a02402920354643c05dff5c9f06ebdecf066c348233e69d6f19eb4fe2",
+  "stop_after_first_invalid_or_over_budget_run": true,
+  "target_labels": [
+    "T173",
+    "T174",
+    "T175",
+    "T176",
+    "T177",
+    "T178",
+    "T179",
+    "T180"
+  ],
+  "target_workers": 1,
+  "timeout_seconds_per_run": 1200
+}
