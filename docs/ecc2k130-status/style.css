@@ -184,6 +184,9 @@ section { margin: 34px 0; }
 .banner.EMPTY,
 .banner.UNREACHABLE { color: var(--idle); }
 .banner a { color: inherit; }
+.banner.mac-current { margin-top: 14px; }
+.banner.mac-current.live { color: var(--good); border-color: #24503f; }
+.banner.mac-current.stale { color: var(--warn); border-color: #54452a; }
 
 .freshness {
   display: flex;
