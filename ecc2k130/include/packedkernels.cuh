@@ -805,7 +805,8 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #if ECC_PACKED_BATCH_SPLIT != 1 || ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_SHARED_X_SLOTS || ECC_PACKED_LAST_SLOT_CACHE || ECC_PACKED_FUSED_SIGMA
 #error "Split batches, block inversion, shared-X slots, the last-slot cache and fused sigma are implemented only by the x-only walk (ECC_PACKED_XONLY_23)"
 #endif
-#if ECC_TABLE_FUSED
+#if ECC_SIGMA_FUSED
+// Forward work and the reverse pass share the sigma fused walk below.
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 #if ECC_SIGMA_SQUARE_TABLE
