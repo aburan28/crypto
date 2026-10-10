@@ -8,6 +8,16 @@ worker writes its object and manifest under `object/`. On timeout it kills the
 named container and checks that it is gone. Worker exit 137 is censored as an
 unknown resource/worker exit; it is not asserted to be an OOM event.
 
+The v2 exporter streams JSONL through a plain-byte BLAKE3 hasher into a gzip
+file named `.partial.jsonl.gz`. After gzip finishes, it hashes the compressed
+file and renames it to the content-addressed object name. It still holds the
+representatives and point coordinates needed for the sorted point-set hash;
+peak memory for a declared larger size has not been measured. An interrupted
+worker may leave the partial file, but no completed manifest names it and the
+uploader requires a matching replay receipt. A small public fixture checks
+that streamed and buffered serialization have identical plain and compressed
+bytes.
+
 This gate checks a clean source commit, executable SHA-256, the one-object
 manifest's declared curve/policy/size/seed and destination, and basic file
 presence. `PASS_construction_only` does **not** certify the compressed BLAKE3

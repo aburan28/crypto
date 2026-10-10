@@ -367,13 +367,31 @@ fn point_set_hash(points: impl IntoIterator<Item = FastPoint128>) -> Result<Stri
     Ok(hash.finalize().to_hex().to_string())
 }
 
-fn construct(
+struct HashingWriter<W> {
+    inner: W,
+    hasher: blake3::Hasher,
+}
+
+impl<W: Write> Write for HashingWriter<W> {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        let written = self.inner.write(bytes)?;
+        self.hasher.update(&bytes[..written]);
+        Ok(written)
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.inner.flush()
+    }
+}
+
+fn construct_into<W: Write>(
     a: u8,
     policy: &str,
     columns: usize,
     seed: u64,
     deadline: Instant,
-) -> Result<(Vec<u8>, Value)> {
+    mut output: W,
+) -> Result<Value> {
     let kc = curve(a)?;
     let fast =
         FastBinaryCurve128::new(&kc.curve.irreducible, u128::from(a)).ok_or("wide backend")?;
@@ -403,8 +421,8 @@ fn construct(
         source_indices.push(scanned);
     }
     let header = json!({"schema":"n83.factor-base/v1","study":STUDY,"curve_slug":if a==0{"icv1-f2m83-tm6151469093347-debefd74"}else{"icv1-f2m83-t6151469093347-cdcc5432"},"n":83,"curve_a":a,"curve_b":"1","modulus_low_terms":[0,1,2,45],"field_encoding":"decimal u128 polynomial word; bit i is coefficient of z^i","subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),"frobenius_lambda":kc.lambda.to_string(),"generator":point_json(words(kc.generator())),"policy":policy,"seed":seed,"orbit_columns":columns,"point_count":columns*166,"closure":"signed_frobenius","subspace_membership_after_projection":false,"representatives":reps.iter().copied().map(point_json).collect::<Vec<_>>(),"source_points_before_cofactor_clearing":sources.iter().copied().map(point_json).collect::<Vec<_>>(),"accepted_candidate_indices":source_indices});
-    let mut bytes = serde_json::to_vec(&header)?;
-    bytes.push(b'\n');
+    serde_json::to_writer(&mut output, &header)?;
+    output.write_all(b"\n")?;
     let r = kc.subgroup_order.to_u128().ok_or("order packing")?;
     let mut point_count = 0usize;
     let mut point_set = Vec::with_capacity(columns * 166);
@@ -417,10 +435,10 @@ fn construct(
                 let c = coeff.to_u128().ok_or("coefficient packing")?;
                 let label = if negative { r - c } else { c };
                 serde_json::to_writer(
-                    &mut bytes,
+                    &mut output,
                     &json!({"point":point_json(p),"column":column,"phase":phase,"negative":negative,"coefficient":label.to_string()}),
                 )?;
-                bytes.push(b'\n');
+                output.write_all(b"\n")?;
                 point_set.push(p);
                 point_count += 1;
             }
@@ -433,6 +451,18 @@ fn construct(
         }
     }
     let row = json!({"a":a,"policy":policy,"columns":columns,"seed":seed,"raw_x_candidates":scanned,"points":point_count,"point_set_blake3":point_set_hash(point_set)?,"construction_elapsed_ms_informational_L0":start.elapsed().as_secs_f64()*1000.0,"runtime_rank_eligible":false,"total_index_calculus_runtime_ms":null,"relation_yield":null,"matrix_rank":null,"verified_dlp":null});
+    Ok(row)
+}
+
+fn construct(
+    a: u8,
+    policy: &str,
+    columns: usize,
+    seed: u64,
+    deadline: Instant,
+) -> Result<(Vec<u8>, Value)> {
+    let mut bytes = Vec::new();
+    let row = construct_into(a, policy, columns, seed, deadline, &mut bytes)?;
     Ok((bytes, row))
 }
 
@@ -584,8 +614,17 @@ fn construct_v2_one(
         }
         std::process::exit(124);
     });
-    let (bytes, mut row) = match construct(a, policy, columns, seed, deadline) {
-        Ok(object) => object,
+    let partial = root.join("objects").join(".partial.jsonl.gz");
+    let file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&partial)?;
+    let mut writer = HashingWriter {
+        inner: GzEncoder::new(file, Compression::default()),
+        hasher: blake3::Hasher::new(),
+    };
+    let mut row = match construct_into(a, policy, columns, seed, deadline, &mut writer) {
+        Ok(row) => row,
         Err(error) if error.to_string() == "BUDGET_EXHAUSTED" => {
             let cap = json!({
                 "schema":"n83.factor-base-object-cap/v2-size-frontier",
@@ -604,21 +643,26 @@ fn construct_v2_one(
         }
         Err(error) => return Err(error),
     };
-    let plain_hash = blake3::hash(&bytes).to_hex().to_string();
-    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
-    encoder.write_all(&bytes)?;
-    let compressed = encoder.finish()?;
-    let compressed_hash = blake3::hash(&compressed).to_hex().to_string();
+    let plain_hash = writer.hasher.finalize().to_hex().to_string();
+    writer.inner.finish()?.sync_all()?;
+    let mut compressed_file = fs::File::open(&partial)?;
+    let bytes = compressed_file.metadata()?.len();
+    let mut compressed_hasher = blake3::Hasher::new();
+    let mut buffer = [0u8; 64 * 1024];
+    loop {
+        let read = compressed_file.read(&mut buffer)?;
+        if read == 0 {
+            break;
+        }
+        compressed_hasher.update(&buffer[..read]);
+    }
+    let compressed_hash = compressed_hasher.finalize().to_hex().to_string();
     let object = format!("objects/{compressed_hash}.jsonl.gz");
-    let mut file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(root.join(&object))?;
-    file.write_all(&compressed)?;
+    fs::rename(&partial, root.join(&object))?;
     row["object"] = json!(object);
     row["compressed_blake3"] = json!(compressed_hash);
     row["plain_blake3"] = json!(plain_hash);
-    row["bytes"] = json!(compressed.len());
+    row["bytes"] = json!(bytes);
     row["s3_uri"] = json!(v2_object_uri(a, &object));
     write_new_json(
         &root.join("manifest.json"),
@@ -1356,9 +1400,26 @@ mod tests {
             Instant::now() + Duration::from_secs(60),
         )
         .unwrap();
+        let mut streamed = HashingWriter {
+            inner: GzEncoder::new(Vec::new(), Compression::default()),
+            hasher: blake3::Hasher::new(),
+        };
+        let streamed_row = construct_into(
+            0,
+            "public_x_hash",
+            2,
+            17,
+            Instant::now() + Duration::from_secs(60),
+            &mut streamed,
+        )
+        .unwrap();
+        assert_eq!(streamed.hasher.finalize(), blake3::hash(&bytes));
+        assert_eq!(streamed_row["point_set_blake3"], row["point_set_blake3"]);
+        let streamed_compressed = streamed.inner.finish().unwrap();
         let mut gz = GzEncoder::new(Vec::new(), Compression::default());
         gz.write_all(&bytes).unwrap();
         let compressed = gz.finish().unwrap();
+        assert_eq!(streamed_compressed, compressed);
         let hash = blake3::hash(&compressed).to_hex().to_string();
         let object = format!("objects/{hash}.jsonl.gz");
         row["object"] = json!(object);
