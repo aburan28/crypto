@@ -502,6 +502,12 @@ defines for the primary IC question: one index-calculus run against one
 strong-rho run (`rho.signed_frobenius_strong`) on one public target,
 compared on their one-target online windows (§3), keyed by
 `(candidate_id, workload_id, run_id)` in the repository's IC1 convention.
+The ledger calls its one-run ratio `online_speedup`; a checker `PASS`
+certifies the report's pairing, timing fields and provenance conditions,
+not a statistically established runtime gain. That requires at least five
+admitted matched pairs, an A/A noise interval, and a paired 95% interval
+excluding no improvement (§8). The cold end-to-end operation comparison
+is a separate requirement.
 
 ```bash
 ./target/release/ecbench claim build --dir SESSION --ic ic --rho rho-strong --workload W... --out claim.json --exit-code

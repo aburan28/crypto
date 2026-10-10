@@ -1075,11 +1075,11 @@ fn build_from_session(
         "verdict",
         json!(match (admissible, independent.is_some()) {
             (true, true) => format!(
-                "online speedup {speedup:.4} (rho / IC) on one public target, both runs at {} or above, replayed independently",
+                "one-run online ratio {speedup:.4} (rho / IC) on one public target, both runs at {} or above, replayed independently; a runtime gain additionally requires paired rounds and an A/A noise interval",
                 required.name()
             ),
             (true, false) => format!(
-                "online speedup {speedup:.4} (rho / IC) on one public target, both runs at {} or above; not a claim until an independent replay is cited",
+                "one-run online ratio {speedup:.4} (rho / IC) on one public target, both runs at {} or above; an independent replay and paired A/A evidence are still required for a runtime claim",
                 required.name()
             ),
             (false, _) => format!(
