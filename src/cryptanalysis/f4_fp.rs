@@ -1804,6 +1804,13 @@ pub struct SolveReport {
     pub field_ops: u64,
     /// Block-reduced steps of the top-level run.
     pub blocked_steps: usize,
+    /// Candidate points the substitution tree produced that do not satisfy
+    /// the input, and were dropped.  A truncated run (pairs above the
+    /// degree bound, or a staircase stop) returns a basis of a sub-ideal,
+    /// whose variety can be strictly larger than the input's; the final
+    /// evaluation against the input keeps the verdict exact.  Non-zero only
+    /// when some run of the tree was truncated.
+    pub candidates_rejected: usize,
 }
 
 /// Roots in `F_p` of a univariate polynomial given as `(degree, coeff)`.
@@ -1867,6 +1874,35 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         &mut blocked,
     );
     let (solving_degree, degree_reached) = top.unwrap_or((0, 0));
+    // Every run of the substitution tree may be a truncation (pairs above
+    // the degree bound dropped, or a staircase stop), and a truncated basis
+    // generates a sub-ideal of the input: its variety is a superset of the
+    // input's, never a subset, and the same holds for every specialised
+    // basis further down.  The tree therefore returns a superset of the
+    // solutions, and the input itself decides which candidates are real.
+    // A refutation needs no check: `1` in a truncated basis is `1` in the
+    // ideal.
+    let mut candidates_rejected = 0usize;
+    let verdict = match verdict {
+        Verdict::Solutions(sols) => {
+            let kept: Vec<Vec<u64>> = sols
+                .into_iter()
+                .filter(|s| {
+                    let ok = input.iter().all(|f| eval(f, s, p) == 0);
+                    if !ok {
+                        candidates_rejected += 1;
+                    }
+                    ok
+                })
+                .collect();
+            if kept.is_empty() {
+                Verdict::Inconsistent
+            } else {
+                Verdict::Solutions(kept)
+            }
+        }
+        other => other,
+    };
     SolveReport {
         verdict,
         solving_degree,
@@ -1878,6 +1914,7 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         timed_out,
         field_ops: field_ops_now() - ops0,
         blocked_steps: blocked,
+        candidates_rejected,
     }
 }
 
@@ -1937,10 +1974,11 @@ fn solve_rec(
     let (var, values): (usize, Vec<u64>) = match best {
         Some(b) => b,
         None => {
-            if r.pairs_above_bound > 0 && r.basis.len() < n_vars {
-                // the truncation may have hidden the univariate element;
-                // brute force on the first variable is still sound
-            }
+            // Without a univariate element every value of the first
+            // variable is tried.  With a truncation (`pairs_above_bound`)
+            // the basis is that of a sub-ideal, so this and the root
+            // enumeration above return a superset of the solutions, which
+            // `solve` filters against the input.
             (0, (0..p).collect())
         }
     };
@@ -2070,7 +2108,7 @@ mod tests {
         }
     }
 
-    fn poly(terms: &[(&[u32], u64)]) -> Poly {
+    pub(super) fn poly(terms: &[(&[u32], u64)]) -> Poly {
         terms.iter().map(|(e, c)| (e.to_vec(), *c)).collect()
     }
 
@@ -2502,5 +2540,48 @@ mod tests {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod degree_bound_solve_tests {
+    use super::tests::poly;
+    use super::*;
+
+    /// `{x³ + 1, xy − 1, x + y}` over `F_5` is inconsistent (x + y = 0 and
+    /// xy = 1 force x² = −1, so x⁴ = 1 and x³ + 1 = x⁻¹ + 1 ≠ 0 for every
+    /// root of x² + 1, i.e. x ∈ {2, 3}).  At degree bound 2 the step finds
+    /// x² + 1, retires x³ + 1, and drops their degree-3 pair: the truncated
+    /// basis no longer generates the input ideal, so a solver that trusts
+    /// it reports solutions of a system that has none.
+    #[test]
+    fn truncated_run_must_not_certify_solutions() {
+        let p = 5;
+        let f = poly(&[(&[3, 0], 1), (&[0, 0], 1)]); // x³ + 1
+        let g = poly(&[(&[1, 1], 1), (&[0, 0], p - 1)]); // xy − 1
+        let h = poly(&[(&[1, 0], 1), (&[0, 1], 1)]); // x + y
+        let sys = [f, g, h];
+        let r = f4(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 2));
+        assert!(
+            r.pairs_above_bound > 0,
+            "the counterexample needs a dropped pair"
+        );
+        let s = solve(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 2));
+        assert!(
+            matches!(s.verdict, Verdict::Inconsistent),
+            "{:?}",
+            s.verdict
+        );
+        assert_eq!(
+            s.candidates_rejected, 2,
+            "both spurious roots x ∈ {{2, 3}} are dropped"
+        );
+        // With a sufficient bound the verdict is exact.
+        let s = solve(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 8));
+        assert!(
+            matches!(s.verdict, Verdict::Inconsistent),
+            "{:?}",
+            s.verdict
+        );
     }
 }
