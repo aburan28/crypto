@@ -13,6 +13,18 @@ use std::hint::black_box;
 #[inline]
 fn cycles() -> u64 { unsafe { core::arch::x86_64::_rdtsc() } }
 
+/// Cycle-count stand-in off x86-64: process-monotonic nanoseconds, so the
+/// bench compiles and stays comparable on aarch64 hosts (the unit changes,
+/// the split it reports does not).
+#[cfg(not(target_arch = "x86_64"))]
+#[inline]
+fn cycles() -> u64 {
+    use std::sync::OnceLock;
+    use std::time::Instant;
+    static START: OnceLock<Instant> = OnceLock::new();
+    START.get_or_init(Instant::now).elapsed().as_nanos() as u64
+}
+
 fn measure<T>(reps: usize, mut f: impl FnMut() -> T) -> f64 {
     for _ in 0..reps / 4 { black_box(f()); }
     let mut v = Vec::with_capacity(reps);

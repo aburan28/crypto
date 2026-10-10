@@ -229,6 +229,8 @@ impl QueryMode {
             Self::PairPairGuided256 => Some(256),
             _ => None,
         }
+    }
+
     fn pair_pair_parallel(self) -> bool {
         matches!(
             self,
@@ -312,6 +314,17 @@ impl QuotientPairWitness {
         }
     }
 
+    /// The witness's two factor-base columns, from the packed labels.
+    fn columns(self) -> [u16; 2] {
+        self.packed_labels.map(|packed| (packed >> 48) as u16)
+    }
+
+    /// The witness's two coefficients, from the packed labels.
+    fn coefficients(self) -> [u64; 2] {
+        const COEFFICIENT_MASK: u64 = (1u64 << 48) - 1;
+        self.packed_labels.map(|packed| packed & COEFFICIENT_MASK)
+    }
+
     fn labels(self) -> [(usize, u64); 2] {
         const COEFFICIENT_BITS: u32 = 48;
         const COEFFICIENT_MASK: u64 = (1u64 << COEFFICIENT_BITS) - 1;
@@ -326,14 +339,15 @@ impl QuotientPairWitness {
 
     fn from_point_indices(indices: [usize; 2], image_y: u64) -> Self {
         Self {
-            columns: indices.map(|index| u16::try_from(index).expect("factor-base index fits u16")),
-            coefficients: [0; 2],
+            packed_labels: indices.map(|index| {
+                ((u16::try_from(index).expect("factor-base index fits u16")) as u64) << 48
+            }),
             image_y,
         }
     }
 
     fn point_indices(self) -> [usize; 2] {
-        self.columns.map(usize::from)
+        self.columns().map(usize::from)
     }
 }
 
@@ -421,6 +435,7 @@ impl CompactPairTable {
             shards: (0..shard_count)
                 .map(|_| Self::with_capacity_unsharded(per_shard, x_only, x_domain))
                 .collect(),
+            x_filter_hashes: 2,
             dense_original_slots_per_shard: 0,
             dense_shard_count: 0,
             dense_occupancy: Vec::new(),
@@ -458,7 +473,7 @@ impl CompactPairTable {
         } else if x_filter_exact {
             x_domain
         } else {
-            (expected.max(4) * filter_bits_per_expected).next_power_of_two()
+            (expected.max(4) * 16).next_power_of_two()
         };
         Self {
             shards: Vec::new(),
@@ -491,7 +506,6 @@ impl CompactPairTable {
             },
             x_filter_mask: filter_bits.saturating_sub(1),
             x_filter_exact,
-            x_filter_hashes: if x_filter_exact { 1 } else { filter_hashes },
             x_filter_split_hash: std::env::var("KIC_DISABLE_SPLIT_BLOOM_HASH").as_deref()
                 != Ok("1"),
             x_filter_insert_hash_reuse: std::env::var("KIC_DISABLE_INSERT_HASH_REUSE").as_deref()
@@ -501,6 +515,7 @@ impl CompactPairTable {
             x_filter_blocked: std::env::var("KIC_ENABLE_BLOCKED_X_FILTER").as_deref() == Ok("1"),
             x_filter_three_window: std::env::var("KIC_ENABLE_THREE_WINDOW_X_FILTER").as_deref()
                 == Ok("1"),
+            x_filter_hashes: 2,
             x_filter_window_shift: if filter_bits == 0 || x_filter_exact {
                 0
             } else {
@@ -579,9 +594,9 @@ impl CompactPairTable {
                 if !self.x_only {
                     self.keys_y[index] = key.1;
                 }
-                self.columns[index] = value.columns;
+                self.columns[index] = value.columns();
                 if !self.x_only {
-                    self.coefficients[index] = value.coefficients;
+                    self.coefficients[index] = value.coefficients();
                 }
                 self.image_y[index] = value.image_y;
                 if self.x_only {
@@ -919,10 +934,9 @@ impl CompactPairTable {
             let dense_slot = self.dense_rank(global_slot);
             if self.dense_key_x(dense_slot) == key.0 {
                 return Some(QuotientPairWitness {
-                    columns: self
+                    packed_labels: self
                         .dense_point_indices(dense_slot)
-                        .map(|index| index as u16),
-                    coefficients: [0; 2],
+                        .map(|index| ((index as u16) as u64) << 48),
                     image_y: self.dense_image_y(dense_slot),
                 });
             }
@@ -943,11 +957,15 @@ impl CompactPairTable {
             }
             if self.keys_x[index] == key.0 && (self.x_only || self.keys_y[index] == key.1) {
                 return Some(QuotientPairWitness {
-                    columns: self.columns[index],
-                    coefficients: if self.x_only {
-                        [0; 2]
+                    packed_labels: if self.x_only {
+                        self.columns[index].map(|column| (column as u64) << 48)
                     } else {
-                        self.coefficients[index]
+                        [
+                            ((self.columns[index][0] as u64) << 48)
+                                | self.coefficients[index][0],
+                            ((self.columns[index][1] as u64) << 48)
+                                | self.coefficients[index][1],
+                        ]
                     },
                     image_y: self.image_y[index],
                 });
@@ -968,20 +986,6 @@ impl CompactPairTable {
         if !self.x_only {
             return true;
         }
-        (0..self.x_filter_hashes).all(|ordinal| {
-            let index = self.x_filter_index(x, ordinal);
-            self.x_filter[index / u64::BITS as usize]
-                & (1u64 << (index % u64::BITS as usize))
-                != 0
-        })
-    }
-
-    fn insert_x_filter(&mut self, x: u64) {
-        for ordinal in 0..self.x_filter_hashes {
-            let index = self.x_filter_index(x, ordinal);
-            self.x_filter[index / u64::BITS as usize] |=
-                1u64 << (index % u64::BITS as usize);
-        }
         if !self.shards.is_empty() {
             return self.shards[self.shard_for_x(x)].might_contain_x(x);
         }
@@ -989,7 +993,7 @@ impl CompactPairTable {
             let (word, mask) = self.x_filter_blocked_word_and_mask(x);
             return self.x_filter[word] & mask == mask;
         }
-        let (first, second) = self.x_filter_indices(x);
+        let (first, second) = self.x_filter_indices_with_mixed(x, Self::hash((x, 0)));
         if self.x_filter[first / u64::BITS as usize] & (1u64 << (first % u64::BITS as usize)) == 0
             || self.x_filter[second / u64::BITS as usize] & (1u64 << (second % u64::BITS as usize))
                 == 0
@@ -1029,24 +1033,6 @@ impl CompactPairTable {
         let (first, second) = self.x_filter_indices_with_mixed(x, mixed);
         self.x_filter[first / u64::BITS as usize] |= 1u64 << (first % u64::BITS as usize);
         self.x_filter[second / u64::BITS as usize] |= 1u64 << (second % u64::BITS as usize);
-    }
-
-    fn x_filter_index(&self, x: u64, ordinal: usize) -> usize {
-        if self.x_filter_exact {
-            return x as usize;
-        }
-        let first = Self::hash((x, 0)) as usize & self.x_filter_mask;
-        let second = Self::hash((x ^ 0xd6e8_feb8_6659_fd93, x.rotate_left(17))) as usize
-            & self.x_filter_mask;
-        match ordinal {
-            0 => first,
-            1 => second,
-            _ => first.wrapping_add(ordinal.wrapping_mul(second | 1)) & self.x_filter_mask,
-        }
-        if self.x_filter_direct_bits {
-            return self.x_filter_direct_indices(x);
-        }
-        self.x_filter_indices_with_mixed(x, Self::hash((x, 0)))
     }
 
     fn x_filter_indices_with_mixed(&self, x: u64, mixed: u64) -> (usize, usize) {
@@ -1319,7 +1305,6 @@ impl CompactPairTable {
             None
         } else {
             let x = key_x - 1;
-            let mut y = witness.image_y();
             let mut y = if self.is_dense() {
                 self.dense_image_y(slot)
             } else {
@@ -1492,6 +1477,16 @@ fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
 }
 
 fn carryless_product_software(left: u64, right: u64) -> u128 {
+    let mut product = 0u128;
+    let mut value = right;
+    while value != 0 {
+        let bit = value.trailing_zeros();
+        product ^= (left as u128) << bit;
+        value &= value - 1;
+    }
+    product
+}
+
 #[inline(always)]
 fn n53_fast_reduction_enabled() -> bool {
     use std::sync::OnceLock;
@@ -1640,7 +1635,7 @@ fn mul_raw_dispatched(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
         product ^= (left as u128) << bit;
         value &= value - 1;
     }
-    product
+    reduce_raw(curve, product)
 }
 
 #[cfg(target_arch = "aarch64")]
@@ -1656,10 +1651,6 @@ fn carryless_product(left: u64, right: u64) -> u128 {
         return unsafe { carryless_product_pmull(left, right) };
     }
     carryless_product_software(left, right)
-}
-
-fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
-    reduce_raw(curve, carryless_product(left, right))
 }
 
 #[inline(always)]
@@ -2139,7 +2130,6 @@ fn batch_raw_target_minus_points_x_filtered(
     points: &[RawPoint],
     table: &CompactPairTable,
     output: &mut Vec<(usize, (u64, u64))>,
-    scratch: &mut BatchInverseScratch,
     scratch: &mut RawBatchScratch,
 ) -> usize {
     assert!(table.x_only);
@@ -2154,12 +2144,6 @@ fn batch_raw_target_minus_points_x_filtered(
         return points.len();
     };
     scratch.denominators.resize(points.len(), 0);
-    scratch.prefixes.resize(points.len(), 0);
-    scratch.inverses.resize(points.len(), 0);
-    scratch.inverses.fill(0);
-    let denominators = &mut scratch.denominators[..points.len()];
-    let prefixes = &mut scratch.prefixes[..points.len()];
-    let inverses = &mut scratch.inverses[..points.len()];
     scratch.prefixes_and_inverses.resize(points.len(), 0);
     let mut product = 1u64;
     for (index, point) in points.iter().enumerate() {
@@ -2211,20 +2195,12 @@ fn batch_raw_target_minus_points_x_filtered(
     points.len()
 }
 
-/// Compute `target - point` and `target - (-point)` with one shared batch
-/// inversion per affine x-coordinate.  The returned boolean identifies a
-/// negated left operand.  Infinity has only one sign.
-/// Compute both `target - point` and `target - (-point)` while sharing the
-/// denominator product and inverse for the two signs of every affine point.
-/// Results retain positive-then-negative order for each input point. Infinity
-/// has only one sign, matching `CompactPairTable::signed_point_at_slot`.
 fn batch_raw_target_minus_signed_points_x_filtered(
     curve: &KoblitzCurve,
     target: RawPoint,
     points: &[RawPoint],
     table: &CompactPairTable,
     output: &mut Vec<(usize, bool, (u64, u64))>,
-    scratch: &mut BatchInverseScratch,
     scratch: &mut RawBatchScratch,
 ) -> usize {
     assert!(table.x_only);
@@ -2249,18 +2225,6 @@ fn batch_raw_target_minus_signed_points_x_filtered(
     };
 
     scratch.denominators.resize(points.len(), 0);
-    scratch.prefixes.resize(points.len(), 0);
-    scratch.inverses.resize(points.len(), 0);
-    scratch.inverses.fill(0);
-    let denominators = &mut scratch.denominators[..points.len()];
-    let prefixes = &mut scratch.prefixes[..points.len()];
-    let inverses = &mut scratch.inverses[..points.len()];
-    let mut product = 1u64;
-    for (index, point) in points.iter().enumerate() {
-        let denominator = point.map(|(x, _)| target_x ^ x).unwrap_or(0);
-        denominators[index] = denominator;
-        if denominator != 0 {
-            prefixes[index] = product;
     scratch.prefixes_and_inverses.resize(points.len(), 0);
     let mut product = 1u64;
     for (index, point) in points.iter().enumerate() {
@@ -2273,12 +2237,6 @@ fn batch_raw_target_minus_signed_points_x_filtered(
     }
     let mut inverse_product = inverse_raw(curve, product);
     for index in (0..points.len()).rev() {
-        let denominator = denominators[index];
-        if denominator == 0 {
-            continue;
-        }
-        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
-        inverse_product = mul_raw(curve, inverse_product, denominator);
         let denominator = scratch.denominators[index];
         if denominator == 0 {
             continue;
@@ -2298,7 +2256,6 @@ fn batch_raw_target_minus_signed_points_x_filtered(
             }
             continue;
         };
-        if denominators[index] == 0 {
         if scratch.denominators[index] == 0 {
             for (negative, left) in [(false, point), (true, raw_neg_point(point))] {
                 let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(left)));
@@ -2310,7 +2267,6 @@ fn batch_raw_target_minus_signed_points_x_filtered(
             continue;
         }
 
-        let inverse = inverses[index];
         let inverse = scratch.prefixes_and_inverses[index];
         for (negative, numerator) in [(false, target_y ^ y ^ x), (true, target_y ^ y)] {
             let lambda = mul_raw(curve, numerator, inverse);
@@ -2327,7 +2283,6 @@ fn batch_raw_target_minus_signed_points_x_filtered(
     attempted
 }
 
-fn batch_raw_add_keys(
 /// Dual-sign batch inversion over compact `(x + 1, y)` points. This is the
 /// same exact computation as `batch_raw_target_minus_signed_points_x_filtered`
 /// without carrying a 24-byte `Option<(u64, u64)>` through every scratch pass.
@@ -2931,11 +2886,6 @@ fn lookup_signed_expanded_pair(
     label_to_index: &HashMap<(usize, u64), usize>,
     x_prefiltered: bool,
 ) -> Option<([usize; 2], [(usize, u64); 2])> {
-    quotient_pairs.get(rest_key).map(|pair| {
-        let stored = pair.labels();
-        let image_y = pair.image_y();
-        let labels = if rest_key.1 == image_y {
-            stored
     let pair = if x_prefiltered {
         quotient_pairs.get_after_x_filter(rest_key)
     } else {
@@ -3707,6 +3657,8 @@ fn exclusive_pdp_ms(
         - solution_validation_ms;
     assert!(exclusive.is_finite() && exclusive >= -1e-9);
     exclusive.max(0.0)
+}
+
 fn should_emit_multi_target_summary(
     producer_fixtures: usize,
     shared_factor_log_precomputation: bool,
@@ -3714,6 +3666,8 @@ fn should_emit_multi_target_summary(
     // The first fixture builds reusable logs and is setup, not an online target.
     let precomputation_fixtures = usize::from(shared_factor_log_precomputation);
     producer_fixtures.saturating_sub(precomputation_fixtures) > 1
+}
+
 type PairExpansionJob = (usize, usize, u64, usize, usize);
 type ExpandedSupportEntry = ((u64, u64), [usize; 2]);
 
@@ -4043,48 +3997,6 @@ fn main() {
             let sum_keys =
                 batch_raw_add_keys_selected(&curve, &operands, specialized_n53_pair_sums);
             pair_batch_inversions = usize::from(!sum_keys.is_empty());
-            for ((left_column, right_column, relative), key) in
-                jobs.into_iter().zip(sum_keys)
-            {
-                if pair_mode == PairMode::SignedQuotient {
-                    let (canonical, multiplier, maps) =
-                        canonical_signed_key(&curve, key, modulus, lambda);
-                    pair_canonicalization_maps += maps;
-                    let witness = QuotientPairWitness::new(
-                        [
-                            (left_column, multiplier),
-                            (
-                                right_column,
-                                ((relative as u128 * multiplier as u128) % modulus as u128)
-                                    as u64,
-                            ),
-                        ],
-                        canonical.1,
-                    );
-                    quotient_pairs.insert(canonical, witness);
-                } else {
-                    let mut image_key = key;
-                    let mut multiplier = 1u64;
-                    for exponent in 0..curve.n {
-                        let witness = QuotientPairWitness::new(
-                            [
-                                (left_column, multiplier),
-                                (
-                                    right_column,
-                                    ((relative as u128 * multiplier as u128) % modulus as u128)
-                                        as u64,
-                                ),
-                            ],
-                            image_key.1,
-                        );
-                        quotient_pairs.insert(image_key, witness);
-                        if exponent + 1 < curve.n && image_key.0 != 0 {
-                            let x = square_raw(&curve, image_key.0 - 1);
-                            let y = square_raw(&curve, image_key.1);
-                            image_key = (x + 1, y);
-                            multiplier = ((multiplier as u128 * lambda as u128)
-                                % modulus as u128) as u64;
-                            pair_canonicalization_maps += 1;
             if parallel_support_expansion {
                 const JOB_CHUNK: usize = 1_024;
                 let job_batch = if pipelined_support_expansion {
@@ -4142,7 +4054,7 @@ fn main() {
                 }
             } else {
                 for ((left_column, right_column, relative, left, right), key) in
-                    jobs.into_iter().zip(sum_keys)
+                    jobs.iter().copied().zip(sum_keys)
                 {
                     if pair_mode == PairMode::SignedQuotient {
                         let (canonical, multiplier, maps) =
@@ -4204,7 +4116,16 @@ fn main() {
             if quotient_pairs.keys_x[slot] == u64::MAX {
                 continue;
             }
-            let labels = quotient_pairs.values[slot].labels();
+            let labels = [
+                (
+                    quotient_pairs.columns[slot][0] as usize,
+                    quotient_pairs.coefficients[slot][0],
+                ),
+                (
+                    quotient_pairs.columns[slot][1] as usize,
+                    quotient_pairs.coefficients[slot][1],
+                ),
+            ];
             let left = labels[0].0;
             let right = labels[1].0;
             let bin = if left == right
@@ -4399,8 +4320,40 @@ fn main() {
     let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
     let mut rng = StdRng::seed_from_u64(fixture_seed);
     let fixture_generation_started = Instant::now();
-    let d0 = rng.gen_range(1..modulus);
-    let q = curve.mul(curve.generator(), &BigUint::from(d0));
+    let generated_scalar = rng.gen_range(1..modulus);
+    let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+        match fixture_target {
+            FixtureTarget::SeededScalar => (
+                Some(generated_scalar),
+                curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
+                "seeded_fixture_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::ExplicitScalar(scalar) => (
+                Some(scalar),
+                curve.mul(curve.generator(), &BigUint::from(scalar)),
+                "explicit_public_validation_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::PublicHash(public_seed) => {
+                let (target, counter) = public_hash_target(&curve, public_seed);
+                (
+                    None,
+                    target,
+                    "public_hash_unknown_scalar",
+                    Some(public_seed),
+                    Some(counter),
+                )
+            }
+        };
+    let target_scalar_constructed = known_scalar.is_some();
+    let target_kind = if target_scalar_constructed {
+        "known_scalar_multiple"
+    } else {
+        "public_hash_to_curve_cofactor"
+    };
     let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
     let fixture_setup_started = Instant::now();
     let generator_raw = to_raw_point(curve.generator());
@@ -4457,6 +4410,7 @@ fn main() {
     let mut target_walk_additions = 0usize;
     let mut query_batch_inversions = 0usize;
     let mut reference_validation_records = Vec::new();
+    let mut relation_hashes = Vec::new();
     let mut walk_seen = HashSet::new();
     let mut target_walk_restarts = 0usize;
     let mut target_scalar_multiplications = match target_mode {
@@ -4469,11 +4423,29 @@ fn main() {
     let mut pair_label_scratch = Vec::with_capacity(256);
     let mut pair_rest_scratch = Vec::with_capacity(256);
     let mut pair_signed_rest_scratch = Vec::with_capacity(512);
-    let mut pair_inverse_scratch = BatchInverseScratch::default();
+    let mut pair_signed_slot_scratch = Vec::with_capacity(512);
+    let mut pair_batch_scratch = RawBatchScratch::default();
+    let mut pair_inverse_scratch = RawBatchScratch::default();
     let mut guided_bin_order = Vec::with_capacity(columns);
     let mut column_relation_counts = vec![0usize; columns];
+    let parallel_lanes = if query_mode.pair_pair_parallel() {
+        rayon::current_num_threads().max(1)
+    } else {
+        0
+    };
+    let mut pair_parallel_scratch: Vec<PairPairChunkScratch> =
+        (0..parallel_lanes).map(|_| Default::default()).collect();
+    let mut pair_parallel_results = Vec::with_capacity(parallel_lanes);
+    let mut query_parallel_waves = 0usize;
+    let mut query_parallel_chunks = 0usize;
+    let mut query_shared_sign_denominator_inputs = 0usize;
     let mut guided_bins_visited = 0usize;
     let mut guided_priority_hits = 0usize;
+    let mut rank_targeted_trials = 0usize;
+    let mut rank_targeted_nonincrements = 0usize;
+    let mut rank_target_slot_index_builds = 0usize;
+    let mut rank_target_slot_column = None;
+    let mut rank_target_slots = Vec::new();
     let mut dense_rank_recomputations = 0usize;
     let mut dimension_bound_rank_crosschecks = 0usize;
     let mut reverse_incremental_rank_crosschecks = 0usize;
@@ -4500,180 +4472,6 @@ fn main() {
         }
         trials += 1;
         let target_generation_started = Instant::now();
-        if target_mode != TargetMode::Independent
-            && !walk_seen.insert(raw_compact_key(walk_target))
-        {
-            loop {
-                walk_a = rng.gen_range(0..modulus);
-                walk_b = rng.gen_range(1..modulus);
-                walk_target = raw_add_point(
-                    &curve,
-                    raw_scalar_point(&curve, generator_raw, walk_a),
-                    raw_scalar_point(&curve, q_raw, walk_b),
-                );
-                target_scalar_multiplications += 2;
-                if walk_seen.insert(raw_compact_key(walk_target)) {
-        let fixture_material = if batch_fixtures == 1 {
-            format!("{TASK_ID}|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}")
-        } else if let Some(corpus) = &batch_corpus {
-            format!("TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{corpus}|{seed}|{fixture_index}")
-        } else {
-            format!(
-            "TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}|{fixture_index}"
-        )
-        };
-        let digest = blake3::hash(fixture_material.as_bytes());
-        let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
-        let mut rng = StdRng::seed_from_u64(fixture_seed);
-        let fixture_generation_started = Instant::now();
-        // Consume the ordinary draw even when a public explicit scalar is
-        // supplied, so changing only the target does not change the relation
-        // coefficient stream that follows.
-        let generated_scalar = rng.gen_range(1..modulus);
-        let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
-            match fixture_target {
-                FixtureTarget::SeededScalar => (
-                    Some(generated_scalar),
-                    curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
-                    "seeded_fixture_scalar",
-                    None,
-                    None,
-                ),
-                FixtureTarget::ExplicitScalar(scalar) => (
-                    Some(scalar),
-                    curve.mul(curve.generator(), &BigUint::from(scalar)),
-                    "explicit_public_validation_scalar",
-                    None,
-                    None,
-                ),
-                FixtureTarget::PublicHash(public_seed) => {
-                    let (target, counter) = public_hash_target(&curve, public_seed);
-                    (
-                        None,
-                        target,
-                        "public_hash_unknown_scalar",
-                        Some(public_seed),
-                        Some(counter),
-                    )
-                }
-            };
-        let target_scalar_constructed = known_scalar.is_some();
-        let target_kind = if target_scalar_constructed {
-            "known_scalar_multiple"
-        } else {
-            "public_hash_to_curve_cofactor"
-        };
-        let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
-        let reference_q_table_started = Instant::now();
-        let reference_q_table =
-            fixed_base_reference_validation.then(|| reference_fixed_base_table(&curve, &q));
-        let reference_q_table_ms = reference_q_table_started.elapsed().as_secs_f64() * 1000.0;
-        let generator_raw = to_raw_point(curve.generator());
-        let q_raw = to_raw_point(&q);
-        let fixture_setup_started = Instant::now();
-        let (mut walk_a, mut walk_b, delta_a, delta_b, mut walk_target, walk_jump) =
-            match target_mode {
-                TargetMode::CoefficientWalk => {
-                    let walk_a = rng.gen_range(0..modulus);
-                    let walk_b = rng.gen_range(1..modulus);
-                    let delta_a = rng.gen_range(1..modulus);
-                    let delta_b = rng.gen_range(1..modulus);
-                    let walk_target = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, walk_a),
-                        raw_scalar_point(&curve, q_raw, walk_b),
-                    );
-                    let walk_jump = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, delta_a),
-                        raw_scalar_point(&curve, q_raw, delta_b),
-                    );
-                    (walk_a, walk_b, delta_a, delta_b, walk_target, walk_jump)
-                }
-                TargetMode::PartitionWalk => {
-                    let walk_a = rng.gen_range(0..modulus);
-                    let walk_b = rng.gen_range(1..modulus);
-                    let walk_target = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, walk_a),
-                        raw_scalar_point(&curve, q_raw, walk_b),
-                    );
-                    (walk_a, walk_b, 0, 0, walk_target, None)
-                }
-                TargetMode::Independent => (0, 0, 0, 0, None, None),
-            };
-        let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
-        let mut echelon = Echelon::new(columns + 1);
-        let mut reverse_echelon = ReverseEchelon::new(columns + 1);
-        let mut rows = Vec::new();
-        let mut right_hand_sides = Vec::new();
-        let mut exact_rows = HashSet::new();
-        let mut projective_rows = HashSet::new();
-        let mut duplicate_rows = 0usize;
-        let mut scalar_multiple_rows = 0usize;
-        let mut accepted = 0usize;
-        let mut trials = 0usize;
-        let mut rank_full_at = None;
-        let mut decomposition_queries = 0usize;
-        let mut query_additions = 0usize;
-        let mut query_canonicalization_maps = 0usize;
-        let mut query_x_filter_rejections = 0usize;
-        let mut query_exact_table_misses = 0usize;
-        let mut target_walk_additions = 0usize;
-        let mut query_batch_inversions = 0usize;
-        let mut query_parallel_waves = 0usize;
-        let mut query_parallel_chunks = 0usize;
-        let mut query_shared_sign_denominator_inputs = 0usize;
-        let mut rank_targeted_trials = 0usize;
-        let mut rank_targeted_nonincrements = 0usize;
-        let mut rank_target_slot_index_builds = 0usize;
-        let mut rank_target_slot_column = None;
-        let mut rank_target_slots = Vec::new();
-        let mut reference_validation_records = Vec::new();
-        let mut relation_hashes = Vec::new();
-        let mut walk_seen = HashSet::new();
-        let mut target_walk_restarts = 0usize;
-        let mut target_scalar_multiplications = match target_mode {
-            TargetMode::Independent => 0,
-            TargetMode::CoefficientWalk => 4,
-            TargetMode::PartitionWalk => 2,
-        };
-        let mut fiber_rest_scratch = Vec::with_capacity(128);
-        let mut pair_point_scratch = Vec::with_capacity(64);
-        let mut pair_signed_slot_scratch = Vec::with_capacity(64);
-        let mut pair_rest_scratch = Vec::with_capacity(64);
-        let mut pair_batch_scratch = RawBatchScratch::default();
-        let parallel_lanes = if query_mode.pair_pair_parallel() {
-            rayon::current_num_threads().max(1)
-        } else {
-            0
-        };
-        let mut pair_parallel_scratch: Vec<PairPairChunkScratch> =
-            (0..parallel_lanes).map(|_| Default::default()).collect();
-        let mut pair_parallel_results = Vec::with_capacity(parallel_lanes);
-        let mut dense_rank_recomputations = 0usize;
-        let mut dimension_bound_rank_crosschecks = 0usize;
-        let mut reverse_incremental_rank_crosschecks = 0usize;
-        let mut terminal_dense_rank_crosschecks = 0usize;
-        let mut target_generation_ns = 0u128;
-        let mut query_total_ns = 0u128;
-        let mut packed_verification_ns = 0u128;
-        let mut rank_diagnostics_ns = 0u128;
-        let mut receipt_construction_ns = 0u128;
-        let collection_started = Instant::now();
-        let relation_cap = 2 * columns + 64 + relation_cap_extra;
-        let target_cap = 100_000usize;
-
-        while trials < target_cap {
-            if let Some(full_at) = rank_full_at {
-                if accepted >= full_at + required_rank_surplus {
-                    break;
-                }
-            } else if accepted >= relation_cap {
-                break;
-            }
-            trials += 1;
-            let target_generation_started = Instant::now();
             if target_mode != TargetMode::Independent
                 && !walk_seen.insert(raw_compact_key(walk_target))
             {
@@ -4692,9 +4490,49 @@ fn main() {
                 }
                 target_walk_restarts += 1;
             }
-        };
-        target_generation_ns += target_generation_started.elapsed().as_nanos();
-        let query_started = Instant::now();
+            let (coefficient_a, coefficient_b, target) = match target_mode {
+                TargetMode::Independent => {
+                    let coefficient_a = rng.gen_range(0..modulus);
+                    let coefficient_b = rng.gen_range(1..modulus);
+                    let target = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, coefficient_a),
+                        raw_scalar_point(&curve, q_raw, coefficient_b),
+                    );
+                    target_scalar_multiplications += 2;
+                    (coefficient_a, coefficient_b, target)
+                }
+                TargetMode::CoefficientWalk => {
+                    let result = (walk_a, walk_b, walk_target);
+                    walk_a = (walk_a + delta_a) % modulus;
+                    walk_b = (walk_b + delta_b) % modulus;
+                    walk_target = raw_add_point(&curve, walk_target, walk_jump);
+                    target_walk_additions += 1;
+                    result
+                }
+                TargetMode::PartitionWalk => {
+                    let result = (walk_a, walk_b, walk_target);
+                    match target_partition(walk_target) {
+                        0 => {
+                            walk_a = (walk_a + 1) % modulus;
+                            walk_target = raw_add_point(&curve, walk_target, generator_raw);
+                        }
+                        1 => {
+                            walk_b = (walk_b + 1) % modulus;
+                            walk_target = raw_add_point(&curve, walk_target, q_raw);
+                        }
+                        _ => {
+                            walk_a = (2 * walk_a) % modulus;
+                            walk_b = (2 * walk_b) % modulus;
+                            walk_target = raw_double_point(&curve, walk_target);
+                        }
+                    }
+                    target_walk_additions += 1;
+                    result
+                }
+            };
+            target_generation_ns += target_generation_started.elapsed().as_nanos();
+            let query_started = Instant::now();
         let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
         if let Some(width) = query_mode.pair_pair_guided_width() {
             assert!(pair_mode == PairMode::SignedExpanded);
@@ -4729,9 +4567,14 @@ fn main() {
                     while cursor < bin.len() && pair_point_scratch.len() < width {
                         let slot = bin[(start + cursor) % bin.len()] as usize;
                         cursor += 1;
-                        if let Some((point, labels)) =
-                            quotient_pairs.signed_pair_at_slot(slot, false, modulus)
-                        {
+                        if let Some(point) = quotient_pairs.signed_point_at_slot(slot, false) {
+                            let (_, labels) = quotient_pairs.signed_labels_at_slot(
+                                slot,
+                                false,
+                                modulus,
+                                &base.point_labels,
+                                &label_to_index,
+                            );
                             pair_point_scratch.push(point);
                             pair_label_scratch.push(labels);
                         }
@@ -4753,7 +4596,9 @@ fn main() {
                             rest_key,
                             modulus,
                             &quotient_pairs,
+                            &base.point_labels,
                             &label_to_index,
+                            false,
                         ) else {
                             query_exact_table_misses += 1;
                             continue;
@@ -4806,9 +4651,14 @@ fn main() {
                 while cursor < slots && pair_point_scratch.len() < width {
                     let slot = (start_slot + cursor) & (slots - 1);
                     cursor += 1;
-                    if let Some((point, labels)) =
-                        quotient_pairs.signed_pair_at_slot(slot, false, modulus)
-                    {
+                    if let Some(point) = quotient_pairs.signed_point_at_slot(slot, false) {
+                        let (_, labels) = quotient_pairs.signed_labels_at_slot(
+                            slot,
+                            false,
+                            modulus,
+                            &base.point_labels,
+                            &label_to_index,
+                        );
                         pair_point_scratch.push(point);
                         pair_label_scratch.push(labels);
                     }
@@ -4833,7 +4683,9 @@ fn main() {
                         rest_key,
                         modulus,
                         &quotient_pairs,
+                        &base.point_labels,
                         &label_to_index,
+                        false,
                     ) else {
                         query_exact_table_misses += 1;
                         continue;
@@ -4869,109 +4721,8 @@ fn main() {
                     break;
                 }
             }
-        } else if let Some(width) = query_mode.pair_pair_width() {
-            assert!(pair_mode == PairMode::SignedExpanded);
-            let slots = quotient_pairs.slots();
-            let start_slot = CompactPairTable::hash(raw_compact_key(target)) as usize
-                & (slots - 1);
-            let mut cursor = 0usize;
-            while cursor < 2 * slots && witness.is_none() {
-                pair_point_scratch.clear();
-                pair_label_scratch.clear();
-                while cursor < 2 * slots && pair_point_scratch.len() < width {
-                    let slot = (start_slot + cursor / 2) & (slots - 1);
-                    let negative = cursor & 1 == 1;
-                    cursor += 1;
-                    if let Some((point, labels)) =
-                        quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
-                    {
-                        pair_point_scratch.push(point);
-                        pair_label_scratch.push(labels);
-                    }
-            let (coefficient_a, coefficient_b, target) = match target_mode {
-                TargetMode::Independent => {
-                    let coefficient_a = rng.gen_range(0..modulus);
-                    let coefficient_b = rng.gen_range(1..modulus);
-                    let target = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, coefficient_a),
-                        raw_scalar_point(&curve, q_raw, coefficient_b),
-                    );
-                    target_scalar_multiplications += 2;
-                    (coefficient_a, coefficient_b, target)
-                }
-                TargetMode::CoefficientWalk => {
-                    let result = (walk_a, walk_b, walk_target);
-                    walk_a = (walk_a + delta_a) % modulus;
-                    walk_b = (walk_b + delta_b) % modulus;
-                    walk_target = raw_add_point(&curve, walk_target, walk_jump);
-                    target_walk_additions += 1;
-                    result
-                }
-                let attempted = batch_raw_target_minus_points_x_filtered(
-                    &curve,
-                    target,
-                    &pair_point_scratch,
-                    &quotient_pairs,
-                    &mut pair_rest_scratch,
-                    &mut pair_inverse_scratch,
-                );
-                query_additions += attempted;
-                decomposition_queries += attempted;
-                query_x_filter_rejections += attempted - pair_rest_scratch.len();
-                query_batch_inversions += usize::from(target.is_some());
-                for &(position, rest_key) in &pair_rest_scratch {
-                    let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
-                        rest_key,
-                        modulus,
-                        &quotient_pairs,
-                        &label_to_index,
-                    ) else {
-                        query_exact_table_misses += 1;
-                        continue;
-                    };
-                    let left_labels = pair_label_scratch[position];
-                    let left_indices = left_labels.map(|label| label_to_index[&label]);
-                    witness = Some((
-                        vec![
-                            left_indices[0],
-                            left_indices[1],
-                            right_indices[0],
-                            right_indices[1],
-                        ],
-                        vec![
-                            left_labels[0],
-                            left_labels[1],
-                            right_labels[0],
-                            right_labels[1],
-                        ],
-                    ));
-                    break;
-                TargetMode::PartitionWalk => {
-                    let result = (walk_a, walk_b, walk_target);
-                    match target_partition(walk_target) {
-                        0 => {
-                            walk_a = (walk_a + 1) % modulus;
-                            walk_target = raw_add_point(&curve, walk_target, generator_raw);
-                        }
-                        1 => {
-                            walk_b = (walk_b + 1) % modulus;
-                            walk_target = raw_add_point(&curve, walk_target, q_raw);
-                        }
-                        _ => {
-                            walk_a = (2 * walk_a) % modulus;
-                            walk_b = (2 * walk_b) % modulus;
-                            walk_target = raw_double_point(&curve, walk_target);
-                        }
-                    }
-                    target_walk_additions += 1;
-                    result
-                }
-            };
-            target_generation_ns += target_generation_started.elapsed().as_nanos();
-            let query_started = Instant::now();
-            let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
-            let targeted_column =
+        }
+        let targeted_column =
                 if rank_aware_pair_scan && echelon.rank + rank_target_deficiency > columns {
                     echelon.pivots[..columns].iter().position(Option::is_none)
                 } else {
@@ -5217,31 +4968,7 @@ fn main() {
                     }
                 }
             }
-        } else {
-            for (right, &point) in raw_base_points.iter().enumerate() {
-                let rest = raw_add_point(&curve, target, raw_neg_point(point));
-                query_additions += 1;
-                decomposition_queries += 1;
-                let (candidate, maps) = lookup_pair_witness(
-                    pair_mode,
-                    &curve,
-                    raw_compact_key(rest),
-                    right,
-                    modulus,
-                    lambda,
-                    &base,
-                    &full_pairs,
-                    &quotient_pairs,
-                    &label_to_index,
-                );
-                query_canonicalization_maps += maps;
-                if let Some((indices, labels)) = candidate {
-                    witness = Some((indices.to_vec(), labels.to_vec()));
-                    break;
-                }
-            }
-        }
-        let query_elapsed = query_started.elapsed();
+            let query_elapsed = query_started.elapsed();
         let query_ms = query_elapsed.as_secs_f64() * 1000.0;
         query_total_ns += query_elapsed.as_nanos();
         let Some((indices, witness_labels)) = witness else {
@@ -5290,71 +5017,28 @@ fn main() {
         let independently_crosschecked_rank = if incremental_rank_crosscheck {
             let reverse_before = reverse_echelon.rank;
             let reverse_incremented = reverse_echelon.insert(row.clone(), modulus);
-            let query_elapsed = query_started.elapsed();
-            let query_ms = query_elapsed.as_secs_f64() * 1000.0;
-            query_total_ns += query_elapsed.as_nanos();
-            let Some((indices, witness_labels)) = witness else {
-                continue;
-            };
-            let packed_verification_started = Instant::now();
-            let sum = indices.iter().fold(None, |accumulator, &index| {
-                raw_add_point(&curve, accumulator, raw_base_points[index])
-            });
             assert_eq!(
-                sum, target,
-                "support-index relation must verify in the group"
+                reverse_echelon.rank,
+                reverse_before + usize::from(reverse_incremented)
             );
-            reference_validation_records.push((indices.clone(), coefficient_a, coefficient_b));
-            packed_verification_ns += packed_verification_started.elapsed().as_nanos();
-
-            let rank_started = Instant::now();
-            let mut row = vec![0u64; columns + 1];
-            for &(column, coefficient) in &witness_labels {
-                row[column] = (row[column] + coefficient) % modulus;
-            }
-            row[columns] = (modulus - coefficient_b) % modulus;
-            let exact_duplicate = !exact_rows.insert(row.clone());
-            duplicate_rows += usize::from(exact_duplicate);
-            let first_nonzero = row.iter().copied().find(|&value| value != 0).unwrap();
-            let normalization_inverse = modpow(first_nonzero, modulus - 2, modulus);
-            let normalized_row: Vec<_> = row
-                .iter()
-                .map(|value| {
-                    ((*value as u128 * normalization_inverse as u128) % modulus as u128) as u64
-                })
-                .collect();
-            let scalar_multiple = !projective_rows.insert(normalized_row);
-            scalar_multiple_rows += usize::from(scalar_multiple);
-            let rank_before = echelon.rank;
-            let incremented = echelon.insert(row.clone(), modulus);
-            let rank_after = echelon.rank;
-            assert_eq!(rank_after, rank_before + usize::from(incremented));
-            rank_targeted_nonincrements += usize::from(targeted_column.is_some() && !incremented);
-            rows.push(row.clone());
-            right_hand_sides.push(coefficient_a);
-            let independently_crosschecked_rank = if incremental_rank_crosscheck {
-                let reverse_before = reverse_echelon.rank;
-                let reverse_incremented = reverse_echelon.insert(row.clone(), modulus);
-                assert_eq!(
-                    reverse_echelon.rank,
-                    reverse_before + usize::from(reverse_incremented)
-                );
-                reverse_incremental_rank_crosschecks += 1;
-                reverse_echelon.rank
-            } else if rank_before == columns + 1 {
-                dimension_bound_rank_crosschecks += 1;
-                columns + 1
-            } else if columns > 64 || std::env::var("KIC_SKIP_DENSE_RANK").as_deref() == Ok("1") {
-                // Full dense GE after every accepted row is O(#rows · K³) and
-                // dominates past ~64 columns (n=53 balanced bases). Trust the
-                // incremental echelon; optional end-of-run dense check remains
-                // available via KIC_INCREMENTAL_RANK_CROSSCHECK.
-                rank_after
-            } else {
-                dense_rank_recomputations += 1;
-                dense_rank(&rows, columns + 1, modulus)
-            };
-            assert_eq!(independently_crosschecked_rank, rank_after);
+            reverse_incremental_rank_crosschecks += 1;
+            reverse_echelon.rank
+        } else if rank_before == columns + 1 {
+            dimension_bound_rank_crosschecks += 1;
+            columns + 1
+        } else if columns > 64
+            || std::env::var("KIC_SKIP_DENSE_RANK").as_deref() == Ok("1")
+        {
+            // Full dense GE after every accepted row is O(#rows · K³) and
+            // dominates past ~64 columns (n=53 balanced bases). Trust the
+            // incremental echelon; optional end-of-run dense check remains
+            // available via KIC_INCREMENTAL_RANK_CROSSCHECK.
+            rank_after
+        } else {
+            dense_rank_recomputations += 1;
+            dense_rank(&rows, columns + 1, modulus)
+        };
+        assert_eq!(independently_crosschecked_rank, rank_after);
             accepted += 1;
             if rank_after == columns + 1 && rank_full_at.is_none() {
                 rank_full_at = Some(accepted);
@@ -5429,8 +5113,6 @@ fn main() {
                         "fixture_scalar_used_by_collector":false
                     })
                 );
-            }
-            receipt_construction_ns += receipt_started.elapsed().as_nanos();
         }
         receipt_construction_ns += receipt_started.elapsed().as_nanos();
     }
@@ -5481,7 +5163,9 @@ fn main() {
     let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
     let solution_validation_started = Instant::now();
     if let Some(solution) = &solution {
-        assert_eq!(solution[columns], d0);
+        if let Some(expected) = known_scalar {
+            assert_eq!(solution[columns], expected);
+        }
         assert_eq!(
             curve.mul(curve.generator(), &BigUint::from(solution[columns])),
             q
@@ -5577,7 +5261,7 @@ fn main() {
             "evidence_class":"measured_exact_support_relation",
             "fixture_index":fixture_index,
             "fixture_seed":fixture_seed,
-            "published_fixture_scalar":d0,
+            "published_fixture_scalar":known_scalar,
             "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
             "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
             "published_q_point_key":[q_key.0.to_string(),q_key.1.to_string()],
@@ -5650,196 +5334,9 @@ fn main() {
             "dimension_bound_rank_crosschecks":dimension_bound_rank_crosschecks,
             "post_full_rank_crosscheck":if incremental_rank_crosscheck {
                 "reverse-pivot incremental rank with terminal dense check"
-        if incremental_rank_crosscheck {
-            let terminal_dense_rank = dense_rank(&rows, columns + 1, modulus);
-            assert_eq!(terminal_dense_rank, echelon.rank);
-            assert_eq!(terminal_dense_rank, reverse_echelon.rank);
-            terminal_dense_rank_crosschecks += 1;
-        }
-        let linear_solve_started = Instant::now();
-        let solution = (echelon.rank == columns + 1).then(|| {
-            solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus).unwrap()
-        });
-        let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
-        let solution_validation_started = Instant::now();
-        if let Some(solution) = &solution {
-            if let Some(expected) = known_scalar {
-                assert_eq!(solution[columns], expected);
-            }
-            let recovered_target = if let Some(table) = &reference_generator_table {
-                reference_fixed_base_mul(&curve, table, solution[columns])
             } else {
-                curve.mul(curve.generator(), &BigUint::from(solution[columns]))
-            };
-            assert_eq!(
-                recovered_target, q,
-                "recovered scalar must reconstruct the public target"
-            );
-            for (column, representative) in base.representatives.iter().enumerate() {
-                let reconstructed = if let Some(table) = &reference_generator_table {
-                    reference_fixed_base_mul(&curve, table, solution[column])
-                } else {
-                    curve.mul(curve.generator(), &BigUint::from(solution[column]))
-                };
-                assert_eq!(reconstructed, *representative);
-            }
-            for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
-                let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
-                    (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
-                });
-                assert_eq!(value, rhs);
-            }
-        }
-        let solution_validation_ms = solution_validation_started.elapsed().as_secs_f64() * 1000.0;
-        let collection_ms = collection_started.elapsed().as_secs_f64() * 1000.0;
-        let reference_validation_started = Instant::now();
-        for (indices, coefficient_a, coefficient_b) in &reference_validation_records {
-            let generator_multiple = if let Some(table) = &reference_generator_table {
-                reference_fixed_base_mul(&curve, table, *coefficient_a)
-            } else {
-                curve.mul(curve.generator(), &BigUint::from(*coefficient_a))
-            };
-            let q_multiple = if let Some(table) = &reference_q_table {
-                reference_fixed_base_mul(&curve, table, *coefficient_b)
-            } else {
-                curve.mul(&q, &BigUint::from(*coefficient_b))
-            };
-            let target = curve.add(&generator_multiple, &q_multiple);
-            let sum = indices
-                .iter()
-                .fold(BinaryPoint::Infinity, |accumulator, &index| {
-                    curve.add(&accumulator, &base.points[index])
-                });
-            assert_eq!(sum, target, "independent reference relation validation");
-        }
-        let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
-        let q_key = point_key(&q);
-        let generator_key = point_key(curve.generator());
-        let status = if rank_full_at
-            .map(|full_at| accepted >= full_at + required_rank_surplus)
-            .unwrap_or(false)
-        {
-            match required_rank_surplus {
-                0 => "FULL_RANK",
-                32 => "RANK_PLUS_32",
-                _ => "RANK_PLUS_SURPLUS",
-            }
-        } else if accepted >= relation_cap {
-            "RANK_DEFICIENT"
-        } else {
-            "TARGET_CAP"
-        };
-        batch_online_charged_ms += fixture_setup_ms + collection_ms;
-        batch_fixture_generation_ms += fixture_generation_ms;
-        batch_reference_validation_ms += reference_validation_ms;
-        batch_target_trials += trials;
-        batch_admitted_relations += accepted;
-        batch_support_queries += decomposition_queries;
-        batch_rank_plus_32 += u64::from(status == "RANK_PLUS_32");
-        println!(
-            "{}",
-            json!({
-                "schema_version":"1.0",
-                "task_id":TASK_ID,
-                "kind":"relation_rank_summary",
-                "evidence_class":"measured_exact_support_relation",
-                "fixture_index":fixture_index,
-                "fixture_seed":fixture_seed,
-                "published_fixture_scalar":known_scalar,
-                "fixture_scalar_source":fixture_scalar_source,
-                "target_scalar_constructed":target_scalar_constructed,
-                "target_kind":target_kind,
-                "public_hash_seed":public_hash_seed,
-                "public_hash_counter":public_hash_counter,
-                "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
-                "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
-                "published_q_point_key":[q_key.0.to_string(),q_key.1.to_string()],
-                "recovered_fixture_scalar":solution.as_ref().map(|values| values[columns]),
-                "factor_base_log_solution":solution.as_ref().map(|values| &values[..columns]),
-                "factor_base_logs_known_by_construction":false,
-                "linear_solution_verified":solution.is_some(),
-                "n":n,
-                "a":a,
-                "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
-                "status":status,
-                "orbit_columns":columns,
-                "matrix_columns":columns+1,
-                "factor_base_points":base.points.len(),
-                "base_hash":&base_hash,
-                "target_trials":trials,
-                "admitted_relations":accepted,
-                "terminal_rank":echelon.rank,
-                "duplicate_rows":duplicate_rows,
-                "scalar_multiple_rows":scalar_multiple_rows,
-                "full_rank_at_relation":rank_full_at,
-                "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
-                "required_surplus_relations":required_rank_surplus,
-                "rank_aware_pair_scan":rank_aware_pair_scan,
-                "rank_target_deficiency":rank_target_deficiency,
-                "rank_targeted_trials":rank_targeted_trials,
-                "rank_targeted_nonincrements":rank_targeted_nonincrements,
-                "rank_target_slot_index_builds":rank_target_slot_index_builds,
-                "rank_target_slot_index_entries":rank_target_slots.len(),
-                "rank_target_slot_index_allocated_bytes":rank_target_slots.capacity()*std::mem::size_of::<u32>(),
-                "relation_cap_without_rank":relation_cap,
-                "relation_cap_extra":relation_cap_extra,
-                "collection_ms":collection_ms,
-                "linear_solve_ms":linear_solve_ms,
-                "solution_validation_ms":solution_validation_ms,
-                "setup_ms":setup_ms,
-                "curve_setup_ms":curve_setup_ms,
-                "fixture_setup_ms":fixture_setup_ms,
-                "fixture_generation_ms":fixture_generation_ms,
-                "fixed_base_reference_validation":fixed_base_reference_validation,
-                "reference_generator_table_ms":reference_generator_table_ms,
-                "reference_q_table_ms":reference_q_table_ms,
-                "charged_total_ms":setup_ms+fixture_setup_ms+collection_ms,
-                "pair_group_additions":pair_additions,
-                "pair_index_mode":pair_mode.name(),
-                "pair_canonicalization_maps":pair_canonicalization_maps,
-                "pair_batch_inversions":pair_batch_inversions,
-                "field_mul_backend":field_mul_backend(),
-                "field_square_backend":field_square_backend(&curve),
-                "field_reduction_backend":field_reduction_backend(&curve),
-                "field_product_pipeline":field_product_pipeline(&curve),
-                "field_product_dispatch":field_product_dispatch(&curve),
-                "query_group_additions":query_additions,
-                "query_canonicalization_maps":query_canonicalization_maps,
-                "query_x_filter_rejections":query_x_filter_rejections,
-                "query_exact_table_misses":query_exact_table_misses,
-                "query_mode":query_mode.name(),
-                "decomposition_arity":if query_mode.pair_pair_width().is_some() {4} else {3},
-                "query_batch_inversions":query_batch_inversions,
-                "query_parallel_threads":if query_mode.pair_pair_parallel() {rayon::current_num_threads()} else {1},
-                "query_parallel_waves":query_parallel_waves,
-                "query_parallel_chunks":query_parallel_chunks,
-                "query_shared_sign_denominator_inputs":query_shared_sign_denominator_inputs,
-                "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
-                "query_compact_pair_scratch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch,
-                "query_dense_scan_fast_path":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled(),
-                "query_dense_derived_slots":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled() && dense_derived_slots_enabled(),
-                "query_signed_slot_scratch_bytes_per_entry":if query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled() && dense_derived_slots_enabled() {0} else {std::mem::size_of::<usize>()},
-                "query_specialized_n53_pair_batch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled(),
-                "query_itoh_n53_inverse":query_mode.pair_pair_parallel() && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled() && itoh_n53_inverse_enabled(),
-                "query_prefiltered_exact_lookup":query_mode.pair_pair_width().is_some() && prefiltered_exact_lookup_enabled(),
-                "query_raw_point_scratch_bytes":std::mem::size_of::<RawPoint>(),
-                "query_compact_point_scratch_bytes":std::mem::size_of::<(u64,u64)>(),
-                "target_mode":target_mode.name(),
-                "target_walk_additions":target_walk_additions,
-                "target_walk_restarts":target_walk_restarts,
-                "target_scalar_multiplications":target_scalar_multiplications,
-                "support_queries":decomposition_queries,
-                "all_relations_group_verified":true,
-                "reference_validation_ms":reference_validation_ms,
-                "reference_relations_validated":reference_validation_records.len(),
-                "rank_crosschecked_after_every_relation":true,
-                "dense_rank_recomputations":dense_rank_recomputations,
-                "dimension_bound_rank_crosschecks":dimension_bound_rank_crosschecks,
-                "post_full_rank_crosscheck":if incremental_rank_crosscheck {
-                    "reverse-pivot incremental rank with terminal dense check"
-                } else {
-                    "ambient dimension bound"
-                },
+                "ambient dimension bound"
+            },
                 "rank_crosscheck_mode":if incremental_rank_crosscheck {
                     "forward_and_reverse_incremental_plus_terminal_dense"
                 } else {
@@ -5976,6 +5473,9 @@ mod packed_tests {
         assert_eq!(target_pdp_ms, 5.5);
         assert_eq!(query_ms + target_generation_ms + target_pdp_ms
             + packed_verification_ms + external_relation_check_ms + recovery_check_ms, online_ms);
+    }
+
+    #[test]
     fn one_online_target_with_log_precomputation_does_not_emit_batch_summary() {
         assert!(!should_emit_multi_target_summary(2, true));
         assert!(should_emit_multi_target_summary(3, true));
@@ -6137,7 +5637,6 @@ mod packed_tests {
                 .filter(|(_, key)| table.might_contain_x(key.0))
                 .collect();
             let mut pointwise_filtered = Vec::new();
-            let mut pointwise_scratch = BatchInverseScratch::default();
             let mut pointwise_scratch = RawBatchScratch::default();
             let pointwise_attempted = batch_raw_target_minus_points_x_filtered(
                 &curve,
@@ -6157,31 +5656,6 @@ mod packed_tests {
     }
 
     #[test]
-    fn dual_sign_batch_matches_separate_signed_inputs() {
-        let curve = KoblitzCurve::new(1, 23).unwrap();
-        let points: Vec<_> = (1..=96u64)
-            .map(|scalar| {
-                to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar)))
-            })
-            .collect();
-        let target = to_raw_point(&curve.mul(curve.generator(), &BigUint::from(197u64)));
-        let signed_points: Vec<_> = points
-            .iter()
-            .flat_map(|&point| [point, raw_neg_point(point)])
-            .collect();
-        let candidate_keys: Vec<_> = signed_points
-            .iter()
-            .map(|&left| raw_compact_key(raw_add_point(&curve, target, raw_neg_point(left))))
-            .collect();
-        let mut table = CompactPairTable::with_capacity(64, true, (1usize << 23) + 1);
-        for (position, &key) in candidate_keys.iter().enumerate() {
-            if position % 3 == 0 {
-                table.insert(key, QuotientPairWitness::default());
-            }
-        }
-
-        let mut separate = Vec::new();
-        let mut separate_scratch = BatchInverseScratch::default();
     fn sharded_support_table_matches_exact_unsharded_membership() {
         let mut entries: Vec<ExpandedSupportEntry> = (1..=256usize)
             .map(|index| {
@@ -6208,7 +5682,7 @@ mod packed_tests {
             assert!(sharded.might_contain_x(key.0));
             let expected = serial.get(key).unwrap();
             let actual = sharded.get(key).unwrap();
-            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.columns(), expected.columns());
             assert_eq!(actual.image_y, expected.image_y);
         }
         let occupied = (0..sharded.slots())
@@ -6229,7 +5703,7 @@ mod packed_tests {
             assert!(dense.might_contain_x(key.0));
             let expected = serial.get(key).unwrap();
             let actual = dense.get(key).unwrap();
-            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.columns(), expected.columns());
             assert_eq!(actual.image_y, expected.image_y);
         }
         let start = dense.scan_start(entries[0].0);
@@ -6256,7 +5730,7 @@ mod packed_tests {
         for &(key, _) in &entries {
             let expected = serial.get(key).unwrap();
             let actual = packed.get(key).unwrap();
-            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.columns(), expected.columns());
             assert_eq!(actual.image_y, expected.image_y);
         }
         for slot in 0..packed.slots() {
@@ -6276,7 +5750,7 @@ mod packed_tests {
         for &(key, _) in &entries {
             let expected = packed.get(key).unwrap();
             let actual = fused.get(key).unwrap();
-            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.columns(), expected.columns());
             assert_eq!(actual.image_y, expected.image_y);
         }
         for slot in 0..fused.slots() {
@@ -6324,14 +5798,6 @@ mod packed_tests {
         let separate_normalized: Vec<_> = separate
             .into_iter()
             .map(|(position, key)| (position / 2, position % 2 == 1, key))
-            .collect();
-
-        let mut dual = Vec::new();
-        let mut dual_scratch = BatchInverseScratch::default();
-            .map(|(position, key)| {
-                let (point_position, negative) = signed_positions[position];
-                (point_position, negative, key)
-            })
             .collect();
 
         let mut dual = Vec::new();
