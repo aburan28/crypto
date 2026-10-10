@@ -1,0 +1,43 @@
+{
+  "actual_usable_points_B": null,
+  "binary_sha256": "518855c5ca4f30474b4287d8997d0ce9c744fba08c5112effc2991b999294061",
+  "candidate_id": null,
+  "controlled_speedup": null,
+  "curve_id": "EC1N53Ckb1h738a572b91f2",
+  "expected_input_roots_if_all_regular": 1073263144,
+  "expected_persistent_index_payload_bytes": 30055197472,
+  "expected_regular_states": 536631572,
+  "expected_root_table_payload_bytes": 8589934592,
+  "expected_root_table_slots": 1073741824,
+  "expected_state_payload_bytes": 21465262880,
+  "field_degree_n": 53,
+  "fixture_scalar": 429728658711,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c3182_exact_feasibility_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "next_column_step": {
+    "columns": 3183,
+    "root_payload_bytes": 17179869184,
+    "root_slots": 2147483648,
+    "states": 536968917
+  },
+  "orbit_columns": 3182,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "point_file_relative": "holdout/n53/T025/public_target.json",
+  "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+  "prepare_rank": 3182,
+  "public_point": [
+    7024908122546358,
+    2805535303407364
+  ],
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "root_table_layout": "packed_8_byte_mixed_key_remainder_displacement12_state_index29_exact_hit_reconstruction",
+  "runner_sha256": "65a0ad246eb734b7fce0baff83bd81908d3d0b5662b8bc18eb702ebc9d3a111b",
+  "source_commit": "3d64fca1bfd96f52bf71ac90264c1229b944f21e",
+  "source_sha256": "39fd572ecddf0f7fed32c31bc81c86946c87782a25dcad6c17c0ebbe1106eb57",
+  "target_label": "T025",
+  "target_workers": 1,
+  "timeout_seconds": 1200,
+  "workload_id": "a238237883e9"
+}
