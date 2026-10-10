@@ -57,9 +57,11 @@ sage_works() {
 }
 
 if ! sage_works; then
-  run_root env DEBIAN_FRONTEND=noninteractive apt-get update
-  if apt-cache show sagemath >/dev/null 2>&1; then
-    run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends sagemath || true
+  if run_root env DEBIAN_FRONTEND=noninteractive apt-get update &&
+     apt-cache show sagemath >/dev/null 2>&1; then
+    if ! run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends sagemath; then
+      echo "APT Sage install failed; trying conda-forge" >&2
+    fi
   fi
 fi
 
@@ -80,7 +82,9 @@ if ! sage_works; then
   fi
   export MAMBA_ROOT_PREFIX="${MAMBA_ROOT_PREFIX:-$HOME/.local/share/micromamba}"
   sage_prefix="$MAMBA_ROOT_PREFIX/envs/sage"
-  if [[ ! -x "$sage_prefix/bin/sage" ]]; then
+  if [[ -d "$sage_prefix/conda-meta" ]]; then
+    micromamba install -y -p "$sage_prefix" -c conda-forge sage
+  else
     micromamba create -y -p "$sage_prefix" -c conda-forge sage
   fi
   ln -sfn "$sage_prefix/bin/sage" "$bin_dir/sage"
