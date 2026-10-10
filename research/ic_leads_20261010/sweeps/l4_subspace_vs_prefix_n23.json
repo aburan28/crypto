@@ -1,0 +1,23 @@
+{
+ "_comment": "L4 (orbit-invariant factor base): the Frobenius-stable subspace against a prefix F_2-subspace of the same dimension (not Frobenius-stable, so orbits straddle the base and the fold is partial); both oracles so the fold's dependence on the base is visible. Dimension 11 = ord_23(2) matches n=23; run_baseline.sh overrides the degree.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "koblitz-orbit:divisor=1",
+   "binary-subspace:dimension=11"
+  ],
+  "oracle": [
+   "mitm-frobenius",
+   "mitm:negation_folded=1"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

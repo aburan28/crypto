@@ -1,0 +1,30 @@
+icms: icms.spec/v1
+label: "lead L1 control (K_0, n = 23): same subspace, no Frobenius fold, mitm m=3"
+description: >
+  Lead L1 (signed Frobenius folding) of docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md section 4,
+  as the unfolded control against k0n23-frobstable-d1-mitmfrob3-baseline.yaml.  Declared
+  differences: factor_base.quotient (frobenius dropped) and decomposition.method (mitm), which
+  the methodology counts as one lead because the fold is one object seen by two stages.
+  Prediction: columns and rows x 2n = 46, LA operations x (2n)^2, decomposition unchanged.
+role: candidate
+instance:
+  curve: {regime: koblitz, degree: 23, koblitz_a: 0}
+  workload: {targets: 1, law: known_answer, seeds: [20261010]}
+factor_base:
+  family: frobenius_stable_subspace
+  params: {divisor: "1"}
+  quotient: [negation]
+  large_primes: {mode: none}
+decomposition: {arity: 3, method: mitm}
+relations: {collector: walk, stop: first_log, max_trials: 4000000}
+linear_algebra: {method: incremental_gauss}
+reference: {rho: rho.measured_matched, floor: floor.generic, rho_runs: 16}
+accounting: {unit: crypto.S.gae_pinned}
+measurement:
+  window: cold_end_to_end
+  repetitions: 5
+  warmup: 1
+  interleave: abab
+  isolation_required: L2
+  timeout_seconds: 600
+execution: {adapter: crypto.ic_bench, threads: 1, cpus: 1}

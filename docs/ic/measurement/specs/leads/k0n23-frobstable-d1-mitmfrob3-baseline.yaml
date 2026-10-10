@@ -1,0 +1,29 @@
+icms: icms.spec/v1
+label: "lead ladder baseline (K_0, n = 23): Frobenius-stable subspace divisor 1, signed-Frobenius fold, mitm-frobenius m=3"
+description: >
+  Baseline B2 of docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md section 2 on the ECC2K-130
+  family member K_0.  Every lead spec in this directory differs from this file in exactly
+  one declared field.  Operation counts are the metric; the wall-clock window needs an
+  isolated host this ladder's first session did not have.
+role: baseline
+instance:
+  curve: {regime: koblitz, degree: 23, koblitz_a: 0}
+  workload: {targets: 1, law: known_answer, seeds: [20261010]}
+factor_base:
+  family: frobenius_stable_subspace
+  params: {divisor: "1"}
+  quotient: [negation, frobenius]
+  large_primes: {mode: none}
+decomposition: {arity: 3, method: mitm_frobenius}
+relations: {collector: walk, stop: first_log, max_trials: 4000000}
+linear_algebra: {method: incremental_gauss}
+reference: {rho: rho.measured_matched, floor: floor.generic, rho_runs: 16}
+accounting: {unit: crypto.S.gae_pinned}
+measurement:
+  window: cold_end_to_end
+  repetitions: 5
+  warmup: 1
+  interleave: abab
+  isolation_required: L2
+  timeout_seconds: 600
+execution: {adapter: crypto.ic_bench, threads: 1, cpus: 1}
