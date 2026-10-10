@@ -36,12 +36,27 @@ isogeny verify --input ./p224-1471
 
 # Screen for small-order Frobenius eigenvalues above degree 1009.
 isogeny screen --curve p192 --from 1010 --to 65537 --max-order 8
+
+# Find distinct maps by advancing only through independently verified codomains.
+isogeny walk --curve p192 --ell 2341 --count 50 --out ./p192-large-walk
+isogeny walk --curve p224 --ell 1117 --count 50 --out ./p224-large-walk
+isogeny verify-walk --input ./p224-large-walk
 ```
 
 Search requires a fresh output directory and uses seed 1 and the published curve
 order automatically. Construction has a default 1800-second limit and an 8 GiB
 resident-memory cap. Independent replay follows construction; its cost is separate
 from that construction timeout and memory cap.
+
+`walk` requires a fresh directory and a prime degree above 1009. The native kernel
+route accepts P192/P224 eigenvalue orders through 16. Each step retains its exact
+map, resource receipt, independently transported subgroup generator, and linked
+hashes. `walk.json` records verified progress after every step. The independent
+`verify-walk` command replays the entire chain from the embedded public source,
+recomputing every destination and generator without modifying its inputs. Distinct
+maps may share the same prime degree; report map count and degree count separately.
+One eigenline per step retains coverage `PARTIAL`. Interrupted output is evidence;
+the current walk command does not resume into an existing directory.
 
 `curves` exposes the complete pinned repository catalogue, including NIST/SEC,
 Brainpool, SM2, GOST/ANSSI, Montgomery/Edwards, binary, Koblitz, subfield and extension

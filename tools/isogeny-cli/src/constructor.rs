@@ -119,16 +119,56 @@ fn construct<F: PrimeFieldInt, const D: usize>(
     stage("kernel_in_base_field");
     h
 }
+pub fn selection(name: &str, ell: u64) -> Option<(usize, u64, u64)> {
+    if !matches!(name, "p192" | "p224") || !isogeny_algos::field::is_prime(ell) {
+        return None;
+    }
+    let roots = crate::eigenvalues(name, ell)?;
+    let mut choices = [
+        (
+            crate::multiplicative_order(roots[0], ell),
+            roots[0],
+            roots[1],
+        ),
+        (
+            crate::multiplicative_order(roots[1], ell),
+            roots[1],
+            roots[0],
+        ),
+    ];
+    choices.sort();
+    let (order, lambda, other) = choices[0];
+    (order <= 16).then_some((order.max(2) as usize, lambda, other))
+}
+fn dispatch<F: PrimeFieldInt>(
+    base: F,
+    c: &PrimeCurve,
+    n: &Int,
+    ell: u64,
+    d: usize,
+    lambda: u64,
+    other: u64,
+) -> Vec<Int> {
+    macro_rules! choose { ($($degree:literal),+) => { match d {
+        $($degree => construct::<_, $degree>(base, c, n, ell, lambda, other),)+
+        _ => panic!("unsupported extension degree"),
+    } }; }
+    choose!(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+}
 pub fn run(name: &str, ell: u64) -> Json {
-    let c = PrimeCurve::preset(name).unwrap();
+    run_model(name, ell, &PrimeCurve::preset(name).unwrap())
+}
+pub fn run_model(name: &str, ell: u64, c: &PrimeCurve) -> Json {
     let n = crate::standard_order(name);
-    let h = match (name, ell) {
-        ("p192", 10453) => construct::<_, 3>(FpM::<3>::new(c.p.mag()), &c, &n, ell, 270, 8274),
-        ("p224", 1471) => construct::<_, 5>(FpM::<4>::new(c.p.mag()), &c, &n, ell, 554, 1178),
-        _ => panic!("case outside the frozen kernel protocol"),
+    assert_eq!(c.p, PrimeCurve::preset(name).unwrap().p);
+    let (d, lambda, other) = selection(name, ell).expect("unsupported eigenvalue order");
+    let h = match name {
+        "p192" => dispatch(FpM::<3>::new(c.p.mag()), c, &n, ell, d, lambda, other),
+        "p224" => dispatch(FpM::<4>::new(c.p.mag()), c, &n, ell, d, lambda, other),
+        _ => unreachable!(),
     };
     stage("map_begin");
-    let r = api::isogeny_from_kernel(&c, &h, ell, 1).unwrap();
+    let r = api::isogeny_from_kernel(c, &h, ell, 1).unwrap();
     assert!(r.verified());
     stage("map_checks_passed");
     let cod = PrimeCurve::new(c.p.clone(), r.codomain.0.clone(), r.codomain.1.clone()).unwrap();
@@ -182,10 +222,54 @@ pub fn run(name: &str, ell: u64) -> Json {
             "result",
             Json::obj(vec![
                 ("ell", Json::Num(ell as i64)),
-                ("source_icv1", identity(&c, &n)),
+                ("source_icv1", identity(c, &n)),
                 ("isogenies", Json::Arr(vec![iso])),
             ]),
         ),
     ]);
     doc
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn selections_keep_old_routes_and_enable_new_degree_nine_routes() {
+        assert_eq!(selection("p192", 10453), Some((3, 270, 8274)));
+        assert_eq!(selection("p224", 1471), Some((5, 554, 1178)));
+        assert_eq!(selection("p192", 2341), Some((9, 850, 1877)));
+        assert_eq!(selection("p224", 1117), Some((9, 591, 698)));
+        assert_eq!(selection("p192", 1021), None);
+        assert_eq!(selection("p224", 1119), None);
+    }
+    fn field_laws<const D: usize>() {
+        let f = Extension::<_, D>::search(isogeny_algos::field::Zp::new(101), 991);
+        let mut rng = Rng::new(2721);
+        for _ in 0..8 {
+            let (a, b, c) = (f.random(&mut rng), f.random(&mut rng), f.random(&mut rng));
+            assert_eq!(f.mul(a, f.add(b, c)), f.add(f.mul(a, b), f.mul(a, c)));
+            assert_eq!(f.pow_big(a, &f.q()), a);
+            if !f.is_zero(a) {
+                assert_eq!(f.mul(a, f.inv(a)), f.one());
+            }
+        }
+    }
+    #[test]
+    fn every_enabled_extension_passes_field_laws() {
+        field_laws::<2>();
+        field_laws::<3>();
+        field_laws::<4>();
+        field_laws::<5>();
+        field_laws::<6>();
+        field_laws::<7>();
+        field_laws::<8>();
+        field_laws::<9>();
+        field_laws::<10>();
+        field_laws::<11>();
+        field_laws::<12>();
+        field_laws::<13>();
+        field_laws::<14>();
+        field_laws::<15>();
+        field_laws::<16>();
+    }
 }

@@ -46,6 +46,14 @@ fn eval(f: &Field, n: &Poly, d: &Poly, p: Option<(Fe, Fe)>) -> Option<(Fe, Fe)> 
 }
 pub fn verify(out: &Path, write_certificate: bool) -> Value {
     let registry: Value = serde_json::from_str(crate::REGISTRY).unwrap();
+    verify_with_registry(out, write_certificate, &registry)
+}
+// Only the walk driver supplies this registry. It starts with the embedded
+// public anchor and adds a source after exact independent replay of its parent.
+pub fn verify_with_registry(out: &Path, write_certificate: bool, registry: &Value) -> Value {
+    verify_detail(out, write_certificate, registry).0
+}
+pub fn verify_detail(out: &Path, write_certificate: bool, registry: &Value) -> (Value, Value) {
     let summary: Value =
         serde_json::from_slice(&fs::read(out.join("search.json")).unwrap()).unwrap();
     let output_suffix = "";
@@ -174,6 +182,15 @@ pub fn verify(out: &Path, write_certificate: bool) -> Value {
             let target_id = &iso["codomain"]["icv1"];
             let target_a = f.to_big(&cod.a);
             let target_b = f.to_big(&cod.b);
+            let target_identity = isogeny_algos::icv1::prime(
+                &crate::catalog::integer(&doc["curve"]["p"]),
+                &crate::catalog::integer(&Value::String(target_a.to_string())),
+                &crate::catalog::integer(&Value::String(target_b.to_string())),
+                &crate::catalog::integer(&Value::String(group_order.to_string())),
+            ).unwrap();
+            assert_eq!(target_id["slug"], target_identity.slug);
+            assert_eq!(target_id["icv1"], target_identity.icv1);
+            assert_eq!(target_id["model_json"], target_identity.model_json);
             let field_record = json!({"characteristic":json_number(&p),"degree":1,"representation":"prime","element_encoding":"hex integer modulo the characteristic"});
             let curve_record = json!({"model":"short Weierstrass","coefficients":[0,0,0,json_number(&target_a),json_number(&target_b)],"subgroup_order":n.to_string(),"cofactor":json_number(&cofactor_big),
                 "generator":[format!("0x{:x}",f.to_big(&gp.0)),format!("0x{:x}",f.to_big(&gp.1))],"target_group":"prime-order subgroup"});
@@ -221,5 +238,5 @@ pub fn verify(out: &Path, write_certificate: bool) -> Value {
         )
         .unwrap();
     }
-    receipt
+    (receipt, json!({"schema":"large-degree-isogeny-curves/v1","curves":curves}))
 }

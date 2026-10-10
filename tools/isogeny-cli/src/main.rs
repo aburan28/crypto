@@ -25,6 +25,7 @@ mod replay {
     include!(concat!(env!("OUT_DIR"), "/verification_engines.rs"));
 }
 mod supervisor;
+mod walk;
 #[cfg(test)]
 pub mod cryptanalysis {
     pub use crate::modular_polynomial;
@@ -48,7 +49,7 @@ use std::{
 
 const REGISTRY: &str = include_str!("../../../docs/curves/registry.json");
 const KERNEL_PROTOCOL: &[u8] = include_bytes!(
-    "../../../research/p192_p224_large_degree_isogenies_20261009/KERNEL_PROTOCOL.md"
+    "../../../research/p192_p224_hundred_large_prime_isogenies_20261010/PROTOCOL.md"
 );
 const GENERAL_PROTOCOL: &[u8] =
     include_bytes!("../../../research/p192_p224_large_degree_isogenies_20261009/PROTOCOL.md");
@@ -57,13 +58,15 @@ const HELP: &str = "isogeny — public-curve isogeny search and independent veri
   isogeny search --curve p224 --ell 1471 --out RESULTS [--timeout 1800]
   isogeny search --curve p192 --ell 10453 --out RESULTS [--timeout 1800]
   isogeny verify --input RESULTS
+  isogeny walk --curve p224 --ell 1117 --count 50 --out RESULTS
+  isogeny verify-walk --input RESULTS
   isogeny screen --curve p192 --from 1010 --to 65537 [--max-order 8]
   isogeny version
   isogeny curves                 full pinned catalogue and operation capabilities
 
 search options:
   --method auto|kernel|modpoly  auto selects the validated kernel route for
-                              p224/1471 and p192/10453; otherwise full enumeration
+                              P192/P224 eigenvalue orders <=16; otherwise full enumeration
   --construct-only            record construction without independent replay
   --timeout SECONDS           construction time limit (default 1800; RSS cap 8 GiB)
   --out DIRECTORY             fresh output directory; existing paths are refused
@@ -314,13 +317,13 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
                     return Err("degree must be coprime to the registered subgroup order".into());
                 }
             }
-            let supported = matches!((name, ell), ("p192", 10453) | ("p224", 1471));
+            let supported = constructor::selection(name, ell).is_some();
             let single = match o.get("method").unwrap_or("auto") {
                 "auto" => supported,
                 "kernel" if supported => true,
                 "kernel" => {
                     return Err(
-                        "kernel construction currently supports p192/10453 and p224/1471".into(),
+                        "kernel construction needs P192/P224 and eigenvalue order <=16".into(),
                     )
                 }
                 "modpoly" => false,
@@ -402,15 +405,41 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
                 0,
             ))
         }
+        "walk" => {
+            let o = Options::parse(&args[1..], &["curve", "ell", "count", "out", "timeout"])?;
+            walk::run(
+                o.curve()?,
+                o.number("ell", None)?,
+                o.number("count", None)?,
+                Path::new(o.need("out")?),
+                o.number("timeout", Some(1800))?,
+            )
+        }
+        "verify-walk" => {
+            let o = Options::parse(&args[1..], &["input"])?;
+            Ok((walk::verify(Path::new(o.need("input")?))?, 0))
+        }
         "kernel-first" | "isogenies" => {
-            let o = Options::parse(&args[1..], &["curve", "ell", "order", "seed"])?;
+            let o = Options::parse(&args[1..], &["curve", "ell", "order", "seed", "model"])?;
             let name = o.curve()?;
             let ell = o.number("ell", None)?;
             if o.need("order")? != standard_order(name).to_string() || o.need("seed")? != "1" {
                 return Err("worker requires the published order and seed 1".into());
             }
             let record = if command == "kernel-first" {
-                constructor::run(name, ell)
+                if let Some(path) = o.get("model") {
+                    let model: Value =
+                        serde_json::from_slice(&fs::read(path).map_err(|e| e.to_string())?)
+                            .map_err(|e| e.to_string())?;
+                    let c = PrimeCurve::new(
+                        catalog::integer(&model["p"]),
+                        catalog::integer(&model["a"]),
+                        catalog::integer(&model["b"]),
+                    )?;
+                    constructor::run_model(name, ell, &c)
+                } else {
+                    constructor::run(name, ell)
+                }
             } else {
                 general_worker(name, ell)?
             };
