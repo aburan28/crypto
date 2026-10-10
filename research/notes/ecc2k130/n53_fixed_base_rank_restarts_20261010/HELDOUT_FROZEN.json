@@ -1,0 +1,55 @@
+{
+  "fixture_verifier_only_sha256": "360ca7e31a0226d9ceb51d129aacbe1ecfc013bbee17d79eede2772ea369823d",
+  "generation_amendment_sha256": "65951762f010accc1ae0cb3c48e7d3dc59114037d38bf9ea2eed4fb53918c932",
+  "generation_receipt_sha256": "9e25a624ed896d61b1001bf3f47ad9409e5837f4c4325fa3ab975d86628b6ef9",
+  "generation_rule_sha256": "52dddfa5a45b7becf2be3c7c95ad1947ab223dd37d4c25ad2377665c86c320de",
+  "ic_binary_sha256": "3c03013e4a12d5eac74e1737c5549558ddf734aa9a324426914778765da0f51e",
+  "ic_candidate_ids": {
+    "cap400000": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h7f0d28c1d4ff",
+    "control": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640"
+  },
+  "ic_source_sha256": "4dd3c5e7823b453ad1fa9046d9be68a04bddc79343ea29576dd1f32b0bc66299",
+  "ic_verifier_sha256": "6041f52975c516f26d8ff88cb7fefc3ebdc85cae8e05b1f53cc73cf5ca72227e",
+  "public_hash_counter": 1,
+  "public_hash_seed": 53261307,
+  "public_point": [
+    2939726529610565,
+    1384157319972946
+  ],
+  "public_point_sha256": "4b32ce8b5c559f68518eca609d4a97f095e49bffdb579746636aafaee77dcabf",
+  "rank_seeds": [
+    531053,
+    531054,
+    531055,
+    531056,
+    531057,
+    531058
+  ],
+  "resource_envelope": {
+    "observed_rss_cap_bytes": 17179869184,
+    "threads": 1,
+    "wall_cap_seconds": 60
+  },
+  "rho_binary_sha256": "f6a1be30979fda8d57fac4dc571c69c76af0cd7cff18e102191de0f1b06ac133",
+  "rho_seeds": [
+    530153,
+    530154,
+    530155,
+    530156,
+    530157,
+    530158
+  ],
+  "rho_source_sha256": "575c1739f37e24d9130cc2fef8ea2c7554c762cf822e52708a13263b2875ccb0",
+  "rho_verifier_sha256": "6a53747d30431d9912da3da530ff93aa49de319d7dbff71fe86f78ac69245d13",
+  "runner_sha256": "93e213e2a4caa1678f094d7dcbf4aa61dd60fb7b393b51c10ba8eb93e5bccfdf",
+  "schema": "n53-rank-restart-heldout-freeze-v1",
+  "selected_cap": 400000,
+  "workload_ids": {
+    "531053": "W95d8ced9cd66",
+    "531054": "W3ba5ba44e9fd",
+    "531055": "W70add07d1871",
+    "531056": "Wf2aa71736c3c",
+    "531057": "Wfa5cc20295c8",
+    "531058": "W630749774d58"
+  }
+}

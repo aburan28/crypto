@@ -840,6 +840,16 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
             }
             1u64.checked_shl(total)
         }
+        FactorBaseSpec::StandardSubspace { dimension } => {
+            if *dimension == 0 || *dimension > 20 || *dimension >= n {
+                return None;
+            }
+            1u64.checked_shl(*dimension)
+        }
+        // A cofactor image can merge abscissae, so the parent bound is
+        // not a lower bound for the child; sampled orbits have no bound
+        // at all.
+        FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),

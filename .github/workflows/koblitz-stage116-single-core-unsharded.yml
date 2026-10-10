@@ -1,10 +1,9 @@
 name: Koblitz Stage 116 n53 single-core unsharded support
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage116_single_core_unsharded.py"
-      - ".github/workflows/koblitz-stage116-single-core-unsharded.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

@@ -750,9 +750,9 @@ impl F6SignedPairIndex {
         if point_index.len() != points.len() {
             return None;
         }
-        let negatives: Vec<u32> = points
+        let negatives: Vec<usize> = points
             .iter()
-            .map(|point| u32::try_from(*point_index.get(&key(&point_neg(point))?)?).ok())
+            .map(|point| point_index.get(&key(&point_neg(point))?).copied())
             .collect::<Option<_>>()?;
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
@@ -799,7 +799,7 @@ impl F6SignedPairIndex {
                         sums.push(SignedPairSum {
                             point: sum,
                             pair: (i as u32, j as u32),
-                            neg_pair: (negatives[i], negatives[j]),
+                            neg_pair: (negatives[i] as u32, negatives[j] as u32),
                         });
                     }
                 }

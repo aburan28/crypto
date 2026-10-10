@@ -1,16 +1,9 @@
 name: Koblitz Stage 131 current gate audit
 
 on:
-  pull_request:
-    paths:
-      - "docs/ic/runs/koblitz-n41-single-target-20260921.json"
-      - "docs/ic/params/k0n41-fixed-algebraic-single-public-41301.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-130-current-gate-audit-20260921/**"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-131-current-gate-audit-20260921/**"
-      - "scripts/compose_koblitz_stage130_gate_audit.py"
-      - "scripts/compose_koblitz_stage131_gate_audit.py"
-      - ".github/workflows/koblitz-stage131-current-gate-audit.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,58 @@
+\section{CPU clients}
+\label{sec:cpu}
+
+The CPU client is the bitsliced backend at the host's word width. It
+matters for three reasons: it is the verification path for every GPU
+report, it is the ECC2K-95 end-to-end control, and the campaign's
+spot fleet included CPU workers whose points are indistinguishable
+from the GPUs'.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Bitsliced CPU client, $\mathrm{GF}(2^{131})$, one core, median
+  of five. Speedups are against the 64-lane build on the same host and
+  compiler. The 2009 qhasm implementation of Bailey et al.\ reached
+  $533$ cycles per iteration on a Core~2 with 128-bit vectors.}
+\label{tab:cpu}
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+host & word & lanes & M it/s & note \\
+\midrule
+Xeon 2.1~GHz & \texttt{uint64\_t} & 64 & 4.42 & 475 cycles/iteration \\
+Xeon 2.1~GHz & AVX2 & 256 & 10.7 & 196 cycles/iteration \\
+Xeon 2.1~GHz & AVX-512 & 512 & 12.6 & 167 cycles/it.; 4 threads 40~M \\
+M4 Pro, g++ 16.1 & NEON & 128 & 11.342 & $2.19\times$ over 64 lanes (5.185) \\
+M4 Pro, Apple clang 17 & NEON & 128 & 15.673 & $3.02\times$ over g++/64 \\
+Graviton3 (V1, SHA3), clang & NEON & 128 & 6.214 & $2.38\times$ over g++/64 \\
+Graviton2 (N1, no SHA3), clang & NEON & 128 & 4.220 & $2.09\times$ over g++/64 \\
+Modal container, 4 threads & AVX-512 & 512 & 12.4 & 49.4~M it/s on 4 threads \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:cpu} is the ledger.\art{ecc2k130/README.md, ``Throughput''}
+Two of its facts generalise. The AVX-512 build spends half its
+multiply on moves rather than arithmetic ($4{,}069$ logic instructions
+against $4{,}287$ \texttt{vmovdqa32}) because the Karatsuba leaf keeps
+254 values live against 32 registers; a scheduling pass over the same
+DAG recovered moves only in the conversion ($4{,}287$ to $3{,}903$),
+missed its declared target, and recorded the leaf-size and compiler
+levers as measured dead ends.\art{ecc2k130/HOST-SCHEDULE.md} On
+aarch64 the gain splits cleanly: the NEON word with \texttt{BSL} alone
+is $1.76\times$ on the M4~Pro, \texttt{EOR3} a further $1.24\times$, and
+a core without \texttt{FEAT\_SHA3} (Graviton2) still takes $1.81\times$
+from the wider word. Compiler choice is worth more than either on
+this code: gcc emits $9{,}372$ instructions for the multiply leaf,
+$59\%$ of them loads and stores against spilled temporaries, where
+clang emits $1{,}902$ plus five outlined calls. The SHA3 probe is gated
+on the CPU reporting the feature, because an ungated probe on a
+Graviton2 selects a \texttt{+sha3} spelling under both compilers and
+the resulting binary dies with \texttt{SIGILL} on its $8{,}907$
+\texttt{eor3} instructions.\art{ecc2k130/README.md, ``Word width''}
+
+In the fleet a CPU worker at $2.3$~B/s (the self-reported median of
+the twelve CPU slots on 2026-09-17) is about a sixth of an
+RTX~PRO~6000; on Modal a four-thread sidecar beside a GPU adds about
+$25\%$ to the cost for $2.7\%$ more iterations and was not
+retained.\art{ecc2k130/benchmarks/dp-interval/raw/worker-counters-2026-09-17.tsv}\art{ecc2k130/README.md, ``Walking on the container's CPUs too''}

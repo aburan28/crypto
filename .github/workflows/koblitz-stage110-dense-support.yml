@@ -1,11 +1,9 @@
 name: Koblitz Stage 110 n53 dense support
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage110_dense_support.py"
-      - ".github/workflows/koblitz-stage110-dense-support.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

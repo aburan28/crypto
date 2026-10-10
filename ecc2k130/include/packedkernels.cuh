@@ -165,6 +165,7 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED_SHARED_SLOTS != 0 && ECC_SIGMA_FUSED_SHARED_SLOTS != 2 && \
     ECC_SIGMA_FUSED_SHARED_SLOTS != 3 && ECC_SIGMA_FUSED_SHARED_SLOTS != 4
 #error "ECC_SIGMA_FUSED_SHARED_SLOTS must be 0, 2, 3 or 4"
+#endif
 #if ECC_SIGMA_SQUARE_TABLE && (!ECC_SIGMA_FUSED || ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE)
 #error "ECC_SIGMA_SQUARE_TABLE requires the polynomial-state sigma-fused walk"
 #endif
@@ -795,6 +796,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
     sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_DENOMINATOR>(
         denominators, slot, tid, p.threads, tagged);
 }
+#endif  // ECC_SIGMA_FUSED
 
 #if ECC_PACKED_XONLY_23 && ECC_WALK_TABLE
 #error "ECC_PACKED_XONLY_23 and ECC_WALK_TABLE select different walks"

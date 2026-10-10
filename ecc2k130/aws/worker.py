@@ -1401,6 +1401,7 @@ class Worker:
             self.store.put(src, entry["key"])
             if metaSrc:
                 self.store.put(metaSrc, entry["key"] + ".json")
+        self.reportRds(src, slot)
         self.removeSpoolEntry(entry)
         self.creditSpoolEntry(entry, slot)
         return True
@@ -1519,15 +1520,6 @@ class Worker:
                     out.write(src.read(base))
                 src.seek(offset)
                 out.write(src.read(whole - offset))
-            key = "dp/slot-%05d/%d-%016d.bin" % (slot, int(time.time()), offset)
-            self.store.put(delta, key)
-            self.reportRds(delta, slot)
-            os.remove(delta)
-            self.state["dpOffset"] = whole
-            # Cumulative across dp file rotations, so the dashboard's count
-            # is this slot's whole contribution.
-            self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + (whole - offset) // RECORD_BYTES
-            self.saveState()
             key = "dp/slot-%05d/%s-%016d-%s.bin" % (slot, self.streamId, offset, sha256File(delta))
             metaPath = None
             if self.contract:

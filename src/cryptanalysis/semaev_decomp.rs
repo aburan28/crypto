@@ -192,6 +192,13 @@ unsafe fn clmul_u64_neon(a: u64, b: u64) -> u128 {
     std::arch::aarch64::vmull_p64(a, b)
 }
 
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
+    // The wide Karatsuba kernel uses the same runtime-gated PMULL primitive.
+    unsafe { clmul_u64_neon(a, b) }
+}
+
 impl Gf2 {
     /// Carry-less multiplication selected by this instance's runtime dispatch.
     pub fn kernel_name(&self) -> &'static str {

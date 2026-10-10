@@ -509,8 +509,11 @@ mod tests {
         assert_eq!(cyclotomic_coset_sizes(131), vec![1, 130]);
         assert_eq!(achievable_magic_numbers(131), vec![0, 1, 130, 131]);
         assert!(ghs_window_is_empty(131, 2, 6));
-        // The contrast: a composite degree has plenty of room, which is
-        // why GHS breaks c2pnb176w1 and cannot touch ECC2K-130.
+        // The contrast: a composite degree has room for a GHS window,
+        // which is why the window question is open for c2pnb176w1 (not
+        // broken: Maurer-Menezes-Teske 2002, Section 6, judge the
+        // isogenous m' = 5 instance infeasible to find) and closed for
+        // ECC2K-130.
         assert!(!ghs_window_is_empty(176, 2, 6));
     }
 

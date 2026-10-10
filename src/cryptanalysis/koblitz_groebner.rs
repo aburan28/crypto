@@ -4669,6 +4669,17 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
+    /// Number of algebraically reduced nodes closed by direct enumeration of
+    /// the remaining small Boolean cube.
+    #[serde(default)]
+    pub tail_enumerations: usize,
+    /// Complete assignments checked inside those tail cubes.
+    #[serde(default)]
+    pub tail_assignments_tested: usize,
+    /// Split nodes that deliberately deferred F4 until the configured batch
+    /// of Boolean decisions was complete.
+    #[serde(default)]
+    pub deferred_splits: usize,
     /// True if the node budget ran out or the input was unsupported, so
     /// results may be incomplete. Check `unsupported` to distinguish them.
     pub exhausted: bool,
@@ -4726,6 +4737,14 @@ pub struct SolveStats {
     /// this base, so the solve used plain inherited F4 instead.
     #[serde(default)]
     pub geometric_fallbacks: usize,
+}
+
+impl SolveStats {
+    /// Comparable search effort including assignments checked by the hybrid
+    /// tail enumerator.
+    pub fn effort(&self) -> usize {
+        self.splits + self.tail_assignments_tested
+    }
 }
 
 /// Reduce `system`, returning polynomials in the same ideal — either a

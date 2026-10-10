@@ -70,6 +70,26 @@ class WorkflowsParse(unittest.TestCase):
             "jobs:\n  j:\n    steps:\n"
             '      - run: "cargo test --lib koblitz_groebner::"\n')
 
+    def test_historical_koblitz_stages_are_manual_only(self):
+        # Shared path filters (for example examples/koblitz_rank_fixture.rs)
+        # used to enqueue dozens of stage workflows on one PR and starve
+        # GitHub-hosted runners across the account. Keep them dispatch-only.
+        offenders = []
+        for path in sorted(WORKFLOWS.glob("koblitz-stage*.yml")):
+            doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+            on = doc.get("on") or doc.get(True)
+            if on == "workflow_dispatch":
+                continue
+            if isinstance(on, dict) and set(on.keys()) == {"workflow_dispatch"}:
+                continue
+            offenders.append(path.name)
+        self.assertEqual(
+            offenders,
+            [],
+            "koblitz-stage workflows must be workflow_dispatch-only; "
+            "PR triggers flood the hosted-runner pool: " + ", ".join(offenders),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
