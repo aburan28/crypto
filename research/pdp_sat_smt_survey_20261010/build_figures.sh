@@ -54,8 +54,8 @@ cat > oracle_ladder.svg <<'SVG'
   <!-- legend -->
   <g font-size="12">
     <circle cx="110" cy="75" r="5" fill="#b03a2e"/><text x="120" y="79">native CDCL + Gauss–Jordan XOR, uniform rejection, n ≈ 3l (RESEARCH_SAT_SEMAEV.md)</text>
-    <rect x="105" y="88" width="10" height="10" fill="none" stroke="#b03a2e" stroke-width="1.5"/><text x="120" y="97">WDSat, plain mode, K0 over F_2^131 (solver_16): 2^(3d)/3! to 0.2 %</text>
-    <polygon points="110,104 116,114 104,114" fill="#6a1b9a"/><text x="120" y="113">CryptoMiniSat 5.14, native XOR, K0 over F_2^131 (solver_16); d = 9, 10 censored at 300 s</text>
+    <rect x="105" y="88" width="10" height="10" fill="none" stroke="#b03a2e" stroke-width="1.5"/><text x="120" y="97">WDSat, plain mode, ECC2K-130 (solver_16): 2^(3d)/3! to 0.2 %</text>
+    <polygon points="110,104 116,114 104,114" fill="#6a1b9a"/><text x="120" y="113">CryptoMiniSat 5.14, native XOR, ECC2K-130 (solver_16); d = 9, 10 censored at 300 s</text>
   </g>
   <text x="500" y="462" text-anchor="middle" fill="#555" font-size="11">Every measured point sits on or above the floor; the SAT arms sit 2^l/3 above it. Lines are derived counts, not fits. Population: 4–16 targets per cell.</text>
 </svg>
