@@ -98,6 +98,44 @@ template<class M> struct NistField {
  NF_HD static elt sqr(const elt&a){return mul(a,a);}
  NF_HD static elt from_canonical(const elt&a){elt r2;for(int i=0;i<N;i++)r2.v[i]=M::r2(i);return mul(a,r2);}
  NF_HD static elt to_canonical(const elt&a){elt c=zero();c.v[0]=1;return mul(a,c);}
+
+ /* ---- helpers the rho walk needs ------------------------------------ */
+ NF_HD static int is_zero(const elt&a){uint32_t x=0;for(int i=0;i<N;i++)x|=a.v[i];return x==0;}
+ /* lexicographic less-than on the raw (Montgomery) representation: a
+  * deterministic total order, which is all the fold needs to choose one
+  * of {y,-y}. */
+ NF_HD static int lt(const elt&a,const elt&b){
+  for(int i=N-1;i>=0;i--){if(a.v[i]!=b.v[i])return a.v[i]<b.v[i];}return 0;
+ }
+ NF_HD static void cmov(elt&r,const elt&a,uint32_t f){n_cmov<N>(r.v,a.v,f);}
+ NF_HD static elt from_limbs(const uint32_t*l){elt r;for(int i=0;i<N;i++)r.v[i]=l[i];return from_canonical(r);}
+ /* p-2 for Fermat inversion; p0=0xffffffff so the subtract never borrows. */
+ NF_HD static uint32_t pm2(int i){return i==0?M::p(0)-2u:M::p(i);}
+ /* Fermat inversion a^(p-2), 4-bit fixed window.  The exponent is the
+  * compile-time constant p-2, so the branch pattern is uniform across a
+  * warp -- no divergence.  inv(0)=0. */
+ NF_HD static elt inv(const elt&a){
+  elt tbl[16];tbl[0]=one();tbl[1]=a;
+#pragma unroll
+  for(int i=2;i<16;i++)tbl[i]=mul(tbl[i-1],a);
+  elt acc=one();const int top=(N*32+3)/4-1;
+#pragma unroll 1
+  for(int w=top;w>=0;w--){
+   if(w!=top){acc=sqr(acc);acc=sqr(acc);acc=sqr(acc);acc=sqr(acc);}
+   uint32_t nib=(pm2(w>>3)>>(4*(w&7)))&15u;
+   if(nib)acc=mul(acc,tbl[nib]);
+  }
+  return acc;
+ }
+ /* Montgomery's simultaneous inversion: one inv + 3(n-1) muls.  `scratch`
+  * holds n slots.  No input may be zero (caller filters). */
+ static void batch_inv(elt*x,int n,elt*scratch){
+  scratch[0]=x[0];
+  for(int i=1;i<n;i++)scratch[i]=mul(scratch[i-1],x[i]);
+  elt t=inv(scratch[n-1]);
+  for(int i=n-1;i>0;i--){elt xi=mul(t,scratch[i-1]);t=mul(t,x[i]);x[i]=xi;}
+  x[0]=t;
+ }
 };
 
 typedef NistField<P256Mod> Fp256;
