@@ -7813,6 +7813,13 @@ impl<'a> ProjectedFactorBase<'a> {
         self.map.representatives.len()
     }
 
+    /// The signed-Frobenius location of `[h]P_i` among the projected
+    /// columns, `(column, shift, negated)`, or `None` when `[h]P_i = O`
+    /// and the point contributes to no column.
+    pub fn location_of(&self, index: usize) -> Option<(usize, u32, bool)> {
+        self.map.orbit_of.get(index).copied().flatten()
+    }
+
     /// Native construction counts for full-cost reporting.
     pub fn cost(&self) -> ProjectedFactorBaseCost {
         self.cost
