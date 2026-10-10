@@ -192,6 +192,13 @@ jobs:
         run: |
           cargo build --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target ${{ matrix.target }}
           cargo test --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target ${{ matrix.target }}
+      - name: Check the portable receipt-hash fallback
+        env:
+          RUSTFLAGS: '--cfg sha2_256_backend="soft"'
+          CARGO_TARGET_DIR: ${{ runner.temp }}/isogeny-software-hash
+          CRYPTO_BUILD_GIT_COMMIT: ${{ github.sha }}
+          CRYPTO_BUILD_GIT_DIRTY: "false"
+        run: cargo test --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target ${{ matrix.target }} --bin isogeny receipt_hashes_match_the_independent_reference_at_padding_boundaries
       - name: Test the installed executable without a checkout
         shell: bash
         run: |
