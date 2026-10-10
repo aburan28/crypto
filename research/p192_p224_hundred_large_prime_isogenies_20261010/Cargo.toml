@@ -11,6 +11,11 @@ test = false
 name = "walk-controls"
 path = "walk_controls.rs"
 test = false
+[[bin]]
+name = "hundred-audit"
+path = "audit.rs"
+test = false
+
 [dependencies]
 num-bigint = "0.4"
 serde = { version = "1.0", features = ["derive"] }

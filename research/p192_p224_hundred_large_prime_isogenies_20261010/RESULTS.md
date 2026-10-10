@@ -26,3 +26,7 @@ Canonical updates append the 100 verified models and mapped generators, rebuild 
 Run the actual executable with: isogeny walk --curve p224 --ell 1117 --count 50 --out ./p224-walk. Replay it with: isogeny verify-walk --input ./p224-walk. Both arithmetic implementations and pinned public anchors are embedded. Runtime Cargo and a checkout are unnecessary. See [tool instructions](../../tools/isogeny-cli/README.md), [commands](COMMANDS.md) and [manifest](MANIFEST.json).
 
 The final required library suite is running. Push/publication remains gated on its result.
+
+The unsandboxed full library run has at least 10 observed failures outside the dedicated map verification path. Its retained [log prefix](evidence/validation/root-complete-prefix.log) is a checkpoint, not a completed passing suite. PR push is awaiting the owner's explicit choice to continue broader repairs or publish with merge/release still blocked.
+
+The rebuilt 449-model executable passed 62 CLI tests and 3 independent limb-field reference tests. It also passed a two-step saved-chain replay and complete two-map P384/19 construction/replay from a directory without a checkout. The [Apple silicon executable archive](evidence/isogeny-aarch64-apple-darwin-3c39c5f23.tar.gz) includes BUILD.json and source commit 3c39c5f23e0bd1590d220fb32386ad9ed79bf399. Its source state was clean.

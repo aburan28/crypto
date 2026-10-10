@@ -213,6 +213,16 @@ fn main() {
     } else {
         md.push_str("\nThe final required library suite is running. Push/publication remains gated on its result.\n");
     }
+    let gate_prefix = study.join("evidence/validation/root-complete-prefix.log");
+    if gate_prefix.exists() {
+        let log = fs::read_to_string(&gate_prefix).unwrap();
+        let failed = log
+            .lines()
+            .filter(|l| l.starts_with("test ") && l.ends_with("FAILED"))
+            .count();
+        writeln!(md,"\nThe unsandboxed full library run has at least {failed} observed failures outside the dedicated map verification path. Its retained [log prefix](evidence/validation/root-complete-prefix.log) is a checkpoint, not a completed passing suite. PR push is awaiting the owner's explicit choice to continue broader repairs or publish with merge/release still blocked.").unwrap();
+    }
+    md.push_str("\nThe rebuilt 449-model executable passed 62 CLI tests and 3 independent limb-field reference tests. It also passed a two-step saved-chain replay and complete two-map P384/19 construction/replay from a directory without a checkout. The [Apple silicon executable archive](evidence/isogeny-aarch64-apple-darwin-3c39c5f23.tar.gz) includes BUILD.json and source commit 3c39c5f23e0bd1590d220fb32386ad9ed79bf399. Its source state was clean.\n");
     fs::write(study.join("RESULTS.md"), &md).unwrap();
     let mut ops = vec![
         Op::Text(35., 45., 26., "100 verified large prime-degree maps".into()),
@@ -431,6 +441,7 @@ fn main() {
         "COMMANDS.md",
         "ROOT_VALIDATION.md",
         "walk_controls.rs",
+        "audit.rs",
         "Cargo.lock",
         "p192-screen-order8.json",
         "p192-screen-order64.json",
