@@ -1,5 +1,5 @@
 {
-  "analyzer_sha256": "0575320f30e03573466813fb9648f8cb64e5e4adbf5605592a2a56ba6c79bd42",
+  "analyzer_sha256": "2624ca09ef08209554d598ad59aa6b738c516f002c3ce14c22b7c17a02691796",
   "binary_sha256": {
     "baseline": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb",
     "expanded": "47223962d292361ed21bbf0ff577cfe3564c74a84773b16b3b467a5c1e24b8dd"
@@ -20,14 +20,17 @@
   "minimum_run_seconds": 30,
   "modal_sdk_version": "1.2.4",
   "per_run_timeout_seconds": 240,
-  "pilot_runner_sha256": "55d40ebe7602c267c353660806c64d68b0576914183db73d07b31c812acd68d7",
+  "perf_counter_boundary": "separate inherited process events attached after child spawn; enabled/running times retained",
+  "perf_min_running_fraction_for_ipc": "0.99",
+  "perf_test_sha256": "4109847ac82c0148e1bd116ecb64d49b9a73fbd4c6d5dd1b8744abaee729db8b",
+  "pilot_runner_sha256": "03ecc65cd3d0d6f21342a4c0b0baadf0634dfc786cbe49479340906293d8d142",
   "pricing_checked_utc_date": "2026-10-10",
   "public_bundle_sha256": "623a6dfde05f4fd3a892276a6d85e57ff4dac93cf6fa241f1d306c18993abadc",
   "published_base_sandbox_compute_usd_for_1200_seconds": "0.63456",
   "published_base_sandbox_cpu_usd_per_physical_core_second": "0.00003942",
   "published_base_sandbox_memory_usd_per_gib_second": "0.00000667",
   "region": null,
-  "remote_runner_sha256": "66e0e743ff3069e8632fd7a9e3326901fb003b73d934b00cdd5ad43ce249174f",
+  "remote_runner_sha256": "ed2039ab90c3036d560dbe48c9405ad37995e7a6bceb3d61e71804b441bc078a",
   "sandbox_creation_attempts": 1,
   "sandbox_timeout_seconds": 1200,
   "transferred_bytes": 3571686,

@@ -9,7 +9,7 @@ local panel; this four-run pilot is an environment and correctness check.
 
 The [transfer manifest](TRANSFER_MANIFEST.json) inventories exactly two
 source-derived Linux x86-64 executables and one 1,446-byte public-point JSON
-bundle, totaling **3,571,686 bytes** in the image. The 15,982-byte guest
+bundle, totaling **3,571,686 bytes** in the image. The 18,145-byte guest
 runner source is also sent as the Sandbox command text. The bundle contains
 candidate/workload IDs and expected public outputs but no fixture scalar.
 The repository, local run archive, caches, and credentials are outside the
@@ -24,8 +24,13 @@ capped, a 1,200-second Sandbox limit, a 1,080-second workload deadline,
 240 seconds per run, no explicit region, VM runtime, and blocked guest
 networking. The guest records affinity, physical-core/SMT topology, NUMA
 placement, PSI, cgroup throttling, steal ticks, interrupts, memory, and
-instructions/cycles when perf access is available. The analyzer retains
-unavailable counters as unavailable. A guest CPU allocation does not by
+instructions/cycles when perf access is available. Each inherited perf event
+also retains its enabled and running times. IPC is exposed only when both
+events ran for at least 99% of their enabled intervals; a scaled diagnostic
+remains in the raw receipt when coverage is lower. The analyzer records
+multiplexing as a failed fidelity check and unavailable perf access as
+unavailable. Three synthetic tests cover scaled counts, short reads, and
+the fidelity gate. A guest CPU allocation does not by
 itself supply the host-wide exclusive partition required by the
 `cryptanalysis/docs/ISOLATED_BENCHMARKS.md` rule.
 
@@ -41,3 +46,12 @@ byte count without creating a Sandbox. The preview passed. No Sandbox has
 been created and no source-derived file or guest runner has been sent to
 Modal. The owner authorization required by the prior automatic approval
 review is pending.
+
+After the perf coverage update, the `PILOT_FREEZE.json` SHA-256 is
+`4134f08070b16e0ac9bd77989a83ae2a40330b647cd9e3d930d2e3232d959b33`;
+the exact `TRANSFER_MANIFEST.json` SHA-256 is
+`76553f73f56f6055684c2c57243713d4413c31fe52388257b8449bc7115c4946`.
+The guest runner source SHA-256 is
+`ed2039ab90c3036d560dbe48c9405ad37995e7a6bceb3d61e71804b441bc078a`.
+The three image files and Sandbox resource cap above are unchanged. This
+revised manifest is the reviewable transfer identity for the C1800 pilot.

@@ -30,6 +30,10 @@ def preflight() -> tuple[dict, dict, dict]:
     assert plan["kind"] == "s3_modal_c1800_pilot_freeze_v1"
     assert plan["pilot_runner_sha256"] == sha(Path(__file__).read_bytes())
     assert plan["remote_runner_sha256"] == sha(REMOTE.read_bytes())
+    assert plan["perf_test_sha256"] == sha((HERE / "test_perf_coverage.py").read_bytes())
+    assert plan["perf_min_running_fraction_for_ipc"] == "0.99"
+    assert plan["perf_counter_boundary"] == (
+        "separate inherited process events attached after child spawn; enabled/running times retained")
     assert plan["public_bundle_sha256"] == sha(BUNDLE.read_bytes())
     assert BUNDLE.read_bytes() == canonical(make_bundle()) + b"\n"
     assert b"fixture_scalar" not in BUNDLE.read_bytes()
