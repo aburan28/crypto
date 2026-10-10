@@ -490,7 +490,8 @@ pub(super) fn chain_capacity_cli(
     identity_mask: u32, max_variables: u32, max_domain_clauses: usize,
     memory_mib: u64, output: &Path,
 ) -> Result<Value> {
-    if ![64, 256, 600].contains(&columns) || !(5..=6).contains(&m)
+    if !([64, 256, 600].contains(&columns) || V2_SIZES.contains(&columns))
+        || !(5..=6).contains(&m)
         || identity_mask >= (1u32 << (m - 2))
         || max_variables == 0 || max_domain_clauses == 0 {
         return Err("chained-S3 capacity parameters outside supported domain".into());

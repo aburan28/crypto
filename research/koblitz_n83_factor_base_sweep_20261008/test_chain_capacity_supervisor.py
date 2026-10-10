@@ -53,6 +53,10 @@ def worker_receipt(config: dict, status: str = "PASS_model_construction_only") -
 
 
 class ChainCapacityGuardTests(unittest.TestCase):
+    def test_v2_sizes_match_frozen_design(self):
+        design = json.loads((Path(guard.__file__).parent / "size-frontier-v2.json").read_text())
+        self.assertEqual(list(guard.V2_SIZES), design["new_sizes"])
+
     def setUp(self):
         self.config = {
             "columns": 64, "policy": "public_x_hash", "seed": guard.SEEDS[0],
@@ -64,6 +68,8 @@ class ChainCapacityGuardTests(unittest.TestCase):
 
     def test_receipt_rejects_false_stage_and_invalid_caps(self):
         self.assertIsNone(guard.receipt_error(worker_receipt(self.config), self.config))
+        v2_config = dict(self.config, columns=1182)
+        self.assertIsNone(guard.receipt_error(worker_receipt(v2_config), v2_config))
         receipt = worker_receipt(self.config)
         receipt["solver_search_executed"] = True
         self.assertIsNotNone(guard.receipt_error(receipt, self.config))
@@ -95,6 +101,7 @@ class ChainCapacityGuardTests(unittest.TestCase):
             checkout = Path(guard.__file__).resolve().parents[2]
             modes = (
                 ("success", "PASS_model_construction_only"),
+                ("v2_success", "PASS_model_construction_only"),
                 ("variable_cap", "UNKNOWN_variable_cap"),
                 ("domain_cap", "UNKNOWN_domain_clause_cap"),
                 ("timeout", "UNKNOWN_wall_cap"),
@@ -142,13 +149,16 @@ class ChainCapacityGuardTests(unittest.TestCase):
                          patch.object(guard.subprocess, "run", side_effect=fake_run), \
                          patch.object(guard.subprocess, "Popen", side_effect=fake_popen):
                         outer = guard.run(
-                            panel, 64, "public_x_hash", guard.SEEDS[0], 5, 0,
+                            panel, 1182 if mode == "v2_success" else 64,
+                            "public_x_hash", guard.SEEDS[0], 5, 0,
                             80000 if mode == "variable_cap" else 100000,
                             100000 if mode == "domain_cap" else 300000,
                             1.0, 256, binary, output,
                             checkout=checkout,
                         )
                     self.assertEqual(outer["status"], expected)
+                    if mode == "v2_success":
+                        self.assertEqual(json.loads((output / "config.json").read_text())["columns"], 1182)
                     self.assertEqual(json.loads((output / "outer.json").read_text())["status"], expected)
 
 

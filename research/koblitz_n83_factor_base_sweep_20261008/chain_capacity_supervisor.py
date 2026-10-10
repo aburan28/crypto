@@ -28,6 +28,7 @@ WORKER_SCHEMA = "n83.chain-s3-capacity-worker/v1"
 ATTESTATION_SCHEMA = "n83.chain-s3-source-attestation/v1"
 POLICIES = ("public_x_sequential", "public_x_hash", "public_x_gray_prefix")
 SEEDS = (2026100801, 2026100802, 2026100803)
+V2_SIZES = (1182, 2048, 4096, 8192, 16627)
 SOURCES = (
     "examples/koblitz_n83_factor_base_export.rs",
     f"research/{STUDY}/primary_adapter.rs",
@@ -114,7 +115,7 @@ def run(
     wall_seconds: float, memory_mib: int, binary: Path, output_dir: Path,
     image: str = "python:3.11-slim", checkout: Path | None = None,
 ) -> dict:
-    if columns not in (64, 256, 600) or policy not in POLICIES or seed not in SEEDS:
+    if columns not in (64, 256, 600, *V2_SIZES) or policy not in POLICIES or seed not in SEEDS:
         raise ValueError("chain selection is outside retained primary panel")
     if summands not in (5, 6) or not 0 <= identity_mask < 1 << (summands - 2):
         raise ValueError("chain arity or identity pattern is unsupported")
