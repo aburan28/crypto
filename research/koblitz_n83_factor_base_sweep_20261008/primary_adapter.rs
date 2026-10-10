@@ -929,6 +929,7 @@ pub(super) fn run_cli(
             "verification_failures":report.verification_failures,
             "sat_unknowns":report.sat_unknowns,
             "sat_invalid_models":report.sat_invalid_models,
+            "sat_group_rejected_models":report.sat_group_rejected_models,
             "linear_solve_attempts":report.linear_solve_attempts,
             "relation_collection_ns":report.relation_collection_ns.to_string(),
             "linear_algebra_ns":report.linear_algebra_ns.to_string(),

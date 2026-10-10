@@ -2346,6 +2346,11 @@ pub enum DecompositionStrategy {
     /// The default keeps descended parity equations as native XOR rows;
     /// the CNF path remains available as a controlled comparison.
     Sat,
+    /// Exact finite-coordinate chained S3 SAT for five or six summands on
+    /// an ambient-basis explicit-orbit factor base. Every accepted model
+    /// is lifted and checked in the original curve group. Resource caps
+    /// are supplied separately through `KoblitzIcOptions::chain_s3_limits`.
+    ChainedS3,
     /// **Meet in the middle** over a precomputed table of all pair sums
     /// `P_i + P_j` ([`PairSumTable`]).  `m = 2` is one lookup, `m = 3`
     /// is `|F|` lookups, `m = 4` is `|F|²` lookups — against
@@ -3506,6 +3511,9 @@ pub struct ChainS3Stats {
     pub solver_calls: usize,
     pub models: usize,
     pub group_rejected_models: usize,
+    /// A SAT assignment that failed the original field/domain replay.
+    /// This is an encoding failure, unlike a valid x-tuple with no group lift.
+    pub invalid_models: usize,
     pub conflicts: u64,
     pub peak_variables: u32,
     pub peak_clauses: usize,
@@ -3627,15 +3635,16 @@ pub fn sat_decompose_chained_s3(
                 }
                 SolveResult::Sat => {
                     let xs = enc.decode_summands();
+                    stats.models += 1;
                     if !enc.verify_model()
                         || xs
                             .iter()
                             .any(|x| codes.binary_search(&x.to_biguint()).is_err())
                     {
+                        stats.invalid_models += 1;
                         stats.exhausted = true; // invalid encoding, never refute
                         return (None, stats);
                     }
-                    stats.models += 1;
                     if let Some(indices) = lift_candidate(kc, fb, &index_of, &xs, target) {
                         return (Some(indices), stats);
                     }
@@ -3971,6 +3980,9 @@ pub struct KoblitzIcOptions {
     /// Native-XOR/CNF, branching, domain, trace, and conflict controls
     /// for [`DecompositionStrategy::Sat`].
     pub sat_options: SatDecompositionOptions,
+    /// Explicit hard limits for [`DecompositionStrategy::ChainedS3`]. The
+    /// default has zero caps and therefore cannot launch SAT search.
+    pub chain_s3_limits: ChainS3Limits,
     /// Identify `P` and `-P` as one signed Frobenius relation unknown.
     /// Disable only for a matched Frobenius-only control.
     pub collapse_negation: bool,
@@ -4005,6 +4017,12 @@ impl Default for KoblitzIcOptions {
             max_models: 64,
             sat_macaulay_degree: Some(2),
             sat_options: SatDecompositionOptions::default(),
+            chain_s3_limits: ChainS3Limits {
+                max_variables: 0,
+                max_domain_clauses: 0,
+                max_models: 0,
+                conflict_budget: 0,
+            },
             collapse_negation: true,
             stop_on_verified_rank: true,
             relation_batch_size: 1,
@@ -4054,6 +4072,8 @@ pub struct KoblitzIcReport {
     pub sat_unknowns: usize,
     /// Encoding/model verification failures; any nonzero value invalidates a run.
     pub sat_invalid_models: usize,
+    /// Valid chained-S3 x-models with no original-curve point-sign lift.
+    pub sat_group_rejected_models: usize,
     /// SAT models examined across relation collection.
     pub sat_models: usize,
     /// Cumulative CDCL conflicts across relation collection.
@@ -4115,6 +4135,7 @@ enum RelationAttemptOutcome {
     Enumerated(Option<Vec<usize>>),
     Groebner(Option<Vec<usize>>, SolveStats),
     Sat(Option<Vec<usize>>, SatDecompositionStats),
+    ChainedS3(Option<Vec<usize>>, ChainS3Stats),
 }
 
 /// Live milestones from the existing small-curve pipeline.
@@ -4301,6 +4322,7 @@ fn koblitz_index_calculus_dlp_observed(
         sat_refutations: 0,
         sat_unknowns: 0,
         sat_invalid_models: 0,
+        sat_group_rejected_models: 0,
         sat_models: 0,
         sat_conflicts: 0,
         relation_collection_ns: 0,
@@ -4318,6 +4340,17 @@ fn koblitz_index_calculus_dlp_observed(
         pair_table_entries: 0,
         pair_table_ns: 0,
     };
+    if opts.strategy == DecompositionStrategy::ChainedS3
+        && (!(5..=6).contains(&opts.m)
+            || !fb.uses_ambient_basis()
+            || opts.chain_s3_limits.max_variables == 0
+            || opts.chain_s3_limits.max_domain_clauses == 0
+            || opts.chain_s3_limits.max_models == 0
+            || opts.chain_s3_limits.conflict_budget == 0)
+    {
+        report.sat_unknowns = 1;
+        return Some(report);
+    }
     if fb.points.is_empty() || !m_cofactor_admissible {
         return Some(report);
     }
@@ -4473,6 +4506,12 @@ fn koblitz_index_calculus_dlp_observed(
                     );
                     RelationAttemptOutcome::Sat(idxs, stats)
                 }
+                DecompositionStrategy::ChainedS3 => {
+                    let (idxs, stats) = sat_decompose_chained_s3(
+                        kc, fb, target, opts.m, opts.chain_s3_limits,
+                    );
+                    RelationAttemptOutcome::ChainedS3(idxs, stats)
+                }
             }
         };
         // Targets are drawn serially above and consumed in order below,
@@ -4494,6 +4533,15 @@ fn koblitz_index_calculus_dlp_observed(
                     report.sat_refutations += usize::from(stats.refuted);
                     report.sat_unknowns += usize::from(stats.exhausted);
                     report.sat_invalid_models += stats.spurious;
+                    report.sat_models += stats.models;
+                    report.sat_conflicts += stats.conflicts;
+                }
+                RelationAttemptOutcome::ChainedS3(_, stats) => {
+                    report.sat_calls += stats.solver_calls;
+                    report.sat_refutations += usize::from(stats.refuted);
+                    report.sat_unknowns += usize::from(stats.exhausted);
+                    report.sat_invalid_models += stats.invalid_models;
+                    report.sat_group_rejected_models += stats.group_rejected_models;
                     report.sat_models += stats.models;
                     report.sat_conflicts += stats.conflicts;
                 }
@@ -4543,7 +4591,8 @@ fn koblitz_index_calculus_dlp_observed(
                 }
                 RelationAttemptOutcome::Enumerated(idxs)
                 | RelationAttemptOutcome::Groebner(idxs, _)
-                | RelationAttemptOutcome::Sat(idxs, _) => idxs,
+                | RelationAttemptOutcome::Sat(idxs, _)
+                | RelationAttemptOutcome::ChainedS3(idxs, _) => idxs,
             };
             if let Some(idxs) = found {
                 let relation = relation_from_decomposition_with_mode(
@@ -4870,6 +4919,9 @@ fn decompose_once(
                 opts.sat_options,
             )
             .0
+        }
+        DecompositionStrategy::ChainedS3 => {
+            sat_decompose_chained_s3(kc, fb, target, opts.m, opts.chain_s3_limits).0
         }
     }
 }
@@ -5882,6 +5934,51 @@ mod tests {
         assert!(domain_capped.exhausted);
         assert!(!domain_capped.refuted);
         assert_eq!(domain_capped.patterns_attempted, 0);
+    }
+
+    #[test]
+    fn chained_s3_strategy_feeds_verified_relation_rank_and_target_solve() {
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("generator is affine");
+        };
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let known = BigUint::from(3u32) % &kc.subgroup_order;
+        let target = kc.mul(kc.generator(), &known);
+        let opts = KoblitzIcOptions {
+            m: 5,
+            strategy: DecompositionStrategy::ChainedS3,
+            max_trials: 16,
+            extra_relations: 1,
+            allow_direct_relation: false,
+            chain_s3_limits: ChainS3Limits {
+                max_variables: 2_000,
+                max_domain_clauses: 10_000,
+                max_models: 128,
+                conflict_budget: 500_000,
+            },
+            ..KoblitzIcOptions::default()
+        };
+        let report =
+            koblitz_index_calculus_dlp_with_factor_base(&kc, &target, &fb, &opts).unwrap();
+        assert_eq!(report.log, Some(known), "{report:?}");
+        assert!(report.sat_calls > 0);
+        assert!(report.independent_relations > 0);
+        assert!(report.linear_solve_attempts > 0);
+        assert_eq!(report.sat_invalid_models, 0);
+        assert_eq!(report.verification_failures, 0);
+        assert!(!report.direct_relation);
+
+        let defaults = KoblitzIcOptions {
+            chain_s3_limits: KoblitzIcOptions::default().chain_s3_limits,
+            ..opts
+        };
+        let capped =
+            koblitz_index_calculus_dlp_with_factor_base(&kc, &target, &fb, &defaults).unwrap();
+        assert_eq!(capped.trials, 0);
+        assert_eq!(capped.sat_calls, 0);
+        assert_eq!(capped.sat_unknowns, 1);
+        assert!(capped.log.is_none());
     }
 
     #[test]

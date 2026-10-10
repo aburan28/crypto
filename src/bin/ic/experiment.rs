@@ -874,6 +874,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
             "inconsistent_relations":r.inconsistent_relations,"verification_failures":r.verification_failures,
             "trials":r.trials,"batches":r.relation_batches,"pair_table_entries":r.pair_table_entries,
             "f4_reductions":r.reductions,"sat_calls":r.sat_calls,"sat_unknowns":r.sat_unknowns,"sat_invalid_models":r.sat_invalid_models,
+            "sat_group_rejected_models":r.sat_group_rejected_models,
             "sat_conflicts":r.sat_conflicts,"linear_solve_attempts":r.linear_solve_attempts,"cofactor_admissible":r.m_cofactor_admissible},
         "timing_seconds":{"pair_table":r.pair_table_ns as f64/1e9,"relation_collection":r.relation_collection_ns as f64/1e9,
             "linear_algebra":r.linear_algebra_ns as f64/1e9},

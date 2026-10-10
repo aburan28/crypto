@@ -80,3 +80,21 @@ The initial gate should use one pattern and one base. Expansion to every
 identity pattern, solving, rank, and a versioned cross-base sweep depends on
 its measured memory and wall receipt. The capacity wall time under Docker
 emulation is not a matched cold-runtime measurement.
+
+## Generic index-calculus driver path
+
+`DecompositionStrategy::ChainedS3` now passes a checked five- or
+six-summand witness to the existing relation-row rewrite, full-width
+incremental rank tracker and target verification. Its four hard limits are
+explicit in `KoblitzIcOptions::chain_s3_limits`; the default limits are zero,
+so selecting this strategy without a resource configuration returns an
+inconclusive disposition before sampling trials or launching SAT search. The
+driver records solver calls, models, conflicts, inconclusive
+targets, original-field/domain model failures and valid x-models rejected by
+original-curve point-sign lifting separately. A model replay failure stops
+the run before a rank or target claim. The factor-base-log and individual-log
+entry points use the same strategy dispatch. A public degree-7
+explicit-orbit fixture checks a complete relation-to-rank-to-verified-target
+path; this validates plumbing and does not measure the retained degree-83
+capacity or cold runtime. The N83 primary CLI still does not offer this
+strategy until a hard-memory, process-wall guarded search receipt exists.
