@@ -1,0 +1,3765 @@
+{
+ "mode": "curve",
+ "args": {
+  "mode": "curve",
+  "names": [
+   "ECC2K-130",
+   "icv1-f2m83-tm6151469093347-debefd74",
+   "icv1-f2m83-t6151469093347-cdcc5432",
+   "ECC2K-95",
+   "ECC2K-108",
+   "secp256k1",
+   "id-GostR3410-2001-CryptoPro-B-ParamSet",
+   "id-GostR3410-2001-CryptoPro-A-ParamSet",
+   "sect113r1"
+  ],
+  "p": null,
+  "m": null,
+  "trace": null,
+  "order": null,
+  "r": null,
+  "conductor": null,
+  "prime_bound": 100,
+  "cost_model": "projective",
+  "doubling_cost": 8.0,
+  "bits": 256,
+  "char2": false,
+  "max_disc_bits": 140,
+  "factor_seconds": 60,
+  "enum_cap": 200000,
+  "radius_factor": 1.0,
+  "top": 6,
+  "scan_from": 3,
+  "scan_to": 2000,
+  "selftest_disc": -71,
+  "json": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+ },
+ "seconds": 17.7,
+ "results": [
+  {
+   "curve": {
+    "name": "ECC2K-130",
+    "family": "koblitz",
+    "q": "2722258935367507707706996859454145691648",
+    "char2": true,
+    "n": 131,
+    "trace": "-22283658519494248867",
+    "order": "2722258935367507707729280517973639940516",
+    "r": "680564733841876926932320129493409985129",
+    "cofactor": 4,
+    "a": 0,
+    "slug": "icv1-f2m131-tm22283658519494248867-115e0dc5",
+    "end": "-7"
+   },
+   "frobenius": {
+    "delta": "-10392474304456602211515481859928051982903",
+    "delta_bits": 133,
+    "factorization": [
+     [
+      "7",
+      1
+     ],
+     [
+      "263",
+      2
+     ],
+     [
+      "146505763881528721",
+      2
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-7",
+    "DK_bits": 3,
+    "conductor_f": "38531015900842053623",
+    "conductor_factorization": [
+     [
+      "263",
+      1
+     ],
+     [
+      "146505763881528721",
+      1
+     ]
+    ],
+    "factor_seconds": 0.001
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-7",
+     "class_group": {
+      "h": "1",
+      "hK": "1",
+      "cyc_K": [],
+      "bnf_seconds": 0.0
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 0,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 1/2"
+      },
+      {
+       "ell": 11,
+       "cost_M": 82.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 6,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 16,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 29,
+       "cost_M": 217.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 16,
+       "sqrtDK_mod_l": 15,
+       "generator": "x - 15"
+      },
+      {
+       "ell": 37,
+       "cost_M": 277.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 14,
+       "sqrtDK_mod_l": 17,
+       "generator": "x - 17"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 13,
+       "sqrtDK_mod_l": 6,
+       "generator": "x - 6"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 38,
+       "sqrtDK_mod_l": 24,
+       "generator": "x - 24"
+      },
+      {
+       "ell": 67,
+       "cost_M": 502.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 61,
+       "sqrtDK_mod_l": 23,
+       "generator": "x - 23"
+      },
+      {
+       "ell": 71,
+       "cost_M": 532.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 26,
+       "sqrtDK_mod_l": 8,
+       "generator": "x - 8"
+      },
+      {
+       "ell": 79,
+       "cost_M": 592.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 12,
+       "sqrtDK_mod_l": 25,
+       "generator": "x - 25"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 1,
+       "degree_bits": 1.0,
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.004
+      },
+      {
+       "ell": 11,
+       "loop_length": 1,
+       "degree_bits": 3.5,
+       "cost_M": 82.5,
+       "ratio_to_saving": 0.159
+      },
+      {
+       "ell": 23,
+       "loop_length": 1,
+       "degree_bits": 4.5,
+       "cost_M": 172.5,
+       "ratio_to_saving": 0.332
+      },
+      {
+       "ell": 29,
+       "loop_length": 1,
+       "degree_bits": 4.9,
+       "cost_M": 217.5,
+       "ratio_to_saving": 0.418
+      },
+      {
+       "ell": 37,
+       "loop_length": 1,
+       "degree_bits": 5.2,
+       "cost_M": 277.5,
+       "ratio_to_saving": 0.534
+      },
+      {
+       "ell": 43,
+       "loop_length": 1,
+       "degree_bits": 5.4,
+       "cost_M": 322.5,
+       "ratio_to_saving": 0.62
+      }
+     ],
+     "relation_search": {
+      "rank": 10,
+      "exhaustive_within_radius": true,
+      "radius_M": 520.0,
+      "lll_upper_bound_M": 2.0,
+      "loops_within_radius": 13718,
+      "candidates": 13722
+     },
+     "loops": [
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.004,
+       "exponents": {
+        "2": 1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + -1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "484053659726015834510287614412464621173",
+       "lambda_conj": "196511074115861092422032515080945363957",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -15203668605084075623,
+         -11663673647878989000
+        ],
+        "b2": [
+         23327347295757978000,
+         -26867342252963064623
+        ],
+        "max_abs_entry_bits": 65,
+        "half_bits": 65,
+        "ratio_to_sqrt_r": 1.029887975006183
+       }
+      },
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.004,
+       "exponents": {
+        "2": -1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + 1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "196511074115861092422032515080945363957",
+       "lambda_conj": "484053659726015834510287614412464621173",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -3539994957205086623,
+         26867342252963064623
+        ],
+        "b2": [
+         -23327347295757978000,
+         -15203668605084075623
+        ],
+        "max_abs_entry_bits": 65,
+        "half_bits": 65,
+        "ratio_to_sqrt_r": 1.029887975006183
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.008,
+       "exponents": {
+        "2": 2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + -1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "484053659726015834510287614412464621171",
+       "lambda_conj": "196511074115861092422032515080945363955",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         8123678690673902377,
+         -15203668605084075623
+        ],
+        "b2": [
+         38531015900842053623,
+         11663673647878989000
+        ],
+        "max_abs_entry_bits": 66,
+        "half_bits": 65,
+        "ratio_to_sqrt_r": 1.476983825472088
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.008,
+       "exponents": {
+        "2": -2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + 1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "196511074115861092422032515080945363955",
+       "lambda_conj": "484053659726015834510287614412464621171",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -3539994957205086623,
+         11663673647878989000
+        ],
+        "b2": [
+         -53734684505926129246,
+         -15203668605084075623
+        ],
+        "max_abs_entry_bits": 66,
+        "half_bits": 65,
+        "ratio_to_sqrt_r": 2.059775950012366
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.012,
+       "exponents": {
+        "2": 3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + 1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "196511074115861092422032515080945363954",
+       "lambda_conj": "484053659726015834510287614412464621170",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         8123678690673902377,
+         11663673647878989000
+        ],
+        "b2": [
+         -36443638348314595361,
+         31451025986431880377
+        ],
+        "max_abs_entry_bits": 65,
+        "half_bits": 65,
+        "ratio_to_sqrt_r": 1.396969768986513
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.012,
+       "exponents": {
+        "2": -3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + -1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "484053659726015834510287614412464621170",
+       "lambda_conj": "196511074115861092422032515080945363954",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -7079989914410173246,
+         -15203668605084075623
+        ],
+        "b2": [
+         36034709719900696131,
+         -18743663562289162246
+        ],
+        "max_abs_entry_bits": 65,
+        "half_bits": 65,
+        "ratio_to_sqrt_r": 1.3812945796405032
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.004,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.1,
+     "tau": {
+      "mu": -1,
+      "lambda_tau": "196511074115861092422032515080945363956",
+      "order_mod_r": 131,
+      "extension_degree": 131,
+      "note": "tau^n = pi acts as 1 on E(F_q)[r]; <tau> x <-1> gives the 2n-element orbits used by rho"
+     },
+     "note": "class number 1: every prime ideal is principal, every loop has length 1 and is an explicit element a + b*tau of Z[tau]; the cheapest is tau itself (the Frobenius), which the tau-adic (tau-NAF) expansion already exploits. Nothing beyond tau-NAF."
+    }
+   ],
+   "sqrtDK_mod_r": "393022148231722184844065030161890727913",
+   "budget": {
+    "log2_r": 130,
+    "half_bits": 65,
+    "doublings_saved_cost_M": 520.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  },
+  {
+   "curve": {
+    "name": "icv1-f2m83-tm6151469093347-debefd74",
+    "family": "koblitz",
+    "q": "9671406556917033397649408",
+    "char2": true,
+    "n": 83,
+    "trace": -6151469093347,
+    "order": "9671406556923184866742756",
+    "r": "2417851639230796216685689",
+    "cofactor": 4,
+    "a": 0,
+    "slug": "icv1-f2m83-tm6151469093347-debefd74",
+    "end": "-7"
+   },
+   "frobenius": {
+    "delta": "-845054221264771390935223",
+    "delta_bits": 80,
+    "factorization": [
+     [
+      "7",
+      1
+     ],
+     [
+      "6473",
+      2
+     ],
+     [
+      "53676929",
+      2
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-7",
+    "DK_bits": 3,
+    "conductor_f": "347450761417",
+    "conductor_factorization": [
+     [
+      "6473",
+      1
+     ],
+     [
+      "53676929",
+      1
+     ]
+    ],
+    "factor_seconds": 0.0
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-7",
+     "class_group": {
+      "h": "1",
+      "hK": "1",
+      "cyc_K": [],
+      "bnf_seconds": 0.0
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 1,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 1/2"
+      },
+      {
+       "ell": 11,
+       "cost_M": 82.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 9,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 3,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 29,
+       "cost_M": 217.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 18,
+       "sqrtDK_mod_l": 15,
+       "generator": "x - 15"
+      },
+      {
+       "ell": 37,
+       "cost_M": 277.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 30,
+       "sqrtDK_mod_l": 17,
+       "generator": "x - 17"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 12,
+       "sqrtDK_mod_l": 6,
+       "generator": "x - 6"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 20,
+       "sqrtDK_mod_l": 24,
+       "generator": "x - 24"
+      },
+      {
+       "ell": 67,
+       "cost_M": 502.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 16,
+       "sqrtDK_mod_l": 23,
+       "generator": "x - 23"
+      },
+      {
+       "ell": 71,
+       "cost_M": 532.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 59,
+       "sqrtDK_mod_l": 8,
+       "generator": "x - 8"
+      },
+      {
+       "ell": 79,
+       "cost_M": 592.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 7,
+       "sqrtDK_mod_l": 25,
+       "generator": "x - 25"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 1,
+       "degree_bits": 1.0,
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.006
+      },
+      {
+       "ell": 11,
+       "loop_length": 1,
+       "degree_bits": 3.5,
+       "cost_M": 82.5,
+       "ratio_to_saving": 0.252
+      },
+      {
+       "ell": 23,
+       "loop_length": 1,
+       "degree_bits": 4.5,
+       "cost_M": 172.5,
+       "ratio_to_saving": 0.526
+      },
+      {
+       "ell": 29,
+       "loop_length": 1,
+       "degree_bits": 4.9,
+       "cost_M": 217.5,
+       "ratio_to_saving": 0.663
+      },
+      {
+       "ell": 37,
+       "loop_length": 1,
+       "degree_bits": 5.2,
+       "cost_M": 277.5,
+       "ratio_to_saving": 0.846
+      },
+      {
+       "ell": 43,
+       "loop_length": 1,
+       "degree_bits": 5.4,
+       "cost_M": 322.5,
+       "ratio_to_saving": 0.983
+      }
+     ],
+     "relation_search": {
+      "rank": 10,
+      "exhaustive_within_radius": true,
+      "radius_M": 328.0,
+      "lll_upper_bound_M": 2.0,
+      "loops_within_radius": 2358,
+      "candidates": 2366
+     },
+     "loops": [
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.006,
+       "exponents": {
+        "2": 1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + -1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "254512724090651164922415",
+       "lambda_conj": "2163338915140145051763275",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         551776910783,
+         899227672200
+        ],
+        "b2": [
+         -1798455344400,
+         1451004582983
+        ],
+        "max_abs_entry_bits": 41,
+        "half_bits": 41,
+        "ratio_to_sqrt_r": 1.1566043846742318
+       }
+      },
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.006,
+       "exponents": {
+        "2": -1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + 1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2163338915140145051763275",
+       "lambda_conj": "254512724090651164922415",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         347450761417,
+         1451004582983
+        ],
+        "b2": [
+         -1451004582983,
+         899227672200
+        ],
+        "max_abs_entry_bits": 41,
+        "half_bits": 41,
+        "ratio_to_sqrt_r": 0.9331553702938541
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.012,
+       "exponents": {
+        "2": 2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + -1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "254512724090651164922413",
+       "lambda_conj": "2163338915140145051763273",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         1246678433617,
+         -551776910783
+        ],
+        "b2": [
+         1103553821566,
+         1451004582983
+        ],
+        "max_abs_entry_bits": 41,
+        "half_bits": 41,
+        "ratio_to_sqrt_r": 0.9331553702938541
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.012,
+       "exponents": {
+        "2": -2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + 1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2163338915140145051763273",
+       "lambda_conj": "254512724090651164922413",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -347450761417,
+         -899227672200
+        ],
+        "b2": [
+         2207107643132,
+         -1246678433617
+        ],
+        "max_abs_entry_bits": 42,
+        "half_bits": 41,
+        "ratio_to_sqrt_r": 1.4194127118269528
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.018,
+       "exponents": {
+        "2": 3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + 1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2163338915140145051763272",
+       "lambda_conj": "254512724090651164922412",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -1246678433617,
+         -899227672200
+        ],
+        "b2": [
+         960429209515,
+         -1246678433617
+        ],
+        "max_abs_entry_bits": 41,
+        "half_bits": 41,
+        "ratio_to_sqrt_r": 0.8017512067174934
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.018,
+       "exponents": {
+        "2": -3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + -1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "254512724090651164922412",
+       "lambda_conj": "2163338915140145051763272",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         694901522834,
+         -551776910783
+        ],
+        "b2": [
+         1859656881715,
+         2002781493766
+        ],
+        "max_abs_entry_bits": 41,
+        "half_bits": 41,
+        "ratio_to_sqrt_r": 1.2880085482505923
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.006,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.02,
+     "tau": {
+      "mu": -1,
+      "lambda_tau": "2163338915140145051763274",
+      "order_mod_r": 333,
+      "extension_degree": 83,
+      "note": "tau^n = pi acts as 1 on E(F_q)[r]; <tau> x <-1> gives the 2n-element orbits used by rho"
+     },
+     "note": "class number 1: every prime ideal is principal, every loop has length 1 and is an explicit element a + b*tau of Z[tau]; the cheapest is tau itself (the Frobenius), which the tau-adic (tau-NAF) expansion already exploits. Nothing beyond tau-NAF."
+    }
+   ],
+   "sqrtDK_mod_r": "1908826191049493886840860",
+   "budget": {
+    "log2_r": 82,
+    "half_bits": 41,
+    "doublings_saved_cost_M": 328.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  },
+  {
+   "curve": {
+    "name": "icv1-f2m83-t6151469093347-cdcc5432",
+    "family": "koblitz",
+    "q": "9671406556917033397649408",
+    "char2": true,
+    "n": 83,
+    "trace": 6151469093347,
+    "order": "9671406556910881928556062",
+    "r": 8569786107849059,
+    "cofactor": 1128547018,
+    "a": 1,
+    "slug": "icv1-f2m83-t6151469093347-cdcc5432",
+    "end": "-7"
+   },
+   "frobenius": {
+    "delta": "-845054221264771390935223",
+    "delta_bits": 80,
+    "factorization": [
+     [
+      "7",
+      1
+     ],
+     [
+      "6473",
+      2
+     ],
+     [
+      "53676929",
+      2
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-7",
+    "DK_bits": 3,
+    "conductor_f": "347450761417",
+    "conductor_factorization": [
+     [
+      "6473",
+      1
+     ],
+     [
+      "53676929",
+      1
+     ]
+    ],
+    "factor_seconds": 0.0
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-7",
+     "class_group": {
+      "h": "1",
+      "hK": "1",
+      "cyc_K": [],
+      "bnf_seconds": 0.0
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 0,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 1/2"
+      },
+      {
+       "ell": 11,
+       "cost_M": 82.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 4,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 17,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 29,
+       "cost_M": 217.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 4,
+       "sqrtDK_mod_l": 15,
+       "generator": "x - 15"
+      },
+      {
+       "ell": 37,
+       "cost_M": 277.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 23,
+       "sqrtDK_mod_l": 17,
+       "generator": "x - 17"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 34,
+       "sqrtDK_mod_l": 6,
+       "generator": "x - 6"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 44,
+       "sqrtDK_mod_l": 24,
+       "generator": "x - 24"
+      },
+      {
+       "ell": 67,
+       "cost_M": 502.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 49,
+       "sqrtDK_mod_l": 23,
+       "generator": "x - 23"
+      },
+      {
+       "ell": 71,
+       "cost_M": 532.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 20,
+       "sqrtDK_mod_l": 8,
+       "generator": "x - 8"
+      },
+      {
+       "ell": 79,
+       "cost_M": 592.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 18,
+       "sqrtDK_mod_l": 25,
+       "generator": "x - 25"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 1,
+       "degree_bits": 1.0,
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.009
+      },
+      {
+       "ell": 11,
+       "loop_length": 1,
+       "degree_bits": 3.5,
+       "cost_M": 82.5,
+       "ratio_to_saving": 0.382
+      },
+      {
+       "ell": 23,
+       "loop_length": 1,
+       "degree_bits": 4.5,
+       "cost_M": 172.5,
+       "ratio_to_saving": 0.799
+      },
+      {
+       "ell": 29,
+       "loop_length": 1,
+       "degree_bits": 4.9,
+       "cost_M": 217.5,
+       "ratio_to_saving": 1.007
+      },
+      {
+       "ell": 37,
+       "loop_length": 1,
+       "degree_bits": 5.2,
+       "cost_M": 277.5,
+       "ratio_to_saving": 1.285
+      },
+      {
+       "ell": 43,
+       "loop_length": 1,
+       "degree_bits": 5.4,
+       "cost_M": 322.5,
+       "ratio_to_saving": 1.493
+      }
+     ],
+     "relation_search": {
+      "rank": 10,
+      "exhaustive_within_radius": true,
+      "radius_M": 216.0,
+      "lll_upper_bound_M": 2.0,
+      "loops_within_radius": 670,
+      "candidates": 684
+     },
+     "loops": [
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.009,
+       "exponents": {
+        "2": 1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(-1 + 1*sqrt(-7))/2",
+       "trace": "-1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "5571781283898602",
+       "lambda_conj": "2998004823950456",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         11537995,
+         95142527
+        ],
+        "b2": [
+         -83604532,
+         53340261
+        ],
+        "max_abs_entry_bits": 27,
+        "half_bits": 27,
+        "ratio_to_sqrt_r": 1.0277552191282093
+       }
+      },
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.009,
+       "exponents": {
+        "2": -1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(-1 + -1*sqrt(-7))/2",
+       "trace": "-1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2998004823950456",
+       "lambda_conj": "5571781283898602",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -53340261,
+         41802266
+        ],
+        "b2": [
+         -83604532,
+         -95142527
+        ],
+        "max_abs_entry_bits": 27,
+        "half_bits": 27,
+        "ratio_to_sqrt_r": 1.0277552191282093
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.019,
+       "exponents": {
+        "2": 2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + -1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2998004823950455",
+       "lambda_conj": "5571781283898601",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -11537995,
+         41802266
+        ],
+        "b2": [
+         -190285054,
+         -53340261
+        ],
+        "max_abs_entry_bits": 28,
+        "half_bits": 27,
+        "ratio_to_sqrt_r": 2.0555104382564187
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.019,
+       "exponents": {
+        "2": -2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + 1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "5571781283898601",
+       "lambda_conj": "2998004823950455",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         30264271,
+         -53340261
+        ],
+        "b2": [
+         106680522,
+         95142527
+        ],
+        "max_abs_entry_bits": 27,
+        "half_bits": 27,
+        "ratio_to_sqrt_r": 1.15239175079743
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.028,
+       "exponents": {
+        "2": 3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(5 + -1*sqrt(-7))/2",
+       "trace": "5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2998004823950459",
+       "lambda_conj": "5571781283898605",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -23075990,
+         53340261
+        ],
+        "b2": [
+         -132595079,
+         -64878256
+        ],
+        "max_abs_entry_bits": 27,
+        "half_bits": 27,
+        "ratio_to_sqrt_r": 1.4323277799103151
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.028,
+       "exponents": {
+        "2": -3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(5 + 1*sqrt(-7))/2",
+       "trace": "5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "5571781283898605",
+       "lambda_conj": "2998004823950459",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         30264271,
+         -41802266
+        ],
+        "b2": [
+         122568231,
+         113868803
+        ],
+        "max_abs_entry_bits": 27,
+        "half_bits": 27,
+        "ratio_to_sqrt_r": 1.324015065414039
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.009,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.01,
+     "tau": {
+      "mu": 1,
+      "lambda_tau": "5571781283898603",
+      "order_mod_r": 333,
+      "extension_degree": 83,
+      "note": "tau^n = pi acts as 1 on E(F_q)[r]; <tau> x <-1> gives the 2n-element orbits used by rho"
+     },
+     "note": "class number 1: every prime ideal is principal, every loop has length 1 and is an explicit element a + b*tau of Z[tau]; the cheapest is tau itself (the Frobenius), which the tau-adic (tau-NAF) expansion already exploits. Nothing beyond tau-NAF."
+    }
+   ],
+   "sqrtDK_mod_r": "2573776459948146",
+   "budget": {
+    "log2_r": 53,
+    "half_bits": 27,
+    "doublings_saved_cost_M": 216.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  },
+  {
+   "curve": {
+    "name": "ECC2K-95",
+    "family": "koblitz",
+    "q": "158456325028528675187087900672",
+    "char2": true,
+    "n": 97,
+    "trace": 378251973071909,
+    "order": "158456325028528296935114828764",
+    "r": "39614081257132074233778707191",
+    "cofactor": 4,
+    "a": 0,
+    "slug": "icv1-f2m97-t378251973071909-f27192f3",
+    "end": "-7"
+   },
+   "frobenius": {
+    "delta": "-490750744981322529490266698407",
+    "delta_bits": 99,
+    "factorization": [
+     [
+      "7",
+      1
+     ],
+     [
+      "751943",
+      2
+     ],
+     [
+      "352124743",
+      2
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-7",
+    "DK_bits": 3,
+    "conductor_f": "264777735625649",
+    "conductor_factorization": [
+     [
+      "751943",
+      1
+     ],
+     [
+      "352124743",
+      1
+     ]
+    ],
+    "factor_seconds": 0.001
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-7",
+     "class_group": {
+      "h": "1",
+      "hK": "1",
+      "cyc_K": [],
+      "bnf_seconds": 0.0
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 1,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 1/2"
+      },
+      {
+       "ell": 11,
+       "cost_M": 82.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 5,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 2,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 29,
+       "cost_M": 217.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 11,
+       "sqrtDK_mod_l": 15,
+       "generator": "x - 15"
+      },
+      {
+       "ell": 37,
+       "cost_M": 277.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 21,
+       "sqrtDK_mod_l": 17,
+       "generator": "x - 17"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 29,
+       "sqrtDK_mod_l": 6,
+       "generator": "x - 6"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 27,
+       "sqrtDK_mod_l": 24,
+       "generator": "x - 24"
+      },
+      {
+       "ell": 67,
+       "cost_M": 502.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 47,
+       "sqrtDK_mod_l": 23,
+       "generator": "x - 23"
+      },
+      {
+       "ell": 71,
+       "cost_M": 532.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 62,
+       "sqrtDK_mod_l": 8,
+       "generator": "x - 8"
+      },
+      {
+       "ell": 79,
+       "cost_M": 592.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 28,
+       "sqrtDK_mod_l": 25,
+       "generator": "x - 25"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 1,
+       "degree_bits": 1.0,
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.005
+      },
+      {
+       "ell": 11,
+       "loop_length": 1,
+       "degree_bits": 3.5,
+       "cost_M": 82.5,
+       "ratio_to_saving": 0.215
+      },
+      {
+       "ell": 23,
+       "loop_length": 1,
+       "degree_bits": 4.5,
+       "cost_M": 172.5,
+       "ratio_to_saving": 0.449
+      },
+      {
+       "ell": 29,
+       "loop_length": 1,
+       "degree_bits": 4.9,
+       "cost_M": 217.5,
+       "ratio_to_saving": 0.566
+      },
+      {
+       "ell": 37,
+       "loop_length": 1,
+       "degree_bits": 5.2,
+       "cost_M": 277.5,
+       "ratio_to_saving": 0.723
+      },
+      {
+       "ell": 43,
+       "loop_length": 1,
+       "degree_bits": 5.4,
+       "cost_M": 322.5,
+       "ratio_to_saving": 0.84
+      }
+     ],
+     "relation_search": {
+      "rank": 10,
+      "exhaustive_within_radius": true,
+      "radius_M": 384.0,
+      "lll_upper_bound_M": 2.0,
+      "loops_within_radius": 4126,
+      "candidates": 4134
+     },
+     "loops": [
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.005,
+       "exponents": {
+        "2": 1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + -1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "23986389105595106179003010551",
+       "lambda_conj": "15627692151536968054775696641",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         104020308451260,
+         160757427174389
+        ],
+        "b2": [
+         -212767581400019,
+         52010154225630
+        ],
+        "max_abs_entry_bits": 48,
+        "half_bits": 48,
+        "ratio_to_sqrt_r": 1.0690072800273807
+       }
+      },
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.005,
+       "exponents": {
+        "2": -1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + 1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "15627692151536968054775696641",
+       "lambda_conj": "23986389105595106179003010551",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -160757427174389,
+         -52010154225630
+        ],
+        "b2": [
+         104020308451260,
+         -212767581400019
+        ],
+        "max_abs_entry_bits": 48,
+        "half_bits": 48,
+        "ratio_to_sqrt_r": 1.0690072800273807
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.01,
+       "exponents": {
+        "2": 2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + -1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "23986389105595106179003010549",
+       "lambda_conj": "15627692151536968054775696639",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         108747272948759,
+         -52010154225630
+        ],
+        "b2": [
+         99293343953761,
+         316787889851279
+        ],
+        "max_abs_entry_bits": 49,
+        "half_bits": 48,
+        "ratio_to_sqrt_r": 1.5916360859450884
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.01,
+       "exponents": {
+        "2": -2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + 1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "15627692151536968054775696639",
+       "lambda_conj": "23986389105595106179003010549",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -56737118723129,
+         -160757427174389
+        ],
+        "b2": [
+         208040616902520,
+         -108747272948759
+        ],
+        "max_abs_entry_bits": 48,
+        "half_bits": 48,
+        "ratio_to_sqrt_r": 1.0452576118354155
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.016,
+       "exponents": {
+        "2": 3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + 1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "15627692151536968054775696638",
+       "lambda_conj": "23986389105595106179003010548",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         99293343953761,
+         -108747272948759
+        ],
+        "b2": [
+         217494545897518,
+         160757427174389
+        ],
+        "max_abs_entry_bits": 48,
+        "half_bits": 48,
+        "ratio_to_sqrt_r": 1.092756948219346
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.016,
+       "exponents": {
+        "2": -3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + -1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "23986389105595106179003010548",
+       "lambda_conj": "15627692151536968054775696638",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         56737118723129,
+         -52010154225630
+        ],
+        "b2": [
+         359344115081911,
+         368798044076909
+        ],
+        "max_abs_entry_bits": 49,
+        "half_bits": 48,
+        "ratio_to_sqrt_r": 1.8529504889039423
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.005,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.04,
+     "tau": {
+      "mu": -1,
+      "lambda_tau": "15627692151536968054775696640",
+      "order_mod_r": 389,
+      "extension_degree": 97,
+      "note": "tau^n = pi acts as 1 on E(F_q)[r]; <tau> x <-1> gives the 2n-element orbits used by rho"
+     },
+     "note": "class number 1: every prime ideal is principal, every loop has length 1 and is an explicit element a + b*tau of Z[tau]; the cheapest is tau itself (the Frobenius), which the tau-adic (tau-NAF) expansion already exploits. Nothing beyond tau-NAF."
+    }
+   ],
+   "sqrtDK_mod_r": "31255384303073936109551393281",
+   "budget": {
+    "log2_r": 95,
+    "half_bits": 48,
+    "doublings_saved_cost_M": 384.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  },
+  {
+   "curve": {
+    "name": "ECC2K-108",
+    "family": "koblitz",
+    "q": "649037107316853453566312041152512",
+    "char2": true,
+    "n": 109,
+    "trace": 50591414728229579,
+    "order": "649037107316853402974897312922934",
+    "r": "324518553658426701487448656461467",
+    "cofactor": 2,
+    "a": 1
+   },
+   "frobenius": {
+    "delta": "-36657185063689047477516434092807",
+    "delta_bits": 105,
+    "factorization": [
+     [
+      "7",
+      1
+     ],
+     [
+      "3271",
+      2
+     ],
+     [
+      "699600307831",
+      2
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-7",
+    "DK_bits": 3,
+    "conductor_f": "2288392606915201",
+    "conductor_factorization": [
+     [
+      "3271",
+      1
+     ],
+     [
+      "699600307831",
+      1
+     ]
+    ],
+    "factor_seconds": 0.0
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-7",
+     "class_group": {
+      "h": "1",
+      "hK": "1",
+      "cyc_K": [],
+      "bnf_seconds": 0.0
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 0,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 1/2"
+      },
+      {
+       "ell": 11,
+       "cost_M": 82.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 9,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 7,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 29,
+       "cost_M": 217.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 6,
+       "sqrtDK_mod_l": 15,
+       "generator": "x - 15"
+      },
+      {
+       "ell": 37,
+       "cost_M": 277.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 29,
+       "sqrtDK_mod_l": 17,
+       "generator": "x - 17"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 12,
+       "sqrtDK_mod_l": 6,
+       "generator": "x - 6"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 44,
+       "sqrtDK_mod_l": 24,
+       "generator": "x - 24"
+      },
+      {
+       "ell": 67,
+       "cost_M": 502.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 21,
+       "sqrtDK_mod_l": 23,
+       "generator": "x - 23"
+      },
+      {
+       "ell": 71,
+       "cost_M": 532.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 48,
+       "sqrtDK_mod_l": 8,
+       "generator": "x - 8"
+      },
+      {
+       "ell": 79,
+       "cost_M": 592.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 18,
+       "sqrtDK_mod_l": 25,
+       "generator": "x - 25"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 1,
+       "degree_bits": 1.0,
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.005
+      },
+      {
+       "ell": 11,
+       "loop_length": 1,
+       "degree_bits": 3.5,
+       "cost_M": 82.5,
+       "ratio_to_saving": 0.191
+      },
+      {
+       "ell": 23,
+       "loop_length": 1,
+       "degree_bits": 4.5,
+       "cost_M": 172.5,
+       "ratio_to_saving": 0.399
+      },
+      {
+       "ell": 29,
+       "loop_length": 1,
+       "degree_bits": 4.9,
+       "cost_M": 217.5,
+       "ratio_to_saving": 0.503
+      },
+      {
+       "ell": 37,
+       "loop_length": 1,
+       "degree_bits": 5.2,
+       "cost_M": 277.5,
+       "ratio_to_saving": 0.642
+      },
+      {
+       "ell": 43,
+       "loop_length": 1,
+       "degree_bits": 5.4,
+       "cost_M": 322.5,
+       "ratio_to_saving": 0.747
+      }
+     ],
+     "relation_search": {
+      "rank": 10,
+      "exhaustive_within_radius": true,
+      "radius_M": 432.0,
+      "lll_upper_bound_M": 2.0,
+      "loops_within_radius": 6458,
+      "candidates": 6464
+     },
+     "loops": [
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.005,
+       "exponents": {
+        "2": 1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + -1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "138423345589698157369693034392981",
+       "lambda_conj": "186095208068728544117755622068487",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -2288392606915201,
+         -12075755530328594
+        ],
+        "b2": [
+         26439903667572389,
+         -2288392606915201
+        ],
+        "max_abs_entry_bits": 55,
+        "half_bits": 54,
+        "ratio_to_sqrt_r": 1.4677094910304995
+       }
+      },
+      {
+       "cost_M": 2.0,
+       "ratio_to_saving": 0.005,
+       "exponents": {
+        "2": -1
+       },
+       "chain_length": 1,
+       "degree": "2",
+       "degree_bits": 1.0,
+       "alpha": "(1 + 1*sqrt(-7))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "186095208068728544117755622068487",
+       "lambda_conj": "138423345589698157369693034392981",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -9787362923413393,
+         -14364148137243795
+        ],
+        "b2": [
+         14364148137243795,
+         -12075755530328594
+        ],
+        "max_abs_entry_bits": 54,
+        "half_bits": 54,
+        "ratio_to_sqrt_r": 0.7973703995547309
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.009,
+       "exponents": {
+        "2": 2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + -1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "138423345589698157369693034392979",
+       "lambda_conj": "186095208068728544117755622068485",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -4576785213830402,
+         -14364148137243795
+        ],
+        "b2": [
+         21863118453741987,
+         -2288392606915201
+        ],
+        "max_abs_entry_bits": 55,
+        "half_bits": 54,
+        "ratio_to_sqrt_r": 1.2136468748725755
+       }
+      },
+      {
+       "cost_M": 4.0,
+       "ratio_to_saving": 0.009,
+       "exponents": {
+        "2": -2
+       },
+       "chain_length": 2,
+       "degree": "4",
+       "degree_bits": 2.0,
+       "alpha": "(-3 + 1*sqrt(-7))/2",
+       "trace": "-3",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "186095208068728544117755622068485",
+       "lambda_conj": "138423345589698157369693034392979",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -9787362923413393,
+         -12075755530328594
+        ],
+        "b2": [
+         18940933351074197,
+         -9787362923413393
+        ],
+        "max_abs_entry_bits": 55,
+        "half_bits": 54,
+        "ratio_to_sqrt_r": 1.051433015712655
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.014,
+       "exponents": {
+        "2": 3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + 1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "186095208068728544117755622068484",
+       "lambda_conj": "138423345589698157369693034392978",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         9153570427660804,
+         -9787362923413393
+        ],
+        "b2": [
+         21863118453741987,
+         12075755530328594
+        ],
+        "max_abs_entry_bits": 55,
+        "half_bits": 54,
+        "ratio_to_sqrt_r": 1.2136468748725755
+       }
+      },
+      {
+       "cost_M": 6.0,
+       "ratio_to_saving": 0.014,
+       "exponents": {
+        "2": -3
+       },
+       "chain_length": 3,
+       "degree": "8",
+       "degree_bits": 3.0,
+       "alpha": "(-5 + -1*sqrt(-7))/2",
+       "trace": "-5",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "138423345589698157369693034392978",
+       "lambda_conj": "186095208068728544117755622068484",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         633792495752589,
+         -16652540744158996
+        ],
+        "b2": [
+         19574725846826786,
+         -2288392606915201
+        ],
+        "max_abs_entry_bits": 55,
+        "half_bits": 54,
+        "ratio_to_sqrt_r": 1.0866155667936133
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 2.0,
+      "ratio_to_saving": 0.005,
+      "exponents": {
+       "2": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.04,
+     "tau": {
+      "mu": 1,
+      "lambda_tau": "186095208068728544117755622068487",
+      "order_mod_r": 437,
+      "extension_degree": 109,
+      "note": "tau^n = pi acts as 1 on E(F_q)[r]; <tau> x <-1> gives the 2n-element orbits used by rho"
+     },
+     "note": "class number 1: every prime ideal is principal, every loop has length 1 and is an explicit element a + b*tau of Z[tau]; the cheapest is tau itself (the Frobenius), which the tau-adic (tau-NAF) expansion already exploits. Nothing beyond tau-NAF."
+    }
+   ],
+   "sqrtDK_mod_r": "47671862479030386748062587675506",
+   "budget": {
+    "log2_r": 108,
+    "half_bits": 54,
+    "doublings_saved_cost_M": 432.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  },
+  {
+   "curve": {
+    "name": "secp256k1",
+    "family": "prime",
+    "q": "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "char2": false,
+    "n": 1,
+    "trace": "432420386565659656852420866390673177327",
+    "order": "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "r": "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "cofactor": 1,
+    "a": 0,
+    "slug": "icv1-fp256-t432420386565659656852420866390673177327-76dadd18",
+    "end": "unk"
+   },
+   "frobenius": {
+    "delta": "-276180966231670251052810340486134462307742726569900724701098994184861751821723",
+    "delta_bits": 258,
+    "factorization": [
+     [
+      "3",
+      3
+     ],
+     [
+      "79",
+      2
+     ],
+     [
+      "349",
+      2
+     ],
+     [
+      "2698097",
+      2
+     ],
+     [
+      "1359580455984873519493666411",
+      2
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-3",
+    "DK_bits": 2,
+    "conductor_f": "303414439467246543595250775667605759171",
+    "conductor_factorization": [
+     [
+      "3",
+      1
+     ],
+     [
+      "79",
+      1
+     ],
+     [
+      "349",
+      1
+     ],
+     [
+      "2698097",
+      1
+     ],
+     [
+      "1359580455984873519493666411",
+      1
+     ]
+    ],
+    "factor_seconds": 0.009
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-3",
+     "class_group": {
+      "h": "1",
+      "hK": "1",
+      "cyc_K": [],
+      "bnf_seconds": 0.0
+     },
+     "primes": [
+      {
+       "ell": 7,
+       "cost_M": 52.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 2,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 13,
+       "cost_M": 97.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 12,
+       "sqrtDK_mod_l": 7,
+       "generator": "x - 7"
+      },
+      {
+       "ell": 19,
+       "cost_M": 142.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 4,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 31,
+       "cost_M": 232.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 19,
+       "sqrtDK_mod_l": 11,
+       "generator": "x - 11"
+      },
+      {
+       "ell": 37,
+       "cost_M": 277.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 22,
+       "sqrtDK_mod_l": 16,
+       "generator": "x - 16"
+      },
+      {
+       "ell": 43,
+       "cost_M": 322.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 32,
+       "sqrtDK_mod_l": 13,
+       "generator": "x - 13"
+      },
+      {
+       "ell": 61,
+       "cost_M": 457.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 28,
+       "sqrtDK_mod_l": 27,
+       "generator": "x - 27"
+      },
+      {
+       "ell": 67,
+       "cost_M": 502.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 45,
+       "sqrtDK_mod_l": 8,
+       "generator": "x - 8"
+      },
+      {
+       "ell": 73,
+       "cost_M": 547.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 61,
+       "sqrtDK_mod_l": 17,
+       "generator": "x - 17"
+      },
+      {
+       "ell": 79,
+       "cost_M": 592.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 73,
+       "sqrtDK_mod_l": 32,
+       "generator": "x - 32"
+      },
+      {
+       "ell": 97,
+       "cost_M": 727.5,
+       "dlog": [],
+       "order_in_ClK": 1,
+       "frobenius_eigenvalue_mod_l": 32,
+       "sqrtDK_mod_l": 26,
+       "generator": "x - 26"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 7,
+       "loop_length": 1,
+       "degree_bits": 2.8,
+       "cost_M": 52.5,
+       "ratio_to_saving": 0.051
+      },
+      {
+       "ell": 13,
+       "loop_length": 1,
+       "degree_bits": 3.7,
+       "cost_M": 97.5,
+       "ratio_to_saving": 0.095
+      },
+      {
+       "ell": 19,
+       "loop_length": 1,
+       "degree_bits": 4.2,
+       "cost_M": 142.5,
+       "ratio_to_saving": 0.139
+      },
+      {
+       "ell": 31,
+       "loop_length": 1,
+       "degree_bits": 5.0,
+       "cost_M": 232.5,
+       "ratio_to_saving": 0.227
+      },
+      {
+       "ell": 37,
+       "loop_length": 1,
+       "degree_bits": 5.2,
+       "cost_M": 277.5,
+       "ratio_to_saving": 0.271
+      },
+      {
+       "ell": 43,
+       "loop_length": 1,
+       "degree_bits": 5.4,
+       "cost_M": 322.5,
+       "ratio_to_saving": 0.315
+      }
+     ],
+     "relation_search": {
+      "rank": 11,
+      "exhaustive_within_radius": true,
+      "radius_M": 1024.0,
+      "lll_upper_bound_M": 52.5,
+      "loops_within_radius": 14946,
+      "candidates": 14946
+     },
+     "loops": [
+      {
+       "cost_M": 52.5,
+       "ratio_to_saving": 0.051,
+       "exponents": {
+        "7": 1
+       },
+       "chain_length": 1,
+       "degree": "7",
+       "degree_bits": 2.8,
+       "alpha": "(1 + 3*sqrt(-3))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2637848147848204714792320558262846500054591612627143416755301512854167554282",
+       "lambda_conj": "113154241089467990708778664450425061352782972666447760965849861628663993940056",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         165641120038288737827001970584068962134,
+         101138146489082181198416925222535253057
+        ],
+        "b2": [
+         -376684785346997792734914535389608847131,
+         469055559505535281422252746251674721305
+        ],
+        "max_abs_entry_bits": 129,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.3784304010513602
+       }
+      },
+      {
+       "cost_M": 52.5,
+       "ratio_to_saving": 0.051,
+       "exponents": {
+        "7": -1
+       },
+       "chain_length": 1,
+       "degree": "7",
+       "degree_bits": 2.8,
+       "alpha": "(1 + -3*sqrt(-3))/2",
+       "trace": "1",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "113154241089467990708778664450425061352782972666447760965849861628663993940056",
+       "lambda_conj": "2637848147848204714792320558262846500054591612627143416755301512854167554282",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         266779266527370919025418895806604215191,
+         -101138146489082181198416925222535253057
+        ],
+        "b2": [
+         174408492368833430338080684944538341017,
+         367917413016453100223835821029139468248
+        ],
+        "max_abs_entry_bits": 129,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.0812121014249774
+       }
+      },
+      {
+       "cost_M": 97.5,
+       "ratio_to_saving": 0.095,
+       "exponents": {
+        "13": 1
+       },
+       "chain_length": 1,
+       "degree": "13",
+       "degree_bits": 3.7,
+       "alpha": "(-7 + 1*sqrt(-3))/2",
+       "trace": "-7",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "78074008874160198520644763525212887401909906723592317393988542598630163514315",
+       "lambda_conj": "37718080363155996902926221483475020450927657555482586988616620542887997980015",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         109905518819626873709495639583004631940,
+         -64502973549206556628585045361533709077
+        ],
+        "b2": [
+         508822099680804615043118670950924322181,
+         754935254311692439995346093198341722710
+        ],
+        "max_abs_entry_bits": 130,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 2.2185553166999537
+       }
+      },
+      {
+       "cost_M": 97.5,
+       "ratio_to_saving": 0.095,
+       "exponents": {
+        "13": -1
+       },
+       "chain_length": 1,
+       "degree": "13",
+       "degree_bits": 3.7,
+       "alpha": "(7 + 1*sqrt(-3))/2",
+       "trace": "7",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "78074008874160198520644763525212887401909906723592317393988542598630163514322",
+       "lambda_conj": "37718080363155996902926221483475020450927657555482586988616620542887997980022",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         277112322475612466062014632586197622522,
+         174408492368833430338080684944538341017
+        ],
+        "b2": [
+         -284314011188460304047576324527542972957,
+         238911465918039986966665730306072050094
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 0.8355237850291494
+       }
+      },
+      {
+       "cost_M": 105.0,
+       "ratio_to_saving": 0.103,
+       "exponents": {
+        "7": 2
+       },
+       "chain_length": 2,
+       "degree": "49",
+       "degree_bits": 5.6,
+       "alpha": "(-13 + 3*sqrt(-3))/2",
+       "trace": "-13",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "2637848147848204714792320558262846500054591612627143416755301512854167554275",
+       "lambda_conj": "113154241089467990708778664450425061352782972666447760965849861628663993940049",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -285879694806157158573093346946667001405,
+         -165641120038288737827001970584068962134
+        ],
+        "b2": [
+         301848755849549689069733753248481730723,
+         -230144093587495294455587015945602671211
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 0.887053768259704
+       }
+      },
+      {
+       "cost_M": 105.0,
+       "ratio_to_saving": 0.103,
+       "exponents": {
+        "7": -2
+       },
+       "chain_length": 2,
+       "degree": "49",
+       "degree_bits": 5.6,
+       "alpha": "(-13 + -3*sqrt(-3))/2",
+       "trace": "-13",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "113154241089467990708778664450425061352782972666447760965849861628663993940049",
+       "lambda_conj": "2637848147848204714792320558262846500054591612627143416755301512854167554275",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         102703830106779035723933947641659281505,
+         -238911465918039986966665730306072050094
+        ],
+        "b2": [
+         441187758896204349363499580751142556208,
+         101138146489082181198416925222535253057
+        ],
+        "max_abs_entry_bits": 129,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.2965342955860841
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 52.5,
+      "ratio_to_saving": 0.051,
+      "exponents": {
+       "7": 1
+      },
+      "chain_length": 1,
+      "within_radius": true
+     },
+     "seconds": 0.09
+    }
+   ],
+   "sqrtDK_mod_r": "40355928511004201617718542041737866950982249168109730405371922055742165534300",
+   "budget": {
+    "log2_r": 256,
+    "half_bits": 128,
+    "doublings_saved_cost_M": 1024.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  },
+  {
+   "curve": {
+    "name": "id-GostR3410-2001-CryptoPro-B-ParamSet",
+    "family": "prime",
+    "q": "57896044618658097711785492504343953926634992332820282019728792003956564823193",
+    "char2": false,
+    "n": 1,
+    "trace": "-467140827435544800340052492131167243509",
+    "order": "57896044618658097711785492504343953927102133160255826820068844496087732066703",
+    "r": "57896044618658097711785492504343953927102133160255826820068844496087732066703",
+    "cofactor": 1,
+    "a": "57896044618658097711785492504343953926634992332820282019728792003956564823190",
+    "slug": "icv1-fp256-tm467140827435544800340052492131167243509-c96d2aed",
+    "end": "unk"
+   },
+   "frobenius": {
+    "delta": "-13363625817466945204638692118990709025153366359306161613697773390076956659691",
+    "delta_bits": 253,
+    "factorization": [
+     [
+      "103",
+      2
+     ],
+     [
+      "619",
+      1
+     ],
+     [
+      "6217",
+      2
+     ],
+     [
+      "17233477",
+      2
+     ],
+     [
+      "3989640269",
+      2
+     ],
+     [
+      "105533924655391",
+      2
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-619",
+    "DK_bits": 10,
+    "conductor_f": "4646402506017662432554672533504826433",
+    "conductor_factorization": [
+     [
+      "103",
+      1
+     ],
+     [
+      "6217",
+      1
+     ],
+     [
+      "17233477",
+      1
+     ],
+     [
+      "3989640269",
+      1
+     ],
+     [
+      "105533924655391",
+      1
+     ]
+    ],
+    "factor_seconds": 0.01
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-619",
+     "class_group": {
+      "h": "5",
+      "hK": "5",
+      "cyc_K": [
+       "5"
+      ],
+      "bnf_seconds": 0.0
+     },
+     "primes": [
+      {
+       "ell": 5,
+       "cost_M": 37.5,
+       "dlog": [
+        3
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 2,
+       "sqrtDK_mod_l": 1,
+       "generator": "x - 1"
+      },
+      {
+       "ell": 7,
+       "cost_M": 52.5,
+       "dlog": [
+        1
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 5,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [
+        1
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 7,
+       "sqrtDK_mod_l": 5,
+       "generator": "x - 5"
+      },
+      {
+       "ell": 31,
+       "cost_M": 232.5,
+       "dlog": [
+        2
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 10,
+       "sqrtDK_mod_l": 1,
+       "generator": "x - 1"
+      },
+      {
+       "ell": 37,
+       "cost_M": 277.5,
+       "dlog": [
+        2
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 27,
+       "sqrtDK_mod_l": 11,
+       "generator": "x - 11"
+      },
+      {
+       "ell": 41,
+       "cost_M": 307.5,
+       "dlog": [
+        1
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 24,
+       "sqrtDK_mod_l": 18,
+       "generator": "x - 18"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [
+        2
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 26,
+       "sqrtDK_mod_l": 21,
+       "generator": "x - 21"
+      },
+      {
+       "ell": 61,
+       "cost_M": 457.5,
+       "dlog": [
+        4
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 47,
+       "sqrtDK_mod_l": 28,
+       "generator": "x - 28"
+      },
+      {
+       "ell": 71,
+       "cost_M": 532.5,
+       "dlog": [
+        1
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 2,
+       "sqrtDK_mod_l": 34,
+       "generator": "x - 34"
+      },
+      {
+       "ell": 73,
+       "cost_M": 547.5,
+       "dlog": [
+        3
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 5,
+       "sqrtDK_mod_l": 29,
+       "generator": "x - 29"
+      },
+      {
+       "ell": 79,
+       "cost_M": 592.5,
+       "dlog": [
+        2
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 25,
+       "sqrtDK_mod_l": 31,
+       "generator": "x - 31"
+      },
+      {
+       "ell": 89,
+       "cost_M": 667.5,
+       "dlog": [
+        4
+       ],
+       "order_in_ClK": 5,
+       "frobenius_eigenvalue_mod_l": 49,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 5,
+       "loop_length": 5,
+       "degree_bits": 11.6,
+       "cost_M": 187.5,
+       "ratio_to_saving": 0.183
+      },
+      {
+       "ell": 7,
+       "loop_length": 5,
+       "degree_bits": 14.0,
+       "cost_M": 262.5,
+       "ratio_to_saving": 0.256
+      },
+      {
+       "ell": 23,
+       "loop_length": 5,
+       "degree_bits": 22.6,
+       "cost_M": 862.5,
+       "ratio_to_saving": 0.842
+      },
+      {
+       "ell": 31,
+       "loop_length": 5,
+       "degree_bits": 24.8,
+       "cost_M": 1162.5,
+       "ratio_to_saving": 1.135
+      },
+      {
+       "ell": 37,
+       "loop_length": 5,
+       "degree_bits": 26.0,
+       "cost_M": 1387.5,
+       "ratio_to_saving": 1.355
+      },
+      {
+       "ell": 41,
+       "loop_length": 5,
+       "degree_bits": 26.8,
+       "cost_M": 1537.5,
+       "ratio_to_saving": 1.501
+      }
+     ],
+     "relation_search": {
+      "rank": 12,
+      "exhaustive_within_radius": true,
+      "radius_M": 1024.0,
+      "lll_upper_bound_M": 127.5,
+      "loops_within_radius": 7650,
+      "candidates": 7650
+     },
+     "loops": [
+      {
+       "cost_M": 127.5,
+       "ratio_to_saving": 0.125,
+       "exponents": {
+        "5": 2,
+        "7": -1
+       },
+       "chain_length": 3,
+       "degree": "175",
+       "degree_bits": 7.5,
+       "alpha": "(9 + 1*sqrt(-619))/2",
+       "trace": "9",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "25745384436187293773257686313148572361251961181400080445531962069440031481859",
+       "lambda_conj": "32150660182470803938527806191195381565850171978855746374536882426647700584853",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         49682763568535282347500875964278603663,
+         226600809958745906521194237265326382106
+        ],
+        "b2": [
+         -254479224994851881116522272466355340704,
+         4646402506017662432554672533504826433
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.0576156930680178
+       }
+      },
+      {
+       "cost_M": 127.5,
+       "ratio_to_saving": 0.125,
+       "exponents": {
+        "5": -2,
+        "7": 1
+       },
+       "chain_length": 3,
+       "degree": "175",
+       "degree_bits": 7.5,
+       "alpha": "(9 + -1*sqrt(-619))/2",
+       "trace": "9",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "32150660182470803938527806191195381565850171978855746374536882426647700584853",
+       "lambda_conj": "25745384436187293773257686313148572361251961181400080445531962069440031481859",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         212661602440692919223530219664811902807,
+         4646402506017662432554672533504826433
+        ],
+        "b2": [
+         37525971209680751197053185295902985453,
+         273064835018922530846740962600374646436
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.1348574908104347
+       }
+      },
+      {
+       "cost_M": 142.5,
+       "ratio_to_saving": 0.139,
+       "exponents": {
+        "5": 1,
+        "7": 2
+       },
+       "chain_length": 3,
+       "degree": "245",
+       "degree_bits": 7.9,
+       "alpha": "(19 + 1*sqrt(-619))/2",
+       "trace": "19",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "25745384436187293773257686313148572361251961181400080445531962069440031481864",
+       "lambda_conj": "32150660182470803938527806191195381565850171978855746374536882426647700584858",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         27523663874566522858712230173164584609,
+         208015199934675256790975547131307076374
+        ],
+        "b2": [
+         -277711237524940193279295635133879472869,
+         4646402506017662432554672533504826433
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.154167940246039
+       }
+      },
+      {
+       "cost_M": 142.5,
+       "ratio_to_saving": 0.139,
+       "exponents": {
+        "5": -1,
+        "7": -2
+       },
+       "chain_length": 3,
+       "degree": "245",
+       "degree_bits": 7.9,
+       "alpha": "(19 + -1*sqrt(-619))/2",
+       "trace": "19",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "32150660182470803938527806191195381565850171978855746374536882426647700584858",
+       "lambda_conj": "25745384436187293773257686313148572361251961181400080445531962069440031481864",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         189429589910604607060756856997287770642,
+         4646402506017662432554672533504826433
+        ],
+        "b2": [
+         -1791074510699653611353628724955852233,
+         305589652561046167874623670334908431467
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.2700306368596643
+       }
+      },
+      {
+       "cost_M": 165.0,
+       "ratio_to_saving": 0.161,
+       "exponents": {
+        "5": 3,
+        "7": 1
+       },
+       "chain_length": 4,
+       "degree": "875",
+       "degree_bits": 9.8,
+       "alpha": "(-32 + 2*sqrt(-619))/2",
+       "trace": "-32",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "51490768872374587546515372626297144722503922362800160891063924138880062963693",
+       "lambda_conj": "6405275746283510165270119878046809204598210797455665929004920357207669102978",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         -132604176678023703928184720615228235907,
+         -145825222521496590288479826367196976084
+        ],
+        "b2": [
+         260194210661238497490993010979861784676,
+         -150471625027514252721034498900701802517
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 1.0813671742608402
+       }
+      },
+      {
+       "cost_M": 165.0,
+       "ratio_to_saving": 0.161,
+       "exponents": {
+        "5": -3,
+        "7": -1
+       },
+       "chain_length": 4,
+       "degree": "875",
+       "degree_bits": 9.8,
+       "alpha": "(-32 + -2*sqrt(-619))/2",
+       "trace": "-32",
+       "in_order_Og": true,
+       "in_Z_pi": false,
+       "Z_pi_is_OK": false,
+       "acts_as_integer": null,
+       "frobenius_power": null,
+       "lambda": "6405275746283510165270119878046809204598210797455665929004920357207669102978",
+       "lambda_conj": "51490768872374587546515372626297144722503922362800160891063924138880062963693",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         201936803755247991215751701797119267269,
+         108654002473355290828042446099158364620
+        ],
+        "b2": [
+         -137609660021331416829423849073005931901,
+         212661602440692919223530219664811902807
+        ],
+        "max_abs_entry_bits": 128,
+        "half_bits": 128,
+        "ratio_to_sqrt_r": 0.8838216481475795
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 127.5,
+      "ratio_to_saving": 0.125,
+      "exponents": {
+       "5": 2,
+       "7": -1
+      },
+      "chain_length": 3,
+      "within_radius": true
+     },
+     "seconds": 0.1
+    }
+   ],
+   "sqrtDK_mod_r": "51490768872374587546515372626297144722503922362800160891063924138880062963709",
+   "budget": {
+    "log2_r": 256,
+    "half_bits": 128,
+    "doublings_saved_cost_M": 1024.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  },
+  {
+   "curve": {
+    "name": "id-GostR3410-2001-CryptoPro-A-ParamSet",
+    "family": "prime",
+    "q": "115792089237316195423570985008687907853269984665640564039457584007913129639319",
+    "char2": false,
+    "n": 1,
+    "trace": "196221757141320814079428202834060788997",
+    "order": "115792089237316195423570985008687907853073762908499243225378155805079068850323",
+    "r": "115792089237316195423570985008687907853073762908499243225378155805079068850323",
+    "cofactor": 1,
+    "a": "115792089237316195423570985008687907853269984665640564039457584007913129639316",
+    "slug": "icv1-fp256-t196221757141320814079428202834060788997-51c05000",
+    "end": "unk"
+   },
+   "frobenius": {
+    "delta": "-424665378973637295795640888511775743925042728546036986688706749501354362291267",
+    "delta_bits": 258,
+    "factorization": [
+     [
+      "23",
+      1
+     ],
+     [
+      "113",
+      1
+     ],
+     [
+      "125117",
+      1
+     ],
+     [
+      "5643492364427",
+      1
+     ],
+     [
+      "111929840121858169591",
+      1
+     ],
+     [
+      "2067428168324721210917000712587143357",
+      1
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-424665378973637295795640888511775743925042728546036986688706749501354362291267",
+    "DK_bits": 258,
+    "conductor_f": "1",
+    "conductor_factorization": [],
+    "factor_seconds": 2.712
+   },
+   "orders": [],
+   "sqrtDK_mod_r": "115792089237316195423570985008687907852877541151357922411298727602245008061328",
+   "budget": {
+    "log2_r": 256,
+    "half_bits": 128,
+    "doublings_saved_cost_M": 1024.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   },
+   "skipped": "|DK| has 258 bits > --max-disc-bits 140; class group not computed",
+   "heuristic": [
+    {
+     "prime_bound": 50,
+     "split_primes": 5,
+     "log2_h_est": 127.3,
+     "shortest_L2_est": 24924275.2,
+     "shortest_L1_est": 44468000.5,
+     "cost_lower_bound_M": 1308524449,
+     "cost_typical_M": 9538386105,
+     "saving_M": 1024.0,
+     "ratio_lower_bound": 1277855.91,
+     "ratio_typical": 9314830.2
+    },
+    {
+     "prime_bound": 100,
+     "split_primes": 12,
+     "log2_h_est": 127.3,
+     "shortest_L2_est": 1307.5,
+     "shortest_L1_est": 3613.7,
+     "cost_lower_bound_M": 68641,
+     "cost_typical_M": 1562943,
+     "saving_M": 1024.0,
+     "ratio_lower_bound": 67.03,
+     "ratio_typical": 1526.3
+    },
+    {
+     "prime_bound": 200,
+     "split_primes": 21,
+     "log2_h_est": 127.3,
+     "shortest_L2_est": 74.0,
+     "shortest_L1_est": 270.7,
+     "cost_lower_bound_M": 3887,
+     "cost_typical_M": 213779,
+     "saving_M": 1024.0,
+     "ratio_lower_bound": 3.8,
+     "ratio_typical": 208.8
+    },
+    {
+     "prime_bound": 500,
+     "split_primes": 49,
+     "log2_h_est": 127.3,
+     "shortest_L2_est": 10.3,
+     "shortest_L1_est": 57.3,
+     "cost_lower_bound_M": 538,
+     "cost_typical_M": 103661,
+     "saving_M": 1024.0,
+     "ratio_lower_bound": 0.53,
+     "ratio_typical": 101.2
+    }
+   ]
+  },
+  {
+   "curve": {
+    "name": "sect113r1",
+    "family": "binary",
+    "q": "10384593717069655257060992658440192",
+    "char2": true,
+    "n": 113,
+    "trace": -122610772499221213,
+    "order": "10384593717069655379671765157661406",
+    "r": "5192296858534827689835882578830703",
+    "cofactor": 2,
+    "a": "984342157317881800509153672175863",
+    "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+    "end": "unk"
+   },
+   "frobenius": {
+    "delta": "-26504973335422840129609279124569399",
+    "delta_bits": 115,
+    "factorization": [
+     [
+      "7",
+      1
+     ],
+     [
+      "47",
+      1
+     ],
+     [
+      "411643769",
+      1
+     ],
+     [
+      "195708607903277035369399",
+      1
+     ]
+    ],
+    "unfactored_cofactor": null,
+    "DK": "-26504973335422840129609279124569399",
+    "DK_bits": 115,
+    "conductor_f": "1",
+    "conductor_factorization": [],
+    "factor_seconds": 0.007
+   },
+   "orders": [
+    {
+     "conductor": 1,
+     "D": "-26504973335422840129609279124569399",
+     "class_group": {
+      "h": "118323207158487408",
+      "hK": "118323207158487408",
+      "cyc_K": [
+       "29580801789621852",
+       "2",
+       "2"
+      ],
+      "bnf_seconds": 13.98
+     },
+     "primes": [
+      {
+       "ell": 2,
+       "cost_M": 2.0,
+       "dlog": [
+        4973763132768276,
+        0,
+        0
+       ],
+       "order_in_ClK": 113,
+       "frobenius_eigenvalue_mod_l": 0,
+       "sqrtDK_mod_l": null,
+       "generator": "1/2*x - 1/2"
+      },
+      {
+       "ell": 5,
+       "cost_M": 37.5,
+       "dlog": [
+        14790400894810911,
+        0,
+        1
+       ],
+       "order_in_ClK": 9860267263207284,
+       "frobenius_eigenvalue_mod_l": 3,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 11,
+       "cost_M": 82.5,
+       "dlog": [
+        12222997102412857,
+        1,
+        0
+       ],
+       "order_in_ClK": 29580801789621852,
+       "frobenius_eigenvalue_mod_l": 3,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 13,
+       "cost_M": 97.5,
+       "dlog": [
+        16065765367860255,
+        0,
+        1
+       ],
+       "order_in_ClK": 9860267263207284,
+       "frobenius_eigenvalue_mod_l": 9,
+       "sqrtDK_mod_l": 4,
+       "generator": "x - 4"
+      },
+      {
+       "ell": 17,
+       "cost_M": 127.5,
+       "dlog": [
+        10417187326997574,
+        1,
+        0
+       ],
+       "order_in_ClK": 547792625733738,
+       "frobenius_eigenvalue_mod_l": 16,
+       "sqrtDK_mod_l": 1,
+       "generator": "x - 1"
+      },
+      {
+       "ell": 23,
+       "cost_M": 172.5,
+       "dlog": [
+        28810300209399841,
+        1,
+        0
+       ],
+       "order_in_ClK": 2689163799056532,
+       "frobenius_eigenvalue_mod_l": 4,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 31,
+       "cost_M": 232.5,
+       "dlog": [
+        25564283241274057,
+        0,
+        1
+       ],
+       "order_in_ClK": 4225828827088836,
+       "frobenius_eigenvalue_mod_l": 29,
+       "sqrtDK_mod_l": 2,
+       "generator": "x - 2"
+      },
+      {
+       "ell": 41,
+       "cost_M": 307.5,
+       "dlog": [
+        25278457195594999,
+        0,
+        0
+       ],
+       "order_in_ClK": 2689163799056532,
+       "frobenius_eigenvalue_mod_l": 29,
+       "sqrtDK_mod_l": 1,
+       "generator": "x - 1"
+      },
+      {
+       "ell": 53,
+       "cost_M": 397.5,
+       "dlog": [
+        1949614270593614,
+        0,
+        1
+       ],
+       "order_in_ClK": 14790400894810926,
+       "frobenius_eigenvalue_mod_l": 45,
+       "sqrtDK_mod_l": 3,
+       "generator": "x - 3"
+      },
+      {
+       "ell": 73,
+       "cost_M": 547.5,
+       "dlog": [
+        93200163663639,
+        0,
+        1
+       ],
+       "order_in_ClK": 9860267263207284,
+       "frobenius_eigenvalue_mod_l": 17,
+       "sqrtDK_mod_l": 28,
+       "generator": "x - 28"
+      },
+      {
+       "ell": 83,
+       "cost_M": 622.5,
+       "dlog": [
+        2198053707903910,
+        1,
+        1
+       ],
+       "order_in_ClK": 14790400894810926,
+       "frobenius_eigenvalue_mod_l": 79,
+       "sqrtDK_mod_l": 16,
+       "generator": "x - 16"
+      },
+      {
+       "ell": 89,
+       "cost_M": 667.5,
+       "dlog": [
+        8212253447377842,
+        1,
+        1
+       ],
+       "order_in_ClK": 4930133631603642,
+       "frobenius_eigenvalue_mod_l": 27,
+       "sqrtDK_mod_l": 30,
+       "generator": "x - 30"
+      }
+     ],
+     "single_prime_loops": [
+      {
+       "ell": 2,
+       "loop_length": 113,
+       "degree_bits": 113.0,
+       "cost_M": 226.0,
+       "ratio_to_saving": 0.496
+      },
+      {
+       "ell": 17,
+       "loop_length": 547792625733738,
+       "degree_bits": 2239082002397608.2,
+       "cost_M": 6.984355978105159e+16,
+       "ratio_to_saving": 153165701274235.94
+      },
+      {
+       "ell": 5,
+       "loop_length": 9860267263207284,
+       "degree_bits": 2.289483158153911e+16,
+       "cost_M": 3.6976002237027315e+17,
+       "ratio_to_saving": 810877242040072.8
+      },
+      {
+       "ell": 23,
+       "loop_length": 2689163799056532,
+       "degree_bits": 1.2164599055017874e+16,
+       "cost_M": 4.638807553372518e+17,
+       "ratio_to_saving": 1017282358195727.6
+      },
+      {
+       "ell": 41,
+       "loop_length": 2689163799056532,
+       "degree_bits": 1.4407334902381704e+16,
+       "cost_M": 8.269178682098836e+17,
+       "ratio_to_saving": 1813416377653253.5
+      },
+      {
+       "ell": 13,
+       "loop_length": 9860267263207284,
+       "degree_bits": 3.64873246122586e+16,
+       "cost_M": 9.613760581627101e+17,
+       "ratio_to_saving": 2108280829304189.0
+      }
+     ],
+     "relation_search": {
+      "rank": 12,
+      "exhaustive_within_radius": true,
+      "radius_M": 456.0,
+      "lll_upper_bound_M": 226.0,
+      "loops_within_radius": 4,
+      "candidates": 26
+     },
+     "loops": [
+      {
+       "cost_M": 226.0,
+       "ratio_to_saving": 0.496,
+       "exponents": {
+        "2": 113
+       },
+       "chain_length": 113,
+       "degree": "10384593717069655257060992658440192",
+       "degree_bits": 113.0,
+       "alpha": "(-122610772499221213 + 1*sqrt(-26504973335422840129609279124569399))/2",
+       "trace": "-122610772499221213",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": true,
+       "acts_as_integer": "1",
+       "frobenius_power": 1,
+       "lambda": "1",
+       "lambda_conj": "5192296858534827567225110079609489",
+       "lambda_is_pm1": true,
+       "glv": {
+        "b1": [
+         -1,
+         1
+        ],
+        "b2": [
+         -2596148429267413844917941289415352,
+         -2596148429267413844917941289415351
+        ],
+        "max_abs_entry_bits": 112,
+        "half_bits": 57,
+        "ratio_to_sqrt_r": 3.602879701896397e+16
+       }
+      },
+      {
+       "cost_M": 226.0,
+       "ratio_to_saving": 0.496,
+       "exponents": {
+        "2": -113
+       },
+       "chain_length": 113,
+       "degree": "10384593717069655257060992658440192",
+       "degree_bits": 113.0,
+       "alpha": "(122610772499221213 + 1*sqrt(-26504973335422840129609279124569399))/2",
+       "trace": "122610772499221213",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": true,
+       "acts_as_integer": "122610772499221214",
+       "frobenius_power": -1,
+       "lambda": "122610772499221214",
+       "lambda_conj": "5192296858534827689835882578830702",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         58047853713050315,
+         -42347803155451187
+        ],
+        "b2": [
+         64562918786170899,
+         42347803155451186
+        ],
+        "max_abs_entry_bits": 56,
+        "half_bits": 57,
+        "ratio_to_sqrt_r": 0.8959904871676374
+       }
+      },
+      {
+       "cost_M": 452.0,
+       "ratio_to_saving": 0.991,
+       "exponents": {
+        "2": 226
+       },
+       "chain_length": 226,
+       "degree": "107839786668602559178668060348078522694548577690162289924414440996864",
+       "degree_bits": 226.0,
+       "alpha": "(5735785901283529615487293807689015 + 122610772499221213*sqrt(-26504973335422840129609279124569399))/2",
+       "trace": "5735785901283529615487293807689015",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": true,
+       "acts_as_integer": "10384593717069655379671765157661405",
+       "frobenius_power": 2,
+       "lambda": "5192296858534827689835882578830702",
+       "lambda_conj": "543489042748701925651411228858313",
+       "lambda_is_pm1": true,
+       "glv": {
+        "b1": [
+         1,
+         1
+        ],
+        "b2": [
+         -2596148429267413844917941289415351,
+         2596148429267413844917941289415352
+        ],
+        "max_abs_entry_bits": 112,
+        "half_bits": 57,
+        "ratio_to_sqrt_r": 3.602879701896397e+16
+       }
+      },
+      {
+       "cost_M": 452.0,
+       "ratio_to_saving": 0.991,
+       "exponents": {
+        "2": -226
+       },
+       "chain_length": 226,
+       "degree": "107839786668602559178668060348078522694548577690162289924414440996864",
+       "degree_bits": 226.0,
+       "alpha": "(-5735785901283529615487293807689015 + 122610772499221213*sqrt(-26504973335422840129609279124569399))/2",
+       "trace": "-5735785901283529615487293807689015",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": true,
+       "acts_as_integer": "4648807815786125764184471349972390",
+       "frobenius_power": -2,
+       "lambda": "4648807815786125764184471349972390",
+       "lambda_conj": "1",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         12204835573563919,
+         -51055444289440881
+        ],
+        "b2": [
+         101750922188608346,
+         -216445412064517
+        ],
+        "max_abs_entry_bits": 57,
+        "half_bits": 57,
+        "ratio_to_sqrt_r": 1.4120777073829465
+       }
+      },
+      {
+       "cost_M": 9594.5,
+       "ratio_to_saving": 21.041,
+       "exponents": {
+        "2": 16,
+        "11": -14,
+        "13": 3,
+        "17": -26,
+        "23": 3,
+        "41": -4,
+        "53": 6,
+        "89": -1
+       },
+       "chain_length": 73,
+       "degree": "363784084459998480037749695855332021239366174296792059842473666538202884407296",
+       "degree_bits": 257.7,
+       "alpha": "(-1065723873266962895222904821159719152965 + -3471224231286831857271*sqrt(-26504973335422840129609279124569399))/2",
+       "trace": "-1065723873266962895222904821159719152965",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": true,
+       "acts_as_integer": "-745666678891528340478774578829627178615",
+       "frobenius_power": null,
+       "lambda": "4265259516798886246354198828909918",
+       "lambda_conj": "1176281510758885043395711611389273",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         17193677780036197,
+         -25717447586982669
+        ],
+        "b2": [
+         144758875571909190,
+         85465604396165069
+        ],
+        "max_abs_entry_bits": 58,
+        "half_bits": 57,
+        "ratio_to_sqrt_r": 2.0089329584847713
+       }
+      },
+      {
+       "cost_M": 9594.5,
+       "ratio_to_saving": 21.041,
+       "exponents": {
+        "2": -16,
+        "11": 14,
+        "13": -3,
+        "17": 26,
+        "23": -3,
+        "41": 4,
+        "53": -6,
+        "89": 1
+       },
+       "chain_length": 73,
+       "degree": "363784084459998480037749695855332021239366174296792059842473666538202884407296",
+       "degree_bits": 257.7,
+       "alpha": "(1065723873266962895222904821159719152965 + -3471224231286831857271*sqrt(-26504973335422840129609279124569399))/2",
+       "trace": "1065723873266962895222904821159719152965",
+       "in_order_Og": true,
+       "in_Z_pi": true,
+       "Z_pi_is_OK": true,
+       "acts_as_integer": "320057194375434554744130242330091974350",
+       "frobenius_power": null,
+       "lambda": "4016015347775942646440170967441430",
+       "lambda_conj": "927037341735941443481683749920785",
+       "lambda_is_pm1": false,
+       "glv": {
+        "b1": [
+         62243678483813701,
+         -34957410342474110
+        ],
+        "b2": [
+         55930051143314776,
+         52007323299252243
+        ],
+        "max_abs_entry_bits": 56,
+        "half_bits": 57,
+        "ratio_to_sqrt_r": 0.8638045623761929
+       }
+      }
+     ],
+     "cheapest_non_frobenius_loop": {
+      "cost_M": 9594.5,
+      "ratio_to_saving": 21.041,
+      "exponents": {
+       "2": 16,
+       "11": -14,
+       "13": 3,
+       "17": -26,
+       "23": 3,
+       "41": -4,
+       "53": 6,
+       "89": -1
+      },
+      "chain_length": 73,
+      "within_radius": false
+     },
+     "seconds": 14.28,
+     "note": "binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered)."
+    }
+   ],
+   "sqrtDK_mod_r": "122610772499221215",
+   "budget": {
+    "log2_r": 113,
+    "half_bits": 57,
+    "doublings_saved_cost_M": 456.0,
+    "cost_model": "projective",
+    "doubling_cost_M": 8.0
+   }
+  }
+ ]
+}
