@@ -12,4 +12,4 @@ speedup**. `S`, end-to-end cost and speedup are unset.
 Companions: `research/isogeny_class_difficulty_20261008/` (protocols I-1..I-5,
 whose nulls this plan inherits), `research/large_prime_isogeny_degree_20261008/`,
 `research/isogeny_walker_engineering_20261008/`, `research/ecbench_yield_sweep_20261004/`,
-and the learner at `/Volumes/SSD990-2/ml-cryptanalysis` (`docs/PLAN.md`, milestone M4).
+and the learner at `/Volumes/SSD990-2/ml-cryptanalysis` (`docs/PLAN.md`, milestone M7).

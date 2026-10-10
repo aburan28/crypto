@@ -11,7 +11,7 @@ Do not rely on any conversation that produced the plan.
   Read `AGENTS.md` and `CLAUDE.md` first. Run all commands from this
   directory; never `cd` to the main checkout; never bare `git stash`.
 - `ml-cryptanalysis`: `/Volumes/SSD990-2/ml-cryptanalysis` (Python learner,
-  branch `hardness-predictor`, create it from `main`). Read `docs/PLAN.md`.
+  branch `hardness-predictor`, the default branch is `csd-milestone-1`; create it from there). Read `docs/PLAN.md`.
 - Data goes only under `/Volumes/SSD990-2/ec-hardness/` (`SSD990` is full).
 
 ## Before editing
