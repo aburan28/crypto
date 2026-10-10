@@ -34,6 +34,47 @@ python3 experiments/koblitz-s3-c1800-n41-confirmation24-20261010/analyze.py \
 ```
 
 The runner preserves partial raw output if any run fails; the analyzer keeps
-the aggregate ratio unknown until every frozen pair verifies. A checked Sage
-replay will separately multiply each recovered scalar on the declared N41
-curve and compare it to the corresponding public point.
+the aggregate ratio unknown until every frozen pair verifies. The checked
+Sage replay separately multiplies each recovered scalar on the declared N41
+curve and compares it to the corresponding public point.
+
+## Confirmation result
+
+All 48 runs completed with native group verification, complete prepared
+ranks, and recovered scalars matching the frozen fixtures. The checked Sage
+launcher independently replayed all 48 scalars against the 24 public points.
+The raw report, stdout, stderr, and ledger hashes are audited by `analyze.py`.
+
+| N41 single-target measure | C1200 | C1800 |
+| --- | ---: | ---: |
+| Actual usable base points | 98,400 | 147,600 |
+| Effective columns and prepared rank | 1,200 | 1,800 |
+| Median online wall time, ms | 0.134771 | 0.0552085 |
+| Median reusable setup wall time, ms | 5,843.153 | 12,545.821 |
+| Maximum observed peak RSS, GiB | 8.28 | 17.44 |
+| Verified runs | 24/24 | 24/24 |
+
+The confirmation-only paired baseline/C1800 geometric online ratio is
+**2.381695**, with a target-bootstrap 95% interval of **[2.154753,
+2.619848]** from 20,000 resamples. Its lower endpoint exceeds the frozen
+2.0 gate. The per-target ratios range from 1.434 to 3.449. The geometric
+S3-call ratio is 1.531644, showing that the complete implementation change
+contributes more than the reduction in calls alone.
+
+For context, `combine.py` checks the disjoint eight-target development and
+24-target confirmation receipts before reporting a 32-target geometric ratio
+of **2.326693** with interval **[2.138091, 2.524331]**. The independently
+held-out 24-target result above is the confirmation gate. Both panels used a
+macOS host without an exclusive physical CPU partition receipt; their
+`controlled_speedup` fields remain null.
+
+`local/raw_confirmation24.tar.zst` contains all 48 source reports, process
+streams, ledger, and Sage replay inputs and receipt. Its SHA-256 is
+`c70b53740f4d9fda4657c674a7239bfcd60da5b236681ebcd93b570aee901325`.
+`local/analysis.json`, `local/sage_replay.json`, and
+`local/combined_analysis.json` bind the audited results to their freeze,
+ledger, and scripts. To inspect the archive, run:
+
+```sh
+zstd -dc experiments/koblitz-s3-c1800-n41-confirmation24-20261010/local/raw_confirmation24.tar.zst | tar -tf -
+```

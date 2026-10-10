@@ -1,0 +1,21 @@
+{
+  "combined_lower_endpoint_at_least_twofold": true,
+  "combined_target_count": 32,
+  "confirmation_analysis_sha256": "b673fd725b3655f851f5fc17d23ba2fd3236aabcd05d7b327bfa817e359c2483",
+  "confirmation_freeze_sha256": "f5a04b48380bb7fb412f0bb6298dd9f38ed081e82452489032c87d118c68d1e9",
+  "confirmation_only_lower_endpoint_at_least_twofold": true,
+  "confirmation_target_count": 24,
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n41_c1200_c1800_combined32_analysis_v1",
+  "log_ratio_sample_sd": 0.24066214103156644,
+  "online_geometric_baseline_over_expanded": 2.326692787963558,
+  "online_target_bootstrap_95pct": [
+    2.1380911220253,
+    2.5243305675230983
+  ],
+  "pilot_analysis_sha256": "256e51d9dd4cd51098d9802e51c412a794829cf833db29b02e2e05774fde0064",
+  "pilot_freeze_sha256": "b4a34951a02efe934f9292293da7e768f612de32f07196cca8d7114112ff1022",
+  "pilot_target_count": 8,
+  "script_sha256": "622cae10f5fd149306ee7b09cc5d6faee05cb1195308a4ff8eaa391a03b5646a"
+}
