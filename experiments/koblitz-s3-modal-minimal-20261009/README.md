@@ -10,27 +10,51 @@ and process perf diagnostics where available. A later pilot can use twelve
 independent targets per curve to estimate variance and a fixed confirmation
 size.
 
-Build only these two examples for `x86_64-unknown-linux-musl` from the
+Build only these two examples for `x86_64-unknown-linux-gnu` from the
 checked-out source and `Cargo.lock`:
 
 1. `s3_partial_prepared_parallel_targetspan` for the C244/C396 baselines.
 2. `s3_partial_prepared_fullrank_targetspan` for the C800/C1200 candidates.
 
 [`build_linux.py`](build_linux.py) checks both frozen source hashes and the
-library tree ID, invokes Cargo offline through a portable Zig musl linker,
+library tree ID, invokes Cargo offline through a Zig linker targeting glibc
+2.28 (compatible with the Debian guest),
 and writes its build log and binary hashes outside the repository. Run it
 after the active local timed panel ends, so compilation does not add CPU
 contention to that panel.
+The [build receipts and logs](build/) preserve the successful GNU cross-build
+and the earlier local toolchain and musl-link attempts. The successful
+executables have SHA-256 values
+`e999feba1bba11f8628493a6fe171f5d948d632aa87af05a78f06fd6fbce97d1`
+and `18186665ee35c837ac8248ce818ee74d3513de50d8909eb625e553b9870afca5`.
 
-The Modal image transfer inventory will contain those two Linux executables
-and one canonical JSON bundle of the selected public points, workload IDs,
-candidate IDs, and scalar replay fixtures. The runner code is a separate
-small Python command. The remote VM receives no repository tree, Cargo
-cache, Sage installation, private credentials, or existing result archive.
-Freeze the exact binary and bundle SHA-256 values and the Modal resource and
-timeout envelope before creating one Sandbox. Do not repeat an ambiguous
-Sandbox creation automatically. Terminate the Sandbox after retrieving its
-receipt.
+[`prepare_bundle.py`](prepare_bundle.py) freezes the two public T181 points,
+workload IDs, candidate IDs, and expected factor-base digests in one 2,411-byte
+JSON file. The known-scalar fixtures remain local and
+[`analyze.py`](analyze.py) compares them with the recovered scalars after the
+guest receipt returns. The Modal image transfer inventory contains exactly
+the two Linux executables and that JSON bundle. The
+[`remote_pilot.py`](remote_pilot.py) text is passed as a Python command; it
+captures per-run affinity, CPU and memory pressure, NUMA topology and sampled
+page placement, cgroup throttling, steal ticks, interrupts, memory, and
+process IPC where available. The analyzer assigns a transparent 16-check
+guest diagnostic score, counting unavailable checks as zero, and records each
+failed or unavailable check. IPC is retained as a whole-process mechanism
+diagnostic and does not enter the fidelity score. The guest receives no
+repository tree, Cargo cache, Sage installation, private credentials, or
+existing result archive.
+
+[`pilot_modal.py`](pilot_modal.py) verifies a frozen transfer manifest before
+one Sandbox creation attempt. The requested envelope is 16 vCPUs, 32 GiB,
+and a 1,200-second Sandbox timeout, with a 1,080-second workload deadline and
+240-second cap per process. It blocks guest networking and terminates the
+Sandbox after retrieving its compressed raw receipt. An attempt marker is
+written before creation so an ambiguous create is never retried automatically.
+The maximum billed resource envelope at Modal's published rate is roughly
+$1.02 for the full 1,200 seconds, plus image-build or storage charges if
+applicable.
+[`PILOT_FREEZE.json`](PILOT_FREEZE.json) binds the exact 3,444,075-byte
+transfer, the build and runner hashes, the public bundle, and the resource cap.
 
 The previous [source-free VM probe](../koblitz-s3-modal-host-probe-20261009/RESULT.md)
 verified guest process perf access and affinity but found no host-wide

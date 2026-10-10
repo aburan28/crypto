@@ -15,7 +15,7 @@ import time
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-TARGET = "x86_64-unknown-linux-musl"
+TARGET = "x86_64-unknown-linux-gnu"
 BUILD_DIR = Path("/private/tmp/s3-modal-minimal-build")
 EXAMPLES = (
     "s3_partial_prepared_parallel_targetspan",
@@ -45,19 +45,39 @@ def build(receipt_path: Path, log_path: Path) -> None:
     zig = shutil.which("zig")
     if zig is None:
         raise FileNotFoundError("zig cross-linker is required")
+    # The Homebrew rustc on PATH has no Linux standard library. Select the
+    # rustup toolchain whose target library is actually installed.
+    sysroot = Path(command("rustup", "run", "stable", "rustc", "--print", "sysroot"))
+    rustc = sysroot / "bin" / "rustc"
+    cargo = sysroot / "bin" / "cargo"
+    target_lib = sysroot / "lib" / "rustlib" / TARGET / "lib"
+    if not (rustc.is_file() and cargo.is_file() and
+            any(target_lib.glob("libcore-*.rlib"))):
+        raise FileNotFoundError(f"installed Rust toolchain lacks {TARGET}: {sysroot}")
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
-    linker = BUILD_DIR / "zig-cc-x86_64-musl"
+    linker = BUILD_DIR / "zig-cc-x86_64-gnu"
     archiver = BUILD_DIR / "zig-ar"
-    linker.write_text(f'#!/bin/sh\nexec "{zig}" cc -target x86_64-linux-musl "$@"\n')
+    linker.write_text(
+        "#!/usr/bin/env python3\n"
+        "import os, sys\n"
+        f"zig = {zig!r}\n"
+        "args = [arg for arg in sys.argv[1:] "
+        "if arg != '--target=x86_64-unknown-linux-gnu']\n"
+        "os.execv(zig, [zig, 'cc', '-target', 'x86_64-linux-gnu.2.28', *args])\n"
+    )
     archiver.write_text(f'#!/bin/sh\nexec "{zig}" ar "$@"\n')
     linker.chmod(0o755)
     archiver.chmod(0o755)
     env = dict(os.environ)
     env["CARGO_TARGET_DIR"] = str(BUILD_DIR / "target")
-    env["CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER"] = str(linker)
-    env["CC_x86_64_unknown_linux_musl"] = str(linker)
-    env["AR_x86_64_unknown_linux_musl"] = str(archiver)
-    argv = ["cargo", "build", "--offline", "--locked", "--release", "--target", TARGET]
+    env["RUSTC"] = str(rustc)
+    env["CARGO_BUILD_JOBS"] = "8"
+    env["ZIG_GLOBAL_CACHE_DIR"] = str(BUILD_DIR / "zig-global-cache")
+    env["ZIG_LOCAL_CACHE_DIR"] = str(BUILD_DIR / "zig-local-cache")
+    env["CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER"] = str(linker)
+    env["CC_x86_64_unknown_linux_gnu"] = str(linker)
+    env["AR_x86_64_unknown_linux_gnu"] = str(archiver)
+    argv = [str(cargo), "build", "--offline", "--locked", "--release", "--target", TARGET]
     for name in EXAMPLES:
         argv += ["--example", name]
     started = time.time_ns()
@@ -80,7 +100,9 @@ def build(receipt_path: Path, log_path: Path) -> None:
         "started_unix_ns": started, "finished_unix_ns": finished,
         "log_sha256": sha(log_path),
         "host": platform.platform(),
-        "rustc": command("rustc", "--version", "--verbose"),
+        "rustc": command(str(rustc), "--version", "--verbose"),
+        "rust_sysroot": str(sysroot),
+        "cargo_build_jobs": 8,
         "zig": command(zig, "version"),
         "target": TARGET, "library_source_tree_git_oid": LIBRARY_TREE_OID,
         "source_sha256": SOURCE_HASHES,

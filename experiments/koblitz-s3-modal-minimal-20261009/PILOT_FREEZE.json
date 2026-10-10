@@ -1,0 +1,27 @@
+{
+  "analyzer_sha256": "6e8364f96d9ce25ac21408eec7aaeb1fd7cfd8c15fe2a0c45984a166e8783e62",
+  "binary_sha256": {
+    "baseline": "e999feba1bba11f8628493a6fe171f5d948d632aa87af05a78f06fd6fbce97d1",
+    "expanded": "18186665ee35c837ac8248ce818ee74d3513de50d8909eb625e553b9870afca5"
+  },
+  "block_network": true,
+  "build_receipt_sha256": "2474a8bafa3687bafa23fc21858faf03fd2b04da4e0ebe7e43b681ffcfc0c66a",
+  "controlled_speedup": null,
+  "cpu_count": 16,
+  "host_exclusive_partition_receipt": null,
+  "image": "modal.Image.debian_slim",
+  "kind": "s3_modal_minimal_pilot_freeze_v1",
+  "memory_mib": 32768,
+  "minimum_run_seconds": 30,
+  "modal_sdk_version": "1.2.4",
+  "per_run_timeout_seconds": 240,
+  "pilot_runner_sha256": "740e87737c7fcff246de989e135eb20988d6fdbf5b44c2c102addfc534c8f3b8",
+  "public_bundle_sha256": "364b7cd54926bf2dfa9d6659398d5495981c050074222b792fbbe243e805ae58",
+  "remote_runner_sha256": "816afc71fdcbf24b4b0f0d2419f4ea50b1c074940ff158445bb13559f4905a0b",
+  "sandbox_creation_attempts": 1,
+  "sandbox_timeout_seconds": 1200,
+  "transferred_bytes": 3444075,
+  "transferred_file_count": 3,
+  "vm_runtime": true,
+  "workload_deadline_seconds": 1080
+}

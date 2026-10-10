@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+    "build",
+    "--offline",
+    "--locked",
+    "--release",
+    "--target",
+    "x86_64-unknown-linux-musl",
+    "--example",
+    "s3_partial_prepared_parallel_targetspan",
+    "--example",
+    "s3_partial_prepared_fullrank_targetspan"
+  ],
+  "binaries": {},
+  "cargo_build_jobs": 8,
+  "cargo_lock_sha256": "4ddc5ef76119493b41352c64a551fbd3fea3b5789644949ee775975b38150bca",
+  "exit_code": 101,
+  "finished_unix_ns": 1791612862535748000,
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "kind": "s3_modal_minimal_cross_build_v1",
+  "library_source_tree_git_oid": "0a574800502e67882d8f8f88a846c1e80ee795fd",
+  "log_sha256": "9022330998c4ed3addc5690b43c43f23a17dbe0227fe4acf04e5b53e527e41ba",
+  "rust_sysroot": "/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8",
+  "source_sha256": {
+    "s3_partial_prepared_fullrank_targetspan": "0ce2fa5f52c15776fa9cd80c173e14c3c405815b6fb2628d6e75d304b7af2559",
+    "s3_partial_prepared_parallel_targetspan": "71f527cf7d4f401ad252a6f5ad3fa504c3f8becac9567e254e10d0b48cd75cfa"
+  },
+  "started_unix_ns": 1791612694179745000,
+  "target": "x86_64-unknown-linux-musl",
+  "zig": "0.16.0"
+}
