@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Experiment A1 at m = 31 (RESEARCH_ISOGENY_FIBERS_ECDLP.md §7.A1) on the
-# ledger cell icv1-f2m31-tm90707-c95f16f5 (K_0 / GF(2^31)), with the
+# ledger cell icv1-f2m31-tm90707-c95f16f5 (icv1-f2m31-tm90707-c95f16f5), with the
 # same seed, repeats and rho reference as research/koblitz_symmetrised_e2e_20260927.
 #
 # Arms (all on the divisor 0;1;2 subspace, dimension 11, unless noted):
