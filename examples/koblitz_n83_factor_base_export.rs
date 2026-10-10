@@ -1187,6 +1187,15 @@ fn main() -> Result<()> {
             )?;
             println!("{receipt}");
         },
+        Some("primary-chain-build")=>{
+            if args.len()!=12 { return Err("primary-chain-build PANEL_DIR K POLICY SEED M IDENTITY_MASK MAX_VARIABLES MAX_DOMAIN_CLAUSES MEMORY_MIB NEW_OUTPUT_JSON (requires hard cgroup memory and external wall caps)".into()); }
+            let receipt=primary_adapter::chain_capacity_cli(
+                Path::new(&args[2]),args[3].parse()?,&args[4],args[5].parse()?,
+                args[6].parse()?,args[7].parse()?,args[8].parse()?,args[9].parse()?,
+                args[10].parse()?,Path::new(&args[11]),
+            )?;
+            println!("{receipt}");
+        },
         Some("primary-cold")=>{
             if args.len()!=9 { return Err("primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()); }
             let summary=primary_adapter::run_cli(
@@ -1195,7 +1204,7 @@ fn main() -> Result<()> {
             )?;
             println!("{summary}");
         },
-        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS | v2-replay-one PANEL_DIR BUDGET_SECONDS | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-s3-probe PANEL_DIR K POLICY SEED ordered|unordered MAX_STATES MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
+        _=>return Err("usage: plan output.json | case ordinal | pilot NEW_DIRECTORY budget_seconds | v2-construct-one NEW_DIRECTORY A POLICY K SEED BUDGET_SECONDS | v2-replay-one PANEL_DIR BUDGET_SECONDS | replay directory | probes directory budget_seconds | upload directory | cold PANEL_DIR K MAX_SECONDS [unordered] | primary-adapter-check PANEL_DIR K NEW_OUTPUT_JSON | primary-sat-build PANEL_DIR K MEMORY_MIB NEW_OUTPUT_JSON | primary-s3-probe PANEL_DIR K POLICY SEED ordered|unordered MAX_STATES MEMORY_MIB NEW_OUTPUT_JSON | primary-chain-build PANEL_DIR K POLICY SEED M IDENTITY_MASK MAX_VARIABLES MAX_DOMAIN_CLAUSES MEMORY_MIB NEW_OUTPUT_JSON | primary-cold PANEL_DIR K M STRATEGY MAX_TRIALS BUDGET_SECONDS NEW_RUN_DIR".into()),
     }
     Ok(())
 }

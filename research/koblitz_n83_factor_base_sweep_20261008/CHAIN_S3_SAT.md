@@ -47,3 +47,36 @@ cgroup-guarded retained
 model-construction receipt with the exact stored base domain. A subsequent
 search must record unsuccessful patterns, solver work, original field/group
 replay and rank novelty before the backend can enter a versioned sweep.
+
+## Retained-base construction gate
+
+`chain_capacity_supervisor.py` now accepts a replayed primary panel object,
+K=64/256/600, a frozen policy and seed, arity five or six, and one
+intermediate-identity mask. It freezes a clean source commit and the four
+source files used by the worker, hashes a Linux ELF binary, and launches the
+worker without network under a hard Docker memory ceiling, zero swap and an
+external process-wall deadline. The worker independently checks the cgroup
+and compiled source snapshot, replays the selected base and public target,
+preflights the exact finite-coordinate trie, and either records a variable or
+domain-clause cap or constructs that one SAT pattern. It never calls the SAT
+solver. The outer receipt retains timeouts, memory exits, changed frozen
+inputs and malformed worker receipts as separate outcomes. Synthetic guard
+tests exercise those paths, but no retained N83 model has been launched under
+this gate. A source estimate or capped outcome cannot rank a factor base.
+
+After a separately authorized resource tranche, use an isolated clean
+checkout and a source-matched static Linux worker. The invocation is:
+
+```sh
+python3 research/koblitz_n83_factor_base_sweep_20261008/chain_capacity_supervisor.py \
+  --panel /absolute/retained/pilot-01 --columns 64 \
+  --policy public_x_hash --seed 2026100801 --summands 5 --identity-mask 0 \
+  --max-variables 100000 --max-domain-clauses 1000000 \
+  --wall-seconds 60 --memory-mib 4096 --binary /absolute/linux/worker \
+  --output-dir /absolute/new/receipt-directory
+```
+
+The initial gate should use one pattern and one base. Expansion to every
+identity pattern, solving, rank, and a versioned cross-base sweep depends on
+its measured memory and wall receipt. The capacity wall time under Docker
+emulation is not a matched cold-runtime measurement.

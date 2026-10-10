@@ -10,6 +10,9 @@ use super::{
 };
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+use crypto_lib::cryptanalysis::binary_semaev_chain_sat::{
+    chain_s3_max_variables, finite_domain_clause_count, ChainedS3Encoding,
+};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_union_s4_encoding, koblitz_index_calculus_dlp_with_factor_base_and_progress,
     koblitz_point_count, point_key, DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase,
@@ -401,6 +404,122 @@ fn frozen_primary_probe_source() -> Result<(String, &'static str)> {
         checked_primary_probe_source(Path::new(env!("CARGO_MANIFEST_DIR")))?;
         Ok((commit, "clean_checkout"))
     }
+}
+
+/// Pin the retained-base importer and both layers of the chained-S3 model.
+/// The outer guard freezes these sources at a clean commit before launching
+/// the Linux worker. The worker compares the snapshot to its compiled bytes.
+fn frozen_chain_source() -> Result<(String, &'static str)> {
+    let files: [(&str, &[u8]); 4] = [
+        ("examples/koblitz_n83_factor_base_export.rs", include_bytes!("../../examples/koblitz_n83_factor_base_export.rs")),
+        ("research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs", include_bytes!("primary_adapter.rs")),
+        ("src/cryptanalysis/binary_semaev_chain_sat.rs", include_bytes!("../../src/cryptanalysis/binary_semaev_chain_sat.rs")),
+        ("src/cryptanalysis/koblitz_index_calculus.rs", include_bytes!("../../src/cryptanalysis/koblitz_index_calculus.rs")),
+    ];
+    let (root, commit, mode) = if let Some(path) = std::env::var_os("ICV1_FROZEN_SOURCE_DIR") {
+        let root = std::path::PathBuf::from(path);
+        let attestation: Value = serde_json::from_slice(&fs::read(root.join("attestation.json"))?)?;
+        let commit = attestation["source_commit"].as_str().ok_or("chain source snapshot lacks a commit")?;
+        if attestation["schema"] != "n83.chain-s3-source-attestation/v1"
+            || attestation["status_clean"] != true
+            || commit.len() != 40
+            || !commit.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+            return Err("invalid chained-S3 source attestation".into());
+        }
+        (root, commit.to_owned(), "supervised_snapshot")
+    } else {
+        (std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")), frozen_v2_source_commit()?, "clean_checkout")
+    };
+    for (path, compiled) in files {
+        if blake3::hash(&fs::read(root.join(path))?) != blake3::hash(compiled) {
+            return Err("compiled chained-S3 source differs from frozen source".into());
+        }
+    }
+    Ok((commit, mode))
+}
+
+/// Construct one identity-pattern model from an exact replayed primary base.
+/// This is a capacity diagnostic only: no SAT search or relation claim occurs.
+/// A hard cgroup memory cap is mandatory here; the caller supplies the wall cap.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn chain_capacity_cli(
+    root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
+    identity_mask: u32, max_variables: u32, max_domain_clauses: usize,
+    memory_mib: u64, output: &Path,
+) -> Result<Value> {
+    if ![64, 256, 600].contains(&columns) || !(5..=6).contains(&m)
+        || identity_mask >= (1u32 << (m - 2))
+        || max_variables == 0 || max_domain_clauses == 0 {
+        return Err("chained-S3 capacity parameters outside supported domain".into());
+    }
+    let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
+    let (source_commit, source_attestation_mode) = frozen_chain_source()?;
+    let start = Instant::now();
+    let (base, row, manifest_hash) = load_panel_selected(root, columns, policy, seed)?;
+    let base_import_ms = start.elapsed().as_secs_f64() * 1000.0;
+    let (target, corpus_hash) = public_target(root, &base.curve)?;
+    let target_validation_ms = start.elapsed().as_secs_f64() * 1000.0 - base_import_ms;
+    let mut codes: Vec<BigUint> = base.factor_base.subspace.iter().map(F2mElement::to_biguint).collect();
+    codes.sort_unstable();
+    codes.dedup();
+    if codes.len() != 83 * columns {
+        return Err("primary coordinate domain does not contain 83 distinct x values per column".into());
+    }
+    let required_variables = chain_s3_max_variables(83, m).ok_or("unsupported chained-S3 arity")?;
+    let required_domain_clauses = finite_domain_clause_count(&codes, 83, m).ok_or("invalid chained-S3 domain")?;
+    let model_start = Instant::now();
+    let mut enc = None;
+    let status = if required_variables > u64::from(max_variables) {
+        "UNKNOWN_variable_cap"
+    } else if required_domain_clauses > max_domain_clauses {
+        "UNKNOWN_domain_clause_cap"
+    } else {
+        let target_x = match &target { BinaryPoint::Affine { x, .. } => Some(x), BinaryPoint::Infinity => None };
+        let mut built = ChainedS3Encoding::build(
+            m, &base.curve.curve.irreducible, &base.curve.curve.b,
+            target_x, identity_mask, max_variables,
+        ).map_err(|_| "chained-S3 model build failed after preflight")?;
+        built.constrain_summands(&codes, max_domain_clauses)
+            .map_err(|_| "chained-S3 finite-domain install failed after preflight")?;
+        enc = Some(built);
+        "PASS_model_construction_only"
+    };
+    let model_construction_ms = model_start.elapsed().as_secs_f64() * 1000.0;
+    let cgroup_peak_bytes: u64 = fs::read_to_string("/sys/fs/cgroup/memory.peak")?.trim().parse()?;
+    let mut receipt = json!({
+        "schema":"n83.chain-s3-capacity-worker/v1", "study":STUDY, "status":status,
+        "curve_a":0, "fixture":0, "orbit_columns":columns, "policy":policy, "seed":seed,
+        "summands":m, "identity_mask":identity_mask, "object":row["object"],
+        "point_set_blake3":row["point_set_blake3"], "panel_manifest_blake3":manifest_hash,
+        "public_corpus_canonical_json_blake3":corpus_hash,
+        "source_commit":source_commit, "source_attestation_mode":source_attestation_mode,
+        "source_exporter_blake3":blake3::hash(include_bytes!("../../examples/koblitz_n83_factor_base_export.rs")).to_hex().to_string(),
+        "source_adapter_blake3":blake3::hash(include_bytes!("primary_adapter.rs")).to_hex().to_string(),
+        "source_chain_blake3":blake3::hash(include_bytes!("../../src/cryptanalysis/binary_semaev_chain_sat.rs")).to_hex().to_string(),
+        "source_index_calculus_blake3":blake3::hash(include_bytes!("../../src/cryptanalysis/koblitz_index_calculus.rs")).to_hex().to_string()
+    });
+    let measurements = json!({
+        "memory_cgroup_limit_bytes":memory_limit_bytes, "memory_cgroup_swap_limit_bytes":0,
+        "memory_cgroup_peak_bytes":cgroup_peak_bytes,
+        "max_variables":max_variables, "max_domain_clauses":max_domain_clauses,
+        "required_max_variables":required_variables, "required_domain_clauses":required_domain_clauses,
+        "legal_x_coordinates":codes.len(),
+        "sat_variables":enc.as_ref().map(|e| e.solver.n_vars()),
+        "sat_clauses":enc.as_ref().map(|e| e.solver.n_clauses()),
+        "sat_xor_rows":enc.as_ref().map(|e| e.solver.n_xors()),
+        "sat_and_gates":enc.as_ref().map(|e| e.n_and_gates),
+        "sat_s3_nodes":enc.as_ref().map(|e| e.n_s3_nodes),
+        "base_import_ms":base_import_ms, "target_validation_ms":target_validation_ms,
+        "model_construction_ms":model_construction_ms,
+        "process_wall_ms":start.elapsed().as_secs_f64()*1000.0, "process_usage":process_usage(),
+        "solver_search_executed":false, "relation_stage_executed":false,
+        "rank_stage_executed":false, "total_index_calculus_runtime_ms":Value::Null,
+        "selected_best_total_runtime":Value::Null
+    });
+    receipt.as_object_mut().ok_or("invalid chained-S3 receipt")?
+        .extend(measurements.as_object().ok_or("invalid chained-S3 measurements")?.clone());
+    write_new_json(output, &receipt)?;
+    Ok(receipt)
 }
 
 /// Probe the published primary point with a replayed retained base through
