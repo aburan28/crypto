@@ -1,0 +1,52 @@
+{
+  "argv": [
+    "/private/tmp/s3-c2800-prefetch-build/release/examples/s3_partial_prepared_fullrank_c2800earlyprefetch_targetspan",
+    "53",
+    "0",
+    "2800",
+    "20260928",
+    "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-prepared-20261009/experiments/koblitz-s3-crosscurve-20261009/holdout/n53/T025/public_target.json",
+    "/private/tmp/s3-c2800-earlyprefetch-t025-20261010/report.json",
+    "14",
+    "2800",
+    "1"
+  ],
+  "binary_sha256": "12c994b43ecbc29745f10a0415f1705255a24b4178fc8fa633bc80835cf05a35",
+  "candidate_id": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h0885f0c36bda",
+  "controlled_speedup": null,
+  "error": null,
+  "exit_code": 0,
+  "finished_unix_ns": 1791617412688673000,
+  "freeze_sha256": "04d664c7d6986ceb084beb2f58fc7568f493ed6fa9b7d895346de9e4b4b44a27",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_c2800_earlyprefetch_t025_control_receipt_v1",
+  "machine": "arm64",
+  "memory_within_envelope": true,
+  "outer_wall_ns": 105382957000,
+  "peak_rss_bytes": 25790038016,
+  "phase_ok": true,
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "raw_report_sha256": "fd7e9cb992a21caace1cebc163ddef6dffea3b9c8adf6ffc31d2ee60dc1b6937",
+  "reference_differing_keys": [
+    "timing_ms"
+  ],
+  "resource_counters": {
+    "involuntary_context_switches": 465175,
+    "major_page_faults": 0,
+    "minor_page_faults": 1692915,
+    "peak_rss_bytes": 25790038016,
+    "ru_maxrss_raw": 25790038016,
+    "ru_maxrss_units": "bytes",
+    "system_cpu_seconds": 7.439128,
+    "user_cpu_seconds": 331.795327,
+    "voluntary_context_switches": 23
+  },
+  "resource_probe": "resource.getrusage(RUSAGE_CHILDREN)",
+  "run_id": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h0885f0c36bdaWa238237883e9R1",
+  "source_sha256": "ac8453008ef252c00651499a81a6c6e2942977896d1cc425c7f007786ace12f5",
+  "started_unix_ns": 1791617307305716000,
+  "stdout_matches_report": true,
+  "unexpected_reference_differences": [],
+  "verified": true,
+  "workload_id": "a238237883e9"
+}
