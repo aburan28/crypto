@@ -1,0 +1,60 @@
+{
+  "base_file_sha256": "53c9c8454be7f1454c96295ab3d00848bdf6bbda6a9266d47fc2dc1b18e0b22d",
+  "base_hash_blake3": "7af2460c8b5a2c29f9d1aa7fefecbcde3a6ce761293d0dab0cecfc3bc980b973",
+  "candidate_ids": {
+    "control": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0hb3fe332f1d0f",
+    "symmetry": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h0fce7cbb5d10"
+  },
+  "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+  "curve_id": "EC1N53Ce0hb097de99be9a",
+  "freeze_source_sha256": "8d54d59e74b2eb504e70587ffb6dab43ea0d49bf43d2f1b537b4c00d2b06e8f3",
+  "generator_args": [
+    "53",
+    "0",
+    "signed_frobenius",
+    "1",
+    "strong",
+    "700001",
+    "hash:53271307"
+  ],
+  "generator_binary_sha256": "4a5f9bcae529e9407c7664a1ae6b74558d38c5aaa4ee331d06f6a61549c5b230",
+  "generator_seed": 700001,
+  "generator_source_sha256": "e6484ed5fb0ecc1e3382b0cd8b1a5f517582d4eb3aa2efbcef7755e0371e01ee",
+  "ic_binary_sha256": "1631607668fd427209e73802f9f0d131b4fd3f94d3527aadbc22e163503c2485",
+  "protocol_sha256": "07b9a32b37828712ed5e664006efc0e403539a6402019e457064582e91db45d5",
+  "public_hash_seed": 53271307,
+  "rank_seeds": [
+    532053,
+    532054,
+    532055,
+    532056,
+    532057,
+    532058
+  ],
+  "resource_envelope": {
+    "observed_rss_cap_bytes": 17179869184,
+    "threads": 1,
+    "wall_cap_seconds": 60
+  },
+  "rho_binary_sha256": "f6a1be30979fda8d57fac4dc571c69c76af0cd7cff18e102191de0f1b06ac133",
+  "rho_config": {
+    "distinguished_bits": 4,
+    "jump_count": 32,
+    "lanes": 32,
+    "rung": 3,
+    "target_count": 1
+  },
+  "rho_seeds": [
+    531153,
+    531154,
+    531155,
+    531156,
+    531157,
+    531158
+  ],
+  "rho_source_sha256": "575c1739f37e24d9130cc2fef8ea2c7554c762cf822e52708a13263b2875ccb0",
+  "schema": "n53-pair-symmetry-prep-v1",
+  "source_parent_commit": "9be831f4ec75c9a18334a67033333aeeb4b42fad",
+  "source_sha256": "b7b290961b0137ce728b80b9ff92934013328c930dbf32fe0be00c01ae788471",
+  "timing_class": "exploratory_shared_host"
+}
