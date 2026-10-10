@@ -78,6 +78,11 @@ class V2ObjectSupervisorTests(unittest.TestCase):
         self.assertIn("--read-only", command)
         self.assertIn("--pull", command)
         self.assertIn("never", command)
+        self.assertEqual(
+            [command[index + 1] for index, value in enumerate(command[:-1]) if value == "--env"],
+            ["GIT_CONFIG_COUNT=1", "GIT_CONFIG_KEY_0=safe.directory",
+             "GIT_CONFIG_VALUE_0=/repo/worktrees/case"],
+        )
         self.assertEqual(command[-8:], [
             "/worker", "v2-construct-one", "/out/object", "0",
             "public_x_hash", "1182", str(guard.SEEDS[0]), "5",
