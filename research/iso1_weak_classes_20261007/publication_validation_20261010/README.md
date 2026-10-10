@@ -19,6 +19,13 @@ After no response during local validation, the documented fallback is recorded
 at [the resolution notice](https://github.com/aburan28/crypto/pull/1588#issuecomment-6094216972).
 The base branch is merged into the PR head without rebase or force push.
 
+Copilot subsequently completed the same base merge in commit
+`f9ffd4b5d619dbd277f7464c723b57ff372ae7c8`. Its canonical catalogue rebuild was
+reviewed and integrated without overwriting the shared branch. All 302 study
+records retain their exact model JSON, trace, order and invariant, and the
+original experiment subtree has no changes. The focused tests were rerun and
+pass; their additional receipts use the `copilot_focused` prefix.
+
 The prescribed full-library command, `cargo test --release --lib`, was run
 after materializing its tracked sources and eight compile-time fixtures. It
 compiled and began 3,923 tests. Seven failures were reported before the process
