@@ -38,3 +38,39 @@ python3 experiments/koblitz-s3-c1800-matchedsource-n53-20261010/analyze.py \
   --ledger /private/tmp/s3-n53-c1800-matchedsource8-20261010/raw.jsonl \
   --output experiments/koblitz-s3-c1800-matchedsource-n53-20261010/local/analysis.json
 ```
+
+## Result
+
+All 32 fresh-process runs reached complete pre-target rank, passed native
+group verification, and recovered the frozen scalar. Checked Sage
+independently replayed all 32 scalars against the eight public points. The
+same executable and target kernel were used in both arms.
+
+| N53 measure | C1200, same executable | C1800, same executable |
+| --- | ---: | ---: |
+| Actual usable base points | 127,200 | 190,800 |
+| Prepared rank / verified preparation relations | 1,200 / 2,338 | 1,800 / 4,970 |
+| Root-table slots | 268,435,456 | 536,870,912 |
+| Median target S3 calls | 584 | 192 |
+| Median charged target PDP, ms | 0.1407705 | 0.0547085 |
+| Median online wall time, ms | 0.174417 | 0.098250 |
+| Median reusable setup wall time, ms | 7,071.720 | 18,072.961 |
+| Maximum observed peak RSS, GiB | 11.19 | 23.44 |
+
+The paired C1200/C1800 geometric online ratio is **2.056889**. A 20,000
+resample bootstrap over target identities gives **[1.246035, 3.738364]**;
+resampling one of the two timings per arm within each selected target gives
+the repeat-aware 95% interval **[1.219081, 3.757180]**. The frozen 2×
+point-estimate gate passed and the lower-endpoint gate did not. The
+geometric target S3-call ratio is **2.689628**. The larger N53 index
+reduces decomposition work on some targets substantially, while other
+targets see similar online time; its setup and memory costs are higher.
+
+Independent phase medians need not add to the median total; each report has
+a checked five-phase sum. `local/raw_matchedsource8.tar.zst` contains all
+32 reports, stdout, stderr, and the ledger. Its SHA-256 is
+`0648d18a1976ced539e2ab0b2a2ce5143e70c7307b608ce13ab8e86bfbd8cef3`.
+`local/analysis.json`, `local/sage_runtime_info.json`, and
+`local/sage_replay.json` bind the result and checked Sage replay to the
+frozen inputs. The 34 fresh N53 targets are the next distribution check;
+the bounded Modal pilot remains prepared pending the reviewed transfer.
