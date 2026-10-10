@@ -63,7 +63,7 @@ fi
 # available, then fall back to the Sage project's conda-forge installation.
 sage_works() {
   command -v sage >/dev/null 2>&1 &&
-    sage -python -c 'from sage.all import GF; assert GF(256).cardinality() == 256' >/dev/null 2>&1
+    sage -c 'assert GF(256).cardinality() == 256' >/dev/null 2>&1
 }
 
 if ! sage_works; then
@@ -97,12 +97,20 @@ if ! sage_works; then
   else
     micromamba create -y -p "$sage_prefix" -c conda-forge sage
   fi
-  ln -sfn "$sage_prefix/bin/sage" "$bin_dir/sage"
+  # Activate the conda environment for each invocation instead of calling
+  # its Sage executable through a bare symlink.
+  micromamba_path="$(command -v micromamba)"
+  sage_wrapper="$(mktemp "$bin_dir/.sage.XXXXXX")"
+  printf '#!/usr/bin/env bash\nexec %q run -p %q %q "$@"\n' \
+    "$micromamba_path" "$sage_prefix" "$sage_prefix/bin/sage" > "$sage_wrapper"
+  chmod 755 "$sage_wrapper"
+  mv -f "$sage_wrapper" "$bin_dir/sage"
   hash -r
 fi
 
 if ! sage_works; then
-  echo "SageMath installation finished without a working sage command" >&2
+  echo "SageMath installation finished, but its finite-field check failed:" >&2
+  sage -c 'assert GF(256).cardinality() == 256' >&2 || true
   exit 1
 fi
 
