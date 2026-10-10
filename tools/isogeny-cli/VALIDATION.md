@@ -1,7 +1,34 @@
 # Dedicated executable validation, 2026-10-09
 
+The optimization and coverage continuation is recorded in
+[`research/isogeny_coverage_optimization_20261009/RESULTS.md`](../../research/isogeny_coverage_optimization_20261009/RESULTS.md).
+The final canonical catalogue contains 349 models: 204 prime, 72 binary, 60 Koblitz,
+4 subfield and 9 extension models. Of these, 174 support short-Weierstrass prime-field
+construction through 640 bits and 146 have complete public generator data for
+independent replay. Montgomery/Edwards, binary and extension map adapters remain
+unresolved; their known-order screening and catalogue records are available.
+
+| Continuation check | Evidence and result |
+| --- | --- |
+| Dedicated CLI tests | 58 passed |
+| Independent field reference tests | 3 passed, including unchanged arithmetic and BigUint references through P521 |
+| Existing standalone algorithm suite | 114 passed |
+| Wider-field full enumeration | P384/19 and P521/7 each produced two independently certified maps with 20 scalar-transport checks per map |
+| High-degree replay through the optimized field | P224/1471 passed |
+| Canonical model certificates | 349 verified, 0 invalid, 0 unsupported |
+| Matched instruction-count panels | Five rounds per panel; screening used 96.814% fewer instructions, P224 verification used 6.307% fewer, and the full P192/73 search used 1.185% more |
+
+These measurements use native ARM Linux inside the local Docker VM with the same
+compiler, release flags and frozen 345-model inputs. They do not establish native
+macOS wall-time gains. Candidate lists, certificates and full-search map bytes match
+the baseline. The report manifest binds the study, source and canonical artifacts.
+The root library still has the previously recorded 643 compiler errors; hosted CI
+and release publication remain pending.
+
+## Initial packaging validation
+
 The CLI and release integration were implemented in commit `5bcc591f3`. The underlying
-research sources and canonical curve records remain unchanged. Native release builds
+research sources and canonical curve records remained unchanged in that packaging phase. Native release builds
 use Rust/Cargo 1.93.1; local validation used an Apple M4 Pro running macOS 26.6.
 
 | Requirement | Evidence and result |
