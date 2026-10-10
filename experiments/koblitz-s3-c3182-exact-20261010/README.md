@@ -29,3 +29,36 @@ Its gates require rank 3182 before target input, the exact packed layout,
 all five charged online phases, the expected scalar, and group verification.
 The target fixture is supplied as a public point. Local wall times from this
 host are exploratory until a host-level isolation receipt is available.
+
+## Verified T025 feasibility result
+
+The frozen direct-child run completed in 142.1 s including reusable setup.
+It constructed 536,631,572 regular states and retained 535,899,198 distinct
+root keys in 1,073,741,824 slots. The factor base has 337,292 distinct usable
+points and 3182 effective columns. Preparation inserted 3182 independent rows
+from 7126 verified relation attempts, and the target scalar
+`429728658711` passed independent group replay.
+
+| Gate | Recorded result |
+| --- | ---: |
+| Solver exit | 0 |
+| Full rank before target input | 3182 |
+| Exact packed layout and table slots | pass |
+| Peak RSS / 32 GiB cap | 23.99 GiB / pass |
+| Charged T025 online interval | 2.410 ms, exploratory |
+| Target S3 calls | 498 |
+
+T025 gave the same first relation witness and 498 target S3 calls as the
+earlier C2800 mixed-index control. This point tests index correctness and
+resource use; fresh holdout points are needed to measure a decomposition-count
+gain. `PROMOTION.json` binds the feasibility receipt to the exact candidate
+`IC1N53Ckb1fb337292PDP4rootRCsampleLAgaussTDdirectISO0h4e9fb5125387`
+and its T025 control run ID. The canonical candidate manifest is under
+`identities/candidates/`; the existing `Wa238237883e9` workload manifest is
+under `../koblitz-s3-crosscurve-20261009/workloads/`. Compressed raw report,
+stdout, stderr, and receipt are under `local/verified_t025/`.
+
+The next representation change sizes the initial quotient table from the
+observed distinct-key count while retaining exact growth. It lets C3200 use
+a 30-bit state ordinal and the same 8 GiB table if the measured key count
+stays inside the capacity bound.
