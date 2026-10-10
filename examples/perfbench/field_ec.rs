@@ -607,7 +607,13 @@ fn isogeny_field_p256_mul_sqr_pow() -> Box<dyn Workload> {
                 rng.gen::<u64>(),
             ]
         })
-        .map(|limbs| f.mul(&crypto_lib::cryptanalysis::isogeny_walk::field::Fe(limbs), &f.one()).0)
+        .map(|limbs| {
+            f.mul(
+                &crypto_lib::cryptanalysis::isogeny_walk::field::Fe(limbs),
+                &f.one(),
+            )
+            .0
+        })
         .collect();
     let exp = (p - 3u8) / 5u8;
     Box::new(Closure(move || {
