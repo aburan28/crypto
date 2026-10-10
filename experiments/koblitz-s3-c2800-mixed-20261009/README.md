@@ -56,10 +56,28 @@ result. Candidate ID:
 After that gate, [`prepare_freeze.py`](prepare_freeze.py) binds the C1200 and
 C2800 candidate manifests, the same eight public points, and the paired
 [`run_paired.py`](run_paired.py) runner. Its screen orders each point's two
-arms AB or BA, caps each process at 600 seconds and 32 GiB RSS, and stops
+arms AB or BA, caps each process at 600 seconds, rejects a run whose measured
+peak RSS exceeds 32 GiB, and stops
 after the first invalid or over-budget row. A complete verified screen needs
 at least a twofold geometric mean reduction in S3 calls before further
 measurement; online wall time and its target-level uncertainty remain
 separate. [`preserve_screen.py`](preserve_screen.py) and
 [`analyze.py`](analyze.py) retain all launched rows and leave aggregates
 unknown when the panel is incomplete.
+
+The [archived local screen](analysis.json) completed all 16 runs on T173–T180
+with native group and known-scalar checks, full-rank preparation, and peak
+whole-process RSS below 32 GiB in every row. The geometric mean target S3
+call ratio was **3.220×** (target bootstrap 95% interval **1.826–5.542×**):
+five of eight points needed at least twofold fewer calls with C2800. The
+corresponding verified one-target online wall ratio was **1.121×** (target
+bootstrap interval **0.621–1.967×**), with one of eight points at or above
+twofold. The largest measured process RSS was 25,814,581,248 bytes. The
+baseline and expanded median reusable setup times were 30.976 and 179.971 s,
+respectively; these are recorded separately from the online interval.
+This Mac screen lacks a host-level isolation receipt, so its timing ratio is
+an exploratory diagnostic. The [ledger](local/raw_paired.jsonl.gz) and
+[raw reports](local/raw_reports.tar.gz) retain every measured row. The
+call-count gate passed. The next optimization step is to profile the wider
+index's per-query work and memory access, which must fall for a twofold wall
+gain on this workload.
