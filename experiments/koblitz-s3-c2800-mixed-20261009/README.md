@@ -39,6 +39,20 @@ If rank, scalar, semantic, memory, and table-geometry gates pass, the
 recorder assigns the content-hashed candidate ID and freezes fresh
 T173–T180 one-target workloads. Preserve any failed or capped row.
 
+The T025 control passed. Its 415,520,000 regular states produced 415,077,662
+distinct canonical roots in exactly 1,073,741,824 slots, with every shard
+remaining at 16,777,216 slots. Input counts ranged from 12,971,694 to
+12,998,628 per shard. Prepared rank reached 2,800; 498 target S3 calls
+recovered scalar 429728658711 with group replay. Peak whole-process RSS was
+22,526,918,656 bytes, within the frozen 32 GiB envelope. The
+[semantic comparison](local/semantic_comparison.json) matches the full-key
+reference outside the declared layout and timing fields. The complete
+process ran 216.328 s; the 5.110 ms target online interval was measured on a
+contended host and remains a diagnostic. The [receipt](local/feasibility_receipt.json)
+and [compressed report](local/feasibility_report.json.gz) preserve the raw
+result. Candidate ID:
+[`IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hbbd5b5a111fb`](identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0hbbd5b5a111fb.json).
+
 After that gate, [`prepare_freeze.py`](prepare_freeze.py) binds the C1200 and
 C2800 candidate manifests, the same eight public points, and the paired
 [`run_paired.py`](run_paired.py) runner. Its screen orders each point's two

@@ -1,0 +1,20 @@
+{
+  "differing_keys": [],
+  "excluded_fields": [
+    "timing_ms",
+    "peak_rss_bytes",
+    "root_table_slots",
+    "root_table_slot_bytes",
+    "root_table_value_bits",
+    "root_table_layout",
+    "root_table_construction_policy",
+    "root_table_input_entries_per_shard",
+    "root_table_slots_per_shard"
+  ],
+  "kind": "s3_n53_c2800mixed_full_key_vs_mixed_slot_semantic_control_v1",
+  "new_only_keys": [],
+  "new_raw_sha256": "c90f51dfdd8f6bf160661f3ef3d083d00aa1ef6b9cdd26d43c3971275a05ec8f",
+  "non_timing_fields_equal": true,
+  "old_only_keys": [],
+  "old_raw_sha256": "32cd6d60dbdd97b40283e6c5480e38902205169e838fa0c7efa896d79ff17650"
+}
