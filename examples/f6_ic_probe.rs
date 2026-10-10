@@ -16,8 +16,7 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
     f4_word_ops_thread, FieldStructure, SolveStats, SolverEngine,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic,
-    KoblitzCurve,
+    build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic, KoblitzCurve,
 };
 use num_bigint::BigUint;
 use std::time::Instant;
@@ -35,7 +34,9 @@ fn main() {
     let dim: u32 = flag("--dim").and_then(|v| v.parse().ok()).unwrap_or(6);
     let m: usize = flag("--m").and_then(|v| v.parse().ok()).unwrap_or(3);
     let targets: u64 = flag("--targets").and_then(|v| v.parse().ok()).unwrap_or(8);
-    let budget: usize = flag("--budget").and_then(|v| v.parse().ok()).unwrap_or(20_000);
+    let budget: usize = flag("--budget")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(20_000);
     let reps: usize = flag("--reps").and_then(|v| v.parse().ok()).unwrap_or(1);
     let engines = flag("--engines").unwrap_or_else(|| "f4,f6".to_string());
     let engines: Vec<&str> = engines.split(',').collect();
@@ -64,10 +65,12 @@ fn main() {
                 let x0 = f4_word_ops_thread();
                 let t0 = Instant::now();
                 let (hit, stats) = match *arm {
-                    "f4" => groebner_decompose(&kc, &fb, &index_of, &st, &target, m, engine, budget),
-                    "f6" => {
-                        groebner_decompose_f6_ic(&kc, &fb, &index_of, &st, &target, m, engine, budget)
+                    "f4" => {
+                        groebner_decompose(&kc, &fb, &index_of, &st, &target, m, engine, budget)
                     }
+                    "f6" => groebner_decompose_f6_ic(
+                        &kc, &fb, &index_of, &st, &target, m, engine, budget,
+                    ),
                     other => panic!("unknown engine {other}; use f4 or f6"),
                 };
                 let ns = t0.elapsed().as_nanos();
@@ -77,10 +80,11 @@ fn main() {
             }
             let (hit, stats, xors) = last.unwrap();
             if let Some(indices) = &hit {
-                let sum = indices.iter().fold(
-                    crypto_lib::binary_ecc::BinaryPoint::Infinity,
-                    |acc, &i| kc.add(&acc, &fb.points[i]),
-                );
+                let sum = indices
+                    .iter()
+                    .fold(crypto_lib::binary_ecc::BinaryPoint::Infinity, |acc, &i| {
+                        kc.add(&acc, &fb.points[i])
+                    });
                 assert_eq!(sum, target, "{arm}: witness for target {k} does not add up");
             }
             println!(

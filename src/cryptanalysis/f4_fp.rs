@@ -2562,12 +2562,26 @@ mod degree_bound_solve_tests {
         let h = poly(&[(&[1, 0], 1), (&[0, 1], 1)]); // x + y
         let sys = [f, g, h];
         let r = f4(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 2));
-        assert!(r.pairs_above_bound > 0, "the counterexample needs a dropped pair");
+        assert!(
+            r.pairs_above_bound > 0,
+            "the counterexample needs a dropped pair"
+        );
         let s = solve(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 2));
-        assert!(matches!(s.verdict, Verdict::Inconsistent), "{:?}", s.verdict);
-        assert_eq!(s.candidates_rejected, 2, "both spurious roots x ∈ {{2, 3}} are dropped");
+        assert!(
+            matches!(s.verdict, Verdict::Inconsistent),
+            "{:?}",
+            s.verdict
+        );
+        assert_eq!(
+            s.candidates_rejected, 2,
+            "both spurious roots x ∈ {{2, 3}} are dropped"
+        );
         // With a sufficient bound the verdict is exact.
         let s = solve(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 8));
-        assert!(matches!(s.verdict, Verdict::Inconsistent), "{:?}", s.verdict);
+        assert!(
+            matches!(s.verdict, Verdict::Inconsistent),
+            "{:?}",
+            s.verdict
+        );
     }
 }
