@@ -554,7 +554,6 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #if ECC_PROFILE_RANGE
         CUDA_CHECK(cudaProfilerStart());
 #endif
-        eccPacked131::walk<<<(P.threads + eccPacked131::walkWorkersPerBlock131 - 1) / eccPacked131::walkWorkersPerBlock131, ECC_THREADS,
 #if ECC_TABLE_GLOBAL_HINTS
         WalkParams<unsigned> one = P;
         one.steps = 1;
