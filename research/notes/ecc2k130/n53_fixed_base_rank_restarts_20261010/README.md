@@ -40,6 +40,14 @@ Its first execution stopped at a contradictory CLI backend assertion before
 generating Q; `inputs/generation_attempt1/` retains the empty fixture, stderr,
 and failure receipt. `HELDOUT_GENERATION_AMENDMENT.json` pins the minimal
 strong-backend gate repair and unchanged hash seed before the second attempt.
+The amended generation yielded public Q
+`[2939726529610565,1384157319972946]` at counter 1, with independent
+group replay and no match in committed prior inputs. `inputs/heldout_q.jsonl`
+is the only target input to the timed arms; the full generator record is a
+verifier-only fixture. `HELDOUT_FROZEN.json` and `heldout_workload_*.json` bind
+the six paired rank/rho seeds, exact Q, source/binary/verifier digests, and
+resource envelope. `run_heldout.py` checks that they have been committed and
+pushed before timing the 18 process cells.
 
 The final cap=1 n13 control in `controls/n13_cap1_seed12/` reached rank 2/2 in five
 attempts, three of which were capped. Its trace accounts for all five probes;
