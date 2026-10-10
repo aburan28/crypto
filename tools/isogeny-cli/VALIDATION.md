@@ -1,5 +1,24 @@
 # Dedicated executable validation, 2026-10-09
 
+The latest native setup/hashing continuation is recorded in
+[`research/isogeny_catalogue_setup_20261009/RESULTS.md`](../../research/isogeny_catalogue_setup_20261009/RESULTS.md).
+Against commit `5cbc3a2dd` with the same 349-model input, five matched pairs per panel
+used 67.9589% fewer instructions for screening, 0.1478% fewer for P224/1471 verification,
+and 5.2924% fewer for the complete P192/73 search, including the constructor child,
+receipt/executable hashing, output and independent replay. All 15 paired output
+comparisons passed, including full catalogue JSON and byte-identical map output.
+These are ARM Linux Callgrind instruction counts; native macOS throughput remains
+unmeasured. Two external Docker interruptions are preserved with their lost counter
+costs marked unmeasured; no measured campaign-total gain is claimed.
+
+The candidate passed 60 CLI tests, 3 field-reference tests, 114 standalone algorithm
+tests and the forced-software receipt-hash reference check. Release CI checks the
+software fallback on all target platforms. SHA-256 values match the unchanged
+repository implementation, and the compact index preserves exact curve/subgroup data.
+Root compilation retains the same 643 errors; hosted CI and publication remain gated.
+
+## Earlier field optimization and coverage round
+
 The optimization and coverage continuation is recorded in
 [`research/isogeny_coverage_optimization_20261009/RESULTS.md`](../../research/isogeny_coverage_optimization_20261009/RESULTS.md).
 The final canonical catalogue contains 349 models: 204 prime, 72 binary, 60 Koblitz,

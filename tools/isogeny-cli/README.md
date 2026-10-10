@@ -60,6 +60,9 @@ Names resolve to exact catalogue models. Ambiguous names require an ICV1 slug.
 Subgroup orders and cofactors are preserved, and the degree must be coprime to the
 registered subgroup order. Independent replay uses exact-size field specializations,
 binary extended-GCD inversion, and the retained exact polynomial checks.
+Execution lookup uses a build-generated compact index while `curves` returns the
+complete embedded inventory. Receipt/executable SHA-256 uses a pinned native backend
+with runtime CPU detection and a portable fallback checked against independent hashes.
 
 `--method auto` uses the validated extension-field kernel construction at P224/1471
 and P192/10453. Those cases construct one Frobenius eigenline of two and report
