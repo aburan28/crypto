@@ -1,0 +1,28 @@
+{
+  "build": "cargo build --release --example koblitz_rank_fixture --example koblitz_rho_fixture",
+  "direct": "/Users/adamburan/cargo-targets/crypto-n61-L65536/release/examples/koblitz_rank_fixture 53 0 1 16 13655157592039865889 signed_quotient independent pointwise 1",
+  "direct_argv": [
+    "/Users/adamburan/cargo-targets/crypto-n61-L65536/release/examples/koblitz_rank_fixture",
+    "53",
+    "0",
+    "1",
+    "16",
+    "13655157592039865889",
+    "signed_quotient",
+    "independent",
+    "pointwise",
+    "1"
+  ],
+  "direct_producer_fixture_count": 1,
+  "env": {
+    "KIC_INCREMENTAL_RANK_CROSSCHECK": "0",
+    "KIC_SUMMARY_ONLY": "1"
+  },
+  "fixtures": 1,
+  "online_target_count": 1,
+  "precompute_fixtures": 0,
+  "rho": null,
+  "rho_argv": null,
+  "rho_producer_fixture_count": 1,
+  "stage": "factor_base"
+}

@@ -819,6 +819,7 @@ RESOURCE_RECEIPT_FIELDS = (
     "stdout_stable",
     "children_cpu_user_ms",
     "children_cpu_system_ms",
+    "children_peak_rss_bytes",
     "command",
     "seed",
 )
@@ -922,6 +923,9 @@ def run_timed(
         "stdout_stable": len(set(outputs)) <= 1,
         "children_cpu_user_ms": statistics.median(users),
         "children_cpu_system_ms": statistics.median(systems),
+        "children_peak_rss_bytes": children_rss_bytes(
+            int(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
+        ),
         "stdout": completed.stdout,
         "stderr": completed.stderr,
     }
