@@ -18,8 +18,9 @@ The original failure happened while `/private/tmp` had low free space. That is c
 | Reusable setup, seconds: min / median / max | 15.96 / 28.02 / 39.15 | 34.13 / 81.71 / 160.16 |
 | Setup coefficient of variation | 0.273 | 0.450 |
 | Involuntary context switches: min / median / max | 116,117 / 169,559 / 227,462 | 284,267 / 489,650 / 764,569 |
+| Median child user CPU seconds, including preparation | 60.43 | 153.30 |
 
-The extreme setup spread and context switching make this host unsuitable for promoting an N53 CPU wall-time ratio. Since T213 produced no report, its exact stopping phase is unknown; the completed runs show that preparation alone can approach this panel's process cap. The next N53 experiment should use a checked host-level isolation receipt, sufficient output space, and a process cap chosen from a fresh preparation pilot before freezing its target panel. Modal guest CPU/memory diagnostics can establish exploratory fidelity, but a CPU reservation alone does not satisfy the repository's host-exclusive isolation gate.
+The extreme setup spread and context switching make this host unsuitable for promoting an N53 CPU wall-time ratio. The completed T214, T246, and T222 C1800 runs spent 160.2, 154.3, and 151.8 seconds in reusable setup; their target-online intervals were only 0.171, 26.616, and 1.507 milliseconds. Since T213 produced no report, its exact stopping phase is unknown; the completed runs show that preparation alone can approach this panel's process cap. The next N53 experiment should use a checked host-level isolation receipt, sufficient output space, and a process cap chosen from a fresh preparation pilot before freezing its target panel. Modal guest CPU/memory diagnostics can establish exploratory fidelity, but a CPU reservation alone does not satisfy the repository's host-exclusive isolation gate.
 
 ## Raw receipts
 
