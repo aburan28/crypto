@@ -19,9 +19,9 @@ fn factors(mut n: u128) -> Vec<(u128, u32)> {
     let mut out = Vec::new();
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             let mut e = 0;
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 n /= d;
                 e += 1;
             }

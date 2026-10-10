@@ -106,6 +106,14 @@ pub enum Model {
     },
     /// `y² = x³ + ax + b` over `GF(p)`.
     Prime { p: BigUint, a: BigUint, b: BigUint },
+    /// A registered prime-field model for which this module has no group law.
+    /// Preserve the exact equation while retaining the field and order traits.
+    PrimeOther {
+        p: BigUint,
+        degree: u32,
+        form: String,
+        model_json: String,
+    },
 }
 
 impl Model {
@@ -114,6 +122,7 @@ impl Model {
         match self {
             Model::Binary { n, .. } => BigUint::one() << *n,
             Model::Prime { p, .. } => p.clone(),
+            Model::PrimeOther { p, degree, .. } => p.pow(*degree),
         }
     }
 
@@ -122,6 +131,7 @@ impl Model {
         match self {
             Model::Binary { n, .. } => u64::from(*n),
             Model::Prime { p, .. } => p.bits(),
+            Model::PrimeOther { .. } => self.q().bits(),
         }
     }
 }
@@ -173,7 +183,8 @@ fn parse_model(model_json: &str) -> Result<Model, String> {
     let num = |key: &str| {
         str_field(&m, key).and_then(|s| parse_uint(s).ok_or_else(|| format!("bad {key}: {s}")))
     };
-    match str_field(&m, "form")? {
+    let form = str_field(&m, "form")?;
+    match form {
         "y^2+xy=x^3+a*x^2+b" => {
             let modulus = num("modulus")?;
             let n = (modulus.bits() - 1) as u32;
@@ -189,11 +200,40 @@ fn parse_model(model_json: &str) -> Result<Model, String> {
                 modulus,
             })
         }
-        "y^2=x^3+a*x+b" => Ok(Model::Prime {
-            p: num("p")?,
-            a: num("a")?,
-            b: num("b")?,
-        }),
+        "y^2=x^3+a*x+b"
+        | "B*y^2=x^3+A*x^2+x"
+        | "a*x^2+y^2=1+d*x^2*y^2"
+        | "x^2+y^2=c^2*(1+d*x^2*y^2)" => {
+            let p = num("p")?;
+            let field = str_field(&m, "field")?;
+            let degree = if field == format!("fp-{p}") {
+                1
+            } else {
+                let k: u32 = str_field(&m, "k")?
+                    .parse()
+                    .map_err(|_| "bad prime extension degree".to_string())?;
+                if k <= 1 || !field.starts_with(&format!("fpk-{p}-{k}-")) {
+                    return Err(format!(
+                        "field {field} is not an extension of GF({p}) of degree {k}"
+                    ));
+                }
+                k
+            };
+            if form == "y^2=x^3+a*x+b" && degree == 1 {
+                Ok(Model::Prime {
+                    p,
+                    a: num("a")?,
+                    b: num("b")?,
+                })
+            } else {
+                Ok(Model::PrimeOther {
+                    p,
+                    degree,
+                    form: form.to_string(),
+                    model_json: model_json.to_string(),
+                })
+            }
+        }
         other => Err(format!("unknown form {other}")),
     }
 }
@@ -221,6 +261,7 @@ fn parse_representation(rep: &Value, model: &Model) -> Option<Representation> {
                 return None;
             }
         }
+        Model::PrimeOther { .. } => return None,
     }
     let gen = curve["generator"].as_array()?;
     let coord = |v: &Value| parse_uint(v.as_str()?);
@@ -720,6 +761,7 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
     let characteristic = match &c.model {
         Model::Binary { .. } => BigUint::from(2u8),
         Model::Prime { p, .. } => p.clone(),
+        Model::PrimeOther { p, .. } => p.clone(),
     };
     let (status, method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
@@ -740,11 +782,13 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
             kind: match c.model {
                 Model::Binary { .. } => "binary",
                 Model::Prime { .. } => "prime",
+                Model::PrimeOther { .. } => "prime",
             }
             .into(),
             degree: match &c.model {
                 Model::Binary { n, .. } => *n,
                 Model::Prime { .. } => 1,
+                Model::PrimeOther { degree, .. } => *degree,
             },
             size_bits: c.model.size_bits(),
         },

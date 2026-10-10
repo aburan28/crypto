@@ -813,7 +813,7 @@ fn run_f4_bounded(
         input_max_degree: equations.iter().map(Pol::degree).max().unwrap_or(0),
         inconsistent: report.inconsistent,
         complete,
-        correct: complete && ((!report.inconsistent) == expected_positive),
+        correct: complete && report.inconsistent != expected_positive,
         timed_out: report.timed_out,
         pairs_above_bound: report.pairs_above_bound,
         solving_degree_max: report.solving_degree_max,
