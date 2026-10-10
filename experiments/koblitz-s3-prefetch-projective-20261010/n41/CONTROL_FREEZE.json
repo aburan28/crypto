@@ -1,0 +1,44 @@
+{
+  "arms": {
+    "baseline": {
+      "actual_usable_points_B": null,
+      "binary_sha256": "0f805070787361a6dc250985ce64c4380b3b781aa7c374f99df66cfee5d530f4",
+      "candidate_id": null,
+      "source_relative": "examples/s3_partial_prepared_fullrank_c2800mixed_targetspan.rs",
+      "source_sha256": "a398b36071cd59f7d6775c8f4e2b03a6bf867319ba1636378d186f7fb738c679"
+    },
+    "combined": {
+      "actual_usable_points_B": null,
+      "binary_sha256": "6673678c0a916e8974f73c44ef98f56dee38a72971e46a9e46d5ccce2d7fa13c",
+      "candidate_id": null,
+      "source_relative": "examples/s3_partial_prepared_fullrank_prefetch_projective_targetspan.rs",
+      "source_sha256": "ec74938598b45e7e5c829050f094d4a6e62e4f6c3c178101ef71fbdeed2b288a"
+    }
+  },
+  "columns": 800,
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n41_c800_combined_control_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "prepare_rank": 800,
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "target": {
+    "family": "fresh_matched_curve",
+    "fixture_scalar": 253982070906,
+    "label": "T025",
+    "n": 41,
+    "point_file_relative": "holdout/n41/T025/public_target.json",
+    "point_sha256": "b246b44a0e5a32b87d0e94b296b1f308511eb6ade56e9fa6d058538c60810dcc",
+    "public_point": [
+      1655120004424,
+      140655220686
+    ],
+    "scalar_derivation_sha256": "2f45b254c569edbe06f61f17adb409f07740ab620b28ea26edbcfd11b55079d7",
+    "workload_id": "1aa57f8a2e83",
+    "workload_identity_sha256": "1aa57f8a2e8325950fd72fb81c5fb22469a00d66bbe48ec101824597dfe28613"
+  },
+  "target_workers": 1,
+  "timeout_seconds_per_run": 120
+}
