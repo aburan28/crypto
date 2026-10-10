@@ -1,0 +1,31 @@
+{
+  "analyzer_sha256": "6665e8ac797255d6d17584de19b480573d1b801d1c3d8e9f78bb2ed4b55f2d30",
+  "binaries": {
+    "baseline": {
+      "architecture": "x86_64-linux-elf",
+      "bytes": 1776688,
+      "example": "s3_partial_prepared_fullrank_c2800mixed_targetspan",
+      "sha256": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb"
+    },
+    "combined": {
+      "architecture": "x86_64-linux-elf",
+      "bytes": 1793552,
+      "example": "s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan",
+      "sha256": "47223962d292361ed21bbf0ff577cfe3564c74a84773b16b3b467a5c1e24b8dd"
+    }
+  },
+  "controlled_speedup": null,
+  "generated_targets_sha256": "a722e47ce3398edcc79e8ebb18558dad29f7bc3619211a3ec9a81323ed81d00a",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1800_confirmation34_execution_freeze_v1",
+  "linux_build_receipt_sha256": "8cd79471efa13087a3dcc5b8433cdbc072598502d567733a65a658257ca6e9fd",
+  "linux_build_source_tree_git_oid": "0a574800502e67882d8f8f88a846c1e80ee795fd",
+  "memory_envelope_bytes": 34359738368,
+  "panel_freeze_sha256": "d1f7d5ba43a74b53b9c98b003884d16e01718f1da649d8abfed16a7c259293e9",
+  "panel_runner_sha256": "dbcd0dec4f35219268231104d9fc1676a75c0ac9a95242a4a8554549341490a4",
+  "per_process_timeout_seconds": 600,
+  "planned_run_count": 136,
+  "run_order_sha256": "f01742f7c2ef6057badfe0fbb7f813e6d896065efb1f519f69376a8a6d4e22ac",
+  "sage_replay_sha256": "46296fbb419c8ac4ea045e9f6d36dae717247fd5352deb9f19801fb35d62d239",
+  "single_runner_sha256": "4357d05dde43f10a1e095930dad4c1ce08c004556b59a0ce915eba17fd106a6d"
+}
