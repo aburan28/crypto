@@ -59,3 +59,37 @@ The runner stops on the first invalid result and preserves all completed
 reports. A complete 16-row ledger is required to compute a paired ratio.
 Keep the raw report archive alongside `analysis.json`; a group replay through
 the checked repository Sage launcher provides an independent scalar check.
+
+## Frozen panel result
+
+All 16 runs exited successfully, passed the native group check, recovered
+their frozen fixture scalar, and had online phase sums consistent with their
+total. The checked Sage runtime independently multiplied every recovered
+scalar by the declared generator and matched all eight public points. The
+ledger and source report hashes were audited by `analyze.py`.
+
+| N41 single-target measure | C1200 | C1800 |
+| --- | ---: | ---: |
+| Actual usable base points | 98,400 | 147,600 |
+| Effective columns and prepared rank | 1,200 | 1,800 |
+| Median online wall time, ms | 0.096229 | 0.0466045 |
+| Median target S3 calls | 47 | 32 |
+| Median reusable setup wall time, ms | 3,770.134 | 8,474.236 |
+| Maximum observed peak RSS, GiB | 8.26 | 17.44 |
+| Verified runs | 8/8 | 8/8 |
+
+The paired baseline/C1800 geometric online ratio is **2.169191** across the
+eight points. Resampling whole targets 20,000 times gives a 95% bootstrap
+interval of **[1.890690, 2.488717]**. The corresponding geometric S3-call
+ratio is 1.696998. The per-target online ratios span 1.676 to 2.765. This
+passes the frozen 2.0 point-estimate development gate; the uncertainty
+interval motivates a larger fresh-target confirmation. These are exploratory
+macOS timings with no host-exclusive partition receipt, so the controlled
+speedup field in `local/analysis.json` remains null.
+
+The raw 16-report ledger and process streams are archived in
+`local/raw_panel8.tar.gz` (SHA-256
+`8d5229936f6b4c0076a03930ae47c68e5e816cc435f33326a127c71adedc6cf6`).
+`local/sage_runtime_info.json` records the checked Sage build before replay,
+and `local/sage_replay.json` binds the independent scalar checks to the raw
+ledger and exact replay script. The smoke archive SHA-256 is in `FREEZE.json`.
