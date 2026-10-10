@@ -83,10 +83,14 @@ cap and a new output directory. Config, copied source, stdout, stderr,
 worker receipt when present, and an outer status survive a hit, miss, wall
 cap, resource exit or producer failure. The synthetic process tests cover
 those classification paths and malformed/changed-source rejection; they do
-not exercise Docker or a retained N83 index. The compact worker still needs
-a Linux rebuild from the committed source and a container startup smoke.
-The earlier one-hour pilot is exhausted, so this source path has not been
-used to measure relation yield.
+not exercise Docker or a retained N83 index. A subsequent build from commit
+`2742a0989` produced a static Linux worker, and two guarded empty/invalid
+public-panel Docker starts retained their expected producer-failure receipts.
+The invalid-panel error occurs after cgroup and compiled-source checks;
+`verification/compact-probe-linux-startup/` retains the build log, both
+outer receipts, exact inputs and independent receipt verifier. The earlier
+one-hour pilot is exhausted, so this path has not loaded a retained base or
+measured relation yield.
 
 ## Subsequent total-runtime experiment
 

@@ -19,6 +19,7 @@ Started 2026-10-08. Public known-answer research. The requested minimum **comple
 | Primary base to generic solver adapter | PASS: replay-bound K=64 S3 object reconstructed as generic ordinary and signed Frobenius orbits; solver stage unexecuted |
 | Primary cold runner | K=64, m=2 exact-enumeration preflight PASS; one trial returned `UNKNOWN_trial_cap` with zero relations. K=64 m=3 and K=256 m=2 attempts reached `UNKNOWN_budget` caps. All retain null total runtime and winner |
 | Existing four-summand source transfer | Balanced-S5 SAT is admitted only through n=53; the upstream wide compact-orbit n=83 runner uses a different polynomial basis/base schema and u64 rank. The study-local adapter pins the study field. A primary compact probe accepts a replayed base, checks a state/cgroup cap, verifies any witness in the generic group and converts a hit to a full-width signed-orbit row. A new outer supervisor freezes compiled sources from a clean commit and classifies bounded probe outcomes; synthetic process tests pass, but no retained primary four-summand probe, natural rank or cold run followed; see `S5_CAPACITY.md` |
+| Compact Linux worker startup | Static x86-64 Linux worker rebuilt from source commit `2742a0989`; two guarded empty/invalid public-panel Docker starts retained expected producer-failure receipts. The second reached panel validation after cgroup and compiled-source checks; no retained base was imported. See `verification/compact-probe-linux-startup/` |
 | Best total runtime | Unresolved: full relation collection, rank, linear algebra and individual-log phases have not completed the comparison gate |
 
 ## Exact revisions and instances
@@ -220,8 +221,10 @@ new outer supervisor freezes a minimal source snapshot from a clean commit,
 pins a local no-network container image, imposes a one-CPU memory/wall
 envelope and retains a fail-closed receipt for hit, miss, timeout, resource
 exit and producer failure. Its synthetic process tests cover those status
-transitions, but do not constitute a Docker or retained-base run. A Linux
-worker rebuild from the committed source and a container startup smoke remain.
+transitions. A Linux worker rebuilt from the committed source and two Docker
+starts on empty/invalid public panels reached the expected fail-closed worker
+exits; the specific invalid-panel error confirms the cgroup and source gates
+ran first. These runs did not load a retained base or build an N83 index.
 A public
 n=71 `a=0` small-order
 fixture checks ordered and Frobenius-unordered extraction on deterministic

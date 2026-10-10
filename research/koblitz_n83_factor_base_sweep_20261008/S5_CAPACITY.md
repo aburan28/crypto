@@ -63,9 +63,11 @@ the panel, worker, source snapshot and output directory, enforces cgroup memory 
 swap plus a process-wall cap, and retains a fail-closed outer receipt. Its
 synthetic process tests cover a miss, a hit, wall expiry, memory exit,
 malformed receipt and mutated source. These checks validate guard logic,
-not container behavior, N83 yield or index capacity. A Linux worker rebuild
-from the committed source and a container startup smoke remain required.
-A retained K=64
+not container behavior, N83 yield or index capacity. A static Linux worker
+was then rebuilt from commit `2742a0989`; two empty/invalid-panel Docker
+starts retained expected negative-control receipts. The invalid-panel error
+is downstream of the cgroup and compiled-source checks, as documented in
+`verification/compact-probe-linux-startup/`. A retained K=64
 probe under the guard and a natural relation/rank receipt are later gates.
 A full cold comparison comes
 only after all phases, including failed work and I/O, are charged.
