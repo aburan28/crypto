@@ -50,3 +50,24 @@ passed both tests (2 passed, 0 failed). The test checks exact narrow-stream
 identity over 384 draws and full-range bounds, replay, and high-limb
 coverage over 512 m = 83 draws. This is a deterministic correctness check;
 it supplies no timing or full-pipeline IC evidence.
+
+## Native wide-pipeline dependency map
+
+The sampler repair does not make `ic.pipeline` a wide method. The current
+counted interface has independent one-word limits:
+
+| Interface | Current contract | Required m = 83 gate |
+|---|---|---|
+| `ic_boundary::CountedGroup::mul` | `k: u64` | Exact subgroup scalars through the 82-bit order, charged by actual additions and doublings |
+| `ic_framework::InstanceCtx` | `r: u64`, `group_order: u64` | Exact `u128` or checked big integers for both orders, with no low-limb conversion |
+| `ic_framework::linalg` and `LinearAlgebra::add_row` | coefficients, right-hand sides and modulus are `u64` | Exact modular operations and rank over the m = 83 prime order |
+| `CountedGroup::key` | a `u64` point key | A collision-free full-point key for wide factor bases, tables and replay |
+| `ecbench` generic and IC method dispatch | the counted IC path accepts one-word instances | A wide group adapter, factor-base and oracle inventory, target descent, verification and phase ledger |
+
+The existing `WideKoblitz` and wide strong-rho group use `u128` coordinates
+and subgroup scalars. A later port must first cross-check the wide adapter
+and every stage against the word-size implementation where both hold, then
+run a budgeted m = 83 pipeline and retain every budget exit. Only a complete
+matched public-target baseline/candidate panel with an independently checked
+answer can discharge AGENTS.md §8a. No one-word truncation is admissible as
+an approximation to that gate.
