@@ -56,7 +56,7 @@ fn sieve(name: &str, upper: u64) -> Vec<(u64, i64, Json)> {
                 -1
             };
             let roots: Vec<u64> = (0..l)
-                .filter(|&x| (x * x + l - tm * x % l + pm) % l == 0)
+                .filter(|&x| (x * x + l - tm * x % l + pm).is_multiple_of(l))
                 .collect();
             let row = Json::obj(vec![
                 ("ell", Json::Num(l as i64)),

@@ -41,7 +41,7 @@ fn p224_small_low_limb_does_not_reject_modular_construction() {
             let tm = t.mod_u64(l);
             let pm = c.p.mod_u64(l);
             (0..l)
-                .filter(|&x| (x * x + l - tm * x % l + pm) % l == 0)
+                .filter(|&x| (x * x + l - tm * x % l + pm).is_multiple_of(l))
                 .count()
                 == 2
         })
