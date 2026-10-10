@@ -1,0 +1,20 @@
+{
+  "identity_sha256": "16e27cb654d6d43bdd1a80adaaf527edd8b7cf9ae1244132366e25acb62b7f33",
+  "record": {
+    "curve_id": "EC1N53Ckb1h738a572b91f2",
+    "preparation_state_at_online_start": "candidate_policy_reusable_setup_ready",
+    "relation_seed": 20260928,
+    "scalar_derivation_sha256": "7cd776ce0980b3f3787eb6189d2feafbe88a8ba59c009639db73e8a816f5fbca",
+    "subgroup_order_r": 21044858204113,
+    "target_count": 1,
+    "target_index": 256,
+    "target_input_law": "known_scalar_sha256_public_point_fixture_v1",
+    "target_label": "T256",
+    "target_point": [
+      146329263852529,
+      296154521090513
+    ],
+    "target_seed_label": "s3-crosscurve-rank243-20261009-v1"
+  },
+  "workload_id": "16e27cb654d6"
+}
