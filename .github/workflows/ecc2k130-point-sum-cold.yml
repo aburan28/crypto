@@ -79,6 +79,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v3.rs
@@ -144,6 +147,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v3.rs
