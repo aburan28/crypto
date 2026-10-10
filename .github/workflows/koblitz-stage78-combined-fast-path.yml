@@ -1,11 +1,9 @@
 name: Koblitz Stage 78 n53 combined field fast path
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage78_combined_fast_path.py"
-      - ".github/workflows/koblitz-stage78-combined-fast-path.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:
