@@ -317,7 +317,14 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
+| `ic.pipeline_counted` | the same pipeline with the relation phase charge rebuilt from counted work and pinned conversions for deterministic SAT/PDP replays | algebraic-solver operations without a pinned conversion, including SAT conflicts; these runs remain lower bounds |
 | `ic.large_prime` | cofactor projection, exact combination-table group additions, target probes, and relation witness checks; the external runner verifies the returned scalar | combination states, MITM lookups, large-prime merge operations, and modular row operations; the record is therefore a lower bound, not a speed claim |
+
+The counted IC method has its own method identity so frozen SAT/PDP sessions
+retain their exact parameter and accounting contract. It removes solver wall
+pricing from the reported group-addition equivalents. Solver conflicts and
+other work without a pinned conversion stay visible as unpriced counters;
+the recorded `S` is therefore a lower bound on the complete pipeline cost.
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
 target scalar is pinned; the factor-base logs can still be underdetermined.
@@ -395,6 +402,21 @@ Two consequences to read every table with:
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
   are counted, not charged), exactly as in the rest of the repository.
+  The ratio of two such lower bounds is **not** a bound on the ratio of
+  full costs. Read it as a counted-work diagnostic until both arms have
+  complete, calibrated costs; do not infer an end-to-end speedup from it.
+
+`ecbench resources --dir SESSION --out resources.json` reports, for every
+measured attempt including failures, the native integer counters by phase,
+charged GAE and clocks by phase, the target's exclusive online window,
+method counters, fork-to-reap and solve time, CPU time, peak resident memory,
+and solve-wide instructions and cycles when the host exposes a PMU. A PMU
+sum is null unless **every** measured run in that arm has the counter.
+These are separate units: a SAT conflict, table lookup and byte of memory
+do not have universal GAE prices. The resource vector shows where the
+counted `S` is incomplete. A full runtime comparison still requires
+matched L2/L3 runs and the A/A noise gate in §8; the Mac's L0 timings
+remain descriptive.
 
 ## 8. Statistics
 
