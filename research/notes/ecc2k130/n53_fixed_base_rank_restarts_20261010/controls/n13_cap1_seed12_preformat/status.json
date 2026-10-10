@@ -1,0 +1,19 @@
+{
+  "binary_sha256": "ee1c28fe6374ed0253ed57ebd9eb3e03c0c9e45a1fd707a4e1505a220fe9f384",
+  "cold_in_process_ms": 3.6814579999999997,
+  "command": [
+    "/private/tmp/crypto-compact-target/release/examples/koblitz_orbit_dlp_fast_online",
+    "construct:13:0:2",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/n13_cap1_seed12/input_scalar.txt",
+    "12",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/n13_cap1_seed12/target.jsonl"
+  ],
+  "exit_code": 0,
+  "rank": 2,
+  "rank_attempts": 5,
+  "rank_capped_attempts": 3,
+  "rank_capped_probes": 3,
+  "rank_probes_total": 5,
+  "source_sha256": "788a24f03c874a344c5e3bb17668549e7f5c555ebac9101812a8aed5ddb24468",
+  "target_online_ms": 0.0035
+}
