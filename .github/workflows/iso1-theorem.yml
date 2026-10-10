@@ -6,6 +6,8 @@ on:
       - 'examples/iso1_report_check.rs'
       - 'examples/iso1_theorem_check.rs'
       - 'research/iso1_weak_classes_20261007/**'
+      - 'research/weak_curve_catalog_20261010/**'
+      - 'docs/curves/weak-families/**'
       - 'src/hash/sha256.rs'
       - 'src/cryptanalysis/identity_certificate.rs'
       - '.github/workflows/iso1-theorem.yml'
@@ -28,6 +30,11 @@ jobs:
         run: |
           cargo test --release --locked --manifest-path research/iso1_weak_classes_20261007/census_runtime/Cargo.toml --bins
           cargo build --release --locked --manifest-path research/iso1_weak_classes_20261007/census_runtime/Cargo.toml --bins
+      - name: Weak-curve catalogue and immutable model/class joins
+        run: |
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin weak_curve_catalog -- check .
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_two_branch_seal -- docs/curves/weak-families --check
+          cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_two_branch_seal -- research/weak_curve_catalog_20261010 --check
       - name: Exact algebra and generalized finite-field controls
         run: |
           study=research/iso1_weak_classes_20261007

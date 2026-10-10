@@ -1,5 +1,13 @@
 # Curves
 
+The [weak-curve family catalogue](weak-families/README.md) organizes 21
+published or verified families and structural conditions, with their recognition
+rules, construction domains and evidence. Its [searchable browser](weak-families/index.html)
+indexes 814 exact models and the complete 294-class ordinary p7 oracle.
+Model membership, class support, subgroup compatibility and measured cost
+have separate labels; [canonical JSON](weak-families/catalog.json) retains
+the source attribution and completeness boundary for each family.
+
 [CM Jacobian certificates](JACOBIAN_CERTIFICATES.md) check principal
 polarizations on elliptic squares using exact Hermitian arithmetic and all
 ideal classes. The [versioned JSON](jacobian-certificates.json) and

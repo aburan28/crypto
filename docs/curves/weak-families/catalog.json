@@ -1,0 +1,234 @@
+{
+  "schema": "weak-curve-family-catalog/v1",
+  "version": "2026-10-10",
+  "title": "Weak elliptic-curve families and structural leads",
+  "definition": "A record identifies a scoped mathematical family or condition. A geometric covering, a selected-subgroup reduction, a class-support witness and an arithmetic optimization carry different evidence statuses.",
+  "global_completeness": "open",
+  "completeness_contract": "An exhaustive statement applies only to its declared field, parameter family, input law and hypotheses. Family overlaps are retained. Unknown membership is not a negative result.",
+  "sources": [
+    {"id":"smart","title":"Smart: The Discrete Logarithm Problem on Elliptic Curves of Trace One (1999)","url":"https://link.springer.com/article/10.1007/s001459900052"},
+    {"id":"ph","title":"Pohlig-Hellman: An Improved Algorithm for Computing Logarithms over GF(p) (1978)","url":"https://ee.stanford.edu/~hellman/publications/28.pdf"},
+    {"id":"mov","title":"Menezes-Okamoto-Vanstone: Reducing elliptic curve logarithms to finite-field logarithms (1991/1993)","url":"https://doi.org/10.1145/103418.103434"},
+    {"id":"mc","title":"Momose-Chao: Elliptic curves with weak coverings over cubic extensions (2009, revised 2013)","url":"https://eprint.iacr.org/2009/236"},
+    {"id":"jv","title":"Joux-Vitse: Cover and Decomposition Index Calculus (2011, EUROCRYPT 2012)","url":"https://eprint.iacr.org/2011/020"},
+    {"id":"hess","title":"Hess: The GHS Attack Revisited (EUROCRYPT 2003)","url":"https://www.iacr.org/archive/eurocrypt2003/26560374/26560374.pdf"},
+    {"id":"volcano","title":"Sutherland: Isogeny volcanoes, MIT 18.783 Lecture 22 (2023)","url":"https://math.mit.edu/classes/18.783/2023/LectureNotes22.pdf"},
+    {"id":"sec1","title":"SEC 1 v2: Elliptic Curve Cryptography (2009)","url":"https://www.secg.org/sec1-v2.pdf"},
+    {"id":"rfc7748","title":"RFC 7748: Elliptic Curves for Security (2016)","url":"https://www.rfc-editor.org/rfc/rfc7748"},
+    {"id":"iso1","title":"ISO-1: exact two-branch support, independent census and construction (2026)","path":"research/iso1_weak_classes_20261007/two_branch_20261009/REPORT.md"},
+    {"id":"iso1-large","title":"ISO-1: frozen independent 192-252-bit population (2026)","path":"research/iso1_weak_classes_20261007/large_population_20261009/REPORT.md"},
+    {"id":"iso1-odd","title":"ISO-1: larger odd extension degrees and norm-one controls (2026)","path":"research/iso1_weak_classes_20261007/larger_fields_20261009/REPORT.md"},
+    {"id":"endo-rules","title":"Repository: curve-structure and endomorphism contracts","path":"docs/endomorphism-rules.md"}
+  ],
+  "families": [
+    {
+      "id":"WCF1:anomalous-prime", "name":"Anomalous prime-field curves", "category":"subgroup_reduction", "scope":"curve_and_subgroup", "evidence":"published_reduction",
+      "domain":"Nonsingular E over F_p, p prime, selected group E(F_p).",
+      "recognition":"Exact N = p, equivalently trace t = 1. Near equality is a different condition.",
+      "properties":["The selected full group has characteristic order p.","Prime-field and extension-field hypotheses are recorded separately."],
+      "find_members":"For a fixed prime, a certified trace-one enumeration or trace-prescribed construction gives members. Exact counting certifies the predicate.",
+      "exhaustive_scope":"All nonsingular prime-field models whose certified trace equals one; equivalent models require identity-aware deduplication.",
+      "subgroup_gate":"Specify the characteristic-order group and the hypotheses of the cited p-adic reduction.",
+      "cost_gate":"Retain construction/counting and reduction verification costs for an implementation.", "local_status":"literature_baseline", "sources":["smart"]
+    },
+    {
+      "id":"WCF1:small-selected-subgroup", "name":"Insufficient selected-subgroup size", "category":"subgroup_reduction", "scope":"selected_subgroup", "evidence":"published_reduction",
+      "domain":"A specified cyclic subgroup with verified order r and a declared work/security target.",
+      "recognition":"Assess generic work against r, rather than field bit length or the ambient curve order.",
+      "properties":["A large field can contain a small selected group.","There is no context-free bit-length threshold in this catalogue."],
+      "find_members":"Fix the required subgroup-size contract and enumerate/count admissible models in a bounded parameter family.",
+      "exhaustive_scope":"Exact only for the declared subgroup-order threshold and counted family.",
+      "subgroup_gate":"Order and subgroup definition or generator must be known.", "cost_gate":"Use the same-target generic reference and resource envelope when measuring a comparison.", "local_status":"literature_baseline", "sources":["endo-rules"]
+    },
+    {
+      "id":"WCF1:smooth-selected-order", "name":"Smooth or highly factored selected group order", "category":"subgroup_reduction", "scope":"selected_subgroup", "evidence":"published_reduction",
+      "domain":"A cyclic selected group with certified factorization r = product of prime powers.",
+      "recognition":"The relevant factorization is that of the selected group order. A small ambient cofactor does not establish this condition.",
+      "properties":["Prime-power component structure controls the known decomposition of the group problem.","Unfactored orders remain unknown."],
+      "find_members":"Use order-prescribed bounded families and retain a certified order factorization.",
+      "exhaustive_scope":"All selected orders satisfying the stated smoothness bound within the counted family.",
+      "subgroup_gate":"Factorization of r and the chosen cyclic group are required.", "cost_gate":"Charge order factoring and component costs; a factorization alone is not a measured runtime.", "local_status":"literature_baseline", "sources":["ph"]
+    },
+    {
+      "id":"WCF1:pairing-transfer", "name":"Low embedding-degree pairing reductions", "category":"conditional_transfer", "scope":"selected_subgroup", "evidence":"published_reduction",
+      "domain":"E over F_Q, prime r distinct from the characteristic, with a nondegenerate suitable pairing and embedding degree k.",
+      "recognition":"Compute k = ord_r(Q) and verify the transfer hypotheses for the selected r-subgroup.",
+      "properties":["MOV and related Tate-pairing reductions lead to finite-field groups.","Small k is a structural fact; comparative weakness depends on the target field Q^k and group r."],
+      "find_members":"Enumerate trace/order or pairing-family parameters in a declared finite domain; certify r and k.",
+      "exhaustive_scope":"Relative to the fixed family, subgroup and embedding-degree bound.",
+      "subgroup_gate":"Nondegeneracy and preservation of the selected r-subgroup must be established.", "cost_gate":"Include transfer and the destination field model/cost, compared on the same target contract.", "local_status":"literature_baseline", "sources":["mov"]
+    },
+    {
+      "id":"WCF1:supersingular", "name":"Supersingular elliptic curves", "category":"conditional_transfer", "scope":"curve_and_subgroup", "evidence":"published_reduction",
+      "domain":"E over F_(p^m), with prime r different from p and the small exceptional subgroup cases handled explicitly.",
+      "recognition":"Supersingularity is exact from the characteristic/trace criterion or a certified endomorphism computation.",
+      "properties":["Supersingular elliptic curves have bounded pairing embedding degree for the relevant prime-to-characteristic subgroups.","The ordinary quadratic-order volcano model does not apply."],
+      "find_members":"Use published supersingular parameter families or a complete bounded trace/model enumeration.",
+      "exhaustive_scope":"For a fixed finite field, complete supersingular enumeration has an explicit finite domain.",
+      "subgroup_gate":"Record r and the actual embedding field; supersingularity alone is not the selected-subgroup cost comparison.", "cost_gate":"Pairing transfer and destination field cost remain separate.", "local_status":"literature_baseline", "sources":["mov","volcano"]
+    },
+    {
+      "id":"WCF1:g3-cubic", "name":"Genus-3 cubic norm-one branch", "category":"cover_family", "scope":"model_and_class", "evidence":"native_verified_geometry",
+      "domain":"K = F_(p^6), q = p^2, p > 3; nonsingular y^2 = x(x-alpha)(x-alpha^q), alpha outside F_q, with allowed twists.",
+      "recognition":"Model: norm-one Legendre parameter. Class: the exact cubic torus/CM intersection for ordinary t = 2 modulo 4 and D_K < -4; the complete finite oracle handles exceptional units.",
+      "properties":["Full rational 2-torsion.","v2(f_pi) >= 2 is necessary, with f_pi the Frobenius-order conductor.","Selected 2-quotient CM orders have c dividing f_pi/4."],
+      "find_members":"Enumerate nonidentity parameters in the torus of order p^4+p^2+1. Hilbert 90 supplies alpha; quotient by documented equivalences.",
+      "exhaustive_scope":"Complete for the declared hyperelliptic branch. Seven complete class censuses are available through p37.",
+      "subgroup_gate":"The covering and any source route need kernel/order compatibility for a specified subgroup.", "cost_gate":"CM support generation, parameter reconstruction, source route and destination computation have separate costs.", "local_status":"complete_small_field_census", "sources":["mc","jv","iso1"]
+    },
+    {
+      "id":"WCF1:g3-quadratic", "name":"Genus-3 nonsplit quadratic branch", "category":"cover_family", "scope":"model_and_class", "evidence":"native_verified_geometry",
+      "domain":"K = F_(p^6), q = p^2, p > 3; y^2 = (x^2-d)(x-alpha)(x-alpha^q), d a base-field nonsquare, alpha outside F_q.",
+      "recognition":"Model: the quadratic torus test on j. Class: the exact selected-floor CM intersection for ordinary t = 2 modulo 4 and D_K < -4; exceptional-unit cases use the complete finite oracle.",
+      "properties":["Exactly one rational nonidentity 2-torsion point; a rational 2-quotient has full 2-torsion.","Selected CM conductors satisfy c | f_pi and v2(c) = v2(f_pi).","The invariant has exact absolute degree six."],
+      "find_members":"Enumerate nonidentity parameters in the torus of order p^4-p^2+1 in F_(p^12), then use the proved Cayley reconstruction and allowed twists.",
+      "exhaustive_scope":"Complete for the declared branch and its finite torus domain.",
+      "subgroup_gate":"Specify subgroup compatibility for cover and source transport.", "cost_gate":"The degree-18 per-factor decision does not include CM support generation.", "local_status":"complete_small_field_census", "sources":["mc","jv","iso1"]
+    },
+    {
+      "id":"WCF1:g3-type-i", "name":"Cubic-extension (2,2) Type I coverings", "category":"cover_family", "scope":"curve_model", "evidence":"published_geometry",
+      "domain":"K = F_(q^3), q odd; the four roots alpha, alpha^q, beta, beta^q are distinct, with alpha,beta outside F_q and the published leading-coefficient condition.",
+      "recognition":"Membership uses the Type I condition of Momose-Chao; their direct test is a quadratic-equation test.",
+      "properties":["Full rational 2-torsion after normalization.","The resulting genus-3 covering may be hyperelliptic or non-hyperelliptic."],
+      "find_members":"Use y^2 = (x-alpha)(x-alpha^q)(x-beta)(x-beta^q), with the recorded exclusions and model equivalences.",
+      "exhaustive_scope":"This parameter family under the paper's isogeny condition; no complete local isogeny-class support census is yet attached.",
+      "subgroup_gate":"Use the actual covering kernel and selected subgroup.", "cost_gate":"Cover construction and destination geometry/solver cost require their own receipts.", "local_status":"recognizer_not_yet_implemented", "sources":["mc"]
+    },
+    {
+      "id":"WCF1:g3-type-ii", "name":"Cubic-extension (2,2) Type II coverings", "category":"cover_family", "scope":"curve_model", "evidence":"published_geometry",
+      "domain":"K = F_(q^3), L = F_(q^6), q odd; alpha in L outside F_(q^2) and K.",
+      "recognition":"The published conjugate-root configuration and its Legendre normalization determine membership and twist conditions.",
+      "properties":["Root configuration alpha, alpha^(q^3), alpha^q, alpha^(q^4).","The Legendre leading-coefficient square class depends on q modulo four."],
+      "find_members":"Enumerate the admissible alpha domain of the published quartic; retain its field of definition and normalization.",
+      "exhaustive_scope":"The specified Type II family under the isogeny condition; no local fast recognition or complete class oracle is claimed here.",
+      "subgroup_gate":"Establish the covering's field and kernel on the selected subgroup.", "cost_gate":"Construction and destination computation are unmeasured locally.", "local_status":"recognizer_not_yet_implemented", "sources":["mc"]
+    },
+    {
+      "id":"WCF1:g3-hyperelliptic-22", "name":"Hyperelliptic locus within the (2,2) families", "category":"cover_family", "scope":"curve_model", "evidence":"published_geometry",
+      "domain":"An admissible Type I or Type II configuration from Momose-Chao.",
+      "recognition":"The stated PGL2(F_q) transformation represented by a trace-zero invertible matrix relating the two root parameters is the hyperellipticity condition.",
+      "properties":["This is a geometric subcase of the Type I/II families, rather than a disjoint count.","Different coverings of an elliptic model can coexist."],
+      "find_members":"Apply the paper's involution condition to the admissible root parameters, retaining its hypotheses.",
+      "exhaustive_scope":"The conditional locus within the published (2,2) configurations.",
+      "subgroup_gate":"Use the chosen covering and subgroup, rather than inferring transfer from a family name.", "cost_gate":"A geometric test has a different cost from complete source construction and solving.", "local_status":"recognizer_not_yet_implemented", "sources":["mc"]
+    },
+    {
+      "id":"WCF1:binary-ghs", "name":"Characteristic-two GHS descent families", "category":"cover_family", "scope":"curve_and_cover", "evidence":"published_geometry",
+      "domain":"Ordinary binary curves over a chosen extension K/F_q satisfying the published descent hypotheses.",
+      "recognition":"Compute the Frobenius span of the coefficients, then verify the descended cover genus and geometry.",
+      "properties":["The coefficient span and extension structure govern the cover.","An extension degree alone is not a weakness certificate."],
+      "find_members":"Choose bounded coefficient/Frobenius-span families, construct the published cover, and verify its map.",
+      "exhaustive_scope":"Only the declared descent construction and bounded coefficient space.",
+      "subgroup_gate":"The induced transfer must preserve the selected subgroup and avoid its kernel.", "cost_gate":"Include cover construction, field conversion and the destination solver; genus alone is insufficient.", "local_status":"literature_baseline", "sources":["hess"]
+    },
+    {
+      "id":"WCF1:generalized-weil-descent", "name":"Generalized Weil-descent cover families", "category":"cover_family", "scope":"curve_and_cover", "evidence":"published_geometry",
+      "domain":"A specified extension field, descent construction and covering hypothesis.",
+      "recognition":"A verified covering and its induced group map establish geometry; the resulting genus may exceed the original GHS case.",
+      "properties":["Generalizations enlarge the parameter family.","They can change hyperellipticity and destination arithmetic."],
+      "find_members":"Enumerate the prescribed coefficient space for a chosen published construction, with maps and genus retained.",
+      "exhaustive_scope":"Construction-specific, rather than all extension-field curves.",
+      "subgroup_gate":"Selected subgroup preservation is required.", "cost_gate":"Measure the resulting destination problem and all construction phases.", "local_status":"literature_baseline", "sources":["hess"]
+    },
+    {
+      "id":"WCF1:odd-cubic-lifts", "name":"Larger odd-degree cubic norm-one models", "category":"cover_family", "scope":"curve_and_cover", "evidence":"native_verified_geometry",
+      "domain":"K = F_(q^n), q = p^2, n odd, n >= 3; alpha outside F_q and lambda of relative norm one.",
+      "recognition":"The norm-one model condition and rational 2-quotient torsion controls are proved in the larger-degree evidence.",
+      "properties":["The cubic 2-depth restriction extends to the recorded odd-degree domain.","The degree-six CM class theorem is not silently promoted to every n."],
+      "find_members":"Use nonidentity relative norm-one parameters and constructive Hilbert 90.",
+      "exhaustive_scope":"The explicit functional model family; efficient large-field class-support discovery remains unresolved.",
+      "subgroup_gate":"Record the actual cover and selected subgroup for the extension degree.", "cost_gate":"Larger-degree arithmetic controls do not supply a destination-solver comparison.", "local_status":"verified_controls_and_bounded_population", "sources":["iso1-odd","iso1-large"]
+    },
+    {
+      "id":"WCF1:odd-quadratic-lifts", "name":"Larger odd-degree quadratic Cayley models", "category":"cover_family", "scope":"curve_and_cover", "evidence":"native_verified_geometry",
+      "domain":"K = F_(q^n), L = F_(q^(2n)), q odd and n >= 3 odd; nonidentity lambda in the torus of order (q^n+1)/(q+1).",
+      "recognition":"Constructive quadratic-base Hilbert 90 and a base norm equation recover alpha even when the inverse exponent does not exist.",
+      "properties":["Sixteen degree-10/14 controls pass; eight have noncoprime section gcd five.","For prime relative n, the specified compositum cover has genus 1+2^(n-2)(n-2), giving 25 and 161 at n=5,7."],
+      "find_members":"Enumerate torus parameters in a finite chosen field, then apply the proved reconstruction.",
+      "exhaustive_scope":"The functional family and specified cover; no minimum-genus or universal class-support statement is added.",
+      "subgroup_gate":"A specified subgroup and induced covering map remain separate requirements.", "cost_gate":"Controls establish reconstruction and geometry; source discovery and destination solving retain separate costs.", "local_status":"verified_controls_and_bounded_population", "sources":["iso1"]
+    },
+    {
+      "id":"WCF1:proper-subfield-points", "name":"Selected points contained in a proper subfield group", "category":"conditional_transfer", "scope":"curve_and_points", "evidence":"published_reduction",
+      "domain":"E and the selected group/points are actually defined over a proper subfield.",
+      "recognition":"Verify Frobenius-fixed coefficients and points, and the selected subgroup's membership in the smaller group.",
+      "properties":["Ambient field bit length can overstate the selected problem's field.","Coefficients in a subfield alone do not establish point or subgroup containment."],
+      "find_members":"Construct over a chosen subfield and explicitly specify the subgroup retained on extension.",
+      "exhaustive_scope":"Relative to the chosen subfield and point/group condition.",
+      "subgroup_gate":"Actual selected points and group must be contained in the subfield model.", "cost_gate":"Compare the smaller-field problem and any coordinate conversion.", "local_status":"literature_baseline", "sources":["endo-rules"]
+    },
+    {
+      "id":"WCF1:isogenous-cover-support", "name":"Isogeny classes containing a covering-family representative", "category":"class_transfer", "scope":"isogeny_class", "evidence":"native_verified_geometry",
+      "domain":"An ordinary class over a specified field, a covering family, and a source model.",
+      "recognition":"An exact class oracle or a verified witness establishes support. A capped or restricted walk leaves the label unresolved.",
+      "properties":["Model membership and class support differ.","The p7 combined oracle is exact; 512 large-field bounded searches leave class labels unresolved."],
+      "find_members":"Use the selected-family class criterion and reconstruct a passing representative; retain a certified route from the fixed source when one is constructed.",
+      "exhaustive_scope":"Only the class/family oracle whose completeness is proved; finite walk policies are separately bounded.",
+      "subgroup_gate":"Every route degree and kernel must be compatible with the specified subgroup.", "cost_gate":"CM support, failed attempts, route maps, transport, reconstruction and destination solving are separate phases.", "local_status":"complete_small_field_oracle_large_labels_unresolved", "sources":["iso1","volcano"]
+    },
+    {
+      "id":"WCF1:cm-conductor-lead", "name":"CM field, class number and conductor signals", "category":"structural_lead", "scope":"curve_and_class", "evidence":"structural_only",
+      "domain":"Ordinary curves with exact or explicitly bounded order information.",
+      "recognition":"Separate the Frobenius conductor from the actual endomorphism-order conductor and retain uncertainty.",
+      "properties":["Class number can inform enumeration and route hypotheses.","Equal class numbers can coexist with different covering-family support."],
+      "find_members":"Organize certified discriminants/orders and investigate a declared family-specific criterion.",
+      "exhaustive_scope":"A signal inventory; no universal weakness classification follows from this property.",
+      "subgroup_gate":"Needed only after an actual map or solver route is proposed.", "cost_gate":"No solver or end-to-end gain is assigned from class number alone.", "local_status":"structural_index", "sources":["volcano","iso1","endo-rules"]
+    },
+    {
+      "id":"WCF1:endomorphism-symmetry-lead", "name":"Efficient endomorphisms and Frobenius symmetries", "category":"structural_lead", "scope":"curve_and_subgroup", "evidence":"structural_only",
+      "domain":"A specified curve and subgroup on which the endomorphism action is established.",
+      "recognition":"Record the actual map, its subgroup action and orbit/decomposition properties.",
+      "properties":["GLV/GLS or Frobenius structure can improve scalar arithmetic and generic constants.","A known endomorphism is not automatically a special curve-class reduction."],
+      "find_members":"Use published endomorphism families with exact parameters and independent map checks.",
+      "exhaustive_scope":"The named construction or symmetry family.",
+      "subgroup_gate":"Verify preservation and the correct eigenvalue/action, rather than selecting an unverified polynomial root.", "cost_gate":"Arithmetic and generic constants need their own measured contracts.", "local_status":"structural_index", "sources":["endo-rules"]
+    },
+    {
+      "id":"WCF1:torsion-lead", "name":"Rational torsion and twist/order patterns", "category":"structural_lead", "scope":"curve_model", "evidence":"structural_only",
+      "domain":"A curve over a fixed field, with certified torsion and twist/order information.",
+      "recognition":"Record exact rational torsion and the family it informs; retain unfactored group orders as unknown.",
+      "properties":["Full 2-torsion and one rational 2-point distinguish the two ISO-1 model branches.","A small torsion factor alone does not determine selected-subgroup weakness."],
+      "find_members":"Use torsion-prescribed models and certify their group conditions.",
+      "exhaustive_scope":"The torsion property or a declared torsion-prescribed family.",
+      "subgroup_gate":"Specify the chosen group and treatment of the cofactor.", "cost_gate":"A structural filter is not a completed source-to-destination cost.", "local_status":"structural_index", "sources":["iso1","endo-rules"]
+    },
+    {
+      "id":"WCF1:twist-input-contract", "name":"Twist and subgroup validation conditions", "category":"implementation_condition", "scope":"protocol", "evidence":"conditional_property",
+      "domain":"A specified point-input and validation contract, together with curve/twist subgroup data.",
+      "recognition":"Assess permitted point domains and subgroup checks under the actual contract.",
+      "properties":["Twist order is relevant to some input contracts.","This is an implementation condition, not a universal curve hardness label."],
+      "find_members":"Maintain defensive validation fixtures for the explicitly supported curve and twist domains.",
+      "exhaustive_scope":"The declared validation contract and allowed point domains.",
+      "subgroup_gate":"The protocol's subgroup/cofactor policy is part of the record.", "cost_gate":"No curve-level comparative solver cost is inferred.", "local_status":"contract_reference", "sources":["sec1","rfc7748"]
+    },
+    {
+      "id":"WCF1:singular-model-domain", "name":"Singular cubic input domain", "category":"input_domain", "scope":"input_model", "evidence":"conditional_property",
+      "domain":"A purported elliptic model whose discriminant vanishes.",
+      "recognition":"Certify nonsingularity before admitting an elliptic-curve record.",
+      "properties":["A singular cubic has different geometry and group structure.","It is kept outside the nonsingular elliptic-family inventory."],
+      "find_members":"Retain boundary fixtures for the model-validity check; catalogue them as rejected elliptic inputs.",
+      "exhaustive_scope":"The exact model-validity predicate.",
+      "subgroup_gate":"Nonsingular group definitions are required for elliptic entries.", "cost_gate":"No elliptic solver benchmark is attached to a rejected model.", "local_status":"contract_reference", "sources":["sec1"]
+    }
+  ],
+  "relations": [
+    {"from":"WCF1:supersingular","to":"WCF1:pairing-transfer","kind":"conditional_mechanism","condition":"Relevant prime-to-characteristic subgroup and verified pairing hypotheses; actual target field and cost are still required."},
+    {"from":"WCF1:g3-cubic","to":"WCF1:torsion-lead","kind":"necessary_property","condition":"Full rational 2-torsion and the branch-scoped Frobenius 2-depth restriction."},
+    {"from":"WCF1:g3-quadratic","to":"WCF1:torsion-lead","kind":"necessary_property","condition":"One rational nonidentity 2-point, with a full-2 rational quotient."},
+    {"from":"WCF1:g3-hyperelliptic-22","to":"WCF1:g3-type-i","kind":"conditional_subcase","condition":"Apply the published Type I configuration and involution hypotheses."},
+    {"from":"WCF1:g3-hyperelliptic-22","to":"WCF1:g3-type-ii","kind":"conditional_subcase","condition":"Apply the published Type II configuration and involution hypotheses."},
+    {"from":"WCF1:g3-cubic","to":"WCF1:isogenous-cover-support","kind":"model_implies_class_support","condition":"The model is a direct representative; construction from another source remains a separate route question."},
+    {"from":"WCF1:g3-quadratic","to":"WCF1:isogenous-cover-support","kind":"model_implies_class_support","condition":"The model is a direct representative, in its exact field and twist."},
+    {"from":"WCF1:odd-quadratic-lifts","to":"WCF1:g3-quadratic","kind":"specialization","condition":"Relative degree n = 3 and the prime-field-square hypotheses of the exact class theorem."},
+    {"from":"WCF1:odd-cubic-lifts","to":"WCF1:g3-cubic","kind":"specialization","condition":"Relative degree n = 3 and q = p^2, p > 3."},
+    {"from":"WCF1:cm-conductor-lead","to":"WCF1:isogenous-cover-support","kind":"lead_requires_witness","condition":"A family-specific exact intersection or constructed representative is required."}
+  ],
+  "growth_requirements": [
+    "Add independently validated Type I and Type II recognition before assigning those model labels.",
+    "Add source-linked anomalous, embedding-degree and binary-descent fixtures with specified subgroups.",
+    "Obtain on-demand CM support or an equivalent complete oracle for independently sampled large classes.",
+    "Retain representative construction, subgroup transfer and destination solver costs as separate obligations.",
+    "Expand finite parameter domains with immutable protocols, exact model IDs and retained unsuccessful rows."
+  ]
+}

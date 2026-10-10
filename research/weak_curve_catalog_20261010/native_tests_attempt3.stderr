@@ -1,0 +1,12 @@
+   Compiling iso1-report-check-runtime v0.1.0 (/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/report_check_runtime)
+error: invalid format string: expected `}`, found `\\`
+  --> ../../weak_curve_catalog_20261010/presentation.rs:86:47
+   |
+86 | ...   latex.push_str(&format!("\\Needspace{8\\baselineskip}\\subsection{{{}}}\n\\texttt{{{}}}\\quad {} / {}.\\par\n\\textbf{{Domain.}} {}...
+   |                                           - ^ expected `}` in format string
+   |                                           |
+   |                                           because of this opening brace
+   |
+   = note: if you intended to print `{`, you can escape it using `{{`
+
+error: could not compile `iso1-report-check-runtime` (bin "weak_curve_catalog" test) due to 1 previous error
