@@ -1,0 +1,52 @@
+{
+  "analyzer_sha256": "17916e96b56f7e5c8a52803faf0dec76d7b39da32a8064e04b9162efa076978a",
+  "binary_bytes": {
+    "prepared": 1672288,
+    "reference": 1650536
+  },
+  "binary_sha256": {
+    "prepared": "e368a507d687c535f4b37c10acd18bce24390e46ce90b3bc5bb76c3cd0e2c806",
+    "reference": "cb2ca849aef82caf7caec0062e596f6fa8846f457e4cec14926fb3293de601f3"
+  },
+  "block_network": true,
+  "build_log_sha256": "b7445942071e358e3b060debbed25dd2c73ff03d8c591df1cc2d14b3b56feb05",
+  "build_receipt_sha256": "d864c256500ffd1a55907557a2114eec0bd5fea04ad941247903aabe1a2fa116",
+  "build_script_sha256": "b3373e0762ee042d888cd9df94c5674b06c3ecaa0c89e63f7f2509c6e9fbe303",
+  "bundle_builder_sha256": "b8e3d0db8bcc1225b9249c09d6638592be58546ff9ff4595969a7d9b791153c4",
+  "controlled_speedup": null,
+  "cpu_limit_physical_cores": 16,
+  "cpu_request_physical_cores": 16,
+  "extension_freeze_sha256": "4df0f3d54831b55f4e6598306d2dd0440f908cafa60df50a964cdf5eb1e1f8d2",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_crosscurve_modal_pilot_freeze_v1",
+  "logical_execution_cpus": 16,
+  "memory_limit_mib": 32768,
+  "memory_request_mib": 32768,
+  "minimum_run_seconds": 30,
+  "modal_sdk_version": "1.2.4",
+  "paired_order": "ABBA_or_BAAB_by_frozen_curve_and_target_index",
+  "per_run_timeout_seconds": 120,
+  "pilot_runner_sha256": "aa734aa70702c2a1f1fb4ec33ab8c0e284238dc2f0060bd8718549589a44d601",
+  "pilot_target_indices": [
+    25,
+    28
+  ],
+  "planned_run_count": 16,
+  "prepare_script_sha256": "e8c2647a34340c1031358ca720c5cb37c0cc8e49df01b148821e28e305b06185",
+  "public_bundle_sha256": "e429dbbbe67560f340c0950f31cfe0520f1065db01b1975a9b7383cbcf32fdbd",
+  "public_target_count": 4,
+  "region": null,
+  "remote_runner_sent_as_sandbox_command": true,
+  "remote_runner_sha256": "ee64fb3ff0afa74f2b16ab6d02bf3906bec6f409b18b998ed4234d25d15ce1aa",
+  "requires_explicit_transfer_approval": true,
+  "sandbox_creation_attempts": 1,
+  "sandbox_timeout_seconds": 1200,
+  "single_target_wall_gain_threshold": 2,
+  "source_commit": "b562cdaed14254d4f6c5f2a4640b302592e8882b",
+  "source_root_tree_git_oid": "4622e64d4f3b9ee426ad023445dc7495a75d57fb",
+  "source_src_tree_git_oid": "fd07c426a334114e35f77e12d8aa7d993c795d28",
+  "transferred_bytes": 3329083,
+  "transferred_file_count": 3,
+  "vm_runtime": true,
+  "workload_deadline_seconds": 1080
+}

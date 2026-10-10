@@ -1,0 +1,31 @@
+{
+  "command_argument_bytes": 375,
+  "command_argument_sha256": "0c1fcc95c9f15498e54639b6c7581b2411af278cf5d9c4f9d5570569fa425951",
+  "file_count": 3,
+  "files": [
+    {
+      "bytes": 1650536,
+      "remote_path": "/opt/s3/reference",
+      "sha256": "cb2ca849aef82caf7caec0062e596f6fa8846f457e4cec14926fb3293de601f3"
+    },
+    {
+      "bytes": 1672288,
+      "remote_path": "/opt/s3/prepared",
+      "sha256": "e368a507d687c535f4b37c10acd18bce24390e46ce90b3bc5bb76c3cd0e2c806"
+    },
+    {
+      "bytes": 6259,
+      "remote_path": "/opt/s3/public_bundle.json",
+      "sha256": "e429dbbbe67560f340c0950f31cfe0520f1065db01b1975a9b7383cbcf32fdbd"
+    }
+  ],
+  "fixture_scalars_in_bundle": false,
+  "kind": "s3_crosscurve_modal_transfer_manifest_v1",
+  "pilot_freeze_sha256": "b7e38128b8cc8d2ee518af47d3968762d87011825b08477e132083e744bb417f",
+  "remote_runner_sent_as_sandbox_command": true,
+  "remote_runner_source_bytes": 15550,
+  "remote_runner_source_sha256": "ee64fb3ff0afa74f2b16ab6d02bf3906bec6f409b18b998ed4234d25d15ce1aa",
+  "source_repository_transferred": false,
+  "total_payload_bytes": 3345008,
+  "transferred_bytes": 3329083
+}

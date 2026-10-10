@@ -1,0 +1,58 @@
+{
+  "argv": [
+    "/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+    "build",
+    "--offline",
+    "--locked",
+    "--release",
+    "--target",
+    "x86_64-unknown-linux-gnu",
+    "--example",
+    "s3_pair_candidate_frozen",
+    "--example",
+    "s3_partial_prepared_targetspan"
+  ],
+  "binaries": {
+    "s3_pair_candidate_frozen": {
+      "bytes": 1650536,
+      "file": "/private/tmp/s3-crosscurve-modal-b562-build/target/x86_64-unknown-linux-gnu/release/examples/s3_pair_candidate_frozen: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.0.0, stripped",
+      "path": "/private/tmp/s3-crosscurve-modal-b562-build/target/x86_64-unknown-linux-gnu/release/examples/s3_pair_candidate_frozen",
+      "sha256": "cb2ca849aef82caf7caec0062e596f6fa8846f457e4cec14926fb3293de601f3"
+    },
+    "s3_partial_prepared_targetspan": {
+      "bytes": 1672288,
+      "file": "/private/tmp/s3-crosscurve-modal-b562-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_targetspan: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.0.0, stripped",
+      "path": "/private/tmp/s3-crosscurve-modal-b562-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_targetspan",
+      "sha256": "e368a507d687c535f4b37c10acd18bce24390e46ce90b3bc5bb76c3cd0e2c806"
+    }
+  },
+  "cargo_lock_sha256": "4ddc5ef76119493b41352c64a551fbd3fea3b5789644949ee775975b38150bca",
+  "exit_code": 0,
+  "finished_unix_ns": 1791636743682505000,
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "kind": "s3_crosscurve_modal_linux_build_v1",
+  "log_sha256": "b7445942071e358e3b060debbed25dd2c73ff03d8c591df1cc2d14b3b56feb05",
+  "rust_sysroot": "/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8",
+  "source_archive_paths": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "src",
+    "docs/ic",
+    "docs/ecbench",
+    "docs/curves",
+    "examples/s3_partial_prepared_targetspan.rs",
+    "experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs",
+    "experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs"
+  ],
+  "source_archive_sha256": "a82876336ac02db198799642faee467764c9f8b4ecfa24ac44b992ac8ae5c328",
+  "source_commit": "b562cdaed14254d4f6c5f2a4640b302592e8882b",
+  "source_sha256": {
+    "prepared": "294cee8a798f4cf417a4ce560cf780b66bb65030d1d76569a4431a7f454b46e1",
+    "reference": "edb605e0a65efb143116c02b918302cd25190b098d3542f4b0b64788d1af7d65"
+  },
+  "source_tree_git_oid": "fd07c426a334114e35f77e12d8aa7d993c795d28",
+  "started_unix_ns": 1791636616117775000,
+  "target": "x86_64-unknown-linux-gnu",
+  "zig": "0.16.0"
+}
