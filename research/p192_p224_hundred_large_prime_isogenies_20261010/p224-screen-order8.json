@@ -1,0 +1,52 @@
+{
+  "candidates": [
+    {
+      "curve": "p224",
+      "eigenvalue_orders": [
+        490,
+        5
+      ],
+      "eigenvalues": [
+        1178,
+        554
+      ],
+      "ell": 1471
+    },
+    {
+      "curve": "p224",
+      "eigenvalue_orders": [
+        9720,
+        5
+      ],
+      "eigenvalues": [
+        8929,
+        4264
+      ],
+      "ell": 9721
+    },
+    {
+      "curve": "p224",
+      "eigenvalue_orders": [
+        8,
+        14268
+      ],
+      "eigenvalues": [
+        22631,
+        17741
+      ],
+      "ell": 28537
+    }
+  ],
+  "lower": 1010,
+  "maximum_selected_order": 8,
+  "schema": "isogeny-screen/v1",
+  "status": "PASS",
+  "tool": {
+    "git_commit": "3203b8ebb1b5b739eafb3d92248771d2a90da965",
+    "git_dirty": "false",
+    "name": "isogeny",
+    "standards_sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4",
+    "version": "0.1.0"
+  },
+  "upper": 1000000
+}
