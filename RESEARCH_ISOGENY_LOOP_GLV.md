@@ -109,8 +109,8 @@ doublings it removes.
 | curve | n | D_K | h | cheapest loop | α | cost | ratio |
 |:--|--:|--:|--:|:--|:--|--:|--:|
 | ECC2K-130 | 131 | −7 | 1 | {2: 1} | (1 − √−7)/2 = τ̄ (or τ) | 2 M | 0.004 |
-| K_0 / GF(2^83) (`k0n83`) | 83 | −7 | 1 | {2: 1} | τ | 2 M | 0.006 |
-| K_1 / GF(2^83) (`k1n83`) | 83 | −7 | 1 | {2: 1} | τ | 2 M | 0.009 |
+| icv1-f2m83-tm6151469093347-debefd74 (Koblitz a = 0 over GF(2^83)) | 83 | −7 | 1 | {2: 1} | τ | 2 M | 0.006 |
+| icv1-f2m83-t6151469093347-cdcc5432 (Koblitz a = 1 over GF(2^83)) | 83 | −7 | 1 | {2: 1} | τ | 2 M | 0.009 |
 | ECC2K-95 | 97 | −7 | 1 | {2: 1} | τ | 2 M | 0.005 |
 | ECC2K-108 | 109 | −7 | 1 | {2: 1} | τ | 2 M | 0.005 |
 
@@ -216,7 +216,7 @@ SCANPLACEHOLDER
 ```
 pip install cypari2
 python3 scripts/isogeny_loop_sweeper.py selftest
-python3 scripts/isogeny_loop_sweeper.py curve ECC2K-130 k0n83 ECC2-131 ECCp-131 --top 6
+python3 scripts/isogeny_loop_sweeper.py curve ECC2K-130 icv1-f2m83-tm6151469093347-debefd74 ECC2-131 ECCp-131 --top 6
 python3 scripts/isogeny_loop_sweeper.py curve id-GostR3410-2001-CryptoPro-B-ParamSet
 python3 scripts/isogeny_loop_sweeper.py scan --scan-from 3 --scan-to 3000 --bits 256
 ```

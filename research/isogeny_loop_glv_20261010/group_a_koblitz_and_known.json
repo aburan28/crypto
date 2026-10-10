@@ -4,8 +4,8 @@
   "mode": "curve",
   "names": [
    "ECC2K-130",
-   "k0n83",
-   "k1n83",
+   "icv1-f2m83-tm6151469093347-debefd74",
+   "icv1-f2m83-t6151469093347-cdcc5432",
    "ECC2K-95",
    "ECC2K-108",
    "secp256k1",
@@ -34,7 +34,7 @@
   "selftest_disc": -71,
   "json": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
  },
- "seconds": 16.4,
+ "seconds": 17.0,
  "results": [
   {
    "curve": {
@@ -82,7 +82,7 @@
       1
      ]
     ],
-    "factor_seconds": 0.001
+    "factor_seconds": 0.0
    },
    "orders": [
     {
@@ -426,7 +426,7 @@
        }
       }
      ],
-     "seconds": 0.08,
+     "seconds": 0.07,
      "tau": {
       "mu": -1,
       "lambda_tau": "196511074115861092422032515080945363956",
@@ -448,7 +448,7 @@
   },
   {
    "curve": {
-    "name": "k0n83",
+    "name": "icv1-f2m83-tm6151469093347-debefd74",
     "family": "koblitz",
     "q": "9671406556917033397649408",
     "char2": true,
@@ -858,7 +858,7 @@
   },
   {
    "curve": {
-    "name": "k1n83",
+    "name": "icv1-f2m83-t6151469093347-cdcc5432",
     "family": "koblitz",
     "q": "9671406556917033397649408",
     "char2": true,
@@ -2064,7 +2064,7 @@
        }
       }
      ],
-     "seconds": 0.05,
+     "seconds": 0.03,
      "tau": {
       "mu": 1,
       "lambda_tau": "186095208068728544117755622068487",
@@ -2503,7 +2503,7 @@
        }
       }
      ],
-     "seconds": 0.11
+     "seconds": 0.09
     }
    ],
    "sqrtDK_mod_r": "40355928511004201617718542041737866950982249168109730405371922055742165534300",
@@ -2585,7 +2585,7 @@
       1
      ]
     ],
-    "factor_seconds": 0.016
+    "factor_seconds": 0.01
    },
    "orders": [
     {
@@ -2979,7 +2979,7 @@
        }
       }
      ],
-     "seconds": 0.13
+     "seconds": 0.08
     }
    ],
    "sqrtDK_mod_r": "51490768872374587546515372626297144722503922362800160891063924138880062963709",
@@ -3040,7 +3040,7 @@
     "DK_bits": 258,
     "conductor_f": "1",
     "conductor_factorization": [],
-    "factor_seconds": 2.347
+    "factor_seconds": 2.307
    },
    "orders": [],
    "sqrtDK_mod_r": "115792089237316195423570985008687907852877541151357922411298727602245008061328",
@@ -3144,7 +3144,7 @@
     "DK_bits": 115,
     "conductor_f": "1",
     "conductor_factorization": [],
-    "factor_seconds": 0.008
+    "factor_seconds": 0.007
    },
    "orders": [
     {
@@ -3158,7 +3158,7 @@
        "2",
        "2"
       ],
-      "bnf_seconds": 13.11
+      "bnf_seconds": 13.99
      },
      "primes": [
       {
@@ -3572,7 +3572,7 @@
        }
       }
      ],
-     "seconds": 13.35,
+     "seconds": 14.21,
      "note": "binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered)."
     }
    ],

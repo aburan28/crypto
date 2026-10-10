@@ -9,7 +9,7 @@ budget, dlogs, eigenvalues, GLV bases), `*.log` the stderr progress lines.
 | file | command |
 |:--|:--|
 | `selftest_D-71.{md,json}` | `python3 scripts/isogeny_loop_sweeper.py selftest --json …` |
-| `group_a_koblitz_and_known.{md,json}` | `python3 scripts/isogeny_loop_sweeper.py curve ECC2K-130 k0n83 k1n83 ECC2K-95 ECC2K-108 secp256k1 id-GostR3410-2001-CryptoPro-B-ParamSet id-GostR3410-2001-CryptoPro-A-ParamSet sect113r1 --top 6 --json …` |
+| `group_a_koblitz_and_known.{md,json}` | `python3 scripts/isogeny_loop_sweeper.py curve ECC2K-130 icv1-f2m83-tm6151469093347-debefd74 icv1-f2m83-t6151469093347-cdcc5432 ECC2K-95 ECC2K-108 secp256k1 id-GostR3410-2001-CryptoPro-B-ParamSet id-GostR3410-2001-CryptoPro-A-ParamSet sect113r1 --top 6 --json …` |
 | `group_b_binary131.{md,json}` | `python3 scripts/isogeny_loop_sweeper.py curve ECC2-131 sect131r1 sect131r2 --top 6 --json …` |
 | `group_c_certicom_mid.{md,json}` | `python3 scripts/isogeny_loop_sweeper.py curve ECCp-131 ECC2-109 ECCp-109 ECC2-97 ECCp-97 --top 6 --json …` |
 | `group_d_certicom_small.{md,json}` | `python3 scripts/isogeny_loop_sweeper.py curve ECC2-89 ECCp-89 ECC2-79 ECCp-79 --top 6 --json …` |

@@ -16,7 +16,7 @@ PARI stack size set to 2147483648 bytes, maximum size set to 2147483648
 
 single-prime loops (paper Section 3): l = 2: length 1, 2 M (0.004x saving); l = 11: length 1, 82 M (0.159x saving); l = 23: length 1, 172 M (0.332x saving)
 
-### k0n83 (koblitz, q bits 84, log2 r = 82)
+### icv1-f2m83-tm6151469093347-debefd74 (koblitz, q bits 84, log2 r = 82)
 - Delta = t^2 - 4q: 80 bits, D_K = -7 (3 bits), conductor f_pi = 347450761417 (f_pi = [('6473', 1), ('53676929', 1)])
 - GLV budget: the split saves ~41 doublings = 328.0 M (projective step model, doubling 8.0 M)
 - order O_1 (D = -7): h = 1, Cl(O_K) = [] (bnfinit 0.0 s); 10 split primes <= bound; loops within 328 M: 2358 (exhaustive: True); LLL upper bound 2 M
@@ -33,7 +33,7 @@ single-prime loops (paper Section 3): l = 2: length 1, 2 M (0.004x saving); l = 
 
 single-prime loops (paper Section 3): l = 2: length 1, 2 M (0.006x saving); l = 11: length 1, 82 M (0.252x saving); l = 23: length 1, 172 M (0.526x saving)
 
-### k1n83 (koblitz, q bits 84, log2 r = 53)
+### icv1-f2m83-t6151469093347-cdcc5432 (koblitz, q bits 84, log2 r = 53)
 - Delta = t^2 - 4q: 80 bits, D_K = -7 (3 bits), conductor f_pi = 347450761417 (f_pi = [('6473', 1), ('53676929', 1)])
 - GLV budget: the split saves ~27 doublings = 216.0 M (projective step model, doubling 8.0 M)
 - order O_1 (D = -7): h = 1, Cl(O_K) = [] (bnfinit 0.0 s); 10 split primes <= bound; loops within 216 M: 670 (exhaustive: True); LLL upper bound 2 M
@@ -130,7 +130,7 @@ single-prime loops (paper Section 3): l = 5: length 5, 188 M (0.183x saving); l 
 ### sect113r1 (binary, q bits 114, log2 r = 113)
 - Delta = t^2 - 4q: 115 bits, D_K = -26504973335422840129609279124569399 (115 bits), conductor f_pi = 1
 - GLV budget: the split saves ~57 doublings = 456.0 M (projective step model, doubling 8.0 M)
-- order O_1 (D = -26504973335422840129609279124569399): h = 118323207158487408, Cl(O_K) = ['29580801789621852', '2', '2'] (bnfinit 13.11 s); 12 split primes <= bound; loops within 456 M: 4 (exhaustive: True); LLL upper bound 226 M
+- order O_1 (D = -26504973335422840129609279124569399): h = 118323207158487408, Cl(O_K) = ['29580801789621852', '2', '2'] (bnfinit 13.99 s); 12 split primes <= bound; loops within 456 M: 4 (exhaustive: True); LLL upper bound 226 M
 - binary ordinary curve: the only 2-isogenies are the Frobenius F (inseparable) and the Verschiebung V, so the 2-loops are {2: +n} = pi (acts as 1) and {2: -n} = pi-bar = V^n (acts as q = t - 1 on E(F_q)); both lie in Z[pi]. A GLV split with lambda = t - 1 is the paper's folklore split: it trades the n/2 doublings of [t-1]P for n Verschiebung steps, and the gain is model-dependent (x-only V step ~1M+2S, but y must be recovered).
 
 | rank | cost M | cost / saving | loop (prime: exponent) | chain length | degree bits | alpha | in Z[pi] (acts as integer) | lambda is ±1 | GLV max |k_i| bits |
