@@ -1,0 +1,58 @@
+{
+  "curve": "p224",
+  "degree_coverage": "PARTIAL",
+  "ell": 1117,
+  "executable_sha256": "9b5cf668a79e6188fba99f8c5982d80366996fdac7b142a61cad6b7c8ec71d16",
+  "protocol_sha256": "721102ac3cc6282e05920f5c3b67da55a398c7f5eb8654f5c8051594b64a4a02",
+  "requested_maps": 2,
+  "resource_envelope": {
+    "construction_rss_limit_bytes": 8589934592,
+    "construction_timeout_seconds": 1800,
+    "walk_concurrency": 1
+  },
+  "schema": "isogeny-prime-walk/v1",
+  "status": "PASS",
+  "steps": [
+    {
+      "construction_elapsed_ms_operational_only": 2899,
+      "curves_sha256": "4241aea71621c3865de86ee65f3d93de28fc0c06fca027103311a71b817bc08a",
+      "directory": "step-000",
+      "ell": 1117,
+      "index": 0,
+      "invocation_elapsed_ms": 17850,
+      "map_sha256": "6f1812ef5c90fabc34093c8b9545053997b55f851c44a9883bfa1ea2842d05fd",
+      "replay_sha256": "d2654d256bf4b854bb0b4d412366af7bf0199474c61e22a3a465f0b941ba24bd",
+      "search_sha256": "07d8c0e78f8f50e32afa491ae68f85343dbd152e8e7161ac122b41b4b038184b",
+      "source_icv1": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+      "source_model_sha256": "af0f0c6e96c831f98b7dc1ce70b6c4e11013991045c594c94f43d08082e02cd3",
+      "status": "PASS",
+      "target_icv1": "icv1-fp224-t4733100108545601916421827343930821-a120b97a",
+      "verification_elapsed_ms": 14939
+    },
+    {
+      "construction_elapsed_ms_operational_only": 2673,
+      "curves_sha256": "f29ebc6418efa2366977043073899a406a759a820cebeb18105b48364d177cf7",
+      "directory": "step-001",
+      "ell": 1117,
+      "index": 1,
+      "invocation_elapsed_ms": 20592,
+      "map_sha256": "d4d5ea5c10aaf66cc041f2eec7c6d90ec730bde8517a7128bb075e42b2287887",
+      "replay_sha256": "a2f6592365593ab744e1a6048d78e6257ab352c1377984bf7526d831a6da0a43",
+      "search_sha256": "ce56531d2cf1de8a0fa8c8a277d0a6d20ae2669bfcbcca8eed94c4aea942487c",
+      "source_icv1": "icv1-fp224-t4733100108545601916421827343930821-a120b97a",
+      "source_model_sha256": "baf162ce173c2b480fac11c3260625ea89bc1b035f467a64a3425ed7a7d7bacc",
+      "status": "PASS",
+      "target_icv1": "icv1-fp224-t4733100108545601916421827343930821-ffea5b3c",
+      "verification_elapsed_ms": 17914
+    }
+  ],
+  "timeout_seconds": 1800,
+  "tool": {
+    "git_commit": "49a280dc60972c9d16b2205b4652cc6c5d87284e",
+    "git_dirty": "false",
+    "name": "isogeny",
+    "standards_sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4",
+    "version": "0.1.0"
+  },
+  "verified_maps": 2
+}

@@ -1,0 +1,30 @@
+{
+  "degree_coverage": "PARTIAL",
+  "expected_total_eigenlines": 2,
+  "method": "existing walker kernel verifier, separate field and polynomial implementation",
+  "records": [
+    {
+      "certificate_sha256": "b9a1f0337ebb4564e6d2c5f39f25f5720bde1a8b1e9e1637c59ca98bf3b5b1c8",
+      "codomain_check": "PASS",
+      "ell": 2341,
+      "exact_rational_map_check": "PASS",
+      "index": 0,
+      "kernel_check": "PASS",
+      "kernel_degree": 1170,
+      "map_denominator_coefficients": 2341,
+      "map_numerator_coefficients": 2342,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:72deae899c5b5bc7e418c74c318fdfa8bba0138cecdf97ae9c82f47cf3ab1429",
+      "source_ec1": "EC1P192Cfph72deae899c5b",
+      "source_icv1": "icv1-fp192-t31607402316713927207482677199-696a5208",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:146e2fb5b27b37c253781637387ae045754225d666acd44207493b855ff9af12",
+      "target_ec1": "EC1P192Cfph146e2fb5b27b",
+      "target_icv1": "icv1-fp192-t31607402316713927207482677199-92399c8e"
+    }
+  ],
+  "schema": "large-degree-isogeny-replay/v1",
+  "scope": "same-host independent implementation",
+  "status": "PASS"
+}

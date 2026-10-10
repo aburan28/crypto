@@ -47,7 +47,7 @@ use std::collections::BTreeMap;
 
 use num_bigint::{BigInt, BigUint};
 use num_integer::Integer;
-use num_traits::{One, Signed, Zero};
+use num_traits::{One, Signed, ToPrimitive, Zero};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -106,6 +106,9 @@ pub enum Model {
     },
     /// `y² = x³ + ax + b` over `GF(p)`.
     Prime { p: BigUint, a: BigUint, b: BigUint },
+    /// A recognized catalogue model whose coordinate arithmetic is unavailable.
+    /// Retain its exact field so order/trace identities can still be checked.
+    Other { p: BigUint, degree: u32 },
 }
 
 impl Model {
@@ -114,6 +117,7 @@ impl Model {
         match self {
             Model::Binary { n, .. } => BigUint::one() << *n,
             Model::Prime { p, .. } => p.clone(),
+            Model::Other { p, degree } => p.pow(*degree),
         }
     }
 
@@ -122,6 +126,7 @@ impl Model {
         match self {
             Model::Binary { n, .. } => u64::from(*n),
             Model::Prime { p, .. } => p.bits(),
+            Model::Other { .. } => self.q().bits(),
         }
     }
 }
@@ -173,6 +178,16 @@ fn parse_model(model_json: &str) -> Result<Model, String> {
     let num = |key: &str| {
         str_field(&m, key).and_then(|s| parse_uint(s).ok_or_else(|| format!("bad {key}: {s}")))
     };
+    if str_field(&m, "field")?.starts_with("fpk-") {
+        let degree = num("k")?.to_u32().ok_or("extension degree is too large")?;
+        if degree == 0 {
+            return Err("extension degree must be positive".into());
+        }
+        return Ok(Model::Other {
+            p: num("p")?,
+            degree,
+        });
+    }
     match str_field(&m, "form")? {
         "y^2+xy=x^3+a*x^2+b" => {
             let modulus = num("modulus")?;
@@ -194,6 +209,12 @@ fn parse_model(model_json: &str) -> Result<Model, String> {
             a: num("a")?,
             b: num("b")?,
         }),
+        "B*y^2=x^3+A*x^2+x" | "a*x^2+y^2=1+d*x^2*y^2" | "x^2+y^2=c^2*(1+d*x^2*y^2)" => {
+            Ok(Model::Other {
+                p: num("p")?,
+                degree: 1,
+            })
+        }
         other => Err(format!("unknown form {other}")),
     }
 }
@@ -221,6 +242,7 @@ fn parse_representation(rep: &Value, model: &Model) -> Option<Representation> {
                 return None;
             }
         }
+        Model::Other { .. } => return None,
     }
     let gen = curve["generator"].as_array()?;
     let coord = |v: &Value| parse_uint(v.as_str()?);
@@ -719,7 +741,7 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
     let q = c.model.q();
     let characteristic = match &c.model {
         Model::Binary { .. } => BigUint::from(2u8),
-        Model::Prime { p, .. } => p.clone(),
+        Model::Prime { p, .. } | Model::Other { p, .. } => p.clone(),
     };
     let (status, method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
@@ -739,12 +761,13 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
         field: FieldInfo {
             kind: match c.model {
                 Model::Binary { .. } => "binary",
-                Model::Prime { .. } => "prime",
+                Model::Prime { .. } | Model::Other { .. } => "prime",
             }
             .into(),
             degree: match &c.model {
                 Model::Binary { n, .. } => *n,
                 Model::Prime { .. } => 1,
+                Model::Other { degree, .. } => *degree,
             },
             size_bits: c.model.size_bits(),
         },
@@ -991,6 +1014,29 @@ impl TraitFile {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn unavailable_coordinate_models_keep_exact_fields_without_order_certificates() {
+        use super::*;
+        for (text, q) in [
+            (
+                r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
+                101u64,
+            ),
+            (
+                r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","a":["1","0"],"b":["1","0"]}"#,
+                1369u64,
+            ),
+        ] {
+            let model = parse_model(text).unwrap();
+            assert_eq!(model.q(), BigUint::from(q));
+            assert_eq!(
+                certify::check_order(&model, &BigUint::from(q), &[])
+                    .unwrap()
+                    .0,
+                Status::NotEvaluated
+            );
+        }
+    }
     use super::*;
 
     const REGISTRY: &str = include_str!("../../../docs/curves/registry.json");

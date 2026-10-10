@@ -66,7 +66,8 @@ const HELP: &str = "isogeny — public-curve isogeny search and independent veri
 
 search options:
   --method auto|kernel|modpoly  auto selects the validated kernel route for
-                              P192/P224 eigenvalue orders <=16; otherwise full enumeration
+                              degrees above 1009 with P192/P224 eigenvalue orders <=16;
+                              otherwise full enumeration
   --construct-only            record construction without independent replay
   --timeout SECONDS           construction time limit (default 1800; RSS cap 8 GiB)
   --out DIRECTORY             fresh output directory; existing paths are refused
@@ -317,7 +318,7 @@ fn execute(args: &[String]) -> Result<(Value, i32), String> {
                     return Err("degree must be coprime to the registered subgroup order".into());
                 }
             }
-            let supported = constructor::selection(name, ell).is_some();
+            let supported = ell > 1009 && constructor::selection(name, ell).is_some();
             let single = match o.get("method").unwrap_or("auto") {
                 "auto" => supported,
                 "kernel" if supported => true,

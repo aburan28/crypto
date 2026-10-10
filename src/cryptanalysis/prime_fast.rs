@@ -1573,7 +1573,7 @@ mod tests {
     }
 
     #[test]
-    fn hasse_bsgs_reproduces_the_ladder_rungs() {
+    fn hasse_bsgs_reproduces_the_ladder_models_and_orders() {
         // The committed 16/20/24-bit a=−3 rungs, and the 28-bit P-256-class
         // rung found independently by `examples/find_a3_bench_curves`
         // (p = 268435399, b = 3, G = (1, 1), n = 268407199).
@@ -1581,7 +1581,17 @@ mod tests {
             let (fc, g) = ladder(bits);
             assert_eq!(point_order_hasse(&fc, g), Some(fc.n), "bits={bits}");
             let (gen, gg) = find_a3_curve(bits, 3).unwrap();
-            assert_eq!((gen.f.p, gen.n, gen.canonical(gg)), (fc.f.p, fc.n, fc.canonical(g)));
+            // Preserve the frozen generator's identity. Square-root implementations
+            // can select its negative, a different representation of the same model.
+            assert_eq!(
+                (gen.f.p, gen.n, gen.f.from_mont(gen.a), gen.f.from_mont(gen.b)),
+                (fc.f.p, fc.n, fc.f.from_mont(fc.a), fc.f.from_mont(fc.b))
+            );
+            let (x, y) = gen.canonical(gg);
+            let (expected_x, expected_y) = fc.canonical(g);
+            assert_eq!(x, expected_x);
+            assert!(y == expected_y || y == fc.f.p - expected_y);
+            assert_eq!(gen.mul(Some(gg), gen.n), None);
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();
         assert_eq!(gen.f.p, 268_435_399);

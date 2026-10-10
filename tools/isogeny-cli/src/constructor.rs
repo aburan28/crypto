@@ -120,7 +120,10 @@ fn construct<F: PrimeFieldInt, const D: usize>(
     h
 }
 pub fn selection(name: &str, ell: u64) -> Option<(usize, u64, u64)> {
-    if !matches!(name, "p192" | "p224") || !isogeny_algos::field::is_prime(ell) {
+    if !matches!(name, "p192" | "p224")
+        || !(3..=1_000_000).contains(&ell)
+        || !isogeny_algos::field::is_prime(ell)
+    {
         return None;
     }
     let roots = crate::eigenvalues(name, ell)?;
@@ -241,6 +244,7 @@ mod tests {
         assert_eq!(selection("p224", 1117), Some((9, 591, 698)));
         assert_eq!(selection("p192", 1021), None);
         assert_eq!(selection("p224", 1119), None);
+        assert_eq!(selection("p224", u64::MAX), None);
     }
     fn field_laws<const D: usize>() {
         let f = Extension::<_, D>::search(isogeny_algos::field::Zp::new(101), 991);

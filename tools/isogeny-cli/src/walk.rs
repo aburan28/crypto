@@ -152,10 +152,18 @@ pub fn verify(out: &Path) -> Result<Value, String> {
     }
     let name = manifest["curve"].as_str().ok_or("missing anchor")?;
     let ell = manifest["ell"].as_u64().ok_or("missing degree")?;
-    if crate::constructor::selection(name, ell).is_none() || ell <= 1009 {
+    if !(1010..=1_000_000).contains(&ell) || crate::constructor::selection(name, ell).is_none() {
         return Err("unsupported walk degree or anchor".into());
     }
     let steps = manifest["steps"].as_array().ok_or("missing steps")?;
+    let requested = manifest["requested_maps"]
+        .as_u64()
+        .ok_or("missing requested count")?;
+    if !(1..=1000).contains(&requested) || steps.is_empty() || steps.len() as u64 > requested {
+        return Err(
+            "walk replay requires a nonempty verified prefix within requested count 1..1000".into(),
+        );
+    }
     assert_eq!(
         steps.len() as u64,
         manifest["verified_maps"].as_u64().unwrap()
@@ -207,6 +215,8 @@ pub fn verify(out: &Path) -> Result<Value, String> {
     Ok(
         json!({"schema":"isogeny-prime-walk-replay/v1","status":"PASS","curve":name,
         "ell":ell,"verified_maps":maps.len(),"degree_coverage":"PARTIAL",
+        "requested_maps":requested,"construction_status":manifest["status"],
+        "complete":manifest["status"]=="PASS" && maps.len() as u64==requested,
         "scope":"same-host independent implementation","walk_sha256":sha256_hex(&fs::read(out.join("walk.json")).unwrap())}),
     )
 }

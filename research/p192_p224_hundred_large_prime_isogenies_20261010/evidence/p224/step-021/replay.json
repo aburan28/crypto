@@ -1,0 +1,30 @@
+{
+  "degree_coverage": "PARTIAL",
+  "expected_total_eigenlines": 2,
+  "method": "existing walker kernel verifier, separate field and polynomial implementation",
+  "records": [
+    {
+      "certificate_sha256": "314be3d12693daedd94924c168d16e3bd5ad7fd64024cbe88abe34b63930f116",
+      "codomain_check": "PASS",
+      "ell": 1117,
+      "exact_rational_map_check": "PASS",
+      "index": 0,
+      "kernel_check": "PASS",
+      "kernel_degree": 558,
+      "map_denominator_coefficients": 1117,
+      "map_numerator_coefficients": 1118,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:0374a092cd360f6bc5175845acb8bb9182c689b0e07f78afcd7ed5dc46ff36ad",
+      "source_ec1": "EC1P224Cfph0374a092cd36",
+      "source_icv1": "icv1-fp224-t4733100108545601916421827343930821-7264358b",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:d114639235fb965645363b86e6a9034b7bc5cb0d5577642eaffc1c70775b1593",
+      "target_ec1": "EC1P224Cfphd114639235fb",
+      "target_icv1": "icv1-fp224-t4733100108545601916421827343930821-75ebcf58"
+    }
+  ],
+  "schema": "large-degree-isogeny-replay/v1",
+  "scope": "same-host independent implementation",
+  "status": "PASS"
+}

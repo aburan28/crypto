@@ -1,0 +1,48 @@
+{
+  "attempts": [
+    {
+      "curve": "p192",
+      "ell": 2341,
+      "receipt": {
+        "command": [
+          "/private/tmp/isogeny-catalogue-setup/macos-target/release/isogeny",
+          "kernel-first",
+          "--curve",
+          "p192",
+          "--ell",
+          "2341",
+          "--order",
+          "6277101735386680763835789423176059013767194773182842284081",
+          "--seed",
+          "1",
+          "--model",
+          "/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/p192/step-028/model.json"
+        ],
+        "elapsed_ms_operational_only": 9072,
+        "exit_code": 0,
+        "map_count": 1,
+        "memory_monitor_grace_ms": 100,
+        "memory_sampling_interval_ms": 25,
+        "resident_memory_limit_bytes": "8589934592",
+        "sampled_peak_resident_bytes": "10977280",
+        "status": "PASS",
+        "stderr_sha256": "487d94e8bfeba3515cd756a0e6c590b1f04c755af8a090c7659d12f5877f16fb",
+        "stdout": "ell-2341.json",
+        "stdout_sha256": "4da83e334e8e05571af9aa6295ad3e97fd7e8d3c850b3be8d118886de1dfc6d0",
+        "unavailable_memory_samples": 0
+      }
+    }
+  ],
+  "executable_sha256": "9b5cf668a79e6188fba99f8c5982d80366996fdac7b142a61cad6b7c8ec71d16",
+  "reference_protocol_sha256": "721102ac3cc6282e05920f5c3b67da55a398c7f5eb8654f5c8051594b64a4a02",
+  "schema": "isogeny-search/v1",
+  "source_commit": "49a280dc60972c9d16b2205b4652cc6c5d87284e",
+  "timeout_seconds": 1800,
+  "tool": {
+    "git_commit": "49a280dc60972c9d16b2205b4652cc6c5d87284e",
+    "git_dirty": "false",
+    "name": "isogeny",
+    "standards_sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4",
+    "version": "0.1.0"
+  }
+}
