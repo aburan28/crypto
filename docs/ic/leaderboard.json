@@ -92,7 +92,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "6cadc45b189b30492e0b6e4ac47a6bc703cf04358792970c408564d3c05b2beb"
+   "sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -12544,6 +12544,78 @@
    "on_board": false,
    "order_bits": 224,
    "slug": "icv1-fp224-t4733100108545601916421827343930821-5a35f6f7",
+   "standard": []
+  },
+  {
+   "coefficients": "standard coefficients",
+   "curves_yaml_key": null,
+   "ec1": [
+    "EC1P521Cfph2ca5252bc7a9"
+   ],
+   "ec1_unresolved": null,
+   "factor_base_link_status": "no_curves_yaml_record",
+   "family": "prime",
+   "field": "GF(p), 521-bit p",
+   "legacy": [
+    "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-5014bab6"
+   ],
+   "on_board": false,
+   "order_bits": 521,
+   "slug": "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-5014bab6",
+   "standard": []
+  },
+  {
+   "coefficients": "standard coefficients",
+   "curves_yaml_key": null,
+   "ec1": [
+    "EC1P521Cfph7e4eadcf791f"
+   ],
+   "ec1_unresolved": null,
+   "factor_base_link_status": "no_curves_yaml_record",
+   "family": "prime",
+   "field": "GF(p), 521-bit p",
+   "legacy": [
+    "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-e804740d"
+   ],
+   "on_board": false,
+   "order_bits": 521,
+   "slug": "icv1-fp521-t657877501894328237357444332315020117536923257219387276263472201219398408051703-e804740d",
+   "standard": []
+  },
+  {
+   "coefficients": "standard coefficients",
+   "curves_yaml_key": null,
+   "ec1": [
+    "EC1P384Cfphf220a662ab79"
+   ],
+   "ec1_unresolved": null,
+   "factor_base_link_status": "no_curves_yaml_record",
+   "family": "prime",
+   "field": "GF(p), 384-bit p",
+   "legacy": [
+    "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-e5c876e1"
+   ],
+   "on_board": false,
+   "order_bits": 384,
+   "slug": "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-e5c876e1",
+   "standard": []
+  },
+  {
+   "coefficients": "standard coefficients",
+   "curves_yaml_key": null,
+   "ec1": [
+    "EC1P384Cfphfafc039c43a3"
+   ],
+   "ec1_unresolved": null,
+   "factor_base_link_status": "no_curves_yaml_record",
+   "family": "prime",
+   "field": "GF(p), 384-bit p",
+   "legacy": [
+    "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-0afff050"
+   ],
+   "on_board": false,
+   "order_bits": 384,
+   "slug": "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-0afff050",
    "standard": []
   }
  ],

@@ -3,7 +3,7 @@
 `isogeny_algos` is a standalone Rust crate (its own workspace, no dependencies) with a command
 line, `isogeny-algos`, for the operations other tools in this repository need most: certified
 point counts, rational isogenies with explicit kernels and maps, and modular polynomials, for
-prime-field curves `y² = x³ + ax + b` with `p` up to 512 bits. Every result carries the checks
+prime-field curves `y² = x³ + ax + b` with `p` up to 640 bits. Every result carries the checks
 that were run on it; nothing is printed without a status.
 
 ## Build

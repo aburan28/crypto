@@ -159,7 +159,11 @@ mod tests {
     #[test]
     fn all_models_are_accounted_for_with_operation_capabilities() {
         let data = inventory();
-        assert_eq!(data["count"], 345);
+        assert!(data["count"].as_u64().unwrap() >= 345);
+        assert_eq!(
+            data["count"].as_u64().unwrap() as usize,
+            registry()["curves"].as_array().unwrap().len()
+        );
         for row in data["curves"].as_array().unwrap() {
             assert_eq!(
                 resolve(row["slug"].as_str().unwrap()).unwrap()["slug"],

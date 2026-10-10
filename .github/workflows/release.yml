@@ -205,6 +205,8 @@ jobs:
           grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' BUILD.json
           "./isogeny$ext" screen --curve p192 --from 1010 --to 65537 > screen.json
           grep -Fq '10453' screen.json
+          "./isogeny$ext" curves > catalogue.json
+          grep -Fq 'brainpoolP384r1' catalogue.json
           "./isogeny$ext" search --curve p224 --ell 1471 --out p224-1471 --timeout 180 > search-result.json
           grep -Fq '"status": "PASS"' search-result.json
           grep -Fq '"degree_coverage": "PARTIAL"' search-result.json
@@ -212,6 +214,8 @@ jobs:
           grep -Fq '"exact_rational_map_check": "PASS"' verification.json
           "./isogeny$ext" search --curve p192 --ell 73 --method modpoly --out p192-73 --timeout 180 > full-result.json
           grep -Fq '"degree_coverage": "COMPLETE"' full-result.json
+          "./isogeny$ext" search --curve P-521 --ell 7 --out p521-7 --timeout 180 > wide-result.json
+          grep -Fq '"degree_coverage": "COMPLETE"' wide-result.json
       - name: Stage the dedicated tool archive
         shell: bash
         run: |

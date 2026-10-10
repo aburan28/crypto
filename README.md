@@ -56,6 +56,9 @@ and run it directly:
 isogeny search --curve p224 --ell 1471 --out ./p224-1471
 isogeny search --curve p192 --ell 10453 --out ./p192-10453
 isogeny verify --input ./p224-1471
+isogeny curves
+isogeny search --curve P-384 --ell 19 --out ./p384-19
+isogeny search --curve P-521 --ell 7 --out ./p521-7
 ```
 
 The executable embeds its algorithms and standard curve data. The kernel route at
