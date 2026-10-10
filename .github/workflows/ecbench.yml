@@ -161,32 +161,24 @@ jobs:
             '/docs/ecbench/**' '/docs/curves/**' '/.cargo/**'
           git -C "$frozen" checkout HEAD
           cp Cargo.lock "$frozen/Cargo.lock"
-          python3 - "$frozen" research/ecbench_n37_shared_rank_20261004/CLAIM_FINAL_DIAGNOSTIC.json <<'PY'
-          import hashlib
-          import json
-          import pathlib
-          import sys
-
-          root = pathlib.Path(sys.argv[1])
-          claim = json.loads(pathlib.Path(sys.argv[2]).read_text())
-          expected = {
-              item["role"]: item["sha256"]
-              for item in claim["candidate_manifest"]["implementation"]["components"]
-          }
-          paths = {
-              "ic_pipeline": "src/cryptanalysis/ic_framework/mod.rs",
-              "ic_plugins": "src/cryptanalysis/ic_framework/plugins.rs",
-              "ic_solvers": "src/cryptanalysis/ic_framework/solvers.rs",
-              "ic_linalg": "src/cryptanalysis/ic_framework/linalg.rs",
-              "relation_loop": "src/cryptanalysis/ic_boundary.rs",
-              "harness": "src/cryptanalysis/ecbench/methods.rs",
-              "shared_rank": "src/cryptanalysis/ic_framework/shared_rank.rs",
-          }
-          assert set(expected) == set(paths), "unexpected frozen claim source roles"
-          for role, path in paths.items():
-              actual = hashlib.sha256((root / path).read_bytes()).hexdigest()
-              assert actual == expected[role], f"{role} source differs from frozen claim"
-          PY
+          claim=research/ecbench_n37_shared_rank_20261004/CLAIM_FINAL_DIAGNOSTIC.json
+          jq -e '([.candidate_manifest.implementation.components[].role] | sort) ==
+            (["ic_pipeline","ic_plugins","ic_solvers","ic_linalg","relation_loop","harness","shared_rank"] | sort)' \
+            "$claim" > /dev/null
+          for entry in \
+            ic_pipeline:src/cryptanalysis/ic_framework/mod.rs \
+            ic_plugins:src/cryptanalysis/ic_framework/plugins.rs \
+            ic_solvers:src/cryptanalysis/ic_framework/solvers.rs \
+            ic_linalg:src/cryptanalysis/ic_framework/linalg.rs \
+            relation_loop:src/cryptanalysis/ic_boundary.rs \
+            harness:src/cryptanalysis/ecbench/methods.rs \
+            shared_rank:src/cryptanalysis/ic_framework/shared_rank.rs; do
+            role=${entry%%:*}
+            path=${entry#*:}
+            expected=$(jq -r --arg role "$role" '.candidate_manifest.implementation.components[] | select(.role == $role) | .sha256' "$claim")
+            actual=$(sha256sum "$frozen/$path" | cut -d' ' -f1)
+            test "$actual" = "$expected" || { echo "frozen source differs for $role" >&2; exit 1; }
+          done
           CARGO_TARGET_DIR="$RUNNER_TEMP/ecbench-frozen-target" \
             cargo build --release --locked --manifest-path "$frozen/Cargo.toml" --bin ecbench
           frozen_ecbench="$RUNNER_TEMP/ecbench-frozen-target/release/ecbench"
@@ -202,9 +194,18 @@ jobs:
             --base-report research/ecbench_n37_shared_rank_20261004/CLAIM_FINAL_DIAGNOSTIC.json \
             --out "$RUNNER_TEMP/ecbench-independent/claim.json" --exit-code
           cmp "$RUNNER_TEMP/ecbench-independent/claim.json" "$report"
-          ./target/release/ecbench claim check --report "$report" \
-            > "$RUNNER_TEMP/ecbench-independent/check.json"
-          cmp "$RUNNER_TEMP/ecbench-independent/check.json" "$check"
+          "$frozen_ecbench" claim check --report "$report" \
+            > "$RUNNER_TEMP/ecbench-independent/check-frozen.json"
+          cmp "$RUNNER_TEMP/ecbench-independent/check-frozen.json" "$check"
+          if ./target/release/ecbench claim check --report "$report" \
+            > "$RUNNER_TEMP/ecbench-independent/check-current.json"; then
+            echo 'the current checker admitted a frozen L0 wall claim' >&2
+            exit 1
+          fi
+          jq -e '.status == "FAIL" and
+            (.validation_errors | index("isolation_levels.ic L0 is below required L2") != null) and
+            (.validation_errors | index("isolation_levels.rho L0 is below required L2") != null)' \
+            "$RUNNER_TEMP/ecbench-independent/check-current.json" > /dev/null
           jq -e '.independent_validation == true
             and .isolation_levels.ic == "L0" and .isolation_levels.rho == "L0"
             and (.verdict | startswith("descriptive only"))' "$report" > /dev/null
@@ -255,27 +256,25 @@ jobs:
       - name: Database loads, twice, strictly
         run: |
           command -v sqlite3 >/dev/null || sudo apt-get install -y -qq sqlite3
-          for i in 1 2; do ./target/release/ecbench db sql "$RUNNER_TEMP/prime" | sqlite3 -bail "$RUNNER_TEMP/ecbench.db"; done
+          for _ in 1 2; do ./target/release/ecbench db sql "$RUNNER_TEMP/prime" | sqlite3 -bail "$RUNNER_TEMP/ecbench.db"; done
           test "$(sqlite3 "$RUNNER_TEMP/ecbench.db" 'select count(*) from runs')" = 72
-      - name: A vs_rho claim builds, loads, and the native checker agrees with the legacy one
+      - name: A vs_rho claim builds, loads, and fails closed at L0
         run: |
           ./target/release/ecbench run --spec docs/ecbench/specs/claim-koblitz.json \
             --out "$RUNNER_TEMP/claim" --cpus none --lock "$RUNNER_TEMP/claim.lock" --allow-busy --settle 1 --quiet
           w=$(./target/release/ecbench plan --spec docs/ecbench/specs/claim-koblitz.json --json | jq -r '.workloads[0].workload_id')
           ./target/release/ecbench claim build --dir "$RUNNER_TEMP/claim" --ic ic --rho rho-strong \
             --workload "$w" --out "$RUNNER_TEMP/claim.json"
-          # Without an independent replay the claim must fail on exactly that,
-          # and the native checker must say what boundary_autolab.py says.
+          # This L0 diagnostic also needs an independent replay. The native
+          # checker enforces both conditions without a legacy Python verifier.
           ./target/release/ecbench claim check --report "$RUNNER_TEMP/claim.json" > "$RUNNER_TEMP/check-native.json" && exit 1 || true
-          python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py claim-check \
-            --report "$RUNNER_TEMP/claim.json" --stage vs_rho > "$RUNNER_TEMP/check-legacy.json" || true
-          pick='{status, missing_stage_fields, missing_global_provenance, validation_errors}'
-          diff <(jq -S "$pick" "$RUNNER_TEMP/check-native.json") <(jq -S "$pick" "$RUNNER_TEMP/check-legacy.json")
           jq -e '.status == "FAIL" and .validation_errors == [
             "independent_validation must be true",
             "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
-            "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest"]' "$RUNNER_TEMP/check-native.json" > /dev/null
-          for i in 1 2; do ./target/release/ecbench db sql "$RUNNER_TEMP/claim" "$RUNNER_TEMP/claim.json" | sqlite3 -bail "$RUNNER_TEMP/ecbench.db"; done
+            "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+            "isolation_levels.ic L0 is below required L2",
+            "isolation_levels.rho L0 is below required L2"]' "$RUNNER_TEMP/check-native.json" > /dev/null
+          for _ in 1 2; do ./target/release/ecbench db sql "$RUNNER_TEMP/claim" "$RUNNER_TEMP/claim.json" | sqlite3 -bail "$RUNNER_TEMP/ecbench.db"; done
           test "$(sqlite3 "$RUNNER_TEMP/ecbench.db" 'select count(*), min(check_status) from claims')" = "1|FAIL"
           jq -r '.verdict' "$RUNNER_TEMP/claim.json" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Committed evidence reproduces on this host
