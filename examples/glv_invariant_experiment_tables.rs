@@ -890,22 +890,27 @@ fn price_arms(r: &Value, p: &Priced) -> (Arm, Arm) {
 
 /// The matched rho walks of a row, in `F_p` multiplications.
 fn price_walks(r: &Value, k_inv: f64) -> (Walk, Walk) {
+    (
+        price_walk(r, k_inv, "negation"),
+        price_walk(r, k_inv, "folded"),
+    )
+}
+
+/// One kind of matched walk of a row (`negation` or `folded`).
+fn price_walk(r: &Value, k_inv: f64, name: &str) -> Walk {
     let sqrt_r = fl(r, "r").sqrt();
     let walks = r["walks"].as_array().unwrap();
-    let walk = |name: &str| {
-        let tot: Vec<f64> = walks
-            .iter()
-            .map(|w| fl(w, &format!("{name}_fp_muls")) + k_inv * fl(w, &format!("{name}_fp_invs")))
-            .collect();
-        let gae: Vec<f64> = walks.iter().map(|w| fl(&w[name], "gae")).collect();
-        Walk {
-            total: mean(&tot),
-            s: mean(&tot) / sqrt_r,
-            per_op: mean(&tot) / mean(&gae).max(1.0),
-            verified: walks.iter().all(|w| bool_at(&w[name], "verified")),
-        }
-    };
-    (walk("negation"), walk("folded"))
+    let tot: Vec<f64> = walks
+        .iter()
+        .map(|w| fl(w, &format!("{name}_fp_muls")) + k_inv * fl(w, &format!("{name}_fp_invs")))
+        .collect();
+    let gae: Vec<f64> = walks.iter().map(|w| fl(&w[name], "gae")).collect();
+    Walk {
+        total: mean(&tot),
+        s: mean(&tot) / sqrt_r,
+        per_op: mean(&tot) / mean(&gae).max(1.0),
+        verified: walks.iter().all(|w| bool_at(&w[name], "verified")),
+    }
 }
 
 fn unit(v: &Value, k_inv: f64) -> f64 {
@@ -1667,6 +1672,318 @@ fn e16(o: &mut String, rows: &[&Value]) {
     );
 }
 
+fn e17_ok(r: &Value) -> bool {
+    ["d3", "s3"]
+        .iter()
+        .map(|k| at(r, k))
+        .filter(|v| !v.is_null())
+        .all(|v| bool_at(v, "stream.folded.verified") && bool_at(v, "stream.control.verified"))
+        && bool_at(r, "rho_all_verified")
+}
+
+/// E17 (goal G2): the D₃ oracle and the `τ_T` fold on the full group
+/// `E(F_{p³})`, `r ≈ p³/h`: the solve constant against S₃, agreement
+/// with the pair table, every phase of the `D₃` arm against the matched
+/// negation rho, the fitted exponents, and the model `S/rho S = A·r^a +
+/// B·r^b` (relation part, linear algebra) the fits imply.
+fn e17(o: &mut String, rows: &[&Value]) {
+    let rows = sorted(rows, &["log2_r", "seed"]);
+    o.push_str("### E17 — the D₃ oracle and the τ_T fold on the full group E(F_{p³}): solve constant and agreement\n\n");
+    o.push_str("| p | log2 r | h | cols ⟨−1, τ_T⟩ / ⟨−1⟩ | ratio | D₃ calls | D₃ muls per call | R(q₃) degree max | D₃ unsolved | S₃ muls per call | S₃ / D₃ | agreement D₃ / S₃ disagreements, all (non-degenerate) of targets; pair-table hits, cancelling | correct |\n");
+    o.push_str("|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|:--|:--|\n");
+    let mut ratios = Vec::new();
+    for r in &rows {
+        let d3 = e13_arm(r, "d3", "fold4").unwrap();
+        let s3 = e13_arm(r, "s3", "fold4");
+        let ag = at(r, "agreement");
+        let agr = if truthy(ag) {
+            format!(
+                "{} ({}) / {} ({}) of {}; {}, {}",
+                py_str(at(ag, "d3_disagreements")),
+                py_str(at(ag, "d3_disagreements_nondegenerate")),
+                py_str(at(ag, "s3_disagreements")),
+                py_str(at(ag, "s3_disagreements_nondegenerate")),
+                py_str(at(ag, "targets")),
+                py_str(at(ag, "pair_table_hits")),
+                py_str(at(ag, "pair_table_cancelling")),
+            )
+        } else {
+            "—".into()
+        };
+        let cols = (fl(r, "columns.fold4"), fl(r, "columns.control"));
+        if let Some(s) = &s3 {
+            ratios.push(s.muls_per_call / d3.muls_per_call);
+        }
+        let _ = writeln!(
+            o,
+            "| {} | {:.1} | {} | {:.0} / {:.0} | {:.2} | {:.0} | {:.0} | {} | {} | {} | {} | {} | {} |",
+            py_str(at(r, "p")),
+            fl(r, "log2_r"),
+            py_str(at(r, "cofactor")),
+            cols.0,
+            cols.1,
+            cols.1 / cols.0,
+            d3.calls,
+            d3.muls_per_call,
+            py_str(at(r, "d3.solver.resultant_degree_max")),
+            py_str(at(r, "d3.solver.unsolved")),
+            s3.as_ref().map_or("—".into(), |s| format!("{:.0}", s.muls_per_call)),
+            s3.as_ref().map_or("—".into(), |s| format!("{:.1}", s.muls_per_call / d3.muls_per_call)),
+            agr,
+            yes(e17_ok(r)),
+        );
+    }
+    if !ratios.is_empty() {
+        let _ = writeln!(
+            o,
+            "\nS₃ / D₃ muls per call over {} rows: {}.\n",
+            ratios.len(),
+            mean_range(&ratios)
+        );
+    }
+    o.push_str("### E17 — every phase of the D₃ arm (base ⟨−1, τ_T⟩) and of the S₃ arm on the same base, beside the matched negation rho (F_p multiplications)\n\n");
+    o.push_str("| p | log2 r | h | cols | rel to pinned | set-up | base | group arithmetic | solver | linear algebra | total D₃ | S D₃ | rho S | S / rho S, D₃ | S / rho S, S₃ |\n");
+    o.push_str("|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    let mut fits: BTreeMap<&str, Vec<(f64, f64)>> = BTreeMap::new();
+    let (mut rel_gap, mut la_gap) = (Vec::new(), Vec::new());
+    for r in &rows {
+        let d3 = e13_arm(r, "d3", "fold4").unwrap();
+        let Some(sq) = d3.square else {
+            continue;
+        };
+        let s3 = e13_arm(r, "s3", "fold4");
+        let k = fl(r, "inversion_in_multiplications");
+        let rho = price_walk(r, k, "negation");
+        let rr = fl(r, "r");
+        for (name, v) in [
+            ("solver", d3.phases[3]),
+            ("group arithmetic", d3.phases[2]),
+            ("linear algebra", d3.phases[4]),
+            ("total", d3.total),
+            ("rho (total)", rho.total),
+            ("S / rho S, D₃", d3.s / rho.s),
+        ] {
+            fits.entry(name).or_default().push((rr, v));
+        }
+        if let Some(s) = &s3 {
+            fits.entry("S / rho S, S₃")
+                .or_default()
+                .push((rr, s.s / rho.s));
+        }
+        rel_gap.push((rr, (d3.total - d3.phases[4]) / rho.total));
+        la_gap.push((rr, d3.phases[4] / rho.total));
+        let _ = writeln!(
+            o,
+            "| {} | {:.1} | {} | {:.0} | {:.0} | {} | {} | {} | {} | {} | {} | {:.0} | {:.2} | {:.1} | {} |",
+            py_str(at(r, "p")),
+            fl(r, "log2_r"),
+            py_str(at(r, "cofactor")),
+            d3.columns,
+            sq,
+            g3(d3.phases[1]),
+            g3(d3.phases[0]),
+            g3(d3.phases[2]),
+            g3(d3.phases[3]),
+            g3(d3.phases[4]),
+            g3(d3.total),
+            d3.s,
+            rho.s,
+            d3.s / rho.s,
+            s3.as_ref().map_or("—".into(), |s| format!("{:.0}", s.s / rho.s)),
+        );
+    }
+    o.push_str("\n#### E17 — fitted exponents against r (least squares, log–log), rows with the logarithm pinned\n\n");
+    o.push_str("| quantity | exponent | rows |\n|:--|--:|--:|\n");
+    for (name, pts) in &fits {
+        let _ = writeln!(
+            o,
+            "| {} | {} | {} |",
+            name,
+            fmt_f(fit_exponent(pts)),
+            pts.len()
+        );
+    }
+    // The model the fits imply: S/rho S = A·r^a (everything but the linear
+    // algebra) + B·r^b (the linear algebra), each fitted on its own.
+    let fit_line = |pts: &[(f64, f64)]| -> Option<(f64, f64)> {
+        let a = fit_exponent(pts)?;
+        let lx: Vec<f64> = pts.iter().map(|p| p.0.log2()).collect();
+        let ly: Vec<f64> = pts.iter().map(|p| p.1.log2()).collect();
+        Some((a, mean(&ly) - a * mean(&lx)))
+    };
+    if let (Some((a, ca)), Some((b, cb))) = (fit_line(&rel_gap), fit_line(&la_gap)) {
+        let _ = writeln!(
+            o,
+            "\nModel (extrapolation, not measurement): S / rho S = 2^{{{ca:.2}}}·r^{{{a:.3}}} (relation part) + 2^{{{cb:.2}}}·r^{{{b:.3}}} (linear algebra)."
+        );
+        if a < 0.0 && b > 0.0 {
+            // d/dlog r of A r^a + B r^b = 0  ⇒  log2 r* = (log2(−aA) − log2(bB)) / (b − a).
+            let l_star = ((-a).log2() + ca - b.log2() - cb) / (b - a);
+            let s_star = 2f64.powf(ca + a * l_star) + 2f64.powf(cb + b * l_star);
+            let _ = writeln!(
+                o,
+                "Its minimum: S / rho S = {s_star:.3} at r ≈ 2^{l_star:.1}; the relation part alone reaches 1 at r ≈ 2^{:.1}.",
+                -ca / a
+            );
+        }
+    }
+}
+
+/// One E18 row's walks of one fold: mean `F_p` multiplications, mean
+/// steps, mean `S = muls / √n`, and whether every walk recovered `d`.
+fn e18_walk(r: &Value, fold: &str) -> Option<(f64, f64, Vec<f64>, bool)> {
+    let w: Vec<&Value> = r["rho"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|w| w["fold"].as_str() == Some(fold))
+        .collect();
+    if w.is_empty() {
+        return None;
+    }
+    let sq = fl(r, "n").sqrt();
+    let muls: Vec<f64> = w.iter().map(|w| fl(w, "fp_muls")).collect();
+    let steps: Vec<f64> = w.iter().map(|w| fl(w, "steps")).collect();
+    Some((
+        mean(&muls),
+        mean(&steps),
+        muls.iter().map(|m| m / sq).collect(),
+        w.iter().all(|w| bool_at(w, "correct")),
+    ))
+}
+
+/// E18 (goal G2, note §9.1): folds of the base on the `k = 4` linear
+/// algebra.  `r = LA·16 / rho` in `F_p` multiplications (a mod-`n`
+/// multiplication is `16`, §11.16), per curve against that curve's walks,
+/// and pooled the way §11.19 pools rho: `S` per fold over every walk of
+/// the family, `r = LA·16 / (S·√n)`.
+fn e18(o: &mut String, rows: &[&Value]) {
+    let rows = sorted(rows, &["family", "bits", "seed"]);
+    o.push_str(
+        "### E18 — folds of the base on the k = 4 linear algebra, against the matched rho\n\n",
+    );
+    o.push_str("| family | p | log2 n | h | base | cols control / folded | rate | targets with > 1 decomposition | control core (φ) | folded core (φ) | duplicates skipped (folded) | LA control | LA folded | LA ratio | rho steps unfolded / negation / ψ | correct (control, folded, walks) |\n");
+    o.push_str("|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|--:|--:|--:|:--|:--|\n");
+    let mut pooled: BTreeMap<(String, String), Vec<f64>> = BTreeMap::new();
+    for r in &rows {
+        let fam = py_str(at(r, "family"));
+        let hist: Vec<f64> = r["decompositions_per_target"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(num)
+            .collect();
+        let multi: f64 = hist[2..].iter().sum();
+        let walks: Vec<_> = ["None", "Negation", "Psi"]
+            .iter()
+            .map(|f| e18_walk(r, f))
+            .collect();
+        for (f, w) in ["None", "Negation", "Psi"].iter().zip(&walks) {
+            if let Some((_, _, s, _)) = w {
+                pooled
+                    .entry((fam.clone(), f.to_string()))
+                    .or_default()
+                    .extend(s);
+            }
+        }
+        let steps = walks
+            .iter()
+            .map(|w| w.as_ref().map_or("—".into(), |w| format!("{:.0}", w.1)))
+            .collect::<Vec<_>>()
+            .join(" / ");
+        let walks_ok = walks.iter().flatten().all(|w| w.3);
+        let _ = writeln!(
+            o,
+            "| {} | {} | {:.1} | {} | {} | {} / {} | {:.4} | {:.0} of {:.0} | {} ({:.3}) | {} ({:.3}) | {} | {} | {} | {:.2} | {} | {}, {}, {} |",
+            fam,
+            py_str(at(r, "p")),
+            fl(r, "bits"),
+            py_str(at(r, "cofactor")),
+            py_str(at(r, "base_points")),
+            py_str(at(r, "control.columns")),
+            py_str(at(r, "folded.columns")),
+            fl(r, "decomposition_rate"),
+            multi,
+            fl(r, "targets_decomposed"),
+            py_str(at(r, "control.unknowns")),
+            fl(r, "control.phi"),
+            py_str(at(r, "folded.unknowns")),
+            fl(r, "folded.phi"),
+            py_str(at(r, "folded.duplicate_rows")),
+            g3(fl(r, "control.la_ops")),
+            g3(fl(r, "folded.la_ops")),
+            fl(r, "control.la_ops") / fl(r, "folded.la_ops"),
+            steps,
+            yes(bool_at(r, "control.correct")),
+            yes(bool_at(r, "folded.correct")),
+            yes(walks_ok),
+        );
+    }
+    o.push_str("\n#### E18 — rho's S per fold, pooled over every walk of the family (F_p multiplications / √n)\n\n");
+    o.push_str(
+        "| family | walk | S (mean ± s.e.) | walks | unfolded / this |\n|:--|:--|--:|--:|--:|\n",
+    );
+    let stat = |v: &[f64]| -> (f64, f64) {
+        let m = mean(v);
+        let sd =
+            (v.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (v.len().max(2) - 1) as f64).sqrt();
+        (m, sd / (v.len() as f64).sqrt())
+    };
+    for ((fam, fold), v) in &pooled {
+        let (m, se) = stat(v);
+        let base = stat(&pooled[&(fam.clone(), "None".to_string())]).0;
+        let _ = writeln!(
+            o,
+            "| {fam} | {fold} | {m:.3} ± {se:.3} | {} | {:.3} |",
+            v.len(),
+            base / m
+        );
+    }
+    o.push_str("\n#### E18 — r = LA / rho, against the pooled S of each walk\n\n");
+    o.push_str("| family | p | log2 n | r control, unfolded | r control, negation | r control, ψ | r folded, unfolded | r folded, negation | r folded, ψ |\n");
+    o.push_str("|:--|--:|--:|--:|--:|--:|--:|--:|--:|\n");
+    let mut fits: BTreeMap<String, Vec<(f64, f64)>> = BTreeMap::new();
+    let mut means: BTreeMap<String, Vec<f64>> = BTreeMap::new();
+    for r in &rows {
+        let fam = py_str(at(r, "family"));
+        let sq = fl(r, "n").sqrt();
+        let cell = |arm: &str, fold: &str| -> Option<f64> {
+            let v = pooled.get(&(fam.clone(), fold.to_string()))?;
+            Some(fl(r, &format!("{arm}.la_ops")) * 16.0 / (mean(v) * sq))
+        };
+        let mut cells = Vec::new();
+        for arm in ["control", "folded"] {
+            for fold in ["None", "Negation", "Psi"] {
+                let v = cell(arm, fold);
+                if let Some(x) = v {
+                    let key = format!("{fam} | {arm} | {fold}");
+                    fits.entry(key.clone()).or_default().push((fl(r, "n"), x));
+                    means.entry(key).or_default().push(x);
+                }
+                cells.push(v.map_or("—".into(), |x| format!("{x:.3}")));
+            }
+        }
+        let _ = writeln!(
+            o,
+            "| {} | {} | {:.1} | {} |",
+            fam,
+            py_str(at(r, "p")),
+            fl(r, "bits"),
+            cells.join(" | ")
+        );
+    }
+    o.push_str("\n| family | arm | walk | r, mean ± s.e. over curves | fitted exponent in n | curves |\n|:--|:--|:--|--:|--:|--:|\n");
+    for (key, v) in &means {
+        let (m, se) = stat(v);
+        let _ = writeln!(
+            o,
+            "| {key} | {m:.3} ± {se:.3} | {} | {} |",
+            fmt_f(fit_exponent(&fits[key])),
+            v.len()
+        );
+    }
+}
+
 fn e13_ok(r: &Value) -> bool {
     ["d3_fold12", "d3_fold6", "s3_fold12", "s3_fold6"]
         .iter()
@@ -2091,7 +2408,14 @@ fn main() {
     for path in env::args().skip(1) {
         let text = fs::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
         let v: Value = serde_json::from_str(&text).unwrap_or_else(|e| panic!("{path}: {e}"));
-        rows.extend(v["rows"].as_array().cloned().unwrap_or_default());
+        // `{"rows": [...]}` (this binary's runners) or a bare array (`quartic_folds`).
+        rows.extend(
+            v["rows"]
+                .as_array()
+                .or(v.as_array())
+                .cloned()
+                .unwrap_or_default(),
+        );
     }
     let mut by: BTreeMap<String, Vec<&Value>> = BTreeMap::new();
     for r in &rows {
@@ -2099,7 +2423,7 @@ fn main() {
     }
     let mut o = String::new();
     type Printer = fn(&mut String, &[&Value]);
-    let printers: [(&str, Printer); 16] = [
+    let printers: [(&str, Printer); 18] = [
         ("e1", e1),
         ("e2", e2),
         ("e3", e3),
@@ -2114,6 +2438,8 @@ fn main() {
         ("e12p", |o, r| e12(o, r, true)),
         ("e13", e13),
         ("e13", e16),
+        ("e17", e17),
+        ("e18", e18),
         ("e14", e14),
         ("e15", e15),
     ];
