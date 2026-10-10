@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/target/release/examples/koblitz_rho_fixture",
+    "53",
+    "0",
+    "signed_frobenius",
+    "1",
+    "strong",
+    "700001",
+    "hash:53271307"
+  ],
+  "exit_code": 0,
+  "fixture_sha256": "2dfeb384051fb820fba25837e0cdc2fc772df1eedea4fccb5cf78cf77a77fca1",
+  "frozen_prep_sha256": "7f55753fc21049b8b28c782544178273454af82839f06cb414a12ebb9d077a12",
+  "generator_binary_sha256": "4a5f9bcae529e9407c7664a1ae6b74558d38c5aaa4ee331d06f6a61549c5b230",
+  "head_commit": "5190a38cc4e9c514670194cd5de607d9ec094e55",
+  "independent_scalar_replay": true,
+  "manifest_sha256": "324d67d2e858dc9042ea5b4901643eb5f22beff291efc32c738f70c98481ec4c",
+  "point": [
+    6017759979451042,
+    2886969156937
+  ],
+  "point_sha256": "777fdc4fc1536f6170ac792b49919109d2110fba626b047bc2613796f71cfa06",
+  "prior_committed_matches": [],
+  "public_hash_counter": 1,
+  "schema": "n53-pair-symmetry-generation-receipt-v1",
+  "status": "ELIGIBLE"
+}

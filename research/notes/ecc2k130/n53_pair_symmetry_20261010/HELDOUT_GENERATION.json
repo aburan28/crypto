@@ -1,0 +1,13 @@
+{
+  "schema": "n53-pair-symmetry-generation-v1",
+  "curve_id": "EC1N53Ce0hb097de99be9a",
+  "public_hash_seed": 53271307,
+  "generator_seed": 700001,
+  "generator_command": ["{generator_binary}", "53", "0", "signed_frobenius", "1", "strong", "700001", "hash:53271307"],
+  "generator_wall_cap_seconds": 60,
+  "generator_method": "BLAKE3 domain ic-workflow-public-target-v1 NUL, little-endian n/a/k/b_index/seed/counter, x lift, digest parity lift choice, cofactor projection, first nonidentity subgroup point",
+  "verifier_only_fixture_policy": "retain generator rho record and recovered scalar outside measured arm inputs; pass only public Q JSONL to IC and rho",
+  "duplicate_policy": "reject previous development Q, preceding restart held-out Q, or occurrence of coordinates in committed research/experiments/docs",
+  "rank_seeds": [532053, 532054, 532055, 532056, 532057, 532058],
+  "rho_seeds": [531153, 531154, 531155, 531156, 531157, 531158]
+}
