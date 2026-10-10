@@ -32,3 +32,36 @@ all five online phases, scalar replay, and group verification. The supplied
 point is the target input; fixture construction remains outside the timing.
 Local CPU wall time is exploratory until a host-level isolation receipt is
 available.
+
+## Verified T025 feasibility result
+
+The frozen run completed in 177.7 s including reusable setup. It constructed
+542,720,000 regular states and retained 541,971,126 distinct canonical keys
+in exactly 1,073,741,824 slots. The factor base has 339,200 distinct usable
+points and 3200 effective columns. Preparation reached full rank from 6300
+verified relation attempts. The recovered scalar `429728658711` passed both
+the native group check and a separate replay in the repository's checked
+Sage runtime.
+
+| Gate | Recorded result |
+| --- | ---: |
+| Solver exit and scalar replay | pass |
+| Full rank before target input | 3200 |
+| 30-bit state ordinal, 11-bit displacement, exact table size | pass |
+| Peak RSS / 32 GiB cap | 23.45 GiB / pass |
+| Charged T025 online interval | 5.551 ms, exploratory |
+| Target S3 calls | 498 |
+
+The T025 control produced the same first relation witness and 498 S3 calls
+as C2800 and C3182. `PROMOTION.json` binds the raw receipt to candidate
+`IC1N53Ckb1fb339200PDP4rootRCsampleLAgaussTDdirectISO0hdf57773efaf3`
+and the T025 workload. The canonical candidate manifest, compressed report,
+stdout, stderr, native receipt, Sage runtime receipt, and independent replay
+are preserved here. `independent_replay.py` reconstructs the N53 polynomial
+field and binary curve from the manifest and verifies the public point using
+Sage elliptic-curve arithmetic.
+
+The next measurement pairs fresh holdout points against C1200 and C2800 on
+the same source and resource envelope, preserving all one-target failures and
+phase costs. The local host has no exclusive CPU partition receipt, so its
+timing ratios remain exploratory.

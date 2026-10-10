@@ -57,6 +57,9 @@ and its T025 control run ID. The canonical candidate manifest is under
 `identities/candidates/`; the existing `Wa238237883e9` workload manifest is
 under `../koblitz-s3-crosscurve-20261009/workloads/`. Compressed raw report,
 stdout, stderr, and receipt are under `local/verified_t025/`.
+The checked Sage runtime receipt and separate Sage scalar replay are stored
+beside them; the replay checks the generator order and verifies
+`429728658711 × G = Q` from the canonical public inputs.
 
 The next representation change sizes the initial quotient table from the
 observed distinct-key count while retaining exact growth. It lets C3200 use
