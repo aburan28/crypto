@@ -71,6 +71,8 @@ REGISTRY = os.path.join(HERE, "..", "docs", "curves", "registry.json")
 # --------------------------------------------------------------------------
 # Built-in curves: the Certicom ECC challenge curves that are not in the
 # registry (parameters from the Certicom challenge document, hex).  #E = h*n.
+# Every entry was checked with PARI: a random point P on the stated curve
+# satisfies [h*n]P = O, |t| <= 2 sqrt(q), and n is prime.
 # --------------------------------------------------------------------------
 BUILTIN = {
     "ECCp-131": dict(family="prime", p=0x048E1D43F293469E33194C43186B3ABC0B,
@@ -92,10 +94,10 @@ BUILTIN = {
                      n=0x0400000000000000026ABB991FE311FE83, h=2,
                      a=0x07EBCB7EECC296A1C4A1A14F2C9E44352E, b=0x00610B0A57C73649AD0093BDD622A61D81),
     "ECC2-109": dict(family="binary", m=109, modulus=(1 << 109) | (1 << 9) | (1 << 2) | (1 << 1) | 1,
-                     n=0x100000000000000053701AB26100B, h=2,
+                     n=0x10000000000000053701AB26100B, h=2,
                      a=0x14BAA8C4131E992C7E35FCF70CE3, b=0x1333BE219E61625E4C2B6B1032D9),
     "ECC2-97": dict(family="binary", m=97, modulus=(1 << 97) | (1 << 6) | 1,
-                    n=0x01000000000000007383E2DE1E81, h=2,
+                    n=0x10000000000007383E2DE1E81, h=2,
                     a=0x01EA5CE2B7F0A58E01B4389418, b=0x009687742B6329E70680231988),
     "ECC2-89": dict(family="binary", m=89, modulus=(1 << 89) | (1 << 38) | 1,
                     n=0x0100000000000B41C8C9D8FD, h=2,

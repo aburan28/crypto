@@ -155,7 +155,7 @@ already τ-adic.
 | ECC2-97 | 97 | GROUPC | | | | | |
 | ECC2-109 | 109 | GROUPC | | | | | |
 | sect113r1 | 113 | 115 | 1 | 1.2·10¹⁷ | [3.0·10¹⁶, 2, 2] | {2: ±113} only | — (bnfinit 13 s)
-| ECC2-131 | 131 | GROUPB | | | | | |
+| ECC2-131 | 131 | 132 | 1 | 2.4·10¹⁹ | [3.0·10¹⁸, 2, 2, 2] | {2: ±131} only | GROUPB_ECC2131 |
 | sect131r1 | 131 | GROUPB | | | | | |
 | sect131r2 | 131 | GROUPB | | | | | |
 
@@ -177,9 +177,9 @@ relation the lattice offers is 10²–10⁴ × the saving.
 |:--|--:|--:|--:|--:|:--|--:|--:|--:|
 | ECCp-79 | 79 | 81 | 1 | 2.3·10¹¹ | [1.4·10¹⁰, 4, 2, 2] | 0 | 6517 M (29 steps, 9 primes) | 20.4 |
 | ECCp-89 | 89 | 90 | 1 | 3.5·10¹² | [1.7·10¹², 2] | 0 | 17790 M (92 steps) | 49.4 |
-| ECCp-97 | 97 | GROUPC | | | | | | |
-| ECCp-109 | 109 | GROUPC | | | | | | |
-| ECCp-131 | 131 | GROUPC | | | | | | |
+| ECCp-97 | 97 | 99 | 1 | 1.2·10¹⁴ | [3.1·10¹³, 2, 2] | 0 | 8423 M (37 steps, 10 primes) | 21.5 |
+| ECCp-109 | 109 | 111 | 1 | 6.9·10¹⁵ | [1.7·10¹⁵, 2, 2] | 0 | 21075 M (104 steps, 11 primes) | 47.9 |
+| ECCp-131 | 131 | 132 | 1 | 1.4·10¹⁹ | [1.8·10¹⁸, 2, 2, 2] | 0 | 49073 M (221 steps, 10 primes; bnfinit 348 s) | 92.9 |
 | CryptoPro-A (control) | 256 | 258 | 1 | ≈ 2^127 (not computed) | — | heuristic | ≥ 538 M lower bound, ≈ 10⁴–10⁶ M typical | ≫ 1 |
 
 The class number grows like √|D| ≈ √q, the relation lattice has determinant h, and
