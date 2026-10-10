@@ -1507,6 +1507,17 @@ pub fn run_walk2(
     }
 }
 
+/// Necessary trace condition for a Joux–Vitse weak curve over `F_(p^6)`.
+/// Its 2-isogenous Legendre neighbor has full rational 4-torsion, hence
+/// its trace is `±(p^6 + 1) (mod 16)` (ISO-1). Passing this filter does
+/// not imply that the isogeny class contains a weak curve.
+pub fn trace_may_hold_weak_curve(p: u64, trace: i128) -> bool {
+    let q_mod_16 = ((p % 16).pow(6) % 16) as i128;
+    let weak_residue = (q_mod_16 + 1) % 16;
+    let t = trace.rem_euclid(16);
+    t == weak_residue || t == (-weak_residue).rem_euclid(16)
+}
+
 /// §18.1 steps 1–2: a breadth-first walk to a weak curve from `start`, with
 /// each discovered curve's producing step recorded, so the path from `start`
 /// to the weak curve can be replayed on points.  Degrees whose Kronecker
@@ -1523,6 +1534,11 @@ pub fn walk_to_weak_record(
     rng: &mut StdRng,
 ) -> Option<(Curve2, Vec<Step>)> {
     let f = &ctx.f;
+    // The public trace identifies a class that cannot contain a weak curve.
+    // Reject it before any field arithmetic or graph enumeration.
+    if !trace_may_hold_weak_curve(f.f.p, trace) {
+        return None;
+    }
     let p3 = (f.f.p as i128).pow(6);
     let disc = trace * trace - 4 * p3;
     let degrees: Vec<u64> = jumps
@@ -2311,6 +2327,30 @@ pub fn summarize_walk2(reports: &[Walk2Report]) -> String {
 mod tests {
     use super::*;
     use crate::cryptanalysis::jv_cover::generate_spec;
+
+    #[test]
+    fn iso1_trace_filter_preserves_weak_instances_and_rejects_before_walking() {
+        for p in [7_u64, 11, 13, 17] {
+            let spec = generate_spec(p, 1);
+            let trace = (p as i128).pow(6) + 1 - 4 * spec.l as i128;
+            assert!(trace_may_hold_weak_curve(p, trace), "p={p}");
+        }
+
+        let p = 11_u64;
+        let ctx = WalkCtx::new(p);
+        let mut rng = StdRng::seed_from_u64(0x1501);
+        let (curve, trace) = (0..40)
+            .find_map(|_| {
+                let curve = random_curve(&ctx.f, &mut rng);
+                let order = curve_order(&ctx.f, &curve, &mut rng);
+                let trace = (p as i128).pow(6) + 1 - order as i128;
+                (!trace_may_hold_weak_curve(p, trace)).then_some((curve, trace))
+            })
+            .expect("a depth-1 trace among deterministic random curves");
+        ctx.f.reset_muls();
+        assert!(walk_to_weak_record(&ctx, curve, &[3, 5, 7], 100, trace, &mut rng).is_none());
+        assert_eq!(ctx.f.muls(), 0, "trace refusal must precede field work");
+    }
 
     #[test]
     fn fp_nonsquare_is_not_an_fp2_square_class_representative() {
