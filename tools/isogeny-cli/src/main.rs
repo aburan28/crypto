@@ -6,6 +6,7 @@ mod constructor;
 mod curve;
 #[path = "../../../src/cryptanalysis/isogeny_walk/field.rs"]
 mod field;
+#[cfg(test)]
 #[path = "../../../src/hash/sha256.rs"]
 mod hash_sha256;
 #[path = "../../../research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs"]
@@ -37,6 +38,7 @@ use isogeny_algos::{
     json::Json,
 };
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use std::{
     collections::HashMap,
     fs,
@@ -75,7 +77,7 @@ Exit: 0 passed; 1 failed; 2 usage; 3 timeout/resource limit/incomplete construct
 ";
 
 fn sha256_hex(bytes: &[u8]) -> String {
-    hash_sha256::sha256(bytes)
+    Sha256::digest(bytes)
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect()
@@ -86,7 +88,7 @@ fn standard_order(name: &str) -> Int {
 fn provenance() -> Value {
     json!({"name":"isogeny", "version":env!("CARGO_PKG_VERSION"),
         "git_commit":env!("ISOGENY_GIT_COMMIT"), "git_dirty":env!("ISOGENY_GIT_DIRTY"),
-        "standards_sha256":sha256_hex(REGISTRY.as_bytes())})
+        "standards_sha256":env!("ISOGENY_REGISTRY_SHA256")})
 }
 
 struct Options(HashMap<String, String>);
@@ -445,6 +447,42 @@ fn main() {
 #[cfg(test)]
 mod cli_tests {
     use super::*;
+    #[test]
+    fn receipt_hashes_match_the_independent_reference_at_padding_boundaries() {
+        for length in [
+            0, 1, 55, 56, 63, 64, 65, 119, 120, 127, 128, 4096, 1_048_576,
+        ] {
+            let bytes: Vec<_> = (0..length).map(|i| (i as u8).wrapping_mul(137)).collect();
+            let expected: String = hash_sha256::sha256(&bytes)
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect();
+            assert_eq!(sha256_hex(&bytes), expected, "length {length}");
+        }
+        assert_eq!(
+            sha256_hex(REGISTRY.as_bytes()),
+            env!("ISOGENY_REGISTRY_SHA256")
+        );
+    }
+
+    #[test]
+    fn execution_index_preserves_each_canonical_curve_and_its_subgroup() {
+        let full: Value = serde_json::from_str(REGISTRY).unwrap();
+        for canonical in full["curves"].as_array().unwrap() {
+            let resolved = catalog::resolve(canonical["slug"].as_str().unwrap()).unwrap();
+            assert_eq!(resolved["icv1"], canonical["icv1"]);
+            assert_eq!(resolved["params"], canonical["params"]);
+            assert_eq!(resolved["order"], canonical["order"]);
+            assert_eq!(
+                catalog::representation(resolved),
+                catalog::representation(canonical)
+            );
+            assert_eq!(
+                catalog::capabilities(resolved),
+                catalog::capabilities(canonical)
+            );
+        }
+    }
     #[test]
     fn known_small_extension_candidates_have_exact_eigenvalue_orders() {
         for (name, ell, root, order) in [("p192", 10453, 270, 3), ("p224", 1471, 554, 5)] {

@@ -5,7 +5,13 @@ use std::sync::OnceLock;
 
 pub fn registry() -> &'static Value {
     static DATA: OnceLock<Value> = OnceLock::new();
-    DATA.get_or_init(|| serde_json::from_str(crate::REGISTRY).unwrap())
+    DATA.get_or_init(|| {
+        serde_json::from_str(include_str!(concat!(
+            env!("OUT_DIR"),
+            "/execution_catalogue.json"
+        )))
+        .unwrap()
+    })
 }
 pub fn integer(value: &Value) -> Int {
     let value = value
@@ -136,7 +142,10 @@ pub fn capabilities(row: &Value) -> Value {
     json!({"screen":bits.is_some(),"construction":construction,"independent_replay":replay,"field_bits":bits,"detail":reason})
 }
 pub fn inventory() -> Value {
-    let rows: Vec<_> = registry()["curves"]
+    // Inventory retains every original field and source record. The index is
+    // only an execution representation and never replaces the public catalogue.
+    let complete: Value = serde_json::from_str(crate::REGISTRY).unwrap();
+    let rows: Vec<_> = complete["curves"]
         .as_array()
         .unwrap()
         .iter()

@@ -1,3 +1,4 @@
+use sha2::{Digest, Sha256};
 use std::{env, fs, path::Path, process::Command};
 
 fn git(repo: &Path, args: &[&str]) -> Option<String> {
@@ -16,6 +17,42 @@ fn git(repo: &Path, args: &[&str]) -> Option<String> {
 fn main() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let root = root.canonicalize().unwrap();
+    let registry_path = root.join("docs/curves/registry.json");
+    println!("cargo:rerun-if-changed={}", registry_path.display());
+    let registry_bytes = fs::read(&registry_path).unwrap();
+    let registry: serde_json::Value = serde_json::from_slice(&registry_bytes).unwrap();
+    let rows: Vec<_> = registry["curves"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|row| {
+            let mut entry = serde_json::Map::new();
+            for key in [
+                "icv1",
+                "slug",
+                "family",
+                "params",
+                "order",
+                "aliases",
+                "standard_names",
+                "representations",
+            ] {
+                entry.insert(key.to_owned(), row[key].clone());
+            }
+            serde_json::Value::Object(entry)
+        })
+        .collect();
+    let index = serde_json::json!({"curves": rows});
+    fs::write(
+        Path::new(&env::var("OUT_DIR").unwrap()).join("execution_catalogue.json"),
+        serde_json::to_vec(&index).unwrap(),
+    )
+    .unwrap();
+    let checksum: String = Sha256::digest(&registry_bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect();
+    println!("cargo:rustc-env=ISOGENY_REGISTRY_SHA256={checksum}");
     let mut engines = String::new();
     for limbs in 1..=10 {
         engines.push_str(&format!("mod n{limbs} {{\nmod field {{ pub type Field=crate::verification_field::PrimeField<{limbs}>; pub type Fe=crate::verification_field::Element<{limbs}>; pub const FIELD_BITS:usize={limbs}*64; }}\n"));
