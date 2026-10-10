@@ -3488,6 +3488,181 @@ fn sat_decompose_union_s4(
     }
 }
 
+/// Hard limits for an experimental five- or six-summand chained-S3 SAT
+/// decomposition. The variable cap is checked before any SAT model is built;
+/// the conflict and model caps cover all intermediate-identity patterns.
+#[derive(Clone, Copy, Debug)]
+pub struct ChainS3Limits {
+    pub max_variables: u32,
+    pub max_domain_clauses: usize,
+    pub max_models: usize,
+    pub conflict_budget: u64,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ChainS3Stats {
+    pub patterns_attempted: usize,
+    pub patterns_refuted: usize,
+    pub solver_calls: usize,
+    pub models: usize,
+    pub group_rejected_models: usize,
+    pub conflicts: u64,
+    pub peak_variables: u32,
+    pub peak_clauses: usize,
+    pub peak_xors: usize,
+    pub domain_clauses: usize,
+    pub refuted: bool,
+    pub exhausted: bool,
+}
+
+/// Solve a retained finite-coordinate union by a chain of binary S3
+/// equations. Each intermediate sum may be the identity, so every identity
+/// pattern is searched separately. An accepted witness passes the original
+/// field equations, exact finite-domain check and all sign choices in the
+/// original curve group. `refuted` is set only after every pattern completes
+/// UNSAT; a resource cap or malformed domain is inconclusive.
+pub fn sat_decompose_chained_s3(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+    limits: ChainS3Limits,
+) -> (Option<Vec<usize>>, ChainS3Stats) {
+    use crate::cryptanalysis::binary_semaev_chain_sat::{
+        finite_domain_clause_count, ChainBuildError, ChainedS3Encoding,
+    };
+    let mut stats = ChainS3Stats::default();
+    if !(5..=6).contains(&m)
+        || limits.max_models == 0
+        || limits.conflict_budget == 0
+        || !kc.curve.is_on_curve(target)
+        || !fb.uses_ambient_basis()
+        || fb.ell != kc.n
+        || fb.subspace_basis.len() != kc.n as usize
+        || fb
+            .subspace_basis
+            .iter()
+            .enumerate()
+            .any(|(bit, basis)| *basis != F2mElement::from_bit_positions(&[bit as u32], kc.n))
+    {
+        stats.exhausted = true;
+        return (None, stats);
+    }
+    let mut codes: Vec<BigUint> = fb
+        .points
+        .iter()
+        .filter_map(|point| match point {
+            BinaryPoint::Affine { x, .. } => Some(x.to_biguint()),
+            BinaryPoint::Infinity => None,
+        })
+        .collect();
+    codes.sort_unstable();
+    codes.dedup();
+    if codes.is_empty() || codes.iter().any(|code| code.bits() > u64::from(kc.n)) {
+        stats.exhausted = true;
+        return (None, stats);
+    }
+    let Some(domain_clauses) = finite_domain_clause_count(&codes, kc.n, m) else {
+        stats.exhausted = true;
+        return (None, stats);
+    };
+    if domain_clauses > limits.max_domain_clauses {
+        stats.exhausted = true;
+        return (None, stats);
+    }
+    stats.domain_clauses = domain_clauses;
+    let index_of = fb.index_map();
+    let target_x = match target {
+        BinaryPoint::Affine { x, .. } => Some(x),
+        BinaryPoint::Infinity => None,
+    };
+    for identity_mask in 0..(1u32 << (m - 2)) {
+        if stats.conflicts >= limits.conflict_budget {
+            stats.exhausted = true;
+            return (None, stats);
+        }
+        let mut enc = match ChainedS3Encoding::build(
+            m,
+            &kc.curve.irreducible,
+            &kc.curve.b,
+            target_x,
+            identity_mask,
+            limits.max_variables,
+        ) {
+            Ok(enc) => enc,
+            Err(
+                ChainBuildError::VariableCap { .. }
+                | ChainBuildError::DomainClauseCap { .. }
+                | ChainBuildError::Unsupported,
+            ) => {
+                stats.exhausted = true;
+                return (None, stats);
+            }
+        };
+        if enc
+            .constrain_summands(&codes, limits.max_domain_clauses)
+            .is_err()
+        {
+            stats.exhausted = true;
+            return (None, stats);
+        }
+        stats.patterns_attempted += 1;
+        stats.peak_variables = stats.peak_variables.max(enc.solver.n_vars());
+        stats.peak_clauses = stats.peak_clauses.max(enc.solver.n_clauses());
+        stats.peak_xors = stats.peak_xors.max(enc.solver.n_xors());
+        let earlier_conflicts = stats.conflicts;
+        enc.solver.conflict_budget = limits.conflict_budget - earlier_conflicts;
+        loop {
+            stats.solver_calls += 1;
+            let outcome = enc.solver.solve();
+            stats.conflicts = earlier_conflicts.saturating_add(enc.solver.conflicts());
+            match outcome {
+                SolveResult::Unsat => {
+                    stats.patterns_refuted += 1;
+                    break;
+                }
+                SolveResult::Unknown => {
+                    stats.exhausted = true;
+                    return (None, stats);
+                }
+                SolveResult::Sat => {
+                    let xs = enc.decode_summands();
+                    if !enc.verify_model()
+                        || xs
+                            .iter()
+                            .any(|x| codes.binary_search(&x.to_biguint()).is_err())
+                    {
+                        stats.exhausted = true; // invalid encoding, never refute
+                        return (None, stats);
+                    }
+                    stats.models += 1;
+                    if let Some(indices) = lift_candidate(kc, fb, &index_of, &xs, target) {
+                        return (Some(indices), stats);
+                    }
+                    stats.group_rejected_models += 1;
+                    if stats.models >= limits.max_models {
+                        stats.exhausted = true;
+                        return (None, stats);
+                    }
+                    let model = enc.solver.model();
+                    enc.solver.reset_search();
+                    // Every internal x choice for this summand tuple has
+                    // the same failed complete sign lift, so block it once.
+                    let block: Vec<i32> = (0..m * kc.n as usize)
+                        .map(|i| {
+                            let wire = (i + 1) as i32;
+                            if model[i] { -wire } else { wire }
+                        })
+                        .collect();
+                    enc.solver.add_clause(block);
+                }
+            }
+        }
+    }
+    stats.refuted = true;
+    (None, stats)
+}
+
 /// Turn a decomposition into a relation row over the orbit unknowns.
 ///
 /// With `x_o := log_G ([h]·rep_o)` and
@@ -5622,6 +5797,91 @@ mod tests {
             assert!(out.is_none() && stats.exhausted && !stats.refuted);
             assert_eq!(stats.solver_calls, 0);
         }
+    }
+
+    #[test]
+    fn chained_s3_five_and_six_summands_lift_on_the_original_curve() {
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("generator is affine");
+        };
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        for m in [5usize, 6] {
+            let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
+            let (found, stats) = sat_decompose_chained_s3(
+                &kc,
+                &fb,
+                &target,
+                m,
+                ChainS3Limits {
+                    max_variables: 2_000,
+                    max_domain_clauses: 10_000,
+                    max_models: 64,
+                    conflict_budget: 500_000,
+                },
+            );
+            let indices = found.unwrap_or_else(|| panic!("m={m}: {stats:?}"));
+            assert_eq!(indices.len(), m);
+            let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+                kc.add(&acc, &fb.points[index])
+            });
+            assert_eq!(sum, target);
+            assert!(!stats.exhausted);
+            assert!(stats.patterns_attempted > 0);
+        }
+        let (identity, identity_stats) = sat_decompose_chained_s3(
+            &kc,
+            &fb,
+            &BinaryPoint::Infinity,
+            6,
+            ChainS3Limits {
+                max_variables: 2_000,
+                max_domain_clauses: 10_000,
+                max_models: 128,
+                conflict_budget: 500_000,
+            },
+        );
+        let identity = identity.unwrap_or_else(|| panic!("identity: {identity_stats:?}"));
+        assert_eq!(identity.len(), 6);
+        assert_eq!(
+            identity.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+                kc.add(&acc, &fb.points[index])
+            }),
+            BinaryPoint::Infinity
+        );
+        let target = kc.mul(&fb.points[0], &BigUint::from(5u32));
+        let (found, capped) = sat_decompose_chained_s3(
+            &kc,
+            &fb,
+            &target,
+            5,
+            ChainS3Limits {
+                max_variables: 100,
+                max_domain_clauses: 10_000,
+                max_models: 64,
+                conflict_budget: 500_000,
+            },
+        );
+        assert!(found.is_none());
+        assert!(capped.exhausted);
+        assert!(!capped.refuted);
+        assert_eq!(capped.patterns_attempted, 0);
+        let (found, domain_capped) = sat_decompose_chained_s3(
+            &kc,
+            &fb,
+            &target,
+            5,
+            ChainS3Limits {
+                max_variables: 2_000,
+                max_domain_clauses: 1,
+                max_models: 64,
+                conflict_budget: 500_000,
+            },
+        );
+        assert!(found.is_none());
+        assert!(domain_capped.exhausted);
+        assert!(!domain_capped.refuted);
+        assert_eq!(domain_capped.patterns_attempted, 0);
     }
 
     #[test]
