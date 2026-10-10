@@ -49,10 +49,24 @@ The raw report, stdout, stderr, and ledger hashes are audited by `analyze.py`.
 | --- | ---: | ---: |
 | Actual usable base points | 98,400 | 147,600 |
 | Effective columns and prepared rank | 1,200 | 1,800 |
+| Verified preparation relations / novel rows | 2,534 / 1,200 | 3,080 / 1,800 |
+| Median target S3 calls | 42 | 24 |
 | Median online wall time, ms | 0.134771 | 0.0552085 |
+| Median target query, ms | 0.0408335 | 0.0123545 |
+| Median charged target PDP, ms | 0.0342910 | 0.0225625 |
+| Median target relation check, ms | 0.0117500 | 0.0107920 |
+| Median target descent/direct recovery, ms | 0.0111250 | 0.0074160 |
+| Median scalar recovery check, ms | 0.0345205 | 0.0034165 |
 | Median reusable setup wall time, ms | 5,843.153 | 12,545.821 |
 | Maximum observed peak RSS, GiB | 8.28 | 17.44 |
 | Verified runs | 24/24 | 24/24 |
+
+The phase rows are medians taken independently, so their displayed values
+need not add to the median total. Every individual raw report includes the
+five exclusive online phases and a checked phase sum. Reusable setup includes
+factor-base construction, S3 index building, preparation relations, matrix
+work, and complete base-log solving; all 24 runs of each arm reached the
+declared rank before the online interval.
 
 The confirmation-only paired baseline/C1800 geometric online ratio is
 **2.381695**, with a target-bootstrap 95% interval of **[2.154753,
