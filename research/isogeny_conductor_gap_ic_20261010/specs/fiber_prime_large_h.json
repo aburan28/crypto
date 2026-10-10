@@ -1,0 +1,270 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "max_trials": "2000000",
+          "oracle": "mitm:negation_folded=1"
+        }
+      },
+      "name": "mitm-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "max_trials": "2000000",
+          "oracle": "mitm-fiber:fiber=lifts,negation_folded=1"
+        }
+      },
+      "name": "mitm-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1"
+        }
+      },
+      "name": "mitm-closed",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Part A on the certified craters and floors at 22 bits whose cofactor exceeds 50: the fiber-blind and all-lifts MITM capped at two million trials against the fiber-closed MITM, which needs no cap.",
+  "label": "fiber-aware relation generation on prime CM curves with cofactor above 50",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 3,
+    "seed": 1,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1622392,
+        "b": 3244784,
+        "group_order": 3785112,
+        "gx": 322105,
+        "gy": 1106556,
+        "kind": "prime_explicit",
+        "p": 3785623,
+        "r": 52571
+      },
+      {
+        "a": 1906959,
+        "b": 2315807,
+        "group_order": 3785112,
+        "gx": 670335,
+        "gy": 1384347,
+        "kind": "prime_explicit",
+        "p": 3785623,
+        "r": 52571
+      },
+      {
+        "a": 14863704,
+        "b": 9909136,
+        "group_order": 19915400,
+        "gx": 285012,
+        "gy": 10730663,
+        "kind": "prime_explicit",
+        "p": 19923691,
+        "r": 99577
+      },
+      {
+        "a": 18833243,
+        "b": 3139010,
+        "group_order": 19915400,
+        "gx": 3297046,
+        "gy": 8932699,
+        "kind": "prime_explicit",
+        "p": 19923691,
+        "r": 99577
+      },
+      {
+        "a": 9425520,
+        "b": 6283680,
+        "group_order": 10790192,
+        "gx": 2388380,
+        "gy": 4544243,
+        "kind": "prime_explicit",
+        "p": 10796507,
+        "r": 13763
+      },
+      {
+        "a": 4200628,
+        "b": 6293280,
+        "group_order": 10790192,
+        "gx": 9510119,
+        "gy": 705270,
+        "kind": "prime_explicit",
+        "p": 10796507,
+        "r": 13763
+      },
+      {
+        "a": 27057489,
+        "b": 18038326,
+        "group_order": 32769776,
+        "gx": 30002105,
+        "gy": 19118236,
+        "kind": "prime_explicit",
+        "p": 32781191,
+        "r": 12119
+      },
+      {
+        "a": 19359013,
+        "b": 10477446,
+        "group_order": 32769776,
+        "gx": 11589692,
+        "gy": 16298073,
+        "kind": "prime_explicit",
+        "p": 32781191,
+        "r": 12119
+      },
+      {
+        "a": 4657573,
+        "b": 19120576,
+        "group_order": 24013650,
+        "gx": 16458339,
+        "gy": 12254932,
+        "kind": "prime_explicit",
+        "p": 24023291,
+        "r": 160091
+      },
+      {
+        "a": 11665223,
+        "b": 14851700,
+        "group_order": 24013650,
+        "gx": 3015401,
+        "gy": 12348095,
+        "kind": "prime_explicit",
+        "p": 24023291,
+        "r": 160091
+      },
+      {
+        "a": 1208060,
+        "b": 8698057,
+        "group_order": 23668326,
+        "gx": 7373922,
+        "gy": 17431673,
+        "kind": "prime_explicit",
+        "p": 23678051,
+        "r": 10867
+      },
+      {
+        "a": 8095833,
+        "b": 718783,
+        "group_order": 23668326,
+        "gx": 19408743,
+        "gy": 16744663,
+        "kind": "prime_explicit",
+        "p": 23678051,
+        "r": 10867
+      },
+      {
+        "a": 2317858,
+        "b": 6224366,
+        "group_order": 7013517,
+        "gx": 1396051,
+        "gy": 6309802,
+        "kind": "prime_explicit",
+        "p": 7018691,
+        "r": 47711
+      },
+      {
+        "a": 5366303,
+        "b": 1725678,
+        "group_order": 7013517,
+        "gx": 4399910,
+        "gy": 5600873,
+        "kind": "prime_explicit",
+        "p": 7018691,
+        "r": 47711
+      },
+      {
+        "a": 2216694,
+        "b": 2955592,
+        "group_order": 17221567,
+        "gx": 1378123,
+        "gy": 3930364,
+        "kind": "prime_explicit",
+        "p": 17229851,
+        "r": 142327
+      },
+      {
+        "a": 16215238,
+        "b": 1944654,
+        "group_order": 17221567,
+        "gx": 9985905,
+        "gy": 5179027,
+        "kind": "prime_explicit",
+        "p": 17229851,
+        "r": 142327
+      },
+      {
+        "a": 0,
+        "b": 15,
+        "group_order": 2342739,
+        "gx": 947244,
+        "gy": 1525967,
+        "kind": "prime_explicit",
+        "p": 2345743,
+        "r": 15937
+      },
+      {
+        "a": 1362548,
+        "b": 282507,
+        "group_order": 2342739,
+        "gx": 893904,
+        "gy": 1121824,
+        "kind": "prime_explicit",
+        "p": 2345743,
+        "r": 15937
+      },
+      {
+        "a": 2,
+        "b": 0,
+        "group_order": 7608818,
+        "gx": 7095924,
+        "gy": 1924757,
+        "kind": "prime_explicit",
+        "p": 7614293,
+        "r": 77641
+      },
+      {
+        "a": 2855857,
+        "b": 5347809,
+        "group_order": 7608818,
+        "gx": 6980560,
+        "gy": 5922283,
+        "kind": "prime_explicit",
+        "p": 7614293,
+        "r": 77641
+      }
+    ],
+    "target_seed": 20261010,
+    "targets_per_curve": 4
+  }
+}

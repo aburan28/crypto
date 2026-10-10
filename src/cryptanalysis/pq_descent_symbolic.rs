@@ -287,16 +287,93 @@ pub fn descend(
     })
 }
 
+/// **The fiber-combined descent.**  `S_{m+1}(x_1, …, x_m, X) = 0` with
+/// every `x_i` in the span of `v_basis` and the target abscissa `X`
+/// **free** in its own `n` boolean variables (bits `m·n' … m·n' + n − 1`,
+/// the polynomial basis), together with the fiber polynomial
+/// `g(X) = Π_{c ∈ fiber_xs} (X + c)`, whose roots are the abscissae of
+/// the cofactor fiber `T + K`, `K ∈ E(F_q)[h]`, of one subgroup target.
+/// A solution names `m` base abscissae and the lift `T + K` they sum to.
+///
+/// `g` descends to `n` equations of boolean degree at most the largest
+/// Hamming weight of an exponent below `h` (2 for `h ≤ 6`), and the
+/// summation polynomial gains one in degree from `x_1 x_2 X`.  The
+/// system has `2n` equations in `m·n' + n` unknowns; the monomial mask
+/// caps `m·n' + n ≤ 64`.
+pub fn descend_fiber(
+    gf: &Gf2,
+    b: u64,
+    fiber_xs: &[u64],
+    v_basis: &[u64],
+    summands: u32,
+) -> Result<SymbolicDescent, String> {
+    let n_prime = v_basis.len() as u32;
+    let n = gf.n;
+    if !(2..=3).contains(&summands) {
+        return Err(format!(
+            "the fiber descent takes 2 or 3 summands, not {summands}"
+        ));
+    }
+    if fiber_xs.is_empty() {
+        return Err("the fiber descent needs at least one lift abscissa".into());
+    }
+    let n_vars_u32 = summands * n_prime + n;
+    if n_prime == 0 || n_vars_u32 > MAX_VARS {
+        return Err(format!(
+            "a subspace of dimension {n_prime} at {summands} summands with a free {n}-bit target needs {n_vars_u32} boolean variables; \
+             the monomial mask holds {MAX_VARS}"
+        ));
+    }
+    let n_vars = n_vars_u32 as usize;
+    let standard: Vec<u64> = (0..n).map(|k| 1u64 << k).collect();
+    let x_free = FieldBoolPoly::linear(summands * n_prime, &standard);
+    let poly = match summands {
+        2 => s3_symbolic_poly(gf, b, &x_free, v_basis),
+        _ => s4_symbolic_poly(gf, b, &x_free, v_basis),
+    };
+    let mut g = FieldBoolPoly::constant(1);
+    for &c in fiber_xs {
+        g = g.mul(&x_free.add(&FieldBoolPoly::constant(c)), gf);
+    }
+    let mut equations = poly.split(n, n_vars);
+    equations.extend(g.split(n, n_vars));
+    Ok(SymbolicDescent {
+        n,
+        n_prime,
+        summands,
+        n_vars,
+        equations,
+        v_basis: v_basis.to_vec(),
+        field_monomials: poly.len() + g.len(),
+    })
+}
+
+impl SymbolicDescent {
+    /// The free target abscissa a fiber-combined solution names: the word
+    /// held in bits `m·n' … m·n' + n − 1`.  Meaningless on a plain descent.
+    pub fn lift_target(&self, v: u64) -> u64 {
+        let base = (self.summands * self.n_prime) as u32;
+        (0..self.n).fold(0u64, |acc, k| acc | (((v >> (base + k)) & 1) << k))
+    }
+}
+
 /// `S_3(x_1, x_2, x_R)` with `x_1`, `x_2` linear forms, term for term
 /// the formula [`semaev_s3_word`] evaluates.
 fn s3_symbolic(gf: &Gf2, b: u64, x_r: u64, v_basis: &[u64]) -> FieldBoolPoly {
+    s3_symbolic_poly(gf, b, &FieldBoolPoly::constant(x_r), v_basis)
+}
+
+/// `S_3(x_1, x_2, X)` with `X` any polynomial in the boolean variables:
+/// a constant for the plain descent, a linear form in its own `n`
+/// variables for the fiber-combined one ([`descend_fiber`]).
+fn s3_symbolic_poly(gf: &Gf2, b: u64, x_r: &FieldBoolPoly, v_basis: &[u64]) -> FieldBoolPoly {
     let np = v_basis.len() as u32;
     let x1 = FieldBoolPoly::linear(0, v_basis);
     let x2 = FieldBoolPoly::linear(np, v_basis);
     let sum12_sq = x1.add(&x2).sqr(gf);
     let prod12 = x1.mul(&x2, gf);
-    let t1 = sum12_sq.scale(gf.sqr(x_r), gf);
-    let t2 = prod12.scale(x_r, gf);
+    let t1 = sum12_sq.mul(&x_r.sqr(gf), gf);
+    let t2 = prod12.mul(x_r, gf);
     let t3 = prod12.sqr(gf).add(&FieldBoolPoly::constant(b));
     t1.add(&t2).add(&t3)
 }
@@ -304,11 +381,16 @@ fn s3_symbolic(gf: &Gf2, b: u64, x_r: u64, v_basis: &[u64]) -> FieldBoolPoly {
 /// `S_4(x_1, x_2, x_3, x_R)` with `x_1`, `x_2`, `x_3` linear forms,
 /// term for term the resultant [`semaev_s4_word`] evaluates.
 fn s4_symbolic(gf: &Gf2, b: u64, x_r: u64, v_basis: &[u64]) -> FieldBoolPoly {
+    s4_symbolic_poly(gf, b, &FieldBoolPoly::constant(x_r), v_basis)
+}
+
+/// `S_4(x_1, x_2, x_3, X)` with `X` any polynomial in the boolean variables.
+fn s4_symbolic_poly(gf: &Gf2, b: u64, x_r: &FieldBoolPoly, v_basis: &[u64]) -> FieldBoolPoly {
     let np = v_basis.len() as u32;
     let x1 = FieldBoolPoly::linear(0, v_basis);
     let x2 = FieldBoolPoly::linear(np, v_basis);
     let x3 = FieldBoolPoly::linear(2 * np, v_basis);
-    let x4 = FieldBoolPoly::constant(x_r);
+    let x4 = x_r.clone();
     let bconst = FieldBoolPoly::constant(b);
     let s3_in_x3 = |p: &FieldBoolPoly, q: &FieldBoolPoly| {
         let a = p.add(q).sqr(gf);

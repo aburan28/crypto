@@ -170,6 +170,14 @@ fn mod_inv(a: u128, p: u128) -> Option<u128> {
 /// list of affine kernel points.  The list must contain at least one
 /// representative of each `{±Q}` orbit.  Duplicate `{±Q}` orbits in
 /// the input are silently de-duplicated.
+/// **The isogeny with an explicit kernel**: the codomain and the maps
+/// from a list of affine kernel points (at least one representative of
+/// each `{±Q}`; duplicates are dropped).  The caller certifies that the
+/// points form a subgroup; this only applies Vélu's sums to them.
+pub fn velu_isogeny_from_kernel(domain: &SmallCurve, kernel: &[(u64, u64)]) -> VeluIsogeny {
+    velu_codomain_from_kernel(domain, kernel)
+}
+
 fn velu_codomain_from_kernel(domain: &SmallCurve, kernel: &[(u64, u64)]) -> VeluIsogeny {
     let p = domain.p as u128;
     let a = domain.a as u128 % p;

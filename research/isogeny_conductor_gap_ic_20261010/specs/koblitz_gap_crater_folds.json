@@ -1,0 +1,71 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      },
+      "name": "rho-strong",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.signed_frobenius"
+      },
+      "name": "rho-frob",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "oracle": "mitm-frobenius:m=2"
+        }
+      },
+      "name": "ic-orbit",
+      "role": "candidate"
+    }
+  ],
+  "description": "Part B: on the crater K_a the signed-Frobenius rho and the tau-orbit factor base apply; the isogenous floor curve is not defined over F_2 and has neither, which is the one structural difference across the gap.",
+  "label": "isogenous pairs, Koblitz craters: the Frobenius folds the floor cannot run",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 3,
+    "seed": 1,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 19
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 23
+      },
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 17
+      },
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 19
+      },
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 23
+      }
+    ],
+    "target_seed": 20261010,
+    "targets_per_curve": 4
+  }
+}
