@@ -30,3 +30,24 @@ python3 experiments/koblitz-s3-c2800-direct-screen-20261009/run_paired.py \
   --binary target/release/examples/s3_partial_prepared_fullrank_c2800direct_targetspan \
   --output /Volumes/SSD990/llm/tmp/s3-c2800-direct-screen-20261009
 ```
+
+## Recorded screen outcome
+
+The frozen runner started six of sixteen planned runs. Five recovered and
+independently verified their scalars within 32 GiB. T159 expanded reached
+the 600-second cap with status `timeout`, and the runner recorded the ten
+unstarted runs in `stop.json`. The complete-panel call and online ratios are
+unknown; [`analysis.json`](analysis.json) records `screen_advanced: false`.
+
+| Target | C1200 calls | C2800 calls | Local C1200 online ms | Local C2800 online ms | Status |
+| --- | ---: | ---: | ---: | ---: | --- |
+| T157 | 998 | 302 | 0.784 | 2.498 | both verified |
+| T158 | 742 | 26 | 2.544 | 4.879 | both verified |
+| T159 | 1,716 | — | 39.199 | — | baseline verified; expanded timeout |
+
+The local online intervals vary sharply under host contention and are
+diagnostics. The [compressed ledger](local/raw_paired.jsonl.gz), [raw report
+archive](local/raw_reports.tar.gz), [host receipt](local/host.json), runner
+log, exit record, and stop record preserve every started run and its resource
+counters. The next C2800 variant uses seven-byte exact root slots and has a
+separate frozen T025 resource and scalar control.

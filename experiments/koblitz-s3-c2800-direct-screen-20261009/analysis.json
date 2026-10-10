@@ -1,0 +1,37 @@
+{
+  "controlled_speedup": null,
+  "failed_runs": [
+    {
+      "arm": "expanded",
+      "error": "timeout",
+      "exit_code": null,
+      "label": "T159",
+      "repetition": 1,
+      "resource_within_envelope": null,
+      "verified_native_and_fixture": false
+    }
+  ],
+  "freeze_sha256": "986b5922ed423fb8cd537e3116e170ae090fec2cc528b47234cd94f2b990b405",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c2800direct_paired_call_screen_analysis_v1",
+  "ledger_decompressed_sha256": "b2335c1cf90d74a57a63502267cdc0a6e57aa7244ee42f2647ddfbdd7dbcd38a",
+  "native_and_fixture_verified_count": 5,
+  "online_geomean_baseline_over_expanded": null,
+  "planned_run_count": 16,
+  "planned_target_count": 8,
+  "raw_reports_archive_sha256": "3fa8383af4a2584a205dce8088f8136528bd445988d30af5019faa87bd12e0ca",
+  "resource_within_envelope_count": 5,
+  "root_call_geomean_baseline_over_expanded": null,
+  "run_count": 6,
+  "runner_exit": "0",
+  "screen_advanced": false,
+  "stop": {
+    "arm": "expanded",
+    "kind": "s3_n53_c2800direct_paired_screen_stop_v1",
+    "label": "T159",
+    "planned_rows": 16,
+    "reason": "invalid_result",
+    "rows_started": 6
+  },
+  "unstarted_run_count": 10
+}

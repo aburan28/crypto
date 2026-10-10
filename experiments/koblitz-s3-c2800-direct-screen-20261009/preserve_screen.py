@@ -10,6 +10,8 @@ import tarfile
 
 HERE = Path(__file__).resolve().parent
 RUN = Path("/Volumes/SSD990/llm/tmp/s3-c2800-direct-screen-20261009")
+LOG = RUN.parent / "s3-c2800-direct-screen.log"
+EXIT = RUN.parent / "s3-c2800-direct-screen.exit"
 LOCAL = HERE / "local"
 
 
@@ -47,8 +49,8 @@ def main():
     host = json.loads((RUN / "host.json").read_bytes())
     assert host["host_exclusive_partition_receipt"] is None
     (LOCAL / "host.json").write_text(json.dumps(host, indent=2, sort_keys=True) + "\n")
-    (LOCAL / "runner_log.txt").write_bytes((RUN.parent / (RUN.name + ".log")).read_bytes())
-    (LOCAL / "runner_exit.txt").write_bytes((RUN.parent / (RUN.name + ".exit")).read_bytes())
+    (LOCAL / "runner_log.txt").write_bytes(LOG.read_bytes())
+    (LOCAL / "runner_exit.txt").write_bytes(EXIT.read_bytes())
     stop = RUN / "stop.json"
     if stop.exists():
         (LOCAL / "stop.json").write_bytes(stop.read_bytes())
