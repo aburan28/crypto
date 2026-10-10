@@ -1,4 +1,4 @@
-# Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E16, and the road to the state of the art
+# Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E18, and the road to the state of the art
 
 **Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 and degree-3 endomorphisms, CM instance generators, the folded rho classes), `src/cryptanalysis/ext_curve.rs` (`ExtField` over `F_{p²}` and `F_{p³}`, the generic `ExtCurve` counted group, diagonal automorphisms and Frobenius-type maps on it), `src/cryptanalysis/gls_fp2.rs` (GLS `ψ`, the `ψ`-stable line, the `j = 0` and `j = 1728` twists with their lifted automorphisms), `src/cryptanalysis/subfield_fp3.rs` (`E/F_p` on `E(F_{p³})`, the Frobenius eigenline), `src/cryptanalysis/line_oracle.rs` (the Weil-descent resultant oracle for a line, E2b), `src/cryptanalysis/glv_invariant_experiments.rs` (one relation stream feeding both arms to full rank), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`), `src/cryptanalysis/orbit_pair_table.rs` (the pair table over orbit representatives, E12), `src/cryptanalysis/fghr_line.rs` (the `Y`-line, the `τ_T` fold and the `D₃` conic-resultant oracle, E13), `src/cryptanalysis/q_curve.rs` (Q-curves of degree 2 and 3 over `F_{p²}` and `ψ = π ∘ ι ∘ φ`, E14)
 **CLI:** `ic bench --bits 20 --family j0 --factor-base glv-orbit:size=64 --oracle mitm:negation_folded=1` (control: `glv-orbit:size=64,no_fold=1`)
@@ -51,7 +51,13 @@
 > relations — a constant at best, never an exponent; the best arm's ratio
 > to rho grows as `r^{0.18}` to `p = 2^{16}`, and two earlier exponent
 > claims are corrected.  Every class is engineering or accounting; no row
-> claims a speed.
+> claims a speed.  §9 sets goal G2 — the cheapest levers, moved to curves where index calculus
+> has rho's exponent or better — and runs it: E17 carries the `D₃` solve (`÷ 38`) and the `τ_T`
+> fold to the full group `E(F_{p³})`; E18 folds the `k = 4` linear algebra, where the `ψ` fold on
+> `j = 0` curves takes the asymptotic ratio to the matched rho from `1.23` (plain) to `0.138` and
+> the extrapolated handover from `2^{156.1}` to `2^{146.0}`, while the `τ_T` fold cannot pay for
+> its curves' cofactor and yield.  Both are engineering; §11.19's `0.518` reads `0.733` against the
+> negation walk.
 
 ## 1. What is new, against what exists
 
@@ -1910,18 +1916,106 @@ So on a `j = 0` curve the plain `k = 4` method does **not** beat the rho an atta
 there, at any size, because its linear algebra alone costs `1.23×` that walk.  The `ψ`-folded base
 does, asymptotically, by **`1/0.138 ≈ 7.2×`**.
 
-**The handover, re-derived (extrapolation, not measurement).**  §11.16's form with the measured
-pooled `S` of the matched walk and §11.17's `C₄ = 1.213·10¹²`: residuals `24` per relation, the
-relation phase `24·(columns)·C₄`, against rho `S·√n` with `√n ≈ p²`:
+**The `τ_T` arm: `8` curves over `F_{p⁴}` with rational `T`**, `p = 269`–`1033` (§11.19's sizes),
+two curves per `p`, `n = 2^{30.3}`–`2^{38.1}`.  The two `p = 1033` curves ran one per invocation
+(`experiments/26_quartic_folds_tau_1033s{1,2}.{json,log}`), after two restarts of the host had
+stopped the run.  **Every logarithm was recovered on both arms, and all `256` walks verified.**
 
-| method | against | `r` | `p*` | `n* ≈ p*⁴` |
-|:--|:--|--:|--:|--:|
-| plain | unfolded walk (§11.19's convention) | `0.554` | `2.7·10¹¹` | `2^{151.9}` (§11.19: `2^{151.1}`) |
-| plain | negation walk | `0.733` | `6.0·10¹¹` | `2^{156.5}` |
-| plain, on `j = 0` | `ψ` walk | `1.232` | — | never |
-| **`ψ`-folded, on `j = 0`** | **`ψ` walk** | **`0.138`** | `1.0·10¹¹` | **`2^{146.4}`** |
+| p | log₂ n | h | cols control / folded | control core (φ) | folded core (φ) | LA ratio | decompositions per decomposed target | residuals per relation | r control / negation walk | r folded / negation walk |
+|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|--:|
+| 269 | 30.3 | 4 | 134 / 67 | 125 (0.933) | 57 (0.851) | 4.87 | 9.23 | 91.5 | 1.526 | 0.313 |
+| 269 | 30.3 | 4 | 116 / 58 | 104 (0.897) | 54 (0.931) | 3.75 | 7.67 | 198.6 | 1.057 | 0.282 |
+| 521 | 34.1 | 4 | 264 / 132 | 241 (0.913) | 121 (0.917) | 3.98 | 7.59 | 82.8 | 1.511 | 0.380 |
+| 521 | 34.1 | 4 | 268 / 134 | 234 (0.873) | 117 (0.873) | 4.04 | 7.80 | 88.0 | 1.424 | 0.353 |
+| 769 | 36.3 | 4 | 378 / 189 | 342 (0.905) | 170 (0.899) | 4.07 | 7.84 | 108.4 | 1.396 | 0.343 |
+| 769 | 36.3 | 4 | 370 / 185 | 329 (0.889) | 175 (0.946) | 3.55 | 7.84 | 105.2 | 1.292 | 0.364 |
+| 1033 | 38.1 | 4 | 496 / 248 | 439 (0.885) | 219 (0.883) | 4.02 | 7.87 | 119.6 | 1.275 | 0.317 |
+| 1033 | 38.1 | 4 | 524 / 262 | 482 (0.920) | 240 (0.916) | 4.05 | 7.90 | 94.5 | 1.536 | 0.379 |
 
-The fold moves the handover earlier by `5.5` bits against §11.19's convention and `10` bits against
-the negation walk.  It does this because the relation count falls by `3` while the matched rho falls
-by only `√6/√2`.  `C₄` still sets the handover, and the `D₄` lever on `C₄` is a separate goal
-(§9.4).
+Rho's `S`, pooled over `128` walks per fold: unfolded `118.9 ± 5.4`, negation `90.8 ± 4.2`
+(ratio `1.31`).  Pooled `r`: control `1.051 ± 0.044` (unfolded walk), `1.377 ± 0.058`
+(negation walk); folded **`0.261 ± 0.009`** (unfolded), **`0.341 ± 0.012`** (negation); fitted
+exponents in `n` `0.01` and `0.03`.
+
+**Reading, against §9.1.**
+
+- **G2.8 holds as registered, at the cofactor the search could reach.**  Columns `÷ 2.00`, linear
+  algebra `÷ 3.55`–`4.87` (`÷ 4` predicted), and `r_τ = 0.341 ± 0.012` against the negation walk,
+  under the `0.50` falsifier.
+- **Deviation: every curve has `h = 4`, never `2`.**  The search took its fallback on all eight,
+  and E17's `24` curves over `F_{p³}` all had `h ∈ {4, 8}`.  The construction makes `f'(x₀) = c²` a
+  square, which is the necessary condition for `T` to be halvable, i.e. for a rational 4-torsion
+  point.  So `h ≥ 4` is very likely structural for this coordinate.  That is not proved here and is
+  recorded as measured.  The cofactor costs `√h` against rho, so the registered `≈ 0.26` at `h = 2`
+  becomes `0.518·√2·√4/4 ≈ 0.37` at `h = 4`, and the control's `≈ 1.04` becomes `≈ 1.47`.  Measured:
+  `0.341` and `1.377`.
+- **What the registration did not price: the relation yield.**  Each decomposed target carries
+  `7.6`–`9.2` verified decompositions, the family that adds `T` to an even number of summands, and
+  the folded arm turns the whole family into one row.  Pooled, a relation costs **`106` residuals**
+  on these curves, against **`22.5`** on the `j = 0` curves (`2,559` relations from `270,464`
+  residuals, against `2,761` from `62,080`; §11.16 assumes `24`).  `r` does not see this, since it
+  prices the linear algebra.  The handover does.
+
+**The handovers, re-derived on the measured yields (extrapolation, not measurement).**  §11.16's
+form: relation phase `y·(columns)·C₄`, with `y` the measured residuals per relation, `columns`
+from the measured `|F| ≈ p/2`, and `C₄ = 1.213·10¹²` (§11.17).  It is set against rho
+`S·√n`, with the matched walk's pooled `S` and `√n = p²/√h`.  Then
+`S / rho = y·(cols/p)·C₄·√h / (S_rho·p) + r`, and `p* = y·(cols/p)·C₄·√h / (S_rho·(1 − r))`.
+
+| method, curves | against | `y` | `r` | `p*` | `n*` |
+|:--|:--|--:|--:|--:|--:|
+| plain, prime order (control of the `ψ` runs) | unfolded walk (§11.19's convention) | `22.5` | `0.554` | `2.5·10¹¹` | `2^{151.6}` (§11.19: `2^{151.1}`) |
+| plain, prime order | negation walk | `22.5` | `0.733` | `5.6·10¹¹` | `2^{156.1}` |
+| plain, `j = 0` | `ψ` walk | `22.5` | `1.232` | — | never |
+| **`ψ`-folded, `j = 0`** | **`ψ` walk** | `22.5` | **`0.138`** | `9.8·10¹⁰` | **`2^{146.0}`** |
+| plain, 2-torsion (`h = 4`) | negation walk | `106` | `1.377` | — | never |
+| `τ_T`-folded, 2-torsion (`h = 4`) | negation walk | `106` | `0.341` | `1.1·10¹²` | `2^{157.9}` |
+
+**So the two folds part.**  The **`ψ` fold moves the frontier**: on a `j = 0` curve, against the
+rho an attacker would run there, the asymptotic edge is `1/0.138 ≈ 7.2×`, against the plain
+method's `1/0.733 ≈ 1.36×` over the negation walk on a prime-order curve.  The handover comes
+`10` bits earlier than that (`2^{146.0}` against `2^{156.1}`).  The **`τ_T` fold improves only
+its own curves**: `r` falls `4×` there, but those curves pay a cofactor of `4` and a `4.7×` poorer
+relation yield, so they hand over `1.8` bits *later* than a plain prime-order curve.  A curve
+with this `T` is a worse target than one without, even with the fold.
+
+**Class: engineering.**  Both folds move constants of an asymptote that is already rho's exponent
+at `k = 4`.  No exponent moved, no end-to-end `S` below rho exists, and every number past `n =
+2^{40}` is an extrapolation on §11.16's exponents and §11.17's `C₄`.
+
+### 9.4 Verdict on G2, and the next lever
+
+| stage | what moved | measured | class |
+|:--|:--|:--|:--|
+| E17, `k = 3`, the `D₃` solve on the full group | `C₃` | `÷ 38.0` (`33.7`–`43.0`) against `S₃` Macaulay, on non-subfield curves with `F_{p³}` Möbius coefficients; end to end still `180`–`377×` rho (G2.4, G2.5 falsified by the harness) | engineering |
+| E17, `k = 3`, the `τ_T` fold | columns | `÷ 2.00` exactly | engineering |
+| E18, `k = 4`, the `ψ` fold | `r∞` against the matched walk | **`0.138 ± 0.008`** (plain on the same curves: `1.232`); handover `2^{156.1} → 2^{146.0}` against the negation walk's | engineering |
+| E18, `k = 4`, the `τ_T` fold | `r∞` on its own curves | `0.341 ± 0.012` (plain: `1.377`), but `h = 4` and a `4.7×` poorer yield: handover `2^{157.9}` | engineering |
+| E18, `k = 4`, the reference | the walk `r∞` is quoted against | negation walk `1.31`–`1.32×` cheaper than §11.19's unfolded one, so §11.19's `0.518` reads `0.733` against it | accounting |
+
+**What G2 established.**  The levers this note built on subfield curves, where §8.10 showed they
+could buy only a constant against a `Θ(p)` rho, carry over to curves where index calculus has
+rho's exponent or better: the `D₃` solve intact (`÷ 38`), and the folds intact and exact.  At
+`k = 4`, the one setting in this repository where a plain method has a regime below rho at all,
+the `ψ` fold is the largest constant on the linear-algebra side.  It turns a `1.36×` asymptotic
+edge into `7.2×` and brings the handover `10` bits earlier.
+
+**What it did not.**  The handover is still `2^{146}`, set by `C₄ = 1.2·10¹²` per `S₅` solve.  No
+end-to-end `k = 4` run below rho exists, here or in §11.  On curves with rational 2-torsion the
+fold cannot pay for the curve's poorer yield.
+
+**The next lever, named and not yet registered.**  §11.17: "every factor `f` taken off `C₄` moves
+`n*` about `4 log₂ f` bits earlier", with `C ≈ D^{3.1}` in this solver.  The two candidates:
+
+1. **`ψ` on the system.**  On a `j = 0` curve, `S₅` is weighted-homogeneous in `x` (weight `2`) and
+   `b` (weight `6`), so the descended system carries a `Z/3` grading.  §2 of
+   `RESEARCH_GLV_INDEX_CALCULUS.md` found the analogous `k = 3` grading usable only on the
+   orbit system, at `12`–`30×` the cost.  At `k = 4` it needs re-deriving, not assuming.
+2. **`D₄` on the system.**  The FGHR symmetry, `(Z/2)³ ⋊ S₄`, on curves with rational `T`, cuts
+   the Bézout number `4096 → 512`.  That is `≈ 8^{3.1} ≈ 630×` on `C₄` if the generic scaling
+   holds, worth `≈ 37` bits of `n*`.  E18 shows those curves pay `≈ 8` bits back through the
+   cofactor and the yield.  The `k = 5` analogue in `RESEARCH_K5_TORSION_JOUX_VITSE.md` measured
+   `416×` for its four-point test.
+
+Either is a separate build: the symmetrised `S₅` over `F_{p⁴}` and a weighted Macaulay solve.  Each
+would be registered with its own falsifier before any code, as E17 and E18 were.
