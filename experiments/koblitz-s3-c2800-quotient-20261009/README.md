@@ -36,3 +36,16 @@ python3 experiments/koblitz-s3-c2800-quotient-20261009/run_feasibility.py \
 If the rank, scalar, table geometry, semantic, and memory gates pass, the
 recorder assigns the content-hashed candidate ID and freezes fresh T173–T180
 workloads. Retain any failed or capped run as a receipt with its raw status.
+
+The frozen T025 control completed in 117.312 s, reached rank 2,800, and
+recovered scalar 429728658711 after 498 S3 calls with group replay. The
+[semantic comparison](local/semantic_comparison.json) matches the full-key
+reference after excluding timing and the declared table geometry. Peak RSS
+was 27,307,655,168 bytes. The low-bit shard hash was skewed: input counts
+ranged from zero to 29,937,272 per shard, and 29 of 64 shards doubled. The
+table reached 1,560,281,088 slots, so the frozen slot-count gate failed.
+The [receipt](local/feasibility_receipt.json) and
+[compressed report](local/feasibility_report.json.gz) preserve this result;
+`candidate_id` remains null and the T173–T180 panel was not started. The
+target online interval was 0.701 ms on this contended host and remains a
+diagnostic.

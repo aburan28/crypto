@@ -52,21 +52,22 @@ def main():
     (LOCAL / "feasibility_receipt.json").write_bytes(receipt_raw)
     (LOCAL / "feasibility_report.json.gz").write_bytes(report_gz)
     if not (receipt["exit_code"] == 0 and receipt["error"] is None
-            and receipt["scalar_verified"] and receipt["full_rank_before_target"]
-            and receipt["root_slots_within_declared_step"]
-            and report is not None):
+            and receipt["scalar_verified"] and report is not None
+            and report.get("prepared_rank") == 2800
+            and report.get("target_full_rank_direct_recovery") is True):
         print(json.dumps({"feasibility_passed": False,
                           "receipt": str(LOCAL / "feasibility_receipt.json")}, sort_keys=True))
         return
     assert report["regular_states"] == plan["expected_regular_states_if_all_regular"]
-    assert report["root_table_slots"] <= plan["root_table_slot_step_limit"]
+    assert receipt["root_slots_within_declared_step"] == (
+        report["root_table_slots"] <= plan["root_table_slot_step_limit"])
     assert report["target_search_schedule"] == "c1200_embedded_state_prefix_then_complete_c2800"
     assert report["factor_base_points"] == receipt["factor_base_points"]
     old_report = json.loads(gzip.decompress(OLD_REPORT.read_bytes()))
     assert sha(gzip.decompress(OLD_REPORT.read_bytes())) == plan["reference_raw_report_sha256"]
     old_fields = dict(old_report)
     new_fields = dict(report)
-    for key in ("timing_ms", "peak_rss_bytes", "root_table_slot_bytes",
+    for key in ("timing_ms", "peak_rss_bytes", "root_table_slots", "root_table_slot_bytes",
                 "root_table_value_bits", "root_table_layout",
                 "root_table_construction_policy",
                 "root_table_input_entries_per_shard", "root_table_slots_per_shard"):
@@ -77,7 +78,7 @@ def main():
         "kind": "s3_n53_c2800quotient_full_key_vs_quotient_slot_semantic_control_v1",
         "old_raw_sha256": plan["reference_raw_report_sha256"],
         "new_raw_sha256": receipt["raw_report_sha256"],
-        "excluded_fields": ["timing_ms", "peak_rss_bytes", "root_table_slot_bytes",
+        "excluded_fields": ["timing_ms", "peak_rss_bytes", "root_table_slots", "root_table_slot_bytes",
                             "root_table_value_bits", "root_table_layout",
                             "root_table_construction_policy",
                             "root_table_input_entries_per_shard", "root_table_slots_per_shard"],
@@ -87,10 +88,13 @@ def main():
         "differing_keys": sorted(key for key in old_fields.keys() & new_fields.keys()
                                  if old_fields[key] != new_fields[key]),
     }, indent=2, sort_keys=True) + "\n")
-    if not semantic_equal or not receipt["memory_within_envelope"]:
+    if (not semantic_equal or not receipt["memory_within_envelope"]
+            or not receipt["root_slots_within_declared_step"]):
         print(json.dumps({"feasibility_passed": False,
                           "semantic_comparison": str(LOCAL / "semantic_comparison.json"),
                           "memory_within_envelope": receipt["memory_within_envelope"],
+                          "root_slots_within_declared_step":
+                              receipt["root_slots_within_declared_step"],
                           "peak_rss_bytes": receipt["peak_rss_bytes"]},
                          sort_keys=True))
         return
