@@ -1,5 +1,17 @@
 # Higher-arity chained-S3 SAT source gate
 
+**2026-10-10 measured update:** The retained K=64 all-affine m=5 and m=6
+models constructed under the fixed one-CPU, 4 GiB guard. The K=256 m=5
+model required 7,195,450 finite-domain clauses and constructed only after a
+separate 8,000,000-clause admission gate; the first 3,000,000-clause attempt
+was `UNKNOWN_domain_clause_cap`. K=64 and K=256 m=5 one-trial searches each
+reached 10,000 conflicts without a model or relation. The m=6 search lost
+its Docker daemon and returned no worker summary; its original cleanup
+field is invalid and the exact container has a corrected recovery audit.
+These receipts are in `verification/two-hour-extension-20261010/` and
+supersede earlier source-only and unlaunched statements below. Natural rank,
+full cold runtime and the selected base remain unmeasured.
+
 `binary_semaev_chain_sat.rs` adds a full-width native-XOR circuit for the
 binary-curve relation `S3(x,y,z)=xyz+(xy+xz+yz)^2+b=0`. Four such nodes encode
 five summands and five nodes encode six summands. Every field multiplication

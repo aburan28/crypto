@@ -4,6 +4,10 @@ Date: 2026-10-08. The primary objective is the lowest fully charged index-calcul
 
 The exact primary model is `icv1-f2m83-tm6151469093347-debefd74`, with equation `y^2 + xy = x^3 + 1`, polynomial-basis modulus `z^83 + z^45 + z^2 + z + 1`, subgroup order `2417851639230796216685689`, and cofactor 4. Its generator is pinned in the native exporter. The diagnostic model is `icv1-f2m83-t6151469093347-cdcc5432`, with `a=1`, the same modulus, subgroup order `8569786107849059`, and cofactor `1128547018`. These are different workloads: an 81-bit subgroup and a 53-bit subgroup. The degree alone does not identify a workload. The slugs were checked against the registry at `c70c32d486a3ac7531fe27f7193d9f09caa58344`; exact representations, generators and subgroup parameters are retained in every exported header.
 
+## Two-hour-total extension, 2026-10-10
+
+The latest [source-linked report](verification/two-hour-extension-20261010/REPORT.md), [editable diagram](verification/two-hour-extension-20261010/report-figure.svg) and [PDF](verification/two-hour-extension-20261010/REPORT.pdf) supersede earlier "not yet run" statements below. A K=1,182 signed-Frobenius object was constructed, checked point by point with generic multi-limb arithmetic, uploaded to S3 and downloaded with matching compressed bytes. Exact K=64 factored-S4, K=64 chained-S3 m=5/m=6 and K=256 chained-S3 m=5 models fit a guarded 4 GiB cgroup under their declared domain-clause caps. One K=64 and one K=256 m=5 trial each reached a 10,000-conflict solver cap without a model or relation. The m=6 trial ended when the Docker daemon disconnected; its container was later audited and removed, with no worker solver verdict. The guard's invalid cleanup flag was corrected before K=256 runs. The complete cold runtime and selected base remain null. The extension stopped at 6,054.092994294 of 7,200 authorized seconds including the prior pilot.
+
 ## Requested scope and completion conditions
 
 | Requirement | Deliverable or completion gate |

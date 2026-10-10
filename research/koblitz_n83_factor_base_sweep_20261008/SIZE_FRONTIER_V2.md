@@ -62,12 +62,15 @@ passed 13 and the boundary Python suite passed 16. The v2 generator was rerun
 against its saved JSON without a byte change. These are design and source
 checks, not N83 performance measurements.
 
-This extension constructs **no new factor-base objects** and makes no
-single-target cold timing claim. Successful full-orbit construction at larger
-K, a capacity check of the current buffered exporter or a streaming output
-path, source-pinned relation production, natural rank and fully charged cold
-comparison remain required. The declared
-S3 destination for future versioned objects is
+The design-only extension initially constructed no larger objects. The
+2026-10-10 two-hour-total pilot subsequently constructed one primary
+hash-policy K=1,182 object at seed 2026100801, replayed all 196,212 signed
+points and uploaded/downloaded its 5,956,114-byte compressed object with a
+matching BLAKE3 digest. Its exact receipt and resource limits are in
+`verification/two-hour-extension-20261010/REPORT.md`. No single-target cold
+timing claim follows. Other larger K choices, source-pinned relation
+production, natural rank and fully charged cold comparison remain required.
+The versioned S3 destination is
 `s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/`.
 
 The exporter now has a one-object path for the five added sizes. It accepts
@@ -93,7 +96,8 @@ small public fixture; out-of-grid publication fails before any AWS call. The
 CLI also rejects a valid v2 construction request from an unfrozen worktree
 before creating its output directory, and rejects a v1 manifest at the bounded
 v2 replay entry point. These negative controls do not exercise a larger base.
-Larger-object construction, its memory use, generic replay time and S3
-round-trip have **not** been run under the exhausted pilot budget. The
-watchdog bounds process wall only, so a future run also needs an external
-memory limit and a fresh run directory.
+The first K=1,182 object construction, generic replay and S3 round-trip
+subsequently passed under a 4 GiB zero-swap guard; the compressed object and
+point-set digests are in the extension report. The watchdog bounds process
+wall only, so each remaining size needs an external memory limit and a fresh
+run directory. The K=1,182 object was not ranked by runtime.

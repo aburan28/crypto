@@ -1,0 +1,16 @@
+{
+  "backend": "generic multi-limb BinaryCurve versus producer Gf2_128",
+  "best_total_runtime": null,
+  "checks": [
+    {
+      "object": "objects/76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92.jsonl.gz",
+      "points_checked": 196212,
+      "representatives_checked": 1182,
+      "status": "PASS"
+    }
+  ],
+  "independence": "same host and repository; external independent replay remains pending",
+  "panel_manifest_blake3": "503c705e0ce5a8f032a22629d541d6bc0db19d247fc9a0cef1e303d6eb27db37",
+  "schema": "n83.factor-base-replay/v2-size-frontier",
+  "status": "PASS"
+}
