@@ -1,0 +1,42 @@
+{
+  "binary_sha256": "598b6079e5069a4bce1042c212bb22ac17b392ccdbfb03bfec4df7c63212a807",
+  "cache_flush_bytes_per_query": 67108864,
+  "candidate_ids": {
+    "early": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h32db5f32bc35",
+    "late": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h725e7b258a32",
+    "none": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h1271295ac92c"
+  },
+  "candidate_manifests": {
+    "early": "experiments/koblitz-s3-c2800-lookup-ab-20261010/identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h32db5f32bc35.json",
+    "late": "experiments/koblitz-s3-c2800-lookup-ab-20261010/identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h725e7b258a32.json",
+    "none": "experiments/koblitz-s3-c2800-lookup-ab-20261010/identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h1271295ac92c.json"
+  },
+  "controlled_speedup": null,
+  "fixture_scalar": 429728658711,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_c2800_lookup_ab_t025_diagnostic_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "point_file_relative": "holdout/n53/T025/public_target.json",
+  "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+  "primary_target_count": 1,
+  "public_point": [
+    7024908122546358,
+    2805535303407364
+  ],
+  "queries_per_mode": 18,
+  "reference_gzip_sha256": "4e9e5b47c10c1d7f246c8ee14a3b226ccb556a1db1928574201ccf9a6d0c00db",
+  "reference_raw_sha256": "03b071da5fbf2a738bf486fa7e46cf867b077ddd306142f44d10cc6056837c0d",
+  "reference_receipt_sha256": "69e56a43815cb7a802d4dea6fb6fd0800a45d5b9e82052c2981daef9ead9eee6",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "runner_sha256": "900bd19012c0663780b983fd3be23b4a014b3c2a87f2c9983faafb78be2bf1be",
+  "schedule_length": 54,
+  "schedule_sha256": "9b39430c4ea15ef0c16d2075d7d4d7a5682d453c4cf605d449d8cfafc77cda3b",
+  "secondary_metric": "same_preparation_repeated_target_extract_wall_and_thread_cpu",
+  "source_commit": "511e14ed33155453d53c438aa0077eefb3eca6c9",
+  "source_sha256": "2241456eacca4500937d569b4f1e0e1fb807c0df31cc29c31ee6396b6de1b237",
+  "target_workers": 1,
+  "timeout_seconds": 1200,
+  "workload_id": "a238237883e9"
+}
