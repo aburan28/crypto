@@ -61,14 +61,37 @@ TeX can open the paper.
 Every number is footnoted to a repository artefact (`\art{path}`);
 paths prefixed `cryptanalysis:` are in the sibling library.
 
+## Revision history
+
+- Draft 1: first complete text.
+- Draft 2: every section fact-checked line by line against its cited
+  files (55 corrections, among them the two-chain B200 verdict, the
+  batch-18 control, the cycle-rule v2/v3 validation attribution, the
+  inversion chain the client actually uses, and the FPGA host's
+  `--verify N` sampling); bibliography checked against Crossref; the
+  reporting rule restated in full so the paper does not depend on the
+  companion draft; an availability paragraph naming the three public
+  repositories; the campaign state refreshed from the published feed
+  (`data/status_20261010T154157Z.json`); related work extended to
+  ECC2K-108 and the 2016 binary-curve record.
+
 ## Known caveats carried into the text
 
 - The RTX PRO 6000 σ-walk headline has moved past the audited 14.64 B/s
   (15.44 fused, 15.88 with nibble tables); the campaign preset still
-  ships 14.64 and the paper says which is which.
+  ships 14.64 and the paper leads with that number, naming the others.
 - The 20.08 B/s table-walk rate is a rate, not a cost per solve; the
-  cycle-rule v2 cost projection (0.81–0.86× σ) is unmeasured.
+  cycle-rule v2 cost projection (0.81–0.86× σ) is unmeasured, and the
+  v3 rule's throughput and walk constant are not yet measured at all.
 - The RTX PRO 4500 bridge map's DP34 collection rate, the L40S
   collection rate and the G7e family are unmeasured.
+- The packed-walk witness cost (34.7%) is stated in `CAIRN-WITNESS.md`
+  but only the job script is frozen under `benchmarks/witness-cost/`.
 - The IC feasibility note's fitted constant `C` has three readings in
-  the source; the paper reports the range and uses the pessimistic fit.
+  the source; the paper carries the values recomputed from the exact
+  subgroup orders (0.33, 1.51, 1.27) and says the extrapolation uses
+  `C = 1`.
+- Whether the storage bucket's copy of `campaign.json` had its iteration
+  guard raised to 2^32 before the fleet stopped is not recorded.
+- The author block is anonymized; `make deanonymize` with an `AUTHORS`
+  file restores it.

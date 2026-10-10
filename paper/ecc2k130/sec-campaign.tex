@@ -1,28 +1,30 @@
 \section{The campaign}
 \label{sec:campaign}
 
-$2^{60.9}$ iterations is decades of single-GPU time, so the campaign
-is collection, not a solve: a corpus of distinguished points, each
+$2^{60.9}$ iterations is about five years of single-GPU time at the
+campaign's collection rate, so the campaign is collection, not a
+solve: a corpus of distinguished points, each
 re-walkable from its seed, grown by whatever hardware is cheapest at
 the time and merged on arrival. This section records its
 configuration, its calibration, its storage protocol and its state.
 
 \subsection{Configuration}
 
-The live configuration is one file.\art{ecc2k130/aws/campaign.json}
-Walk: $\sigma$ (Section~\ref{sec:walk-sigma}). \texttt{dpWeight}: 32,
+The configuration is one file in the repository; the copy in the
+storage bucket is what workers read.\art{ecc2k130/aws/campaign.json}\art{ecc2k130/aws/README.md} Walk: $\sigma$ (Section~\ref{sec:walk-sigma}). \texttt{dpWeight}: 32,
 uniform campaign-wide, and a campaign run refuses any other. Batch 16,
 256-thread blocks, two resident blocks per SM, $385{,}024$ workers
 $=6{,}160{,}384$ logical walks per GPU, $1{,}024$ steps per launch,
-checkpoint and upload every 600~s, restart every 48~h. The iteration
-guard \texttt{maxIters} is $2^{32}$, twelve trail lengths at weight 32;
-it was $2^{30}$, three trail lengths, which cut $4.9\%$ of walks and
-discarded $15.6\%$ of the fleet's steps until an audit found
-it.\art{research/ecc2k130_rho_audit_20260925/README.md} The fields
+checkpoint and upload every 600~s, restart every 48~h. The iteration guard \texttt{maxIters} in the repository file is
+$2^{32}$, twelve trail lengths at weight 32; it was $2^{30}$, three
+trail lengths, which a model on the measured rates says cut $4.9\%$ of
+walks and discarded $15.6\%$ of the fleet's steps until an audit found
+it. Whether the bucket copy was raised before the fleet stopped is not
+recorded.\art{research/ecc2k130_rho_audit_20260925/README.md} The fields
 that define the corpus (workers, batch, geometry, curve, cutoff, walk
 and the state-layout knobs) freeze once any slot exists;
-\texttt{WITNESS=0} is pinned. The preset is the audited RTX~PRO~6000
-build at CUDA~13.3.1 and \texttt{sm\_120}. A checkpoint is about
+\texttt{WITNESS=0} is pinned. The preset is the audited RTX~PRO~6000 build at CUDA~13.3.1 and
+\texttt{sm\_120}.\art{ecc2k130/aws/README.md} A checkpoint is about
 370~MB (six million walks at 60 bytes).
 
 \subsection{Cutoff 32 and the interval $2^{28.41}$}
@@ -46,8 +48,8 @@ was wrong. A fleet-wide ratio of $7.93\cdot10^{15}$ checkpointed
 iterations to $31.6$~M uploaded points on 2026-09-15 had been quoted
 as $2^{27.9}$ iterations per point. Neither counter was clean: the
 checkpoint sum multiplied every slot's per-walk base by the Blackwell
-grid constant, inflating Ada slots about $26\times$, and the point
-total mixed in two retired slots that had walked at weight 34. The
+grid constant, inflating the auto-sized Ada slots by the ratio of the
+grids (about $26\times$ on an L4-sized grid), and the point total mixed in two retired slots that had walked at weight 34. The
 replacement reads from each live worker the client's own two
 counters, iterations this run on the grid the client built itself and
 points reported over the same interval, frozen at 2026-09-17 18:47~UTC
@@ -90,9 +92,8 @@ $42{,}400$ GPU-hours are about $\$56$k whether 8 GPUs take 221 days or
 512 take $3.4$; on demand the figure is $\$142$k--$\$175$k.\art{ecc2k130/aws/README.md}
 What the fleet size buys is the collision-in-flight loss above and the
 calendar. The campaign ran mixed families because iterations per
-dollar, not iterations per card, is the objective: on 2026-09-18 the
-cheapest quoted instance was an L4 in \texttt{eu-north-1} at
-$56\cdot10^{12}$ iterations per dollar against $38\cdot10^{12}$ for the
+dollar, not iterations per card, is the objective: on 2026-09-18 the best-value quote was an L4 in \texttt{eu-north-1}
+at $56\cdot10^{12}$ iterations per dollar against $38\cdot10^{12}$ for the
 RTX~PRO~6000 and $28\cdot10^{12}$ for the RTX~PRO~4500, and at that
 quote a full reference walk costs about
 $\$38$k.\art{ecc2k130/aws/RESEARCH-CREDITS.md} The per-SKU rates
@@ -101,24 +102,27 @@ behind those ratios are measured, not list: L40S $8.84$~B/s with
 
 The RTX~PRO~4500 is the instructive case. Its measured $5.107$~B/s on
 the shipping walk is exactly what the 6000's rate predicts from SM
-count and clock ($14.64\times82/188\times1.95/2.44=5.10$), and at that
-rate the 6000 wins per dollar by $1.2$--$1.3\times$; the break-even is
-$6.2$--$6.6$~B/s depending on region.\art{ecc2k130/RTX-PRO4500.md} That
+count and clock ($14.64\times82/188\times1.95/2.44=5.10$), and at that rate the 6000 wins per dollar by $1.2$--$1.3\times$; the
+break-even against the 6000's shipping rate is $6.2$--$6.6$~B/s in the
+two cheapest regions and $8.8$ in the third, figures the note says
+must be redone with both cards on their best
+builds.\art{ecc2k130/RTX-PRO4500.md} That
 is why a $12$~B/s goal was set for the card and why the $x$-only
 bridge map of Section~\ref{sec:walk-bridge} was pursued there rather
 than on the 6000: a power-capped die rewards fewer instructions per
 step more than a pipe-bound one does. The separate goal of $28$~B/s on
 one 6000 was priced below the pipe (Section~\ref{sec:floor}) and its
-grid and occupancy screens on the available hardware confirmed
-nothing above the shipping configuration.\art{ecc2k130/GOAL28-RESULTS.md}
+grid and occupancy screens, run on an RTX~PRO~4500 because no 6000
+could be allocated, found nothing faster than the shipping
+configuration.\art{ecc2k130/GOAL28-RESULTS.md}
 
-A power survey closes the loop: on the 6000 the $20$~B/s build draws
-$565$~W for $35.6$~M updates per joule and a fused-pass variant
-$544$~W for $37.0$~M/J, $1.072\times$ per joule in five paired
-repetitions against a $1.03$ target; per joule, not per second, is
-the figure that transfers to a $165$~W card, and the model that
-predicted the 4500's $5.107$ and $5.552$~B/s from the 6000's energy
-figures to $+2.6\%$ predicts $7.2$--$7.4$~B/s for the fused build
+A power survey closes the loop: on the 6000 the $20$~B/s build drew
+$583$~W for $34.4$~M updates per joule and a fused-pass variant
+$544$~W for $37.0$~M/J in the same session, $1.072\times$ per joule in
+five paired repetitions against a $1.03$ target; per joule, not per
+second, is the figure that transfers to a $165$~W card, and the model,
+calibrated on the 4500's $5.107$ and $5.552$~B/s receipts (ratio error
+$+2.6\%$), predicts $7.2$--$7.4$~B/s for the fused build
 there.\art{ecc2k130/POWER-BOUND.md} That prediction is owed a
 measurement; the bridge map arrived first.
 
@@ -127,14 +131,14 @@ measurement; the bridge map arrived first.
 
 A record is 32 bytes: a little-endian 64-bit seed and the canonical
 normal-basis $x$ of the endpoint, three 64-bit words; no scalar
-coefficients are stored, they are rebuilt by replay. The seed is
-\texttt{run id (16) $\|$ walk index (32) $\|$ restart counter (16)}
-with run id $=$ slot $+1$; a splitmix64 finaliser expands it to the
-128-bit $c$ of the start point. Two contributors who pick different
-run ids never repeat each other's trail, and a permanent seed
-registry does compare-and-set across providers (Modal GPU runs are
-ids 8000--8999, CPU sidecars 9000--9999); a race test with eight
-claimants acquired exactly one.\art{ecc2k130/CERTIFICATION.md}\art{ecc2k130/SEED-IDENTITY.md}
+coefficients are stored, they are rebuilt by replay. The seed is \texttt{run id (16) $\|$ walk index (32) $\|$ restart
+counter (16)} with run id $=$ slot $+1$; a splitmix64 finaliser
+expands it to the 128-bit $c$ of the start point. Two contributors who
+pick different run ids never start the same walk (independently
+seeded walks can still meet, which is the point), and a permanent seed
+registry does compare-and-set across providers (Modal GPU runs are ids
+8000--8999, CPU sidecars 9000--9999); a race test with eight claimants
+acquired exactly one.\art{ecc2k130/CERTIFICATION.md}\art{ecc2k130/SEED-IDENTITY.md}\art{research/ecc2k130_rho_audit_20260925/README.md, ``Seeds''}\art{ecc2k130/aws/README.md}
 
 Uploads are ordered so that no pointer ever names data that is not
 there: payloads before their commit manifests, both before checkpoint
@@ -147,66 +151,81 @@ content-addressed and the owner-checked heartbeat publishes the
 pointer, so a stale worker can leave orphaned blobs but cannot commit.
 The note is explicit that this is integrity against failure, not
 authentication against an actor able to rewrite both data and
-manifests.\art{ecc2k130/CERTIFICATION.md}
+manifests.\art{ecc2k130/CERTIFICATION.md}\art{ecc2k130/aws/README.md, ``Slots''}
 
-Merging buckets records by a hash of the key into $4{,}096$ files,
-sorts, drops exact duplicates (the client store, the database primary
+Merging buckets records by a hash of the key limbs (the first layout
+used the key's low bits) into $4{,}096$ files, sorts, drops exact duplicates (the client store, the database primary
 key and the merge are three layers; $9.95$~M re-reports had been
 dropped by 2026-09-25) and reports equal keys with different seeds.
 Such a pair goes into a two-record file and to the CPU client, which
 re-walks both trails, aligns Frobenius and negation, and verifies
 $[k]P=Q$; a $\mathrm{GF}(2^{41})$ pair with known seeds that recovers
-$k=369250562913$ is the local acceptance fixture. An exhaustive check
-of $76{,}904{,}684$ step multisets confirms that no multiset of at most
-32 $\sigma$-walk steps closes an orbit, so the merge never sees a
-self-collision.\art{ecc2k130/CERTIFICATION.md}\art{research/ecc2k130_rho_audit_20260925/README.md}
+$k=369250562913$ is the local acceptance fixture. An exhaustive check of $76{,}904{,}684$ step multisets confirms that
+no multiset of at most 32 $\sigma$-walk steps closes an orbit, so no
+short fruitless cycle exists; a trail crossing itself at random is
+estimated at about $2^{-65}$ per trail, about $10^{-10}$ over the
+campaign, and the iteration guard releases such a
+walk.\art{ecc2k130/CERTIFICATION.md}\art{research/ecc2k130_rho_audit_20260925/README.md}\art{ecc2k130/aws/README.md}
 
 The public dashboard publishes aggregates only: not point keys,
-coefficients, seeds or database locations.\art{docs/ecc2k130-status/README.md}
+coefficients, seeds or database locations.\art{docs/ecc2k130-status/README.md}\art{scripts/rho_status/README.md}
 
 \subsection{State}
 \label{sec:campaign-state}
 
-The campaign was created on 2026-09-11. Its fleet on 2026-09-17 was
-the 132 workers of Table~\ref{tab:cutoff}, producing about $2{,}600$
-points/s; the ingest path was re-engineered that week from one object
+The campaign was created on 2026-09-11. Its fleet on 2026-09-17 was about 133 workers (the 132 with enough
+points to calibrate are in Table~\ref{tab:cutoff}), producing about
+$2{,}600$ points/s by the ingest's count; the ingest path was re-engineered that week from one object
 at a time ($2{,}450$ records/s, below production) to a threaded loader
-measured at $137{,}753$ rows/s, and a five-hour blind spot during a key
-layout change was recovered in 23 minutes ($4{,}321$ objects,
+measured at $137{,}753$ rows/s, and a five-and-a-half-hour blind spot during a key layout change was
+recovered in 23 minutes ($4{,}321$ objects,
 $63{,}351{,}803$ rows, zero failed), taking the store from $67.6$~M to
-$124.3$~M points.\art{ecc2k130/aws/README.md} On 2026-09-18 the spot
-market reclaimed every worker and the cloud account was placed on an
-administrative hold that has blocked new instance launches since;
-collection continued at a small scale on another provider, whose GPU
-runs re-walked the first four slots as a cross-check ($813$k of one
-run's $912$k records byte-identical to the slot they replayed) and
-then walked fresh ids.\art{ecc2k130/aws/ACCOUNT-HOLD.md}\art{ecc2k130/README.md, ``Collecting for the campaign from Modal''}
+$124.3$~M points.\art{ecc2k130/aws/README.md} On 2026-09-18 the spot market reclaimed every worker and the cloud
+account was placed on an account-verification (risk) hold that has
+blocked new instance launches since; collection continued at a small
+scale on another provider. Its first four GPU runs reused the run ids
+of the first four slots by mistake and re-walked them ($813$k of one
+run's $912$k records byte-identical to the slot they replayed, all
+dropped as re-reports, and an inadvertent end-to-end replay check);
+later runs use the reserved ids
+8000--8999.\art{ecc2k130/aws/ACCOUNT-HOLD.md}\art{ecc2k130/README.md, ``Collecting for the campaign from Modal''}
 
-The last full snapshot in the tree is 2026-09-25 05:05~UTC
-(Table~\ref{tab:state}).\art{research/ecc2k130_rho_audit_20260925/live_status_20260925T050509Z.json}
-No collision is the expected state: $2^{56.38}$ iterations is
-$4.4\%$ of $2^{60.9}$, and the probability of no collision after a
-fraction $c$ of the expected work is about $\exp(-\pi c^2/4)$.
+Table~\ref{tab:state} gives two snapshots: the audited one of
+2026-09-25, while a small fleet was still walking, and the published
+feed of 2026-10-10, by which time the last point had landed
+(2026-10-07) and no slot was walking; the sustained peak and the
+mean trail length in the caption are from the
+audit.\art{research/ecc2k130_rho_audit_20260925/live_status_20260925T050509Z.json}\art{paper/ecc2k130/data/status_20261010T154157Z.json}\art{research/ecc2k130_rho_audit_20260925/README.md}
+No collision is the expected state: $2^{56.68}$ iterations is $5.4\%$
+of $2^{60.9}$, and the probability of no collision after a fraction
+$c$ of the expected work is about $\exp(-\pi c^2/4)$, here $0.998$.
+Collection is paused, not finished: every slot's checkpoint and the
+corpus are intact, and a worker that resumes a slot continues its
+walks from the checkpoint.
 
 \begin{table}[t]
 \centering
 \small
-\caption{Campaign state, 2026-09-25 05:05~UTC. The pooled ratio is
-  below $2^{28.41}$ because the corpus still holds weight-34 records
-  from the first two slots; the mean length of walks that ended is
-  $2^{28.34}$.}
+\caption{Campaign state at the audited snapshot of 2026-09-25
+  05:05~UTC and at the published feed of 2026-10-10 15:42~UTC. The pooled iterations-per-point ratio is below $2^{28.41}$, partly
+  because the corpus still holds weight-34 records from the first two
+  slots; the mean length of walks that ended by 2026-09-25 is
+  $2^{28.34}$. Sustained production peaked at about $842{,}000$ points
+  per hour on 2026-09-23, about $83$~B it/s.}
 \label{tab:state}
-\begin{tabular}{@{}lr@{}}
+\begin{tabular}{@{}lrr@{}}
 \toprule
-distinguished points stored & $367{,}123{,}410$ \\
-iterations (checkpointed) & $93{,}791{,}688{,}142{,}422{,}016 = 2^{56.38}$ \\
-share of expected work & $4.4\%$ \\
-collisions & 0 \\
-duplicate re-reports dropped & $9{,}953{,}494$ \\
-slots / walking / off-weight & 195 / 2 / 7 \\
-points in the last 24~h / last hour & $741{,}048$ / $40{,}149$ \\
-walk rate over the last 54~min & $3.65$~B it/s \\
-peak points per hour (2026-09-23) & about $842{,}000$ ($\approx83$~B it/s) \\
+ & 2026-09-25 & 2026-10-10 \\
+\midrule
+distinguished points stored & $367{,}123{,}410$ & $485{,}528{,}850$ \\
+iterations (checkpointed) & $2^{56.38}$ & $2^{56.68}$ \\
+share of expected work & $4.4\%$ & $5.4\%$ \\
+collisions & 0 & 0 \\
+duplicate re-reports dropped & $9{,}953{,}494$ & $14{,}153{,}833$ \\
+slots / walking / off-weight & 195 / 2 / 7 & 227 / 0 / 7 \\
+points in the last 24~h & $741{,}048$ & 0 \\
+walk rate over the last hour & $3.65$~B it/s & 0 \\
+last point stored & --- & 2026-10-07 14:41 \\
 \bottomrule
 \end{tabular}
 \end{table}
