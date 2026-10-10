@@ -48,6 +48,10 @@ verifier-only fixture. `HELDOUT_FROZEN.json` and `heldout_workload_*.json` bind
 the six paired rank/rho seeds, exact Q, source/binary/verifier digests, and
 resource envelope. `run_heldout.py` checks that they have been committed and
 pushed before timing the 18 process cells.
+`HELDOUT_RESULT.md` and `HELDOUT_ANALYSIS.json` contain the verified
+six-seed comparison and advancement-gate decision. The median paired probe
+reduction was 5.189% and the median paired cold ratio was 1.020, so the
+400,000-probe restart did not advance under the frozen gate.
 
 The final cap=1 n13 control in `controls/n13_cap1_seed12/` reached rank 2/2 in five
 attempts, three of which were capped. Its trace accounts for all five probes;
