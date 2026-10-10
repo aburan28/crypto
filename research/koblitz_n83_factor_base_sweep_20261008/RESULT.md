@@ -185,6 +185,14 @@ Generic-versus-wide arithmetic replay uses a separate process on the same host a
 
 ## Remaining comparison work
 
+The refreshed current-main source audit in `SOLVER_GATES.md` pins the
+2026-10-09 revision, six dry-merge content conflicts, and the width/domain
+limits of candidate WDSat, FES, higher-arity, large-prime and sparse-LA
+modules. Its small-curve solve-cost finding reinforces the need to measure
+solver effort and complete cold time for each retained N83 base; it does not
+select a winner. `S5_CAPACITY.md` now classifies a guarded K=64 four-sum run
+as a capacity/correctness gate under the stated one-row query model.
+
 The imported primary base still needs an end-to-end solver run with an audited wide-field relation oracle, full subgroup-modulus handling, natural rank, verified column logarithms and target extraction. The new wide large-prime matrix bridge covers row-to-log algebra on checked fixtures, but has no retained N83 partial-relation producer or rank receipt. WDSat sealed ANF capacities, FES full-system verification, cofactor-aware subspace lifting and domain-preserving symmetry remain explicit gates in `protocol.json`.
 
 The generic relation driver now uses full-width incremental echelon form for

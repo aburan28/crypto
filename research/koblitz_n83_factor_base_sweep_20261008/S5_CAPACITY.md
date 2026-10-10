@@ -128,9 +128,14 @@ and independently replays the resulting row on the original curve. A small
 public fixture verifies sign, phase, high-limb coefficients, malformed labels,
 and insertion into the exact wide rank tracker. This is a correctness gate;
 it has not produced a retained N83 relation or measured natural rank.
-The smallest useful next empirical gate is a retained K=64 primary probe
-through the new supervisor, followed by natural relation accumulation and
-rank measurement;
-K=1,182 and larger need an explicit memory strategy before construction.
+The guarded retained K=64 primary probe is a capacity and correctness gate.
+Under the separate uniform-query, one-full-smooth-row model in
+`RANK_QUERY_SCREEN.md`, an m=4 K=64 oracle needs at least 145,677,800,576
+queries before its first-moment bound can even permit a 50% full-rank chance.
+This necessary condition does not cover multiple rows per query, selected
+targets or large-prime cycles. A plausible rank and runtime comparison first
+needs a source-pinned full-width higher-arity or partial-relation producer,
+natural yield and rank measurements, and complete phase accounting.
+K=1,182 and larger also need an explicit memory strategy before construction.
 The balanced-S5 SAT example is an alternative source of four-summand algebra
 and domain constraints, not a directly executable N83 backend.

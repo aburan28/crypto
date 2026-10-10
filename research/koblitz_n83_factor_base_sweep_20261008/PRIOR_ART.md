@@ -1,6 +1,6 @@
 # Source and literature inventory
 
-Inspected source revision: `c70c32d486a3ac7531fe27f7193d9f09caa58344`. The isolated native baseline is recorded in RESULT.md. Every capability below describes source, not a completed degree-83 experiment.
+Initial inspected source revision: `c70c32d486a3ac7531fe27f7193d9f09caa58344`; refreshed `origin/main` revision: `09750b8108b2cb1e99bac24069618461b3d7936e` (2026-10-09). The isolated native baseline is recorded in RESULT.md. Every capability below describes source, not a completed degree-83 experiment. `SOLVER_GATES.md` records the current-main applicability audit and exact integration conflicts.
 
 A follow-up source audit on study-branch revision `c26ae1e3953823436cb0143d8eb77261cd784783` checked the balanced-S5 and wide compact-orbit implementations. `S5_CAPACITY.md` records their exact degree, subgroup-width, polynomial-basis and retained-object transfer gates.
 
@@ -9,11 +9,13 @@ A follow-up source audit on study-branch revision `c26ae1e3953823436cb0143d8eb77
 | Source | Existing work | Consequence for this design |
 | --- | --- | --- |
 | `src/cryptanalysis/koblitz_index_calculus.rs` | Frobenius-divisor bases, explicit orbit domains, SAT decomposition, wide arithmetic, pinned degree-83 curve constructors and modular LA | Separate the invariant-subspace and compact-orbit families; bind exact representations and subgroup order |
-| `src/cryptanalysis/koblitz_factor_base_search.rs` | Yield/coverage scoring and bounded candidate search | Avoid selecting a base by yield alone; include rank, full preprocessing and holdout costs |
+| `src/cryptanalysis/koblitz_factor_base_search.rs` | Yield/coverage search plus an optional measured Gröbner solve-cost selector for invariant linear subspaces | The current-main note records a 22.41× *solver-stage word-XOR* gap between trials- and solve-cost-selected bases over 72 complete small-curve runs; its `measure_solve_cost` rejects explicit-orbit subsets, so use the principle but measure the N83 domain and total cold cost separately |
 | `src/cryptanalysis/koblitz_symmetrised.rs` | Rational-torsion coordinates and symmetrized algebraic systems | Symmetry is a domain/model change with exceptional-point and lifting obligations |
 | `src/cryptanalysis/koblitz_groebner.rs` | F4, splitting heuristics and batch split bits | Freeze branch policies, degree/node/memory bounds and UNKNOWN outcomes |
 | `src/cryptanalysis/wdsat_oracle.rs` | ANF export, capacity derivation and external WDSat model checks | Bind source ANF and binary/configuration; never silently truncate allocations |
 | `src/cryptanalysis/mq_fes.rs` | Moebius, Monica and derivative Gray enumeration, packed-equation limits | Degree-83 equation representation and full verification are explicit adapter gates |
+| `src/cryptanalysis/semaev_higher.rs` | Prime-field short-Weierstrass S3–S6 resultants | Does not provide the characteristic-two Koblitz higher-arity equations needed for this N83 arm |
+| `src/cryptanalysis/large_prime_filter.rs` and `src/cryptanalysis/koblitz_sparse_la.rs` | Generic large-prime elimination and sparse modular LA over `u64` residues | Their subgroup-modulus width is below the primary arm's 81 bits; the study-local wide row bridge still needs natural partials and rank |
 | `src/cryptanalysis/ecbench_large_prime.rs` | Exact zero/one/two-large-prime binary IC with single-word field/point/order types | The idea is implemented, but this adapter cannot be assumed to cover degree 83 |
 | `src/cryptanalysis/ecbench/` and `docs/ecbench/README.md` | Native matched workloads, exclusive phase accounting, L0/L2 grades, replay and paired intervals | Required integration path for future complete comparisons; construction data is a stage diagnostic |
 | `examples/koblitz_orbit_dlp_fast.rs` | Compact signed-Frobenius bases, S3 four-sum root index, parallel guided rank | Existing online-after-setup results do not identify the minimum cold runtime |

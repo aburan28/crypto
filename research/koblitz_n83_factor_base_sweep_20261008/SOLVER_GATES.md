@@ -23,3 +23,44 @@ The factored correspondence uses `3l²` pair-product AND gates, `3(2l-1)` shared
 The next runnable gate is a bounded, source-pinned construction of the factored N83 S4 model with the retained K=64 coordinate domain. `build_union_s4_encoding` now shares the exact domain and trace construction with the solver, and `sat_capacity_supervisor.py` prepares a Linux worker in a no-network Docker container with a hard cgroup memory ceiling, zero swap and a wall deadline. Its success, wall-cap and memory-cap paths passed synthetic guard checks (`verification/capacity-guard-smoke/`); no retained N83 model was constructed in those checks. The real gate still needs an authorized run and a retained-base construction receipt. Any subsequent solve needs independent scalar S4 and group checks of lifted models, with `UNKNOWN` on budget exhaustion. Only then can this experimental encoding enter a versioned sweep and a matched one-target cold comparison. WDSat and FES need wide adapters and original-system validation; the large-prime arm needs a source-pinned partial producer and measured graph/rank behavior. Spending more time on the existing exact enumerator alone would not rank factor bases.
 
 The local Docker server exposed 7,529,156,608 bytes of VM memory at the guard check, less than the 48 GiB macOS host. The static x86-64 Linux worker ran inside an arm64 container under emulation. Its future construction wall time is therefore only a resource-capacity diagnostic; it cannot be used as a matched macOS index-calculus timing or a factor-base ranking.
+
+## Current-main applicability audit (2026-10-09)
+
+The refreshed `origin/main` source snapshot is
+`09750b8108b2cb1e99bac24069618461b3d7936e`; the isolated study branch
+was `e276b4f2dc3da51bd454c5a490ff0cde60f0ae97`. This is a source audit,
+not an N83 solver measurement. The main-branch
+`koblitz_factor_base_search.rs::measure_solve_cost` explicitly accepts only
+`FactorBaseDomain::LinearSubspace`: its Weil-restricted solver prices the
+entire span, not an explicit orbit subset. The main-branch
+`RESEARCH_FACTOR_BASE_SOLVE_COST.md` §6 reports a 22.41× difference in
+Gröbner word-XOR cost between trials- and solve-cost-selected bases across
+72 complete, verified runs on K_1/2^15 at m=2. That is a solver-stage
+counter on a different domain and cannot be imported as a cold-runtime ratio
+or as a score for the stored N83 bases.
+
+The WDSat exporter calls `build_decomposition_system_reusing` and converts
+its single-word `F2BoolPoly` to ANF; its model lift stops above 64 bits.
+`mq_fes.rs` accepts quadratic systems with at most 24 variables and 64
+equations for its Möbius path, and refuses chained cubic m>=3 Semaev systems.
+`semaev_higher.rs` handles prime-field short-Weierstrass curves, not the
+binary Koblitz curve. `large_prime_filter.rs` stores modular coefficients in
+`u64`, and `koblitz_sparse_la.rs::modulus_supported` permits at most 63-bit
+orders; the primary order is 81 bits. These modules supply design prior art,
+but no directly executable N83 explicit-orbit higher-arity/large-prime/sparse
+pipeline. The study-local BigUint row adapter supports checked algebra and
+small fixtures; it still lacks a retained N83 partial producer.
+
+A dry `git merge-tree --write-tree --name-only --messages` of those two pinned
+revisions identified content conflicts in `Cargo.toml`,
+`src/bin/ic/experiment.rs`, `src/cryptanalysis/binary_semaev_s4.rs`,
+`src/cryptanalysis/koblitz_index_calculus.rs`, `src/cryptanalysis/mod.rs` and
+`src/cryptanalysis/semaev_sat.rs`. It did not edit the worktree. A deliberate
+integration must resolve and retest those contracts before importing a
+current-main backend. The next runtime-relevant implementation gate is a
+full-width producer for m>=5 or verified partial relations, with a complete
+finite-base model and independent group replay. A guarded K=64 four-sum
+probe remains useful for capacity and correctness, but the one-row uniform
+rank screen in `RANK_QUERY_SCREEN.md` rules out treating it as a likely
+full-rank comparison within a short pilot. This is a necessary-condition
+screen for that oracle model, not a lower bound on every IC algorithm.
