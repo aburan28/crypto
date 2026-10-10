@@ -20,7 +20,8 @@ def sha(raw):
 def main():
     raw_ledger = (RUN / "raw.jsonl").read_bytes()
     rows = [json.loads(line) for line in raw_ledger.splitlines()]
-    assert len(rows) == 16
+    assert len(rows) == 3
+    assert rows[-1]["error"] == "operator_stop_after_prior_memory_envelope_breach"
     names = set()
     archive_buffer = io.BytesIO()
     with tarfile.open(fileobj=archive_buffer, mode="w") as archive:
@@ -42,11 +43,13 @@ def main():
             info.mtime = 0
             archive.addfile(info, io.BytesIO(raw))
     LOCAL.mkdir(parents=True, exist_ok=True)
-    (LOCAL / "raw_paired16.jsonl.gz").write_bytes(gzip.compress(raw_ledger, mtime=0))
+    (LOCAL / "raw_partial3.jsonl.gz").write_bytes(gzip.compress(raw_ledger, mtime=0))
     (LOCAL / "raw_reports.tar.gz").write_bytes(gzip.compress(archive_buffer.getvalue(), mtime=0))
     host = json.loads((RUN / "host.json").read_bytes())
     assert host["host_exclusive_partition_receipt"] is None
     (LOCAL / "host.json").write_text(json.dumps(host, indent=2, sort_keys=True) + "\n")
+    (LOCAL / "runner_log.txt").write_bytes((RUN.parent / (RUN.name + ".log")).read_bytes())
+    (LOCAL / "runner_exit.txt").write_bytes((RUN.parent / (RUN.name + ".exit")).read_bytes())
     print(json.dumps({
         "rows": len(rows),
         "raw_reports": len(names),

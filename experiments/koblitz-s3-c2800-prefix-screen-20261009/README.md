@@ -1,5 +1,18 @@
 # Fresh N53 C1200/C2800 prefix screen
 
+The C2800 arm completed T149 with a verified scalar, but its measured
+whole-process peak RSS was **36,839,751,680 bytes**, exceeding the frozen
+32 GiB envelope by **2,480,013,312 bytes**. The paired C1200 run peaked at
+16,147,365,888 bytes. Both arms used **374** target S3 calls on T149; its
+single-pair local online ratio was **0.638×**. The resource gate was already
+false, so the panel was stopped during the next C2800 run rather than
+continuing fourteen more expensive launches. T150 expanded is preserved as
+an explicit interrupted row. The aggregate screen call and online ratios
+remain **unknown**, and the C2800 configuration does not advance under this
+memory envelope. The earlier T025 feasibility run peaked at 30,260,428,800
+bytes; the separate per-run receipts show why a single memory control was
+insufficient to qualify this panel.
+
 [`SCREEN_FREEZE.json`](SCREEN_FREEZE.json) fixes eight previously unused
 one-target public points T149–T156. Each point is paired between the native
 C1200 state order and the C2800 root table with an exact embedded C1200
@@ -34,6 +47,18 @@ The runner verifies candidate/workload hashes, source/binary identities,
 public points, full-rank preparation, table and factor-base identities,
 search policy, online phase sum, and independently replayed scalars. Its
 append-only ledger retains failed rows and complete raw reports. On
-completion, [`preserve_screen.py`](preserve_screen.py) archives all rows and
-available raw reports, and [`analyze.py`](analyze.py) checks pairing, report
-digests, scalar results, resources, and the frozen advancement gate.
+the resource stop, [`preserve_screen.py`](preserve_screen.py) archived the
+three started rows and available raw reports.
+[`analyze_resource_stop.py`](analyze_resource_stop.py) checks their identities,
+pairing, report hashes, scalar results, peak RSS, runner exit, and the stopped
+gate to regenerate [`analysis.json`](analysis.json). The decompressed ledger
+SHA-256 is
+`c45d48803188adac2e276d79e0cfe81c1c71e32880e98489f4843d6b6e0ff1ca`;
+the raw-report archive SHA-256 is
+`421694c939a2cb036a50b59f3524bf9b3637a1bae13167960589396559d59708`.
+
+The next candidate should reduce the C2800 root table's slot payload before
+another fresh-target panel. The current table uses 13 bytes per slot across
+1,073,741,824 slots; an 8-byte packed slot would save **5,368,709,120
+payload bytes** if it preserves the exact key/value and collision semantics.
+This is a storage calculation, not a measured peak-RSS or online gain.
