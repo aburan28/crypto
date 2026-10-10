@@ -64,3 +64,41 @@ probe remains useful for capacity and correctness, but the one-row uniform
 rank screen in `RANK_QUERY_SCREEN.md` rules out treating it as a likely
 full-rank comparison within a short pilot. This is a necessary-condition
 screen for that oracle model, not a lower bound on every IC algorithm.
+
+### Refreshed upstream and semantic merge gate (2026-10-09)
+
+At refreshed `origin/main` `416dffe827704cb8b9ee5e61daa4bb3b46cce763`,
+the Git blobs for `wdsat_oracle.rs`, `mq_fes.rs`, `mq_monica.rs`,
+`ecbench_large_prime.rs`, `koblitz_index_calculus.rs`,
+`koblitz_factor_base_search.rs`, and `koblitz_sparse_la.rs` are byte-identical
+to the `09750b8` snapshot audited above. The width and system-shape gates in
+that audit therefore still apply. The current main driver has WDSat,
+MQ-FES, Crossbred and batched relation-attempt branches; their presence on
+main does not make them executable on this isolated study branch or establish
+N83 throughput.
+
+An actual no-commit merge into study-branch `f1a154026` confirmed six content
+conflicts: `Cargo.toml`, `src/bin/ic/experiment.rs`,
+`src/cryptanalysis/binary_semaev_s4.rs`,
+`src/cryptanalysis/koblitz_index_calculus.rs`, `src/cryptanalysis/mod.rs`, and
+`src/cryptanalysis/semaev_sat.rs`. The main driver changed by 16,005 insertions
+and 2,837 deletions relative to the merge base, while the study driver changed
+by 854 insertions and 85 deletions. Git aligned a moved decomposition block
+twice, producing duplicate `groebner_decompose` and SAT definitions in the
+unresolved file. Applying the study driver's patch over the main file left 33
+of 51 hunks rejected. These are source-integration diagnostics, not timings or
+solver verdicts. The merge was aborted and the study branch was restored clean.
+
+The integration must use the current main driver as the structural base and
+port the study changes by contract: exact multi-limb point identities and
+subgroup coefficients; `RelationSolver`/`WideRankTracker` rank and column-log
+gates; the guarded five- and six-summand `ChainedS3` strategy; then the
+S3-bound `primary-chain-cold` adapter and its source/input supervisor. Main's
+coordinate-domain trie already uses `u128` codes, so its 83-bit paths should
+be retained and checked against distinct coordinates that share their low
+64 bits. WDSat, MQ-FES, Crossbred and batched attempts must remain reachable
+after adding `ChainedS3`. A merged binary needs a fresh source hash, Linux
+build and startup receipt, release library and touched-example tests, the
+study and boundary Python suites, and independent replay before any N83
+backend or runtime claim. This source integration uses no part of the
+exhausted one-hour N83 experimental allowance.
