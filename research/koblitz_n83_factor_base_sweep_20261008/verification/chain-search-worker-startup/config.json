@@ -1,0 +1,44 @@
+{
+  "binary": "/private/tmp/n83-chain-search-linux-target/x86_64-unknown-linux-musl/release/examples/koblitz_n83_factor_base_export",
+  "binary_sha256": "18d9c7455c1bb683b6011e883c5e1f25806b6670e0e7cb8683b35f6dde042642",
+  "columns": 64,
+  "conflict_budget": 10000,
+  "container_image": "python:3.11-slim",
+  "container_image_id": "sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce",
+  "container_name": "n83-chain-search-30a31f875acc4695",
+  "cpu_limit": 1.0,
+  "fixture_dir": "/private/tmp/n83-chain-search-startup-20261009/fixtures",
+  "fixture_sha256": {
+    "probe-corpus.json": "72ee0e165afdd8e56e27100770b885fe203b2dcc654c39af4df80b87ef8a7f63",
+    "probe-validation.json": "72ee0e165afdd8e56e27100770b885fe203b2dcc654c39af4df80b87ef8a7f63"
+  },
+  "max_domain_clauses": 1000000,
+  "max_models": 1,
+  "max_trials": 0,
+  "max_variables": 100000,
+  "memory_cgroup_limit_bytes": 268435456,
+  "memory_cgroup_swap_limit_bytes": 0,
+  "panel_dir": "/private/tmp/n83-chain-search-startup-20261009/empty-panel",
+  "panel_sha256": {
+    "manifest.json": "72ee0e165afdd8e56e27100770b885fe203b2dcc654c39af4df80b87ef8a7f63",
+    "replay.json": "72ee0e165afdd8e56e27100770b885fe203b2dcc654c39af4df80b87ef8a7f63",
+    "upload-receipt.json": "72ee0e165afdd8e56e27100770b885fe203b2dcc654c39af4df80b87ef8a7f63"
+  },
+  "policy": "public_x_hash",
+  "schema": "n83.chain-s3-search-config/v1",
+  "seed": 2026100801,
+  "selected_best_total_runtime": null,
+  "source_commit": "7eba91dd46661a2e035c6fe1f5eb15a2e09ba7fa",
+  "source_sha256": {
+    "attestation.json": "dc35c20b6249397966c9b2011922a1172110422e1e457ffff5016a3a33b9afee",
+    "examples/koblitz_n83_factor_base_export.rs": "da9e6db9b18f394ed615eb54c4281582229c9f9a418dbd0048f1bf874fb869b3",
+    "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs": "b46604bfcad3c0651aace71c7604177b79286c741de972f68dcfd8a2028d0aa5",
+    "research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json": "7526b6218dfe0b074368901f3869ddf4a978cb0bacffe8654056056700f8a972",
+    "src/cryptanalysis/binary_semaev_chain_sat.rs": "e0007c6f40a0e9724a5c4c18cab9d3db29f451872485f5d3719b3703cdb43006",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "b693e1859e7286b14b1dc79a955e5a550c2005ee91e77595fb4449a1700a2121"
+  },
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "summands": 5,
+  "wall_seconds": 60.0,
+  "worker_wall_seconds": 60
+}
