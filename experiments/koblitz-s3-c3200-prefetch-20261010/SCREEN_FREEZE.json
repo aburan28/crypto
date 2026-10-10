@@ -1,0 +1,179 @@
+{
+  "advance_online_geomean_ratio_min": "2.0",
+  "analyzer_sha256": "4d92f9fd84624064ffb1cb50f5609c1b3818288ccc225a4e57acbecd75320cef",
+  "arms": {
+    "baseline": {
+      "binary_sha256": "217d6f5218674da4be03d1a4f77aae79314538c44aa5257dd3dc10357ed16405",
+      "candidate_id": "IC1N53Ckb1fb339200PDP4rootRCsampleLAgaussTDdirectISO0h0e595bd6143a",
+      "candidate_manifest_relative": "experiments/koblitz-s3-c3200-projective-20261010/identities/candidates/IC1N53Ckb1fb339200PDP4rootRCsampleLAgaussTDdirectISO0h0e595bd6143a.json",
+      "candidate_manifest_sha256": "7e14da65af970cf9e335262b02976fbdcb0ae5a6397257922da2feec5d7867f4",
+      "columns": 3200,
+      "factor_base_digest": "b059162fd5fd7235398d7f91be3123fe3adbc9c27bcdfa8627aa3ef0125f139e",
+      "factor_base_points": 339200,
+      "prepare_rank": 3200,
+      "report_target_lookup_prefetch_policy": null,
+      "root_table_capacity_policy": "one_state_per_shard_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_layout": "packed_8_byte_mixed_key_remainder_displacement11_state_index30_exact_hit_reconstruction",
+      "root_table_slots": 1073741824,
+      "source_relative": "examples/s3_partial_prepared_fullrank_c3200projective_targetspan.rs",
+      "source_sha256": "e465572c3e63fe69d6aeb5c1ab0b8a1a3730532cb250707fe86d772c76771b6d",
+      "target_query_batch_width": 8,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c3200"
+    },
+    "candidate": {
+      "binary_sha256": "54644a12e05ab3212dbad3dbf723f66dc913d1fb66bdaec135128570abb3dfae",
+      "candidate_id": "IC1N53Ckb1fb339200PDP4rootRCsampleLAgaussTDdirectISO0h35d70065259b",
+      "candidate_manifest_relative": "experiments/koblitz-s3-c3200-prefetch-20261010/identities/candidates/IC1N53Ckb1fb339200PDP4rootRCsampleLAgaussTDdirectISO0h35d70065259b.json",
+      "candidate_manifest_sha256": "b52684f0dfaa88f7b359a55829d59fbf311cec60817b87320bbe2e07c42d8974",
+      "columns": 3200,
+      "factor_base_digest": "b059162fd5fd7235398d7f91be3123fe3adbc9c27bcdfa8627aa3ef0125f139e",
+      "factor_base_points": 339200,
+      "prepare_rank": 3200,
+      "report_target_lookup_prefetch_policy": "prefetch_all_mixed_quotient_home_slots_after_eight_state_root_batch_then_original_lookup_order",
+      "root_table_capacity_policy": "one_state_per_shard_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_layout": "packed_8_byte_mixed_key_remainder_displacement11_state_index30_exact_hit_reconstruction",
+      "root_table_slots": 1073741824,
+      "source_relative": "examples/s3_partial_prepared_fullrank_c3200projective_prefetch_targetspan.rs",
+      "source_sha256": "56ed0e2167c9b5b1cc389b4d95ed7887f65bf17273d68911b9924ee4167008ac",
+      "target_query_batch_width": 8,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c3200"
+    }
+  },
+  "comparison_variable": "batch_home_slot_prefetch_before_ordered_exact_mixed_quotient_lookups",
+  "control_freeze_sha256": "bb28362a1a6c697da6e837d3c761604e8f3ca8eb5accf824a285f09f83732b26",
+  "control_receipt_sha256": "04b1012aadf05b5b95af086b15af9a0b3a56e7edd5ccc8c1b302fa2dc9610446",
+  "control_sage_replay_sha256": "4659b4495b6b22a30c8baa97badf9a68b1e71c444fd31c3df0ceedfe37b91d86",
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c3200_prefetch_pair_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "paired_runner_sha256": "ff43baf929453dce037a5d643a45d73f7f74085763e2baee8e781c2f6e7aefc9",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "reference_screen_freeze_sha256": "99345285e9100fe869745c3cfb4ab7b5582edbe39c8009fa75e4d88d4f266667",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 1,
+  "run_order": "baseline_candidate_even_target_candidate_baseline_odd_target",
+  "sage_replay_source_sha256": "e035177176d521342027bc7241147cd430ee3a13ae27be8d36966517f6d0b3df",
+  "single_runner_sha256": "a98a410cd43ad15401cf5bbda2cbb5daf7e3a001b40619dcb7b97152aca7edbe",
+  "target_labels": [
+    "T173",
+    "T174",
+    "T175",
+    "T176",
+    "T177",
+    "T178",
+    "T179",
+    "T180"
+  ],
+  "target_workers": 1,
+  "targets": [
+    {
+      "fixture_scalar": 1473096451027,
+      "label": "T173",
+      "point_file_relative": "holdout/n53/T173/public_target.json",
+      "point_sha256": "5fb4898698fa7a9627e76de8a6e5158e06428153436c56d17f4b6dfd88831819",
+      "public_point": [
+        5274535902632793,
+        6873984068499590
+      ],
+      "workload_id": "ec53420ad4a1",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/Wec53420ad4a1.json",
+      "workload_manifest_sha256": "ba6689e5786bf639fdeb26b4c8b4dfa326c04e6e882f5683b0bdbae78d81a797"
+    },
+    {
+      "fixture_scalar": 2740220286929,
+      "label": "T174",
+      "point_file_relative": "holdout/n53/T174/public_target.json",
+      "point_sha256": "e502c35b658d57fd44c23c0c5e38cf14e4889022b2d64cca578a7f94d40c2349",
+      "public_point": [
+        8887617207264588,
+        4762042817929182
+      ],
+      "workload_id": "118e82758f8d",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W118e82758f8d.json",
+      "workload_manifest_sha256": "6446187870f98b1e1582bf47a8ee6beb7b196c4950bcc9236151f1c7b907b723"
+    },
+    {
+      "fixture_scalar": 15579804495200,
+      "label": "T175",
+      "point_file_relative": "holdout/n53/T175/public_target.json",
+      "point_sha256": "bfcbbf7aabe5c0f3e466a8115746c1adf7916ad524239946f7f1d6815109879c",
+      "public_point": [
+        7103420503038145,
+        6610862874528765
+      ],
+      "workload_id": "e260933bd7d6",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/We260933bd7d6.json",
+      "workload_manifest_sha256": "92f4baae4a8d41133e3c7d5ec40f9dfa1043abc062ffcb4ecb7ad1428b39cd2a"
+    },
+    {
+      "fixture_scalar": 13290020959051,
+      "label": "T176",
+      "point_file_relative": "holdout/n53/T176/public_target.json",
+      "point_sha256": "6540e9c9a2b3bd9f0a97879d9fa1d4126d7490d4eae908380beec9068027a482",
+      "public_point": [
+        3514884543098279,
+        3225770833936652
+      ],
+      "workload_id": "794d954647c5",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W794d954647c5.json",
+      "workload_manifest_sha256": "68ff98ffe840dd4358ef746a6fca02c83fcb2efaf5732e1d8da7fb49fb3e9d82"
+    },
+    {
+      "fixture_scalar": 20444457167534,
+      "label": "T177",
+      "point_file_relative": "holdout/n53/T177/public_target.json",
+      "point_sha256": "7adfd48cc6118d27a8845f10add00a7a1fd9eb2596e07705d5b97a00bc540653",
+      "public_point": [
+        6696685824226803,
+        3184055120285178
+      ],
+      "workload_id": "58c4f55a8b14",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W58c4f55a8b14.json",
+      "workload_manifest_sha256": "fa6cb2361ee6630ffe7d26dc5a2878a88ce47258a5a573bd5e20e6873c962ff4"
+    },
+    {
+      "fixture_scalar": 768333703440,
+      "label": "T178",
+      "point_file_relative": "holdout/n53/T178/public_target.json",
+      "point_sha256": "c0a50051e4acb83f19e38f2df400d1d143c8a9688d9bd3617a06d5bc7e2e621e",
+      "public_point": [
+        6003618802027238,
+        8666597494844433
+      ],
+      "workload_id": "5ea0f5e17ad7",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W5ea0f5e17ad7.json",
+      "workload_manifest_sha256": "54a29c59da0318fc2992ea2035b6e188bb95045fc7fab3206d06033915c3b1d9"
+    },
+    {
+      "fixture_scalar": 6477411547479,
+      "label": "T179",
+      "point_file_relative": "holdout/n53/T179/public_target.json",
+      "point_sha256": "64773abc149aba4e8e6dddd7e1b2cce597f3c41388e6c44ab119fa35d7fe909d",
+      "public_point": [
+        2402688465314504,
+        2696564400539624
+      ],
+      "workload_id": "858f78853f8c",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W858f78853f8c.json",
+      "workload_manifest_sha256": "c5bd111551853ac436ebc313a07482e3262c05e8419bd2abbf86cd43db706b89"
+    },
+    {
+      "fixture_scalar": 10294877514183,
+      "label": "T180",
+      "point_file_relative": "holdout/n53/T180/public_target.json",
+      "point_sha256": "7ffcb4c8e814aedbf4e30b7fb09d7554058e6a53716861734d96541d420f26a1",
+      "public_point": [
+        8104225384054590,
+        4485252222981061
+      ],
+      "workload_id": "664fc0a3fe77",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W664fc0a3fe77.json",
+      "workload_manifest_sha256": "80366bb3e2c5e2ee2cc060badc7916cd81ccbc5731dd64a4027caf4e2081ab89"
+    }
+  ],
+  "timeout_seconds_per_run": 600
+}
