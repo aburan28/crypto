@@ -35,7 +35,7 @@ not an N83 solver measurement. The main-branch
 entire span, not an explicit orbit subset. The main-branch
 `RESEARCH_FACTOR_BASE_SOLVE_COST.md` §6 reports a 22.41× difference in
 Gröbner word-XOR cost between trials- and solve-cost-selected bases across
-72 complete, verified runs on K_1/2^15 at m=2. That is a solver-stage
+72 complete, verified runs on `icv1-f2m15-t275-b7f03703` at m=2. That is a solver-stage
 counter on a different domain and cannot be imported as a cold-runtime ratio
 or as a score for the stored N83 bases.
 
