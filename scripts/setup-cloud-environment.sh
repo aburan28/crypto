@@ -31,7 +31,7 @@ packages=(
   build-essential ca-certificates clang cmake curl git jq
   libgmp-dev libmpfr-dev libpq-dev libssl-dev pkg-config ripgrep
   python3 python3-pip python3-venv python3-sympy python3-pytest
-  sagemath pari-gp
+  sagemath pari-gp shellcheck git-lfs
 )
 if ! command -v go >/dev/null 2>&1; then
   packages+=(golang-go)
@@ -54,11 +54,15 @@ if ! command -v cargo >/dev/null 2>&1; then
     sh -s -- -y --profile minimal
   export PATH="$HOME/.cargo/bin:$PATH"
 fi
+if command -v rustup >/dev/null 2>&1; then
+  rustup component add rustfmt clippy
+fi
 
 if ! command -v conductor >/dev/null 2>&1 ||
    ! command -v conductor-mcp >/dev/null 2>&1 ||
    ! command -v conductord >/dev/null 2>&1; then
-  GOBIN="$bin_dir" GOFLAGS=-modcacherw     go install "github.com/aburan28/conductor/cmd/...@${CONDUCTOR_VERSION:-main}"
+  GOBIN="$bin_dir" GOFLAGS=-modcacherw go install \
+    "github.com/aburan28/conductor/cmd/...@${CONDUCTOR_VERSION:-main}"
 fi
 
 if ! command -v cairn >/dev/null 2>&1; then
