@@ -33,6 +33,8 @@ The executable is a local build artifact; the source and lockfile are tracked.
 caps each process at 60 seconds and 16 GiB observed peak RSS, and preserves
 the first result of every cell. It writes each process's raw files and
 independent rank/target replay receipts under `runs/pilot/`.
+`PILOT_RESULT.md` and `PILOT_ANALYSIS.json` give the paired audit and the
+preregistered 400,000-probe cap selection for the held-out step.
 
 The final cap=1 n13 control in `controls/n13_cap1_seed12/` reached rank 2/2 in five
 attempts, three of which were capped. Its trace accounts for all five probes;
