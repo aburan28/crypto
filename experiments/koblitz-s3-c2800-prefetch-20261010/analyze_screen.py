@@ -12,6 +12,8 @@ import random
 
 HERE = Path(__file__).resolve().parent
 FREEZE = HERE / "SCREEN_FREEZE.json"
+PHASES = ("target_query", "target_pdp_charged", "target_relation_check",
+          "target_descent", "target_recovery_check")
 
 
 def sha(raw: bytes) -> str:
@@ -102,8 +104,14 @@ def analyze(run_dir: Path, output: Path) -> dict:
             "prefetch_online_ms": prefetch["target_online_ms"],
             "baseline_pdp_charged_ms": baseline["target_pdp_charged_ms"],
             "prefetch_pdp_charged_ms": prefetch["target_pdp_charged_ms"],
+            "baseline_online_phases_ms": {key: a["timing_ms"][key] for key in PHASES},
+            "prefetch_online_phases_ms": {key: b["timing_ms"][key] for key in PHASES},
             "baseline_s3_calls": baseline["target_s3_calls"],
             "prefetch_s3_calls": prefetch["target_s3_calls"],
+            "baseline_pdp_us_per_s3_call":
+                1000 * baseline["target_pdp_charged_ms"] / baseline["target_s3_calls"],
+            "prefetch_pdp_us_per_s3_call":
+                1000 * prefetch["target_pdp_charged_ms"] / prefetch["target_s3_calls"],
             "baseline_reusable_setup_ms": a["timing_ms"]["reusable_setup_total"],
             "prefetch_reusable_setup_ms": b["timing_ms"]["reusable_setup_total"],
             "baseline_peak_rss_bytes": baseline["peak_rss_bytes"],
