@@ -38,7 +38,7 @@ def main() -> None:
     import modal
 
     plan = {
-        "kind": "s3_modal_minimal_pilot_freeze_v1",
+        "kind": "s3_modal_minimal_pilot_freeze_v2",
         "build_receipt_sha256": sha(BUILD.read_bytes()),
         "public_bundle_sha256": sha(bundle.read_bytes()),
         "pilot_runner_sha256": sha((HERE / "pilot_modal.py").read_bytes()),
@@ -50,7 +50,11 @@ def main() -> None:
             Path(item["path"]).stat().st_size for item in binaries.values()),
         "modal_sdk_version": modal.__version__,
         "image": "modal.Image.debian_slim",
-        "cpu_count": 16, "memory_mib": 32768,
+        "cpu_request_physical_cores": 8,
+        "cpu_limit_physical_cores": 8,
+        "logical_execution_cpus": 16,
+        "memory_request_mib": 32768,
+        "memory_limit_mib": 32768,
         "sandbox_timeout_seconds": 1200,
         "workload_deadline_seconds": 1080,
         "minimum_run_seconds": 30,

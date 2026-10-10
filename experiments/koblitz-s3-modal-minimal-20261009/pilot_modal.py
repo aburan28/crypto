@@ -26,7 +26,7 @@ def sha(raw: bytes) -> str:
 
 def preflight() -> tuple[dict, dict, dict]:
     plan = json.loads(PLAN.read_bytes())
-    assert plan["kind"] == "s3_modal_minimal_pilot_freeze_v1"
+    assert plan["kind"] == "s3_modal_minimal_pilot_freeze_v2"
     assert plan["pilot_runner_sha256"] == sha(Path(__file__).read_bytes())
     assert plan["remote_runner_sha256"] == sha(REMOTE.read_bytes())
     assert plan["public_bundle_sha256"] == sha(BUNDLE.read_bytes())
@@ -48,7 +48,11 @@ def preflight() -> tuple[dict, dict, dict]:
     assert plan["transferred_file_count"] == 3
     assert plan["transferred_bytes"] == (sum(path.stat().st_size for path in paths.values())
                                           + BUNDLE.stat().st_size)
-    assert plan["cpu_count"] == 16 and plan["memory_mib"] == 32768
+    assert plan["cpu_request_physical_cores"] == 8
+    assert plan["cpu_limit_physical_cores"] == 8
+    assert plan["logical_execution_cpus"] == 16
+    assert plan["memory_request_mib"] == 32768
+    assert plan["memory_limit_mib"] == 32768
     assert plan["sandbox_timeout_seconds"] == 1200
     assert plan["per_run_timeout_seconds"] == 240
     assert plan["workload_deadline_seconds"] == 1080
@@ -82,6 +86,11 @@ def launch(output: Path, region: str | None) -> None:
                                    "started_unix_ns": started,
                                    "transfer_inventory": inventory,
                                    "sandbox_creation_attempts": 1,
+                                   "cpu_request_physical_cores": plan["cpu_request_physical_cores"],
+                                   "cpu_limit_physical_cores": plan["cpu_limit_physical_cores"],
+                                   "logical_execution_cpus": plan["logical_execution_cpus"],
+                                   "memory_request_mib": plan["memory_request_mib"],
+                                   "memory_limit_mib": plan["memory_limit_mib"],
                                    "sandbox_timeout_seconds": plan["sandbox_timeout_seconds"]},
                                   sort_keys=True, indent=2) + "\n")
     receipt = {"kind": "s3_modal_minimal_launch_receipt_v1",
@@ -102,7 +111,7 @@ def launch(output: Path, region: str | None) -> None:
         image = image.add_local_file(str(BUNDLE), "/opt/s3/public_bundle.json", copy=True)
         expected = {"bundle_sha256": plan["public_bundle_sha256"],
                     "binary_sha256": plan["binary_sha256"],
-                    "cpu_count": plan["cpu_count"],
+                    "logical_execution_cpus": plan["logical_execution_cpus"],
                     "workload_deadline_seconds": plan["workload_deadline_seconds"],
                     "minimum_run_seconds": plan["minimum_run_seconds"],
                     "per_run_timeout_seconds": plan["per_run_timeout_seconds"]}
@@ -111,8 +120,11 @@ def launch(output: Path, region: str | None) -> None:
             sandbox = modal.Sandbox.create(
                 "python3", "-c", REMOTE.read_text(),
                 json.dumps(expected, sort_keys=True, separators=(",", ":")),
-                app=app, image=image, cpu=plan["cpu_count"],
-                memory=plan["memory_mib"], timeout=plan["sandbox_timeout_seconds"],
+                app=app, image=image,
+                cpu=(plan["cpu_request_physical_cores"],
+                     plan["cpu_limit_physical_cores"]),
+                memory=(plan["memory_request_mib"], plan["memory_limit_mib"]),
+                timeout=plan["sandbox_timeout_seconds"],
                 region=region, block_network=plan["block_network"],
                 experimental_options={"vm_runtime": plan["vm_runtime"]})
             receipt["sandbox_id"] = sandbox.object_id
@@ -164,6 +176,12 @@ if __name__ == "__main__":
         print(json.dumps({"files": 3, "transferred_bytes": plan["transferred_bytes"],
                           "binary_sha256": plan["binary_sha256"],
                           "bundle_sha256": plan["public_bundle_sha256"],
+                          "cpu_physical_cores_request_and_limit": [
+                              plan["cpu_request_physical_cores"],
+                              plan["cpu_limit_physical_cores"]],
+                          "guest_logical_execution_cpus": plan["logical_execution_cpus"],
+                          "memory_mib_request_and_limit": [
+                              plan["memory_request_mib"], plan["memory_limit_mib"]],
                           "sandbox_timeout_seconds": plan["sandbox_timeout_seconds"],
                           "paths": {arm: str(path) for arm, path in paths.items()}},
                          sort_keys=True))

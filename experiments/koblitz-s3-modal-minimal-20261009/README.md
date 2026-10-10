@@ -45,19 +45,25 @@ repository tree, Cargo cache, Sage installation, private credentials, or
 existing result archive.
 
 [`pilot_modal.py`](pilot_modal.py) verifies a frozen transfer manifest before
-one Sandbox creation attempt. The requested envelope is 16 vCPUs, 32 GiB,
-and a 1,200-second Sandbox timeout, with a 1,080-second workload deadline and
-240-second cap per process. It blocks guest networking and terminates the
+one Sandbox creation attempt. The requested and capped allocation is eight
+physical CPU cores (16 vCPUs), with 16 logical execution CPUs selected in the
+guest, 32 GiB requested and capped memory, and a 1,200-second Sandbox
+timeout. The workload has a 1,080-second deadline and a 240-second cap per
+process. The runner blocks guest networking and terminates the
 Sandbox after retrieving its compressed raw receipt. An attempt marker is
 written before creation so an ambiguous create is never retried automatically.
-The maximum billed resource envelope at Modal's published rate is roughly
-$1.02 for the full 1,200 seconds, plus image-build or storage charges if
-applicable.
+The maximum billed CPU-and-memory envelope at [Modal's published
+rate](https://modal.com/pricing) is roughly $0.64 for the full 1,200 seconds,
+plus image-build or storage charges if applicable.
 [`PILOT_FREEZE.json`](PILOT_FREEZE.json) binds the exact 3,444,075-byte
 transfer, the build and runner hashes, the public bundle, and the resource cap.
+Its v2 resource fields correct an earlier prelaunch manifest that labeled
+Modal's physical-core request as vCPUs; no Sandbox was created under v1.
 
 The previous [source-free VM probe](../koblitz-s3-modal-host-probe-20261009/RESULT.md)
-verified guest process perf access and affinity but found no host-wide
+requested 16 physical cores and observed 32 logical CPUs. The new guest
+runner requires 16 selected logical CPUs for its eight-core request. The
+probe also verified guest process perf access and affinity but found no host-wide
 exclusive CPU partition receipt. Modal's
 [Sandbox resource guide](https://modal.com/docs/guide/sandbox-resources)
 describes CPU requests as minimum reservations with possible bursting, and

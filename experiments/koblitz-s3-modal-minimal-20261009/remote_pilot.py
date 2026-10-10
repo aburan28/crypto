@@ -318,8 +318,8 @@ def main() -> None:
         binary.chmod(0o755)
     allowed = sorted(os.sched_getaffinity(0))
     topo = topology(allowed)
-    cpus = choose_cpus(allowed, topo, expected["cpu_count"])
-    assert len(cpus) == expected["cpu_count"]
+    cpus = choose_cpus(allowed, topo, expected["logical_execution_cpus"])
+    assert len(cpus) == expected["logical_execution_cpus"]
     host = {
         "platform": platform.platform(), "cpu_model": model(),
         "cpu_count_visible": os.cpu_count(), "allowed_cpus": allowed,

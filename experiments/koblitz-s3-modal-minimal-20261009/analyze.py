@@ -17,7 +17,7 @@ BUNDLE = HERE / "public_bundle.json"
 PHASES = ("target_query", "target_pdp_charged", "target_relation_check",
           "target_descent", "target_recovery_check")
 QUALITY_CHECKS = ("verified_scalar_and_fixture", "exclusive_phase_sum",
-                  "unique_physical_cores", "whole_smt_siblings_selected",
+                  "eight_physical_cores_selected", "whole_smt_siblings_selected",
                   "observed_thread_affinity", "observed_worker_threads",
                   "one_numa_node", "numa_pages_on_selected_node",
                   "unlimited_cpu_quota", "zero_cpu_throttling",
@@ -92,7 +92,7 @@ def guest_quality(row: dict, host: dict, verified: bool) -> dict:
                   for entry in entries]
     physical = (len(selected) == 16 and all(all(part is not None for part in pair)
                                            for pair in identities)
-                and len(set(identities)) == 16)
+                and len(set(identities)) == 8)
     siblings = [cpu_list(entry.get("thread_siblings_list")) for entry in entries]
     sibling_complete = (all(siblings) and all(set(group).issubset(selected)
                                                for group in siblings)
@@ -129,7 +129,7 @@ def guest_quality(row: dict, host: dict, verified: bool) -> dict:
     checks = {
         "verified_scalar_and_fixture": verified,
         "exclusive_phase_sum": row["phase_ok"],
-        "unique_physical_cores": physical,
+        "eight_physical_cores_selected": physical,
         "whole_smt_siblings_selected": sibling_complete,
         "observed_thread_affinity": affinity,
         "observed_worker_threads": row["max_threads_seen"] >= 14,
