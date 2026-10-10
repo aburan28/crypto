@@ -1,0 +1,197 @@
+{
+  "failures": [],
+  "family": "binary",
+  "pairs": [
+    {
+      "a": 0,
+      "b_found": 72334,
+      "cofactor": 16,
+      "curves": [
+        {
+          "conductor": 1,
+          "end_evidence": "rank-2 E[ℓ] over F_{q^m}: ℓ ∤ [End : Z[π]] fails, so ℓ ∤ f_E",
+          "role": "crater",
+          "spec": {
+            "a": 0,
+            "b": 130102,
+            "group_order": 130864,
+            "gx": 80448,
+            "gy": 22841,
+            "kind": "binary_explicit",
+            "modulus": 131081,
+            "n": 17,
+            "r": 8179
+          }
+        },
+        {
+          "conductor": 17,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m}: ℓ | f_E",
+          "role": "floor",
+          "spec": {
+            "a": 0,
+            "b": 72334,
+            "group_order": 130864,
+            "gx": 128570,
+            "gy": 60190,
+            "kind": "binary_explicit",
+            "modulus": 131081,
+            "n": 17,
+            "r": 8179
+          }
+        }
+      ],
+      "direction": "found vertex is on the floor; ascended",
+      "edge": {
+        "a6_from": 72334,
+        "a6_to": 130102,
+        "ell": 17,
+        "ext_degree": 16,
+        "kernels_tried": 1,
+        "loops_skipped": 0,
+        "x_image": 80448
+      },
+      "ell": 17,
+      "ext_degree": 16,
+      "family": "binary",
+      "frobenius_conductor": 17,
+      "fundamental_discriminant": -1663,
+      "gap": 17,
+      "group_order": 130864,
+      "koblitz_class_skipped": 3,
+      "n": 17,
+      "r": 8179,
+      "scanned": 600,
+      "seconds": 6.058455987,
+      "seed_found": 128,
+      "trace": 209
+    },
+    {
+      "a": 1,
+      "b_found": 491530,
+      "cofactor": 14,
+      "curves": [
+        {
+          "conductor": 1,
+          "end_evidence": "rank-2 E[ℓ] over F_{q^m}: ℓ ∤ [End : Z[π]] fails, so ℓ ∤ f_E",
+          "role": "crater",
+          "spec": {
+            "a": 1,
+            "b": 343073,
+            "group_order": 524846,
+            "gx": 60085,
+            "gy": 42358,
+            "kind": "binary_explicit",
+            "modulus": 524327,
+            "n": 19,
+            "r": 37489
+          }
+        },
+        {
+          "conductor": 41,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m}: ℓ | f_E",
+          "role": "floor",
+          "spec": {
+            "a": 1,
+            "b": 491530,
+            "group_order": 524846,
+            "gx": 107129,
+            "gy": 421888,
+            "kind": "binary_explicit",
+            "modulus": 524327,
+            "n": 19,
+            "r": 37489
+          }
+        }
+      ],
+      "direction": "found vertex is on the floor; ascended",
+      "edge": {
+        "a6_from": 491530,
+        "a6_to": 343073,
+        "ell": 41,
+        "ext_degree": 40,
+        "kernels_tried": 1,
+        "loops_skipped": 0,
+        "x_image": 60085
+      },
+      "ell": 41,
+      "ext_degree": 40,
+      "family": "binary",
+      "frobenius_conductor": 41,
+      "fundamental_discriminant": -1063,
+      "gap": 41,
+      "group_order": 524846,
+      "koblitz_class_skipped": 3,
+      "n": 19,
+      "r": 37489,
+      "scanned": 600,
+      "seconds": 31.700479901,
+      "seed_found": 428,
+      "trace": -557
+    },
+    {
+      "a": 1,
+      "b_found": 2682779,
+      "cofactor": 14,
+      "curves": [
+        {
+          "conductor": 1,
+          "end_evidence": "rank-2 E[ℓ] over F_{q^m}: ℓ ∤ [End : Z[π]] fails, so ℓ ∤ f_E",
+          "role": "crater",
+          "spec": {
+            "a": 1,
+            "b": 3046357,
+            "group_order": 8386966,
+            "gx": 6783357,
+            "gy": 1725542,
+            "kind": "binary_explicit",
+            "modulus": 8388641,
+            "n": 23,
+            "r": 599069
+          }
+        },
+        {
+          "conductor": 23,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m}: ℓ | f_E",
+          "role": "floor",
+          "spec": {
+            "a": 1,
+            "b": 2682779,
+            "group_order": 8386966,
+            "gx": 2550571,
+            "gy": 8241458,
+            "kind": "binary_explicit",
+            "modulus": 8388641,
+            "n": 23,
+            "r": 599069
+          }
+        }
+      ],
+      "direction": "found vertex is on the floor; ascended",
+      "edge": {
+        "a6_from": 2682779,
+        "a6_to": 3046357,
+        "ell": 23,
+        "ext_degree": 22,
+        "kernels_tried": 1,
+        "loops_skipped": 0,
+        "x_image": 6783357
+      },
+      "ell": 23,
+      "ext_degree": 22,
+      "family": "binary",
+      "frobenius_conductor": 23,
+      "fundamental_discriminant": -58327,
+      "gap": 23,
+      "group_order": 8386966,
+      "koblitz_class_skipped": 1,
+      "n": 23,
+      "r": 599069,
+      "scanned": 600,
+      "seconds": 554.903739772,
+      "seed_found": 40,
+      "trace": 1643
+    }
+  ],
+  "schema": "isogeny_gap_pairs/v1",
+  "seed": 20261010
+}

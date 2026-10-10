@@ -1,0 +1,130 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "mitm:negation_folded=1"
+        }
+      },
+      "name": "mitm-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "mitm-fiber:fiber=lifts,negation_folded=1"
+        }
+      },
+      "name": "mitm-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1"
+        }
+      },
+      "name": "mitm-closed",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "oracle": "mitm-frobenius:m=2"
+        }
+      },
+      "name": "frob-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "oracle": "mitm-frobenius-fiber:fiber=lifts"
+        }
+      },
+      "name": "frob-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "oracle": "mitm-frobenius-fiber:fiber=closed"
+        }
+      },
+      "name": "frob-closed",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic-fiber:fiber=lifts",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Part A of research/isogeny_conductor_gap_ic_20261010/PROTOCOL.md: fiber-blind, all-lifts and fiber-closed MITM (plain and Frobenius-folded) and fiber-blind, all-lifts and fiber-combined F4 descent on one Koblitz curve; h = 4 (K_0) or 2 (K_1).",
+  "label": "fiber-aware relation generation on K_1 / F_2^17",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 3,
+    "seed": 1,
+    "timeout_seconds": 1800,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 17
+      }
+    ],
+    "target_seed": 20261010,
+    "targets_per_curve": 4
+  }
+}

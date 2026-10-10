@@ -62,6 +62,7 @@
 //! worked example of adding a solver, how to run a sweep, and how to
 //! report what comes out.
 
+pub mod fiber;
 pub mod linalg;
 pub mod plugins;
 pub mod shared_rank;
