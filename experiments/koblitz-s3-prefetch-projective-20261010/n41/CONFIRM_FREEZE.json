@@ -1,0 +1,172 @@
+{
+  "analysis_sha256": "51db4c4d57278212896563ea76fbae75b1da498815df676c39f844e0cf049f8d",
+  "arms": {
+    "baseline": {
+      "binary_sha256": "0f805070787361a6dc250985ce64c4380b3b781aa7c374f99df66cfee5d530f4",
+      "candidate_id": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0h161970671e93",
+      "candidate_manifest_relative": "experiments/koblitz-s3-prefetch-projective-20261010/n41/identities/candidates/IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0h161970671e93.json",
+      "candidate_manifest_sha256": "5a8216b6fb918864be0b233c55692a83930e46604e561aa36741e464014729e6",
+      "columns": 800,
+      "factor_base_digest": "cdd82bd0acdb98b53455a97fc5611af7cebdccc87b63d966d9000adb300092a7",
+      "factor_base_points": 65600,
+      "prepare_rank": 800,
+      "root_table_capacity_policy": "uniform_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_layout": "packed_13_byte_u64_key_u40_value_slots",
+      "root_table_slots": 67108864,
+      "source_relative": "examples/s3_partial_prepared_fullrank_c2800mixed_targetspan.rs",
+      "source_sha256": "a398b36071cd59f7d6775c8f4e2b03a6bf867319ba1636378d186f7fb738c679",
+      "target_search_prefix_columns": 800,
+      "target_search_schedule": "native_rotating_state_order",
+      "target_workers": 1
+    },
+    "combined": {
+      "binary_sha256": "6673678c0a916e8974f73c44ef98f56dee38a72971e46a9e46d5ccce2d7fa13c",
+      "candidate_id": "IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0h700c174acd1e",
+      "candidate_manifest_relative": "experiments/koblitz-s3-prefetch-projective-20261010/n41/identities/candidates/IC1N41Ckb1fb65600PDP4rootRCsampleLAgaussTDdirectISO0h700c174acd1e.json",
+      "candidate_manifest_sha256": "3e678b59ac73993e2bba49ef1c7fc5f14d2b7ed1d2d4aa4c3c5b0cedd499e6bc",
+      "columns": 800,
+      "factor_base_digest": "cdd82bd0acdb98b53455a97fc5611af7cebdccc87b63d966d9000adb300092a7",
+      "factor_base_points": 65600,
+      "prepare_rank": 800,
+      "root_table_capacity_policy": "uniform_initial_next_power_of_two_with_exact_growth_per_shard",
+      "root_table_layout": "packed_13_byte_u64_key_u40_value_slots",
+      "root_table_slots": 67108864,
+      "source_relative": "examples/s3_partial_prepared_fullrank_prefetch_projective_targetspan.rs",
+      "source_sha256": "ec74938598b45e7e5c829050f094d4a6e62e4f6c3c178101ef71fbdeed2b288a",
+      "target_search_prefix_columns": 800,
+      "target_search_schedule": "native_rotating_state_order",
+      "target_workers": 1
+    }
+  },
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n41_c800_prefetch_projective_confirmation_freeze_v1",
+  "local_gate_online_ratio_min": "2",
+  "memory_envelope_bytes": 34359738368,
+  "paired_runner_sha256": "d3df237868af690b7aa31c9e05b119d118694e81fe124cefbd7c5cc05b6bd906",
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 2,
+  "replay_sage_sha256": "7313817bca2153951b01c0faf3dd2de967c04dc2bccde142573136b277204ac1",
+  "run_order": "ABBA_even_target_BAAB_odd_target",
+  "single_runner_sha256": "57ff872bdec41f91d690d5a17c31e240f1869f4f6b1165ba5dd3fe5a4f17167d",
+  "target_labels": [
+    "T189",
+    "T190",
+    "T191",
+    "T192",
+    "T193",
+    "T194",
+    "T195",
+    "T196"
+  ],
+  "target_workers": 1,
+  "targets": [
+    {
+      "fixture_scalar": 54267114055,
+      "label": "T189",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T189/public_target.json",
+      "point_sha256": "175e196fdeb53ed54b0b15f965a50b95b137d02630339ca6fb294ec10a957f1f",
+      "public_point": [
+        94987576486,
+        1757880037252
+      ],
+      "workload_id": "5769b83d6116",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W5769b83d6116.json",
+      "workload_manifest_sha256": "0215eca3fcb15af8f6deed798c9056f07f3dd2108ea0fed08b3969beb2011323"
+    },
+    {
+      "fixture_scalar": 104301053381,
+      "label": "T190",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T190/public_target.json",
+      "point_sha256": "19a25ace2dbb3a4b5d39966157cecbf0bdaaa17c28935c6f371d1ae2cf777cf9",
+      "public_point": [
+        819575220978,
+        478104534440
+      ],
+      "workload_id": "18fd26d68f35",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W18fd26d68f35.json",
+      "workload_manifest_sha256": "a5cc2c3469d812601170117d335eca08e49eb7eeefb69e7893037dd4a84ade79"
+    },
+    {
+      "fixture_scalar": 144421245193,
+      "label": "T191",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T191/public_target.json",
+      "point_sha256": "2ca5dc9f8cd82c59336ca30385350d24cca41e86b135416cf36d7e1b9c6ad312",
+      "public_point": [
+        617517687596,
+        144168989148
+      ],
+      "workload_id": "03b2f54e2fe0",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W03b2f54e2fe0.json",
+      "workload_manifest_sha256": "4d026ebfb987a2d58d7cd6385f2c0d49df81b11747904f27a6031ad24ecb04d8"
+    },
+    {
+      "fixture_scalar": 231531213404,
+      "label": "T192",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T192/public_target.json",
+      "point_sha256": "d1cb03ee2880a81f804838ccf65010e9eb1083816ede92feb5855f763c1388d6",
+      "public_point": [
+        81744839050,
+        1097365982354
+      ],
+      "workload_id": "eebcc1e68ce9",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/Weebcc1e68ce9.json",
+      "workload_manifest_sha256": "46d52e382537c6a4da4dd80e6c2e98c872b38986409de2f0cca4da494eee10ad"
+    },
+    {
+      "fixture_scalar": 378549052530,
+      "label": "T193",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T193/public_target.json",
+      "point_sha256": "a52cd53c9c2b1bbcbadbe13035a4df8550ded1b5e7ce5412e5e4acb5fe056996",
+      "public_point": [
+        915209105304,
+        1368801806626
+      ],
+      "workload_id": "a774b4e6d53d",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/Wa774b4e6d53d.json",
+      "workload_manifest_sha256": "018bf13b81ed8b452400d166d22550af39b41241f21f5db18cf068a400098434"
+    },
+    {
+      "fixture_scalar": 156662958190,
+      "label": "T194",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T194/public_target.json",
+      "point_sha256": "4dfa5ed2680af191f4907998e451e4e5c5f2e903e91349a580d688b8981f5eb2",
+      "public_point": [
+        1240679470650,
+        2198192566448
+      ],
+      "workload_id": "468b9a647d8d",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W468b9a647d8d.json",
+      "workload_manifest_sha256": "f3d39dc7883a6c882355435c1565aa169c71a27e24f2f5bf20b87d73c80a0360"
+    },
+    {
+      "fixture_scalar": 230841707979,
+      "label": "T195",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T195/public_target.json",
+      "point_sha256": "535cb33620c5709ac7496f6212c3ae3ffbfe055fbf11309edadf7f98771054be",
+      "public_point": [
+        1381196153016,
+        1721119138601
+      ],
+      "workload_id": "a34e07767b42",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/Wa34e07767b42.json",
+      "workload_manifest_sha256": "9b008d77c19c41193fd8fc963a22284c7d0616d8a9d09b49e2afed4f2d40d2ec"
+    },
+    {
+      "fixture_scalar": 406039559807,
+      "label": "T196",
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T196/public_target.json",
+      "point_sha256": "4233d3a399345cedc2b8917577a9f4c0b23c201ee6434a66cb013ced117ffac1",
+      "public_point": [
+        377228573530,
+        2142420510440
+      ],
+      "workload_id": "9d669abc3397",
+      "workload_manifest_relative": "experiments/koblitz-s3-crosscurve-20261009/workloads/W9d669abc3397.json",
+      "workload_manifest_sha256": "fc3dfafc89fa8e4f7c239ba0089d6b8417ccecf6895941ce7599c80be041e99d"
+    }
+  ],
+  "timeout_seconds_per_run": 120
+}
