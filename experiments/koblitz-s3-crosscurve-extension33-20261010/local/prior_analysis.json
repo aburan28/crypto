@@ -1,0 +1,2689 @@
+{
+  "binary_sha256": {
+    "prepared": "50d3ad29fbd28c146ed60cbd6a255638fc6d48733ce08bd8097b08e03acbd195",
+    "reference": "c4ff99ace090551747b2a1083b9546754e0ce1814f309a47e46d2ab0bd132ca7"
+  },
+  "blocks": [
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 45.092566186147494,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T001",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.806917,
+          3.604333
+        ],
+        "reference": [
+          93.202667,
+          63.450542
+        ]
+      },
+      "online_root_call_ratio": 162.32255083179297,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          2164,
+          2164
+        ],
+        "reference": [
+          351266,
+          351266
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 1.49667119887759,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W01fe6b4d4c51R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW01fe6b4d4c51R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW01fe6b4d4c51R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W01fe6b4d4c51R2"
+      ],
+      "workload_id": "01fe6b4d4c51"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 1156.045714842131,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T002",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.10012499999999999,
+          0.196667
+        ],
+        "reference": [
+          174.013417,
+          151.231167
+        ]
+      },
+      "online_root_call_ratio": 3968.068181818182,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          88,
+          88
+        ],
+        "reference": [
+          349190,
+          349190
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.6750925377569501,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW18d4d396d66aR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W18d4d396d66aR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W18d4d396d66aR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW18d4d396d66aR2"
+      ],
+      "workload_id": "18d4d396d66a"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 499.68230047870446,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T003",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.158708,
+          0.16674999999999998
+        ],
+        "reference": [
+          89.323083,
+          73.975667
+        ]
+      },
+      "online_root_call_ratio": 1204.8,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          290,
+          290
+        ],
+        "reference": [
+          349392,
+          349392
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.04942964895606996,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W826829b21fceR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW826829b21fceR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW826829b21fceR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W826829b21fceR2"
+      ],
+      "workload_id": "826829b21fce"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 461.4567635611009,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T004",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.21558300000000002,
+          0.201375
+        ],
+        "reference": [
+          69.923958,
+          132.2075
+        ]
+      },
+      "online_root_call_ratio": 1333.4503816793895,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          262,
+          262
+        ],
+        "reference": [
+          349364,
+          349364
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.06817714470719417,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW4c2576b21817R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W4c2576b21817R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W4c2576b21817R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW4c2576b21817R2"
+      ],
+      "workload_id": "4c2576b21817"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 144.44519545301657,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T005",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.673875,
+          0.711333
+        ],
+        "reference": [
+          123.531375,
+          80.962
+        ]
+      },
+      "online_root_call_ratio": 171.62658846529814,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          2046,
+          2046
+        ],
+        "reference": [
+          351148,
+          351148
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.05409604081808501,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W85c417178fefR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW85c417178fefR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW85c417178fefR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W85c417178fefR2"
+      ],
+      "workload_id": "85c417178fef"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 678.4793193331977,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T006",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.11933300000000001,
+          0.11641699999999999
+        ],
+        "reference": [
+          80.764333,
+          79.18275
+        ]
+      },
+      "online_root_call_ratio": 2910.1833333333334,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          120,
+          120
+        ],
+        "reference": [
+          349222,
+          349222
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.02473933168928387,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWb2ff22d50f86R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wb2ff22d50f86R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wb2ff22d50f86R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWb2ff22d50f86R2"
+      ],
+      "workload_id": "b2ff22d50f86"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 211.6273522393314,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T007",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.40045800000000004,
+          0.830833
+        ],
+        "reference": [
+          110.55366599999999,
+          134.784875
+        ]
+      },
+      "online_root_call_ratio": 316.07400722021663,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1108,
+          1108
+        ],
+        "reference": [
+          350210,
+          350210
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.7298199198687652,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wdb1c8e558defR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWdb1c8e558defR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWdb1c8e558defR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wdb1c8e558defR2"
+      ],
+      "workload_id": "db1c8e558def"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 941.1922995557866,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T008",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.185792,
+          0.180917
+        ],
+        "reference": [
+          183.147458,
+          162.578167
+        ]
+      },
+      "online_root_call_ratio": 1518.8347826086956,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          230,
+          230
+        ],
+        "reference": [
+          349332,
+          349332
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.02658940584466235,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW93920170f31cR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W93920170f31cR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W93920170f31cR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW93920170f31cR2"
+      ],
+      "workload_id": "93920170f31c"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 334.95311381266345,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T009",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.193291,
+          0.22404200000000002
+        ],
+        "reference": [
+          57.093458999999996,
+          85.098667
+        ]
+      },
+      "online_root_call_ratio": 15869.272727272726,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          22,
+          22
+        ],
+        "reference": [
+          349124,
+          349124
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.1476367089004469,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W38293f9bddb1R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW38293f9bddb1R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW38293f9bddb1R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W38293f9bddb1R2"
+      ],
+      "workload_id": "38293f9bddb1"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 466.2419146698767,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T010",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.251459,
+          0.208875
+        ],
+        "reference": [
+          180.10999999999999,
+          63.392583
+        ]
+      },
+      "online_root_call_ratio": 882.570707070707,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          396,
+          396
+        ],
+        "reference": [
+          349498,
+          349498
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.1855439674659395,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW6b94203b9663R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W6b94203b9663R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W6b94203b9663R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW6b94203b9663R2"
+      ],
+      "workload_id": "6b94203b9663"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 68.56996546972485,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T011",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          1.245625,
+          2.661292
+        ],
+        "reference": [
+          105.49508300000001,
+          147.745917
+        ]
+      },
+      "online_root_call_ratio": 103.97994100294986,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          3390,
+          3390
+        ],
+        "reference": [
+          352492,
+          352492
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.7591743071733986,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wbc9fb7040553R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWbc9fb7040553R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWbc9fb7040553R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wbc9fb7040553R2"
+      ],
+      "workload_id": "bc9fb7040553"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 363.55604046709357,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T012",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.30416699999999997,
+          0.26925
+        ],
+        "reference": [
+          163.898291,
+          66.044417
+        ]
+      },
+      "online_root_call_ratio": 577.0759075907591,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          606,
+          606
+        ],
+        "reference": [
+          349708,
+          349708
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.12193657664184929,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW8315d1c8d027R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W8315d1c8d027R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W8315d1c8d027R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW8315d1c8d027R2"
+      ],
+      "workload_id": "8315d1c8d027"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 97.4495891594941,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T013",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.6799590000000001,
+          1.259917
+        ],
+        "reference": [
+          95.911583,
+          84.823
+        ]
+      },
+      "online_root_call_ratio": 213.3491484184915,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1644,
+          1644
+        ],
+        "reference": [
+          350746,
+          350746
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.616768622525186,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W099b4a542c4bR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW099b4a542c4bR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW099b4a542c4bR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W099b4a542c4bR2"
+      ],
+      "workload_id": "099b4a542c4b"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 102.77609416389662,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T014",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.548708,
+          1.019208
+        ],
+        "reference": [
+          65.20704099999999,
+          90.592833
+        ]
+      },
+      "online_root_call_ratio": 218.64463840399003,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1604,
+          1604
+        ],
+        "reference": [
+          350706,
+          350706
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.6192147102058475,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW63b8db65b84fR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W63b8db65b84fR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W63b8db65b84fR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW63b8db65b84fR2"
+      ],
+      "workload_id": "63b8db65b84f"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 132.7149337710353,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T015",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.41370799999999996,
+          0.985417
+        ],
+        "reference": [
+          64.82558300000001,
+          110.766167
+        ]
+      },
+      "online_root_call_ratio": 361.64256198347107,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          968,
+          968
+        ],
+        "reference": [
+          350070,
+          350070
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.8679044908737535,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W2b1d078b750dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW2b1d078b750dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW2b1d078b750dR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W2b1d078b750dR2"
+      ],
+      "workload_id": "2b1d078b750d"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 76.86471928457485,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T016",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.804292,
+          0.829709
+        ],
+        "reference": [
+          60.593792,
+          65.067708
+        ]
+      },
+      "online_root_call_ratio": 144.30952380952382,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          2436,
+          2436
+        ],
+        "reference": [
+          351538,
+          351538
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.03111264958241639,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW97ef4d65eaf8R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W97ef4d65eaf8R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W97ef4d65eaf8R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW97ef4d65eaf8R2"
+      ],
+      "workload_id": "97ef4d65eaf8"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 276.78574229700206,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T017",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.453041,
+          0.371375
+        ],
+        "reference": [
+          168.20220799999998,
+          76.63125
+        ]
+      },
+      "online_root_call_ratio": 351.50401606425703,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          996,
+          996
+        ],
+        "reference": [
+          350098,
+          350098
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.19877029533095456,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W4d76497fb690R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW4d76497fb690R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW4d76497fb690R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W4d76497fb690R2"
+      ],
+      "workload_id": "4d76497fb690"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 28.81320392469115,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T018",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          4.531917,
+          2.718291
+        ],
+        "reference": [
+          76.353667,
+          133.94641700000003
+        ]
+      },
+      "online_root_call_ratio": 43.511203117389186,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          8212,
+          8212
+        ],
+        "reference": [
+          357314,
+          357314
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.5111416547723218,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW7111b329ee6dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W7111b329ee6dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W7111b329ee6dR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW7111b329ee6dR2"
+      ],
+      "workload_id": "7111b329ee6d"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 544.5020478782914,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T019",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.215708,
+          0.207417
+        ],
+        "reference": [
+          155.781792,
+          85.151625
+        ]
+      },
+      "online_root_call_ratio": 856.6421568627451,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          408,
+          408
+        ],
+        "reference": [
+          349510,
+          349510
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.03919438160684482,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W0a7c239c4b1eR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW0a7c239c4b1eR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW0a7c239c4b1eR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W0a7c239c4b1eR2"
+      ],
+      "workload_id": "0a7c239c4b1e"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 143.9956338254884,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T020",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.627958,
+          0.706458
+        ],
+        "reference": [
+          96.336584,
+          95.482625
+        ]
+      },
+      "online_root_call_ratio": 195.16129032258064,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1798,
+          1798
+        ],
+        "reference": [
+          350900,
+          350900
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.11779046712365769,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW58b9cce9c0a0R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W58b9cce9c0a0R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W58b9cce9c0a0R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW58b9cce9c0a0R2"
+      ],
+      "workload_id": "58b9cce9c0a0"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 319.9554414212312,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T021",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.181083,
+          0.456167
+        ],
+        "reference": [
+          93.103792,
+          90.82662499999999
+        ]
+      },
+      "online_root_call_ratio": 1033.8461538461538,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          338,
+          338
+        ],
+        "reference": [
+          349440,
+          349440
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.9239034808458202,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W2ca4ec37b1f5R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW2ca4ec37b1f5R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW2ca4ec37b1f5R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W2ca4ec37b1f5R2"
+      ],
+      "workload_id": "2ca4ec37b1f5"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 246.32286801875446,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T022",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.5864159999999999,
+          0.613292
+        ],
+        "reference": [
+          158.151334,
+          137.977959
+        ]
+      },
+      "online_root_call_ratio": 212.83373786407765,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1648,
+          1648
+        ],
+        "reference": [
+          350750,
+          350750
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.04481173302986416,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWeaeb57b483d3R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Weaeb57b483d3R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Weaeb57b483d3R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWeaeb57b483d3R2"
+      ],
+      "workload_id": "eaeb57b483d3"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 302.7073233764122,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T023",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.30075,
+          0.300166
+        ],
+        "reference": [
+          93.748584,
+          88.23649999999999
+        ]
+      },
+      "online_root_call_ratio": 518.9554896142433,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          674,
+          674
+        ],
+        "reference": [
+          349776,
+          349776
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.0019436998976935498,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W2f3382a7d4d1R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW2f3382a7d4d1R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW2f3382a7d4d1R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W2f3382a7d4d1R2"
+      ],
+      "workload_id": "2f3382a7d4d1"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 155.8158286034288,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T024",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.680666,
+          0.396708
+        ],
+        "reference": [
+          107.082958,
+          61.222041
+        ]
+      },
+      "online_root_call_ratio": 320.6904761904762,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1092,
+          1092
+        ],
+        "reference": [
+          350194,
+          350194
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.5398712369345724,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW03ff08de9857R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W03ff08de9857R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W03ff08de9857R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW03ff08de9857R2"
+      ],
+      "workload_id": "03ff08de9857"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 133.29798911856506,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T025",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          1.0146249999999999,
+          0.631834
+        ],
+        "reference": [
+          100.85108299999999,
+          112.947125
+        ]
+      },
+      "online_root_call_ratio": 256.5651537335285,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1366,
+          1366
+        ],
+        "reference": [
+          350468,
+          350468
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.47364766366304406,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W1aa57f8a2e83R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW1aa57f8a2e83R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW1aa57f8a2e83R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W1aa57f8a2e83R2"
+      ],
+      "workload_id": "1aa57f8a2e83"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 190.16829077116165,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T026",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.4615,
+          0.404417
+        ],
+        "reference": [
+          71.038333,
+          95.013333
+        ]
+      },
+      "online_root_call_ratio": 914.8795811518324,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          382,
+          382
+        ],
+        "reference": [
+          349484,
+          349484
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.13203553009359714,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWb4d18a041539R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wb4d18a041539R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wb4d18a041539R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWb4d18a041539R2"
+      ],
+      "workload_id": "b4d18a041539"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 120.00519121915599,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T027",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.822875,
+          0.856958
+        ],
+        "reference": [
+          101.1085,
+          100.439792
+        ]
+      },
+      "online_root_call_ratio": 347.3313492063492,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1008,
+          1008
+        ],
+        "reference": [
+          350110,
+          350110
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.040584603440771444,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wda93f4d44a87R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWda93f4d44a87R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWda93f4d44a87R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wda93f4d44a87R2"
+      ],
+      "workload_id": "da93f4d44a87"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 5.443497568485265,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        42,
+        42
+      ],
+      "label": "T028",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          21.655541,
+          21.356832999999998
+        ],
+        "reference": [
+          138.089833,
+          99.243084
+        ]
+      },
+      "online_root_call_ratio": 6.678301886792453,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          61480,
+          61480
+        ],
+        "reference": [
+          410582,
+          410582
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.013889621728534609,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWa65a79f91046R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wa65a79f91046R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wa65a79f91046R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWa65a79f91046R2"
+      ],
+      "workload_id": "a65a79f91046"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 650.7748134378545,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T029",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.144333,
+          0.183875
+        ],
+        "reference": [
+          105.235667,
+          106.803833
+        ]
+      },
+      "online_root_call_ratio": 4718.594594594595,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          74,
+          74
+        ],
+        "reference": [
+          349176,
+          349176
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2421330490587106,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W41c844d8c2a7R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW41c844d8c2a7R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW41c844d8c2a7R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W41c844d8c2a7R2"
+      ],
+      "workload_id": "41c844d8c2a7"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 27.997761525880772,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T030",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          6.205292,
+          2.3742910000000004
+        ],
+        "reference": [
+          103.56520800000001,
+          111.513875
+        ]
+      },
+      "online_root_call_ratio": 94.79419666845781,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          3722,
+          3722
+        ],
+        "reference": [
+          352824,
+          352824
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.9607036097699037,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWfcde9f49489dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wfcde9f49489dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wfcde9f49489dR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWfcde9f49489dR2"
+      ],
+      "workload_id": "fcde9f49489d"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 80.78931649710759,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T031",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          1.415292,
+          1.1955
+        ],
+        "reference": [
+          93.205,
+          118.48525
+        ]
+      },
+      "online_root_call_ratio": 206.59599528857478,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1698,
+          1698
+        ],
+        "reference": [
+          350800,
+          350800
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.16877136231360343,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W4d6e6360e51dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW4d6e6360e51dR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW4d6e6360e51dR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W4d6e6360e51dR2"
+      ],
+      "workload_id": "4d6e6360e51d"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 64.8801881486988,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T032",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          1.597792,
+          1.898708
+        ],
+        "reference": [
+          106.341667,
+          120.087875
+        ]
+      },
+      "online_root_call_ratio": 275.88346456692915,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1270,
+          1270
+        ],
+        "reference": [
+          350372,
+          350372
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.1725509786987267,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWa52f57853ec8R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wa52f57853ec8R1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376Wa52f57853ec8R2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aWa52f57853ec8R2"
+      ],
+      "workload_id": "a52f57853ec8"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 50.90015786282877,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T033",
+      "n": 41,
+      "online_ms_by_arm": {
+        "prepared": [
+          1.059541,
+          1.1035000000000001
+        ],
+        "reference": [
+          55.939667,
+          54.15125
+        ]
+      },
+      "online_root_call_ratio": 141.2016064257028,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          2490,
+          2490
+        ],
+        "reference": [
+          351592,
+          351592
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.04065115123834607,
+      "run_ids": [
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W54209252ce9cR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW54209252ce9cR1",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h0f38cf1ef60aW54209252ce9cR2",
+        "IC1N41Ckb1fb20008PDP4rootRCsampleLAgaussTDdirectISO0h3f64f5604376W54209252ce9cR2"
+      ],
+      "workload_id": "54209252ce9c"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 57.380821308019456,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T001",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          22.858417,
+          24.028083
+        ],
+        "reference": [
+          1343.434,
+          1346.115917
+        ]
+      },
+      "online_root_call_ratio": 129.49337427818017,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          59918,
+          59918
+        ],
+        "reference": [
+          7758984,
+          7758984
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.0499038629103732,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W368597d135b1R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW368597d135b1R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW368597d135b1R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W368597d135b1R2"
+      ],
+      "workload_id": "368597d135b1"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 74.31223732031904,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T002",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          24.712334,
+          17.44
+        ],
+        "reference": [
+          1560.235625,
+          1525.4245420000002
+        ]
+      },
+      "online_root_call_ratio": 147.00367898050519,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          52732,
+          52732
+        ],
+        "reference": [
+          7751798,
+          7751798
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.34853605274498467,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW9d82461fb386R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W9d82461fb386R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W9d82461fb386R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW9d82461fb386R2"
+      ],
+      "workload_id": "9d82461fb386"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 38.15226335290938,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T003",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          25.844042,
+          47.787583000000005
+        ],
+        "reference": [
+          1237.863625,
+          1452.256459
+        ]
+      },
+      "online_root_call_ratio": 101.7889459077342,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          76388,
+          76388
+        ],
+        "reference": [
+          7775454,
+          7775454
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.6146857450468688,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W7576a5f00f05R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW7576a5f00f05R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW7576a5f00f05R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W7576a5f00f05R2"
+      ],
+      "workload_id": "7576a5f00f05"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 337.00455848120026,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T004",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          4.132875,
+          3.48
+        ],
+        "reference": [
+          1358.959459,
+          1201.978125
+        ]
+      },
+      "online_root_call_ratio": 961.9418372441338,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          8012,
+          8012
+        ],
+        "reference": [
+          7707078,
+          7707078
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.17194099691129572,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWe92d88790a98R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111We92d88790a98R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111We92d88790a98R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWe92d88790a98R2"
+      ],
+      "workload_id": "e92d88790a98"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 85.2458989510994,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T005",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          14.082542,
+          17.372084
+        ],
+        "reference": [
+          1304.540083,
+          1362.769917
+        ]
+      },
+      "online_root_call_ratio": 328.3857860409326,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          26678,
+          26678
+        ],
+        "reference": [
+          8760676,
+          8760676
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2099286758208627,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wcdbcf5dc2a26R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWcdbcf5dc2a26R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWcdbcf5dc2a26R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wcdbcf5dc2a26R2"
+      ],
+      "workload_id": "cdbcf5dc2a26"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 37.04128809334579,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T006",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          48.351625000000006,
+          34.117000000000004
+        ],
+        "reference": [
+          1497.368334,
+          1511.560125
+        ]
+      },
+      "online_root_call_ratio": 96.35155553353809,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          80744,
+          80744
+        ],
+        "reference": [
+          7779810,
+          7779810
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.3487040366476805,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWde599fb706a0R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wde599fb706a0R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wde599fb706a0R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWde599fb706a0R2"
+      ],
+      "workload_id": "de599fb706a0"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 87.84853972433642,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T007",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          17.500375,
+          18.758833
+        ],
+        "reference": [
+          1663.5952920000002,
+          1522.911208
+        ]
+      },
+      "online_root_call_ratio": 273.7263903648601,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          28230,
+          28230
+        ],
+        "reference": [
+          7727296,
+          7727296
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.0694424255488179,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W2734b044ed55R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW2734b044ed55R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW2734b044ed55R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W2734b044ed55R2"
+      ],
+      "workload_id": "2734b044ed55"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 108.66565346329072,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T008",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          15.456833,
+          19.274333000000002
+        ],
+        "reference": [
+          2083.664084,
+          1688.32775
+        ]
+      },
+      "online_root_call_ratio": 332.4610246679317,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          26350,
+          26350
+        ],
+        "reference": [
+          8760348,
+          8760348
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2207231434953706,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWa7cd85ac2861R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wa7cd85ac2861R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wa7cd85ac2861R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWa7cd85ac2861R2"
+      ],
+      "workload_id": "a7cd85ac2861"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 65.85871547339877,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T009",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          25.439583000000002,
+          20.385917
+        ],
+        "reference": [
+          1643.798708,
+          1368.415916
+        ]
+      },
+      "online_root_call_ratio": 291.969992441421,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          26460,
+          26460
+        ],
+        "reference": [
+          7725526,
+          7725526
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2214620275117763,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111We6f87c51ddafR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWe6f87c51ddafR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWe6f87c51ddafR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111We6f87c51ddafR2"
+      ],
+      "workload_id": "e6f87c51ddaf"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 272.01975262173823,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T010",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          6.515917000000001,
+          8.4195
+        ],
+        "reference": [
+          2328.772334,
+          1743.15375
+        ]
+      },
+      "online_root_call_ratio": 486.1333333333333,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          15870,
+          15870
+        ],
+        "reference": [
+          7714936,
+          7714936
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.25630249128555277,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW92518b3d1ba8R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W92518b3d1ba8R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W92518b3d1ba8R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW92518b3d1ba8R2"
+      ],
+      "workload_id": "92518b3d1ba8"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 325.4616491877391,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T011",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          6.053167,
+          4.485666999999999
+        ],
+        "reference": [
+          1912.9205840000002,
+          1503.531
+        ]
+      },
+      "online_root_call_ratio": 619.4982326478149,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          12448,
+          12448
+        ],
+        "reference": [
+          7711514,
+          7711514
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2996944037518835,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wbb1156729cbaR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWbb1156729cbaR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWbb1156729cbaR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wbb1156729cbaR2"
+      ],
+      "workload_id": "bb1156729cba"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 110.5971684232077,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T012",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          18.62275,
+          8.898916999999999
+        ],
+        "reference": [
+          1501.886083,
+          1349.6836669999998
+        ]
+      },
+      "online_root_call_ratio": 338.82650285212816,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          22790,
+          22790
+        ],
+        "reference": [
+          7721856,
+          7721856
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.7384543676583718,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWb079180c71e1R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wb079180c71e1R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wb079180c71e1R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWb079180c71e1R2"
+      ],
+      "workload_id": "b079180c71e1"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 27.577310258418272,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T013",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          45.338167,
+          49.07975
+        ],
+        "reference": [
+          1229.449167,
+          1376.447125
+        ]
+      },
+      "online_root_call_ratio": 85.1888026243849,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          91450,
+          91450
+        ],
+        "reference": [
+          7790516,
+          7790516
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.07929730972130512,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W6340a83a9d4fR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW6340a83a9d4fR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW6340a83a9d4fR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W6340a83a9d4fR2"
+      ],
+      "workload_id": "6340a83a9d4f"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 25.2043414302589,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T014",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          88.146584,
+          33.906875
+        ],
+        "reference": [
+          1304.901209,
+          1455.011167
+        ]
+      },
+      "online_root_call_ratio": 120.11052322163434,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          64638,
+          64638
+        ],
+        "reference": [
+          7763704,
+          7763704
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.9553833597812722,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWda3fbc21cdcaR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wda3fbc21cdcaR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wda3fbc21cdcaR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWda3fbc21cdcaR2"
+      ],
+      "workload_id": "da3fbc21cdca"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 1090.7398556928915,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T015",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          1.169958,
+          1.606042
+        ],
+        "reference": [
+          1531.0345829999999,
+          1460.1064999999999
+        ]
+      },
+      "online_root_call_ratio": 2700.532258064516,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          2852,
+          2852
+        ],
+        "reference": [
+          7701918,
+          7701918
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.31680491638343666,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W734c446d7b59R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW734c446d7b59R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW734c446d7b59R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W734c446d7b59R2"
+      ],
+      "workload_id": "734c446d7b59"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 242.15107927156768,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T016",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          5.152666999999999,
+          6.398542
+        ],
+        "reference": [
+          1376.140708,
+          1404.82775
+        ]
+      },
+      "online_root_call_ratio": 880.0895181548299,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          8758,
+          8758
+        ],
+        "reference": [
+          7707824,
+          7707824
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.21655570720442766,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW99d4aac2271fR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W99d4aac2271fR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W99d4aac2271fR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW99d4aac2271fR2"
+      ],
+      "workload_id": "99d4aac2271f"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 629.3780637405857,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T017",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          2.152375,
+          2.211792
+        ],
+        "reference": [
+          1394.7978329999999,
+          1351.992125
+        ]
+      },
+      "online_root_call_ratio": 1327.9675973802136,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          5802,
+          5802
+        ],
+        "reference": [
+          7704868,
+          7704868
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.02723116306480923,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W52bb7b3c60edR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW52bb7b3c60edR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW52bb7b3c60edR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W52bb7b3c60edR2"
+      ],
+      "workload_id": "52bb7b3c60ed"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 55.342344013988786,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T018",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          18.666542,
+          36.528167
+        ],
+        "reference": [
+          1408.618541,
+          1482.564
+        ]
+      },
+      "online_root_call_ratio": 177.02693310165074,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          43738,
+          43738
+        ],
+        "reference": [
+          7742804,
+          7742804
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.6713509381389843,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW7da1a60c04e5R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W7da1a60c04e5R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W7da1a60c04e5R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW7da1a60c04e5R2"
+      ],
+      "workload_id": "7da1a60c04e5"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 231.48449726325563,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T019",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          6.497208,
+          5.957125
+        ],
+        "reference": [
+          1395.819875,
+          1485.860125
+        ]
+      },
+      "online_root_call_ratio": 700.5335271669998,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          11006,
+          11006
+        ],
+        "reference": [
+          7710072,
+          7710072
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.08678456401895117,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wd1a757b58230R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWd1a757b58230R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWd1a757b58230R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wd1a757b58230R2"
+      ],
+      "workload_id": "d1a757b58230"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 67.40301570095947,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T020",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          25.304457999999997,
+          32.361709000000005
+        ],
+        "reference": [
+          1930.249125,
+          1927.408542
+        ]
+      },
+      "online_root_call_ratio": 262.32303445346923,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          37674,
+          37674
+        ],
+        "reference": [
+          9882758,
+          9882758
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.24599531716480147,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW408d05355023R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W408d05355023R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W408d05355023R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW408d05355023R2"
+      ],
+      "workload_id": "408d05355023"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 189.14954893870785,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T021",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          11.442375,
+          9.16225
+        ],
+        "reference": [
+          1957.586125,
+          1916.055375
+        ]
+      },
+      "online_root_call_ratio": 500.64900527811614,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          19704,
+          19704
+        ],
+        "reference": [
+          9864788,
+          9864788
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2222317875889231,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W0db829f024fbR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW0db829f024fbR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW0db829f024fbR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W0db829f024fbR2"
+      ],
+      "workload_id": "0db829f024fb"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 75.40070728525954,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T022",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          16.047625,
+          23.176167
+        ],
+        "reference": [
+          1423.433041,
+          1485.477834
+        ]
+      },
+      "online_root_call_ratio": 207.9196409374328,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          37208,
+          37208
+        ],
+        "reference": [
+          7736274,
+          7736274
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.36756360262240245,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWaa8bb8a9b5e8R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Waa8bb8a9b5e8R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Waa8bb8a9b5e8R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWaa8bb8a9b5e8R2"
+      ],
+      "workload_id": "aa8bb8a9b5e8"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 27.93657041157125,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T023",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          49.420083,
+          66.048209
+        ],
+        "reference": [
+          1535.760708,
+          1658.773708
+        ]
+      },
+      "online_root_call_ratio": 67.95422210627011,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          114990,
+          114990
+        ],
+        "reference": [
+          7814056,
+          7814056
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2900280347383015,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W1326a60fd5abR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW1326a60fd5abR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW1326a60fd5abR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W1326a60fd5abR2"
+      ],
+      "workload_id": "1326a60fd5ab"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 426.69008855564346,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T024",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          3.677334,
+          3.2338750000000003
+        ],
+        "reference": [
+          1434.324958,
+          1509.502583
+        ]
+      },
+      "online_root_call_ratio": 1329.3412698412699,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          5796,
+          5796
+        ],
+        "reference": [
+          7704862,
+          7704862
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.12850692453011706,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWc5dfd9f6ee9eR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wc5dfd9f6ee9eR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wc5dfd9f6ee9eR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWc5dfd9f6ee9eR2"
+      ],
+      "workload_id": "c5dfd9f6ee9e"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 243.42898785548374,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T025",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          6.316667,
+          3.44625
+        ],
+        "reference": [
+          1102.782584,
+          1169.740292
+        ]
+      },
+      "online_root_call_ratio": 1027.5421333333334,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          7500,
+          7500
+        ],
+        "reference": [
+          7706566,
+          7706566
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.6059050122749032,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wa238237883e9R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWa238237883e9R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWa238237883e9R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wa238237883e9R2"
+      ],
+      "workload_id": "a238237883e9"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 72.0774228337716,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T026",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          14.864375,
+          14.099
+        ],
+        "reference": [
+          1040.110917,
+          1046.776125
+        ]
+      },
+      "online_root_call_ratio": 326.7071664269397,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          23638,
+          23638
+        ],
+        "reference": [
+          7722704,
+          7722704
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.052863537610600704,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW32f53845e8e6R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W32f53845e8e6R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W32f53845e8e6R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW32f53845e8e6R2"
+      ],
+      "workload_id": "32f53845e8e6"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 33.079223294433945,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T027",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          26.228958,
+          50.621417
+        ],
+        "reference": [
+          1245.2220419999999,
+          1166.753583
+        ]
+      },
+      "online_root_call_ratio": 135.0319974931235,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          57442,
+          57442
+        ],
+        "reference": [
+          7756508,
+          7756508
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.6575106800288142,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W810f29afe48aR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW810f29afe48aR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW810f29afe48aR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W810f29afe48aR2"
+      ],
+      "workload_id": "810f29afe48a"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 263.9931750076785,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T028",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          7.128334,
+          3.729666
+        ],
+        "reference": [
+          1336.5081249999998,
+          1386.346458
+        ]
+      },
+      "online_root_call_ratio": 1185.7273164861613,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          8310,
+          8310
+        ],
+        "reference": [
+          9853394,
+          9853394
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.6477588611237809,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW53201a77509fR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W53201a77509fR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W53201a77509fR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW53201a77509fR2"
+      ],
+      "workload_id": "53201a77509f"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 76.44179550429298,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T029",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          13.377125,
+          16.664583
+        ],
+        "reference": [
+          1145.79225,
+          1136.8760419999999
+        ]
+      },
+      "online_root_call_ratio": 263.1761901518763,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          29366,
+          29366
+        ],
+        "reference": [
+          7728432,
+          7728432
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.2197395302774946,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wa83ef5a3caf8R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWa83ef5a3caf8R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bWa83ef5a3caf8R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111Wa83ef5a3caf8R2"
+      ],
+      "workload_id": "a83ef5a3caf8"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 62.88050036663897,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T030",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          16.529458,
+          21.507624999999997
+        ],
+        "reference": [
+          1179.021833,
+          1192.2331669999999
+        ]
+      },
+      "online_root_call_ratio": 263.8923717817387,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          29286,
+          29286
+        ],
+        "reference": [
+          7728352,
+          7728352
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.26326340099590645,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW3550412afa4dR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W3550412afa4dR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W3550412afa4dR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW3550412afa4dR2"
+      ],
+      "workload_id": "3550412afa4d"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 60.11665957506926,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T031",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          25.704459,
+          22.448042
+        ],
+        "reference": [
+          1460.724417,
+          1427.605875
+        ]
+      },
+      "online_root_call_ratio": 293.74707106749923,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          33630,
+          33630
+        ],
+        "reference": [
+          9878714,
+          9878714
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.13546108444788854,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W0566924175aaR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW0566924175aaR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW0566924175aaR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W0566924175aaR2"
+      ],
+      "workload_id": "0566924175aa"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 286.1910302211914,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T032",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          5.3075,
+          3.0915
+        ],
+        "reference": [
+          1186.5327080000002,
+          1132.639166
+        ]
+      },
+      "online_root_call_ratio": 1202.477215980025,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          6408,
+          6408
+        ],
+        "reference": [
+          7705474,
+          7705474
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.5404645045787878,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW91c8ec96b20eR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W91c8ec96b20eR1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W91c8ec96b20eR2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW91c8ec96b20eR2"
+      ],
+      "workload_id": "91c8ec96b20e"
+    },
+    {
+      "all_verified": true,
+      "exploratory_online_ratio": 1246.9272312736794,
+      "failed_run_ids": [],
+      "fallback_attempts": [
+        0,
+        0
+      ],
+      "label": "T033",
+      "n": 53,
+      "online_ms_by_arm": {
+        "prepared": [
+          0.719459,
+          0.727667
+        ],
+        "reference": [
+          908.8836660000001,
+          895.597041
+        ]
+      },
+      "online_root_call_ratio": 5798.489457831325,
+      "online_root_calls_by_arm": {
+        "prepared": [
+          1328,
+          1328
+        ],
+        "reference": [
+          7700394,
+          7700394
+        ]
+      },
+      "prepared_aa_abs_log_ratio": 0.01134398527983965,
+      "run_ids": [
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W40f5fc159ec4R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW40f5fc159ec4R1",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0h5ed3e1d8954bW40f5fc159ec4R2",
+        "IC1N53Ckb1fb25864PDP4rootRCsampleLAgaussTDdirectISO0hbd278c9cf111W40f5fc159ec4R2"
+      ],
+      "workload_id": "40f5fc159ec4"
+    }
+  ],
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "at_least_2_online_ratio_count": 33,
+      "exploratory_online_ratio_geomean": 165.75161346664447,
+      "exploratory_online_ratio_min": 5.443497568485265,
+      "failed_run_count": 0,
+      "fallback_attempts_total": 84,
+      "online_root_call_ratio_geomean": 402.8361297059703,
+      "online_root_call_ratio_min": 6.678301886792453,
+      "prepared_aa_p95_abs_log_ratio": 0.9607036097699037,
+      "provisional_pairs_for_geomean_above_2_one_sided_95_80_percent_power": 24,
+      "target_count": 33,
+      "verified_target_count": 33
+    },
+    "53": {
+      "at_least_2_online_ratio_count": 33,
+      "exploratory_online_ratio_geomean": 118.69075228616981,
+      "exploratory_online_ratio_min": 25.2043414302589,
+      "failed_run_count": 0,
+      "fallback_attempts_total": 0,
+      "online_root_call_ratio_geomean": 378.65307312068643,
+      "online_root_call_ratio_min": 67.95422210627011,
+      "prepared_aa_p95_abs_log_ratio": 0.7384543676583718,
+      "provisional_pairs_for_geomean_above_2_one_sided_95_80_percent_power": 24,
+      "target_count": 33,
+      "verified_target_count": 33
+    }
+  },
+  "kind": "s3_crosscurve_local_pilot_analysis_v1",
+  "ledger_sha256": "da63c4f19710fc36b9612d4588322c90bd24aa4619151151044333c400ce6c92",
+  "matched_curve_difference": {
+    "provisional_pairs_for_difference_two_sided_95_80_percent_power": 193,
+    "ratio_of_curve_geomean_online_ratios": 1.3964998137934816,
+    "verified_pairs": 33
+  },
+  "matched_index_count": 33,
+  "plan_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "run_count": 264,
+  "sample_size_estimates_are_exploratory": true,
+  "strict_host_isolation_receipt": null
+}

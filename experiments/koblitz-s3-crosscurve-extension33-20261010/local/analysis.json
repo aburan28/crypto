@@ -1,0 +1,67 @@
+{
+  "bootstrap_draws": 20000,
+  "bootstrap_seed": 20261010,
+  "complete": true,
+  "completion_sha256": "061a209eb549623dc8b82515051e556a4682478e716bb78e936b82bb991cd41d",
+  "controlled_speedup": null,
+  "extension_ledger_sha256": "7fa08df44a7d044810c6876b953b06c3dea843cc899f60ebbfaa51964b8e5926",
+  "extension_run_count": 72,
+  "freeze_sha256": "4df0f3d54831b55f4e6598306d2dd0440f908cafa60df50a964cdf5eb1e1f8d2",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_crosscurve_extension33_analysis_v1",
+  "matched_index_count": 33,
+  "old_ledger_sha256": "e5ac8482f17138f04018bf7150c161b72290e776a6bf3525e9542fb1fd567ccc",
+  "old_run_count": 192,
+  "online_wall_exploratory": {
+    "41": {
+      "min_point_ratio": 5.443497568485266,
+      "reference_over_prepared_geomean": 165.75161346664447,
+      "target_bootstrap95": [
+        111.63809495963137,
+        241.7111544966465
+      ]
+    },
+    "53": {
+      "min_point_ratio": 25.2043414302589,
+      "reference_over_prepared_geomean": 118.69075228616981,
+      "target_bootstrap95": [
+        83.92734041801333,
+        170.09737156867035
+      ]
+    },
+    "n41_over_n53_gain": {
+      "geomean_ratio": 1.3964998137934819,
+      "matched_index_bootstrap95": [
+        0.7894402533149635,
+        2.385096073700166
+      ]
+    }
+  },
+  "operation_count": {
+    "41": {
+      "min_point_ratio": 6.678301886792453,
+      "reference_over_prepared_geomean": 402.8361297059703,
+      "target_bootstrap95": [
+        248.05370602153073,
+        656.9270226256773
+      ]
+    },
+    "53": {
+      "min_point_ratio": 67.95422210627014,
+      "reference_over_prepared_geomean": 378.65307312068643,
+      "target_bootstrap95": [
+        266.65255397080324,
+        544.1105493786206
+      ]
+    },
+    "n41_over_n53_gain": {
+      "geomean_ratio": 1.0638659984612775,
+      "matched_index_bootstrap95": [
+        0.5395300805904917,
+        2.054016512915747
+      ]
+    }
+  },
+  "pooled_ledger_sha256": "da63c4f19710fc36b9612d4588322c90bd24aa4619151151044333c400ce6c92",
+  "prior_analysis_sha256": "fae14b5ead84500a6892348761ecbb38589977f50b1c6b28b1478da488f29685"
+}

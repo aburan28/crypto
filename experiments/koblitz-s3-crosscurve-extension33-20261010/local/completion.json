@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-prepared-20261009/experiments/koblitz-s3-crosscurve-20261009/run_local_pilot.py",
+    "--first",
+    "25",
+    "--count",
+    "9",
+    "--binaries",
+    "/private/tmp/s3-crosscurve-b562-build/release/examples",
+    "--output",
+    "/private/tmp/s3-crosscurve-extension33-20261010"
+  ],
+  "complete": true,
+  "completed_run_count": 72,
+  "controlled_speedup": null,
+  "freeze_sha256": "4df0f3d54831b55f4e6598306d2dd0440f908cafa60df50a964cdf5eb1e1f8d2",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_crosscurve_extension33_completion_v1",
+  "ledger_sha256": "7fa08df44a7d044810c6876b953b06c3dea843cc899f60ebbfaa51964b8e5926",
+  "order_prefix_verified": true,
+  "planned_run_count": 72,
+  "runner_exit_code": 0,
+  "verified_run_count": 72
+}
