@@ -24,13 +24,15 @@ KIC_DUMP_BASE=base.jsonl KIC_DUMP_RANK=rank.jsonl \
   construct:13:0:2 targets_n13.txt 7 targets.jsonl > summary.jsonl
 python3 ../compact_orbit_rank_evidence_20260929/verify_rank.py \
   --trace rank.jsonl --base base.jsonl --summary summary.jsonl --out replay.json
+python3 verify_target.py \
+  --base base.jsonl --target targets.jsonl --out target_replay.json
 ```
 
 The command above shows the intended path layout; the recorded run used an isolated `CARGO_TARGET_DIR` and absolute output paths. `verify_rank.py` resolves its independent group arithmetic from the repository root. `summary.jsonl` is producer stdout; `targets.jsonl` is the path passed as the fourth producer argument.
 
 ## Result and validation
 
-The producer inserted 2 verified relations in 2 attempts and reached rank 2/2. The independent replay checked both representative logarithms and 7 used base points (`replay.json`: `status=PASS`). The single target record reports recovered scalar 7, matching its published fixture scalar, with group replay true. The 1,029-byte summary retains raw stage timing, which is an uncontrolled correctness diagnostic on a contended host.
+The producer inserted 2 verified relations in 2 attempts and reached rank 2/2. The independent rank replay checked both representative logarithms and 7 used base points (`replay.json`: `status=PASS`). A separate independent group calculation verified that scalar 7 maps the recorded generator to the public target (`target_replay.json`: `status=PASS`). The 1,029-byte summary retains raw stage timing, which is an uncontrolled correctness diagnostic on a contended host.
 
 `rustfmt --edition 2021 --emit stdout` parsed the repaired source; `git diff --check` passed. `cargo test --offline --release --example koblitz_orbit_dlp_fast` passed all 3 wide JSON tests. The compact-orbit archived n=37 source42 library test passed after its tracked fixture was materialized in the sparse worktree. A full release library test was attempted; its unrelated failures and exact test environment are recorded in the PR validation report.
 
