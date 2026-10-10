@@ -1,11 +1,9 @@
 name: Koblitz Stage 61 n53 production rank
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage61_production_rank.py"
-      - ".github/workflows/koblitz-stage61-production-rank.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

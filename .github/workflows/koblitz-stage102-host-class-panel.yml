@@ -1,11 +1,9 @@
 name: Koblitz Stage 102 n53 host-class panel
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage33_n41_unknown_scalar.py"
-      - "scripts/run_koblitz_stage102_host_class_panel.py"
-      - ".github/workflows/koblitz-stage102-host-class-panel.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:
