@@ -260,6 +260,55 @@ fn median(v: &[u64]) -> u64 {
 }
 fn main() {
     let args: Vec<_> = std::env::args().skip(1).collect();
+    if args.len() == 2 && args[1] == "--manifest" {
+        let root = Path::new(&args[0]);
+        let mut files = vec![];
+        fn visit(root: &Path, dir: &Path, out: &mut Vec<Value>) {
+            for entry in fs::read_dir(dir).unwrap() {
+                let p = entry.unwrap().path();
+                if p.is_dir() {
+                    if p.file_name().unwrap() != "target" {
+                        visit(root, &p, out);
+                    }
+                } else if p.file_name().unwrap() != "MANIFEST.json" {
+                    let b = fs::read(&p).unwrap();
+                    out.push(json!({"path":p.strip_prefix(root).unwrap().to_string_lossy(),"bytes":b.len(),"sha256":hash(&b)}));
+                }
+            }
+        }
+        visit(root, root, &mut files);
+        files.sort_by_key(|v| v["path"].as_str().unwrap().to_string());
+        let mut sources = vec![];
+        for base in [
+            "tools/isogeny-cli",
+            "isogeny_algos/src",
+            "src/cryptanalysis/isogeny_walk",
+        ] {
+            visit(Path::new(""), Path::new(base), &mut sources);
+        }
+        sources.retain(|v| !v["path"].as_str().unwrap().contains("/dist/"));
+        for p in [
+            "docs/curves/registry.json",
+            "docs/curves/covers.json",
+            "docs/curves/cover-links.yaml",
+            "docs/ic/leaderboard.json",
+            "docs/ic/LEADERBOARD.md",
+            "docs/ic-leaderboard.html",
+            "docs/browser/data.json",
+            "src/cryptanalysis/curve_aliases.json",
+            ".github/workflows/release.yml",
+        ] {
+            let b = fs::read(p).unwrap();
+            sources.push(json!({"path":p,"bytes":b.len(),"sha256":hash(&b)}));
+        }
+        fs::write(root.join("MANIFEST.json"),format!("{}\n",serde_json::to_string_pretty(&json!({"schema":"isogeny-evidence-manifest/v1","files":files,"sources_and_canonical":sources})).unwrap())).unwrap();
+        println!(
+            "Manifest written: {} files and {} source/canonical bindings.",
+            files.len(),
+            sources.len()
+        );
+        return;
+    }
     assert_eq!(args.len(), 3);
     let study = Path::new(&args[0]);
     let v1 = Path::new(&args[1]);
