@@ -1,0 +1,77 @@
+{
+  "actual_usable_points_B": 339200,
+  "binary_sha256": "217d6f5218674da4be03d1a4f77aae79314538c44aa5257dd3dc10357ed16405",
+  "candidate_id": "IC1N53Ckb1fb339200PDP4rootRCsampleLAgaussTDdirectISO0h0e595bd6143a",
+  "controlled_speedup": null,
+  "diagnostic": {
+    "replay_thread_cpu": {
+      "affine_median_ns": 61375.0,
+      "complete_pairs": 256,
+      "paired_ratio_geometric_mean": 9.668436661996296,
+      "paired_ratio_median": 10.886256355951378,
+      "paired_ratio_p10": 7.149945867917719,
+      "paired_ratio_p90": 11.209564750134337,
+      "projective_median_ns": 5583.0
+    },
+    "replay_wall": {
+      "affine_median_ns": 61187.5,
+      "complete_pairs": 256,
+      "paired_ratio_geometric_mean": 10.913857971295826,
+      "paired_ratio_median": 11.379813953488373,
+      "paired_ratio_p10": 7.4380273767110445,
+      "paired_ratio_p90": 13.063428571428572,
+      "projective_median_ns": 5333.0
+    },
+    "validation_thread_cpu": {
+      "affine_median_ns": 70042.0,
+      "complete_pairs": 256,
+      "paired_ratio_geometric_mean": 11.396536878265685,
+      "paired_ratio_median": 13.28745270166609,
+      "paired_ratio_p10": 8.089915815869604,
+      "paired_ratio_p90": 13.723512195121952,
+      "projective_median_ns": 5250.0
+    },
+    "validation_wall": {
+      "affine_median_ns": 69854.5,
+      "complete_pairs": 256,
+      "paired_ratio_geometric_mean": 13.12418975836509,
+      "paired_ratio_median": 14.0166,
+      "paired_ratio_p10": 8.420300476364968,
+      "paired_ratio_p90": 14.401641025641025,
+      "projective_median_ns": 4979.5
+    }
+  },
+  "diagnostic_scope": "256 balanced check pairs on one already-verified public point",
+  "freeze_sha256": "26fc8e235f050b66ce16505475e188dc821f0064fdc0078792f0549f927c96b7",
+  "host_exclusive_partition_receipt": null,
+  "independent_sage_replay_verified": true,
+  "kind": "s3_n53_c3200_projective_control_analysis_v1",
+  "online_ms": {
+    "projective": 3.036625,
+    "reference": 5.551041
+  },
+  "online_phase_ms": {
+    "projective": {
+      "target_descent": 0.0440829999999997,
+      "target_pdp_charged": 2.9395420000000003,
+      "target_query": 0.010042,
+      "target_recovery_check": 0.008,
+      "target_relation_check": 0.034958
+    },
+    "reference": {
+      "target_descent": 0.03850099999999912,
+      "target_pdp_charged": 4.775083,
+      "target_query": 0.632499,
+      "target_recovery_check": 0.061583,
+      "target_relation_check": 0.043375
+    }
+  },
+  "online_ratio_exploratory": 1.8280298028238586,
+  "peak_rss_bytes": 30810456064,
+  "prepared_rank": 3200,
+  "same_first_relation_witness": true,
+  "same_target_s3_calls": 498,
+  "source_sha256": "e465572c3e63fe69d6aeb5c1ab0b8a1a3730532cb250707fe86d772c76771b6d",
+  "verified_target_scalar": 429728658711,
+  "workload_id": "a238237883e9"
+}

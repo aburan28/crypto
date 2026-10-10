@@ -1,0 +1,89 @@
+{
+  "architecture": "arm64",
+  "archive": {
+    "diagnostic.jsonl": {
+      "gzip_bytes": 6797,
+      "gzip_sha256": "7e7153e5183035bb3ad31c8b1c8d73fee89660ecc8683a788d0decf8697898c5",
+      "raw_bytes": 167799,
+      "raw_sha256": "89e7efdb9fa838de2e4844ca3914307e1cc7479b4dc35495c16967dbc705a1fb"
+    },
+    "report.json": {
+      "gzip_bytes": 456764,
+      "gzip_sha256": "185da5986575cd1832ea21f45600567c59bfa2474786bf042c819c783b5b25bd",
+      "raw_bytes": 1544720,
+      "raw_sha256": "84e9497e6c9f1e1dad87bcd2a92891e9fb208569ff2ff94aa85f81cce9d7c38a"
+    },
+    "stderr.txt": {
+      "gzip_bytes": 20,
+      "gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout.bin": {
+      "gzip_bytes": 456764,
+      "gzip_sha256": "185da5986575cd1832ea21f45600567c59bfa2474786bf042c819c783b5b25bd",
+      "raw_bytes": 1544720,
+      "raw_sha256": "84e9497e6c9f1e1dad87bcd2a92891e9fb208569ff2ff94aa85f81cce9d7c38a"
+    }
+  },
+  "argv": [
+    "/private/tmp/s3-c3182-build/release/examples/s3_partial_prepared_fullrank_c3200projective_targetspan",
+    "53",
+    "0",
+    "3200",
+    "20260928",
+    "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-prepared-20261009/experiments/koblitz-s3-crosscurve-20261009/holdout/n53/T025/public_target.json",
+    "/private/tmp/s3-c3200-projective-t025-20261010/report.json",
+    "14",
+    "3200",
+    "1"
+  ],
+  "binary_sha256": "217d6f5218674da4be03d1a4f77aae79314538c44aa5257dd3dc10357ed16405",
+  "candidate_id": null,
+  "controlled_speedup": null,
+  "diagnostic_row_count": 512,
+  "diagnostic_thread_cpu_available_count": 512,
+  "diagnostic_verified": true,
+  "error": null,
+  "exit_code": 0,
+  "factor_base_digest": "b059162fd5fd7235398d7f91be3123fe3adbc9c27bcdfa8627aa3ef0125f139e",
+  "factor_base_points": 339200,
+  "finished_unix_ns": 1791621250207061000,
+  "freeze_sha256": "26fc8e235f050b66ce16505475e188dc821f0064fdc0078792f0549f927c96b7",
+  "full_rank_before_target": true,
+  "host_exclusive_partition_receipt": null,
+  "index_layout_ok": true,
+  "kind": "s3_n53_c3200_projective_control_v1",
+  "memory_within_envelope": true,
+  "outer_wall_ns": 85211425000,
+  "peak_rss_bytes": 30810456064,
+  "peak_rss_method": "direct child RUSAGE_CHILDREN ru_maxrss",
+  "phase_accounting_ok": true,
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+  "prepared_rank": 3200,
+  "reference_differing_keys": [
+    "target_recovery_check_scalar_engine",
+    "target_validation_scalar_engine",
+    "timing_ms"
+  ],
+  "regular_states": 542720000,
+  "resource_counters": {
+    "involuntary_context_switches": 899897,
+    "major_page_faults": 0,
+    "minor_page_faults": 3680169,
+    "system_cpu_seconds": 25.106695,
+    "user_cpu_seconds": 392.979576,
+    "voluntary_context_switches": 30
+  },
+  "root_table_entries": 541971126,
+  "root_table_slots": 1073741824,
+  "scalar_verified": true,
+  "source_sha256": "e465572c3e63fe69d6aeb5c1ab0b8a1a3730532cb250707fe86d772c76771b6d",
+  "started_unix_ns": 1791621164995636000,
+  "stdout_matches_report": true,
+  "target_online_ms_diagnostic": 3.036625,
+  "target_s3_calls": 498,
+  "unexpected_reference_differences": [],
+  "workload_id": "a238237883e9"
+}
