@@ -1,0 +1,96 @@
+{
+  "arms": {
+    "baseline": {
+      "archive": {
+        "report.json": {
+          "gzip_bytes": 94591,
+          "gzip_sha256": "ca92eb765a5c44fbeb15d199a09866bdd09d3e60293c2abf63e8b28ded1e510e",
+          "raw_bytes": 339922,
+          "raw_sha256": "5d9e452da00d18984a1957a136371fb8f85c084ea8e12320ce59a9831d5a8974"
+        },
+        "stderr.txt": {
+          "gzip_bytes": 102,
+          "gzip_sha256": "73aba63feca4a857c4ca12b1013acff3a9ecdfbb9f4696ce4f90e8cd0f5ff882",
+          "raw_bytes": 106,
+          "raw_sha256": "3ed64c683e64b4208f36112448dc244815d77572b292dc766f5ddc822fdd2b03"
+        },
+        "stdout.bin": {
+          "gzip_bytes": 94591,
+          "gzip_sha256": "ca92eb765a5c44fbeb15d199a09866bdd09d3e60293c2abf63e8b28ded1e510e",
+          "raw_bytes": 339922,
+          "raw_sha256": "5d9e452da00d18984a1957a136371fb8f85c084ea8e12320ce59a9831d5a8974"
+        }
+      },
+      "factor_base_digest": "cdd82bd0acdb98b53455a97fc5611af7cebdccc87b63d966d9000adb300092a7",
+      "factor_base_points": 65600,
+      "first_relation_indices": [
+        32414,
+        58107,
+        13391,
+        43988
+      ],
+      "fixture_scalar_match": true,
+      "group_verified": true,
+      "prepared_rank": 800,
+      "projective_replay_engine": null,
+      "projective_validation_engine": null,
+      "public_target_match": true,
+      "recovered_scalar": 253982070906,
+      "reusable_setup_ms": 2693.643583,
+      "stdout_matches_report": true,
+      "target_online_ms": 0.244333,
+      "target_phase_sum_ms": 0.24433300000000002,
+      "target_s3_calls": 26
+    },
+    "combined": {
+      "archive": {
+        "report.json": {
+          "gzip_bytes": 94625,
+          "gzip_sha256": "dda16ddc6c87d4753b59fadd807410c504590c3efe3f820ac16b87bf1952d8f7",
+          "raw_bytes": 340070,
+          "raw_sha256": "6f36cc03718d85b27d6764223c40051d96aa81fa7ec146df9123fcac82dfa093"
+        },
+        "stderr.txt": {
+          "gzip_bytes": 20,
+          "gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+          "raw_bytes": 0,
+          "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout.bin": {
+          "gzip_bytes": 94625,
+          "gzip_sha256": "dda16ddc6c87d4753b59fadd807410c504590c3efe3f820ac16b87bf1952d8f7",
+          "raw_bytes": 340070,
+          "raw_sha256": "6f36cc03718d85b27d6764223c40051d96aa81fa7ec146df9123fcac82dfa093"
+        }
+      },
+      "factor_base_digest": "cdd82bd0acdb98b53455a97fc5611af7cebdccc87b63d966d9000adb300092a7",
+      "factor_base_points": 65600,
+      "first_relation_indices": [
+        32414,
+        58107,
+        13391,
+        43988
+      ],
+      "fixture_scalar_match": true,
+      "group_verified": true,
+      "prepared_rank": 800,
+      "projective_replay_engine": "portable_lopez_dahab_projective_u64_one_final_inversion",
+      "projective_validation_engine": "portable_lopez_dahab_projective_u64_one_final_inversion",
+      "public_target_match": true,
+      "recovered_scalar": 253982070906,
+      "reusable_setup_ms": 3500.24575,
+      "stdout_matches_report": true,
+      "target_online_ms": 0.08904200000000001,
+      "target_phase_sum_ms": 0.08904200000000001,
+      "target_s3_calls": 32
+    }
+  },
+  "baseline_time_wrapper_status": "time -l returned 1 after native stdout and report were written because sysctl kern.clockrate was denied; its stderr is archived",
+  "controlled_speedup": null,
+  "freeze_sha256": "e66480ff16be4ef4c4ac81722ebf670964c30d8d1cd9273a61cd8b5449c70e87",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n41_c800_combined_t025_control_archive_v1",
+  "point_sha256": "b246b44a0e5a32b87d0e94b296b1f308511eb6ade56e9fa6d058538c60810dcc",
+  "resource_peak_rss_bytes": null,
+  "same_first_relation_witness": true
+}
