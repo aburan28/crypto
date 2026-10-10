@@ -583,6 +583,57 @@ fn hyperelliptic_g2_scalar_mul() -> Box<dyn Workload> {
     }))
 }
 
+/// 256 rounds over 2048 elements of the isogeny-walk `GF(p)` (P-256's
+/// prime, four-limb CIOS Montgomery): `x ← x·y ⊕ x²`, plus one `pow`
+/// per 256 elements.  This is the field every `isogeny_walk` curve
+/// operation runs on; it had no kernel here before, so changes to it
+/// were invisible to the performance index.
+fn isogeny_field_p256_mul_sqr_pow() -> Box<dyn Workload> {
+    let p = BigUint::parse_bytes(
+        b"ffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+        16,
+    )
+    .unwrap();
+    let f = std::sync::Arc::new(
+        crypto_lib::cryptanalysis::isogeny_walk::field::Field::new(&p).unwrap(),
+    );
+    let mut rng = StdRng::seed_from_u64(0x4953_4f5f_6670_32);
+    let ys: Vec<[u64; 4]> = (0..2048)
+        .map(|_| {
+            [
+                rng.gen::<u64>(),
+                rng.gen::<u64>(),
+                rng.gen::<u64>(),
+                rng.gen::<u64>(),
+            ]
+        })
+        .map(|limbs| {
+            f.mul(
+                &crypto_lib::cryptanalysis::isogeny_walk::field::Fe(limbs),
+                &f.one(),
+            )
+            .0
+        })
+        .collect();
+    let exp = (p - 3u8) / 5u8;
+    Box::new(Closure(move || {
+        let mut x = crypto_lib::cryptanalysis::isogeny_walk::field::Fe(ys[0]);
+        let mut fp = Fp::new();
+        for (i, y) in ys.iter().enumerate() {
+            let y = crypto_lib::cryptanalysis::isogeny_walk::field::Fe(*y);
+            for _ in 0..256 {
+                x = f.mul(&x, &y);
+                x = f.sqr(&x);
+            }
+            if i % 256 == 0 {
+                x = f.pow(&x, &exp);
+            }
+            fp = fp.u64(x.0[(i / 512) % 4]);
+        }
+        fp.finish()
+    }))
+}
+
 pub fn register(kernels: &mut Vec<Kernel>) {
     let mut k =
         |id: &'static str, desc: &'static str, tier: Tier, setup: fn() -> Box<dyn Workload>| {
@@ -594,6 +645,12 @@ pub fn register(kernels: &mut Vec<Kernel>) {
                 setup,
             });
         };
+    k(
+        "field_ec/isogeny_field_p256_mul_sqr_pow",
+        "isogeny_walk::field (4-limb CIOS Montgomery, P-256 prime): 1,048,576 mul + sqr, 8 pow",
+        Tier::Quick,
+        isogeny_field_p256_mul_sqr_pow,
+    );
     k(
         "field_ec/point_scalar_mul_p256_x8",
         "ecc::point::Point::scalar_mul of the P-256 generator by 8 fixed scalars",

@@ -31,7 +31,7 @@ kernels are grouped into eight **areas**:
 | `fp_gb` | Gröbner bases over F_p and extension fields: F4, F5/signature, tower F4 |
 | `sat` | CDCL with native XOR clauses; Semaev and WDSat encodings |
 | `pdp` | point decomposition: summation polynomials and decomposition oracles |
-| `field_ec` | F₂ᵐ, F_p, F₃ᵐ arithmetic; point addition; scalar multiplication; batch inversion |
+| `field_ec` | F₂ᵐ, F_p, F₃ᵐ arithmetic; point addition; scalar multiplication; batch inversion; the isogeny-walk `GF(p)` |
 | `relation` | relation collection, index-calculus pipelines, relation-matrix algebra |
 | `dlp` | generic discrete logarithm: Pollard rho, BSGS, kangaroo, Pohlig–Hellman |
 
