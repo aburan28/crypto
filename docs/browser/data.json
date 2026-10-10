@@ -6,7 +6,7 @@
   "curves": 321,
   "methods": 49,
   "factor_bases": 30,
-  "candidates": 264,
+  "candidates": 266,
   "rounds": 30,
   "sessions": 30,
   "yields": 2436
@@ -53474,6 +53474,28 @@
    "slug": "icv1-f2m43-tm998717-e2e742b0"
   },
   {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h0fce7cbb5d10",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "0fce7cbb5d10",
+   "mentions": 10,
+   "files": 4,
+   "where": [
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/HELDOUT_ANALYSIS.json",
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/FROZEN_PREP.json",
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/HELDOUT_FROZEN.json",
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/candidate_symmetry.json"
+   ],
+   "slug": null
+  },
+  {
    "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640",
    "n": 53,
    "curve_tag": "e0",
@@ -53582,6 +53604,28 @@
    "where": [
     "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/FROZEN.json",
     "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/candidate_control.json"
+   ],
+   "slug": null
+  },
+  {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0hb3fe332f1d0f",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "b3fe332f1d0f",
+   "mentions": 10,
+   "files": 4,
+   "where": [
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/HELDOUT_ANALYSIS.json",
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/FROZEN_PREP.json",
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/HELDOUT_FROZEN.json",
+    "research/notes/ecc2k130/n53_pair_symmetry_20261010/candidate_control.json"
    ],
    "slug": null
   },
