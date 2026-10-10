@@ -6,7 +6,7 @@
   "curves": 321,
   "methods": 49,
   "factor_bases": 30,
-  "candidates": 258,
+  "candidates": 264,
   "rounds": 30,
   "sessions": 30,
   "yields": 2436
@@ -53472,6 +53472,138 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/final-pairinv.json"
    ],
    "slug": "icv1-f2m43-tm998717-e2e742b0"
+  },
+  {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "3b66c9056640",
+   "mentions": 39,
+   "files": 24,
+   "where": [
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/HELDOUT_ANALYSIS.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/PILOT_ANALYSIS.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530053/control/intent.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530053/control/status.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/control/intent.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/control/status.json"
+   ],
+   "slug": null
+  },
+  {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h4473025f5a16",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "4473025f5a16",
+   "mentions": 2,
+   "files": 2,
+   "where": [
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/FROZEN.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/candidate_cap200000.json"
+   ],
+   "slug": null
+  },
+  {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h6c8de5cfb242",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "6c8de5cfb242",
+   "mentions": 18,
+   "files": 9,
+   "where": [
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/PILOT_ANALYSIS.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530053/cap200000/intent.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530053/cap200000/status.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/cap200000/intent.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/cap200000/status.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530055/cap200000/intent.json"
+   ],
+   "slug": null
+  },
+  {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h7f0d28c1d4ff",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "7f0d28c1d4ff",
+   "mentions": 39,
+   "files": 24,
+   "where": [
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/HELDOUT_ANALYSIS.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/PILOT_ANALYSIS.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530053/cap400000/intent.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530053/cap400000/status.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/cap400000/intent.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/cap400000/status.json"
+   ],
+   "slug": null
+  },
+  {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h9bc770c69100",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "9bc770c69100",
+   "mentions": 2,
+   "files": 2,
+   "where": [
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/FROZEN.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/candidate_control.json"
+   ],
+   "slug": null
+  },
+  {
+   "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0hb8e77e148baf",
+   "n": 53,
+   "curve_tag": "e0",
+   "factor_base_points": 23320,
+   "summands": 4,
+   "solver": "root",
+   "collector": "guided",
+   "linear_algebra": "gauss",
+   "descent": "direct",
+   "isogeny": 0,
+   "record_sha12": "b8e77e148baf",
+   "mentions": 2,
+   "files": 2,
+   "where": [
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/FROZEN.json",
+    "research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/controls/preformat_identity/candidate_cap400000.json"
+   ],
+   "slug": null
   },
   {
    "candidate_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h048c1aa09468",

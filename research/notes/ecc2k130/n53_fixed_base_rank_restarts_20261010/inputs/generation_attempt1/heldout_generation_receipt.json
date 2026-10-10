@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/private/tmp/crypto-compact-target/release/examples/koblitz_rho_fixture",
+    "53",
+    "0",
+    "signed_frobenius",
+    "1",
+    "strong",
+    "700001",
+    "hash:53261307"
+  ],
+  "error": "generator exit 101",
+  "error_type": "AssertionError",
+  "exit_code": 101,
+  "generator_binary_sha256": "f63f0215745a9eb74e608deb288e7bf34bc56f60c618b7f01801fd6ca1fd8550",
+  "head_commit": "12a1dd140c5952ba89204ba27b7ad83068545b86",
+  "manifest_sha256": "52dddfa5a45b7becf2be3c7c95ad1947ab223dd37d4c25ad2377665c86c320de",
+  "schema": "n53-rank-restart-heldout-generation-receipt-v1",
+  "status": "INVALID_OR_INCOMPLETE",
+  "traceback": "Traceback (most recent call last):\n  File \"/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/generate_heldout.py\", line 84, in main\n    assert process.returncode == 0, f\"generator exit {process.returncode}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: generator exit 101\n"
+}
