@@ -1,0 +1,53 @@
+{
+  "arms": {
+    "baseline": {
+      "candidate_id": "IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0haeee7ec59767",
+      "candidate_manifest": "experiments/koblitz-s3-c2800-prefix-screen-20261009/identities/candidates/IC1N53Ckb1fb127200PDP4rootRCsampleLAgaussTDdirectISO0haeee7ec59767.json",
+      "columns": 1200,
+      "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+      "factor_base_points": 127200,
+      "prepare_rank": 1200,
+      "root_table_slots": 268435456,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "native_rotating_state_order"
+    },
+    "expanded": {
+      "candidate_id": "IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h1f41cb1aeaa9",
+      "candidate_manifest": "experiments/koblitz-s3-c2800-prefix-20261009/identities/candidates/IC1N53Ckb1fb296800PDP4rootRCsampleLAgaussTDdirectISO0h1f41cb1aeaa9.json",
+      "columns": 2800,
+      "factor_base_digest": "c9ee1efcb17aeb1ced5a354a01bbf562a2c0dda6867fc6839047ad97fc804755",
+      "factor_base_points": 296800,
+      "prepare_rank": 2800,
+      "root_table_slots": 1073741824,
+      "target_search_prefix_columns": 1200,
+      "target_search_schedule": "c1200_embedded_state_prefix_then_complete_c2800"
+    }
+  },
+  "binary_sha256": "c6292074ec3cb7a8bd0d810b931ac837022a6d91d245ce145f1f12f13f6b60ae",
+  "controlled_speedup": null,
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_n53_c1200_c2800prefix_paired_call_screen_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "repetitions_per_arm_per_target": 1,
+  "resource_probe": "/usr/bin/time -l per child; full-process RSS, instructions, cycles, and context switches",
+  "run_order": "AB_even_target_BA_odd_target",
+  "runner_sha256": "c3aa5c1c95e36e780c2295ea85c825b93ff5883f5c491bb53a7cf3fa9f37a250",
+  "screen_advance_root_call_geomean_ratio_min": 3,
+  "source_commit": "a1df596ee8cd836d13fdd11ab83864aa5fe031e0",
+  "source_sha256": "8909652b94eb417e9da25e4d99b4544c3d3a972d6262a326623324fb914410d0",
+  "target_labels": [
+    "T149",
+    "T150",
+    "T151",
+    "T152",
+    "T153",
+    "T154",
+    "T155",
+    "T156"
+  ],
+  "target_workers": 1,
+  "timeout_seconds_per_run": 600
+}
