@@ -38,3 +38,14 @@ python3 experiments/koblitz-s3-c2800-mixed-20261009/run_feasibility.py \
 If rank, scalar, semantic, memory, and table-geometry gates pass, the
 recorder assigns the content-hashed candidate ID and freezes fresh
 T173–T180 one-target workloads. Preserve any failed or capped row.
+
+After that gate, [`prepare_freeze.py`](prepare_freeze.py) binds the C1200 and
+C2800 candidate manifests, the same eight public points, and the paired
+[`run_paired.py`](run_paired.py) runner. Its screen orders each point's two
+arms AB or BA, caps each process at 600 seconds and 32 GiB RSS, and stops
+after the first invalid or over-budget row. A complete verified screen needs
+at least a twofold geometric mean reduction in S3 calls before further
+measurement; online wall time and its target-level uncertainty remain
+separate. [`preserve_screen.py`](preserve_screen.py) and
+[`analyze.py`](analyze.py) retain all launched rows and leave aggregates
+unknown when the panel is incomplete.
