@@ -216,7 +216,11 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzTraceZeroBase<'_> {
             format!(
                 "trace-zero invariant subspace, divisor {idx:?}, dimension {}{}",
                 frob.ell,
-                if params.flag("projected") { ", columns merged by cofactor projection" } else { "" }
+                if params.flag("projected") {
+                    ", columns merged by cofactor projection"
+                } else {
+                    ""
+                }
             ),
         )
         .ok_or_else(|| "the trace-zero subspace produced no usable factor base".into())
