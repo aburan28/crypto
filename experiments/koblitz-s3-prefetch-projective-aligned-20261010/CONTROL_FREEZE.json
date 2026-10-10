@@ -1,0 +1,49 @@
+{
+  "binary_sha256": "aa9d26220696ff760e670a0fb7ca0a109aaf9a8ba2192ab40d8f4f993aa4346e",
+  "controlled_speedup": null,
+  "curves": {
+    "41": {
+      "columns": 800,
+      "factor_base_digest": "cdd82bd0acdb98b53455a97fc5611af7cebdccc87b63d966d9000adb300092a7",
+      "factor_base_points": 65600,
+      "fixture_scalar": 253982070906,
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T025/public_target.json",
+      "point_sha256": "b246b44a0e5a32b87d0e94b296b1f308511eb6ade56e9fa6d058538c60810dcc",
+      "public_point": [
+        1655120004424,
+        140655220686
+      ],
+      "reference_report_gzip_sha256": "dda16ddc6c87d4753b59fadd807410c504590c3efe3f820ac16b87bf1952d8f7",
+      "reference_report_raw_sha256": "6f36cc03718d85b27d6764223c40051d96aa81fa7ec146df9123fcac82dfa093",
+      "reference_report_relative": "experiments/koblitz-s3-prefetch-projective-20261010/n41/local/control/combined/report.json.gz",
+      "workload_id": "1aa57f8a2e83"
+    },
+    "53": {
+      "columns": 1200,
+      "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+      "factor_base_points": 127200,
+      "fixture_scalar": 429728658711,
+      "point_file_relative": "experiments/koblitz-s3-crosscurve-20261009/holdout/n53/T025/public_target.json",
+      "point_sha256": "5a9230c011729aa1e93187121c9f94dfee55943b4a42b1bbe5d270c8afcd0f8e",
+      "public_point": [
+        7024908122546358,
+        2805535303407364
+      ],
+      "reference_report_gzip_sha256": "0e5d19b6e8ec7fe52138af9b76dbea3a57bf0d4f5db040d5f4c78583ee32b879",
+      "reference_report_raw_sha256": "13d7da624f9dec8effba450060c794691ba939a9f4107b8558a34bf7fe8820da",
+      "reference_report_relative": "experiments/koblitz-s3-prefetch-projective-20261010/local/verified_t025/report.json.gz",
+      "workload_id": "a238237883e9"
+    }
+  },
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_aligned_root_n41_n53_t025_control_freeze_v1",
+  "memory_envelope_bytes": 34359738368,
+  "parent_freeze_sha256": "45cbbe93b2b0e541bce89973a97571d128293c786026ee3ada5cb346d0a48283",
+  "relation_seed": 20260928,
+  "relation_workers": 14,
+  "runner_sha256": "d26bf62098d559df6ecb995910eae0fc8039e9f2650e21466137993e85d528ce",
+  "source_relative": "examples/s3_partial_prepared_fullrank_prefetch_projective_aligned_targetspan.rs",
+  "source_sha256": "7570cef66733a7d9d9ff57771741fab72d55eaa194c76e453e2127cf88d0be2d",
+  "target_workers": 1,
+  "timeout_seconds_per_run": 120
+}
