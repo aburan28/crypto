@@ -26,7 +26,7 @@ QUALITY_CHECKS = ("verified_scalar_and_fixture", "exclusive_phase_sum",
                   "cpu_psi_at_most_1_percent",
                   "memory_io_psi_at_most_0_1_percent",
                   "zero_oom_events", "fixed_cpu_frequency",
-                  "perf_cycles_and_instructions")
+                  "perf_counters_unmultiplexed")
 
 
 def sha(raw: bytes) -> str:
@@ -128,6 +128,10 @@ def guest_quality(row: dict, host: dict, verified: bool) -> dict:
                  for governor, low, high in frequency)
              if all(governor and low and high for governor, low, high in frequency)
              else None)
+    perf = row["perf"]
+    perf_coverage = (None if perf["cycles_error"] or perf["instructions_error"] else
+                     bool(perf["cycles"] and perf["instructions"] and
+                          perf["both_events_at_least_99_percent_running"]))
     checks = {
         "verified_scalar_and_fixture": verified,
         "exclusive_phase_sum": row["phase_ok"],
@@ -149,8 +153,7 @@ def guest_quality(row: dict, host: dict, verified: bool) -> dict:
         "zero_oom_events": (oom == 0 and oom_kill == 0
                             if oom is not None and oom_kill is not None else None),
         "fixed_cpu_frequency": fixed,
-        "perf_cycles_and_instructions": bool(row["perf"]["cycles"] and
-                                             row["perf"]["instructions"]),
+        "perf_counters_unmultiplexed": perf_coverage,
     }
     assert tuple(checks) == QUALITY_CHECKS
     return {
@@ -165,7 +168,10 @@ def guest_quality(row: dict, host: dict, verified: bool) -> dict:
                      "selected_cpu_interrupts": irq, "cgroup_cpu_psi_fraction": cpu_psi,
                      "cgroup_memory_psi_fraction": mem_psi,
                      "cgroup_io_psi_fraction": io_psi,
-                     "oom_events": oom, "oom_kills": oom_kill},
+                     "oom_events": oom, "oom_kills": oom_kill,
+                     "cycles_running_fraction": (perf["cycles_event"] or {}).get("running_fraction"),
+                     "instructions_running_fraction":
+                         (perf["instructions_event"] or {}).get("running_fraction")},
     }
 
 
@@ -253,7 +259,9 @@ def analyze(receipt_path: Path) -> tuple[dict, list[dict]]:
             "setup_ms": timing.get("reusable_setup_total"),
             "fallback_attempts": report.get("fallback_attempts", 0),
             "sampled_peak_rss_bytes": row["sampled_peak_rss_bytes"],
-            "ipc": row["perf"]["ipc"], "guest_quality": quality,
+            "ipc": row["perf"]["ipc"],
+            "ipc_scaled_estimate": row["perf"]["ipc_scaled_estimate"],
+            "guest_quality": quality,
             "error": row["error"],
         })
         replay_rows.append({

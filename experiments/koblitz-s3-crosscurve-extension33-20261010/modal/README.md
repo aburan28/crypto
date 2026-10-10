@@ -8,8 +8,8 @@ The Modal repetitions use R3/R4, distinct from the local R1/R2 records.
 
 The [transfer manifest](TRANSFER_MANIFEST.json) inventories **3,329,083
 bytes** in exactly two source-derived ELF executables and one 6,259-byte
-public-point bundle. The 15,550-byte [guest runner](remote_pilot.py) and its
-375-byte argument JSON are sent as Sandbox command text, for **3,345,008
+public-point bundle. The 17,530-byte [guest runner](remote_pilot.py) and its
+375-byte argument JSON are sent as Sandbox command text, for **3,346,988
 bytes of total input payload**. The public bundle contains candidate and
 workload IDs, curve IDs, factor-base sizes, and public points; fixture scalars, the
 repository source tree, local run archives, caches, and credentials stay local.
@@ -33,7 +33,13 @@ specifies physical cores and request/limit billing.
 The guest samples CPU affinity and thread masks, physical core and SMT
 topology, NUMA pages, cgroup quota/throttling, PSI, steal ticks, interrupts,
 RSS, and process cycles/instructions when perf access is available. The
-[analyzer](analyze.py) checks the recovered scalars against local fixtures,
+perf receipt keeps each event's enabled and running time, reports an IPC
+estimate only when both events ran for at least 99% of their enabled time,
+and preserves unavailable counters. The counters attach after child spawn
+and inherit future threads, so the IPC remains a process diagnostic. The
+[Linux perf_event_open manual](https://man7.org/linux/man-pages/man2/perf_event_open.2.html)
+describes the enabled/running fields and the inherited-group limitation.
+The [analyzer](analyze.py) checks the recovered scalars against local fixtures,
 every charged online phase, candidate/workload/run IDs, and the bundle and
 binary identities. The online S3 operation count adds target-dependent rank
 calls to final target calls in the reference arm, and fallback calls to final

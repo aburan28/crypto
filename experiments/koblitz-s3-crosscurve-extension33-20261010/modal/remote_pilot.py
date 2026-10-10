@@ -156,6 +156,10 @@ def perf_open(pid: int, config: int) -> tuple[int | None, str | None]:
         return None, "unsupported_architecture"
     attr = ctypes.create_string_buffer(64)
     struct.pack_into("IIQ", attr, 0, 0, 64, config)
+    # PERF_FORMAT_TOTAL_TIME_ENABLED | PERF_FORMAT_TOTAL_TIME_RUNNING.
+    # Inherited events cannot reliably use PERF_FORMAT_GROUP, so retain both
+    # event scheduling fractions and treat IPC as a process diagnostic.
+    struct.pack_into("Q", attr, 32, 3)
     struct.pack_into("Q", attr, 40, 2)  # inherit future threads and children
     libc = ctypes.CDLL(None, use_errno=True)
     libc.syscall.restype = ctypes.c_long
@@ -166,12 +170,20 @@ def perf_open(pid: int, config: int) -> tuple[int | None, str | None]:
     return int(fd), None
 
 
-def perf_close(fd: int | None) -> int | None:
+def perf_close(fd: int | None) -> tuple[dict | None, str | None]:
     if fd is None:
-        return None
+        return None, None
     try:
-        raw = os.read(fd, 8)
-        return struct.unpack("Q", raw)[0] if len(raw) == 8 else None
+        raw = os.read(fd, 24)
+        if len(raw) != 24:
+            return None, f"short_perf_read:{len(raw)}"
+        count, enabled, running = struct.unpack("QQQ", raw)
+        return {"raw_count": count, "time_enabled_ns": enabled,
+                "time_running_ns": running,
+                "running_fraction": running / enabled if enabled else None,
+                "scaled_count": count * enabled / running if running else None}, None
+    except OSError as exc:
+        return None, f"{type(exc).__name__}:{exc.errno}"
     finally:
         os.close(fd)
 
@@ -259,8 +271,22 @@ def run_one(bundle: dict, case: dict, order: dict,
                 observed_numa = numa_pages(child.pid)
     finished = time.time_ns()
     after = snapshot(cpus)
-    cycles = perf_close(cycles_fd)
-    instructions = perf_close(instructions_fd)
+    cycles_sample, cycles_read_error = perf_close(cycles_fd)
+    instructions_sample, instructions_read_error = perf_close(instructions_fd)
+    cycles_error = cycles_error or cycles_read_error
+    instructions_error = instructions_error or instructions_read_error
+    cycles = cycles_sample["raw_count"] if cycles_sample else None
+    instructions = instructions_sample["raw_count"] if instructions_sample else None
+    cycles_scaled = cycles_sample["scaled_count"] if cycles_sample else None
+    instructions_scaled = (instructions_sample["scaled_count"]
+                           if instructions_sample else None)
+    fractions = [sample["running_fraction"] for sample in
+                 (cycles_sample, instructions_sample) if sample]
+    full_perf_coverage = (len(fractions) == 2 and
+                          all(fraction is not None and fraction >= 0.99
+                              for fraction in fractions))
+    ipc_estimate = (instructions_scaled / cycles_scaled
+                    if instructions_scaled is not None and cycles_scaled else None)
     raw = output.read_bytes() if output.exists() else b""
     try:
         report = json.loads(raw) if raw else None
@@ -300,10 +326,14 @@ def run_one(bundle: dict, case: dict, order: dict,
         "max_threads_seen": max_threads,
         "thread_affinity_masks_seen": sorted(thread_masks),
         "perf": {"cycles": cycles, "instructions": instructions,
-                 "ipc": instructions / cycles if cycles and instructions else None,
+                 "cycles_event": cycles_sample,
+                 "instructions_event": instructions_sample,
+                 "ipc_scaled_estimate": ipc_estimate,
+                 "ipc": ipc_estimate if full_perf_coverage else None,
+                 "both_events_at_least_99_percent_running": full_perf_coverage,
                  "cycles_error": cycles_error,
                  "instructions_error": instructions_error,
-                 "boundary": "child counters opened immediately after process start; inheriting later threads"},
+                 "boundary": "two separately opened inherited process events attached after child spawn; pre-attachment work and pre-existing threads are outside counters"},
         "before": before, "after": after, "report": report,
     }
 
