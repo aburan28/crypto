@@ -17,3 +17,19 @@ factor-base digest, full rank, recovered scalar, and all unchanged report
 fields. Prefetch look-ahead may increase the final batch's S3 call count;
 the complete charged count remains in the report. A fresh N53 holdout screen
 will follow only if the correctness and 32 GiB memory gates pass.
+
+The T025 control passed: all unchanged report fields match the reference,
+including its first relation, and checked Sage independently replayed scalar
+`429728658711`. The target made 3,280 charged S3 calls versus 3,272 before
+look-ahead prefetch. Its exploratory online interval was 0.949 ms versus
+1.701 ms for the single earlier reference run. These T025 runs select the
+candidate; they do not enter the fresh holdout ratio.
+
+`SCREEN_FREEZE.json` binds previously unused N53 points T189–T196, both
+candidate manifests, source and release binary hashes, 14 preparation
+workers, one target worker, 32 GiB peak RSS, and alternating AB/BA order.
+Every arm receives one point per fresh process with full reusable preparation
+outside the online clock. The prespecified advancement gate is all 16 scalar
+recoveries verified and a held-out geometric reference/combined online ratio
+of at least **2×**. The host-isolation and 10% setup-noise gates still apply
+before a controlled wall-time claim.
