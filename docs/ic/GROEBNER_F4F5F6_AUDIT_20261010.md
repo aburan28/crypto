@@ -135,6 +135,7 @@ control.
 | root echelon of the inherited engine and every other `echelon_f2_counted` caller now reaches `gf2_elim` at ≥ 128 × 256 (it never did: only `rref_f2_counted` routed there) | `koblitz_groebner.rs` | `KIC_F4_KERNEL=legacy` | kernel alone 1.8–3.2× on the oracle's own Macaulay matrices (`gf2_elim_bench --quick`, table below); reach ladder 1.0–1.1× (its matrices are mostly below the gate and build-dominated) |
 | child nodes ask the node oracle **before** specialising the parent's bases | `koblitz_groebner.rs::solve_rec` | `KIC_F4_EARLY_ORACLE=0` | n = 17, dim 6, m = 3, 8 targets: F6-IC 197.7 → 185.4 ms with both changes; the same 463 reductions, 280 refutations, 58 341 additions |
 | partial support pruning: a summand with some bits assigned refutes as soon as no base code agrees with them | `koblitz_index_calculus.rs::F6GeometricGate::decide` | `KIC_F6_PARTIAL_SUPPORT=0` | n = 17: reductions 508 → 463 (−9 %), 45 extra refutations; larger cells in §4.2 |
+| `gf2_elim` selects AVX2 on hosts without AVX-512 (they ran scalar) | `gf2_elim.rs::simd_kind` | `KIC_GF2_SIMD=0` | §4.3; no change on AVX-512 hosts |
 | `f4_fp::solve` candidate filter (§2.1) | `f4_fp.rs` | — | correctness |
 | `examples/f6_ic_probe.rs`: same-binary F4/F6-IC timing probe with verdict agreement | new | — | tooling |
 
@@ -154,7 +155,53 @@ K₁/2⁹ m3 0.0008 → 0.0009; K₁/2¹⁵ m3 0.0084 → 0.0080. Hits identical
 
 ### 4.2 F6-IC probe
 
-PROBE_RESULTS
+Standard-subspace bases, m = 3, `InheritedF4 { max_degree: 3 }`, node
+budget 20 000, best of 3 runs a target (one run at n = 31), both arms in
+one binary; "controls off" is F6-IC with `KIC_F4_EARLY_ORACLE=0
+KIC_F6_PARTIAL_SUPPORT=0`. Verdicts agree across arms on every target.
+
+| cell | \|F\| | arm | total ms | reductions | splits | gate refutations | group additions | word XORs |
+|:--|--:|:--|--:|--:|--:|--:|--:|--:|
+| K₁/2¹⁷ dim 6, 8 targets (1 hit) | 62 | inherited F4 | 255.6 | 1 201 | 504 | — | — | 15.02 M |
+| | | F6-IC, controls off | 197.7 | 508 | 275 | 235 | 58 341 | 12.65 M |
+| | | **F6-IC** | **185.4** | **463** | 275 | 280 | 58 341 | 12.64 M |
+| K₁/2²³ dim 7, 4 targets (0 hits) | 107 | inherited F4 | 578.1 | 1 180 | 500 | — | — | 53.27 M |
+| | | F6-IC, controls off | 531.0 | 542 | 288 | 216 | 91 592 | 51.97 M |
+| | | **F6-IC** | **520.3** | **450** | 272 | 276 | 91 592 | 51.92 M |
+| K₀/2²³ dim 8, 4 targets (0 hits), cap off | 275 | inherited F4 | 1 741.2 | 2 796 | 1 192 | — | — | 158.51 M |
+| | | F6-IC, controls off | 1 789.6 | 2 796 | 1 192 | 0 | 0 | 158.51 M |
+| | | **F6-IC** | **1 719.7** | **2 692** | 1 184 | 88 | 0 | 158.47 M |
+| K₀/2³¹ dim 9, 1 target, budget 2 000 (exhausted) | 553 | inherited F4 | 2 253.3 | 1 410 | 602 | — | — | 281.58 M |
+| | | F6-IC | 2 375.4 | 1 357 | 599 | 47 | 0 | 281.54 M |
+
+Reading it: the early oracle and partial support pruning take 6 % (n = 17),
+2 % (n = 23, dim 7) and 4 % (n = 23, dim 8) off F6-IC's wall and 9 %, 17 %
+and 4 % off its reductions, with identical geometry. Above the 256-point
+closure cap F6-IC was identical to inherited F4; the partial support test
+is now the only thing it does there, and it is worth about 4 %. None of
+this moves the exponent: at every cell the random targets are refuted by
+walking the tree, and the n = 31 cell exhausts a 2 000-node budget in
+2.3 s a target where meet in the middle answers in under a millisecond
+(`OPTIMIZATION_PLAN.md` §6).
+
+### 4.3 Kernel row update on this host
+
+`gf2_elim_bench --quick`, ms per cell, two runs (3 and 5 repetitions):
+
+| cell | scalar (`KIC_GF2_SIMD=0`) | AVX2 (`KIC_GF2_FORCE_AVX2=1`) | AVX-512 (default) |
+|:--|--:|--:|--:|
+| K/2^23 m2 d4 (5 842 × 8 449) | 79.8 / 72.2 | 75.4 / 79.0 | 110.8 / 99.7 |
+| K/2^5 m3 d5 (4 940 × 8 357) | 48.2 / 55.9 | 56.7 / 44.7 | 58.3 / 46.8 |
+| rand 4096² ½ | 57.8 / 56.1 | 33.9 / 34.0 | 70.9 / 36.6 |
+
+On this cloud Xeon the AVX-512 path is never the fastest and is the
+slowest on the largest Macaulay cell, by 1.3–1.4× against AVX2; on the
+random matrix AVX2 and AVX-512 tie and beat scalar 1.6×. The default is
+left as the repository measured it on its own runner
+(`gf2-elim-reference-v1.json`); what this audit changed is that hosts
+without AVX-512 now take the AVX2 path instead of scalar. Re-measuring
+the preference on the CI runner is a one-line change in `simd_kind`
+with these numbers as the reason.
 
 ## 5. The fastest version of this, in order of expected payoff
 
