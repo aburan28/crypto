@@ -158,3 +158,9 @@ Per AGENTS.md, open or update a PR in this task:
 
 CI (`.github/workflows/ecbench.yml`) re-audits every committed session with
 replays on Linux. A session whose counts do not reproduce there fails the PR.
+
+In a sparse checkout (`scripts/sparse-checkout.sh status`,
+`docs/sparse-checkout.md`) a new session directory is included and builds
+work as usual. An earlier session you replay or compare against (`--b-dir`)
+may sit under an excluded directory: `scripts/sparse-checkout.sh add --path`
+it first. Off disk is not absent.

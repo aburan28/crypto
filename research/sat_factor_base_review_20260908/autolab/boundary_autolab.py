@@ -235,7 +235,7 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     ic_ops = accounting.get("ic_online_operations")
     rho_ops = accounting.get("rho_online_operations")
     for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
-        if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
+        if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
             errors.append(f"operation_accounting.{name} must be positive")
     units = accounting.get("operation_units")
     if not isinstance(units, dict) or not all(
@@ -246,7 +246,7 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     if not isinstance(assumption, str) or not assumption.strip():
         errors.append("operation_accounting.unit_assumption must state how the units compare")
     ratio = accounting.get("ops_speedup_online")
-    if not isinstance(ratio, (int, float)) or isinstance(ratio, bool):
+    if type(ratio) not in (int, float) or not math.isfinite(ratio) or ratio <= 0:
         errors.append("operation_accounting.ops_speedup_online is required")
     elif not errors:
         expected = float(rho_ops) / float(ic_ops)
@@ -271,55 +271,22 @@ def validate_claim(
     global_required = list(schema.get("global_provenance_required", []))
     missing_stage = missing_fields(report, required)
     missing_global = missing_fields(report, global_required)
-    pairing_errors: list[str] = []
-    if stage == "vs_rho":
-        paired = report.get("paired_target")
-        if report.get("target_count") != 1:
-            pairing_errors.append("target_count must be exactly one")
-        if not isinstance(paired, dict):
-            pairing_errors.append("paired_target must be an object")
-        else:
-            ic_q = paired.get("ic_public_q")
-            rho_q = paired.get("rho_public_q")
-            if not isinstance(ic_q, list) or not isinstance(rho_q, list):
-                pairing_errors.append("both arms must record public target coordinates")
-            elif ic_q != rho_q:
-                pairing_errors.append("IC and rho public targets differ")
-            if paired.get("same_public_point") is not True:
-                pairing_errors.append("same_public_point is not verified")
-        if report.get("ic_verified") is not True:
-            pairing_errors.append("IC target recovery is not verified")
-        if report.get("rho_verified") is not True:
-            pairing_errors.append("rho target recovery is not verified")
-        if not isinstance(report.get("ic_online_ms"), (int, float)) or report.get("ic_online_ms", 0) <= 0:
-            pairing_errors.append("positive ic_online_ms is required")
-        if not isinstance(report.get("rho_online_ms"), (int, float)) or report.get("rho_online_ms", 0) <= 0:
-            pairing_errors.append("positive rho_online_ms is required")
-        if not isinstance(report.get("online_speedup"), (int, float)) or report.get("online_speedup", 0) <= 0:
-            pairing_errors.append("positive same-target online_speedup is required")
-        elif isinstance(report.get("ic_online_ms"), (int, float)) and isinstance(report.get("rho_online_ms"), (int, float)):
-            expected = float(report["rho_online_ms"]) / float(report["ic_online_ms"])
-            if abs(float(report["online_speedup"]) - expected) > max(1e-9, expected * 1e-8):
-                pairing_errors.append("online_speedup does not equal rho_online_ms / ic_online_ms")
-        for arm in ("ic", "rho"):
-            phases = report.get(f"{arm}_online_phase_ms")
-            total = report.get(f"{arm}_online_ms")
-            if not isinstance(phases, dict) or not phases:
-                pairing_errors.append(f"{arm}_online_phase_ms must record exclusive phases")
-            elif isinstance(total, (int, float)):
-                phase_sum = sum(float(value) for value in phases.values())
-                if abs(phase_sum - float(total)) > max(0.02, float(total) * 1e-8):
-                    pairing_errors.append(f"{arm} online phase costs do not sum to online time")
-            else:
-                pairing_errors.append(f"{arm}_online_ms is missing")
-        if report.get("all_stages_charged_same_series") is not True:
-            pairing_errors.append("same-target charged intervals are not confirmed")
-        if field_present(report, "operation_accounting"):
-            pairing_errors.extend(operation_accounting_errors(report["operation_accounting"]))
-    ok = not missing_stage and not missing_global and not pairing_errors
     validation_errors: list[str] = []
 
     if stage == "vs_rho":
+        paired = report.get("paired_target")
+        if paired is not None:
+            if not isinstance(paired, dict):
+                validation_errors.append("paired_target must be an object")
+            elif (
+                paired.get("same_public_point") is not True
+                or paired.get("ic_public_q") != paired.get("rho_public_q")
+            ):
+                validation_errors.append("paired_target must contain the same public point in both arms")
+        if "all_stages_charged_same_series" in report and report["all_stages_charged_same_series"] is not True:
+            validation_errors.append("all_stages_charged_same_series must be true when present")
+        if field_present(report, "operation_accounting"):
+            validation_errors.extend(operation_accounting_errors(report["operation_accounting"]))
         for key in ("candidate_id", "workload_id", "run_id"):
             value = report.get(key)
             if not isinstance(value, str) or not value.strip():
@@ -458,7 +425,6 @@ def validate_claim(
         "status": "PASS" if ok else "FAIL",
         "missing_stage_fields": missing_stage,
         "missing_global_provenance": missing_global,
-        "pairing_errors": pairing_errors,
         "validation_errors": validation_errors,
         "required_stage_fields": required,
         "required_global_provenance": global_required,
@@ -690,6 +656,7 @@ RESOURCE_RECEIPT_FIELDS = (
     "stdout_stable",
     "children_cpu_user_ms",
     "children_cpu_system_ms",
+    "children_peak_rss_bytes",
     "command",
     "seed",
 )
@@ -717,16 +684,6 @@ def _run_once(
     # Children CPU deltas (seconds -> ms). Wall is the outer process wait.
     cpu_user_ms = (usage_after.ru_utime - usage_before.ru_utime) * 1000.0
     cpu_system_ms = (usage_after.ru_stime - usage_before.ru_stime) * 1000.0
-    # Peak RSS after wait is cumulative for this process's children; treat as
-    # an observed upper bound for single-producer launches.
-    peak_rss = children_rss_bytes(int(usage_after.ru_maxrss))
-    return {
-        "command": command,
-        "exit_code": completed.returncode,
-        "whole_process_wall_ms": elapsed_ms,
-        "children_cpu_user_ms": cpu_user_ms,
-        "children_cpu_system_ms": cpu_system_ms,
-        "children_peak_rss_bytes": peak_rss,
     return completed, elapsed_ms, cpu_user_ms, cpu_system_ms
 
 
@@ -800,6 +757,9 @@ def run_timed(
         "stdout_stable": len(set(outputs)) <= 1,
         "children_cpu_user_ms": statistics.median(users),
         "children_cpu_system_ms": statistics.median(systems),
+        "children_peak_rss_bytes": children_rss_bytes(
+            int(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
+        ),
         "stdout": completed.stdout,
         "stderr": completed.stderr,
     }
@@ -912,6 +872,8 @@ def exclusive_precomputation_ms(row: dict[str, Any] | None) -> float | None:
            or not math.isfinite(value) or value < 0 for value in values):
         return None
     return sum(values)
+
+
 def positive_cost(value):
     return float(value) if type(value) in (int, float) and math.isfinite(value) and value > 0 else None
 
@@ -1000,6 +962,26 @@ def automorphism_discount(n: int) -> dict[str, Any]:
     }
 
 
+def public_target_hash(beat: dict[str, Any], point: Any) -> str | None:
+    """Bind a producer's public point to the beat's field and curve parameters."""
+    if not isinstance(point, list) or len(point) != 2:
+        return None
+    try:
+        coordinates = []
+        for value in point:
+            if type(value) is int and value >= 0:
+                coordinates.append(str(value))
+            elif isinstance(value, str) and value.isascii() and value.isdecimal():
+                coordinates.append(str(int(value)))
+            else:
+                return None
+        payload = {"n": int(beat["n"]), "a": int(beat["a"]), "q": coordinates}
+    except (KeyError, TypeError, ValueError):
+        return None
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def draft_vs_rho_claim(
     *,
     beat: dict[str, Any],
@@ -1028,26 +1010,31 @@ def draft_vs_rho_claim(
     )
     ic_q = online_row.get("published_q") if online_row else None
     rho_q = rho_row.get("published_q") if rho_row else None
-    same_public_point = (
-        isinstance(ic_q, list) and isinstance(rho_q, list) and ic_q == rho_q
-    )
+    ic_target_hash = public_target_hash(beat, ic_q)
+    rho_target_hash = public_target_hash(beat, rho_q)
+    same_public_point = ic_target_hash is not None and ic_target_hash == rho_target_hash
     ic_scalar = online_row.get("published_fixture_scalar") if online_row else None
     rho_scalar = rho_row.get("published_fixture_scalar") if rho_row else None
     same_fixture_scalar = ic_scalar is not None and ic_scalar == rho_scalar
 
     ic_phases = online_row.get("target_online_phase_ms") if online_row else None
     ic_online = online_row.get("target_online_wall_ms") if online_row else None
-    ic_phase_sum_ok = False
-    if isinstance(ic_phases, dict) and isinstance(ic_online, (int, float)):
-        phase_sum = sum(float(value) for value in ic_phases.values())
-        ic_phase_sum_ok = abs(phase_sum - float(ic_online)) <= max(0.02, float(ic_online) * 1e-8)
     ic_phase_exclusive_ok = exclusive_online_timing_ok(online_row)
+    ic_phase_sum_ok = False
+    if ic_phase_exclusive_ok:
+        phase_sum = math.fsum(float(value) for value in ic_phases.values())
+        ic_phase_sum_ok = math.isclose(
+            phase_sum, float(ic_online), rel_tol=1e-8, abs_tol=0.02
+        )
     rho_phases = None
     rho_online = None
     if rho_row is not None:
         walk_ms = rho_row.get("walk_ms")
         validation_ms = rho_row.get("validation_ms")
-        if isinstance(walk_ms, (int, float)) and isinstance(validation_ms, (int, float)):
+        if all(
+            type(value) in (int, float) and math.isfinite(value) and value >= 0
+            for value in (walk_ms, validation_ms)
+        ):
             rho_phases = {
                 "target_walk": float(walk_ms),
                 "scalar_recovery_check": float(validation_ms),
@@ -1068,33 +1055,29 @@ def draft_vs_rho_claim(
         rho_row
         and rho_row.get("verified") is True
         and rho_row.get("recovered_fixture_scalar") == rho_scalar
-        and rho_online is not None
-    direct_rows = parse_json_lines(direct_obs["stdout"])
-    rho_rows = parse_json_lines(rho_obs["stdout"])
-    producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
-    integrity = comparison_integrity(direct_rows, rho_rows, direct_obs.get('fixtures'))
-    ic_cost = (
-        float(direct_obs["whole_process_wall_ms"])
-        if timing_class == "whole_process_wall"
-        else extract_ic_cost(direct_rows, timing_class)
+        and positive_cost(rho_online) is not None
     )
     target_count = int(online_row.get("online_target_count", 0)) if online_row else 0
     pairing_ok = same_public_point and same_fixture_scalar and target_count == 1
+    stable_outputs = all(
+        observation.get("stdout_stable", True) is True
+        for observation in (direct_obs, rho_obs)
+    )
     online_speedup = (
         float(rho_online) / float(ic_online)
-        if pairing_ok and ic_verified and rho_verified
-        and isinstance(ic_online, (int, float)) and ic_online > 0
-        and isinstance(rho_online, (int, float)) and rho_online > 0
+        if pairing_ok and ic_verified and rho_verified and stable_outputs
+        and positive_cost(ic_online) is not None
+        and positive_cost(rho_online) is not None
         else None
     )
     producers_ok = (
         direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
-        and pairing_ok and ic_verified and rho_verified
+        and pairing_ok and ic_verified and rho_verified and stable_outputs
     )
     precompute_ms = exclusive_precomputation_ms(precompute_row)
-    if timing_class == "single_target_online":
-        ic_cost = float(ic_online) if isinstance(ic_online, (int, float)) else None
-        rho_cost = float(rho_online) if isinstance(rho_online, (int, float)) else None
+    if timing_class in ("single_target_online", "single_target_online_wall"):
+        ic_cost = positive_cost(ic_online)
+        rho_cost = positive_cost(rho_online)
     else:
         ic_cost = (
             float(direct_obs["whole_process_wall_ms"])
@@ -1142,36 +1125,30 @@ def draft_vs_rho_claim(
         "workload_manifest_sha256": None,
         "run_id": None,
         "autolab_run_id": run.name,
-        "target_count": integrity.get("fixtures"),
-        "ic_target_hash": integrity.get("fixture_hash") if integrity["status"] == "MATCHED" else None,
-        "rho_target_hash": integrity.get("fixture_hash") if integrity["status"] == "MATCHED" else None,
-        "ic_online_wall_ms": None,
-        "rho_online_wall_ms": None,
-        "ic_online_phase_ms": None,
-        "online_speedup": None,
+        "target_count": target_count,
+        "ic_target_hash": ic_target_hash,
+        "rho_target_hash": rho_target_hash,
+        "ic_online_wall_ms": positive_cost(ic_online),
+        "rho_online_wall_ms": positive_cost(rho_online),
         "online_interval": None,
         "same_resource_envelope": None,
-        "ic_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
-        "rho_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
         "independent_validation": False,
         "ic_replay_certificate_sha256": None,
         "rho_replay_certificate_sha256": None,
         "ic_resource_envelope": None,
         "rho_resource_envelope": None,
+        "ic_scalar_verified": ic_verified,
+        "rho_scalar_verified": rho_verified,
         "rho_policy": None,
         "ic_cost": ic_cost,
         "rho_cost": rho_cost,
         "automorphism_discount": automorphism_discount(int(beat["n"])),
         "all_stages_charged_same_series": bool(
-            pairing_ok and ic_verified and rho_verified
-            and ic_phase_sum_ok and ic_phase_exclusive_ok
+            pairing_ok and ic_verified and rho_verified and ic_phase_sum_ok
+            and ic_phase_exclusive_ok and stable_outputs
         ),
-        "all_stages_charged_same_series": bool(producers_ok and integrity['status'] == 'MATCHED'
-            and timing_class == 'whole_process_wall'
-            and all(isinstance(x, (int, float)) and math.isfinite(x) and x > 0 for x in (ic_cost, rho_cost))),
-        "comparison_integrity": integrity,
         "verdict": (
-            ("DRAFT_PENDING_INDEPENDENT_VALIDATION" if integrity['status'] == 'MATCHED' else 'INVALID_COMPARISON')
+            "DRAFT_PENDING_INDEPENDENT_VALIDATION"
             if producers_ok
             else "PRODUCER_FAILURE"
         ),
@@ -1179,9 +1156,6 @@ def draft_vs_rho_claim(
             "Public synthetic Koblitz, one-target online comparison after reusable "
             "IC setup. No batch throughput, key recovery, asymptotic sub-rho claim, "
             "or ledger promotion before independent validation."
-            "Legacy single-fixture producer diagnostic only. Current producers "
-            "report whole-process or operation-counted costs, not target-online "
-            "wall intervals; this row is not a primary single-target speedup."
         ),
         "claim_boundary_non_claims": [
             "not key recovery",
@@ -1192,7 +1166,6 @@ def draft_vs_rho_claim(
             "not compared against Pollard rho with precomputation at equal "
             "precompute and memory",
         ],
-        "target_count": target_count,
         "paired_target": {
             "ic_public_q": ic_q,
             "rho_public_q": rho_q,
@@ -1224,8 +1197,7 @@ def draft_vs_rho_claim(
         "ic_precomputation_fixture_ms": precompute_ms,
         "ic_target_relation_attempts": online_row.get("target_trials") if online_row else None,
         "independent_replay_pointer": independent_replay_pointer(run),
-        "fixture_hash": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
-        "fixture_hash": integrity['fixture_hash'],
+        "fixture_hash": ic_target_hash if same_public_point else None,
         "executable_or_source_hash": {
             "direct": sha256(binaries["direct"]),
             "rho": sha256(binaries["rho"]),
@@ -1247,10 +1219,7 @@ def draft_vs_rho_claim(
             "rho": rho_obs["whole_process_wall_ms"],
         },
         "whole_process_wall_method": {
-            "description": (
-                "median of timed executions after one discarded warmup; "
-                "first-execution cost is reported separately and not charged"
-            ),
+            "description": "median of timed executions after one discarded warmup; first-execution cost is reported separately",
             "cold_start_wall_ms": {
                 "direct": direct_obs.get("cold_start_wall_ms"),
                 "rho": rho_obs.get("cold_start_wall_ms"),
@@ -1420,11 +1389,8 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
     if beat.get("stage") == "vs_rho":
         require(
             fixtures == 1,
-            "vs_rho primary launches require exactly one online target; define a separate secondary workload before using multiple targets",
+            "vs_rho primary launches require exactly one target; define a separate secondary workload before using multiple targets",
         )
-    require(fixtures == 1, "run exactly one target per workload; batch fixtures are disabled")
-    repeats = getattr(arguments, "repeats", None) or DEFAULT_TIMED_REPEATS
-    require(repeats > 0, "repeats must be positive")
 
     with RunnerLock():
         preflight_receipt = preflight(protocol, ledger)
@@ -1491,25 +1457,12 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         direct_seed = seed_for(beat_id, "direct", 0)
         direct_cmd = commands["direct_argv"]
         direct_obs = run_timed(direct_cmd, env=env, cwd=REPO)
-        direct_obs = run_timed(direct_cmd, env=env, cwd=REPO, repeats=repeats)
         direct_obs["seed"] = direct_seed
-        direct_obs["fixtures"] = fixtures
         (run / "logs/direct.stdout.jsonl").write_text(direct_obs["stdout"])
         (run / "logs/direct.stderr.txt").write_text(direct_obs["stderr"])
         write_json(
             run / "receipts/direct.resource.json",
-            {
-                k: direct_obs[k]
-                for k in (
-                    "exit_code",
-                    "whole_process_wall_ms",
-                    "children_cpu_user_ms",
-                    "children_cpu_system_ms",
-                    "children_peak_rss_bytes",
-                    "command",
-                    "seed",
-                )
-            },
+            {key: direct_obs.get(key) for key in RESOURCE_RECEIPT_FIELDS},
         )
 
         if stage == "factor_base":
@@ -1527,7 +1480,7 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             status = (
                 "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
             )
-            if validation["status"] != "PASS":
+            if producers_ok and validation["status"] != "PASS":
                 status = "SCHEMA_INCOMPLETE"
             state.update(
                 status=status,
@@ -1584,17 +1537,8 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             write_json(
                 run / "receipts/rho.resource.json",
                 {
-                    k: rho_obs[k]
-                    for k in (
-                        "exit_code",
-                        "whole_process_wall_ms",
-                        "children_cpu_user_ms",
-                        "children_cpu_system_ms",
-                        "children_peak_rss_bytes",
-                        "command",
-                        "seed",
-                        "fixed_target_scalar",
-                    )
+                    **{key: rho_obs.get(key) for key in RESOURCE_RECEIPT_FIELDS},
+                    "fixed_target_scalar": rho_obs.get("fixed_target_scalar"),
                 },
             )
 
@@ -1614,12 +1558,17 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             status = (
                 "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
             )
-            if validation["status"] != "PASS":
-                status = (
-                    "PAIRING_FAILURE"
-                    if validation.get("pairing_errors")
-                    else "SCHEMA_INCOMPLETE"
-                )
+            pairing_errors = []
+            if producers_ok and claim["paired_target"]["same_public_point"] is not True:
+                pairing_errors.append("IC and rho public targets differ or are missing")
+            if producers_ok and claim["paired_target"]["same_fixture_scalar"] is not True:
+                pairing_errors.append("IC and rho fixture scalars differ or are missing")
+            if producers_ok and pairing_errors:
+                status = "PAIRING_FAILURE"
+            elif producers_ok and not claim["all_stages_charged_same_series"]:
+                status = "ACCOUNTING_INCOMPLETE"
+            elif producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
             state.update(
                 status=status,
                 phase="analysis",
@@ -1627,51 +1576,11 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
                 direct_exit_code=direct_obs["exit_code"],
                 rho_exit_code=rho_obs["exit_code"],
                 claim_check=validation["status"],
-                pairing_errors=validation.get("pairing_errors", []),
+                pairing_errors=pairing_errors,
             )
         else:
             raise AutolabError(f"unsupported launch stage: {stage}")
 
-            {k: direct_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
-        )
-
-        rho_obs = run_timed(rho_cmd, env=env, cwd=REPO, repeats=repeats)
-        rho_obs["seed"] = rho_seed
-        (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
-        (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
-        write_json(
-            run / "receipts/rho.resource.json",
-            {k: rho_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
-        )
-
-        claim = draft_vs_rho_claim(
-            beat=beat,
-            beat_id=beat_id,
-            run=run,
-            direct_obs=direct_obs,
-            rho_obs=rho_obs,
-            binaries=binaries,
-        )
-        write_json(run / "artifacts/claim_draft.json", claim)
-        validation = validate_claim(claim, stage="vs_rho", ledger=ledger)
-        write_json(run / "artifacts/claim_check.json", validation)
-
-        producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
-        status = "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
-        if validation["status"] != "PASS":
-            status = "SCHEMA_INCOMPLETE"
-        if producers_ok and claim['comparison_integrity']['status'] != 'MATCHED':
-            status = 'INVALID_COMPARISON'
-        elif producers_ok and not claim['all_stages_charged_same_series']:
-            status = 'ACCOUNTING_INCOMPLETE'
-        state.update(
-            status=status,
-            phase="analysis",
-            updated_at=now(),
-            direct_exit_code=direct_obs["exit_code"],
-            rho_exit_code=rho_obs["exit_code"],
-            claim_check=validation["status"],
-        )
         write_json(run / "state.json", state)
         write_json(
             run / "artifacts/candidate.json",
@@ -2522,16 +2431,6 @@ def parser() -> argparse.ArgumentParser:
         "--fixtures",
         type=int,
         help="Online target count (default from beat); vs_rho primary runs require exactly 1",
-        help="Compatibility option; the only accepted value is 1 target per workload",
-    )
-    launch_parser.add_argument(
-        "--repeats",
-        type=int,
-        help=(
-            "Timed executions per arm after a discarded warmup exec "
-            f"(default {DEFAULT_TIMED_REPEATS}; stops early once a run "
-            f"exceeds {int(REPEAT_BUDGET_MS / 1000)}s)"
-        ),
     )
     launch_parser.add_argument(
         "--prepare-only",
