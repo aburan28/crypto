@@ -184,7 +184,7 @@ impl QueryMode {
             | Self::PairPairDual128
             | Self::PairPairDual256
             | Self::PairPairGuided256 => None,
-            | Self::PairPairParallel512
+            Self::PairPairParallel512
             | Self::PairPairParallel1024
             | Self::PairPairParallel2048
             | Self::PairPairParallel4096 => None,
@@ -307,9 +307,8 @@ impl QuotientPairWitness {
             column <= u16::MAX as usize && coefficient <= COEFFICIENT_MASK
         }));
         Self {
-            packed_labels: labels.map(|(column, coefficient)| {
-                ((column as u64) << COEFFICIENT_BITS) | coefficient
-            }),
+            packed_labels: labels
+                .map(|(column, coefficient)| ((column as u64) << COEFFICIENT_BITS) | coefficient),
             image_y,
         }
     }
@@ -329,7 +328,10 @@ impl QuotientPairWitness {
         const COEFFICIENT_BITS: u32 = 48;
         const COEFFICIENT_MASK: u64 = (1u64 << COEFFICIENT_BITS) - 1;
         self.packed_labels.map(|packed| {
-            ((packed >> COEFFICIENT_BITS) as usize, packed & COEFFICIENT_MASK)
+            (
+                (packed >> COEFFICIENT_BITS) as usize,
+                packed & COEFFICIENT_MASK,
+            )
         })
     }
 
@@ -961,10 +963,8 @@ impl CompactPairTable {
                         self.columns[index].map(|column| (column as u64) << 48)
                     } else {
                         [
-                            ((self.columns[index][0] as u64) << 48)
-                                | self.coefficients[index][0],
-                            ((self.columns[index][1] as u64) << 48)
-                                | self.coefficients[index][1],
+                            ((self.columns[index][0] as u64) << 48) | self.coefficients[index][0],
+                            ((self.columns[index][1] as u64) << 48) | self.coefficients[index][1],
                         ]
                     },
                     image_y: self.image_y[index],
@@ -4149,13 +4149,18 @@ fn main() {
         .sum::<usize>();
     let guided_slot_index_ms = guided_slot_index_started.elapsed().as_secs_f64() * 1000.0;
     let support_occupied_slot_payload_bytes = match pair_mode {
-        PairMode::Full => support_index_entries
-            * (2 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>()),
-        PairMode::SignedQuotient => support_index_entries
-            * (2 * std::mem::size_of::<u64>()
-                + std::mem::size_of::<QuotientPairWitness>()),
-        PairMode::SignedExpanded => support_index_entries
-            * (std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>()),
+        PairMode::Full => {
+            support_index_entries
+                * (2 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>())
+        }
+        PairMode::SignedQuotient => {
+            support_index_entries
+                * (2 * std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>())
+        }
+        PairMode::SignedExpanded => {
+            support_index_entries
+                * (std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>())
+        }
     };
     let pair_ms = pair_started.elapsed().as_secs_f64() * 1000.0;
     let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
@@ -4297,181 +4302,177 @@ fn main() {
     let mut batch_shared_log_one_relation = 0u64;
     let mut retained_factor_base_logs: Option<Vec<u64>> = None;
     for fixture_index in 0..batch_fixtures {
-    let uses_retained_factor_logs = shared_factor_log_precomputation
-        && retained_factor_base_logs.is_some();
-    let fixture_material = if shared_public_fixture_domain {
-        format!(
-            "KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{}|{seed}|{}",
-            batch_corpus.as_deref().unwrap(),
-            shared_public_fixture_offset + fixture_index
-        )
-    } else if batch_fixtures == 1 {
-        format!("{TASK_ID}|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}")
-    } else if let Some(corpus) = &batch_corpus {
-        format!(
-            "TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{corpus}|{seed}|{fixture_index}"
-        )
-    } else {
-        format!(
+        let uses_retained_factor_logs =
+            shared_factor_log_precomputation && retained_factor_base_logs.is_some();
+        let fixture_material = if shared_public_fixture_domain {
+            format!(
+                "KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{}|{seed}|{}",
+                batch_corpus.as_deref().unwrap(),
+                shared_public_fixture_offset + fixture_index
+            )
+        } else if batch_fixtures == 1 {
+            format!("{TASK_ID}|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}")
+        } else if let Some(corpus) = &batch_corpus {
+            format!("TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{corpus}|{seed}|{fixture_index}")
+        } else {
+            format!(
             "TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}|{fixture_index}"
         )
-    };
-    let digest = blake3::hash(fixture_material.as_bytes());
-    let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
-    let mut rng = StdRng::seed_from_u64(fixture_seed);
-    let fixture_generation_started = Instant::now();
-    let generated_scalar = rng.gen_range(1..modulus);
-    let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
-        match fixture_target {
-            FixtureTarget::SeededScalar => (
-                Some(generated_scalar),
-                curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
-                "seeded_fixture_scalar",
-                None,
-                None,
-            ),
-            FixtureTarget::ExplicitScalar(scalar) => (
-                Some(scalar),
-                curve.mul(curve.generator(), &BigUint::from(scalar)),
-                "explicit_public_validation_scalar",
-                None,
-                None,
-            ),
-            FixtureTarget::PublicHash(public_seed) => {
-                let (target, counter) = public_hash_target(&curve, public_seed);
-                (
-                    None,
-                    target,
-                    "public_hash_unknown_scalar",
-                    Some(public_seed),
-                    Some(counter),
-                )
-            }
         };
-    let target_scalar_constructed = known_scalar.is_some();
-    let target_kind = if target_scalar_constructed {
-        "known_scalar_multiple"
-    } else {
-        "public_hash_to_curve_cofactor"
-    };
-    let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
-    let fixture_setup_started = Instant::now();
-    let generator_raw = to_raw_point(curve.generator());
-    let q_raw = to_raw_point(&q);
-    let (mut walk_a, mut walk_b, delta_a, delta_b, mut walk_target, walk_jump) =
-        match target_mode {
-        TargetMode::CoefficientWalk => {
-            let walk_a = rng.gen_range(0..modulus);
-            let walk_b = rng.gen_range(1..modulus);
-            let delta_a = rng.gen_range(1..modulus);
-            let delta_b = rng.gen_range(1..modulus);
-            let walk_target = raw_add_point(
-                &curve,
-                raw_scalar_point(&curve, generator_raw, walk_a),
-                raw_scalar_point(&curve, q_raw, walk_b),
-            );
-            let walk_jump = raw_add_point(
-                &curve,
-                raw_scalar_point(&curve, generator_raw, delta_a),
-                raw_scalar_point(&curve, q_raw, delta_b),
-            );
-            (walk_a, walk_b, delta_a, delta_b, walk_target, walk_jump)
-        }
-        TargetMode::PartitionWalk => {
-            let walk_a = rng.gen_range(0..modulus);
-            let walk_b = rng.gen_range(1..modulus);
-            let walk_target = raw_add_point(
-                &curve,
-                raw_scalar_point(&curve, generator_raw, walk_a),
-                raw_scalar_point(&curve, q_raw, walk_b),
-            );
-            (walk_a, walk_b, 0, 0, walk_target, None)
-        }
-        TargetMode::Independent => {
-            (0, 0, 0, 0, None, None)
-        }
-    };
-    let mut echelon = Echelon::new(columns + 1);
-    let mut reverse_echelon = ReverseEchelon::new(columns + 1);
-    let mut rows = Vec::new();
-    let mut right_hand_sides = Vec::new();
-    let mut exact_rows = HashSet::new();
-    let mut projective_rows = HashSet::new();
-    let mut duplicate_rows = 0usize;
-    let mut scalar_multiple_rows = 0usize;
-    let mut accepted = 0usize;
-    let mut trials = 0usize;
-    let mut rank_full_at = None;
-    let mut decomposition_queries = 0usize;
-    let mut query_additions = 0usize;
-    let mut query_canonicalization_maps = 0usize;
-    let mut query_x_filter_rejections = 0usize;
-    let mut query_exact_table_misses = 0usize;
-    let mut target_walk_additions = 0usize;
-    let mut query_batch_inversions = 0usize;
-    let mut reference_validation_records = Vec::new();
-    let mut relation_hashes = Vec::new();
-    let mut walk_seen = HashSet::new();
-    let mut target_walk_restarts = 0usize;
-    let mut target_scalar_multiplications = match target_mode {
-        TargetMode::Independent => 0,
-        TargetMode::CoefficientWalk => 4,
-        TargetMode::PartitionWalk => 2,
-    };
-    let mut fiber_rest_scratch = Vec::with_capacity(128);
-    let mut pair_point_scratch = Vec::with_capacity(256);
-    let mut pair_label_scratch = Vec::with_capacity(256);
-    let mut pair_rest_scratch = Vec::with_capacity(256);
-    let mut pair_signed_rest_scratch = Vec::with_capacity(512);
-    let mut pair_signed_slot_scratch = Vec::with_capacity(512);
-    let mut pair_batch_scratch = RawBatchScratch::default();
-    let mut pair_inverse_scratch = RawBatchScratch::default();
-    let mut guided_bin_order = Vec::with_capacity(columns);
-    let mut column_relation_counts = vec![0usize; columns];
-    let parallel_lanes = if query_mode.pair_pair_parallel() {
-        rayon::current_num_threads().max(1)
-    } else {
-        0
-    };
-    let mut pair_parallel_scratch: Vec<PairPairChunkScratch> =
-        (0..parallel_lanes).map(|_| Default::default()).collect();
-    let mut pair_parallel_results = Vec::with_capacity(parallel_lanes);
-    let mut query_parallel_waves = 0usize;
-    let mut query_parallel_chunks = 0usize;
-    let mut query_shared_sign_denominator_inputs = 0usize;
-    let mut guided_bins_visited = 0usize;
-    let mut guided_priority_hits = 0usize;
-    let mut rank_targeted_trials = 0usize;
-    let mut rank_targeted_nonincrements = 0usize;
-    let mut rank_target_slot_index_builds = 0usize;
-    let mut rank_target_slot_column = None;
-    let mut rank_target_slots = Vec::new();
-    let mut dense_rank_recomputations = 0usize;
-    let mut dimension_bound_rank_crosschecks = 0usize;
-    let mut reverse_incremental_rank_crosschecks = 0usize;
-    let mut terminal_dense_rank_crosschecks = 0usize;
-    let mut target_generation_ns = 0u128;
-    let mut query_total_ns = 0u128;
-    let mut packed_verification_ns = 0u128;
-    let mut rank_diagnostics_ns = 0u128;
-    let mut receipt_construction_ns = 0u128;
-    let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
-    let collection_started = Instant::now();
-    let relation_cap = 2 * columns + 64 + relation_cap_extra;
-    let target_cap = 100_000usize;
+        let digest = blake3::hash(fixture_material.as_bytes());
+        let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
+        let mut rng = StdRng::seed_from_u64(fixture_seed);
+        let fixture_generation_started = Instant::now();
+        let generated_scalar = rng.gen_range(1..modulus);
+        let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+            match fixture_target {
+                FixtureTarget::SeededScalar => (
+                    Some(generated_scalar),
+                    curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
+                    "seeded_fixture_scalar",
+                    None,
+                    None,
+                ),
+                FixtureTarget::ExplicitScalar(scalar) => (
+                    Some(scalar),
+                    curve.mul(curve.generator(), &BigUint::from(scalar)),
+                    "explicit_public_validation_scalar",
+                    None,
+                    None,
+                ),
+                FixtureTarget::PublicHash(public_seed) => {
+                    let (target, counter) = public_hash_target(&curve, public_seed);
+                    (
+                        None,
+                        target,
+                        "public_hash_unknown_scalar",
+                        Some(public_seed),
+                        Some(counter),
+                    )
+                }
+            };
+        let target_scalar_constructed = known_scalar.is_some();
+        let target_kind = if target_scalar_constructed {
+            "known_scalar_multiple"
+        } else {
+            "public_hash_to_curve_cofactor"
+        };
+        let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
+        let fixture_setup_started = Instant::now();
+        let generator_raw = to_raw_point(curve.generator());
+        let q_raw = to_raw_point(&q);
+        let (mut walk_a, mut walk_b, delta_a, delta_b, mut walk_target, walk_jump) =
+            match target_mode {
+                TargetMode::CoefficientWalk => {
+                    let walk_a = rng.gen_range(0..modulus);
+                    let walk_b = rng.gen_range(1..modulus);
+                    let delta_a = rng.gen_range(1..modulus);
+                    let delta_b = rng.gen_range(1..modulus);
+                    let walk_target = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, walk_a),
+                        raw_scalar_point(&curve, q_raw, walk_b),
+                    );
+                    let walk_jump = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, delta_a),
+                        raw_scalar_point(&curve, q_raw, delta_b),
+                    );
+                    (walk_a, walk_b, delta_a, delta_b, walk_target, walk_jump)
+                }
+                TargetMode::PartitionWalk => {
+                    let walk_a = rng.gen_range(0..modulus);
+                    let walk_b = rng.gen_range(1..modulus);
+                    let walk_target = raw_add_point(
+                        &curve,
+                        raw_scalar_point(&curve, generator_raw, walk_a),
+                        raw_scalar_point(&curve, q_raw, walk_b),
+                    );
+                    (walk_a, walk_b, 0, 0, walk_target, None)
+                }
+                TargetMode::Independent => (0, 0, 0, 0, None, None),
+            };
+        let mut echelon = Echelon::new(columns + 1);
+        let mut reverse_echelon = ReverseEchelon::new(columns + 1);
+        let mut rows = Vec::new();
+        let mut right_hand_sides = Vec::new();
+        let mut exact_rows = HashSet::new();
+        let mut projective_rows = HashSet::new();
+        let mut duplicate_rows = 0usize;
+        let mut scalar_multiple_rows = 0usize;
+        let mut accepted = 0usize;
+        let mut trials = 0usize;
+        let mut rank_full_at = None;
+        let mut decomposition_queries = 0usize;
+        let mut query_additions = 0usize;
+        let mut query_canonicalization_maps = 0usize;
+        let mut query_x_filter_rejections = 0usize;
+        let mut query_exact_table_misses = 0usize;
+        let mut target_walk_additions = 0usize;
+        let mut query_batch_inversions = 0usize;
+        let mut reference_validation_records = Vec::new();
+        let mut relation_hashes = Vec::new();
+        let mut walk_seen = HashSet::new();
+        let mut target_walk_restarts = 0usize;
+        let mut target_scalar_multiplications = match target_mode {
+            TargetMode::Independent => 0,
+            TargetMode::CoefficientWalk => 4,
+            TargetMode::PartitionWalk => 2,
+        };
+        let mut fiber_rest_scratch = Vec::with_capacity(128);
+        let mut pair_point_scratch = Vec::with_capacity(256);
+        let mut pair_label_scratch = Vec::with_capacity(256);
+        let mut pair_rest_scratch = Vec::with_capacity(256);
+        let mut pair_signed_rest_scratch = Vec::with_capacity(512);
+        let mut pair_signed_slot_scratch = Vec::with_capacity(512);
+        let mut pair_batch_scratch = RawBatchScratch::default();
+        let mut pair_inverse_scratch = RawBatchScratch::default();
+        let mut guided_bin_order = Vec::with_capacity(columns);
+        let mut column_relation_counts = vec![0usize; columns];
+        let parallel_lanes = if query_mode.pair_pair_parallel() {
+            rayon::current_num_threads().max(1)
+        } else {
+            0
+        };
+        let mut pair_parallel_scratch: Vec<PairPairChunkScratch> =
+            (0..parallel_lanes).map(|_| Default::default()).collect();
+        let mut pair_parallel_results = Vec::with_capacity(parallel_lanes);
+        let mut query_parallel_waves = 0usize;
+        let mut query_parallel_chunks = 0usize;
+        let mut query_shared_sign_denominator_inputs = 0usize;
+        let mut guided_bins_visited = 0usize;
+        let mut guided_priority_hits = 0usize;
+        let mut rank_targeted_trials = 0usize;
+        let mut rank_targeted_nonincrements = 0usize;
+        let mut rank_target_slot_index_builds = 0usize;
+        let mut rank_target_slot_column = None;
+        let mut rank_target_slots = Vec::new();
+        let mut dense_rank_recomputations = 0usize;
+        let mut dimension_bound_rank_crosschecks = 0usize;
+        let mut reverse_incremental_rank_crosschecks = 0usize;
+        let mut terminal_dense_rank_crosschecks = 0usize;
+        let mut target_generation_ns = 0u128;
+        let mut query_total_ns = 0u128;
+        let mut packed_verification_ns = 0u128;
+        let mut rank_diagnostics_ns = 0u128;
+        let mut receipt_construction_ns = 0u128;
+        let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
+        let collection_started = Instant::now();
+        let relation_cap = 2 * columns + 64 + relation_cap_extra;
+        let target_cap = 100_000usize;
 
-    while trials < target_cap {
-        if uses_retained_factor_logs && accepted >= 1 {
-            break;
-        } else if let Some(full_at) = rank_full_at {
-            if accepted >= full_at + required_surplus_relations {
+        while trials < target_cap {
+            if uses_retained_factor_logs && accepted >= 1 {
+                break;
+            } else if let Some(full_at) = rank_full_at {
+                if accepted >= full_at + required_surplus_relations {
+                    break;
+                }
+            } else if accepted >= relation_cap {
                 break;
             }
-        } else if accepted >= relation_cap {
-            break;
-        }
-        trials += 1;
-        let target_generation_started = Instant::now();
+            trials += 1;
+            let target_generation_started = Instant::now();
             if target_mode != TargetMode::Independent
                 && !walk_seen.insert(raw_compact_key(walk_target))
             {
@@ -4533,39 +4534,123 @@ fn main() {
             };
             target_generation_ns += target_generation_started.elapsed().as_nanos();
             let query_started = Instant::now();
-        let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
-        if let Some(width) = query_mode.pair_pair_guided_width() {
-            assert!(pair_mode == PairMode::SignedExpanded);
-            let target_key = raw_compact_key(target);
-            guided_bin_order.clear();
-            guided_bin_order.extend(0..columns);
-            guided_bin_order.sort_unstable_by_key(|&column| {
-                (
-                    usize::from(echelon.pivots[column].is_some()),
-                    column_relation_counts[column],
-                    CompactPairTable::hash((
-                        target_key.0 ^ column as u64,
-                        target_key.1 ^ (column as u64).rotate_left(19),
-                    )),
-                )
-            });
-            for (priority, &column) in guided_bin_order.iter().enumerate() {
-                let bin = &guided_slot_bins[column];
-                if bin.is_empty() {
-                    continue;
+            let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
+            if let Some(width) = query_mode.pair_pair_guided_width() {
+                assert!(pair_mode == PairMode::SignedExpanded);
+                let target_key = raw_compact_key(target);
+                guided_bin_order.clear();
+                guided_bin_order.extend(0..columns);
+                guided_bin_order.sort_unstable_by_key(|&column| {
+                    (
+                        usize::from(echelon.pivots[column].is_some()),
+                        column_relation_counts[column],
+                        CompactPairTable::hash((
+                            target_key.0 ^ column as u64,
+                            target_key.1 ^ (column as u64).rotate_left(19),
+                        )),
+                    )
+                });
+                for (priority, &column) in guided_bin_order.iter().enumerate() {
+                    let bin = &guided_slot_bins[column];
+                    if bin.is_empty() {
+                        continue;
+                    }
+                    guided_bins_visited += 1;
+                    let start = CompactPairTable::hash((
+                        target_key.0 ^ (column as u64).rotate_left(11),
+                        target_key.1,
+                    )) as usize
+                        % bin.len();
+                    let mut cursor = 0usize;
+                    while cursor < bin.len() && witness.is_none() {
+                        pair_point_scratch.clear();
+                        pair_label_scratch.clear();
+                        while cursor < bin.len() && pair_point_scratch.len() < width {
+                            let slot = bin[(start + cursor) % bin.len()] as usize;
+                            cursor += 1;
+                            if let Some(point) = quotient_pairs.signed_point_at_slot(slot, false) {
+                                let (_, labels) = quotient_pairs.signed_labels_at_slot(
+                                    slot,
+                                    false,
+                                    modulus,
+                                    &base.point_labels,
+                                    &label_to_index,
+                                );
+                                pair_point_scratch.push(point);
+                                pair_label_scratch.push(labels);
+                            }
+                        }
+                        let attempted = batch_raw_target_minus_signed_points_x_filtered(
+                            &curve,
+                            target,
+                            &pair_point_scratch,
+                            &quotient_pairs,
+                            &mut pair_signed_rest_scratch,
+                            &mut pair_inverse_scratch,
+                        );
+                        query_additions += attempted;
+                        decomposition_queries += attempted;
+                        query_x_filter_rejections += attempted - pair_signed_rest_scratch.len();
+                        query_batch_inversions += usize::from(target.is_some());
+                        for &(position, negative, rest_key) in &pair_signed_rest_scratch {
+                            let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                                rest_key,
+                                modulus,
+                                &quotient_pairs,
+                                &base.point_labels,
+                                &label_to_index,
+                                false,
+                            ) else {
+                                query_exact_table_misses += 1;
+                                continue;
+                            };
+                            let mut left_labels = pair_label_scratch[position];
+                            if negative {
+                                left_labels = left_labels.map(|(column, coefficient)| {
+                                    (
+                                        column,
+                                        if coefficient == 0 {
+                                            0
+                                        } else {
+                                            modulus - coefficient
+                                        },
+                                    )
+                                });
+                            }
+                            let left_indices = left_labels.map(|label| label_to_index[&label]);
+                            witness = Some((
+                                vec![
+                                    left_indices[0],
+                                    left_indices[1],
+                                    right_indices[0],
+                                    right_indices[1],
+                                ],
+                                vec![
+                                    left_labels[0],
+                                    left_labels[1],
+                                    right_labels[0],
+                                    right_labels[1],
+                                ],
+                            ));
+                            guided_priority_hits += usize::from(priority < columns / 4);
+                            break;
+                        }
+                    }
+                    if witness.is_some() {
+                        break;
+                    }
                 }
-                guided_bins_visited += 1;
-                let start = CompactPairTable::hash((
-                    target_key.0 ^ (column as u64).rotate_left(11),
-                    target_key.1,
-                )) as usize
-                    % bin.len();
+            } else if let Some(width) = query_mode.pair_pair_dual_width() {
+                assert!(pair_mode == PairMode::SignedExpanded);
+                let slots = quotient_pairs.slots();
+                let start_slot =
+                    CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1);
                 let mut cursor = 0usize;
-                while cursor < bin.len() && witness.is_none() {
+                while cursor < slots && witness.is_none() {
                     pair_point_scratch.clear();
                     pair_label_scratch.clear();
-                    while cursor < bin.len() && pair_point_scratch.len() < width {
-                        let slot = bin[(start + cursor) % bin.len()] as usize;
+                    while cursor < slots && pair_point_scratch.len() < width {
+                        let slot = (start_slot + cursor) & (slots - 1);
                         cursor += 1;
                         if let Some(point) = quotient_pairs.signed_point_at_slot(slot, false) {
                             let (_, labels) = quotient_pairs.signed_labels_at_slot(
@@ -4578,6 +4663,9 @@ fn main() {
                             pair_point_scratch.push(point);
                             pair_label_scratch.push(labels);
                         }
+                    }
+                    if pair_point_scratch.is_empty() {
+                        continue;
                     }
                     let attempted = batch_raw_target_minus_signed_points_x_filtered(
                         &curve,
@@ -4631,98 +4719,11 @@ fn main() {
                                 right_labels[1],
                             ],
                         ));
-                        guided_priority_hits += usize::from(priority < columns / 4);
                         break;
                     }
                 }
-                if witness.is_some() {
-                    break;
-                }
             }
-        } else if let Some(width) = query_mode.pair_pair_dual_width() {
-            assert!(pair_mode == PairMode::SignedExpanded);
-            let slots = quotient_pairs.slots();
-            let start_slot = CompactPairTable::hash(raw_compact_key(target)) as usize
-                & (slots - 1);
-            let mut cursor = 0usize;
-            while cursor < slots && witness.is_none() {
-                pair_point_scratch.clear();
-                pair_label_scratch.clear();
-                while cursor < slots && pair_point_scratch.len() < width {
-                    let slot = (start_slot + cursor) & (slots - 1);
-                    cursor += 1;
-                    if let Some(point) = quotient_pairs.signed_point_at_slot(slot, false) {
-                        let (_, labels) = quotient_pairs.signed_labels_at_slot(
-                            slot,
-                            false,
-                            modulus,
-                            &base.point_labels,
-                            &label_to_index,
-                        );
-                        pair_point_scratch.push(point);
-                        pair_label_scratch.push(labels);
-                    }
-                }
-                if pair_point_scratch.is_empty() {
-                    continue;
-                }
-                let attempted = batch_raw_target_minus_signed_points_x_filtered(
-                    &curve,
-                    target,
-                    &pair_point_scratch,
-                    &quotient_pairs,
-                    &mut pair_signed_rest_scratch,
-                    &mut pair_inverse_scratch,
-                );
-                query_additions += attempted;
-                decomposition_queries += attempted;
-                query_x_filter_rejections += attempted - pair_signed_rest_scratch.len();
-                query_batch_inversions += usize::from(target.is_some());
-                for &(position, negative, rest_key) in &pair_signed_rest_scratch {
-                    let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
-                        rest_key,
-                        modulus,
-                        &quotient_pairs,
-                        &base.point_labels,
-                        &label_to_index,
-                        false,
-                    ) else {
-                        query_exact_table_misses += 1;
-                        continue;
-                    };
-                    let mut left_labels = pair_label_scratch[position];
-                    if negative {
-                        left_labels = left_labels.map(|(column, coefficient)| {
-                            (
-                                column,
-                                if coefficient == 0 {
-                                    0
-                                } else {
-                                    modulus - coefficient
-                                },
-                            )
-                        });
-                    }
-                    let left_indices = left_labels.map(|label| label_to_index[&label]);
-                    witness = Some((
-                        vec![
-                            left_indices[0],
-                            left_indices[1],
-                            right_indices[0],
-                            right_indices[1],
-                        ],
-                        vec![
-                            left_labels[0],
-                            left_labels[1],
-                            right_labels[0],
-                            right_labels[1],
-                        ],
-                    ));
-                    break;
-                }
-            }
-        }
-        let targeted_column =
+            let targeted_column =
                 if rank_aware_pair_scan && echelon.rank + rank_target_deficiency > columns {
                     echelon.pivots[..columns].iter().position(Option::is_none)
                 } else {
@@ -4969,76 +4970,77 @@ fn main() {
                 }
             }
             let query_elapsed = query_started.elapsed();
-        let query_ms = query_elapsed.as_secs_f64() * 1000.0;
-        query_total_ns += query_elapsed.as_nanos();
-        let Some((indices, witness_labels)) = witness else {
-            continue;
-        };
-        for (position, &(column, _)) in witness_labels.iter().enumerate() {
-            if !witness_labels[..position]
-                .iter()
-                .any(|&(earlier_column, _)| earlier_column == column)
-            {
-                column_relation_counts[column] += 1;
+            let query_ms = query_elapsed.as_secs_f64() * 1000.0;
+            query_total_ns += query_elapsed.as_nanos();
+            let Some((indices, witness_labels)) = witness else {
+                continue;
+            };
+            for (position, &(column, _)) in witness_labels.iter().enumerate() {
+                if !witness_labels[..position]
+                    .iter()
+                    .any(|&(earlier_column, _)| earlier_column == column)
+                {
+                    column_relation_counts[column] += 1;
+                }
             }
-        }
-        let packed_verification_started = Instant::now();
-        let sum = indices.iter().fold(None, |accumulator, &index| {
-            raw_add_point(&curve, accumulator, raw_base_points[index])
-        });
-        assert_eq!(sum, target, "support-index relation must verify in the group");
-        reference_validation_records.push((indices.clone(), coefficient_a, coefficient_b));
-        packed_verification_ns += packed_verification_started.elapsed().as_nanos();
-
-        let rank_started = Instant::now();
-        let mut row = vec![0u64; columns + 1];
-        for &(column, coefficient) in &witness_labels {
-            row[column] = (row[column] + coefficient) % modulus;
-        }
-        row[columns] = (modulus - coefficient_b) % modulus;
-        let exact_duplicate = !exact_rows.insert(row.clone());
-        duplicate_rows += usize::from(exact_duplicate);
-        let first_nonzero = row.iter().copied().find(|&value| value != 0).unwrap();
-        let normalization_inverse = modpow(first_nonzero, modulus - 2, modulus);
-        let normalized_row: Vec<_> = row
-            .iter()
-            .map(|value| {
-                ((*value as u128 * normalization_inverse as u128) % modulus as u128) as u64
-            })
-            .collect();
-        let scalar_multiple = !projective_rows.insert(normalized_row);
-        scalar_multiple_rows += usize::from(scalar_multiple);
-        let rank_before = echelon.rank;
-        let incremented = echelon.insert(row.clone(), modulus);
-        let rank_after = echelon.rank;
-        assert_eq!(rank_after, rank_before + usize::from(incremented));
-        rows.push(row.clone());
-        right_hand_sides.push(coefficient_a);
-        let independently_crosschecked_rank = if incremental_rank_crosscheck {
-            let reverse_before = reverse_echelon.rank;
-            let reverse_incremented = reverse_echelon.insert(row.clone(), modulus);
+            let packed_verification_started = Instant::now();
+            let sum = indices.iter().fold(None, |accumulator, &index| {
+                raw_add_point(&curve, accumulator, raw_base_points[index])
+            });
             assert_eq!(
-                reverse_echelon.rank,
-                reverse_before + usize::from(reverse_incremented)
+                sum, target,
+                "support-index relation must verify in the group"
             );
-            reverse_incremental_rank_crosschecks += 1;
-            reverse_echelon.rank
-        } else if rank_before == columns + 1 {
-            dimension_bound_rank_crosschecks += 1;
-            columns + 1
-        } else if columns > 64
-            || std::env::var("KIC_SKIP_DENSE_RANK").as_deref() == Ok("1")
-        {
-            // Full dense GE after every accepted row is O(#rows · K³) and
-            // dominates past ~64 columns (n=53 balanced bases). Trust the
-            // incremental echelon; optional end-of-run dense check remains
-            // available via KIC_INCREMENTAL_RANK_CROSSCHECK.
-            rank_after
-        } else {
-            dense_rank_recomputations += 1;
-            dense_rank(&rows, columns + 1, modulus)
-        };
-        assert_eq!(independently_crosschecked_rank, rank_after);
+            reference_validation_records.push((indices.clone(), coefficient_a, coefficient_b));
+            packed_verification_ns += packed_verification_started.elapsed().as_nanos();
+
+            let rank_started = Instant::now();
+            let mut row = vec![0u64; columns + 1];
+            for &(column, coefficient) in &witness_labels {
+                row[column] = (row[column] + coefficient) % modulus;
+            }
+            row[columns] = (modulus - coefficient_b) % modulus;
+            let exact_duplicate = !exact_rows.insert(row.clone());
+            duplicate_rows += usize::from(exact_duplicate);
+            let first_nonzero = row.iter().copied().find(|&value| value != 0).unwrap();
+            let normalization_inverse = modpow(first_nonzero, modulus - 2, modulus);
+            let normalized_row: Vec<_> = row
+                .iter()
+                .map(|value| {
+                    ((*value as u128 * normalization_inverse as u128) % modulus as u128) as u64
+                })
+                .collect();
+            let scalar_multiple = !projective_rows.insert(normalized_row);
+            scalar_multiple_rows += usize::from(scalar_multiple);
+            let rank_before = echelon.rank;
+            let incremented = echelon.insert(row.clone(), modulus);
+            let rank_after = echelon.rank;
+            assert_eq!(rank_after, rank_before + usize::from(incremented));
+            rows.push(row.clone());
+            right_hand_sides.push(coefficient_a);
+            let independently_crosschecked_rank = if incremental_rank_crosscheck {
+                let reverse_before = reverse_echelon.rank;
+                let reverse_incremented = reverse_echelon.insert(row.clone(), modulus);
+                assert_eq!(
+                    reverse_echelon.rank,
+                    reverse_before + usize::from(reverse_incremented)
+                );
+                reverse_incremental_rank_crosschecks += 1;
+                reverse_echelon.rank
+            } else if rank_before == columns + 1 {
+                dimension_bound_rank_crosschecks += 1;
+                columns + 1
+            } else if columns > 64 || std::env::var("KIC_SKIP_DENSE_RANK").as_deref() == Ok("1") {
+                // Full dense GE after every accepted row is O(#rows · K³) and
+                // dominates past ~64 columns (n=53 balanced bases). Trust the
+                // incremental echelon; optional end-of-run dense check remains
+                // available via KIC_INCREMENTAL_RANK_CROSSCHECK.
+                rank_after
+            } else {
+                dense_rank_recomputations += 1;
+                dense_rank(&rows, columns + 1, modulus)
+            };
+            assert_eq!(independently_crosschecked_rank, rank_after);
             accepted += 1;
             if rank_after == columns + 1 && rank_full_at.is_none() {
                 rank_full_at = Some(accepted);
@@ -5113,148 +5115,148 @@ fn main() {
                         "fixture_scalar_used_by_collector":false
                     })
                 );
+            }
+            receipt_construction_ns += receipt_started.elapsed().as_nanos();
         }
-        receipt_construction_ns += receipt_started.elapsed().as_nanos();
-    }
-    if incremental_rank_crosscheck {
-        let terminal_dense_rank = dense_rank(&rows, columns + 1, modulus);
-        assert_eq!(terminal_dense_rank, echelon.rank);
-        assert_eq!(terminal_dense_rank, reverse_echelon.rank);
-        terminal_dense_rank_crosschecks += 1;
-    }
-    let linear_solve_started = Instant::now();
-    let solution = if let Some(factor_logs) = retained_factor_base_logs.as_ref() {
-        assert!(uses_retained_factor_logs);
-        assert_eq!(factor_logs.len(), columns);
-        assert_eq!(rows.len(), 1);
-        let row = &rows[0];
-        let factor_sum = row[..columns]
-            .iter()
-            .zip(factor_logs)
-            .fold(0u64, |sum, (&coefficient, &logarithm)| {
-                (sum
-                    + ((coefficient as u128 * logarithm as u128) % modulus as u128) as u64)
-                    % modulus
-            });
-        let negative_target_coefficient = row[columns];
-        let target_coefficient = if negative_target_coefficient == 0 {
-            0
-        } else {
-            modulus - negative_target_coefficient
-        };
-        assert_ne!(target_coefficient, 0);
-        let numerator = if factor_sum >= right_hand_sides[0] {
-            factor_sum - right_hand_sides[0]
-        } else {
-            modulus - (right_hand_sides[0] - factor_sum)
-        };
-        let recovered = ((numerator as u128
-            * modpow(target_coefficient, modulus - 2, modulus) as u128)
-            % modulus as u128) as u64;
-        let mut values = factor_logs.clone();
-        values.push(recovered);
-        Some(values)
-    } else {
-        (echelon.rank == columns + 1).then(|| {
-            solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus)
-                .unwrap()
-        })
-    };
-    let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
-    let solution_validation_started = Instant::now();
-    if let Some(solution) = &solution {
-        if let Some(expected) = known_scalar {
-            assert_eq!(solution[columns], expected);
+        if incremental_rank_crosscheck {
+            let terminal_dense_rank = dense_rank(&rows, columns + 1, modulus);
+            assert_eq!(terminal_dense_rank, echelon.rank);
+            assert_eq!(terminal_dense_rank, reverse_echelon.rank);
+            terminal_dense_rank_crosschecks += 1;
         }
-        assert_eq!(
-            curve.mul(curve.generator(), &BigUint::from(solution[columns])),
-            q
-        );
-        if !uses_retained_factor_logs {
-            for (column, representative) in base.representatives.iter().enumerate() {
-                assert_eq!(
-                    curve.mul(curve.generator(), &BigUint::from(solution[column])),
-                    *representative
-                );
+        let linear_solve_started = Instant::now();
+        let solution = if let Some(factor_logs) = retained_factor_base_logs.as_ref() {
+            assert!(uses_retained_factor_logs);
+            assert_eq!(factor_logs.len(), columns);
+            assert_eq!(rows.len(), 1);
+            let row = &rows[0];
+            let factor_sum = row[..columns].iter().zip(factor_logs).fold(
+                0u64,
+                |sum, (&coefficient, &logarithm)| {
+                    (sum + ((coefficient as u128 * logarithm as u128) % modulus as u128) as u64)
+                        % modulus
+                },
+            );
+            let negative_target_coefficient = row[columns];
+            let target_coefficient = if negative_target_coefficient == 0 {
+                0
+            } else {
+                modulus - negative_target_coefficient
+            };
+            assert_ne!(target_coefficient, 0);
+            let numerator = if factor_sum >= right_hand_sides[0] {
+                factor_sum - right_hand_sides[0]
+            } else {
+                modulus - (right_hand_sides[0] - factor_sum)
+            };
+            let recovered = ((numerator as u128
+                * modpow(target_coefficient, modulus - 2, modulus) as u128)
+                % modulus as u128) as u64;
+            let mut values = factor_logs.clone();
+            values.push(recovered);
+            Some(values)
+        } else {
+            (echelon.rank == columns + 1).then(|| {
+                solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus)
+                    .unwrap()
+            })
+        };
+        let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
+        let solution_validation_started = Instant::now();
+        if let Some(solution) = &solution {
+            if let Some(expected) = known_scalar {
+                assert_eq!(solution[columns], expected);
+            }
+            assert_eq!(
+                curve.mul(curve.generator(), &BigUint::from(solution[columns])),
+                q
+            );
+            if !uses_retained_factor_logs {
+                for (column, representative) in base.representatives.iter().enumerate() {
+                    assert_eq!(
+                        curve.mul(curve.generator(), &BigUint::from(solution[column])),
+                        *representative
+                    );
+                }
+            }
+            for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
+                let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
+                    (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
+                });
+                assert_eq!(value, rhs);
             }
         }
-        for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
-            let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
-                (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
-            });
-            assert_eq!(value, rhs);
+        if shared_factor_log_precomputation && retained_factor_base_logs.is_none() {
+            let solution = solution
+                .as_ref()
+                .expect("first fixture must establish the reusable factor-log table");
+            retained_factor_base_logs = Some(solution[..columns].to_vec());
         }
-    }
-    if shared_factor_log_precomputation && retained_factor_base_logs.is_none() {
-        let solution = solution
-            .as_ref()
-            .expect("first fixture must establish the reusable factor-log table");
-        retained_factor_base_logs = Some(solution[..columns].to_vec());
-    }
-    let solution_validation_ms =
-        solution_validation_started.elapsed().as_secs_f64() * 1000.0;
-    let collection_ms = collection_started.elapsed().as_secs_f64() * 1000.0;
-    let reference_validation_started = Instant::now();
-    for (indices, coefficient_a, coefficient_b) in &reference_validation_records {
-        let target = curve.add(
-            &curve.mul(curve.generator(), &BigUint::from(*coefficient_a)),
-            &curve.mul(&q, &BigUint::from(*coefficient_b)),
+        let solution_validation_ms = solution_validation_started.elapsed().as_secs_f64() * 1000.0;
+        let collection_ms = collection_started.elapsed().as_secs_f64() * 1000.0;
+        let reference_validation_started = Instant::now();
+        for (indices, coefficient_a, coefficient_b) in &reference_validation_records {
+            let target = curve.add(
+                &curve.mul(curve.generator(), &BigUint::from(*coefficient_a)),
+                &curve.mul(&q, &BigUint::from(*coefficient_b)),
+            );
+            let sum = indices
+                .iter()
+                .fold(BinaryPoint::Infinity, |accumulator, &index| {
+                    curve.add(&accumulator, &base.points[index])
+                });
+            assert_eq!(sum, target, "independent reference relation validation");
+        }
+        let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
+        let target_generation_ms = target_generation_ns as f64 / 1_000_000.0;
+        let packed_verification_ms = packed_verification_ns as f64 / 1_000_000.0;
+        let target_pdp_ms = exclusive_pdp_ms(
+            collection_ms,
+            target_generation_ms,
+            packed_verification_ms,
+            linear_solve_ms,
+            solution_validation_ms,
         );
-        let sum = indices.iter().fold(BinaryPoint::Infinity, |accumulator, &index| {
-            curve.add(&accumulator, &base.points[index])
+        let online_phase_ms = uses_retained_factor_logs.then(|| {
+            json!({
+                "target_query":fixture_setup_ms+target_generation_ms,
+                "target_pdp":target_pdp_ms,
+                "target_relation_check":packed_verification_ms+reference_validation_ms,
+                "target_descent":0.0,
+                "target_recovery_check":linear_solve_ms+solution_validation_ms
+            })
         });
-        assert_eq!(sum, target, "independent reference relation validation");
-    }
-    let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
-    let target_generation_ms = target_generation_ns as f64 / 1_000_000.0;
-    let packed_verification_ms = packed_verification_ns as f64 / 1_000_000.0;
-    let target_pdp_ms = exclusive_pdp_ms(
-        collection_ms,
-        target_generation_ms,
-        packed_verification_ms,
-        linear_solve_ms,
-        solution_validation_ms,
-    );
-    let online_phase_ms = uses_retained_factor_logs.then(|| {
-        json!({
-            "target_query":fixture_setup_ms+target_generation_ms,
-            "target_pdp":target_pdp_ms,
-            "target_relation_check":packed_verification_ms+reference_validation_ms,
-            "target_descent":0.0,
-            "target_recovery_check":linear_solve_ms+solution_validation_ms
-        })
-    });
-    let target_online_ms = uses_retained_factor_logs
-        .then_some(fixture_setup_ms + collection_ms + reference_validation_ms);
-    let q_key = point_key(&q);
-    let generator_key = point_key(curve.generator());
-    let status = if uses_retained_factor_logs && accepted == 1 && solution.is_some() {
-        "SHARED_FACTOR_LOG_ONE_RELATION"
-    } else if rank_full_at
-        .map(|full_at| accepted >= full_at + required_surplus_relations)
-        .unwrap_or(false)
-    {
-        if required_surplus_relations == 32 {
-            "RANK_PLUS_32"
+        let target_online_ms = uses_retained_factor_logs
+            .then_some(fixture_setup_ms + collection_ms + reference_validation_ms);
+        let q_key = point_key(&q);
+        let generator_key = point_key(curve.generator());
+        let status = if uses_retained_factor_logs && accepted == 1 && solution.is_some() {
+            "SHARED_FACTOR_LOG_ONE_RELATION"
+        } else if rank_full_at
+            .map(|full_at| accepted >= full_at + required_surplus_relations)
+            .unwrap_or(false)
+        {
+            if required_surplus_relations == 32 {
+                "RANK_PLUS_32"
+            } else {
+                "RANK_PLUS_SURPLUS"
+            }
+        } else if accepted >= relation_cap {
+            "RANK_DEFICIENT"
         } else {
-            "RANK_PLUS_SURPLUS"
-        }
-    } else if accepted >= relation_cap {
-        "RANK_DEFICIENT"
-    } else {
-        "TARGET_CAP"
-    };
-    batch_online_charged_ms += fixture_setup_ms + collection_ms + reference_validation_ms;
-    batch_fixture_generation_ms += fixture_generation_ms;
-    batch_reference_validation_ms += reference_validation_ms;
-    batch_target_trials += trials;
-    batch_admitted_relations += accepted;
-    batch_support_queries += decomposition_queries;
-    batch_rank_plus_32 += u64::from(matches!(status, "RANK_PLUS_32" | "RANK_PLUS_SURPLUS"));
-    batch_shared_log_one_relation += u64::from(status == "SHARED_FACTOR_LOG_ONE_RELATION");
-    println!(
-        "{}",
-        json!({
+            "TARGET_CAP"
+        };
+        batch_online_charged_ms += fixture_setup_ms + collection_ms + reference_validation_ms;
+        batch_fixture_generation_ms += fixture_generation_ms;
+        batch_reference_validation_ms += reference_validation_ms;
+        batch_target_trials += trials;
+        batch_admitted_relations += accepted;
+        batch_support_queries += decomposition_queries;
+        batch_rank_plus_32 += u64::from(matches!(status, "RANK_PLUS_32" | "RANK_PLUS_SURPLUS"));
+        batch_shared_log_one_relation += u64::from(status == "SHARED_FACTOR_LOG_ONE_RELATION");
+        println!(
+            "{}",
+            json!({
             "schema_version":"1.0",
             "task_id":TASK_ID,
             "kind":"relation_rank_summary",
@@ -5363,10 +5365,7 @@ fn main() {
             })
         );
     }
-    if should_emit_multi_target_summary(
-        batch_fixtures as usize,
-        shared_factor_log_precomputation,
-    ) {
+    if should_emit_multi_target_summary(batch_fixtures as usize, shared_factor_log_precomputation) {
         let observed_batch_section_ms = batch_started.elapsed().as_secs_f64() * 1000.0;
         println!(
             "{}",
@@ -5471,8 +5470,15 @@ mod packed_tests {
         let recovery_check_ms = linear_solve_ms + solution_validation_ms;
         let online_ms = query_ms + collection_ms + external_relation_check_ms;
         assert_eq!(target_pdp_ms, 5.5);
-        assert_eq!(query_ms + target_generation_ms + target_pdp_ms
-            + packed_verification_ms + external_relation_check_ms + recovery_check_ms, online_ms);
+        assert_eq!(
+            query_ms
+                + target_generation_ms
+                + target_pdp_ms
+                + packed_verification_ms
+                + external_relation_check_ms
+                + recovery_check_ms,
+            online_ms
+        );
     }
 
     #[test]
@@ -5812,7 +5818,10 @@ mod packed_tests {
         );
         assert_eq!(dual_attempted, separate_attempted);
         assert_eq!(dual, separate_normalized);
-        assert_eq!(dual_scratch.denominators.len() * 2, separate_scratch.denominators.len());
+        assert_eq!(
+            dual_scratch.denominators.len() * 2,
+            separate_scratch.denominators.len()
+        );
         assert_eq!(dual_scratch.denominators.len() * 2, signed_points.len());
 
         let compact_points: Vec<_> = points.iter().copied().map(raw_compact_key).collect();
