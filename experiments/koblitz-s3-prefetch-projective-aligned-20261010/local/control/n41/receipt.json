@@ -1,0 +1,73 @@
+{
+  "architecture": "arm64",
+  "archive": {
+    "report.json": {
+      "gzip_bytes": 94626,
+      "gzip_sha256": "f48e140c65a8c7d70033812b9494c0e268e24c8a23d1e2f0a3bf47a8d6d5e227",
+      "raw_bytes": 340077,
+      "raw_sha256": "f28b40fddb9826eb8c464ff2821a8d8977ffe95272f4603abc31466c512af24b"
+    },
+    "stderr.txt": {
+      "gzip_bytes": 20,
+      "gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout.bin": {
+      "gzip_bytes": 94626,
+      "gzip_sha256": "f48e140c65a8c7d70033812b9494c0e268e24c8a23d1e2f0a3bf47a8d6d5e227",
+      "raw_bytes": 340077,
+      "raw_sha256": "f28b40fddb9826eb8c464ff2821a8d8977ffe95272f4603abc31466c512af24b"
+    }
+  },
+  "argv": [
+    "/private/tmp/s3-c3182-build/release/examples/s3_partial_prepared_fullrank_prefetch_projective_aligned_targetspan",
+    "41",
+    "0",
+    "800",
+    "20260928",
+    "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-prepared-20261009/experiments/koblitz-s3-crosscurve-20261009/holdout/n41/T025/public_target.json",
+    "/private/tmp/s3-aligned-root-control-20261010/n41/report.json",
+    "14",
+    "800",
+    "1"
+  ],
+  "binary_sha256": "aa9d26220696ff760e670a0fb7ca0a109aaf9a8ba2192ab40d8f4f993aa4346e",
+  "candidate_id": null,
+  "controlled_speedup": null,
+  "error": null,
+  "exit_code": 0,
+  "finished_unix_ns": 1791624194638220000,
+  "freeze_sha256": "9517782ff54636b625f5e86f1038efa6b9e6055153d9efc00fafb1bdfba5c5f6",
+  "host_exclusive_partition_receipt": null,
+  "kind": "s3_aligned_root_t025_control_run_v1",
+  "memory_within_envelope": true,
+  "n": 41,
+  "online_ms": 0.084208,
+  "outer_wall_ns": 3311095000,
+  "peak_rss_bytes": 3989438464,
+  "phase_accounting_ok": true,
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "reference_differing_keys": [
+    "root_table_layout",
+    "root_table_slot_bytes",
+    "timing_ms"
+  ],
+  "resource_counters": {
+    "involuntary_context_switches": 23781,
+    "major_page_faults": 0,
+    "minor_page_faults": 256306,
+    "system_cpu_seconds": 0.696232,
+    "user_cpu_seconds": 16.478459,
+    "voluntary_context_switches": 5
+  },
+  "reusable_setup_ms": 2786.90675,
+  "run_id": null,
+  "source_sha256": "7570cef66733a7d9d9ff57771741fab72d55eaa194c76e453e2127cf88d0be2d",
+  "started_unix_ns": 1791624191327125000,
+  "stdout_matches_report": true,
+  "target_s3_calls": 32,
+  "unexpected_reference_differences": [],
+  "verified": true,
+  "workload_id": "1aa57f8a2e83"
+}
