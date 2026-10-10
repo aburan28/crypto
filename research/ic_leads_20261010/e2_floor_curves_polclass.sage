@@ -62,9 +62,9 @@ for j in roots:
 orbits = sorted(set(r["orbit_rep_j"] for r in recs))
 for r in recs:
     r["orbit"] = f"O{orbits.index(r['orbit_rep_j']):02d}"
-doc = {"n": N, "ell": ELL, "discriminant": D, "trace_K0": int(t), "order_K0": int(order), "conductor": int(f),
-       "modulus_int": to_int(F.gen()**0 * 0 + F(0)) if False else int(sum(int(c) << i for i, c in enumerate(mod.list()))),
-       "modulus": str(mod), "class_polynomial_degree": H.degree(), "roots_in_Fq": len(roots),
+doc = {"n": N, "ell": ELL, "discriminant": int(D), "trace_K0": int(t), "order_K0": int(order), "conductor": int(f),
+       "modulus_int": int(sum(int(c) << i for i, c in enumerate(mod.list()))),
+       "modulus": str(mod), "class_polynomial_degree": int(H.degree()), "roots_in_Fq": int(len(roots)),
        "frobenius_orbits": len(orbits), "curves": recs}
 json.dump(doc, open(OUT, "w"), indent=1)
 print(json.dumps({k: v for k, v in doc.items() if k != "curves"}, indent=1))

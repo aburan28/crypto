@@ -126,7 +126,13 @@ baseline is the per-lead ratios above, not this column.
   n = 131) was not run: `ic bench --list` does not expose it on this build,
   and the compact-orbit pipeline's baseline is the landed `K = 600`
   configuration in `BOUNDARY_TARGETS.md`.
-- The n = 23 floor-curve twin (L8): the CM-route construction
-  (`e2_floor_curves_polclass.sage`) was still running when this file was
-  written; the Vélu-built T23 family already exists in the parallel
-  workspace and E1 measured the pipeline on it.
+- The n = 23 floor-curve twin (L8) was not run through the ladder, but its
+  curves are now built independently: the CM route
+  (`e2_floor_curves_polclass.sage`, ring class polynomial of discriminant
+  `−7·967²`, degree 966, reduced mod 2 over `x²³ + x⁵ + 1`) gives 966 roots
+  in `F_{2^23}`, all 966 with `#E = #K_0` on the `a₂` twist chosen by order
+  check, in 42 Frobenius orbits of 23, and the set of `b` coefficients is
+  **identical** to the Vélu-built T23 family of the parallel workspace
+  (966 of 966 in common): `e2_floor_n23_ell967.json`. The same script is
+  the E2 constructor for `n = 41/409`, `61/1951`, `83/6473` (class
+  polynomial degrees 410, 1952, 6474).
