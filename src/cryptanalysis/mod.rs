@@ -141,6 +141,7 @@ pub mod ecc2k130_guard;
 pub mod ecc2k130_merge;
 pub mod ecc2k130_pyjson;
 pub mod ecc2k130_status;
+pub mod ecdlp_nist;
 pub mod ecdlp_variants;
 pub mod ecdsa_audit;
 pub mod ecm;

@@ -657,8 +657,7 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(0x274c);
         for unknowns in [1usize, 4, 9] {
             let mut tracker = U64RankTracker::new(m, unknowns);
-            let mut solver =
-                IncrementalRelationSolver::new(unknowns, &big).expect("modulus fits");
+            let mut solver = IncrementalRelationSolver::new(unknowns, &big).expect("modulus fits");
             for _ in 0..3 * unknowns + 5 {
                 let coeff: Vec<u64> = (0..unknowns).map(|_| rng.gen_range(0..m)).collect();
                 let t_rank = tracker.insert(coeff.clone());

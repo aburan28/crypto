@@ -37,6 +37,13 @@ path = "src/bin/hyperelliptic_cover.rs"
 name = "icx"
 path = "src/bin/icx.rs"
 
+# `ecdlp-nist` — ECDLP across the fifteen NIST curves (prime, binary,
+# Koblitz) with the structural audit, interval solvers, folded rho and the
+# Smart attack on constructed anomalous curves.
+[[bin]]
+name = "ecdlp-nist"
+path = "src/bin/ecdlp_nist.rs"
+
 # `ecc2k-guard` — the ECC2K-130 rho campaign's no-fruitless-cycle
 # certificate and verifiable seed provenance.
 [[bin]]

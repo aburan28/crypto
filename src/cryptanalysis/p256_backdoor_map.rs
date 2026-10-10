@@ -385,13 +385,21 @@ pub fn format_backdoor_assessment(a: &BackdoorAssessment) -> String {
     }
     s.push_str(&format!(
         "- **Implicates curve math:** {}\n\n",
-        if a.confirmed.implicates_curve_math { "yes" } else { "no" }
+        if a.confirmed.implicates_curve_math {
+            "yes"
+        } else {
+            "no"
+        }
     ));
     s.push_str("## Unresolved: the seed\n\n");
     s.push_str(&format!("- **Seed:** `{}`\n", a.seed.seed_hex));
     s.push_str(&format!(
         "- **X9.62 derivation re-executed:** {}\n",
-        if a.seed.derivation_verified { "holds (r·b² ≡ a³ mod p)" } else { "FAILS" }
+        if a.seed.derivation_verified {
+            "holds (r·b² ≡ a³ mod p)"
+        } else {
+            "FAILS"
+        }
     ));
     for (k, v) in [
         ("What verifies", a.seed.what_verifies),
@@ -408,7 +416,9 @@ pub fn format_backdoor_assessment(a: &BackdoorAssessment) -> String {
         "{} CPU-years; {:.0e} s per coefficient test; {:.0} s per 256-bit point count.\n\n",
         a.budget.cpu_years, a.budget.coefficient_test_seconds, a.budget.point_count_seconds
     ));
-    s.push_str("| grind model | log₂ candidates | thinnest reachable weak class |\n|---|---:|---:|\n");
+    s.push_str(
+        "| grind model | log₂ candidates | thinnest reachable weak class |\n|---|---:|---:|\n",
+    );
     for model in [GrindCostModel::CoefficientTest, GrindCostModel::PointCount] {
         if let Some(k) = a.budget.log2_candidates(model) {
             s.push_str(&format!("| {model:?} | {k:.1} | 2^−{k:.0} |\n"));
@@ -430,7 +440,10 @@ pub fn format_backdoor_assessment(a: &BackdoorAssessment) -> String {
         s.push_str(&format!("- **Verdict.** {:?}\n\n", h.verdict));
     }
     s.push_str("## Overall\n\n");
-    s.push_str(&format!("{}\n\n{}\n\n**What would change this:** {}\n", a.overall, a.binary_curve_note, a.what_would_change_it));
+    s.push_str(&format!(
+        "{}\n\n{}\n\n**What would change this:** {}\n",
+        a.overall, a.binary_curve_note, a.what_would_change_it
+    ));
     s
 }
 
@@ -442,7 +455,10 @@ mod tests {
     fn p256_seed_derivation_holds_and_matches_pinned_r() {
         let d = verify_p256_seed_derivation();
         assert_eq!((d.s, d.v), (1, 96));
-        assert!(d.holds, "r·b² ≡ a³ (mod p) must hold for the published seed");
+        assert!(
+            d.holds,
+            "r·b² ≡ a³ (mod p) must hold for the published seed"
+        );
         assert_eq!(format!("{:x}", d.r), P256_X962_R_HEX);
     }
 
@@ -479,9 +495,18 @@ mod tests {
         let b = GrindBudget::default_1999();
         let coeff = b.log2_candidates(GrindCostModel::CoefficientTest).unwrap();
         let count = b.log2_candidates(GrindCostModel::PointCount).unwrap();
-        assert!(coeff > count + 20.0, "coefficient tests buy ≫ more candidates than point counts");
-        assert!((24.0..28.0).contains(&count), "≈2^25.6 point counts: {count}");
-        assert!((54.0..56.0).contains(&coeff), "≈2^54.8 coefficient tests: {coeff}");
+        assert!(
+            coeff > count + 20.0,
+            "coefficient tests buy ≫ more candidates than point counts"
+        );
+        assert!(
+            (24.0..28.0).contains(&count),
+            "≈2^25.6 point counts: {count}"
+        );
+        assert!(
+            (54.0..56.0).contains(&coeff),
+            "≈2^54.8 coefficient tests: {coeff}"
+        );
         assert_eq!(b.log2_candidates(GrindCostModel::NoGrindNeeded), None);
     }
 
@@ -495,6 +520,10 @@ mod tests {
         for h in &a.hypotheses {
             assert!(md.contains(h.name), "missing {}", h.name);
         }
-        assert!(md.contains("Dual_EC_DRBG") && md.contains(&a.seed.seed_hex) && md.contains("speculation"));
+        assert!(
+            md.contains("Dual_EC_DRBG")
+                && md.contains(&a.seed.seed_hex)
+                && md.contains("speculation")
+        );
     }
 }
