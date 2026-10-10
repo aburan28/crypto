@@ -537,10 +537,17 @@ field the schema requires, from the session's own files:
   one thread, timeout), identical for both arms by construction.
 - **Independence.** The schema requires `independent_validation` and a
   replay certificate for each arm. The certificate is the SHA-256 of an
-  `ecbench verify --replay-all` receipt made on a host of another class
-  that reproduced both runs; `--independent-receipt FILE --pointer WHERE`
-  supplies it, and a receipt from the session's own class, for other
-  bytes, or that did not reproduce both runs is refused. Without one the
+  `ecbench verify --replay-all` receipt that reproduced both runs;
+  `--independent-receipt FILE --pointer WHERE` supplies it. The auditor
+  must have a different measurement environment **and** a different
+  hardware profile class. The latter omits mutable compiler, kernel and
+  governor facts: changing `rustc` on `PATH` on one Mac was enough to
+  change `ECBENV2` while staying on the same machine. A receipt from the
+  session's own hardware class, one lacking the new auditor hardware
+  class, one for other bytes, or one that did not reproduce both runs is
+  refused. These self-reported fingerprints cannot by themselves attest
+  physical independence; retain the external runner's job and custody
+  receipt with the pointer. Without an admitted receipt the
   claim is built with null certificates, the checker fails it on exactly
   those fields, and the verdict says it is not yet a claim.
 - **Late receipt attachment.** If the measuring binary is no longer
