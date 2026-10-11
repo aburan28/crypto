@@ -33,6 +33,9 @@ EOF
   [ -n "${MODEL_B:-}" ] && cmd+=(--model-b "$MODEL_B")
   printf '%q ' "${cmd[@]}" > "$out/cmd_n$n.txt"; echo >> "$out/cmd_n$n.txt"
   echo "== n=$n"; "${cmd[@]}" 2>&1 | tee "$out/stdout_n$n.txt" | tail -20
+  # Committed compressed (-n: no name or timestamp, so the bytes are
+  # reproducible); summarise_runs.py reads .json.gz directly.
+  gzip -9 -n -f "$out/report_n$n.json" "$out/stdout_n$n.txt" 2>/dev/null || true
 done
 uptime > "$out/host_load_at_end.txt"
 echo "reports in $out"

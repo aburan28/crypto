@@ -1,5 +1,5 @@
 
-## research/ic_leads_20261010/runs/20261010T193217Z/report_n13.json
+## research/ic_leads_20261010/runs/20261010T193217Z/report_n13.json.gz
 
 instance `icv1-f2m13-t181-515ee569`  log2 r = 11.0  status complete  rho reference: negation-map r-adding walk: look-ahead, short-cycle escape by doubling, distinguished points, stride starts A=2 mean S=2.67 (plain A=1: S=19.2)
 calibration: pinned units ['ns_per_double', 'ns_per_lookup', 'ns_per_row_op', 'ns_per_as_solve', 'ns_per_word_xor', 'ns_per_frobenius', 'ns_per_canon'], measured on this host [] (GAE of a measured unit is host-dependent; the counted columns are not)
@@ -25,7 +25,7 @@ skipped: koblitz-orbit[divisor=1,no_fold=1] + mitm-frobenius-counted + — + wal
 - `koblitz-orbit[divisor=1] + mitm[negation_folded=1] + — + walk`: B=4e+03 D=528 → B·D²/N = 5.57e+05
 - `koblitz-orbit[divisor=1,no_fold=1] + mitm[negation_folded=1] + — + walk`: B=4e+03 D=758 → B·D²/N = 1.149e+06
 
-## research/ic_leads_20261010/runs/20261010T193624Z/report_n17.json
+## research/ic_leads_20261010/runs/20261010T193624Z/report_n17.json.gz
 
 instance `icv1-f2m17-tm101-00378d4e`  log2 r = 16.0  status complete  rho reference: negation-map r-adding walk: look-ahead, short-cycle escape by doubling, distinguished points, stride starts A=2 mean S=1.65 (plain A=1: S=5.75)
 calibration: pinned units ['ns_per_double', 'ns_per_lookup', 'ns_per_row_op', 'ns_per_as_solve', 'ns_per_word_xor', 'ns_per_frobenius', 'ns_per_canon'], measured on this host [] (GAE of a measured unit is host-dependent; the counted columns are not)
@@ -55,7 +55,7 @@ calibration: pinned units ['ns_per_double', 'ns_per_lookup', 'ns_per_row_op', 'n
 - `koblitz-orbit[divisor=1,no_fold=1] + mitm-frobenius + — + walk`: B=205 D=1.03e+03 → B·D²/N = 3.31e+03
 - `koblitz-orbit[divisor=1,no_fold=1] + mitm[negation_folded=1] + — + walk`: B=205 D=1.02e+03 → B·D²/N = 3.28e+03
 
-## research/ic_leads_20261010/runs/20261010T193620Z/report_n23.json
+## research/ic_leads_20261010/runs/20261010T193620Z/report_n23.json.gz
 
 instance `icv1-f2m23-t5197-69e76b73`  log2 r = 21.0  status complete  rho reference: signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference) A=46 mean S=1.06 (plain A=1: S=2.71)
 calibration: pinned units [], measured on this host ['ns_per_double', 'ns_per_lookup', 'ns_per_row_op', 'ns_per_as_solve', 'ns_per_word_xor', 'ns_per_frobenius'] (GAE of a measured unit is host-dependent; the counted columns are not)
@@ -85,7 +85,7 @@ calibration: pinned units [], measured on this host ['ns_per_double', 'ns_per_lo
 - `koblitz-orbit[divisor=1,no_fold=1] + mitm-frobenius + — + walk`: B=2.02e+03 D=2.71e+03 → B·D²/N = 7.11e+03
 - `koblitz-orbit[divisor=1,no_fold=1] + mitm[negation_folded=1] + — + walk`: B=2.02e+03 D=2.76e+03 → B·D²/N = 7.36e+03
 
-## research/ic_leads_20261010/runs/20261010T193711Z/report_n23.json
+## research/ic_leads_20261010/runs/20261010T193711Z/report_n23.json.gz
 
 instance `icv1-f2m23-t5197-69e76b73`  log2 r = 21.0  status complete  rho reference: signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference) A=46 mean S=1.06 (plain A=1: S=2.71)
 calibration: pinned units [], measured on this host ['ns_per_double', 'ns_per_lookup', 'ns_per_row_op', 'ns_per_as_solve', 'ns_per_word_xor', 'ns_per_frobenius'] (GAE of a measured unit is host-dependent; the counted columns are not)

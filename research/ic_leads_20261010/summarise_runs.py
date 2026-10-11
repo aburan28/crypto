@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Turn `ic --out report.json bench --sweep ...` reports into the lead-ladder table.
 
-  python3 -I summarise_runs.py runs/<stamp>/report_n*.json [--baseline-label SUBSTR]
+  python3 -I summarise_runs.py runs/<stamp>/report_n*.json.gz [--baseline-label SUBSTR]
+
+Reports may be plain `.json` or gzip-compressed `.json.gz` (how they are
+committed, to keep the pull-request diff reviewable); both read the same.
 
 For every report: one line per configuration with the medians over its repeats of the
 structural metrics (LEAD_LADDER_METHODOLOGY_20261010.md section 1) and the per-phase
@@ -10,7 +13,7 @@ first configuration of the sweep unless --baseline-label names another).  The se
 copy of the baseline in an A/B/A sweep is the noise floor and is reported as such.
 Operation counts only; wall seconds are printed in a separate column marked as a note.
 """
-import argparse, json, statistics, sys
+import argparse, gzip, json, statistics, sys
 
 PHASES = [("fb", lambda r: r["factor_base"]["cost"]["gae"]),
           ("setup", lambda r: r["decomposition"]["setup"]["gae"]),
@@ -60,7 +63,9 @@ def fmt(x):
     return str(x)
 
 def summarise(path, baseline_label):
-    doc = json.load(open(path))
+    opener = gzip.open if path.endswith(".gz") else open
+    with opener(path, "rt") as fh:
+        doc = json.load(fh)
     rows = doc["rows"]
     by_label = {}
     order = []
