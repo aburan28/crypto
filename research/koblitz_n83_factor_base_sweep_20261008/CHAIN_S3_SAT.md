@@ -6,8 +6,9 @@ supervisors. It constrains the first two summand x-coordinates to unsigned
 `x0 <= x1`. Swapping those summands preserves the first S3 equation and every
 later node depends on their sum only; the original-curve sign lift still checks
 both point signs. The constraint therefore retains a representative for each
-first-pair swap. At degree 83 it adds exactly 82 SAT variables and 247 CNF
-clauses by source count. Existing unordered-orbit receipts remain distinct.
+first-pair swap. At degree 83 it adds exactly 82 SAT variables and emits up to
+247 CNF clauses; root simplification can reduce the installed count. Existing
+unordered-orbit receipts remain distinct.
 The ordered arm has small-width exhaustive comparator and guard-contract tests;
 retained N83 construction and solver performance for this arm are still to be
 measured. This is a symmetry arm, not a measured full-runtime improvement.
