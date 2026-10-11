@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img" aria-labelledby="title desc">
+  <title id="title">Binary curve comparison decision path</title>
+  <desc id="desc">Exact curves feed a GHS screen. Koblitz trace kills the tested subgroups; degree-15 non-Koblitz models have genus three but lack a point map; sect113r1 and sect113r2 have very large descent genus. Generic ECDLP costs are measured separately.</desc>
+  <style>text{font-family:Arial,sans-serif;fill:#17324b}.title{font-size:24px;font-weight:bold}.body{font-size:16px}.small{font-size:14px}.box{fill:#eef5fb;stroke:#50789c;stroke-width:2}.stop{fill:#fff0e8;stroke:#c0643a;stroke-width:2}.ok{fill:#edf7ed;stroke:#4d895c;stroke-width:2}.edge{stroke:#637d91;stroke-width:2;fill:none}</style>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#637d91"/></marker></defs>
+  <text x="28" y="36" class="title">What the curve comparison can actually test</text>
+  <rect x="25" y="80" width="210" height="78" rx="10" class="box"/><text x="42" y="109" class="body">Exact curve, field,</text><text x="42" y="134" class="body">prime subgroup</text>
+  <rect x="282" y="80" width="194" height="78" rx="10" class="box"/><text x="304" y="110" class="body">GHS screen across</text><text x="304" y="135" class="body">all field towers</text>
+  <path d="M235 119 H281" class="edge" marker-end="url(#arrow)"/>
+  <rect x="540" y="62" width="425" height="75" rx="10" class="stop"/><text x="557" y="90" class="body">Koblitz: magic 1; checked trace kills</text><text x="557" y="116" class="body">each tested prime subgroup generator</text>
+  <rect x="540" y="166" width="425" height="75" rx="10" class="stop"/><text x="557" y="194" class="body">Degree-15 non-Koblitz: genus 3;</text><text x="557" y="220" class="body">higher-genus point map still absent</text>
+  <rect x="540" y="270" width="425" height="75" rx="10" class="stop"/><text x="557" y="298" class="body">sect113r1/r2: magic 113;</text><text x="557" y="324" class="body">no genus ≤ 4 tower found</text>
+  <path d="M476 119 H511 V100 H539" class="edge" marker-end="url(#arrow)"/><path d="M476 119 H511 V204 H539" class="edge" marker-end="url(#arrow)"/><path d="M476 119 H511 V308 H539" class="edge" marker-end="url(#arrow)"/>
+  <rect x="283" y="366" width="427" height="47" rx="10" class="ok"/><text x="306" y="396" class="body">Generic rho / BSGS ECDLP measured separately</text>
+  <path d="M752 345 V359 H709" class="edge" marker-end="url(#arrow)"/>
+  <text x="29" y="390" class="small">Structural rows are not solver timings.</text>
+</svg>

@@ -11,8 +11,7 @@ from the GPUs'.
 \centering
 \small
 \caption{Bitsliced CPU client, $\mathrm{GF}(2^{131})$, one core, median
-  of five. Speedups are against the 64-lane build on the same host and
-  compiler. The 2009 qhasm implementation of Bailey et al.\ reached
+  of five. Speedups are against the g++ 64-lane build on the same host. The 2009 qhasm implementation of Bailey et al.\ reached
   $533$ cycles per iteration on a Core~2 with 128-bit vectors.}
 \label{tab:cpu}
 \begin{tabular}{@{}llrrl@{}}
@@ -40,9 +39,8 @@ DAG recovered moves only in the conversion ($4{,}287$ to $3{,}903$),
 missed its declared target, and recorded the leaf-size and compiler
 levers as measured dead ends.\art{ecc2k130/HOST-SCHEDULE.md} On
 aarch64 the gain splits cleanly: the NEON word with \texttt{BSL} alone
-is $1.76\times$ on the M4~Pro, \texttt{EOR3} a further $1.24\times$, and
-a core without \texttt{FEAT\_SHA3} (Graviton2) still takes $1.81\times$
-from the wider word. Compiler choice is worth more than either on
+is $1.76\times$ on the M4~Pro, \texttt{EOR3} a further $1.24\times$, and a core without \texttt{FEAT\_SHA3} (Graviton2) still takes
+$1.81\times$ from the wider word and \texttt{BSL}. Compiler choice is worth more than either on
 this code: gcc emits $9{,}372$ instructions for the multiply leaf,
 $59\%$ of them loads and stores against spilled temporaries, where
 clang emits $1{,}902$ plus five outlined calls. The SHA3 probe is gated
@@ -53,6 +51,6 @@ the resulting binary dies with \texttt{SIGILL} on its $8{,}907$
 
 In the fleet a CPU worker at $2.3$~B/s (the self-reported median of
 the twelve CPU slots on 2026-09-17) is about a sixth of an
-RTX~PRO~6000; on Modal a four-thread sidecar beside a GPU adds about
-$25\%$ to the cost for $2.7\%$ more iterations and was not
-retained.\art{ecc2k130/benchmarks/dp-interval/raw/worker-counters-2026-09-17.tsv}\art{ecc2k130/README.md, ``Walking on the container's CPUs too''}
+RTX~PRO~6000; on Modal a 32-thread (16-core) sidecar beside a GPU adds about
+$25\%$ to the container's cost for $2.7\%$ more iterations and is off
+by default.\art{ecc2k130/benchmarks/dp-interval/raw/worker-counters-2026-09-17.tsv}\art{ecc2k130/README.md, ``Walking on the container's CPUs too''}

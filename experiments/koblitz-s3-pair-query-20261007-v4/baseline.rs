@@ -38,7 +38,7 @@ struct Linear {
 
 impl Linear {
     fn from_images(images: &[u64]) -> Self {
-        let chunks = (images.len() + 7) / 8;
+        let chunks = images.len().div_ceil(8);
         let mut tables = vec![[0u64; 256]; chunks];
         for (chunk, table) in tables.iter_mut().enumerate() {
             for byte in 1usize..256 {
@@ -393,10 +393,6 @@ fn build_index(
     let lefts_per_worker = reps.len().div_ceil(worker_count);
     let mut state_chunks = Vec::with_capacity(worker_count);
     thread::scope(|scope| {
-        let gf = gf;
-        let basis = basis;
-        let solver = solver;
-        let reps = reps;
         let shifted = &shifted;
         let handles: Vec<_> = (0..worker_count)
             .map(|worker| {
@@ -465,7 +461,6 @@ fn build_index(
                 let first = worker * states_per_scatter_worker;
                 let end = (first + states_per_scatter_worker).min(states.len());
                 let states = &states;
-                let basis = basis;
                 scope.spawn(move || {
                     let mut entries = (0..SHARD_COUNT).map(|_| Vec::new()).collect::<Vec<_>>();
                     for state in &states[first..end] {
@@ -493,7 +488,7 @@ fn build_index(
     // shard insertion consumes the state chunks in their original order, so
     // insert-if-absent picks the same first witness as the serial table.
     let root_insert_started = Instant::now();
-    let table_workers = workers.max(1).min(SHARD_COUNT);
+    let table_workers = workers.clamp(1, SHARD_COUNT);
     let mut built_shards: Vec<Option<RootTable>> =
         std::iter::repeat_with(|| None).take(SHARD_COUNT).collect();
     thread::scope(|scope| {
@@ -1024,7 +1019,9 @@ fn main() {
     assert!(setup_timer_boundary_residual_ms >= -0.02);
     let target_online_started = Instant::now();
     let target_validation_started = Instant::now();
-    let (qx, qy) = target.expect("Q must be affine");
+    let Some((qx, qy)) = target else {
+        panic!("Q must be affine")
+    };
     let lhs = gf.sqr(qy) ^ gf.mul(qx, qy);
     let rhs = gf.mul(gf.sqr(qx), qx) ^ gf.mul(gf.from_element(&curve.curve.a), gf.sqr(qx)) ^ b;
     assert_eq!(lhs, rhs, "Q must lie on the declared curve");
@@ -1130,12 +1127,12 @@ fn main() {
                     scope.spawn(move || {
                         let pdp_started = Instant::now();
                         let (relation, state_probes, s3_calls) = extract(
-                            &gf,
-                            &fast,
-                            &basis,
-                            &solver,
-                            &index,
-                            &base,
+                            gf,
+                            fast,
+                            basis,
+                            solver,
+                            index,
+                            base,
                             Some(relation_target),
                             relation_hash as usize,
                         );

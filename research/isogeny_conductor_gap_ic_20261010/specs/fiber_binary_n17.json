@@ -1,0 +1,116 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "mitm:negation_folded=1"
+        }
+      },
+      "name": "mitm-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "mitm-fiber:fiber=lifts,negation_folded=1"
+        }
+      },
+      "name": "mitm-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1"
+        }
+      },
+      "name": "mitm-closed",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic-fiber:fiber=lifts",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Part A: the same arms on four random binary curves with cofactor up to 8; the fiber size each oracle found is in its set-up counters.",
+  "label": "fiber-aware relation generation on random binary curves, n = 17",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 3,
+    "seed": 1,
+    "timeout_seconds": 1800,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "binary_random",
+        "max_cofactor": 8,
+        "n": 17,
+        "seed": 1
+      },
+      {
+        "kind": "binary_random",
+        "max_cofactor": 8,
+        "n": 17,
+        "seed": 2
+      },
+      {
+        "kind": "binary_random",
+        "max_cofactor": 8,
+        "n": 17,
+        "seed": 3
+      },
+      {
+        "kind": "binary_random",
+        "max_cofactor": 8,
+        "n": 17,
+        "seed": 4
+      }
+    ],
+    "target_seed": 20261010,
+    "targets_per_curve": 4
+  }
+}

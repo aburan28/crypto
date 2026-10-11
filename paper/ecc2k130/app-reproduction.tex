@@ -27,6 +27,15 @@ Every rate is a paired comparison; the candidate/control pairs,
 raw samples and re-walk logs are in the \texttt{ecc2k130/benchmarks/}
 directory each note links.
 
+\paragraph{Other GPU kernels (host emulation; no device needed).}
+{\small\begin{verbatim}
+make -C gpu/ecc test        # secp256k1 field, folds, BSGS; ptx_asm_check
+make -C gpu/btcpuzzle test  # kangaroo invariant, planted 28/32/36-bit solves
+make -C gpu/nist test       # P-256/P-384 against Boost.Multiprecision
+make -C gpu/ecc2k test      # ECC2K-95 field, steppers, pair table, tsan
+make -C gpu/semaev test && make -C gpu/semaev bench-host L=7
+\end{verbatim}}
+
 \paragraph{Walk constant and cycles.}
 {\small\begin{verbatim}
 make -C ecc2k130 test-cycle-rule   # 19,200 tau-cycles refused

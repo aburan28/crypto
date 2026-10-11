@@ -50,25 +50,65 @@ TeX can open the paper.
   rules, the 0.85→14.64 B/s ledger, the table walk at 20.08, the RTX
   PRO 4500, the twelve-SKU survey, every declined candidate.
 - §6 CPU clients.
-- §7 The FPGA engine: pre-board estimate, design, measured F2 images.
-- §8 The campaign: configuration, the 2^28.41 interval, fleet
+- §7 The other GPU kernels: an evidence-class inventory, 256-bit
+  secp256k1 arithmetic and its instruction ledger, rho with order-six
+  folding and baby-step giant-step, kangaroo, P-256/P-384, the ECC2K-95
+  kernel and pair table, the polynomial-system and linear-algebra
+  solvers, and the F4 elimination kernels that did run on a device.
+- §8 The FPGA engine: pre-board estimate, design, measured F2 images.
+- §9 The campaign: configuration, the 2^28.41 interval, fleet
   economics, storage and certification, state.
-- §9 Structural alternatives: index calculus on the Koblitz curve,
+- §10 Structural alternatives: index calculus on the Koblitz curve,
   point decomposition against the budget.
-- §10 Related work. §11 Conclusion.
+- §11 Related work. §12 Conclusion.
 - Appendix A: reproduction commands.
 
 Every number is footnoted to a repository artefact (`\art{path}`);
 paths prefixed `cryptanalysis:` are in the sibling library.
 
+## Revision history
+
+- Draft 1: first complete text.
+- Draft 2: every section fact-checked line by line against its cited
+  files (55 corrections, among them the two-chain B200 verdict, the
+  batch-18 control, the cycle-rule v2/v3 validation attribution, the
+  inversion chain the client actually uses, and the FPGA host's
+  `--verify N` sampling); bibliography checked against Crossref; the
+  reporting rule restated in full so the paper does not depend on the
+  companion draft; an availability paragraph naming the three public
+  repositories; the campaign state refreshed from the published feed
+  (`data/status_20261010T154157Z.json`); related work extended to
+  ECC2K-108 and the 2016 binary-curve record.
+
+- Draft 3: a new section on the repositories' other GPU arithmetic
+  (prime-field secp256k1 / NIST and binary-field ECC2K-95 / solver
+  kernels), written from their READMEs, optimisation notes and
+  experiment records, with an evidence-class table up front. Apart
+  from the F4 elimination kernels and one Macaulay scheduling run, none
+  of that code has run on a device; the section quotes static
+  instruction counts and emulated walk constants and says so.
+
 ## Known caveats carried into the text
 
 - The RTX PRO 6000 σ-walk headline has moved past the audited 14.64 B/s
   (15.44 fused, 15.88 with nibble tables); the campaign preset still
-  ships 14.64 and the paper says which is which.
+  ships 14.64 and the paper leads with that number, naming the others.
 - The 20.08 B/s table-walk rate is a rate, not a cost per solve; the
-  cycle-rule v2 cost projection (0.81–0.86× σ) is unmeasured.
+  cycle-rule v2 cost projection (0.81–0.86× σ) is unmeasured, and the
+  v3 rule's throughput and walk constant are not yet measured at all.
 - The RTX PRO 4500 bridge map's DP34 collection rate, the L40S
   collection rate and the G7e family are unmeasured.
+- The packed-walk witness cost (34.7%) is stated in `CAIRN-WITNESS.md`
+  but only the job script is frozen under `benchmarks/witness-cost/`.
 - The IC feasibility note's fitted constant `C` has three readings in
-  the source; the paper reports the range and uses the pessimistic fit.
+  the source; the paper carries the values recomputed from the exact
+  subgroup orders (0.33, 1.51, 1.27) and says the extrapolation uses
+  `C = 1`.
+- Whether the storage bucket's copy of `campaign.json` had its iteration
+  guard raised to 2^32 before the fleet stopped is not recorded.
+- The other-GPU section's numbers are static PTX counts (clang,
+  `ptxas` 12.9) and host-emulation operation counts, not device rates;
+  the `gpu/ecc` occupancy and stack tables predate the order-six fold
+  and the cycle ring and are quoted as such.
+- The author block is anonymized; `make deanonymize` with an `AUTHORS`
+  file restores it.

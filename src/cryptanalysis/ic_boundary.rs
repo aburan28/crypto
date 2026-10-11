@@ -118,6 +118,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     find_irreducible_sparse, koblitz_signed_frobenius_rho_reference,
     saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
+    ProjectedFactorBase,
 };
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
@@ -740,15 +741,40 @@ pub(crate) fn fast_map<V>(capacity: usize) -> FastMap<V> {
 
 // ── Modular arithmetic on u64 ──────────────────────────────────────
 
+/// `a·b mod m`, the value of `(a·b) % m` on 128-bit integers exactly.
+///
+/// A 128-bit remainder is a library call on every target (`__umodti3`,
+/// a loop of word divisions), and it sat under every multiplication of
+/// the prime-curve group law.  When the modulus fits 32 bits and both
+/// operands are reduced — every curve `ecbench` registers, and every
+/// operand the group law forms — the product fits a word and one
+/// hardware division gives the same value.  Anything else takes the
+/// 128-bit path unchanged, so no input changes its result.
 #[inline]
-fn mulmod(a: u64, b: u64, m: u64) -> u64 {
-    ((a as u128 * b as u128) % m as u128) as u64
+pub(crate) fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+    if m <= u64::from(u32::MAX) && a < m && b < m {
+        (a * b) % m
+    } else {
+        ((a as u128 * b as u128) % m as u128) as u64
+    }
 }
 
+/// `a + b mod m`, the value of `(a + b) % m` on 128-bit integers exactly.
+/// Reduced operands need one compare-and-subtract instead of the
+/// 128-bit remainder's library call; the carry handles a modulus above
+/// `2^63`.
 #[inline]
-fn addmod(a: u64, b: u64, m: u64) -> u64 {
-    let s = a as u128 + b as u128;
-    (s % m as u128) as u64
+pub(crate) fn addmod(a: u64, b: u64, m: u64) -> u64 {
+    if a < m && b < m {
+        let (s, carry) = a.overflowing_add(b);
+        if carry || s >= m {
+            s.wrapping_sub(m)
+        } else {
+            s
+        }
+    } else {
+        ((a as u128 + b as u128) % m as u128) as u64
+    }
 }
 
 #[inline]
@@ -773,23 +799,38 @@ fn powmod(mut a: u64, mut e: u64, m: u64) -> u64 {
     r
 }
 
-/// Modular inverse by the extended Euclidean algorithm.
+/// Modular inverse by the extended Euclidean algorithm: `a⁻¹ mod m` in
+/// `[0, m)`, `None` when `gcd(a, m) ≠ 1`.
+///
+/// Remainders and quotients are words, so each step is one hardware
+/// division; the earlier 128-bit form paid a library call (`__divti3`)
+/// per step, and one inversion sits in every affine group operation.
+/// The Bézout coefficient is kept as a magnitude with its sign tracked
+/// separately: successive coefficients alternate in sign, so the update
+/// `s₀ − q·s₁` only ever adds magnitudes, and every magnitude stays at
+/// most `m`.  The inverse is unique, so the result is the one the
+/// 128-bit form returned.
 pub fn invmod(a: u64, m: u64) -> Option<u64> {
-    let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
-    let (mut old_s, mut s) = (1i128, 0i128);
-    while r != 0 {
-        let q = old_r / r;
-        (old_r, r) = (r, old_r - q * r);
-        (old_s, s) = (s, old_s - q * s);
+    let (mut r0, mut r1) = (m, a % m);
+    // `r0 ≡ ±t0·a`, `r1 ≡ ∓t1·a (mod m)`; `neg0` is the sign of `t0`'s
+    // coefficient.  Initially `m ≡ 0·a` and `a ≡ +1·a`.
+    let (mut t0, mut t1) = (0u64, 1u64);
+    let mut neg0 = true;
+    while r1 != 0 {
+        let q = r0 / r1;
+        (r0, r1) = (r1, r0 - q * r1);
+        (t0, t1) = (t1, t0 + q * t1);
+        neg0 = !neg0;
     }
-    if old_r != 1 {
+    if r0 != 1 {
         return None;
     }
-    let mut v = old_s % m as i128;
-    if v < 0 {
-        v += m as i128;
-    }
-    Some(v as u64)
+    Some(if neg0 {
+        // `t0 == m` only when `m == 1`, where the inverse is `0`.
+        (m - t0) % m
+    } else {
+        t0 % m
+    })
 }
 
 // ── Incremental Gauss–Jordan over Z/rZ ─────────────────────────────
@@ -3714,6 +3755,43 @@ pub fn koblitz_instance(a: u8, n: u32) -> Option<BinaryInstance> {
     })
 }
 
+/// A curve of the Koblitz isogeny class that is **not** the Koblitz model:
+/// `y² + xy = x³ + a x² + b` with `b ∉ F₂`, the same group order as `K_a`
+/// (certified on sampled points by [`KoblitzCurve::isogenous_model`]),
+/// no Frobenius endomorphism.  This is the floor-curve control of the
+/// conductor-gap experiments (`docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md`
+/// L8): every lead that claims a gain *from* `τ` must vanish on it.
+/// `b` is a bitmask in the instance's own sparse modulus (the one
+/// `KoblitzCurve::new` selects), so a `b` built elsewhere must be in the
+/// same representation; `koblitz` is `None`, so only negation folds.
+pub fn koblitz_floor_instance(a: u8, n: u32, b: u64) -> Option<BinaryInstance> {
+    use num_bigint::BigUint as Big;
+    if n == 0 || n > 63 || b < 2 {
+        return None;
+    }
+    let b_fe = crate::binary_ecc::F2mElement::from_biguint(&Big::from(b), n);
+    let kc = KoblitzCurve::isogenous_model(a, n, b_fe, None)?;
+    let fast = FastCurve::new(&kc.curve)?;
+    let gf = Gf2::new(&kc.curve.irreducible);
+    let ash = ArtinSchreier::new(&gf);
+    let generator = fast.lift(kc.generator());
+    Some(BinaryInstance {
+        name: format!("{}-floor-b{b:x}", kc.label()),
+        n,
+        irreducible: kc.curve.irreducible.clone(),
+        a: u64::from(a),
+        b,
+        group_order: kc.group_order.to_u64()?,
+        r: kc.subgroup_order.to_u64()?,
+        cofactor: kc.cofactor.to_u64()?,
+        generator,
+        fast,
+        gf,
+        artin_schreier: ash,
+        koblitz: None,
+    })
+}
+
 // ── Factor bases ───────────────────────────────────────────────────
 
 /// How factor-base points map to relation columns.
@@ -3724,6 +3802,13 @@ pub enum ColumnFold {
     /// One column per signed Frobenius orbit; `(−1)^s π^k(rep)` carries
     /// `(−1)^s λ^k`.  Koblitz only.
     SignedFrobeniusOrbit,
+    /// One column per signed Frobenius orbit *of the cofactor
+    /// projections* `[h]P`: two raw orbits whose projections coincide
+    /// or are signed Frobenius translates of each other share a column
+    /// (for a base closed under translation by the 2-torsion point `T`,
+    /// `P` and `P + T` do).  A point with `[h]P = O` carries
+    /// coefficient `0`.  Koblitz only.
+    ProjectedSignedFrobeniusOrbit,
 }
 
 /// A materialised factor base with its column map.  Both `P` and `−P`
@@ -3958,6 +4043,10 @@ pub fn koblitz_factor_base(
     let mut out = FactorBase::empty(description);
     let mut abscissa_col: FastMap<usize> = fast_map(fb.points.len());
     let mut key_to_index: FastMap<usize> = fast_map(fb.points.len());
+    let projected = match fold {
+        ColumnFold::ProjectedSignedFrobeniusOrbit => Some(ProjectedFactorBase::new(kc, fb)),
+        _ => None,
+    };
     for (i, p) in fb.points.iter().enumerate() {
         let fp = inst.fast.lift(p);
         key_to_index.insert(fp.pack(), i);
@@ -3967,6 +4056,15 @@ pub fn koblitz_factor_base(
                 let (orbit, k, negated) = fb.signed_orbit_of[i];
                 let c = powmod(lambda, k as u64, r);
                 (orbit, if negated { submod(0, c, r) } else { c })
+            }
+            ColumnFold::ProjectedSignedFrobeniusOrbit => {
+                match projected.as_ref().and_then(|map| map.location_of(i)) {
+                    Some((orbit, k, negated)) => {
+                        let c = powmod(lambda, u64::from(k), r);
+                        (orbit, if negated { submod(0, c, r) } else { c })
+                    }
+                    None => (0, 0),
+                }
             }
             ColumnFold::Abscissa => {
                 let next = abscissa_col.len();
@@ -3996,8 +4094,20 @@ pub fn koblitz_factor_base(
     out.abscissa_list.sort_unstable();
     out.columns = match fold {
         ColumnFold::SignedFrobeniusOrbit => fb.signed_orbits.len(),
+        ColumnFold::ProjectedSignedFrobeniusOrbit => {
+            projected.as_ref().map_or(0, |map| map.columns())
+        }
         ColumnFold::Abscissa => abscissa_col.len(),
     };
+    if let Some(map) = projected.as_ref() {
+        let c = map.cost();
+        out.cost
+            .count("cofactor_multiplications", c.cofactor_multiplications);
+        out.cost.count(
+            "frobenius_coordinate_squarings",
+            c.derived_frobenius_coordinate_squarings + c.canonical_frobenius_coordinate_squarings,
+        );
+    }
     if !fb.uses_ambient_basis() {
         out.dimension = Some(fb.ell);
         out.subspace_basis = Some(
@@ -4280,25 +4390,33 @@ impl FrobeniusPairTable {
                 member_of[i * n + t] = idx as u32;
             }
         }
-        // One representative per column, the first point of it: any
-        // member of a signed orbit serves, the orbit being its own
-        // ⟨σ, −1⟩-image.
-        let mut rep_of_col = vec![usize::MAX; fb.columns];
-        for i in 0..f {
-            let c = fb.col_of[i];
-            if rep_of_col[c] == usize::MAX {
-                rep_of_col[c] = i;
+        // One representative per signed Frobenius orbit, the first point
+        // of it: any member serves, the orbit being its own ⟨σ, −1⟩-image.
+        // Orbits are found by the canonical name of the abscissa, not by
+        // column: a column may hold several orbits (the `Z[τ]`-multiplier
+        // closure of `compact-orbit-scan`), and a table built from one
+        // representative per column would miss every pair whose first
+        // member lies in another orbit of the column.
+        let mut orbit_of = vec![0u32; f];
+        let mut rep_of_orbit: Vec<usize> = Vec::new();
+        {
+            let mut orbit_index: FastMap<u32> = fast_map(f / n + 1);
+            for i in 0..f {
+                let key = canon.canon(fb.points[i].x);
+                let next = rep_of_orbit.len() as u32;
+                let id = *orbit_index.entry(key).or_insert(next);
+                if id == next {
+                    rep_of_orbit.push(i);
+                }
+                orbit_of[i] = id;
             }
         }
         let mut ops = GroupOps::default();
         let mut canons = 0u64;
         let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
-        for (col, &rep) in rep_of_col.iter().enumerate() {
-            if rep == usize::MAX {
-                continue;
-            }
+        for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
             for j in 0..f {
-                if fb.col_of[j] < col {
+                if (orbit_of[j] as usize) < orbit {
                     continue;
                 }
                 let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
@@ -4313,7 +4431,7 @@ impl FrobeniusPairTable {
         }
         Some(Self {
             entries: map.len() as u64,
-            representatives: rep_of_col.iter().filter(|&&r| r != usize::MAX).count() as u64,
+            representatives: rep_of_orbit.len() as u64,
             map,
             canon,
             member_of,
@@ -6077,6 +6195,22 @@ fn calibrate_binary(inst: &BinaryInstance, calib: &mut Calibration) {
     calib.ns_per_frobenius = Some(start.elapsed().as_nanos() as f64 / samples as f64);
     std::hint::black_box(acc);
     calib.ns_per_word_xor = Some(calibrate_word_xor());
+    // The Frobenius-orbit canonicalisation (lead L2): priced here so the
+    // framework's `canonicalisations` counter is charged like every other
+    // non-addition instead of riding along unpriced.
+    if inst.koblitz.is_some() {
+        if let Some(canon) = FrobeniusCanon::new(&inst.gf, inst.n) {
+            let xs: Vec<u64> = (0..1024).map(|_| rng.gen::<u64>() & inst.gf.mask).collect();
+            let start = Instant::now();
+            let mut acc = 0u64;
+            for i in 0..samples {
+                let (c, t) = canon.canon_with_shift(xs[(i % 1024) as usize]);
+                acc ^= c.wrapping_add(t as u64);
+            }
+            calib.ns_per_canon = Some(start.elapsed().as_nanos() as f64 / samples as f64);
+            std::hint::black_box(acc);
+        }
+    }
 }
 
 /// Nanoseconds per pair of the `S₄` pairs-and-solve loop, measured on
@@ -7108,6 +7242,115 @@ pub fn format_markdown(ledger: &BoundaryLedger) -> String {
 
 #[cfg(test)]
 mod tests {
+    /// The 128-bit forms the word-sized helpers replaced; every result
+    /// of the fast paths must equal theirs.
+    mod reference {
+        pub fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+            ((a as u128 * b as u128) % m as u128) as u64
+        }
+        pub fn addmod(a: u64, b: u64, m: u64) -> u64 {
+            ((a as u128 + b as u128) % m as u128) as u64
+        }
+        pub fn invmod(a: u64, m: u64) -> Option<u64> {
+            let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
+            let (mut old_s, mut s) = (1i128, 0i128);
+            while r != 0 {
+                let q = old_r / r;
+                (old_r, r) = (r, old_r - q * r);
+                (old_s, s) = (s, old_s - q * s);
+            }
+            if old_r != 1 {
+                return None;
+            }
+            let mut v = old_s % m as i128;
+            if v < 0 {
+                v += m as i128;
+            }
+            Some(v as u64)
+        }
+    }
+
+    /// Moduli at every edge the fast paths branch on: tiny, either side
+    /// of `2^32`, above `2^63`, and the largest word.
+    fn edge_moduli() -> Vec<u64> {
+        vec![
+            1,
+            2,
+            3,
+            7,
+            53117,
+            (1u64 << 32) - 5,
+            (1u64 << 32) - 1,
+            1u64 << 32,
+            (1u64 << 32) + 15,
+            (1u64 << 63) - 25,
+            (1u64 << 63) + 11,
+            u64::MAX - 58,
+            u64::MAX,
+        ]
+    }
+
+    #[test]
+    fn word_sized_field_helpers_match_the_128_bit_forms() {
+        use rand::{Rng, SeedableRng};
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0x6d75_6c6d_6f64);
+        for round in 0..200_000u32 {
+            let m = if round % 4 == 0 {
+                edge_moduli()[(round as usize / 4) % edge_moduli().len()]
+            } else if round % 4 == 1 {
+                rng.gen_range(1..=u64::from(u32::MAX))
+            } else {
+                rng.gen_range(1..=u64::MAX)
+            };
+            // Reduced operands take the fast paths; unreduced ones and
+            // the edge values must fall back to the same answers.
+            let pick = |rng: &mut rand::rngs::StdRng| match rng.gen_range(0..6) {
+                0 => 0,
+                1 => m - 1,
+                2 => m,
+                3 => rng.gen::<u64>(),
+                _ => rng.gen_range(0..m),
+            };
+            let (a, b) = (pick(&mut rng), pick(&mut rng));
+            assert_eq!(
+                super::mulmod(a, b, m),
+                reference::mulmod(a, b, m),
+                "mulmod({a}, {b}, {m})"
+            );
+            assert_eq!(
+                super::addmod(a, b, m),
+                reference::addmod(a, b, m),
+                "addmod({a}, {b}, {m})"
+            );
+            assert_eq!(
+                super::invmod(a, m),
+                reference::invmod(a, m),
+                "invmod({a}, {m})"
+            );
+        }
+    }
+
+    #[test]
+    fn invmod_inverts_every_unit_of_small_moduli() {
+        for m in [1u64, 2, 3, 4, 6, 7, 12, 97, 53117] {
+            for a in 0..m.min(1 << 12) {
+                match super::invmod(a, m) {
+                    Some(v) => {
+                        assert!(v < m, "invmod({a}, {m}) = {v} not reduced");
+                        assert_eq!(super::mulmod(a, v, m) % m, 1 % m, "invmod({a}, {m}) = {v}");
+                    }
+                    None => assert_ne!(gcd(a, m), 1, "invmod({a}, {m}) missing"),
+                }
+            }
+        }
+    }
+
+    fn gcd(mut a: u64, mut b: u64) -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    }
     use super::*;
 
     #[test]

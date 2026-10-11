@@ -95,8 +95,10 @@ is an AXI4-Lite slave in front of \texttt{NENG} walkers with a
 credit-based register spine (about 870 FFs and 300 LUTs per engine),
 introduced after the first flat 48-engine build placed at
 $-2.5$~ns. The host program is a drop-in for the CUDA client under
-the same worker script: it writes the same 32-byte records and
-re-walks every report from its seed on the CPU.\art{hdl/ecc2k130/ec2k_walker.vhd}\art{hdl/ecc2k130/host/ecc2k130_fpga.cpp}
+the same worker script: it writes the same 32-byte records and can re-walk the first $N$
+reports from their seeds on the CPU (\texttt{--verify N}); production
+workers leave verification to the campaign
+merge.\art{hdl/ecc2k130/ec2k_walker.vhd}\art{hdl/ecc2k130/host/ecc2k130_fpga.cpp}
 
 \paragraph{Verification.} The reference script imports the client's
 field model and emits 256 multiplier vectors (including 0, the
@@ -117,10 +119,10 @@ clocks).\art{hdl/ecc2k130/ecc2k_ref.py}\art{hdl/ecc2k130/vectors_ecc2k130.txt}
 \centering
 \small
 \caption{F2 images on one VU47P (\texttt{f2.6xlarge}). All runs had
-  zero dropped reports; 32 or 64 sampled distinguished points per
-  image were re-walked on the host against the client reference from
-  the same seed and matched. The 128-engine image is the promoted
-  AFI.}
+  zero dropped reports; for every image except the 112- and 120-engine
+  ones, 32 or 64 sampled distinguished points were re-walked on the
+  host against the client reference from the same seed and matched.
+  The 128-engine image is the promoted AFI.}
 \label{tab:fpga-images}
 \begin{tabular}{@{}rrlrrr@{}}
 \toprule
@@ -149,9 +151,10 @@ prediction of a design that shares nothing between engines except the
 host port, and the measured images sit on it. Builds that missed
 timing (128 engines at 375~MHz, 112 at 400) and the 144-engine build
 that failed block-RAM placement ($3{,}744$ RAMB18 sites needed against
-$3{,}576$) are recorded alongside; the projection at $5.16$ clocks per
-step is $8.8$~G at 136 engines and $9.3$~G at 144 or at 128 engines
-and 375~MHz, neither yet routed.
+$3{,}576$) are recorded alongside; the projection at $5.16$ clocks per step is $8.8$~G at 136 engines
+and $9.3$~G at 144 or at 128 engines and 375~MHz, neither yet met (128
+at 375~MHz routed at $-0.21$~ns; 144 failed
+placement).\art{hdl/ecc2k130/README.md}
 
 \begin{figure}[t]
 \centering

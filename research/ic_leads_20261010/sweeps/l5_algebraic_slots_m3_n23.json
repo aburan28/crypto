@@ -1,0 +1,25 @@
+{
+ "_comment": "L5 algebraic form with three summands at n=23: closure of the prefix subspace of dimension 5; plain descended S4 (all three summands over V) against slots=all (summand 2 over every Frobenius image of V, summands 1 and 3 over V). Prediction: hits per solved system x 3 (the 3! symmetry of the plain system is broken down to the swap of summands 1 and 3).",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 400000,
+ "matrix": {
+  "factor_base": [
+   "koblitz-closure:dimension=4"
+  ],
+  "oracle": [
+   "descent-algebraic:m=3",
+   "descent-algebraic:m=3,slots=all"
+  ],
+  "solver": [
+   "exhaustive"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}
