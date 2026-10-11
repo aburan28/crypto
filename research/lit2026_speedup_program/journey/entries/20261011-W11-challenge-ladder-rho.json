@@ -1,0 +1,22 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "challenge-ladder-rho",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#TBD",
+  "papers": ["arXiv 2508.14011"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "secpkk1-ladder-30-60-rho-negation",
+    "description": "prime_fast::rho_parallel with the negation map on the arXiv 2508.14011 secpkk1 ladder, k = 30..60 step 2 (Algorithm 3 as printed), target 'Quantum' point P, generator 'Challenge' point Q; 64 seeds per level at 30-48 bits, 16 at 50-56, 8 at 58-60",
+    "curve_ids": ["secp30k1 ... secp60k1 (arXiv 2508.14011 Algorithm 3; secp32k1 and secp48k1 match Appendix A)"]
+  },
+  "metric": "rho iterations / sqrt(pi n / 4), pooled mean over 720 verified solves",
+  "unit": "ratio",
+  "isolation": "L0",
+  "samples": 720,
+  "arms": [],
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Pooled mean 1.077 (s.d. 0.546, s.e. 0.020), median 0.998; per-level means 0.80-1.24; DP start-up overhead estimate 0.12-0.18. The paper's 8/12/16-bit cards follow an ascending prime search, its 6/24/32/48-bit cards the printed descending one."
+}

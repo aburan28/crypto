@@ -1,0 +1,27 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "binary-torsion19-step",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#TBD",
+  "papers": ["ePrint 2026/704"],
+  "kind": "speedup",
+  "workload": {
+    "id": "koblitz-torsion-walk-step-n19-a1-l457",
+    "description": "binary_torsion_walk Velu abscissa step, x(P) and x(Q) through each of the 458 kernels of E[457] in F_{q^8} on the (n, a2) = (19, 1) Koblitz class crater curve (s = 228)",
+    "curve_ids": ["K_1 / F_2^19 isogeny class (koblitz_isogeny_class_walk 19:1)"]
+  },
+  "metric": "F_{q^8} multiplications over all 458 kernels (two points each)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 1,
+  "arms": [
+    {"role": "original", "label": "program baseline (counter absent)", "commit": "4b6e09b78", "value": null},
+    {"role": "previous", "label": "velu_x_from_abscissae twice", "commit": "680f3cf9d", "value": 627460},
+    {"role": "candidate", "label": "velu_x_pair_fraction (BTW_XEVAL=fraction)", "commit": "680f3cf9d", "value": 419070}
+  ],
+  "ratio_previous_over_candidate": {"value": 1.497, "interval": [1.497, 1.497], "interval_kind": "none"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Inversions 916 -> 458. Wall per kernel 1564 -> 1211 us (ratio of medians 1.29, per-round 0.94-1.93, 9 rounds, L0). End to end the class walk does not change (separate entry)."
+}

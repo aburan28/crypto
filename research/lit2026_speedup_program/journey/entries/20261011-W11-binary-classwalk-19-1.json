@@ -1,0 +1,28 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "binary-classwalk-19-1",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#TBD",
+  "papers": ["ePrint 2026/704"],
+  "kind": "no-change",
+  "workload": {
+    "id": "koblitz-isogeny-class-walk-n19-a1",
+    "description": "examples/koblitz_isogeny_class_walk 19:1: walk the 457-member K_1/F_2^19 isogeny class by l=457 Velu steps, carrying one ECDLP instance",
+    "curve_ids": ["K_1 / F_2^19 isogeny class"]
+  },
+  "metric": "median walk seconds reported by the example",
+  "unit": "s",
+  "isolation": "L0",
+  "samples": 12,
+  "arms": [
+    {"role": "original", "label": "program baseline", "commit": "4b6e09b78", "value": 1.280},
+    {"role": "previous", "label": "this branch, BTW_XEVAL unset", "commit": "680f3cf9d", "value": 1.164},
+    {"role": "candidate", "label": "BTW_XEVAL=fraction", "commit": "680f3cf9d", "value": 1.198}
+  ],
+  "ratio_original_over_candidate": {"value": 1.069, "interval": [0.714, 1.831], "interval_kind": "min-max of rounds"},
+  "ratio_previous_over_candidate": {"value": 0.972, "interval": [0.561, 1.498], "interval_kind": "min-max of rounds"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Snapshots identical across all 36 runs (seconds removed). The step-level saving does not show end to end at L0; the evaluation step is not where this walk spends its time."
+}

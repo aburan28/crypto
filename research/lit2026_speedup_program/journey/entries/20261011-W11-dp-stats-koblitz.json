@@ -1,0 +1,22 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "dp-stats-koblitz",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#TBD",
+  "papers": ["ePrint 2026/1823"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "strong-rho-dp-trails-k0-n53-n61",
+    "description": "koblitz_strong_rho signed-Frobenius walk (32 lanes, fruitless walks abandoned) on K_0/F_2^53 (r = 21044858204113, 64 solves per dp) and K_0/F_2^61 (r = 162888033982417, 32 solves per dp), dp_bits 4, 8, 12",
+    "curve_ids": ["K_0/F_2^53 (KoblitzCurve::new(0, 53))", "K_0/F_2^61 (KoblitzCurve::new(0, 61))"]
+  },
+  "metric": "mean DP trail length over the geometric-model mean (1-theta)/theta",
+  "unit": "ratio",
+  "isolation": "L0",
+  "samples": 6,
+  "arms": [],
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Mean trail / geometric: 0.993, 0.921, 0.433 (n=53, dp 4/8/12) and 0.994, 0.932, 0.482 (n=61); against the competing-risk geometric with the measured abandonment hazard (2.5-3.0e-4 per step) 0.95-0.998. DP hits per step / theta 1.066 at dp 4 (zero-step DPs at walk starts). Steps/ideal rises 0.80 -> 1.37-1.58 from dp 4 to dp 12."
+}

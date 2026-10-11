@@ -1,0 +1,28 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "bsgs-paired-secp52k1",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#TBD",
+  "papers": ["ePrint 2026/2102"],
+  "kind": "speedup",
+  "workload": {
+    "id": "bsgs-fast-fullgroup-secp52k1",
+    "description": "bsgs_fast full-group solve with negation map, 8 targets, 14 rayon threads, on secp52k1 of the arXiv 2508.14011 ladder (y^2=x^3+7, p=4503599627369383, prime n=4503599759134657, generator = 'Challenge' NUMS point)",
+    "curve_ids": ["secp52k1 (arXiv 2508.14011 Algorithm 3)"]
+  },
+  "metric": "median wall time per solve batch (table build + 8 searches)",
+  "unit": "s",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [
+    {"role": "original", "label": "program baseline", "commit": "4b6e09b78", "value": 15.55},
+    {"role": "previous", "label": "this branch, BSGS_STEP=chain", "commit": "680f3cf9d", "value": 19.40},
+    {"role": "candidate", "label": "BSGS_STEP=paired, BSGS_PAIR_K=32", "commit": "680f3cf9d", "value": 13.58}
+  ],
+  "ratio_original_over_candidate": {"value": 1.145, "interval": [0.996, 1.976], "interval_kind": "min-max of rounds"},
+  "ratio_previous_over_candidate": {"value": 1.429, "interval": [1.204, 2.466], "interval_kind": "min-max of rounds"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Ratio of medians over 5 interleaved rounds on a shared host (load 72-155); the original/candidate interval includes 1. The coz arm measured 14.77 s; the previous arm ran 0.80x of original here."
+}

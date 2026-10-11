@@ -1,0 +1,27 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "biext-k2-pairing",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#TBD",
+  "papers": ["ePrint 2025/1652"],
+  "kind": "speedup",
+  "workload": {
+    "id": "k2-tate-pairing-ss-x3px-r52",
+    "description": "reduced Tate pairing t_r(P, phi(R)) on supersingular y^2=x^3+x over F_p, p the first prime c*r - 1 with 4 | c (58 bits), r the largest prime below 2^52 (the eds_mov k=2 path at a larger size)",
+    "curve_ids": ["y^2=x^3+x over F_p (p = c*r - 1, r = largest prime below 2^52)"]
+  },
+  "metric": "F_p M-equivalents per pairing loop (M + S + I x Fermat cost)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 4,
+  "arms": [
+    {"role": "original", "label": "program baseline (no counted pairing loop)", "commit": "4b6e09b78", "value": null},
+    {"role": "previous", "label": "denominator-free Jacobian Miller", "commit": "680f3cf9d", "value": 1857},
+    {"role": "candidate", "label": "cubical ladder + unsquare", "commit": "680f3cf9d", "value": 1538}
+  ],
+  "ratio_previous_over_candidate": {"value": 1.207, "interval": [1.207, 1.207], "interval_kind": "none"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Deterministic counts; the repo's affine Miller loop (eds_mov::miller_fp2, ported to the counting field) counts 22757 M-eq with 194 inversions. Cubical value = pairing squared, corrected by unsquare (counted). 16-19% fewer M-eq than Jacobian Miller at 28-52-bit r."
+}
