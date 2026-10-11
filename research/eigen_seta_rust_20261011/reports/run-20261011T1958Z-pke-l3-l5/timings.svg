@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="360" viewBox="0 0 760 360">
+  <rect width="760" height="360" fill="white"/>
+  <text x="28" y="30" font-family="sans-serif" font-size="17" font-weight="bold">L3 and L5 PKE: measured wall time</text>
+  <text x="28" y="53" font-family="sans-serif" font-size="12">run-20261011T1958Z-pke-l3-l5 · n=1 per operation/set · concurrent shared-VM runs</text>
+  <g stroke="#bdc9d8" stroke-width="1">
+    <line x1="217" y1="75" x2="217" y2="298"/><line x1="344" y1="75" x2="344" y2="298"/>
+    <line x1="471" y1="75" x2="471" y2="298"/><line x1="598" y1="75" x2="598" y2="298"/><line x1="725" y1="75" x2="725" y2="298"/>
+  </g>
+  <g font-family="sans-serif" font-size="12" fill="#26374c">
+    <text x="190" y="319">0.1</text><text x="341" y="319">1</text><text x="464" y="319">10</text><text x="591" y="319">100</text><text x="711" y="319">1000</text>
+    <text x="42" y="107">L3 KeyGen</text><text x="42" y="146">L3 Encrypt</text><text x="42" y="185">L3 Decrypt</text>
+    <text x="42" y="224">L5 KeyGen</text><text x="42" y="263">L5 Encrypt</text><text x="42" y="302">L5 Decrypt</text>
+    <text x="645" y="107">186.427 s</text><text x="365" y="146">1.1051 s</text><text x="570" y="185">47.138 s</text>
+    <text x="674" y="224">298.906 s</text><text x="405" y="263">2.2990 s</text><text x="615" y="302">104.223 s</text>
+  </g>
+  <g stroke-width="2" fill="none">
+    <g stroke="#256da8"><line x1="217" y1="103" x2="632" y2="103"/><line x1="217" y1="142" x2="350" y2="142"/><line x1="217" y1="181" x2="556" y2="181"/></g>
+    <g stroke="#b06028"><line x1="217" y1="220" x2="658" y2="220"/><line x1="217" y1="259" x2="390" y2="259"/><line x1="217" y1="298" x2="600" y2="298"/></g>
+  </g>
+  <g fill="#256da8"><circle cx="632" cy="103" r="5"/><circle cx="350" cy="142" r="5"/><circle cx="556" cy="181" r="5"/></g>
+  <g fill="#b06028"><circle cx="658" cy="220" r="5"/><circle cx="390" cy="259" r="5"/><circle cx="600" cy="298" r="5"/></g>
+  <text x="319" y="351" font-family="sans-serif" font-size="12">Wall time (seconds, logarithmic axis)</text>
+</svg>

@@ -1,0 +1,19 @@
+{
+  "build_log_sha256": "70a3eeec4a396c8d6b2eeb563dac31c70181d3f514b642d005c59a7f756bf279",
+  "command": "CARGO_BUILD_JOBS=4 CARGO_PROFILE_RELEASE_CODEGEN_UNITS=256 CARGO_TARGET_DIR=/private/tmp/n83-chain-search-linux-target RUSTC=/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc CARGO_ZIGBUILD_CACHE_DIR=/Volumes/SSD990/llm/tmp/n83-cargo-zigbuild-cache ZIG_LOCAL_CACHE_DIR=/Volumes/SSD990/llm/tmp/n83-zig-cache ZIG_GLOBAL_CACHE_DIR=/Volumes/SSD990/llm/tmp/n83-zig-cache cargo zigbuild --release --no-default-features --target x86_64-unknown-linux-musl --example koblitz_n83_factor_base_export --locked --offline",
+  "executable_bytes": 4707064,
+  "executable_file_description": "ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped",
+  "executable_path": "/private/tmp/n83-chain-search-linux-target/x86_64-unknown-linux-musl/release/examples/koblitz_n83_factor_base_export",
+  "executable_sha256": "18d9c7455c1bb683b6011e883c5e1f25806b6670e0e7cb8683b35f6dde042642",
+  "features": "--no-default-features",
+  "profile": "release",
+  "rustc_version": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "schema": "n83.chain-s3-linux-build/v1",
+  "selected_best_total_runtime": null,
+  "solver_search_executed": false,
+  "source_commit": "7eba91dd46661a2e035c6fe1f5eb15a2e09ba7fa",
+  "status": "PASS_build_only",
+  "target": "x86_64-unknown-linux-musl",
+  "total_index_calculus_runtime_ms": null,
+  "zig_version": "0.16.0"
+}
