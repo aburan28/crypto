@@ -960,6 +960,15 @@ mod tests {
 
     #[test]
     fn staged_parts_reconstruct_the_exact_verified_certificate() {
+        std::thread::Builder::new()
+            .stack_size(8 * 1024 * 1024)
+            .spawn(staged_parts_reconstruct_the_exact_verified_certificate_inner)
+            .unwrap()
+            .join()
+            .unwrap();
+    }
+
+    fn staged_parts_reconstruct_the_exact_verified_certificate_inner() {
         let root = temporary();
         fs::create_dir_all(&root).unwrap();
         let mut raw = Vec::new();

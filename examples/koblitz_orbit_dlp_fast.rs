@@ -3,6 +3,8 @@
 //! Public synthetic Koblitz fixtures only. Reads a retained
 //! `point_defined_factor_base` header, builds the Frobenius-quotiented S3
 //! regular-root index once (no pair table, no edge selectors), then
+//!   1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
+//!   2. target stage: decomposes each published target and recovers its log.
 //!
 //! 1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
 //! 2. target stage: decomposes each published target and recovers its log.
@@ -31,6 +33,7 @@ struct Linear {
 
 impl Linear {
     fn from_images(images: &[u64]) -> Self {
+        let chunks = (images.len() + 7) / 8;
         let chunks = images.len().div_ceil(8);
         let mut tables = vec![[0u64; 256]; chunks];
         for (chunk, table) in tables.iter_mut().enumerate() {
@@ -636,6 +639,7 @@ fn peak_rss_bytes() -> Option<u64> {
 // and the rank linear algebra stay `u64` (every admitted `r < 2^64`
 // through `n = 127`); only field elements move to the wider word.
 mod wide {
+    use super::{mulmod, pack, peak_rss_bytes, unpack, Echelon};
     use super::{pack, unpack};
     use crypto_lib::cryptanalysis::koblitz_fast_arith::{
         s3_x_roots_128, FastBinaryCurve128, FastPoint128,
@@ -2029,9 +2033,9 @@ fn main() {
     let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
 
     // Rank stage: rows sum(coefficient * L_column) = a for random [a]G.
+    let rank_started = Instant::now();
     // The optional trace lets a separate implementation replay every attempted
     // group relation, rank transition, and final base-log solution.
-    let rank_started = Instant::now();
     let mut rank_trace = std::env::var("KIC_DUMP_RANK")
         .ok()
         .map(|path| std::fs::File::create(path).expect("create rank trace"));

@@ -261,16 +261,24 @@ pub fn bike_keygen() -> BikeKeyPair {
 }
 
 pub fn bike_encapsulate(pk: &BikePublicKey) -> (BikeCiphertext, [u8; 32]) {
-    // Sample error vector (e0, e1) of total weight T.
+    // The decoder returns the first error vector matching a syndrome.  At
+    // these parameters a syndrome can have more than one weight-T preimage.
+    // Since h0 is invertible, the public equation e0 + e1*h = s and the
+    // private equation e0*h0 + e1*h1 = s*h0 have the same solutions in the
+    // same enumeration order.  Derive the key from the representative
+    // decapsulation will recover, so an honest ciphertext yields the same key.
+    let mut one = R2Poly::zero();
+    one.set(0, 1);
     let t0 = T / 2 + (T & 1);
     let t1 = T / 2;
     let e0 = R2Poly::sample_sparse(t0);
     let e1 = R2Poly::sample_sparse(t1);
     let s = e0.add(&e1.mul(&pk.h));
+    let (canonical_e0, canonical_e1) = brute_force_decode(&s, &one, &pk.h, T);
 
     let mut hash_input = Vec::with_capacity(3 * BYTES);
-    hash_input.extend_from_slice(&e0.bits);
-    hash_input.extend_from_slice(&e1.bits);
+    hash_input.extend_from_slice(&canonical_e0.bits);
+    hash_input.extend_from_slice(&canonical_e1.bits);
     hash_input.extend_from_slice(&s.bits);
     let k = sha256(&hash_input);
 
@@ -409,10 +417,12 @@ mod tests {
     /// which is exactly what encapsulation injects.
     #[test]
     fn bike_kem_shared_secret_matches() {
-        let kp = bike_keygen();
-        let (ct, k_enc) = bike_encapsulate(&kp.pk);
-        let k_dec = bike_decapsulate(&ct, &kp.sk);
-        assert_eq!(k_enc, k_dec);
+        for _ in 0..100 {
+            let kp = bike_keygen();
+            let (ct, k_enc) = bike_encapsulate(&kp.pk);
+            let k_dec = bike_decapsulate(&ct, &kp.sk);
+            assert_eq!(k_enc, k_dec);
+        }
     }
 
     #[test]

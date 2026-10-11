@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 """Operation-count accounting for the Koblitz single-target vs_rho rungs.
 
-The promoted single-target rungs report wall-clock ratios.  The IC probe
+The retained single-target rungs report exploratory wall-clock ratios. The IC probe
 loop and the rho fixture run at different per-operation speeds, so a wall
 ratio mixes the algorithmic comparison with implementation speed.  This
 tool reads the raw run rows that every rung already retains and writes an
 ``operation_accounting`` block into the rung's ``claim_report_vs_rho.json``:
 
 - IC target probes per paired run (deterministic per target) and the
-  rank-stage mean probes per relation, which estimates the mean over
-  random targets;
+  rank-stage mean probes per relation on its separate guided-query law;
 - rho walk steps per paired run and the expected walk
   ``sqrt(pi*r/(4n))`` on signed-Frobenius classes;
-- operation ratios (rho operations / IC operations) next to the wall
-  ratios, the per-operation rate of each arm, the target-luck factor,
+- native counter quotients (rho steps per IC probe) next to the wall
+  ratios, each arm's native counter rate, the rank-to-target probe ratio,
   thread counts, and the host-contention flags each rung's README states.
 
-One probe and one rho step are counted as one operation each.  That unit
-assumption is recorded in the block and is not yet calibrated on a common
-backend (plan step 1.2).
+Probes and walk steps remain distinct native units.  The block keeps the
+counter quotients as diagnostics; a calibrated operation speedup and total
+work S remain unknown until a common boundary is measured.
+
+The generated top-level classification keeps a historical verdict as
+provenance while explicitly marking the recorded wall ratio exploratory.
 
 See docs/ic/PLAN_IC_ACCOUNTING_FIXES_20261007.md, findings F2-F4 and steps
 0.3, 1.1, 1.4, 1.5.
@@ -33,19 +35,18 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import re
 import statistics
 from pathlib import Path
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[3]
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "2.0"
 GENERATED_BY = "research/sat_factor_base_review_20260908/autolab/op_accounting.py"
 
 UNIT_ASSUMPTION = (
-    "one IC probe (S3 quadratic solve plus root-table lookup) and one rho walk "
-    "step (one group addition plus class canonicalisation) are each counted as "
-    "one operation; not yet calibrated on a common backend (plan step 1.2)"
+    "IC probes (S3 quadratic solve plus root-table lookup) and rho walk steps "
+    "(group addition plus class canonicalisation) are distinct native counters; "
+    "no common operation calibration or complete total-work boundary is recorded"
 )
 
 NON_CLAIMS = [
@@ -197,7 +198,7 @@ def account_run(rung_dir: Path, spec: dict[str, Any]) -> dict[str, Any]:
         "rho_walk_ms": walk_ms,
         "rho_online_ms": rho_ms,
         "wall_speedup": rho_ms / ic_ms,
-        "ops_speedup_measured_walk": steps / probes,
+        "rho_steps_per_ic_probe_measured": steps / probes,
         "ic_probes_per_s": ic_rate,
         "rho_steps_per_s": rho_rate,
         "ic_to_rho_rate_ratio": ic_rate / rho_rate,
@@ -250,28 +251,31 @@ def account_rung(name: str) -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "generated_by": GENERATED_BY,
         "unit_assumption": UNIT_ASSUMPTION,
+        "comparison_status": "native_counters_only",
         "operation_units": {"ic": "target probes", "rho": "walk steps"},
         "ic_online_operations": frozen_probes,
         "ic_online_operations_basis": "deterministic probes to the first relation for the frozen target (identical on every run)",
         "rho_online_operations": expected,
         "rho_online_operations_basis": "expected walk sqrt(pi*r/(4n)) on signed-Frobenius classes; measured walks are under runs",
-        "ops_speedup_online": expected / frozen_probes,
+        "rho_per_ic_native_counter": expected / frozen_probes,
+        "ops_speedup_online": None,
+        "total_work_S": None,
         "ic_rank_probes_mean_per_relation": rank_means,
         "ic_rank_probes_mean_pooled": rank_mean,
         "ic_rank_probes_source": cfg["rank_summaries"],
         "ic_rank_probes_note": (
-            "each rank relation runs the same extraction on a random subgroup point, so the "
-            "rank mean estimates the online probes of a random target; per-relation counts are "
-            "not retained, so no confidence interval is available"
+            "guided rank queries and target extraction use different input laws and scan starts; "
+            "this mean is a rank-stage diagnostic, not an estimate of unseen-target cost; "
+            "per-relation counts are not retained, so no confidence interval is available"
         ),
-        "ops_speedup_online_mean_target": expected / rank_mean,
-        "target_luck_factor": rank_mean / frozen_probes,
+        "rho_expected_steps_per_rank_mean_probe": expected / rank_mean,
+        "rank_mean_to_frozen_probe_ratio": rank_mean / frozen_probes,
         "precompute_rank_probes": precompute_probes,
         "precompute_rank_probes_note": "rank_probes_mean x rank_attempts; the S3 root-index build is not counted in probes",
-        "ops_speedup_total_mean_target": expected / (precompute_probes + rank_mean),
+        "rho_expected_steps_per_rank_plus_target_probe": expected / (precompute_probes + rank_mean),
         "wall_speedup_median_all_runs": statistics.median(walls),
         "wall_speedup_median_uncontended_runs": statistics.median(clean_walls) if clean_walls else None,
-        "ops_speedup_measured_walk_median": statistics.median(row["ops_speedup_measured_walk"] for row in runs),
+        "rho_steps_per_ic_probe_measured_median": statistics.median(row["rho_steps_per_ic_probe_measured"] for row in runs),
         "ic_to_rho_rate_ratio_median": statistics.median(row["ic_to_rho_rate_ratio"] for row in runs),
         "ic_rank_threads": sorted(t for t in rank_threads if t is not None) or None,
         "thread_note": "ic_target_threads and rho_threads were not recorded by these run drivers (null)",
@@ -283,19 +287,6 @@ def account_rung(name: str) -> dict[str, Any]:
     }
 
 
-S_UNKNOWN = re.compile(
-    r"[;,]?\s*total operation-count (?:boundary not comparable|comparison absent)[;,]\s*S unknown"
-)
-
-
-def strip_s_unknown(item: str) -> str | None:
-    """Drop the 'S unknown' clause; operation_accounting now records S."""
-    if "S unknown" not in item:
-        return item
-    item = S_UNKNOWN.sub("", item).replace(" ()", "").replace("()", "").strip()
-    return item or None
-
-
 def apply_to_claim(name: str, block: dict[str, Any]) -> Path:
     path = REPO / RUNGS[name]["dir"] / "claim_report_vs_rho.json"
     text = path.read_text()
@@ -305,10 +296,10 @@ def apply_to_claim(name: str, block: dict[str, Any]) -> Path:
     indent = len(second) - len(second.lstrip()) or 2
     sort_keys = list(claim) == sorted(claim)
     claim["operation_accounting"] = block
-    non_claims = [
-        kept for kept in map(strip_s_unknown, claim.get("claim_boundary_non_claims") or [])
-        if kept is not None
-    ]
+    claim["record_class"] = "verified_answer_exploratory_wall"
+    claim["controlled_online_speedup"] = None
+    claim["host_isolation_receipt"] = None
+    non_claims = list(claim.get("claim_boundary_non_claims") or [])
     wanted = list(NON_CLAIMS)
     if block["host_contention"]["contended_runs"]:
         wanted.append(CONTENTION_NON_CLAIM)
@@ -322,17 +313,17 @@ def apply_to_claim(name: str, block: dict[str, Any]) -> Path:
 
 def table(blocks: dict[str, dict[str, Any]]) -> str:
     header = (
-        "| rung | IC probes, frozen | IC probes, rank mean | luck | rho expected | "
-        "ops x frozen | ops x mean | ops x total | wall x median | wall x uncontended | IC/rho rate |"
+        "| rung | IC probes, frozen | IC probes, rank mean | rank/frozen probes | rho expected steps | "
+        "rho steps/IC probe | rho steps/rank probe | rho steps/(rank+target probe) | wall x median | wall x uncontended | native rate ratio |"
     )
     lines = [header, "|" + "---|" * 11]
     for name, b in blocks.items():
         clean = b["wall_speedup_median_uncontended_runs"]
         lines.append(
             f"| {name} | {b['ic_online_operations']:,} | {b['ic_rank_probes_mean_pooled']:,.0f} | "
-            f"{b['target_luck_factor']:.2f} | {b['rho_online_operations']:,.0f} | "
-            f"{b['ops_speedup_online']:.3g} | {b['ops_speedup_online_mean_target']:.3g} | "
-            f"{b['ops_speedup_total_mean_target']:.3g} | {b['wall_speedup_median_all_runs']:.4g} | "
+            f"{b['rank_mean_to_frozen_probe_ratio']:.2f} | {b['rho_online_operations']:,.0f} | "
+            f"{b['rho_per_ic_native_counter']:.3g} | {b['rho_expected_steps_per_rank_mean_probe']:.3g} | "
+            f"{b['rho_expected_steps_per_rank_plus_target_probe']:.3g} | {b['wall_speedup_median_all_runs']:.4g} | "
             f"{'-' if clean is None else format(clean, '.4g')} | {b['ic_to_rho_rate_ratio_median']:.3g} |"
         )
     return "\n".join(lines)

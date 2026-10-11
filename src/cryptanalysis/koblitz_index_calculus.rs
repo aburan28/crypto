@@ -149,11 +149,17 @@ use crate::cryptanalysis::ec_index_calculus::{
 use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
+use crate::cryptanalysis::koblitz_fast_arith::{
+    pack_fast, FastBinaryCurve, FastPoint as ArithFastPoint,
+};
 use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
     solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
     FieldStructure, NodeOracleDecision, SolveOptions, SolveStats, SolverEngine,
+};
+use crate::cryptanalysis::koblitz_relation_solver::{
+    to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
@@ -836,6 +842,14 @@ fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
 }
 
 impl KoblitzCurve {
+    /// Word arithmetic with the curve's actual field-encoded coefficient.
+    /// A subfield model's `a` tag is a basis index, not that coefficient.
+    pub(crate) fn fast_binary_curve(&self) -> Option<FastBinaryCurve> {
+        let mut fast = FastBinaryCurve::new(&self.curve.irreducible, 0)?;
+        fast.a = fast.word(&self.curve.a);
+        Some(fast)
+    }
+
     /// Build `K_a` over `F_{2^n}`: pick a defining irreducible
     /// polynomial, count points, split off the largest prime-order
     /// subgroup, find a generator of it, and determine `λ`.
@@ -1045,6 +1059,7 @@ impl KoblitzCurve {
             a_index: u64::from(a),
             b_index: 1,
             subfield_basis: vec![F2mElement::one(n)],
+            frobenius_is_endomorphism: true,
         })
     }
 
@@ -1187,6 +1202,207 @@ impl KoblitzCurve {
             subgroup_order: r,
             cofactor,
             lambda,
+            k,
+            q,
+            a_index,
+            b_index,
+            subfield_basis,
+            frobenius_is_endomorphism: true,
+        })
+    }
+
+    /// Build an **isogenous member of the class of `K_a`**: the model
+    /// `y² + xy = x³ + a x² + b` over `F_{2^n}` with `b` arbitrary (in
+    /// practice `b ∉ F_2`, a floor curve of the isogeny volcano).
+    ///
+    /// Isogenous curves have equal point counts, so `#E` is taken from the
+    /// Koblitz recurrence for the class and then **certified** on sampled
+    /// points: every sample is killed by `#E`, and some sample realises the
+    /// full 2-part of `#E`.  With `r > 2√q` (every admitted rung) `#E` is
+    /// the only multiple of `r` in the Hasse interval, so the certificate
+    /// pins `#E`; a `b` whose curve is not in the class fails it and yields
+    /// `None`.
+    ///
+    /// The 2-power Frobenius is **not** an endomorphism of such a model:
+    /// `frobenius_is_endomorphism` is false, [`KoblitzCurve::frobenius`]
+    /// is the identity, `λ = 1`, and the factor-base machinery folds only
+    /// by negation.  `modulus` fixes the field representation (`None`
+    /// selects the same sparse search as [`KoblitzCurve::new`], so toy
+    /// classes built on that modulus can pass `b` verbatim).
+    pub fn isogenous_model(
+        a: u8,
+        n: u32,
+        b: F2mElement,
+        modulus: Option<IrreduciblePoly>,
+    ) -> Option<Self> {
+        if a > 1 || n < 3 || n > MAX_N {
+            return None;
+        }
+        let irreducible = match modulus {
+            Some(m) => {
+                if m.degree != n {
+                    return None;
+                }
+                m
+            }
+            None if n <= 63 => find_irreducible_sparse(n)?,
+            None => find_irreducible_sparse_wide(n)?,
+        };
+        let a_fe = if a == 0 {
+            F2mElement::zero(n)
+        } else {
+            F2mElement::one(n)
+        };
+        if b.is_zero() {
+            return None; // singular
+        }
+        let mut curve = BinaryCurve {
+            m: n,
+            irreducible,
+            a: a_fe,
+            b,
+            generator: BinaryPoint::Infinity,
+            order: BigUint::zero(),
+            cofactor: BigUint::one(),
+        };
+        let group_order = koblitz_point_count(a, n);
+
+        // Certify the class order on sampled points.
+        let half_order = &group_order >> 1u32;
+        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
+        let mut state = 0x2545_f491_4f6c_dd1du64 ^ (n as u64) ^ ((a as u64) << 32);
+        let mut samples = 0usize;
+        // Every sample must be killed by `#E`; with `r > 2√q` (every admitted
+        // rung) `#E` is the only multiple of `r` in the Hasse interval, so a
+        // point of order `r` plus this check pins `#E`.  The second check,
+        // that some sample realises the full 2-part of `#E`, is a cheap extra
+        // guard against a twist of the same `r`-part.
+        let mut saw_full_two_part = false;
+        let mut tries = 0u32;
+        while samples < 16 && tries < 4096 {
+            tries += 1;
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            let x = F2mElement::from_biguint(&BigUint::from(state & mask), n);
+            for p in points_with_x(&curve, &x) {
+                samples += 1;
+                if scalar_mul(&curve, &p, &group_order) != BinaryPoint::Infinity {
+                    return None;
+                }
+                if scalar_mul(&curve, &p, &half_order) != BinaryPoint::Infinity {
+                    saw_full_two_part = true;
+                }
+            }
+        }
+        if samples < 8 || !saw_full_two_part {
+            return None;
+        }
+
+        let (r, cofactor) = attach_prime_subgroup(&mut curve, a, n, &group_order)?;
+        let trace: i64 = if a == 0 { -1 } else { 1 };
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda: BigUint::one(),
+            frobenius_is_endomorphism: false,
+            k: 1,
+            q: 2,
+            a_index: u64::from(a),
+            b_index: 0,
+            subfield_basis: vec![F2mElement::one(n)],
+        })
+    }
+}
+
+/// Factor `#E`, split off the largest prime `r` (which must be simple
+/// and exceed the cofactor), find a generator of the order-`r` subgroup,
+/// and store generator / order / cofactor on `curve`.  Shared by
+/// [`KoblitzCurve::new`] and [`KoblitzCurve::isogenous_model`].
+fn attach_prime_subgroup(
+    curve: &mut BinaryCurve,
+    a: u8,
+    n: u32,
+    group_order: &BigUint,
+) -> Option<(BigUint, BigUint)> {
+    {
+        let factors = factorise(group_order.clone());
+        let (r, e) = factors.last()?.clone();
+        if e != 1 {
+            return None;
+        }
+        let cofactor = &group_order / &r;
+        if r <= cofactor {
+            return None;
+        }
+
+        // A generator of the order-r subgroup: kill the cofactor on
+        // curve points until the result is non-trivial.  Exhaustive
+        // abscissa search is fine through ~24 bits; past that a full
+        // `2^n` sweep is impossible, so sample deterministically from
+        // a fixed LCG (reproducible across hosts).
+        let mut generator = BinaryPoint::Infinity;
+        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
+        let exhaustive = n <= 24;
+        let budget = if exhaustive {
+            1u64 << n
+        } else {
+            // ~1M trials is plenty: a random x hits the curve ~1/2 of
+            // the time and survives the cofactor map with probability
+            // ≈ 1 − 1/r ≫ 2^{-20} on admitted rungs.
+            1u64 << 20
+        };
+        let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ (n as u64) ^ ((a as u64) << 32);
+        for i in 0..budget {
+            let raw = if exhaustive {
+                i
+            } else {
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                state & mask
+            };
+            let x = F2mElement::from_biguint(&BigUint::from(raw), n);
+            let pts = points_with_x(&curve, &x);
+            let mut found = false;
+            for p in pts {
+                let cand = scalar_mul(&curve, &p, &cofactor);
+                if cand != BinaryPoint::Infinity {
+                    // Confirm order divides r (reject accidental torsion).
+                    if scalar_mul(&curve, &cand, &r) == BinaryPoint::Infinity {
+                        generator = cand;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if found {
+                break;
+            }
+        }
+        if generator == BinaryPoint::Infinity {
+            return None;
+        }
+        curve.generator = generator;
+        curve.order = r.clone();
+        curve.cofactor = cofactor.clone();
+        Some((r, cofactor))
+
+        let trace = i64::try_from(trace).ok()?;
+        let lambda = frobenius_eigenvalue_q(&curve, trace, q, k, &r)?;
+
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda,
             frobenius_is_endomorphism: true,
             k,
             q,
@@ -1196,11 +1412,13 @@ impl KoblitzCurve {
         })
     }
 
+impl KoblitzCurve {
     /// The `2`-power Frobenius `π(x, y) = (x², y²)`; the identity on an
     /// isogenous model where squaring would leave the curve.
     ///
     /// The `q`-power Frobenius `π(x, y) = (x^q, y^q)` — squaring for a
-    /// Koblitz curve.
+    /// Koblitz curve — and the identity on an isogenous model where
+    /// field Frobenius would leave the curve.
     pub fn frobenius(&self, p: &BinaryPoint) -> BinaryPoint {
         if !self.frobenius_is_endomorphism {
             return p.clone();
@@ -1214,9 +1432,14 @@ impl KoblitzCurve {
         }
     }
 
-    /// `x ↦ x^q`, the Frobenius on abscissae.
+    /// The abscissa action of [`Self::frobenius`]: `x ↦ x^q` when that
+    /// map is a curve endomorphism, and the identity otherwise.
     pub fn frobenius_x(&self, x: &F2mElement) -> F2mElement {
-        x.square_k_times(self.k, &self.curve.irreducible)
+        if self.frobenius_is_endomorphism {
+            x.square_k_times(self.k, &self.curve.irreducible)
+        } else {
+            x.clone()
+        }
     }
 
     /// The degree `e = n / k` of `F_{2^n}` over the subfield: the
@@ -1755,6 +1978,27 @@ impl FrobeniusFactorBase {
     /// every invariant subspace and carries the 2-torsion point — these
     /// classes are non-trivial and constrain which `m` can work at all.
     pub fn cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
+        match kc.fast_binary_curve() {
+            // One batched `[r]` for every point (was: one slow scalar mul
+            // each).  Bit-exact, so the class list is unchanged.
+            Some(fast) if kc.n <= 63 => {
+                let pts: Vec<ArithFastPoint> = self
+                    .points
+                    .iter()
+                    .map(|p| to_fast_point(&fast, p))
+                    .collect();
+                let rs: Vec<BigUint> = (0..pts.len()).map(|_| kc.subgroup_order.clone()).collect();
+                fast.batch_scalar_mul(&pts, &rs)
+                    .into_iter()
+                    .map(|p| from_fast_point(&fast, p))
+                    .collect()
+            }
+            _ => self
+                .points
+                .iter()
+                .map(|p| kc.mul(p, &kc.subgroup_order))
+                .collect(),
+        }
         self.points
             .iter()
             .map(|p| kc.mul(p, &kc.subgroup_order))
@@ -1769,24 +2013,52 @@ impl FrobeniusFactorBase {
     /// operations. Multiplicity is irrelevant to exact-summand reachability
     /// because decomposition permits repeated factor-base points.
     pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
-        let mut classes = HashMap::new();
-        for orbit in &self.signed_orbits {
-            let Some(&representative) = orbit.first() else {
-                continue;
-            };
-            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
-            let steps = if matches!(
+        let steps = if !kc.frobenius_is_endomorphism
+            || matches!(
                 self.domain,
                 FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
             ) {
-                1
-            } else {
-                kc.n
-            };
-            for _ in 0..steps {
-                for candidate in [current.clone(), point_neg(&current)] {
-                    classes.entry(point_key(&candidate)).or_insert(candidate);
+            1
+        } else {
+            kc.extension_degree()
+        };
+        let Some(fast) = kc.fast_binary_curve().filter(|_| kc.n <= 63) else {
+            let mut classes = HashMap::new();
+            for orbit in &self.signed_orbits {
+                let Some(&representative) = orbit.first() else {
+                    continue;
+                };
+                let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
+                for _ in 0..steps {
+                    for candidate in [current.clone(), point_neg(&current)] {
+                        classes.entry(point_key(&candidate)).or_insert(candidate);
+                    }
+                    current = kc.frobenius(&current);
                 }
+            }
+            return classes.into_values().collect();
+        };
+        let reps: Vec<ArithFastPoint> = self
+            .signed_orbits
+            .iter()
+            .filter_map(|orbit| {
+                orbit
+                    .first()
+                    .map(|&i| to_fast_point(&fast, &self.points[i]))
+            })
+            .collect();
+        let rs: Vec<BigUint> = (0..reps.len()).map(|_| kc.subgroup_order.clone()).collect();
+        let projs = fast.batch_scalar_mul(&reps, &rs);
+        let mut classes = HashMap::new();
+        for projected in projs {
+            let mut current = projected;
+            for _ in 0..steps {
+                for candidate in [current, FastBinaryCurve::neg(current)] {
+                    classes
+                        .entry(pack_fast(candidate))
+                        .or_insert_with(|| from_fast_point(&fast, candidate));
+                }
+                current = fast_frobenius(kc, &fast, current);
                 current = kc.frobenius(&current);
             }
         }
@@ -1812,6 +2084,82 @@ impl FrobeniusFactorBase {
         if m == 1 {
             return classes.contains(&BinaryPoint::Infinity);
         }
+        // `Σ c_i = O` with `m` summands ⇔ `−c_m` lies in the (m − 1)-fold
+        // sumset, and the classes are closed under negation, so it is
+        // enough to build `m − 1` layers and intersect with the classes.
+        //
+        // Every layer is closed under Frobenius and negation (the
+        // classes are, and both commute with addition), so a layer is
+        // generated by adding the classes to one representative per
+        // signed Frobenius orbit of the previous layer and closing the
+        // result under squaring and negation — cheap field squarings in
+        // place of the `|layer| · |classes|` point additions the naive
+        // walk pays.  Each layer holds at most `h` points.
+        //
+        // The grid additions run as one Montgomery batch per layer and
+        // the walks on words; sets, keys, and the verdict match the
+        // general-field version exactly.  Curves too wide for the
+        // single-word field take the original slow path below.
+        let Some(fast) = kc.fast_binary_curve().filter(|_| kc.n <= 63) else {
+            return self.m_can_decompose_slow(kc, &classes, m);
+        };
+        let class_pts: Vec<ArithFastPoint> =
+            classes.iter().map(|c| to_fast_point(&fast, c)).collect();
+        let class_keys: HashSet<u64> = class_pts.iter().map(|&p| pack_fast(p)).collect();
+        let identity = pack_fast(None);
+        let mut layer: Vec<ArithFastPoint> = vec![None];
+        let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
+        let frob = |p: ArithFastPoint| fast_frobenius(kc, &fast, p);
+        for _ in 1..m {
+            let reps = signed_frobenius_orbit_representatives_fast(&fast, kc, &layer);
+            // One batch for the reps × classes grid; replayed below in
+            // the same nested order, so traversal matches exactly.
+            let mut pairs = Vec::with_capacity(reps.len() * class_pts.len());
+            for q in &reps {
+                let (qx, qy, qi) = match q {
+                    None => (0, 0, true),
+                    Some((x, y)) => (*x, *y, false),
+                };
+                for c in &class_pts {
+                    let (cx, cy, ci) = match c {
+                        None => (0, 0, true),
+                        Some((x, y)) => (*x, *y, false),
+                    };
+                    pairs.push((qx, qy, cx, cy, qi, ci));
+                }
+            }
+            let seeds = fast.batch_add(&pairs);
+            let mut next_keys: HashSet<u64> = HashSet::new();
+            let mut next: Vec<ArithFastPoint> = Vec::new();
+            let mut it = seeds.into_iter();
+            for _ in &reps {
+                for _ in &class_pts {
+                    let seed = it.next().expect("grid batch mirrors the nested loops");
+                    if next_keys.contains(&pack_fast(seed)) {
+                        continue;
+                    }
+                    // Close the orbit of `seed` under π and negation.
+                    let mut current = seed;
+                    for _ in 0..kc.n {
+                        for candidate in [current, FastBinaryCurve::neg(current)] {
+                            if next_keys.insert(pack_fast(candidate)) {
+                                next.push(candidate);
+                            }
+                        }
+                        current = frob(current);
+                    }
+                }
+            }
+            layer = next;
+            layer_keys = next_keys;
+        }
+        layer_keys.iter().any(|k| class_keys.contains(k))
+    }
+
+    /// Slow general-field admissibility walk, kept for curves too wide
+    /// for the single-word fast path (unreachable via the constructor)
+    /// and as a second reference alongside the naive one in tests.
+    fn m_can_decompose_slow(&self, kc: &KoblitzCurve, classes: &[BinaryPoint], m: usize) -> bool {
         match FastCurve::new(&kc.curve) {
             Some(fc) => fast_classes_can_cancel(kc, &fc, &classes, m),
             None => classes_can_cancel(kc, &classes, m),
@@ -1893,6 +2241,62 @@ fn signed_frobenius_orbit_representatives(
             seen.insert(pack_point(&current));
             seen.insert(pack_point(&point_neg(&current)));
             current = kc.frobenius(&current);
+        }
+    }
+    reps
+}
+
+/// Apply the curve's q-power Frobenius to a word point.  For subfield
+/// curves q = 2^k; an isogenous model without this endomorphism is fixed.
+fn fast_frobenius(
+    kc: &KoblitzCurve,
+    fast: &FastBinaryCurve,
+    point: ArithFastPoint,
+) -> ArithFastPoint {
+    if !kc.frobenius_is_endomorphism {
+        return point;
+    }
+    match point {
+        None => None,
+        Some((mut x, mut y)) => {
+            for _ in 0..kc.k {
+                x = fast.gf.sqr(x);
+                y = fast.gf.sqr(y);
+            }
+            Some((x, y))
+        }
+    }
+}
+
+/// The same curve action on the packed `FastCurve` point representation.
+fn packed_curve_frobenius(kc: &KoblitzCurve, fc: &FastCurve, point: FastPoint) -> FastPoint {
+    if kc.frobenius_is_endomorphism {
+        fc.frobenius_k(point, kc.k)
+    } else {
+        point
+    }
+}
+
+/// Word-level twin of [`signed_frobenius_orbit_representatives`]: same
+/// traversal over packed keys, so the representative sequence matches
+/// exactly while the arithmetic stays allocation-free.
+fn signed_frobenius_orbit_representatives_fast(
+    fast: &FastBinaryCurve,
+    kc: &KoblitzCurve,
+    points: &[ArithFastPoint],
+) -> Vec<ArithFastPoint> {
+    let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
+    let mut reps = Vec::new();
+    for &p in points {
+        if seen.contains(&pack_fast(p)) {
+            continue;
+        }
+        reps.push(p);
+        let mut current = p;
+        for _ in 0..kc.n {
+            seen.insert(pack_fast(current));
+            seen.insert(pack_fast(FastBinaryCurve::neg(current)));
+            current = fast_frobenius(kc, fast, current);
         }
     }
     reps
@@ -1993,7 +2397,7 @@ fn fast_classes_can_cancel(
                 for _ in 0..kc.n {
                     next_keys.insert(current.pack());
                     next_keys.insert(fc.neg(current).pack());
-                    current = fc.frobenius_k(current, kc.k);
+                    current = packed_curve_frobenius(kc, fc, current);
                 }
             }
         }
@@ -2051,22 +2455,25 @@ pub fn q_linearised_kernel_basis(
 /// Kernel basis of an `F_2`-linear map on `F_{2^n}` given by its action
 /// on the polynomial basis.
 fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2mElement> {
-    // Column i = F(z^i), packed into the low n bits of a u64.
-    let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    // Column i = F(z^i), packed into the low n bits of a u128.
+    // Retain both coordinate words for the admitted degrees 64..=127.
+    let mut rows: Vec<(u128, u128)> = Vec::with_capacity(n as usize);
     for i in 0..n {
         let basis = F2mElement::from_bit_positions(&[i], n);
         let img = image(&basis);
-        let img_bits = img.raw_bits().first().copied().unwrap_or(0);
-        rows.push((img_bits, 1u64 << i));
+        let words = img.raw_bits();
+        let img_bits = u128::from(words.first().copied().unwrap_or(0))
+            | (u128::from(words.get(1).copied().unwrap_or(0)) << 64);
+        rows.push((img_bits, 1u128 << i));
     }
 
     // Gaussian elimination on the image halves; whatever reduces to
     // zero contributes its preimage to the kernel basis.
-    let mut pivots: Vec<(u64, u64)> = Vec::new();
-    let mut kernel_basis: Vec<u64> = Vec::new();
+    let mut pivots: Vec<(u128, u128)> = Vec::new();
+    let mut kernel_basis: Vec<u128> = Vec::new();
     for (mut img, mut pre) in rows {
         for &(pimg, ppre) in &pivots {
-            let lead = 1u64 << (63 - pimg.leading_zeros());
+            let lead = 1u128 << (127 - pimg.leading_zeros());
             if img & lead != 0 {
                 img ^= pimg;
                 pre ^= ppre;
@@ -2873,7 +3280,9 @@ pub fn build_subgroup_orbit_factor_base_with_cost(
             for _ in 0..kc.extension_degree() {
                 abscissae.insert(orbit.to_biguint());
                 orbit = kc.frobenius_x(&orbit);
-                cost.frobenius_squarings += 1;
+                if kc.frobenius_is_endomorphism {
+                    cost.frobenius_squarings += u64::from(kc.k);
+                }
             }
             representatives.push(x);
             added += 1;
@@ -2959,6 +3368,27 @@ pub fn saturate_factor_base_two_torsion(
     if kc.mul(&t, &kc.cofactor) != BinaryPoint::Infinity {
         return None;
     }
+    // Translate every base point by T in one Montgomery batch (a single
+    // inversion for the whole base instead of one slow inversion per
+    // point).  Results are bit-identical to the per-point adds, so the
+    // collected abscissa set — and everything built from it — is
+    // unchanged.  The at-most-one doubling case (P = T itself) takes the
+    // exact slow path inside the batch.
+    let fast = kc.fast_binary_curve()?;
+    let (tx, ty) = match &t {
+        BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y)),
+        BinaryPoint::Infinity => return None,
+    };
+    let mut pairs = Vec::with_capacity(fb.points.len());
+    for p in &fb.points {
+        match p {
+            BinaryPoint::Infinity => pairs.push((0, 0, tx, ty, true, false)),
+            BinaryPoint::Affine { x, y } => {
+                pairs.push((fast.word(x), fast.word(y), tx, ty, false, false))
+            }
+        }
+    }
+    let sums = fast.batch_add(&pairs);
     let mut xs = std::collections::BTreeMap::new();
     for p in &fb.points {
         for q in [p.clone(), kc.add(p, &t)] {
@@ -3024,7 +3454,7 @@ fn orbit_maps_packed(
             }
             orbit_of[idx] = (o, k);
             cycle.push(idx);
-            cur = curve.frobenius_k(cur, kc.k);
+            cur = packed_curve_frobenius(kc, curve, cur);
             k += 1;
         }
         orbits.push(cycle);
@@ -3049,7 +3479,7 @@ fn orbit_maps_packed(
                     return None;
                 }
             }
-            current = curve.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, curve, current);
         }
         if current != fast[start] {
             return None;
@@ -4943,7 +5373,9 @@ impl PairSumTable {
             tagged,
         ))
     }
+}
 
+impl PairSumTable {
     /// A folded table around stored words, however they were built:
     /// everything a lookup needs beyond the words themselves comes from
     /// the base.  `parts.canon_tables` is not read — `canon` is the basis
@@ -5356,7 +5788,28 @@ impl PairSumTable {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
+}
 
+/// Project a general point to single-word coordinates for the fast field.
+pub(crate) fn to_fast_point(fast: &FastBinaryCurve, p: &BinaryPoint) -> ArithFastPoint {
+    match p {
+        BinaryPoint::Infinity => None,
+        BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+    }
+}
+
+/// Lift single-word coordinates back to a general point.
+pub(crate) fn from_fast_point(fast: &FastBinaryCurve, p: ArithFastPoint) -> BinaryPoint {
+    match p {
+        None => BinaryPoint::Infinity,
+        Some((x, y)) => BinaryPoint::Affine {
+            x: fast.element(x),
+            y: fast.element(y),
+        },
+    }
+}
+
+impl PairSumTable {
     /// The single-word curve the table was built on.
     pub fn curve(&self) -> &FastCurve {
         &self.curve
@@ -7879,6 +8332,14 @@ fn build_projected_signed_orbit_map(
     if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
         return map;
     }
+    projected_signed_orbit_map_slow(kc, fb)
+}
+
+/// General-field reference for the projected signed-orbit map.
+fn projected_signed_orbit_map_slow(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> ProjectedSignedOrbitMap {
     let projected: Vec<_> = fb
         .points
         .iter()
@@ -7982,7 +8443,7 @@ fn projected_signed_orbit_map_fast(
                     canonical_key = key;
                 }
             }
-            current = fc.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, &fc, current);
         }
         representatives.push(canonical);
     }
@@ -7998,7 +8459,7 @@ fn projected_signed_orbit_map_fast(
             location_by_key
                 .entry(fc.neg(current).pack())
                 .or_insert((orbit, k, true));
-            current = fc.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, &fc, current);
         }
     }
     let orbit_of = projected
@@ -8053,7 +8514,7 @@ fn project_by_frobenius_orbits(
             }
             let walks = orbit
                 .windows(2)
-                .all(|w| fc.frobenius_k(lifted[w[0]], kc.k) == lifted[w[1]]);
+                .all(|w| packed_curve_frobenius(kc, fc, lifted[w[0]]) == lifted[w[1]]);
             if !walks {
                 return None;
             }
@@ -8061,7 +8522,7 @@ fn project_by_frobenius_orbits(
             let mut images = Vec::with_capacity(orbit.len());
             images.push(current);
             for _ in 1..orbit.len() {
-                current = fc.frobenius_k(current, kc.k);
+                current = packed_curve_frobenius(kc, fc, current);
                 images.push(current);
             }
             Some(images)
@@ -16896,6 +17357,52 @@ mod tests {
     }
 
     #[test]
+    fn radix_sort_orders_entries_by_key_stably() {
+        // Edge cases: empty, singleton, all-equal keys.
+        let mut empty: Vec<(u64, u32, u32)> = Vec::new();
+        radix_sort_entries_by_key(&mut empty);
+        assert!(empty.is_empty());
+        let mut one = vec![(7u64, 1u32, 2u32)];
+        radix_sort_entries_by_key(&mut one);
+        assert_eq!(one, vec![(7u64, 1u32, 2u32)]);
+        // Random data with heavy key duplication (few distinct keys, as
+        // in real pair-sum tables): keys sorted, payloads stable
+        // (input order within each key), multiset preserved.
+        let mut rng_state = 0x9e3779b97f4a7c15u64;
+        let mut next = move || {
+            rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            rng_state
+        };
+        for &len in &[0usize, 1, 2, 3, 17, 1000, 70000] {
+            let mut v: Vec<(u64, u32, u32)> = (0..len)
+                .map(|i| (next() % 13, i as u32, (i * 7) as u32))
+                .collect();
+            let mut expected = v.clone();
+            expected.sort_by_key(|e| e.0);
+            radix_sort_entries_by_key(&mut v);
+            // `sort_by_key` is stable too: exact equality, not just
+            // key order, pins stability down.
+            assert_eq!(v, expected, "len = {len}");
+        }
+        // Full-width keys incl. extremes.
+        let mut v: Vec<(u64, u32, u32)> = vec![
+            (u64::MAX, 0, 0),
+            (0, 1, 1),
+            (u64::MAX, 2, 3),
+            (1u64 << 63, 4, 5),
+            (0, 6, 7),
+        ];
+        radix_sort_entries_by_key(&mut v);
+        let keys: Vec<u64> = v.iter().map(|e| e.0).collect();
+        assert_eq!(keys, vec![0, 0, 1 << 63, u64::MAX, u64::MAX]);
+        // Stability: the two 0-keys and two MAX-keys keep input order.
+        assert_eq!((v[0].1, v[0].2), (1, 1));
+        assert_eq!((v[1].1, v[1].2), (6, 7));
+        assert_eq!((v[3].1, v[3].2), (0, 0));
+        assert_eq!((v[4].1, v[4].2), (2, 3));
+    }
+
+    #[test]
     fn query_accounting_descent_preserves_success_and_terminal_failures() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
@@ -18350,6 +18857,7 @@ mod isogenous_model_tests {
         assert_eq!(kc.mul(&g, &kc.subgroup_order), BinaryPoint::Infinity);
         // Squaring really leaves the curve: `(x², y²)` is not a point of `E_b`.
         if let BinaryPoint::Affine { x, y } = &g {
+            assert_eq!(kc.frobenius_x(x), x.clone());
             let irr = &kc.curve.irreducible;
             let (xs, ys) = (x.square(irr), y.square(irr));
             let lifted = points_with_x(&kc.curve, &xs);
@@ -18373,6 +18881,12 @@ mod isogenous_model_tests {
         let kc = KoblitzCurve::isogenous_model(1, 11, b, None).expect("isogenous model");
         let fb = build_frobenius_factor_base(&kc, 0).expect("factor base on the model");
         // Without a Frobenius endomorphism every point is its own orbit.
+        assert!(fb.orbits.iter().all(|orbit| orbit.len() == 1));
+        let fast = FastCurve::new(&kc.curve).expect("packed curve");
+        assert_eq!(
+            orbit_maps_packed(&kc, &fast, &fb.points),
+            orbit_maps_bigint(&kc, &fb.points)
+        );
         for p in &fb.points {
             assert_eq!(kc.frobenius(p), *p);
         }
@@ -18462,6 +18976,16 @@ mod subfield_tests {
         );
         assert!(KoblitzCurve::subfield(2, 10, 4, 1).is_none(), "a below q");
         assert!(KoblitzCurve::subfield(9, 27, 0, 1).is_none(), "k ≤ 8");
+    }
+
+    #[test]
+    fn wide_f2_subfield_kernel_is_the_unit_line() {
+        let n = 71;
+        let irr = find_irreducible_sparse_wide(n).unwrap();
+        assert_eq!(
+            linearised_kernel_basis(&[0, 1], n, &irr),
+            vec![F2mElement::one(n)]
+        );
     }
 
     #[test]
