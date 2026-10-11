@@ -122,6 +122,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
 use crate::cryptanalysis::semaev_decomp::{Gf2, SubspaceOracle};
+use rayon::prelude::*;
 
 // ── Units, ledgers, boundaries ─────────────────────────────────────
 
@@ -4259,6 +4260,29 @@ impl PairTable {
     }
 }
 
+/// Pair count above which the batched build uses its threads.
+const PARALLEL_BUILD_PAIRS: usize = 1 << 21;
+
+/// The shard of a table key.  Not the in-shard hash ([`MixHasher`]): a
+/// different multiplier and fold, so the keys of one shard do not share
+/// the tag bits the shard's own hash uses.
+#[inline(always)]
+fn frob_shard(key: u64, bits: u32) -> usize {
+    if bits == 0 {
+        return 0;
+    }
+    let m = (key ^ (key >> 31)).wrapping_mul(0xD6E8_FEB8_6659_FD93);
+    (m >> (64 - bits)) as usize
+}
+
+/// Shard bits for a table of about `entries` entries: shards of about
+/// `2^15` entries (a few hundred kilobytes, resident in a core's cache
+/// while it is built), at most `2^10` of them.
+fn frob_shard_bits(entries: usize) -> u32 {
+    let per_shard = 1usize << 15;
+    (usize::BITS - (entries / per_shard).max(1).leading_zeros() - 1).min(10)
+}
+
 /// Bits of a table entry that hold the second index; the rotation that
 /// canonicalised the entry's sum sits above them.
 const FROB_INDEX_BITS: u32 = 26;
@@ -4278,7 +4302,12 @@ const FROB_INDEX_BITS: u32 = 26;
 /// their own unit and converted at a measured factor, like every other
 /// non-addition.
 pub struct FrobeniusPairTable {
-    map: FastMap<(u32, u32)>,
+    /// The table, split into `2^shard_bits` maps by [`frob_shard`] of the
+    /// key: a build writes each shard from sequential buffers instead of
+    /// scattering inserts over one table too large for any cache, and can
+    /// do so for all shards at once.  One shard when the table is small.
+    shards: Vec<FastMap<(u32, u32)>>,
+    shard_bits: u32,
     canon: FrobeniusCanon,
     /// `member_of[i·n + t]`: the base index of `σ^t(P_i)`.
     member_of: Vec<u32>,
@@ -4293,6 +4322,22 @@ pub struct FrobeniusPairTable {
 }
 
 impl FrobeniusPairTable {
+    /// The pair stored under canonical abscissa `key`.
+    #[inline(always)]
+    fn lookup(&self, key: u64) -> Option<&(u32, u32)> {
+        self.shards[frob_shard(key, self.shard_bits)].get(&key)
+    }
+
+    /// Entries in the table.
+    pub fn entry_count(&self) -> usize {
+        self.shards.iter().map(FastMap::len).sum()
+    }
+
+    /// Every `(key, stored pair)`, in no particular order.
+    pub fn entries_iter(&self) -> impl Iterator<Item = (&u64, &(u32, u32))> {
+        self.shards.iter().flat_map(|m| m.iter())
+    }
+
     /// `None` when the base is not closed under the Frobenius, has more
     /// than `2^26` points, or the field yields no normal basis.
     ///
@@ -4302,7 +4347,18 @@ impl FrobeniusPairTable {
     /// counters and the charged group operations are those of
     /// [`Self::build_scalar`] exactly.
     pub fn build(inst: &BinaryInstance, fb: &FactorBase<FastPoint>) -> Option<Self> {
-        Self::build_impl(inst, fb, true)
+        Self::build_impl(inst, fb, true, None)
+    }
+
+    /// [`Self::build`] with the shard count forced to `2^bits`, so a test
+    /// can exercise sharding on a base too small to need it.
+    #[cfg(test)]
+    pub(crate) fn build_sharded(
+        inst: &BinaryInstance,
+        fb: &FactorBase<FastPoint>,
+        bits: u32,
+    ) -> Option<Self> {
+        Self::build_impl(inst, fb, true, Some(bits))
     }
 
     /// The reference construction: one scalar affine addition (one field
@@ -4310,13 +4366,14 @@ impl FrobeniusPairTable {
     /// held to it entry for entry, and as the baseline of
     /// `examples/ic_batch_bench.rs`.
     pub fn build_scalar(inst: &BinaryInstance, fb: &FactorBase<FastPoint>) -> Option<Self> {
-        Self::build_impl(inst, fb, false)
+        Self::build_impl(inst, fb, false, None)
     }
 
     fn build_impl(
         inst: &BinaryInstance,
         fb: &FactorBase<FastPoint>,
         batched: bool,
+        force_shard_bits: Option<u32>,
     ) -> Option<Self> {
         let start = Instant::now();
         let g = BinaryGroup(&inst.fast);
@@ -4362,55 +4419,121 @@ impl FrobeniusPairTable {
         }
         let mut ops = GroupOps::default();
         let mut canons = 0u64;
-        let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
-        let mut scratch = BatchScratch::default();
-        let mut addends: Vec<FastPoint> = Vec::new();
-        let mut indices: Vec<u32> = Vec::new();
-        let mut sums: Vec<FastPoint> = Vec::new();
-        for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
-            if batched {
-                addends.clear();
-                indices.clear();
-                sums.clear();
-                for j in 0..f {
-                    if (orbit_of[j] as usize) >= orbit {
-                        addends.push(fb.points[j]);
-                        indices.push(j as u32);
+        let estimate = f * f / (4 * n) + 1;
+        let shard_bits = force_shard_bits.unwrap_or_else(|| frob_shard_bits(estimate));
+        let shard_count = 1usize << shard_bits;
+        let shard_capacity = estimate / shard_count + 1;
+        let mut shards: Vec<FastMap<(u32, u32)>> = Vec::new();
+        if batched {
+            // Pair sums are generated in parallel chunks of consecutive
+            // representatives, each chunk appending to one buffer per
+            // shard; every shard is then filled from the chunks in chunk
+            // order, so the first pair to reach a key wins exactly as in
+            // the sequential build (representative order, then base
+            // order) whatever the thread count.
+            struct Chunk {
+                per_shard: Vec<Vec<(u64, (u32, u32))>>,
+                adds: u64,
+                canons: u64,
+            }
+            let reps = rep_of_orbit.len();
+            // Threads are worth their start-up and scheduling cost only
+            // for a build of some millions of pairs; a small table is
+            // built by the same chunked, sharded algorithm on one thread
+            // (a descheduled worker on a busy host would otherwise set
+            // its wall time).
+            let pairs = reps.saturating_mul(f) / 2;
+            let parallel = pairs >= PARALLEL_BUILD_PAIRS && rayon::current_num_threads() > 1;
+            let chunks = if parallel {
+                reps.clamp(1, rayon::current_num_threads() * 4)
+            } else {
+                1
+            };
+            let per_chunk = reps.div_ceil(chunks).max(1);
+            let generate = |c: usize| {
+                {
+                    let mut scratch = BatchScratch::default();
+                    let mut addends: Vec<FastPoint> = Vec::new();
+                    let mut indices: Vec<u32> = Vec::new();
+                    let mut sums: Vec<FastPoint> = Vec::new();
+                    let mut out = Chunk {
+                        per_shard: vec![Vec::new(); shard_count],
+                        adds: 0,
+                        canons: 0,
+                    };
+                    for orbit in (c * per_chunk)..((c + 1) * per_chunk).min(reps) {
+                        let rep = rep_of_orbit[orbit];
+                        addends.clear();
+                        indices.clear();
+                        sums.clear();
+                        for j in 0..f {
+                            if (orbit_of[j] as usize) >= orbit {
+                                addends.push(fb.points[j]);
+                                indices.push(j as u32);
+                            }
+                        }
+                        inst.fast
+                            .add_many(fb.points[rep], &addends, &mut sums, &mut scratch);
+                        // One charged addition per pair, as the scalar loop pays.
+                        out.adds += addends.len() as u64;
+                        for (u, &j) in sums.iter().zip(&indices) {
+                            if u.infinity {
+                                continue;
+                            }
+                            out.canons += 1;
+                            let (key, t_u) = canon.canon_with_shift(u.x);
+                            out.per_shard[frob_shard(key, shard_bits)]
+                                .push((key, (rep as u32, j | (t_u << FROB_INDEX_BITS))));
+                        }
+                    }
+                    out
+                }
+            };
+            let outs: Vec<Chunk> = if parallel {
+                (0..chunks).into_par_iter().map(generate).collect()
+            } else {
+                (0..chunks).map(generate).collect()
+            };
+            ops.adds += outs.iter().map(|o| o.adds).sum::<u64>();
+            canons += outs.iter().map(|o| o.canons).sum::<u64>();
+            let fill = |sh: usize| {
+                let mut m: FastMap<(u32, u32)> = fast_map(shard_capacity);
+                for out in &outs {
+                    for &(key, value) in &out.per_shard[sh] {
+                        m.entry(key).or_insert(value);
                     }
                 }
-                inst.fast
-                    .add_many(fb.points[rep], &addends, &mut sums, &mut scratch);
-                // One charged addition per pair, as the scalar loop pays.
-                ops.adds += addends.len() as u64;
-                for (u, &j) in sums.iter().zip(&indices) {
-                    if u.infinity {
+                m
+            };
+            shards = if parallel {
+                (0..shard_count).into_par_iter().map(fill).collect()
+            } else {
+                (0..shard_count).map(fill).collect()
+            };
+        } else {
+            shards.extend((0..shard_count).map(|_| fast_map(shard_capacity)));
+            for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
+                for j in 0..f {
+                    if (orbit_of[j] as usize) < orbit {
+                        continue;
+                    }
+                    let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
+                    if g.is_identity(&u) {
                         continue;
                     }
                     canons += 1;
                     let (key, t_u) = canon.canon_with_shift(u.x);
-                    map.entry(key)
-                        .or_insert((rep as u32, j | (t_u << FROB_INDEX_BITS)));
+                    shards[frob_shard(key, shard_bits)]
+                        .entry(key)
+                        .or_insert((rep as u32, (j as u32) | (t_u << FROB_INDEX_BITS)));
                 }
-                continue;
-            }
-            for j in 0..f {
-                if (orbit_of[j] as usize) < orbit {
-                    continue;
-                }
-                let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
-                if g.is_identity(&u) {
-                    continue;
-                }
-                canons += 1;
-                let (key, t_u) = canon.canon_with_shift(u.x);
-                map.entry(key)
-                    .or_insert((rep as u32, (j as u32) | (t_u << FROB_INDEX_BITS)));
             }
         }
         Some(Self {
-            entries: map.len() as u64,
+            entries: shards.iter().map(|m| m.len() as u64).sum(),
             representatives: rep_of_orbit.len() as u64,
-            map,
+            shards,
+            shard_bits,
             canon,
             member_of,
             n: inst.n,
@@ -4453,7 +4576,7 @@ impl FrobeniusPairTable {
         key: u64,
         t_r: u32,
     ) -> Option<(usize, usize)> {
-        let &(i, packed) = self.map.get(&key)?;
+        let &(i, packed) = self.lookup(key)?;
         let n = self.n;
         let j = (packed & ((1u32 << FROB_INDEX_BITS) - 1)) as usize;
         let t_u = packed >> FROB_INDEX_BITS;
@@ -4534,7 +4657,7 @@ impl FrobeniusPairTable {
                 ctr.canonicalisations += 1;
                 ctr.lookups += 1;
                 let key = keys[offset];
-                if !self.map.contains_key(&key) {
+                if self.lookup(key).is_none() {
                     continue;
                 }
                 let (_, t_r) = self.canon.canon_with_shift(s.x);
@@ -4555,7 +4678,7 @@ impl FrobeniusPairTable {
         let start = Instant::now();
         let mut hits = 0u64;
         for i in 0..samples {
-            if self.map.contains_key(&keys[(i % 1024) as usize]) {
+            if self.lookup(keys[(i % 1024) as usize]).is_some() {
                 hits += 1;
             }
         }
@@ -8693,9 +8816,62 @@ mod tests {
             );
             assert_eq!(batched.build_frobenius_maps, scalar.build_frobenius_maps);
             assert_eq!(batched.build_lookups, scalar.build_lookups);
-            assert_eq!(batched.map.len(), scalar.map.len());
-            for (key, value) in batched.map.iter() {
-                assert_eq!(scalar.map.get(key), Some(value), "n = {n}, key {key}");
+            assert_eq!(batched.entry_count(), scalar.entry_count());
+            for (key, value) in batched.entries_iter() {
+                assert_eq!(scalar.lookup(*key), Some(value), "n = {n}, key {key}");
+            }
+            // Neither the thread count nor the number of shards may change
+            // the table: sharded builds (forced on this small base) on
+            // pools of one and of five threads, entry for entry, and the
+            // probes through them.
+            let planted: Vec<FastPoint> = {
+                let mut rng = StdRng::seed_from_u64(0x5AD);
+                let f = folded.points.len();
+                (0..60)
+                    .filter_map(|_| {
+                        let mut acc = g.identity();
+                        let mut scratch = GroupOps::default();
+                        for _ in 0..3 {
+                            acc = g.add(&mut scratch, acc, folded.points[rng.gen_range(0..f)]);
+                        }
+                        (!g.is_identity(&acc)).then_some(acc)
+                    })
+                    .collect()
+            };
+            for (bits, threads) in [(0u32, 1usize), (3, 1), (3, 5), (6, 5)] {
+                let pool = rayon::ThreadPoolBuilder::new()
+                    .num_threads(threads)
+                    .build()
+                    .expect("pool");
+                let other = pool
+                    .install(|| FrobeniusPairTable::build_sharded(&inst, &folded, bits))
+                    .expect("table");
+                assert_eq!(other.shard_bits, bits);
+                assert_eq!(other.entry_count(), scalar.entry_count(), "{bits} bits");
+                assert_eq!(
+                    other.build_ops, scalar.build_ops,
+                    "{bits} bits, {threads} threads"
+                );
+                for (key, value) in scalar.entries_iter() {
+                    assert_eq!(
+                        other.lookup(*key),
+                        Some(value),
+                        "{bits} bits, {threads} threads"
+                    );
+                }
+                for &q in &planted {
+                    let (mut ops_a, mut ops_b) = (GroupOps::default(), GroupOps::default());
+                    let (mut ctr_a, mut ctr_b) =
+                        (OracleCounters::default(), OracleCounters::default());
+                    let a =
+                        decompose_mitm_frobenius(&g, &folded, &other, 3, &mut ops_a, &mut ctr_a, q);
+                    let b = decompose_mitm_frobenius_scalar(
+                        &g, &folded, &scalar, 3, &mut ops_b, &mut ctr_b, q,
+                    );
+                    assert_eq!(a, b, "{bits} bits, {threads} threads: decomposition");
+                    assert_eq!(ops_a, ops_b);
+                    assert_eq!(ctr_a.lookups, ctr_b.lookups);
+                }
             }
             let mut rng = StdRng::seed_from_u64(0xBA7C);
             let f = folded.points.len();
