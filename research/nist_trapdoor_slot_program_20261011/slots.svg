@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="620" viewBox="0 0 980 620" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <title>NIST prime-curve trapdoor slots: where a trapdoor could live and what bounds it</title>
+  <desc>Editable source. Boxes are parameter slots of the X9.62 / FIPS 186-4 generation procedure; colour is the status after round 0 (census). Green: executed public check, no anomaly. Amber: executed, unexplained degree of freedom recorded. Blue: pending registered experiment. Grey: not publicly testable.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="980" height="620" fill="#ffffff"/>
+  <text x="490" y="28" text-anchor="middle" font-size="18" font-weight="bold">NIST prime-curve trapdoor slots (P-192 … P-521), status after round 0</text>
+
+  <!-- generation pipeline -->
+  <rect x="30" y="60" width="130" height="50" rx="6" fill="#fff3cd" stroke="#8a6d00"/>
+  <text x="95" y="80" text-anchor="middle" font-weight="bold">S2  prime p</text>
+  <text x="95" y="98" text-anchor="middle" font-size="11">Solinas form, open choice</text>
+
+  <rect x="200" y="60" width="130" height="50" rx="6" fill="#fff3cd" stroke="#8a6d00"/>
+  <text x="265" y="80" text-anchor="middle" font-weight="bold">S7  seed</text>
+  <text x="265" y="98" text-anchor="middle" font-size="11">84 public preimages: 0 hits</text>
+
+  <rect x="370" y="60" width="150" height="50" rx="6" fill="#fff3cd" stroke="#8a6d00"/>
+  <text x="445" y="80" text-anchor="middle" font-weight="bold">S3  seed → b</text>
+  <text x="445" y="98" text-anchor="middle" font-size="11">root sign = twist on 4 of 5</text>
+
+  <rect x="560" y="60" width="150" height="50" rx="6" fill="#dbe9ff" stroke="#1f4e9a"/>
+  <text x="635" y="80" text-anchor="middle" font-weight="bold">S1  model (p, a, b)</text>
+  <text x="635" y="98" text-anchor="middle" font-size="11">the only sub-exp slot</text>
+
+  <rect x="750" y="60" width="130" height="50" rx="6" fill="#fff3cd" stroke="#8a6d00"/>
+  <text x="815" y="80" text-anchor="middle" font-weight="bold">S4  base point G</text>
+  <text x="815" y="98" text-anchor="middle" font-size="11">never first valid x</text>
+
+  <line x1="160" y1="85" x2="200" y2="85" stroke="#333" marker-end="url(#arrow)"/>
+  <line x1="330" y1="85" x2="370" y2="85" stroke="#333" marker-end="url(#arrow)"/>
+  <line x1="520" y1="85" x2="560" y2="85" stroke="#333" marker-end="url(#arrow)"/>
+  <line x1="710" y1="85" x2="750" y2="85" stroke="#333" marker-end="url(#arrow)"/>
+
+  <!-- invariants column: checkable -->
+  <text x="150" y="160" font-weight="bold" font-size="14">Isogeny-invariant (public, checkable)</text>
+  <rect x="30" y="175" width="240" height="190" rx="6" fill="#e3f6e3" stroke="#2e7d32"/>
+  <text x="45" y="198" font-weight="bold">S6 / S5 / S2 census, executed</text>
+  <text x="45" y="220">n prime, cofactor 1 (5/5)</text>
+  <text x="45" y="240">embedding degree k &gt; 1000 (5/5)</text>
+  <text x="45" y="260">|D| = 4p − t²: no square part ≤ 10^6</text>
+  <text x="45" y="280">except 3³ on P-224; no square residue</text>
+  <text x="45" y="300">twist orders factored to 2^22 rho:</text>
+  <text x="45" y="320">P-384 prime; P-224, P-192 residues open</text>
+  <text x="45" y="340">n ± 1: large residues (5/5)</text>
+  <text x="45" y="358" font-size="11" fill="#2e7d32">any weakness here cannot be hidden by an isogeny</text>
+
+  <!-- model-dependent column -->
+  <text x="545" y="160" font-weight="bold" font-size="14">Model-dependent (can be isogeny-hidden) — pending rounds</text>
+  <rect x="310" y="175" width="300" height="190" rx="6" fill="#dbe9ff" stroke="#1f4e9a"/>
+  <text x="325" y="198" font-weight="bold">S1a cover route  (E1a, toy p 2^20–2^28)</text>
+  <text x="325" y="216" font-size="11">predict slope 2 − 2/g &gt; 0.55; falsify if below</text>
+  <text x="325" y="240" font-weight="bold">S1b class-group map  (E1b, 2^16 curves)</text>
+  <text x="325" y="258" font-size="11">predict 0 curves with n | h(O); Lagrange bound</text>
+  <text x="325" y="282" font-weight="bold">S1c factor-base carrier  (E1c, 136 vertices)</text>
+  <text x="325" y="300" font-size="11">predict Semaev PDP cost constant on isogeny class</text>
+  <text x="325" y="324" font-weight="bold">S1d hiding asymmetry  (E1d, L ≤ 32)</text>
+  <text x="325" y="342" font-size="11">predict known-target ≪ predicate-only recovery, ratio &gt; 2^10</text>
+  <text x="325" y="358" font-size="11" fill="#1f4e9a">Teske 2006 template; no F_p instance known</text>
+
+  <rect x="650" y="175" width="300" height="190" rx="6" fill="#dbe9ff" stroke="#1f4e9a"/>
+  <text x="665" y="198" font-weight="bold">S3 grind density  (E3, 40-bit p, 2^24 seeds)</text>
+  <text x="665" y="216" font-size="11">predict public classes ≤ 2^-16; root-sign unbiased</text>
+  <text x="665" y="240" font-weight="bold">S4a rigid-G test  (E4a)</text>
+  <text x="665" y="258" font-size="11">predict no deterministic rule reproduces G</text>
+  <text x="665" y="282" font-weight="bold">S4b protocol audit  (E4b, literature)</text>
+  <text x="665" y="300" font-size="11">Dual_EC pattern table per deployed protocol</text>
+  <text x="665" y="324" font-weight="bold">S5 twist completion  (E5, ECM)</text>
+  <text x="665" y="342" font-size="11">predict P-224 largest twist prime ≈ 2^117</text>
+  <text x="665" y="358" font-size="11" fill="#1f4e9a">S2 matched-rho control (E2): equal iteration counts</text>
+
+  <!-- not testable -->
+  <rect x="30" y="400" width="920" height="60" rx="6" fill="#ececec" stroke="#666"/>
+  <text x="45" y="422" font-weight="bold">Not publicly testable</text>
+  <text x="45" y="442" font-size="11">S8 a better generic algorithm (a capability, not a parameter trapdoor; docs/ic/BOUNDARY_TARGETS.md regime C) · S7 seed = SHA-1(secret ‖ counter): only a preimage closes it</text>
+
+  <!-- legend -->
+  <rect x="30" y="490" width="18" height="14" fill="#e3f6e3" stroke="#2e7d32"/><text x="55" y="502">executed, no anomaly</text>
+  <rect x="220" y="490" width="18" height="14" fill="#fff3cd" stroke="#8a6d00"/><text x="245" y="502">executed, unexplained freedom recorded (not evidence of grinding)</text>
+  <rect x="640" y="490" width="18" height="14" fill="#dbe9ff" stroke="#1f4e9a"/><text x="665" y="502">registered, pending</text>
+  <rect x="800" y="490" width="18" height="14" fill="#ececec" stroke="#666"/><text x="825" y="502">not testable</text>
+
+  <text x="30" y="540" font-size="11">Round 0 evidence: examples/nist_slot_census.rs → census.md / census.json (sha256 in PROTOCOL.md §3). Curves: CurveParams::p192 … p521 (FIPS 186-4 D.1.2); seeds SEC 2 §2.4.</text>
+  <text x="30" y="560" font-size="12">Principle: a weakness that is a function of #E, t, k or the square-free part of t² − 4p is constant on the isogeny class and cannot be hidden; only a model-dependent</text>
+  <text x="30" y="578" font-size="12">property (a cover, a factor-base structure, a GHS-type descent) can be hidden by an isogeny walk, and over F_p no such property with a sub-exponential solver is known.</text>
+  <text x="30" y="604" font-size="11" fill="#666">Proposed and pending items are drawn in blue and make no measured claim. No weakness in any NIST curve is claimed or found.</text>
+</svg>
