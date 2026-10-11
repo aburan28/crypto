@@ -929,6 +929,140 @@ fn rref32_deferred(
     Some(pivots)
 }
 
+/// Most entries of `B'` (reducers × free columns, 4 bytes each) the
+/// Faugère–Lachartre form is allowed; above it the step falls back to
+/// reducing each pair row through the reducer cascade.
+const FL_MAX_ENTRIES: usize = 1 << 28;
+
+/// Reducers finished together in [`reduce_pairs_fl`].
+const FL_BLOCK: usize = 64;
+
+/// `F4_FP_FL=0` keeps the per-pair-row reducer cascade; a same-binary
+/// control for the Faugère–Lachartre form.
+fn fl_enabled() -> bool {
+    static FL: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *FL.get_or_init(|| std::env::var("F4_FP_FL").as_deref() != Ok("0"))
+}
+
+/// The pair rows reduced by the reducers, over the free columns, in the
+/// Faugère–Lachartre form (see the call site).  `reducer_at[c]` is the
+/// reducer led by column `c` or `u32::MAX`; `free_cols` is ascending.
+/// Entries are `< p`; `None` when the deadline passed.
+#[allow(clippy::too_many_arguments)]
+fn reduce_pairs_fl(
+    pair_rows: &[Vec<(u32, u64)>],
+    reducers: &[Vec<(u32, u64)>],
+    reducer_at: &[u32],
+    free_cols: &[usize],
+    n_cols: usize,
+    fp: Barrett,
+    deadline: Option<Instant>,
+) -> Option<Vec<Vec<u32>>> {
+    const NONE: u32 = u32::MAX;
+    const NORMALIZE_AFTER: usize = 256;
+    let simd = lazy_simd_kind();
+    let n_free = free_cols.len();
+    let mut free_index = vec![NONE; n_cols];
+    for (i, &c) in free_cols.iter().enumerate() {
+        free_index[c] = i as u32;
+    }
+    // reducers by leading column, rightmost first: a reducer's entry at
+    // another reducer's column lies right of its own lead, so that
+    // reducer is finished before this one is reached
+    let mut order: Vec<usize> = (0..reducers.len()).collect();
+    order.sort_unstable_by_key(|&k| std::cmp::Reverse(reducers[k][0].0));
+    let mut position = vec![0usize; reducers.len()];
+    for (pos, &k) in order.iter().enumerate() {
+        position[k] = pos;
+    }
+    let mut bprime: Vec<Vec<u32>> = vec![Vec::new(); reducers.len()];
+    // `(acc, pending, in-block dependencies)` of one reducer against the
+    // finished blocks
+    let against_finished = |k: usize, block_start: usize, bprime: &Vec<Vec<u32>>| {
+        let mut acc = vec![0u64; n_free];
+        let mut pending = 0usize;
+        let mut later: Vec<(usize, u64)> = Vec::new();
+        for &(c, v) in &reducers[k][1..] {
+            let fi = free_index[c as usize];
+            if fi != NONE {
+                acc[fi as usize] += v;
+            } else {
+                let j = reducer_at[c as usize] as usize;
+                if position[j] < block_start {
+                    add_lazy(&mut acc, &bprime[j], 0, fp.p - v, simd);
+                    pending += 1;
+                    if pending == NORMALIZE_AFTER {
+                        normalize_lazy(&mut acc, fp);
+                        pending = 0;
+                    }
+                } else {
+                    later.push((j, v));
+                }
+            }
+        }
+        (acc, pending, later)
+    };
+    for block in order.chunks(FL_BLOCK) {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let block_start = position[block[0]];
+        let bp = &bprime;
+        let mut partial: Vec<(Vec<u64>, usize, Vec<(usize, u64)>)> =
+            if block.len() * n_free > PAR_WORK {
+                block
+                    .par_iter()
+                    .map(|&k| against_finished(k, block_start, bp))
+                    .collect()
+            } else {
+                block
+                    .iter()
+                    .map(|&k| against_finished(k, block_start, bp))
+                    .collect()
+            };
+        for (&k, (acc, pending, later)) in block.iter().zip(partial.iter_mut()) {
+            // in-block dependencies are earlier in the block, so finished
+            for &(j, v) in later.iter() {
+                debug_assert!(position[j] < position[k]);
+                add_lazy(acc, &bprime[j], 0, fp.p - v, simd);
+                *pending += 1;
+                if *pending == NORMALIZE_AFTER {
+                    normalize_lazy(acc, fp);
+                    *pending = 0;
+                }
+            }
+            bprime[k] = acc.iter().map(|&x| fp.reduce(x) as u32).collect();
+        }
+    }
+    let reduce_pair = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let mut acc = vec![0u64; n_free];
+        let mut pending = 0usize;
+        for &(c, v) in r {
+            let fi = free_index[c as usize];
+            if fi != NONE {
+                acc[fi as usize] += v;
+            } else {
+                let j = reducer_at[c as usize] as usize;
+                add_lazy(&mut acc, &bprime[j], 0, fp.p - v, simd);
+                pending += 1;
+                if pending == NORMALIZE_AFTER {
+                    normalize_lazy(&mut acc, fp);
+                    pending = 0;
+                }
+            }
+        }
+        Some(acc.iter().map(|&x| fp.reduce(x) as u32).collect())
+    };
+    if pair_rows.len() * n_free > PAR_WORK {
+        pair_rows.par_iter().map(reduce_pair).collect()
+    } else {
+        pair_rows.iter().map(reduce_pair).collect()
+    }
+}
+
 /// Row-reduce `rows` (dense, entries in `[0, p)`) to reduced echelon form
 /// in place: zero rows are dropped, the rest sorted by pivot column, whose
 /// list is returned.  `None` when the deadline passed first.
@@ -1420,7 +1554,29 @@ fn f4_with_arithmetic(
                         .collect(),
                 )
             };
-            let reduced: Option<Vec<Vec<u32>>> = if parallel {
+            // Faugère–Lachartre: reduce the reducer block once instead of
+            // re-running its cascade for every pair row.  With the
+            // reducers `A | B` (`A` on their own leading columns, `B` on the
+            // free columns) brought to `B' = A⁻¹B`, each pair row `C | D`
+            // becomes `D − C·B'`: one dense update over the free columns per
+            // original entry at a reducer column, and no cascade, because
+            // `B'` has no entries on reducer columns.  Rows are monic, so
+            // `A` has a unit diagonal.  `B'` is built rightmost lead first
+            // in blocks: a block's rows are reduced in parallel against the
+            // blocks before it, then finished in order against each other.
+            let fl =
+                fl_enabled() && reducers.len().saturating_mul(free_cols.len()) <= FL_MAX_ENTRIES;
+            let reduced: Option<Vec<Vec<u32>>> = if fl {
+                reduce_pairs_fl(
+                    pair_rows,
+                    reducers,
+                    &reducer_at,
+                    &free_cols,
+                    n_cols,
+                    fp,
+                    deadline,
+                )
+            } else if parallel {
                 pair_rows.par_iter().map(reduce_pair_row).collect()
             } else {
                 pair_rows.iter().map(reduce_pair_row).collect()
