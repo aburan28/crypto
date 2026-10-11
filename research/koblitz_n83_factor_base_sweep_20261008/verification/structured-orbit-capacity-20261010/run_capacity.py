@@ -19,6 +19,7 @@ EXPECTED_OBJECT_SHA256 = "c5de0b26e84ad80bfb7be6a214b89c9682e356effb6079c7abf28c
 SOURCE = Path("examples/koblitz_n83_structured_orbit_capacity.rs")
 PROTOCOL = Path("research/koblitz_n83_factor_base_sweep_20261008/verification/structured-orbit-capacity-20261010/PROTOCOL.md")
 RUNNER = Path("research/koblitz_n83_factor_base_sweep_20261008/verification/structured-orbit-capacity-20261010/run_capacity.py")
+BUILDER = Path("research/koblitz_n83_factor_base_sweep_20261008/verification/structured-orbit-capacity-20261010/build-linux.sh")
 
 
 def digest(path: Path) -> str:
@@ -49,6 +50,13 @@ def write_bytes_new(name: str, data: bytes) -> None:
         stream.write(data)
 
 
+def docker_call(*args: str, timeout: int = 15) -> subprocess.CompletedProcess[bytes] | None:
+    try:
+        return subprocess.run(["docker", *args], capture_output=True, timeout=timeout, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         raise ValueError("usage: run_capacity.py CONFIG.json")
@@ -61,13 +69,13 @@ def main() -> int:
             raise FileExistsError(name)
     if git("rev-parse", "HEAD") != config["source_commit"]:
         raise ValueError("source commit changed")
-    if git("diff", "--name-only", "HEAD", "--", str(SOURCE), str(PROTOCOL), str(RUNNER)):
+    if git("diff", "--name-only", "HEAD", "--", str(SOURCE), str(PROTOCOL), str(RUNNER), str(BUILDER)):
         raise ValueError("frozen source/protocol/runner dirty")
     binary = Path(config["binary"]).resolve()
     obj = Path(config["object"]).resolve()
     manifest = (ROOT / config["manifest"]).resolve()
     corpus = (ROOT / config["public_corpus"]).resolve()
-    if digest(binary) != config["binary_sha256"] or digest(obj) != EXPECTED_OBJECT_SHA256:
+    if digest(binary) != config["binary_sha256"] or digest(obj) != EXPECTED_OBJECT_SHA256 or config["object_sha256"] != EXPECTED_OBJECT_SHA256:
         raise ValueError("binary or S3 object hash")
     if digest(manifest) != config["manifest_sha256"] or digest(corpus) != config["public_corpus_sha256"]:
         raise ValueError("manifest or public corpus hash")
@@ -81,28 +89,62 @@ def main() -> int:
         raise ValueError("budget chain")
     if config["wall_cap_seconds"] != 240 or config["memory_limit_bytes"] != 4 * 1024**3:
         raise ValueError("resource contract")
-
-    command = [str(binary), str(obj), str(manifest), str(corpus)]
+    image = config["image"]
+    image_check = docker_call("image", "inspect", image, "--format", "{{.Id}} {{.Architecture}} {{.Os}}")
+    if not image_check or image_check.returncode != 0 or image_check.stdout.decode().strip() != f'{config["image_id"]} arm64 linux':
+        raise ValueError("local image identity/architecture")
+    name = f"n83-structured-capacity-{os.getpid()}"
+    command = [
+        "docker", "run", "--pull", "never", "--platform", "linux/arm64", "--name", name,
+        "--network", "none", "--cpus", "1", "--memory", "4096m", "--memory-swap", "4096m",
+        "--pids-limit", "64", "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
+        "--read-only", "--tmpfs", "/tmp:rw,noexec,nosuid,size=64m",
+        "--user", f"{os.getuid()}:{os.getgid()}",
+        "--env", f'N83_SOURCE_COMMIT={config["source_commit"]}',
+        "--mount", f"type=bind,src={binary},dst=/worker,readonly",
+        "--mount", f"type=bind,src={obj},dst=/object.jsonl.gz,readonly",
+        "--mount", f"type=bind,src={manifest},dst=/manifest.json,readonly",
+        "--mount", f"type=bind,src={corpus},dst=/probe-corpus.json,readonly",
+        image, "/worker", "/object.jsonl.gz", "/manifest.json", "/probe-corpus.json",
+    ]
     load_before = os.getloadavg()
     start = time.monotonic()
     process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
     timed_out = False
     try:
-        stdout, stderr = process.communicate(timeout=240)
+        client_stdout, client_stderr = process.communicate(timeout=240)
     except subprocess.TimeoutExpired:
         timed_out = True
+        docker_call("kill", name)
         os.killpg(process.pid, signal.SIGKILL)
-        stdout, stderr = process.communicate()
+        client_stdout, client_stderr = process.communicate()
     wall = time.monotonic() - start
+    state_result = docker_call("inspect", "--format", "{{json .State}}", name)
+    state = None
+    if state_result and state_result.returncode == 0:
+        try:
+            state = json.loads(state_result.stdout)
+        except (ValueError, UnicodeDecodeError):
+            pass
+    if not isinstance(state, dict):
+        state = None
+    logs = docker_call("logs", name)
+    stdout = logs.stdout if logs and logs.returncode == 0 else client_stdout
+    stderr = logs.stderr if logs and logs.returncode == 0 else client_stderr
+    removed = docker_call("rm", "-f", name)
+    remaining = docker_call("ps", "-aq", "--filter", f"name=^{name}$")
+    cleanup_ok = bool(removed and removed.returncode == 0 and remaining and remaining.returncode == 0 and not remaining.stdout.strip())
     write_bytes_new("worker.stdout", stdout)
     write_bytes_new("worker.stderr", stderr)
     worker = None
-    if process.returncode == 0 and not timed_out:
+    if process.returncode == 0 and not timed_out and state and state.get("ExitCode") == 0:
         try:
             worker = json.loads(stdout)
         except (ValueError, UnicodeDecodeError):
             pass
-    valid = bool(worker and worker.get("schema") == "n83.structured-orbit-capacity-worker/v1"
+    if not isinstance(worker, dict):
+        worker = None
+    valid = bool(cleanup_ok and worker and worker.get("schema") == "n83.structured-orbit-capacity-worker/v1"
         and worker.get("status") == "PASS_model_construction_only"
         and worker.get("source_commit") == config["source_commit"]
         and worker.get("object_compressed_blake3") == config["object_blake3"]
@@ -110,21 +152,28 @@ def main() -> int:
         and worker.get("domain_variables") == 26265
         and worker.get("domain_clauses") == 872260
         and worker.get("domain_xors") == 3320
-        and worker.get("peak_resident_bytes", 4 * 1024**3 + 1) <= 4 * 1024**3
+        and worker.get("memory_cgroup_limit_bytes") == 4 * 1024**3
+        and worker.get("memory_cgroup_swap_limit_bytes") == 0
+        and type(worker.get("memory_cgroup_peak_bytes")) is int
+        and 0 < worker["memory_cgroup_peak_bytes"] <= 4 * 1024**3
         and worker.get("solver_search_executed") is False
         and worker.get("relation_stage_executed") is False
         and worker.get("rank_stage_executed") is False
         and worker.get("total_index_calculus_runtime_ms") is None
         and worker.get("selected_best_total_runtime") is None)
     status = ("PASS_model_construction_only" if valid else
+              "PRODUCER_FAILURE_cleanup" if not cleanup_ok else
               "UNKNOWN_wall_cap" if timed_out else
+              "UNKNOWN_memory_cap" if state and state.get("OOMKilled") else
               "PRODUCER_FAILURE_worker_exit" if process.returncode else
               "PRODUCER_FAILURE_worker_receipt")
     write_new("outer.json", {
         "schema": "n83.structured-orbit-capacity-outer/v1", "status": status,
         "source_commit": config["source_commit"], "config_sha256": digest(config_path),
-        "binary_sha256": config["binary_sha256"], "object_sha256": EXPECTED_OBJECT_SHA256,
-        "command": command, "exit_code": process.returncode, "timed_out": timed_out,
+        "binary_sha256": config["binary_sha256"], "image_id": config["image_id"],
+        "object_sha256": EXPECTED_OBJECT_SHA256, "command": command,
+        "docker_client_exit_code": process.returncode, "container_state": state,
+        "timed_out": timed_out, "cleanup_verified": cleanup_ok,
         "wall_elapsed_seconds_L0": wall, "load_average_before": load_before,
         "load_average_after": os.getloadavg(), "worker_receipt_valid": valid,
         "worker_stdout_sha256": hashlib.sha256(stdout).hexdigest(),

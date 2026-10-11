@@ -1,6 +1,6 @@
 //! Bounded construction-only gate for the stored N83 structured-orbit base.
-//! The driver must impose an external wall deadline; this process sets and
-//! verifies its own 4 GiB address-space limit before building the SAT model.
+//! The driver imposes a 240-second wall deadline and a 4 GiB, zero-swap
+//! Linux cgroup; this process reads both limits back before model construction.
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::binary_semaev_chain_sat::{
     frobenius_orbit_domain_size, ChainedS3Encoding, FrobeniusOrbitDomainSize,
@@ -13,7 +13,6 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::fs;
 use std::io::{BufRead, BufReader};
-use std::process::Command;
 use std::time::Instant;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
@@ -43,37 +42,31 @@ fn affine(v: &Value) -> Result<BinaryPoint> {
     })
 }
 
-fn set_memory_limit() -> Result<()> {
-    let cap = libc::rlimit {
-        rlim_cur: LIMIT as libc::rlim_t,
-        rlim_max: LIMIT as libc::rlim_t,
-    };
-    // SAFETY: cap is a valid rlimit value, and readback uses an initialized struct.
-    unsafe {
-        if libc::setrlimit(libc::RLIMIT_AS, &cap) != 0 {
-            return Err(std::io::Error::last_os_error().into());
+fn cgroup_memory() -> Result<(u64, u64)> {
+    #[cfg(not(target_os = "linux"))]
+    return Err("Linux cgroup memory gate required".into());
+    #[cfg(target_os = "linux")]
+    {
+        let maximum: u64 = fs::read_to_string("/sys/fs/cgroup/memory.max")?
+            .trim()
+            .parse()?;
+        let swap: u64 = fs::read_to_string("/sys/fs/cgroup/memory.swap.max")?
+            .trim()
+            .parse()?;
+        if maximum != LIMIT || swap != 0 {
+            return Err("cgroup memory/swap readback mismatch".into());
         }
-        let mut readback = std::mem::zeroed::<libc::rlimit>();
-        if libc::getrlimit(libc::RLIMIT_AS, &mut readback) != 0 {
-            return Err(std::io::Error::last_os_error().into());
-        }
-        if readback.rlim_cur as u64 != LIMIT || readback.rlim_max as u64 != LIMIT {
-            return Err("memory-limit readback mismatch".into());
-        }
+        Ok((maximum, swap))
     }
-    Ok(())
 }
 
-fn peak_resident_bytes() -> Result<u64> {
-    // SAFETY: getrusage fills the initialized struct for the current process.
-    let mut usage = unsafe { std::mem::zeroed::<libc::rusage>() };
-    if unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut usage) } != 0 {
-        return Err(std::io::Error::last_os_error().into());
-    }
-    #[cfg(target_os = "macos")]
-    return Ok(usage.ru_maxrss as u64);
-    #[cfg(not(target_os = "macos"))]
-    return Ok((usage.ru_maxrss as u64) * 1024);
+fn cgroup_peak_bytes() -> Result<u64> {
+    #[cfg(not(target_os = "linux"))]
+    return Err("Linux cgroup memory gate required".into());
+    #[cfg(target_os = "linux")]
+    return Ok(fs::read_to_string("/sys/fs/cgroup/memory.peak")?
+        .trim()
+        .parse()?);
 }
 
 fn run() -> Result<Value> {
@@ -155,7 +148,7 @@ fn run() -> Result<Value> {
     if frobenius_orbit_domain_size(83, 5, reps.len()) != Some(expected) {
         return Err("domain-size preflight".into());
     }
-    set_memory_limit()?;
+    let (memory_limit, swap_limit) = cgroup_memory()?;
     let model_start = Instant::now();
     let mut model = ChainedS3Encoding::build(
         5,
@@ -185,14 +178,14 @@ fn run() -> Result<Value> {
     {
         return Err("installed model counts".into());
     }
-    let git = Command::new("git").args(["rev-parse", "HEAD"]).output()?;
-    if !git.status.success() {
-        return Err("source commit".into());
+    let source_commit = std::env::var("N83_SOURCE_COMMIT")?;
+    if source_commit.len() != 40 || !source_commit.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return Err("source commit environment".into());
     }
     Ok(json!({
         "schema":"n83.structured-orbit-capacity-worker/v1",
         "status":"PASS_model_construction_only",
-        "source_commit":String::from_utf8(git.stdout)?.trim(),
+        "source_commit":source_commit,
         "source_blake3":blake3::hash(SOURCE).to_hex().to_string(),
         "chain_source_blake3":blake3::hash(include_bytes!("../src/cryptanalysis/binary_semaev_chain_sat.rs")).to_hex().to_string(),
         "object_compressed_blake3":OBJECT_BLAKE3,
@@ -201,8 +194,9 @@ fn run() -> Result<Value> {
         "curve_slug":CURVE, "summands":5, "identity_mask":0,
         "orbit_columns":reps.len(), "domain_x_coordinates":166083,
         "max_variables":150000, "max_domain_clauses":12000000,
-        "memory_limit_bytes":LIMIT,
-        "peak_resident_bytes":peak_resident_bytes()?,
+        "memory_cgroup_limit_bytes":memory_limit,
+        "memory_cgroup_swap_limit_bytes":swap_limit,
+        "memory_cgroup_peak_bytes":cgroup_peak_bytes()?,
         "core_variables":core.0, "core_clauses":core.1, "core_xors":core.2,
         "domain_variables":expected.variables, "domain_clauses":expected.clauses,
         "domain_xors":expected.xor_rows,
