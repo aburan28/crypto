@@ -236,6 +236,7 @@ pub struct ChainedS3Encoding {
     b: F2mElement,
     irr: IrreduciblePoly,
     domain_installed: bool,
+    first_pair_ordered: bool,
 }
 
 impl ChainedS3Encoding {
@@ -327,6 +328,7 @@ impl ChainedS3Encoding {
             b: b.clone(),
             irr: irr.clone(),
             domain_installed: false,
+            first_pair_ordered: false,
         })
     }
 
@@ -399,6 +401,27 @@ impl ChainedS3Encoding {
         }
         self.domain_installed = true;
         Ok(required)
+    }
+
+    /// Keep one representative of the first summand-pair swap. The first
+    /// S3 node is symmetric in these two x-coordinates, and every later
+    /// node depends only on its output. This is optional so ordered and
+    /// unrestricted searches remain separate sweep arms.
+    pub fn order_first_pair(&mut self, max_variables: u32) -> Result<(), ChainBuildError> {
+        if self.first_pair_ordered || !self.domain_installed {
+            return Err(ChainBuildError::Unsupported);
+        }
+        let extra = self.n - 1;
+        let required = u64::from(self.solver.n_vars()) + u64::from(extra);
+        if required > u64::from(max_variables) || required > i32::MAX as u64 {
+            return Err(ChainBuildError::VariableCap {
+                required,
+                maximum: max_variables,
+            });
+        }
+        add_lex_leq(&mut self.solver, &self.blocks[0], &self.blocks[1]);
+        self.first_pair_ordered = true;
+        Ok(())
     }
 
     fn decode_block(&self, block: &[u32], model: &[bool]) -> F2mElement {
@@ -557,6 +580,29 @@ fn add_frobenius_orbit_domain(
     debug_assert_eq!(next - 1, *allocated.end());
 }
 
+/// Enforce unsigned `a <= b`, with the highest field bit most significant.
+/// Equality forces each next prefix wire true; no other assignment is lost.
+fn add_lex_leq(solver: &mut Solver, a: &[u32], b: &[u32]) {
+    debug_assert_eq!(a.len(), b.len());
+    let top = a.len() - 1;
+    let aux: Vec<Lit> = solver.add_vars(top as u32).map(|wire| wire as Lit).collect();
+    solver.add_clause(vec![-(a[top] as Lit), b[top] as Lit]);
+    for bit in (0..top).rev() {
+        let above = if bit + 1 < top { Some(aux[bit + 1]) } else { None };
+        for (left, right) in [
+            (a[bit + 1] as Lit, b[bit + 1] as Lit),
+            (-(a[bit + 1] as Lit), -(b[bit + 1] as Lit)),
+        ] {
+            let mut clause = vec![left, right, aux[bit]];
+            if let Some(prefix) = above {
+                clause.push(-prefix);
+            }
+            solver.add_clause(clause);
+        }
+        solver.add_clause(vec![-aux[bit], -(a[bit] as Lit), b[bit] as Lit]);
+    }
+}
+
 fn add_coordinate_domain(solver: &mut Solver, block: &[u32], codes: &[BigUint], bit: usize) {
     fn visit(
         solver: &mut Solver,
@@ -590,6 +636,58 @@ mod tests {
     use crate::binary_ecc::BinaryPoint;
     use crate::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
     use crate::cryptanalysis::sat::SolveResult;
+
+    #[test]
+    fn first_pair_lex_constraint_keeps_exactly_one_swap_orientation() {
+        for width in 1..=4usize {
+            let mut solver = Solver::new((2 * width) as u32);
+            let a: Vec<u32> = (1..=width as u32).collect();
+            let b: Vec<u32> = ((width + 1) as u32..=(2 * width) as u32).collect();
+            add_lex_leq(&mut solver, &a, &b);
+            let mut seen = std::collections::HashSet::new();
+            while solver.solve() == SolveResult::Sat {
+                let model = solver.model();
+                let code = |first: usize| {
+                    (0..width).fold(0u32, |word, bit| {
+                        word | (u32::from(model[first + bit]) << bit)
+                    })
+                };
+                let pair = (code(0), code(width));
+                assert!(pair.0 <= pair.1);
+                assert!(seen.insert(pair));
+                solver.reset_search();
+                solver.add_clause(
+                    (0..2 * width)
+                        .map(|bit| if model[bit] { -((bit + 1) as Lit) } else { (bit + 1) as Lit })
+                        .collect(),
+                );
+            }
+            let choices = 1usize << width;
+            assert_eq!(seen.len(), choices * (choices + 1) / 2);
+        }
+    }
+
+    #[test]
+    fn first_pair_order_cap_is_checked_before_mutation() {
+        let irr = IrreduciblePoly { degree: 7, low_terms: vec![0, 1] };
+        let mut encoding = ChainedS3Encoding::build(
+            5, &irr, &F2mElement::one(7), None, 0, 2_000,
+        ).unwrap();
+        encoding.constrain_summands(&[BigUint::from(1u8), BigUint::from(2u8)], 1_000).unwrap();
+        let variables = encoding.solver.n_vars();
+        let clauses = encoding.solver.n_clauses();
+        assert!(matches!(
+            encoding.order_first_pair(variables + 5),
+            Err(ChainBuildError::VariableCap { required, .. }) if required == u64::from(variables + 6)
+        ));
+        assert_eq!(encoding.solver.n_vars(), variables);
+        assert_eq!(encoding.solver.n_clauses(), clauses);
+        encoding.order_first_pair(variables + 6).unwrap();
+        assert_eq!(encoding.solver.n_vars(), variables + 6);
+        // Root assignments from the finite domain may remove clauses.
+        assert!((clauses + 1..=clauses + 19).contains(&encoding.solver.n_clauses()));
+        assert!(matches!(encoding.order_first_pair(variables + 12), Err(ChainBuildError::Unsupported)));
+    }
 
     #[test]
     fn product_gates_match_field_multiplication_and_reject_a_wrong_output() {
