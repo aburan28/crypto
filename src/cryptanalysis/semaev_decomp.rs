@@ -135,6 +135,106 @@ const MAX_DEG: usize = 6;
 /// Squaring skips the multiply entirely: in characteristic 2 it is the
 /// `F₂`-linear bit-spreading `Σ aᵢ zⁱ ↦ Σ aᵢ z^{2i}`, then the same
 /// reduction.
+/// Field-operation counters for the PDP oracle-speedup program
+/// (`research/pdp_oracle_speedup_20261011/`, PS-0).  Compiled only with the
+/// `pdp-opcount` feature; every timing build leaves it off and the `opc!`
+/// call sites expand to nothing.  Counts are defined for the folding path
+/// (`Gf2::folds()`), where a product is `mul_fold` (three carry-less
+/// multiplies) and a standalone reduction is `reduce_fold` (two).
+#[cfg(feature = "pdp-opcount")]
+pub mod opcount {
+    use std::cell::Cell;
+
+    #[derive(Clone, Copy, Default, Debug)]
+    pub struct Counts {
+        /// `Gf2::mul` calls.
+        pub mul: u64,
+        /// `Gf2::sqr` calls.
+        pub sqr: u64,
+        /// Squarings inside `Gf2::sqr_k` (the sum of `k`).
+        pub sqr_k: u64,
+        /// Standalone `Gf2::clmul` products (unreduced).
+        pub clmul: u64,
+        /// Standalone `Gf2::sqr_wide` squares (unreduced).
+        pub sqr_wide: u64,
+        /// Standalone `Gf2::reduce` calls.
+        pub reduce: u64,
+        /// `Gf2::inv` calls (their internal products are inside `mul`, `sqr`, `sqr_k`).
+        pub inv: u64,
+        /// `Gf2::batch_inv` calls.
+        pub batch_calls: u64,
+        /// Non-zero elements inverted by `batch_inv`.
+        pub batch_elems: u64,
+        /// Products the batch inversion spends on its elements, `3` per element
+        /// (the model in `Gf2::batch_inv`); its few fixed `mul` calls are in `mul`.
+        pub batch_mul: u64,
+    }
+
+    impl Counts {
+        /// Carry-less multiply instructions: 3 per folded product or square,
+        /// 1 per bare product or square, 2 per bare reduction.
+        pub fn pclmul(&self) -> u64 {
+            3 * (self.mul + self.sqr + self.sqr_k + self.batch_mul)
+                + self.clmul
+                + self.sqr_wide
+                + 2 * self.reduce
+        }
+
+        pub fn json(&self) -> String {
+            format!(
+                "{{\"mul\":{},\"sqr\":{},\"sqr_k\":{},\"clmul\":{},\"sqr_wide\":{},\"reduce\":{},\"inv\":{},\"batch_calls\":{},\"batch_elems\":{},\"batch_mul\":{},\"pclmul\":{}}}",
+                self.mul, self.sqr, self.sqr_k, self.clmul, self.sqr_wide, self.reduce,
+                self.inv, self.batch_calls, self.batch_elems, self.batch_mul, self.pclmul()
+            )
+        }
+
+        pub fn per_pair_json(&self, pairs: f64) -> String {
+            let f = |v: u64| format!("{:.4}", v as f64 / pairs);
+            format!(
+                "{{\"mul\":{},\"sqr\":{},\"sqr_k\":{},\"clmul\":{},\"sqr_wide\":{},\"reduce\":{},\"inv\":{},\"batch_elems\":{},\"batch_mul\":{},\"pclmul\":{}}}",
+                f(self.mul), f(self.sqr), f(self.sqr_k), f(self.clmul), f(self.sqr_wide),
+                f(self.reduce), f(self.inv), f(self.batch_elems), f(self.batch_mul), f(self.pclmul())
+            )
+        }
+    }
+
+    thread_local! {
+        static COUNTS: Cell<Counts> = const { Cell::new(Counts {
+            mul: 0, sqr: 0, sqr_k: 0, clmul: 0, sqr_wide: 0, reduce: 0, inv: 0,
+            batch_calls: 0, batch_elems: 0, batch_mul: 0,
+        }) };
+    }
+
+    pub fn reset() {
+        COUNTS.with(|c| c.set(Counts::default()));
+    }
+
+    pub fn snapshot() -> Counts {
+        COUNTS.with(|c| c.get())
+    }
+
+    #[inline(always)]
+    pub(super) fn bump(f: impl FnOnce(&mut Counts)) {
+        COUNTS.with(|c| {
+            let mut v = c.get();
+            f(&mut v);
+            c.set(v);
+        });
+    }
+}
+
+/// `opc!(field += n)` bumps an [`opcount`] counter; nothing without the feature.
+#[cfg(feature = "pdp-opcount")]
+macro_rules! opc {
+    ($f:ident += $e:expr) => {
+        opcount::bump(|c| c.$f += ($e) as u64)
+    };
+}
+#[cfg(not(feature = "pdp-opcount"))]
+macro_rules! opc {
+    ($f:ident += $e:expr) => {};
+}
+
 #[derive(Clone, Debug)]
 pub struct Gf2 {
     pub n: u32,
@@ -308,13 +408,14 @@ impl Gf2 {
     /// Only the x86-64 paths ask; elsewhere the tests alone do.
     #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
     #[inline(always)]
-    pub(crate) fn folds(&self) -> bool {
+    pub fn folds(&self) -> bool {
         self.fold_tail != 0
     }
 
     /// Fold a `< 2^{2n−1}` carry-less product back into the field.
     #[inline(always)]
     fn reduce(&self, w: u128) -> u64 {
+        opc!(reduce += 1);
         #[cfg(target_arch = "x86_64")]
         if self.folds() {
             // SAFETY: `fold_tail` is non-zero only when `pclmulqdq` was
@@ -427,6 +528,7 @@ impl Gf2 {
 
     #[inline(always)]
     fn clmul(&self, a: u64, b: u64) -> u128 {
+        opc!(clmul += 1);
         #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
         if self.has_clmul {
             // SAFETY: guarded by the runtime feature detection recorded
@@ -460,6 +562,7 @@ impl Gf2 {
     /// it keeps an ordinary inlining hint.
     #[inline(always)]
     pub fn mul(&self, a: u64, b: u64) -> u64 {
+        opc!(mul += 1);
         #[cfg(target_arch = "x86_64")]
         if self.folds() {
             // SAFETY: `fold_tail` is non-zero only when `pclmulqdq` was
@@ -486,6 +589,7 @@ impl Gf2 {
     /// Always inlined, as [`Self::mul`] is.
     #[inline(always)]
     pub fn sqr(&self, a: u64) -> u64 {
+        opc!(sqr += 1);
         #[cfg(target_arch = "x86_64")]
         if self.folds() {
             // SAFETY: as in `mul`.
@@ -529,6 +633,7 @@ impl Gf2 {
     /// `a²` before reduction, for callers that fold it into a sum first.
     #[inline(always)]
     fn sqr_wide(&self, a: u64) -> u128 {
+        opc!(sqr_wide += 1);
         #[cfg(target_arch = "x86_64")]
         if self.has_clmul {
             // SAFETY: guarded by the runtime feature detection recorded
@@ -546,6 +651,7 @@ impl Gf2 {
     /// `a^(2^k)`.
     #[inline(always)]
     pub fn sqr_k(&self, mut a: u64, k: u32) -> u64 {
+        opc!(sqr_k += k);
         #[cfg(target_arch = "x86_64")]
         if self.folds() {
             // SAFETY: as in `mul`.
@@ -593,6 +699,7 @@ impl Gf2 {
     /// multiplications, against `n − 2` for square-and-multiply —
     /// 7 instead of 22 at `n = 24`.
     pub fn inv(&self, a: u64) -> u64 {
+        opc!(inv += 1);
         #[cfg(target_arch = "x86_64")]
         if self.folds() {
             // SAFETY: the field folds, as just checked.
@@ -654,6 +761,9 @@ impl Gf2 {
     /// Both passes walk `xs` and `scratch` as zipped chunks, so the loops
     /// carry no bounds checks and no `Vec` growth checks.
     pub fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
+        opc!(batch_calls += 1);
+        opc!(batch_elems += xs.iter().filter(|&&x| x != 0).count());
+        opc!(batch_mul += 3 * xs.iter().filter(|&&x| x != 0).count());
         #[cfg(target_arch = "x86_64")]
         if self.folds() {
             // SAFETY: the field folds, as just checked.

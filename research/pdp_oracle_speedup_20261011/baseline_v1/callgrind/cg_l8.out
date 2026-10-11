@@ -1,0 +1,810 @@
+# callgrind format
+version: 1
+creator: callgrind-3.22.0
+pid: 11658
+cmd:  /tmp/ps0_bin/pdp_speedup_A one --l 8 --corpus research/pdp_oracle_speedup_20261011/baseline_v1/corpus/corpus_l8.txt
+part: 1
+
+
+desc: I1 cache: 
+desc: D1 cache: 
+desc: LL cache: 
+
+desc: Timerange: Basic block 0 - 5788240
+desc: Trigger: Program termination
+
+positions: line
+events: Ir
+summary: 77504893
+
+
+ob=(6) /tmp/ps0_bin/pdp_speedup_A
+fl=(162) ???
+fn=(890) pdp_speedup::run_one
+0 5
+cfn=(892) crypto_lib::cryptanalysis::semaev_decomp::decompose
+calls=1 0 
+0 77504885
+0 3
+
+fn=(904) __rustc::__rdl_alloc_zeroed
+0 152
+cob=(2) /usr/lib/x86_64-linux-gnu/libc.so.6
+cfi=(184) ./malloc/./malloc/malloc.c
+cfn=(758) calloc
+calls=8 3699 
+0 1714
+
+fn=(782) __rustc::__rust_alloc
+0 5
+cfn=(784) __rustc::__rdl_alloc
+calls=212 0 
+0 1270
+
+fn=(784)
+0 45
+cob=(2)
+cfi=(184)
+cfn=(604) malloc
+calls=212 3294 
+0 1225
+
+fn=(568) std::rt::lang_start_internal
+cfn=(788) std::rt::lang_start::<()>::{closure#0}
+calls=1 0 
+0 77504893
+
+fn=(792) pdp_speedup::main
+cfn=(890)
+calls=1 0 
+0 77504893
+
+fn=(808) __rustc::__rdl_dealloc
+0 13
+cob=(2)
+cfi=(184)
+cfn=(722) free
+calls=219 3359 
+0 1370
+
+fn=(918) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv
+0 4864
+cfn=(920) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul
+calls=256 0 
+0 105728
+
+fn=(894) crypto_lib::cryptanalysis::semaev_decomp::decompose_pclmulqdq
+0 15
+cfn=(896) crypto_lib::cryptanalysis::semaev_decomp::subspace_poly
+calls=1 0 
+0 7531
+0 7
+cfn=(906) <crypto_lib::cryptanalysis::semaev_decomp::LvHorner>::new
+calls=1 0 
+0 2050
+0 4
+cfn=(912) <crypto_lib::cryptanalysis::semaev_decomp::TargetPowers>::new
+calls=1 0 
+0 80
+0 12
+cfn=(780) __rustc::__rust_no_alloc_shim_is_unstable_v2
+calls=1 0 
+0 1
+0 4
+cfn=(782)
+calls=1 0 
+0 267
+0 10
+cfn=(780)
+calls=1 0 
+0 1
+0 3
+cfn=(782)
+calls=1 0 
+0 265
+0 6
+cfn=(780)
+calls=1 0 
+0 1
+0 3
+cfn=(782)
+calls=1 0 
+0 331
+0 7635294
+cfn=(914) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv
+calls=256 0 
+0 2084003
+0 67405692
+cfn=(922) <crypto_lib::cryptanalysis::semaev_decomp::Poly>::gcd
+calls=257 0 
+0 367253
+0 1291
+cfn=(806) __rustc::__rust_dealloc
+calls=1 0 
+0 166
+0 7
+cfn=(806)
+calls=1 0 
+0 194
+0 7
+cfn=(806)
+calls=1 0 
+0 166
+0 7
+cfn=(806)
+calls=1 0 
+0 87
+0 7
+cfn=(806)
+calls=1 0 
+0 87
+0 8
+
+fn=(896)
+0 11
+cfn=(780)
+calls=1 0 
+0 1
+0 3
+cfn=(782)
+calls=1 0 
+0 357
+0 104
+cfn=(806)
+calls=8 0 
+0 696
+0 200
+cfn=(898) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::sqr_k_fold
+calls=8 0 
+0 32
+0 168
+cfn=(898)
+calls=28 0 
+0 1265
+0 180
+cfn=(900) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold
+calls=36 0 
+0 540
+0 168
+cfn=(780)
+calls=8 0 
+0 8
+0 24
+cfn=(902) __rustc::__rust_alloc_zeroed
+calls=8 0 
+0 1874
+0 136
+cfn=(900)
+calls=8 0 
+0 120
+0 196
+cfn=(900)
+calls=28 0 
+0 420
+0 288
+cfn=(900)
+calls=36 0 
+0 540
+0 200
+
+fn=(898)
+0 2889
+
+fn=(906)
+0 45
+cfn=(898)
+calls=1 0 
+0 182
+0 13
+cfn=(898)
+calls=1 0 
+0 182
+0 13
+cfn=(898)
+calls=1 0 
+0 182
+0 13
+cfn=(908) <alloc::vec::Vec<u64> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<u64, core::iter::adapters::map::Map<core::iter::adapters::rev::Rev<core::ops::range::Range<usize>>, <crypto_lib::cryptanalysis::semaev_decomp::LvHorner>::new::{closure#2}>>>::from_iter
+calls=1 0 
+0 1408
+0 12
+
+fn=(910) <core::iter::adapters::rev::Rev<core::ops::range::Range<usize>> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::adapters::map::map_fold<usize, u64, (), <crypto_lib::cryptanalysis::semaev_decomp::LvHorner>::new::{closure#2}, core::iter::traits::iterator::Iterator::for_each::call<u64, <alloc::vec::Vec<u64>>::extend_trusted<core::iter::adapters::map::Map<core::iter::adapters::rev::Rev<core::ops::range::Range<usize>>, <crypto_lib::cryptanalysis::semaev_decomp::LvHorner>::new::{closure#2}>>::{closure#0}>::{closure#0}>::{closure#0}>
+0 32
+cfn=(898)
+calls=6 0 
+0 1046
+0 214
+
+fn=(916) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul
+0 5394
+cob=(2)
+cfi=(217) ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S
+cfn=(750) __memset_avx2_unaligned_erms
+calls=1 158 
+0 134
+0 880651
+cfn=(918)
+calls=256 0 
+0 110592
+0 1086720
+
+fn=(922)
+0 101515
+cfn=(924) <crypto_lib::cryptanalysis::semaev_decomp::Poly>::scale_in_place
+calls=1285 0 
+0 156770
+0 27242
+cfn=(900)
+calls=3341 0 
+0 50115
+0 31611
+
+fn=(924)
+0 58596
+cfn=(900)
+calls=4369 0 
+0 65535
+0 32639
+
+fn=(534) (below main)
+cob=(2)
+cfi=(163) ./csu/../csu/libc-start.c
+cfn=(536) __libc_start_main@@GLIBC_2.34
+calls=1 242 
+0 77504893
+
+fn=(566) main
+cfn=(568)
+calls=1 0 
+0 77504893
+
+fn=(780)
+0 13
+
+fn=(790) std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+cfn=(792)
+calls=1 0 
+0 77504893
+
+fn=(908)
+0 27
+cfn=(780)
+calls=1 0 
+0 1
+0 4
+cfn=(782)
+calls=1 0 
+0 55
+0 16
+cfn=(910)
+calls=1 0 
+0 1292
+0 13
+
+fn=(920)
+0 105728
+
+fn=(788)
+cfn=(790)
+calls=1 0 
+0 77504893
+
+fn=(806)
+0 13
+cfn=(808)
+calls=219 0 
+0 1383
+
+fn=(892)
+0 15
+cfn=(894)
+calls=1 0 
+0 77504860
+0 10
+
+fn=(900)
+0 117315
+
+fn=(912)
+0 14
+cfn=(900)
+calls=1 0 
+0 15
+0 5
+cfn=(900)
+calls=1 0 
+0 15
+0 5
+cfn=(900)
+calls=1 0 
+0 15
+0 11
+
+fn=(914)
+0 512
+cfn=(916)
+calls=256 0 
+0 2083491
+
+fn=(902)
+0 8
+cfn=(904)
+calls=8 0 
+0 1866
+
+ob=(1) /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+fl=(1) ???
+fn=(0) 0x000000000001f540
+cob=(6)
+cfi=(162)
+cfn=(534)
+calls=1 0 
+0 77504893
+
+ob=(2)
+fl=(165) ./csu/../sysdeps/nptl/libc_start_call_main.h
+fn=(558) (below main)
+cob=(6)
+cfi=(162)
+cfn=(566)
+calls=1 0 
+58 77504893
+
+fl=(217)
+fn=(750)
+158 1
++1 2
++5 1
++1 1
++1 1
++1 1
++1 1
++69 1
++1 1
++6 1
++1 1
++12 1
++3 1
++1 1
++12 1
++1 1
++13 1
++1 1
++2 1
++3 1
++3 1
++3 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
+-6 14
++1 14
++1 14
++1 14
++1 14
++1 14
++1 15
++3 1
++1 1
++1 1
++1 1
++3 2
+
+fl=(184)
+fn=(624) alloc_perturb
+1985 30
++2 10
+
+fn=(604)
+3294 40
++7 10
+1326 10
++19 24
+3311 8
++2 20
++3 10
++10 8
++28 24
+-36 6
+3178 2
++4 2
++4 1
++4 1
+-4 3
++4 1
++1 1
+3354 6
+-26 16
+cfn=(616) _int_malloc
+calls=187 3846 
+* 1004
++1 20
+fi=(185) ./malloc/./malloc/arena.c
+153 8
+fe=(184)
+
+fn=(722)
+3359 13
++4 26
+-4 39
++14 13
+-14 39
++12 13
++4 13
+-4 13
++4 26
++17 39
+fi=(185)
+153 39
+fe=(184)
+3398 39
+cfn=(718) _int_free
+calls=225 4495 
+* 967
++3 13
++1 78
+
+fn=(616)
+3846 132
+1326 24
++19 71
+3887 22
+1794 11
+3914 22
++65 16
+-63 32
++3 8
++2 16
++56 6
++62 25
++1 9
++20 12
+-1 12
+-1 12
++1 24
++1 24
+-2 24
++12 60
+-1 22
++4 22
++1 11
++2 22
++1 33
++2 11
++1 44
++2 44
+-10 11
++12 22
++1 22
++2 22
++11 44
++29 3
++1 3
++4 6
++29 6
++8 8
++1 2
++1 2
+-1 2
++4 4
+3887 2
++27 2
++66 9
++2 9
+-2 9
++2 18
+-68 3
+1345 1
+3919 2
++2 2
++9 27
+4487 144
+4163 2
++1 3
++1 1
+-1 1
++57 2
++9 1
+-9 2
++9 1
+-9 3
++1 1
++1 1
++1 1
++1 1
++6 2
+-10 4
++9 2
+-9 4
++9 2
+-9 6
++1 2
++1 2
++1 2
++1 2
++6 4
+4070 9
+4246 6
++11 12
++2 9
++3 3
+-3 3
++3 6
++1 4
++71 12
+-4 4
++1 4
++1 4
+-1 4
++1 4
++1 8
++1 12
++5 25
++16 17
++2 34
+-4 44
++8 5
++3 10
++2 3
++1 3
++1 3
+-2 12
+-27 3
+-99 12
+4099 18
++2 8
+-1 16
++61 2
++8 10
++49 2
+-48 2
++48 6
+4343 12
++3 8
+-3 3
++3 4
+-3 3
++3 4
++97 2
++1 4
++2 4
++3 6
+4343 2
++5 8
++1 4
++24 8
++3 4
++2 2
++3 4
+-3 4
++3 2
+cfn=(870) unlink_chunk.isra.0
+calls=141 1608 
+* 66
++3 8
++15 4
+-5 2
++5 4
++1 4
++3 2
++1 2
++1 2
++3 4
++1 1
++1 4
++2 2
++3 8
++2 3
++1 1
+1985 1
+4421 1
+1985 2
+4415 8
++2 3
++1 1
+1985 1
+4421 1
+1985 2
+4105 8
+-1 8
++3 8
+-1 8
++1 16
++1 24
++1 16
++2 16
++4 8
++6 8
+-6 8
++7 8
+-7 48
++2 24
++5 8
+-4 8
++4 8
+cfn=(624)
+calls=11 1985 
+* 32
++1 8
+4460 6
+cfn=(624)
+calls=92 1985 
+* 8
++1 2
+-9 4
++2 4
+-1 2
++1 2
+-3 2
++3 2
++2 2
+-2 8
++2 2
++3 4
+
+fn=(868) _int_free_maybe_consolidate
+4770 33
++6 6
++22 33
+-20 8
++3 6
++3 10
+
+fn=(718)
+4495 91
++4 39
++6 52
++1 26
++4 65
++8 52
+-1 26
++1 26
++29 10
+-20 10
+-6 10
++6 20
++20 40
+1792 3
+4561 6
++97 60
+-21 6
++3 6
++18 3
+-12 3
++12 12
+-12 3
+cfn=(866) _int_free_merge_chunk
+calls=182 +19 
+* 298
+3163 10
++4 10
+-4 10
++2 40
++1 10
++1 10
+4550 10
+
+fn=(870)
+1608 3
++2 9
+-2 3
++2 6
++3 3
++1 6
++2 12
+-3 3
++6 3
++1 3
++1 12
++2 4
++1 6
++3 4
++14 2
++1 2
++3 6
+
+fn=(758)
+3699 16
++10 8
+-10 56
++10 64
++8 16
++3 24
++2 16
++34 40
+fi=(185)
+153 16
+fe=(184)
+3732 8
++1 8
++21 16
+-21 16
++21 8
+cfn=(616)
+calls=9 +92 
+* 1088
++2 16
++81 64
+-41 8
+-12 8
++12 16
++3 40
++8 8
++2 16
++2 16
++5 8
++2 8
+-2 8
++3 16
++2 6
++2 12
++2 4
++2 8
++2 4
+-73 24
++3 24
+
+fn=(866)
+4665 15
++1 3
+-1 9
++5 18
++3 6
++5 9
++3 6
++1 6
++1 6
+1992 9
+4689 6
++25 6
++6 2
++13 1
+-1 1
++1 3
++1 2
++2 1
++2 2
++5 1
++1 1
++2 3
++1 1
+-45 1
+-1 2
++1 6
+-1 1
+cfn=(868)
+calls=158 +69 
+* 24
++1 2
+-1 4
++1 12
+-1 2
+cfn=(868)
+calls=24 +69 
+* 72
++39 3
++16 2
++1 6
++1 4
+-37 1
++1 1
+-1 1
+cfn=(870)
+calls=50 1608 
+* 21
++1 1
+-47 9
+-2 6
+
+fl=(163)
+fn=(536)
+cfi=(165)
+cfn=(558)
+calls=1 29 
+360 77504893
+
+totals: 77504893
