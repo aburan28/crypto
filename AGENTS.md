@@ -188,6 +188,27 @@ unverified rules visibly separate from proved or measured ones. This visual
 record supplements the evidence, curve-identity, scoreboard, and PR rules
 below; it does not promote a hypothesis or replace a verified run.
 
+### Performance results also land in `benchmarks/`
+
+Every run or PR that measures how fast an algorithm runs or reports a speedup
+(an engine, kernel or solver timing, a before/after comparison of the same
+code, a comparison with an external system such as msolve, Singular or Magma)
+also copies its visual record into `benchmarks/`, in the same PR, always:
+
+- `benchmarks/<YYYYMMDD>-<slug>/` holds the report PDFs (run report and
+  results report), every graph as SVG, and a PNG render of every graph
+  (150 dpi, rendered from the same plotting source as the SVG).
+- `benchmarks/README.md` gets one row per entry, newest first: date, what was
+  measured, the headline values with their units and ratios as the report
+  states them, host and isolation level, and links to the study directory
+  and run report.
+- The study directory stays the source of truth (raw records, sources,
+  inputs); `benchmarks/` holds copies for browsing. Regenerate both from the
+  same source and never edit a copy alone. A later run adds a new entry and
+  leaves earlier ones as they are.
+
+`benchmarks/` is not `benches/`, which holds Cargo bench sources.
+
 ## Papers
 
 Manuscripts generated from this repository's results live under `papers/`,

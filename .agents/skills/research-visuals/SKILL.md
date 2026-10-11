@@ -65,6 +65,17 @@ Refresh every affected canonical graph and its rendered copies in the same PR
 ("Refresh existing graphs in the same change" below; AGENTS.md section 7), and
 list the graphs checked and left unchanged.
 
+## Performance results: copy into `benchmarks/`
+
+When the run or PR measures how fast an algorithm runs or reports a speedup,
+also copy the report PDFs, every graph as SVG and a 150 dpi PNG render of
+every graph into `benchmarks/<YYYYMMDD>-<slug>/`, and add a row to
+`benchmarks/README.md` (date, what was measured, headline values with units,
+host and isolation, links to the study and run report), in the same PR
+(AGENTS.md "Performance results also land in `benchmarks/`"). Render the PNG
+from the same plotting source as the SVG (for matplotlib, a second `savefig`
+with `dpi=150`). The study directory stays the source of truth.
+
 ## Rendering
 
 Use an installed renderer: Typst, Pandoc with a PDF engine, or LaTeX. Where
