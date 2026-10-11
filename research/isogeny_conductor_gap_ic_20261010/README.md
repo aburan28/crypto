@@ -60,11 +60,15 @@ and certificate.  In short:
   scalar; the floor also gets an isomorphic model (the I-4 control).
   Two configurations (`D_K = −7, ℓ = 2`) found no prime pair in the
   window and are recorded as failures in `pairs/prime_pairs.json`.
-- **Koblitz**, 5 pairs: `K_0/F_{2^19}`, `K_0/F_{2^23}`, `K_1/F_{2^17}`,
-  `K_1/F_{2^19}`, `K_1/F_{2^23}`, each descended by one isogeny of
+- **Koblitz**, 5 pairs: the `a = 0` craters over `F_{2^19}` and
+  `F_{2^23}` (`icv1-f2m19-t797-b6cf2467`, `icv1-f2m23-t5197-69e76b73`)
+  and the `a = 1` craters over `F_{2^17}`, `F_{2^19}` and `F_{2^23}`
+  (`icv1-f2m17-tm101-00378d4e`, `icv1-f2m19-tm797-9c54981b`,
+  `icv1-f2m23-tm5197-1f85e9e1`), each descended by one isogeny of
   prime degree `f_π ∈ {457, 967, 271}` with the kernel built in
   `F_{q^m}`, `m = ord_ℓ(t/2)`; the floor is certified by rank-1 `E[ℓ]`
-  over the same extension.  (`K_0/F_{2^17}` and the even degrees have no
+  over the same extension.  (The `a = 0` curve over `F_{2^17}`,
+  `icv1-f2m17-t101-e6c4b64d`, and the even degrees have no
   prime-order subgroup of cofactor 2 or 4 and are refused by the
   constructor.)
 - **random binary**, 3 pairs: classes over `F_{2^17}`, `F_{2^19}`,

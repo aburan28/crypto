@@ -3503,6 +3503,174 @@
       "group_order": 8386966,
       "name": "isogeny-gap-binary-n23-l23-floor",
       "subgroup_order": 599069
+    },
+    {
+      "a": 1,
+      "b": 45819,
+      "cofactor": 6,
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": 107315,
+        "y": 97137
+      },
+      "group_order": 131358,
+      "name": "isogeny-gap-binary-random-n17-seed1",
+      "subgroup_order": 21893
+    },
+    {
+      "a": 1,
+      "b": 119735,
+      "cofactor": 6,
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": 100191,
+        "y": 11321
+      },
+      "group_order": 131358,
+      "name": "isogeny-gap-binary-random-n17-seed2",
+      "subgroup_order": 21893
+    },
+    {
+      "a": 1,
+      "b": 91042,
+      "cofactor": 6,
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": 127105,
+        "y": 124062
+      },
+      "group_order": 131106,
+      "name": "isogeny-gap-binary-random-n17-seed3",
+      "subgroup_order": 21851
+    },
+    {
+      "a": 1,
+      "b": 99255,
+      "cofactor": 6,
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator": {
+        "x": 30963,
+        "y": 115511
+      },
+      "group_order": 130926,
+      "name": "isogeny-gap-binary-random-n17-seed4",
+      "subgroup_order": 21821
+    },
+    {
+      "a": 0,
+      "b": 3199,
+      "cofactor": 4,
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": 262039,
+        "y": 31343
+      },
+      "group_order": 524572,
+      "name": "isogeny-gap-binary-random-n19-seed1",
+      "subgroup_order": 131143
+    },
+    {
+      "a": 0,
+      "b": 80378,
+      "cofactor": 8,
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": 343882,
+        "y": 214839
+      },
+      "group_order": 524168,
+      "name": "isogeny-gap-binary-random-n19-seed2",
+      "subgroup_order": 65521
+    },
+    {
+      "a": 1,
+      "b": 238179,
+      "cofactor": 6,
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": 500610,
+        "y": 445496
+      },
+      "group_order": 525282,
+      "name": "isogeny-gap-binary-random-n19-seed3",
+      "subgroup_order": 87547
+    },
+    {
+      "a": 0,
+      "b": 89262,
+      "cofactor": 8,
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator": {
+        "x": 242697,
+        "y": 407937
+      },
+      "group_order": 525032,
+      "name": "isogeny-gap-binary-random-n19-seed4",
+      "subgroup_order": 65629
     }
   ],
   "schema": "ecbench.curve-source/v1",

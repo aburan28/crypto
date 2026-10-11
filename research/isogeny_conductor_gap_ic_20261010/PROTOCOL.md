@@ -71,7 +71,7 @@ Hence:
 
 | item | value |
 |:--|:--|
-| Koblitz | `K_0 / F_{2^17}`, `K_0 / F_{2^19}`, `K_0 / F_{2^23}` (`h = 4`); `K_1 / F_{2^19}` (`h = 2`) |
+| Koblitz | the `a = 0` craters `icv1-f2m17-t101-e6c4b64d`, `icv1-f2m19-t797-b6cf2467`, `icv1-f2m23-t5197-69e76b73` (`h = 4`); the `a = 1` crater `icv1-f2m19-tm797-9c54981b` (`h = 2`) |
 | binary random | `binary_random` n = 17, 19 with seeds 1..4, `max_cofactor = 8`; cofactors as found |
 | prime | `prime_search` 20-bit seed 59297 (`h = 1` control); the CM crater and floor curves of part B (`h = ℓ²·c`) |
 | factor bases | Koblitz: `koblitz-orbit:divisor=0;1` (MITM) and `binary-subspace:dimension=8` (algebraic); binary random: `binary-subspace:dimension=8`; prime: `prime-abscissa:size=32` |
@@ -161,10 +161,10 @@ registered target curve.
    pair use the same dimension, which is the comparison the protocol
    protects.
 2. **A3 at `n = 17` only.**  The smoke run of the combined descent on
-   `K_1 / F_{2^17}` took 67 s per target against 0.35 s for the blind
+   `icv1-f2m17-tm101-00378d4e` took 67 s per target against 0.35 s for the blind
    descent (solving degree 3.0 against 1.95; 240× the solver
    operations), so A3 runs in its own spec (`fiber_combined_n17.json`,
-   two targets, two rounds) on `K_1 / F_{2^17}` and two random curves
+   two targets, two rounds) on `icv1-f2m17-tm101-00378d4e` and two random curves
    over `F_{2^17}`, and not at `n = 19, 23`.  Its result at `n = 17` is
    the result.
 3. **Targets and rounds.**  Four targets per curve and three rounds
