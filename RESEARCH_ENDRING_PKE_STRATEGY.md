@@ -1,8 +1,10 @@
 # Research Note: Public-Key Encryption from the Endomorphism Ring Problem
 
-**Date.** 2026-10-10. **Status.** Literature survey plus a design proposal. No code,
-no measurements; every parameter figure below is a derived estimate, not a
-measurement. **Goal addressed.** Devise a strategy for a *novel* public-key
+**Date.** 2026-10-10, revised 2026-10-11 after a first prototype. **Status.**
+Literature survey, design proposal, and a SageMath toy prototype of the
+complete KeyGen/Encaps/Decaps path (`research/eigen_seta_prototype_20261011/`).
+Parameter figures are derived estimates, not measurements; the prototype runs
+at toy sizes only. **Goal addressed.** Devise a strategy for a *novel* public-key
 encryption (PKE/KEM) scheme whose trapdoor is the endomorphism ring End(E) of
 the public curve, building on primitives that exist today (Deuring
 correspondence, Kani/higher-dimensional isogenies, lollipop attacks).
@@ -108,6 +110,19 @@ Lemma 3 with σ₀ = id; the derivation above is a one-line restatement.) Hence:
   ψ_θ as an explicit isogeny, and ker φ̂ = ker ψ_θ ∩ E_C[d] (generic case,
   CV §3.2). So the torsion requirement is **N > d·√n(θ)**, and the receiver's
   cost is one 2^e-isogeny chain in dimension 2, 4 or 8.
+* Parity (found while implementing). An eigenbasis of θ on E_A[2^e] with
+  eigenlines of full order exists iff 2 splits in Z[θ], i.e. disc(Z[θ]) ≡ 1
+  mod 8, i.e. t odd and w even. Then one eigenvalue is even, so ψ_θ + [c] has
+  even degree for every c and the Kani kernel degenerates at the 2-torsion.
+  The fix is to decode with the trace-zero element θ' := 2θ − t (norm
+  Δ' := 4w − t² ≡ 7 mod 8, same eigenlines, eigenvalues ±s₀ with s₀² ≡ −Δ'
+  mod 2^{e+2}); ψ' := φθ'φ̂ then has odd eigenvalues ±d·s₀ and the Kani
+  scalars satisfy **c² + c'² = N² − d²Δ'** with c even, c' odd. Because θ' is
+  diagonal with odd eigenvalues, it acts as the identity on E_C[2], so the
+  (2,2)-chain necessarily starts with product-to-product steps (the kernel's
+  2-torsion is the diagonal of E_C[2]²) before gluing into a Jacobian; the
+  FESTA and Castryck–Decru chain code (glue once, split once) cannot run it,
+  and a general stepper is needed (implemented in `kani_chain.py`).
 
 Everything else in the hint taxonomy is either decodable by everyone
 (unmasked, single point with square N), or not decodable by anyone known
@@ -135,13 +150,15 @@ fixed by §4.3. Everything lives in F_{p²}.
    with trace t, norm w, Δ' := 4w − t² such that
    (i) −Δ' is a non-zero square modulo 2^e (so θ is diagonalisable on E_A[2^e]
        with distinct eigenvalues μ ≠ ν mod 2), and
-   (ii) 4N² − d²Δ' is a prime ≡ 1 mod 4 (for a dimension-2 decryption, §4.2).
+   (ii) N² − d²Δ' is a sum of two squares c² + c'² (c even, c' odd; e.g. a
+        prime ≡ 1 mod 4) for a dimension-2 decryption, §4.2.
    Re-sample θ (thousands of short vectors are available) or E_A until both
-   hold; (i) has density ≈ 1/4 among odd Δ', (ii) ≈ 1/(2 ln(4N²)) ≈ 1/700.
+   hold; (i) has density ≈ 1/4 among odd Δ', (ii) ≈ 1/(2 ln N²) ≈ 1/700 for a
+   prime, more if composite values are accepted.
 3. Compute an eigenbasis (P,Q) of θ on E_A[2^e] (evaluate θ on a basis via its
    explicit representation; solve the 2×2 eigenproblem mod 2^e).
-4. pk = (E_A, P, Q). sk = (θ as an evaluable endomorphism, μ, ν, t, w, and the
-   Cornacchia solution of (ii)).
+4. pk = (E_A, P, Q). sk = (s₀ = μ − ν mod 2^e and the Cornacchia solution
+   (c, c') of (ii); θ itself is not needed at decryption time).
 
 **Encaps.**
 1. Sample s ← Z/3^f and nonces a, b ← (Z/2^e)^×, all derived from a seed.
@@ -150,33 +167,34 @@ fixed by §4.3. Everything lives in F_{p²}.
 3. ct = (E_C, S := [a]φ(P), T := [b]φ(Q)); key = H(seed, ct).
 
 **Decaps.**
-1. Define ψ := φθφ̂ ∈ End(E_C), degree d²w. Then ψ(S) = [dμ]S and
-   ψ(T) = [dν]T, and ψ̂ = φ(t − θ)φ̂ acts as [dν] on S and [dμ] on T.
-   (Derived: ψ(aφP) = aφθ(φ̂φP) = a d φ(θP) = a d μ φ(P). The nonces never
-   enter; no commutation argument is needed beyond this.) So ψ's action on
-   E_C[2^e] is known for free.
-2. Kani in dimension 2: with integers c, c' from the Cornacchia solution of
-   (2c + dt)² + (2c')² = 4N² − d²Δ' (equivalently deg(ψ + [c]) + c'² = N²),
-   the endomorphism F = [[ψ + c, c'], [−c', ψ̂ + c]] of E_C² is an N²-isogeny;
-   compute it as two N-isogeny halves from the actions of ψ and ψ̂ on E_C[N]
-   (standard SQIsignHD/FESTA technique), giving ψ as an evaluable map.
-3. ker φ̂ = ker ψ ∩ E_C[3^f] (ψ is cyclic on the 3-part for generic θ);
-   recover φ, hence K and s; recompute a, b from the seed, re-encrypt, compare
-   (FO with implicit rejection; the eigenvalues μ, ν are secret and used in
-   step 1, so malformed ciphertexts must never reach a non-rejecting path —
-   compare the Moriya–Onuki adaptive attacks on FESTA).
+1. Let θ' = 2θ − t and ψ' := φθ'φ̂ ∈ End(E_C), degree d²Δ'. Then
+   ψ'(S) = [d·s₀]S and ψ'(T) = [−d·s₀]T, and ψ̂' = −ψ'.
+   (Derived: ψ'(aφP) = aφθ'(φ̂φP) = a d φ(θ'P) = a d s₀ φ(P). The nonces never
+   enter.) So ψ' acts on E_C[2^e] by known scalars, for free.
+2. Kani in dimension 2: with α := ψ' + [c] and c² + c'² = N² − d²Δ', the matrix
+   F = [[α, c'], [−c', α̂]] is an (N², N²)-isogeny of E_C² with kernel
+   {(c'x, −αx) : x ∈ E_C[N²]}, whose N-torsion part ⟨(c'S, −(ds₀+c)S),
+   (c'T, −(c−ds₀)T)⟩ is known. Compute F as two N-halves from the actions of
+   α and α̂ (SQIsignHD technique; see §4.3 on why the halves are essential),
+   then α(X) is the first component of F(X, 0) and c'X the second, which also
+   fixes the component isomorphisms of the split codomain.
+3. ker φ̂ = ker(α − c) ∩ E_C[3^f] (cyclic of order d for generic θ'; otherwise
+   try the few cyclic order-d subgroups, CV §3.2); recover φ, hence K and s;
+   recompute a, b from the seed, re-encrypt, compare (FO with implicit
+   rejection; s₀ is secret and used in step 1, so malformed ciphertexts must
+   never reach a non-rejecting path — compare the Moriya–Onuki adaptive attacks
+   on FESTA).
 
 ### 4.2 Why dimension 2 is available without Séta-style curve engineering
 
-Kani needs deg(ψ + [c]) + c'² = N². Expanding, this is
-4N² − d²Δ' = (2c + dt)² + (2c')². The left side depends on θ only through Δ',
-so the receiver *chooses* θ among its short endomorphisms until the left side
-is a prime ≡ 1 mod 4 and solves with Cornacchia (parity of 2c + dt matches
-dt automatically when the prime is odd). Séta had to construct the curve
-around a norm equation; here the curve is random and only the choice of θ is
-constrained. If (ii) is dropped, dimension 4 works with any θ (write
-4N² − d²Δ' − (2c + dt)² as a sum of two squares over a free c), dimension 8
-always works.
+Kani needs deg(ψ' + [c]) + c'² = N², i.e. c² + c'² = N² − d²Δ' (θ' has trace
+zero). The right side depends on θ only through Δ', so the receiver *chooses*
+θ among its short endomorphisms until N² − d²Δ' is a sum of two squares and
+solves with Cornacchia; the parities c even, c' odd are automatic because
+N² − d²Δ' ≡ 1 mod 8. Séta had to construct the curve around a norm equation;
+here the curve is random and only the choice of θ is constrained. Dimension 4
+works with any θ (N² − d²Δ' − c² as a sum of two squares over a free c),
+dimension 8 always works.
 
 ### 4.3 Parameter estimate at λ = 128 (derived, not measured)
 
@@ -194,9 +212,32 @@ Solving N ≈ d·(Nd)^{1/3} gives N ≈ d², p ≈ d³:
 | decaps | one (2^515, 2^515)-isogeny chain in dimension 2 plus a 3^162 kernel recovery | FESTA-class cost; C implementations of comparable chains run in tens of ms (SQIsign2D-West verification class) |
 | key recovery | EndRing(E_A): classical p^{1/2} ≈ 2^386, heuristic p^{1/3} ≈ 2^257, quantum p^{1/4} ≈ 2^193 | far above target; the ciphertext problem is the binding constraint |
 
-If one instead engineers θ Séta-style with w ≈ 4d² (so that 4N² − d²Δ' is
+**Why the two halves are essential.** The table assumes the (N², N²)-isogeny
+is computed from N-torsion as two N-halves (N² > deg). With a *single* chain
+(N > deg, the FESTA/Castryck–Decru regime) the condition becomes
+N > d²Δ' ≈ 4d²p^{2/3} with N ≤ p, which forces p > d^9 ≈ 2^{18λ}; and for
+curves near E_0 every odd-trace endomorphism has norm ≥ p/(4D_A) (D_A the
+walk degree), which the prototype confirmed (shortest admissible norms were
+exactly p/(4D_A)-sized), so a single chain never fits. In Richelot/Mumford
+form the second half needs the dual chain plus an explicit isomorphism of the
+middle Jacobians; in theta coordinates (SQIsignHD, SQIsign2D) duals are
+explicit. The prototype implements only the single-chain regime and therefore
+only the two special-key variants below.
+
+If one instead engineers θ Séta-style with w ≈ 4d² (so that N² − d²Δ' is
 small), the same p ≈ d³ results; the random-curve route is preferred because
 its key-recovery problem is plain EndRing plus a leakage term (§5.1).
+
+**Special-key variant actually prototyped ("hidden CM curve").** Take E_cm with
+CM by Z[(1+√−7)/2] (j = −3375, supersingular when p ≡ 3, 5, 6 mod 7); its
+degree-2 endomorphism ω has t = ±1, w = 2, Δ' = 7. Walk away by a secret
+isogeny ε of odd degree D_A and use θ = εωε̂ (t = ±D_A, w = 2D_A², Δ' = 7D_A²).
+This is CV §5.3's backdoor used by its owner: key recovery means finding ε
+(MITM √D_A) or the endomorphism of norm 7D_A² (cycle search √(7)D_A), so
+D_A ≈ 2^{2λ}, Δ' ≈ 2^{4λ}, and with two halves N ≈ d·√Δ' ≈ 2^{4λ}, p ≈ 2^{6λ}
+— the same size as the random-curve variant, with a much cheaper keygen (no
+LLL on End(E_A), no Deuring machinery) but a *different* key-recovery
+assumption (hidden small-discriminant orientation plus a walk, not EndRing).
 
 ### 4.4 What is new relative to each neighbour
 
@@ -264,16 +305,32 @@ Given (E_A, P, Q, E_C, [a]φP, [b]φQ) with a, b random, find φ.
   rejection from day one.
 
 ### 5.4 Correctness corner cases
-* ψ non-cyclic on E_C[3^f] (ker φ θ-stable): probability ≈ 1/3 per prime
-  factor, handled by CV §3.2's guessing (≤ 2 choices); with d = 3^f a
-  single prime, expect O(1) retries or reject such K at encryption time via
-  a public test (none exists without θ; so handle on the receiver side).
+* ψ' non-cyclic on E_C[3^f] (part of ker φ θ'-stable): handled by trying the
+  cyclic order-d subgroups of ker ψ' ∩ E_C[3^f] and keeping the one whose
+  codomain is E_A (prototype: observed in 1 of 8 trials at the 44-bit size,
+  brute-force enumeration over (Z/d)² at toy size; Smith normal form at real
+  size). Exact frequency not yet measured.
 * Eigenvalues must satisfy μ ≢ ν mod 2 for the eigenlines to span E_A[2^e];
   guaranteed when Δ' is odd.
+* The Mumford-coordinate splitting formulas have rare degenerate inputs; the
+  prototype retries with a fresh basis of E_C[3^f] (seen ≈ 1 in 25 trials at
+  toy sizes, cause not yet isolated).
 
-## 6. Experiment protocol (next steps, in order)
+## 6. Experiment protocol and status
 
-All runs on public toy parameters; no security claims at toy sizes.
+All runs on public toy parameters; no security claims at toy sizes. Code and
+logs: `research/eigen_seta_prototype_20261011/` (README there).
+
+Status 2026-10-11: step 1 done for two special-key variants (CM(−7) curve, and
+a hidden CM curve behind a secret 5^k-walk) with the single-chain regime; the
+generic mixed-step (2,2)-chain evaluator needed for it is written. Step 3 done
+at toy size for those variants: of 86 wrong but pairing-consistent guesses of
+Δ' (including guesses agreeing with the truth on 3–13 low bits), 85 ran the
+full chain and ended on a Jacobian, i.e. failed only at the final split, with
+no early-abort signal; one random guess in the CM variant also split to
+E_C × E_C, an artefact of the CM curve's many small endomorphisms (and a
+warning for special-key variants). Step 2 (random curve) blocked on the
+two-halves evaluation. Steps 4–6 not started.
 
 1. **Correctness prototype (SageMath).** Toy p = 2^e·3^f·c − 1 with e ≈ 60,
    f ≈ 20. Use E_0 = j 1728 directly as E_A (End public is fine for
@@ -332,9 +389,10 @@ All runs on public toy parameters; no security claims at toy sizes.
 |---|---|---|
 | Research the state of the art on EndRing-based encryption | complete (survey level) | Sections 1–2, sources below; ePrint PDFs were Cloudflare-blocked, mirrors used; items marked abstract-only in the agent reports were not re-verified from full text |
 | Identify primitives/concepts to build on | complete | §3 decoding lemma (CV Lemma 3), Deuring tooling, dimension-2 Kani, FO |
-| Devise a strategy for a novel scheme | complete as a design; **not implemented, not analysed beyond §5** | §4–6; novelty claim rests on the four surveys finding no eigenbasis-trapdoor PKE; a dedicated search for the exact combination is still advisable before any write-up |
+| Devise a strategy for a novel scheme | complete as a design; prototyped at toy size for two special-key variants; **not analysed beyond §5** | §4–6; `research/eigen_seta_prototype_20261011/`; novelty claim rests on the four surveys finding no eigenbasis-trapdoor PKE; a dedicated search for the exact combination is still advisable before any write-up |
+| Build the scheme (user request of 2026-10-11) | partial: KeyGen/Encaps/Decaps correct in all completed toy trials for the `cm` and `walk` variants; random-curve variant not implemented (needs two-halves Kani) | `results/correctness_runs.txt`; §4.3 "two halves" paragraph |
 | Parameter/efficiency figures | derived estimates only | §4.3; no measurements exist |
-| Security | **not established** | §5 checklist; experiment 3 is the kill-or-keep test |
+| Security | **not established** | §5 checklist; experiment 3 run at toy size with no early-abort signal (§6) |
 
 ## Sources (primary; see agent reports for the full list)
 
