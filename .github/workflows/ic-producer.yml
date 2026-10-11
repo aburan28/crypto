@@ -1,27 +1,8 @@
 name: Optimized IC producer admission
 on:
-  pull_request:
-    paths:
-      - 'research/ic_candidate_tournament_20260915/producer/**'
-      - 'research/ic_candidate_tournament_20260915/identity.py'
-      - 'research/ic_candidate_tournament_20260915/measurement.py'
-      - 'research/ic_candidate_tournament_20260915/oracle.py'
-      - 'research/ic_candidate_tournament_20260915/tournament.py'
-      - 'research/ic_candidate_tournament_20260915/test_producer.py'
-      - 'research/ic_candidate_tournament_20260915/autolab.py'
-      - 'research/ic_candidate_tournament_20260915/driver_admission.py'
-      - 'research/ic_candidate_tournament_20260915/generic*.py'
-      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-qualification-adapter/**'
-      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/**'
-      - 'research/ic_candidate_tournament_20260915/test_generic_qualification.py'
-      - 'examples/ic_tournament_worker.rs'
-      - 'research/ic_candidate_tournament_20260915/driver_smoke.py'
-      - 'research/ic_candidate_tournament_20260915/test_driver_admission.py'
-      - 'research/ic_candidate_tournament_20260915/qualification.py'
-      - 'research/ic_candidate_tournament_20260915/qualify_references.py'
-      - 'research/ic_candidate_tournament_20260915/test_qualification.py'
-      - 'research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/**'
-      - '.github/workflows/ic-producer.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
     inputs:
       qualify_references:
