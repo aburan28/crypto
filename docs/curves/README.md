@@ -13,6 +13,15 @@ same-field cover certificates to each supported catalog model in
 the verified genus, map degree and field assumptions. Descent and DLP
 advantage remain unmeasured.
 
+[Jacobian transfer discovery](JACOBIAN_TRANSFERS.md) enumerates, for every
+registered curve, the known routes into a Jacobian (GHS descent per field
+factorisation, its isogeny extension, same-field covers, extension-field
+decomposition and cover descent), computes what is exact about each and
+prices the rest with one frozen formula cost model against Pollard rho, in
+[`jacobian-transfers.json`](jacobian-transfers.json). Rows are formulas and
+leads; `jacobian_transfers check` fails CI when a registered curve is
+unscreened.
+
 The [hyperelliptic infrastructure guide](HYPERELLIPTIC_INFRASTRUCTURE.md)
 documents the standalone construction, verification, arithmetic, and catalog
 commands; the one-infinity arithmetic boundary; bounded binary transfer; and
