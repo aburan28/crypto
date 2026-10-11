@@ -22,3 +22,4 @@ pub fn fp_hex(h: &str) -> Fp<Cfg, 4> {
 pub fn ed_curve() -> WCurve<F> {
     WCurve::new(F::zero(), Fp2::from_fp(fp_hex(Toy16::ED_A4_HEX)), Fp2::from_fp(fp_hex(Toy16::ED_A6_HEX)))
 }
+pub mod testrng;

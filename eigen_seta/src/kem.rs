@@ -29,7 +29,7 @@ use num_traits::{One, Zero};
 use rand_core::{CryptoRng, RngCore};
 use sha3::digest::{ExtendableOutput, Update, XofReader};
 use sha3::Shake256;
-use zeroize::{Zeroize, ZeroizeOnDrop};
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
 pub const SS_BYTES: usize = 32;
 
@@ -224,7 +224,7 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
     /// Masks (a, b), odd, mod 2^E, from the kernel scalar s.
     fn masks(ctx: &Ctx<P, N>, s_bytes: &[u8], pkh: &[u8]) -> (Scalar, Scalar) {
         let nb = ctx.e.div_ceil(8);
-        let h = shake(&[b"EigenSeta-G", s_bytes, pkh], 2 * nb);
+        let h = Zeroizing::new(shake(&[b"EigenSeta-G", s_bytes, pkh], 2 * nb));
         let mut a = Scalar::from_le_bytes(&h[..nb], ctx.e_limbs).mod_2k(ctx.e);
         let mut b = Scalar::from_le_bytes(&h[nb..], ctx.e_limbs).mod_2k(ctx.e);
         a.l[0] |= 1;
@@ -267,7 +267,7 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let cc = ProjCurve::from_affine(a_c);
         let (xp, xq, xpq) = (pts[0], pts[1], pts[2]);
         let xppq = xadd(&xp, &xq, &xpq); // x(phiP + phiQ)
-        let (a, b) = Self::masks(ctx, &Self::s_to_bytes(ctx, s), pkh);
+        let (a, b) = Self::masks(ctx, &Zeroizing::new(Self::s_to_bytes(ctx, s)), pkh);
         let (xs, _) = ladder(&xp, &a, ctx.e, &cc);
         let (xt, _) = ladder(&xq, &b, ctx.e, &cc);
         let m = b.mul_mod_2k(&a.inv_mod_2k(ctx.e), ctx.e);
@@ -286,7 +286,7 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let s = ctx.modd.to_scalar_width(&ctx.modd.reduce(&s_raw), ctx.modd.limbs());
         buf.zeroize();
         let ct = Self::enc_det(&ctx, &pkf, &s, &pkh);
-        let k = shake(&[b"EigenSeta-K", &Self::s_to_bytes(&ctx, &s), &ct], SS_BYTES);
+        let k = Zeroizing::new(shake(&[b"EigenSeta-K", &Zeroizing::new(Self::s_to_bytes(&ctx, &s)), &ct], SS_BYTES));
         let mut out = [0u8; SS_BYTES];
         out.copy_from_slice(&k);
         Some((Ciphertext { bytes: ct }, out))
@@ -330,14 +330,15 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
     /// examples/ct_probe.rs and SIDE_CHANNELS.md).
     #[inline(never)]
     pub fn decaps_core(sk: &SecretKey, prep: &DecapsPrep<F<P, N>>, ct: &Ciphertext) -> [u8; SS_BYTES] {
-        let reject = shake(&[b"EigenSeta-R", &sk.z, &ct.bytes], SS_BYTES);
+        let reject = Zeroizing::new(shake(&[b"EigenSeta-R", &sk.z, &ct.bytes], SS_BYTES));
         let mut out = [0u8; SS_BYTES];
         out.copy_from_slice(&reject);
         let ctx = Ctx::<P, N>::new();
-        let s = Self::recover_s_core(sk, prep);
+        let s = Self::recover_s_core(sk, prep); // Scalar: wiped on drop
         let ct2 = Self::enc_det_core(&ctx, &prep.pkf, &prep.pk_basis, &s, &sk.pkh);
         let same = crate::ct::bytes_eq(&ct2, &ct.bytes);
-        let k = shake(&[b"EigenSeta-K", &Self::s_to_bytes(&ctx, &s), &ct.bytes], SS_BYTES);
+        let s_bytes = Zeroizing::new(Self::s_to_bytes(&ctx, &s));
+        let k = Zeroizing::new(shake(&[b"EigenSeta-K", &s_bytes, &ct.bytes], SS_BYTES));
         for i in 0..SS_BYTES {
             out[i] = u8::conditional_select(&out[i], &k[i], same);
         }
@@ -597,6 +598,15 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let ds0 = BigInt::from((&d * &s0) % &n2);
         let lam_s = modpos(&(&ds0 + &c), &n2);
         let lam_t = modpos(&(&c - &ds0), &n2);
+        // Exclude scalars k = -1 mod the point order: x-only y-recovery returns
+        // O for [k]P when [k+1]P = O (SIDE_CHANNELS.md R3).  Probability about
+        // 2^-E and 3^-F3 per key; checked so the case cannot occur at all.
+        let n2m1 = &n2 - 1u32;
+        let dm1 = &d - 1u32;
+        let cp2v = modpos(&cp, &n2);
+        if lam_s == n2m1 || lam_t == n2m1 || cp2v == n2m1 || modpos(&c, &d) == dm1 || modpos(&cp, &d) == dm1 {
+            return None;
+        }
         let mut z = [0u8; 32];
         rng.fill_bytes(&mut z);
         let pkh = shake(&[b"EigenSeta-P", &pk_bytes], 32);
@@ -607,7 +617,7 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let sk = SecretKey {
             lam_s: Scalar::from_biguint(&lam_s, el),
             lam_t: Scalar::from_biguint(&lam_t, el),
-            cp2: Scalar::from_biguint(&modpos(&cp, &n2), el),
+            cp2: Scalar::from_biguint(&cp2v, el),
             c3: Scalar::from_biguint(&modpos(&c, &d), dl),
             cp3: Scalar::from_biguint(&modpos(&cp, &d), dl),
             z,
