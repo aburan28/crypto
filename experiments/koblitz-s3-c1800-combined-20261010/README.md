@@ -73,7 +73,10 @@ more involuntary context switches than its 0.115 ms repeat. All such runs
 remain in the analysis. The exact sources and workload can now be taken to
 an auditable isolated host for the >=2× controlled confirmation.
 
-The [bounded Modal T205 pilot](modal/README.md) now has exact Linux binaries,
-an image-transfer manifest, a public-only point bundle, guest fidelity
-telemetry, and a passing offline preview. It awaits authorization for the
-source-derived transfer and Sandbox creation.
+The [bounded Modal T205 pilot](modal/README.md) transferred the pinned Linux
+binaries and public point bundle, then stopped at guest CPU-topology preflight
+before any timed row. Its single authorized Sandbox creation attempt is
+recorded with raw failure evidence. The [native retry](modal_native_retry/README.md)
+now records the observed CPU topology and has a passing offline preview,
+archived-report tests, and a reproducible Linux guest build. A new Sandbox
+creation attempt requires separate approval.
