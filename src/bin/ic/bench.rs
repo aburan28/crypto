@@ -27,7 +27,7 @@ use crypto_lib::cryptanalysis::ic_boundary::{
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle, GlvOrbitBase,
-    KoblitzOrbitBase, KoblitzSymmetrisedBase, KoblitzTraceZeroBase, MitmOracle, PrimeAbscissaBase,
+    KoblitzClosureBase, KoblitzOrbitBase, KoblitzSymmetrisedBase, KoblitzTraceZeroBase, MitmOracle, PrimeAbscissaBase,
     SubtractOracle, SymmetrisedOracle,
 };
 use crypto_lib::cryptanalysis::ic_framework::solvers::{
@@ -234,6 +234,9 @@ fn listing() -> Value {
                      "parameters": [
                         {"name": "divisor", "means": "`;`-separated factor indices, e.g. divisor=0;1; must include 0 (x + 1) so that 1 ∈ V; the base is F_u = {P : 1/(x+1) ∈ V}, T = (0,1) included"},
                         {"name": "no_fold", "means": "1 for one column per abscissa"}]},
+                    {"name": "koblitz-closure", "regimes": ["koblitz"],
+                     "parameters": [
+                        {"name": "dimension", "means": "the Frobenius closure of the prefix subspace of this dimension: the ordered tau-slot relation space, one column per signed orbit, subspace basis kept for descent-algebraic:slots=all"}]},
                     {"name": "compact-orbit-scan", "regimes": ["koblitz"],
                      "parameters": [
                         {"name": "columns", "means": "number of distinct signed Frobenius orbits (the orbit-union base, the shape that exists where no invariant subspace does)"},
@@ -575,7 +578,9 @@ fn run_binary(
     let trace_zero = KoblitzTraceZeroBase { instance: inst };
     let symmetrised_base = KoblitzSymmetrisedBase { instance: inst };
     let compact_orbit = CompactOrbitScanBase { instance: inst };
+    let closure = KoblitzClosureBase { instance: inst };
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name {
+        "koblitz-closure" => &closure,
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "koblitz-trace-zero" => &trace_zero,

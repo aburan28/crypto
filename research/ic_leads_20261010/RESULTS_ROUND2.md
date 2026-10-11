@@ -184,3 +184,153 @@ invariant subspace 0.89 relations, 0.58 LA row operations, 0.92
 decomposition additions; prefix base 18× the relations and 8.8× the
 decomposition additions of the baseline. Frobenius-folded against
 negation-folded table: 21.6× on setup, nothing else.
+
+## Base sizing at n = 41 with three summands (4 targets each)
+
+| columns | points | trials per relation | relations | probes (lookups) | decomposition adds | total GAE | `S` | IC / rho (`A = 82`, S = 0.21) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 20 | 1,640 | 898 | 20 | 2.86·10⁷ | 2.86·10⁷ | 3.10·10⁷ | 41.7 | 199× |
+| 60 | 4,920 | 27.3 | 55 | 7.24·10⁶ | 7.24·10⁶ | 7.90·10⁶ | 10.8 | 51× |
+| 200 | 16,400 | 1.35 | 186 | 1.59·10⁶ | 1.59·10⁶ | 3.36·10⁶ | 4.57 | 22× |
+
+Against the 2-sum rows at the same columns (8.5, 2.13, 2.99): **three
+summands lose to two at every size tried**, because the 3-sum oracle pays
+`|F|` probes (one addition each) per trial and the extra yield does not
+repay them until the base is large enough that trials per relation reach
+1; at 200 columns it is 1.35 and still 2× behind the 2-sum optimum. The
+600-column `m = 3` run (the ledger's shape) is in `runs/20261011T001608Z`
+when it completes. For the pair-table family at 39 bits the operation-
+counted optimum is therefore the 2-sum table near 60 columns; the
+leaderboard's `m = 3` collection rows are priced in a different unit and
+window and are not contradicted by this, but a re-based row should start
+from the 2-sum optimum.
+
+## L5, algebraic form: ordered τ-slots in the descended S3 (new this round)
+
+New plug-ins: `koblitz-closure:dimension=d` (the signed-Frobenius closure
+of the prefix subspace `V` of dimension `d`, one column per orbit, `V`'s
+basis kept) and `descent-algebraic:slots=all` (per target, one descended
+system per rotation `j` with summand 2 over `σ^j(V)`, first lifted hit
+wins; `pq_descent_symbolic::descend_with_bases`). Solver `fes-f2`
+(exhaustive over the `2d` Boolean unknowns, exact), so the comparison is
+about yield, not solver heuristics. 8 targets each, all verified.
+
+| rung | base | arm | targets tried | relations | systems solved | **hits per system** | relation-phase GAE |
+|---:|---|---|---:|---:|---:|---:|---:|
+| n = 17 (`K_1`) | closure of dim 6: 986 pts, 29 cols | plain descent (`V × V`) | 6,799 | 126 | 6,744 | 0.0187 | 4.56·10⁵ (median run) |
+| n = 17 | same | slots = all (17 systems/target) | 382 | 133 | 5,313 | 0.0250 (**1.34×**) | 1.90·10⁵ |
+| n = 23 (`K_0`) | closure of dim 7: 2,850 pts, 63 cols | plain descent | 174,614 | 210 | 173,639 | 0.00121 | 9.14·10⁶ |
+| n = 23 | same | slots = all (23 systems/target) | 5,972 | 290 | 134,174 | 0.00216 (**1.79×**) | 4.69·10⁶ |
+| n = 23 | same | `mitm-frobenius` table (reference) | 564 | 232 | — | — | 1.09·10³ + 9.3·10⁴ setup |
+
+Readings. (1) The pre-registered prediction was `m! = 2` hits per solved
+system; measured **1.79 at n = 23** (binomial 95 % interval on 290 hits
+≈ ±0.21, consistent with 2) and **1.34 at n = 17** (`K_1`, cofactor 2,
+986 points in a 2^16 group: the coset structure LEADS saw inflate the
+n = 11 figure deflates this one). (2) Because every rotation is a separate
+system, the slots also multiply the relations **per target** by ≈ `2n`
+(trials per relation 18.3 against 897 at n = 23), which is the relation
+space the table pipeline gets for free; the solver cost per relation halves
+(4.7·10⁶ against 9.1·10⁶ GAE). (3) At these sizes the algebraic oracle is
+50–100× dearer than the pair table on the same base; the lead matters where
+the table does not fit. The plain arm hits only at rotation 0 by
+construction; the slotted arm's hits are spread over all rotations
+(`slot_hit_rotation_j` counters in the reports), which is the structural
+check that the per-summand bases are doing what they claim.
+
+## A1. `Z[τ]`-multiplier closure (new `norm` parameter of `compact-orbit-scan`), n = 23, first run
+
+Multipliers `α = a + bτ` of norm `a² − ab + 2b² ≤ norm`; `α(P) = [a]P + [b]τ(P)`
+joins `P`'s column with weight `a + bλ`, its whole signed Frobenius orbit
+with it. 5 columns, Frobenius-folded 2-sum table, 8 targets, all verified:
+
+| norm | points | points per column | trials per relation | table adds | `S` |
+|---:|---:|---:|---:|---:|---:|
+| 0 (plain `±τ^k`) | 230 | 46 | 59.1 | 690 | 1.63 |
+| 4 | 690 | 138 | 27.6 | 2,070 | 3.60 |
+| 8 | 1,150 | 230 | 18.3 | 3,450 | 5.69 |
+| 16 | 2,300 | 460 | 9.4 | 6,900 | 10.4 |
+| 45 columns, norm 0 (equal points to norm 16) | 2,070 | 46 | 1.53 | 47,565 | 35.6 |
+
+Reading of the first run: the relations are correct (the `a + bλ` weights
+verify), but the yield falls **linearly** with the points (3×, 5×, 10×
+points → 2.1×, 3.2×, 6.3× fewer trials) where a 2-sum table over
+independent points falls with the square, and the table grew linearly too
+(690 → 2,070 → 3,450 → 6,900 additions). The cause is in the table, not the
+lead: `FrobeniusPairTable::build` took **one representative per column**
+and paired it against the base, which is complete only when a column is a
+single orbit; with `M` orbits per column it builds `M·K × |B|` pairs instead
+of `|B|²/(4n)`. Fixed (one representative per *orbit*, found by the
+canonical abscissa); the rerun follows below.
+
+## L8 floor twin at n = 41, three summands (4 targets)
+
+Floor curve `b = 0xbe5ad65b0b` (orbit O00 of the 409-level), prefix
+subspace of dimension 13 (8,060 points, 4,030 columns), negation-folded
+3-sum table: trials per relation **26**, 3,700 relations, 7.6·10⁸ probe
+additions, `S = 1,040` against the floor's negation-only rho `S = 1.02`
+(the floor loses the `√(2n) = 9.1` of the signed-Frobenius walk as well).
+The matching `K_0` row with the same base and oracle is the last arm of
+`runs/20261011T001608Z` and is compared here when it lands; the
+level-blindness prediction is trials per relation within the spread of 26.
+
+### A1 rerun with the per-orbit pair table (n = 23, 5 columns, 2-sums, 8 targets, all verified)
+
+| norm | points | points per column | trials per relation | relations | LA row ops | table adds | base build GAE | total GAE | `S` |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 230 | 46 | 59.1 | 5 | 46 | 690 | 319 | 2,360 | 1.63 |
+| 4 | 690 | 138 | 10.9 | 5 | 45 | 5,520 | 1,980 | 8,590 | 5.93 |
+| 8 | 1,150 | 230 | 4.83 | 5 | 41 | 15,000 | 3,670 | 19,700 | 13.6 |
+| 16 | 2,300 | 460 | **1.50** | 6 | 47.5 | 58,600 | 7,080 | 66,800 | 46.1 |
+| 45 columns, norm 0 | 2,070 | 46 | 1.53 | 30.5 | 382 | 47,565 | 2,860 | 51,600 | 35.6 |
+
+Readings. (1) With the table complete, the yield scales with the **square**
+of the points as the lead claims (3×, 5×, 10× points → 5.4×, 12×, 39× fewer
+trials, saturating near one trial per relation), and the table grows with
+the square too (58,600 at 2,300 points against 47,565 at 2,070): the
+multiplier closure behaves as a set of independent points for the 2-sum
+table. (2) At equal points (norm 16 against 45 plain columns) the yield is
+equal (1.50 vs 1.53), the table is equal, and the columns are **9× fewer**
+(5 vs 45): relations needed 6 against 30.5, LA 8× smaller. (3) The price is
+the base build, 7,080 against 2,860 GAE, because every `α(P)` costs two
+scalar multiplications, which at this size outweighs the LA saving, so the
+one-target total is 1.3× worse. (4) The lead therefore pays exactly where
+the feasibility note says the compact-orbit pipeline is bound: when
+relations are expensive (probes per relation ≫ 1) and the rank stage needs
+`K + 1` of them, `K ÷ M` at equal table and equal yield is a direct `M×` on
+the rank precompute. On the toy table at 21 bits the relation phase is
+already one trial per relation, so there is nothing left to save there.
+Prediction for the compact-orbit pipeline at the landed rungs (K = 600,
+probes per relation 10⁶–10⁸): rank work ÷ `M` at equal table memory, with
+`M ≈ 10` at norm 16, i.e. the same `K` with a `100×` smaller root table or
+the same table with `10×` fewer relations; unmeasured there.
+
+## §7 items 2, 3, 6, 7: status
+
+- **Re-basing the leaderboard (item 2).** The inputs are now measured: the
+  orbit-union base with a 2-sum Frobenius-folded table at the family
+  optimum (3–5 columns at n = 23, ≈ 60 at n = 41) is the operation-counted
+  optimum of the pair-table family on `K_0`, 1.5× behind the counted
+  signed-Frobenius rho at 21 bits and 10× behind at 39 bits; three summands
+  lose at both rungs. Table A of `LEADERBOARD.md` is priced in a different
+  unit (batched additions per `√r`, `ic price`) and window (one target
+  after collection), so the re-based rows have to be produced by
+  `ic price` on `compact-orbit-scan` bases of the optimum size, which is a
+  measurement campaign, not a code change; the ladder here fixes the base
+  shape and size that campaign should use.
+- **Charge-free base build (item 3).** After the A1 measurement the build
+  cost that matters is the multiplier images (`7,080` GAE at norm 16
+  against `2,860` plain), not the inversions of the plain scan; the
+  multipliers are 2-bit scalars whose double-and-add is already 2–3 group
+  operations, so an addition chain over the shared `P`, `τ(P)` would save
+  at most a third of it. Not pursued; the plain scan's `_uncharged` lifts
+  remain as recorded.
+- **Batched probes (item 6).** Invisible in operation counts and only
+  measurable in the wall-clock window on an isolated host; not pursued on
+  this host.
+- **Calibration pins (item 7).** `koblitz/K_0 / GF(2^23)` added to
+  `docs/ic/calibration.json` from the median of 10 reports (provenance in
+  `sources`); `K_0` n = 41 was already pinned, which is why its reports
+  show `pinned` units. The pins are from this loaded host and should be
+  re-measured on the ledger's isolated host before any `S` from them is
+  compared across hosts.

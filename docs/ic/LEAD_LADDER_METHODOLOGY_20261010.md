@@ -274,8 +274,12 @@ the *only* τ-dependent IC resource a non-stable base keeps, per LEADS V1).
 `ic bench`): the signed-Frobenius closure of a seed set is the ordered-slot
 relation space, and at n = 23 it decomposes targets 2.8× more often per
 trial than the prefix base of equal point count (and 1.7× more often than
-the invariant subspace of equal columns). The algebraic-oracle form remains
-unimplemented.
+the invariant subspace of equal columns). **Algebraic form measured
+2026-10-11** (`koblitz-closure` base + `descent-algebraic:slots=all`,
+`pq_descent_symbolic::descend_with_bases`, exhaustive solver): hits per
+solved system 1.79× (n = 23) and 1.34× (n = 17) against the predicted
+`2! = 2`; relations per target × ≈ 2n because every rotation is its own
+system. `RESULTS_ROUND2.md` §L5 algebraic.
 
 ### L6. Phase-aware quotient summation
 
@@ -402,14 +406,27 @@ stated with the phase it moves, the evidence, and the bar it must clear.
    this is the `K` lever (§2 of the feasibility note) without the `K²`
    table. Prediction: trials per relation ÷ 3–10 at n = 23 with
    `|D| = 10|F|`; falsifier: merge rate below `1/|D|` per stored residual.
-   Unimplemented; it needs a second table and the relation merge in the
-   matrix. Engineering with a real constant.
+   **Closed 2026-10-11 by analysis and measurement**: with the residual
+   collector as the `|D| = r` limit, the break-even is `|F| < 2.4·(K r)^{1/4}`
+   (≈ 100 points at n = 23), and at 2, 3 and 5 columns (92–230 points) the
+   collector still costs 1.9–4× the direct table's relation phase. A bounded
+   `D` lowers both the entry rate and the collision rate by the same factor,
+   so it cannot cross over where `|D| = r` does not.
 5. **`Z[τ]`-multiplier closure (A1 of the directions note).** The orbit
    union uses `{±τ^k}`; adding the norm-≤16 elements of `Z[τ]` multiplies
    the usable points per column by ≈ 19 at no column cost. In the table
    pipeline the table grows with the square of the points, so this is a
    fixed-memory trade: 19× fewer columns at equal table. Unmeasured;
    `compact-orbit-scan` is the place to add a `multipliers` parameter.
+   **Implemented 2026-10-11** as `compact-orbit-scan:norm=N`; the first run
+   found the Frobenius pair table paired one representative per *column*,
+   which is incomplete when a column holds several orbits; fixed to one
+   per orbit. **Measured** (`RESULTS_ROUND2.md` §A1): at n = 23 the closure
+   with norm ≤ 16 gives 10× the points per column, yield scaling with the
+   square of the points, equal yield and equal table to the 45-column plain
+   base with 9× fewer columns (relations 6 vs 30.5); the base build costs
+   2.5× more, so the one-target total at 21 bits is 1.3× worse, and the
+   lead pays only where relations are dear (the compact-orbit rank stage).
 6. **Batch the probe.** The probe is add + canonicalise + lookup; the
    addition is 95 % of it and is an affine addition with an inversion.
    Probing 64 targets' `R − P₃` with one shared inversion (the
@@ -421,7 +438,10 @@ stated with the phase it moves, the evidence, and the bar it must clear.
    prerequisite: without pins the GAE of `as_solves`, `row_ops` and now
    `canonicalisations` is host-priced and the `S` column moves between
    identical runs (0.22 vs 8.7 LA GAE for the same 225 row operations).
-   `calibration.json` has pins for `K_1` n = 17 but not `K_0` n = 23 or 41.
+   `calibration.json` had pins for `K_0` at n = 13, 15, 31, 37, 39, 41 and
+   none at n = 23; **added 2026-10-11** (`koblitz/K_0 / GF(2^23)`, median of
+   10 reports on this host, provenance in `sources`), to be re-pinned on
+   the ledger's isolated host.
 8. **Algebraic τ-slots (L5/L6 proper) for the no-table regime.** The table
    form is realised; at n = 131 the table does not fit (`K² n` states), so
    the gain has to be carried by the S3-chain extraction (`extract128`) or

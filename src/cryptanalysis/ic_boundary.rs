@@ -4317,25 +4317,33 @@ impl FrobeniusPairTable {
                 member_of[i * n + t] = idx as u32;
             }
         }
-        // One representative per column, the first point of it: any
-        // member of a signed orbit serves, the orbit being its own
-        // ⟨σ, −1⟩-image.
-        let mut rep_of_col = vec![usize::MAX; fb.columns];
-        for i in 0..f {
-            let c = fb.col_of[i];
-            if rep_of_col[c] == usize::MAX {
-                rep_of_col[c] = i;
+        // One representative per signed Frobenius orbit, the first point
+        // of it: any member serves, the orbit being its own ⟨σ, −1⟩-image.
+        // Orbits are found by the canonical name of the abscissa, not by
+        // column: a column may hold several orbits (the `Z[τ]`-multiplier
+        // closure of `compact-orbit-scan`), and a table built from one
+        // representative per column would miss every pair whose first
+        // member lies in another orbit of the column.
+        let mut orbit_of = vec![0u32; f];
+        let mut rep_of_orbit: Vec<usize> = Vec::new();
+        {
+            let mut orbit_index: FastMap<u32> = fast_map(f / n + 1);
+            for i in 0..f {
+                let key = canon.canon(fb.points[i].x);
+                let next = rep_of_orbit.len() as u32;
+                let id = *orbit_index.entry(key).or_insert(next);
+                if id == next {
+                    rep_of_orbit.push(i);
+                }
+                orbit_of[i] = id;
             }
         }
         let mut ops = GroupOps::default();
         let mut canons = 0u64;
         let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
-        for (col, &rep) in rep_of_col.iter().enumerate() {
-            if rep == usize::MAX {
-                continue;
-            }
+        for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
             for j in 0..f {
-                if fb.col_of[j] < col {
+                if (orbit_of[j] as usize) < orbit {
                     continue;
                 }
                 let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
@@ -4350,7 +4358,7 @@ impl FrobeniusPairTable {
         }
         Some(Self {
             entries: map.len() as u64,
-            representatives: rep_of_col.iter().filter(|&&r| r != usize::MAX).count() as u64,
+            representatives: rep_of_orbit.len() as u64,
             map,
             canon,
             member_of,
