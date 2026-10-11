@@ -5,7 +5,7 @@
 //!
 //! ```text
 //! cargo run --release --example gb_cas_export -- fp <outdir> [repeats]
-//! cargo run --release --example gb_cas_export -- fp-xl <outdir> [repeats]
+//! cargo run --release --example gb_cas_export -- fp-xl <outdir> [repeats] [case,case,…]
 //! cargo run --release --example gb_cas_export -- bool <node_dump.jsonl> <outdir>
 //! ```
 //!
@@ -327,11 +327,17 @@ fn main() {
             let outdir = Path::new(args.get(2).expect("outdir"));
             std::fs::create_dir_all(outdir).expect("outdir");
             let repeats = args.get(3).map_or(3, |s| s.parse().expect("repeats"));
-            run_fp(
-                outdir,
-                repeats,
-                if tier == "fp" { FP_CASES } else { FP_XL_CASES },
-            );
+            let all = if tier == "fp" { FP_CASES } else { FP_XL_CASES };
+            // optional comma-separated case names: run only those
+            let cases: Vec<_> = match args.get(4) {
+                Some(only) => all
+                    .iter()
+                    .copied()
+                    .filter(|c| only.split(',').any(|n| n == c.0))
+                    .collect(),
+                None => all.to_vec(),
+            };
+            run_fp(outdir, repeats, &cases);
         }
         Some("bool") => {
             let dump = Path::new(args.get(2).expect("node dump"));

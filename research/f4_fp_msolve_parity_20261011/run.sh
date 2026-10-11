@@ -8,7 +8,8 @@
 # with src/cryptanalysis/f4_fp.rs as on main (4b6e09b78) and as on this
 # branch.  Each round runs, interleaved: both builds at 1 and 4 rayon
 # threads (median of 3 repetitions inside; 1 for fp-xl), msolve -g 2 at -t 1 and -t 4,
-# and Singular std (which also checks the new build's basis).
+# and Singular std (which also checks the new build's basis).  The baseline
+# skips quad_n11 (minutes per repetition; quad_n10 alone takes over a minute).
 set -uo pipefail
 MAIN=$1
 NEW=$2
@@ -31,7 +32,10 @@ for r in $(seq 1 "$ROUNDS"); do
       bin=$MAIN; [ "$arm" = new ] && bin=$NEW
       for th in 1 4; do
         reps=3; [ "$tier" = fp-xl ] && reps=1
-        RAYON_NUM_THREADS=$th "$bin" "$tier" "$OUT/inputs" $reps > "$OUT/raw/ours_${arm}_t${th}_${tier}.round$r.jsonl"
+        only=""
+        # the baseline takes minutes per repetition on quad_n11: not run
+        [ "$arm" = main ] && [ "$tier" = fp-xl ] && only="quad_n10_p65521,cubic_n6_p31"
+        RAYON_NUM_THREADS=$th "$bin" "$tier" "$OUT/inputs" $reps $only > "$OUT/raw/ours_${arm}_t${th}_${tier}.round$r.jsonl"
       done
     done
     # the new build wrote the inputs last: its basis is the one Singular checks
