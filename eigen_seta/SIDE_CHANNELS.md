@@ -97,25 +97,27 @@ valgrind --tool=callgrind --toggle-collect='*probe_core*' \
 It goes through the whole trapdoor and is rejected by the FO
 re-encryption check.
 
-**Results.** Toy16 parameters, 4 key seeds. Each key has two valid
-ciphertexts and one foreign ciphertext. Built with rustc 1.97.0 in release
-mode with debuginfo, on x86-64 with glibc malloc. "Non-allocator" is the
-total minus the glibc allocator and `mem*` routines.
+**Results.** Run `run-20261011T1827Z-sidechannel`, built from commit
+19c641d12 with rustc 1.97.0 in release mode with debuginfo, on x86-64 with
+glibc malloc. Toy16 parameters, 4 key seeds, each with two valid
+ciphertexts and one foreign ciphertext. "Non-allocator" is the total minus
+the glibc allocator and `mem*` routines. Records are in
+`research/eigen_seta_rust_20261011/reports/run-20261011T1827Z-sidechannel/records/`.
 
 | key seed | ciphertext | accepted | total instructions | glibc allocator and `mem*` | non-allocator |
 |---|---|---|---|---|---|
-| 1 | valid 1 | yes | 1,147,540,623 | 31,354,620 | **1,116,186,003** |
-| 1 | valid 2 | yes | 1,147,540,623 | 31,354,620 | **1,116,186,003** |
-| 1 | foreign | no | 1,147,836,044 | 31,650,041 | **1,116,186,003** |
-| 2 | valid 1 | yes | 1,147,668,035 | 31,482,032 | **1,116,186,003** |
-| 2 | valid 2 | yes | 1,147,668,035 | 31,482,032 | **1,116,186,003** |
-| 2 | foreign | no | 1,147,335,137 | 31,149,134 | **1,116,186,003** |
-| 3 | valid 1 | yes | 1,147,956,714 | 31,770,711 | **1,116,186,003** |
-| 3 | valid 2 | yes | 1,147,956,714 | 31,770,711 | **1,116,186,003** |
-| 3 | foreign | no | 1,147,986,335 | 31,800,332 | **1,116,186,003** |
-| 4 | valid 1 | yes | 1,147,876,450 | 31,690,447 | **1,116,186,003** |
-| 4 | valid 2 | yes | 1,147,876,450 | 31,690,447 | **1,116,186,003** |
-| 4 | foreign | no | 1,147,452,618 | 31,266,615 | **1,116,186,003** |
+| 1 | valid 1 | yes | 1,147,512,199 | 31,326,196 | **1,116,186,003** |
+| 1 | valid 2 | yes | 1,147,512,199 | 31,326,196 | **1,116,186,003** |
+| 1 | foreign | no | 1,147,807,708 | 31,621,705 | **1,116,186,003** |
+| 2 | valid 1 | yes | 1,147,639,699 | 31,453,696 | **1,116,186,003** |
+| 2 | valid 2 | yes | 1,147,639,699 | 31,453,696 | **1,116,186,003** |
+| 2 | foreign | no | 1,147,306,795 | 31,120,792 | **1,116,186,003** |
+| 3 | valid 1 | yes | 1,147,928,378 | 31,742,375 | **1,116,186,003** |
+| 3 | valid 2 | yes | 1,147,928,378 | 31,742,375 | **1,116,186,003** |
+| 3 | foreign | no | 1,147,958,199 | 31,772,196 | **1,116,186,003** |
+| 4 | valid 1 | yes | 1,147,848,114 | 31,662,111 | **1,116,186,003** |
+| 4 | valid 2 | yes | 1,147,848,114 | 31,662,111 | **1,116,186,003** |
+| 4 | foreign | no | 1,147,424,282 | 31,238,279 | **1,116,186,003** |
 
 The non-allocator count is identical in all 12 runs. The allocator count
 varies with the key and with the mode, because the heap state on entry
@@ -136,15 +138,15 @@ catch this class of problem.
 **Statistical timing test.** `examples/dudect_decaps.rs` times the secret
 phase on one Toy16 key for two classes, interleaved in random order. Class 0
 is one fixed ciphertext. Class 1 is a pool of 16 fresh ciphertexts, half of
-them FO-rejected. It reports Welch's t, the dudect method. Result with
-1,000 samples per class on the host listed in README §2:
+them FO-rejected. It reports Welch's t, the dudect method. The result
+with 1,000 samples per class, in the same run:
 
 ```
-samples/class 1000; median ns: fixed 123366526, random 123573182
-t(raw) = -0.34
-t(crop <= p50) = +0.16  (n = 503, 498)
-t(crop <= p75) = +0.75  (n = 764, 737)
-t(crop <= p90) = -0.60  (n = 904, 897)
+samples/class 1000; median ns: fixed 122309563, random 122318589
+t(raw) = +0.75
+t(crop <= p50) = +0.84  (n = 501, 500)
+t(crop <= p75) = -0.19  (n = 743, 758)
+t(crop <= p90) = +0.68  (n = 898, 903)
 ```
 
 |t| stays well under the usual 4.5 threshold. This is weaker evidence than
