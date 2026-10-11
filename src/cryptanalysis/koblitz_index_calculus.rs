@@ -8344,11 +8344,7 @@ fn build_projected_signed_orbit_map(
     if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
         return map;
     }
-    let projected: Vec<_> = fb
-        .points
-        .iter()
-        .map(|point| kc.mul(point, &kc.cofactor))
-        .collect();
+    let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
     let mut representatives: Vec<BinaryPoint> = Vec::new();
     let mut seen = HashSet::new();
 
@@ -8405,6 +8401,67 @@ fn build_projected_signed_orbit_map(
         orbit_of,
         representatives,
     }
+}
+
+/// Project one representative per signed orbit, deriving its labelled
+/// members from [h]pi^k(P) = pi^k([h]P) and [h](-P) = -[h]P. A stale or
+/// malformed orbit label falls back to the original pointwise operation.
+fn project_by_frobenius_orbits_generic(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> (Vec<BinaryPoint>, usize) {
+    let mut projected = vec![None; fb.points.len()];
+    let mut multiplications = 0;
+    if kc.frobenius_is_endomorphism && fb.signed_orbit_of.len() == fb.points.len() {
+        for (column, members) in fb.signed_orbits.iter().enumerate() {
+            let Some(&first) = members.first() else {
+                continue;
+            };
+            if first >= fb.points.len() || fb.signed_orbit_of[first] != (column, 0, false) {
+                continue;
+            }
+            let mut point = fb.points[first].clone();
+            let mut image = kc.mul(&point, &kc.cofactor);
+            multiplications += 1;
+            let mut by_phase = vec![None; 2 * kc.n as usize];
+            for &index in members {
+                if index >= fb.points.len() {
+                    continue;
+                }
+                let (label_column, phase, negative) = fb.signed_orbit_of[index];
+                if label_column == column && phase < kc.n {
+                    by_phase[2 * phase as usize + usize::from(negative)] = Some(index);
+                }
+            }
+            for phase in 0..kc.n as usize {
+                for negative in [false, true] {
+                    if let Some(index) = by_phase[2 * phase + usize::from(negative)] {
+                        let expected = if negative { point_neg(&point) } else { point.clone() };
+                        if fb.points[index] == expected {
+                            projected[index] = Some(if negative {
+                                point_neg(&image)
+                            } else {
+                                image.clone()
+                            });
+                        }
+                    }
+                }
+                point = kc.frobenius(&point);
+                image = kc.frobenius(&image);
+            }
+        }
+    }
+    let projected = projected
+        .into_iter()
+        .zip(&fb.points)
+        .map(|(derived, point)| {
+            derived.unwrap_or_else(|| {
+                multiplications += 1;
+                kc.mul(point, &kc.cofactor)
+            })
+        })
+        .collect();
+    (projected, multiplications)
 }
 
 /// [`projected_signed_orbit_map`] in single-word arithmetic, or `None`
@@ -14795,6 +14852,31 @@ mod tests {
         let mut duplicate = expected.points.clone();
         duplicate.push(expected.points[0].clone());
         assert!(build_explicit_frobenius_point_factor_base(&kc, duplicate).is_none());
+    }
+
+    #[test]
+    fn n83_wide_projection_uses_one_cofactor_multiply_per_signed_orbit() {
+        let kc = KoblitzCurve::known_n83_k0().expect("public N83 curve fixture");
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("N83 generator must be affine");
+        };
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
+            .expect("complete signed orbit");
+        let expected: Vec<_> = fb
+            .points
+            .iter()
+            .map(|point| kc.mul(point, &kc.cofactor))
+            .collect();
+        let (projected, multiplies) = project_by_frobenius_orbits_generic(&kc, &fb);
+        assert_eq!(projected, expected);
+        assert_eq!(multiplies, fb.signed_orbits.len());
+
+        let mut altered = fb.clone();
+        let second = altered.signed_orbits[0][1];
+        altered.signed_orbit_of[second] = (usize::MAX, 0, false);
+        let (recovered, multiplies) = project_by_frobenius_orbits_generic(&kc, &altered);
+        assert_eq!(recovered, expected);
+        assert!(multiplies > fb.signed_orbits.len());
     }
 
     #[test]
