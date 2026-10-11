@@ -1,0 +1,7 @@
+# Superseding check, 2026-10-11T18:23Z: ecbench built from main 7666b708e (includes #1646 word-wise rewrite and #1671 eager rows), sha256 6ae1a2a11478602e2e149f33d063f707cc626c10a4f6afb060c9085dbb2a1ed6.
+# Callgrind total Ir, whole process, same frozen inputs as results/run-1; round-2 baseline and candidate figures copied from results/run-1/ir.tsv.
+# Outputs of main differ from the round-2 baseline (a3652edd): counted solver_ops rise and F6-IC refutation counts change; see output_vs_round2_baseline.
+input	round2_baseline_ir	round2_candidate_ir	main_7666b708_ir	main_solver_ops	round2_solver_ops	output_vs_round2_baseline
+L13-25	2222337308	2185880355	2286390878	15715620	11575434	DIFFER (solver_ops)
+L19-24	33959343192	30866373759	27799877737	520513284	405966170	DIFFER (solver_ops; geometric_refutations 4219->4795, infeasible_branches 576->0)
+L19-25	52004620860	48778989164	46233505868	668516039	549394694	DIFFER (solver_ops)
