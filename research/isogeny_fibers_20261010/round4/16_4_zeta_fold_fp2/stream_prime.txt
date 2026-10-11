@@ -1,0 +1,6 @@
+stream 10 seed 1 p=1021: ab trials 3788 rel 1310 | b sq rel Some(470) trials Some(1377) ok true | a sq rel Some(1310) ok true | c trials 3788 sq rel Some(470) trials Some(1377) ok true | cneg sq rel Some(1310) ok true [0.7s]
+stream 10 seed 2 p=733: ab trials 3178 rel 1195 | b sq rel Some(429) trials Some(1152) ok true | a sq rel Some(1195) ok true | c trials 3178 sq rel Some(429) trials Some(1152) ok true | cneg sq rel Some(1195) ok true [0.4s]
+stream 10 seed 3 p=547: ab trials 1849 rel 746 | b sq rel Some(178) trials Some(451) ok true | a sq rel Some(746) ok true | c trials 1849 sq rel Some(178) trials Some(451) ok true | cneg sq rel Some(746) ok true [0.2s]
+stream 12 seed 1 p=2311: ab trials 12696 rel 5194 | b sq rel Some(1367) trials Some(3339) ok true | a sq rel Some(5194) ok true | c trials 12696 sq rel Some(1367) trials Some(3339) ok true | cneg sq rel Some(5194) ok true [2.0s]
+stream 12 seed 2 p=3943: ab trials 18319 rel 6819 | b sq rel Some(1967) trials Some(5387) ok true | a sq rel Some(6819) ok true | c trials 18319 sq rel Some(1967) trials Some(5387) ok true | cneg sq rel Some(6819) ok true [3.2s]
+stream 12 seed 3 p=3907: ab trials 20121 rel 8151 | b sq rel Some(2219) trials Some(5411) ok true | a sq rel Some(8151) ok true | c trials 20121 sq rel Some(2219) trials Some(5411) ok true | cneg sq rel Some(8151) ok true [3.8s]

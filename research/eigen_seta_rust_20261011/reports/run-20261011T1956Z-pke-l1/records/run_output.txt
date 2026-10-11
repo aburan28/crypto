@@ -1,0 +1,4 @@
+Command: cargo run --release --example pke_run -- L1
+Exit: 0
+Stdout:
+L1 keygen_s 25.044 encrypt_s 0.3897 decrypt_s 11.208 pk_bytes 1344 pke_ct_bytes 1411 message_bytes 39 correct true

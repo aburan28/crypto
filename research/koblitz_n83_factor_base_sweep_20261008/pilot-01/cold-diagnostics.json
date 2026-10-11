@@ -1,0 +1,71 @@
+{
+  "approximate_active_execution_seconds": 3530.848,
+  "cases": [
+    {
+      "binary_sha256": "38670992b1596edee12d50e3eb79452fdc9a6ee83e5b64e1864dfed5d8aafe92",
+      "columns": 256,
+      "completed_pipeline_record_count": 0,
+      "pair_mode": "ordered",
+      "partial_record_count": 0,
+      "phase_checkpoints": [],
+      "process_wall_seconds": 606.68,
+      "run_directory": "cold-a1-hash-256-seed-2026100801-attempt-1",
+      "solver_cap_seconds": 600,
+      "source_commit": "8a7d14adf96048147ae448e23dacd8b21aac5a9b",
+      "status": "UNKNOWN_budget"
+    },
+    {
+      "binary_sha256": "38670992b1596edee12d50e3eb79452fdc9a6ee83e5b64e1864dfed5d8aafe92",
+      "columns": 64,
+      "completed_pipeline_record_count": 0,
+      "pair_mode": "ordered",
+      "partial_record_count": 0,
+      "phase_checkpoints": [],
+      "process_wall_seconds": 601.32,
+      "run_directory": "cold-a1-hash-64-seed-2026100801-attempt-1",
+      "solver_cap_seconds": 600,
+      "source_commit": "8a7d14adf96048147ae448e23dacd8b21aac5a9b",
+      "status": "UNKNOWN_budget"
+    },
+    {
+      "binary_sha256": "786183f6becf192efa7df25680f469b855be73aabc306308bec3ca6fe63d0819",
+      "columns": 64,
+      "completed_pipeline_record_count": 0,
+      "pair_mode": "unordered",
+      "partial_record_count": 0,
+      "phase_checkpoints": [
+        {
+          "columns": 64,
+          "pair_symmetry": "unordered_frobenius",
+          "phase": "index_started"
+        },
+        {
+          "index_ms": 771.463875,
+          "phase": "index_completed",
+          "regular_states": 172640,
+          "root_table_entries": 339776
+        }
+      ],
+      "process_wall_seconds": 600.59,
+      "run_directory": "cold-a1-hash-64-unordered-seed-2026100801-attempt-1",
+      "solver_cap_seconds": 600,
+      "source_commit": "b3603f9a987674bb8ec77bab6779f7ad23ebf2ae",
+      "status": "UNKNOWN_budget"
+    }
+  ],
+  "curve_arm": "diagnostic_a1_53bit",
+  "local_pilot_cap_seconds": 3600,
+  "panel_manifest_blake3": "3e46b5b87250e67f18284e03dcbd587d3b5ca502afd5b240bb95037a22bc02b5",
+  "primary_a0_complete_cold_runs": 0,
+  "public_seed": 2026100801,
+  "schema": "n83.cold-diagnostics/v1",
+  "selected_best_total_runtime": null,
+  "source_stage_times_seconds": {
+    "construction_internal_seconds": 166.577547042,
+    "probes_process_wall_seconds": 225.24,
+    "replay_process_wall_seconds": 1189.33,
+    "upload_process_wall_seconds": 141.11
+  },
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "time_basis_note": "construction is the producer's internal elapsed time; later stages are /usr/bin/time process wall; the sum is an approximate pilot-budget audit"
+}

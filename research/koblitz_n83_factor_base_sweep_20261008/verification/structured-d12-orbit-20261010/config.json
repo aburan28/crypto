@@ -1,0 +1,10 @@
+{
+  "schema": "n83.structured-orbit-run/v1",
+  "source_commit": "67b251de4c921a8dd2ba34ad52f6afbc8bdabc3c",
+  "root": "/private/tmp/n83_structured_d12_object",
+  "build_cap_seconds": 60,
+  "construct_cap_seconds": 45,
+  "replay_cap_seconds": 120,
+  "single_process": true,
+  "claim_scope": "construction_and_replay_only"
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "n83.two-hour-extension-budget/v1",
+  "started_utc": "2026-10-10T16:37:01.923Z",
+  "experimental_stop_utc": "2026-10-10T17:18:02.045Z",
+  "prior_charged_seconds": 3593.092994294,
+  "extension_conservative_wall_seconds": 2461,
+  "total_conservative_charged_seconds": 6054.092994294,
+  "total_authorized_seconds": 7200,
+  "remaining_unused_seconds": 1145.9070057059998,
+  "source_validation_excluded_after_experimental_stop": true,
+  "claim_scope": "all extension preparation, rebuild and worker phase elapsed included; source validation after stop reported separately",
+  "selected_best_total_runtime": null
+}
