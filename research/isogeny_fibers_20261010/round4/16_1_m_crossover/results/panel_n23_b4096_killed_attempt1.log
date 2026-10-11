@@ -1,0 +1,4 @@
+# 2026-10-11T20:20:39Z r4_16_1_m_crossover --curves 23:0 --ms 2,3,4 --v-spec 23:3:div=0.1 --targets 24 --node-budget 4096 --cell-wall-s 300
+n=23 a=0 r=2095853 h=4  ns/XOR 0.678 ns/add 164.6  GAE/XOR 0.00412
+  n=23 m=2 ell=12 x-direct    |F|= 4055 cols=2024 vars=24 found 15 refuted  9 budget  0 unbuildable  0 truth 15 gate 0 | XOR/att 3.661e6 XOR/rel 5.857e6 S_rel 3.377e4 wall 0.6s
+  n=23 m=2 ell=12 sym         |F|= 4209 cols=1051 vars=23 found  3 refuted 21 budget  0 unbuildable  0 truth  3 gate 0 | XOR/att 4.946e6 XOR/rel 3.957e7 S_rel 1.185e5 wall 1.1s
