@@ -494,6 +494,8 @@ mod packed83 {
     /// query path avoids rebuilding heap-backed points for every batch.
     /// # Safety
     /// The caller must check the pinned polynomial and ARM64 AES/PMULL.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
     #[cfg(test)]
     pub(super) unsafe fn batch_x_keys_stored(
@@ -560,6 +562,8 @@ mod packed83 {
     /// # Safety
     /// The caller must have checked ARM64 AES/PMULL support and the pinned
     /// degree-83 irreducible polynomial.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
     #[cfg(all(test, target_arch = "aarch64"))]
     pub(super) unsafe fn batch_add_fixed(

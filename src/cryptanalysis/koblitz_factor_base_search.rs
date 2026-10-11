@@ -1612,7 +1612,7 @@ mod tests {
         assert!(candidates[0]
             .skipped
             .as_ref()
-            .is_none_or(|s| { !s.contains("exceed the cap") }));
+            .is_none_or(|s| !s.contains("exceed the cap")));
     }
 
     #[test]

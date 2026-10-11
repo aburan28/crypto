@@ -8,6 +8,9 @@
 // The optional cache is not wired into the solver yet.
 #![allow(dead_code)]
 
+// Fail-open cache infra, currently unwired: kept for upcoming use.
+// `dead_code` is allowed so `-D warnings` stays green until it is wired in.
+#![allow(dead_code)]
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use redis::Commands;
 use serde::{Deserialize, Serialize};

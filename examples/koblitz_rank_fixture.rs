@@ -6,6 +6,9 @@ mod rank;
 mod shared;
 
 fn main() {
+    // Diagnostic counters (parallel waves, rank-targeted trials, …) are
+    // accumulated for manual inspection and not always printed.
+    #![allow(unused_assignments)]
     let arguments: Vec<_> = std::env::args().collect();
     let mode = arguments.get(8).map(String::as_str).unwrap_or("pointwise");
     let shared_mode = mode.starts_with("pair_pair_dual_")
