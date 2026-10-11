@@ -38,7 +38,7 @@ COVER_LINKS = "docs/curves/cover-links.yaml"
 STANDARDS_COVERAGE = "docs/curves/standards/coverage.json"
 LEADERBOARD = "docs/ic/leaderboard.json"
 TOURNAMENT_RUNS = "research/ic_candidate_tournament_20260915/runs"
-ECBENCH_SESSIONS_GLOB = "research/ecbench_*/sessions/*"
+ECBENCH_SESSIONS_GLOBS = ("research/ecbench_*/sessions/*", "research/isogeny_conductor_gap_ic_*/sessions/*")
 IC1_SCAN_GLOBS = (
     "docs/ic/**/*.json",
     "docs/ic/**/*.md",
@@ -206,7 +206,7 @@ def curve_rows(registry: dict, leaderboard: dict) -> list[dict]:
 def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list[dict]]:
     sessions, methods, fbs, yields = [], {}, {}, []
     per_curve_arm = defaultdict(lambda: {"n": 0, "verified": 0, "s_sum": 0.0, "floor_sum": 0.0})
-    for sdir in sorted(glob.glob(os.path.join(ROOT, ECBENCH_SESSIONS_GLOB))):
+    for sdir in sorted(d for g in ECBENCH_SESSIONS_GLOBS for d in glob.glob(os.path.join(ROOT, g))):
         session_path = os.path.join(sdir, "session.json")
         records_path = os.path.join(sdir, "records.jsonl")
         if not (os.path.exists(session_path) and os.path.exists(records_path)):
