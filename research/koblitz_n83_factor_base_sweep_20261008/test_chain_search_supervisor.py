@@ -33,7 +33,7 @@ def receipts(config: dict, status: str = "PREFLIGHT_ONLY") -> tuple[dict, dict]:
     worker_config = {
         "schema": guard.WORKER_CONFIG_SCHEMA, "study": guard.STUDY,
         "curve_a": 0, "fixture": 0, "orbit_columns": config["columns"],
-        "summands": config["summands"], "strategy": "chain-s3",
+        "summands": config["summands"], "strategy": guard.strategy_name(config),
         "policy": config["policy"], "seed": config["seed"],
         "max_trials": config["max_trials"],
         "budget_seconds": config["worker_wall_seconds"],
@@ -100,6 +100,11 @@ class ChainSearchGuardTests(unittest.TestCase):
         worker_config, worker = receipts(config, "PASS_verified_target_only")
         worker_config["source_commit"] = "0" * 40
         self.assertIn("source_commit", guard.receipt_error(worker, worker_config, config))
+        orbit_config = dict(config, domain_encoding="frobenius_orbit_phase")
+        worker_config, worker = receipts(orbit_config, "UNKNOWN_solver_cap")
+        self.assertIsNone(guard.receipt_error(worker, worker_config, orbit_config))
+        worker_config["strategy"] = "chain-s3"
+        self.assertIn("strategy", guard.receipt_error(worker, worker_config, orbit_config))
 
     def test_outer_retains_preflight_timeout_resource_and_bad_receipts(self):
         with tempfile.TemporaryDirectory(prefix="n83-chain-search-guard-") as temporary:
@@ -123,11 +128,19 @@ class ChainSearchGuardTests(unittest.TestCase):
                 "resource": "UNKNOWN_resource_or_worker_exit",
                 "malformed": "PRODUCER_FAILURE_worker_receipt",
                 "source_changed": "PRODUCER_FAILURE_frozen_input_changed",
+                "orbit_preflight": "PREFLIGHT_ONLY",
+                "orbit_worker_cap": "UNKNOWN_wall_cap",
+                "orbit_bad_cap": "PRODUCER_FAILURE_worker_exit",
+                "orbit_bad_strategy": "PRODUCER_FAILURE_worker_receipt",
                 "input_changed": "PRODUCER_FAILURE_frozen_input_changed",
             }
             for mode, status in expected.items():
                 with self.subTest(mode=mode):
                     output = root / mode
+                    columns = 2048 if mode.startswith("orbit_") else 64
+                    max_variables = 150000 if mode.startswith("orbit_") else 100000
+                    max_domain_clauses = 1000000 if mode.startswith("orbit_") else 300000
+                    memory_mib = 4096 if mode.startswith("orbit_") else 256
 
                     def fake_run(command, **_kwargs):
                         if command[:3] == ["docker", "image", "inspect"]:
@@ -141,25 +154,40 @@ class ChainSearchGuardTests(unittest.TestCase):
                             self.calls += 1
                             if mode == "timeout" and self.calls == 1:
                                 raise subprocess.TimeoutExpired("docker run", timeout)
-                            return 137 if mode == "resource" else 0
+                            if mode == "resource":
+                                return 137
+                            return 124 if mode in ("orbit_worker_cap", "orbit_bad_cap") else 0
 
                         def kill(self):
                             pass
 
                     def fake_popen(command, **_kwargs):
                         config = json.loads((output / "config.json").read_text())
+                        orbit = mode.startswith("orbit_")
                         self.assertIn("--network", command)
                         self.assertEqual(command[command.index("--network") + 1], "none")
-                        self.assertEqual(command[command.index("--memory-swap") + 1], "256m")
-                        self.assertEqual(command[-16:-14], ["/worker", "primary-chain-cold"])
+                        self.assertEqual(command[command.index("--memory-swap") + 1], f"{memory_mib}m")
+                        selected = "primary-orbit-chain-cold" if orbit else "primary-chain-cold"
+                        self.assertEqual(command[-16:-14], ["/worker", selected])
                         if mode not in ("timeout", "resource"):
                             worker_config, worker = receipts(config)
                             if mode == "malformed":
                                 worker["report"]["sat_invalid_models"] = 1
+                            if mode == "orbit_bad_strategy":
+                                worker_config["strategy"] = "chain-s3"
                             run_dir = output / "run"
                             run_dir.mkdir()
                             (run_dir / "config.json").write_text(json.dumps(worker_config))
                             (run_dir / "summary.json").write_text(json.dumps(worker))
+                            if mode in ("orbit_worker_cap", "orbit_bad_cap"):
+                                cap = {
+                                    "schema": "n83.primary-cold-cap/v1",
+                                    "status": "UNKNOWN_budget", "orbit_columns": config["columns"],
+                                    "summands": config["summands"], "max_trials": config["max_trials"],
+                                    "budget_seconds": config["worker_wall_seconds"],
+                                    "strategy": "chain-s3" if mode == "orbit_bad_cap" else "orbit-chain-s3",
+                                }
+                                (run_dir / "cap.json").write_text(json.dumps(cap))
                         if mode == "source_changed":
                             (output / "source" / guard.SOURCES[2]).write_bytes(b"changed")
                         if mode == "input_changed":
@@ -170,9 +198,10 @@ class ChainSearchGuardTests(unittest.TestCase):
                          patch.object(guard.subprocess, "run", side_effect=fake_run), \
                          patch.object(guard.subprocess, "Popen", side_effect=fake_popen):
                         outer = guard.run(
-                            panel, fixtures, 64, "public_x_hash", guard.SEEDS[0], 5,
-                            0, 100000, 300000, 1, 1000, 1.0, 256,
+                            panel, fixtures, columns, "public_x_hash", guard.SEEDS[0], 5,
+                            0, max_variables, max_domain_clauses, 1, 1000, 1.0, memory_mib,
                             binary, output, checkout=checkout,
+                            orbit_domain=mode.startswith("orbit_"),
                         )
                     self.assertEqual(outer["status"], status)
                     self.assertEqual(json.loads((output / "outer.json").read_text())["status"], status)

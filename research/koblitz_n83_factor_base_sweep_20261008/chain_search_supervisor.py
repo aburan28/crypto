@@ -39,6 +39,15 @@ COUNTERS = (
 )
 
 
+def strategy_name(config: dict) -> str:
+    encoding = config.get("domain_encoding", "coordinate_trie")
+    if encoding == "coordinate_trie":
+        return "chain-s3"
+    if encoding == "frobenius_orbit_phase":
+        return "orbit-chain-s3"
+    raise ValueError("unsupported chained-S3 domain encoding")
+
+
 def receipt_error(worker: object, worker_config: object, config: dict) -> str | None:
     if not isinstance(worker, dict) or not isinstance(worker_config, dict):
         return "worker summary or config is not a JSON object"
@@ -51,7 +60,7 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
     expected = {
         "schema": WORKER_CONFIG_SCHEMA, "study": STUDY,
         "curve_a": 0, "fixture": 0, "orbit_columns": config["columns"],
-        "summands": config["summands"], "strategy": "chain-s3",
+        "summands": config["summands"], "strategy": strategy_name(config),
         "policy": config["policy"], "seed": config["seed"],
         "max_trials": config["max_trials"],
         "budget_seconds": config["worker_wall_seconds"],
@@ -153,7 +162,8 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         max_trials: int, max_variables: int, max_domain_clauses: int,
         max_models: int, conflict_budget: int, wall_seconds: float,
         memory_mib: int, binary: Path, output_dir: Path,
-        image: str = "python:3.11-slim", checkout: Path | None = None) -> dict:
+        image: str = "python:3.11-slim", checkout: Path | None = None,
+        orbit_domain: bool = False) -> dict:
     if columns not in SIZES or policy not in POLICIES or seed not in SEEDS:
         raise ValueError("search selection is outside the retained primary panel")
     if summands not in (5, 6) or not 0 <= max_trials <= 1000:
@@ -214,6 +224,7 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         "fixture_sha256": {name: sha256_file(fixtures / name) for name in fixture_files},
         "columns": columns, "policy": policy,
         "seed": seed, "summands": summands, "max_trials": max_trials,
+        "domain_encoding": "frobenius_orbit_phase" if orbit_domain else "coordinate_trie",
         "max_variables": max_variables, "max_domain_clauses": max_domain_clauses,
         "max_models": max_models, "conflict_budget": conflict_budget,
         "wall_seconds": wall_seconds, "worker_wall_seconds": math.ceil(wall_seconds),
@@ -239,7 +250,8 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         "--mount", f"type=bind,src={source_dir},dst=/source,readonly",
         "--mount", f"type=bind,src={output_dir},dst=/out",
         "--env", "ICV1_FROZEN_SOURCE_DIR=/source", image_id,
-        "/worker", "primary-chain-cold", "/panel", "/fixtures", str(columns), policy, str(seed),
+        "/worker", "primary-orbit-chain-cold" if orbit_domain else "primary-chain-cold",
+        "/panel", "/fixtures", str(columns), policy, str(seed),
         str(summands), str(max_trials), str(max_variables), str(max_domain_clauses),
         str(max_models), str(conflict_budget), str(config["worker_wall_seconds"]),
         str(memory_mib), "/out/run",
@@ -309,7 +321,7 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
     valid_cap = (isinstance(cap, dict) and cap.get("schema") == "n83.primary-cold-cap/v1" and
                  cap.get("status") == "UNKNOWN_budget" and
                  cap.get("orbit_columns") == columns and cap.get("summands") == summands and
-                 cap.get("strategy") == "chain-s3" and cap.get("max_trials") == max_trials and
+                 cap.get("strategy") == strategy_name(config) and cap.get("max_trials") == max_trials and
                  cap.get("budget_seconds") == config["worker_wall_seconds"])
     worker_error = receipt_error(worker, worker_config, config)
     if cleanup_error:
@@ -367,12 +379,14 @@ def main() -> int:
     parser.add_argument("--memory-mib", type=int, required=True)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--image", default="python:3.11-slim")
+    parser.add_argument("--orbit-domain", action="store_true")
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     outer = run(args.panel, args.fixtures, args.columns, args.policy, args.seed, args.summands,
                 args.max_trials, args.max_variables, args.max_domain_clauses,
                 args.max_models, args.conflict_budget, args.wall_seconds,
-                args.memory_mib, args.binary, args.output_dir, args.image)
+                args.memory_mib, args.binary, args.output_dir, args.image,
+                orbit_domain=args.orbit_domain)
     print(json.dumps(outer, sort_keys=True))
     return 1 if outer["status"].startswith("PRODUCER_FAILURE") else 0
 
