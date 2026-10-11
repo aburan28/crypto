@@ -328,6 +328,7 @@ class MeasurementSchemaTests(unittest.TestCase):
             "seeds": {"direct": 1, "rho": 2},
             "claim_boundary_non_claims": ["not key recovery"],
             "operation_accounting": valid_operation_accounting(),
+        }
         report["paired_target"] = {
             "ic_public_q": [3, 5],
             "rho_public_q": [3, 5],
@@ -655,8 +656,8 @@ class HelperTests(unittest.TestCase):
             )
             result = lab.claim_check(args)
             self.assertEqual(result["status"], "FAIL")
+            self.assertIn("target_count", result["missing_stage_fields"])
             self.assertEqual(json.loads(out.read_text())["status"], "FAIL")
-
 
 
 class OperationAccountingTests(unittest.TestCase):
@@ -689,8 +690,6 @@ class OperationAccountingTests(unittest.TestCase):
         self.assertEqual(block["comparison_status"], "native_counters_only")
         self.assertIsNone(block["total_work_S"])
         self.assertIsNone(block["ops_speedup_online"])
-            self.assertIn("target_count", result["missing_stage_fields"])
-            self.assertEqual(json.loads(out.read_text())["status"], "FAIL")
 
 
     def test_independent_replay_pointer_targets_validation_receipt(self) -> None:
@@ -1136,40 +1135,6 @@ class SingleTargetPanelTests(unittest.TestCase):
         self.assertEqual(self.stp.untimed(record, ("relation_checks",)), {"kind": "k", "probes": 3})
 
 
-class OperationAccountingTests(unittest.TestCase):
-    def test_every_rung_accounts_and_matches_the_committed_block(self) -> None:
-        for name, cfg in op_accounting.RUNGS.items():
-            block = op_accounting.account_rung(name)
-            self.assertEqual(lab.operation_accounting_errors(block), [], name)
-            claim = json.loads((lab.REPO / cfg["dir"] / "claim_report_vs_rho.json").read_text())
-            self.assertEqual(claim.get("operation_accounting"), block, f"{name}: rerun op_accounting.py --write")
-            self.assertFalse(
-                any("S unknown" in item for item in claim["claim_boundary_non_claims"]), name
-            )
-
-    def test_n73_separates_contended_runs_and_lucky_target(self) -> None:
-        block = op_accounting.account_rung("n73")
-        self.assertEqual(block["ic_online_operations"], 457561)
-        self.assertEqual(block["host_contention"]["contended_runs"], ["R2", "R3"])
-        self.assertAlmostEqual(block["wall_speedup_median_uncontended_runs"], 184.8588, places=3)
-        self.assertGreater(block["target_luck_factor"], 100)
-        self.assertLess(block["ops_speedup_online_mean_target"], 1)
-        expected = op_accounting.expected_rho_steps(86020738150056119, 73)
-        self.assertAlmostEqual(block["ops_speedup_online"], expected / 457561)
-
-    def test_strip_s_unknown_keeps_the_rest_of_the_non_claim(self) -> None:
-        strip = op_accounting.strip_s_unknown
-        self.assertIsNone(strip("total operation-count comparison absent; S unknown"))
-        self.assertEqual(
-            strip("not an asymptotic sub-rho claim (both arms remain sqrt-class; "
-                  "total operation-count boundary not comparable, S unknown)"),
-            "not an asymptotic sub-rho claim (both arms remain sqrt-class)",
-        )
-        self.assertEqual(
-            strip("not an asymptotic sub-rho claim (total operation-count boundary not comparable, S unknown)"),
-            "not an asymptotic sub-rho claim",
-        )
-        self.assertEqual(strip("not key recovery"), "not key recovery")
 
 if __name__ == "__main__":
     unittest.main()

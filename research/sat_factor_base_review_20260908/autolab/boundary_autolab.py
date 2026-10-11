@@ -2643,7 +2643,6 @@ def parser() -> argparse.ArgumentParser:
             f"(default {DEFAULT_TIMED_REPEATS}; stops early once a run "
             f"exceeds {int(REPEAT_BUDGET_MS / 1000)}s)"
         ),
-        help="Online target count (default from beat); vs_rho primary runs require exactly 1",
     )
     launch_parser.add_argument(
         "--prepare-only",
