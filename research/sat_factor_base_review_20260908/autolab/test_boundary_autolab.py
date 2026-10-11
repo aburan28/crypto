@@ -34,6 +34,82 @@ def valid_operation_accounting(ic_ops: float = 100.0, rho_ops: float = 400.0) ->
     }
 
 
+def valid_single_target_report() -> dict:
+    return {
+        "n": 37,
+        "n_or_bits": 37,
+        "timing_class": "single_target_online",
+        "record_class": "verified_answer_exploratory_wall",
+        "ic_cost": 10.0,
+        "rho_cost": 20.0,
+        "automorphism_discount": {"A": 74, "formula": "sqrt(2*n)"},
+        "all_stages_charged_same_series": True,
+        "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
+        "candidate_manifest_sha256": "123456789abc0000000000000000000000000000000000000000000000000000",
+        "workload_id": "abcdef123456",
+        "workload_manifest_sha256": "abcdef1234560000000000000000000000000000000000000000000000000000",
+        "run_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abcWabcdef123456R1",
+        "target_count": 1,
+        "ic_target_hash": "target-abc",
+        "rho_target_hash": "target-abc",
+        "ic_online_wall_ms": 10.0,
+        "rho_online_wall_ms": 20.0,
+        "online_speedup": 2.0,
+        "ic_online_phase_ms": {
+            "T_target_query_ms": 1.0,
+            "T_target_PDP_ms": 3.0,
+            "T_target_relation_check_ms": 1.0,
+            "T_target_descent_ms": 4.0,
+            "T_target_recovery_check_ms": 1.0,
+        },
+        "online_interval": {
+            "ic_start_event": "first target-dependent IC query after reusable setup",
+            "ic_stop_event": "scalar recovered and independently verified",
+            "ic_included_stages": ["target_query", "target_PDP", "target_relation_check", "target_descent", "target_recovery_check"],
+            "rho_start_event": "first target-dependent rho walk",
+            "rho_stop_event": "scalar recovered and independently verified",
+            "rho_included_stages": ["walk", "collision", "recovery_check"],
+        },
+        "same_resource_envelope": True,
+        "independent_validation": True,
+        "ic_replay_certificate_sha256": "a" * 64,
+        "rho_replay_certificate_sha256": "b" * 64,
+        "ic_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+        "rho_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+        "ic_scalar_verified": True,
+        "rho_scalar_verified": True,
+        "rho_policy": {
+            "worker_count": 1,
+            "walk_policy": "signed_frobenius",
+            "collision_policy": "distinguished_point",
+            "distinguished_point_memory_bytes": 0,
+            "automorphism_size": 74,
+        },
+        "verdict": "DRAFT",
+        "claim_boundary": "single public target only",
+        "independent_replay_pointer": "research/example",
+        "paired_target": {
+            "ic_public_q": [17, 23],
+            "rho_public_q": [17, 23],
+            "same_public_point": True,
+        },
+        "ic_verified": True,
+        "rho_verified": True,
+        "ic_online_ms": 10.0,
+        "rho_online_ms": 20.0,
+        "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
+        "ic_online_interval": "target work only",
+        "rho_online_interval": "target walk through replay",
+        "fixture_hash": "target-abc",
+        "executable_or_source_hash": {"direct": "def", "rho": "ghi"},
+        "host_id": {"node": "test"},
+        "resource_caps": {"common_cap_bytes": 1},
+        "seeds": {"direct": 1, "rho": 2},
+        "claim_boundary_non_claims": ["not key recovery"],
+        "operation_accounting": valid_operation_accounting(),
+    }
+
+
 class LedgerContractTests(unittest.TestCase):
     def test_protocol_and_ledger_load(self) -> None:
         protocol = lab.load_protocol()
@@ -169,78 +245,7 @@ class MeasurementSchemaTests(unittest.TestCase):
                 self.assertIn(expected, result["validation_errors"])
 
     def test_vs_rho_single_target_online_claim_passes(self) -> None:
-        report = {
-            "n": 37,
-            "n_or_bits": 37,
-            "timing_class": "single_target_online",
-            "record_class": "verified_answer_exploratory_wall",
-            "ic_cost": 10.0,
-            "rho_cost": 20.0,
-            "automorphism_discount": {"A": 74, "formula": "sqrt(2*n)"},
-            "all_stages_charged_same_series": True,
-            "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
-            "candidate_manifest_sha256": "123456789abc0000000000000000000000000000000000000000000000000000",
-            "workload_id": "abcdef123456",
-            "workload_manifest_sha256": "abcdef1234560000000000000000000000000000000000000000000000000000",
-            "run_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abcWabcdef123456R1",
-            "target_count": 1,
-            "ic_target_hash": "target-abc",
-            "rho_target_hash": "target-abc",
-            "ic_online_wall_ms": 10.0,
-            "rho_online_wall_ms": 20.0,
-            "online_speedup": 2.0,
-            "ic_online_phase_ms": {
-                "T_target_query_ms": 1.0,
-                "T_target_PDP_ms": 3.0,
-                "T_target_relation_check_ms": 1.0,
-                "T_target_descent_ms": 4.0,
-                "T_target_recovery_check_ms": 1.0,
-            },
-            "online_interval": {
-                "ic_start_event": "first target-dependent IC query after reusable setup",
-                "ic_stop_event": "scalar recovered and independently verified",
-                "ic_included_stages": ["target_query", "target_PDP", "target_relation_check", "target_descent", "target_recovery_check"],
-                "rho_start_event": "first target-dependent rho walk",
-                "rho_stop_event": "scalar recovered and independently verified",
-                "rho_included_stages": ["walk", "collision", "recovery_check"],
-            },
-            "same_resource_envelope": True,
-            "independent_validation": True,
-            "ic_replay_certificate_sha256": "a" * 64,
-            "rho_replay_certificate_sha256": "b" * 64,
-            "ic_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
-            "rho_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
-            "ic_scalar_verified": True,
-            "rho_scalar_verified": True,
-            "rho_policy": {
-                "worker_count": 1,
-                "walk_policy": "signed_frobenius",
-                "collision_policy": "distinguished_point",
-                "distinguished_point_memory_bytes": 0,
-                "automorphism_size": 74,
-            },
-            "verdict": "DRAFT",
-            "claim_boundary": "single public target only",
-            "independent_replay_pointer": "research/example",
-            "paired_target": {
-                "ic_public_q": [17, 23],
-                "rho_public_q": [17, 23],
-                "same_public_point": True,
-            },
-            "ic_verified": True,
-            "rho_verified": True,
-            "ic_online_ms": 10.0,
-            "rho_online_ms": 20.0,
-            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
-            "ic_online_interval": "target work only",
-            "rho_online_interval": "target walk through replay",
-            "fixture_hash": "target-abc",
-            "executable_or_source_hash": {"direct": "def", "rho": "ghi"},
-            "host_id": {"node": "test"},
-            "resource_caps": {"common_cap_bytes": 1},
-            "seeds": {"direct": 1, "rho": 2},
-            "claim_boundary_non_claims": ["not key recovery"],
-        }
+        report = valid_single_target_report()
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "PASS", result)
 
@@ -295,40 +300,7 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertTrue(lab.operation_accounting_errors(accounting))
 
     def test_vs_rho_different_public_points_fail(self) -> None:
-        report = {
-            "n_or_bits": 41,
-            "timing_class": "single_target_online",
-            "record_class": "verified_answer_exploratory_wall",
-            "ic_cost": 10.0,
-            "rho_cost": 20.0,
-            "automorphism_discount": {"A": 82, "formula": "sqrt(2*n)"},
-            "all_stages_charged_same_series": True,
-            "verdict": "DRAFT",
-            "claim_boundary": "synthetic only",
-            "independent_replay_pointer": "research/example",
-            "target_count": 1,
-            "paired_target": {
-                "ic_public_q": [17, 23],
-                "rho_public_q": [19, 29],
-                "same_public_point": False,
-            },
-            "ic_verified": True,
-            "rho_verified": True,
-            "ic_online_ms": 10.0,
-            "rho_online_ms": 20.0,
-            "online_speedup": 2.0,
-            "ic_online_phase_ms": {"target_pdp": 10.0},
-            "rho_online_phase_ms": {"walk_and_collision_ms": 19.0, "recovery_check_ms": 1.0},
-            "ic_online_interval": "target work only",
-            "rho_online_interval": "target walk through replay",
-            "fixture_hash": "abc",
-            "executable_or_source_hash": "def",
-            "host_id": {"node": "test"},
-            "resource_caps": {"common_cap_bytes": 1},
-            "seeds": {"direct": 1, "rho": 2},
-            "claim_boundary_non_claims": ["not key recovery"],
-            "operation_accounting": valid_operation_accounting(),
-        }
+        report = valid_single_target_report()
         report["paired_target"] = {
             "ic_public_q": [3, 5],
             "rho_public_q": [3, 5],
@@ -615,7 +587,7 @@ class HelperTests(unittest.TestCase):
         args = lab.parser().parse_args([
             'launch', '--beat', 'koblitz.vs_rho.n37_wall', '--fixtures', '2'
         ])
-        with self.assertRaisesRegex(lab.AutolabError, 'exactly one online target'):
+        with self.assertRaisesRegex(lab.AutolabError, 'require exactly one target'):
             lab.launch(args)
 
     def test_seed_is_deterministic(self) -> None:
@@ -784,7 +756,8 @@ class OperationAccountingTests(unittest.TestCase):
             accounting = claim["operation_accounting"]
             self.assertEqual(accounting["ic_online_operations"], 1)
             self.assertEqual(accounting["rho_online_operations"], 12)
-            self.assertEqual(accounting["ops_speedup_online"], 12.0)
+            self.assertEqual(accounting["rho_per_ic_native_counter"], 12.0)
+            self.assertIsNone(accounting["ops_speedup_online"])
             self.assertEqual(lab.operation_accounting_errors(accounting), [])
             self.assertEqual(
                 claim["independent_replay_pointer"],
