@@ -381,3 +381,39 @@ constant-factor mechanism the feasibility note's rank-stage accounting
 `K ÷ 10` at equal table memory, i.e. a 10× smaller rank precompute, or the
 same `K` with the yield of a 10× larger table. Still `B·D²/N ≫ 1` and still
 a pair-table constant, not an exponent.
+
+### A1 limit at n = 41, three summands: fewer columns, larger norm (4 targets each, all verified)
+
+| base | points | columns | trials per relation | relations | probes (adds) | table adds | base build GAE | total GAE | `S` | IC / rho |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 6 columns, norm 16 | 4,920 | 6 | 21.5 | 6.5 | 6.55·10⁵ | 1.5·10⁵ | 11,700 | 8.71·10⁵ | 1.17 | 5.6× |
+| 3 columns, norm 32 | 4,920 | 3 | 34.8 | 4 | 6.69·10⁵ | 1.5·10⁵ | 11,600 | 8.86·10⁵ | 1.19 | 5.7× |
+| 2 columns, norm 64 | 6,230 | 2 | 22.5 | 3 | 4.05·10⁵ | 2.4·10⁵ | 15,200 | 6.94·10⁵ | **0.94** | **4.5×** |
+| 1 column, norm 160 | 7,790 | 1 | 37.8 | 2 | 5.75·10⁵ | 3.74·10⁵ | 18,900 | 1.02·10⁶ | 1.37 | 6.5× |
+
+The floor is in sight: a one-column base still needs two relations (the
+target column and one more), each costing `trials × |B|` probes, so below
+three columns the relation phase stops falling and the table (∝ `|B|²/4n`)
+takes over. The operation-counted optimum of the pair-table family on `K_0`
+at 39 bits with everything this ladder has (orbit union, `Z[τ]` closure,
+Frobenius-folded table, three summands) is **≈ 2 columns of ≈ 6,000 points,
+`S ≈ 0.94`, 4.5× the matched signed-Frobenius rho**, against 51× for the
+ledger-shaped 60-column base and 199× for 20 plain columns. Still a constant
+on a toy rung; the exponent is the family's.
+
+### L5 algebraic form, three summands (descended S4, `exhaustive` solver on 12 unknowns)
+
+Only summand 2 is rotated (`slots=all`), summands 1 and 3 stay over `V`, so
+the plain system's `3! = 6` symmetry is broken down to the swap of summands
+1 and 3: the prediction is **3** hits per solved system relative to plain.
+
+| rung | base | arm | targets tried | relations | systems solved | hits per system | ratio |
+|---:|---|---|---:|---:|---:|---:|---:|
+| n = 17 (`K_1`) | closure of dim 4: 136 points, 4 columns | plain descended S4 | 22,982 | 35 | 22,451 | 0.00156 | 1 |
+| n = 17 | same | slots = all (17 systems per target) | 686 | 34 | 11,387 | 0.00299 | **1.92** |
+
+At n = 17 the measured factor is again about two thirds of the prediction
+(1.92 against 3, as 1.34 against 2 at `m = 2`), consistent with the same
+small-group correction on this `K_1` instance; the n = 23 row follows below
+when it lands. Lift failures (18 and 10) are abscissae whose points lie on
+the twist, as the oracle documents; every recovered logarithm verified.
