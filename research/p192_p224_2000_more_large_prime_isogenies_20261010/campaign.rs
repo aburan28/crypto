@@ -291,7 +291,8 @@ fn snapshot(old: &Path, out: &Path) -> Value {
     }
     json!({"schema":"additional-prime-maps/v1","status":if complete && total>=2000 {"PASS"} else {"IN_PROGRESS"},"requested_additional_maps":2000,"verified_additional_maps":total,"remaining_additional_maps":2000u64.saturating_sub(total),"distinct_prime_degrees":2,"degree_coverage":"PARTIAL","integrity_audit":"PASS","audit_scope":"linked hashes and exact-replay receipts; algebraic replay occurs in the walk executable","counts":counts,"records":records})
 }
-fn launch(binary: &Path, out: &Path, protocol: &Path) {
+fn launch(binary: &Path, out: &Path, protocol: &Path, old: &Path) {
+    assert_eq!(prior_keys(old).len(), 100);
     assert!(!out.exists(), "launch needs a fresh output root");
     fs::create_dir_all(out).unwrap();
     fs::copy(binary, out.join("isogeny")).unwrap();
@@ -303,7 +304,7 @@ fn launch(binary: &Path, out: &Path, protocol: &Path) {
     assert_eq!(v["tool"]["git_dirty"], "false");
     save(
         &out.join("LAUNCH.json"),
-        &json!({"schema":"additional-prime-launch/v1","supervisor_pid":std::process::id(),"tool":v["tool"],"binary_sha256":hash(&fs::read(&exe).unwrap()),"protocol_sha256":hash(&fs::read(protocol).unwrap()),"per_curve_count":1050,"concurrent_walks":2}),
+        &json!({"schema":"additional-prime-launch/v1","supervisor_pid":std::process::id(),"tool":v["tool"],"binary_sha256":hash(&fs::read(&exe).unwrap()),"supervisor_binary_sha256":hash(&fs::read(std::env::current_exe().unwrap()).unwrap()),"supervisor_source_commit":option_env!("CAMPAIGN_SOURCE_COMMIT").unwrap_or("unknown"),"protocol_sha256":hash(&fs::read(protocol).unwrap()),"prior_manifest_sha256":hash(&fs::read(old.join("MANIFEST.json")).unwrap()),"per_curve_count":1050,"concurrent_walks":2}),
     );
     let prevent_sleep = Command::new("caffeinate")
         .args(["-i", "-w", &std::process::id().to_string()])
@@ -330,6 +331,12 @@ fn launch(binary: &Path, out: &Path, protocol: &Path) {
         &out.join("SUPERVISOR_EXIT.json"),
         &json!({"status":if ok {"PASS"} else {"FAIL"},"pid":std::process::id()}),
     );
+    // Preserve the actual outcome even if no chat turn is active at completion.
+    let final_summary = snapshot(old, out);
+    save(&out.join("FINAL_SUMMARY.json"), &final_summary);
+    if ok && final_summary["status"] != "PASS" {
+        std::process::exit(4);
+    }
     if !ok {
         std::process::exit(3);
     }
@@ -346,8 +353,13 @@ fn main() {
             check_long_prefix(Path::new(&a[2]), Path::new(&a[3]), Path::new(&a[4]));
         }
         Some("launch") => {
-            assert_eq!(a.len(), 5, "launch BINARY FRESH_OUTPUT PROTOCOL");
-            launch(Path::new(&a[2]), Path::new(&a[3]), Path::new(&a[4]));
+            assert_eq!(a.len(), 6, "launch BINARY FRESH_OUTPUT PROTOCOL OLD_STUDY");
+            launch(
+                Path::new(&a[2]),
+                Path::new(&a[3]),
+                Path::new(&a[4]),
+                Path::new(&a[5]),
+            );
         }
         Some("status") => {
             assert_eq!(a.len(), 4, "status OLD_STUDY OUTPUT");

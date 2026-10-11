@@ -17,7 +17,7 @@ The CLI seals `walk.json` after every verified step, even during a running walk.
 The campaign utility has separate launch and read-only integrity status modes:
 
 ```sh
-isogeny-campaign launch /absolute/path/isogeny /fresh/campaign/root /absolute/path/PROTOCOL.md
+isogeny-campaign launch /absolute/path/isogeny /fresh/campaign/root /absolute/path/PROTOCOL.md /absolute/path/old-hundred-study
 isogeny-campaign status /absolute/path/old-hundred-study /absolute/path/campaign/root
 isogeny-campaign report /absolute/path/old-hundred-study /absolute/path/campaign/root /fresh/report/directory
 ```
@@ -29,6 +29,9 @@ directory. Preserve snapshots rather than replacing an earlier observed state.
 
 `launch` records the clean CLI version, binary/protocol hashes, supervisor PID,
 stdout/stderr, and child exit receipts. Its process waits for both walks.
+It writes `FINAL_SUMMARY.json` after both walks exit, checking the final unique
+additional count even if no chat turn is active. The final integrity receipt is
+separate from archiving, canonical registration and PR delivery.
 Run it detached with `nohup` when starting a long campaign. It invokes macOS
 `caffeinate` when available to keep the host awake for its lifetime.
 
