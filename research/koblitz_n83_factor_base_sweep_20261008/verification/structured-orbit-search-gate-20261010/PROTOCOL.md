@@ -44,7 +44,12 @@ change or cleanup failure cannot be promoted to relation evidence.
 The output is a fresh directory outside the checkout. It keeps `config.json`,
 stage stdout/stderr, `outer.json`, `budget.json`, and the worker's progress,
 attempt, relation, rank and cgroup peak-memory records if the search stage
-reached them. The outer receipt validates the worker's counts and retains the status
+reached them. The search supervisor defaults to the same immutable Linux image
+ID pinned by the build script. A prior local `python:3.11-slim` tag resolved to
+a different image and would fail the frozen build/search identity check before
+archive import.
+
+The outer receipt validates the worker's counts and retains the status
 `UNKNOWN_solver_cap`, `UNKNOWN_trial_cap`, `UNKNOWN_wall_cap`,
 `UNKNOWN_resource_cap` or `PRODUCER_FAILURE_*`. One trial cannot determine the
 2,001 relation columns and the driver disables direct-relation bypass; a

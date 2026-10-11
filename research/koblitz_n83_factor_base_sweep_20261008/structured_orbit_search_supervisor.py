@@ -31,6 +31,7 @@ OBJECT_BLAKE3 = "aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a3138
 MANIFEST_BLAKE3 = "d6adad9bec74350f37bf917e737006869bc0f343692f668fa4dc893afe332745"
 CORPUS_BLAKE3 = "831eaa7be2387634fd610f6706103b2af9b4e274f0db59923c0280af3cbed74b"
 CURVE = "icv1-f2m83-tm6151469093347-debefd74"
+IMAGE = "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31"
 VERIFY_WALL = 240
 SEARCH_WALL = 720
 WORKER_WALL = 710
@@ -259,7 +260,7 @@ def stage(
 
 def run(
     object_path: Path, binary: Path, authorization_path: Path, output: Path,
-    image: str = "python:3.11-slim", checkout: Path = ROOT,
+    image: str = IMAGE, checkout: Path = ROOT,
 ) -> dict:
     checkout = checkout.resolve(strict=True)
     object_path, binary, authorization_path = (
@@ -479,7 +480,7 @@ def main() -> int:
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--authorization", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--image", default="python:3.11-slim")
+    parser.add_argument("--image", default=IMAGE)
     args = parser.parse_args()
     outer = run(args.object, args.binary, args.authorization, args.output, args.image)
     print(json.dumps(outer, sort_keys=True))

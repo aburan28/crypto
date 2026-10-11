@@ -56,6 +56,12 @@ def search_records() -> tuple[dict, dict]:
 
 
 class StructuredOrbitGateTests(unittest.TestCase):
+    def test_default_search_image_matches_pinned_build_image(self):
+        script = (Path(gate.__file__).parent / "verification" /
+                  "structured-orbit-search-gate-20261010" / "build-linux.sh")
+        self.assertIn(f'image = "{gate.IMAGE}"', script.read_text())
+        self.assertEqual(gate.run.__defaults__[0], gate.IMAGE)
+
     def test_archive_and_search_receipts_reject_false_claims(self):
         self.assertIsNone(gate.verify_receipt_error(verification()))
         wrong = verification()
