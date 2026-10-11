@@ -1067,8 +1067,8 @@ impl Gf2_128 {
     pub fn sqr(&self, a: u128) -> u128 {
         let lo64 = a as u64;
         let hi64 = (a >> 64) as u64;
-        let lo = (spread32(lo64) as u128) | ((spread32((lo64 >> 32) as u64) as u128) << 64);
-        let hi = (spread32(hi64) as u128) | ((spread32((hi64 >> 32) as u64) as u128) << 64);
+        let lo = (spread32(lo64) as u128) | ((spread32(lo64 >> 32) as u128) << 64);
+        let hi = (spread32(hi64) as u128) | ((spread32(hi64 >> 32) as u128) << 64);
         #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
         if self.fold_tail != 0 {
             // SAFETY: as in `mul`; a square has degree ≤ 2n − 2 as well.

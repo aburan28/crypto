@@ -1307,7 +1307,7 @@ mod tests {
             .iter()
             .filter(|curve| matches!(&curve.model, Model::Extension { .. }))
             .collect();
-        assert_eq!(extensions.len(), 1313);
+        assert_eq!(extensions.len(), 1324);
         for curve in extensions {
             let Model::Extension {
                 p,

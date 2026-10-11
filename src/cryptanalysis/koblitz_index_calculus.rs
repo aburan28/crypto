@@ -151,10 +151,8 @@ use crate::cryptanalysis::ec_index_calculus::{
 use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
+use crate::cryptanalysis::koblitz_fast_arith::{pack_fast, FastPoint as ArithFastPoint};
 use crate::cryptanalysis::koblitz_fast_arith::{FastBinaryCurve, FastBinaryCurve128, FastPoint128};
-use crate::cryptanalysis::koblitz_fast_arith::{
-    pack_fast, FastPoint as ArithFastPoint,
-};
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
     solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
@@ -865,7 +863,6 @@ impl KoblitzCurve {
         Self::subfield(1, n, u64::from(a), 1)
     }
 
-
     /// The pinned K_1 model over GF(2^83) used by the two-word IC stage
     /// gate. Its parameters are the C082 public fixture.
     pub fn known_n83_k1() -> Option<Self> {
@@ -1128,7 +1125,7 @@ impl KoblitzCurve {
         b: F2mElement,
         modulus: Option<IrreduciblePoly>,
     ) -> Option<Self> {
-        if a > 1 || n < 3 || n > MAX_N {
+        if a > 1 || !(3..=MAX_N).contains(&n) {
             return None;
         }
         let irreducible = match modulus {
@@ -1212,7 +1209,6 @@ impl KoblitzCurve {
         })
     }
 }
-
 
 impl KoblitzCurve {
     /// The `2`-power Frobenius `π(x, y) = (x², y²)`; the identity on an
@@ -1958,8 +1954,8 @@ impl FrobeniusFactorBase {
     /// and as a second reference alongside the naive one in tests.
     fn m_can_decompose_slow(&self, kc: &KoblitzCurve, classes: &[BinaryPoint], m: usize) -> bool {
         match FastCurve::new(&kc.curve) {
-            Some(fc) => fast_classes_can_cancel(kc, &fc, &classes, m),
-            None => classes_can_cancel(kc, &classes, m),
+            Some(fc) => fast_classes_can_cancel(kc, &fc, classes, m),
+            None => classes_can_cancel(kc, classes, m),
         }
     }
 
@@ -2266,13 +2262,6 @@ fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2m
     for i in 0..n {
         let basis = F2mElement::from_bit_positions(&[i], n);
         let img = image(&basis);
-        let img_bits = img
-            .to_biguint()
-            .to_u128()
-            .expect("field degree at most 127");
-        let raw = img.raw_bits();
-        let img_bits = raw.first().copied().unwrap_or(0) as u128
-            | ((raw.get(1).copied().unwrap_or(0) as u128) << 64);
         let words = img.raw_bits();
         let img_bits = u128::from(words.first().copied().unwrap_or(0))
             | (u128::from(words.get(1).copied().unwrap_or(0)) << 64);
@@ -3247,9 +3236,16 @@ pub fn saturate_factor_base_two_torsion(
     }
     let sums = fast.batch_add(&pairs);
     let mut xs = std::collections::BTreeMap::new();
-    for p in &fb.points {
-        for q in [p.clone(), kc.add(p, &t)] {
-            if let BinaryPoint::Affine { x, .. } = q {
+    for (p, s) in fb.points.iter().zip(sums.iter()) {
+        let q = match s {
+            None => BinaryPoint::Infinity,
+            Some((x, y)) => BinaryPoint::Affine {
+                x: fast.element(*x),
+                y: fast.element(*y),
+            },
+        };
+        for r in [p.clone(), q] {
+            if let BinaryPoint::Affine { x, .. } = r {
                 xs.entry(x.to_biguint()).or_insert(x);
             }
         }
@@ -4440,6 +4436,7 @@ impl Default for ProbeBudget {
 /// ranges, key-grouped `m = 4` walk); the previous comparison sort made
 /// no order guarantee within a group either, and every gate checks
 /// verdicts, witness validity, and sortedness rather than exact order.
+#[cfg(test)]
 fn radix_sort_entries_by_key(entries: &mut [(u64, u32, u32)]) {
     const BITS: u32 = 16;
     const BUCKETS: usize = 1 << BITS;
