@@ -392,6 +392,9 @@ static void test_interval() {
         else if (lo + 32 > nb) x0[l] &= (1u << (nb - lo)) - 1u;
     }
     x0[7] &= 0x7FFFFFFFu; x0[1] &= 0x7FFFFFFFu;   /* comfortably below n on both curve sizes */
+    /* and below 2^(nb-1) <= n whatever n's leading bits are (curve25519's
+     * n = 2^252 + ... leaves most 253-bit values above it) */
+    x0[(nb - 1) / 32] &= ~(1u << ((nb - 1) % 32));
     BsgsPlan p = bsgs_plan(width, 1, T, W, x0);
     BsgsHost h;
     h.setup(G, p);

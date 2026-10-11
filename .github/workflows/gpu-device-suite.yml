@@ -1,0 +1,61 @@
+name: GPU device suite (Modal)
+# Manual only: GPU time is billed.  Runs gpu/run_device_suite.sh on one Modal
+# GPU and uploads the logs.  Needs the repository secrets MODAL_TOKEN_ID and
+# MODAL_TOKEN_SECRET; without them the job reports that and does nothing.
+on:
+  workflow_dispatch:
+    inputs:
+      gpu:
+        description: "Modal GPU type"
+        required: true
+        type: choice
+        default: RTX-PRO-6000
+        options: [RTX-PRO-6000, H100, H200, B200, L40S, A100, L4, T4]
+      families:
+        description: "Comma-separated: ecc-secp256k1, ecc-curve25519, nist"
+        required: false
+        default: "ecc-secp256k1,ecc-curve25519,nist"
+concurrency:
+  group: gpu-device-suite
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  suite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 600
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Modal credentials
+        id: creds
+        run: |
+          if [ -n "$MODAL_TOKEN_ID" ] && [ -n "$MODAL_TOKEN_SECRET" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "MODAL_TOKEN_ID / MODAL_TOKEN_SECRET are not configured; nothing ran." | tee modal-unavailable.txt
+          fi
+      - name: Host suites first (no GPU; a failure here means the image would be broken)
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          sudo apt-get update && sudo apt-get install -y libboost-dev
+          make -C gpu/ecc test && make -C gpu/nist test
+      - name: Device suite
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          python3 -m pip install -q 'modal>=1.1,<2'
+          gpu/run_device_suite.sh "${{ inputs.gpu }}" "${{ inputs.families }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gpu-device-suite-${{ inputs.gpu }}
+          path: |
+            research/gpu_device_suite_*/
+            modal-unavailable.txt
+          if-no-files-found: warn

@@ -455,3 +455,39 @@ does and does not establish.
 5. `./bench rho --fold 6` vs `--fold 2` (secp256k1 defaults to 6): the
    fold-6 step should cost about 10% more; on a toy curve `--solve` then
    shows the sqrt(3) fewer steps.
+
+## 7. Curve25519 (Ed25519's group)
+
+Added after the sections above were written; nothing here has executed on
+a device either.
+
+The field of Ed25519 / X25519 is p = 2^255 − 19, and `fp256.cuh` gives it
+its own `FAST` path (`CURVE_FAST_KIND 2`): elements are canonical integers,
+and a 512-bit product is reduced with 2^256 ≡ 38 (mod p) in one
+`mp_mac_row9` (lo + 38·hi, the top limb below 2^5), one `mp_add_small`
+fold of that top limb times 38, one more for its carry, and two conditional
+subtractions of p (the folded value is below 2^256 = 2p + 38, so one is not
+always enough). That is strictly less work than the secp256k1 reduction,
+which also needs the `hi << 32` carry chain. The reduction reuses the
+primitives whose inline-PTX variants `ptx_asm_check.py` already interprets,
+so `FP_PTX=1` covers it with no new assembly.
+
+Inversion is the ref10 / TweetNaCl `fe_invert` chain: a^(2^k − 1) for
+k = 5, 10, 20, 40, 50, 100, 200, 250, then ·a^11, for 254 squarings and 11
+multiplications (265 operations, eight live elements) against 270 on
+secp256k1 and ~316 for the generic window. The rho step is therefore
+6 + 265/W multiplications; there is no order-six fold (a ≠ 0), so the walk
+defaults to the negation map and the expected step count is
+√(πℓ/4) with ℓ ≈ 2^252.
+
+What is verified: `test_25519_fast` and `test_25519_mont` (the same
+vectors through the special reduction and through Montgomery, so the two
+agree on canonical values; field, points including the cofactor-cleared
+base point and ℓ·G = O, walk traces for folds 1 and 2, three bit-identical
+steppers, replayed distinguished points, fruitless-cycle rates and escapes)
+and `test_bsgs_25519_fast` (table, steppers, a 2^22-wide interval log at a
+random 253-bit offset). Static PTX counts for the new multiply are not yet
+taken (no CUDA-capable clang where this was written); the expectation from
+the fold shapes is a reduction a little under secp256k1's 77 PTX
+instructions on the PTX path.
+
