@@ -975,6 +975,14 @@ fn reduce_pairs_fl(
     for (i, &c) in free_cols.iter().enumerate() {
         free_index[c] = i as u32;
     }
+    // A row of `B'` is zero on the free columns left of its reducer's lead
+    // (every term of a reducer, and of everything it is reduced by, lies
+    // right of that lead), so its updates start at the first free column
+    // past the lead.
+    let bstart: Vec<usize> = reducers
+        .iter()
+        .map(|r| free_cols.partition_point(|&c| c <= r[0].0 as usize))
+        .collect();
     // reducers by leading column, rightmost first: a reducer's entry at
     // another reducer's column lies right of its own lead, so that
     // reducer is finished before this one is reached
@@ -998,7 +1006,7 @@ fn reduce_pairs_fl(
             } else {
                 let j = reducer_at[c as usize] as usize;
                 if position[j] < block_start {
-                    add_lazy(&mut acc, &bprime[j], 0, fp.p - v, simd);
+                    add_lazy(&mut acc, &bprime[j], bstart[j], fp.p - v, simd);
                     pending += 1;
                     if pending == NORMALIZE_AFTER {
                         normalize_lazy(&mut acc, fp);
@@ -1033,7 +1041,7 @@ fn reduce_pairs_fl(
             // in-block dependencies are earlier in the block, so finished
             for &(j, v) in later.iter() {
                 debug_assert!(position[j] < position[k]);
-                add_lazy(acc, &bprime[j], 0, fp.p - v, simd);
+                add_lazy(acc, &bprime[j], bstart[j], fp.p - v, simd);
                 *pending += 1;
                 if *pending == NORMALIZE_AFTER {
                     normalize_lazy(acc, fp);
@@ -1055,7 +1063,7 @@ fn reduce_pairs_fl(
                 acc[fi as usize] += v;
             } else {
                 let j = reducer_at[c as usize] as usize;
-                add_lazy(&mut acc, &bprime[j], 0, fp.p - v, simd);
+                add_lazy(&mut acc, &bprime[j], bstart[j], fp.p - v, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -1416,11 +1424,16 @@ fn f4_with_arithmetic(
         let mut monomials: FxSet<Vec<u32>> = FxSet::default();
         let mut done: FxSet<Vec<u32>> = FxSet::default();
         let mut queue: Vec<Vec<u32>> = Vec::new();
+        // One scratch monomial; a heap copy only for a monomial not seen.
+        let mut em: Vec<u32> = vec![0; n_vars];
         for (idx, m) in &rows_poly {
             for (e, _) in &basis[*idx] {
-                let em: Vec<u32> = e.iter().zip(m).map(|(x, y)| x + y).collect();
-                if monomials.insert(em.clone()) {
-                    queue.push(em);
+                for (k, x) in em.iter_mut().enumerate() {
+                    *x = e[k] + m[k];
+                }
+                if !monomials.contains(em.as_slice()) {
+                    monomials.insert(em.clone());
+                    queue.push(em.clone());
                 }
             }
             let lm: Vec<u32> = basis[*idx][0].0.iter().zip(m).map(|(x, y)| x + y).collect();
@@ -1443,9 +1456,12 @@ fn f4_with_arithmetic(
                     .collect();
                 if seen.insert((idx, m.clone())) {
                     for (e, _) in &basis[idx] {
-                        let em: Vec<u32> = e.iter().zip(&m).map(|(x, y)| x + y).collect();
-                        if monomials.insert(em.clone()) {
-                            queue.push(em);
+                        for (k, x) in em.iter_mut().enumerate() {
+                            *x = e[k] + m[k];
+                        }
+                        if !monomials.contains(em.as_slice()) {
+                            monomials.insert(em.clone());
+                            queue.push(em.clone());
                         }
                     }
                     rows_poly.push((idx, m));
