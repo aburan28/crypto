@@ -37,6 +37,8 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             src
+            docs/curves/traits.json
+            docs/identity-certificates/schoenhage-10mult.json
             examples/n37_frobenius_fold_gate.rs
             examples/n37_frobenius_fold_replay.rs
             docs/curves/registry.json

@@ -80,6 +80,11 @@ jobs:
             Cargo.toml
             docs/ic/calibration.json
             src
+            docs/curves/registry.json
+            docs/curves/traits.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/identity-certificates/schoenhage-10mult.json
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v3.rs
       - name: Build exact merged source with frozen lock
@@ -145,6 +150,11 @@ jobs:
             Cargo.toml
             docs/ic/calibration.json
             src
+            docs/curves/registry.json
+            docs/curves/traits.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/identity-certificates/schoenhage-10mult.json
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v3.rs
       - name: Build exact merged source with frozen lock

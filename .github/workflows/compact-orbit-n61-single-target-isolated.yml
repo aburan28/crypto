@@ -51,6 +51,8 @@ jobs:
             experiments/koblitz-single-target-n73-20261003
             experiments/koblitz-single-target-n83-20261006
             src
+            docs/curves/traits.json
+            docs/identity-certificates/schoenhage-10mult.json
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_orbit_dlp_fast_online.rs
             examples/koblitz_rho_batch_ks_strong.rs
@@ -97,6 +99,8 @@ jobs:
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             src
+            docs/curves/traits.json
+            docs/identity-certificates/schoenhage-10mult.json
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_orbit_dlp_fast_online.rs
             examples/koblitz_rho_batch_ks_strong.rs

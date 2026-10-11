@@ -43,6 +43,8 @@ jobs:
             docs/ecbench/schema.sql
             docs/curves/registry.json
             src
+            docs/curves/traits.json
+            docs/identity-certificates/schoenhage-10mult.json
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_orbit_dlp_fast_online.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -85,6 +87,8 @@ jobs:
             docs/ecbench/schema.sql
             docs/curves/registry.json
             src
+            docs/curves/traits.json
+            docs/identity-certificates/schoenhage-10mult.json
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_orbit_dlp_fast_online.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
