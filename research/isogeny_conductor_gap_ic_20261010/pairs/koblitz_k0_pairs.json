@@ -1,0 +1,181 @@
+{
+  "failures": [
+    {
+      "a": 0,
+      "error": "no Koblitz instance",
+      "family": "koblitz",
+      "n": 20
+    },
+    {
+      "a": 0,
+      "error": "no Koblitz instance",
+      "family": "koblitz",
+      "n": 17
+    }
+  ],
+  "family": "koblitz",
+  "pairs": [
+    {
+      "a": 0,
+      "cofactor": 4,
+      "conductor_factors": [
+        [
+          457,
+          1
+        ]
+      ],
+      "curves": [
+        {
+          "a6": 1,
+          "conductor": 1,
+          "end_evidence": "defined over F_2: End = Z[τ] = O_K",
+          "explicit": {
+            "a": 0,
+            "b": 1,
+            "group_order": 523492,
+            "gx": 385982,
+            "gy": 301867,
+            "kind": "binary_explicit",
+            "modulus": 524327,
+            "n": 19,
+            "r": 130873
+          },
+          "role": "crater",
+          "spec": {
+            "a": 0,
+            "kind": "koblitz",
+            "n": 19
+          }
+        },
+        {
+          "a6": 212302,
+          "at_ell_floor": true,
+          "conductor": 457,
+          "ell": 457,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m} for every ℓ | f_π: End = Z[π]",
+          "role": "floor",
+          "spec": {
+            "a": 0,
+            "b": 212302,
+            "group_order": 523492,
+            "gx": 383442,
+            "gy": 292022,
+            "kind": "binary_explicit",
+            "modulus": 524327,
+            "n": 19,
+            "r": 130873
+          },
+          "step": 1
+        }
+      ],
+      "edges": [
+        {
+          "a6_from": 1,
+          "a6_to": 212302,
+          "ell": 457,
+          "ext_degree": 8,
+          "kernels_tried": 1,
+          "loops_skipped": 0,
+          "x_image": 383442
+        }
+      ],
+      "family": "koblitz",
+      "floor_certificates": [
+        {
+          "ell": 457,
+          "ext_degree": 8,
+          "rank": 1
+        }
+      ],
+      "frobenius_conductor": 457,
+      "gap": 457,
+      "group_order": 523492,
+      "n": 19,
+      "r": 130873,
+      "seconds": 0.082130578,
+      "trace": 797
+    },
+    {
+      "a": 0,
+      "cofactor": 4,
+      "conductor_factors": [
+        [
+          967,
+          1
+        ]
+      ],
+      "curves": [
+        {
+          "a6": 1,
+          "conductor": 1,
+          "end_evidence": "defined over F_2: End = Z[τ] = O_K",
+          "explicit": {
+            "a": 0,
+            "b": 1,
+            "group_order": 8383412,
+            "gx": 7502454,
+            "gy": 6195881,
+            "kind": "binary_explicit",
+            "modulus": 8388641,
+            "n": 23,
+            "r": 2095853
+          },
+          "role": "crater",
+          "spec": {
+            "a": 0,
+            "kind": "koblitz",
+            "n": 23
+          }
+        },
+        {
+          "a6": 6290471,
+          "at_ell_floor": true,
+          "conductor": 967,
+          "ell": 967,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m} for every ℓ | f_π: End = Z[π]",
+          "role": "floor",
+          "spec": {
+            "a": 0,
+            "b": 6290471,
+            "group_order": 8383412,
+            "gx": 6545096,
+            "gy": 2451407,
+            "kind": "binary_explicit",
+            "modulus": 8388641,
+            "n": 23,
+            "r": 2095853
+          },
+          "step": 1
+        }
+      ],
+      "edges": [
+        {
+          "a6_from": 1,
+          "a6_to": 6290471,
+          "ell": 967,
+          "ext_degree": 21,
+          "kernels_tried": 1,
+          "loops_skipped": 0,
+          "x_image": 6545096
+        }
+      ],
+      "family": "koblitz",
+      "floor_certificates": [
+        {
+          "ell": 967,
+          "ext_degree": 21,
+          "rank": 1
+        }
+      ],
+      "frobenius_conductor": 967,
+      "gap": 967,
+      "group_order": 8383412,
+      "n": 23,
+      "r": 2095853,
+      "seconds": 0.859005531,
+      "trace": 5197
+    }
+  ],
+  "schema": "isogeny_gap_pairs/v1",
+  "seed": 20261010
+}

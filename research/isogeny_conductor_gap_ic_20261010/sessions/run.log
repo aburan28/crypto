@@ -1,0 +1,43 @@
+== fiber_prime: start 2026-10-10T21:14:36Z
+   exit 0 at 2026-10-10T21:15:43Z; session ECBS1h472473eb8a3c complete -> research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime (1520 records: {"verified": 1520})
+   verify exit 0: audit OK: 1520 records, 1520 verified, 12 replays reproduced, 0 problems
+== fiber_koblitz_k1_n17: start 2026-10-10T21:15:47Z
+   exit 0 at 2026-10-10T21:16:45Z; session ECBS1he74fe63a5a5a complete -> research/isogeny_conductor_gap_ic_20261010/sessions/fiber_koblitz_k1_n17 (160 records: {"verified": 160})
+   verify exit 0: audit OK: 160 records, 160 verified, 12 replays reproduced, 0 problems
+== fiber_koblitz_k0_n19: start 2026-10-10T21:16:46Z
+   exit 2 at 2026-10-10T21:16:48Z; ecbench: host is not quiet (PSI cpu some avg10 71.84 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/fiber_koblitz_k0_n19/session.json: No such file or directory (os error 2)
+== fiber_koblitz_k1_n19: start 2026-10-10T21:16:48Z
+   exit 2 at 2026-10-10T21:16:51Z; ecbench: host is not quiet (PSI cpu some avg10 59.01 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/fiber_koblitz_k1_n19/session.json: No such file or directory (os error 2)
+== fiber_binary_n17: start 2026-10-10T21:16:51Z
+   exit 2 at 2026-10-10T21:16:53Z; ecbench: host is not quiet (PSI cpu some avg10 48.50 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/fiber_binary_n17/session.json: No such file or directory (os error 2)
+== fiber_binary_n19: start 2026-10-10T21:16:53Z
+   exit 2 at 2026-10-10T21:16:56Z; ecbench: host is not quiet (PSI cpu some avg10 32.70 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/fiber_binary_n19/session.json: No such file or directory (os error 2)
+== koblitz_gap_n17: start 2026-10-10T21:16:56Z
+   exit 2 at 2026-10-10T21:16:58Z; ecbench: host is not quiet (PSI cpu some avg10 27.13 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/koblitz_gap_n17/session.json: No such file or directory (os error 2)
+== koblitz_gap_n19: start 2026-10-10T21:16:58Z
+   exit 2 at 2026-10-10T21:17:01Z; ecbench: host is not quiet (PSI cpu some avg10 22.40 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/koblitz_gap_n19/session.json: No such file or directory (os error 2)
+== binary_gap_n17: start 2026-10-10T21:17:01Z
+   exit 2 at 2026-10-10T21:17:03Z; ecbench: host is not quiet (PSI cpu some avg10 18.70 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/binary_gap_n17/session.json: No such file or directory (os error 2)
+== binary_gap_n19: start 2026-10-10T21:17:03Z
+   exit 2 at 2026-10-10T21:17:05Z; ecbench: host is not quiet (PSI cpu some avg10 12.87 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/binary_gap_n19/session.json: No such file or directory (os error 2)
+== koblitz_gap_crater_folds: start 2026-10-10T21:17:05Z
+   exit 2 at 2026-10-10T21:17:08Z; ecbench: host is not quiet (PSI cpu some avg10 10.72 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/koblitz_gap_crater_folds/session.json: No such file or directory (os error 2)
+== fiber_koblitz_k0_n23: start 2026-10-10T21:17:08Z
+   exit 2 at 2026-10-10T21:17:10Z; ecbench: host is not quiet (PSI cpu some avg10 8.96 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/fiber_koblitz_k0_n23/session.json: No such file or directory (os error 2)
+== koblitz_gap_n23: start 2026-10-10T21:17:10Z
+   exit 2 at 2026-10-10T21:17:13Z; ecbench: host is not quiet (PSI cpu some avg10 7.51 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/koblitz_gap_n23/session.json: No such file or directory (os error 2)
+== binary_gap_n23: start 2026-10-10T21:17:13Z
+   exit 2 at 2026-10-10T21:17:15Z; ecbench: host is not quiet (PSI cpu some avg10 6.33 > 5.00); wait, or pass --allow-busy to record runs below L2
+   verify exit 2: ecbench: research/isogeny_conductor_gap_ic_20261010/sessions/binary_gap_n23/session.json: No such file or directory (os error 2)
+== prime_gap_22: start 2026-10-10T21:17:15Z
