@@ -257,8 +257,9 @@ single canonical y² + h(x)y = f(x) genus-2 equation is the next step
         "
 For Scenario A's starting curve, list the magic numbers of every
 2- and 3-isogenous neighbour. This is what the Hess search would
-trawl over for c2pnb176w1 (where direct magic is 1 and the goal is
-to find a neighbour with magic ~5).
+trawl over for c2pnb176w1 (where direct magic is 1 and the goal would
+be a neighbour with magic ~5, which Maurer-Menezes-Teske 2002 judge
+infeasible to find).
 "
     );
     let start_curve = ECurve::new(big_n, irr.clone(), a, b);
@@ -303,7 +304,8 @@ to find a neighbour with magic ~5).
   4. Lift through isogeny     | ✓ trivial for m=1; needs Vélu for m≥2
 
   For the c2pnb176w1 target specifically (m=11 over F_{{2^176}}, direct
-  magic 1, Hess-reachable m'=5 per Menezes-Teske):
+  magic 1; Maurer-Menezes-Teske 2002, Sec. 6, list a hypothetical m'=5
+  isogenous instance and judge finding it infeasible, not a break):
 
     - the isogeny walk in this demo scales structurally to c2pnb176w1's
       F_{{2^176}} field, but a useful traversal needs Φ_l for ℓ ≥ 5
@@ -313,11 +315,12 @@ to find a neighbour with magic ~5).
       level of abstraction (5-dim F_2-orbit, 32-orbit element σ-action)
       but converting to a single hyperelliptic equation of genus 16 is
       where Hess's algorithm 'really' kicks in;
-    - genus-16 index calculus over F_{{2^16}} is itself a research-grade
-      implementation (Diem/GTTD, ~2^57 ops per Menezes-Teske).
+    - genus-16 index calculus over F_{{2^22}} (the hypothetical instance)
+      is itself a research-grade implementation (Diem/GTTD; Enge-Gaudry
+      cost 2^61-2^65 against rho 2^87 in Maurer-Menezes-Teske's units).
 
   This module makes the structural attack inspectable and the easy
-  cases runnable; the c2pnb176w1 numerical break stays out of scope.
+  cases runnable; any numerical attack on c2pnb176w1 stays out of scope.
 "
     );
 }

@@ -157,6 +157,45 @@ This closeout supersedes the pending library/push status in the frozen campaign
 report. The scientific maps, timings, source/binary archives and original
 manifest retain their historical bytes.
 
+## Main integration and frozen canonical context
+
+After the passing branch was pushed as 12a846a56, GitHub reported conflicts
+against main 8b6b1384e. The release conflict concerns equivalent cancellation
+comments; both sides use the same cancellation predicate. The merged workflow
+retains the dedicated isogeny platform jobs and pinned ReleaseMe publication.
+The compact-orbit example retains main's current code with formatting applied.
+Main's committed research, ledger and browser additions are preserved.
+
+Main changes the current browser context. Before integration, all ten
+canonical outputs bound by the original scientific manifest were archived
+from clean 12a846a56 as evidence/canonical-at-run-12a846a56.tar. The original
+native audit runs in that extracted canonical context with the same sealed
+study files and passes all 891 bindings, retaining manifest hash
+3b7ba9aeac62495be74d4e6f7e5089af12834e85eb5c968b6aa1bedaed5558b5.
+The receipt is evidence/frozen-canonical-context-audit.json. The original
+scientific manifest is a frozen-context manifest; it is not a claim that a
+later global browser file still has its earlier hash.
+
+The merged browser refresh uses the native canonical-roster helper, which
+asserts that only its four source hashes change. Incoming browser candidate
+records and every other value are preserved. Workflow Actionlint and example
+formatting pass. The merged-version library, workspace and example checks
+are recorded separately from the pre-merge passing checks.
+
+The merged workspace all-target compile and three compact-orbit example tests
+pass. The merged library build includes 3925 tests. Its first run exposed the
+S4 staged-format fixture's six-extra-row rank variance; that test passes in
+isolation, and the failed run was stopped with its SIGTERM/exit receipt retained.
+The S4 fixture now uses 64 extra rows in both compared formats and requires
+the exact raw-row count. Its mathematical verification assertions and production
+solver remain unchanged. The focused repetition and subsequent full run are
+separate checks; the interrupted run is not presented as passing.
+
+The corrected S4 fixture passes its focused release test and 100 consecutive
+isolated repetitions. Every output is retained in s4-stage-100-repetitions-20261010.log.
+The full merged-tree run follows this committed correction. This is additional
+fixture validation and does not change the frozen map or performance evidence.
+
 The full command is:
 
 ```sh

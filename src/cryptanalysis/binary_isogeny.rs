@@ -4,9 +4,14 @@
 //! magic number is too small (typically `m = 1`, useless), we walk the
 //! `l`-isogeny graph until we find an isogenous curve `E'` whose magic
 //! number is `2 ≤ m' ≤ ~6` — small enough that the descended
-//! hyperelliptic curve has tractable genus.  This is the move that
-//! takes c2pnb176w1 from "structurally interesting but uncrackable
-//! direct-GHS" to "crackable via Hess's generalisation."
+//! hyperelliptic curve has tractable genus.  This is the move Hess's
+//! generalisation adds to direct GHS.  Whether a given curve's isogeny
+//! class actually reaches such an `E'` is a separate, hard question, and
+//! no source read for this repository reports it for any X9.62 curve:
+//! Maurer-Menezes-Teske (LMS J. Comput. Math. 5 (2002) 127-174, Section 6,
+//! Remark 26, Table 4) list a *hypothetical* `m' = 5` instance for
+//! c2pnb176w1 (genus 16 over `F_{2^22}`) and judge finding it infeasible.
+//! Neither Menezes-Teske paper discusses c2pnb176w1.
 //!
 //! ## What this module does
 //!

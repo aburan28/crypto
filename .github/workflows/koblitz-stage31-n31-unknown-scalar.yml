@@ -1,16 +1,9 @@
 name: Koblitz Stage 31 n31 unknown scalar
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage31_n31_unknown_scalar.py"
-      - "scripts/verify_koblitz_stage30_31_results.py"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE31_N31_UNKNOWN_SCALAR.md"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE30_31_RESULTS.md"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-30-n31-factor-search-result-20260911/**"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-31-n31-unknown-scalar-result-20260911/**"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-30-31-verification-20260911.json"
-      - ".github/workflows/koblitz-stage31-n31-unknown-scalar.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

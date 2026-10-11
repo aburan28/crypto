@@ -144,6 +144,39 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 | `end_to_end_dlp` | **1,024 public-synthetic n=53 known-answer targets** recovered with one retained factor-log table; all `[d]G = Q`, relation equations, and factor logs verified with zero replay discrepancies | Repeat at a second n≥53 rung or independent host under the same staged accounting | Public synthetic only; every target group-verified; support → rank → recover → verify timers present | `runs/shared_factor_logs_n53_eta_1_10_batch1024/`; independent replay |
 | `vs_rho` | **n=83 a=1 retained observation:** IC and rho solved the same frozen public point in three paired runs; independent scalar replay passed. Recorded online walls were IC 5.6–7.9 s and rho 43–71 s, with a median ratio of 8.2. The host was shared with unrelated work, and no qualifying isolation receipt is attached. This is a verified-answer, exploratory-timing record, not a controlled speedup. Earlier n=41–73 observations remain in history. | Repair the n=73/n=83 claim schemas and measure a new verified one-target IC/rho pair on the same point with a qualifying isolation receipt. Higher-degree rho projections are separately labeled research estimates. | Exactly one unseen public target; identical point; five exclusive IC online phase costs and exact rho interval; matched resource envelope; independent replay; host-isolation receipt; claim-check PASS; preserve failed rows | `experiments/koblitz-single-target-n83-20261006/` (claim report, fixture, R1–R3 raw runs and replays); `experiments/koblitz-single-target-n73-20261003/` |
 
+**Complete cold compact-orbit panel (disjoint public points).** The
+[preregistered six-cell W64 result](../../research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/RESULT.md)
+charges fresh-process factor-base/index construction, full-rank collection,
+linear solve, and verified recovery of either one or 1,024 targets. Each cell
+uses the same public points as its 32-walk signed-Frobenius normal-basis rho
+reference. All 135 child processes exited successfully; hosted and separate
+macOS replay agreed on 90 full-rank traces and 46,170 target logarithms.
+The frozen source is `38c173072e16f580237447c93b085634275ba048`, the
+input-freeze SHA-256 is
+`da958a3f1117dd1b88703fed2055c5c9f64255516e1e920f35d193bf53c6a88d`,
+and the sealed evidence manifest SHA-256 is
+`350779eb61b5c9b14f065f4f2b3563166de0aaa6ed1da91f3d5308a8fc6fac97`.
+Every cell passed its preregistered A/A and quiet-host gates. The paired
+intervals below measure **complete child CPU**, not the one-target online wall
+metric in the `vs_rho` row.
+
+| Field / targets / orbit columns | Compact policy | Paired compact/rho CPU, median [95% interval] | Complete CPU reduction to median parity |
+| --- | --- | ---: | ---: |
+| n37 / 1 / K7 | unfiltered | 2.810 [2.718, 2.874] | 64.4% |
+| n37 / 1,024 / K42 | unfiltered | 3.031 [2.998, 3.047] | 67.0% |
+| n41 / 1 / K85 | unfiltered | 13.378 [9.367, 18.491] | 92.5% |
+| n41 / 1,024 / K255 | blocked prefilter | 1.314 [1.288, 1.359] | 23.9% |
+| n53 / 1 / K220 | unfiltered | 22.675 [17.904, 31.595] | 95.6% |
+| n53 / 1,024 / K440 | blocked prefilter | 1.605 [1.566, 1.666] | 37.7% |
+
+All six intervals lie above parity for these exact W64 policies. The next
+charged selection experiment holds the useful column count fixed, beginning
+with n41/K255 and n53/K440 on new disjoint points, and records natural
+relation yield, novel rank, full-rank cost, target descent, and matched rho.
+The degree-263 descendant route separately needs an equal-useful-size
+ordinary-query PDP/rank panel before these lower-degree ratios can inform it.
+This secondary cold panel does not move the primary one-target `vs_rho` row.
+
 **Historical labels and status.** The n=41, 53, 61, 71, 73, and 83
 verdict strings are retained as provenance. Their paired public-point scalar
 checks establish answer correctness. The earlier CPU wall ratios are

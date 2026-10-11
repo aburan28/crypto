@@ -413,8 +413,12 @@ The math of §6 says exactly where the leverage is, and it is a **constant**
 game, not an exponent game:
 
 - Every halving of `C₃` moves the double-large-prime crossover down by
-  `≈ 6` bits of `n` (`N_× ∝ C_DLP^{18}`, and `C_DLP` is dominated by
-  `C₃`). Closing `2^{230}` to a reachable size needs `C₃` cut by many
+  ~~`≈ 6` bits of `n`~~ **up to `18` bits of `n`** (`N_× ∝ C_DLP^{18}`, and `C_DLP` is dominated by
+  `C₃`). *Accounting correction (2026-10-09,
+  `RESEARCH_GLV_INVARIANT_FACTOR_BASES.md` §9): with `N_× = 2^{33}·(S_DLP/S_rho)^{18}`
+  (Theorem 3), halving `C_DLP` halves the ratio and divides `N_×` by `2^{18}`; a halving
+  of `C₃` alone is worth `18·log₂(1/(1 − φ/2))` bits, `φ` the share of `C_DLP` the solve
+  is — `18` bits as `φ → 1`, never `6`.* Closing `2^{230}` to a reachable size needs `C₃` cut by many
   orders of magnitude, which is why the attacks that matter in practice
   either cut the constant (Joux–Vitse's `F₄`-based `k−1` decompositions)
   or change the target (Weil descent / GHS), not tune the walk.

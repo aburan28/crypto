@@ -1827,12 +1827,16 @@ mod tests {
         let (x, _trials) = find_one_relation_s4_counted(&curve, &g, &q, &fb, 5000)
             .expect("an S4 relation exists on the tiny curve");
         let _ = x; // one relation suffices; full solve below.
-        let staged = ec_index_calculus_dlp_s4_staged(&curve, &g, &q, 10, 6, 5000, 64);
+
+        // Compare the relation formats with ample random-row redundancy;
+        // a small raw-row surplus is not a matrix-rank guarantee.
+        let extra_relations = 64;
+        let staged = ec_index_calculus_dlp_s4_staged(&curve, &g, &q, 10, extra_relations, 5000, 64);
         let (s4_x, report) = staged.expect("S4 staged solve succeeds on the tiny curve");
         assert_eq!(g.scalar_mul(&s4_x, &a_fe), q);
-        let plain = ec_index_calculus_dlp(&curve, &g, &q, 10, 6, 5000);
+        let plain = ec_index_calculus_dlp(&curve, &g, &q, 10, extra_relations, 5000);
         assert_eq!(s4_x, plain.expect("2-decomp solve also succeeds"));
-        assert!(report.relations_collected >= 10);
+        assert_eq!(report.relations_collected, 10 + extra_relations);
         assert!(report.trials_per_relation_median >= 1.0);
     }
 

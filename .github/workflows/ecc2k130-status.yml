@@ -70,10 +70,12 @@ permissions:
   id-token: write
 
 concurrency:
-  # Scheduled publications must not replace pending PR validation runs.
-  # Keep all publishing events in the original serialized deployment group.
+  # PRs get their own group so they never cancel each other.
+  # Schedule/push share one deployment group; cancel superseded runs so a
+  # stalled publish cannot hold the account's hosted runners for hours while
+  # every */3 schedule piles up behind it (2026-10-07 run 3682; 2026-10-10 jam).
   group: ${{ github.event_name == 'pull_request' && format('ecc2k130-status-pages-pr-{0}', github.event.pull_request.number) || 'ecc2k130-status-pages' }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name != 'pull_request' }}
 
 jobs:
   # Pull requests only. A publishing run runs these same steps inside the

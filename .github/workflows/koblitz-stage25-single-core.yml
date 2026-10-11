@@ -1,19 +1,9 @@
 name: Koblitz Stage 25 single-CPU control
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage25_single_core.py"
-      - "scripts/test_koblitz_stage25_single_core.py"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-protocol.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-affinity.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-artifact.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result-seal.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-math-replay.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-verification.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE25_SINGLE_CORE_RESULTS.md"
-      - ".github/workflows/koblitz-stage25-single-core.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

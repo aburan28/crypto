@@ -40,10 +40,14 @@
 //!   demo runs the `m = 1` path end-to-end.
 //!
 //! For the `c2pnb176w1` target specifically: direct magic is 1 (so the
-//! `m = 1` pipeline is trivial / useless), and the Menezes-Teske
-//! attack reaches `m' = 5` via the isogeny walk. Running step 2 at
-//! `m' = 5` requires the genus-16 smooth-model construction and a
-//! genus-16 index calculus over `F_{2^16}` — both research-grade and
+//! `m = 1` pipeline is trivial / useless). Maurer-Menezes-Teske
+//! (LMS J. Comput. Math. 5 (2002), Section 6, Remark 26 and Table 4)
+//! list a hypothetical isogenous instance with `m' = 5` (genus 16 over
+//! `F_{2^22}`) and judge finding such a curve infeasible; no source read
+//! for this repository reports the isogeny walk reaching it, and neither
+//! Menezes-Teske paper discusses `c2pnb176w1`. Running step 2 at
+//! `m' = 5` would require the genus-16 smooth-model construction and a
+//! genus-16 index calculus — both research-grade and
 //! not implemented here. What this module *does* do for `c2pnb176w1`
 //! is enumerate `2`- and `3`-isogenous neighbours and report their
 //! magic numbers, so you can see the magic spectrum the Hess search

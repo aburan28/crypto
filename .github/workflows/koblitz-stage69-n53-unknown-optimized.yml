@@ -1,10 +1,9 @@
 name: Koblitz Stage 69 n53 optimized unknown scalar
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage57_n53_unknown.py"
-      - ".github/workflows/koblitz-stage69-n53-unknown-optimized.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:
