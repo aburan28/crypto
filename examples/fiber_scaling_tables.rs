@@ -75,7 +75,7 @@ fn main() {
     let dir = arg(&args, "--dir");
     let mut md = String::new();
     let mut js = serde_json::Map::new();
-    let mut by_h_size: BTreeMap<(u64, u64), Vec<f64>> = BTreeMap::new();
+    let mut by_h_size: BTreeMap<(String, u64), Vec<f64>> = BTreeMap::new();
     let mut sessions: Vec<String> = std::fs::read_dir(format!("{dir}/sessions"))
         .map(|d| {
             d.filter_map(|e| e.ok())
@@ -85,8 +85,21 @@ fn main() {
         })
         .unwrap_or_default();
     sessions.sort();
-    for name in sessions {
-        let text = std::fs::read_to_string(format!("{dir}/sessions/{name}/records.jsonl")).unwrap();
+    // `--combine NAME=a+b` also analyses sessions a and b as one (the same
+    // curves and targets, more arms): the envelope then spans both.
+    let mut groups: Vec<(String, Vec<String>)> = sessions
+        .iter()
+        .map(|s| (s.clone(), vec![s.clone()]))
+        .collect();
+    if let Some(i) = args.iter().position(|a| a == "--combine") {
+        let (n, parts) = args[i + 1].split_once('=').expect("--combine NAME=a+b");
+        groups.push((n.to_string(), parts.split('+').map(String::from).collect()));
+    }
+    for (name, members) in groups {
+        let text: String = members
+            .iter()
+            .map(|m| std::fs::read_to_string(format!("{dir}/sessions/{m}/records.jsonl")).unwrap())
+            .collect();
         // curve slug → (log2 N, bits, cofactor, arms)
         let mut curves: BTreeMap<(u64, String), (f64, u64, u64, BTreeMap<String, Arm>)> =
             BTreeMap::new();
@@ -167,7 +180,10 @@ fn main() {
                     let ratio = s / rho;
                     xs.push(*lg);
                     ys.push(ratio.log2());
-                    by_h_size.entry((*h, *bits)).or_default().push(ratio);
+                    by_h_size
+                        .entry((name.clone(), *bits))
+                        .or_default()
+                        .push(ratio);
                     let bl = blind.map_or("–".into(), |b| format!("{:.2}", b / s));
                     writeln!(md, " {k} | {ratio:.2} | {bl} |").unwrap();
                     rows.push(json!({"slug": slug, "bits": bits, "cofactor": h, "log2_order": lg,
@@ -209,20 +225,31 @@ fn main() {
             json!({"cofactor": h_seen, "curves": rows, "fit": fitted}),
         );
     }
-    // P-S2: cofactor 72 over cofactor 4 at matched size.
-    writeln!(md, "## Cofactor 72 against cofactor 4 at matched size\n\n| bits | mean envelope ÷ rho, h = 4 | h = 72 | ratio |\n|--:|--:|--:|--:|").unwrap();
-    let sizes: std::collections::BTreeSet<u64> = by_h_size.keys().map(|(_, b)| *b).collect();
+    // P-S2: cofactor 72 over cofactor 4 at matched size, for the
+    // pre-registered h = 72 session and for any combined h = 72 analysis.
     let mut ps2 = Vec::new();
-    for b in sizes {
-        let m = |h: u64| {
-            by_h_size
-                .get(&(h, b))
-                .map(|v| v.iter().sum::<f64>() / v.len() as f64)
-        };
-        if let (Some(a), Some(c)) = (m(4), m(72)) {
-            writeln!(md, "| {b} | {a:.2} | {c:.2} | {:.2} |", c / a).unwrap();
-            ps2.push(json!({"bits": b, "h4": a, "h72": c, "ratio": c / a}));
+    let names72: std::collections::BTreeSet<String> = by_h_size
+        .keys()
+        .map(|(n, _)| n.clone())
+        .filter(|n| n.starts_with("scaling_h72") && n != "scaling_h72_small_b")
+        .collect();
+    for n72 in names72 {
+        writeln!(md, "## Cofactor 72 (`{n72}`) against cofactor 4 at matched size\n\n| bits | mean envelope ÷ rho, h = 4 | h = 72 | ratio |\n|--:|--:|--:|--:|").unwrap();
+        let sizes: std::collections::BTreeSet<u64> = by_h_size.keys().map(|(_, b)| *b).collect();
+        for b in sizes {
+            let m = |n: &str| {
+                by_h_size
+                    .get(&(n.to_string(), b))
+                    .map(|v| v.iter().sum::<f64>() / v.len() as f64)
+            };
+            if let (Some(a), Some(c)) = (m("scaling_h4"), m(&n72)) {
+                writeln!(md, "| {b} | {a:.2} | {c:.2} | {:.2} |", c / a).unwrap();
+                ps2.push(
+                    json!({"h72_analysis": n72, "bits": b, "h4": a, "h72": c, "ratio": c / a}),
+                );
+            }
         }
+        writeln!(md).unwrap();
     }
     js.insert("cofactor_comparison".into(), Value::Array(ps2));
     std::fs::write(arg(&args, "--out"), &md).expect("write");
