@@ -38,10 +38,10 @@ ax.plot(ms, [r["delta"] for r in best_cl], "s:", color="#3aa76d",
 need = {2: 0.5, 3: 0.25, 4: 0.2}
 ax.plot(ms, [need[m] for m in ms], "D-", color="#d0453b",
         label="δ IC needs (repo §2.4: 1/2 never wins, 1/4 ties, 1/5 first win)")
-ax.errorbar([2], [0.12], yerr=[[0.02], [0.04]], fmt="*", color="#444", capsize=4,
+ax.errorbar([2.06], [0.12], yerr=[[0.02], [0.04]], fmt="*", color="#444", capsize=4,
             label="repo S3 probes B/C (40–56-bit): HG ≤ 0.10, heuristic fades 0.12–0.16")
 for m, v in zip(ms, lim):
-    ax.annotate(f"{v:.4f}", (m, v), xytext=(6, -12), textcoords="offset points", fontsize=7, color="#2a6fdb")
+    ax.annotate(f"{v:.4f}", (m, v), xytext=(8, -14), textcoords="offset points", fontsize=7, color="#2a6fdb")
 for m, v in zip(ms, ub):
     ax.annotate(f"{v:.4f}", (m, v), xytext=(6, 4), textcoords="offset points", fontsize=7, color="#7a4cc2")
 ax.set_yscale("log")
