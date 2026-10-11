@@ -11,10 +11,6 @@ on:
       - 'research/notes/ecc2k130/m83_solver_matrix_20260927/**'
       - '.github/workflows/ecc2k130-m83-solver-matrix.yml'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 jobs:
   verify-receipts:
     runs-on: ubuntu-latest

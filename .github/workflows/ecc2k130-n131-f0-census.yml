@@ -8,16 +8,11 @@ on:
       - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/verify.py'
   push:
-    branches: [main]
     paths:
       - '.github/workflows/ecc2k130-n131-f0-census.yml'
       - 'research/notes/ecc2k130/n131_beta3_f0_census_20260925/**'
       - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/verify.py'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   frozen-controls-and-archive:

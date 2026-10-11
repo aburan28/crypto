@@ -15,10 +15,6 @@ on:
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
       - '.github/workflows/ecc2k130-rotated-beta-portfolio.yml'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 jobs:
   replay:
     runs-on: ubuntu-latest

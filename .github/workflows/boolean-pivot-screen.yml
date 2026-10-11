@@ -2,7 +2,6 @@ name: Boolean sibling pivot screen
 
 on:
   push:
-    branches: [main]
     paths:
       - 'research/boolean_pivot_screen_20261003/**'
       - '.github/workflows/boolean-pivot-screen.yml'
@@ -13,10 +12,6 @@ on:
 
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   native-correctness:
