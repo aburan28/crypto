@@ -31,7 +31,7 @@ bound `|t| ≤ 2√q` before any trace is classified. The implementation is
 
 | Field | Meaning | How |
 |:--|:--|:--|
-| `order_check` | how well `#E` itself is established | exhaustive count for `q ≤ 2^22`; for a binary curve defined over `GF(2^k)`, `k ≤ 16`, a count over `GF(2^k)` lifted by `t_n = V_{n/k}(t_k, 2^k)`; otherwise a generator certificate (`G` on the curve, `[r]G = O`, `r` prime and `r > 4√q`, so one multiple of `r` lies in the Hasse interval) |
+| `order_check` | how well `#E` itself is established | exhaustive count for supported models with `q ≤ 2^22`; for a binary curve defined over `GF(2^k)`, `k ≤ 16`, a count over `GF(2^k)` lifted by `t_n = V_{n/k}(t_k, 2^k)`; otherwise a generator certificate when the model's group law is implemented (`G` on the curve, `[r]G = O`, `r` prime and `r > 4√q`, so one multiple of `r` lies in the Hasse interval) |
 | `trace_ratio` | `t / 2√q ∈ [−1, 1]` | size-free |
 | `frobenius.disc` | `Δ = t² − 4q`, its primes and any unfactored composites | trial division to 2¹⁶, perfect powers, Brent's rho with a fixed iteration budget |
 | `frobenius.cm_disc` | `d_K`, the fundamental discriminant of `Q(π)` | `Δ = v²·d_K` |
@@ -45,6 +45,12 @@ bound `|t| ≤ 2√q` before any trace is classified. The implementation is
 | `embedding` | `ord_r(q)` and the bit length of `(r − 1)/k` | exact from the factorisation of `r − 1`; else `q^k ≢ 1` for `k ≤ 1000` gives a bound |
 | `twist` | the quadratic twist's order `q + 1 + t`, its largest prime and cofactor | factored with the same budget |
 | `keys` | the grouping keys below | |
+
+Montgomery, Edwards, and prime-extension registry equations retain their
+exact model JSON, characteristic, degree, field size, trace, and order
+identity. Their point-count and generator checks are `not_evaluated` until
+the corresponding group laws are implemented; the parser does not apply
+short-Weierstrass formulas to those coordinates.
 
 **Subfields.** `E_{a,b} : y² + xy = x³ + ax² + b` over `GF(2^n)` is the base
 change of a curve over `GF(2^k)` exactly when `b ∈ GF(2^k)` and either `n/k`
@@ -91,7 +97,7 @@ of one curve under different moduli stay two records, as ICV1 requires.
 | `probable` | exact if every probable prime under it is prime |
 | `bounded` | only a bound is known: `conductor` is then a lower bound and `cm_disc` is absent |
 | `unknown` | attempted and not determined within the factoring budget |
-| `not_evaluated` | skipped by a declared limit (`h(d_K)` above `|d_K| = 10^7`, a subfield above degree 40) |
+| `not_evaluated` | skipped by a declared limit (`h(d_K)` above `|d_K| = 10^7`, a subfield above degree 40) or by an unimplemented registered group law |
 | `not_applicable` | does not apply (no proper subfield of definition, a prime field's subfields) |
 
 An unfactored composite of even multiplicity still fixes `d_K`. Every
@@ -143,14 +149,14 @@ over a field of the target's size.
 
 ## What the current registry shows
 
-From `group --by cm,descent --min-sizes 2` on the 121 registry curves:
+From `group --by cm,descent --min-sizes 2` on the 321 distinct registry curves:
 
-- **CM by −7, defined over `GF(2)`: 59 curves at 41 degrees**, 7 to 577:
+- **CM by −7, defined over `GF(2)`: 60 curves at 42 degrees**, 7 to 577:
   the `K_a / GF(2^n)` family, every member with `|t₁| = 1`;
   `descent_signed` separates `K_0` (`t₁ = −1`) from `K_1` (`t₁ = 1`).
   Adding `cofactor` picks out the `K_0` curves of order 4·prime (14 curves
   from `GF(2^7)` to `GF(2^571)`, ECC2K-130 among them) and the `K_1`
-  curves of order 2·prime (8 curves up to sect163k1); 35 others have a
+  curves of order 2·prime (9 curves up to sect163k1); 35 others have a
   composite `#E/4` or `#E/2`, and two (degrees 157 and 577) an order that
   did not factor within the budget.
 - **CM by −15, defined over `GF(4)` with `t₂ = 1`: 3 curves**, over
@@ -162,14 +168,17 @@ From `group --by cm,descent --min-sizes 2` on the 121 registry curves:
 - secp256k1 has `d_K = −3` (`j = 0`) and a 128-bit conductor;
   P-256's `Δ` does not factor within the budget, so its `cm` is `unknown`
   and its conductor only bounded.
-- `End(E) = O_K` is established for 114 of the 121 curves, 61 of them
-  where `Z[π]` itself is not maximal: all 59 Koblitz curves through `Z[τ]`,
-  the four curves defined over `GF(4)` through their `GF(4)` Frobenius, and
-  secp256k1 through `Z[ζ₃]`. Six remain unresolved between `Z[π]` and
-  `O_K`; P-256 is unknown with its `d_K`.
-- Every order in the registry is certified: 60 by exhaustive count, 41 by
-  a descent count, the rest by generator certificates (4 of those rest on
-  a probable prime).
+- `End(E) = O_K` is recorded for 188 curves (146 `proved`, 42 `probable`),
+  including all 60 Koblitz curves through `Z[τ]`, the four curves defined
+  over `GF(4)` through their `GF(4)` Frobenius, and secp256k1 through
+  `Z[ζ₃]`. Another 51 have a conductor bound and 82 remain `unknown`;
+  P-256 is among the latter because its `d_K` is not determined at this
+  budget.
+- Order checks are `proved` for 123 curves and `probable` for 126:
+  60 exhaustive counts, 47 descent counts, and 142 generator certificates.
+  The 39 registered models without an implemented group law are
+  `not_evaluated`; 33 further orders lack a usable certificate at this
+  budget.
 
 ## Keeping it current
 

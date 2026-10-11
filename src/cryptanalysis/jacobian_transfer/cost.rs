@@ -69,7 +69,7 @@ pub fn log2_irreducible_count(q_bits: f64, d: u32) -> f64 {
     let q = q_bits.exp2();
     let mut total = 0.0;
     for e in 1..=d {
-        if d % e != 0 {
+        if !d.is_multiple_of(e) {
             continue;
         }
         let mu = mobius(e);
@@ -84,9 +84,9 @@ fn mobius(mut n: u32) -> i32 {
     let mut result = 1;
     let mut p = 2;
     while p * p <= n {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             n /= p;
-            if n % p == 0 {
+            if n.is_multiple_of(p) {
                 return 0;
             }
             result = -result;
@@ -214,7 +214,12 @@ impl CostModel {
     /// Enge–Gaudry subexponential index calculus, `L_N(1/2, c)` group
     /// operations for a Jacobian of `log2 N = log2_jacobian_order` bits.  Its
     /// hypothesis (genus large beside `log q`) is reported, not enforced.
-    pub fn log2_enge_gaudry(&self, log2_jacobian_order: f64, log2_genus: f64, field_bits: f64) -> f64 {
+    pub fn log2_enge_gaudry(
+        &self,
+        log2_jacobian_order: f64,
+        log2_genus: f64,
+        field_bits: f64,
+    ) -> f64 {
         let ln_n = log2_jacobian_order * std::f64::consts::LN_2;
         if ln_n <= std::f64::consts::E {
             return self.log2_jacobian_op(log2_genus, field_bits);
@@ -358,10 +363,13 @@ impl CostModel {
         let (solver, log2_cost, log2_leading) = considered
             .iter()
             .copied()
-            .fold(None, |best: Option<(DestinationSolver, f64, f64)>, x| match best {
-                Some(b) if b.1 <= x.1 => Some(b),
-                _ => Some(x),
-            })
+            .fold(
+                None,
+                |best: Option<(DestinationSolver, f64, f64)>, x| match best {
+                    Some(b) if b.1 <= x.1 => Some(b),
+                    _ => Some(x),
+                },
+            )
             .expect("at least rho");
         DestinationCost {
             solver,
@@ -411,7 +419,11 @@ mod tests {
         assert!((gaudry - relations - m.log2_jacobian_op(4.0, 31.0)).abs() < 0.5);
         // Whichever solver wins, the formulas leave less than the margin.
         let rho = m.log2_rho_elliptic(152.0, 155.0);
-        assert!(rho - dest.log2_cost < m.advantage_margin_bits, "rho {rho} vs dest {}", dest.log2_cost);
+        assert!(
+            rho - dest.log2_cost < m.advantage_margin_bits,
+            "rho {rho} vs dest {}",
+            dest.log2_cost
+        );
     }
 
     #[test]
@@ -437,14 +449,20 @@ mod tests {
         // Genus 16 over GF(2^31): 16! * q = 2^75.25 now dominates q^(2-2/g) * g^2 = 2^66.
         let ic16 = m.log2_hyperelliptic_ic(4.0, 31.0).unwrap();
         let relations = log2_factorial(16.0) + 31.0;
-        assert!((ic16 - (relations + m.log2_jacobian_op(4.0, 31.0))).abs() < 0.5, "{ic16}");
+        assert!(
+            (ic16 - (relations + m.log2_jacobian_op(4.0, 31.0))).abs() < 0.5,
+            "{ic16}"
+        );
     }
 
     #[test]
     fn irreducible_counts_match_necklace_formula() {
         // Over F_2: 2, 1, 2, 3, 6 irreducibles of degree 1..5.
         for (d, n) in [(1u32, 2.0f64), (2, 1.0), (3, 2.0), (4, 3.0), (5, 6.0)] {
-            assert!((log2_irreducible_count(1.0, d) - n.log2()).abs() < 1e-9, "{d}");
+            assert!(
+                (log2_irreducible_count(1.0, d) - n.log2()).abs() < 1e-9,
+                "{d}"
+            );
         }
         assert_eq!(mobius(30), -1);
         assert_eq!(mobius(12), 0);
@@ -476,8 +494,11 @@ mod tests {
         let m = CostModel::default();
         let (total, leading, b) = m.log2_smoothness_ic(6.0, 4.0, 160.0).unwrap();
         let asymptotic = m.log2_enge_gaudry(256.0, 6.0, 4.0) - m.log2_jacobian_op(6.0, 4.0);
-        assert!(b >= 2 && b < 20, "b = {b}");
-        assert!(leading > 40.0 && leading < asymptotic + 1.0, "explicit {leading} vs asymptotic {asymptotic}");
+        assert!((2..20).contains(&b), "b = {b}");
+        assert!(
+            leading > 40.0 && leading < asymptotic + 1.0,
+            "explicit {leading} vs asymptotic {asymptotic}"
+        );
         assert!(leading < 128.0);
         assert!(total > leading);
     }

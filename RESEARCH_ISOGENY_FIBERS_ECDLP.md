@@ -114,7 +114,7 @@ hypothesis it uses (rationality of φ, r ∤ deg φ, GRH only for
 random-self-reducibility within a level, smoothness of the conductor for
 vertical moves). Proven results are labelled Prop./Thm.; the heuristic layer
 (Semaev/Gaudry/Diem yield, degree-of-regularity assumptions) is marked as
-such where used. References are collected in §16.
+such where used. References are collected in §18.
 ---
 
 ## 2. Mathematical model: fibers, Galois action, relation generation
@@ -273,6 +273,10 @@ whose points are defined over F_{q^k} with k | ℓ − (D_K/ℓ) or ℓ²−1; t
 kernel polynomial has degree (ℓ−1)/2 and is found as a factor of ψ_ℓ
 (degree (ℓ²−1)/2) or from a root of Φ_ℓ(j(E₁), Y) (degree ℓ+1), both
 Õ(ℓ²) (Elkies, Bostan–Morain–Salvy–Schost). Evaluation bounds are Vélu / √élu. ∎
+
+*Round 4 (§17.3):* the 2⁶⁰ figure is loose. For a generic kernel the
+transfer exceeds rho on a 128-bit group from ℓ ≈ 2^22–2^25, and when a
+kernel point is rational over a small extension no ℓ in range reaches rho.
 
 **Proposition 3.4 (what the gap buys).** The total speedup available by moving
 from any level to any other level of the same class, over the best generic or
@@ -1522,7 +1526,282 @@ a large prime factor. There the transfer maps are not computable at all,
 yet by Thm. 15.1 and Prop. 3.2 nothing on the far side of the gap could
 be easier in any way these rows measure.
 
-## 16. References
+*Round 4 (§17.4, §17.7):* the |M|^{m−2} factor applies to oracles that
+enumerate F; an oracle on F/M pays 1. The rows hold over prime fields and
+prime-degree binary fields; over composite extension fields an isogeny class
+can contain curves weaker in exponent (GHS), so there the map is not closed.
+---
+
+## 16. Open directions (2026-10-11)
+
+§15.4 leaves no route to an exponent change, but it does leave measurable
+questions where the constants, the feasibility frontier or the defender's
+cost could move. Ranked by expected value. Each item names the first
+experiment and what its result would mean.
+
+### 16.1 Where kernel saturation pays: the feasibility crossover in m
+
+The affine law (Prop. 15.2) charges a kernel-saturated base |M|^{m−2} in
+yield. Symmetrised summation polynomials buy degree reductions that also
+grow with m: S₄ drops from degrees [4,4,4,4] to [2,2,2,2,1]. The previous
+round found that at n = 17, m = 3, the symmetrised system was the only one
+the engine could solve at all (§7.A1-R and the 2026-09-27 contract). So
+there is a regime where the penalty buys feasibility.
+*Experiment.* For n ∈ {17, 19, 23} and m ∈ {3, 4}, run plain x-frame and
+u-frame symmetrised arms under one wall cap. Record solved or unsolved,
+S and hit rate. Find the smallest (n, m) where the plain arm is infeasible
+and the symmetrised arm is not, and compare its S with the best feasible
+m = 2 arm on the same curve.
+*Meaning.* If the crossover arm ever beats every feasible arm at the
+same n, kernel saturation earns a real role. The law predicts it will
+not, because m = 2 arms are 50× cheaper at n = 17. A measured exception
+would be the first counterexample to §15.4's row on algebraic oracles.
+
+### 16.2 A fast 4E test as a subgroup check (defender side)
+
+Prop. 14.2 decides P ∈ 4E on y² + xy = x³ + 1 with two traces, one
+half-trace and one multiplication. When h = 4, as for ECC2K-130 and
+sect233k1, 4E is exactly the prime-order subgroup. That replaces the
+[r]P membership check, about n doublings and additions, with O(n)
+squarings.
+*Experiment.* Implement the test in the binary-field fast path. Validate
+it against [r]P on 10⁶ random points for n ∈ {131, 233}, and benchmark it.
+*Meaning.* A practical constant-factor win for point validation. The
+trace test for halvability is classical; the two-level closed form and its
+use as a full subgroup check for cofactor-4 Koblitz curves should be
+checked against the literature before any claim.
+
+### 16.3 The vertical security margin
+
+Thm. 15.1 and Prop. 3.2 leave one region open: a conductor gap with a large
+prime factor ℓ, where the transfer isogeny exists but costs Õ(√ℓ) to
+evaluate after Õ(ℓ²) to find.
+*Experiment.* Time kernel finding (ψ_ℓ factor or modular-polynomial root)
+and √élu evaluation for ℓ up to 2^20 with the repository's isogeny code.
+Fit the exponents, and report for a given class the ℓ above which a
+vertical transfer costs more than rho on the target.
+*Meaning.* Turns "polynomial in ℓ" into a number per curve: how large the
+conductor's prime factors must be before the vertical neighbours are
+cryptographically independent.
+
+### 16.4 Algebraic oracles over F_{p²}: the free automorphism fold
+
+On a j = 0 curve over F_{p²} with p ≡ 1 mod 3, the Gaudry base {x ∈ F_p}
+is automatically ζ-closed, because ω ∈ F_p. The affine law then predicts
+a free ×3 cut in unknowns at unchanged Weil-descent cost. A 3-torsion
+saturated alternative is predicted to lose 3× at m = 3 despite its
+smaller symmetric system.
+*Experiment.* Run both arms through the repository's F_{p²} pipeline
+(`glv_invariant_base.rs`, `gls_fp2.rs`) at matched p and wall cap, and check
+whether the ζ-fold is already applied.
+*Meaning.* Confirms Prop. 15.2 for an algebraic oracle in odd
+characteristic, where so far it is only measured for the mitm oracle.
+
+### 16.5 Class-wide multi-target rho, measured
+
+§14.5 predicts that L keys on L isogenous curves cost about √(Lr) in
+total once transported.
+*Experiment.* Take a toy class with explicit 2- and 3-isogeny paths
+(`csd/volcano.py` builds them) and L ∈ {1, 4, 16, 64}. Transport the
+targets and run one batch rho through ecbench against L independent runs.
+*Meaning.* Turns a folklore argument into a measured guidance line for
+protocols that issue per-user curves.
+
+### 16.6 Genus 2: does a larger automorphism group change the law?
+
+Jacobians of y² = x⁵ + 1 carry an order-10 automorphism group and admit
+rational (2,2)-isogeny kernels. The law predicts a gain of |A| and a loss
+of |M|^{m−2}, nothing more.
+*Experiment.* Port the exact census of §15.2 to a genus-2 Jacobian over a
+small prime field, with Mumford-coordinate bases.
+*Meaning.* Either the law is dimension-free, or higher genus has a
+saturation regime the elliptic case lacks.
+
+### 16.7 Theory: isogeny oracles in the algebraic group model
+
+Thm. 15.1 is generic. Index calculus is not, because it reads coordinates.
+The natural next statement adds isogeny oracles to an algebraic-group-model
+reduction and asks whether the summation-polynomial structure can be
+expressed there.
+*Goal.* Either a reduction showing that coordinate access plus isogeny
+oracles adds nothing beyond coordinate access alone, or an explicit
+construction where it does.
+
+---
+
+## 17. Fourth round: the §16 leads, measured (2026-10-11)
+
+Every lead of §16 was run. Each has a directory under
+`research/isogeny_fibers_20261010/round4/` with `RESULTS.md` (commands,
+tables, limits), raw outputs, graphs and a PDF report. All computation is
+native Rust (`examples/r4_16_*.rs`); Python only plots recorded values.
+All instances are toy or synthetic. Nothing here is a sub-rho result or a
+statement about a deployed curve's security.
+
+| lead | verdict | headline (measured unless marked derived) |
+|:--|:--|:--|
+| 16.1 crossover in m | law confirmed; falsifier not met | first crossover cell (n = 17, m = 3): direct x-frame S4 infeasible, symmetrised arm S = 74 460 vs rho 1.76 and mitm m = 2 17.1 |
+| 16.2 fast 4E check | identity confirmed, 0 errors; not new | 1 M + 17 table lookups vs 346 M + 609 S (τ-NAF [r]P) at n = 131 |
+| 16.3 vertical margin | gap is a margin only for generic kernels | generic kernel finding ∝ ℓ^2.61; transfer exceeds rho from ℓ ≈ 2^9.6 / 2^21.5–2^24.7 / 2^45.7–2^55.6 at r = 2^64 / 2^128 / 2^256 (derived) |
+| 16.4 ζ-fold over F_{p²} | fold exact; ×3 loss is oracle-dependent | (b)/(a) cost 0.3333 on 24 curves; T-saturated m = 3 cost 2.67–3.62 sweeping F, 0.93–1.07 in quotient coordinates |
+| 16.5 class-wide rho | confirmed | L = 64: one transported batch costs B/C = 0.998–1.026 of single-curve L-target rho, ≈ 7× below L independent runs |
+| 16.6 genus 2 | law confirmed; base geometry differs | m = 3 cost 0.200 / 1.89 / 3.83 / 4.85 vs 0.2 / 2 / 4 / 5 |
+| 16.7 AGM with isogeny oracles | "adds nothing" proved to CJ-DLP; "constants only" refuted in general | 5000/5000 simulated oracle answers from one evaluation of φ |
+
+### 17.1 Kernel saturation buys feasibility only against the weakest arm
+
+Toy Koblitz curves, n ∈ {17, 19, 23}, m ∈ {3, 4}, one counted node
+budget, every panel verdict gated against exact enumeration (0 gate
+failures in 25 cells). The smallest cell where the plain arm is infeasible
+and the kernel-saturated symmetrised arm is not is (n = 17, m = 3) on the
+invariant ℓ = 9 base: the direct x-frame S4 descent (degree 6) hit the node
+budget, the symmetrised arm recovered the planted logarithm at
+S = 74 460 (GAE/√r). On the same curve the m = 2 arms cost S = 17.1 (mitm)
+and 757 (x-frame), and rho 1.76. The library's chained x-frame descent
+(`groebner_decompose`, not yet an `ic` oracle) is feasible wherever the
+symmetrised arm is and 2.4×–440× cheaper per relation; against it there is
+no crossover, and at m = 4 the kernel-saturated chain is the infeasible one
+(1/24 and 0/24 against 22/24 and 23/24). The crossover arm never beats a
+feasible arm at the same n, so the §15.4 row on algebraic oracles stands.
+Open: n = 23, m = 4 exceeds the engine's 64-unknown cap; a direct S5 does
+not exist in the library; the n = 23 sym m = 3 hit rate differs between
+the panel (0.04) and `ic bench` (0.22).
+
+### 17.2 The 4E test is a cheap subgroup check, and it is prior art
+
+On y² + xy = x³ + 1 over F_{2^n}, n odd: P ∈ 4E ⟺ P = O, or Tr(x) = 0 and
+Tr(y) + Tr(x·H(x)) = 0. The 2-part of E is exactly Z/4 for every odd n,
+so for h = 4 and r prime 4E = G. Exhaustive at n = 5 … 23 (up to 8.4·10⁶
+points) and on 1 000 009 points from all four cosets at n = 131 (the
+ECC2K-130 curve) and n = 233 (sect233k1): zero false accepts or rejects,
+agreeing with binary and τ-NAF [r]P and with `is_valid_public_point`.
+Counted cost on members of G: 1 M + 17 / 30 table lookups against
+346 M + 609 S / 618 M + 1085 S for τ-NAF López–Dahab [r]P. The method is
+not new: trace-based halving validation for cofactor 2 or 4 appears in
+US 7,257,709 (priority 2002) and in King (PKC 2004) and Eagle–Galbraith–Ong
+(ePrint 2009/086). This form only folds the half's trace into Tr(y) + Tr(xH(x)),
+avoiding the square root. The code is not constant-time; the literature
+check used search snippets only.
+
+### 17.3 The vertical margin is a margin only when the kernel is not rational
+
+Instances: the j = −3375 crater (D = −7) over 61-bit primes, descending
+edges only. Unit: F_p multiplications, 6 per rho step; r = 2^64, 2^128,
+2^256 are extrapolations.
+
+* Rational kernel point: finding it is flat in ℓ (582–1 663 M);
+  Vélu is ℓ^0.998, √élu ℓ^0.82 (Karatsuba, not FFT). With √élu no ℓ that a
+  conductor gap can contain (ℓ ≤ 2√p) reaches rho; Vélu reaches it only at
+  ℓ ≈ √r.
+* Generic kernel (x-coordinates in F_{p^k}, k = (ℓ−1)/2): finding is the
+  whole cost, ℓ^2.605 [2.578, 2.631] for ℓ = 31 … 433. Derived crossovers
+  with rho: ℓ ≈ 2^9.6 (r = 2^64), 2^21.5–2^24.7 (2^128), 2^45.7–2^55.6 (2^256).
+
+So the gap protects a curve only through the field of definition of the
+kernel, not through ℓ itself. **Correction to Prop. 3.3:** "ℓ ≳ 2⁶⁰ for a
+128-bit group" is loose for generic kernels (the crossover is near 2^22–2^25)
+and wrong when a kernel point is rational over a small extension (no
+crossover in range).
+
+### 17.4 The ζ-fold over F_{p²} is free; the M penalty depends on the oracle
+
+On j = 0 curves over F_{p²}, p ≡ 1 mod 3, the base {x ∈ F_p^*} is
+ζ-closed (checked on 24 curves). Orbits have exactly 6 points, so unknowns
+drop by exactly 3 at the same descent cost; full-rank streams need
+2.79–4.19× more relations unfolded (3 plus the coupon-collector term).
+The repository already folds over F_{p³} (`glv_gaudry.rs`) and on GLS
+lines (`gls_fp2.rs`), but not for this plain case.
+
+For the 3-torsion-saturated base the yield law holds exactly at m = 3
+(relations per unknown 0.301–0.336 of the folded base, law 1/3; every
+relation found 9.0 times). The cost law does not hold for every oracle: a
+sweep over F pays 2.67–3.62 (derived from the quotient sweep), but an
+oracle in the quotient coordinate x′ = x∘φ enumerates F/⟨T⟩ and pays
+0.93–1.07 (95% intervals exclude 3 on all 8 curves). **Refinement of
+Prop. 15.2:** the |M|^{m−2} factor is a property of oracles that enumerate
+F; an oracle on F/M pays 1. This is §17.7's Theorem 7 seen from the
+measurement side: kernel saturation is the image law on E/M, transported
+back. Structural note (derived, checked on every instance): a j = 0 curve
+over F_{p²} with a rational 3-torsion point has b square, is a base change
+from F_p, and has #E = N₁N₂ with N_i ≈ p, so the N = 3r setup of §15.2
+cannot occur there.
+
+### 17.5 Class-wide multi-target rho, measured
+
+Toy classes over prime fields (r = 2^28.79, 2^31.40, 2^37.18), built by
+breadth-first search over rational 2- and 3-isogenies with certified duals.
+At L = 64 the transported batch costs S = 12.91 / 12.06 / 11.65
+(S = total group operations/√r) against 12.75 / 12.08 / 11.35 for L targets
+on one curve and 87.5 / 82.9 / 81.1 for independent runs. B/C 95%
+intervals contain 1 in all 12 (r, L) cells; fitted growth L^0.52–0.55
+against the Kuhn–Struik slope 0.53. Transport costs at most
+78.8 M + 8.8 I per target, under 0.1% of any total. All 40 800 recovered
+logarithms were verified on their original curves. A protocol that issues
+per-user curves within one isogeny class with known paths gives an
+attacker the multi-target discount √L, not independence.
+
+### 17.6 Genus 2 follows the same law, with different base geometry
+
+Jacobians of y² = x⁵ + b over F_p (p up to 4111), Cantor arithmetic,
+#J verified against L(1) and the repository's `jv_cover::Hyp`. The §15.2
+census definition, unchanged: m = 3 cost 0.200 for |A| = 10 (law 0.2),
+1.89 / 3.83 / 4.85 for kernels of order 2 / 4 / 5 (law 2 / 4 / 5, still
+rising with p), image arms 15.98 and 5.02 (law 16 and 5). One deviation,
+explained: when A fixes a cofactor class the A-closed base gains pairs
+{ζᵃP, ζᵇ(−P)} in G, a 1/|F| correction 1 + (h−1)(|A|−2)/(2|F|) (measured
+1.32 / 1.21 / 1.09, predicted 1.32 / 1.16 / 1.08) that also applies to the
+elliptic census. The difference is geometric: a base of degree-1 divisors
+can never be translation-closed (proof in the lead's RESULTS.md), so every
+kernel-saturated base needs degree-2 divisors, which the mitm census
+handles but a Gaudry/Nagao oracle cannot use. Automorphism folding stays
+free.
+
+### 17.7 Isogeny oracles in the algebraic group model
+
+In a model where the adversary reads coordinates and has oracles for a
+fixed family of rational isogenies and duals across the class, with
+algebraic representations on oracle inputs:
+
+* Theorem 1: the oracles can be simulated with no isogeny evaluation, at
+  cost O(Q(ℓ + log r)), given the CJ-DLP instance (P_j, xP_j) — the same
+  logarithm on every curve the family touches. Theorem 2 gives the
+  converse, so the oracles are worth exactly the transported challenges.
+* Corollary 3: if transport is computable along a spanning tree, oracle-DLP
+  on E₁ reduces to plain DLP on E₁. For horizontal classes the path
+  costs a one-time, instance-independent Õ(q^{1/4}) (heuristic).
+* Theorem 7: kernel saturation (§14.1(b)) is the image law (§14.1(a)) on
+  E/M, transported back; the μ^{m−2} penalty is μ^m/(μ·μ).
+* Proposition 9: oracle-DLP ≤ min_j DLP(E_j). Whether an exponent moves
+  depends only on whether members of the class differ in exponent. Over
+  F_{2^n} with composite n they can (GHS Weil descent applies to some
+  isogenous curves and not others), so "isogenies change constants, never
+  exponents" is false in general. **Qualification of §15.4:** its rows
+  hold for prime fields and prime-degree binary fields; over composite
+  extension fields the isogeny class itself can contain weaker curves.
+  Conjecture 10: over prime fields no member of a class is weaker in
+  exponent.
+
+Measured sanity check on one toy pair (a 2-isogeny over F_1048583): 5000/5000
+simulated oracle answers from one evaluation of φ, the pushforward
+identity D_m(G) = D_m(G′) exact (6195 = 6195, 360 = 360), image and
+saturation ratios near 2, 1/2, 1/4.
+
+### 17.8 What should move into the library
+
+* `is_in_4e` for a = 0, n odd, h = 4 binary curves, used by
+  `is_valid_public_point` (17.2).
+* An `ic` oracle plug-in for the chained x-frame descent, and direct S5
+  systems (17.1).
+* A counted F_p, √élu and FFT polynomial arithmetic; re-measure the √élu and
+  generic-kernel exponents with FFT (17.3).
+* Quotient-coordinate oracles for saturated bases; re-check the 2.95×
+  u-frame loss of §7.A1-R with a pair table on F/M (17.4).
+* A pooled multi-target method with a shared distinguished-point table in
+  ecbench, and a prime-field Vélu for ℓ ∈ {2, 3} with duals (17.5).
+* A genus-2 toolkit over F_p (`cryptanalysis::genus2_fp`) (17.6).
+
+## 18. References
+
 
 * Faugère, Huot, Joux, Renault, Vitse. Symmetrized summation polynomials: using small order torsion points to speed up elliptic curve index calculus. EUROCRYPT 2014.
 * Galbraith, Gebregiyorgis. Summation polynomial algorithms for elliptic curves in characteristic two. INDOCRYPT 2014; ePrint 2014/806.
